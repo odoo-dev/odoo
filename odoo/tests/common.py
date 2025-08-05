@@ -39,7 +39,6 @@ from datetime import datetime
 from functools import cache, partial, wraps
 from itertools import islice, zip_longest
 from textwrap import shorten
-from typing import TYPE_CHECKING
 from unittest import TestResult
 from unittest.mock import Mock, _patch, patch
 from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
@@ -84,8 +83,6 @@ from . import case, test_cursor
 from odoo.addons.base.models import ir_actions_report
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Iterable
-if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .result import OdooTestResult
@@ -175,29 +172,42 @@ def flushing_cursor(cr: Cursor):
     changes made on the main cursor. You can still continue using the main
     cursor inside the block, it will be flushed on exit and then reset.
     """
+    assert isinstance(odoo.modules.module.current_test, TransactionCase), "only available for TransactionCase"
+
     if _disable_flushing_cursor:
         # execution of wkhtml happens in parallel, we don't want to flush the
         # cursor in that case
         yield
         return
 
-    # simulating a cr.commit()
-    cr.flush()
     if cr.transaction is None:  # no environment to clear
+        cr.flush()
         yield
         return
 
-    registry = cr.transaction.registry
-    if registry.cache_invalidated:
-        registry.signal_changes()
-    cr.transaction.clear()
+    # simluate cr.commit()
+    state_stack, closing = cr.transaction._state_stack__, cr._closing
+    try:
+        cr._closing = True  # do a quick clean
+        cr.transaction._state_stack__ = []  # replace the stack
+        with cr.transaction.committing():
+            pass  # no real commit
+    finally:
+        cr.transaction._state_stack__ = state_stack
+        cr._closing = closing
 
     yield
 
-    # flush and invalidate changes made by the main cursor
-    cr.transaction.default_env.invalidate_all(flush=True)
-    # then reset it to start fresh
-    cr.transaction.reset()
+    # simulate cr.commit() again to flush changes made by the main cursor
+    state_stack, closing = cr.transaction._state_stack__, cr._closing
+    try:
+        cr._closing = False  # do a reset
+        cr.transaction._state_stack__ = []  # replace the stack
+        with cr.transaction.committing():
+            pass  # no real commit
+    finally:
+        cr.transaction._state_stack__ = state_stack
+        cr._closing = closing
 
 
 def standalone(*tags):
@@ -1086,8 +1096,7 @@ class BaseCase(case.TestCase):
             patch.object(registry, 'cursor', _patched_cursor),
             # Disable locking and signaling
             patch.object(Registry, '_lock', DummyRLock()),
-            patch.object(registry, 'setup_signaling', return_value=None), #noop
-            patch.object(registry, 'check_signaling', return_value=registry),
+            patch.object(registry, 'setup_signaling', return_value=None),  # noop
         ]
 
     @classmethod
@@ -1301,7 +1310,6 @@ class Approx:  # noqa: PLW1641
         return self.cmp(self.value, other) == 0
 
 
-
 class TransactionCase(BaseCase):
     """ Test class in which all test methods are run in a single transaction,
     but each test method is run in a sub-transaction managed by a savepoint.
@@ -1315,7 +1323,7 @@ class TransactionCase(BaseCase):
     After being run, each test method cleans up the record cache and the
     registry cache. However, there is no cleanup of the registry models and
     fields. If a test modifies the registry (custom models and/or fields), it
-    should prepare the necessary cleanup (`self.registry.reset_changes()`).
+    should prepare the necessary cleanup (`self.env.transaction.will_change_registry()`).
     """
     muted_registry_logger = mute_logger(odoo.orm.registry._logger.name)
     freeze_time = None
@@ -1327,45 +1335,49 @@ class TransactionCase(BaseCase):
         # they can addup during test and take some disc space.
         # since cron are not running during tests, we need to gc manually
         # We need to check the status of the file system outside of the test cursor
-        with Registry(get_db_name()).cursor() as cr:
+        with cls.registry.cursor() as cr:
             gc_env = api.Environment(cr, api.SUPERUSER_ID, {})
             gc_env['ir.attachment']._gc_file_store_unsafe()
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.addClassCleanup(cls._gc_filestore)
         cls.registry = Registry(get_db_name())
-        cls.registry_start_invalidated = cls.registry.registry_invalidated
-        cls.registry_start_sequence = cls.registry.registry_sequence
-        cls.registry_cache_sequences = dict(cls.registry.cache_sequences)
+        registry_start_sequence = cls.registry.registry_sequence
 
-        def reset_changes():
-            if (cls.registry_start_sequence != cls.registry.registry_sequence) or cls.registry.registry_invalidated:
-                with cls.registry.cursor() as cr:
-                    cls.registry._setup_models__(cr)
-            cls.registry.registry_invalidated = cls.registry_start_invalidated
-            cls.registry.registry_sequence = cls.registry_start_sequence
-            with cls.muted_registry_logger:
+        def reset_registry_changes(*a, drop_caches=False, **kw):
+            nonlocal registry_start_sequence
+            registry = cls.registry
+            setup_registry = registry_start_sequence != registry.registry_sequence
+            with contextlib.closing(registry.cursor(readonly=not setup_registry)) as cr:
+                seq, _cache_sequences = registry.get_sequences(cr)
+                registry_start_sequence = registry.registry_sequence = seq
+                if setup_registry:
+                    _logger.info("Setup registry models during testing")
+                    registry._setup_models__(cr)
+            if drop_caches:
                 cls.drop_ormcaches()
-            cls.registry.cache_invalidated.clear()
-            cls.registry.cache_sequences = cls.registry_cache_sequences
-        cls.addClassCleanup(reset_changes)
+            return registry
 
-        def signal_changes():
-            if not cls.registry.ready:
-                _logger.info('Skipping signal changes during tests')
-                return
-            if cls.registry.registry_invalidated or cls.registry.cache_invalidated:
+        cls.startClassPatcher(patch.object(Registry, 'new', reset_registry_changes))
+        cls.addClassCleanup(cls._gc_filestore)
+        cls.addClassCleanup(reset_registry_changes, drop_caches=True)
+
+        def signal_changes(cr, names):
+            if 'registry' in names:
+                if not cls.registry.ready:
+                    _logger.info('Skipping signal changes during tests')
+                    return
                 _logger.info('Simulating signal changes during tests')
-            if cls.registry.registry_invalidated:
                 cls.registry.registry_sequence += 1
-            for cache_name in cls.registry.cache_invalidated or ():
-                cls.registry.cache_sequences[cache_name] += 1
-            cls.registry.registry_invalidated = False
-            cls.registry.cache_invalidated.clear()
+                for key, seq in cls.registry.cache_sequences.items():
+                    cls.registry.cache_sequences[key] = seq + 1
+            elif names:
+                _logger.debug('Simulating signal changes during tests')
+                for name in names:
+                    cls.registry.cache_sequences[name] += 1
 
-        cls.startClassPatcher(patch.object(cls.registry, 'signal_changes', signal_changes))
+        cls.startClassPatcher(patch.object(cls.registry, '_signal_changes', signal_changes))
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(typing.cast('Cursor', cls.cr).close)

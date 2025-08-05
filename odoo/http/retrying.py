@@ -46,8 +46,9 @@ def retrying[T](func: Callable[[], T], env: Environment) -> T:
         and the cursor are taken.
     """
     try:
-        for tryno in range(1, MAX_TRIES_ON_CONCURRENCY_FAILURE + 1):
-            tryleft = MAX_TRIES_ON_CONCURRENCY_FAILURE - tryno
+        tryno = 0
+        while True:
+            tryno += 1
             try:
                 result = func()
                 if not env.cr.closed:
@@ -61,8 +62,6 @@ def retrying[T](func: Callable[[], T], env: Environment) -> T:
                 if env.cr.closed:
                     raise
                 env.cr.rollback()
-                env.transaction.reset()
-                env.registry.reset_changes()
                 if request:
                     # We need to reset the `session` attribute of `request`
                     # which may have been modified during the transaction.
@@ -93,6 +92,8 @@ def retrying[T](func: Callable[[], T], env: Environment) -> T:
                     error = repr(exc)
                 else:
                     raise
+
+                tryleft = MAX_TRIES_ON_CONCURRENCY_FAILURE - tryno
                 if not tryleft:
                     _logger.info("%s, maximum number of tries reached!", error)
                     raise
@@ -101,19 +102,14 @@ def retrying[T](func: Callable[[], T], env: Environment) -> T:
                 _logger.info("%s, %s tries left, try again in %.04f sec...",
                     error, tryleft, wait_time)
                 time.sleep(wait_time)
-        else:
-            # handled in the "if not tryleft" case
-            raise RuntimeError("unreachable")  # noqa: EM101, TRY301
+
+        if not env.cr.closed:
+            env.cr.commit()  # effectively commits and execute post-commits
+        return result
 
     except Exception:
         env.transaction.reset()
-        env.registry.reset_changes()
         raise
-
-    if not env.cr.closed:
-        env.cr.commit()  # effectively commits and execute post-commits
-    env.registry.signal_changes()
-    return result
 
 
 # ruff: noqa: E402
