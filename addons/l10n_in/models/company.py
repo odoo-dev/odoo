@@ -1,7 +1,8 @@
-import pytz
+import base64
 from stdnum.in_ import pan, gstin
 
-from odoo import _, api, fields, models 
+from odoo import _, api, fields, models
+from odoo.tools.image import image_data_uri
 from odoo.exceptions import ValidationError
 
 
@@ -181,3 +182,13 @@ class ResCompany(models.Model):
     def action_update_state_as_per_gstin(self):
         self.ensure_one()
         self.partner_id.action_update_state_as_per_gstin()
+
+    def generate_upi_base64_code(self, amount, ref, rec_name):
+        payment_url = 'upi://pay?pa=%s&pn=%s&am=%s&tr=%s&tn=%s' % (
+            self.l10n_in_upi_id,
+            self.name,
+            amount,
+            ref,
+            ("Payment for %s" % rec_name))
+        barcode = self.env['ir.actions.report'].barcode(barcode_type="QR", value=payment_url, width=512, height=512, quiet=False)
+        return image_data_uri(base64.b64encode(barcode))

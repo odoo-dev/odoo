@@ -1,6 +1,4 @@
-import base64
 import logging
-import json
 import re
 
 from markupsafe import Markup
@@ -8,8 +6,7 @@ from markupsafe import Markup
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import ValidationError, RedirectWarning, UserError
 from odoo.tools.float_utils import json_float_round
-from odoo.tools.image import image_data_uri
-from odoo.tools import float_compare, SQL
+from odoo.tools import SQL
 from odoo.tools.date_utils import get_month
 from odoo.addons.l10n_in.models.iap_account import IAP_SERVICE_NAME
 
@@ -591,14 +588,7 @@ class AccountMove(models.Model):
     def _generate_qr_code(self, silent_errors=False):
         self.ensure_one()
         if self.company_id.country_code == 'IN' and self.company_id.l10n_in_upi_id:
-            payment_url = 'upi://pay?pa=%s&pn=%s&am=%s&tr=%s&tn=%s' % (
-                self.company_id.l10n_in_upi_id,
-                self.company_id.name,
-                self.amount_residual,
-                self.payment_reference or self.name,
-                ("Payment for %s" % self.name))
-            barcode = self.env['ir.actions.report'].barcode(barcode_type="QR", value=payment_url, width=120, height=120, quiet=False)
-            return image_data_uri(base64.b64encode(barcode))
+            return self.company_id.generate_upi_base64_code(self.amount_residual, self.payment_reference or self.name, self.name)
         return super()._generate_qr_code(silent_errors)
 
     def _l10n_in_get_hsn_summary_table(self):

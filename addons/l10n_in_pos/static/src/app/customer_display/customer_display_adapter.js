@@ -5,6 +5,8 @@ patch(CustomerDisplayPosAdapter.prototype, {
     formatOrderData(order) {
         super.formatOrderData(order);
         this.data.onlinePaymentData = { ...(order.onlinePaymentData || {}) };
+        this.data.screenName = order.uiState.screen_data.value.name;
+        this.data.upiQrCode = order.uiState.upiQrCode;
     },
     getOrderlineData(line) {
         const data = super.getOrderlineData(line);

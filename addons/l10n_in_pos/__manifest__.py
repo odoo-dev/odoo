@@ -27,6 +27,9 @@
         'web.assets_tests': [
             'l10n_in_pos/static/tests/tours/**/*',
         ],
+        'point_of_sale.customer_display_assets': [
+            'l10n_in_pos/static/src/app/customer_display/customer_display.xml',
+        ],
     },
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
