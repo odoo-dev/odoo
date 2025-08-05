@@ -93,7 +93,7 @@ class StockMove(models.Model):
         productions = self._get_subcontract_production().filtered(lambda m: m.state != 'cancel')
         if lot_id:
             productions = productions.filtered(lambda p: p.lot_producing_id == self.env['stock.lot'].browse(lot_id))
-        ctx = dict(self.env.context, mrp_subcontracting=True)
+        ctx = {"mrp_subcontracting": True}
         if self.env.user._is_portal():
             form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
             ctx.update(no_breadcrumbs=False)
