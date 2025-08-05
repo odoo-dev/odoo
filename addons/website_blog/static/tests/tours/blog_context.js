@@ -30,7 +30,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Click on Blog Post",
-            trigger: "#o_new_content_menu_choices button[title='Blog Post']",
+            trigger: "#o_new_content_menu_choices button[title='Blog Post']:not(visible)",
             run: "click",
         },
         {
