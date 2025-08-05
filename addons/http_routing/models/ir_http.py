@@ -183,14 +183,21 @@ class IrHttp(models.AbstractModel):
         # relative URL with either a path or a force_lang
         if url and not url.netloc and not url.scheme and (url.path or force_lang):
             location = werkzeug.urls.url_join(request.httprequest.path, location)
-            lang_url_codes = [info.url_code for info in Lang._get_frontend().values()]
+            lang_codes = []
+            lang_url_codes = []
+            for info in Lang._get_frontend().values():
+                lang_codes.append(info.code)
+                lang_url_codes.append(info.url_code)
             lang_code = lang_code or request.env.context['lang']
             lang_url_code = Lang._get_data(code=lang_code).url_code
-            lang_url_code = lang_url_code if lang_url_code in lang_url_codes else lang_code
+            lang_url_code = lang_url_code if lang_url_code in lang_url_codes else lang_code.replace('_', '-')
             if (len(lang_url_codes) > 1 or force_lang) and cls._is_multilang_url(location, lang_url_codes):
                 loc, sep, qs = location.partition('?')
                 ps = loc.split('/')
                 default_lg = request.env['ir.http']._get_default_lang()
+                if ps[1] in lang_codes:
+                    # Replace the language code to url_code if needed
+                    ps[1] = Lang._get_data(code=ps[1]).url_code
                 if ps[1] in lang_url_codes:
                     # Replace the language only if we explicitly provide a language to url_for
                     if force_lang:
@@ -312,7 +319,13 @@ class IrHttp(models.AbstractModel):
         if lang_code in frontend_langs:
             return lang_code
 
-        short = lang_code.partition('_')[0]
+        if '_' in lang_code:
+            short = lang_code.partition('_')[0]
+        elif '-' in lang_code:
+            short = lang_code.partition('-')[0]
+        else:
+            short = lang_code
+
         if not short:
             return None
         return next((code for code in frontend_langs if code.startswith(short)), None)

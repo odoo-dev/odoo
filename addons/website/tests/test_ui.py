@@ -73,7 +73,7 @@ class TestUiHtmlEditor(HttpCaseWithUserDemo):
             'name': 'Parseltongue',
             'code': 'pa_GB',
             'iso_code': 'pa_GB',
-            'url_code': 'pa_GB',
+            'url_code': 'pa-GB',
         })
         Lang._activate_lang(parseltongue.code)
         default_website.write({
@@ -201,7 +201,7 @@ class TestUiTranslate(odoo.tests.HttpCase):
             'name': 'Parseltongue',
             'code': 'pa_GB',
             'iso_code': 'pa_GB',
-            'url_code': 'pa_GB',
+            'url_code': 'pa-GB',
         })
         self.start_tour(self.env['website'].get_client_action_url('/'), 'rte_translator', login='admin', timeout=120)
 
@@ -211,7 +211,7 @@ class TestUiTranslate(odoo.tests.HttpCase):
             'name': 'Parseltongue',
             'code': 'pa_GB',
             'iso_code': 'pa_GB',
-            'url_code': 'pa_GB',
+            'url_code': 'pa-GB',
         })
         self.env['res.lang']._activate_lang(parseltongue.code)
         default_website = self.env.ref('website.default_website')
@@ -249,13 +249,13 @@ class TestUiTranslate(odoo.tests.HttpCase):
             'name': 'Parseltongue',
             'code': 'pa_GB',
             'iso_code': 'pa_GB',
-            'url_code': 'pa_GB',
+            'url_code': 'pa-GB',
             'direction': 'rtl',
         }, {
             'name': 'Fake User Lang',
             'code': 'fu_GB',
             'iso_code': 'fu_GB',
-            'url_code': 'fu_GB',
+            'url_code': 'fu-GB',
         }])
         ResLang._activate_lang(parseltongue.code)
         ResLang._activate_lang(fake_user_lang.code)
