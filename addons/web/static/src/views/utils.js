@@ -3,6 +3,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { combineModifiers } from "@web/model/relational_model/utils";
+import { evaluateExpr } from "@web/core/py_js/py";
 
 export const X2M_TYPES = ["one2many", "many2many"];
 const NUMERIC_TYPES = ["integer", "float", "monetary"];
@@ -144,11 +145,21 @@ export const computeReportMeasures = (fields, fieldAttrs, activeMeasures) => {
 export function getFormattedValue(record, fieldName, attrs) {
     const field = record.fields[fieldName];
     const formatter = registry.category("formatters").get(field.type, (val) => val);
+
+    let digits;
+    if (attrs.digits) {
+        digits = JSON.parse(attrs.digits);
+    } else if (attrs.options) {
+        digits = (evaluateExpr(attrs.options) || {}).digits;
+    } else {
+        digits = field.digits;
+    }
+
     const formatOptions = {
         escape: false,
         data: record.data,
         isPassword: "password" in attrs,
-        digits: attrs.digits ? JSON.parse(attrs.digits) : field.digits,
+        digits,
         field: record.fields[fieldName],
     };
     return record.data[fieldName] !== undefined
