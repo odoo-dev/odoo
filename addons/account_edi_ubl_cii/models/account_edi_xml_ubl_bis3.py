@@ -137,6 +137,13 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         # EXTENDS account.edi.xml.ubl_21
         supplier = invoice.company_id.partner_id.commercial_partner_id
         customer = invoice.partner_id
+        dedicated_shipping_partner = invoice.partner_shipping_id != customer and invoice.partner_shipping_id
+
+        # In BIS 3.0 the DeliveryParty has only one child `PartyName` (which is mandatory)
+        # https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/cac-Delivery/cac-DeliveryParty/
+        delivery_party_vals = {
+            'party_name_vals': [{'name': dedicated_shipping_partner.display_name}],
+        } if dedicated_shipping_partner else {}
 
         economic_area = self.env.ref('base.europe').country_ids.mapped('code') + ['NO']
         intracom_delivery = (customer.country_id.code in economic_area
@@ -158,9 +165,14 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                 'delivery_location_vals': {
                     'delivery_address_vals': self._get_partner_address_vals(partner_shipping),
                 },
+                'delivery_party_vals': delivery_party_vals,
             }]
 
-        return super()._get_delivery_vals_list(invoice)
+        delivery_vals_list = super()._get_delivery_vals_list(invoice)
+        for delivery_vals in delivery_vals_list:
+            delivery_vals['delivery_party_vals'] = delivery_party_vals
+
+        return delivery_vals_list
 
     def _get_partner_address_vals(self, partner):
         # EXTENDS account.edi.xml.ubl_21
@@ -552,6 +564,14 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                     'cac:Address': self._get_address_node({'partner': vals['partner_shipping']})
                 },
             }
+
+        # In BIS 3.0 the DeliveryParty has only one child `PartyName` (which is mandatory)
+        # https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/cac-Delivery/cac-DeliveryParty/
+        # TODO: check: whether `vals['customer']` is correct; role / bills?
+        dedicated_shipping_partner = vals['partner_shipping'] != vals['customer'] and vals['partner_shipping']
+        document_node['cac:Delivery']['cac:DeliveryParty'] = {
+            'cac:PartyName': {'cbc:Name': {'_text': dedicated_shipping_partner.display_name}}
+        } if dedicated_shipping_partner else None
 
     def _add_invoice_payment_means_nodes(self, document_node, vals):
         super()._add_invoice_payment_means_nodes(document_node, vals)

@@ -183,12 +183,14 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _get_delivery_vals_list(self, invoice):
         # the data is optional, except for ubl bis3 (see the override, where we need to set a default delivery address)
+        dedicated_shipping_partner = invoice.partner_shipping_id != invoice.partner_id and invoice.partner_shipping_id
         return [{
             'actual_delivery_date': invoice.delivery_date,
             'delivery_location_vals': {
                 'delivery_address_vals': self._get_partner_address_vals(invoice.partner_shipping_id),
             },
-            'delivery_party_vals': self._get_partner_party_vals(invoice.partner_shipping_id, 'delivery') if invoice.partner_shipping_id else {},
+            'delivery_party_vals': self._get_partner_party_vals(dedicated_shipping_partner, 'delivery')
+                                   if dedicated_shipping_partner else {},
         }]
 
     def _get_bank_address_vals(self, bank):
@@ -1130,11 +1132,15 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _add_invoice_delivery_nodes(self, document_node, vals):
         invoice = vals['invoice']
+        # TODO: whether `vals['customer']` is correct; role / bills?
+        dedicated_shipping_partner = vals['partner_shipping'] != vals['customer'] and vals['partner_shipping']
         document_node['cac:Delivery'] = {
             'cbc:ActualDeliveryDate': {'_text': invoice.delivery_date},
             'cac:DeliveryLocation': {
                 'cac:Address': self._get_address_node({'partner': vals['partner_shipping']})
             },
+            'cac:DeliveryParty': self._get_party_node({**vals, 'partner': dedicated_shipping_partner, 'role': 'delivery'})
+                                 if dedicated_shipping_partner else None,
         }
 
     def _add_invoice_payment_means_nodes(self, document_node, vals):
