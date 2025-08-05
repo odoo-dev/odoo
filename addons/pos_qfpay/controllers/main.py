@@ -43,9 +43,6 @@ class QFPayNotificationController(Controller):
         # We have verified the signature we can trust the data
         pos_session_sudo = request.env['pos.session'].sudo().browse(int(trade_no_parts[1]))
         qfpay_pm_sudo.qfpay_latest_response = json.dumps(data)
-        pos_session_sudo.config_id._notify("QFPAY_LATEST_RESPONSE", {
-            'response': data,
-            'line_uuid': trade_no_parts[0],
-        })
+        qfpay_pm_sudo._qfpay_handle_webhook(pos_session_sudo.config_id, data, trade_no_parts[0])
 
         return Response('SUCCESS', status=200)

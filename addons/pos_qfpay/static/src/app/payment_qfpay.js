@@ -3,6 +3,8 @@ import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_inter
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { register_payment_method } from "@point_of_sale/app/services/pos_store";
 
+import { QFPay } from "./qfpay";
+
 const { DateTime } = luxon;
 
 export class PaymentQFpay extends PaymentInterface {
@@ -11,6 +13,7 @@ export class PaymentQFpay extends PaymentInterface {
         this.orm = this.env.services.orm;
         this.dialog = this.env.services.dialog;
         this.paymentLineResolvers = {};
+        this.qfpay = new QFPay(this.env, this.payment_method_id, this._showError.bind(this));
     }
 
     async sendPaymentRequest(uuid) {
@@ -56,13 +59,13 @@ export class PaymentQFpay extends PaymentInterface {
                 );
                 return Promise.resolve(false);
             }
-            this._make_qfpay_request(uuid, "cancel", {
+            this.callQFPay(uuid, "cancel", {
                 func_type: 1002,
                 orderId: originalPayment.transaction_id,
                 refund_amount: (-line.amount).toFixed(2),
             });
         } else {
-            this._make_qfpay_request(uuid, "trade", {
+            this.callQFPay(uuid, "trade", {
                 func_type: 1001,
                 amt: line.amount,
                 channel: this.payment_method_id.qfpay_payment_type,
@@ -82,56 +85,19 @@ export class PaymentQFpay extends PaymentInterface {
 
     async sendPaymentCancel(order, uuid) {
         super.sendPaymentCancel(order, uuid);
-        this._make_qfpay_request(uuid, "cancel_request", {
+        this.callQFPay(uuid, "cancel_request", {
             func_type: 5001,
         });
         return Promise.resolve(true);
     }
 
-    async _make_qfpay_request(uuid, endpoint, payload) {
-        const signedPayload = await this.orm.call("pos.payment.method", "qfpay_sign_request", [
-            this.payment_method_id.id,
-            payload,
-        ]);
-        try {
-            const result = await fetch(
-                `https://${this.payment_method_id.qfpay_terminal_ip_address}:9001/api/pos/${endpoint}`,
-                {
-                    method: "POST",
-                    headers: {
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(signedPayload),
-                }
-            );
-            const response = await result.json();
-
-            if (response.respcd !== "6000") {
-                // Don't show error message when a request is canceled from the terminal
-                if (response.respcd !== "6001") {
-                    this._showError(
-                        `Error Code: ${response.respcd}\nError Message: ${
-                            response.resperr || response.respmsg || _t("Unknown error occurred")
-                        }`
-                    );
-                }
-                const resolver = this.paymentLineResolvers[uuid];
-                resolver && resolver(false);
-                return false;
-            }
-            return response.data ? JSON.parse(response.data) : true;
-        } catch (error) {
-            if (error.name == "TypeError" && error.message == "Failed to fetch") {
-                this._showError(
-                    _t(
-                        "Failed to connect to the QFPay terminal. This might be a certificate issue.\nMake sure you imported the certificates provided by QFPay on this machine."
-                    )
-                );
-            } else {
-                throw error;
-            }
+    async callQFPay(uuid, endpoint, payload) {
+        const response = await this.qfpay.makeQFPayRequest(endpoint, payload);
+        if (!response) {
+            const resolver = this.paymentLineResolvers[uuid];
+            resolver && resolver(false);
         }
+        return response;
     }
 
     async handleQFPayStatusResponse(data) {
@@ -184,12 +150,9 @@ export class PaymentQFpay extends PaymentInterface {
         );
     }
 
-    _showError(msg, title) {
-        if (!title) {
-            title = _t("QFPay Error");
-        }
+    _showError(msg) {
         this.dialog.add(AlertDialog, {
-            title: title,
+            title: _t("QFPay Error"),
             body: msg,
         });
     }
