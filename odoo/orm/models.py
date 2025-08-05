@@ -1086,7 +1086,7 @@ class BaseModel(metaclass=MetaModel):
             savepoint.rollback()
             ids = False
             # cancel all changes done to the registry/ormcache
-            self.pool.reset_changes()
+            self.env.transaction.reset()
         savepoint.close(rollback=False)
 
         nextrow = info['rows']['to'] + 1

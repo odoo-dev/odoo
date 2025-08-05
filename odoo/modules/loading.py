@@ -112,7 +112,7 @@ def force_demo(env: Environment) -> None:
     if env['ir.module.module'].search_count([('state', 'in', ('to install', 'to upgrade', 'to remove'))], limit=1):
         env.cr.commit()
         Registry.new(env.cr.dbname, update_module=True)
-        env.transaction.reset()
+        env.transaction.reset(skip_reset_registry=True)
 
 
 def load_module_graph(
@@ -269,7 +269,6 @@ def load_module_graph(
             package.state = 'installed'
             module.env.flush_all()
             module.env.cr.commit()
-            registry.signal_changes()
 
         test_time = 0.0
         test_queries = 0
@@ -397,6 +396,7 @@ def load_modules(
 
     report = registry._assertion_report
     env = api.Environment(cr, api.SUPERUSER_ID, {})
+    assert registry is env.registry, "Registry changed while loading!"
     load_module_graph(
         env,
         graph,
@@ -513,6 +513,8 @@ def load_modules(
     registry.finalize_constraints(cr)
 
     # STEP 4: Finish and cleanup installations
+    if update_module:
+        env.transaction.will_change_registry()
     if registry.updated_modules:
 
         cr.execute("SELECT model from ir_model")

@@ -1015,7 +1015,7 @@ class IrModelFields(models.Model):
                 pass
 
         # clean the registry from the fields to remove
-        self.pool.registry_invalidated = True
+        self.env.transaction.will_change_registry()
         self.pool._discard_fields(fields)
 
         # discard the removed fields from fields to compute

@@ -1085,7 +1085,8 @@ class PreforkServer(CommonServer):
                 return
             for registry in registries.values():
                 with registry.cursor() as cr:
-                    registry.check_signaling(cr)
+                    # check signaling by instantiating an environment
+                    api.Environment(cr, api.SUPERUSER_ID, {})
             registries.clear()
             # Close all opened cursors
             sql_db.close_all()

@@ -22,7 +22,7 @@ from odoo.tools.func import deprecated
 from odoo.tools.translate import get_translation, get_translated_module, LazyGettext
 from odoo.tools.misc import StackMap, SENTINEL
 
-from .registry import Registry
+from .registry import Registry, _CACHES_BY_KEY
 from .query import Query
 from .utils import SUPERUSER_ID
 
@@ -34,6 +34,7 @@ if typing.TYPE_CHECKING:
     from .types import BaseModel, Field
 
 _logger = logging.getLogger('odoo.api')
+_logger_signaling = logging.getLogger('odoo.registry')
 
 MAX_FIXPOINT_ITERATIONS = 10
 ENVS_SIZE = 20  # used as a reference size in a transaction's environments
@@ -69,11 +70,13 @@ class Environment(Mapping[str, "BaseModel"]):
             if cr._closing:
                 _logger.error("The cursor is being closed, but starts a new transaction", stack_info=True)
             transaction = cr.transaction = Transaction(Registry(cr.dbname))
+            transaction._check_signaling(cr)
 
-        # if env already exists, return it
-        env = transaction.lookup_env(uid, context, su)
-        if env is not None:
-            return env
+        else:
+            # if env already exists, return it
+            env = transaction.lookup_env(uid, context, su)
+            if env is not None:
+                return env
 
         # otherwise create environment, and add it in the set
         self = object.__new__(cls)
@@ -563,11 +566,27 @@ class Environment(Mapping[str, "BaseModel"]):
 
 
 class Transaction:
-    """ A object holding ORM data structures for a transaction. """
+    """ A object holding ORM data structures for a transaction.
+
+    Signaling summary:
+
+    - Creating the first `Environment` for a cursor triggers checks signaling.
+    - `cr.commit` signals changes and resets the transaction.
+    - `cr.rollback` resets the transaction without signaling.
+    - Resetting a transaction checks signaling unless we are closing the
+      cursor and won't be using the transaction anymore.
+
+    Notes:
+
+    - `transaction.will_change_registry()` before modifying registry
+    - `Registry.new` should be followed by `transaction.reset(skip_reset_registry=True)`.
+
+    """
     __slots__ = (
         '_Transaction__file_open_tmp_paths',
-        '_cache', '_recent_envs', '_registry_sequence',
-        '_state_stack', '_weak_envs',
+        '_cache', '_recent_envs',
+        '_registry_invalidated', '_registry_sequence',
+        '_state_stack__', '_weak_envs',
         'access_read', 'default_env',
         'field_data', 'field_data_patches', 'field_dirty',
         'protected', 'registry', 'tocompute',
@@ -582,9 +601,10 @@ class Transaction:
 
         # default environment (for flushing)
         self.default_env: Environment | None = None
+        self._registry_invalidated: int = 0
         self._registry_sequence = registry.registry_sequence
         # transaction state manipulated by savepoints
-        self._state_stack: list[TransactionState] = []
+        self._state_stack__: list[TransactionState] = []
 
         # cache data {field: cache_data_managed_by_field} often uses a dict
         # to store a mapping from id to a value, but fields may use this field
@@ -707,6 +727,78 @@ class Transaction:
                 Environment(env.cr, public_user.id, {}).flush_all()
                 break
 
+    def _check_signaling(self, cr: BaseCursor) -> None:
+        """ Check the sequences in the database an invalidate accordingly.
+
+        When the registry changed, create a new registry and rebind to it.
+        Otherwise, invalidate named caches and their dependencies.
+        """
+        registry = self.registry
+        if not registry.ready:
+            _logger_signaling.debug("%s: skip check signaling, registry not ready", self.registry.db_name)
+            return
+
+        db_registry_sequence, db_cache_sequences = registry.get_sequences(cr)
+        changes = ''
+        # Check if the model registry must be reloaded
+        registry_sequence = registry.registry_sequence
+        if registry_sequence != db_registry_sequence:
+            _logger_signaling.info("Reloading the model registry after database signaling.")
+            self.registry = registry = Registry.new(registry.db_name)
+            if _logger_signaling.isEnabledFor(logging.DEBUG):
+                changes += "[Registry - %s -> %s]" % (registry_sequence, db_registry_sequence)
+        # Check if the model caches must be invalidated.
+        else:
+            invalidated = set()
+            for cache_name, expected_sequence in db_cache_sequences.items():
+                cache_sequence = registry.cache_sequences[cache_name]
+                if cache_sequence == expected_sequence:
+                    continue
+                registry.cache_sequences[cache_name] = expected_sequence
+                for name in _CACHES_BY_KEY[cache_name]:
+                    if '.' in name:
+                        registry.cache_sequences[name] = expected_sequence
+                    invalidated.add(name)
+                if _logger_signaling.isEnabledFor(logging.DEBUG):
+                    changes += "[Cache %s - %s -> %s]" % (cache_name, cache_sequence, expected_sequence)
+            self.registry.cache_invalidated.clear()
+            if invalidated:
+                _logger_signaling.info("Invalidating caches after database signaling: %s", sorted(invalidated))
+                caches = self.registry._Registry__caches
+                for name in sorted(invalidated):
+                    caches[name].clear()
+        if changes:
+            _logger_signaling.debug("Multiprocess signaling check: %s", changes)
+
+    def will_change_registry(self) -> None:
+        """ Invalidate the current registry.
+
+        Note: registry changes are not thread-safe.
+        """
+        self._registry_invalidated += 1
+
+    def _reset_registry_change(self):
+        """ When the registry was invalidated, re-setup models. """
+        if not self._registry_invalidated:
+            return
+
+        env = self.default_env or next(iter(self.envs), None)
+        if env is None:
+            raise RuntimeError("resetting registry changes, but no cursor found!")
+        cr = env.cr
+
+        # retrieve the latest registry sequence to avoid recreating the
+        # registry while checking signaling
+        registry = self.registry
+        new_sequence, _caches = registry.get_sequences(cr)
+        # if we are executing post-rollback and the registry sequence changed,
+        # skip resetup of the registry, a new one will be created
+        if cr._closing and registry.registry_sequence != new_sequence:
+            return
+        registry.registry_sequence = self._registry_sequence = new_sequence
+        registry._setup_models__(cr)
+        self._registry_invalidated = 0  # mark transaction with valid registry
+
     @deprecated("Since 20.0, renamed to invalidate_access_cache")
     def clear_access_cache(self, model_name: str = '') -> None:
         self.invalidate_access_cache(model_name)
@@ -744,85 +836,139 @@ class Transaction:
             env.cr.cache.clear()
             break  # all envs of the transaction share the same cursor
 
-    def reset(self) -> None:
-        """ Reset the transaction.  This clears the transaction, and reassigns
-            the registry on all its environments.  This operation is strongly
-            recommended after reloading the registry.
+    def reset(self, *, skip_reset_registry=False) -> None:
+        """ Reset the transaction.
+        This clears the transaction, and reassigns the registry on all its
+        environments. This operation is strongly recommended after reloading
+        the registry; this is done automatically after a commit or rollback.
+
+        :param skip_reset_registry: Do not reset changes to the registry,
+            just set the currently known registry on the Transaction.
         """
         # get the registry and rebuild the stack of states
+        if skip_reset_registry:
+            self._registry_invalidated = 0
+        else:
+            self._reset_registry_change()
+
         self.registry = Registry(self.registry.db_name)
         self._registry_sequence = self.registry.registry_sequence
-        self._state_stack = [
+        self._state_stack__ = [
             TransactionState(
                 default_env=state.default_env,
+                registry_invalidated=self._registry_invalidated,
                 registry_sequence=self._registry_sequence,
-            ) for state in self._state_stack]
+            ) for state in self._state_stack__]
 
+        cr = None
         for env in self.envs:
             reset_cached_properties(env)
+            cr = env.cr
         self.access_read.clear()
         # make all environments weak
         self._recent_envs.clear()
         self.clear()
+        # recheck signaling for the ormcache
+        if cr is not None and not cr._closing:
+            self._check_signaling(cr)
 
     @contextmanager
     def committing(self):
         """ Context for committing the connection. """
-        assert not self._state_stack, "Pending savepoints not released, cannot commit!"
+        assert not self._state_stack__, "Pending savepoints not released, cannot commit!"
+        registry = self.registry
+        env = self.default_env or next(iter(self.envs), None)
+        if env is not None:
+            cr = env.cr
+            cr.flush()  # first flush remaining changes
+
+            # TODO move cache invalidation to transaction
+            names = set()
+            if self._registry_invalidated:
+                names.add('registry')
+            for cache_name in self.registry.cache_invalidated:
+                if '.' not in cache_name:
+                    names.add(cache_name)
+                registry.cache_sequences[cache_name] += 1
+            self.registry._signal_changes(cr, names)
+            self.registry.cache_invalidated.clear()
+        else:
+            _logger_signaling.debug("no cursor to flush signaling", stack_info=True)
+            cr = None
+
         yield
 
-        env = self.default_env or next(iter(self.envs), None)
-        cr = env.cr if env is not None else None
-        if cr is None or not cr._closing or cr.postcommit:
-            # if not closing or if we have some postcommit to execute,
-            # reset the cursor entirely
+        if cr is None:
             self.reset()
-        else:
+            return
+
+        if cr.postcommit:
+            # We have postcommit hooks, which can use the current cursor,
+            # so reset the transaction before running hooks; generally, the
+            # hook uses a new cursor. Since it uses a new cursor, rollback our
+            # cursor after the postcommit hook has been done to see changes.
+            # To reproduce, install l10n_be,l10n_us_1099 with demo data.
+            self.reset(skip_reset_registry=True)
+        elif cr._closing:
             # we are closing the cursor, just a quick clean-up
             self.clear()
+        else:
+            # if not closing, reset the cursor entirely
+            # skip resetting the registry because the transaction should
+            # re-setup the registry correctly
+            self.reset(skip_reset_registry=True)
 
     @contextmanager
     def rollbacking(self):
         """ Context for rollbacking the connection. """
-        assert not self._state_stack, "Pending savepoints not released, cannot rollback!"
+        assert not self._state_stack__, "Pending savepoints not released, cannot rollback!"
         yield
         self.restore_state()
 
     def save_state(self):
         """ Save the current state of the transaction for future restore. """
         self.flush()
-        self._state_stack.append(TransactionState(
+        self._state_stack__.append(TransactionState(
             default_env=self.default_env,
+            registry_invalidated=self._registry_invalidated,
             registry_sequence=self._registry_sequence,
         ))
 
     def merge_state(self):
         """ Merge current state into the last saved state. """
-        assert self._state_stack, "no state to pop"
-        self._state_stack.pop()
+        assert self._state_stack__, "no state to pop"
+        self._state_stack__.pop()
 
     def restore_state(self):
         """ Restore the previously saved state of the transaction after
         rollback execution (on savepoint or connection). """
-        if self._state_stack:
-            state = self._state_stack[-1]
+        if self._state_stack__:
+            state = self._state_stack__[-1]
             self.default_env = state.default_env
+            registry_invalidated = state.registry_invalidated
+        else:
+            registry_invalidated = 0
 
         env = self.default_env or next(iter(self.envs), None)
         cr = env.cr if env is not None else None
         if (cr is None or not cr._closing or cr.postrollback) and self.registry.registry_sequence != self._registry_sequence:
             # registry changed, reset the transaction
             self.reset()
+            self._registry_invalidated = registry_invalidated
             return
 
         self.clear()
         for env in self.envs:
             reset_cached_properties(env)
+        if self._registry_invalidated != registry_invalidated:
+            self._reset_registry_change()
+            self._registry_invalidated = registry_invalidated
 
 
 class TransactionState(typing.NamedTuple):
     """ The state of the transaction that can be stacked for savepoint operations. """
     default_env: Environment | None
+    registry_invalidated: int
     registry_sequence: int
 
 

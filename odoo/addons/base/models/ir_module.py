@@ -643,12 +643,11 @@ class IrModuleModule(models.Model):
 
         self.env.cr.commit()
         registry = modules.registry.Registry.new(self.env.cr.dbname, update_module=True)
-        self.env.cr.commit()
-        if request and request.registry is self.env.registry:
-            request.env.transaction.reset()
+        self.env.transaction.reset(skip_reset_registry=True)
+        if request:
+            assert request.env.transaction is self.env.transaction, "request on another transaction than the model"
             request.registry = request.env.registry
             assert request.env.registry is registry
-        self.env.transaction.reset()
         assert self.env.registry is registry
 
         # pylint: disable=next-method-called
