@@ -47,6 +47,7 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
 
     @freeze_time('2024-01-01')
     def test_bom_overview_availability(self):
+        self.comp2.bom_ids.unlink()
         # Create routes for components and the main product
         self.env['product.supplierinfo'].create({
             'product_tmpl_id': self.finished.product_tmpl_id.id,
@@ -828,6 +829,7 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
     @freeze_time('2024-01-01')
     def test_bom_overview_availability_po_lead(self):
         # Create routes for components and the main product
+        self.comp2.bom_ids.unlink()
         self.env['product.supplierinfo'].create({
             'product_tmpl_id': self.finished.product_tmpl_id.id,
             'partner_id': self.subcontractor_partner1.id,
