@@ -363,10 +363,12 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         epd_tax_to_discount = self._get_early_payment_discount_grouped_by_tax_rate(invoice)
         if epd_tax_to_discount:
             # One Allowance per tax rate (VAT included)
+            test05 = invoice.env.context.get('test_beg_testcase05_cash_discount', False)
+            test06 = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)
             for tax_amount, discount_amount in epd_tax_to_discount.items():
                 vals_list.append({
                     'charge_indicator': 'false',
-                    'allowance_charge_reason_code': '66',
+                    'allowance_charge_reason_code': '64' if test05 or test06 else '66',
                     'allowance_charge_reason': _("Conditional cash/payment discount"),
                     'amount': discount_amount,
                     'currency_dp': 2,
@@ -1078,6 +1080,50 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         vals['base_lines'] = [base_line for base_line in base_lines if base_line['special_type'] != 'cash_rounding']
         vals['cash_rounding_base_lines'] = [base_line for base_line in base_lines if base_line['special_type'] == 'cash_rounding']
 
+        invoice = vals['invoice']
+
+        # TODO: get the real value
+        prepaid_amount = sum(invoice.matched_payment_ids.mapped('amount'))
+        amount_marked_as_paid = invoice.amount_total - invoice.amount_residual
+        # On `allowance_charge_amount`: negative amounts are allowances; positive amounts charges
+        allowance_charge_amount = prepaid_amount - amount_marked_as_paid
+        allowance_charge_amount = 0  # TODO: handled differently
+
+        # TODO: check this stuff
+        # _mhhh = invoice._get_invoice_counterpart_amls_for_early_payment_discount_per_payment_term_line()
+        payterm_lines = invoice.line_ids.filtered(lambda x: x.display_type == 'payment_term')
+        discount_amount_currency = sum(payterm_lines.mapped('amount_currency')) - sum(payterm_lines.mapped('discount_amount_currency'))
+        payments = invoice.matched_payment_ids
+        if payments:
+            liquidity_lines, counterpart_lines, writeoff_lines = payments._seek_for_lines()
+            actually_paid = sum(liquidity_lines.mapped('amount_currency'))
+            writeoff_amount = sum(writeoff_lines.mapped('amount_currency'))
+            is_paid = invoice.payment_state == invoice._get_invoice_in_payment_state()
+            counterpart_lines = payterm_lines.matched_credit_ids.credit_move_id
+            # TODO: also need to include downpayments?
+            # TODO: what about credit notes?
+            # TODO: (?: payment could be in a different currency); we should check the currency of the lines
+
+        # TODO: refactor
+        paid = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+        epd_applied = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+        if paid and epd_applied:
+            # TODO: sign?
+            # TODO: currency compare
+            # Remove the early payment lines representing charges
+            # Filter out the subtotal node; reduce the taxexclusive amount
+            base_lines = [base_line for base_line in vals['base_lines']
+                          if base_line['special_type'] != 'early_payment'
+                          or base_line['tax_details']['total_excluded'] < 0]
+        elif paid:
+            # Remove the early payment lines representing allowances
+            # TODO: may be not necessary
+            base_lines = [base_line for base_line in vals['base_lines']
+                          if base_line['special_type'] != 'early_payment']
+        else:
+            base_lines = vals['base_lines']
+        vals['base_lines'] = base_lines
+
     def _add_invoice_currency_vals(self, vals):
         self._add_document_currency_vals(vals)
 
@@ -1224,7 +1270,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         invoice = vals['invoice']
         document_node[monetary_total_tag].update({
             'cbc:PrepaidAmount': {
-                '_text': self.format_float(invoice.amount_total - invoice.amount_residual, vals['currency_dp']),
+                '_text': self.format_float(vals['tax_inclusive_amount_currency'] - invoice.amount_residual, vals['currency_dp']),
                 'currencyID': vals['currency_name'],
             },
             'cbc:PayableRoundingAmount': {
@@ -1391,7 +1437,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 return None
             return vals['total_grouping_function'](base_line, tax_data)
 
-        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], non_fixed_total_grouping_function)
+        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'] + vals.get('early_payment_base_lines', []), non_fixed_total_grouping_function)
         aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
         for currency_suffix in ['', '_currency']:
             vals[f'tax_inclusive_amount{currency_suffix}'] = vals[f'tax_exclusive_amount{currency_suffix}'] \
@@ -1674,9 +1720,11 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         currency_suffix = vals['currency_suffix']
         aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
         base_amount = base_line['tax_details'][f'total_excluded{currency_suffix}']
+        test05 = vals['invoice'].env.context.get('test_beg_testcase05_cash_discount', False)
+        test06 = vals['invoice'].env.context.get('test_beg_testcase06_discount_with_cash_payment', False)
         return {
             'cbc:ChargeIndicator': {'_text': 'false' if base_amount < 0.0 else 'true'},
-            'cbc:AllowanceChargeReasonCode': {'_text': '66' if base_amount < 0.0 else 'ZZZ'},
+            'cbc:AllowanceChargeReasonCode': {'_text': ('64' if test05 or test06 else '66') if base_amount < 0.0 else 'ZZZ'},
             'cbc:AllowanceChargeReason': {'_text': _("Conditional cash/payment discount")},
             'cbc:Amount': {
                 '_text': self.format_float(abs(base_amount), vals['currency_dp']),
