@@ -89,6 +89,8 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
 
         # A tax category "Outside of tax cope" can only have an amount of 0.
         for tax_total_val in vals['vals']['tax_total_vals']:
+            if 'tax_subtotal_vals' not in tax_total_val:
+                continue
             for tax_subtotal_val in tax_total_val['tax_subtotal_vals']:
                 tax_category_vals = tax_subtotal_val['tax_category_vals']
                 if tax_category_vals['tax_category_code'] == 'O' and tax_category_vals['percent'] != 0:
