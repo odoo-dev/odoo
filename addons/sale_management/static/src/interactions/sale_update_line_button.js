@@ -9,9 +9,6 @@ export class SaleUpdateLineButton extends Interaction {
         "a.js_update_line_json": {
             "t-on-click.prevent.withTarget": this.onUpdateLineClick,
         },
-        "a.js_add_optional_products": {
-            "t-on-click.prevent.withTarget": this.onAddOptionalProductClick,
-        },
         ".js_quantity": {
             "t-on-change.prevent.withTarget": this.onQuantityChange,
         },
@@ -27,15 +24,6 @@ export class SaleUpdateLineButton extends Interaction {
      */
     callUpdateLineRoute(orderId, params) {
         return rpc("/my/orders/" + orderId + "/update_line_dict", params);
-    }
-
-    /**
-     * @param {number} orderId
-     * @param {number} optionId
-     * @param {Object} params
-     */
-    callAddOptionRoute(orderId, optionId, params) {
-        return rpc("/my/orders/" + orderId + "/add_option/" + optionId, params);
     }
 
     refreshOrderUI() {
@@ -65,19 +53,6 @@ export class SaleUpdateLineButton extends Interaction {
             "access_token": this.orderDetail.token,
             "line_id": currentTargetEl.dataset.lineId,
             "remove": currentTargetEl.dataset.remove,
-            "unlink": currentTargetEl.dataset.unlink,
-        }));
-        this.refreshOrderUI(data);
-    }
-
-    /**
-     * @param {MouseEvent} ev
-     * @param {HTMLElement} currentTargetEl
-     */
-    async onAddOptionalProductClick(ev, currentTargetEl) {
-        currentTargetEl.style.setProperty("pointer-events", "none");
-        const data = await this.waitFor(this.callAddOptionRoute(this.orderDetail.orderId, currentTargetEl.dataset.optionId, {
-            "access_token": this.orderDetail.token,
         }));
         this.refreshOrderUI(data);
     }

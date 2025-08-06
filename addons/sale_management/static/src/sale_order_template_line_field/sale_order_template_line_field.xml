@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+    <t
+        t-name="sale_management.ListRenderer.RecordRow"
+        t-inherit="account.SectionAndNoteListRenderer.RecordRow"
+        t-inherit-mode="primary"
+    >
+        <xpath
+            expr="//DropdownItem[@onSelected='() => this.toggleHideComposition(record)']"
+            position="after"
+        >
+            <DropdownItem
+                t-if="this.isActionVisible(record, ['is_optional'])"
+                onSelected="() => this.toggleOptional(record)"
+            >
+                <i class="me-1 fa fa-fw fa-list"/>
+                <span t-out="record.data.is_optional ? 'Unset Optional' : 'Set Optional'"/>
+            </DropdownItem>
+        </xpath>
+    </t>
+
+</templates>

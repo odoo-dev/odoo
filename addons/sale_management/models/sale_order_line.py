@@ -7,7 +7,15 @@ class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
     _description = "Sales Order Line"
 
-    sale_order_option_ids = fields.One2many('sale.order.option', 'line_id', 'Optional Products Lines')
+    # Whether this section's lines are optional and in the portal.
+    is_optional = fields.Boolean(
+        string="Optional Line",
+        compute="_compute_is_optional",
+        store=True,
+        readonly=False,
+        copy=True,
+        recursive=True,
+    )
 
     @api.depends('product_id')
     def _compute_name(self):
@@ -39,12 +47,23 @@ class SaleOrderLine(models.Model):
 
     def _lines_without_price_recomputation(self):
         """ Hook to allow filtering the lines to avoid the recomputation of the price. """
-        return self.filtered('sale_order_option_ids')
+        return self.browse()
+
+    @api.depends('parent_id.is_optional')
+    def _compute_is_optional(self):
+        for line in self:
+            if line.display_type == 'line_section':
+                continue  # Don't recompute when moving sections around.
+            if line.display_type == 'line_subsection':
+                line.is_optional = line.is_optional or line.parent_id.is_optional
+            else:  # Product/Note lines
+                line.is_optional = line.parent_id.is_optional
+
+    @api.depends('order_id.sale_order_template_id')
+    def _compute_parent_id(self):
+        return super()._compute_parent_id()
 
     #=== TOOLING ===#
 
     def _can_be_edited_on_portal(self):
-        return self.order_id._can_be_edited_on_portal() and (
-            self.sale_order_option_ids
-            or self.product_id in self.order_id.sale_order_option_ids.product_id
-        )
+        return self.order_id._can_be_edited_on_portal() and self.is_optional

@@ -22,7 +22,7 @@ function getPreviousSectionRecords(list, record) {
     return sectionRecords;
 }
 
-function getSectionRecords(list, record, subSection) {
+export function getSectionRecords(list, record, subSection) {
     const { sectionRecords } = getRecordsUntilSection(list, record, true, subSection);
     return sectionRecords;
 }
@@ -111,17 +111,24 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         return this.record.data.collapse_composition;
     }
 
-    get showPricesButton() {
-        if (this.record.data.display_type === DISPLAY_TYPES.SUBSECTION) {
-            const parent_record = this.getParentSectionRecord(this.record);
-            return !parent_record?.data?.collapse_prices && !parent_record?.data?.collapse_composition;
-        }
-        return true;
-    }
-
-    get showCompositionButton() {
-        if (this.record.data.display_type === DISPLAY_TYPES.SUBSECTION) {
-            return !this.getParentSectionRecord(this.record)?.data?.collapse_composition;
+    /**
+     * Check if a dropdown action should be visible for the given record.
+     *
+     * For subsection lines, the action is visible only if all the specified
+     * fields are falsy for parent section. For other lines, actions are always visible.
+     *
+     * @param {Object} record - The current record.
+     * @param {Array<string>} fields - Parent fields that must be falsy.
+     * @returns {boolean} true if the action should be visible.
+     */
+    isActionVisible(record, fields) {
+        if (this.isSubSection(record)) {
+            const parent = this.getParentSectionRecord(record);
+            if (!parent) {
+                return true;
+            }
+            // All fields must be falsy for the option to be visible
+            return fields.every(field => !parent.data?.[field]);
         }
         return true;
     }

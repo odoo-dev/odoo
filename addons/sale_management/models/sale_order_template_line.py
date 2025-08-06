@@ -59,6 +59,22 @@ class SaleOrderTemplateLine(models.Model):
         ('line_subsection', "Subsection"),
         ('line_note', "Note")], default=False)
 
+    # Section-related fields
+    parent_id = fields.Many2one(
+        string="Parent Section Line",
+        comodel_name='sale.order.template.line',
+        compute='_compute_parent_id',
+        store=True,
+    )
+    is_optional = fields.Boolean(
+        string="Optional Line",
+        compute='_compute_is_optional',
+        store=True,
+        readonly=False,
+        copy=True,
+        recursive=True,
+    )
+
     #=== COMPUTE METHODS ===#
 
     @api.depends('product_id', 'product_id.uom_id', 'product_id.uom_ids')
@@ -70,6 +86,34 @@ class SaleOrderTemplateLine(models.Model):
     def _compute_product_uom_id(self):
         for option in self:
             option.product_uom_id = option.product_id.uom_id
+
+    @api.depends('sale_order_template_id.sale_order_template_line_ids', 'sale_order_template_id')
+    def _compute_parent_id(self):
+        for option in self:
+            if not option.display_type:
+                parent_types = ['line_section', 'line_subsection']
+            elif option.display_type == 'line_subsection':
+                parent_types = ['line_section']
+            else:
+                parent_types = []
+
+            if parent_types:
+                qualified_lines = option.sale_order_template_id.sale_order_template_line_ids.filtered(
+                    lambda l: l.display_type in parent_types and l.sequence < option.sequence,
+                )
+                option.parent_id = max(qualified_lines, key=lambda l: l.sequence, default=False)
+            else:
+                option.parent_id = False
+
+    @api.depends('parent_id.is_optional')
+    def _compute_is_optional(self):
+        for option in self:
+            if option.display_type == 'line_section':
+                continue
+            if option.display_type == 'line_subsection':
+                option.is_optional = option.is_optional or option.parent_id.is_optional
+            else:  # Product/Note lines
+                option.is_optional = option.parent_id.is_optional
 
     #=== CRUD METHODS ===#
 
@@ -104,6 +148,7 @@ class SaleOrderTemplateLine(models.Model):
             'product_id': self.product_id.id,
             'product_uom_qty': self.product_uom_qty,
             'product_uom_id': self.product_uom_id.id,
+            'is_optional': self.is_optional,
             'sequence': self.sequence,
         }
         if self.name:
