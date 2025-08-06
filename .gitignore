@@ -50,3 +50,6 @@ package.json
 /man/
 /share/
 /src/
+
+# ERLE custom
+pyproject.toml
