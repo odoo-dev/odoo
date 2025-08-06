@@ -55,7 +55,7 @@ class AccountTestInvoicingCommon(ProductCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.disable_documents_sync()
+        # cls.disable_documents_sync()
 
         cls.maxDiff = None
         cls.company_data = cls.collect_company_accounting_data(cls.env.company)
@@ -216,7 +216,7 @@ class AccountTestInvoicingCommon(ProductCommon):
     def setup_other_company(cls, **kwargs):
         # OVERRIDE
         company = cls._create_company(**{'name': 'company_2'} | kwargs)
-        cls.disable_documents_sync()
+        # cls.disable_documents_sync()
         data = cls.collect_company_accounting_data(company)
         cls.product_category.with_company(company).write({
             'property_account_income_categ_id': data['default_account_revenue'].id,
