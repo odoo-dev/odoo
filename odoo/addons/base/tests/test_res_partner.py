@@ -1056,3 +1056,18 @@ class TestPartnerRecursion(TransactionCase):
         self.p1.parent_id = self.p2
         with self.assertRaises(ValidationError):
             (self.p3|self.p2).write({'parent_id': self.p1.id})
+
+
+@tagged('res_partner')
+class TestPartnerCategory(TransactionCase):
+
+    def setUp(self):
+        super(TestPartnerCategory, self).setUp()
+        self.Model = self.env['res.partner.category']
+
+    def test_search_display_name(self):
+        operator = 'ilike'
+        value = ''
+        domain = self.Model._search_display_name(operator, value)
+
+        self.assertIsInstance(domain, list)
