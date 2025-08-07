@@ -158,7 +158,11 @@ export class SavePlugin extends Plugin {
         if (!this.canObserve) {
             return;
         }
-        if (currentOperation === "undo" || currentOperation === "redo") {
+        if (
+            currentOperation === "undo" ||
+            currentOperation === "redo" //||
+            // currentOperation === "consumed"
+        ) {
             // Do nothing as `o_dirty` has already been handled by the history
             // plugin.
             return;
@@ -167,6 +171,15 @@ export class SavePlugin extends Plugin {
             if (record.attributeName === "contenteditable") {
                 continue;
             }
+            // if (
+            //     record.type === "classList" &&
+            //     record.className === "o_dirty" &&
+            //     record.value === false
+            // ) {
+            //     // Ignore removing the o_dirty class
+            //     // debugger
+            //     continue;
+            // }
             let targetEl = record.target;
             if (!targetEl.isConnected) {
                 continue;
