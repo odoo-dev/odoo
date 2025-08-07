@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Real Estate Property"
+    _order = "id desc"
 
     name = fields.Char(string="Name", required=True)
     description = fields.Text(string="Description")
@@ -141,5 +142,5 @@ class EstateProperty(models.Model):
     def _check_selling_price(self):
         for record in self:
             if not float_utils.float_is_zero(record.selling_price, 2):
-                if float_utils.float_compare(record.selling_price, record.expected_price, 2):
+                if float_utils.float_compare(record.selling_price, record.expected_price * 0.9, 2) < 0:
                     raise ValidationError("must be >90% expected price")
