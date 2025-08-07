@@ -153,9 +153,11 @@ class Store:
             return self
         for record, record_data_list in self._get_records_data_list(field_list).items():
             for record_data in record_data_list:
+                mail_models = record.env["ir.model"].sudo().search([("is_mail_thread", "=", True), ("transient", "=", False)])
+                hasMailThread = record.env["ir.model"]._get(record._name).id in mail_models.ids
                 if as_thread:
                     self.add_model_values(
-                        "mail.thread", {"id": record.id, "model": record._name, **record_data},
+                        "mail.thread", {"id": record.id, "model": record._name, "hasMailThread": hasMailThread, **record_data},
                     )
                 else:
                     self.add_model_values(record._name, {"id": record.id, **record_data})
