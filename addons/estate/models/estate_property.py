@@ -1,4 +1,5 @@
 from odoo import api, models, fields
+from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
 
 
@@ -45,6 +46,7 @@ class EstateProperty(models.Model):
         required=True,
         copy=False,
         default="new",
+        # readonly=True,
     )
 
     # computed
@@ -87,3 +89,32 @@ class EstateProperty(models.Model):
         else:
             self.garden_area = 0
             self.garden_orientation = ""
+
+    # public
+    def action_estate_property_sold(self):
+        for record in self:
+            if record.state == "cancelled":
+                raise UserError(
+                    "You already cancelled, man. Price has gone up (not really)")
+
+            # Check for an accepted offer
+            accepted_offers = record.offer_ids.filtered(
+                lambda x: x.status == 'accepted')
+            if not accepted_offers:
+                raise UserError(
+                    "No offer has been accepted yet! Please accept an offer before marking as sold."
+                )
+
+            record.state = "sold"
+        return True
+
+    def action_estate_property_cancel(self):
+        for record in self:
+            if record.state == "sold":
+                raise UserError(
+                    "They already paid, no takesie-backsies. That'd be a scam otherwise!")
+
+            record.state = "cancelled"
+            # Reject all offers when cancelling property
+            record.offer_ids.write({'status': 'refused'})
+        return True

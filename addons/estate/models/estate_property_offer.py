@@ -1,5 +1,7 @@
 from odoo import api, models, fields
+from odoo.exceptions import UserError
 from datetime import datetime, timedelta
+
 
 class EstatePropertyOffer(models.Model):
     _name = "estate.property.offer"
@@ -10,7 +12,7 @@ class EstatePropertyOffer(models.Model):
     status = fields.Selection(
         [
             ("accepted", "Accepted"),
-            ("refused", "Refused"),
+            ("rejected", "Rejected"),
         ],
         string="Status",
         copy=False,
@@ -37,3 +39,47 @@ class EstatePropertyOffer(models.Model):
             if record.date_deadline:
                 base_date = record.create_date.date() if record.create_date else fields.Date.today()
                 record.validity = (record.date_deadline - base_date).days
+
+    # public
+    def action_accept(self):
+        for record in self:
+            if record.property_id.state in ['sold', 'cancelled']:
+                raise UserError(
+                    "Cannot accept offers for sold or cancelled properties!")
+
+            # Check if another offer is already accepted
+            accepted_offers = record.property_id.offer_ids.filtered(
+                lambda x: x.status == 'accepted' and x.id != record.id
+            )
+
+            if accepted_offers:
+                raise UserError(
+                    f"An offer from {accepted_offers[0].partner_id.name} is already accepted! "
+                    "You must reject it first before accepting this offer."
+                )
+
+            # Accept this offer and reject all others
+            record.status = "accepted"
+            other_offers = record.property_id.offer_ids.filtered(
+                lambda x: x.id != record.id)
+            other_offers.write({'status': 'rejected'})
+
+            # Set buyer and selling price on property
+            record.property_id.write({
+                'partner_id': record.partner_id.id,
+                'selling_price': record.price,
+                'state': 'offer_accepted'
+            })
+        return True
+
+    def action_reject(self):
+        for record in self:
+            if record.status == 'accepted':
+                # If we're refusing an accepted offer, clear buyer and selling price
+                record.property_id.write({
+                    'partner_id': False,
+                    'selling_price': 0.0,
+                    'state': 'offer_received' if record.property_id.offer_ids.filtered(lambda x: x.id != record.id and x.status != 'rejected') else 'new'
+                })
+            record.status = "rejected"
+        return True
