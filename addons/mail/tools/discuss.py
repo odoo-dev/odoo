@@ -154,11 +154,13 @@ class Store:
         if not fields:
             return self
         fields = self._format_fields(records, fields)
+        mail_models = request.env["ir.model"].sudo().search([("is_mail_thread", "=", True), ("transient", "=", False)])
+        hasMailThread = request.env["ir.model"]._get(records._name).id in mail_models.ids
         for record, record_data_list in zip(records, self._get_records_data_list(records, fields)):
             for record_data in record_data_list:
                 if as_thread:
                     self.add_model_values(
-                        "mail.thread", {"id": record.id, "model": record._name, **record_data},
+                        "mail.thread", {"id": record.id, "model": record._name, "hasMailThread": hasMailThread, **record_data},
                     )
                 else:
                     self.add_model_values(record._name, {"id": record.id, **record_data})
