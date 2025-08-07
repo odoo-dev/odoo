@@ -523,12 +523,12 @@ class Picking(models.Model):
     package_level_ids = fields.One2many('stock.package_level', 'picking_id')
     package_level_ids_details = fields.One2many('stock.package_level', 'picking_id')
     products_availability = fields.Char(
-        string="Product Availability", compute='_compute_products_availability',
+        string="Product Availability", compute='_compute_products_availability', store=True,
         help="Latest product availability status of the picking")
     products_availability_state = fields.Selection([
         ('available', 'Available'),
         ('expected', 'Expected'),
-        ('late', 'Late')], compute='_compute_products_availability')
+        ('late', 'Late')], compute='_compute_products_availability', store=True)
     # To remove in Master
     show_set_qty_button = fields.Boolean(compute='_compute_show_qty_button')
     show_clear_qty_button = fields.Boolean(compute='_compute_show_qty_button')

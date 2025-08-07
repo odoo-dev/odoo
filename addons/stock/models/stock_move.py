@@ -145,7 +145,7 @@ class StockMove(models.Model):
         help='Move that created the return move', check_company=True)
     returned_move_ids = fields.One2many('stock.move', 'origin_returned_move_id', 'All returned moves', help='Optional: all returned moves created from this move')
     availability = fields.Float(
-        'Forecasted Quantity', compute='_compute_product_availability',
+        'Forecasted Quantity', compute='_compute_product_availability', store=True,
         readonly=True, help='Quantity in stock that can still be reserved for this move')
     # used to depict a restriction on the ownership of quants to consider when marking this move as 'done'
     restrict_partner_id = fields.Many2one(
