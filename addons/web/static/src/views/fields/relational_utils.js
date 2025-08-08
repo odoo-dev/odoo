@@ -388,6 +388,13 @@ export class Many2XAutocomplete extends Component {
             return promise;
         });
     }
+    abortableSearch(name) {
+        const originalPromise = this.search(name);
+        return {
+            promise: originalPromise,
+            abort: originalPromise.abort ? originalPromise.abort.bind(originalPromise) : () => {},
+        };
+    }
 
     async suggest(request, lock) {
         const suggestions = [];
@@ -399,7 +406,9 @@ export class Many2XAutocomplete extends Component {
                 suggestions.push(this.buildStartTypingSuggestion());
             }
         } else {
-            records = await lock(this.search(request));
+            this.__lastSuggestionsLoadPromise = this.abortableSearch(request);
+            records = await this.__lastSuggestionsLoadPromise.promise;
+
             if (records.length) {
                 for (const record of records) {
                     suggestions.push(this.buildRecordSuggestion(request, record));
