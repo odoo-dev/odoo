@@ -4,10 +4,9 @@ import json
 import logging
 import psycopg2
 
-import odoo.api
 import odoo.exceptions
-import odoo.modules.registry
 from odoo import http
+from odoo.addons.base.controllers import IndexController
 from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.service import security
@@ -31,7 +30,7 @@ LOGIN_SUCCESSFUL_PARAMS = set()
 CREDENTIAL_PARAMS = ['login', 'password', 'type']
 
 
-class Home(http.Controller):
+class Home(Index):
 
     @http.route('/', type='http', auth="none")
     def index(self, s_action=None, db=None, **kw):
