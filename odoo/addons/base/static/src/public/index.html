@@ -1,0 +1,47 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Odoo</title>
+    <style>
+        a {
+            text-decoration: none;
+        }
+        img {
+            height: 3em;
+        }
+        div.list-group-item {
+            margin: 1em;
+            font-size: 1.4em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3 o_database_list">
+                <img src="/web/static/img/logo2.png" class="img-fluid d-block mx-auto"/> <!-- XXX move to base -->
+                <t t-if="error">
+                    <div class="alert alert-danger" t-out="error"></div>
+                </t>
+                <t t-if="list_db and databases">
+                    <div class="list-group">
+                        <t t-foreach="databases" t-as="db">
+                            <div class="list-group-item d-flex align-items-center">
+                                <a t-attf-href="/?db={{ db }}" class="d-block flex-grow-1">
+                                    <t t-if="db in incompatible_databases">
+                                        <i class="icon fa fa-warning float-end text-warning" title="This database may not be compatible"></i>
+                                    </t>
+                                    <t t-out="db" />
+                                </a>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+                <t t-elif="list_db">
+                    No databases.
+                </t>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

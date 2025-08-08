@@ -30,7 +30,7 @@ LOGIN_SUCCESSFUL_PARAMS = set()
 CREDENTIAL_PARAMS = ['login', 'password', 'type']
 
 
-class Home(Index):
+class Home(IndexController):
 
     @http.route('/', type='http', auth="none")
     def index(self, s_action=None, db=None, **kw):

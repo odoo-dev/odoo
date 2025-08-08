@@ -72,20 +72,14 @@ def ensure_db(redirect, db=None):
 
 
 class IndexController(http.Controller):
-    @http.route('/<path>', type='http', auth='none')
-    def index(self, path, db=None, **kw):
+    @http.route('/', type='http', auth='none')
+    def index(self, db=None, **kw):
         if db:
-            ensure_db('/odoo', db=db)
-        _logger.info("Default controller, no database")
-        return self._render_template()
+            ensure_db('/', db=db)
 
-    def _render_template(self, **d):
-        d['manage'] = False
-        d['insecure'] = odoo.tools.config.verify_admin_password('admin')
+        _logger.info("Default controller, no database")
+        d = {}
         d['list_db'] = odoo.tools.config['list_db']
-        d['langs'] = odoo.service.db.exp_list_lang()
-        d['countries'] = odoo.service.db.exp_list_countries()
-        d['pattern'] = DBNAME_PATTERN
         # databases list
         try:
             d['databases'] = http.db_list()
@@ -95,12 +89,11 @@ class IndexController(http.Controller):
 
         templates = {}
 
-        # XXX need to have a specific one for base
-        with file_open("web/static/src/public/database_manager.qweb.html", "r") as fd:
+        with file_open("base/static/src/public/index.html", "r") as fd:
             templates['database_manager'] = fd.read()
 
         def load(template_name):
-            fromstring = html.document_fromstring if template_name == 'database_manager' else html.fragment_fromstring
+            fromstring = html.document_fromstring
             return (fromstring(templates[template_name]), template_name)
 
         return qweb_render('database_manager', d, load)
