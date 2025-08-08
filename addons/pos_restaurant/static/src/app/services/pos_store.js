@@ -61,40 +61,6 @@ patch(PosStore.prototype, {
             },
         ];
     },
-    get firstScreen() {
-        const screen = super.firstScreen;
-        const isFirstSession = this.config.raw.session_ids.length === 1;
-        const hasNoProducts = this.productsToDisplay.length === 0;
-
-        if (!this.config.module_pos_restaurant) {
-            return screen;
-        }
-
-        if (screen.page === "LoginScreen") {
-            return { page: "LoginScreen", params: {} };
-        }
-
-        if (isFirstSession && hasNoProducts) {
-            return {
-                page: "ProductScreen",
-                params: {
-                    orderUuid: this.getOrder()?.uuid,
-                },
-            };
-        }
-
-        return this.defaultPage;
-    },
-    get defaultScreen() {
-        if (this.config.module_pos_restaurant) {
-            const screens = {
-                register: "ProductScreen",
-                tables: "FloorScreen",
-            };
-            return screens[this.config.default_screen];
-        }
-        return super.defaultScreen;
-    },
 
     createNewOrder() {
         const order = super.createNewOrder(...arguments);

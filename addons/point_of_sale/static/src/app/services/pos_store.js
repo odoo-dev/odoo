@@ -42,7 +42,6 @@ const { DateTime } = luxon;
 
 export class PosStore extends WithLazyGetterTrap {
     loadingSkipButtonIsShown = false;
-    mainScreen = { name: null, component: null };
 
     static serviceDependencies = [
         "bus_service",
