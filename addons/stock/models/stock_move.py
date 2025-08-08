@@ -187,6 +187,7 @@ class StockMove(models.Model):
     show_quant = fields.Boolean("Show Quant", compute="_compute_show_info")
     show_lots_m2o = fields.Boolean("Show lot_id", compute="_compute_show_info")
     show_lots_text = fields.Boolean("Show lot_name", compute="_compute_show_info")
+    is_updated=fields.Boolean('Is Updated')
 
     @api.depends('product_id')
     def _compute_product_uom(self):
@@ -427,6 +428,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         """ Compute forecasted information of the related product by warehouse."""
         self.forecast_availability = False
         self.forecast_expected_date = False
+        self.is_updated=True
 
         # Prefetch product info to avoid fetching all product fields
         self.product_id.fetch(['type', 'uom_id'])

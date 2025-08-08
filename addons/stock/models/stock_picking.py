@@ -583,8 +583,11 @@ class Picking(models.Model):
         other_pickings.products_availability_state = False
 
         all_moves = pickings.move_ids
+        moves_to_compute= all_moves.filtered(lambda move: move.is_updated)
         # Force to prefetch more than 1000 by 1000
-        all_moves._fields['forecast_availability'].compute_value(all_moves)
+        if moves_to_compute:
+            moves_to_compute._fields['forecast_availability'].compute_value(moves_to_compute)
+            moves_to_compute.write({'is_updated': False})
         for picking in pickings:
             # In case of draft the behavior of forecast_availability is different : if forecast_availability < 0 then there is a issue else not.
             if any(float_compare(move.forecast_availability, 0 if move.state == 'draft' else move.product_qty, precision_rounding=move.product_id.uom_id.rounding) == -1 for move in picking.move_ids):
