@@ -247,10 +247,10 @@ class StockForecasted(models.AbstractModel):
         def _reconcile_out_with_ins(lines, out, ins, demand, product_rounding, only_matching_move_dest=True, read=True):
             index_to_remove = []
             for index, in_ in enumerate(ins):
+                if only_matching_move_dest and in_['move_dests'] and out.id not in in_['move_dests']:
+                    continue
                 if float_is_zero(in_['qty'], precision_rounding=product_rounding):
                     index_to_remove.append(index)
-                    continue
-                if only_matching_move_dest and in_['move_dests'] and out.id not in in_['move_dests']:
                     continue
                 taken_from_in = min(demand, in_['qty'])
                 demand -= taken_from_in
