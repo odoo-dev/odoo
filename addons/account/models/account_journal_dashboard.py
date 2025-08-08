@@ -680,6 +680,7 @@ class AccountJournal(models.Model):
                 'number_to_check': count,
                 'to_check_balance': currency.format(amount_total_signed_sum),
                 'drag_drop_settings': drag_drop_settings,
+                'to_hide_tax_return_button': False
             })
 
     def _fill_onboarding_data(self, dashboard_data):
