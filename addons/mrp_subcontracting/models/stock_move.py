@@ -252,19 +252,7 @@ class StockMove(models.Model):
                         production.subcontracting_has_been_recorded = True
                 else:
                     # MOs already created for lots, update to enforce sync:
-                    # 1. Delete 'orphan' MOs with lot not linked to any move line
-                    orphan_productions = productions.filtered(lambda p: p.lot_producing_id not in qty_by_lot)
-                    if len(productions) == len(orphan_productions):
-                        # Make sure not to delete all MOs, leave 1 subcontracting MO as 'open' MO for splitting later
-                        production_to_keep = orphan_productions[-1]
-                        production_to_keep.subcontracting_has_been_recorded = False
-                        production_to_keep.lot_producing_id = False
-                        orphan_productions = orphan_productions[:-1]
-                    if orphan_productions:
-                        orphan_productions.with_context(skip_activity=True).unlink()
-                        productions -= orphan_productions
-
-                    # 2. Ensure quantities of linked MOs still match the quantities on the move
+                    # 1. Ensure quantities of linked MOs still match the quantities on the move
                     mos_to_create = {}  # lot -> qty
                     for lot_id, ml_qty in qty_by_lot.items():
                         lot_mo = productions.filtered(lambda p: p.lot_producing_id == lot_id)
@@ -277,7 +265,7 @@ class StockMove(models.Model):
                             }]).change_prod_qty()
                             lot_mo.action_assign()
 
-                    # 3. Create new MOs where needed, by splitting them from an existing subcontracting MO
+                    # 2. Create new MOs where needed, by splitting them from an existing subcontracting MO
                     if mos_to_create:
                         production_to_split = move._get_subcontract_production()[0]
                         new_mos = production_to_split.sudo().with_context(allow_more=True)._split_productions({
@@ -286,6 +274,19 @@ class StockMove(models.Model):
                         for mo, lot_id in zip(new_mos, mos_to_create.keys()):
                             mo.lot_producing_id = lot_id
                             mo.subcontracting_has_been_recorded = True
+
+                    # 3. Delete 'orphan' MOs with lot not linked to any move line
+                    productions = move._get_subcontract_production()
+                    orphan_productions = productions.filtered(lambda p: p.lot_producing_id not in qty_by_lot)
+                    if len(productions) == len(orphan_productions):
+                        # Make sure not to delete all MOs, leave 1 subcontracting MO as 'open' MO for splitting later
+                        production_to_keep = orphan_productions[-1]
+                        production_to_keep.subcontracting_has_been_recorded = False
+                        production_to_keep.lot_producing_id = False
+                        orphan_productions = orphan_productions[:-1]
+                    if orphan_productions:
+                        orphan_productions.with_context(skip_activity=True).unlink()
+                        productions -= orphan_productions
 
     def _split(self, qty, restrict_partner_id=False):
         # Make sure that backordered subcontracting moves are disconnected from the sbc production linked to the original move
