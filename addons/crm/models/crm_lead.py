@@ -733,12 +733,12 @@ class CrmLead(models.Model):
 
     def _prepare_partner_name_from_partner(self, partner):
         """ Company name: name of partner parent (if set) or name of partner
-        (if company) or company_name of partner (if not a company). """
+        (if company) or parent_name of partner (if not a company). """
         partner_name = partner.parent_id.name
         if not partner_name and partner.is_company:
             partner_name = partner.name
-        elif not partner_name and partner.company_name:
-            partner_name = partner.company_name
+        elif not partner_name and partner.parent_name:
+            partner_name = partner.parent_name
         return {'partner_name': partner_name or self.partner_name}
 
     def _get_partner_email_update(self, force_void=True):
@@ -2042,7 +2042,6 @@ class CrmLead(models.Model):
             values['is_company'] = is_company
             if not is_company and lead.commercial_partner_id:
                 values['parent_id'] = lead.commercial_partner_id.id
-                values.pop('company_name', None)
         return email_keys_to_values
 
     def _prepare_customer_values(self, partner_name, is_company=False, parent_id=False):
@@ -2073,9 +2072,10 @@ class CrmLead(models.Model):
             # company / hierarchy
             'parent_id': parent_id,
             'is_company': is_company,
-            'company_name': not is_company and not parent_id and self.partner_name,
             'type': 'contact'
         }
+        if not parent_id and self.partner_name:
+            res['parent_name'] = self.partner_name
         if self.lang_id.active:
             res['lang'] = self.lang_id.code
         return res

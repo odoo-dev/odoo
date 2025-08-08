@@ -232,8 +232,7 @@ class TestCrmCommon(TestSalesCommon, MailCase):
         })
         cls.contact_company = cls.env['res.partner'].create({
             'name': 'Mom',
-            'company_name': 'MomCorp',
-            'is_company': True,
+            'vat': 'BE0477472701',
             'street': 'Mom Friendly Robot Street',
             'city': 'New new York',
             'country_id': base_us.id,

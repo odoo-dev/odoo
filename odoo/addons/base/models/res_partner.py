@@ -204,7 +204,8 @@ class ResPartner(models.Model):
     name = fields.Char(index=True, default_export_compatible=True)
     complete_name = fields.Char(compute='_compute_complete_name', store=True, index=True)
     parent_id: ResPartner = fields.Many2one('res.partner', string='Related Company', index=True)
-    parent_name = fields.Char(related='parent_id.name', readonly=True, string='Parent name')
+    # It's Stored intentionally and will act in place of `company_name`
+    parent_name = fields.Char(related='parent_id.name', readonly=True, store=True, string='Parent name')
     child_ids: ResPartner = fields.One2many('res.partner', 'parent_id', string='Contact', domain=[('active', '=', True)], context={'active_test': False})
     ref = fields.Char(string='Reference', index=True)
     lang = fields.Selection(_lang_get, string='Language',
@@ -292,7 +293,6 @@ class ResPartner(models.Model):
         recursive=True, index=True)
     commercial_company_name = fields.Char('Company Name Entity', compute='_compute_commercial_company_name',
                                           store=True)
-    company_name = fields.Char('Company Name')
     barcode = fields.Char(help="Use a barcode to identify this contact.", copy=False, company_dependent=True)
 
     # hack to allow using plain browse record in qweb views, and used in ir.qweb.field.contact
@@ -369,14 +369,14 @@ class ResPartner(models.Model):
         type_description = dict(self._fields['type']._description_selection(self.env))
 
         name = self.name or ''
-        if self.company_name or self.parent_id:
+        if self.parent_name or self.parent_id:
             if not name and self.type in displayed_types:
                 name = type_description[self.type]
             if not self.is_company and not self.env.context.get('partner_display_name_hide_company'):
                 name = f"{self.commercial_company_name or self.sudo().parent_id.name}, {name}"
         return name.strip()
 
-    @api.depends('is_company', 'name', 'parent_id.name', 'type', 'company_name', 'commercial_company_name')
+    @api.depends('is_company', 'name', 'parent_id.name', 'type', 'parent_name', 'commercial_company_name')
     def _compute_complete_name(self):
         for partner in self:
             partner.complete_name = partner.with_context({})._get_complete_name()
@@ -499,11 +499,11 @@ class ResPartner(models.Model):
             else:
                 partner.commercial_partner_id = partner.parent_id.commercial_partner_id
 
-    @api.depends('company_name', 'parent_id.is_company', 'commercial_partner_id.name')
+    @api.depends('parent_name', 'parent_id.is_company', 'commercial_partner_id.name')
     def _compute_commercial_company_name(self):
         for partner in self:
             p = partner.commercial_partner_id
-            partner.commercial_company_name = p.is_company and p.name or partner.company_name
+            partner.commercial_company_name = (p.is_company and p.name) or partner.parent_name
 
     def _compute_company_registry(self):
         # exists to allow overrides
@@ -843,8 +843,6 @@ class ResPartner(models.Model):
                                             'Linked active users :\n%(names)s', names=", ".join([u.display_name for u in users])))
         if vals.get('website'):
             vals['website'] = self._clean_website(vals['website'])
-        if vals.get('parent_id'):
-            vals['company_name'] = False
 
         # filter to keep only really updated values -> field synchronize goes through
         # partner tree and we should avoid infinite loops in case same value is
@@ -890,14 +888,18 @@ class ResPartner(models.Model):
         for vals in vals_list:
             if vals.get('website'):
                 vals['website'] = self._clean_website(vals['website'])
-            if vals.get('parent_id'):
-                vals['company_name'] = False
         partners = super().create(vals_list)
         # due to ir.default, compute is not called as there is a default value
         # hence calling the compute manually
         for partner, values in zip(partners, vals_list):
             if 'lang' not in values and partner.parent_id:
                 partner._compute_lang()
+            if values.get('parent_name') and not partner.parent_id:
+                # Create parent company if we got 'parent_name'
+                partner._create_parent_from_name(
+                    values.get('parent_name'),
+                    values.get('parent_additional_values')
+                )
 
         if self.env.context.get('_partners_skip_fields_sync'):
             return partners
@@ -960,19 +962,26 @@ class ResPartner(models.Model):
             partner._handle_first_contact_creation()
         return partners
 
-    def create_company(self):
+    def _create_parent_from_name(self, parent_name, additional_values=None):
+        """ Creates a parent form a name, used mainly when creating new partners with
+        a parent (often a company) as a name. """
         self.ensure_one()
-        if self.company_name:
-            # Create parent company
-            values = dict(name=self.company_name, is_company=True, vat=self.vat)
-            values.update(self._convert_fields_to_values(self._address_fields()))
-            new_company = self.create(values)
-            # Set new company as my parent
-            self.write({
-                'parent_id': new_company.id,
-                'child_ids': [Command.update(partner_id, dict(parent_id=new_company.id)) for partner_id in self.child_ids.ids]
-            })
-        return True
+        if not parent_name:
+            raise ValueError(_('Parent Name is required at this point'))
+        parent_values = dict(name=parent_name, vat=self.vat)
+        parent_values.update(self._convert_fields_to_values(self._address_fields()))
+        if additional_values:
+            parent_values.update(**additional_values)
+        parent_company = self.create(parent_values)
+        # Set new company as parent
+        self.write({
+            'parent_id': parent_company.id,
+            'child_ids': [
+                Command.update(partner_id, dict(parent_id=parent_company.id))
+                for partner_id in self.child_ids.ids
+            ],
+        })
+        return parent_company
 
     def open_commercial_entity(self):
         """ Utility method used to add an "Open Company" button in partner views """
@@ -994,8 +1003,8 @@ class ResPartner(models.Model):
         for partner in self:
             if partner.env.context.get("formatted_display_name"):
                 name = partner.name or ''
-                if partner.parent_id or partner.company_name:
-                    name = (f"{partner.company_name or partner.parent_id.name} \t "
+                if partner.parent_id:
+                    name = (f"{partner.parent_id.name} \t "
                             f"--{partner.name or type_description.get(partner.type, '')}--")
 
                 if partner.env.context.get('show_email') and partner.email:
@@ -1136,14 +1145,14 @@ class ResPartner(models.Model):
             'state_name': self.state_id.name or '',
             'country_code': self.country_id.code or '',
             'country_name': self._get_country_name(),
-            'company_name': self.commercial_company_name or '',
+            'parent_name': self.commercial_company_name or '',
         })
         for field in self._formatting_address_fields():
             args[field] = self[field] or ''
         if without_company:
-            args['company_name'] = ''
+            args['parent_name'] = ''
         elif self.commercial_company_name:
-            address_format = '%(company_name)s\n' + address_format
+            address_format = '%(parent_name)s\n' + address_format
         return address_format, args
 
     def _display_address(self, without_company=False):
@@ -1162,7 +1171,7 @@ class ResPartner(models.Model):
     def _display_address_depends(self):
         # field dependencies of method _display_address()
         return self._formatting_address_fields() + [
-            'country_id', 'company_name', 'state_id',
+            'country_id', 'parent_name', 'state_id',
         ]
 
     @api.model

@@ -201,15 +201,15 @@ class TestCRMLead(TestCrmCommon):
         self.assertEqual(lead.partner_name, self.contact_company.name,
                          "Lead company name should be set to partner name if partner is a company")
         # Test that partner_name (company name) is the partner company name if partner is an individual
-        self.contact_company.write({'is_company': False})
+        self.contact_company.write({'vat': False})
         lead = self.env['crm.lead'].create({
             'name': 'TestLead',
             'partner_id': self.contact_company.id,
         })
         self.assertEqual(lead.contact_name, self.contact_company.name,
                          "Lead contact name should be set to partner name if partner is not a company")
-        self.assertEqual(lead.partner_name, self.contact_company.company_name,
-                         "Lead company name should be set to company name if partner is not a company")
+        self.assertEqual(lead.partner_name, False,
+                         "Lead company name should be Falsy if partner is not a company")
 
     @users('user_sales_manager')
     def test_crm_lead_creation_partner_no_address(self):
