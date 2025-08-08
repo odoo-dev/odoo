@@ -23,8 +23,10 @@ export class ProjectTaskCalendarModel extends ProjectTaskModelMixin(CalendarMode
     }
 
     async load(params = {}) {
-        const domain = params.domain || this.meta.domain;
-        params.domain = this._processSearchDomain(domain);
+        if (this.meta.resModel === "project.task") {
+            const domain = params.domain || this.meta.domain;
+            params.domain = this._processSearchDomain(domain);
+        }
         return super.load({
             planTask: false,
             ...(params || {}),

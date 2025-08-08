@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { check, click, queryAll, queryOne, waitFor } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { mountView } from "@web/../tests/web_test_helpers";
+import { mountView, onRpc, selectFieldDropdownItem } from "@web/../tests/web_test_helpers";
 
 import { defineProjectModels, ProjectTask } from "./project_models";
 
@@ -80,4 +80,40 @@ test("project.task (list): toggle sub-tasks", async () => {
     await click("span.o-dropdown-item");
     await animationFrame();
     expect(".o_data_row").toHaveCount(2);
+});
+
+test("project.task (list): search more on any relational fields should not be impacted by toggle sub-tasks feature", async () => {
+    onRpc("project.task.type", "web_search_read", ({ kwargs }) => {
+        expect(kwargs.domain).toEqual([]);
+    })
+    ProjectTask._records = [
+        {
+            id: 1,
+            project_id: 1,
+            name: "Task 1",
+            stage_id:  1,
+            display_in_project: true,
+        },
+        {
+            id: 2,
+            project_id: 1,
+            name: "Task 2",
+            stage_id:  1,
+            display_in_project: false,
+        }
+    ];
+    await mountView({
+        resModel: "project.task",
+        type: "list",
+        arch: `
+            <list editable="1" js_class="project_task_list">
+                <field name="project_id"/>
+                <field name="stage_id"/>
+            </list>
+        `,
+    });
+    expect(".o_data_row").toHaveCount(1);
+    await click(".o_data_row td[name='stage_id']");
+
+    await selectFieldDropdownItem("stage_id", "Search more...");
 });
