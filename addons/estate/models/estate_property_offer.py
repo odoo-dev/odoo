@@ -31,9 +31,11 @@ class EstatePropertyOffer(models.Model):
     property_type_id = fields.Many2one(
         "estate.property.type", string="Property Type",
         related="property_id.property_type_id",
-        # store=True,  # This creates the database column
-        readonly=False  # Add this temporarily if needed
+        store=True,
+        # readonly=False,
     )
+
+    some_field=fields.Char()
 
     @api.depends("create_date", "validity")
     def _compute_date_deadline(self):

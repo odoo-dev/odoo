@@ -25,7 +25,7 @@
             <form string="Property Type">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_estate_property_offer"
+                        <button name="estate.action_estate_property_offer"
                             type="action"
                             class="oe_stat_button"
                             icon="fa-handshake-o">
