@@ -9,7 +9,6 @@
         "account"
     ],
     "data": [
-        "views/estate_account_view.xml",
     ],
     "license": "LGPL-3",
 }
