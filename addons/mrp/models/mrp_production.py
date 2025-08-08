@@ -1532,7 +1532,7 @@ class MrpProduction(models.Model):
         workorder_to_confirm = self.env['mrp.workorder'].browse(sorted(workorder_ids_to_confirm))
 
         move_raws_to_adjust._adjust_procure_method()
-        moves_to_confirm._action_confirm(merge=False)
+        moves_to_confirm._action_confirm(merge=False, create_proc=not self.env.context.get('no_procurement'))
         workorder_to_confirm._action_confirm()
         workorder_to_confirm._set_cost_mode()
         # run scheduler for moves forecasted to not have enough in stock

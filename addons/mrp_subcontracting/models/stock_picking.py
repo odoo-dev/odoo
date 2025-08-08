@@ -92,6 +92,9 @@ class StockPicking(models.Model):
         return vals
 
     def _get_subcontract_mo_confirmation_ctx(self):
+        if self._is_subcontract() and not self.env.context.get('cancel_backorder', True):
+            # Do not trigger rules on raw moves when creating backorder for a subcontract receipt.
+            return {'no_procurement': True}
         return {}  # To override in mrp_subcontracting_purchase
 
     def _subcontracted_produce(self, subcontract_details):
