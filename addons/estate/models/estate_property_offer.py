@@ -1,6 +1,6 @@
 from odoo import api, models, fields
 from odoo.exceptions import UserError
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 class EstatePropertyOffer(models.Model):
@@ -35,7 +35,7 @@ class EstatePropertyOffer(models.Model):
         # readonly=False,
     )
 
-    some_field=fields.Char()
+    some_field = fields.Char()
 
     @api.depends("create_date", "validity")
     def _compute_date_deadline(self):
@@ -101,3 +101,26 @@ class EstatePropertyOffer(models.Model):
             'The offer price must be strictly positive.'
         )
     ]
+
+    @api.model_create_multi
+    def create(self, vals):
+       # validate price
+        if 'property_id' in vals and 'price' in vals:
+            new_price = float(vals['price'])
+            prop_id = vals['property_id']
+            highest = self.search(
+                [('property_id', '=', prop_id)], order='price desc', limit=1)
+
+            if highest and new_price < highest.price:
+                raise UserError(
+                    "You cannot create an offer with a lower price than the highest offer."
+                )
+
+        # create the offer
+        offer = super().create(vals)
+
+        # update state to offer_received if in previous state
+        if offer.property_id.state == 'new':
+            offer.property_id.write({'state': 'offer_received'})
+
+        return offer
