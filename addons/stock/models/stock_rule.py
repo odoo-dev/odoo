@@ -609,8 +609,9 @@ class ProcurementGroup(models.Model):
         if warehouse_id:
             # For multi company we need all warehouse.
             warehouse = self.env['stock.warehouse'].search([])
-            route_ids |= set((warehouse.route_ids).ids)
-            route_ids |= set((warehouse_id.route_ids).ids)
+            # Take only those routes whose has rules
+            route_ids |= set((warehouse.route_ids.filtered(lambda r: r.rule_ids)).ids)
+            route_ids |= set((warehouse_id.route_ids.filtered(lambda r: r.rule_ids)).ids)
         return route_ids
 
     @api.model
