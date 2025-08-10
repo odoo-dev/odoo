@@ -15,10 +15,10 @@ class TestEnv(TransactionCase):
             'password': 'superuser',
             'group_ids': [(6, 0, cls.env.user.group_ids.ids)],
         })
-        cls.env = cls.env(user=user)
+        cls.env = cls.env.make(user=user)
 
         # make sure there is at least another environment in the current transaction
-        cls.sudo_env = cls.env(su=True)
+        cls.sudo_env = cls.env.make(su=True)
 
     def test_env_company_part_01(self):
         """

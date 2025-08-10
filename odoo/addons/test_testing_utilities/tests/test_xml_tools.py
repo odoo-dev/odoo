@@ -11,7 +11,7 @@ class TestXMLTools(common.TransactionCase):
 
     def setUp(self):
         super(TestXMLTools, self).setUp()
-        self.qweb_poor = self.env()['ir.ui.view'].create({
+        self.qweb_poor = self.env.make()['ir.ui.view'].create({
             'type': 'qweb',
             'arch_db': """
     <h1>

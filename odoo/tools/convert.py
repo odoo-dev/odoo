@@ -218,7 +218,7 @@ class xml_import(object):
         uid = node.get('uid')
         context = node.get('context')
         if uid or context:
-            return self.env(
+            return self.env.make(
                 user=uid and self.id_get(uid),
                 context=context and {
                     **self.env.context,

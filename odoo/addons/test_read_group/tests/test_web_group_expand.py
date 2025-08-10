@@ -9,7 +9,7 @@ class TestGroupExpand(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env = cls.env(context=dict(**cls.env.context, read_group_expand=True))
+        cls.env = cls.env.make(context=dict(**cls.env.context, read_group_expand=True))
         cls.Model = cls.env['test_read_group.on_selection']
 
     def test_none(self):

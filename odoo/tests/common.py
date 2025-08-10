@@ -420,7 +420,7 @@ class BaseCase(case.TestCase):
     @uid.setter
     def uid(self, user):
         """ Set the uid by changing the test's environment. """
-        self.env = self.env(user=user)
+        self.env = self.env.make(user=user)
         # set the updated environment as the default one
         self.env.transaction.default_env = self.env
 
@@ -494,7 +494,7 @@ class BaseCase(case.TestCase):
             assert user, "Login %s not found" % login
             # switch user
             self.uid = user.id
-            self.env = self.env(user=self.uid)
+            self.env = self.env.make(user=self.uid)
             yield
         finally:
             # back

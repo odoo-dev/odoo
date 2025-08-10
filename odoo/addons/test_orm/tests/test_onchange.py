@@ -577,7 +577,7 @@ class TestOnchange(SavepointCaseWithUserDemo):
         self.assertEqual(result['value'], expected)
 
         self.env.invalidate_all()
-        Message = self.env(user=self.user_demo.id)['test_orm.related']
+        Message = self.env.make(user=self.user_demo.id)['test_orm.related']
         result = Message.onchange(values, ['message'], fields_spec)
 
         self.assertEqual(result['value'], expected)

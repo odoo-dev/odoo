@@ -416,7 +416,7 @@ class TestHttpStatic(TestHttpStaticCommon):
 
     def test_static22_image_field_csp(self):
         test_user = new_test_user(self.env, "test user")
-        env = self.env(user=test_user)
+        env = self.env.make(user=test_user)
         self.authenticate('test user', 'test user')
         earth = env.ref('test_http.earth')
 

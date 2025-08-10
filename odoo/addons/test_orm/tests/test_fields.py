@@ -1228,7 +1228,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(message.env, self.env)
         self.assertEqual(message.discussion.env, self.env)
 
-        demo_env = self.env(user=demo)
+        demo_env = self.env.make(user=demo)
         self.assertNotEqual(demo_env, self.env)
 
         # check environment of record and related records
@@ -2322,7 +2322,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         access.write({'perm_read': False})
 
         # create an environment for demo user
-        env = self.env(user=self.user_demo)
+        env = self.env.make(user=self.user_demo)
         self.assertEqual(env.user.login, "demo")
 
         # create a new message as demo user
@@ -2347,7 +2347,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         access.write({'perm_read': False})
 
         # create an environment for demo user
-        env = self.env(user=self.user_demo)
+        env = self.env.make(user=self.user_demo)
         self.assertEqual(env.user.login, "demo")
 
         # create a new discussion and a new message as demo user
@@ -4194,7 +4194,7 @@ class TestSelectionUpdates(TransactionCase):
         super().setUpClass()
         # Specifying a lang in env/context should not increase query counts
         # of CRUD operations
-        cls.env = cls.env(context={'lang': 'en_US'})
+        cls.env = cls.env.make(context={'lang': 'en_US'})
 
     def test_selection(self):
         self.env[self.MODEL_BASE].create({})   # warming up

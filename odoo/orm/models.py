@@ -5888,7 +5888,7 @@ class BaseModel(metaclass=MetaModel):
         assert isinstance(flag, bool)
         if flag == self.env.su:
             return self
-        return self.with_env(self.env(su=flag))
+        return self.with_env(self.env.make(su=flag))
 
     @api.private
     def with_user(self, user: BaseModel | IdType) -> Self:
@@ -5898,7 +5898,7 @@ class BaseModel(metaclass=MetaModel):
         """
         if not user:
             return self
-        return self.with_env(self.env(user=user, su=False))
+        return self.with_env(self.env.make(user=user, su=False))
 
     @api.private
     def with_company(self, company: BaseModel | IdType) -> Self:
@@ -5965,7 +5965,7 @@ class BaseModel(metaclass=MetaModel):
             # Force 'allowed_company_ids' to be kept when context is overridden
             # without 'allowed_company_ids'
             context['allowed_company_ids'] = self.env.context['allowed_company_ids']
-        return self.with_env(self.env(context=context))
+        return self.with_env(self.env.make(context=context))
 
     @api.private
     def with_prefetch(self, prefetch_ids: Reversible[IdType] | None = None) -> Self:

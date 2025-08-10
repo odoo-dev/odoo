@@ -1855,7 +1855,7 @@ def limited_field_access_token(record, field_name, timestamp=None, *, scope):
         adler32_max = 4294967295
         jitter = two_weeks * zlib.adler32(unique_str.encode()) // adler32_max
         timestamp = hex(start_of_period + 2 * two_weeks + jitter)
-    token = hmac(record.env(su=True), scope, (record._name, record.id, field_name, timestamp))
+    token = hmac(record.env.make(su=True), scope, (record._name, record.id, field_name, timestamp))
     return f"{token}o{timestamp}"
 
 

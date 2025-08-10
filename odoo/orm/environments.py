@@ -121,7 +121,7 @@ class Environment(Mapping[str, "BaseModel"]):
     def __hash__(self):
         return object.__hash__(self)
 
-    def __call__(
+    def make(
         self,
         cr: BaseCursor | None = None,
         user: IdType | BaseModel | None = None,
@@ -144,6 +144,10 @@ class Environment(Mapping[str, "BaseModel"]):
             context = clean_context(self.context) if su and not self.su else self.context
         su = (user is None and self.su) if su is None else su
         return Environment(cr, uid, context, su)
+
+    def __call__(self, cr=None, user=None, context=None, su=None):
+        warnings.warn("Since 20.0, use `make`", DeprecationWarning, stacklevel=2)
+        return self.make(cr, user, context, su)
 
     @typing.overload
     def ref(self, xml_id: str, raise_if_not_found: typing.Literal[True] = True) -> BaseModel:
