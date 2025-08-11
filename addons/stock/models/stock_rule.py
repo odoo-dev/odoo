@@ -607,8 +607,8 @@ class ProcurementGroup(models.Model):
         if not route_ids:
             route_ids = set()
         if warehouse_id:
-            # For multi company we need all warehouse.
-            warehouse = self.env['stock.warehouse'].search([])
+            # For multi company we need all warehouse which access by the user.
+            warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_ids.ids)])
             # Take only those routes whose has rules
             route_ids |= set((warehouse.route_ids.filtered(lambda r: r.rule_ids)).ids)
             route_ids |= set((warehouse_id.route_ids.filtered(lambda r: r.rule_ids)).ids)
