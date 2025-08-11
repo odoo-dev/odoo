@@ -548,7 +548,7 @@ class ProcurementGroup(models.Model):
         if warehouse_ids:
             valid_route_ids |= set(warehouse_ids.route_ids.ids)
         if product_id and valid_route_ids:
-            valid_route_ids = self._get_product_routes(product_id, valid_route_ids, warehouse_ids)
+            valid_route_ids |= set(self._get_product_routes(product_id, valid_route_ids, warehouse_ids).ids)
         if valid_route_ids:
             domain &= Domain('route_id', 'in', list(valid_route_ids))
         res = self.env["stock.rule"]._read_group(
@@ -581,11 +581,11 @@ class ProcurementGroup(models.Model):
                 res = Rule.search(Domain('route_id', 'in', packaging_routes.ids) & domain, order='route_sequence, sequence', limit=1)
         if not res:
             product_routes = set((product_id.route_ids | product_id.categ_id.total_route_ids).ids)
-            valid_route_ids = set()
+            valid_route_ids = self.env['stock.route']
             if warehouse_id:
                 valid_route_ids = self._get_product_routes(product_id, product_routes, warehouse_id)
             if valid_route_ids:
-                res = Rule.search(Domain('route_id', 'in', list(valid_route_ids)) & domain, order='route_sequence, sequence', limit=1)
+                res = Rule.search(Domain('route_id', 'in', valid_route_ids.ids) & domain, order='route_sequence, sequence', limit=1)
 
         if not res and warehouse_id:
             warehouse_routes = warehouse_id.route_ids
@@ -603,15 +603,15 @@ class ProcurementGroup(models.Model):
         """
         if not product:
             return set()
-        route_ids = valid_route_ids
+        route_ids = self.env['stock.route'].browse(valid_route_ids)
         if not route_ids:
-            route_ids = set()
+            route_ids = self.env['stock.route']
         if warehouse_id:
             # For multi company we need all warehouse which access by the user.
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_ids.ids)])
             # Take only those routes whose has rules
-            route_ids |= set((warehouse.route_ids.filtered(lambda r: r.rule_ids)).ids)
-            route_ids |= set((warehouse_id.route_ids.filtered(lambda r: r.rule_ids)).ids)
+            route_ids |= warehouse.route_ids.filtered(lambda r: r.rule_ids)
+            route_ids |= warehouse_id.route_ids.filtered(lambda r: r.rule_ids)
         return route_ids
 
     @api.model
@@ -641,7 +641,7 @@ class ProcurementGroup(models.Model):
             valid_route_ids = set()
             if route_ids:
                 valid_route_ids |= set(route_ids.ids)
-                valid_route_ids = self._get_product_routes(product_id, valid_route_ids, warehouse_id)
+                valid_route_ids = set(self._get_product_routes(product_id, valid_route_ids, warehouse_id).ids)
             valid_route_ids = self.env['stock.route'].browse(list(valid_route_ids))
             # Give priority based on selected routes on product, then by sequence.
             for route_id in sorted(valid_route_ids, key=lambda r: (r not in product_id.route_ids, r.sequence)):

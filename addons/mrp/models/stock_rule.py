@@ -294,7 +294,7 @@ class ProcurementGroup(models.Model):
         valid_route_ids = super()._get_product_routes(product, valid_route_ids, warehouse_id)
         if not valid_route_ids:
             return self.env["stock.route"]
-        manufacturing_routes = self.env['stock.rule'].search([('action', '=', 'manufacture'), ('picking_type_id.code', '=', 'mrp_operation'), ('active', '=', True)]).route_id.ids
-        if not any(bom.type == 'normal' for bom in product.bom_ids) and not any(route_id in product.route_ids.ids for route_id in manufacturing_routes):
-            valid_route_ids -= set(manufacturing_routes)
+        manufacturing_routes = self.env['stock.rule'].search([('action', '=', 'manufacture'), ('picking_type_id.code', '=', 'mrp_operation'), ('active', '=', True)]).route_id
+        if not any(bom.type == 'normal' for bom in product.bom_ids) and not any(route_id.id in product.route_ids.ids for route_id in manufacturing_routes):
+            valid_route_ids -= manufacturing_routes
         return valid_route_ids

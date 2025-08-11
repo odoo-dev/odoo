@@ -20,8 +20,8 @@ class ProcurementGroup(models.Model):
         valid_route_ids = super()._get_product_routes(product, valid_route_ids, warehouse_id)
         if not valid_route_ids:
             return self.env["stock.route"]
-        resupply_subcontractor_routes = self.env['stock.rule'].search([('action', '=', 'pull'), ('picking_type_id.code', '=', 'internal'), ('location_src_id.is_subcontracting_location', '=', True), ('active', '=', True)]).route_id.ids
+        resupply_subcontractor_routes = self.env['stock.rule'].search([('action', '=', 'pull'), ('picking_type_id.code', '=', 'internal'), ('location_src_id.is_subcontracting_location', '=', True), ('active', '=', True)]).route_id
         has_subcontract_bom = any(bom_line.bom_id.type == 'subcontract' for bom_line in product.bom_line_ids)
-        if not has_subcontract_bom and not any(route_id in product.route_ids.ids for route_id in resupply_subcontractor_routes):
-            valid_route_ids -= set(resupply_subcontractor_routes)
+        if not has_subcontract_bom and not any(route_id.id in product.route_ids.ids for route_id in resupply_subcontractor_routes):
+            valid_route_ids -= resupply_subcontractor_routes
         return valid_route_ids
