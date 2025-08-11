@@ -1,4 +1,4 @@
-import { Component, whenReady } from "@odoo/owl";
+import { Component, useState, whenReady } from "@odoo/owl";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { Router } from "@pos_self_order/app/router";
@@ -40,6 +40,15 @@ export class selfOrderIndex extends Component {
     setup() {
         this.selfOrder = useSelfOrder();
         window.posmodel = this.selfOrder;
+        this.errorState = useState({
+            hasError: false,
+        });
+
+        window.addEventListener("error", () => this.showError());
+        window.addEventListener("unhandledrejection", (event) => {
+            this.showError();
+            event.preventDefault();
+        });
 
         // Disable cursor on touch devices (required on IoT Box Kiosk)
         if (hasTouch()) {
@@ -62,6 +71,9 @@ export class selfOrderIndex extends Component {
     }
     get selfIsReady() {
         return this.selfOrder.models["product.product"].length > 0;
+    }
+    showError() {
+        this.errorState.hasError = true;
     }
 }
 whenReady(() => mountComponent(selfOrderIndex, document.body));
