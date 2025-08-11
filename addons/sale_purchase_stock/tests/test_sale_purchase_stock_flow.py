@@ -29,11 +29,6 @@ class TestSalePurchaseStockFlow(TransactionCase):
                 'partner_id': cls.vendor.id,
             })],
         })
-        cls.mto_product_without_seller = cls.env['product.product'].create({
-            'name': 'SuperProduct',
-            'is_storable': True,
-            'route_ids': [Command.set((cls.mto_route + cls.buy_route).ids)],
-        })
         cls.warehouse = cls.env['stock.warehouse'].create({
             'name': 'Other Warehouse',
             'code': 'OTH',
@@ -354,7 +349,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
 
     def test_reservation_on_mto_product_after_po_cancellation(self):
         """Test that a reservation can be made on an MTO product after its purchase order is cancelled.
-        - Create a sale order with two MTO products: one with a seller and one without.
+        - Create a sale order with two MTO products: one with a seller.
         - Confirm the SO: only the product with a vendor should trigger a purchase order.
         - Cancel the generated purchase order.
         - The MTO product should switch to MTS (Make to Stock), allowing reservation.
@@ -366,10 +361,6 @@ class TestSalePurchaseStockFlow(TransactionCase):
                     'product_id': self.mto_product.id,
                     'product_uom_qty': 1,
                 }),
-                Command.create({
-                    'product_id': self.mto_product_without_seller.id,
-                    'product_uom_qty': 1,
-                }),
             ],
         })
         sale_order.action_confirm()
@@ -379,17 +370,13 @@ class TestSalePurchaseStockFlow(TransactionCase):
         mto_move = sale_order.picking_ids.move_ids.filtered(lambda m: m.product_id == self.mto_product)
         self.assertEqual(mto_move.quantity, 0)
         self.assertEqual(mto_move.procure_method, 'make_to_order')
-        # As the MTO product has no seller, it should be switched to MTS
-        mto_move_without_seller = sale_order.picking_ids.move_ids - mto_move
-        self.assertEqual(mto_move_without_seller.quantity, 0)
-        self.assertEqual(mto_move_without_seller.procure_method, 'make_to_stock')
         # Cancel the purchase order related to the MTO product
         purchase_order = sale_order._get_purchase_orders()
         self.assertEqual(purchase_order.state, 'draft')
         purchase_order.button_cancel()
         self.assertEqual(purchase_order.state, 'cancel')
         # The MTO product should now be in MTS
-        self.assertEqual(sale_order.picking_ids.move_ids.mapped('procure_method'), ['make_to_stock', 'make_to_stock'])
+        self.assertEqual(sale_order.picking_ids.move_ids.mapped('procure_method'), ['make_to_stock'])
         # update the quantity on hand of the MTO product
         self.env['stock.quant']._update_available_quantity(self.mto_product, sale_order.picking_ids.move_ids.location_id, 1)
         sale_order.picking_ids.action_assign()

@@ -580,10 +580,9 @@ class ProcurementGroup(models.Model):
             if packaging_routes:
                 res = Rule.search(Domain('route_id', 'in', packaging_routes.ids) & domain, order='route_sequence, sequence', limit=1)
         if not res:
-            product_routes = set((product_id.route_ids | product_id.categ_id.total_route_ids).ids)
-            valid_route_ids = self.env['stock.route']
+            valid_route_ids = (product_id.route_ids | product_id.categ_id.total_route_ids)
             if warehouse_id:
-                valid_route_ids = self._get_product_routes(product_id, product_routes, warehouse_id)
+                valid_route_ids = self._get_product_routes(product_id, set(valid_route_ids.ids), warehouse_id)
             if valid_route_ids:
                 res = Rule.search(Domain('route_id', 'in', valid_route_ids.ids) & domain, order='route_sequence, sequence', limit=1)
 
@@ -644,7 +643,7 @@ class ProcurementGroup(models.Model):
                 valid_route_ids = set(self._get_product_routes(product_id, valid_route_ids, warehouse_id).ids)
             valid_route_ids = self.env['stock.route'].browse(list(valid_route_ids))
             # Give priority based on selected routes on product, then by sequence.
-            for route_id in sorted(valid_route_ids, key=lambda r: (r not in product_id.route_ids, r.sequence)):
+            for route_id in sorted(valid_route_ids, key=lambda r: (0 if r in route_ids else 1 if r in product_id.route_ids else 2, r.sequence)):
                 sub_dict = rule_dict.get((location_dest_id.id, route_id.id))
                 if not sub_dict:
                     continue
