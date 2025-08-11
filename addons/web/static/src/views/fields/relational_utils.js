@@ -392,10 +392,10 @@ export class Many2XAutocomplete extends Component {
     async suggest(request, lock) {
         const suggestions = [];
         /** @type {Record<string, any>[] | null} */
-        let records = null;
+        let records = null; // "null" here means there is no search done
 
         if (request.length < this.props.searchThreshold) {
-            if (this.addStartTypingSuggestion()) {
+            if (this.addStartTypingSuggestion({ request, records })) {
                 suggestions.push(this.buildStartTypingSuggestion());
             }
         } else {
@@ -404,8 +404,10 @@ export class Many2XAutocomplete extends Component {
                 for (const record of records) {
                     suggestions.push(this.buildRecordSuggestion(request, record));
                 }
-            } else if (this.addNoRecordsSuggestion()) {
+            } else if (this.addNoRecordsSuggestion({ request, records })) {
                 suggestions.push(this.buildNoRecordsSuggestion());
+            } else if (this.addStartTypingSuggestion({ request, records })) {
+                suggestions.push(this.buildStartTypingSuggestion());
             }
         }
 
@@ -450,7 +452,7 @@ export class Many2XAutocomplete extends Component {
         );
     }
 
-    addNoRecordsSuggestion() {
+    addNoRecordsSuggestion({ request, records }) {
         return !this.activeActions.createEdit && !this.props.quickCreate;
     }
 
@@ -458,8 +460,8 @@ export class Many2XAutocomplete extends Component {
         return request.length < this.props.searchThreshold || records?.length > 0;
     }
 
-    addStartTypingSuggestion() {
-        return !this.props.value;
+    addStartTypingSuggestion({ request, records }) {
+        return records !== null ? request.length === 0 && !this.activeActions.createEdit : !this.props.value;
     }
 
     buildCreateSuggestion(request) {
