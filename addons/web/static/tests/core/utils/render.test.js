@@ -25,3 +25,7 @@ test("renderToElement always returns an element", () => {
     });
     expectMarkup(compiledTemplate.outerHTML).toBe("<div>Ok</div>");
 });
+
+test("renderToElement app should be empty at the start of a test", () => {
+    expect(renderToString.app.templates).toEqual({});
+});

@@ -7,6 +7,7 @@ import { pick } from "@web/core/utils/objects";
 import { patch } from "@web/core/utils/patch";
 import { makeEnv, startServices } from "@web/env";
 import { MockServer, makeMockServer } from "./mock_server/mock_server";
+import { renderToString } from "@web/core/utils/render";
 
 /**
  * @typedef {Record<keyof Services, any>} Dependencies
@@ -45,6 +46,11 @@ let currentEnv = null;
 // Registers all registries for cleanup in all tests
 beforeEach(() => registerRegistryForCleanup(registry));
 afterEach(() => restoreRegistry(registry));
+
+// cleanup the renderToString app
+afterEach(() => {
+    renderToString.app = null;
+});
 
 //-----------------------------------------------------------------------------
 // Exports

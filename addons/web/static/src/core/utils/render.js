@@ -46,6 +46,9 @@ Object.defineProperty(renderToString, "app", {
         }
         return app;
     },
+    set: (v) => {
+        app = v;
+    },
 });
 
 function render(template, context = {}) {
