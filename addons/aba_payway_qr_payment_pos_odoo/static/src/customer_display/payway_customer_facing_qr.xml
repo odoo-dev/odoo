@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    
+    <!-- background-color: #E8E9EC;  -->
+    <t t-name="aba_payway_qr_payment_pos_odoo.PaywayCustomerFacingQR">
+        <t t-if="props.qrCodeMethod == 'abapay_khqr'">
+            <Dialog footer="false" header="false">
+                <div 
+                    class="text-center d-flex flex-column gap-3 justify-content-center align-items-center"
+                    style="gap: 2rem; padding: 1rem; border-radius: 16px;"
+                >
+                    <img 
+                        class="pos-customer_payment_qr_code my-1" 
+                        t-att-src="props.qrCode" 
+                        alt="QR Code"
+                    />
+                    <p></p>
+                </div>
+            </Dialog>
+        </t>
+
+        <t t-elif="props.qrCodeMethod == 'wechat' or props.qrCodeMethod == 'alipay'">        
+            <Dialog footer="false" header="false">
+                <div 
+                    class="text-center d-flex flex-column gap-1 justify-content-center align-items-center"
+                    style="padding: 1rem; border-radius: 16px;"
+                >
+                    <p style="font-size: 1.3rem; font-weight: bold; color: black; margin-top: 0.5rem;">
+                        <t t-out="props.amount"/>
+                        <span class="ms-1" style="font-size: 1rem; font-weight: normal; color: #555;">
+                            <t t-out="props.currency_name"/>
+                        </span>
+                    </p>
+
+                    <div class="position-relative d-flex justify-content-center align-items-center my-3" style="width: 250px; height: 250px;">
+                        <div class="position-absolute translate-middle-y text-dark fw-medium" style="top: 0.1rem; font-size: 16px; z-index: 2;">
+                            Scan to pay
+                        </div>
+
+                        <!-- Top Left -->
+                        <img
+                            t-att-src="'/aba_payway_qr_payment_pos_odoo/static/src/img/border-top-left.svg'"
+                            alt="border-top-left"
+                            class="position-absolute"
+                            style="top: 0; left: 0; width: 30px; height: 30px;"
+                        />
+
+                        <!-- Top Right -->
+                        <img
+                            t-att-src="'/aba_payway_qr_payment_pos_odoo/static/src/img/border-top-right.svg'"
+                            alt="border-top-right"
+                            class="position-absolute"
+                            style="top: 0; right: 0; width: 30px; height: 30px;"
+                        />
+
+                        <!-- Bottom Left -->
+                        <img
+                            t-att-src="'/aba_payway_qr_payment_pos_odoo/static/src/img/border-bottom-left.svg'"
+                            alt="border-bottom-left"
+                            class="position-absolute"
+                            style="bottom: 0; left: 0; width: 30px; height: 30px;"
+                        />
+
+                        <!-- Bottom Right -->
+                        <img
+                            t-att-src="'/aba_payway_qr_payment_pos_odoo/static/src/img/border-bottom-right.svg'"
+                            alt="border-bottom-right"
+                            class="position-absolute"
+                            style="bottom: 0; right: 0; width: 30px; height: 30px;"
+                        />
+
+                        <img
+                            class="pos-customer_payment_qr_code"
+                            t-att-src="props.qrCode"
+                            alt="QR Code"
+                            style="width: 200px; height: 200px; object-fit: contain; z-index: 1;"
+                        />
+                    </div>
+
+                    <!-- Logo -->
+                    <t t-if="props.qrCodeMethod == 'wechat'"> 
+                        <img 
+                            t-att-src="'/aba_payway_qr_payment_pos_odoo/static/src/img/wechat_logo.svg'"
+                            alt="Wechat logo"
+                            width="65"
+                        />
+                    </t>
+                    <t t-else="">
+                        <img 
+                            t-att-src="'/aba_payway_qr_payment_pos_odoo/static/src/img/alipay_logo.svg'"
+                            alt="Alipay logo"
+                            width="65"
+                        />
+                    </t>
+                </div> 
+            </Dialog>
+        </t>
+    </t>
+</templates>
