@@ -47,7 +47,6 @@ async function waitForTrigger(trigger) {
         return;
     }
     try {
-        await delay(50);
         return await waitUntil(() => {
             if (typeof trigger === "function") {
                 return trigger();
