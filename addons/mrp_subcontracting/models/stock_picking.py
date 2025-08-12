@@ -122,7 +122,11 @@ class StockPicking(models.Model):
             all_mo.update(grouped_mo.ids)
 
         all_mo = self.env['mrp.production'].browse(sorted(all_mo))
-        all_mo.with_context(self._get_subcontract_mo_confirmation_ctx()).action_confirm()
+        ctx = self._get_subcontract_mo_confirmation_ctx()
+        all_mo.with_context(ctx).action_confirm()
+        if ctx.get('no_procurement'):
+            # Make sure to check availability to the backorder
+            all_mo.action_assign()
 
         for mo in all_mo:
             move = group_move[mo.procurement_group_id.id][0]
