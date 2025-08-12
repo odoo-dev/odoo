@@ -21,7 +21,7 @@ class StockMoveLine(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if 'quantity' in vals or 'lot_id' in vals:
+        if not self.env.context.get('mrp_subcontracting') and ('quantity' in vals or 'lot_id' in vals):
             self.move_id.filtered(lambda m: m.is_subcontract)._sync_subcontracting_productions()
         return res
 

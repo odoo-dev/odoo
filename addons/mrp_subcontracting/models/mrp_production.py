@@ -63,7 +63,29 @@ class MrpProduction(models.Model):
                 res &= super(MrpProduction, production).write({**vals, 'date_start': date_start_map[production]})
             return res
 
-        return super().write(vals)
+        old_lots = [mo.lot_producing_ids for mo in self]
+        if self.env.context.get('mrp_subcontracting') and 'product_qty' in vals:
+            for mo in self:
+                self.sudo().env['change.production.qty'].with_context(skip_activity=True, mrp_subcontracting=False).create([{
+                    'mo_id': mo.id,
+                    'product_qty': vals['product_qty'],
+                }]).change_prod_qty()
+
+        res = super().write(vals)
+
+        if self.env.context.get('mrp_subcontracting') and ('product_qty' in vals or 'lot_producing_ids' in vals):
+            for mo, old_lot in zip(self, old_lots):
+                sbc_move = mo._get_subcontract_move()
+                if not sbc_move:
+                    continue
+                if mo.product_tracking in ('lot', 'serial'):
+                    sbc_move_line = sbc_move.move_line_ids.filtered(lambda m: m.lot_id == old_lot)
+                    sbc_move_line.quantity = mo.product_qty
+                    sbc_move_line.lot_id = mo.lot_producing_ids
+                else:
+                    sbc_move.quantity = mo.product_qty
+
+        return res
 
     def action_merge(self):
         if any(production._get_subcontract_move() for production in self):

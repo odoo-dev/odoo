@@ -36,14 +36,23 @@ class StockMove(models.Model):
         subcontract_moves.show_lots_text = False
         subcontract_moves.show_lots_m2o = True
 
-    @api.depends('is_subcontract', 'has_tracking')
+    @api.depends('is_subcontract')
     def _compute_is_quantity_done_editable(self):
         done_moves = self.env['stock.move']
         for move in self:
             if move.is_subcontract:
-                move.is_quantity_done_editable = move.has_tracking == 'none'
+                move.is_quantity_done_editable = False
                 done_moves |= move
         return super(StockMove, self - done_moves)._compute_is_quantity_done_editable()
+
+    @api.depends('show_subcontracting_details_visible')
+    def _compute_show_details_visible(self):
+        done_moves = self.env['stock.move']
+        for move in self:
+            if move.show_subcontracting_details_visible:
+                move.show_details_visible = False
+                done_moves |= move
+        return super(StockMove, self - done_moves)._compute_show_details_visible()
 
     def copy_data(self, default=None):
         default = dict(default or {})

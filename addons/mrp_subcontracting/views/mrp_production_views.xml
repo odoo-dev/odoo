@@ -17,7 +17,7 @@
             <xpath expr="//div[hasclass('oe_title')]" position="replace"/>
             <xpath expr="//div[@name='qty']" position="replace">
                 <div class="o_row g-0 d-flex" name="qty">
-                    <field name="product_qty" readonly="1"/>
+                    <field name="product_qty"/>
                 </div>
             </xpath>
             <xpath expr="//button[@name='action_generate_bom']" position="replace"/>
@@ -34,8 +34,6 @@
             </xpath>
             <xpath expr="//field[@name='lot_producing_ids']" position="attributes">
                 <attribute name="invisible">product_tracking in ('none', False)</attribute>
-                <attribute name="required">0</attribute>
-                <attribute name="readonly">1</attribute>
             </xpath>
             <xpath expr="//page[@name='miscellaneous']" position="attributes">
                 <attribute name="invisible">1</attribute>
