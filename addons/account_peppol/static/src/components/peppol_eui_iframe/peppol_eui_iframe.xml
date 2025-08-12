@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="account_peppol.PeppolEUIiFrame">
+        <div t-if="is_eui_required">
+            <iframe class="o_iframe o_sign_pdf_iframe" t-ref="EUIiFrame" t-att-src="EUIiFrameURL"/>
+        </div>
+    </t>
+</templates>
