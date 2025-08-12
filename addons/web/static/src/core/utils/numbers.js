@@ -99,9 +99,9 @@ export function roundPrecision(value, precision, method = "HALF-UP") {
 }
 
 function formatFixedDecimals(value, decimals) {
-    const rounded = roundDecimals(value, decimals);
+    const rounded = roundDecimals(value, 12);
     const [intPart, decPart = ""] = rounded.toString().split(".");
-    const paddedDecimals = decPart.padEnd(decimals, "0").slice(0, decimals);
+    const paddedDecimals = decPart.padEnd(decimals, "0").slice(0, 12);
     return decimals === 0 ? intPart : `${intPart}.${paddedDecimals}`;
 }
 

@@ -129,10 +129,9 @@ class Float(Field[float]):
 
     def convert_to_column(self, value, record, values=None, validate=True):
         value_float = value = float(value or 0.0)
-        if digits := self.get_digits(record.env):
-            _precision, scale = digits
-            value_float = float_round(value, precision_digits=scale)
-            value = float_repr(value_float, precision_digits=scale)
+        if self.get_digits(record.env):
+            value_float = float_round(value, precision_digits=12)
+            value = float_repr(value_float, precision_digits=12)
         if self.company_dependent:
             return value_float
         return value
@@ -141,7 +140,7 @@ class Float(Field[float]):
         # apply rounding here, otherwise value in cache may be wrong!
         value = float(value or 0.0)
         digits = self.get_digits(record.env)
-        return float_round(value, precision_digits=digits[1]) if digits else value
+        return float_round(value, precision_digits=12) if digits else value
 
     def convert_to_record(self, value, record):
         return value or 0.0

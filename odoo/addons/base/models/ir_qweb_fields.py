@@ -222,11 +222,8 @@ class IrQwebFieldFloat(models.AbstractModel):
         else:
             precision = options['precision']
 
-        if precision is None:
-            fmt = '%f'
-        else:
-            value = float_utils.float_round(value, precision_digits=precision)
-            fmt = '%.{precision}f'.format(precision=precision)
+        value = float_utils.float_round(value, precision_digits=12)
+        fmt = '%.12f'
 
         formatted = self.user_lang().format(fmt, value, grouping=True).replace(r'-', '-\N{ZERO WIDTH NO-BREAK SPACE}')
 
@@ -236,6 +233,10 @@ class IrQwebFieldFloat(models.AbstractModel):
         # strip trailing 0.
         if precision is None:
             formatted = re.sub(r'(?:(0|\d+?)0+)$', r'\1', formatted)
+        else:
+            pattern = r'(\d+\.\d{' + str(precision) + r'}\d*?)0+$'
+            if regex_match := re.search(pattern, formatted):
+                formatted = regex_match.group(1)
 
         return formatted
 
