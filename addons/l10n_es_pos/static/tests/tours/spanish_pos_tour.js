@@ -6,6 +6,7 @@ import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import * as PartnerList from "@point_of_sale/../tests/pos/tours/utils/partner_list_util";
 import { registry } from "@web/core/registry";
 import { checkSimplifiedInvoiceNumber, pay } from "./utils/receipt_util";
+import { today } from "@web/core/l10n/dates";
 
 const SIMPLIFIED_INVOICE_LIMIT = 1000;
 
@@ -64,7 +65,7 @@ registry.category("web_tour.tours").add("l10n_es_pos_settle_account_due", {
             ProductScreen.clickPartnerButton(),
             PartnerList.clickPartnerOptions("Partner Test 1"),
             PartnerList.clickDropDownItemText("Settle invoices"),
-            PartnerList.clickSettleOrderName("TSJ/2025/00001"),
+            PartnerList.clickSettleOrderName(`TSJ/${today().year}/00001`),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
