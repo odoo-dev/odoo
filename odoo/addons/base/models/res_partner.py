@@ -282,7 +282,6 @@ class ResPartner(models.Model):
         selection=[('person', 'Person'), ('company', 'Company')],
         compute='_compute_company_type', inverse='_write_company_type')
     company_id: ResCompany = fields.Many2one('res.company', 'Company', index=True)
-    color = fields.Integer(string='Color Index', default=0)
     user_ids: ResUsers = fields.One2many('res.users', 'partner_id', string='Users', bypass_search_access=True)
     main_user_id: ResUsers = fields.Many2one(
         "res.users",
