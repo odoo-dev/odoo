@@ -325,19 +325,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                     'tax_exemption_reason': "Exempt from tax",
                 },
             })
-        tax_totals_vals_list = [tax_totals_vals]
-
-        # TODO: Check UBL version
-        # NOTE: / TODO:  TaxCurrencyCode was in XML already
-        company_currency = invoice.company_currency_id
-        if tax_totals_vals['currency'] != company_currency:
-            tax_totals_vals_list.append({
-                'currency': company_currency,
-                'currency_dp': company_currency.decimal_places,
-                'tax_amount': taxes_vals['tax_amount'],
-            })
-
-        return tax_totals_vals_list
+        return [tax_totals_vals]
 
     def _get_invoice_line_item_vals(self, line, taxes_vals):
         """ Method used to fill the cac:InvoiceLine/cac:Item node.
@@ -708,7 +696,6 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 'due_date': invoice.invoice_date_due,
                 'note_vals': self._get_note_vals_list(invoice),
                 'document_currency_code': invoice.currency_id.name,
-                'tax_currency_code': invoice.company_currency_id.name if invoice.company_currency_id != invoice.currency_id else None,
                 'order_reference': order_reference,
                 'sales_order_id': sales_order_id,
                 'accounting_supplier_party_vals': {
@@ -1118,9 +1105,6 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             'cbc:InvoiceTypeCode': {'_text': 380} if vals['document_type'] == 'invoice' else None,
             'cbc:Note': {'_text': html2plaintext(invoice.narration)} if invoice.narration else None,
             'cbc:DocumentCurrencyCode': {'_text': invoice.currency_id.name},
-            'cbc:TaxCurrencyCode': {
-                '_text': invoice.company_currency_id.name
-            } if invoice.company_currency_id != invoice.currency_id else None,
             'cac:OrderReference': {
                 # OrderReference/ID (order_reference) is mandatory inside the OrderReference node
                 'cbc:ID': {'_text': invoice.ref or invoice.name},
@@ -1485,17 +1469,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         """ Generic helper to fill the TaxTotal and WithholdingTaxTotal nodes for a document. """
         base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], vals['tax_grouping_function'])
         aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
-        document_node['cac:TaxTotal'] = [self._get_tax_total_node({**vals, 'aggregated_tax_details': aggregated_tax_details, 'role': 'document'})]
-        if vals['currency_id'] != vals['company_currency_id']:
-            company_node = self._get_tax_total_node({
-                **vals,
-                'aggregated_tax_details': aggregated_tax_details,
-                'currency_suffix': '',
-                'currency_dp': self._get_currency_decimal_places(vals['company_currency_id']),
-                'currency_name': vals['company_currency_id'].name,
-                'role': 'document',  # TODO:?:
-            })
-            document_node['cac:TaxTotal'].append({'cbc:TaxAmount': company_node['cbc:TaxAmount']})
+        document_node['cac:TaxTotal'] = self._get_tax_total_node({**vals, 'aggregated_tax_details': aggregated_tax_details, 'role': 'document'})
         document_node['cac:WithholdingTaxTotal'] = None
 
     def _add_tax_total_node_in_company_currency(self, document_node, vals):
