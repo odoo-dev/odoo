@@ -1209,7 +1209,7 @@
                                         <field name="display_type" force_save="1" column_invisible="True"/>
                                         <field name="collapse_prices" column_invisible="True"/>
                                         <field name="collapse_composition" column_invisible="True"/>
-                                        <field name="parent_id" column_invisible="True"/>
+                                        <field name="parent_id" column_invisible="True" force_save="1"/>
                                     </list>
                                     <kanban class="o_kanban_mobile">
                                         <!-- Displayed fields -->

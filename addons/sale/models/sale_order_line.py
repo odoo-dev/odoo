@@ -1,5 +1,3 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 from collections import defaultdict
 from datetime import timedelta
 from markupsafe import Markup
@@ -312,21 +310,24 @@ class SaleOrderLine(models.Model):
         comodel_name='sale.order.line',
         compute='_compute_parent_id',
         index='btree_not_null',
+        copy=False,
         store=True,
+        precompute=True,
     )  # The section or subsection this line belongs to.
+    child_ids = fields.One2many(comodel_name='sale.order.line', inverse_name='parent_id')
     collapse_prices = fields.Boolean(
         string="Collapse Prices",
         compute='_compute_section_visibility_fields',
         store=True,
         readonly=False,
-        copy=True,
+        precompute=True,
     )  # Whether this section's lines' prices will be hidden in reports and in the portal.
     collapse_composition = fields.Boolean(
         string="Collapse Composition",
         compute='_compute_section_visibility_fields',
         store=True,
         readonly=False,
-        copy=True,
+        precompute=True,
     )  # Whether this section's lines will be hidden in reports and in the portal.
 
     #=== COMPUTE METHODS ===#
@@ -1178,36 +1179,38 @@ class SaleOrderLine(models.Model):
             # line.ids checks whether it's a new record not yet saved
             line.product_uom_readonly = line.ids and line.state in ['sale', 'cancel']
 
-    @api.depends('sequence', 'display_type', 'order_id')
+    @api.depends('order_id.order_line.order_id')
     def _compute_parent_id(self):
-        for _orders, lines in self.grouped('order_id').items():
-            current_section = None
-            current_subsection = None
-            for line in lines.sorted('sequence'):
+        for lines in self.grouped('order_id').values():
+            last_section = False
+            last_sub = False
+            sale_order_lines = set(self)
+            for line in lines.order_id.order_line.sorted('sequence'):
                 if line.display_type == 'line_section':
-                    line.parent_id = None
-                    current_section = line
-                    current_subsection = None  # Reset subsection when entering a new section.
+                    last_section = line
+                    if line in sale_order_lines:
+                        line.parent_id = False
+                    last_sub = False
                 elif line.display_type == 'line_subsection':
-                    line.parent_id = current_section
-                    current_subsection = line
-                else:  # Product/Note lines
-                    # Link to the current subsection or fall back to the current section.
-                    line.parent_id = current_subsection or current_section
+                    if line in sale_order_lines:
+                        line.parent_id = last_section
+                    last_sub = line
+                elif line in sale_order_lines:
+                    line.parent_id = last_sub or last_section or False
 
-    @api.depends('parent_id', 'display_type')
+    @api.depends('order_id.order_line.parent_id')
     def _compute_section_visibility_fields(self):
-        for line in self:
-            if line.display_type == 'line_section':
-                continue  # Don't recompute when moving sections around.
-            elif line.display_type == 'line_subsection':
-                line.collapse_prices = line.collapse_prices or line.parent_id.collapse_prices
-                line.collapse_composition = (
-                    line.collapse_composition or line.parent_id.collapse_composition
-                )
-            else:  # Product/Note lines
-                line.collapse_prices = line.parent_id.collapse_prices
-                line.collapse_composition = line.parent_id.collapse_composition
+        for order in self.grouped('order_id'):
+            for line in order.order_line.sorted('sequence'):
+                if line.display_type == 'line_section':
+                    continue
+
+                if line.display_type == 'line_subsection':
+                    line.collapse_prices = line.collapse_prices or line.parent_id.collapse_prices
+                    line.collapse_composition = line.collapse_composition or line.parent_id.collapse_composition
+                else:
+                    line.collapse_prices = line.parent_id.collapse_prices
+                    line.collapse_composition = line.parent_id.collapse_composition
 
     #=== CONSTRAINT METHODS ===#
 
