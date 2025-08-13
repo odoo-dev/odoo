@@ -63,8 +63,7 @@ class WebClient(WebclientController):
                 )
                 store.add_global_values(livechat_rule=Store.One(matching_rule))
             store.add_global_values(
-                livechat_available=matching_rule.action != "hide_button"
-                and bool(matching_rule._is_bot_configured() or channel.available_operator_ids),
+                livechat_available=matching_rule.action != "hide_button" and channel._is_livechat_available(),
                 can_download_transcript=bool(
                     request.env.ref("im_livechat.action_report_livechat_conversation", False),
                 ),

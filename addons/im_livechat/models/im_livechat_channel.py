@@ -651,9 +651,6 @@ class Im_LivechatChannelRule(models.Model):
         domain = [('country_ids', '=', False), ('channel_id', '=', channel_id)]
         return _match(self.search(domain))
 
-    def _is_bot_configured(self):
-        return bool(self.chatbot_script_id)
-
     def _to_store_defaults(self, target):
         return [
             "action",
