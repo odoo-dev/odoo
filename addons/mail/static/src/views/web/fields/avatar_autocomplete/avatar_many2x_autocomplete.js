@@ -35,11 +35,10 @@ export class Many2XAvatarUserAutocomplete extends Many2XAutocomplete {
         return "md";
     }
 
-    slowCreate(request) {
-        return this.openMany2X({
-            context: this.getCreationContext(request),
-            nextRecordsContext: this.props.context,
+    getSlowCreateParams(request) {
+        return {
+            ...super.getSlowCreateParams(request),
             title: _t("Invite teammates"),
-        });
+        };
     }
 }

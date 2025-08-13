@@ -206,10 +206,12 @@ export class Many2XAutocomplete extends Component {
         createAction: { type: Function, optional: true },
         dropdown: { type: Boolean, optional: true },
         fieldString: String,
+        getCreationContext: { type: Function, optional: true },
         getDomain: Function,
         id: { type: String, optional: true },
         isToMany: { type: Boolean, optional: true },
-        nameCreateField: { type: String, optional: true },
+        onCancel: { type: Function, optional: true },
+        onInput: { type: Function, optional: true },
         otherSources: { type: Array, optional: true },
         placeholder: { type: String, optional: true },
         quickCreate: { type: [Function, { value: null }], optional: true },
@@ -218,7 +220,6 @@ export class Many2XAutocomplete extends Component {
         searchMoreLabel: { type: String, optional: true },
         searchMoreLimit: { type: Number, optional: true },
         searchThreshold: { type: Number, optional: true },
-        setInputFloats: { type: Function, optional: true },
         slots: { optional: true },
         specification: { type: Object, optional: true },
         update: Function,
@@ -227,13 +228,13 @@ export class Many2XAutocomplete extends Component {
     static defaultProps = {
         context: {},
         dropdown: true,
-        nameCreateField: "name",
+        onCancel: () => {},
+        onInput: () => {},
         otherSources: [],
         quickCreate: null,
         searchLimit: 7,
         searchThreshold: 0,
         searchMoreLimit: 320,
-        setInputFloats: () => {},
         specification: {},
         value: "",
     };
@@ -295,9 +296,9 @@ export class Many2XAutocomplete extends Component {
             autofocus: this.props.autofocus,
             dropdown: this.props.dropdown,
             id: this.props.id,
-            onCancel: this.onCancel.bind(this),
+            onCancel: this.props.onCancel,
             onChange: this.onChange.bind(this),
-            onInput: this.onInput.bind(this),
+            onInput: this.props.onInput,
             placeholder: this.props.placeholder,
             resetOnSelect: this.props.value === "",
             sources: this.sources,
@@ -330,21 +331,6 @@ export class Many2XAutocomplete extends Component {
         return "lg";
     }
 
-    getCreationContext(value) {
-        return makeContext([
-            this.props.context,
-            value && { [`default_${this.props.nameCreateField}`]: value },
-        ]);
-    }
-    onInput({ inputValue }) {
-        if (!this.props.value || this.props.value !== inputValue) {
-            this.props.setInputFloats(true);
-        }
-    }
-    onCancel() {
-        this.props.setInputFloats(false);
-    }
-
     get searchSpecification() {
         return {
             display_name: {},
@@ -370,17 +356,22 @@ export class Many2XAutocomplete extends Component {
         return records;
     }
 
-    slowCreate(request) {
-        return this.openMany2X({
-            context: this.getCreationContext(request),
+    getSlowCreateParams(request) {
+        return {
+            context: this.props.getCreationContext?.(request) ?? this.props.context,
             nextRecordsContext: this.props.context,
-        });
+        };
+    }
+
+    slowCreate(request) {
+        return this.openMany2X(this.getSlowCreateParams(request));
     }
 
     onQuickCreateError(error, request) {
         if (
             error instanceof RPCError &&
-            error.exceptionName === "odoo.exceptions.ValidationError"
+            error.exceptionName === "odoo.exceptions.ValidationError" &&
+            !(error.data?.debug && error.data.debug.includes("psycopg2.errors.UniqueViolation"))
         ) {
             return this.slowCreate(request);
         } else {
@@ -513,7 +504,7 @@ export class Many2XAutocomplete extends Component {
         return {
             cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
             data: { slotName: "searchMoreItem" },
-            label: this.SearchMoreButtonLabel,
+            label: this.props.searchMoreLabel ?? _t("Search more..."),
             onSelect: this.onSearchMore.bind(this, request),
         };
     }
@@ -527,10 +518,6 @@ export class Many2XAutocomplete extends Component {
                     ? _t("Start typing %s characters", this.props.searchThreshold)
                     : _t("Start typing..."),
         };
-    }
-
-    get SearchMoreButtonLabel() {
-        return this.props.searchMoreLabel ?? _t("Search more...");
     }
 
     async onBarcodeSearch() {

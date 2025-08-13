@@ -946,14 +946,6 @@ test("empty readonly many2one field", async () => {
 });
 
 test("empty many2one field with no result", async () => {
-    patchWithCleanup(Many2XAutocomplete.prototype, {
-        getCreationContext(value) {
-            expect(value).toBe("");
-            const context = super.getCreationContext(value);
-            expect(context[`default_${this.props.nameCreateField}`]).toBe(undefined);
-            return context;
-        },
-    });
     class M2O extends models.Model {
         m2o = fields.Many2one({ relation: "m2o" });
     }
@@ -976,7 +968,22 @@ test("empty many2one field with no result", async () => {
     expect(".dropdown-menu li.o_m2o_dropdown_option").toHaveText("Create...");
     expect(".dropdown-menu li.o_m2o_start_typing").toHaveCount(0);
 
+    onRpc("onchange", ({ kwargs }) => {
+        expect.step(["slow create", kwargs.context]);
+    });
+
     await contains(".dropdown-menu li.o_m2o_dropdown_option").click();
+    expect.verifySteps([
+        [
+            "slow create",
+            {
+                allowed_company_ids: [1],
+                lang: "en",
+                tz: "taht",
+                uid: 7,
+            },
+        ],
+    ]);
     expect(".o_dialog").toHaveCount(1);
     expect(".o_dialog .o_field_many2one[name=m2o] input").toHaveValue("");
     press("Esc");

@@ -10,26 +10,9 @@ import {
     Many2ManyTagsField,
     many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
-import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 
 export class FieldMany2ManyTagsEmailTagsList extends RecipientsInputTagsList {
     static template = "FieldMany2ManyTagsEmailTagsList";
-}
-
-export class FieldMany2ManyTagsEmailMany2xAutocomplete extends Many2XAutocomplete {
-    /**
-     * @override
-     * @param {string} value
-     * @returns {Object}
-     */
-    getCreationContext(value) {
-        const [name, email] = value ? parseEmail(value) : ["", ""];
-        const context = super.getCreationContext(name);
-        if (email) {
-            context["default_email"] = email;
-        }
-        return context;
-    }
 }
 
 export class FieldMany2ManyTagsEmail extends Many2ManyTagsField {
@@ -37,7 +20,6 @@ export class FieldMany2ManyTagsEmail extends Many2ManyTagsField {
     static components = {
         ...FieldMany2ManyTagsEmail.components,
         TagsList: FieldMany2ManyTagsEmailTagsList,
-        Many2XAutocomplete: FieldMany2ManyTagsEmailMany2xAutocomplete,
     };
     static props = {
         ...Many2ManyTagsField.props,
@@ -78,6 +60,20 @@ export class FieldMany2ManyTagsEmail extends Many2ManyTagsField {
             tag.title = tag.text;
         });
         return tags;
+    }
+
+    /**
+     * @override
+     * @param {string} value
+     * @returns {Object}
+     */
+    getCreationContext(value) {
+        const [name, email] = value ? parseEmail(value) : ["", ""];
+        const context = super.getCreationContext(name);
+        if (email) {
+            context["default_email"] = email;
+        }
+        return context;
     }
 
     /**

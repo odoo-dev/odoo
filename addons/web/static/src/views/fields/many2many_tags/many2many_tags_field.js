@@ -19,6 +19,7 @@ import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook
 
 import { Component, useRef } from "@odoo/owl";
 import { getFieldDomain } from "@web/model/relational_model/utils";
+import { makeContext } from "@web/core/context";
 
 class Many2ManyTagsFieldColorListPopover extends Component {
     static template = "web.Many2ManyTagsFieldColorListPopover";
@@ -133,6 +134,29 @@ export class Many2ManyTagsField extends Component {
         }
     }
 
+    get many2XAutocompleteProps() {
+        return {
+            activeActions: this.activeActions,
+            autoSelect: true,
+            context: this.props.context,
+            fieldString: this.string,
+            getCreationContext: this.getCreationContext.bind(this),
+            getDomain: this.getDomain.bind(this),
+            id: this.props.id,
+            isToMany: true,
+            placeholder: this.tags.length ? "" : this.props.placeholder,
+            quickCreate: this.activeActions.create ? this.quickCreate : null,
+            resModel: this.relation,
+            searchThreshold: this.props.searchThreshold,
+            specification: this.specification,
+            update: this.update,
+        };
+    }
+
+    get specification() {
+        return {};
+    }
+
     get relation() {
         return this.props.record.fields[this.props.name].relation;
     }
@@ -141,6 +165,13 @@ export class Many2ManyTagsField extends Component {
     }
     get string() {
         return this.props.string || this.props.record.fields[this.props.name].string || "";
+    }
+
+    getCreationContext(value) {
+        return makeContext([
+            this.props.context,
+            value && { [`default_${this.props.nameCreateField}`]: value },
+        ]);
     }
 
     getTagProps(record) {

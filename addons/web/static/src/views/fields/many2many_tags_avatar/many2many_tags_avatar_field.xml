@@ -9,20 +9,7 @@
         >
             <TagsList tags="tags" visibleItemsLimit="visibleItemsLimit"/>
             <div t-if="showM2OSelectionField" class="o_field_many2many_selection d-inline-flex w-100" t-ref="autoComplete">
-                <Many2XAutocomplete
-                    id="props.id"
-                    placeholder="tags.length ? '' : props.placeholder"
-                    resModel="relation"
-                    autoSelect="true"
-                    fieldString="string"
-                    activeActions="activeActions"
-                    update="update"
-                    quickCreate="activeActions.create ? quickCreate : null"
-                    context="props.context"
-                    getDomain.bind="getDomain"
-                    isToMany="true"
-                    specification="specification"
-                >
+                <Many2XAutocomplete t-props="this.many2XAutocompleteProps">
                     <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
                         <t t-call="{{ constructor.optionTemplate }}"/>
                     </t>

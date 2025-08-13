@@ -10,37 +10,8 @@ import {
     listMany2ManyTagsAvatarUserField,
     many2ManyTagsAvatarUserField,
 } from "@mail/views/web/fields/many2many_avatar_user_field/many2many_avatar_user_field";
-import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { AvatarCardResourcePopover } from "@resource_mail/components/avatar_card_resource/avatar_card_resource_popover";
-import { Domain } from "@web/core/domain";
 import { KanbanMany2ManyTagsAvatarFieldTagsList } from "@web/views/fields/many2many_tags_avatar/many2many_tags_avatar_field";
-
-
-export class AvatarResourceMany2XAutocomplete extends Many2XAutocomplete {
-    /**
-     * @override
-     */
-    search(request) {
-        return this.orm.call(
-            this.props.resModel,
-            "search_read",
-            [this.getDomain(request), ["id", "display_name", "resource_type", "color"]],
-            {
-                context: this.props.context,
-                limit: this.props.searchLimit + 1,
-            }
-        );
-    }
-
-    /**
-     * @override
-     */
-    getDomain(request) {
-        return Domain.and([[["name", "ilike", request]], this.props.getDomain()]).toList(
-            this.props.context
-        );
-    }
-}
 
 class Many2ManyAvatarResourceTagsList extends Many2ManyAvatarUserTagsList {
     static template = "resource_mail.Many2ManyAvatarResourceTagsList";
@@ -56,10 +27,18 @@ const WithResourceFieldMixin = (T) => class ResourceFieldMixin extends T {
 
     static components = {
         ...super.components,
-        Many2XAutocomplete: AvatarResourceMany2XAutocomplete,
         TagsList: Many2ManyAvatarResourceTagsList,
     };
     static optionTemplate = "resource_mail.Many2ManyAvatarResourceField.option";
+
+    get specification() {
+        return {
+            ...super.specification,
+            color: {},
+            display_name: {},
+            resource_type: {},
+        };
+    }
 
     displayAvatarCard(record) {
         return !this.env.isSmall && this.relation === "resource.resource" && record.data.resource_type === "user";

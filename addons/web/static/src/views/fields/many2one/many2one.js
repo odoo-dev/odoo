@@ -164,18 +164,28 @@ export class Many2One extends Component {
             context: this.props.context,
             createAction: this.props.createAction,
             fieldString: this.props.string,
+            getCreationContext: (value) => {
+                return makeContext([
+                    this.props.context,
+                    value && { [`default_${this.props.nameCreateField}`]: value },
+                ]);
+            },
             getDomain: this.props.domain,
             id: this.props.id,
-            nameCreateField: this.props.nameCreateField,
+            onCancel: () => {
+                this.state.isFloating = false;
+            },
+            onInput: ({ inputValue }) => {
+                if (!this.displayName || this.displayName !== inputValue) {
+                    this.state.isFloating = true;
+                }
+            },
             otherSources: this.props.otherSources,
             placeholder: this.props.placeholder,
             quickCreate: this.props.canQuickCreate ? (name) => this.quickCreate(name) : null,
             resModel: this.props.relation,
             searchMoreLabel: this.props.searchMoreLabel,
             searchThreshold: this.props.searchThreshold,
-            setInputFloats: (isFloating) => {
-                this.state.isFloating = isFloating;
-            },
             slots: this.props.slots,
             specification: this.props.specification,
             update: (records) => {

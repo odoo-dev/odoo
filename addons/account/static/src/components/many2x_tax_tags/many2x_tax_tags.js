@@ -11,17 +11,9 @@ export class Many2XTaxTagsAutocomplete extends Many2XAutocomplete {
         ...Many2XAutocomplete.components,
     };
 
-    async loadOptionsSource(request) {
+    addSearchMoreSuggestion() {
         // Always include Search More
-        let options = await super.loadOptionsSource(...arguments);
-        if (!options.slice(-1)[0]?.cssClass?.includes("o_m2o_dropdown_option_search_more")) {
-            options.push({
-                label: this.SearchMoreButtonLabel,
-                onSelect: this.onSearchMore.bind(this, request),
-                cssClass: "o_m2o_dropdown_option o_m2o_dropdown_option_search_more",
-            });
-        }
-        return options;
+        return true;
     }
 
     async onSearchMore(request) {
