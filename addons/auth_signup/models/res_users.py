@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.fields import Domain
+from odoo.tools.misc import str2bool
 
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.addons.auth_signup.models.res_partner import SignupError
@@ -272,3 +273,15 @@ class ResUsers(models.Model):
             # avoid sending email to the user we are duplicating
             self = self.with_context(no_reset_password=True)
         return super().copy(default=default)
+
+    def _alert_untrusted_device_in_session(self, device_repr):
+        ICP = self.env['ir.config_parameter'].sudo()
+        if not str2bool(ICP.get_param('auth_signup.alert_untrusted_device_in_session', 'false')):
+            return
+        self._notify_security_setting_update(
+            subject=_('Security Update: Suspicious activity'),
+            content=_(
+                'A suspicious device is using your account %(device_repr)s',
+                device_repr=device_repr,
+            ),
+        )

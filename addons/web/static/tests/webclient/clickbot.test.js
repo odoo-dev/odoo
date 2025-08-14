@@ -18,6 +18,7 @@ import { browser } from "@web/core/browser/browser";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { SUCCESS_SIGNAL } from "@web/webclient/clickbot/clickbot";
 import { WebClient } from "@web/webclient/webclient";
+import { rpc } from "@web/core/network/rpc";
 
 class Foo extends models.Model {
     foo = fields.Char();
@@ -401,6 +402,7 @@ test("clickbot show rpc error when an error dialog is detected", async () => {
             id: null,
             jsonrpc: "2.0",
             method: "call",
+            fingerprint: rpc.getFingerprint(),
             params: {
                 model: "foo",
                 method: "web_search_read",

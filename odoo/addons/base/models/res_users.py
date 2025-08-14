@@ -1309,6 +1309,13 @@ class ResUsers(models.Model):
             arch = etree.tostring(tree)
         return arch, models
 
+    def _alert_untrusted_device_in_session(self, device_repr):
+        """Deal with new untrusted device detected during login.
+
+        To be overriden.
+        """
+        pass
+
 
 ResUsersPatchedInTest = ResUsers
 
