@@ -1,8 +1,9 @@
 import math
+
 from num2words import num2words
+from odoo.exceptions import UserError
 
 from odoo import _, api, models
-from odoo.exceptions import UserError
 
 
 class AccountEdiXmlUblTr(models.AbstractModel):
@@ -38,7 +39,7 @@ class AccountEdiXmlUblTr(models.AbstractModel):
             vals['InvoiceType_template'] = 'l10n_tr_nilvera_einvoice.ubl_tr_InvoiceType'
         else:
             raise UserError(_(
-                "To continue sending e-Invoices to Nilvera, please upgrade the 'Türkiye - Nilvera E-Invoice' module."
+                "To continue sending e-Invoices to Nilvera, please upgrade the 'Türkiye - Nilvera E-Invoice' module.",
             ))
 
         vals['vals'].update({
@@ -102,6 +103,20 @@ class AccountEdiXmlUblTr(models.AbstractModel):
             },
             'id': partner.vat,
         })
+
+        mandatory_categories = self.env["res.partner.category"]._get_l10n_tr_official_mandatory_categories()
+        tr_companies = self.env["res.company"].search([("country_code", "=", "TR")])
+        if partner in tr_companies.partner_id and not (mandatory_categories & partner.category_id.parent_id):
+            raise UserError(_("Please ensure that your company contact has either the 'MERSISNO' or 'TICARETSICILNO' tag assigned."))
+
+        for category in partner.category_id.filtered(lambda c: c.parent_id in partner.category_id._get_l10n_tr_official_categories()):
+            vals.append({
+                'id_attrs': {
+                    'schemeID': category.parent_id.name,
+                },
+                'id': category.name,
+            })
+
         return vals
 
     def _get_partner_address_vals(self, partner):
@@ -127,7 +142,7 @@ class AccountEdiXmlUblTr(models.AbstractModel):
                 {
                     "id": "",
                     "name": partner.ref,
-                }
+                },
             )
         return vals_list
 
