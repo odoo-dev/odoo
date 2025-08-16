@@ -312,14 +312,14 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.unaccent_python = remove_accents if self.has_unaccent else lambda x: x
 
     @classmethod
-    @locked
+    # @locked
     def delete(cls, db_name: str) -> None:
         """ Delete the registry linked to a given database. """
         if db_name in cls.registries:  # pylint: disable=unsupported-membership-test
             del cls.registries[db_name]  # pylint: disable=unsupported-delete-operation
 
     @classmethod
-    @locked
+    # @locked
     def delete_all(cls):
         """ Delete all the registries. """
         cls.registries.clear()
@@ -405,7 +405,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         return model_names
 
-    @locked
+    # @locked
     def _setup_models__(self, cr: BaseCursor, model_names: Iterable[str] | None = None) -> None:  # noqa: PLW3201
         """ Perform the setup of models.
         This must be called after loading modules and before using the ORM.
