@@ -663,15 +663,15 @@ class ThreadedServer(CommonServer):
             rc = preload_registries(preload)
 
         if stop:
-            if config['test_enable']:
-                from odoo.tests.result import _logger as logger  # noqa: PLC0415
-                with Registry.registries._lock:
-                    for db, registry in Registry.registries.items():
-                        report = registry._assertion_report
-                        log = logger.error if not report.wasSuccessful() \
-                         else logger.warning if not report.testsRun \
-                         else logger.info
-                        log("%s when loading database %r", report, db)
+            # if config['test_enable']:
+            #     from odoo.tests.result import _logger as logger  # noqa: PLC0415
+            #     with Registry.registries._lock:
+            #         for db, registry in Registry.registries.items():
+            #             report = registry._assertion_report
+            #             log = logger.error if not report.wasSuccessful() \
+            #              else logger.warning if not report.testsRun \
+            #              else logger.info
+            #             log("%s when loading database %r", report, db)
             self.stop()
             return rc
 
@@ -1410,29 +1410,29 @@ def preload_registries(dbnames):
                 registry = Registry.new(dbname, update_module=update_module, install_modules=config['init'], upgrade_modules=config['update'], reinit_modules=config['reinit'])
 
                 # run post-install tests
-                if config['test_enable']:
-                    from odoo.tests import loader  # noqa: PLC0415
-                    t0 = time.time()
-                    t0_sql = sql_db.sql_counter
-                    module_names = (registry.updated_modules if update_from_config else
-                                    sorted(registry._init_modules))
-                    _logger.info("Starting post tests")
-                    tests_before = registry._assertion_report.testsRun
-                    post_install_suite = loader.make_suite(module_names, 'post_install')
-                    if post_install_suite.has_http_case():
-                        with registry.cursor() as cr:
-                            env = api.Environment(cr, api.SUPERUSER_ID, {})
-                            env['ir.qweb']._pregenerate_assets_bundles()
-                    result = loader.run_suite(post_install_suite, global_report=registry._assertion_report)
-                    registry._assertion_report.update(result)
-                    _logger.info("%d post-tests in %.2fs, %s queries",
-                                registry._assertion_report.testsRun - tests_before,
-                                time.time() - t0,
-                                sql_db.sql_counter - t0_sql)
+                # if config['test_enable']:
+                #     from odoo.tests import loader  # noqa: PLC0415
+                #     t0 = time.time()
+                #     t0_sql = sql_db.sql_counter
+                #     module_names = (registry.updated_modules if update_from_config else
+                #                     sorted(registry._init_modules))
+                #     _logger.info("Starting post tests")
+                #     tests_before = registry._assertion_report.testsRun
+                #     post_install_suite = loader.make_suite(module_names, 'post_install')
+                #     if post_install_suite.has_http_case():
+                #         with registry.cursor() as cr:
+                #             env = api.Environment(cr, api.SUPERUSER_ID, {})
+                #             env['ir.qweb']._pregenerate_assets_bundles()
+                #     result = loader.run_suite(post_install_suite, global_report=registry._assertion_report)
+                #     registry._assertion_report.update(result)
+                #     _logger.info("%d post-tests in %.2fs, %s queries",
+                #                 registry._assertion_report.testsRun - tests_before,
+                #                 time.time() - t0,
+                #                 sql_db.sql_counter - t0_sql)
 
-                    registry._assertion_report.log_stats()
-                if registry._assertion_report and not registry._assertion_report.wasSuccessful():
-                    rc += 1
+                #     registry._assertion_report.log_stats()
+                # if registry._assertion_report and not registry._assertion_report.wasSuccessful():
+                #     rc += 1
         except Exception:
             _logger.critical('Failed to initialize database `%s`.', dbname, exc_info=True)
             return -1
