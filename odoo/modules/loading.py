@@ -311,7 +311,7 @@ def load_module_graph(
             )
 
     _logger.runbot("%s modules loaded in %.2fs, %s queries (+%s extra)",
-                   len(graph),
+                   len(registry._init_modules),
                    time.time() - t0,
                    env.cr.sql_log_count - loading_cursor_query_count,
                    odoo.sql_db.sql_counter - loading_extra_query_count)  # extra queries: testes, notify, any other closed cursor
