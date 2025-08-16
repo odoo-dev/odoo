@@ -12,5 +12,5 @@ class IrQweb(models.AbstractModel):
         # especially true on runbot where all modules are installed.
         # pregenerate assets at the end of the loading to speedup tests
         registry = self.env.registry
-        if init and registry.updated_modules and not registry.ready:
+        if init and registry.updated_modules and not registry.ready and not registry.installing:
             self._pregenerate_assets_bundles()
