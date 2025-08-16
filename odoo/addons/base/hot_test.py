@@ -67,11 +67,11 @@ class HotTest(threading.Thread):
             _logger.info("Starting test execution for module=%s", module_name)
             
             self._reload_and_run_tests(module_name)
-            test_finished_event.set()
 
             _logger.info("Completed test execution for module=%s", module_name)
             
         finally:
+            test_finished_event.set()
             with test_running_lock:
                 is_test_running_ref['value'] = False
 
