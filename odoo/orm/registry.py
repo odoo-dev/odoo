@@ -245,11 +245,11 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.models: dict[str, type[BaseModel]] = {}    # model name/model instance mapping
         self._sql_constraints = set()  # type: ignore
         self._database_translated_fields: set[str] = set()  # names of translated fields in database "{model}.{field_name}"
-        if config['test_enable']:
-            from odoo.tests.result import OdooTestResult  # noqa: PLC0415
-            self._assertion_report: OdooTestResult | None = OdooTestResult()
-        else:
-            self._assertion_report = None
+        # if config['test_enable']:
+        #     from odoo.tests.result import OdooTestResult  # noqa: PLC0415
+        #     self._assertion_report: OdooTestResult | None = OdooTestResult()
+        # else:
+        self._assertion_report = None
         self._ordinary_tables: set[str] | None = None  # cached names of regular tables
         self._constraint_queue: dict[typing.Any, Callable[[BaseCursor], None]] = {}  # queue of functions to call on finalization of constraints
         self.__caches: dict[str, LRU] = {cache_name: LRU(cache_size) for cache_name, cache_size in _REGISTRY_CACHES.items()}
