@@ -111,11 +111,11 @@ class Registry(Mapping[str, type["BaseModel"]]):
     def __new__(cls, db_name: str):
         """ Return the registry for the given database name."""
         assert db_name, "Missing database name"
-        with cls._lock:
-            try:
-                return cls.registries[db_name]
-            except KeyError:
-                return cls.new(db_name)
+        # with cls._lock:
+        try:
+            return cls.registries[db_name]
+        except KeyError:
+            return cls.new(db_name)
 
     _init: bool  # whether init needs to be done
     ready: bool  # whether everything is set up
@@ -123,8 +123,31 @@ class Registry(Mapping[str, type["BaseModel"]]):
     models: dict[str, type[BaseModel]]
 
     @classmethod
-    @locked
+    # @locked
     def new(
+        cls,
+        db_name: str,
+        *,
+        update_module: bool = False,
+        install_modules: Collection[str] = (),
+        upgrade_modules: Collection[str] = (),
+        reinit_modules: Collection[str] = (),
+        new_db_demo: bool | None = None,
+    ) -> Registry:
+        while True:
+            registry = cls._new(db_name, update_module=update_module, install_modules=install_modules, upgrade_modules=upgrade_modules, reinit_modules=reinit_modules, new_db_demo=new_db_demo)
+            if not registry.installing:
+                return registry
+            from odoo.addons.base.hot_test import hot_test
+            hot_test.execute_test(registry.updated_modules[-1])
+            from odoo.addons.base.hot_test import test_finished_event
+            if test_finished_event.wait():
+                test_finished_event.clear()
+                continue
+
+    @classmethod
+    # @locked
+    def _new(
         cls,
         db_name: str,
         *,
@@ -217,6 +240,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self._init = True
         self.loaded = False
         self.ready = False
+        self.installing = False
 
         self.models: dict[str, type[BaseModel]] = {}    # model name/model instance mapping
         self._sql_constraints = set()  # type: ignore

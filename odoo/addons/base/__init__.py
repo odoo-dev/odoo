@@ -4,6 +4,7 @@
 from . import models
 from . import report
 from . import wizard
+from . import hot_test
 
 
 def post_init(env):

@@ -259,28 +259,35 @@ def load_module_graph(
             module.env.flush_all()
             module.env.cr.commit()
 
+        if update_operation == 'install':
+            module.env.invalidate_all()
+            module.env.cr.execute("UPDATE ir_module_module SET state = 'uninstalled' WHERE state = 'to install'")
+            module.env.cr.commit()
+            registry.installing = True
+            break;
+
         test_time = 0.0
         test_queries = 0
         test_results = None
 
-        update_from_config = tools.config['update'] or tools.config['init'] or tools.config['reinit']
-        if tools.config['test_enable'] and (update_operation or not update_from_config):
-            from odoo.tests import loader  # noqa: PLC0415
-            suite = loader.make_suite([module_name], 'at_install')
-            if suite.countTestCases():
-                if not update_operation:
-                    registry._setup_models__(env.cr, [])  # incremental setup
-                registry.check_null_constraints(env.cr)
-                # Python tests
-                tests_t0, tests_q0 = time.time(), odoo.sql_db.sql_counter
-                test_results = loader.run_suite(suite, global_report=report)
-                assert report is not None, "Missing report during tests"
-                report.update(test_results)
-                test_time = time.time() - tests_t0
-                test_queries = odoo.sql_db.sql_counter - tests_q0
+        # update_from_config = tools.config['update'] or tools.config['init'] or tools.config['reinit']
+        # if tools.config['test_enable'] and (update_operation or not update_from_config):
+        #     from odoo.tests import loader  # noqa: PLC0415
+        #     suite = loader.make_suite([module_name], 'at_install')
+        #     if suite.countTestCases():
+        #         if not update_operation:
+        #             registry._setup_models__(env.cr, [])  # incremental setup
+        #         registry.check_null_constraints(env.cr)
+        #         # Python tests
+        #         tests_t0, tests_q0 = time.time(), odoo.sql_db.sql_counter
+        #         test_results = loader.run_suite(suite, global_report=report)
+        #         assert report is not None, "Missing report during tests"
+        #         report.update(test_results)
+        #         test_time = time.time() - tests_t0
+        #         test_queries = odoo.sql_db.sql_counter - tests_q0
 
-                # tests may have reset the environment
-                module = env['ir.module.module'].browse(module_id)
+        #         # tests may have reset the environment
+        #         module = env['ir.module.module'].browse(module_id)
 
 
         extra_queries = odoo.sql_db.sql_counter - module_extra_query_count - test_queries
@@ -444,6 +451,8 @@ def load_modules(
             load_module_graph(
                 env, graph, update_module=update_module,
                 report=report, models_to_check=models_to_check)
+            if registry.installing:
+                break;
             if len(registry.updated_modules) == updated_modules_count:
                 break
 
