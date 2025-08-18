@@ -250,6 +250,15 @@ class StockMove(models.Model):
                 if move.product_id.lot_valuated:
                     lots_to_recompute.update(move.move_line_ids.lot_id.ids)
             if move.is_in:
+                # if move.product_id.lot_valuated:
+                #     value = 0.0
+                #     for move_line in move.move_line_ids:
+                #         if move_line.lot_id:
+                #             breakpoint()
+                #             value += move_line.lot_id.standard_price * move_line.quantity_product_uom
+                #         else:
+                #             value += move.product_id.standard_price * move_line.quantity_product_uom
+                #     move.value = value
                 move.value = move.sudo()._get_value()
                 continue
             # Outgoing moves
