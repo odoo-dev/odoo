@@ -101,6 +101,7 @@
                                 <field name="price_subtotal_incl" widget="monetary" force_save="1"/>
                                 <field name="currency_id" column_invisible="True"/>
                                 <field name="refunded_qty" optional="hide" />
+                                <field name="state" optional="hide" widget="badge" />
                             </list>
                             <form string="Order lines">
                                 <group col="4">

@@ -285,7 +285,7 @@ export class PosOrder extends Base {
     }
 
     get hasChange() {
-        return this.lines.some((l) => l.uiState.hasChange);
+        return this.lines.filter((l) => l.state != 'cancel').some((l) => l.uiState.hasChange);
     }
     /**
      * This function is called after the order has been successfully sent to the preparation tool(s).
@@ -317,6 +317,9 @@ export class PosOrder extends Base {
                 };
             }
             line.setHasChange(false);
+            if (line.state === "draft") {
+                line.state = "order";
+            }
             line.uiState.savedQuantity = line.getQuantity();
         });
         // Checks whether an orderline has been deleted from the order since it
@@ -453,8 +456,8 @@ export class PosOrder extends Base {
                 delete this.uiState.lineToRefund[lineToRemove.refunded_orderline_id.uuid];
             }
 
-            if (this.assertEditable()) {
-                lineToRemove.delete();
+            if (lineToRemove.state == "order") {
+                lineToRemove.state = "cancel";
             }
         }
         if (!this.lines.length) {
@@ -862,7 +865,7 @@ export class PosOrder extends Base {
 
     // NOTE: Overrided in pos_loyalty to put loyalty rewards at this end of array.
     getOrderlines() {
-        return this.lines;
+        return this.lines.filter((l) => l.state != 'cancel');
     }
 
     serializeForORM(opts = {}) {

@@ -1448,6 +1448,9 @@ class PosOrderLine(models.Model):
     refunded_qty = fields.Float('Refunded Quantity', compute='_compute_refund_qty', help='Number of items refunded in this orderline.')
     uuid = fields.Char(string='Uuid', readonly=True, default=lambda self: str(uuid4()), copy=False)
     note = fields.Char('Product Note')
+    state = fields.Selection(
+        [('draft', 'New'), ('order', 'Ordered'), ('cancel', 'Cancelled')],
+        'Status', readonly=True, copy=False, default='draft', index=True)
 
     combo_parent_id = fields.Many2one('pos.order.line', string='Combo Parent', index='btree_not_null') # FIXME rename to parent_line_id
     combo_line_ids = fields.One2many('pos.order.line', 'combo_parent_id', string='Combo Lines') # FIXME rename to child_line_ids
@@ -1466,7 +1469,7 @@ class PosOrderLine(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         return [
-            'qty', 'attribute_value_ids', 'custom_attribute_value_ids', 'price_unit',
+            'qty', 'state', 'attribute_value_ids', 'custom_attribute_value_ids', 'price_unit',
             'uuid', 'price_subtotal', 'price_subtotal_incl', 'order_id', 'note', 'price_type',
             'product_id', 'discount', 'tax_ids', 'pack_lot_ids', 'customer_note',
             'refunded_qty', 'price_extra', 'full_product_name', 'refunded_orderline_id',
@@ -1522,6 +1525,11 @@ class PosOrderLine(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
+        if qty := vals.get('qty'):
+            if self.state != "cancel" and qty < self.qty:
+                newol = self.copy()
+                newol.state = "cancel"
+                newol.qty -= qty
         if vals.get('pack_lot_line_ids'):
             for pl in vals.get('pack_lot_ids'):
                 if pl[2].get('server_id'):
