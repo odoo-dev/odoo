@@ -1,5 +1,5 @@
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 import tourUtils from "@sale/js/tours/tour_utils";
 
 import { markup } from "@odoo/owl";

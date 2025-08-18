@@ -161,7 +161,7 @@ export class TourInteractive {
 
     /**
      * @param {HTMLElement} params.anchorEl
-     * @param {import("../../tour_utils").ConsumeEvent[]} params.consumeEvents
+     * @param {import("../utils/step_utils").ConsumeEvent[]} params.consumeEvents
      * @param {() => void} params.onMouseEnter
      * @param {() => void} params.onMouseLeave
      * @param {(ev: Event) => any} params.onScroll

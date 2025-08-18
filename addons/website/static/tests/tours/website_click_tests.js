@@ -6,7 +6,7 @@ import {
     goBackToBlocks,
     registerWebsitePreviewTour,
 } from '@website/js/tours/tour_utils';
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 
 const cover = {
     id: 's_cover',

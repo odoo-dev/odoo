@@ -5,7 +5,7 @@ import {
     registerWebsitePreviewTour,
     insertSnippet
 } from '@website/js/tours/tour_utils';
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 
 const checkNoTranslate = {
     content: "Check there is no translate button",

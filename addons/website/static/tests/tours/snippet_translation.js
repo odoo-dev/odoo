@@ -7,7 +7,7 @@ import {
     insertSnippet,
     registerWebsitePreviewTour,
 } from '@website/js/tours/tour_utils';
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 
 registerWebsitePreviewTour('snippet_translation', {
     url: '/',

@@ -2,7 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import {
     registerBackendAndFrontendTour,
 } from '@website/js/tours/tour_utils';
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 
 registerBackendAndFrontendTour("question", {
     url: '/forum/1',

@@ -1,4 +1,4 @@
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,

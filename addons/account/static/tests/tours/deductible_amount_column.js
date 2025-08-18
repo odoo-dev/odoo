@@ -1,5 +1,5 @@
 import { registry } from '@web/core/registry';
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 
 registry.category("web_tour.tours").add("deductible_amount_column", {
     url: "/odoo/vendor-bills/new",

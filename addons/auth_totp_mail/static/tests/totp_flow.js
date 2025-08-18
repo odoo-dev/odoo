@@ -1,5 +1,5 @@
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 import { queryFirst } from "@odoo/hoot-dom";
 
 function openAccountSettingsTab() {

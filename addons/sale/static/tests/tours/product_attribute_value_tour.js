@@ -1,5 +1,5 @@
 import { registry } from "@web/core/registry";
-import { stepUtils } from "@web_tour/tour_utils";
+import { stepUtils } from "@web_tour/js/utils/step_utils";
 
 const openProductAttribute = (product_attribute) => [
     ...stepUtils.goToAppSteps("sale.sale_menu_root", "Go to the Sales App"),
