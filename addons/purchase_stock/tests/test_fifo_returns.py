@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import time
-from unittest import skip
 
 from odoo.tests import tagged, Form
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
@@ -10,7 +9,6 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 @tagged('-at_install', 'post_install')
 class TestFifoReturns(ValuationReconciliationTestCommon):
 
-    @skip('Temporary to fast merge new valuation')
     def test_fifo_returns(self):
         """Test to create product and purchase order to test the FIFO returns of the product"""
         res_partner_3 = self.env['res.partner'].create({
@@ -86,4 +84,4 @@ class TestFifoReturns(ValuationReconciliationTestCommon):
 
         #  After the return only 10 of the second purchase order should still be in stock as it applies fifo on the return too
         self.assertEqual(product_fiforet_icecream.qty_available, 10.0, 'Qty available should be 10.0')
-        self.assertEqual(product_fiforet_icecream.value_svl, 800.0, 'Stock value should be 800')
+        self.assertEqual(product_fiforet_icecream.total_value, 800.0, 'Stock value should be 800')
