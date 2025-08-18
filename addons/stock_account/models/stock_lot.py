@@ -25,7 +25,6 @@ class StockLot(models.Model):
         company_id = self.env.company
         self.company_currency_id = company_id.currency_id
         at_date = self.env.context.get('to_date')
-
         for lot in self:
             if not lot.lot_valuated:
                 lot.total_value = 0.0
