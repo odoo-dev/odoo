@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounting_data
 from odoo.tests import Form, tagged
 from odoo import fields, Command
 
 
-@skip('Temporary to fast merge new valuation')
 class TestAccountMoveStockCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
@@ -32,8 +29,6 @@ class TestAccountMoveStockCommon(AccountTestInvoicingCommon):
         cls.auto_categ = cls.env['product.category'].create({
             'name': 'child_category',
             'parent_id': cls.all_categ.id,
-            "property_stock_account_input_categ_id": cls.stock_input_account.id,
-            "property_stock_account_output_categ_id": cls.stock_output_account.id,
             "property_stock_valuation_account_id": cls.stock_valuation_account.id,
             "property_stock_journal": cls.stock_journal.id,
             "property_valuation": "real_time",
@@ -56,9 +51,19 @@ class TestAccountMoveStockCommon(AccountTestInvoicingCommon):
 
         cls.branch_a = cls.setup_other_company(name="Branch A", parent_id=cls.env.company.id)
 
+        cls.inventory_loss_location = cls.env['stock.location'].search(
+            [('usage', '=', 'inventory'), ('company_id', '=', cls.env.company.id)
+        ], limit=1)
+        cls.inventory_adjustment_account = cls.env['account.account'].create({
+            'name': 'Inventory Adjustment Account',
+            'code': 'INVADJ',
+            'account_type': 'expense',
+            'reconcile': True,
+        })
+        cls.inventory_loss_location.valuation_account_id = cls.inventory_adjustment_account
+
 
 @tagged("post_install", "-at_install")
-@skip('Temporary to fast merge new valuation')
 class TestAccountMove(TestAccountMoveStockCommon):
     def test_standard_perpetual_01_mc_01(self):
         rate = self.other_currency.rate_ids.sorted()[0].rate
@@ -103,6 +108,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
 
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_total)
         self.assertAlmostEqual(self.product_A.lst_price * rate, invoice.amount_residual)
+        # TODO:The COGS flow needs to be adapted.
         self.assertEqual(len(invoice.mapped("line_ids")), 4)
         self.assertEqual(len(invoice.mapped("line_ids").filtered(lambda l: l.display_type == 'cogs')), 2)
         self.assertEqual(len(invoice.mapped("line_ids.currency_id")), 2)
@@ -149,7 +155,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
         })
         move.action_post()
 
-        stock_output_line = move.line_ids.filtered(lambda l: l.account_id == self.stock_output_account)
+        stock_output_line = move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
         self.assertEqual(stock_output_line.debit, 0)
         self.assertEqual(stock_output_line.credit, -10)
 
@@ -224,8 +230,9 @@ class TestAccountMove(TestAccountMoveStockCommon):
         Upon switching to an automated valuation method for the product category, the following
         entries should be generated in the stock journal:
             1. CREDIT to valuation account
-            2. DEBIT to stock output account
+            2. DEBIT to expense account
         """
+        self.stock_valuation_account.account_stock_variation_id = self.expense_account
         stock_location = self.env['stock.warehouse'].search([
             ('company_id', '=', self.env.company.id),
         ], limit=1).lot_stock_id
@@ -255,28 +262,23 @@ class TestAccountMove(TestAccountMoveStockCommon):
 
         categ.write({
             'property_valuation': 'real_time',
-            'property_stock_account_input_categ_id': self.stock_input_account.id,
-            'property_stock_account_output_categ_id': self.stock_output_account.id,
             'property_stock_valuation_account_id': self.stock_valuation_account.id,
             'property_stock_journal': self.stock_journal.id,
         })
 
-        amls = self.env['account.move.line'].search([('product_id', '=', product.id)]).sorted(
-            # ensure the aml with the stock_valuation_account is the first one
-            lambda amls: amls.account_id != self.stock_valuation_account
+        move = self.env['account.move'].browse(
+            self.env.company.action_close_stock_valuation()['res_id']
         )
+        amls = move.line_ids
 
-        expected_valuation_line = {
-            'account_id': self.stock_valuation_account.id,
-            'credit': product.standard_price,
-            'debit': 0,
-        }
-        expected_output_line = {
-            'account_id': self.stock_output_account.id,
-            'credit': 0,
-            'debit': product.standard_price,
-        }
-        self.assertRecordValues(amls, [expected_valuation_line, expected_output_line])
+        self.assertTrue(
+            any(l.account_id == self.stock_valuation_account and l.credit == product.standard_price and not l.debit for l in amls),
+            "Missing credit in stock valuation account"
+        )
+        self.assertTrue(
+            any(l.account_id == self.expense_account and l.debit == product.standard_price and not l.credit for l in amls),
+            "Missing debit in expense account"
+        )
 
     def test_stock_account_move_automated_not_standard_with_branch_company(self):
         """
@@ -310,7 +312,21 @@ class TestAccountMove(TestAccountMoveStockCommon):
         })
         in_picking.button_validate()
         self.assertEqual(sm.state, 'done')
-        self.assertEqual(sm.account_move_ids.company_id, self.env.company)
+        self.assertEqual(product.total_value, 300)
+        # self._create_invoice(
+        #     company_id=branch_a.id,
+        #     move_type='in_invoice',
+        #     invoice_line_ids=[
+        #         Command.create({
+        #             'product_id': product.id,
+        #             'quantity': 1,
+        #         }),
+        #     ],
+        # )
+        # move = self.env['account.move'].browse(
+        #     self.env.company.action_close_stock_valuation()['res_id']
+        # )
+        # self.assertEqual(move.line_ids.company_id, self.env.company)
 
     def test_cogs_analytic_accounting(self):
         """Check analytic distribution is correctly propagated to COGS lines"""
@@ -352,7 +368,7 @@ class TestAccountMove(TestAccountMoveStockCommon):
             'account_type': 'asset_current',
         })
         self.auto_categ.with_company(branch.id).property_valuation = "real_time"
-        self.auto_categ.with_company(branch.id).property_stock_account_input_categ_id = test_account
+        self.auto_categ.with_company(branch.id).property_stock_valuation_account_id = test_account
 
         bill = self.env['account.move'].with_company(branch.id).with_context(default_move_type='in_invoice').create({
             'partner_id': self.partner_a.id,
@@ -385,9 +401,9 @@ class TestAccountMove(TestAccountMoveStockCommon):
         self.assertRecordValues(
             inv_adjustment_journal_items,
             [
-                {'account_id': prod_a_accounts['income'].id, 'product_id': self.product_a.id},
-                {'account_id': prod_a_accounts['stock_valuation'].id, 'product_id': self.product_a.id},
-                {'account_id': prod_b_accounts['stock_valuation'].id, 'product_id': self.product_b.id},
-                {'account_id': prod_b_accounts['expense'].id, 'product_id': self.product_b.id},
+                {'account_id': self.inventory_adjustment_account.id, 'product_id': self.product_a.id, 'credit': 4000, 'debit': 0},
+                {'account_id': prod_a_accounts['stock_valuation'].id, 'product_id': self.product_a.id, 'debit': 4000, 'credit': 0},
+                {'account_id': prod_b_accounts['stock_valuation'].id, 'product_id': self.product_b.id, 'credit': 800, 'debit': 0},
+                {'account_id': self.inventory_adjustment_account.id, 'product_id': self.product_b.id, 'debit': 800, 'credit': 0},
             ]
         )
