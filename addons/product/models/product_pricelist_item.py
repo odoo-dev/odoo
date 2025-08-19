@@ -480,7 +480,7 @@ class ProductPricelistItem(models.Model):
 
     #=== BUSINESS METHODS ===#
 
-    def _is_applicable_for(self, product, qty_in_product_uom):
+    def _is_applicable_for(self, product, qty_in_product_uom, **kwargs):
         """Check whether the current rule is valid for the given product & qty.
 
         Note: self.ensure_one()

@@ -220,7 +220,7 @@ class ProductPricelist(models.Model):
                 qty_in_product_uom = quantity
 
             for rule in rules:
-                if rule._is_applicable_for(product, qty_in_product_uom):
+                if rule._is_applicable_for(product, qty_in_product_uom, **kwargs):
                     suitable_rule = rule
                     break
 
