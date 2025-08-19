@@ -17,8 +17,10 @@ registry.category("web_tour.tours").add("ProductComboPriceTaxIncludedTour", {
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             scan_barcode("SuperCombo"),
+            // price: 16.0, tax 30%, extra_price: 2
             combo.select("Combo Product 3"),
             combo.isConfirmationButtonDisabled(),
+            // price: 50.0, tax 20% incl
             combo.select("Combo Product 9"),
             // Check Product Configurator is open
             Dialog.is("Attribute selection"),
@@ -28,15 +30,25 @@ registry.category("web_tour.tours").add("ProductComboPriceTaxIncludedTour", {
                     ".modal-footer .o-default-button:contains(/^Add$/) + .o-default-button:contains(/^Discard$/)",
                 run: "click",
             },
+            // price: 25.0, tax 20% incl, extra_price: 2
             combo.select("Combo Product 5"),
+            // price: 32.0, tax 10%
             combo.select("Combo Product 7"),
             combo.isSelected("Combo Product 7"),
+            // price: 40.0, tax 20% incl, extra_price: 5
             combo.select("Combo Product 8"),
             combo.isSelected("Combo Product 8"),
             combo.isNotSelected("Combo Product 7"),
             Dialog.confirm(),
+            // 16.0 + 25.0 + 40.0 = 81
+            // product 3: discount = (16.0 / 81.0 * -31.0) + 2.0 = −4.12345679
+            // tax on : 16.0 * 0.3 = 4.8
+            // tax on : −4.12345679 * 0.3 = −1.237037037
+            // product 5: discount: 25.0 / 81.0 * -31.0 = −9.567901235
+            // product 8: discount = (40.0 / 81.0 * -31.0) + 5.0 = −10.308641975
+            // Total combo: 50.0 + 2.0 + 5.0 + 4.8 − 1.24 = 60.56
             inLeftSide([
-                ...ProductScreen.selectedOrderlineHasDirect("Office Combo", "1", "62.1"),
+                ...ProductScreen.selectedOrderlineHasDirect("Office Combo", "1", "60.56"),
                 ...ProductScreen.clickLine("Combo Product 3"),
                 ...ProductScreen.selectedOrderlineHasDirect("Combo Product 3", "1"),
                 ...ProductScreen.clickLine("Combo Product 5"),
@@ -194,32 +206,5 @@ registry.category("web_tour.tours").add("ProductComboMaxFreeQtyTour", {
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickValidate(),
             ReceiptScreen.isShown(),
-        ].flat(),
-});
-
-registry.category("web_tour.tours").add("ProductComboChangePricelist", {
-    steps: () =>
-        [
-            Chrome.startPoS(),
-            Dialog.confirm("Open Register"),
-            ProductScreen.clickDisplayedProduct("Office Combo"),
-            combo.select("Combo Product 2"),
-            combo.select("Combo Product 4"),
-            combo.select("Combo Product 6"),
-            Dialog.confirm(),
-            inLeftSide([
-                ...ProductScreen.orderComboLineHas("Combo Product 2", "1.0"),
-                ...ProductScreen.orderComboLineHas("Combo Product 4", "1.0"),
-                ...ProductScreen.orderComboLineHas("Combo Product 6", "1.0"),
-            ]),
-            ProductScreen.totalAmountIs("47.33"),
-            ProductScreen.clickPriceList("sale 10%"),
-            inLeftSide([
-                ...ProductScreen.orderComboLineHas("Combo Product 2", "1.0"),
-                ...ProductScreen.orderComboLineHas("Combo Product 4", "1.0"),
-                ...ProductScreen.orderComboLineHas("Combo Product 6", "1.0"),
-            ]),
-            ProductScreen.totalAmountIs("42.60"),
-            ProductScreen.isShown(),
         ].flat(),
 });

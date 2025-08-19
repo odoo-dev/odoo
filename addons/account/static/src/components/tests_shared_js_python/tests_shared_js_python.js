@@ -115,6 +115,40 @@ export class TestsSharedJsPython extends Component {
             );
             return {tax_totals: taxTotals, soft_checking: params.soft_checking};
         }
+        if (params.test === "combo_product") {
+            const document = this.populateDocument(params.document);
+            const lineIndexesComboPrice = params.line_indexes_combo_price;
+            for (const [lineIndexes, comboPrice] of lineIndexesComboPrice) {
+                const sortedLineIndexes = lineIndexes.sort();
+                const baseLines = document.lines.map((baseLine, index) => lineIndexes.includes(index) ? baseLine : null).filter((baseLine) => baseLine !== null);
+                const discountComboBaseLines = accountTaxHelpers.prepare_discount_combo_lines(
+                    baseLines,
+                    document.company,
+                    comboPrice
+                );
+                const comboBaseLines = accountTaxHelpers.combine_with_discount_combo_lines(
+                    baseLines,
+                    document.company,
+                    discountComboBaseLines
+                );
+
+                let counter = 0;
+                for (const index of sortedLineIndexes) {
+                    document.lines[index] = comboBaseLines[counter];
+                    counter++;
+                }
+            }
+
+            accountTaxHelpers.add_tax_details_in_base_lines(document.lines, document.company);
+            accountTaxHelpers.round_base_lines_tax_details(document.lines, document.company);
+            const taxTotals = accountTaxHelpers.get_tax_totals_summary(
+                document.lines,
+                document.currency,
+                document.company,
+                {cash_rounding: document.cash_rounding}
+            );
+            return {tax_totals: taxTotals, soft_checking: params.soft_checking};
+        }
         if (params.test === "base_lines_tax_details") {
             const document = this.populateDocument(params.document);
             return {

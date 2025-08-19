@@ -5,6 +5,7 @@ import { markRaw, reactive } from "@odoo/owl";
 import { renderToElement } from "@web/core/utils/render";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { accountTaxHelpers } from "@account/helpers/account_tax";
 import { deduceUrl, random5Chars, uuidv4, Counter } from "@point_of_sale/utils";
 import { HWPrinter } from "@point_of_sale/app/utils/printer/hw_printer";
 import { ConnectionAbortedError, ConnectionLostError, RPCError } from "@web/core/network/rpc";
@@ -24,7 +25,6 @@ import {
 } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PartnerList } from "../screens/partner_list/partner_list";
 import { ScaleScreen } from "../screens/scale_screen/scale_screen";
-import { computeComboItems } from "../models/utils/compute_combo_items";
 import { changesToOrder, getOrderChanges } from "../models/utils/order_change";
 import { QRPopup } from "@point_of_sale/app/components/popups/qr_code_popup/qr_code_popup";
 import { ActionScreen } from "@point_of_sale/app/screens/action_screen";
@@ -1038,36 +1038,31 @@ export class PosStore extends WithLazyGetterTrap {
             }
 
             // Product template of combo should not have more than 1 variant.
-            const [childLineConf, comboExtraLines] = payload;
-            const comboPrices = computeComboItems(
-                values.product_tmpl_id.product_variant_ids[0],
-                childLineConf,
-                order.pricelist_id,
-                this.data.models["decimal.precision"].getAll(),
-                this.data.models["product.template.attribute.value"].getAllBy("id"),
-                comboExtraLines,
-                this.currency
-            );
+            const [comboChoices, extraComboChoices] = payload;
+            const comboProduct = values.product_tmpl_id.product_variant_ids[0];
+            const comboChoiceBaseLines = order.prepareComboChoiceBaseLines(comboChoices);
+            const comboItemBaseLines = order.prepareComboItemBaseLines(comboProduct, comboChoiceBaseLines);
+            const extraComboChoiceBaseLines = order.prepareComboChoiceBaseLines(extraComboChoices);
 
-            values.combo_line_ids = comboPrices.map((comboItem) => [
+            values.combo_line_ids = [...comboItemBaseLines, ...extraComboChoiceBaseLines].map((baseLine) => [
                 "create",
                 {
-                    product_id: comboItem.combo_item_id.product_id,
-                    tax_ids: comboItem.combo_item_id.product_id.taxes_id.map((tax) => [
+                    product_id: baseLine.product_id,
+                    tax_ids: baseLine.tax_ids.map((tax) => [
                         "link",
                         tax,
                     ]),
-                    combo_item_id: comboItem.combo_item_id,
-                    price_unit: comboItem.price_unit,
+                    combo_item_id: baseLine._combo_item_id,
+                    price_unit: baseLine.price_unit,
                     price_type: "automatic",
                     order_id: order,
-                    qty: comboItem.qty,
-                    attribute_value_ids: comboItem.attribute_value_ids?.map((attr) => [
+                    qty: baseLine.quantity,
+                    attribute_value_ids: baseLine._attribute_value_ids.map((attributeId) => [
                         "link",
-                        attr,
+                        attributeId,
                     ]),
                     custom_attribute_value_ids: Object.entries(
-                        comboItem.attribute_custom_values
+                        baseLine._attribute_custom_values
                     ).map(([id, cus]) => [
                         "create",
                         {
@@ -1076,6 +1071,7 @@ export class PosStore extends WithLazyGetterTrap {
                             custom_value: cus,
                         },
                     ]),
+                    extra_tax_data: accountTaxHelpers.export_base_line_extra_tax_data(baseLine),
                 },
             ]);
         }

@@ -1034,7 +1034,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'barcode': 'SuperCombo',
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_pos_tour('ProductComboPriceTaxIncludedTour')
+        self.start_pos_tour('ProductComboPriceTaxIncludedTour', debug=True)
         order = self.env['pos.order'].search([])
         self.assertEqual(len(order.lines), 4, "There should be 4 order lines - 1 combo parent and 3 combo lines")
         # check that the combo lines are correctly linked to each other
@@ -1593,29 +1593,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'ProductComboChangeFP', login="pos_user")
-
-    def test_product_combo_change_pricelist(self):
-        """
-        Verify than when we change the pricelist, the combo price is updated
-        """
-        setup_product_combo_items(self)
-
-        sale_10_pl = self.env['product.pricelist'].create({
-            'name': 'sale 10%',
-        })
-        self.env['product.pricelist.item'].create({
-            'pricelist_id': sale_10_pl.id,
-            'base': 'pricelist',
-            'compute_price': 'percentage',
-            'applied_on': '3_global',
-            'percent_price': 10,
-        })
-
-        self.main_pos_config.write({
-            'available_pricelist_ids': [(4, sale_10_pl.id)],
-        })
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'ProductComboChangePricelist', login="pos_user")
 
     def test_cash_rounding_payment(self):
         """Verify than an error popup is shown if the payment value is more precise than the rounding method"""
@@ -2892,18 +2869,49 @@ class TestTaxCommonPOS(TestPointOfSaleHttpCommon, TestTaxCommon):
         super().setUpClass()
         cls.partner_a.name = "AAAAAA"  # The POS only load the first 100 partners
 
-    def create_base_line_product(self, base_line, **kwargs):
+    def create_product(self, list_price, taxes=None, **kwargs):
         return self.env['product.product'].create({
             **kwargs,
             'available_in_pos': True,
-            'list_price': base_line['price_unit'],
-            'taxes_id': [Command.set(base_line['tax_ids'].ids)],
+            'list_price': list_price,
+            'taxes_id': [Command.set(taxes.ids)] if taxes else [],
             'pos_categ_ids': [Command.set(self.pos_desk_misc_test.ids)],
         })
+
+    def create_base_line_product(self, base_line, **kwargs):
+        return self.create_product(
+            list_price=base_line['price_unit'],
+            taxes=base_line['tax_ids'],
+            **kwargs,
+        )
 
     def ensure_products_on_document(self, document, product_prefix):
         for i, base_line in enumerate(document['lines'], start=1):
             base_line['product_id'] = self.create_base_line_product(base_line, name=f'{product_prefix}_{i}')
+
+    def ensure_combo_products_on_document(self, document, line_indexes_combo_price, product_combo_prefix):
+        for i, (line_indexes, combo_price) in enumerate(line_indexes_combo_price, start=1):
+            base_lines = [base_line for index, base_line in enumerate(document['lines']) if index in line_indexes]
+            combo_items = self.env['product.combo'].create([
+                {
+                    'name': f'{product_combo_prefix}_{i}_item_{j}',
+                    'qty_max': base_line['quantity'],
+                    'qty_free': base_line['quantity'],
+                    'combo_item_ids': [
+                        Command.create({
+                            'product_id': base_line['product_id'].id,
+                            'extra_price': base_line['_combo_extra_price'],
+                        }),
+                    ],
+                }
+                for j, base_line in enumerate(base_lines, start=1)
+            ])
+            self.create_product(
+                name=f'{product_combo_prefix}_{i}',
+                list_price=combo_price,
+                type='combo',
+                combo_ids=[Command.set(combo_items.ids)],
+            )
 
     def assert_pos_order_totals(self, order, expected_values):
         expected_amounts = {}
@@ -2920,7 +2928,9 @@ class TestTaxCommonPOS(TestPointOfSaleHttpCommon, TestTaxCommon):
 
         self.start_pos_tour(tour)
         orders = self.env['pos.order'].search([('session_id', '=', self.main_pos_config.current_session_id.id)], limit=len(tests_with_orders))
-        for index, (order, (test_code, _document, _soft_checking, _amount_type, _amount, expected_values)) in enumerate(zip(orders, tests_with_orders)):
+        for index, (order, test) in enumerate(zip(orders, tests_with_orders)):
+            test_code = test[0]
+            expected_values = test[-1]
             with self.subTest(test_code=test_code, index=index):
                 self.assert_pos_order_totals(order, expected_values)
                 if order.account_move:

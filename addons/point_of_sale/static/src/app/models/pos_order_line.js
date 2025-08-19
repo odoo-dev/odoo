@@ -395,7 +395,7 @@ export class PosOrderline extends Base {
             tax_ids: this.tax_ids,
             product_id: product,
             rate: 1.0,
-            is_refund: this.qty * priceUnit < 0,
+            extra_tax_data: this.extra_tax_data,
             ...customValues,
         };
         if (order.fiscal_position_id) {
@@ -643,19 +643,35 @@ export class PosOrderline extends Base {
     }
 
     getPriceString() {
-        return this.getDiscountStr() === "100"
-            ? // free if the discount is 100
-              _t("Free")
-            : this.combo_line_ids.length > 0
-            ? // total of all combo lines if it is combo parent
-              formatCurrency(
-                  this.combo_line_ids.reduce((total, cl) => total + cl.getDisplayPrice(), 0),
-                  this.currency
-              )
-            : this.combo_parent_id
-            ? // empty string if it has combo parent
-              ""
-            : formatCurrency(this.getDisplayPrice(), this.currency);
+        if (this.getDiscountStr() === "100") {
+            // The product is fully discounted.
+            return _t("Free");
+        }
+        if (this.combo_line_ids.length) {
+            // Combo parent line.
+            const baseLines = this.combo_line_ids.map((line) => accountTaxHelpers.prepare_base_line_for_taxes_computation(
+                line,
+                line.prepareBaseLineForTaxesComputationExtraValues()
+            ));
+            const company = this.company;
+            accountTaxHelpers.add_tax_details_in_base_lines(baseLines, company);
+            accountTaxHelpers.round_base_lines_tax_details(baseLines, company);
+            const baseLinesAggregatedValues = accountTaxHelpers.aggregate_base_lines_tax_details(baseLines, (x) => true);
+            const valuesPerGroupingKey = accountTaxHelpers.aggregate_base_lines_aggregated_values(baseLinesAggregatedValues);
+            let total = 0.0;
+            for (const values of Object.values(valuesPerGroupingKey)) {
+                total += values.base_amount_currency;
+                if (this.config.iface_tax_included === "total") {
+                    total += values.tax_amount_currency;
+                }
+            }
+            return formatCurrency(total, this.currency);
+        }
+        if (this.combo_parent_id) {
+            // Combo child line.
+            return "";
+        }
+        return formatCurrency(this.getDisplayPrice(), this.currency);
     }
 
     get packLotLines() {

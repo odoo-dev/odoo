@@ -3,7 +3,6 @@ import { Base } from "./related_models";
 import { _t } from "@web/core/l10n/translation";
 import { random5Chars } from "@point_of_sale/utils";
 import { roundCurrency } from "@point_of_sale/app/models/utils/currency";
-import { computeComboItems } from "./utils/compute_combo_items";
 import { accountTaxHelpers } from "@account/helpers/account_tax";
 import { localization } from "@web/core/l10n/localization";
 import { formatDate, deserializeDate, serializeDateTime } from "@web/core/l10n/dates";
@@ -76,6 +75,110 @@ export class PosOrder extends Base {
             requiredPartnerDetails: {},
         };
     }
+
+    // -------------------------------------------------------------------------
+    // BASE LINES GENERIC HELPERS
+    // -------------------------------------------------------------------------
+
+    /**
+     * TODO
+     **/
+    get documentSign() {
+        return this.isRefund ? -1 : 1;
+    }
+
+    /**
+     * TODO
+     **/
+    getBaseLines(lines) {
+        return lines.filter((line) => !(line.combo_line_ids || []).length).map((line) =>
+            accountTaxHelpers.prepare_base_line_for_taxes_computation(
+                line,
+                line.prepareBaseLineForTaxesComputationExtraValues({
+                    quantity: this.documentSign * line.qty,
+                })
+            )
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // BASE LINES COMBO PRODUCT HELPERS
+    // -------------------------------------------------------------------------
+
+    /**
+     * Convert a combo choice into params to be passed to 'prepare_base_line_for_taxes_computation'.
+     * @param comboChoice: An object containing:
+     * - combo_item_id: The chosen combo item.
+     * - qty: The chosen quantity.
+     * - configuration: TODO
+     * @returns An object to be passed to 'prepare_base_line_for_taxes_computation'.
+     **/
+    prepareComboChoiceBaseLineForTaxesComputationExtraValues(comboChoice) {
+        const priceList = this.pricelist_id;
+        const fiscalPosition = this.fiscal_position_id;
+        const comboItem = comboChoice.combo_item_id;
+        const attributeValues = (comboChoice.configuration?.attribute_value_ids || []).map((attributeId) => {
+            return this.models["product.template.attribute.value"].get(attributeId)
+        });
+        const attributeValuesExtraPrice = attributeValues.map(
+            (attribute) => attribute.price_extra
+        ).reduce((acc, price_extra) => acc + price_extra, 0.0);
+        const attributeCustomValues = comboChoice.configuration?.attribute_custom_values || {};
+        return {
+            ...comboItem.product_id.prepareProductBaseLineForTaxesComputationExtraValues(
+                false,
+                priceList,
+                fiscalPosition,
+            ),
+            quantity: comboChoice.qty,
+            _combo_item_id: comboItem,
+            _combo_extra_price: comboItem.extra_price + attributeValuesExtraPrice,
+            _attribute_value_ids: attributeValues,
+            _attribute_custom_values: attributeCustomValues,
+        };
+    }
+
+    /**
+     * TODO
+     **/
+    prepareComboChoiceBaseLines(comboChoices) {
+        return comboChoices.map((comboChoice) => {
+            return accountTaxHelpers.prepare_base_line_for_taxes_computation(
+                {},
+                this.prepareComboChoiceBaseLineForTaxesComputationExtraValues(comboChoice)
+            );
+        });
+    }
+
+    /**
+     * TODO
+     **/
+    prepareComboItemBaseLines(comboProduct, comboChoiceBaseLines) {
+        const priceList = this.pricelist_id;
+        const fiscalPosition = this.fiscal_position_id;
+        const comboProductPrice = comboProduct.getProductPrice(
+            false,
+            priceList,
+            fiscalPosition
+        );
+        accountTaxHelpers.add_tax_details_in_base_lines(comboChoiceBaseLines, this.company);
+        accountTaxHelpers.round_base_lines_tax_details(comboChoiceBaseLines, this.company);
+        const discountComboBaseLines = accountTaxHelpers.prepare_discount_combo_lines(
+            comboChoiceBaseLines,
+            this.company,
+            comboProductPrice
+        );
+        const comboItemBaseLines = accountTaxHelpers.combine_with_discount_combo_lines(
+            comboChoiceBaseLines,
+            this.company,
+            discountComboBaseLines
+        );
+        return comboItemBaseLines;
+    }
+
+    // -------------------------------------------------------------------------
+    // MISC
+    // -------------------------------------------------------------------------
 
     get user() {
         return this.models["res.users"].getFirst();
@@ -193,19 +296,7 @@ export class PosOrder extends Base {
     getTaxTotalsOfLines(lines) {
         const currency = this.currency;
         const company = this.company;
-
-        // If each line is negative, we assume it's a refund order.
-        // It's a normal order if it doesn't contain a line (useful for pos_settle_due).
-        // TODO: Properly differentiate refund orders from normal ones.
-        const documentSign = this.isRefund ? -1 : 1;
-        const baseLines = lines.map((line) =>
-            accountTaxHelpers.prepare_base_line_for_taxes_computation(
-                line,
-                line.prepareBaseLineForTaxesComputationExtraValues({
-                    quantity: documentSign * line.qty,
-                })
-            )
-        );
+        const baseLines = this.getBaseLines(lines);
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, company);
         accountTaxHelpers.round_base_lines_tax_details(baseLines, company);
 
@@ -219,7 +310,7 @@ export class PosOrder extends Base {
             cash_rounding: cashRounding,
         });
 
-        taxTotals.order_sign = documentSign;
+        taxTotals.order_sign = this.documentSign;
         taxTotals.order_total =
             taxTotals.total_amount_currency - (taxTotals.cash_rounding_base_amount_currency || 0.0);
 
@@ -230,7 +321,7 @@ export class PosOrder extends Base {
             p,
             i === validPayments.length - 1,
         ])) {
-            const paymentAmount = documentSign * payment.getAmount();
+            const paymentAmount = this.documentSign * payment.getAmount();
             if (isLast) {
                 if (this.config.cash_rounding) {
                     const roundedRemaining = this.getRoundedRemaining(
@@ -412,56 +503,68 @@ export class PosOrder extends Base {
     setPricelist(pricelist) {
         this.pricelist_id = pricelist ? pricelist : false;
 
-        const lines_to_recompute = this.getLinesToCompute();
+        const comboMapping = {};
+        for (const line of this.lines) {
+            if (line.combo_parent_id) {
+                // Combo child line.
+                if (!(line.combo_parent_id.id in comboMapping)) {
+                    comboMapping[line.combo_parent_id.id] = {
+                        parent: null,
+                        children: []
+                    };
+                }
 
-        for (const line of lines_to_recompute) {
-            const newPrice = line.product_id.getPrice(
-                pricelist,
-                line.getQuantity(),
-                line.getPriceExtra(),
-                false,
-                line.product_id
-            );
-            line.setUnitPrice(newPrice);
+                comboMapping[line.combo_parent_id.id].children.push(line);
+            } else if (line.combo_line_ids?.length) {
+                // Combo parent line.
+                if (!(line.id in comboMapping)) {
+                    comboMapping[line.id] = {
+                        parent: null,
+                        children: []
+                    };
+                }
+
+                comboMapping[line.id].parent = line;
+            } else if (line.price_type === "original") {
+                const newPrice = line.product_id.getPrice(
+                    pricelist,
+                    line.getQuantity(),
+                    line.getPriceExtra(),
+                    false,
+                    line.product_id
+                );
+                line.setUnitPrice(newPrice);
+            }
         }
 
-        const attributes_prices = {};
-        const combo_parent_lines = this.lines.filter(
-            (line) => line.price_type === "original" && line.combo_line_ids?.length
-        );
-        for (const pLine of combo_parent_lines) {
-            attributes_prices[pLine.id] = computeComboItems(
-                pLine.product_id,
-                pLine.combo_line_ids.map((cLine) => {
-                    if (cLine.attribute_value_ids) {
-                        return {
-                            combo_item_id: cLine.combo_item_id,
-                            configuration: {
-                                attribute_value_ids: cLine.attribute_value_ids,
-                            },
-                            qty: pLine.qty,
-                        };
-                    } else {
-                        return { combo_item_id: cLine.combo_item_id, qty: pLine.qty };
-                    }
-                }),
-                pricelist,
-                this.models["decimal.precision"].getAll(),
-                this.models["product.template.attribute.value"].getAllBy("id"),
-                [],
-                this.config_id.currency_id
-            );
+        // Manage combo products.
+        for (const comboProductData of Object.values(comboMapping)) {
+            const parentLine = comboProductData.parent;
+            const childrenLines = comboProductData.children;
+            const comboProduct = parentLine.product_id;
+
+            const comboChoices = childrenLines.map((line) => Object.assign({}, {
+                combo_item_id: line.combo_item_id,
+                qty: line.getQuantity(),
+                configuration: {
+                    attribute_value_ids: line.attribute_value_ids.map((attribute) => attribute.id),
+                    // TODO: check with POS team the comment below
+                    attributeCustomValues: {},
+                },
+            }));
+            const comboChoiceBaseLines = this.prepareComboChoiceBaseLines(comboChoices);
+            const comboItemBaseLines = this.prepareComboItemBaseLines(comboProduct, comboChoiceBaseLines);
+
+            // TODO: safer to use a mapping here? Is it possible the lines are reordered somehow?
+            // TODO: if mapping, how to compare attribute_value_ids / attributeCustomValues ?
+            let i = 0;
+            for (const comboItemBaseLine of comboItemBaseLines) {
+                const existingLine = childrenLines[i];
+                existingLine.setUnitPrice(comboItemBaseLine.price_unit);
+                existingLine.extra_tax_data = accountTaxHelpers.export_base_line_extra_tax_data(comboItemBaseLine);
+                i++;
+            }
         }
-        const combo_children_lines = this.lines.filter(
-            (line) => line.price_type === "automatic" && line.combo_parent_id
-        );
-        combo_children_lines.forEach((line) => {
-            line.setUnitPrice(
-                attributes_prices[line.combo_parent_id.id].find(
-                    (item) => item.combo_item_id.id === line.combo_item_id.id
-                ).price_unit
-            );
-        });
     }
 
     /**
@@ -887,7 +990,9 @@ export class PosOrder extends Base {
         }
 
         if (!this.config.use_presets || !this.preset_id?.pricelist_id) {
-            this.setPricelist(newPartnerPricelist);
+            if (this.pricelist_id !== newPartnerPricelist) {
+                this.setPricelist(newPartnerPricelist);
+            }
         }
     }
 

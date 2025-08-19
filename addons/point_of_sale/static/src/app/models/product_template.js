@@ -25,12 +25,12 @@ export class ProductTemplate extends Base {
     ) {
         const config = this.models["pos.config"].getFirst();
         const productTemplate = this instanceof ProductTemplate ? this : this.product_tmpl_id;
-        const basePrice = this?.lst_price || productTemplate.getPrice(pricelist, 1);
+        const basePrice = productTemplate.getPrice(pricelist, 1);
         const priceUnit = price || price === 0 ? price : basePrice;
         const currency = config.currency_id;
         const extraValues = { currency_id: currency };
 
-        let taxes = this.taxes_id;
+        let taxes = this.type === "combo" ? [] : this.taxes_id;
 
         // Fiscal position.
         if (fiscalPosition) {
@@ -65,6 +65,7 @@ export class ProductTemplate extends Base {
             return baseLine.tax_details.total_excluded_currency;
         }
     }
+
     getProductPriceInfo(product, company, pricelist = false, fiscalPosition = false) {
         if (!product) {
             product = this.product_variant_ids[0];

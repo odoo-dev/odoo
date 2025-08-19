@@ -1,6 +1,6 @@
 import { PosOrderline } from "@point_of_sale/app/models/pos_order_line";
 import { STORE_SYMBOL } from "@point_of_sale/app/models/related_models/utils";
-import { computeComboItems } from "@point_of_sale/app/models/utils/compute_combo_items";
+import { accountTaxHelpers } from "@account/helpers/account_tax";
 
 export function computeProductPrice(selfOrder, productTemplate, selectedAttributes, qty) {
     const lineValues = getOrderLineValues(selfOrder, productTemplate, qty, "", selectedAttributes);
@@ -118,8 +118,8 @@ export function getOrderLineValues(
     }
 
     if (Object.entries(comboValues).length > 0) {
-        const freeItems = [];
-        const extraItems = [];
+        const comboChoices = [];
+        const extraComboChoices = [];
         const order = values.order_id;
 
         // Group comboValues by combo_id
@@ -142,45 +142,42 @@ export function getOrderLineValues(
                 const extraQty = item.qty - freeQty;
 
                 if (freeQty > 0) {
-                    freeItems.push({ ...item, qty: freeQty });
+                    comboChoices.push({ ...item, qty: freeQty });
                     freeCount += freeQty;
                 }
 
                 if (extraQty > 0) {
-                    extraItems.push({ ...item, qty: extraQty });
+                    extraComboChoices.push({ ...item, qty: extraQty });
                 }
             }
         }
 
-        const comboPrices = computeComboItems(
-            product,
-            freeItems,
-            order.pricelist_id,
-            models["decimal.precision"].getAll(),
-            models["product.template.attribute.value"].getAllBy("id"),
-            extraItems,
-            selfOrder.currency
-        );
+        const comboChoiceBaseLines = order.prepareComboChoiceBaseLines(comboChoices);
+        const comboItemBaseLines = order.prepareComboItemBaseLines(product, comboChoiceBaseLines);
+        const extraComboChoiceBaseLines = order.prepareComboChoiceBaseLines(extraComboChoices);
 
         values.price_unit = 0;
         values.combo_id = product.combo_id;
-        values.combo_line_ids = comboPrices.map((comboItem) => [
+        values.combo_line_ids = [...comboItemBaseLines, ...extraComboChoiceBaseLines].map((baseLine) => [
             "create",
             {
-                product_id: comboItem.combo_item_id.product_id,
-                tax_ids: comboItem.combo_item_id.product_id.taxes_id
-                    ? [...comboItem.combo_item_id.product_id.taxes_id]
-                    : [],
-                combo_item_id: comboItem.combo_item_id,
-                price_unit: comboItem.price_unit,
+                product_id: baseLine.product_id,
+                tax_ids: baseLine.tax_ids.map((tax) => [
+                    "link",
+                    tax,
+                ]),
+                combo_item_id: baseLine._combo_item_id,
+                price_unit: baseLine.price_unit,
                 order_id: order,
-                qty: comboItem.qty * qty,
-                attribute_value_ids: comboItem.attribute_value_ids
-                    ? [...comboItem.attribute_value_ids]
-                    : [],
-                custom_attribute_value_ids: Object.entries(comboItem.attribute_custom_values).map(
+                qty: baseLine.quantity * qty,  // TODO: wtf is that multiplication?
+                attribute_value_ids: baseLine._attribute_value_ids.map((attributeId) => [
+                    "link",
+                    attributeId,
+                ]),
+                custom_attribute_value_ids: Object.entries(baseLine._attribute_custom_values).map(
                     ([id, cus]) => ["create", cus]
                 ),
+                extra_tax_data: accountTaxHelpers.export_base_line_extra_tax_data(baseLine),
             },
         ]);
     }
