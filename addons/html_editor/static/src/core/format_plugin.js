@@ -603,7 +603,7 @@ export class FormatPlugin extends Plugin {
 
     shouldBeMergedWithPreviousSibling(node) {
         const isMergeable = (node) =>
-            !this.getResource("unsplittable_node_predicates").some((predicate) => predicate(node));
+            node.tagName !== "A" && !this.getResource("unsplittable_node_predicates").some((predicate) => predicate(node));
         return (
             !isSelfClosingElement(node) &&
             areSimilarElements(node, node.previousSibling) &&
