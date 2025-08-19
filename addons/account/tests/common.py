@@ -1360,6 +1360,25 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         self._assert_sub_test_tax_totals_summary(results, expected_values)
 
     # -------------------------------------------------------------------------
+    # invoice tax_totals_summary
+    # -------------------------------------------------------------------------
+
+    def assert_invoice_totals(self, invoice, expected_values):
+        cash_rounding_base_amount_currency = invoice.tax_totals.get('cash_rounding_base_amount_currency', 0.0)
+        expected_amounts = {}
+        if 'base_amount_currency' in expected_values:
+            expected_amounts['amount_untaxed'] = expected_values['base_amount_currency'] + cash_rounding_base_amount_currency
+        if 'tax_amount_currency' in expected_values:
+            expected_amounts['amount_tax'] = expected_values['tax_amount_currency']
+        if 'total_amount_currency' in expected_values:
+            expected_amounts['amount_total'] = expected_values['total_amount_currency']
+        self.assertRecordValues(invoice, [expected_amounts])
+
+    def assert_invoice_tax_totals_summary(self, invoice, expected_values, soft_checking=False):
+        self._assert_tax_totals_summary(invoice.tax_totals, expected_values, soft_checking=soft_checking)
+        self.assert_invoice_totals(invoice, expected_values)
+
+    # -------------------------------------------------------------------------
     # global_discount
     # -------------------------------------------------------------------------
 
@@ -1465,23 +1484,68 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         )
 
     # -------------------------------------------------------------------------
-    # invoice tax_totals_summary
+    # combo_product
     # -------------------------------------------------------------------------
 
-    def assert_invoice_totals(self, invoice, expected_values):
-        cash_rounding_base_amount_currency = invoice.tax_totals.get('cash_rounding_base_amount_currency', 0.0)
-        expected_amounts = {}
-        if 'base_amount_currency' in expected_values:
-            expected_amounts['amount_untaxed'] = expected_values['base_amount_currency'] + cash_rounding_base_amount_currency
-        if 'tax_amount_currency' in expected_values:
-            expected_amounts['amount_tax'] = expected_values['tax_amount_currency']
-        if 'total_amount_currency' in expected_values:
-            expected_amounts['amount_total'] = expected_values['total_amount_currency']
-        self.assertRecordValues(invoice, [expected_amounts])
+    def _assert_sub_test_combo_product(self, results, expected_results):
+        self._assert_tax_totals_summary(
+            results['tax_totals'],
+            expected_results,
+            soft_checking=results['soft_checking'],
+        )
 
-    def assert_invoice_tax_totals_summary(self, invoice, expected_values, soft_checking=False):
-        self._assert_tax_totals_summary(invoice.tax_totals, expected_values, soft_checking=soft_checking)
-        self.assert_invoice_totals(invoice, expected_values)
+    def _create_py_sub_test_combo_product(self, document, line_indexes_combo_price, soft_checking):
+        AccountTax = self.env['account.tax']
+        new_base_lines_mapping = {}
+        new_document = copy.deepcopy(document)
+        new_document['lines'] = []
+        for line_indexes, combo_price in line_indexes_combo_price:
+            line_indexes = sorted(line_indexes)
+            base_lines = [base_line for index, base_line in enumerate(document['lines']) if index in line_indexes]
+            discount_combo_base_lines = AccountTax._prepare_discount_combo_lines(
+                base_lines=base_lines,
+                company=self.env.company,
+                combo_price=combo_price,
+            )
+            combo_base_lines = AccountTax._combine_with_discount_combo_lines(
+                base_lines=base_lines,
+                discount_combo_base_lines=discount_combo_base_lines,
+                company=self.env.company,
+            )
+            for index, combo_base_line in zip(line_indexes, combo_base_lines):
+                new_base_lines_mapping[index] = combo_base_line
+
+        for index, base_line in enumerate(document['lines']):
+            new_document['lines'].append(new_base_lines_mapping.get(index) or base_line)
+
+        AccountTax._add_tax_details_in_base_lines(new_document['lines'], self.env.company)
+        AccountTax._round_base_lines_tax_details(new_document['lines'], self.env.company)
+        tax_totals = AccountTax._get_tax_totals_summary(
+            base_lines=new_document['lines'],
+            currency=new_document['currency'],
+            company=self.env.company,
+            cash_rounding=new_document['cash_rounding'],
+        )
+        return {'tax_totals': tax_totals, 'soft_checking': soft_checking}
+
+    def _create_js_sub_test_combo_product(self, document, combo_price, soft_checking):
+        return {
+            'test': 'combo_product',
+            'document': self._jsonify_document(document),
+            'combo_price': combo_price,
+            'soft_checking': soft_checking,
+        }
+
+    def assert_combo_product(self, document, line_indexes_combo_price, expected_values, soft_checking=False):
+        self._create_assert_test(
+            expected_values,
+            self._create_py_sub_test_combo_product,
+            None,  #self._create_js_sub_test_combo_product,
+            self._assert_sub_test_combo_product,
+            document,
+            line_indexes_combo_price,
+            soft_checking,
+        )
 
 
 class TestAccountMergeCommon(AccountTestInvoicingCommon):

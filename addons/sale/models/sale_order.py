@@ -1530,7 +1530,7 @@ class SaleOrder(models.Model):
                         ._reverse_quantity_base_line_extra_tax_data(line.extra_tax_data)
 
                 invoice_line_vals.append(
-                    Command.create(line._prepare_invoice_line(**optional_values))
+                    Command.create(line._prepare_invoice_linez(**optional_values))
                 )
                 invoice_item_sequence += 1
 

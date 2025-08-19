@@ -213,7 +213,6 @@ class TestTaxesDispatchingBaseLines(TestTaxCommon):
 
         # Dispatch the global discount on the others base lines.
         self.assertEqual(len(base_lines), 3)
-        base_lines[-1]['special_type'] = 'global_discount'
         base_lines = AccountTax._dispatch_global_discount_lines(base_lines, self.env.company)
         AccountTax._squash_global_discount_lines(base_lines, self.env.company)
         self.assertEqual(len(base_lines), 2)

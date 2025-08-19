@@ -1573,6 +1573,12 @@ class AccountTax(models.Model):
         if 'price_unit' in extra_tax_data:
             base_line['price_unit'] = extra_tax_data['price_unit']
 
+        # Propagate custom values.
+        if record and isinstance(record, dict):
+            for k, v in record.items():
+                if k.startswith('_') and k not in base_line:
+                    base_line[k] = v
+
         return base_line
 
     @api.model
@@ -2972,7 +2978,7 @@ class AccountTax(models.Model):
         }
 
     # -------------------------------------------------------------------------
-    # GLOBAL DISCOUNT
+    # GLOBAL DISCOUNT/DOWN PAYMENT: HELPERS
     # -------------------------------------------------------------------------
 
     def _can_be_discounted(self):
@@ -2987,539 +2993,11 @@ class AccountTax(models.Model):
         return self.amount_type not in ('fixed', 'code')
 
     @api.model
-    def _compute_subset_base_lines_total(self, base_lines, company):
-        """ Compute the total of the lines passed as parameter.
-
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-
-        :param base_lines:  A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
-        :param company:     The company owning the base lines.
-        :return: The total.
-        """
-        base_amount_currency = 0.0
-        tax_amount_currency = 0.0
-        base_amount = 0.0
-        tax_amount = 0.0
-        tax_amounts_mapping = defaultdict(lambda: {
-            'tax_amount_currency': 0.0,
-            'tax_amount': 0.0,
-        })
-        raw_total_included_currency = 0.0
-        raw_total_included = 0.0
-        for base_line in base_lines:
-            tax_details = base_line['tax_details']
-            base_amount_currency += tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
-            base_amount += tax_details['total_excluded'] + tax_details['delta_total_excluded']
-            raw_total_included_currency += tax_details['raw_total_excluded_currency']
-            raw_total_included += tax_details['raw_total_excluded']
-            for tax_data in tax_details['taxes_data']:
-                tax = tax_data['tax']
-                if not tax._can_be_discounted():
-                    continue
-
-                tax_id_str = str(tax.id)
-                tax_amount_currency += tax_data['tax_amount_currency']
-                tax_amount += tax_data['tax_amount']
-                tax_amounts_mapping[tax_id_str]['tax_amount_currency'] += tax_data['tax_amount_currency']
-                tax_amounts_mapping[tax_id_str]['tax_amount'] += tax_data['tax_amount']
-                raw_total_included_currency += tax_data['raw_tax_amount_currency']
-                raw_total_included += tax_data['raw_tax_amount']
-        return {
-            'base_amount_currency': base_amount_currency,
-            'tax_amount_currency': tax_amount_currency,
-            'base_amount': base_amount,
-            'tax_amount': tax_amount,
-            'tax_amounts_mapping': tax_amounts_mapping,
-            'raw_total_included_currency': raw_total_included_currency,
-            'raw_total_included': raw_total_included,
-            'rate': raw_total_included_currency / raw_total_included if raw_total_included else 0.0,
-        }
-
-    @api.model
-    def _has_taxes_to_exclude(self, base_lines):
-        """ Detect if there is at least one tax that is not affected by the discount in the base lines passed
-        as parameter.
-
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-
-        :param base_lines:  A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
-        :return:            A boolean.
-        """
-        return any(
-            any(not tax_data['tax']._can_be_discounted() for tax_data in base_line['tax_details']['taxes_data'])
-            for base_line in base_lines
-        )
-
-    @api.model
-    def _reduce_base_lines_with_grouping_function(self, base_lines, grouping_function=None):
-        """ Create the new base lines that will get the discount.
-        Since they no longer contain fixed taxes, we can remove the quantity and aggregate them depending on
-        the grouping_function passed as parameter.
-
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-
-        :param base_lines:          The base lines to be aggregated.
-        :param grouping_function:   An optional function taking a base line as parameter and returning a grouping key
-                                    being the way the base lines will be aggregated all together.
-                                    By default, the base lines will be aggregated by taxes.
-        :return:                    The base lines aggregated.
-        """
-        aggregated_base_lines = {}
-        base_line_map = {}
-        for base_line in base_lines:
-            price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
-            new_base_line = self._prepare_base_line_for_taxes_computation(
-                base_line,
-                price_unit=base_line['quantity'] * price_unit_after_discount,
-                quantity=1.0,
-                discount=0.0,
-            )
-            grouping_key = {
-                'tax_ids': new_base_line['tax_ids'],
-                'computation_key': base_line['computation_key'],
-            }
-            if grouping_function:
-                grouping_key.update(grouping_function(new_base_line))
-            grouping_key = frozendict(grouping_key)
-
-            if base_line['analytic_distribution']:
-                for account_id, distribution in base_line['analytic_distribution'].items():
-                    aggregated_base_lines.setdefault(account_id, []).append(distribution)
-
-            target_base_line = base_line_map.get(grouping_key)
-            if target_base_line:
-                target_base_line['price_unit'] += new_base_line['price_unit']
-            else:
-                target_base_line = base_line_map[grouping_key] = self._prepare_base_line_for_taxes_computation(
-                    new_base_line,
-                    **grouping_key,
-                )
-            aggregated_base_lines.setdefault(grouping_key, []).append(base_line)
-
-        # Remove zero lines.
-        base_line_map = {
-            grouping_key: base_line
-            for grouping_key, base_line in base_line_map.items()
-            if not base_line['currency_id'].is_zero(base_line['price_unit'])
-        }
-
-        # Compute the analytic distribution for the new base line.
-        # To do so, we have to aggregate the analytic distribution of each line that has been aggregated.
-        # We need to take care about the negative lines but also of the negative distribution.
-        # Suppose:
-        # - line1 of 1000 having an analytic distribution of 100%
-        # - line2 of -100 having an analytic distribution of 50%
-        # After the aggregation, the result will be an analytic distribution of
-        # ((1000 * 1) + (-100 * 0.5)) / (1000 - 100) = 1.055555556
-        for grouping_key, base_line in base_line_map.items():
-            total_factor = 0.0
-            analytic_distribution_to_aggregate = defaultdict(float)
-            for aggregated_base_line in aggregated_base_lines[grouping_key]:
-                amount = aggregated_base_line['tax_details']['raw_total_excluded_currency']
-                total_factor += amount
-                for account_id, distribution in (aggregated_base_line['analytic_distribution'] or {}).items():
-                    analytic_distribution_to_aggregate[account_id] += distribution * amount / 100.0
-            analytic_distribution = {}
-            for account_id, amount in analytic_distribution_to_aggregate.items():
-                analytic_distribution[account_id] = amount * 100 / total_factor
-            base_line['analytic_distribution'] = analytic_distribution
-
-        return list(base_line_map.values())
-
-    @api.model
-    def _apply_base_lines_manual_amounts_to_reach(
-        self,
-        base_lines,
-        company,
-        target_base_amount_currency,
-        target_base_amount,
-        target_tax_amounts_mapping,
-    ):
-        """ Fix the tax amounts of the base lines passed as parameter by storing them in 'manual_tax_amounts' and make some
-        adjustement to ensure the total of those lines will be exactly 'target_amount_currency'/'target_amount'.
-
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-
-        :param base_lines:                  A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
-        :param company:                     The company owning the base lines.
-        :param target_base_amount_currency: The expected base amount for the base lines expressed in foreign currency.
-        :param target_base_amount:          The expected base amount for the base lines expressed in company currency.
-        :param target_tax_amounts_mapping:   A mapping tax_id => dictionary containing:
-            * tax_amount_currency:              The expected tax amount for the base lines expressed in foreign currency.
-            * tax_amount:                       The expected tax amount for the base lines expressed in company currency.
-        """
-        currency = base_lines[0]['currency_id']
-        for base_line in base_lines:
-            taxes_data = base_line['tax_details']['taxes_data']
-            if not taxes_data:
-                continue
-            first_batch = taxes_data[0]['batch']
-            base_line['manual_tax_amounts'] = {}
-            for tax_data in taxes_data:
-                tax = tax_data['tax']
-                tax_amounts = {
-                    'tax_amount_currency': tax_data['tax_amount_currency'],
-                    'tax_amount': tax_data['tax_amount'],
-                }
-                if tax in first_batch:
-                    tax_amounts['base_amount_currency'] = tax_data['base_amount_currency']
-                    tax_amounts['base_amount'] = tax_data['base_amount']
-                base_line['manual_tax_amounts'][str(tax.id)] = tax_amounts
-
-        # Smooth distribution of the delta base amount accross the base line, starting at the biggest one.
-        sorted_base_lines = sorted(
-            [
-                base_line
-                for base_line in base_lines
-            ],
-            key=lambda base_line: (bool(base_line['special_type']), -base_line['tax_details']['total_excluded_currency'])
-        )
-        base_lines_totals = self._compute_subset_base_lines_total(base_lines, company)
-        for delta_suffix, delta_target_base_amount, delta_currency in (
-            ('_currency', target_base_amount_currency, currency),
-            ('', target_base_amount, company.currency_id),
-        ):
-            target_factors = [
-                {
-                    'factor': abs(
-                        (base_line['tax_details']['total_excluded_currency'] + base_line['tax_details']['delta_total_excluded_currency'])
-                        / base_lines_totals['base_amount_currency']
-                    ),
-                    'base_line': base_line,
-                }
-                for base_line in sorted_base_lines
-            ]
-            amounts_to_distribute = self._distribute_delta_amount_smoothly(
-                precision_digits=delta_currency.decimal_places,
-                delta_amount=delta_target_base_amount - base_lines_totals[f'base_amount{delta_suffix}'],
-                target_factors=target_factors,
-            )
-            for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
-                base_line = target_factor['base_line']
-                tax_details = base_line['tax_details']
-                taxes_data = tax_details['taxes_data']
-                if delta_currency == currency:
-                    base_line['price_unit'] += amount_to_distribute / abs(base_line['quantity'] or 1.0)
-                if not taxes_data:
-                    continue
-
-                first_batch = taxes_data[0]['batch']
-                for tax_data in taxes_data:
-                    tax = tax_data['tax']
-                    if tax in first_batch:
-                        base_line['manual_tax_amounts'][str(tax.id)][f'base_amount{delta_suffix}'] += amount_to_distribute
-                    else:
-                        break
-
-        for tax_id_str, tax_amounts in target_tax_amounts_mapping.items():
-            for delta_suffix, delta_target_tax_amount, delta_currency in (
-                ('_currency', tax_amounts['tax_amount_currency'], currency),
-                ('', tax_amounts['tax_amount'], company.currency_id),
-            ):
-                current_tax_amounts = base_lines_totals['tax_amounts_mapping'][tax_id_str]
-                if not current_tax_amounts['tax_amount_currency']:
-                    continue
-
-                target_factors = [
-                    {
-                        'factor': abs(tax_data['tax_amount_currency'] / current_tax_amounts['tax_amount_currency']),
-                        'base_line': base_line,
-                        'tax_data': tax_data,
-                    }
-                    for base_line in sorted_base_lines
-                    for tax_data in base_line['tax_details']['taxes_data']
-                    if str(tax_data['tax'].id) == tax_id_str
-                ]
-                amounts_to_distribute = self._distribute_delta_amount_smoothly(
-                    precision_digits=delta_currency.decimal_places,
-                    delta_amount=delta_target_tax_amount - current_tax_amounts[f'tax_amount{delta_suffix}'],
-                    target_factors=target_factors,
-                )
-                for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
-                    base_line = target_factor['base_line']
-                    base_line['manual_tax_amounts'][tax_id_str][f'tax_amount{delta_suffix}'] += amount_to_distribute
-
-    @api.model
-    def _prepare_global_discount_lines(
-        self,
-        base_lines,
-        company,
-        amount_type,
-        amount,
-        computation_key='global_discount',
-        grouping_function=None,
-    ):
-        """ Prepare negative lines to be added representing a global discount.
-
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-
-        :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
-        :param company:             The company of the base lines.
-        :param amount_type:         'fixed' or 'percent' indicating the type of the discount.
-        :param amount:              The amount to be discounted in case of 'fixed' amount_type. Otherwise, a percentage [0-100].
-        :param computation_key:     The key that will be used to split the base lines to round the tax amounts.
-        :param grouping_function:   An optional function taking a base line as parameter and returning a grouping key
-                                    being the way the base lines will be aggregated all together.
-                                    By default, the base lines will be aggregated by taxes.
-        :return:                    The negative base lines representing the global discount.
-        """
-        if not base_lines:
-            return []
-
-        currency = base_lines[0]['currency_id']
-
-        # Exclude non-discountable taxes.
-        discountable_base_lines = base_lines
-        if self._has_taxes_to_exclude(base_lines):
-            discountable_base_lines = []
-            for base_line in base_lines:
-                tax_details = base_line['tax_details']
-                taxes_data = tax_details['taxes_data']
-                taxes = base_line['tax_ids'].filtered(lambda tax: tax._can_be_discounted())
-
-                if any(
-                    tax_data['tax'] not in taxes
-                    and tax_data['tax'].price_include
-                    and tax_data['tax'].include_base_amount
-                    for tax_data in taxes_data
-                ):
-                    # When the removed tax affect the base of the others, we had to remove the tax amount applied
-                    # on those taxes too.
-                    discountable_base_line = self._prepare_base_line_for_taxes_computation(
-                        base_line,
-                        price_unit=tax_details['raw_total_excluded_currency'],
-                        quantity=1.0,
-                        discount=0.0,
-                        tax_ids=taxes,
-                        special_mode='total_excluded',
-                    )
-                    self._add_tax_details_in_base_line(discountable_base_line, company)
-                    taxes_data_for_price_unit = discountable_base_line['tax_details']['taxes_data']
-                else:
-                    taxes_data_for_price_unit = taxes_data
-
-                discountable_base_lines.append(self._prepare_base_line_for_taxes_computation(
-                    base_line,
-                    price_unit=tax_details['raw_total_excluded_currency'] + sum(
-                        tax_data['raw_tax_amount_currency']
-                        for tax_data in taxes_data_for_price_unit
-                        if tax_data['tax'].price_include and tax_data['tax'] in taxes
-                    ),
-                    quantity=1.0,
-                    discount=0.0,
-                    tax_ids=taxes,
-                ))
-            self._add_tax_details_in_base_lines(discountable_base_lines, company)
-            self._round_base_lines_tax_details(discountable_base_lines, company)
-
-        # Compute the total discount amount to reach.
-        base_lines_totals = self._compute_subset_base_lines_total(discountable_base_lines, company)
-        total_included_currency = base_lines_totals['base_amount_currency'] + base_lines_totals['tax_amount_currency']
-        total_included = base_lines_totals['base_amount'] + base_lines_totals['tax_amount']
-        rate = base_lines_totals['rate']
-        if amount_type == 'fixed':
-            percentage = (amount / total_included_currency) if total_included_currency else 0.0
-            target_amount_currency = currency.round(-amount)
-            target_amount = company.currency_id.round(target_amount_currency / rate) if rate else 0.0
-        else:  # if amount_type == 'percent':
-            percentage = amount / 100.0
-            target_amount_currency = currency.round(total_included_currency * -percentage)
-            target_amount = company.currency_id.round(total_included * -percentage)
-        target_base_amount_currency = target_amount_currency
-        target_base_amount = target_amount
-        target_tax_amounts_mapping = {}
-        for tax_id_str, tax_amounts in base_lines_totals['tax_amounts_mapping'].items():
-            target_tax_amounts = {
-                'tax_amount_currency': currency.round(tax_amounts['tax_amount_currency'] * -percentage),
-                'tax_amount': company.currency_id.round(tax_amounts['tax_amount'] * -percentage),
-            }
-            target_base_amount_currency -= target_tax_amounts['tax_amount_currency']
-            target_base_amount -= target_tax_amounts['tax_amount']
-            target_tax_amounts_mapping[tax_id_str] = target_tax_amounts
-
-        # Apply the percentage to each line.
-        new_base_lines = []
-        for base_line in discountable_base_lines:
-            new_base_line = self._prepare_base_line_for_taxes_computation(
-                base_line,
-                computation_key=computation_key,
-                price_unit=base_line['price_unit'] * -percentage,
-            )
-
-            # Propagate custom values.
-            for k, v in base_line.items():
-                if k not in new_base_line:
-                    new_base_line[k] = v
-
-            new_base_lines.append(new_base_line)
-
-        reduced_base_lines = self._reduce_base_lines_with_grouping_function(new_base_lines, grouping_function=grouping_function)
-        if not reduced_base_lines:
-            return []
-
-        self._add_tax_details_in_base_lines(reduced_base_lines, company)
-        self._round_base_lines_tax_details(reduced_base_lines, company)
-        self._apply_base_lines_manual_amounts_to_reach(
-            base_lines=reduced_base_lines,
-            company=company,
-            target_base_amount_currency=target_base_amount_currency,
-            target_base_amount=target_base_amount,
-            target_tax_amounts_mapping=target_tax_amounts_mapping,
-        )
-        return reduced_base_lines
-
-    @api.model
-    def _prepare_down_payment_lines(
-        self,
-        base_lines,
-        company,
-        amount_type,
-        amount,
-        computation_key='down_payment',
-        grouping_function=None,
-    ):
-        """ Prepare the base lines to be added representing a down payment.
-
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-
-        :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
-        :param company:             The company of the base lines.
-        :param amount_type:         'fixed' or 'percent' indicating the type of the down payment.
-        :param amount:              The amount of the down payment in case of 'fixed' amount_type. Otherwise, a percentage [0-100].
-        :param computation_key:     The key that will be used to split the base lines to round the tax amounts.
-        :param grouping_function:   An optional function taking a base line as parameter and returning a grouping key
-                                    being the way the base lines will be aggregated all together.
-                                    By default, the base lines will be aggregated by taxes.
-        :return:                    The negative base lines representing the global discount.
-        """
-        if not base_lines:
-            return []
-
-        currency = base_lines[0]['currency_id']
-
-        # Exclude non-discountable taxes.
-        discountable_base_lines = base_lines
-        if self._has_taxes_to_exclude(base_lines):
-            discountable_base_lines = []
-            for base_line in base_lines:
-                taxes = base_line['tax_ids']
-                tax_details = base_line['tax_details']
-                taxes_data = tax_details['taxes_data']
-
-                # Split the taxes in multiple batch of taxes, one per sub base line.
-                new_taxes = self.env['account.tax']
-                new_discountable_base_lines = []
-                for i, tax_data in enumerate(taxes_data):
-                    tax = tax_data['tax']
-                    if tax._can_be_discounted():
-                        new_taxes += tax
-                    elif not tax.price_include:
-                        # The tax is standalone and can just be extracted as a fixed amount.
-                        new_discountable_base_lines.append(self._prepare_base_line_for_taxes_computation(
-                            base_line,
-                            price_unit=tax_data['tax_amount_currency'],
-                            quantity=1.0,
-                            discount=0.0,
-                            tax_ids=tax_data['taxes'].filtered(lambda tax: tax._can_be_discounted()),
-                        ))
-                    else:
-                        continue
-
-                if new_discountable_base_lines:
-                    if new_taxes:
-                        price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
-                        new_discountable_base_lines.append(self._prepare_base_line_for_taxes_computation(
-                            base_line,
-                            price_unit=base_line['quantity'] * price_unit_after_discount,
-                            quantity=1.0,
-                            discount=0.0,
-                            tax_ids=new_taxes,
-                        ))
-                else:
-                    # The base line can be used as raw since it doesn't contain taxes to be excluded.
-                    price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
-                    new_discountable_base_lines.append(self._prepare_base_line_for_taxes_computation(
-                        base_line,
-                        price_unit=base_line['quantity'] * price_unit_after_discount,
-                        quantity=1.0,
-                        discount=0.0,
-                        tax_ids=new_taxes,
-                    ))
-                discountable_base_lines += new_discountable_base_lines
-            self._add_tax_details_in_base_lines(discountable_base_lines, company)
-            self._round_base_lines_tax_details(discountable_base_lines, company)
-
-        # Compute the total discount amount to reach.
-        base_lines_totals = self._compute_subset_base_lines_total(discountable_base_lines, company)
-        total_included_currency = base_lines_totals['base_amount_currency'] + base_lines_totals['tax_amount_currency']
-        total_included = base_lines_totals['base_amount'] + base_lines_totals['tax_amount']
-        rate = base_lines_totals['rate']
-        if amount_type == 'fixed':
-            percentage = (amount / total_included_currency) if total_included_currency else 0.0
-            target_amount_currency = currency.round(amount)
-            target_amount = company.currency_id.round(target_amount_currency / rate) if rate else 0.0
-        else:  # if amount_type == 'percent':
-            percentage = amount / 100.0
-            target_amount_currency = currency.round(total_included_currency * percentage)
-            target_amount = company.currency_id.round(total_included * percentage)
-        target_base_amount_currency = target_amount_currency
-        target_base_amount = target_amount
-        target_tax_amounts_mapping = {}
-        for tax_id_str, tax_amounts in base_lines_totals['tax_amounts_mapping'].items():
-            target_tax_amounts = {
-                'tax_amount_currency': currency.round(tax_amounts['tax_amount_currency'] * percentage),
-                'tax_amount': company.currency_id.round(tax_amounts['tax_amount'] * percentage),
-            }
-            target_base_amount_currency -= target_tax_amounts['tax_amount_currency']
-            target_base_amount -= target_tax_amounts['tax_amount']
-            target_tax_amounts_mapping[tax_id_str] = target_tax_amounts
-
-        # Apply the percentage to each line.
-        new_base_lines = []
-        for base_line in discountable_base_lines:
-            new_base_line = self._prepare_base_line_for_taxes_computation(
-                base_line,
-                computation_key=computation_key,
-                price_unit=base_line['price_unit'] * percentage,
-            )
-
-            # Propagate custom values.
-            for k, v in base_line.items():
-                if k not in new_base_line:
-                    new_base_line[k] = v
-
-            new_base_lines.append(new_base_line)
-
-        reduced_base_lines = self._reduce_base_lines_with_grouping_function(new_base_lines, grouping_function=grouping_function)
-        if not reduced_base_lines:
-            return []
-
-        self._add_tax_details_in_base_lines(reduced_base_lines, company)
-        self._round_base_lines_tax_details(reduced_base_lines, company)
-        self._apply_base_lines_manual_amounts_to_reach(
-            base_lines=reduced_base_lines,
-            company=company,
-            target_base_amount_currency=target_base_amount_currency,
-            target_base_amount=target_base_amount,
-            target_tax_amounts_mapping=target_tax_amounts_mapping,
-        )
-        return reduced_base_lines
-
-    # -------------------------------------------------------------------------
-    # DISPATCHING OF LINES
-    # -------------------------------------------------------------------------
-
-    @api.model
     def _merge_tax_details(self, tax_details_1, tax_details_2):
         """ Helper merging 2 tax details together coming from base lines.
 
-        [!] Only added python-side.
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
 
         :param tax_details_1: First tax details.
         :param tax_details_2: Second tax details.
@@ -3569,11 +3047,40 @@ class AccountTax(models.Model):
         return results
 
     @api.model
+    def _fix_base_lines_tax_details_on_manual_tax_amounts(self, base_lines, company, filter_function=None):
+        """ Store the tax details into manual_tax_amounts to fix the results.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_lines:      A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
+        :param company:         The company owning the base lines.
+        :param filter_function: An optional function taking <base_line, tax_data> as parameter and telling which tax will be considered.
+        """
+        for base_line in base_lines:
+            taxes_data = base_line['tax_details']['taxes_data']
+            if not taxes_data:
+                continue
+
+            base_line['manual_tax_amounts'] = {}
+            for tax_data in taxes_data:
+                if filter_function and not filter_function(base_line, tax_data):
+                    continue
+                tax = tax_data['tax']
+                base_line['manual_tax_amounts'][str(tax.id)] = {
+                    'tax_amount_currency': tax_data['tax_amount_currency'],
+                    'tax_amount': tax_data['tax_amount'],
+                    'base_amount_currency': tax_data['base_amount_currency'],
+                    'base_amount': tax_data['base_amount'],
+                }
+
+    @api.model
     def _split_base_line(self, base_line, company, target_factors, populate_function=None):
         """ Split a base lines into multiple ones. When computing taxes, the results should be
         exactly the same with a single base_line or after the split.
 
-        [!] Only added python-side.
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
 
         :param base_line:           A base line.
         :param company:             The company owning the base line.
@@ -3682,7 +3189,6 @@ class AccountTax(models.Model):
                 'extra_tax_data': None,
                 'price_unit': (
                     sub_tax_details['raw_total_excluded_currency']
-                    + sub_tax_details['delta_total_excluded_currency']
                     + sum(
                         sub_tax_data['raw_tax_amount_currency']
                         for sub_tax_data in sub_tax_details['taxes_data']
@@ -3706,6 +3212,795 @@ class AccountTax(models.Model):
             new_base_line = self._prepare_base_line_for_taxes_computation(base_line, **kwargs)
             new_base_lines.append(new_base_line)
         return new_base_lines
+
+    @api.model
+    def _reduce_base_lines_to_target_amount(
+        self,
+        base_lines,
+        company,
+        amount_type,
+        amount,
+        computation_key=None,
+        grouping_function=None,
+    ):
+        currency = base_lines[0]['currency_id']
+        rate = base_lines[0]['rate']
+
+        # Compute the current total amount of the base lines.
+        def grouping_function_total(base_line, tax_data):
+            return True
+
+        base_lines_aggregated_values = self._aggregate_base_lines_tax_details(base_lines, grouping_function_total)
+        values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        total_amount_currency = sum(
+            values['base_amount_currency'] + values['tax_amount_currency']
+            for _grouping_key, values in values_per_grouping_key.items()
+        )
+        total_amount = sum(
+            values['base_amount'] + values['tax_amount']
+            for _grouping_key, values in values_per_grouping_key.items()
+        )
+
+        # Compute the current total tax amount per tax.
+        def grouping_function_tax(base_line, tax_data):
+            return str(tax_data['tax'].id) if tax_data else None
+
+        base_lines_aggregated_values = self._aggregate_base_lines_tax_details(base_lines, grouping_function_tax)
+        values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        tax_amounts_per_tax = {
+            grouping_key: {
+                'tax_amount_currency': values['tax_amount_currency'],
+                'tax_amount': values['tax_amount'],
+            }
+            for grouping_key, values in values_per_grouping_key.items()
+            if grouping_key
+        }
+
+        # Turn the 'amount_type' / 'amount' into a percentage and the total amounts to be reached
+        # from the base lines.
+        sign = -1 if amount < 0.0 else 1
+        signed_amount = sign * amount
+        if amount_type == 'fixed':
+            percentage = (signed_amount / total_amount_currency) if total_amount_currency else 0.0
+            expected_total_amount_currency = currency.round(amount)
+            expected_total_amount = company.currency_id.round(expected_total_amount_currency / rate) if rate else 0.0
+        else:  # if amount_type == 'percent':
+            percentage = signed_amount / 100.0
+            expected_total_amount_currency = currency.round(total_amount_currency * sign * percentage)
+            expected_total_amount = company.currency_id.round(total_amount * sign * percentage)
+
+        # Compute the expected amounts.
+        expected_tax_amounts = {
+            grouping_key: {
+                'tax_amount_currency': currency.round(values['tax_amount_currency'] * sign * percentage),
+                'tax_amount': company.currency_id.round(values['tax_amount'] * sign * percentage),
+            }
+            for grouping_key, values in tax_amounts_per_tax.items()
+        }
+        expected_base_amount_currency = expected_total_amount_currency - sum(
+            values['tax_amount_currency']
+            for values in expected_tax_amounts.values()
+        )
+        expected_base_amount = expected_total_amount - sum(
+            values['tax_amount']
+            for values in expected_tax_amounts.values()
+        )
+
+        # Reduce the base lines to minimize the number of lines.
+        reduced_base_lines = self._reduce_base_lines_with_grouping_function(
+            base_lines=base_lines,
+            company=company,
+            grouping_function=grouping_function,
+        )
+
+        # Reduce the unit price to approach the target amount.
+        new_base_lines = []
+        for base_line in reduced_base_lines:
+            new_base_line = self._prepare_base_line_for_taxes_computation(
+                base_line,
+                price_unit=base_line['price_unit'] * sign * percentage,
+                manual_tax_amounts=None,
+                computation_key=computation_key,
+            )
+            new_base_lines.append(new_base_line)
+
+        self._add_tax_details_in_base_lines(new_base_lines, company)
+        self._round_base_lines_tax_details(new_base_lines, company)
+
+        # Smooth distribution of the delta tax/base amounts.
+        sorted_base_lines = sorted(
+            [
+                base_line
+                for base_line in new_base_lines
+            ],
+            key=lambda base_line: (bool(base_line['special_type']), -base_line['tax_details']['total_excluded_currency'])
+        )
+        base_lines_aggregated_values = self._aggregate_base_lines_tax_details(new_base_lines, grouping_function_tax)
+        values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        current_tax_amounts_per_tax = {
+            grouping_key: {
+                'tax_amount_currency': values['tax_amount_currency'],
+                'tax_amount': values['tax_amount'],
+            }
+            for grouping_key, values in values_per_grouping_key.items()
+            if grouping_key
+        }
+        for tax_id_str, tax_amounts in current_tax_amounts_per_tax.items():
+            tax_amount_currency = tax_amounts['tax_amount_currency']
+            if not tax_amount_currency:
+                continue
+
+            for delta_suffix, delta_tax_amount, delta_currency in (
+                ('_currency', expected_tax_amounts[tax_id_str]['tax_amount_currency'] - tax_amounts['tax_amount_currency'], currency),
+                ('', expected_tax_amounts[tax_id_str]['tax_amount'] - tax_amounts['tax_amount'], company.currency_id),
+            ):
+                current_tax_amount = tax_amounts[f'tax_amount{delta_suffix}']
+                target_factors = [
+                    {
+                        'factor': abs(tax_data['tax_amount_currency'] / tax_amount_currency),
+                        'base_line': base_line,
+                        'tax_data': tax_data,
+                    }
+                    for base_line in sorted_base_lines
+                    for tax_data in base_line['tax_details']['taxes_data']
+                    if str(tax_data['tax'].id) == tax_id_str
+                ]
+                amounts_to_distribute = self._distribute_delta_amount_smoothly(
+                    precision_digits=delta_currency.decimal_places,
+                    delta_amount=delta_tax_amount,
+                    target_factors=target_factors,
+                )
+                for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
+                    tax_data = target_factor['tax_data']
+                    tax_data[f'tax_amount{delta_suffix}'] += amount_to_distribute
+
+        base_lines_aggregated_values = self._aggregate_base_lines_tax_details(new_base_lines, grouping_function_total)
+        values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        current_total_amount_currency = sum(
+            values['base_amount_currency'] + values['tax_amount_currency']
+            for _grouping_key, values in values_per_grouping_key.items()
+        )
+        current_total_amount = sum(
+            values['base_amount'] + values['tax_amount']
+            for _grouping_key, values in values_per_grouping_key.items()
+        )
+        current_base_amount_currency = sum(
+            values['base_amount_currency']
+            for _grouping_key, values in values_per_grouping_key.items()
+        )
+        current_base_amount = sum(
+            values['base_amount']
+            for _grouping_key, values in values_per_grouping_key.items()
+        )
+        for delta_suffix, delta_base_amount, delta_currency in (
+            ('_currency', expected_base_amount_currency - current_base_amount_currency, currency),
+            ('', expected_base_amount - current_base_amount, company.currency_id),
+        ):
+            target_factors = [
+                {
+                    'factor': abs(
+                        (base_line['tax_details']['total_excluded_currency'] + base_line['tax_details']['delta_total_excluded_currency'])
+                        / current_base_amount_currency
+                    ),
+                    'base_line': base_line,
+                }
+                for base_line in sorted_base_lines
+            ]
+            amounts_to_distribute = self._distribute_delta_amount_smoothly(
+                precision_digits=delta_currency.decimal_places,
+                delta_amount=delta_base_amount,
+                target_factors=target_factors,
+            )
+            for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
+                base_line = target_factor['base_line']
+                tax_details = base_line['tax_details']
+                taxes_data = tax_details['taxes_data']
+                if delta_suffix == '_currency':
+                    base_line['price_unit'] += amount_to_distribute
+                if not taxes_data:
+                    continue
+
+                first_batch = taxes_data[0]['batch']
+                for tax_data in taxes_data:
+                    tax = tax_data['tax']
+                    if tax in first_batch:
+                        tax_data[f'base_amount{delta_suffix}'] += amount_to_distribute
+                    else:
+                        break
+
+        return new_base_lines
+
+    @api.model
+    def _reduce_base_lines_with_grouping_function(self, base_lines, company, grouping_function=None):
+        """ Create the new base lines that will get the discount.
+        Since they no longer contain fixed taxes, we can remove the quantity and aggregate them depending on
+        the grouping_function passed as parameter.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_lines:          The base lines to be aggregated.
+        :param company:             The company of the base lines.
+        :param grouping_function:   An optional function taking a base line as parameter and returning a grouping key
+                                    being the way the base lines will be aggregated all together.
+                                    By default, the base lines will be aggregated by taxes.
+        :return:                    The base lines aggregated.
+        """
+        aggregated_base_lines = {}
+        base_line_map = {}
+        for base_line in base_lines:
+            price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
+            new_base_line = self._prepare_base_line_for_taxes_computation(
+                base_line,
+                price_unit=base_line['quantity'] * price_unit_after_discount,
+                quantity=1.0,
+                discount=0.0,
+                manual_tax_amounts=None,
+                computation_key=None,
+            )
+            grouping_key = {
+                'tax_ids': new_base_line['tax_ids'],
+                'computation_key': base_line['computation_key'],
+            }
+            if grouping_function:
+                grouping_key.update(grouping_function(new_base_line))
+            grouping_key = frozendict(grouping_key)
+
+            if base_line['analytic_distribution']:
+                for account_id, distribution in base_line['analytic_distribution'].items():
+                    aggregated_base_lines.setdefault(account_id, []).append(distribution)
+
+            target_base_line = base_line_map.get(grouping_key)
+            if target_base_line:
+                target_base_line['price_unit'] += new_base_line['price_unit']
+                target_base_line['tax_details'] = self._merge_tax_details(
+                    tax_details_1=target_base_line['tax_details'],
+                    tax_details_2=base_line['tax_details'],
+                )
+            else:
+                target_base_line = base_line_map[grouping_key] = self._prepare_base_line_for_taxes_computation(
+                    new_base_line,
+                    **grouping_key,
+                    tax_details=base_line['tax_details'],
+                )
+            aggregated_base_lines.setdefault(grouping_key, []).append(base_line)
+
+        # Remove zero lines.
+        base_line_map = {
+            grouping_key: base_line
+            for grouping_key, base_line in base_line_map.items()
+            if not base_line['currency_id'].is_zero(base_line['price_unit'])
+        }
+
+        # Compute the analytic distribution for the new base line.
+        # To do so, we have to aggregate the analytic distribution of each line that has been aggregated.
+        # We need to take care about the negative lines but also of the negative distribution.
+        # Suppose:
+        # - line1 of 1000 having an analytic distribution of 100%
+        # - line2 of -100 having an analytic distribution of 50%
+        # After the aggregation, the result will be an analytic distribution of
+        # ((1000 * 1) + (-100 * 0.5)) / (1000 - 100) = 1.055555556
+        for grouping_key, base_line in base_line_map.items():
+            total_factor = 0.0
+            analytic_distribution_to_aggregate = defaultdict(float)
+            for aggregated_base_line in aggregated_base_lines[grouping_key]:
+                amount = aggregated_base_line['tax_details']['raw_total_excluded_currency']
+                total_factor += amount
+                for account_id, distribution in (aggregated_base_line['analytic_distribution'] or {}).items():
+                    analytic_distribution_to_aggregate[account_id] += distribution * amount / 100.0
+            analytic_distribution = {}
+            for account_id, amount in analytic_distribution_to_aggregate.items():
+                analytic_distribution[account_id] = amount * 100 / total_factor
+            base_line['analytic_distribution'] = analytic_distribution
+
+        return list(base_line_map.values())
+
+    @api.model
+    def _partition_base_lines_taxes(self, base_lines, partition_function):
+        """ Partition the taxes of base lines passed as parameter.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_lines:              The base lines.
+        :param partition_function:      A function taking <base_line, tax_data> as parameter and returning
+                                        True if the tax has to be kept or not.
+        :return:                        A tuple <base_lines_partition_taxes, has_taxes_to_exclude> where
+            * base_lines_partition_taxes:   A list of tuple <base_line, taxes_to_keep, taxes_to_exclude>
+            * has_taxes_to_exclude:         A boolean indicating if at least one tax to exclude has been found.
+        """
+        has_taxes_to_exclude = False
+        base_lines_partition_taxes = []
+        for base_line in base_lines:
+            tax_details = base_line['tax_details']
+            taxes_data = tax_details['taxes_data']
+            taxes_to_keep = self.env['account.tax']
+            taxes_to_exclude = self.env['account.tax']
+            for tax_data in taxes_data:
+                tax = tax_data['tax']
+                if partition_function(base_line, tax_data):
+                    taxes_to_keep += tax_data['tax']
+                else:
+                    taxes_to_exclude += tax_data['tax']
+            if taxes_to_exclude:
+                has_taxes_to_exclude = True
+            base_lines_partition_taxes.append((base_line, taxes_to_keep, taxes_to_exclude))
+        return base_lines_partition_taxes, has_taxes_to_exclude
+
+    @api.model
+    def _prepare_discountable_base_lines(self, base_lines, company, exclude_function=None):
+        """ Prepare base lines on which we can compute all kind of discount.
+        This method remove all part of base lines / taxes that are not eligible for a discount.
+        Those taxes are given by the '_can_be_discounted' method giving False if not discountable.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
+        :param company:             The company of the base lines.
+        :param exclude_function:    An optional function taking a base line and a tax_data as parameter and returning
+                                    a boolean indicating if the tax_data has to be exclude from the computation.
+        :return:                    The base lines that are discountable.
+        """
+        def partition_function(base_line, tax_data):
+            tax = tax_data['tax']
+            return tax._can_be_discounted() and (not exclude_function or not exclude_function(base_line, tax_data))
+
+        base_lines_partition_taxes, has_taxes_to_exclude = self._partition_base_lines_taxes(base_lines, partition_function)
+        if not has_taxes_to_exclude:
+            return base_lines
+
+        # Exclude non-discountable taxes.
+        discountable_base_lines = []
+        for base_line, taxes_to_keep, taxes_to_exclude in base_lines_partition_taxes:
+            tax_details = base_line['tax_details']
+            taxes_data = tax_details['taxes_data']
+
+            if any(
+                tax_data['tax'] in taxes_to_exclude
+                and tax_data['tax'].price_include
+                and tax_data['tax'].include_base_amount
+                for tax_data in taxes_data
+            ):
+                # When the removed tax affect the base of the others, we had to remove the tax amount applied
+                # on those taxes too.
+                discountable_base_line = self._prepare_base_line_for_taxes_computation(
+                    base_line,
+                    price_unit=tax_details['raw_total_excluded_currency'],
+                    quantity=1.0,
+                    discount=0.0,
+                    tax_ids=taxes_to_keep,
+                    special_mode='total_excluded',
+                )
+                self._add_tax_details_in_base_line(discountable_base_line, company)
+                taxes_data_for_price_unit = discountable_base_line['tax_details']['taxes_data']
+            else:
+                taxes_data_for_price_unit = [
+                    tax_data
+                    for tax_data in taxes_data
+                    if tax_data['tax'] in taxes_to_keep
+                ]
+
+            price_unit = tax_details['raw_total_excluded_currency'] + sum(
+                tax_data['raw_tax_amount_currency']
+                for tax_data in taxes_data_for_price_unit
+                if tax_data['tax'].price_include and tax_data['tax'] in taxes_to_keep
+            )
+            discountable_base_lines.append(self._prepare_base_line_for_taxes_computation(
+                base_line,
+                price_unit=price_unit,
+                quantity=1.0,
+                discount=0.0,
+                tax_ids=taxes_to_keep,
+            ))
+        self._add_tax_details_in_base_lines(discountable_base_lines, company)
+        self._round_base_lines_tax_details(discountable_base_lines, company)
+        return discountable_base_lines
+
+    # -------------------------------------------------------------------------
+    # GLOBAL DISCOUNT
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _prepare_global_discount_lines(
+        self,
+        base_lines,
+        company,
+        amount_type,
+        amount,
+        computation_key='global_discount',
+        grouping_function=None,
+    ):
+        """ Prepare negative lines to be added representing a global discount.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
+        :param company:             The company of the base lines.
+        :param amount_type:         'fixed' or 'percent' indicating the type of the discount.
+        :param amount:              The amount to be discounted in case of 'fixed' amount_type. Otherwise, a percentage [0-100].
+        :param computation_key:     The key that will be used to split the base lines to round the tax amounts.
+        :param grouping_function:   An optional function taking a base line as parameter and returning a grouping key
+                                    being the way the base lines will be aggregated all together.
+                                    By default, the base lines will be aggregated by taxes.
+        :return:                    The negative base lines representing the global discount.
+        """
+        discountable_base_lines = self._prepare_discountable_base_lines(base_lines, company)
+        new_base_lines = self._reduce_base_lines_to_target_amount(
+            base_lines=discountable_base_lines,
+            company=company,
+            amount_type=amount_type,
+            amount=-amount,
+            computation_key=computation_key,
+            grouping_function=grouping_function,
+        )
+        self._fix_base_lines_tax_details_on_manual_tax_amounts(
+            base_lines=new_base_lines,
+            company=company,
+        )
+        return new_base_lines
+
+    # -------------------------------------------------------------------------
+    # DOWN PAYMENT
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _prepare_base_lines_for_down_payment(
+        self,
+        base_lines,
+        company,
+        exclude_function=None,
+    ):
+        """ Prepare base lines on which we can compute down payments.
+        This method wrap all part of base lines / taxes that are not eligible for a down payment into the base amount.
+
+        :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
+        :param company:             The company of the base lines.
+        :param exclude_function:    An optional function taking a base line and a tax_data as parameter and returning
+                                    a boolean indicating if the tax_data has to be exclude from the computation.
+        :return:                    The negative base lines representing the global discount.
+        """
+        def partition_function(base_line, tax_data):
+            tax = tax_data['tax']
+            return tax._can_be_discounted() and (not exclude_function or not exclude_function(base_line, tax_data))
+
+        base_lines_partition_taxes, has_taxes_to_exclude = self._partition_base_lines_taxes(base_lines, partition_function)
+        if not has_taxes_to_exclude:
+            return base_lines
+
+        base_lines_for_dp = []
+        for base_line, taxes_to_keep, taxes_to_exclude in base_lines_partition_taxes:
+            taxes = base_line['tax_ids']
+            tax_details = base_line['tax_details']
+            taxes_data = tax_details['taxes_data']
+
+            # Split the taxes in multiple batch of taxes, one per sub base line.
+            new_taxes = self.env['account.tax']
+            new_base_lines_for_dp = []
+            for i, tax_data in enumerate(taxes_data):
+                tax = tax_data['tax']
+                if tax in taxes_to_keep:
+                    new_taxes += tax
+                elif not tax.price_include:
+                    # The tax is standalone and can just be extracted as a fixed amount.
+                    new_base_lines_for_dp.append(self._prepare_base_line_for_taxes_computation(
+                        base_line,
+                        price_unit=tax_data['tax_amount_currency'],
+                        quantity=1.0,
+                        discount=0.0,
+                        tax_ids=tax_data['taxes'].filtered(lambda tax: tax in taxes_to_keep),
+                    ))
+                else:
+                    continue
+
+            if new_base_lines_for_dp:
+                if new_taxes:
+                    price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
+                    new_base_lines_for_dp.append(self._prepare_base_line_for_taxes_computation(
+                        base_line,
+                        price_unit=base_line['quantity'] * price_unit_after_discount,
+                        quantity=1.0,
+                        discount=0.0,
+                        tax_ids=new_taxes,
+                    ))
+            else:
+                # The base line can be used as raw since it doesn't contain taxes to be excluded.
+                price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
+                new_base_lines_for_dp.append(self._prepare_base_line_for_taxes_computation(
+                    base_line,
+                    price_unit=base_line['quantity'] * price_unit_after_discount,
+                    quantity=1.0,
+                    discount=0.0,
+                    tax_ids=new_taxes,
+                ))
+            base_lines_for_dp += new_base_lines_for_dp
+        self._add_tax_details_in_base_lines(base_lines_for_dp, company)
+        self._round_base_lines_tax_details(base_lines_for_dp, company)
+        return base_lines_for_dp
+
+    @api.model
+    def _prepare_down_payment_lines(
+        self,
+        base_lines,
+        company,
+        amount_type,
+        amount,
+        computation_key='down_payment',
+        grouping_function=None,
+    ):
+        """ Prepare the base lines to be added representing a down payment.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
+        :param company:             The company of the base lines.
+        :param amount_type:         'fixed' or 'percent' indicating the type of the down payment.
+        :param amount:              The amount of the down payment in case of 'fixed' amount_type. Otherwise, a percentage [0-100].
+        :param computation_key:     The key that will be used to split the base lines to round the tax amounts.
+        :param grouping_function:   An optional function taking a base line as parameter and returning a grouping key
+                                    being the way the base lines will be aggregated all together.
+                                    By default, the base lines will be aggregated by taxes.
+        :return:                    The negative base lines representing the global discount.
+        """
+        base_lines_for_dp = self._prepare_base_lines_for_down_payment(base_lines, company)
+        new_base_lines = self._reduce_base_lines_to_target_amount(
+            base_lines=base_lines_for_dp,
+            company=company,
+            amount_type=amount_type,
+            amount=amount,
+            computation_key=computation_key,
+            grouping_function=grouping_function,
+        )
+        self._fix_base_lines_tax_details_on_manual_tax_amounts(
+            base_lines=new_base_lines,
+            company=company,
+        )
+        return new_base_lines
+
+    # -------------------------------------------------------------------------
+    # COMBO PRODUCT
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _prepare_discount_combo_lines(
+        self,
+        base_lines,
+        company,
+        combo_price,
+        grouping_function=None,
+    ):
+        if not base_lines:
+            return []
+
+        # 'discountable_base_lines' are the lines without any tax that can't be discounted.
+        discountable_base_lines = self._prepare_discountable_base_lines(base_lines, company)
+
+        # From 'discountable_base_lines', we compute 'discountable_base_lines_bis' being the same except we
+        # only keep the price included taxes since the price excluded taxes will be added on top of 'combo_price'.
+        def partition_function(base_line, tax_data):
+            return tax_data['tax'].price_include
+
+        base_lines_partition_taxes = self._partition_base_lines_taxes(discountable_base_lines, partition_function)[0]
+        discountable_base_lines_bis = [
+            self._prepare_base_line_for_taxes_computation(
+                discountable_base_line,
+                tax_ids=taxes_to_keep,
+                _source_tax_ids=discountable_base_line['tax_ids'],
+            )
+            for discountable_base_line, taxes_to_keep, _taxes_to_exclude in base_lines_partition_taxes
+        ]
+        self._add_tax_details_in_base_lines(discountable_base_lines_bis, company)
+        self._round_base_lines_tax_details(discountable_base_lines_bis, company)
+
+        # Reduce to compute a first bunch of base lines to reach the combo price.
+        def grouping_function_total(base_line, tax_data):
+            return True
+
+        base_lines_aggregated_values = self._aggregate_base_lines_tax_details(discountable_base_lines_bis, grouping_function_total)
+        values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        current_total_amount_currency = sum(
+            values['base_amount_currency'] + values['tax_amount_currency']
+            for values in values_per_grouping_key.values()
+        )
+        delta_combo_price = combo_price - current_total_amount_currency
+
+        def grouping_function_reduce(base_line):
+            return {
+                **(grouping_function(base_line) if grouping_function else {}),
+                'source_tax_ids': base_line['_source_tax_ids'],
+            }
+
+        new_base_lines = self._reduce_base_lines_to_target_amount(
+            base_lines=discountable_base_lines_bis,
+            company=company,
+            amount_type='fixed',
+            amount=delta_combo_price,
+            grouping_function=grouping_function_reduce,
+        )
+
+        # Manage extra prices.
+        # The idea here is to create another positive line having an amount corresponding to the extra price.
+        extra_prices_new_base_lines_per_taxes = defaultdict(lambda: {
+            'base_lines': [],
+            'extra_price': 0.0,
+        })
+        extra_prices_new_base_lines = []
+        for discountable_base_line_bis in discountable_base_lines_bis:
+            # Skip sub line created for non-discountable taxes affecting the taxes of others.
+            if discountable_base_line_bis['special_mode'] == 'total_excluded':
+                continue
+
+            combo_extra_price = discountable_base_line_bis['_combo_extra_price']
+            if discountable_base_line_bis['currency_id'].is_zero(combo_extra_price):
+                continue
+
+            grouping_key = frozendict({'source_tax_ids': discountable_base_line_bis['_source_tax_ids']})
+            extra_price_data = extra_prices_new_base_lines_per_taxes[grouping_key]
+            extra_price_data['base_lines'].append(discountable_base_line_bis)
+            extra_price_data['extra_price'] += combo_extra_price
+            extra_price_data['source_tax_ids'] = discountable_base_line_bis['_source_tax_ids']
+
+        for extra_price_data in extra_prices_new_base_lines_per_taxes.values():
+            extra_prices_new_base_lines += self._reduce_base_lines_to_target_amount(
+                base_lines=extra_price_data['base_lines'],
+                company=company,
+                amount_type='fixed',
+                amount=extra_price_data['extra_price'],
+                grouping_function=grouping_function_reduce,
+            )
+
+        if extra_prices_new_base_lines:
+            new_base_lines = self._reduce_base_lines_with_grouping_function(
+                base_lines=new_base_lines + extra_prices_new_base_lines,
+                company=company,
+                grouping_function=grouping_function_reduce,
+            )
+
+        self._fix_base_lines_tax_details_on_manual_tax_amounts(
+            base_lines=new_base_lines,
+            company=company,
+        )
+
+        # Almost done. Now we can safely put back the taxes we excluded at the beginning.
+        need_reload_tax_details = False
+        for new_base_line in new_base_lines:
+            discountable_base_line = new_base_line['record']
+            if set(new_base_line['tax_ids'].ids) != set(discountable_base_line['_source_tax_ids'].ids):
+                new_base_line['tax_ids'] = discountable_base_line['_source_tax_ids']
+                need_reload_tax_details = True
+        if need_reload_tax_details:
+            self._add_tax_details_in_base_lines(new_base_lines, company)
+            self._round_base_lines_tax_details(new_base_lines, company)
+        return new_base_lines
+
+    @api.model
+    def _combine_with_discount_combo_lines(
+        self,
+        base_lines,
+        discount_combo_base_lines,
+        company,
+    ):
+        # Group 'discount_combo_base_lines' per taxes.
+        dispatch_data_per_taxes = {}
+        for discount_combo_base_line in discount_combo_base_lines:
+            tax_details = discount_combo_base_line['tax_details']
+            taxes_data = tax_details['taxes_data']
+
+            # Get all the taxes flattened.
+            taxes = self.env['account.tax']
+            for gb_tax_data in taxes_data:
+                taxes += gb_tax_data['tax']
+            taxes = taxes.filtered(lambda tax: tax._can_be_discounted())
+
+            # Compute the raw totals implied by the base line.
+            raw_total_amount_currency = tax_details['raw_total_excluded_currency']
+            for gb_tax_data in taxes_data:
+                raw_total_amount_currency += gb_tax_data['raw_tax_amount_currency']
+
+            dispatch_data = dispatch_data_per_taxes.setdefault(taxes, {
+                'raw_total_amount_currency': 0.0,
+                'discount_combo_base_lines': [],
+                'base_lines_raw_total_amount_currency': [],
+                'base_lines': [],
+            })
+            dispatch_data['discount_combo_base_lines'].append(discount_combo_base_line)
+
+        # Group 'base_lines' per taxes.
+        new_base_lines = []
+        for base_line in base_lines:
+            tax_details = base_line['tax_details']
+            taxes_data = tax_details['taxes_data']
+
+            # Get all the taxes flattened.
+            taxes = self.env['account.tax']
+            for gb_tax_data in taxes_data:
+                taxes += gb_tax_data['tax']
+            taxes = taxes.filtered(lambda tax: tax._can_be_discounted())
+
+            # Compute the raw totals implied by the base line.
+            raw_total_amount_currency = tax_details['raw_total_excluded_currency']
+            for gb_tax_data in taxes_data:
+                raw_total_amount_currency += gb_tax_data['raw_tax_amount_currency']
+            raw_total_amount_currency += base_line['_combo_extra_price']
+
+            new_base_line = {
+                **base_line,
+                'discount_combo_base_lines': [],
+            }
+            new_base_lines.append(new_base_line)
+
+            if taxes not in dispatch_data_per_taxes:
+                continue
+
+            dispatch_data = dispatch_data_per_taxes[taxes]
+            dispatch_data['raw_total_amount_currency'] += raw_total_amount_currency
+            dispatch_data['base_lines'].append(new_base_line)
+            dispatch_data['base_lines_raw_total_amount_currency'].append(raw_total_amount_currency)
+
+        # Distribute 'discount_combo_base_lines' on 'base_lines'.
+        for dispatch_data in dispatch_data_per_taxes.values():
+            sum_raw_total_amount_currency = dispatch_data['raw_total_amount_currency']
+            dispatch_data['target_factors'] = [
+                {
+                    'base_line': base_line,
+                    'factor': (
+                        abs(raw_total_amount_currency / sum_raw_total_amount_currency)
+                        if sum_raw_total_amount_currency
+                        else 0.0
+                    ),
+                }
+                for base_line, raw_total_amount_currency in zip(
+                    dispatch_data['base_lines'],
+                    dispatch_data['base_lines_raw_total_amount_currency'],
+                )
+            ]
+            if not dispatch_data['target_factors']:
+                continue
+
+            for discount_combo_base_line in dispatch_data['discount_combo_base_lines']:
+                splitted_base_lines = self._split_base_line(
+                    base_line=discount_combo_base_line,
+                    company=company,
+                    target_factors=dispatch_data['target_factors'],
+                )
+                for base_line, new_base_line in zip(dispatch_data['base_lines'], splitted_base_lines):
+                    base_line['discount_combo_base_lines'].append(new_base_line)
+
+        # Merge the dispatched 'discount_combo_base_lines' into the existing 'base_lines'.
+        for new_base_line in new_base_lines:
+            # Adapt 'tax_details'.
+            for sub_base_line in new_base_line['discount_combo_base_lines']:
+                new_base_line['tax_details'] = self._merge_tax_details(
+                    tax_details_1=new_base_line['tax_details'],
+                    tax_details_2=sub_base_line['tax_details'],
+                )
+
+            # Update the 'price_unit'.
+            discount = new_base_line['discount']
+            price_unit = new_base_line['price_unit']
+            quantity = new_base_line['quantity']
+            total_after_discount = price_unit * quantity * (1 - (discount / 100.0)) + sum(
+                sub_base_line['price_unit'] * sub_base_line['quantity'] * (1 - (sub_base_line['discount'] / 100.0))
+                for sub_base_line in new_base_line['discount_combo_base_lines']
+            )
+            if discount != 100.0:
+                new_base_line['price_unit'] = total_after_discount / quantity / (1 - (discount / 100.0))
+
+        def filter_function(base_line, tax_data):
+            return tax_data['tax'].price_include
+
+        self._fix_base_lines_tax_details_on_manual_tax_amounts(
+            base_lines=new_base_lines,
+            company=company,
+            filter_function=filter_function,
+        )
+        return new_base_lines
+
+    # -------------------------------------------------------------------------
+    # DISPATCHING OF LINES
+    # -------------------------------------------------------------------------
 
     @api.model
     def _dispatch_global_discount_lines(self, base_lines, company):
@@ -3751,7 +4046,8 @@ class AccountTax(models.Model):
                 'discount_base_lines': [],
             }
 
-            if base_line['special_type'] == 'global_discount':
+            is_negative = base_line['tax_details']['raw_total_excluded_currency'] < 0.0
+            if is_negative and not base_line['special_type']:
                 discount_data['discount_base_lines'].append(new_base_line)
             else:
                 discount_data['raw_total_amount_currency'] += raw_total_amount_currency
@@ -3807,6 +4103,10 @@ class AccountTax(models.Model):
                     tax_details_1=base_line['tax_details'],
                     tax_details_2=sub_base_line['tax_details'],
                 )
+        self._fix_base_lines_tax_details_on_manual_tax_amounts(
+            base_lines=base_lines,
+            company=company,
+        )
 
     @api.model
     def _dispatch_return_of_merchandise_lines(self, base_lines, company):
@@ -3922,6 +4222,10 @@ class AccountTax(models.Model):
                     tax_details_2=sub_base_line['tax_details'],
                 )
                 base_line['quantity'] += sub_base_line['quantity']
+        self._fix_base_lines_tax_details_on_manual_tax_amounts(
+            base_lines=base_lines,
+            company=company,
+        )
 
     # -------------------------------------------------------------------------
     # END HELPERS IN BOTH PYTHON/JAVASCRIPT (account_tax.js)
