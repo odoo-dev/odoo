@@ -221,8 +221,6 @@ export function formatFloat(value, options = {}) {
     let precision;
     if (options.digits && options.digits[1] !== undefined) {
         precision = options.digits[1];
-    } else {
-        precision = 2;
     }
     if (floatIsZero(value, precision)) {
         value = 0.0;
@@ -233,7 +231,7 @@ export function formatFloat(value, options = {}) {
     const grouping = options.grouping || l10n.grouping;
     const thousandsSep = "thousandsSep" in options ? options.thousandsSep : l10n.thousandsSep;
     const decimalPoint = "decimalPoint" in options ? options.decimalPoint : l10n.decimalPoint;
-    const formatted = formatFixedDecimals(value, precision).split(".");
+    const formatted = (precision !== undefined? formatFixedDecimals(value, precision): value.toString()).split(".")
     formatted[0] = insertThousandsSep(formatted[0], thousandsSep, grouping);
     if (options.trailingZeros === false && formatted[1]) {
         formatted[1] = formatted[1].replace(/0+$/, "");
