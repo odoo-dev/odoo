@@ -1,0 +1,12 @@
+.o-we-toolbar {
+    .btn:not(:hover) {
+        background-color: unset;
+    }
+    .btn {
+        border: unset;
+    }
+}
+
+.o-we-powerbox.bg-light {
+    background-color: white !important;
+}
