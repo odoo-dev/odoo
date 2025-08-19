@@ -16,6 +16,7 @@ import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
  * @param {number} [params.linesNumber]
  * @param {[number, number]} [params.position]
  * @param {string} [params.sheetId]
+ * @param {boolean} [params.vectorized]
  */
 export function insertListInSpreadsheet(model, params) {
     const { definition, columns } = generateListDefinition(
@@ -24,7 +25,7 @@ export function insertListInSpreadsheet(model, params) {
         params.actionXmlId
     );
     const [col, row] = params.position || [0, 0];
-
+    const vectorized = params.vectorized ?? true;
     model.dispatch("INSERT_ODOO_LIST", {
         sheetId: params.sheetId || model.getters.getActiveSheetId(),
         definition,
@@ -33,6 +34,7 @@ export function insertListInSpreadsheet(model, params) {
         id: model.getters.getNextListId(),
         col,
         row,
+        vectorized,
     });
 }
 

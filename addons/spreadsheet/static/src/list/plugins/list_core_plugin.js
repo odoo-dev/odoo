@@ -85,10 +85,10 @@ export class ListCorePlugin extends OdooCorePlugin {
     handle(cmd) {
         switch (cmd.type) {
             case "INSERT_ODOO_LIST": {
-                const { sheetId, col, row, id, definition, linesNumber, columns } = cmd;
+                const { sheetId, col, row, id, definition, linesNumber, columns, vectorized } = cmd;
                 const anchor = [col, row];
                 this._addList(id, definition);
-                this._insertList(sheetId, anchor, id, linesNumber, columns);
+                this._insertList(sheetId, anchor, id, linesNumber, columns, vectorized);
                 this.history.update("nextId", parseInt(id, 10) + 1);
                 break;
             }
@@ -101,6 +101,7 @@ export class ListCorePlugin extends OdooCorePlugin {
                 break;
             }
             case "RE_INSERT_ODOO_LIST": {
+                //TODOPRO With re-insert list ?
                 const { sheetId, col, row, id, linesNumber, columns } = cmd;
                 const anchor = [col, row];
                 this._insertList(sheetId, anchor, id, linesNumber, columns);
@@ -225,11 +226,12 @@ export class ListCorePlugin extends OdooCorePlugin {
      * @param {string} id Id of the list
      * @param {number} linesNumber Number of records to insert
      * @param {Array<Object>} columns Columns ({name, type})
+     * @param {boolean} vectorized Whether the list should be vectorized or not
      */
-    _insertList(sheetId, anchor, id, linesNumber, columns) {
+    _insertList(sheetId, anchor, id, linesNumber, columns, vectorized) {
         this._resizeSheet(sheetId, anchor, columns.length, linesNumber + 1);
         this._insertHeaders(sheetId, anchor, id, columns);
-        this._insertValues(sheetId, anchor, id, columns, linesNumber);
+        this._insertValues(sheetId, anchor, id, columns, linesNumber, vectorized);
     }
 
     _insertHeaders(sheetId, anchor, id, columns) {
@@ -245,21 +247,33 @@ export class ListCorePlugin extends OdooCorePlugin {
         }
     }
 
-    _insertValues(sheetId, anchor, id, columns, linesNumber) {
+    _insertValues(sheetId, anchor, id, columns, linesNumber, vectorized) {
         let col = anchor[0];
         let row = anchor[1] + 1;
-        for (let i = 1; i <= linesNumber; i++) {
-            col = anchor[0];
+        if (vectorized) {
             for (const column of columns) {
                 this.dispatch("UPDATE_CELL", {
                     sheetId,
                     col,
                     row,
-                    content: `=ODOO.LIST(${id},${i},"${column.name}")`,
+                    content: `=ODOO.LIST(${id},SEQUENCE(${linesNumber}),"${column.name}")`,
                 });
                 col++;
             }
-            row++;
+        } else {
+            for (let i = 1; i <= linesNumber; i++) {
+                col = anchor[0];
+                for (const column of columns) {
+                    this.dispatch("UPDATE_CELL", {
+                        sheetId,
+                        col,
+                        row,
+                        content: `=ODOO.LIST(${id},${i},"${column.name}")`,
+                    });
+                    col++;
+                }
+                row++;
+            }
         }
     }
 
