@@ -5,6 +5,7 @@ import { utils } from "@web/core/ui/ui_service";
 import { TourStep } from "@web_tour/js/tour_step";
 import { MacroMutationObserver } from "@web/core/macro";
 import { getScrollParent } from "@web_tour/js/utils/tour_utils";
+import { TourPointer } from "./tour_pointer";
 
 /**
  * @typedef ConsumeEvent
@@ -30,12 +31,10 @@ export class TourInteractive {
     }
 
     /**
-     * @param {import("@web_tour/js/tour_pointer/tour_pointer").TourPointer} pointer
      * @param {Function} onTourEnd
      */
-    start(pointer, onTourEnd) {
-        this.pointer = pointer;
-        this.debouncedToggleOpen = debounce(this.pointer.showContent, 50, true);
+    start(onTourEnd) {
+        this.debouncedToggleOpen = debounce(TourPointer.showContent, 50, true);
         this.onTourEnd = onTourEnd;
         this.observer = new MacroMutationObserver(() => this._onMutation());
         this.observer.observe(document.body);
@@ -107,12 +106,12 @@ export class TourInteractive {
 
     updatePointer() {
         if (this.anchorEls.length) {
-            this.pointer.pointTo(
+            TourPointer.pointTo(
                 this.anchorEls[0],
                 this.currentAction.pointerInfo,
                 this.currentAction.event === "drop"
             );
-            this.pointer.setState({
+            TourPointer.setState({
                 onMouseEnter: () => this.debouncedToggleOpen(true),
                 onMouseLeave: () => this.debouncedToggleOpen(false),
             });
@@ -125,13 +124,13 @@ export class TourInteractive {
                 anchorEl,
                 consumeEvents: this.getConsumeEventType(anchorEl, this.currentAction.event),
                 onConsume: () => {
-                    this.pointer.hide();
+                    TourPointer.hide();
                     this.currentActionIndex++;
                     this.play();
                 },
                 onError: () => {
                     if (this.currentAction.event === "drop") {
-                        this.pointer.hide();
+                        TourPointer.hide();
                         this.currentActionIndex--;
                         this.play();
                     }
@@ -140,8 +139,8 @@ export class TourInteractive {
             if (index === 0) {
                 return this.setupListeners({
                     ...toListen,
-                    onMouseEnter: () => this.pointer.showContent(true),
-                    onMouseLeave: () => this.pointer.showContent(false),
+                    onMouseEnter: () => TourPointer.showContent(true),
+                    onMouseLeave: () => TourPointer.showContent(false),
                     onScroll: () => this.updatePointer(),
                 });
             } else {
@@ -454,7 +453,7 @@ export class TourInteractive {
                 this.anchorEls = tempAnchors;
                 this.setActionListeners();
             } else if (!tempAnchors.length && this.anchorEls.length) {
-                this.pointer.hide();
+                TourPointer.hide();
                 if (
                     !hoot.queryFirst(".o_home_menu", { visible: true }) &&
                     !hoot.queryFirst(".dropdown-item.o_loading", { visible: true })

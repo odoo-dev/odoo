@@ -2,21 +2,21 @@
 <templates id="template" xml:space="preserve">
     <t t-name="web_tour.TourPointer">
         <div
-            t-if="props.pointerState.isVisible"
+            t-if="state.isVisible"
             t-ref="pointer"
             t-attf-class="
                 o_tour_pointer
                 o_{{ position }}
                 {{ isOpen ? 'o_open' : (props.bounce ? 'o_bouncing' : '') }}
-                {{ props.pointerState.onClick ? 'cursor-pointer' : '' }}
+                {{ state.onClick ? 'cursor-pointer' : '' }}
             "
             t-attf-style="
                 --TourPointer__width: {{ constructor.width }}px;
                 --TourPointer__height: {{ constructor.height }}px;
             "
-            t-on-mouseenter="props.pointerState.onMouseEnter or (() => {})"
-            t-on-mouseleave="props.pointerState.onMouseLeave or (() => {})"
-            t-on-click="props.pointerState.onClick or (() => {})"
+            t-on-mouseenter="state.onMouseEnter or (() => {})"
+            t-on-mouseleave="state.onMouseLeave or (() => {})"
+            t-on-click="state.onClick or (() => {})"
         >
             <div class="o_tour_pointer_tip position-absolute" />
             <div
@@ -31,6 +31,6 @@
                 </div>
             </div>
         </div>
-        <div class="o_tour_dropzone position-fixed pe-none" t-if="props.pointerState.isVisible and props.pointerState.isZone" t-ref="zone" style="border: 3px dashed #714b67;"/>
+        <div class="o_tour_dropzone position-fixed pe-none" t-if="state.isVisible and state.isZone" t-ref="zone" style="border: 3px dashed #714b67;"/>
     </t>
 </templates>

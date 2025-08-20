@@ -3,8 +3,7 @@ import { browser } from "@web/core/browser/browser";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
-import { TourPointer } from "@web_tour/js/tour_pointer/tour_pointer";
-import { createPointerState } from "@web_tour/js/tour_pointer/tour_pointer_state";
+import { TourPointer } from "@web_tour/js/tour_interactive/tour_pointer";
 import { tourState } from "@web_tour/js/tour_state";
 import { TourInteractive } from "@web_tour/js/tour_interactive/tour_interactive";
 import { TourAutomatic } from "@web_tour/js/tour_automatic/tour_automatic";
@@ -68,8 +67,6 @@ export const tourService = {
         await whenReady();
         let toursEnabled = session?.tour_enabled;
         const tourRegistry = registry.category("web_tour.tours");
-        const pointer = createPointerState();
-        pointer.stop = () => {};
 
         debugMenuRegistry.add("onboardingItem", () => ({
             type: "component",
@@ -127,7 +124,6 @@ export const tourService = {
         }
 
         async function startTour(tourName, options = {}) {
-            pointer.stop();
             const tourFromRegistry = getTourFromRegistry(tourName);
 
             if (!tourFromRegistry && !options.fromDB) {
@@ -179,22 +175,21 @@ export const tourService = {
             }
 
             tour.steps.forEach((step) => validateStep(step));
-            pointer.stop = overlay.add(
-                TourPointer,
-                {
-                    pointerState: pointer.state,
-                    bounce: !(tourConfig.mode === "auto" && tourConfig.keepWatchBrowser),
-                },
-                {
-                    sequence: 1100, // sequence based on bootstrap z-index values.
-                }
-            );
 
             if (tourConfig.mode === "auto") {
                 new TourAutomatic(tour).start();
             } else {
-                new TourInteractive(tour).start(pointer, async () => {
-                    pointer.stop();
+                const stop = overlay.add(
+                    TourPointer,
+                    {
+                        bounce: !tourConfig.keepWatchBrowser,
+                    },
+                    {
+                        sequence: 1100, // sequence based on bootstrap z-index values.
+                    }
+                );
+                new TourInteractive(tour).start(async () => {
+                    stop();
                     tourState.clear();
                     browser.console.log("tour succeeded");
                     let message = tourConfig.rainbowManMessage || tour.rainbowManMessage;
