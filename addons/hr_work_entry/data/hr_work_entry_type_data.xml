@@ -205,6 +205,7 @@
     <record id="l10n_be_work_entry_type_bank_holiday" model="hr.work.entry.type">
         <field name="name">Public Holiday</field>
         <field name="code">LEAVE500</field>
+        <field name="display_code">PTO</field>
         <field name="color">3</field>
         <field name="country_id" ref="base.be"/>
         <field name="is_leave" eval="True"/>
@@ -251,6 +252,7 @@
     <record id="l10n_be_work_entry_type_maternity" model="hr.work.entry.type">
         <field name="name">Maternity Time Off</field>
         <field name="code">LEAVE210</field>
+        <field name="display_code">MTO</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.be"/>
         <field name="is_leave" eval="True"/>
