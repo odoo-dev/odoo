@@ -75,7 +75,9 @@ class IrActionsReport(models.Model):
         data.setdefault('debug', False)
         return data
 
-    def _collect_existing_streams(self, report_sudo, res_ids, has_duplicated_ids):
+    def _collect_existing_streams(self, report_ref, res_ids):
+        report_sudo = self._get_report(report_ref)
+        has_duplicated_ids = res_ids and len(res_ids) != len(set(res_ids))
         collected_streams = OrderedDict()
         if not res_ids:
             return collected_streams
@@ -112,9 +114,8 @@ class IrActionsReport(models.Model):
         report_sudo = self._get_report(report_ref)
         has_duplicated_ids = res_ids and len(res_ids) != len(set(res_ids))
         collected_streams = self._collect_existing_streams(
-            report_sudo=report_sudo,
+            report_ref=report_sudo,
             res_ids=res_ids,
-            has_duplicated_ids=has_duplicated_ids,
         )
         res_ids_wo_stream = [
             res_id for res_id, s

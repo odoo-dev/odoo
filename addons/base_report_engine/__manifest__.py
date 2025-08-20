@@ -19,6 +19,8 @@ n.b.: for odoo 19.0 and before this was included in the base module.
         'base_setup',
     ],
     'data': [
+        'views/ir_model_reports.xml',
+        'views/ir_module_reports.xml',
         'views/res_config_settings_views.xml',
     ],
     'author': 'Odoo S.A.',
