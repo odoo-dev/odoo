@@ -318,7 +318,7 @@ describe("Link creation", () => {
             );
         });
         test("Should be able to insert link on empty p", async () => {
-            const { editor, el } = await setupEditor("<p>[]</p>");
+            const { editor, el } = await setupEditor("<p>[]<br></p>");
             await insertText(editor, "/link");
             await animationFrame();
             await click(".o-we-command-name:first");
@@ -327,7 +327,7 @@ describe("Link creation", () => {
             expect(cleanLinkArtifacts(getContent(el))).toBe('<p><a href="#">#[]</a></p>');
         });
         test("Should be able to insert button on empty p", async () => {
-            const { editor, el } = await setupEditor("<p>[]</p>");
+            const { editor, el } = await setupEditor("<p>[]<br></p>");
             await insertText(editor, "/button");
             await animationFrame();
             await click(".o-we-command-name:first");
@@ -633,7 +633,7 @@ describe("shortcut", () => {
         expect(queryText(".o_command_name:first")).toBe("Create link");
     });
     test("create a link with shortcut", async () => {
-        const { el } = await setupEditor(`<p>[]</p>`);
+        const { el } = await setupEditor(`<p>[]<br></p>`);
 
         await press(["ctrl", "k"]);
         await animationFrame();
@@ -644,7 +644,7 @@ describe("shortcut", () => {
         );
     });
     test("should be able to create link with ctrl+k and ctrl+k", async () => {
-        const { el } = await setupEditor(`<p>[]</p>`);
+        const { el } = await setupEditor(`<p>[]<br></p>`);
 
         await press(["ctrl", "k"]);
         await animationFrame();
@@ -683,7 +683,7 @@ describe("link preview", () => {
             link_preview_name: "Task name | Project name",
         }));
         onRpc("/odoo/project/1/tasks/8", () => "");
-        const { editor, el } = await setupEditor(`<p>[]</p>`);
+        const { editor, el } = await setupEditor(`<p>[]<br></p>`);
         await insertText(editor, "/link");
         await animationFrame();
         await click(".o-we-command-name:first");
@@ -711,7 +711,7 @@ describe("link preview", () => {
             og_site_name: "Odoo",
             source_url: "http://odoo.com/",
         }));
-        const { editor } = await setupEditor(`<p>[]</p>`);
+        const { editor } = await setupEditor(`<p>[]<br></p>`);
         await insertText(editor, "/link");
         await animationFrame();
         await click(".o-we-command-name:first");
@@ -826,7 +826,7 @@ describe("link preview", () => {
                 source_url: "http://odoo.com/",
             };
         });
-        const { editor } = await setupEditor(`<p>[]</p>`);
+        const { editor } = await setupEditor(`<p>[]<br></p>`);
         await insertText(editor, "/link");
         await animationFrame();
         await click(".o-we-command-name:first");

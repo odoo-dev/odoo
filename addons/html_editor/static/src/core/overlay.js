@@ -25,7 +25,6 @@ export class EditorOverlay extends Component {
         props: { type: Object, optional: true },
         editable: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
         bus: Object,
-        getContainer: Function,
         history: Object,
         close: Function,
         isOverlayOpen: Function,
@@ -45,6 +44,8 @@ export class EditorOverlay extends Component {
 
     setup() {
         this.lastSelection = this.props.initialSelection;
+        /** @type {HTMLElement} */
+        const editable = this.props.editable;
         let getTarget, position;
         if (this.props.target) {
             getTarget = () => this.props.target;
@@ -52,7 +53,6 @@ export class EditorOverlay extends Component {
             useExternalListener(this.props.bus, "updatePosition", () => {
                 position.unlock();
             });
-            const editable = this.props.editable;
             this.rangeElement = editable.ownerDocument.createElement("range-el");
             editable.after(this.rangeElement);
             onWillDestroy(() => {
@@ -90,13 +90,15 @@ export class EditorOverlay extends Component {
         if (this.props.hasAutofocus) {
             useActiveElement("root");
         }
+        const topDocument = editable.ownerDocument.defaultView.top.document;
+        const container = closestScrollable(editable) || topDocument.documentElement;
         const positionOptions = {
             position: "bottom-start",
-            container: this.props.getContainer,
+            container: container,
             ...this.props.positionOptions,
             onPositioned: (el, solution) => {
                 this.props.positionOptions?.onPositioned?.(el, solution);
-                this.updateVisibility(el, solution);
+                this.updateVisibility(el, solution, container);
             },
         };
         position = usePosition("root", getTarget, positionOptions);
@@ -144,16 +146,27 @@ export class EditorOverlay extends Component {
         return this.rangeElement;
     }
 
-    updateVisibility(overlayElement, solution) {
+    updateVisibility(overlayElement, solution, container) {
         // @todo: mobile tests rely on a visible (yet overflowing) toolbar
         // Remove this once the mobile toolbar is fixed?
         if (this.env.isSmall) {
             return;
         }
-        const container = closestScrollableY(this.props.editable) || this.props.getContainer();
         const containerRect = container.getBoundingClientRect();
         const shouldBeVisible = solution.top > containerRect.top;
         overlayElement.style.visibility = shouldBeVisible ? "visible" : "hidden";
         this.overlayState.isOverlayVisible = shouldBeVisible;
     }
+}
+
+/**
+ * Wrapper around closestScrollableY that keeps searching outside of iframes.
+ *
+ * @param {HTMLElement} el
+ */
+function closestScrollable(el) {
+    if (!el) {
+        return null;
+    }
+    return closestScrollableY(el) || closestScrollable(el.ownerDocument.defaultView.frameElement);
 }

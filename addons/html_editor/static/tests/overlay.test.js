@@ -22,6 +22,7 @@ class Test extends models.Model {
                 </tbody></table>
                 ${"<p>text</p>".repeat(50)}`),
         },
+        { id: 3, name: "Test", txt: "<p>text</p>" },
     ];
 }
 
@@ -84,6 +85,34 @@ test("Toolbar should not overflow scroll container", async () => {
     scrollableElement.scrollTop -= scrollStep;
     await animationFrame();
 
+    expect(toolbar).toBeVisible();
+});
+
+test.tags("desktop");
+test("Toolbar should be visible after scroll bar is added", async () => {
+    await mountView({
+        type: "form",
+        resId: 3,
+        resModel: "test",
+        arch: `
+            <form>
+                <field name="name"/>
+                <field name="txt" widget="html" options="{'height': 300}"/>
+            </form>`,
+    });
+
+    // At this point there's no scroll bar around the editable
+    const p = queryOne(".odoo-editor-editable p");
+
+    // Add text: this creates a vertical scroll bar in the editable
+    const morePs = parseHTML(document, "<p>more text</p>".repeat(20));
+    p.after(...morePs.childNodes);
+
+    // Select first paragraph
+    setSelection({ anchorNode: p, anchorOffset: 0, focusNode: p, focusOffset: 1 });
+
+    // Toolbar should be visible
+    const toolbar = await waitFor(".o-we-toolbar");
     expect(toolbar).toBeVisible();
 });
 
