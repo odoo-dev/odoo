@@ -1,8 +1,6 @@
 import { markRaw, EventBus } from "@odoo/owl";
 import { Plugin } from "../plugin";
 import { EditorOverlay } from "./overlay";
-import { throttleForAnimation } from "@web/core/utils/timing";
-import { findUpTo } from "@html_editor/utils/dom_traversal";
 
 /**
  * @typedef { Object } OverlayShared
@@ -17,24 +15,10 @@ export class OverlayPlugin extends Plugin {
     static id = "overlay";
     static dependencies = ["history"];
     static shared = ["createOverlay"];
-    resources = {
-        step_added_handlers: this.getScrollContainer.bind(this),
-    };
 
     overlays = [];
 
-    setup() {
-        this.iframe = this.window.frameElement;
-        this.topDocument = this.iframe?.ownerDocument || this.document;
-        this.container = this.getScrollContainer();
-        this.throttledUpdateContainer = throttleForAnimation(() => {
-            this.container = this.getScrollContainer();
-        });
-        this.addDomListener(this.topDocument.defaultView, "resize", this.throttledUpdateContainer);
-    }
-
     destroy() {
-        this.throttledUpdateContainer.cancel();
         super.destroy();
         for (const overlay of this.overlays) {
             overlay.close();
@@ -50,25 +34,14 @@ export class OverlayPlugin extends Plugin {
      * @returns {Overlay}
      */
     createOverlay(Component, props = {}, options) {
-        const overlay = new Overlay(this, Component, () => this.container, props, options);
+        const overlay = new Overlay(this, Component, props, options);
         this.overlays.push(overlay);
         return overlay;
-    }
-
-    getScrollContainer() {
-        const isScrollable = (element) =>
-            element.scrollHeight > element.clientHeight &&
-            ["auto", "scroll"].includes(getComputedStyle(element).overflowY);
-
-        return (
-            findUpTo(this.iframe || this.editable, null, isScrollable) ||
-            this.topDocument.documentElement
-        );
     }
 }
 
 export class Overlay {
-    constructor(plugin, C, getContainer, props, options) {
+    constructor(plugin, C, props, options) {
         this.plugin = plugin;
         this.C = C;
         this.editorOverlayProps = props;
@@ -77,7 +50,6 @@ export class Overlay {
         this._remove = null;
         this.component = null;
         this.bus = new EventBus();
-        this.getContainer = getContainer;
     }
 
     /**
@@ -108,7 +80,6 @@ export class Overlay {
                     target,
                     initialSelection,
                     bus: this.bus,
-                    getContainer: this.getContainer,
                     close: this.close.bind(this),
                     isOverlayOpen: this.isOverlayOpen.bind(this),
                     history: {
