@@ -86,6 +86,8 @@ Ask questions, get answers, no distractions
         'web.assets_unit_tests_setup': [
             'website_forum/static/src/interactions/website_forum_share.js',
             'website_forum/static/src/interactions/website_forum_spam.js',
+            'website_forum/static/src/interactions/website_forum.js',
+            'website_forum/static/src/components/**/*',
             'website_forum/static/src/xml/public_templates.xml',
         ],
         'website.website_builder_assets': [
