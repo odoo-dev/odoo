@@ -519,6 +519,8 @@ class HrVersion(models.Model):
             version.date_start = max(version.date_version, version.contract_date_start) \
                 if version.contract_date_start \
                 else version.date_version
+            if not version.contract_date_start:
+                version.contract_date_start = version.date_version
 
             next_version = self.env['hr.version'].search([
                 ('employee_id', 'in', version.employee_id.ids),
