@@ -305,17 +305,13 @@ class SaleOrderLine(models.Model):
         string='Tax calculation rounding method', readonly=True)
     company_price_include = fields.Selection(related="company_id.account_price_include")
     sale_line_warn_msg = fields.Text(related='product_id.sale_line_warn_msg')
-    section_line_id = fields.Many2one(
-        comodel_name='sale.order.line',
-        compute='_compute_section_line_id',
-        store=True,
-    )  # FIXME SHRM NIPL merge this with parent_id
 
     # Section-related fields
     parent_id = fields.Many2one(
         string="Parent Section Line",
         comodel_name='sale.order.line',
         compute='_compute_parent_id',
+        index='btree_not_null',
         store=True,
     )  # The section or subsection this line belongs to.
     collapse_prices = fields.Boolean(
@@ -1182,17 +1178,6 @@ class SaleOrderLine(models.Model):
             # line.ids checks whether it's a new record not yet saved
             line.product_uom_readonly = line.ids and line.state in ['sale', 'cancel']
 
-    @api.depends('order_id.order_line.sequence')
-    def _compute_section_line_id(self):
-        for order, lines in self.grouped('order_id').items():
-            current_section_line = False
-            for line in lines.sorted('sequence'):
-                if line.display_type == 'line_section':
-                    current_section_line = line
-                    line.section_line_id = False
-                else:
-                    line.section_line_id = current_section_line
-
     @api.depends('sequence', 'display_type', 'order_id')
     def _compute_parent_id(self):
         for _orders, lines in self.grouped('order_id').items():
@@ -1523,6 +1508,12 @@ class SaleOrderLine(models.Model):
             'taxes': [],
             'price_subtotal': 0.0,
         }]
+
+    def get_parent_section_line(self):
+        if not self.display_type and self.parent_id.display_type == 'line_subsection':
+            return self.parent_id.parent_id
+
+        return self.parent_id
 
     #=== CORE METHODS OVERRIDES ===#
 
