@@ -25,6 +25,9 @@ export class BackgroundImageOption extends BaseOptionComponent {
     }
     showMainColorPicker() {
         const editingEl = this.env.getEditingElement();
+        if (!editingEl) {
+            return false;
+        }
         const src = new URL(getBgImageURLFromEl(editingEl), window.location.origin);
         return (
             src.origin === window.location.origin &&
