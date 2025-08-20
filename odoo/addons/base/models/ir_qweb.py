@@ -76,7 +76,6 @@ in the IrQweb class.
               ┣━► _compile_directives (loop)    Consume all remaining directives ◄━━━┓  ┃ ┃
               ┃  ┃                              (e.g.: to change the indentation)    ┃  ┃ ┃
               ┃  ┣━► _compile_directive                                              ┃  ┃ ┃
-              ┃  ┃    ┗━► t-nocache       ━━► _compile_directive_nocache            ━┫  ┃ ┃
               ┃  ┃    ┗━► t-cache         ━━► _compile_directive_cache              ━┫  ┃ ┃
               ┃  ┃    ┗━► t-groups        ━━► _compile_directive_groups             ━┫  ┃ ┃
               ┃  ┃    ┗━► t-foreach       ━━► _compile_directive_foreach            ━┫  ┃ ┃
@@ -390,7 +389,7 @@ from dateutil.relativedelta import relativedelta
 from pathlib import Path
 from psycopg2.extensions import TransactionRollbackError
 from psycopg2.errors import ReadOnlySqlTransaction
-from typing import NamedTuple, Literal
+from typing import NamedTuple, Literal, TypeAlias, Union
 
 from odoo import api, models, tools
 from odoo.modules import Manifest
@@ -412,6 +411,11 @@ from odoo.tools.constants import SCRIPT_EXTENSIONS, STYLE_EXTENSIONS, TEMPLATE_E
 
 _logger = logging.getLogger(__name__)
 
+
+JSONValue: TypeAlias = Union[
+    str, int, float, bool, None,
+    list["JSONValue"], dict[str, "JSONValue"]
+]
 
 # QWeb token usefull for generate expression used in `_compile_expr_tokens` method
 token.QWEB = token.NT_OFFSET - 1
@@ -592,7 +596,7 @@ class QwebContent:
 
     def __init__(self, irQweb: IrQweb, params: QwebCallParameters):
         self.__irQweb = irQweb
-        self.__value = None
+        self.__iterator = None
         self.params = params
 
     @property
@@ -601,18 +605,26 @@ class QwebContent:
 
     @property
     def is_already_loaded(self):
-        return self.__value is not None
+        return self.__iterator is not None
 
     def __str__(self):
-        if self.__value is None:
-            # When we need to evaluate the content lazily, we cache the value
-            # for later.In `_render_iterall`, if the value is already cached,
-            # we yield it, otherwise it is evaluated without being cached.
-            self.__value = ''.join(self.__irQweb.with_context(__qweb_dont_fetch_directive=None)._render_iterall(self.params.view_ref, self.params.method, self.params.values, self.params.directive, self.params.path_xml))
-        return self.__value
+        return ''.join(self)
 
     def __repr__(self):
         return f'QwebContent({self.params!r})'
+
+    def __iter__(self):
+        # When we need to evaluate the content lazily, we cache the value
+        # for later.In `_render_iterall`, if the value is already cached,
+        # we yield it, otherwise it is evaluated without being cached.
+        if self.__iterator is not None:
+            return iter(self.__iterator)
+
+        self.__iterator = []
+        iterator = self.__irQweb.with_context(__qweb_dont_fetch_directive=None)._render_iterall(self.params.view_ref, self.params.method, self.params.values, self.params.directive, self.params.path_xml)
+        for item in iterator:
+            self.__iterator.append(item)
+            yield item
 
     def __getattr__(self, name):
         return getattr(Markup(str(self)), name)
@@ -762,20 +774,20 @@ class IrQweb(models.AbstractModel):
                     # To debug the rendering step by step you can log the (directive, len(stack) * '  ', repr(item))
                     if isinstance(item, str) or item.directive in qweb_skip_render_directives:
                         yield item
+                    elif isinstance(item, QwebContent) and item.is_already_loaded:
+                        yield from item
                     else:
                         # add new QwebStackFrame from QwebCallParameters or QwebContent
                         values = frame.values
                         irQweb = frame.irQweb
                         params = item
+                        is_main_method = False
                         is_content = False
                         if isinstance(item, QwebContent):
-                            if item.is_already_loaded:
-                                yield str(item)
-                                continue
                             is_content = True
                             params = item.params
-
-                        render_template = loaded_functions.get(params.method)
+                        elif not params.method:
+                            is_main_method = True
 
                         # Use the current directive context
                         if is_content:
@@ -784,6 +796,7 @@ class IrQweb(models.AbstractModel):
                             irQweb = irQweb.with_context(**params.context)
 
                         # Fetch the compiled function and template options
+                        render_template = loaded_functions.get(params.method)
                         if not render_template:
                             template_functions, def_name, options = irQweb._compile(params.view_ref)
                             loaded_functions.update(template_functions)
@@ -801,6 +814,32 @@ class IrQweb(models.AbstractModel):
                         if params.values:
                             values.update(params.values)
 
+                        # Get if  is a cached root method
+                        template_key_cache = False
+                        if is_main_method and options.get('used_values'):
+                            used_values = {key: values.get(key) for key in options['used_values'] if key in values}
+                            cached_values = self._get_cached_key_dict(params.view_ref, options, used_values)
+                            if cached_values:
+                                keys = []
+                                for name in sorted(cached_values):
+                                    value = cached_values[name]
+                                    if value is None or isinstance(value, (int, bool)):
+                                        keys.append(value)
+                                        continue
+                                    try:
+                                        write_dates = value.mapped('write_date')
+                                        if write_dates:
+                                            keys.append((value._name, value.ids, max(write_dates).timestamp()))
+                                        else:
+                                            keys.append((value._name, value.ids))
+                                    except AttributeError:
+                                        keys.append(repr(value))
+                                data_cache_key = tuple(keys)
+                                base_key_cache = tuple([options.get('ref')] + [self.env.context.get(k) for k in self._get_template_cache_keys()])
+                                template_key_cache = base_key_cache, data_cache_key
+                        if is_main_method:
+                            irQweb = irQweb.with_context(_qweb_is_cached_template=bool(template_key_cache))
+
                         iterator = []
                         try:
                             # Create the iterator from the template
@@ -810,6 +849,16 @@ class IrQweb(models.AbstractModel):
                                 # add a stack frame to log a complete error with the path when compile the template
                                 logParams = QwebCallParameters(*(params[0:-1] + (tuple(self.env.context['_qweb_error_path_xml']),)))
                                 stack.append(QwebStackFrame(logParams, irQweb, [], values, options))
+
+                            # Call the root method wrapped by the orm cache
+                            if template_key_cache:
+                                params = QwebCallParameters(dict(params.context, _qweb_is_cached_template=True), *params[1:])
+                                stack.append(QwebStackFrame(params, irQweb, iter(irQweb._get_cached_values(template_key_cache, lambda: list(iterator))), values, options))
+                                break
+                            # call the root method
+                            if is_main_method:
+                                params = QwebCallParameters(dict(params.context, _qweb_is_cached_template=False), *params[1:])
+
                             stack.append(QwebStackFrame(params, irQweb, iterator, values, options))
                         break
                 else:
@@ -857,6 +906,8 @@ class IrQweb(models.AbstractModel):
         loaded_codes = self.env.context['__qweb_loaded_codes']
         if (frame.params.view_ref in loaded_codes and not isinstance(error, RecursionError)) or len(stack) <= 1:
             options = frame.options or {}  # The compilation may have failed before the compilation options were loaded.
+            if 'ref' not in options:
+                options = self.env.context['__qweb_loaded_options'].get(stack[0].params.view_ref) or {}
             ref = options.get('ref') or stack[0].params.view_ref  # The template can have a null reference, for example for a provided etree.
             ref_name = options.get('ref_name') or None
             code = loaded_codes.get(frame.params.view_ref) or loaded_codes.get(False)
@@ -903,6 +954,12 @@ class IrQweb(models.AbstractModel):
 
         return QWebErrorInfo(f'{error.__class__.__name__}: {error}', ref if ref_name is None else ref_name, ref, path, html, source)
 
+    def _get_cached_key_dict(self, ref: int | str, options: dict, used_values: dict[str, str]) -> None | JSONValue:
+        """ if the method return None, the rendering will not be cached """
+        if self.env.context.get('is_t_cache_disabled'):
+            return None
+        return used_values or None
+
     # assume cache will be invalidated by third party on write to ir.ui.view
     def _get_template_cache_keys(self):
         """ Return the list of context keys to use for caching ``_compile``. """
@@ -944,12 +1001,6 @@ class IrQweb(models.AbstractModel):
         else:
             ref = self._get_template_info(template)['id']
 
-        # define the base key cache for code in cache and t-cache feature
-        base_key_cache = None
-        if ref:
-            base_key_cache = self._get_cache_key(tuple([ref] + [self.env.context.get(k) for k in self._get_template_cache_keys()]))
-        self = self.with_context(__qweb_base_key_cache=base_key_cache)
-
         # generate the template functions and the root function name
         def generate_functions():
             code, options, def_name = self._generate_code(template)
@@ -978,7 +1029,11 @@ class IrQweb(models.AbstractModel):
             unsafe_eval(compiled, globals_dict)
             return globals_dict['generate_functions'](), def_name, frozendict(options)
 
-        return self._load_values(base_key_cache, generate_functions)
+        if ref:
+            cache_key = self._get_cache_key(tuple([ref] + [self.env.context.get(k) for k in self._get_template_cache_keys()]))
+            return self._get_cached_values(cache_key, generate_functions)
+
+        return generate_functions()
 
     def _generate_code(self, template):
         if isinstance(template, etree._Element):
@@ -1027,7 +1082,7 @@ class IrQweb(models.AbstractModel):
 
         compile_context.pop('raise_if_not_found', None)
 
-        ref_name = element.attrib.pop('t-name', template if isinstance(template, str) and '<' not in template else None)
+        ref_name = element.attrib.get('t-name', template if isinstance(template, str) and '<' not in template else None)
         if ref_name is None and isinstance(ref, int):
             ref_name = self._get_template_info(ref)['key']
 
@@ -1072,6 +1127,7 @@ class IrQweb(models.AbstractModel):
             element.text = FIRST_RSTRIP_REGEXP.sub(r'\2', element.text)
 
         compile_context['template_functions'] = {}
+        compile_context['used_values'] = tuple(key for key in element.attrib.pop('t-args', '').split(',') if key and VARNAME_REGEXP.match(key))
 
         compile_context['_text_concat'] = []
         self._append_text("", compile_context)  # To ensure the template function is a generator and doesn't become a regular function
@@ -1091,8 +1147,10 @@ class IrQweb(models.AbstractModel):
                 yield from {def_name}_content(self, values)
                 """, 0)]
 
+        options['used_values'] = compile_context["used_values"]
+
         code_lines = []
-        code_lines.append(f'template_options = {pprint.pformat(options, indent=4)}')
+        code_lines.append(f'template_options = frozendict({pprint.pformat(options, indent=4)})')
         code_lines.append('code = None')
         code_lines.append('template_functions = {}')
 
@@ -1123,19 +1181,7 @@ class IrQweb(models.AbstractModel):
 
         # template is an xml etree already
         if isinstance(template, etree._Element):
-            element = template
-            document = etree.tostring(template, encoding='unicode')
-
-            # <templates>
-            #   <template t-name=... /> <!-- return ONLY this element -->
-            #   <template t-name=... />
-            # </templates>
-            for node in element.iter():
-                ref = node.get('t-name')
-                if ref:
-                    return (node, document, ref)
-
-            return (element, document, 'etree._Element')
+            return (template, etree.tostring(template, encoding='unicode'), 'etree._Element')
 
         # template is xml as string
         if isinstance(template, str) and '<' in template:
@@ -1149,6 +1195,13 @@ class IrQweb(models.AbstractModel):
 
         # In dev mode `_generate_code_cached` is not cached and the tree can be processed several times
         value_tree = deepcopy(value['tree']) if 'xml' in tools.config['dev_mode'] else value['tree']
+
+        # key and t-name have the same value
+        if 't-name' in value_tree.attrib and value_tree.get('t-name') != value['xmlid']:
+            raise ValueError(f"'t-name' and the 'ir.ui.view' record key is different: {value_tree.get('t-name')!r} != {value['xmlid']!r}")
+        else:
+            value_tree.set('t-name', value['xmlid'])
+
         # return etree, document and ref
         return (value_tree, value['template'], value['ref'])
 
@@ -1295,6 +1348,7 @@ class IrQweb(models.AbstractModel):
             'Mapping': Mapping,
             'Markup': Markup,
             'escape': escape,
+            'frozendict': frozendict,
             'VOID_ELEMENTS': VOID_ELEMENTS,
             'QwebCallParameters': QwebCallParameters,
             'QwebContent': QwebContent,
@@ -1607,8 +1661,6 @@ class IrQweb(models.AbstractModel):
             'elif', # Must be the first because compiled by the previous if.
             'else', # Must be the first because compiled by the previous if.
             'debug',
-            'nocache',
-            'cache',
             'groups',
             'as', 'foreach',
             'if',
@@ -1775,9 +1827,6 @@ class IrQweb(models.AbstractModel):
                 code.extend(self._compile_directive(el, compile_context, directive, level))
             elif directive == 'options':
                 if any(name.startswith('t-options-') for name in el.attrib):
-                    code.extend(self._compile_directive(el, compile_context, directive, level))
-            elif directive == 'nocache':
-                if any(name.startswith('t-nocache-') for name in el.attrib):
                     code.extend(self._compile_directive(el, compile_context, directive, level))
 
         # compile unordered directives still present on the element
@@ -2026,7 +2075,7 @@ class IrQweb(models.AbstractModel):
                 code.append(indent_code(f"values.update({self._compile_expr(varname)})", level))
             else:
                 # set the content as value
-                _ref, path, xml = compile_context['_qweb_error_path_xml']
+                ref, path, xml = compile_context['_qweb_error_path_xml']
                 content = (
                     self._compile_directive(el, compile_context, 'inner-content', 1) +
                     self._flush_text(compile_context, 1))
@@ -2038,7 +2087,7 @@ class IrQweb(models.AbstractModel):
                     compile_context['template_functions'][def_name] = def_code
 
                     code.append(indent_code(f"""
-                        values[{varname!r}] = QwebContent(self, QwebCallParameters(self.env.context, {compile_context['ref']!r}, {def_name!r}, values.copy(), 'root', 't-set', (template_options['ref'], {path!r}, {xml!r})))
+                        values[{varname!r}] = QwebContent(self, QwebCallParameters(self.env.context, {ref!r}, {def_name!r}, values.copy(), 'root', 't-set', (template_options['ref'], {path!r}, {xml!r})))
                     """, level))
                 else:
                     code.append(indent_code(f"values[{varname!r}] = ''", level))
@@ -2329,7 +2378,7 @@ class IrQweb(models.AbstractModel):
 
         code = self._flush_text(compile_context, level)
 
-        _ref, path, xml = compile_context['_qweb_error_path_xml']
+        ref, path, xml = compile_context['_qweb_error_path_xml']
 
         code_options = el.attrib.pop('t-consumed-options', 'None')
         tag_open = (
@@ -2409,7 +2458,7 @@ class IrQweb(models.AbstractModel):
         # `_render`.
         code.append(indent_code(f"""
             if isinstance(content, QwebContent):
-                self.env.context['_qweb_error_path_xml'][0] = template_options['ref']
+                self.env.context['_qweb_error_path_xml'][0] = {ref!r}
                 self.env.context['_qweb_error_path_xml'][1] = {path!r}
                 self.env.context['_qweb_error_path_xml'][2] = {xml!r}
                 yield content
@@ -2512,7 +2561,7 @@ class IrQweb(models.AbstractModel):
         nsmap = compile_context.get('nsmap')
 
         code = self._flush_text(compile_context, level, rstrip=el.tag.lower() == 't')
-        _ref, path, xml = compile_context['_qweb_error_path_xml']
+        ref, path, xml = compile_context['_qweb_error_path_xml']
 
         # options
         el.attrib.pop('t-consumed-options', None)
@@ -2598,7 +2647,15 @@ class IrQweb(models.AbstractModel):
                     template = int(template)
                 """, level))
 
-        code.append(indent_code(f"yield QwebCallParameters(t_call_options, template, None, t_call_values, True, 't-call', (template_options['ref'], {path!r}, {xml!r}))", level))
+        code.append(indent_code(f"""
+                is_in_cache = self.env.context.get('_qweb_is_cached_template')
+                if is_in_cache:
+                    for key, value in t_call_values.items():
+                        if value is not None and not isinstance(value, (str, int, float, bool)):
+                            raise ValueError(f'''The value type of {{key!r}} cannot be cached: {{value!r}}''')
+
+                yield QwebCallParameters(t_call_options, template, None, t_call_values, 'root' if is_in_cache else True, 't-call', ({ref!r}, {path!r}, {xml!r}))
+            """, level))
 
         return code
 
@@ -2655,118 +2712,6 @@ class IrQweb(models.AbstractModel):
                     yield tagName
                     yield '>'
                 """, level))
-
-        return code
-
-    def _compile_directive_cache(self, el, compile_context, level):
-        """Compile the `t-cache` tuple expression into a key cache.
-
-        The `t-cache` directive allows you to keep the rendered result
-        of a template part. The supplied key must be a tuple. This tuple
-        can contain recordset in this case the zone will be invalidated
-        each time the write_date of these records changes.
-        The values are scoped into the `t-cache` and are not available
-        outside.
-        see: `t-nocache`
-        """
-        expr = el.attrib.pop('t-cache')
-        code = self._flush_text(compile_context, level)
-
-        def_name = compile_context['make_name']('t_cache')
-
-        # Generate the content function
-        def_code = [indent_code(f"""def {def_name}(self, values):""", 0)]
-        _ref, path, xml = compile_context['_qweb_error_path_xml']
-        def_code.append(indent_code(f'# element: {path!r} , {xml!r}', 1))
-        def_content = self._compile_directives(el, compile_context, 1)
-        if def_content and not compile_context['_text_concat']:
-            self._append_text('', compile_context) # To ensure the template function is a generator and doesn't become a regular function
-        def_code.extend(def_content)
-        def_code.extend(self._flush_text(compile_context, 1))
-        compile_context['template_functions'][def_name] = def_code
-
-        # Get the dynamic key for the cache and load the content.
-        # The t-nocache yield a tuple (ref, function name) instead of a
-        # When reading tuple coming from t-nocache, we check if the
-        # method is already known otherwise the corresponding template
-        # and its functions are loaded.
-        def_wrap = [indent_code(f"""
-            def {def_name}_wrap(self, values):
-                # element: {path!r} , {xml!r}'
-                template_cache_key = {self._compile_expr(expr)} if not self.env.context.get('is_t_cache_disabled') else None
-                cache_key = self._get_cache_key(template_cache_key) if template_cache_key else None
-                uniq_cache_key = cache_key and ({self.env.context['__qweb_base_key_cache']!r}, '{def_name}_cache', cache_key)
-                def {def_name}_cache():
-                    text = []
-                    result = []
-                    for item in self.with_context(__qweb_skip_render_directives=['t-nocache'])._render_iterall({compile_context['template']!r}, {def_name!r}, values):
-                        if isinstance(item, str):
-                            text.append(item)
-                        else:
-                            if text:
-                                result.append(''.join(text))
-                                text = []
-                            result.append(item)
-                    if text:
-                        result.append(''.join(text))
-                    return result
-
-                yield from self._load_values(uniq_cache_key, {def_name}_cache, self.env.context['__qweb_loaded_functions'])
-            """, 0)]
-        compile_context['template_functions'][f'{def_name}_wrap'] = def_wrap
-
-        code.append(indent_code(f"yield QwebCallParameters({{}}, {compile_context['template']!r}, '{def_name}_wrap', {{}}, True, 't-cache', (template_options['ref'], {path!r}, {xml!r}))", level))
-        return code
-
-    def _compile_directive_nocache(self, el, compile_context, level):
-        """
-        The `t-nocache` directive makes it possible to force rendering
-        of a part even if it is in a `t-cache`. The values available in
-        the `t-nocache` are the one provided when calling the template
-        (and therefore ignores any t-set that could have been done).
-
-        The `t-nocache-*` are the values whose result of the
-        expression will be cached and added to the root's values when
-        rendering the no cache part. Only primitive types can be cached.
-
-        see: `t-cache`
-        """
-        if 't-nocache' not in el.attrib:
-            raise SyntaxError("t-nocache-* must be on the same node as t-nocache")
-
-        el.attrib.pop('t-nocache')
-        code = self._flush_text(compile_context, level)
-
-        # t-nocache-* will generate the values to put in cache
-        # must cosume this attributes before generate the cached content.
-        code_cache_values = [indent_code("cached_values = {}", level)]
-        for key in list(el.attrib):
-            if key.startswith('t-nocache-'):
-                expr = el.attrib.pop(key)
-                varname = key[10:]
-                if not VARNAME_REGEXP.match(varname):
-                    raise ValueError(f'The varname {varname!r} can only contain alphanumeric characters and underscores.')
-                code_cache_values.append(indent_code(f"""
-                    cached_value = {self._compile_expr(expr)}
-                    if cached_value is not None and not isinstance(cached_value, (str, int, float, bool)):
-                        raise ValueError(f'''The value type of {key!r} cannot be cached: {{cached_value!r}}''')
-                    cached_values[{varname!r}] = cached_value
-                """, level))
-
-        # generate the cached content method
-        def_name = compile_context['make_name']('t_nocache')
-        def_code = [f"def {def_name}(self, values):"]
-        _ref, path, xml = compile_context['_qweb_error_path_xml']
-        def_code.append(indent_code(f'# element: {path!r} , {xml!r}', 1))
-        def_content = self._compile_directives(el, compile_context, 1)
-        if def_content and not compile_context['_text_concat']:
-            self._append_text('', compile_context) # To ensure the template function is a generator and doesn't become a regular function
-        def_code.extend(def_content)
-        def_code.extend(self._flush_text(compile_context, 1))
-        compile_context['template_functions'][def_name] = def_code
-
-        code.extend(code_cache_values)
-        code.append(indent_code(f"yield QwebCallParameters({{'__qweb_skip_render_directives': None}}, {compile_context['template']!r}, {def_name!r}, cached_values, self.env.context.get('__qweb_skip_render_directives') and 'root', 't-nocache', (template_options['ref'], {path!r}, {xml!r}))", level))
 
         return code
 
@@ -2906,17 +2851,6 @@ class IrQweb(models.AbstractModel):
             except AttributeError:
                 keys.append(repr(item))
         return tuple(keys)
-
-    def _load_values(self, cache_key, get_value, loaded_values=None):
-        """ generate value from the function if the result is not cached. """
-        if not cache_key:
-            return get_value()
-        value = loaded_values and loaded_values.get(cache_key)
-        if not value:
-            value = self._get_cached_values(cache_key, get_value)
-        if loaded_values is not None:
-            loaded_values[cache_key] = value
-        return value
 
     # The cache does not need to be invalidated if the 'base_key_cache'
     # in '_compile' method contains the write_date of all inherited views.
