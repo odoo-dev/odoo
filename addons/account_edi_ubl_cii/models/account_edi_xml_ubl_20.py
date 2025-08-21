@@ -1437,7 +1437,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 return None
             return vals['total_grouping_function'](base_line, tax_data)
 
-        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'] + vals.get('early_payment_base_lines', []), non_fixed_total_grouping_function)
+        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], non_fixed_total_grouping_function)
         aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
         for currency_suffix in ['', '_currency']:
             vals[f'tax_inclusive_amount{currency_suffix}'] = vals[f'tax_exclusive_amount{currency_suffix}'] \
