@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo import Command
 from odoo.exceptions import UserError
 from odoo.tests import Form
@@ -10,7 +8,6 @@ from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounti
 from odoo.addons.stock_account.tests.test_stockvaluationlayer import TestStockValuationCommon
 
 
-@skip('Temporary to fast merge new valuation')
 class TestStockValuationLayerRevaluation(TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
@@ -19,114 +16,81 @@ class TestStockValuationLayerRevaluation(TestStockValuationCommon):
         cls.product1.write({
             'property_account_expense_id': cls.expense_account.id,
         })
+        cls.stock_valuation_account.account_stock_variation_id = cls.stock_valuation_account
         cls.product1.categ_id.write({
             'property_valuation': 'real_time',
-            'property_stock_account_input_categ_id': cls.stock_input_account.id,
-            'property_stock_account_output_categ_id': cls.stock_output_account.id,
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
 
         cls.product1.categ_id.property_valuation = 'real_time'
+        cls.env.company.account_stock_journal_id = cls.stock_journal
 
     def test_stock_valuation_layer_revaluation_avco(self):
         self.product1.categ_id.property_cost_method = 'average'
-        context = {
-            'default_product_id': self.product1.id,
-            'default_company_id': self.env.company.id,
-            'default_added_value': 0.0
-        }
-        # Quantity of product1 is zero, raise
-        with self.assertRaises(UserError):
-            Form(self.env['stock.valuation.layer.revaluation'].with_context(context)).save()
 
         self._make_in_move(self.product1, 10, unit_cost=2)
-        self._make_in_move(self.product1, 10, unit_cost=4)
+        move = self._make_in_move(self.product1, 10, unit_cost=4)
 
         self.assertEqual(self.product1.standard_price, 3)
-        self.assertEqual(self.product1.quantity_svl, 20)
+        self.assertEqual(self.product1.qty_available, 20)
+        self.assertEqual(move.value, 40)
 
-        old_layers = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc")
-
-        self.assertEqual(len(old_layers), 2)
-        self.assertEqual(old_layers[0].remaining_value, 40)
-
-        revaluation_wizard = Form(self.env['stock.valuation.layer.revaluation'].with_context(context))
-        revaluation_wizard.added_value = 20
-        revaluation_wizard.account_id = self.stock_valuation_account
-        revaluation_wizard.save().action_validate_revaluation()
+        move.value_manual = 60
 
         # Check standard price change
         self.assertEqual(self.product1.standard_price, 4)
-        self.assertEqual(self.product1.quantity_svl, 20)
+        self.assertEqual(self.product1.qty_available, 20)
 
-        # Check the creation of stock.valuation.layer
-        new_layer = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc", limit=1)
-        self.assertEqual(new_layer.value, 20)
+        # Check the value of move and product
+        self.assertEqual(move.value, 60)
+        self.assertEqual(move.remaining_value, 40)
+        self.assertEqual(self.product1.total_value, 80)
 
-        # Check the remaing value of current layers
-        self.assertEqual(old_layers[0].remaining_value, 50)
-        self.assertEqual(sum(slv.remaining_value for slv in old_layers), 80)
 
         # Check account move
-        self.assertTrue(bool(new_layer.account_move_id))
-        self.assertEqual(len(new_layer.account_move_id.line_ids), 2)
+        account_move_line = self.env['account.move'].browse(self.env.company.action_close_stock_valuation()['res_id']).line_ids
+        self.assertTrue(bool(account_move_line))
+        self.assertEqual(len(account_move_line), 2)
 
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("debit")), 20)
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("credit")), 20)
+        self.assertEqual(sum(account_move_line.mapped("debit")), 80)
+        self.assertEqual(sum(account_move_line.mapped("credit")), 80)
 
-        credit_lines = [l for l in new_layer.account_move_id.line_ids if l.credit > 0]
+        credit_lines = [l for l in account_move_line if l.credit > 0]
         self.assertEqual(len(credit_lines), 1)
         self.assertEqual(credit_lines[0].account_id.id, self.stock_valuation_account.id)
 
     def test_stock_valuation_layer_revaluation_avco_rounding(self):
         self.product1.categ_id.property_cost_method = 'average'
-        context = {
-            'default_product_id': self.product1.id,
-            'default_company_id': self.env.company.id,
-            'default_added_value': 0.0
-        }
-        # Quantity of product1 is zero, raise
-        with self.assertRaises(UserError):
-            Form(self.env['stock.valuation.layer.revaluation'].with_context(context)).save()
 
         self._make_in_move(self.product1, 1, unit_cost=1)
         self._make_in_move(self.product1, 1, unit_cost=1)
-        self._make_in_move(self.product1, 1, unit_cost=1)
+        move = self._make_in_move(self.product1, 1, unit_cost=1)
 
         self.assertEqual(self.product1.standard_price, 1)
-        self.assertEqual(self.product1.quantity_svl, 3)
+        self.assertEqual(self.product1.qty_available, 3)
+        self.assertEqual(move.value, 1)
 
-        old_layers = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc")
-
-        self.assertEqual(len(old_layers), 3)
-        self.assertEqual(old_layers[0].remaining_value, 1)
-
-        revaluation_wizard = Form(self.env['stock.valuation.layer.revaluation'].with_context(context))
-        revaluation_wizard.added_value = 1
-        revaluation_wizard.account_id = self.stock_valuation_account
-        revaluation_wizard.save().action_validate_revaluation()
+        move.value_manual = 2
 
         # Check standard price change
         self.assertEqual(self.product1.standard_price, 1.33)
-        self.assertEqual(self.product1.quantity_svl, 3)
+        self.assertEqual(self.product1.qty_available, 3)
 
-        # Check the creation of stock.valuation.layer
-        new_layer = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc", limit=1)
-        self.assertEqual(new_layer.value, 1)
-
-        # Check the remaing value of current layers
-        self.assertEqual(sum(slv.remaining_value for slv in old_layers), 4)
-        self.assertTrue(1.34 in old_layers.mapped("remaining_value"))
+        # Check the value of move and product
+        self.assertEqual(move.value, 2)
+        self.assertEqual(move.remaining_value, 1.33)
+        self.assertEqual(self.product1.total_value, 4)
 
         # Check account move
-        self.assertTrue(bool(new_layer.account_move_id))
-        self.assertEqual(len(new_layer.account_move_id.line_ids), 2)
+        account_move_line = self.env['account.move'].browse(self.env.company.action_close_stock_valuation()['res_id']).line_ids
+        self.assertTrue(bool(account_move_line))
+        self.assertEqual(len(account_move_line), 2)
 
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("debit")), 1)
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("credit")), 1)
+        self.assertEqual(sum(account_move_line.mapped("debit")), 4)
+        self.assertEqual(sum(account_move_line.mapped("credit")), 4)
 
-        credit_lines = [l for l in new_layer.account_move_id.line_ids if l.credit > 0]
+        credit_lines = [l for l in account_move_line if l.credit > 0]
         self.assertEqual(len(credit_lines), 1)
         self.assertEqual(credit_lines[0].account_id.id, self.stock_valuation_account.id)
 
@@ -145,23 +109,21 @@ class TestStockValuationLayerRevaluation(TestStockValuationCommon):
 
         # First Move
         self.product1.write({'standard_price': 0.022})
-        self._make_in_move(self.product1, 10000)
+        move1 = self._make_in_move(self.product1, 10000)
 
         self.assertEqual(self.product1.standard_price, 0.02)
-        self.assertEqual(self.product1.quantity_svl, 10000)
-
-        layer = self.product1.stock_valuation_layer_ids
-        self.assertEqual(layer.value, 200)
+        self.assertEqual(self.product1.qty_available, 10000)
+        self.assertEqual(move1.value, 200)
 
         # Second Move
         self.product1.write({'standard_price': 0.053})
 
         self.assertEqual(self.product1.standard_price, 0.05)
-        self.assertEqual(self.product1.quantity_svl, 10000)
+        self.assertEqual(self.product1.qty_available, 10000)
 
-        layers = self.product1.stock_valuation_layer_ids
-        self.assertEqual(layers[0].value, 200)
-        self.assertEqual(layers[1].value, 300)
+        move2 = self._make_in_move(self.product1, 10000)
+        self.assertEqual(move2.value, 500)
+        self.assertEqual(self.product1.total_value, 700)
 
     def test_stock_valuation_layer_revaluation_avco_rounding_5_digits(self):
         """
@@ -177,70 +139,50 @@ class TestStockValuationLayerRevaluation(TestStockValuationCommon):
 
         # First Move
         self.product1.write({'standard_price': 0.00875})
-        self._make_in_move(self.product1, 10000)
+        move = self._make_in_move(self.product1, 10000)
 
         self.assertEqual(self.product1.standard_price, 0.00875)
-        self.assertEqual(self.product1.quantity_svl, 10000)
+        self.assertEqual(self.product1.qty_available, 10000)
 
-        layer = self.product1.stock_valuation_layer_ids
-        self.assertEqual(layer.value, 87.5)
+        self.assertEqual(move.value, 87.5)
 
         # Second Move
         self.product1.write({'standard_price': 0.00975})
 
         self.assertEqual(self.product1.standard_price, 0.00975)
-        self.assertEqual(self.product1.quantity_svl, 10000)
+        self.assertEqual(self.product1.qty_available, 10000)
 
-        layers = self.product1.stock_valuation_layer_ids
-        self.assertEqual(layers[0].value, 87.5)
-        self.assertEqual(layers[1].value, 10)
+        move1 = self._make_in_move(self.product1, 10000)
+        self.assertEqual(move1.value, 97.5)
+        self.assertEqual(self.product1.total_value, 185.0)
 
     def test_stock_valuation_layer_revaluation_fifo(self):
         self.product1.categ_id.property_cost_method = 'fifo'
-        context = {
-            'default_product_id': self.product1.id,
-            'default_company_id': self.env.company.id,
-            'default_added_value': 0.0
-        }
-        # Quantity of product1 is zero, raise
-        with self.assertRaises(UserError):
-            Form(self.env['stock.valuation.layer.revaluation'].with_context(context)).save()
 
         self._make_in_move(self.product1, 10, unit_cost=2)
-        self._make_in_move(self.product1, 10, unit_cost=4)
+        move = self._make_in_move(self.product1, 10, unit_cost=4)
 
         self.assertEqual(self.product1.standard_price, 3)
-        self.assertEqual(self.product1.quantity_svl, 20)
+        self.assertEqual(self.product1.qty_available, 20)
+        self.assertEqual(move.value, 40)
 
-        old_layers = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc")
-
-        self.assertEqual(len(old_layers), 2)
-        self.assertEqual(old_layers[0].remaining_value, 40)
-
-        revaluation_wizard = Form(self.env['stock.valuation.layer.revaluation'].with_context(context))
-        revaluation_wizard.added_value = 20
-        revaluation_wizard.account_id = self.stock_valuation_account
-        revaluation_wizard.save().action_validate_revaluation()
+        move.value_manual = 60
 
         self.assertEqual(self.product1.standard_price, 4)
-
-        # Check the creation of stock.valuation.layer
-        new_layer = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc", limit=1)
-        self.assertEqual(new_layer.value, 20)
-
-        # Check the remaing value of current layers
-        self.assertEqual(old_layers[0].remaining_value, 50)
-        self.assertEqual(sum(slv.remaining_value for slv in old_layers), 80)
+        self.assertEqual(move.value, 60)
+        self.assertEqual(self.product1.total_value, 80)
 
         # Check account move
-        self.assertTrue(bool(new_layer.account_move_id))
-        self.assertTrue(len(new_layer.account_move_id.line_ids), 2)
+        account_move_line = self.env['account.move'].browse(self.env.company.action_close_stock_valuation()['res_id']).line_ids
+        self.assertTrue(bool(account_move_line))
+        self.assertEqual(len(account_move_line), 2)
 
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("debit")), 20)
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("credit")), 20)
+        self.assertEqual(sum(account_move_line.mapped("debit")), 80)
+        self.assertEqual(sum(account_move_line.mapped("credit")), 80)
 
-        credit_lines = [l for l in new_layer.account_move_id.line_ids if l.credit > 0]
+        credit_lines = [l for l in account_move_line if l.credit > 0]
         self.assertEqual(len(credit_lines), 1)
+        self.assertEqual(credit_lines[0].account_id.id, self.stock_valuation_account.id)
 
     def test_stock_valuation_layer_revaluation_partial(self):
         """ Only adjust the valuation on some of the layers for a product """
@@ -253,81 +195,42 @@ class TestStockValuationLayerRevaluation(TestStockValuationCommon):
 
         self._make_in_move(self.product1, 5, unit_cost=4)
         self._make_in_move(self.product1, 10, unit_cost=4)
-        self._make_in_move(self.product1, 5, unit_cost=8)
+        move1 = self._make_in_move(self.product1, 5, unit_cost=8)
         self._make_in_move(product2, 10, unit_cost=4)
 
         self.assertEqual(self.product1.standard_price, 5)
-        self.assertEqual(self.product1.quantity_svl, 20)
+        self.assertEqual(self.product1.qty_available, 20)
 
-        old_layers = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc")
+        moves = self.env['stock.move'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc")
 
-        self.assertEqual(len(old_layers), 3)
-        self.assertEqual(old_layers.mapped("remaining_value"), [40, 40, 20])
+        self.assertEqual(moves.mapped("remaining_value"), [40, 40, 20])
 
-        # Adjusting layers for multiple products at once: raise
-        with self.assertRaises(UserError):
-            Form(self.env['stock.valuation.layer.revaluation'].with_context({
-                'active_ids': self.env['stock.valuation.layer'].search([]).ids,
-                'active_model': 'stock.valuation.layer'
-            })).save()
-
-        revaluation_wizard = Form(self.env['stock.valuation.layer.revaluation'].with_context({
-            'active_ids': old_layers[0:2].ids,
-            'active_model': 'stock.valuation.layer'
-        }))
-        revaluation_wizard.added_value = 30
-        revaluation_wizard.account_id = self.stock_valuation_account
-        revaluation_wizard.save().action_validate_revaluation()
+        move1.value_manual = 70
 
         # Check standard price change
         self.assertEqual(self.product1.standard_price, 6.5)
-        self.assertEqual(self.product1.quantity_svl, 20)
+        self.assertEqual(self.product1.qty_available, 20)
+        self.assertEqual(move1.value, 70)
 
-        # Check the creation of stock.valuation.layer
-        new_layer = self.env['stock.valuation.layer'].search([('product_id', '=', self.product1.id)], order="create_date desc, id desc", limit=1)
-        self.assertEqual(new_layer.value, 30)
-
-        # Check the remaing value of current layers: only the adjusted layers should have changed
-        # the added value should be impacted proportionally to the qty of each layer (+10 and +20)
-        self.assertEqual(old_layers.mapped("remaining_value"), [50, 60, 20])
+        # Check the remaing value of current moves: only the adjusted move should have changed
+        # the added value should be impacted proportionally to the qty of move (+30)
+        self.assertEqual(moves.mapped("remaining_value"), [70, 40, 20])
 
         # Check account move
-        self.assertTrue(bool(new_layer.account_move_id))
-        self.assertEqual(len(new_layer.account_move_id.line_ids), 2)
+        account_move_line = self.env['account.move'].browse(self.env.company.action_close_stock_valuation()['res_id']).line_ids
+        self.assertTrue(bool(account_move_line))
+        self.assertEqual(len(account_move_line), 2)
 
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("debit")), 30)
-        self.assertEqual(sum(new_layer.account_move_id.line_ids.mapped("credit")), 30)
+        self.assertEqual(sum(account_move_line.mapped("debit")), 130)
+        self.assertEqual(sum(account_move_line.mapped("credit")), 130)
 
-        credit_lines = [l for l in new_layer.account_move_id.line_ids if l.credit > 0]
+        credit_lines = [l for l in account_move_line if l.credit > 0]
         self.assertEqual(len(credit_lines), 1)
         self.assertEqual(credit_lines[0].account_id.id, self.stock_valuation_account.id)
 
-        self.assertIn(
-            f"Affected valuation layers: {old_layers[1].reference} (id: {old_layers[1].id}) and {old_layers[0].reference} (id: {old_layers[0].id})",
-            new_layer.account_move_id.line_ids[0].name
-        )
-
-        # Adjusting an adjustment layer: raise
-        with self.assertRaises(UserError):
-            Form(self.env['stock.valuation.layer.revaluation'].with_context({
-                'active_ids': [new_layer.id],
-                'active_model': 'stock.valuation.layer'
-            })).save()
-
-        # remove all products from the oldest layer
-        self._make_out_move(self.product1, 5)
-        self.assertEqual(old_layers[2].remaining_qty, 0)
-
-        # Adjusting a layer with no remaining quantity: raise
-        with self.assertRaises(UserError):
-            Form(self.env['stock.valuation.layer.revaluation'].with_context({
-                'active_ids': [old_layers[2].id],
-                'active_model': 'stock.valuation.layer'
-            })).save()
-
     def test_multi_company_fifo_svl_negative_revaluation(self):
         """
-        Check that the journal entries and stock valuation layers are created for the company related
+        Check that the journal entries are created for the company related
         to the stock move even if the picking is validated using a different one.
         """
         company1 = self.env.company
@@ -364,6 +267,5 @@ class TestStockValuationLayerRevaluation(TestStockValuationCommon):
         receipt.action_confirm()
         receipt.button_validate()
 
-        svls = self.env['stock.valuation.layer'].search([('product_id', '=', product.id)])
-        self.assertEqual(len(svls), 4, "Expected 4 valuation layers")
-        self.assertTrue(all(svl.account_move_id for svl in svls), "All SVLs should be linked to a journal entry")
+        data = self.env.company.action_close_stock_valuation()
+        self.assertTrue(data, "account moves should be created")
