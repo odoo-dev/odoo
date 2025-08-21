@@ -986,9 +986,8 @@ class TestUblBis3(AccountTestInvoicingCommon):
         )
 
     def test_beg_testcase06_discount_with_cash_payment_old(self):
-        raise NotImplementedError("Will we fix AllowanceCharge node filtering in old version (w/o new helpers)?")
-        # self.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', False)
-        # self.test_beg_testcase06_discount_with_cash_payment()
+        self.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', False)
+        self.test_beg_testcase06_discount_with_cash_payment()
 
     def test_beg_testcase10_invoice_in_usd_and_eur_vat_21(self):
         """ Test that the delta is dispatched evenly on the base lines. """

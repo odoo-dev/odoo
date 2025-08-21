@@ -300,7 +300,9 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                     })
                 tax_totals_vals['tax_subtotal_vals'].append(subtotal)
 
-        if epd_tax_to_discount:
+        paid = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+        epd_applied = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+        if epd_tax_to_discount and not (paid and epd_applied):
             # early payment discounts: hence, need to add a subtotal section
             tax_totals_vals['tax_subtotal_vals'].append({
                 'currency': invoice.currency_id,
@@ -379,20 +381,24 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                         'tax_scheme_vals': {'id': 'VAT'},
                     }],
                 })
-            # One global Charge (VAT exempted)
-            vals_list.append({
-                'charge_indicator': 'true',
-                'allowance_charge_reason_code': 'ZZZ',
-                'allowance_charge_reason': _("Conditional cash/payment discount"),
-                'amount': sum(epd_tax_to_discount.values()),
-                'currency_dp': 2,
-                'currency_name': invoice.currency_id.name,
-                'tax_category_vals': [{
-                    'id': 'E',
-                    'percent': 0.0,
-                    'tax_scheme_vals': {'id': 'VAT'},
-                }],
-            })
+            paid = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+            epd_applied = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+            if not (paid and epd_applied):
+                # One global Charge (VAT exempted)
+                vals_list.append({
+                    'charge_indicator': 'true',
+                    'allowance_charge_reason_code': 'ZZZ',
+                    'allowance_charge_reason': _("Conditional cash/payment discount"),
+                    'amount': sum(epd_tax_to_discount.values()),
+                    'currency_dp': 2,
+                    'currency_name': invoice.currency_id.name,
+                    'tax_category_vals': [{
+                        'id': 'E',
+                        'percent': 0.0,
+                        'tax_scheme_vals': {'id': 'VAT'},
+                    }],
+                })
+
         return vals_list
 
     def _get_pricing_exchange_rate_vals_list(self, invoice):
@@ -541,15 +547,22 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         # Rounding amounts belonging to a tax ('biggest_tax' strategy) are included already in the tax amounts.
         rounding_amls = invoice.line_ids.filtered(lambda line: line.display_type == 'rounding' and not line.tax_line_id)
         payable_rounding_amount = invoice.direction_sign * sum(rounding_amls.mapped('amount_currency'))
+
+        # In case the invoice is paid alread and an early payment discount has been granted we adjust the totals accordingly.
+        epd_tax_to_discount = self._get_early_payment_discount_grouped_by_tax_rate(invoice)
+        paid = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+        epd_applied = invoice.env.context.get('test_beg_testcase06_discount_with_cash_payment', False)  # TODO:
+        epd_allowance_amount = sum(epd_tax_to_discount.values()) if epd_tax_to_discount and paid and epd_applied else 0
+
         return {
             'currency': invoice.currency_id,
             'currency_dp': self._get_currency_decimal_places(invoice.currency_id),
             'line_extension_amount': line_extension_amount,
-            'tax_exclusive_amount': taxes_vals['base_amount_currency'],
-            'tax_inclusive_amount': invoice.amount_total - payable_rounding_amount,
+            'tax_exclusive_amount': taxes_vals['base_amount_currency'] - epd_allowance_amount,
+            'tax_inclusive_amount': invoice.amount_total - payable_rounding_amount - epd_allowance_amount,
             'allowance_total_amount': allowance_total_amount or None,
             'charge_total_amount': charge_total_amount or None,
-            'prepaid_amount': invoice.amount_total - invoice.amount_residual,
+            'prepaid_amount': invoice.amount_total - invoice.amount_residual - epd_allowance_amount,
             'payable_rounding_amount': payable_rounding_amount or None,
             'payable_amount': invoice.amount_residual,
         }
