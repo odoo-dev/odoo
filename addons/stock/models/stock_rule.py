@@ -604,13 +604,10 @@ class ProcurementGroup(models.Model):
         if not product:
             return self.env['stock.route']
         route_ids = self.env['stock.route'].browse(valid_route_ids)
-        if not route_ids:
-            route_ids = self.env['stock.route']
         if warehouse_id:
-            # For multi company we need all warehouse which access by the user.
+            # For multi-company we need all warehouses accessible by the user.
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_ids.ids)])
-            # Take only those routes whose has rules.
-            route_ids |= (warehouse.route_ids | warehouse_id.route_ids).filtered(lambda r: r.rule_ids)
+            route_ids |= warehouse.route_ids | warehouse_id.route_ids
         return route_ids
 
     @api.model

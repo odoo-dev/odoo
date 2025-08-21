@@ -74,7 +74,7 @@ class ProductReplenish(models.TransientModel):
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1)
             res['warehouse_id'] = warehouse.id
         if 'route_id' in fields and 'route_id' not in res and product_tmpl_id:
-            route = self.env['procurement.group']._get_product_routes(product_tmpl_id.product_variant_id, False, False)
+            route = self.env['procurement.group']._get_product_routes(product_tmpl_id.product_variant_id, False, self.env['stock.warehouse'].browse(self.env.context.get('default_warehouse_id')))
             if route:
                 res['route_id'] = route[0].id
             else:
