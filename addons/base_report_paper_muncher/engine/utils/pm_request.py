@@ -1,5 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+"""The :mod:`odoo.addons.base_report_paper_muncher.engine.utils.pm_request`
+module provides utilities for consuming and reading
+Paper Muncher requests.
+It includes functions to read the request line,
+and to consume the request headers.
+It also handles timeouts for reading lines from the request.
+"""
+
+
 import logging
 import time
 
@@ -22,6 +31,7 @@ def consume_paper_muncher_request(
     timeout: int
 ) -> None:
     """Read and discard all header lines from a Paper Muncher request.
+
     :param BinaryIO stdout: File-like stdout stream from Paper Muncher.
     :param int timeout: Timeout in seconds for each line read.
     :return: None
@@ -41,15 +51,20 @@ def read_paper_muncher_request(
     timeout: int,
 ) -> Optional[str]:
     """Read the HTTP-like request line from Paper Muncher and return the path.
+
     :param BinaryIO stdout: File-like stdout stream from Paper Muncher.
     :param int timeout: Timeout in seconds for each line read.
     :return: The requested asset path, or ``None`` if the method is PUT.
     :rtype: str or None
     :raises EOFError: If no request line is found.
-    :raises ValueError: If the request format is invalid or the method is unsupported.
+    :raises ValueError: If the request format is invalid or the method is
+        unsupported.
     """
     deadline = time.monotonic() + timeout
-    first_line_bytes = readline_with_timeout(stdout, timeout=remaining_time(deadline))
+    first_line_bytes = readline_with_timeout(
+        stdout,
+        timeout=remaining_time(deadline)
+    )
 
     if not first_line_bytes:
         raise EOFError("EOF reached while reading first line from subprocess")

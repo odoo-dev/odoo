@@ -6,6 +6,8 @@ The :mod:`.paper_muncher` module provides
 utilities for interacting with Paper Muncher, a subprocess used to render
 HTML content into  or Image format.
 """
+
+
 import logging
 import subprocess
 
@@ -57,6 +59,17 @@ def rendered(
     mode: str = "print",
     **options,
 ) -> Generator[tuple[BinaryIO], None, None]:
+    """Context manager to render HTML content using Paper Muncher.
+
+    :param paperformat: The paper format to use for rendering.
+    :param content: The HTML content to render, as a BytesIO object.
+    :param mode: The rendering mode, either 'print' or 'render'.
+    :param options: Additional options to pass to Paper Muncher.
+    :return: A generator yielding the stdout and stderr streams of the
+        Paper Muncher process.
+    :raises RuntimeError: If Paper Muncher is not available or crashes.
+    :raises ValueError: If an invalid mode is specified.
+    """
 
     if not can_use_paper_muncher():
         raise RuntimeError(
@@ -221,6 +234,17 @@ def render(
     mode: str = "print",
     **options,
 ) -> bytes:
+    """Render HTML content using Paper Muncher and return the rendered output.
+
+    :param paperformat: The paper format to use for rendering.
+    :param content: The HTML content to render, as a BytesIO object.
+    :param mode: The rendering mode, either 'print' or 'render'.
+    :param options: Additional options to pass to Paper Muncher.
+    :return: The rendered content as bytes.
+    :raises RuntimeError: If Paper Muncher is not available or crashes.
+    :raises ValueError: If an invalid mode is specified.
+    """
+
     with rendered(
         paperformat,
         content,

@@ -6,6 +6,8 @@ and footers to HTML content.
 It includes functions to format the HTML with
 headers and footers using CSS rules.
 """
+
+
 import re
 from lxml import etree
 

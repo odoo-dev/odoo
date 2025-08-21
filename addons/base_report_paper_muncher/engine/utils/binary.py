@@ -3,6 +3,8 @@
 """The :mod:`odoo.addons.base_report_paper_muncher.engine.utils.binary` module
 provides utilities to locate and validate the Paper Muncher binary.
 """
+
+
 import logging
 import subprocess
 from typing import Optional
@@ -17,7 +19,9 @@ FALLBACK_BINARY = '/opt/paper-muncher/bin/paper-muncher'
 
 def get_paper_muncher_binary() -> Optional[str]:
     """Find and validate the Paper Muncher binary
-    :return: Path to the Paper Muncher binary if found and usable, None otherwise.
+
+    :return: Path to the Paper Muncher binary if found and usable,
+        None otherwise.
     :rtype: str or None
     """
     try:
@@ -42,7 +46,9 @@ def get_paper_muncher_binary() -> Optional[str]:
 
 def can_use_paper_muncher() -> bool:
     """Check if Paper Muncher binary is available and usable.
-    :return: True if Paper Muncher is in debug session and available, False otherwise.
+
+    :return: True if Paper Muncher is in debug session and available,
+        False otherwise.
     :rtype: bool
     """
     return bool(get_paper_muncher_binary())

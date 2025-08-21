@@ -7,8 +7,13 @@ from lxml import etree
 from markupsafe import Markup
 
 from odoo import models, fields, api, _
-from odoo.addons.base_report_paper_muncher.engine import can_use_paper_muncher, rendered
-from odoo.addons.base_report_paper_muncher.engine.utils.html import patch_html_etree
+from odoo.addons.base_report_paper_muncher.engine import (
+    can_use_paper_muncher,
+    rendered,
+)
+from odoo.addons.base_report_paper_muncher.engine.utils.html import (
+    patch_html_etree,
+)
 
 
 REPORT_HEADER_ID = 'minimal_layout_report_headers'
