@@ -44,6 +44,7 @@ export class OrderSummary extends Component {
     }
 
     clickLine(ev, orderline) {
+        ev.stopPropagation();
         if (ev.detail === 2) {
             clearTimeout(this.singleClick);
             return;
