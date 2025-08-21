@@ -15,3 +15,10 @@ class SaleManagementCommon(SaleCommon):
         cls.empty_order_template = cls.env['sale.order.template'].create({
             'name': "Test Quotation Template",
         })
+
+    @staticmethod
+    def _get_optional_product_lines(order):
+        """
+        Returns the order lines that are optional products.
+        """
+        return order.order_line.filtered(lambda line: line.is_optional and not line.display_type)
