@@ -548,7 +548,7 @@ class ProcurementGroup(models.Model):
         if warehouse_ids:
             valid_route_ids |= set(warehouse_ids.route_ids.ids)
         if product_id and valid_route_ids:
-            valid_route_ids |= set(self._get_product_routes(product_id, valid_route_ids, warehouse_ids).ids)
+            valid_route_ids |= set(self.with_context(warehouse_id=warehouse_ids.ids)._get_product_routes(product_id, valid_route_ids).ids)
         if valid_route_ids:
             domain &= Domain('route_id', 'in', list(valid_route_ids))
         res = self.env["stock.rule"]._read_group(
@@ -583,7 +583,7 @@ class ProcurementGroup(models.Model):
             valid_route_ids = (product_id.route_ids | product_id.categ_id.total_route_ids)
 
             if warehouse_id:
-                valid_route_ids = self._get_product_routes(product_id, set(valid_route_ids.ids), warehouse_id)
+                valid_route_ids = self.with_context(warehouse_id=warehouse_id.id)._get_product_routes(product_id, set(valid_route_ids.ids))
             if valid_route_ids:
                 res = Rule.search(Domain('route_id', 'in', valid_route_ids.ids) & domain, order='route_sequence, sequence', limit=1)
 
@@ -594,7 +594,7 @@ class ProcurementGroup(models.Model):
                 res = Rule.search(Domain('route_id', 'in', warehouse_routes.ids) & domain, order='route_sequence, sequence', limit=1)
         return res
 
-    def _get_product_routes(self, product, valid_route_ids, warehouse_id):
+    def _get_product_routes(self, product, valid_route_ids):
         """ Get valid routes for a product based on the following conditions:
             - If `purchase_ok` is enabled and the product has a vendor, select the 'Buy' route.
             - If the product has a Bill of Materials (BOM), select the 'Manufacturing' route.
@@ -604,10 +604,13 @@ class ProcurementGroup(models.Model):
         if not product:
             return self.env['stock.route']
         route_ids = self.env['stock.route'].browse(valid_route_ids)
-        if warehouse_id:
+        warehouse_ids = self.env.context.get('warehouse_id')
+        if warehouse_ids and isinstance(warehouse_ids, int) or isinstance(warehouse_ids, list):
+            warehouse_ids = self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id'))
+        if warehouse_ids:
             # For multi-company we need all warehouses accessible by the user.
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_ids.ids)])
-            route_ids |= warehouse.route_ids | warehouse_id.route_ids
+            route_ids |= warehouse.route_ids | warehouse_ids.route_ids
         return route_ids
 
     @api.model
@@ -637,7 +640,7 @@ class ProcurementGroup(models.Model):
             valid_route_ids = set()
             if route_ids:
                 valid_route_ids |= set(route_ids.ids)
-                valid_route_ids = set(self._get_product_routes(product_id, valid_route_ids, warehouse_id).ids)
+                valid_route_ids = set(self.with_context(warehouse_id=warehouse_id.id)._get_product_routes(product_id, valid_route_ids).ids)
             valid_route_ids = self.env['stock.route'].browse(list(valid_route_ids))
             # Give priority based on selected routes on product, then by sequence.
             for route_id in sorted(valid_route_ids, key=lambda r: (r not in product_id.route_ids, r.sequence)):
