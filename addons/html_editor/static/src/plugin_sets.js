@@ -67,7 +67,7 @@ import { EmbeddedFilePlugin } from "@html_editor/others/embedded_components/plug
 import { QWebPlugin } from "./others/qweb_plugin";
 import { EditorVersionPlugin } from "./core/editor_version_plugin";
 import { ImagePostProcessPlugin } from "./main/media/image_post_process_plugin";
-import { ImagePreviewPlugin } from "./main/media/image_preview_plugin";
+import { DoubleClickImagePreviewPlugin } from "./main/media/dblclick_image_preview_plugin";
 import { StylePlugin } from "./core/style_plugin";
 import { ContentEditablePlugin } from "./core/content_editable_plugin";
 
@@ -158,7 +158,7 @@ export const MAIN_PLUGINS = [
     ImagePlugin,
     ImagePostProcessPlugin,
     ImageCropPlugin,
-    ImagePreviewPlugin,
+    DoubleClickImagePreviewPlugin,
     LinkPlugin,
     LinkPastePlugin,
     FeffPlugin,
