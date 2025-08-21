@@ -13,7 +13,7 @@ import subprocess
 
 from datetime import datetime, timezone
 from contextlib import contextmanager
-from collections.abc import Mapping, Generator
+from collections.abc import Generator
 from email.utils import format_datetime
 from io import BytesIO
 from itertools import count
