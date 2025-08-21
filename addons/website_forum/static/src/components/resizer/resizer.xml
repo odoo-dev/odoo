@@ -1,9 +1,0 @@
-<templates xml:space="preserve">
-    <t t-name="website_forum.Resizer">
-        <div class="o_wysiwyg_resizer" t-on-mousedown.prevent="onResizerMouseDown">
-            <div class="o_wysiwyg_resizer_hook"></div>
-            <div class="o_wysiwyg_resizer_hook"></div>
-            <div class="o_wysiwyg_resizer_hook"></div>
-        </div>
-    </t>
-</templates>
