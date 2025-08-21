@@ -1,9 +1,12 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 """The :mod:`odoo.tools.io_with_timeout.posix.communications`
 module provides POSIX-specific implementations for reading and writing data
 with timeouts in a file-like object.
 This module uses the `selectors` module to handle I/O operations
 in a non-blocking manner, allowing for timeouts on read and write operations.
 """
+
 import logging
 import os
 import selectors
@@ -20,8 +23,11 @@ def readline_with_timeout(
     file_object: BinaryIO,
     timeout: int,
 ) -> bytes:
-    """Read a full line ending with '\\n' from a file-like object within a timeout.
-    :param BinaryIO file_object: File-like object to read from (must be in binary mode).
+    """Read a full line ending with '\\n' from a file-like object within a
+    timeout.
+
+    :param BinaryIO file_object: File-like object to read from
+        (must be in binary mode).
     :param int timeout: Max seconds to wait for line data.
     :return: A line of bytes ending in '\\n'.
     :rtype: bytes
@@ -56,7 +62,9 @@ def read_all_with_timeout(
     timeout: int,
     chunk_size: int,
 ) -> bytes:
-    """Read all data from a file-like object until EOF, with a timeout per chunk.
+    """Read all data from a file-like object until EOF, with a timeout per
+    chunk.
+
     :param BinaryIO file_object: File-like object to read from.
     :param int timeout: Timeout in seconds for the entire read operation.
     :param int chunk_size: Number of bytes to read per chunk.
@@ -89,6 +97,7 @@ def write_with_timeout(
     timeout: int,
 ) -> None:
     """Write all data to a file-like object within a timeout, using selectors.
+
     :param BinaryIO file_object: File-like object to write to.
     :param bytes data: Bytes to write.
     :param int timeout: Max seconds to wait for write readiness.
@@ -104,7 +113,9 @@ def write_with_timeout(
         while total_written < len(data):
             events = selector.select(timeout=remaining_time(deadline))
             if not events:
-                raise TimeoutError("Timeout exceeded while writing to subprocess")
+                raise TimeoutError(
+                    "Timeout exceeded while writing to subprocess"
+                )
 
             written = os.write(fd, data[total_written:])
             if written == 0:

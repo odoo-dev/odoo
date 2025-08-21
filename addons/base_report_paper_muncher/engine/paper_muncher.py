@@ -25,7 +25,10 @@ from .utils.pm_request import (
     consume_paper_muncher_request,
     read_paper_muncher_request,
 )
-from odoo.tools.io_with_timeout import read_all_with_timeout, write_with_timeout
+from odoo.tools.io_with_timeout import (
+    read_all_with_timeout,
+    write_with_timeout,
+)
 from .utils.popen import Popen
 
 

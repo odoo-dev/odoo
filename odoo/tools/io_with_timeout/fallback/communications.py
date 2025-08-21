@@ -1,8 +1,11 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 """The :mod:`odoo.tools.io_with_timeout.fallback.communications`
 module provides fallback implementations for reading and writing data
 with timeouts in a file-like object.
 This means it does not support timeouts and may lead to stalled processes.
 """
+
 import logging
 
 from typing import BinaryIO
@@ -16,14 +19,16 @@ def readline_with_timeout(
 ) -> bytes:
     """Read a full line ending with '\\n' from a file-like object.
 
-    :param BinaryIO file_object: File-like object to read from (must be in binary mode).
+    :param BinaryIO file_object: File-like object to read from
+        (must be in binary mode).
     :param int timeout: UNUSED timeout parameter.
         (Fallback implementation does not support timeouts)
     :return: A line of bytes ending in '\\n'.
     :rtype: bytes
     """
     _logger.warning(
-        "Using fallback readline_with_timeout. This may lead to stalled processes."
+        "Using fallback readline_with_timeout. "
+        "This may lead to stalled processes."
     )
     return file_object.readline()
 
@@ -41,7 +46,8 @@ def read_all_with_timeout(
     :rtype: bytes
     """
     _logger.warning(
-        "Using fallback readlines_with_timeout. This may lead to stalled processes."
+        "Using fallback readlines_with_timeout. "
+        "This may lead to stalled processes."
     )
     return file_object.read()
 
@@ -59,7 +65,8 @@ def write_with_timeout(
         (Fallback implementation does not support timeouts)
     """
     _logger.warning(
-        "Using fallback write_with_timeout. This may lead to stalled processes."
+        "Using fallback write_with_timeout. "
+        "This may lead to stalled processes."
     )
     file_object.write(data)
     file_object.flush()

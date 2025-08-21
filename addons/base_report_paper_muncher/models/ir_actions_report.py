@@ -10,12 +10,6 @@ from odoo import models, fields, api, _
 from odoo.addons.base_report_paper_muncher.engine import can_use_paper_muncher, rendered
 from odoo.addons.base_report_paper_muncher.engine.utils.html import patch_html_etree
 
-import fitz
-def fix_with_pymupdf(broken_pdf_bytes: bytes) -> bytes:
-    doc = fitz.open(stream=broken_pdf_bytes, filetype="pdf")
-    output = io.BytesIO()
-    doc.save(output)
-    return io.BytesIO(output.getvalue())
 
 REPORT_HEADER_ID = 'minimal_layout_report_headers'
 REPORT_FOOTER_ID = 'minimal_layout_report_footers'
@@ -113,9 +107,6 @@ class IrActionsReport(models.Model):
 
     def prepare_paper_muncher_args(self, specific_paperformat_args=None):
         return {}
-
-    def post_process_pm_pdf_stream(self, pdf_stream, document_id, documents_by_html_id):
-        return ''
 
     def _run_paper_muncher(self, reports, mode='print'):
         self.ensure_one()

@@ -1,11 +1,14 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 """The :mod:`odoo.tools.io_with_timeout`
 module provides cross-platform utilities for I/O operations with timeouts.
 It includes functions for reading and writing data with a specified timeout,
 and handles platform-specific differences in I/O behavior when possible.
 """
+
 import os
-import sys
 import logging
+import sys
 
 _logger = logging.getLogger(__name__)
 

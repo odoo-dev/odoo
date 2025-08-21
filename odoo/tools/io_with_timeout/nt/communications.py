@@ -1,3 +1,5 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 """The :mod:`odoo.tools.io_with_timeout.nt.communications`
 module provides cross-platform utilities for reading and writing data
 with timeouts on Windows systems. It includes functions for reading lines
@@ -28,9 +30,11 @@ def readline_with_timeout(
     file_object: BinaryIO,
     timeout: int,
 ) -> bytes:
-    """Read a full line ending with '\\n' from a file-like object within a timeout.
+    """Read a full line ending with '\\n' from a file-like object within a
+    timeout.
 
-    :param BinaryIO file_object: File-like object to read from (must be in binary mode).
+    :param BinaryIO file_object: File-like object to read from
+        (must be in binary mode).
     :param int timeout: Max seconds to wait for line data.
     :return: A line of bytes ending in '\\n'.
     :rtype: bytes
@@ -63,7 +67,8 @@ def read_all_with_timeout(
     timeout: int,
     chunk_size: int,
 ) -> bytes:
-    """Read all data from a file-like object until EOF, with a timeout per chunk.
+    """Read all data from a file-like object until EOF, with a timeout per
+    chunk.
 
     :param BinaryIO file_object: File-like object to read from.
     :param int timeout: Timeout in seconds for the entire read operation.
