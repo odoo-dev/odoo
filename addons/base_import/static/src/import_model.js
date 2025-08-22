@@ -287,15 +287,6 @@ export class BaseImportModel {
         }
 
         if (!importRes.hasError) {
-            if (importRes.nextrow) {
-                this._addMessage("warning", [
-                    _t(
-                        "Click 'Resume' to proceed with the import, resuming at line %s.",
-                        importRes.nextrow + 1
-                    ),
-                    _t("You can test or reload your file before resuming the import."),
-                ]);
-            }
             if (isTest) {
                 this._addMessage("info", [_t("Everything seems valid.")]);
             }
