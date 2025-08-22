@@ -25,7 +25,7 @@
                         <span class="fs-4"><t t-esc="props.importProgress.value" />%</span>
                     </div>
                 </div>
-                <a class="o_progress_stop_import ms-2" role="button" t-on-click="interrupt"><i class="fa fa-close fs-2 text-danger" aria-label="Stop Import" title="Stop Import"/></a>
+                <a class="o_progress_stop_import ms-2" role="button" t-on-click="interrupt"><i class="fa fa-pause fs-2 text-danger" aria-label="Pause Import" title="Pause Import"/></a>
             </div>
         </div>
     </t>

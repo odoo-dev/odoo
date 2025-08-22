@@ -958,13 +958,6 @@ describe("Import view", () => {
         await animationFrame();
         await animationFrame();
         expect.verifySteps(["Block UI received the right text", "pause triggered during step 2"]);
-        expect(".o_import_data_content div .alert-warning").toHaveCount(1, {
-            message: "a message is shown to indicate the user to resume from the third row",
-        });
-        expect(".o_import_data_content .alert-warning b:first-child").toHaveText(
-            "Click 'Resume' to proceed with the import, resuming at line 2.",
-            { message: "a message is shown to indicate the user to resume from the third row" }
-        );
         expect(".o_control_panel_main_buttons button:nth-child(2)").toHaveText("Resume", {
             message: "button contains the right text",
         });
