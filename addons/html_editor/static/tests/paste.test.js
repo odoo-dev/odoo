@@ -4124,6 +4124,7 @@ describe("onDrop", () => {
         // Simulate the application/vnd.odoo.odoo-editor data that the browser would do.
         dropData.setData("application/vnd.odoo.odoo-editor", imageHTML);
         await dispatch(pElement, "drop", { dataTransfer: dropData });
+        await dispatch(imgElement, "dragend");
         await animationFrame();
 
         expect(getContent(el)).toBe(
@@ -4162,6 +4163,7 @@ describe("onDrop", () => {
         // Simulate the application/vnd.odoo.odoo-editor data that the browser would do.
         dropData.setData("application/vnd.odoo.odoo-editor", odooEditorData);
         await dispatch(targetNodeForDrop, "drop", { dataTransfer: dropData });
+        await dispatch(bannerElement, "dragend");
         await animationFrame();
 
         expect(getContent(el)).toBe(
@@ -4199,6 +4201,7 @@ describe("onDrop", () => {
         // Simulate the application/vnd.odoo.odoo-editor-node data that the browser would do.
         dropData.setData("application/vnd.odoo.odoo-editor-node", odooEditorData);
         await dispatch(targetNodeForDrop, "drop", { dataTransfer: dropData });
+        await dispatch(iconElement, "dragend");
         await animationFrame();
 
         expect(getContent(el)).toBe(
