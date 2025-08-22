@@ -9,6 +9,7 @@ from markupsafe import escape, Markup
 from werkzeug.urls import url_encode
 
 from odoo import api, Command, fields, models, _
+from odoo.fields import Domain
 from odoo.osv import expression
 from odoo.tools import format_amount, format_date, format_list, formatLang, groupby, SQL
 from odoo.tools.float_utils import float_is_zero, float_repr
@@ -281,14 +282,17 @@ class PurchaseOrder(models.Model):
 
     def _search_is_late(self, operator, value):
         if operator not in ["=", "!="]:
-            raise ValidationError(_("Unsupported operator"))
-        purchase_ids = self._search([('state', '=', 'purchase'), ('date_planned', '<=', fields.Datetime.now())])
+            raise ValidationError(self.env._("Unsupported operator"))
+        purchase_ids = self._search(self._get_doamin_is_late(operator, value))
         if operator == "=" and value or operator == "!=" and not value:
-            purchase_lines_late = self.env['purchase.order.line'].search([('order_id', 'in', purchase_ids), ('qty_received', '<', SQL('product_qty'))])
-            return [('id', 'in', purchase_lines_late.order_id.ids)]
+            purchase_lines_late = self.env['purchase.order.line'].search(Domain.AND([Domain('order_id', 'in', purchase_ids), Domain([('qty_received', '<', SQL('product_qty'))])]))
+            return Domain('id', 'in', purchase_lines_late.order_id.ids)
         else:
-            purchase_lines_on_time = self.env['purchase.order.line']._search([('order_id', 'in', purchase_ids), ('qty_received', '>=', SQL('product_qty'))])
-            return [('id', 'in', purchase_lines_on_time.order_id.ids)]
+            purchase_lines_on_time = self.env['purchase.order.line'].search(Domain.AND([Domain('order_id', 'in', purchase_ids), Domain('qty_received', '>=', SQL('product_qty'))]))
+            return Domain('id', 'in', purchase_lines_on_time.order_id.ids)
+
+    def _get_doamin_is_late(self, operator, value):
+        return Domain.AND([Domain('state', '=', 'purchase'), Domain('date_planned', '<=', fields.Datetime.now())])
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -930,11 +934,11 @@ class PurchaseOrder(models.Model):
         rfq_late_group = self.env['purchase.order']._read_group(rfq_late_domain, groupby, aggregate)
         _update('late', result, rfq_late_group)
 
-        rfq_not_acknowledge = [('state', '=', 'purchase'), ('acknowledged', '=', False)]
+        rfq_not_acknowledge = Domain('state', 'in', ['purchase', 'done']) & Domain('acknowledged', '=', False)
         rfq_not_acknowledge_group = self.env['purchase.order']._read_group(rfq_not_acknowledge, groupby, aggregate)
         _update('not_acknowledged', result, rfq_not_acknowledge_group)
 
-        rfq_late_receipt = [('is_late', '=', True)]
+        rfq_late_receipt = Domain('state', 'in', ['purchase', 'done']) & Domain('is_late', '=', True)
         rfq_late_receipt_group = self.env['purchase.order']._read_group(rfq_late_receipt, groupby, aggregate)
         _update('late_receipt', result, rfq_late_receipt_group)
 

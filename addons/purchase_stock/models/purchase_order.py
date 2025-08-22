@@ -4,6 +4,7 @@ from dateutil.relativedelta import relativedelta
 from markupsafe import Markup
 
 from odoo import api, Command, fields, models, SUPERUSER_ID, _
+from odoo.fields import Domain
 from odoo.tools.float_utils import float_compare, float_repr
 from odoo.exceptions import UserError
 from odoo.tools import format_list
@@ -84,6 +85,12 @@ class PurchaseOrder(models.Model):
         p_type = self.picking_type_id
         if not(p_type and p_type.code == 'incoming' and (p_type.warehouse_id.company_id == self.company_id or not p_type.warehouse_id)):
             self.picking_type_id = self._get_picking_type(self.company_id.id)
+
+    def _get_doamin_is_late(self, operator, value):
+        res = super()._get_doamin_is_late(operator, value)
+        if operator == "=" and value or operator == "!=" and not value:
+            res = Domain.AND([res, Domain.OR([Domain('picking_ids', '=', False), Domain('picking_ids.state', '!=', 'done')])])
+        return res
 
     # --------------------------------------------------
     # CRUD
