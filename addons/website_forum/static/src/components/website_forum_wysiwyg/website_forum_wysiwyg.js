@@ -72,7 +72,7 @@ export class WebsiteForumWysiwyg extends Wysiwyg {
         if (!content.trim()) {
             content = "<p><br></p>";
         }
-        // !!!!! TODO !!!!!: is this safe??
+        content = DOMPurify.sanitize(content, { ADD_ATTR: ["contenteditable"] });
         return markup(content);
     }
 
