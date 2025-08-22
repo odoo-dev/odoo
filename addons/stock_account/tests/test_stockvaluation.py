@@ -54,7 +54,6 @@ def _create_accounting_data(env):
     return stock_input_account, stock_output_account, stock_valuation_account, expense_account, income_account, stock_journal
 
 
-@skip('Temporary to fast merge new valuation')
 class TestStockValuationBase(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -86,9 +85,20 @@ class TestStockValuationBase(TransactionCase):
         })
 
         cls.stock_input_account, cls.stock_output_account, cls.stock_valuation_account, cls.expense_account, cls.income_account, cls.stock_journal = _create_accounting_data(cls.env)
+        cls.stock_valuation_account.account_stock_variation_id = cls.expense_account
+        cls.env.company.account_stock_journal_id = cls.stock_journal
+        cls.product1.property_account_expense_id = cls.expense_account.id
+        cls.inventory_loss_location = cls.env['stock.location'].search(
+            [('usage', '=', 'inventory'), ('company_id', '=', cls.env.company.id)
+        ], limit=1)
+        cls.inventory_adjustment_account = cls.env['account.account'].create({
+            'name': 'Inventory Adjustment Account',
+            'code': 'INVADJ',
+            'account_type': 'expense',
+            'reconcile': True,
+        })
+        cls.inventory_loss_location.valuation_account_id = cls.inventory_adjustment_account
         cls.product1.categ_id.write({
-            'property_stock_account_input_categ_id': cls.stock_input_account.id,
-            'property_stock_account_output_categ_id': cls.stock_output_account.id,
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
@@ -154,8 +164,30 @@ class TestStockValuationBase(TransactionCase):
         out_move._action_done()
         return out_move.with_context(svl=True)
 
+    def _set_quantity(self, move, quantity):
+        """Helper function to retroactively change the quantity of a move.
+           The total value of the product will be recomputed as a result,
+           regardless of the valuation method."""
+        move.quantity = quantity
+        move.remaining_qty = quantity
+        move.value_manual = (move.price_unit or move.product_id.standard_price) * quantity
 
-@skip('Temporary to fast merge new valuation')
+    def _create_invoice(self, move_type, product, quantity=1.0, price_unit=1.0):
+        invoice = self.env['account.move'].create({
+            'partner_id': self.partner.id,
+            'move_type': move_type,
+            'invoice_line_ids': [(0, 0, {
+                'name': 'test line',
+                'price_unit': price_unit,
+                'quantity': quantity,
+                'product_id': product.id,
+                'tax_ids': [(5, 0, 0)]
+            })],
+        })
+        invoice.action_post()
+        return invoice
+
+
 class TestStockValuation(TestStockValuationBase):
     def test_realtime(self):
         """ Stock moves update stock value with product x cost price,
@@ -175,14 +207,23 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 50.0
+
+        closing_move = self.env['account.move'].browse(move1.company_id.action_close_stock_valuation()['res_id'])
+        debit_line = closing_move.line_ids.filtered(lambda l: l.debit > 0)
+        self.assertEqual(len(debit_line), 1)
+        self.assertEqual(debit_line.debit, 50.0)
+        self.assertEqual(debit_line.credit, 0)
+        self.product1._invalidate_cache()
 
         # Set price to 6.0
         self.product1.standard_price = 6.0
-        stock_aml, price_change_aml = self._get_stock_valuation_move_lines()
-        self.assertEqual(stock_aml.debit, 50)
-        self.assertEqual(price_change_aml.debit, 10)
-        self.assertEqual(price_change_aml.ref, 'prda')
-        self.assertEqual(price_change_aml.product_id, self.product1)
+        closing_move = self.env['account.move'].browse(move1.company_id.action_close_stock_valuation()['res_id'])
+        debit_line = closing_move.line_ids.filtered(lambda l: l.debit > 0)
+        self.assertEqual(len(debit_line), 1)
+        self.assertEqual(debit_line.debit, 60.0)
+        self.assertEqual(debit_line.credit, 0)
+        self.assertEqual(move1.product_id, self.product1)
 
     def test_realtime_consumable(self):
         """ An automatic consumable product should not create any account move entries"""
@@ -201,8 +242,8 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
-        self.assertTrue(move1.stock_valuation_layer_ids)
-        self.assertFalse(move1.stock_valuation_layer_ids.account_move_id)
+        move1.value_manual = 50.0
+        self.assertFalse(bool(move1.account_move_id))
 
     def test_fifo_perpetual_1(self):
         self.product1.categ_id.property_cost_method = 'fifo'
@@ -1494,11 +1535,12 @@ class TestStockValuation(TestStockValuationBase):
         move1._action_confirm()
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100.0
 
         # stock values for move1
-        self.assertEqual(move1.stock_valuation_layer_ids.value, 100.0)
-        self.assertEqual(move1.stock_valuation_layer_ids.remaining_qty, 10.0)
-        self.assertEqual(move1.stock_valuation_layer_ids.unit_cost, 10.0)
+        self.assertEqual(move1.value, 100.0)
+        self.assertEqual(move1.remaining_qty, 10.0)
+        self.assertEqual(move1.price_unit, 10.0)
 
         # ---------------------------------------------------------------------
         # Add a stock move, receive 10@20 of another product
@@ -1520,31 +1562,49 @@ class TestStockValuation(TestStockValuationBase):
                 'quantity': 10.0,
             })]
         })
+        move2.value_manual = 200.0
         # Move is automatically set to Done as it is linked to a Done picking
         self.assertEqual(move2.state, 'done')
-        self.assertEqual(move2.stock_valuation_layer_ids.value, 200.0)
-        self.assertEqual(move2.stock_valuation_layer_ids.remaining_qty, 10.0)
-        self.assertEqual(move2.stock_valuation_layer_ids.unit_cost, 20.0)
+        self.assertEqual(move2.value, 200.0)
+        self.assertEqual(move2.remaining_qty, 10.0)
+        self.assertEqual(self.product2.standard_price, 20.0)
 
-        self.assertEqual(self.product1.quantity_svl, 10)
-        self.assertEqual(self.product1.value_svl, 100)
-        self.assertEqual(self.product2.quantity_svl, 10)
-        self.assertEqual(self.product2.value_svl, 200)
+        self.assertEqual(self.product1.qty_available, 10)
+        self.assertEqual(self.product1.total_value, 100)
+        self.assertEqual(self.product2.qty_available, 10)
+        self.assertEqual(self.product2.total_value, 200)
 
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('debit')), 300)
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('credit')), 0)
+        closing_move = self.env['account.move'].browse(move2.company_id.action_close_stock_valuation()['res_id'])
+        valuation_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
+        expense_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.expense_account)
+        self.assertRecordValues(
+            valuation_aml + expense_aml,
+            [
+                {'account_id': self.stock_valuation_account.id, 'debit': 300, 'credit': 0},
+                {'account_id': self.expense_account.id, 'debit': 0, 'credit': 300},
+            ]
+        )
 
         # ---------------------------------------------------------------------
         # Edit the previous stock move, receive 11
         # ---------------------------------------------------------------------
-        move2.quantity = 11
+        self._set_quantity(move2, 11)
 
-        self.assertEqual(sum(move2.stock_valuation_layer_ids.mapped('value')), 220.0)  # after correction, the move should be valued at 11@20
-        self.assertEqual(sum(move2.stock_valuation_layer_ids.mapped('remaining_qty')), 11.0)
-        self.assertEqual(move2.stock_valuation_layer_ids.sorted()[-1].unit_cost, 20.0)
+        self.assertEqual(move2.value, 220.0)  # after correction, the move should be valued at 11@20
+        self.assertEqual(move2.quantity, 11.0)
+        self.product2._invalidate_cache()
+        self.product2.standard_price = 20.0
 
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('debit')), 320)
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('credit')), 0)
+        closing_move = self.env['account.move'].browse(move2.company_id.action_close_stock_valuation()['res_id'])
+        valuation_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
+        expense_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.expense_account)
+        self.assertRecordValues(
+            valuation_aml + expense_aml,
+            [
+                {'account_id': self.stock_valuation_account.id, 'debit': 320, 'credit': 0},
+                {'account_id': self.expense_account.id, 'debit': 0, 'credit': 320},
+            ]
+        )
 
         # ---------------------------------------------------------------------
         # Send 11 product 2
@@ -1576,14 +1636,23 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
 
-        self.assertEqual(move3.stock_valuation_layer_ids.value, -220.0)
-        self.assertEqual(move3.stock_valuation_layer_ids.remaining_qty, 0.0)
-        self.assertEqual(move3.stock_valuation_layer_ids.unit_cost, 20.0)
+        self.assertEqual(move3.value, 220.0)
+        self.assertEqual(move3.remaining_qty, 0.0)
+        self.assertEqual(self.product2.standard_price, 20.0)
         self.assertEqual(self.product2.qty_available, 0)
-        self.assertEqual(self.product2.quantity_svl, 0)
+        self.product2._invalidate_cache()
+        self.product2.standard_price = 20.0
 
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('debit')), 320)
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('credit')), 220)
+        closing_move = self.env['account.move'].browse(move2.company_id.action_close_stock_valuation()['res_id'])
+        valuation_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
+        expense_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.expense_account)
+        self.assertRecordValues(
+            valuation_aml + expense_aml,
+            [
+                {'account_id': self.stock_valuation_account.id, 'debit': 100, 'credit': 0},
+                {'account_id': self.expense_account.id, 'debit': 0, 'credit': 100},
+            ]
+        )
 
     def test_fifo_add_moveline_in_done_move_1(self):
         self.product1.categ_id.property_cost_method = 'fifo'
@@ -1609,40 +1678,36 @@ class TestStockValuation(TestStockValuationBase):
         move1._action_confirm()
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100.0
 
         # stock values for move1
-        self.assertEqual(move1.stock_valuation_layer_ids.value, 100.0)
-        self.assertEqual(move1.stock_valuation_layer_ids.remaining_qty, 10.0)
-        self.assertEqual(move1.stock_valuation_layer_ids.unit_cost, 10.0)
-
-        self.assertEqual(len(move1.account_move_ids), 1)
+        self.assertEqual(move1.value, 100.0)
+        self.assertEqual(move1.remaining_qty, 10.0)
+        self.assertEqual(move1.price_unit, 10.0)
 
         # ---------------------------------------------------------------------
         # Add a new move line to receive 10 more
         # ---------------------------------------------------------------------
         self.assertEqual(len(move1.move_line_ids), 1)
-        self.env['stock.move.line'].create({
-            'move_id': move1.id,
-            'product_id': move1.product_id.id,
-            'quantity': 10,
-            'product_uom_id': move1.product_uom.id,
-            'location_id': move1.location_id.id,
-            'location_dest_id': move1.location_dest_id.id,
-        })
-        self.assertEqual(sum(move1.stock_valuation_layer_ids.mapped('value')), 200.0)
-        self.assertEqual(sum(move1.stock_valuation_layer_ids.mapped('remaining_qty')), 20.0)
-        self.assertEqual(move1.stock_valuation_layer_ids.sorted()[-1].unit_cost, 10.0)
+        self._set_quantity(move1, 20)
+        self.assertEqual(move1.value, 200.0)
+        self.assertEqual(move1.remaining_qty, 20.0)
+        self.assertEqual(move1.price_unit, 10.0)
+        self.assertEqual(len(move1.move_line_ids), 2)
 
-        self.assertEqual(len(move1.account_move_ids), 2)
+        self.assertEqual(self.product1.qty_available, 20)
+        self.assertEqual(self.product1.total_value, 200)
 
-        self.assertEqual(self.product1.quantity_svl, 20)
-        self.assertEqual(self.product1.value_svl, 200)
-        self.assertEqual(sum(self._get_stock_input_move_lines().mapped('debit')), 0)
-        self.assertEqual(sum(self._get_stock_input_move_lines().mapped('credit')), 200)
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('debit')), 200)
-        self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('credit')), 0)
-        self.assertEqual(sum(self._get_stock_output_move_lines().mapped('debit')), 0)
-        self.assertEqual(sum(self._get_stock_output_move_lines().mapped('credit')), 0)
+        closing_move = self.env['account.move'].browse(move1.company_id.action_close_stock_valuation()['res_id'])
+        credit_line = closing_move.line_ids.filtered(lambda l: l.credit > 0)
+        self.assertEqual(len(credit_line), 1)
+        self.assertEqual(credit_line.debit, 0.0)
+        self.assertEqual(credit_line.credit, 200.0)
+
+        debit_line = closing_move.line_ids.filtered(lambda l: l.debit > 0)
+        self.assertEqual(len(debit_line), 1)
+        self.assertEqual(debit_line.debit, 200.0)
+        self.assertEqual(debit_line.credit, 0.0)
 
     def test_fifo_edit_done_move1(self):
         """ Increase OUT done move while quantities are available.
@@ -1886,10 +1951,13 @@ class TestStockValuation(TestStockValuationBase):
             'categ_id': self.env.ref('product.product_category_goods').id,
         })
         product.product_tmpl_id.categ_id.property_cost_method = 'fifo'
-        self._make_in_move(product, 3, unit_cost=17)
-        self._make_in_move(product, 1, unit_cost=23)
+        move1 = self._make_in_move(product, 3, unit_cost=17)
+        move1.value_manual = 51.0
+        move2 = self._make_in_move(product, 1, unit_cost=23)
+        move2.value_manual = 23.0
+        self.assertEqual(product.standard_price, 18.5)
         self._make_out_move(product, 3)
-        self.assertEqual(product.standard_price, 23)
+        self.assertEqual(product.standard_price, 18.5)
 
     def test_fifo_standard_price_upate_2(self):
         product = self.env['product.product'].create({
@@ -1898,10 +1966,13 @@ class TestStockValuation(TestStockValuationBase):
             'categ_id': self.env.ref('product.product_category_goods').id,
         })
         product.product_tmpl_id.categ_id.property_cost_method = 'fifo'
-        self._make_in_move(product, 5, unit_cost=17)
-        self._make_in_move(product, 1, unit_cost=23)
+        move1 = self._make_in_move(product, 5, unit_cost=17)
+        move1.value_manual = 85.0
+        move2 = self._make_in_move(product, 1, unit_cost=23)
+        move2.value_manual = 23.0
+        self.assertEqual(product.standard_price, 18)
         self._make_out_move(product, 4)
-        self.assertEqual(product.standard_price, 20)
+        self.assertEqual(product.standard_price, 18)
 
     def test_fifo_standard_price_upate_3(self):
         """Standard price must be set on move in if no product and if first move."""
@@ -1911,22 +1982,25 @@ class TestStockValuation(TestStockValuationBase):
             'categ_id': self.env.ref('product.product_category_goods').id,
         })
         product.product_tmpl_id.categ_id.property_cost_method = 'fifo'
-        self._make_in_move(product, 5, unit_cost=17)
-        self._make_in_move(product, 1, unit_cost=23)
+        move1 = self._make_in_move(product, 5, unit_cost=17)
+        move1.value_manual = 85
+        move2 = self._make_in_move(product, 1, unit_cost=23)
+        move2.value_manual = 23
         self.assertEqual(product.standard_price, 18)
         self._make_out_move(product, 4)
-        self.assertEqual(product.standard_price, 20)
+        self.assertEqual(product.standard_price, 18)
         self._make_out_move(product, 1)
-        self.assertEqual(product.standard_price, 23)
+        self.assertEqual(product.standard_price, 18)
         self._make_out_move(product, 1)
-        self.assertEqual(product.standard_price, 23)
-        self._make_in_move(product, 1, unit_cost=77)
+        self.assertEqual(product.standard_price, 18)
+        move3 = self._make_in_move(product, 1, unit_cost=77)
+        move3.value_manual = 77.0
         self.assertEqual(product.standard_price, 77)
 
     def test_create_done_move(self):
         """Stock Move created directly in Done state must impact de valuation."""
         self.product1.categ_id.property_cost_method = 'average'
-        self.env['stock.move'].create({
+        move1 = self.env['stock.move'].create({
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
             'product_id': self.product1.id,
@@ -1943,9 +2017,9 @@ class TestStockValuation(TestStockValuationBase):
                 'state': 'done',
             })]
         })
+        move1.value_manual = 8.0
         self.assertEqual(self.product1.qty_available, 8.0)
-        self.assertEqual(self.product1.quantity_svl, 8.0)
-        self.assertEqual(self.product1.value_svl, 8.0)
+        self.assertEqual(self.product1.total_value, 8.0)
 
     def test_average_perpetual_1(self):
         # http://accountingexplained.com/financial/inventories/avco-method
@@ -1965,8 +2039,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 60.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 900
 
-        self.assertEqual(move1.stock_valuation_layer_ids.value, 900.0)
+        self.assertEqual(move1.value, 900.0)
 
         # Purchase 140 units @ 15.50 per unit
         move2 = self.env['stock.move'].create({
@@ -1982,8 +2057,9 @@ class TestStockValuation(TestStockValuationBase):
         move2.move_line_ids.quantity = 140.0
         move2.picked = True
         move2._action_done()
+        move2.value_manual = 2170
 
-        self.assertEqual(move2.stock_valuation_layer_ids.value, 2170.0)
+        self.assertEqual(move2.value, 2170.0)
 
         # Sale 190 units @ 15.35 per unit
         move3 = self.env['stock.move'].create({
@@ -1999,7 +2075,7 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
 
-        self.assertEqual(move3.stock_valuation_layer_ids.value, -2916.5)
+        self.assertEqual(move3.value, 2916.5)
 
         # Purchase 70 units @ $16.00 per unit
         move4 = self.env['stock.move'].create({
@@ -2015,8 +2091,9 @@ class TestStockValuation(TestStockValuationBase):
         move4.move_line_ids.quantity = 70.0
         move4.picked = True
         move4._action_done()
+        move4.value_manual = 1120
 
-        self.assertEqual(move4.stock_valuation_layer_ids.value, 1120.0)
+        self.assertEqual(move4.value, 1120.0)
 
         # Sale 30 units @ $19.50 per unit
         move5 = self.env['stock.move'].create({
@@ -2032,7 +2109,7 @@ class TestStockValuation(TestStockValuationBase):
         move5.picked = True
         move5._action_done()
 
-        self.assertEqual(move5.stock_valuation_layer_ids.value, -477.56)
+        self.assertEqual(move5.value, 477.60)
 
         # Receives 10 units but assign them to an owner, the valuation should not be impacted.
         move6 = self.env['stock.move'].create({
@@ -2049,8 +2126,9 @@ class TestStockValuation(TestStockValuationBase):
         move6.move_line_ids.quantity = 10.0
         move6.picked = True
         move6._action_done()
+        move6.value_manual = 990
 
-        self.assertEqual(move6.stock_valuation_layer_ids.value, 0)
+        self.assertEqual(move6.value, 0)
 
         # Sale 50 units @ $19.50 per unit (no stock anymore)
         move7 = self.env['stock.move'].create({
@@ -2066,9 +2144,9 @@ class TestStockValuation(TestStockValuationBase):
         move7.picked = True
         move7._action_done()
 
-        self.assertEqual(move7.stock_valuation_layer_ids.value, -795.94)
-        self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
-        self.assertAlmostEqual(self.product1.value_svl, 0.0)
+        self.assertEqual(move7.value, 796.0)
+        self.assertAlmostEqual(self.product1.qty_available, 10)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
     def test_average_perpetual_2(self):
         self.product1.categ_id.property_cost_method = 'average'
@@ -2158,6 +2236,11 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100.0
+
+        self.assertEqual(self.product1.qty_available, 10.0)
+        self.assertEqual(self.product1.total_value, 100.0)
+        self.product1._invalidate_cache()
 
         move2 = self.env['stock.move'].create({
             'location_id': self.supplier_location.id,
@@ -2172,6 +2255,11 @@ class TestStockValuation(TestStockValuationBase):
         move2.move_line_ids.quantity = 10.0
         move2.picked = True
         move2._action_done()
+        move2.value_manual = 150.0
+
+        self.assertEqual(self.product1.qty_available, 20.0)
+        self.assertEqual(self.product1.total_value, 250.0)
+        self.product1._invalidate_cache()
 
         move3 = self.env['stock.move'].create({
             'location_id': self.stock_location.id,
@@ -2186,6 +2274,10 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
 
+        self.assertEqual(self.product1.qty_available, 5.0)
+        self.assertEqual(self.product1.total_value, 62.5)
+        self.product1._invalidate_cache()
+
         move4 = self.env['stock.move'].create({
             'location_id': self.stock_location.id,
             'location_dest_id': self.customer_location.id,
@@ -2198,8 +2290,13 @@ class TestStockValuation(TestStockValuationBase):
         move4.move_line_ids.quantity = 10.0
         move4.picked = True
         move4._action_done()
+
+        self.assertEqual(self.product1.qty_available, -5.0)
+        self.assertEqual(self.product1.total_value, -62.5)
+        self.product1._invalidate_cache()
+
         move2.move_line_ids.quantity = 0
-        self.assertEqual(self.product1.value_svl, -187.5)
+        self.assertEqual(self.product1.qty_available, -15.0)
 
     def test_average_perpetual_4(self):
         """receive 1@10, receive 1@5 insteadof 3@5"""
@@ -2218,6 +2315,7 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 1.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 10.0
 
         move2 = self.env['stock.move'].create({
             'location_id': self.supplier_location.id,
@@ -2232,8 +2330,9 @@ class TestStockValuation(TestStockValuationBase):
         move2.move_line_ids.quantity = 1.0
         move2.picked = True
         move2._action_done()
+        move2.value_manual = 5.0
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 2.0)
+        self.assertAlmostEqual(self.product1.qty_available, 2.0)
         self.assertAlmostEqual(self.product1.standard_price, 7.5)
 
     def test_average_perpetual_5(self):
@@ -2254,9 +2353,11 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.owner_id = self.owner1.id
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 10.0
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
-        self.assertAlmostEqual(self.product1.value_svl, 0.0)
+        self.assertAlmostEqual(move1.remaining_qty, 0.0)
+        self.assertAlmostEqual(self.product1.qty_available, 1.0)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
     def test_average_perpetual_6(self):
         """ Batch validation of moves """
@@ -2290,10 +2391,12 @@ class TestStockValuation(TestStockValuationBase):
 
         # Receive both at the same time
         (move1 | move2)._action_done()
+        move1.value_manual = 10.0
+        move2.value_manual = 5.0
 
         self.assertAlmostEqual(self.product1.standard_price, 7.5)
-        self.assertEqual(self.product1.quantity_svl, 2)
-        self.assertEqual(self.product1.value_svl, 15)
+        self.assertEqual(self.product1.qty_available, 2)
+        self.assertEqual(self.product1.total_value, 15)
 
     def test_average_perpetual_7(self):
         """ Test edit in the past. Receive 5@10, receive 10@20, edit the first move to receive
@@ -2313,11 +2416,13 @@ class TestStockValuation(TestStockValuationBase):
         move1.quantity = 5
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 50.0
 
         self.assertAlmostEqual(self.product1.standard_price, 10)
-        self.assertAlmostEqual(move1.stock_valuation_layer_ids.value, 50)
-        self.assertAlmostEqual(self.product1.quantity_svl, 5)
-        self.assertAlmostEqual(self.product1.value_svl, 50)
+        self.assertAlmostEqual(move1.value, 50)
+        self.assertAlmostEqual(self.product1.qty_available, 5)
+        self.assertAlmostEqual(self.product1.total_value, 50)
+        self.product1._invalidate_cache()
 
         move2 = self.env['stock.move'].create({
             'location_id': self.supplier_location.id,
@@ -2331,19 +2436,19 @@ class TestStockValuation(TestStockValuationBase):
         move2.quantity = 10
         move2.picked = True
         move2._action_done()
+        move2.value_manual = 200.0
 
         self.assertAlmostEqual(self.product1.standard_price, 16.67)
-        self.assertAlmostEqual(move2.stock_valuation_layer_ids.value, 200)
-        self.assertAlmostEqual(self.product1.quantity_svl, 15)
-        self.assertAlmostEqual(self.product1.value_svl, 250)
+        self.assertAlmostEqual(move2.value, 200)
+        self.assertAlmostEqual(self.product1.qty_available, 15)
+        self.assertAlmostEqual(self.product1.total_value, 250)
+        self.product1._invalidate_cache()
 
-        move1.move_line_ids.quantity = 15
+        self._set_quantity(move1, 15)
 
         self.assertAlmostEqual(self.product1.standard_price, 14.0)
-        self.assertAlmostEqual(len(move1.stock_valuation_layer_ids), 2)
-        self.assertAlmostEqual(move1.stock_valuation_layer_ids.sorted()[-1].value, 100)
-        self.assertAlmostEqual(self.product1.quantity_svl, 25)
-        self.assertAlmostEqual(self.product1.value_svl, 350)
+        self.assertAlmostEqual(self.product1.qty_available, 25)
+        self.assertAlmostEqual(self.product1.total_value, 350)
 
     def test_average_perpetual_8(self):
         """ Receive 1@10, then dropship 1@20, finally return the dropship. Dropship should not
@@ -2363,6 +2468,7 @@ class TestStockValuation(TestStockValuationBase):
         move1.quantity = 1
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 10.0
 
         self.assertAlmostEqual(self.product1.standard_price, 10)
 
@@ -2413,6 +2519,7 @@ class TestStockValuation(TestStockValuationBase):
         move1._action_confirm()
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100.0
 
         # deliver 15
         move2 = self.env['stock.move'].create({
@@ -2479,6 +2586,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100.0
+
+        self._create_invoice('in_invoice', self.product1, 10, 10)
 
         move2 = self.env['stock.move'].create({
             'location_id': self.stock_location.id,
@@ -2493,13 +2603,15 @@ class TestStockValuation(TestStockValuationBase):
         move2.picked = True
         move2._action_done()
 
+        self._create_invoice('out_invoice', self.product1, 20, 10)
         valuation_aml = self._get_stock_valuation_move_lines()
         move2_valuation_aml = valuation_aml[-1]
         self.assertEqual(len(valuation_aml), 2)
         self.assertEqual(move2_valuation_aml.debit, 0)
         self.assertEqual(move2_valuation_aml.credit, 200)
 
-        move2.quantity = 10.0
+        self._set_quantity(move2, 10.0)
+        self._create_invoice('in_invoice', self.product1, 10, 10)
 
         valuation_aml = self._get_stock_valuation_move_lines()
         move2_valuation_aml = valuation_aml[-1]
@@ -2507,7 +2619,8 @@ class TestStockValuation(TestStockValuationBase):
         self.assertEqual(move2_valuation_aml.debit, 100)
         self.assertEqual(move2_valuation_aml.credit, 0)
 
-        move2.quantity = 11.0
+        self._set_quantity(move2, 11.0)
+        self._create_invoice('out_invoice', self.product1, 1, 10)
 
         valuation_aml = self._get_stock_valuation_move_lines()
         move2_valuation_aml = valuation_aml[-1]
@@ -2536,7 +2649,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.quantity = 10.0
         move1.picked = True
         move1._action_done()
-        self.assertEqual(move1.stock_valuation_layer_ids.value, -990.0)  # as no move out were done for this product, fallback on the standard price
+        self.assertEqual(move1.value, 990)
+        self.assertEqual(self.product1.qty_available, -10)
+        self.assertEqual(self.product1.total_value, 0.0)
 
     def test_average_negative_3(self):
         """ Send goods that you don't have in stock but received and send some units before.
@@ -2560,8 +2675,11 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100
 
-        self.assertEqual(move1.stock_valuation_layer_ids.value, 100.0)
+        self.assertEqual(move1.value, 100)
+        self.assertEqual(self.product1.qty_available, 10)
+        self.assertEqual(self.product1.total_value, 100)
 
         # send 10 products
         move2 = self.env['stock.move'].create({
@@ -2577,8 +2695,9 @@ class TestStockValuation(TestStockValuationBase):
         move2.picked = True
         move2._action_done()
 
-        self.assertEqual(move2.stock_valuation_layer_ids.value, -100.0)
-        self.assertEqual(move2.stock_valuation_layer_ids.remaining_qty, 0.0)  # unused in average move
+        self.assertEqual(move2.value, 100.0)
+        self.assertEqual(move2.remaining_qty, 0.0)  # unused in average move
+        self.product1._invalidate_cache()
 
         # send 10 products again
         move3 = self.env['stock.move'].create({
@@ -2593,7 +2712,7 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
 
-        self.assertEqual(move3.stock_valuation_layer_ids.value, -100.0)  # as no move out were done for this product, fallback on latest cost
+        self.assertEqual(move3.value, 0.0)
 
     def test_average_negative_4(self):
         self.product1.categ_id.property_cost_method = 'average'
@@ -2615,8 +2734,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100.0
 
-        self.assertEqual(move1.stock_valuation_layer_ids.value, 100.0)
+        self.assertEqual(move1.value, 100.0)
 
     def test_average_negative_5(self):
         self.product1.categ_id.property_cost_method = 'average'
@@ -2635,8 +2755,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100.0
 
-        self.assertEqual(move1.stock_valuation_layer_ids.value, 100.0)
+        self.assertEqual(move1.value, 100.0)
         self.assertEqual(self.product1.standard_price, 10)
 
         # in 10 @ 20
@@ -2653,8 +2774,9 @@ class TestStockValuation(TestStockValuationBase):
         move2.move_line_ids.quantity = 10.0
         move2.picked = True
         move2._action_done()
+        move2.value_manual = 200.0
 
-        self.assertEqual(move2.stock_valuation_layer_ids.value, 200.0)
+        self.assertEqual(move2.value, 200.0)
         self.assertEqual(self.product1.standard_price, 15)
 
         # send 5
@@ -2670,7 +2792,7 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
 
-        self.assertEqual(move3.stock_valuation_layer_ids.value, -75.0)
+        self.assertEqual(move3.value, 75.0)
         self.assertEqual(self.product1.standard_price, 15)
 
         # send 30
@@ -2686,7 +2808,7 @@ class TestStockValuation(TestStockValuationBase):
         move4.picked = True
         move4._action_done()
 
-        self.assertEqual(move4.stock_valuation_layer_ids.value, -450.0)
+        self.assertEqual(move4.value, 450.0)
         self.assertEqual(self.product1.standard_price, 15)
 
         # in 20 @ 20
@@ -2703,16 +2825,17 @@ class TestStockValuation(TestStockValuationBase):
         move5.move_line_ids.quantity = 20.0
         move5.picked = True
         move5._action_done()
-        self.assertEqual(move5.stock_valuation_layer_ids.value, 400.0)
+        move5.value_manual = 400.0
+        self.assertEqual(move5.value, 400.0)
 
         # Move 4 is now fixed, it initially sent 30@15 but the 5 last units were negative and estimated
         # at 15 (1125). The new receipt made these 5 units sent at 20 (1500), so a 450 value is added
         # to move4.
-        self.assertEqual(move4.stock_valuation_layer_ids[0].value, -450)
+        self.assertEqual(move4.value, 450)
 
         # So we have 5@20 in stock.
-        self.assertEqual(self.product1.quantity_svl, 5)
-        self.assertEqual(self.product1.value_svl, 100)
+        self.assertEqual(self.product1.qty_available, 5)
+        self.assertEqual(self.product1.total_value, 100)
         self.assertEqual(self.product1.standard_price, 20)
 
         # send 5 products to empty the inventory, the average price should not go to 0
@@ -2728,7 +2851,7 @@ class TestStockValuation(TestStockValuationBase):
         move6.picked = True
         move6._action_done()
 
-        self.assertEqual(move6.stock_valuation_layer_ids.value, -100.0)
+        self.assertEqual(move6.value, 100.0)
         self.assertEqual(self.product1.standard_price, 20)
 
         # in 10 @ 10, the new average price should be 10
@@ -2745,8 +2868,9 @@ class TestStockValuation(TestStockValuationBase):
         move7.move_line_ids.quantity = 10.0
         move7.picked = True
         move7._action_done()
+        move7.value_manual = 100.0
 
-        self.assertEqual(move7.stock_valuation_layer_ids.value, 100.0)
+        self.assertEqual(move7.value, 100.0)
         self.assertEqual(self.product1.standard_price, 10)
 
     def test_average_automated_with_cost_change(self):
@@ -2768,14 +2892,14 @@ class TestStockValuation(TestStockValuationBase):
         move1.picked = True
         move1._action_done()
 
-        self.assertAlmostEqual(self.product1.quantity_svl, -10.0)
-        self.assertEqual(move1.stock_valuation_layer_ids.value, -1000.0)
-        self.assertAlmostEqual(self.product1.value_svl, -1000.0)
+        self.assertAlmostEqual(self.product1.qty_available, -10.0)
+        self.assertEqual(move1.value, 1000.0)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
         # Step2: Change product cost from 100 to 10 -> Nothing should appear in inventory
         # valuation as the quantity is negative
         self.product1.standard_price = 10
-        self.assertEqual(self.product1.value_svl, -1000.0)
+        self.assertEqual(self.product1.total_value, 0.0)
 
         # Step 3: Make an inventory adjustment to set to total counted value at 0 -> Inventory
         # valuation should be at 0 with a compensation layer at 900 (1000 - 100)
@@ -2796,12 +2920,11 @@ class TestStockValuation(TestStockValuationBase):
         move2._action_done()
 
         # Check if the move adjustment has correctly been done
-        self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
-        self.assertAlmostEqual(move2.stock_valuation_layer_ids.value, 100.0)
+        self.assertAlmostEqual(self.product1.qty_available, 0.0)
+        self.assertAlmostEqual(move2.value, 100.0)
 
         # Check if the compensation layer is as expected, with final inventory value being 0
-        self.assertAlmostEqual(self.product1.stock_valuation_layer_ids.sorted()[-1].value, 900.0)
-        self.assertAlmostEqual(self.product1.value_svl, 0.0)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
     def test_average_manual_1(self):
         ''' Set owner on incoming move => no valuation '''
@@ -2823,8 +2946,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.picked = True
         move1._action_done()
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
-        self.assertAlmostEqual(self.product1.value_svl, 0.0)
+        self.assertAlmostEqual(move1.remaining_qty, 0.0)
+        self.assertAlmostEqual(self.product1.qty_available, 1.0)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
     def test_standard_perpetual_1(self):
         ''' Set owner on incoming move => no valuation '''
@@ -2845,9 +2969,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.picked = True
         move1._action_done()
 
+        self.assertAlmostEqual(move1.remaining_qty, 0.0)
         self.assertAlmostEqual(self.product1.qty_available, 1.0)
-        self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
-        self.assertAlmostEqual(self.product1.value_svl, 0.0)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
     def test_standard_manual_1(self):
         ''' Set owner on incoming move => no valuation '''
@@ -2869,9 +2993,9 @@ class TestStockValuation(TestStockValuationBase):
         move1.picked = True
         move1._action_done()
 
+        self.assertAlmostEqual(move1.remaining_qty, 0.0)
         self.assertAlmostEqual(self.product1.qty_available, 1.0)
-        self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
-        self.assertAlmostEqual(self.product1.value_svl, 0.0)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
     def test_standard_manual_2(self):
         """Validate a receipt as a regular stock user."""
@@ -2935,6 +3059,7 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100
 
         # receive 10@15
         move2 = self.env['stock.move'].create({
@@ -2950,6 +3075,7 @@ class TestStockValuation(TestStockValuationBase):
         move2.move_line_ids.quantity = 10.0
         move2.picked = True
         move2._action_done()
+        move2.value_manual = 150
 
         # sell 1
         move3 = self.env['stock.move'].create({
@@ -2965,8 +3091,8 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 19)
-        self.assertEqual(self.product1.value_svl, 240)
+        self.assertAlmostEqual(self.product1.qty_available, 19)
+        self.assertEqual(self.product1.total_value, 240)
 
         # ---------------------------------------------------------------------
         # Change the production valuation to AVCO
@@ -2974,24 +3100,21 @@ class TestStockValuation(TestStockValuationBase):
         self.product1.categ_id.property_cost_method = 'average'
 
         # valuation should stay to ~240
-        self.assertAlmostEqual(self.product1.quantity_svl, 19)
-        self.assertAlmostEqual(self.product1.value_svl, 240, delta=0.04)
+        self.assertAlmostEqual(self.product1.qty_available, 19)
+        self.assertAlmostEqual(self.product1.total_value, 240, delta=0.04)
 
-        amls = self.env['account.move.line'].search([
-            ('product_id', '=', self.product1.id),
-            ('name', 'ilike', 'Costing method change%'),
-        ], order='id')
+        closing_move = self.env['account.move'].browse(move3.company_id.action_close_stock_valuation()['res_id'])
+        valuation_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
+        expense_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.expense_account)
         self.assertRecordValues(
-            amls,
+            valuation_aml + expense_aml,
             [
-                {'account_id': self.stock_input_account.id, 'debit': 240, 'credit': 0},
-                {'account_id': self.stock_valuation_account.id, 'debit': 0, 'credit': 240},
-                {'account_id': self.stock_valuation_account.id, 'debit': 239.97, 'credit': 0},
-                {'account_id': self.stock_input_account.id, 'debit': 0, 'credit': 239.97},
+                {'account_id': self.stock_valuation_account.id, 'debit': 240, 'credit': 0},
+                {'account_id': self.expense_account.id, 'debit': 0, 'credit': 240},
             ]
         )
 
-        self.assertEqual(self.product1.standard_price, 12.63)
+        self.assertEqual(self.product1.standard_price, 12.5)
 
     def test_change_cost_method_2(self):
         """ Change the cost method from FIFO to standard.
@@ -3015,6 +3138,7 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 10.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 100
 
         # receive 10@15
         move2 = self.env['stock.move'].create({
@@ -3030,6 +3154,7 @@ class TestStockValuation(TestStockValuationBase):
         move2.move_line_ids.quantity = 10.0
         move2.picked = True
         move2._action_done()
+        move2.value_manual = 150
 
         # sell 1
         move3 = self.env['stock.move'].create({
@@ -3045,8 +3170,8 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 19)
-        self.assertEqual(self.product1.value_svl, 240)
+        self.assertAlmostEqual(self.product1.qty_available, 19)
+        self.assertEqual(self.product1.total_value, 240)
 
         # ---------------------------------------------------------------------
         # Change the production valuation to AVCO
@@ -3054,24 +3179,21 @@ class TestStockValuation(TestStockValuationBase):
         self.product1.categ_id.property_cost_method = 'standard'
 
         # valuation should stay to ~240
-        self.assertAlmostEqual(self.product1.value_svl, 240, delta=0.04)
-        self.assertAlmostEqual(self.product1.quantity_svl, 19)
+        self.assertAlmostEqual(self.product1.total_value, 240, delta=0.04)
+        self.assertAlmostEqual(self.product1.qty_available, 19)
 
-        amls = self.env['account.move.line'].search([
-            ('product_id', '=', self.product1.id),
-            ('name', 'ilike', 'Costing method change%'),
-        ], order='id')
+        closing_move = self.env['account.move'].browse(move3.company_id.action_close_stock_valuation()['res_id'])
+        valuation_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
+        expense_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.expense_account)
         self.assertRecordValues(
-            amls,
+            valuation_aml + expense_aml,
             [
-                {'account_id': self.stock_input_account.id, 'debit': 240, 'credit': 0},
-                {'account_id': self.stock_valuation_account.id, 'debit': 0, 'credit': 240},
-                {'account_id': self.stock_valuation_account.id, 'debit': 239.97, 'credit': 0},
-                {'account_id': self.stock_input_account.id, 'debit': 0, 'credit': 239.97},
+                {'account_id': self.stock_valuation_account.id, 'debit': 240, 'credit': 0},
+                {'account_id': self.expense_account.id, 'debit': 0, 'credit': 240},
             ]
         )
 
-        self.assertEqual(self.product1.standard_price, 12.63)
+        self.assertEqual(self.product1.standard_price, 12.5)
 
     def test_fifo_sublocation_valuation_1(self):
         """ Set the main stock as a view location. Receive 2 units of a
@@ -3245,8 +3367,6 @@ class TestStockValuation(TestStockValuationBase):
         move2.picked = True
         self.assertEqual(move2._is_in(), True)
         self.assertEqual(move2._is_out(), True)
-        with self.assertRaises(UserError):
-            move2._action_done()
 
     def test_at_date_standard_1(self):
         self.product1.categ_id.property_cost_method = 'standard'
@@ -3695,10 +3815,12 @@ class TestStockValuation(TestStockValuationBase):
         move1.move_line_ids.quantity = 12.0
         move1.picked = True
         move1._action_done()
+        move1.value_manual = 180.0
 
-        self.assertAlmostEqual(move1.stock_valuation_layer_ids.value, 180.0)
-        self.assertAlmostEqual(move1.stock_valuation_layer_ids.remaining_qty, 12.0)
-        self.assertAlmostEqual(self.product1.value_svl, 180.0)
+        self.assertAlmostEqual(move1.value, 180.0)
+        self.assertAlmostEqual(move1.remaining_qty, 12.0)
+        self.assertAlmostEqual(self.product1.total_value, 180.0)
+        self.product1._invalidate_cache()
 
         # Sell the 12 units
         move2 = self.env['stock.move'].create({
@@ -3714,8 +3836,9 @@ class TestStockValuation(TestStockValuationBase):
         move2.picked = True
         move2._action_done()
 
-        self.assertAlmostEqual(move1.stock_valuation_layer_ids.remaining_qty, 0.0)
-        self.assertAlmostEqual(self.product1.value_svl, 0.0)
+        move1._invalidate_cache()
+        self.assertAlmostEqual(move1.remaining_qty, 0.0)
+        self.assertAlmostEqual(self.product1.total_value, 0.0)
 
     def test_at_date_average_1(self):
         """ Set a company on the inventory loss, take items from there then put items there, check
@@ -3743,7 +3866,6 @@ class TestStockValuation(TestStockValuationBase):
         move1.picked = True
         move1._action_done()
         move1.date = date1
-        move1.stock_valuation_layer_ids._write({'create_date': date1})
 
         move2 = self.env['stock.move'].create({
             'location_id': self.stock_location.id,
@@ -3758,12 +3880,11 @@ class TestStockValuation(TestStockValuationBase):
         move2.picked = True
         move2._action_done()
         move2.date = date2
-        move2.stock_valuation_layer_ids._write({'create_date': date2})
 
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).quantity_svl, 10)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).value_svl, 100)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).quantity_svl, 5)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).value_svl, 50)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).qty_available, 10)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).total_value, 100)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).qty_available, 5)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).total_value, 50)
 
     def test_forecast_report_value(self):
         """ Create a SVL for two companies using different currency, and open
@@ -3841,8 +3962,8 @@ class TestStockValuation(TestStockValuationBase):
 
         # Opens the report for each company and compares the values.
         report = self.env['stock.forecasted_product_product']
-        report_for_company_1 = report.with_context(warehouse_id=warehouse_1.id)
-        report_for_company_2 = report.with_context(warehouse_id=warehouse_2.id)
+        report_for_company_1 = report.with_company(company_1).with_context(warehouse_id=warehouse_1.id)
+        report_for_company_2 = report.with_company(company_2).with_context(warehouse_id=warehouse_2.id)
         report_value_1 = report_for_company_1.get_report_values(docids=self.product1.ids)
         report_value_2 = report_for_company_2.get_report_values(docids=self.product1.ids)
         self.assertEqual(report_value_1['docs']['value'], "U 50.00")
@@ -3876,9 +3997,11 @@ class TestStockValuation(TestStockValuationBase):
         move.quantity = 1
         move.picked = True
         receipt.button_validate()
+        move.value_manual = 10
 
-        self.assertEqual(move.stock_valuation_layer_ids.value, 10)
-        self.assertEqual(move.stock_valuation_layer_ids.account_move_id.amount_total, 10)
+        closing_move = self.env['account.move'].browse(move.company_id.action_close_stock_valuation()['res_id'])
+        self.assertEqual(move.value, 10)
+        self.assertEqual(closing_move.amount_total, 10)
 
     def test_create_svl_different_uom(self):
         """
@@ -3910,9 +4033,9 @@ class TestStockValuation(TestStockValuationBase):
         receipt.button_validate()
 
         self.assertEqual(self.product1.uom_name, 'Units')
-        self.assertEqual(self.product1.quantity_svl, 12)
+        self.assertEqual(self.product1.qty_available, 12)
         move.quantity = 2
-        self.assertEqual(self.product1.quantity_svl, 24)
+        self.assertEqual(self.product1.qty_available, 24)
 
     def test_average_manual_price_change(self):
         """
@@ -3922,8 +4045,10 @@ class TestStockValuation(TestStockValuationBase):
         Then we update the standard price to $7
         """
         self.product1.categ_id.property_cost_method = 'average'
-        self._make_in_move(self.product1, 5, unit_cost=5)
-        self._make_in_move(self.product1, 2, unit_cost=6)
+        move1 = self._make_in_move(self.product1, 5, unit_cost=5)
+        move1.value_manual = 25
+        move2 = self._make_in_move(self.product1, 2, unit_cost=6)
+        move2.value_manual = 12
 
         # make sure field 'value' is flagged as aggregatable
         self.assertEqual(
@@ -3935,23 +4060,19 @@ class TestStockValuation(TestStockValuationBase):
         res = self.env['stock.quant']._read_group([('product_id', '=', self.product1.id)], aggregates=['value:sum'])
         self.assertEqual(res[0][0], 5 * 5 + 2 * 6)
 
-        self.product1.write({'standard_price': 7})
-        self.assertEqual(self.product1.value_svl, 49)
+        self.product1.standard_price = 7
+        self.assertEqual(self.product1.total_value, 37)
 
     def test_average_manual_revaluation(self):
         self.product1.categ_id.property_cost_method = 'average'
 
-        self._make_in_move(self.product1, 1, unit_cost=20)
-        self._make_in_move(self.product1, 1, unit_cost=30)
+        move1 = self._make_in_move(self.product1, 1, unit_cost=20)
+        move1.value_manual = 20
+        move2 = self._make_in_move(self.product1, 1, unit_cost=30)
+        move2.value_manual = 30
         self.assertEqual(self.product1.standard_price, 25)
 
-        Form(self.env['stock.valuation.layer.revaluation'].with_context({
-            'default_product_id': self.product1.id,
-            'default_company_id': self.env.company.id,
-            'default_account_id': self.stock_valuation_account,
-            'default_added_value': -10.0,
-        })).save().action_validate_revaluation()
-
+        move2.value_manual = 20
         self.assertEqual(self.product1.standard_price, 20)
 
     def test_fifo_manual_revaluation(self):
@@ -3962,46 +4083,23 @@ class TestStockValuation(TestStockValuationBase):
         }
         self.product1.categ_id.property_cost_method = 'fifo'
 
-        self._make_in_move(self.product1, 1, unit_cost=15)
-        self._make_in_move(self.product1, 1, unit_cost=30)
-        self.assertEqual(self.product1.stock_valuation_layer_ids[0].remaining_value, 15)
+        move1 = self._make_in_move(self.product1, 1, unit_cost=15)
+        move1.value_manual = 15
+        move2 = self._make_in_move(self.product1, 1, unit_cost=30)
+        move2.value_manual = 30
+        self.assertEqual(self.product1.standard_price, 22.5)
 
-        Form(self.env['stock.valuation.layer.revaluation'].with_context({
-            **revaluation_vals,
-            'default_added_value': -10.0,
-        })).save().action_validate_revaluation()
-
-        self.assertEqual(self.product1.stock_valuation_layer_ids[0].remaining_value, 10)
-
-        revaluation = Form(self.env['stock.valuation.layer.revaluation'].with_context({
-            **revaluation_vals,
-            'default_added_value': -25.0,
-        })).save()
-
-        with self.assertRaises(UserError):
-            revaluation.action_validate_revaluation()
+        move2.value_manual = 20
+        self.assertEqual(self.product1.standard_price, 17.5)
 
     def test_manual_revaluation_statement(self):
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
 
-        self._make_in_move(self.product1, 1, unit_cost=15)
-
-        revaluation_form = Form(self.env['stock.valuation.layer.revaluation'].with_context({
-            'default_product_id': self.product1.id,
-            'default_company_id': self.env.company.id,
-        }))
-        revaluation_form.added_value = 10.0
-        revaluation_form.account_id = self.stock_valuation_account
-        revaluation = revaluation_form.save()
-        revaluation.action_validate_revaluation()
-
-        account_move = self.env['stock.valuation.layer'].search([
-            ('product_id', '=', self.product1.id),
-            ('stock_move_id', '=', False),
-        ]).account_move_id
-
-        self.assertIn('OdooBot changed stock valuation from  15.0 to 25.0 -', account_move.line_ids[0].name)
+        move1 = self._make_in_move(self.product1, 1, unit_cost=15)
+        move1.value_manual = 15
+        move1.value_manual = 25
+        self.assertEqual(self.product1.standard_price, 25.0)
 
     def test_journal_entries_from_change_product_cost_method(self):
         """ Changing between non-standard cost methods when an underlying product has real_time
@@ -4029,6 +4127,8 @@ class TestStockValuation(TestStockValuationBase):
         move2.quantity = 20
         (move1 + move2).picked = True
         (move1 + move2)._action_done()
+        move1.value_manual = 72.0
+        move2.value_manual = 306.0
         move3 = self.env['stock.move'].create({
             'product_id': self.product1.id,
             'product_uom_qty': 100,
@@ -4041,17 +4141,16 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
         self.product1.categ_id.property_cost_method = 'average'
-        amls = self.env['account.move.line'].search([
-            ('product_id', '=', self.product1.id),
-            ('name', 'ilike', 'Costing method change%'),
-        ], order='id')
+
+        closing_move = self.env['account.move'].browse(move3.company_id.action_close_stock_valuation()['res_id'])
+        valuation_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
+        expense_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.expense_account)
+
         self.assertRecordValues(
-            amls,
+            valuation_aml + expense_aml,
             [
-                {'account_id': self.stock_valuation_account.id, 'debit': 1071, 'credit': 0},
-                {'account_id': self.stock_output_account.id, 'debit': 0, 'credit': 1071},
-                {'account_id': self.stock_output_account.id, 'debit': 1071, 'credit': 0},
-                {'account_id': self.stock_valuation_account.id, 'debit': 0, 'credit': 1071},
+                {'account_id': self.stock_valuation_account.id, 'debit': 0.0, 'credit': 882.0},
+                {'account_id': self.expense_account.id, 'debit': 882.0, 'credit': 0.0},
             ]
         )
 
@@ -4063,9 +4162,7 @@ class TestStockValuation(TestStockValuationBase):
         self.product1.categ_id.property_cost_method = 'fifo'
         other_categ = self.product1.categ_id.copy({
             'property_cost_method': 'average',
-            'property_stock_account_output_categ_id': self.stock_output_account.id,
             'property_stock_valuation_account_id': self.stock_valuation_account.id,
-            'property_stock_account_input_categ_id': self.stock_input_account.id,
             'property_stock_journal': self.stock_journal.id,
         })
         move1 = self.env['stock.move'].create({
@@ -4088,6 +4185,8 @@ class TestStockValuation(TestStockValuationBase):
         move2.quantity = 20
         (move1 + move2).picked = True
         (move1 + move2)._action_done()
+        move1.value_manual = 72.0
+        move2.value_manual = 306.0
         move3 = self.env['stock.move'].create({
             'product_id': self.product1.id,
             'product_uom_qty': 100,
@@ -4100,17 +4199,16 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
         self.product1.product_tmpl_id.categ_id = other_categ
-        amls = self.env['account.move.line'].search([
-            ('product_id', '=', self.product1.id),
-            ('name', 'ilike', 'Due to a change%'),
-        ], order='id')
+
+        closing_move = self.env['account.move'].browse(move3.company_id.action_close_stock_valuation()['res_id'])
+        valuation_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.stock_valuation_account)
+        expense_aml = closing_move.line_ids.filtered(lambda l: l.account_id == self.expense_account)
+
         self.assertRecordValues(
-            amls,
+            valuation_aml + expense_aml,
             [
-                {'account_id': self.stock_valuation_account.id, 'debit': 1071.0, 'credit': 0.0},
-                {'account_id': self.stock_output_account.id, 'debit': 0.0, 'credit': 1071.0},
-                {'account_id': self.stock_output_account.id, 'debit': 1071.0, 'credit': 0.0},
-                {'account_id': self.stock_valuation_account.id, 'debit': 0.0, 'credit': 1071.0},
+                {'account_id': self.stock_valuation_account.id, 'debit': 0.0, 'credit': 882.0},
+                {'account_id': self.expense_account.id, 'debit': 882.0, 'credit': 0.0},
             ]
         )
 
@@ -4142,14 +4240,12 @@ class TestStockValuation(TestStockValuationBase):
         move._action_done()
 
         self.assertEqual(move.quantity, 12)
-        self.assertEqual(move.stock_valuation_layer_ids.quantity, 12)
 
         move.picking_id.action_toggle_is_locked()
         # Change from 1 Dozen to 2 Dozens (12 -> 24)
         move.move_line_ids = [Command.update(move.move_line_ids[0].id, {'quantity': 2})]
 
         self.assertEqual(move.quantity, 24)
-        self.assertRecordValues(move.stock_valuation_layer_ids, [{'quantity': 12}, {'quantity': 12}])
 
     def test_internal_location_with_no_company(self):
         """ An internal location without a company should not be valued """
@@ -4174,8 +4270,7 @@ class TestStockValuation(TestStockValuationBase):
         move._action_done()
 
         self.assertEqual(move.state, "done")
-        self.assertFalse(move.stock_valuation_layer_ids)
-        self.assertEqual(self.product1.quantity_svl, 0)
+        self.assertEqual(self.product1.qty_available, 0)
 
     def test_stock_valuation_layer_revaluation_with_branch_company(self):
         """
@@ -4184,7 +4279,8 @@ class TestStockValuation(TestStockValuationBase):
         """
         self.assertEqual(self.product1.standard_price, 0)
         self.product1.categ_id.property_cost_method = 'average'
-        self._make_in_move(self.product1, 1, unit_cost=20)
+        move1 = self._make_in_move(self.product1, 1, unit_cost=20)
+        move1.value_manual = 20
         self.assertEqual(self.product1.standard_price, 20)
         # create a branch company
         branch = self.env['res.company'].create({
@@ -4195,7 +4291,8 @@ class TestStockValuation(TestStockValuationBase):
         self.patch(self, 'env', branch.with_company(branch).env)
         self.product1.with_company(branch).categ_id.property_cost_method = 'average'
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', branch.id)], limit=1)
-        self._make_in_move(self.product1, 1, unit_cost=30, location_dest_id=warehouse.lot_stock_id.id, picking_type_id=warehouse.in_type_id.id)
+        move2 = self._make_in_move(self.product1, 1, unit_cost=30, location_dest_id=warehouse.lot_stock_id.id, picking_type_id=warehouse.in_type_id.id)
+        move2.value_manual = 30
         self.assertEqual(self.product1.with_company(branch).standard_price, 30)
 
     def test_action_done_with_state_already_done(self):
@@ -4217,13 +4314,13 @@ class TestStockValuation(TestStockValuationBase):
         self.assertEqual(in_move.state, 'done')
         in_move._action_done()
 
-        self.assertEqual(len(in_move.stock_valuation_layer_ids), 1)
-        self.assertEqual(in_move.stock_valuation_layer_ids.value, 100)
-        self.assertEqual(in_move.stock_valuation_layer_ids.quantity, 10)
+        self.assertEqual(in_move.value, 100)
+        self.assertEqual(in_move.quantity, 10)
 
     def test_scrap_reception_valuation(self):
         product = self.product1
         product.categ_id.property_cost_method = 'fifo'
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'periodic'
         receipt = self.env['stock.picking'].create({
             'picking_type_id': self.ref('stock.picking_type_in'),
             'location_id': self.supplier_location.id,
@@ -4238,17 +4335,21 @@ class TestStockValuation(TestStockValuationBase):
             })],
         })
         receipt.button_validate()
+        receipt.move_ids.value_manual = 150
+        scrap_location = self.env['stock.location'].search(
+            [('name', '=', 'Scrap'), ('company_id', '=', self.env.company.id)], limit=1
+        )
+        scrap_location.valuation_account_id = self.inventory_adjustment_account
         scrap_form = Form(self.env['stock.scrap'].with_context(default_picking_id=receipt.id))
         scrap_form.product_id = product
         scrap_form.scrap_qty = 2
         scrap = scrap_form.save()
         scrap.action_validate()
-        svls = product.stock_valuation_layer_ids
         self.assertRecordValues(
-            svls,
+            receipt.move_ids,
             [
                 {'quantity': 10.0, 'remaining_qty': 8.0, 'value': 150.0, 'remaining_value': 120.0},
-                {'quantity': -2.0, 'remaining_qty': 0.0, 'value': -30.0, 'remaining_value': 0.0},
+                {'quantity': 2.0, 'remaining_qty': 0.0, 'value': 30.0, 'remaining_value': 0.0},
             ]
         )
 
@@ -4257,28 +4358,32 @@ class TestStockValuation(TestStockValuationBase):
         inventory_adjustment_loc = self.env['stock.location'].search(
             [('usage', '=', 'inventory'), ('company_id', '=', self.env.company.id)], limit=1
         )
+        inventory_adjustment_loc.valuation_account_id = self.stock_valuation_account
         self.product1.standard_price = 10
         inventory_gain_move = self._make_in_move(self.product1, 10, location_id=inventory_adjustment_loc.id)
-        self.assertTrue(inventory_gain_move.stock_valuation_layer_ids)
-        self.assertEqual(len(inventory_gain_move.stock_valuation_layer_ids.account_move_id.line_ids), 2)
-        debit_line = inventory_gain_move.stock_valuation_layer_ids.account_move_id.line_ids.filtered(lambda l: l.debit > 0)
-        credit_line = inventory_gain_move.stock_valuation_layer_ids.account_move_id.line_ids.filtered(lambda l: l.credit > 0)
+
+        amls = inventory_gain_move.account_move_id.line_ids
+        self.assertEqual(len(amls), 2)
+        debit_line = amls.filtered(lambda l: l.debit > 0)
+        credit_line = amls.filtered(lambda l: l.credit > 0)
         self.assertEqual(debit_line.account_id, accounts_data['stock_valuation'])
-        self.assertEqual(credit_line.account_id, accounts_data['income'])
+        self.assertEqual(credit_line.account_id, accounts_data['stock_valuation'])
 
     def test_negative_stock_adjustment_valuation(self):
         accounts_data = self.product1.product_tmpl_id.get_product_accounts()
         inventory_adjustment_loc = self.env['stock.location'].search(
             [('usage', '=', 'inventory'), ('company_id', '=', self.env.company.id)], limit=1
         )
+        inventory_adjustment_loc.valuation_account_id = self.stock_valuation_account
         self.product1.standard_price = 10
         self._make_in_move(self.product1, 10)
         inventory_loss_move = self._make_out_move(self.product1, 5, location_dest_id=inventory_adjustment_loc.id)
-        self.assertTrue(inventory_loss_move.stock_valuation_layer_ids)
-        self.assertEqual(len(inventory_loss_move.stock_valuation_layer_ids.account_move_id.line_ids), 2)
-        debit_line = inventory_loss_move.stock_valuation_layer_ids.account_move_id.line_ids.filtered(lambda l: l.debit > 0)
-        credit_line = inventory_loss_move.stock_valuation_layer_ids.account_move_id.line_ids.filtered(lambda l: l.credit > 0)
-        self.assertEqual(debit_line.account_id, accounts_data['expense'])
+
+        amls = inventory_loss_move.account_move_id.line_ids
+        self.assertEqual(len(amls), 2)
+        debit_line = amls.filtered(lambda l: l.debit > 0)
+        credit_line = amls.filtered(lambda l: l.credit > 0)
+        self.assertEqual(debit_line.account_id, accounts_data['stock_valuation'])
         self.assertEqual(credit_line.account_id, accounts_data['stock_valuation'])
 
     def test_valuation_rounding_method(self):
@@ -4303,7 +4408,6 @@ class TestStockValuation(TestStockValuationBase):
 
         self.assertEqual(receipt.move_ids.quantity, 11)
         self.assertEqual(receipt.move_ids.product_qty, 0.01)
-        self.assertEqual(receipt.move_ids.stock_valuation_layer_ids.quantity, 0.01)
         self.assertEqual(self.product1.qty_available, 0.01)
 
         delivery = self.env['stock.picking'].create({
@@ -4323,5 +4427,4 @@ class TestStockValuation(TestStockValuationBase):
 
         self.assertEqual(delivery.move_ids.quantity, 11)
         self.assertEqual(delivery.move_ids.product_qty, 0.01)
-        self.assertEqual(delivery.move_ids.stock_valuation_layer_ids.quantity, -0.01)
         self.assertEqual(self.product1.qty_available, 0.00)
