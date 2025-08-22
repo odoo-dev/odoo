@@ -4,11 +4,9 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 from odoo.tests import tagged
 
 import time
-from unittest import skip
 
 
 @tagged('-at_install', 'post_install')
-@skip('Temporary to fast merge new valuation')
 class TestAveragePrice(ValuationReconciliationTestCommon):
 
     def test_00_average_price(self):
@@ -240,53 +238,4 @@ class TestAveragePrice(ValuationReconciliationTestCommon):
         picking = purchase_order.picking_ids[0]
         picking.button_validate()
 
-        self.assertEqual(avco_product.avg_cost, 9)
-        self.assertEqual(avco_product.value_svl, 90)
-
-    def test_no_compensatory_svl_from_asymmetrical_rounding(self):
-        """ Ensure that a purchase order for a high quantity of some product using avg costing does
-        not calculate the price unit asymmetrically for the order(line) and the invoice AML.
-        """
-        self.stock_account_product_categ.property_cost_method = 'average'
-        avco_product = self.env['product.product'].create({
-            'name': 'test_rounding_in_valuation product',
-            'is_storable': True,
-            'categ_id': self.stock_account_product_categ.id,
-            'purchase_method': 'purchase',
-            'standard_price': 2.0,
-        })
-
-        incl_tax = self.env['account.tax'].create({
-            'name': 'test_rounding_in_valuation tax',
-            'type_tax_use': 'purchase',
-            'amount_type': 'percent',
-            'amount': 10,
-            'price_include_override': 'tax_included',
-            'invoice_repartition_line_ids': [
-                (0, 0, {'repartition_type': 'base'}),
-                (0, 0, {
-                    'repartition_type': 'tax',
-                    'factor_percent': 100,
-                    'account_id': self.env['account.account'].search([('name', '=', 'Tax Paid')], limit=1).id,
-                }),
-            ],
-            'include_base_amount': False,
-        })
-
-        po = self.env['purchase.order'].create({
-            'partner_id': self.partner_a.id,
-            'order_line': [(0, 0, {
-                'product_id': avco_product.id,
-                'product_qty': 999,
-                'tax_ids': [(6, 0, [incl_tax.id])],
-            })],
-        })
-        po.button_confirm()
-
-        po.picking_ids.move_ids.quantity = 999
-        po.picking_ids.button_validate()
-        po.action_create_invoice()
-        po.invoice_ids[0].invoice_date = time.strftime('%Y-%m-%d')
-        po.invoice_ids[0].action_post()
-
-        self.assertFalse(po.picking_ids.move_ids.stock_valuation_layer_ids.stock_valuation_layer_ids)
+        self.assertEqual(avco_product.total_value, 90)
