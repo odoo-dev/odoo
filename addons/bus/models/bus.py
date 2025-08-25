@@ -154,7 +154,7 @@ class BusBus(models.Model):
                         "The imbus notification payload was too large, it's been split into %d payloads.",
                         len(payloads),
                     )
-                with odoo.sql_db.db_connect("postgres").cursor() as cr:
+                with odoo.sql_db.db_connect('postgres').cursor() as cr:
                     for payload in payloads:
                         cr.execute(
                             SQL(
@@ -219,6 +219,8 @@ class ImDispatch(threading.Thread):
         self._clear_outdated_channels(websocket, outdated_channels)
         websocket.subscribe(channels, last)
         with contextlib.suppress(RuntimeError):
+            import traceback
+            traceback.print_stack()
             if not self.is_alive():
                 self.start()
 
@@ -242,9 +244,12 @@ class ImDispatch(threading.Thread):
             conn = cr._cnx
             sel.register(conn, selectors.EVENT_READ)
             while not stop_event.is_set():
+                _logger.info('loop')
                 if sel.select(TIMEOUT):
+                    _logger.info('polling')
                     conn.poll()
                     channels = []
+                    _logger.info(conn.notifies[0].payload)
                     while conn.notifies:
                         channels.extend(json.loads(conn.notifies.pop().payload))
                     # relay notifications to websockets that have
@@ -256,14 +261,18 @@ class ImDispatch(threading.Thread):
                         websocket.trigger_notification_dispatching()
 
     def run(self):
+        import traceback
+        traceback.print_stack()
         while not stop_event.is_set():
             try:
+                _logger.info('start_loop')
                 self.loop()
             except Exception as exc:
                 if isinstance(exc, InterfaceError) and stop_event.is_set():
                     continue
                 _logger.exception("Bus.loop error, sleep and retry")
                 time.sleep(TIMEOUT)
+        print('****************** Bus thread stopping')
 
 # Partially undo a2ed3d3d5bdb6025a1ba14ad557a115a86413e65
 # IMDispatch has a lazy start, so we could initialize it anyway

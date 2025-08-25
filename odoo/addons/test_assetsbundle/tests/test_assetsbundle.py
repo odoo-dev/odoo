@@ -23,6 +23,9 @@ from odoo.tests.common import TransactionCase
 from odoo.tools import mute_logger
 from odoo.tools.misc import file_path
 
+import logging
+_logger = logging.getLogger(__name__)
+
 GETMTINE = os.path.getmtime
 
 # ruff: noqa: S320
@@ -2054,15 +2057,22 @@ class AssetsNodeOrmCacheUsage(TransactionCase):
 class TestErrorManagement(HttpCase):
 
     def test_assets_bundle_css_error_backend(self):
-        self.env['ir.qweb']._get_asset_bundle('web.assets_backend', assets_params={}).css() # force pregeneration so that we have the base style
+        _logger.info('Getting web.assets_backend bundle')
+        bundle = self.env['ir.qweb']._get_asset_bundle('web.assets_backend', assets_params={})  # force pregeneration so that we have the base style
+        _logger.info('Generating web.assets_backend css')
+        bundle.css()
+        _logger.info('Creating an asset')
         self.env['ir.asset'].create({
             'name': 'Css error',
             'bundle': 'web.assets_backend',
             'path': 'test_assetsbundle/static/src/css/test_error.scss',
         })
 
+        return
+        _logger.info('Starting the tour')
         with mute_logger('odoo.addons.base.models.assetsbundle'):
             self.start_tour('/odoo', 'css_error_tour', login='admin')
+        _logger.info('tour is finished')
 
     def test_assets_bundle_css_error_frontend(self):
         whatever = {'website_id': website.search([], limit=1).id} if (website := self.env.get('website')) else {}

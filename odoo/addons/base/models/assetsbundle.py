@@ -574,6 +574,7 @@ css_error_message {
             css files are also stored in ir.attachment after processing done by rtlcss.
             Returns the bundle's flat css.
         """
+        _logger.info('Preprocessing css for bundle %s', self.name)
         if self.stylesheets:
             compiled = ""
             for atype in (SassStylesheetAsset, ScssStylesheetAsset, LessStylesheetAsset):
@@ -581,7 +582,7 @@ css_error_message {
                 if assets:
                     source = '\n'.join([asset.get_source() for asset in assets])
                     compiled += self.compile_css(assets[0].compile, source)
-
+    
             if self.autoprefix:
                 compiled = self.autoprefix_css(compiled)
 
@@ -592,6 +593,7 @@ css_error_message {
                 compiled = self.run_rtlcss(compiled)
 
             if not self.css_errors and old_attachments:
+                _logger.info('Unlinking old attachments for bundle %s', self.name)
                 self._unlink_attachments(old_attachments)
                 old_attachments = None
 
@@ -628,7 +630,9 @@ css_error_message {
         source = re.sub(self.rx_preprocess_imports, sanitize, source)
 
         try:
+            _logger.info('Compiling with %s', compiler)
             compiled = compiler(source)
+            _logger.info('Compiled')
         except CompileError as e:
             return handle_compile_error(e, source=source)
 

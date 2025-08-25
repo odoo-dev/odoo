@@ -967,6 +967,7 @@ class WebsocketConnectionHandler:
         # However, they are enabled during tours as RPC requests and WebSocket
         # instances both use the `TestCursor` class wich is locked.
         # See `HttpCase@browser_js`.
+        _logger.info(modules.module.current_test)
         return not modules.module.current_test
 
     @classmethod
@@ -979,8 +980,10 @@ class WebsocketConnectionHandler:
         versions the client supports and those we support.
         :raise: BadRequest if the handshake data is incorrect.
         """
+        print('********************open_connection', cls.websocket_allowed, cls.websocket_allowed(request))
         if not cls.websocket_allowed(request):
             raise ServiceUnavailable("Websocket is disabled in test mode")
+        print('********************yes')
         public_session = cls._handle_public_configuration(request)
         try:
             response = cls._get_handshake_response(request.httprequest.headers)

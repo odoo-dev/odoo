@@ -116,7 +116,7 @@ def _check_faketime_mode(db_name):
                 """, (int(time_offset), ))
                 cursor.execute("SELECT (now() AT TIME ZONE 'UTC');")
                 new_now = cursor.fetchone()[0]
-                _logger.info("Faketime mode, new cursor now is %s", new_now)
+                _logger.info("Faketime mode, new cursor now is %s for db %s", new_now, db_name)
                 cursor.commit()
         except psycopg2.Error as e:
             _logger.warning("Unable to set fakedtimed NOW() : %s", e)

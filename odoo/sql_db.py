@@ -422,6 +422,9 @@ class Cursor(BaseCursor):
             raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
 
         start = real_time()
+        f = self._format(query, params)
+        if ('listen' in f.lower() or 'notify' in f.lower()):
+            _logger.debug("NOTIFY/LISTEN query: %s", f)
         try:
             self._obj.execute(query, params)
         except Exception as e:
@@ -805,6 +808,10 @@ _Pool_readonly: ConnectionPool | None = None
 
 
 def db_connect(to: str, allow_uri=False, readonly=False) -> Connection:
+    #if to not in str(tools.config['db_name']):
+    #    _logger.info(f"----------------------- Connection to '{to}' database--------------------------")
+    #    import traceback
+    #    traceback.print_stack()
     global _Pool, _Pool_readonly  # noqa: PLW0603 (global-statement)
 
     maxconn = (tools.config['db_maxconn_gevent'] if hasattr(odoo, 'evented') and odoo.evented else 0) or tools.config['db_maxconn']
