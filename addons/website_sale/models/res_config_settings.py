@@ -61,6 +61,10 @@ class ResConfigSettings(models.TransientModel):
         related='website_id.show_line_subtotals_tax_selection',
         readonly=False,
     )
+    confirmation_email_template_id = fields.Many2one(
+        related="website_id.confirmation_email_template_id",
+        readonly=False,
+    )
 
     # Additional settings
     account_on_checkout = fields.Selection(

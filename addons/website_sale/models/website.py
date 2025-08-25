@@ -46,6 +46,16 @@ class Website(models.Model):
         except ValueError:
             return False
 
+    def _default_confirmation_email_template(self):
+        default_confirmation_template_id = self.env['ir.config_parameter'].sudo().get_param(
+            'sale.default_confirmation_template',
+        )
+        default_confirmation_template = default_confirmation_template_id \
+            and self.env['mail.template'].browse(int(default_confirmation_template_id)).exists()
+        if default_confirmation_template:
+            return default_confirmation_template
+        return self.env.ref('sale.mail_template_sale_confirmation', raise_if_not_found=False)
+
     #=== FIELDS ===#
 
     enabled_portal_reorder_button = fields.Boolean(string="Re-order From Portal")
@@ -188,6 +198,11 @@ class Website(models.Model):
         string="Price list available for this Ecommerce/Website",
         comodel_name='product.pricelist',
         compute="_compute_pricelist_ids",
+    )
+    confirmation_email_template_id = fields.Many2one(
+        comodel_name='mail.template',
+        domain=[('model', '=', 'sale.order')],
+        default=_default_confirmation_email_template,
     )
 
     _check_gmc_ecommerce_access = models.Constraint(
