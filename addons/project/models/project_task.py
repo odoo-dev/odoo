@@ -158,7 +158,7 @@ class ProjectTask(models.Model):
         store=True, readonly=False, ondelete='restrict', tracking=True, index=True,
         default=_get_default_stage_id, group_expand='_read_group_stage_ids',
         domain="[('project_ids', '=', project_id)]")
-    stage_id_color = fields.Integer(string='Stage Color', related="stage_id.color", export_string_translation=False)
+    stage_id_color = fields.Integer(string='Stage Color', related="stage_id.color", export_string_translation=False, aggregator=None)
     tag_ids = fields.Many2many('project.tags', string='Tags')
 
     state = fields.Selection([
@@ -807,7 +807,7 @@ class ProjectTask(models.Model):
     def _search_has_template_ancestor(self, operator, value):
         if operator not in ['=', '!='] or not isinstance(value, bool):
             return NotImplemented
-        template_tasks = self.env['project.task'].with_context(active_test=False).sudo().search([('is_template', '=', True)])
+        template_tasks = self.env['project.task'].with_context(active_test=False).sudo().search([('is_template', '=', True)], order='id')
         domain = [('id', 'child_of', template_tasks.ids)]
         if (operator == "=") != value:
             domain = ['!', ('id', 'child_of', template_tasks.ids)]
