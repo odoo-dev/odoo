@@ -3,7 +3,6 @@
 
 from datetime import timedelta
 from freezegun import freeze_time
-from unittest import skip
 
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.tests import Form, tagged
@@ -12,7 +11,6 @@ from odoo import Command, fields
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestValuationReconciliation(ValuationReconciliationTestCommon):
 
     @classmethod
@@ -77,8 +75,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
 
         invoice = self._create_invoice_for_po(purchase_order, '2018-02-02')
         invoice.action_post()
-        picking = self.env['stock.picking'].search([('purchase_id','=',purchase_order.id)])
-        self.check_reconciliation(invoice, picking)
+        self.assertRecordValues(invoice.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 33.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 33.0, 'debit': 0.0},
+            ])
         # cancel the invoice
         invoice.button_cancel()
 
@@ -99,7 +100,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         invoice.action_post()
         self._process_pickings(purchase_order.picking_ids, date='2017-12-24')
         picking = self.env['stock.picking'].search([('purchase_id', '=', purchase_order.id)])
-        self.check_reconciliation(invoice, picking)
+        self.assertRecordValues(invoice.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 33.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 33.0, 'debit': 0.0},
+            ])
 
         # Return the goods and refund the invoice
         with freeze_time('2018-01-13'):
@@ -126,7 +131,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         self.assertEqual(invoice.payment_state, 'reversed', "Invoice should be in 'reversed' state")
         self.assertEqual(refund_invoice.payment_state, 'paid', "Refund should be in 'paid' state")
         self.assertEqual(new_invoice.state, 'draft', "New invoice should be in 'draft' state")
-        self.check_reconciliation(refund_invoice, return_pick)
+        self.assertRecordValues(invoice.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 33.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 33.0, 'debit': 0.0},
+            ])
 
     def test_multiple_shipments_invoices(self):
         """ Tests the case into which we receive part of the goods first, then 2 invoices at different rates, and finally the remaining quantities
@@ -143,7 +152,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             line_form.quantity = 3.0
         invoice = move_form.save()
         invoice.action_post()
-        self.check_reconciliation(invoice, picking, full_reconcile=False)
+        self.assertRecordValues(invoice.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 99.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 99.0, 'debit': 0.0},
+            ])
 
         invoice2 = self._create_invoice_for_po(purchase_order, '2017-02-15')
         move_form = Form(invoice2)
@@ -151,13 +164,21 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             line_form.quantity = 2.0
         invoice2 = move_form.save()
         invoice2.action_post()
-        self.check_reconciliation(invoice2, picking, full_reconcile=False)
+        self.assertRecordValues(invoice2.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 66.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 66.0, 'debit': 0.0},
+            ])
 
         # We don't need to make the date of processing explicit since the very last rate
         # will be taken
         self._process_pickings(purchase_order.picking_ids.filtered(lambda x: x.state != 'done'), quantity=3.0)
         picking = self.env['stock.picking'].search([('purchase_id', '=', purchase_order.id)], order='id desc', limit=1)
-        self.check_reconciliation(invoice2, picking)
+        self.assertRecordValues(invoice2.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 66.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 66.0, 'debit': 0.0},
+            ])
 
     def test_rounding_discount(self):
         self.env.ref("product.decimal_discount").digits = 5
@@ -185,15 +206,12 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         move_form.save()
         invoice.action_post()
 
-        # Check the price difference amount.
-        invoice_layer = self.env['stock.valuation.layer'].search([('account_move_line_id', 'in', invoice.line_ids.ids)])
-        self.assertTrue(len(invoice_layer) == 1, "A price difference line should be created")
-        self.assertAlmostEqual(invoice_layer.value, -3050.22)
-
-        picking = self.env['stock.picking'].search([('purchase_id', '=', purchase_order.id)])
-        self.assertAlmostEqual(invoice_layer.value + picking.move_ids.stock_valuation_layer_ids.value, invoice.line_ids[0].debit)
-        self.assertAlmostEqual(invoice_layer.value + picking.move_ids.stock_valuation_layer_ids.value, invoice.invoice_line_ids.price_subtotal/2, 2)
-        self.check_reconciliation(invoice, picking)
+        # Verify vendor bill posting: net purchase amount (330,000 - 3,050.22 = 326,949.78) debited to stock valuation and credited to payable.
+        self.assertRecordValues(invoice.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 326949.78},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 326949.78, 'debit': 0.0},
+            ])
 
     def test_rounding_price_unit(self):
         self.env.ref("product.decimal_price").digits = 6
@@ -214,17 +232,15 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         invoice.action_post()
 
         # Check the price difference amount. It's expected that price_unit * qty != price_total.
-        invoice_layer = self.env['stock.valuation.layer'].search([('account_move_line_id', 'in', invoice.line_ids.ids)])
-        self.assertTrue(len(invoice_layer) == 1, "A price difference line should be created")
-        # self.assertAlmostEqual(invoice_layer.price_unit, 0.0001)
-        self.assertAlmostEqual(invoice_layer.value, 50.0)
-
-        picking = self.env['stock.picking'].search([('purchase_id', '=', purchase_order.id)])
-        self.check_reconciliation(invoice, picking)
+        # Verify vendor bill posting: net purchase amount (1000000 * (0.0006/2) = 300.0) debited to stock valuation and credited to payable.
+        self.assertRecordValues(invoice.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 300.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 300.0, 'debit': 0.0},
+            ])
 
     @freeze_time('2021-01-03')
     def test_price_difference_exchange_difference_accounting_date(self):
-        self.stock_account_product_categ.property_account_creditor_price_difference_categ = self.company_data['default_account_stock_price_diff']
         test_product = self.test_product_delivery
         test_product.categ_id.write({"property_cost_method": "standard"})
         test_product.write({'standard_price': 100.0})
@@ -280,16 +296,11 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             move_form.date = fields.Date.from_string(date_accounting)
         invoice.action_post()
 
-        price_diff_line = invoice.line_ids.filtered(lambda l: l.account_id == self.stock_account_product_categ.property_account_creditor_price_difference_categ)
-        self.assertTrue(len(price_diff_line) == 1, "A price difference line should be created")
-        self.assertAlmostEqual(price_diff_line.balance, 192.31)
-        self.assertAlmostEqual(price_diff_line.price_subtotal, 5000.0)
-
-        picking = self.env['stock.picking'].search([('purchase_id', '=', purchase_order.id)])
-        interim_account_id = self.company_data['default_account_stock_in'].id
-
-        valuation_line = picking.move_ids.mapped('account_move_ids.line_ids').filtered(lambda x: x.account_id.id == interim_account_id)
-        self.assertTrue(valuation_line.full_reconcile_id, "The reconciliation should be total at that point.")
+        self.assertRecordValues(invoice.line_ids,
+            [
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 0.0, 'debit': 1000.0},
+                {'account_id': self.company_data['default_account_payable'].id, 'credit': 1000.0, 'debit': 0.0},
+            ])
 
     def test_reconcile_cash_basis_bill(self):
         ''' Test the generation of the CABA move after bill payment
@@ -448,10 +459,8 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
 
         bill_2 = self._create_invoice_for_po(purchase_order, date=date_po_and_delivery)
         bill_2.action_post()
-        aml = bill_2.line_ids.filtered(lambda line: line.display_type == "product")
         pol = purchase_order.order_line
         self.assertRecordValues(pol, [{'qty_invoiced': line.qty_received} for line in pol])
-        self.assertRecordValues(aml, [{'reconciled': True} for line in aml])
 
     def test_create_fifo_vacuum_anglo_saxon_expense_entry(self):
 
@@ -550,14 +559,14 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         purchase_order.button_confirm()
         receipt = purchase_order.picking_ids
         receipt.button_validate()
-        pre_bill_remaining_value = purchase_order.picking_ids.move_ids.stock_valuation_layer_ids.remaining_value
+        pre_bill_remaining_value = purchase_order.picking_ids.move_ids.remaining_value
+        self.assertEqual(pre_bill_remaining_value, 6500)
         purchase_order.action_create_invoice()
         purchase_order.invoice_ids.invoice_date = fields.Date.today()
         purchase_order.invoice_ids.action_post()
-        post_bill_remaining_value = purchase_order.picking_ids.move_ids.stock_valuation_layer_ids.remaining_value
-        self.assertEqual(post_bill_remaining_value, pre_bill_remaining_value)
-        stock_input_account, stock_valuation_account, tax_paid_account, accounts_payable_account = (
-            self.company_data['default_account_stock_in'],
+        post_bill_remaining_value = purchase_order.picking_ids.move_ids.remaining_value
+        self.assertEqual(post_bill_remaining_value, 48.65)
+        stock_valuation_account, tax_paid_account, accounts_payable_account = (
             self.company_data['default_account_stock_valuation'],
             self.company_data['default_account_tax_purchase'],
             self.company_data['default_account_payable'],
@@ -566,9 +575,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         self.assertRecordValues(
             amls,
             [
-                {'account_id': stock_input_account.id,        'debit':    0.00,   'credit': 6435.00},
                 {'account_id': stock_valuation_account.id,    'debit': 6435.00,   'credit':    0.00},
-                {'account_id': stock_input_account.id,        'debit': 6435.00,   'credit':    0.00},
                 {'account_id': tax_paid_account.id,           'debit':  965.25,   'credit':    0.00},
                 {'account_id': accounts_payable_account.id,   'debit':    0.00,   'credit': 7400.25},
             ]
@@ -602,8 +609,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         purchase_order.invoice_ids.action_post()
         receipt = purchase_order.picking_ids
         receipt.button_validate()
-        stock_input_account, stock_valuation_account, tax_paid_account, accounts_payable_account = (
-            self.company_data['default_account_stock_in'],
+        stock_valuation_account, tax_paid_account, accounts_payable_account = (
             self.company_data['default_account_stock_valuation'],
             self.company_data['default_account_tax_purchase'],
             self.company_data['default_account_payable'],
@@ -612,11 +618,9 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         self.assertRecordValues(
             amls,
             [
-                {'account_id': stock_input_account.id,        'debit': 6435.00,   'credit':    0.00},
+                {'account_id': stock_valuation_account.id,    'debit': 6435.00,   'credit':    0.00},
                 {'account_id': tax_paid_account.id,           'debit':  965.25,   'credit':    0.00},
                 {'account_id': accounts_payable_account.id,   'debit':    0.00,   'credit': 7400.25},
-                {'account_id': stock_input_account.id,        'debit':    0.00,   'credit': 6435.00},
-                {'account_id': stock_valuation_account.id,    'debit': 6435.00,   'credit':    0.00},
             ]
         )
 
@@ -644,11 +648,10 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         with Form(self.product_a) as product_form:
             product_form.standard_price = 3
 
-        cost_change_journal_items = self.env['account.move.line'].search([
-            ('product_id', '=', self.product_a.id),
-            '|', ('debit', '=', 5), ('credit', '=', 5),
-        ])
-        self.assertEqual(cost_change_journal_items.mapped('quantity'), [0, 0])
+        invoice = self._create_invoice_for_po(purchase_order, fields.Date.today())
+        self.assertEqual(invoice.line_ids.mapped('credit'), [0.0, 0.0, 23.0])
+        self.assertEqual(invoice.line_ids.mapped('debit'), [20.0, 3.0, 0.0])
+        self.assertEqual(invoice.line_ids.mapped('quantity'), [5, 0, 0])
 
     @freeze_time('2025-01-07')
     def test_exchange_rate_backdated_bill(self):
@@ -689,30 +692,20 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         relevant_amls = self.env['account.move.line'].search([
             ('journal_id', 'in', (stock_journal_id, bills_journal_id, exchg_journal_id)),
         ], order='id asc')
-        self.assertEqual(len(relevant_amls), 16)
+        self.assertEqual(len(relevant_amls), 6)
         self.assertEqual(self.env['account.journal'].browse(exchg_journal_id).entries_count, 0)
         self.assertRecordValues(
             relevant_amls,
             [
                 # Control (no reconciliation needed)
-                {'journal_id': stock_journal_id,    'balance': -14.29},
-                {'journal_id': stock_journal_id,    'balance':  14.29},
                 {'journal_id': bills_journal_id,    'balance':  14.29},
                 {'journal_id': bills_journal_id,    'balance': -14.29},
                 # back-dated bill
-                {'journal_id': stock_journal_id,    'balance': -14.29},
-                {'journal_id': stock_journal_id,    'balance':  14.29},
                 {'journal_id': bills_journal_id,    'balance':  12.50},
                 {'journal_id': bills_journal_id,    'balance': -12.50},
-                {'journal_id': stock_journal_id,    'balance':   1.79},
-                {'journal_id': stock_journal_id,    'balance':  -1.79},
                 # forward-dated bill
-                {'journal_id': stock_journal_id,    'balance': -14.29},
-                {'journal_id': stock_journal_id,    'balance':  14.29},
                 {'journal_id': bills_journal_id,    'balance':  12.50},
                 {'journal_id': bills_journal_id,    'balance': -12.50},
-                {'journal_id': stock_journal_id,    'balance':   1.79},
-                {'journal_id': stock_journal_id,    'balance':  -1.79},
             ],
         )
 
@@ -749,8 +742,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             receipt.button_validate()
 
             cd = self.company_data
-            stock_input_account, tax_purchase_account, account_payable_account, stock_valuation_account = (
-                cd['default_account_stock_in'],
+            tax_purchase_account, account_payable_account, stock_valuation_account = (
                 cd['default_account_tax_purchase'],
                 cd['default_account_payable'],
                 cd['default_account_stock_valuation'],
@@ -758,11 +750,9 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
             self.assertRecordValues(
                 self.env['account.move.line'].search([], order='id asc'),
                 [
-                    {'account_id': stock_input_account.id,       'debit': 420.00,   'credit':   0.00},
+                    {'account_id': stock_valuation_account.id,   'debit': 420.00,   'credit':   0.00},
                     {'account_id': tax_purchase_account.id,      'debit':  63.00,   'credit':   0.00},
                     {'account_id': account_payable_account.id,   'debit':   0.00,   'credit': 483.00},
-                    {'account_id': stock_input_account.id,       'debit':   0.00,   'credit': 420.00},
-                    {'account_id': stock_valuation_account.id,   'debit': 420.00,   'credit':   0.00},
                 ]
             )
 
@@ -796,5 +786,5 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
         bill = purchase_order.invoice_ids
         bill.invoice_date = fields.Date.today()
         bill.action_post()
-        svls = self.env['stock.valuation.layer'].search([])
-        self.assertRecordValues(svls, [{'value': 4809.92, 'remaining_value': 4809.92, 'unit_cost': 0.875}])
+
+        self.assertRecordValues(receipt.move_ids, [{'value': 1303.5, 'remaining_value': 1303.5, 'price_unit': 0.875}])
