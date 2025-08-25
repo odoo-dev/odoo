@@ -6,6 +6,7 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     l10n_in_hsn_code = fields.Char(string="HSN/SAC Code", help="Harmonized System Nomenclature/Services Accounting Code")
+    l10n_in_hsn_code_id = fields.Many2one("l10n_in.hsn.entity", string="HSN/SAC Code", help="Link to HSN entity to auto-fill HSN code and price per unit")
     l10n_in_hsn_warning = fields.Text(string="HSC/SAC warning", compute="_compute_l10n_in_hsn_warning")
     l10n_in_is_gst_registered_enabled = fields.Boolean(compute="_compute_l10n_in_is_gst_registered_enabled")
 
@@ -39,3 +40,15 @@ class ProductTemplate(models.Model):
                 )
                 continue
             record.l10n_in_hsn_warning = False
+
+    @api.onchange('l10n_in_hsn_code_id', 'list_price')
+    def _onchange_l10n_in_hsn_code_id(self):
+        for record in self:
+            if record.l10n_in_hsn_code_id:
+                if record.list_price > record.l10n_in_hsn_code_id.price_per_unit:
+                    record.taxes_id = record.l10n_in_hsn_code_id.tax_id
+                else:
+                    record.taxes_id = (
+                        self.env.companies.account_sale_tax_id
+                        or self.env.companies.root_id.sudo().account_sale_tax_id
+                    )

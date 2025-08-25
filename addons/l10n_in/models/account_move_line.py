@@ -8,6 +8,18 @@ class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     l10n_in_hsn_code = fields.Char(string="HSN/SAC Code", compute="_compute_l10n_in_hsn_code", store=True, readonly=False, copy=False)
+    l10n_in_hsn_code_id  = fields.Many2one(
+        "l10n_in.hsn.entity",
+        string="HSN/SAC Code",
+        compute="_compute_l10n_in_hsn_code_id",
+        store=True, readonly=False, copy=False, precompute=True,
+    )
+    l10n_in_unit_price_after_discount = fields.Float(
+        string="Unit Price After Discount",
+        compute='_compute_l10n_in_unit_price_after_discount',
+        store=True, precompute=True,
+        digits='Product Price',
+    )
     l10n_in_gstr_section = fields.Selection(
         selection=[
             ("sale_b2b_rcm", "B2B RCM"),
@@ -68,6 +80,37 @@ class AccountMoveLine(models.Model):
         for line in self:
             if line.move_id.country_code == 'IN' and line.parent_state == 'draft':
                 line.l10n_in_hsn_code = line.product_id.l10n_in_hsn_code
+
+    @api.depends('product_id', 'product_id.l10n_in_hsn_code_id')
+    def _compute_l10n_in_hsn_code_id(self):
+        for line in self:
+            if line.move_id.country_code == 'IN' and line.parent_state == 'draft':
+                line.l10n_in_hsn_code_id = line.product_id.l10n_in_hsn_code_id
+            else:
+                line.l10n_in_hsn_code_id = False
+
+    @api.depends('discount', 'price_unit')
+    def _compute_l10n_in_unit_price_after_discount(self):
+        for line in self:
+            if line.discount:
+                line.l10n_in_unit_price_after_discount = line.price_unit * (1 - (line.discount / 100))
+            else:
+                line.l10n_in_unit_price_after_discount = line.price_unit
+
+    @api.depends('l10n_in_hsn_code_id', 'l10n_in_unit_price_after_discount')
+    def _compute_tax_ids(self):
+        aml_with_hsn = self.filtered(lambda l:
+            l.move_id.country_code == 'IN' and
+            l.l10n_in_hsn_code_id and
+            l.l10n_in_unit_price_after_discount > l.l10n_in_hsn_code_id.price_per_unit
+        )
+        for line in aml_with_hsn:
+            # line.tax_ids = line.l10n_in_hsn_code_id.tax_id
+            line.tax_ids = self.move_id.fiscal_position_id.map_tax(line.l10n_in_hsn_code_id.tax_id)
+
+        # For the rest, fallback to default Odoo computation
+        super(AccountMoveLine, self - aml_with_hsn)._compute_tax_ids()
+
 
     def _l10n_in_check_invalid_hsn_code(self):
         self.ensure_one()
