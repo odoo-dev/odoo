@@ -82,29 +82,7 @@
         "A33": "=ODOO.LIST(1,9,\"name\")",
         "A34": "=ODOO.LIST(1,10,\"name\")",
         "A36": "[Top Countries](odoo://view/{\"viewType\":\"pivot\",\"action\":{\"domain\":[\"&\",[\"state\",\"not in\",[\"draft\",\"cancel\"]],\"&\",[\"country_id\",\"!=\",false],[\"move_type\",\"in\",[\"out_invoice\",\"out_refund\"]]],\"context\":{\"group_by\":[\"country_id\"],\"pivot_measures\":[\"price_subtotal\"],\"pivot_column_groupby\":[],\"pivot_row_groupby\":[\"country_id\"]},\"modelName\":\"account.invoice.report\",\"views\":[[false,\"graph\"],[false,\"pivot\"],[false,\"list\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Invoices Analysis\"})",
-        "A37": "=_t(\"Country\")",
-        "A38": "=PIVOT.HEADER(2,\"#country_id\",1)",
-        "A39": "=PIVOT.HEADER(2,\"#country_id\",2)",
-        "A40": "=PIVOT.HEADER(2,\"#country_id\",3)",
-        "A41": "=PIVOT.HEADER(2,\"#country_id\",4)",
-        "A42": "=PIVOT.HEADER(2,\"#country_id\",5)",
-        "A43": "=PIVOT.HEADER(2,\"#country_id\",6)",
-        "A44": "=PIVOT.HEADER(2,\"#country_id\",7)",
-        "A45": "=PIVOT.HEADER(2,\"#country_id\",8)",
-        "A46": "=PIVOT.HEADER(2,\"#country_id\",9)",
-        "A47": "=PIVOT.HEADER(2,\"#country_id\",10)",
         "A49": "[Top Products](odoo://view/{\"viewType\":\"pivot\",\"action\":{\"domain\":[\"&\",[\"state\",\"not in\",[\"draft\",\"cancel\"]],\"&\",[\"product_id\",\"!=\",false],[\"move_type\",\"in\",[\"out_invoice\",\"out_refund\"]]],\"context\":{\"group_by\":[\"product_id\"],\"pivot_measures\":[\"price_subtotal\"],\"pivot_column_groupby\":[],\"pivot_row_groupby\":[\"product_id\"]},\"modelName\":\"account.invoice.report\",\"views\":[[false,\"graph\"],[false,\"pivot\"],[false,\"list\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Invoices Analysis\"})",
-        "A50": "=_t(\"Product\")",
-        "A51": "=PIVOT.HEADER(3,\"#product_id\",1)",
-        "A52": "=PIVOT.HEADER(3,\"#product_id\",2)",
-        "A53": "=PIVOT.HEADER(3,\"#product_id\",3)",
-        "A54": "=PIVOT.HEADER(3,\"#product_id\",4)",
-        "A55": "=PIVOT.HEADER(3,\"#product_id\",5)",
-        "A56": "=PIVOT.HEADER(3,\"#product_id\",6)",
-        "A57": "=PIVOT.HEADER(3,\"#product_id\",7)",
-        "A58": "=PIVOT.HEADER(3,\"#product_id\",8)",
-        "A59": "=PIVOT.HEADER(3,\"#product_id\",9)",
-        "A60": "=PIVOT.HEADER(3,\"#product_id\",10)",
         "B24": "=_t(\"Salesperson\")",
         "B25": "=ODOO.LIST(1,1,\"user_id\")",
         "B26": "=ODOO.LIST(1,2,\"user_id\")",
@@ -116,28 +94,6 @@
         "B32": "=ODOO.LIST(1,8,\"user_id\")",
         "B33": "=ODOO.LIST(1,9,\"user_id\")",
         "B34": "=ODOO.LIST(1,10,\"user_id\")",
-        "B37": "=_t(\"Amount\")",
-        "B38": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",1)",
-        "B39": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",2)",
-        "B40": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",3)",
-        "B41": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",4)",
-        "B42": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",5)",
-        "B43": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",6)",
-        "B44": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",7)",
-        "B45": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",8)",
-        "B46": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",9)",
-        "B47": "=PIVOT.VALUE(2,\"price_subtotal\",\"#country_id\",10)",
-        "B50": "=_t(\"Amount\")",
-        "B51": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",1)",
-        "B52": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",2)",
-        "B53": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",3)",
-        "B54": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",4)",
-        "B55": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",5)",
-        "B56": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",6)",
-        "B57": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",7)",
-        "B58": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",8)",
-        "B59": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",9)",
-        "B60": "=PIVOT.VALUE(3,\"price_subtotal\",\"#product_id\",10)",
         "C24": "=_t(\"Status\")",
         "C25": "=ODOO.LIST(1,1,\"payment_state\")",
         "C26": "=ODOO.LIST(1,2,\"payment_state\")",
@@ -183,29 +139,7 @@
         "D33": "=ODOO.LIST(1,9,\"partner_id\")",
         "D34": "=ODOO.LIST(1,10,\"partner_id\")",
         "E36": "[Top Categories](odoo://view/{\"viewType\":\"pivot\",\"action\":{\"domain\":[\"&\",[\"state\",\"not in\",[\"draft\",\"cancel\"]],\"&\",[\"product_categ_id\",\"!=\",false],[\"move_type\",\"in\",[\"out_invoice\",\"out_refund\"]]],\"context\":{\"group_by\":[\"product_categ_id\"],\"pivot_measures\":[\"price_subtotal\"],\"pivot_column_groupby\":[],\"pivot_row_groupby\":[\"product_categ_id\"]},\"modelName\":\"account.invoice.report\",\"views\":[[false,\"graph\"],[false,\"pivot\"],[false,\"list\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Invoices Analysis\"})",
-        "E37": "=_t(\"Top Categories\")",
-        "E38": "=PIVOT.HEADER(1,\"#product_categ_id\",1)",
-        "E39": "=PIVOT.HEADER(1,\"#product_categ_id\",2)",
-        "E40": "=PIVOT.HEADER(1,\"#product_categ_id\",3)",
-        "E41": "=PIVOT.HEADER(1,\"#product_categ_id\",4)",
-        "E42": "=PIVOT.HEADER(1,\"#product_categ_id\",5)",
-        "E43": "=PIVOT.HEADER(1,\"#product_categ_id\",6)",
-        "E44": "=PIVOT.HEADER(1,\"#product_categ_id\",7)",
-        "E45": "=PIVOT.HEADER(1,\"#product_categ_id\",8)",
-        "E46": "=PIVOT.HEADER(1,\"#product_categ_id\",9)",
-        "E47": "=PIVOT.HEADER(1,\"#product_categ_id\",10)",
         "E49": "[Top Salespeople](odoo://view/{\"viewType\":\"pivot\",\"action\":{\"domain\":[\"&\",[\"state\",\"not in\",[\"draft\",\"cancel\"]],\"&\",[\"invoice_user_id\",\"!=\",false],[\"move_type\",\"in\",[\"out_invoice\",\"out_refund\"]]],\"context\":{\"group_by\":[\"invoice_user_id\"],\"pivot_measures\":[\"price_subtotal\"],\"pivot_column_groupby\":[],\"pivot_row_groupby\":[\"invoice_user_id\"]},\"modelName\":\"account.invoice.report\",\"views\":[[false,\"graph\"],[false,\"pivot\"],[false,\"list\"],[false,\"search\"]]},\"threshold\":0,\"name\":\"Invoices Analysis\"})",
-        "E50": "=_t(\"Salesperson\")",
-        "E51": "=PIVOT.HEADER(4,\"#invoice_user_id\",1)",
-        "E52": "=PIVOT.HEADER(4,\"#invoice_user_id\",2)",
-        "E53": "=PIVOT.HEADER(4,\"#invoice_user_id\",3)",
-        "E54": "=PIVOT.HEADER(4,\"#invoice_user_id\",4)",
-        "E55": "=PIVOT.HEADER(4,\"#invoice_user_id\",5)",
-        "E56": "=PIVOT.HEADER(4,\"#invoice_user_id\",6)",
-        "E57": "=PIVOT.HEADER(4,\"#invoice_user_id\",7)",
-        "E58": "=PIVOT.HEADER(4,\"#invoice_user_id\",8)",
-        "E59": "=PIVOT.HEADER(4,\"#invoice_user_id\",9)",
-        "E60": "=PIVOT.HEADER(4,\"#invoice_user_id\",10)",
         "F24": "=_t(\"Date\")",
         "F25": "=ODOO.LIST(1,1,\"invoice_date\")",
         "F26": "=ODOO.LIST(1,2,\"invoice_date\")",
@@ -217,28 +151,6 @@
         "F32": "=ODOO.LIST(1,8,\"invoice_date\")",
         "F33": "=ODOO.LIST(1,9,\"invoice_date\")",
         "F34": "=ODOO.LIST(1,10,\"invoice_date\")",
-        "F37": "=_t(\"Amount\")",
-        "F38": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",1)",
-        "F39": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",2)",
-        "F40": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",3)",
-        "F41": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",4)",
-        "F42": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",5)",
-        "F43": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",6)",
-        "F44": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",7)",
-        "F45": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",8)",
-        "F46": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",9)",
-        "F47": "=PIVOT.VALUE(1,\"price_subtotal\",\"#product_categ_id\",10)",
-        "F50": "=_t(\"Amount\")",
-        "F51": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",1)",
-        "F52": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",2)",
-        "F53": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",3)",
-        "F54": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",4)",
-        "F55": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",5)",
-        "F56": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",6)",
-        "F57": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",7)",
-        "F58": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",8)",
-        "F59": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",9)",
-        "F60": "=PIVOT.VALUE(4,\"price_subtotal\",\"#invoice_user_id\",10)",
         "G24": "=_t(\"Amount\")",
         "G25": "=ODOO.LIST(1,1,\"amount_untaxed_signed\")",
         "G26": "=ODOO.LIST(1,2,\"amount_untaxed_signed\")",
@@ -271,7 +183,11 @@
         "G57": "=iferror(if(F57,F57/PIVOT.VALUE(4,\"price_subtotal\"),\"\"),\"\")",
         "G58": "=iferror(if(F58,F58/PIVOT.VALUE(4,\"price_subtotal\"),\"\"),\"\")",
         "G59": "=iferror(if(F59,F59/PIVOT.VALUE(4,\"price_subtotal\"),\"\"),\"\")",
-        "G60": "=iferror(if(F60,F60/PIVOT.VALUE(4,\"price_subtotal\"),\"\"),\"\")"
+        "G60": "=iferror(if(F60,F60/PIVOT.VALUE(4,\"price_subtotal\"),\"\"),\"\")",
+        "A37": "=PIVOT(2, 10, FALSE, FALSE)",
+        "A50": "=PIVOT(3, 10, FALSE, FALSE)",
+        "E37": "=PIVOT(1, 10, FALSE, FALSE)",
+        "E50": "=PIVOT(4, 10, FALSE, FALSE)"
       },
       "styles": {
         "A7": 1,
@@ -684,11 +600,19 @@
         ],
         "&",
         ["product_categ_id", "!=", false],
-        ["move_type", "in", ["out_invoice", "out_refund"]]
+        [
+          "move_type",
+          "in",
+          ["out_invoice", "out_refund"]
+        ]
       ],
       "id": "1",
       "measures": [
-        { "id": "price_subtotal", "fieldName": "price_subtotal" }
+        {
+          "id": "price_subtotal",
+          "fieldName": "price_subtotal",
+          "userDefinedName": "Amount"
+        }
       ],
       "model": "account.invoice.report",
       "name": "Top Categories",
@@ -724,14 +648,22 @@
         ],
         "&",
         ["country_id", "!=", false],
-        ["move_type", "in", ["out_invoice", "out_refund"]]
+        [
+          "move_type",
+          "in",
+          ["out_invoice", "out_refund"]
+        ]
       ],
       "id": "2",
       "measures": [
-        { "id": "price_subtotal", "fieldName": "price_subtotal" }
+        {
+          "id": "price_subtotal",
+          "fieldName": "price_subtotal",
+          "userDefinedName": "Amount"
+        }
       ],
       "model": "account.invoice.report",
-      "name": "Top Countries",
+      "name": "Country",
       "sortedColumn": {
         "measure": "price_subtotal",
         "order": "desc",
@@ -764,14 +696,22 @@
         ],
         "&",
         ["product_id", "!=", false],
-        ["move_type", "in", ["out_invoice", "out_refund"]]
+        [
+          "move_type",
+          "in",
+          ["out_invoice", "out_refund"]
+        ]
       ],
       "id": "3",
       "measures": [
-        { "id": "price_subtotal", "fieldName": "price_subtotal" }
+        {
+          "id": "price_subtotal",
+          "fieldName": "price_subtotal",
+          "userDefinedName": "Amount"
+        }
       ],
       "model": "account.invoice.report",
-      "name": "Top Products",
+      "name": "Product",
       "sortedColumn": {
         "measure": "price_subtotal",
         "order": "desc",
@@ -804,14 +744,22 @@
         ],
         "&",
         ["invoice_user_id", "!=", false],
-        ["move_type", "in", ["out_invoice", "out_refund"]]
+        [
+          "move_type",
+          "in",
+          ["out_invoice", "out_refund"]
+        ]
       ],
       "id": "4",
       "measures": [
-        { "id": "price_subtotal", "fieldName": "price_subtotal" }
+        {
+          "id": "price_subtotal",
+          "fieldName": "price_subtotal",
+          "userDefinedName": "Amount"
+        }
       ],
       "model": "account.invoice.report",
-      "name": "Top Salespeople",
+      "name": "Salesperson",
       "sortedColumn": {
         "measure": "price_subtotal",
         "order": "desc",

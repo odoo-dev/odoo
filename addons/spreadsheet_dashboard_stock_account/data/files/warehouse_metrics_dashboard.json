@@ -85,31 +85,10 @@
         "A23": "Available and reserved stock qty (top products)",
         "A41": "Ageing stock qty by category and creation date",
         "A58": "=_t(\"Top 10 products with negative stock\")",
-        "A59": "Products",
-        "A60": "=PIVOT.HEADER(22,\"#product_id\",1)",
-        "A61": "=PIVOT.HEADER(22,\"#product_id\",2)",
-        "A62": "=PIVOT.HEADER(22,\"#product_id\",3)",
-        "A63": "=PIVOT.HEADER(22,\"#product_id\",4)",
-        "A64": "=PIVOT.HEADER(22,\"#product_id\",5)",
-        "A65": "=PIVOT.HEADER(22,\"#product_id\",6)",
-        "A66": "=PIVOT.HEADER(22,\"#product_id\",7)",
-        "A67": "=PIVOT.HEADER(22,\"#product_id\",8)",
-        "A68": "=PIVOT.HEADER(22,\"#product_id\",9)",
-        "A69": "=PIVOT.HEADER(22,\"#product_id\",10)",
-        "B59": "=PIVOT.HEADER(22,\"measure\",\"quantity\")",
-        "B60": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",1)",
-        "B61": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",2)",
-        "B62": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",3)",
-        "B63": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",4)",
-        "B64": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",5)",
-        "B65": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",6)",
-        "B66": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",7)",
-        "B67": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",8)",
-        "B68": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",9)",
-        "B69": "=PIVOT.VALUE(22,\"quantity\",\"#product_id\",10)",
         "E7": "Available and reserved stock value (top locations)",
         "E23": "Available and reserved stock value (top products)",
-        "E41": "Ageing stock value by product and creation date"
+        "E41": "Ageing stock value by product and creation date",
+        "A59": "=PIVOT(22, 10, FALSE, FALSE)"
       },
       "styles": {
         "A6": 1,
@@ -1192,7 +1171,7 @@
       "rows": [
         { "fieldName": "product_id" }
       ],
-      "name": "Inventory by Location",
+      "name": "Products",
       "actionXmlId": "stock.dashboard_open_quants",
       "formulaId": "22",
       "fieldMatching": {
