@@ -55,7 +55,9 @@ class WebsiteSeoMetadata(models.AbstractModel):
             'og:title': title,
             'og:site_name': request.website.name,
             'og:url': url_join(request.website.domain or request.httprequest.url_root, self.env['ir.http']._url_for(request.httprequest.path)),
-            'og:image': request.website.image_url(request.website, img_field),
+            'og:image': request.website.image_url(request.website, img_field)
+                if img_field == 'logo'
+                else request.website.social_default_image_src,
         }
         # Default meta for Twitter
         default_twitter = {

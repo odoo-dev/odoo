@@ -590,6 +590,7 @@ export class FormCompiler extends ViewCompiler {
             info: toStringExpression(el.getAttribute("info") || ""),
             title: toStringExpression(el.getAttribute("title") || ""),
             help: toStringExpression(el.getAttribute("help") || ""),
+            noString: el.getAttribute("noString") === "1" || false,
             companyDependent: el.getAttribute("company_dependent") === "1" || "false",
             documentation: toStringExpression(el.getAttribute("documentation") || ""),
             record: `__comp__.props.record`,

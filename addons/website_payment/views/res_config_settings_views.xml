@@ -7,24 +7,25 @@
         <field name="inherit_id" ref="website.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <setting id="website_creation_settings" position="after">
-                <setting type="header" id="website_payment_settings" string="Payment">
-                    <field name="providers_state" invisible="1"/>
-                    <field name="is_stripe_supported_country" invisible="1"/>
-                    <span
-                        class="d-flex"
-                        invisible="providers_state == 'other_than_paypal'"
-                    >
+                <setting
+                    id="website_payment_settings"
+                    class="bg-warning"
+                    type="header"
+                    noString="1"
+                >
+                    <span class="d-flex" invisible="active_provider_id">
                         No payment provider defined?
                     </span>
                     <button
-                        invisible="not is_stripe_supported_country"
+                        invisible="not onboarding_payment_module"
                         class="btn btn-link"
-                        name="action_activate_stripe"
+                        type="object"
+                        name="action_w_payment_start_payment_onboarding"
                     >
                         Configure Stripe
                     </button>
                     <button
-                        invisible="is_stripe_supported_country"
+                        invisible="onboarding_payment_module"
                         class="btn btn-link"
                         disabled=""
                         string="Configure Stripe"
@@ -32,6 +33,7 @@
                     <span>or</span>
                     <button
                         class="btn btn-link"
+                        type="action"
                         name="%(payment.action_payment_provider)d"
                     >
                         View all providers
@@ -75,8 +77,7 @@
                                     string="Find a provider"
                                     type="action"
                                     name="%(payment.action_payment_provider)d"
-                                    icon="oi-arrow-right"
-                                    class="btn-link oe_inline"
+                                    class="btn-secondary oe_inline"
                                 />
                             </div>
                             <div invisible="not active_provider_id">
@@ -97,8 +98,7 @@
                                     string="Find a provider"
                                     type="action"
                                     name="%(payment.action_payment_provider)d"
-                                    icon="oi-arrow-right"
-                                    class="btn-link col-auto"
+                                    class="btn-secondary col-auto"
                                 />
                             </div>
                         </div>

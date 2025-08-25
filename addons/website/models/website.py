@@ -177,7 +177,10 @@ class Website(models.Model):
     social_instagram = fields.Char('Instagram Account', default=_default_social_instagram)
     social_tiktok = fields.Char('TikTok Account', default=_default_social_tiktok)
     social_discord = fields.Char('Discord Account', default=_default_social_discord)
-    social_default_image = fields.Binary(string="Default Social Share Image", help="If set, replaces the website logo as the default social share image.")
+    social_default_image_src = fields.Char(
+        string="Default Social Share Image",
+        help="If set, replaces the website logo as the default social share image.",
+    )
     has_social_default_image = fields.Boolean(compute='_compute_has_social_default_image', store=True)
 
     google_analytics_key = fields.Char('Google Analytics Key')
@@ -236,10 +239,10 @@ class Website(models.Model):
             except UnicodeError:
                 website.domain_punycode = website_domain
 
-    @api.depends('social_default_image')
+    @api.depends('social_default_image_src')
     def _compute_has_social_default_image(self):
         for website in self:
-            website.has_social_default_image = bool(website.social_default_image)
+            website.has_social_default_image = bool(website.social_default_image_src)
 
     @api.depends('language_ids')
     def _compute_language_count(self):

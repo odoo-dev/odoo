@@ -74,10 +74,22 @@ class WebsiteBackend(http.Controller):
         }
         return features_info
 
-    @http.route('/website/set_default_social_image', type='jsonrpc', auth='user', readonly=True)
-    def set_default_social_image(self, website_id, data):
+    @http.route('/website/set_default_social_image', type='jsonrpc', auth='user')
+    def set_default_social_image(self, website_id, img_url):
         website = request.env['website'].browse(website_id)
         if not website or not website.exists():
             return {'error': 'Website not found'}
-        website.social_default_image = data
-        return {'status': 'ok'}
+        website.social_default_image_src = img_url
+        return True
+
+    @http.route(
+            '/website/unset_has_social_default_image',
+            type='jsonrpc',
+            auth='user',
+        )
+    def unset_has_social_default_image(self, website_id):
+        website = request.env['website'].browse(website_id)
+        if not website or not website.exists():
+            return {'error': 'Website not found'}
+        website.social_default_image_src = False
+        return True

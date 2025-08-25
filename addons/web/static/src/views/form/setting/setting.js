@@ -21,6 +21,7 @@ export class Setting extends Component {
         record: { type: Object, optional: 1 },
         documentation: { type: String, optional: 1 },
         string: { type: String, optional: 1 },
+        noString: { type: Boolean, optional: 1 },
         addLabel: { type: Boolean },
         companyDependent: { type: Boolean, optional: 1 },
         slots: { type: Object, optional: 1 },
