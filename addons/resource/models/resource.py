@@ -76,7 +76,7 @@ class Intervals(object):
             append = self._items.append
             starts = []
             recses = []
-            for value, flag, recs in sorted(_boundaries(intervals, 'start', 'stop')):
+            for value, flag, recs in sorted(_boundaries(sorted(intervals), 'start', 'stop'), key=lambda i: i[0]):
                 if flag == 'start':
                     starts.append(value)
                     recses.append(recs)
@@ -122,7 +122,7 @@ class Intervals(object):
         start = None                    # set by start/stop
         recs1 = None                    # set by start
         enabled = difference            # changed by switch
-        for value, flag, recs in sorted(chain(bounds1, bounds2)):
+        for value, flag, recs in sorted(chain(bounds1, bounds2), key=lambda i: i[0]):
             if flag == 'start':
                 start = value
                 recs1 = recs
