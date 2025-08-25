@@ -57,10 +57,7 @@ The Dashboard for the Sales Manager will include
     ],
     'assets': {
         'web.assets_backend': [
-            'sale_management/static/src/sale_order_line_field/sale_order_line_field.js',
-            'sale_management/static/src/sale_order_line_field/sale_order_line_field.xml',
-            'sale_management/static/src/sale_order_template_line_field/sale_order_template_line_field.js',
-            'sale_management/static/src/sale_order_template_line_field/sale_order_template_line_field.xml',
+            'sale_management/static/src/fields/**/*',
         ],
         'web.assets_frontend': [
             'sale_management/static/src/interactions/**/*',

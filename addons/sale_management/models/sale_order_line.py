@@ -53,10 +53,11 @@ class SaleOrderLine(models.Model):
     def _compute_is_optional(self):
         for line in self:
             if line.display_type == 'line_section':
-                continue  # Don't recompute when moving sections around.
-            if line.display_type == 'line_subsection':
-                line.is_optional = line.is_optional or line.parent_id.is_optional
-            else:  # Product/Note lines
+                continue  # We want to retain the original(user-selected) value.
+            elif (
+                line.display_type != 'line_subsection'
+                or not line.is_optional
+            ):
                 line.is_optional = line.parent_id.is_optional
 
     @api.depends('order_id.sale_order_template_id')

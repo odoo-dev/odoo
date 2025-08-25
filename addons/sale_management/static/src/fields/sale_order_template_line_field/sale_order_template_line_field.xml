@@ -6,18 +6,18 @@
         t-inherit="account.SectionAndNoteListRenderer.RecordRow"
         t-inherit-mode="primary"
     >
-        <xpath
-            expr="//DropdownItem[@onSelected='() => this.toggleHideComposition(record)']"
+        <DropdownItem
+            onSelected="() => this.toggleHideComposition(record)"
             position="after"
         >
             <DropdownItem
-                t-if="this.isActionVisible(record, ['is_optional'])"
-                onSelected="() => this.toggleOptional(record)"
+                t-if="this.showActionButton(record, ['is_optional'])"
+                onSelected="() => this.toggleIsOptional(record)"
             >
                 <i class="me-1 fa fa-fw fa-list"/>
                 <span t-out="record.data.is_optional ? 'Unset Optional' : 'Set Optional'"/>
             </DropdownItem>
-        </xpath>
+        </DropdownItem>
     </t>
 
 </templates>

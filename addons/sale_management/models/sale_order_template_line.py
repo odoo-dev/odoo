@@ -109,10 +109,11 @@ class SaleOrderTemplateLine(models.Model):
     def _compute_is_optional(self):
         for option in self:
             if option.display_type == 'line_section':
-                continue
-            if option.display_type == 'line_subsection':
-                option.is_optional = option.is_optional or option.parent_id.is_optional
-            else:  # Product/Note lines
+                continue # We want to retain the original(user-selected) value.
+            elif (
+                option.display_type != 'line_subsection'
+                or not option.is_optional
+            ):
                 option.is_optional = option.parent_id.is_optional
 
     #=== CRUD METHODS ===#

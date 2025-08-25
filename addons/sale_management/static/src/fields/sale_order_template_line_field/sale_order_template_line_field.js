@@ -3,35 +3,23 @@ import {
     sectionAndNoteFieldOne2Many,
     SectionAndNoteListRenderer,
     getSectionRecords,
-} from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
-import { x2ManyCommands } from "@web/core/orm_service";
-import { registry } from "@web/core/registry";
+} from '@account/components/section_and_note_fields_backend/section_and_note_fields_backend';
+import { x2ManyCommands } from '@web/core/orm_service';
+import { registry } from '@web/core/registry';
 
 export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRenderer {
     static recordRowTemplate = "sale_management.ListRenderer.RecordRow";
 
-    get showPricesButton() {
-        return false;
-    }
-
-    get showCompositionButton() {
-        return false;
-    }
-
     getRowClass(record) {
-        let classNames = super.getRowClass(record);
-        if (record.data.is_optional) {
-            classNames += " text-primary";
-        }
-        return classNames;
+        return super.getRowClass(record) + (record.data.is_optional ? ' text-primary' : '');
     }
 
-    async toggleOptional(record) {
+    async toggleIsOptional(record) {
         const commands = [(x2ManyCommands.update(record.resId || record._virtualId, {
             is_optional: !record.data.is_optional,
         }))];
-        const sectionRecords = getSectionRecords(this.props.list, record);
-        for (const sectionRecord of sectionRecords) {
+
+        for (const sectionRecord of getSectionRecords(this.props.list, record)) {
             let recordChanges = {}
             if(!record.data.is_optional) {
                 recordChanges.product_uom_qty = 0;
@@ -54,4 +42,4 @@ export const saleOrderTemplateLineOne2Many = {
     component: SaleOrderTemplateLineOne2Many,
 };
 
-registry.category("fields").add("sol_template_o2m", saleOrderTemplateLineOne2Many);
+registry.category("fields").add("sol_template_lines_o2m", saleOrderTemplateLineOne2Many);

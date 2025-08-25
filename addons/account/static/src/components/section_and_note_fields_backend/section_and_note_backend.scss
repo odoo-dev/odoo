@@ -37,18 +37,17 @@ table.o_section_and_note_list_view tr.o_data_row {
             border: none !important;
         }
     }
+    &.o_selected_row.o_is_line_subsection,
+    &.o_selected_row.o_is_line_section {
+        th:focus-within,
+        td:focus-within {
+            background-color: inherit !important;
+        }
+    }
 }
 
 .o_field_section_and_note_text {
     > span {
         white-space: pre-wrap !important;
-    }
-}
-
-.o_list_table {
-    .o_selected_row.o_is_line_subsection, .o_selected_row.o_is_line_section {
-        th:focus-within, td:focus-within {
-            background-color: var(--table-bg);
-        }
     }
 }

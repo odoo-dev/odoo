@@ -8,14 +8,32 @@
                 <div class="input-group js_quantity_container pull-right">
 
                     <span class="d-print-none input-group-text d-none d-md-inline-block">
-                        <a t-att-data-line-id="line.id" t-att-data-remove="True" href="#" class="js_update_line_json" aria-label="Remove one" title="Remove one">
+                        <a
+                            title="Remove one"
+                            aria-label="Remove one"
+                            href="#"
+                            t-att-data-line-id="line.id"
+                            t-att-data-remove="True"
+                            t-att-class="'pe-none opacity-50' if line.product_uom_qty &lt;= 0 else 'js_update_line_json'"
+                        >
                             <span class="fa fa-minus"/>
                         </a>
                     </span>
                     <!-- TODO add uom in this case too -->
-                    <input type="text" class="js_quantity form-control" t-att-data-line-id="line.id" t-att-value="line.product_uom_qty or '0.0'"/>
+                    <input
+                        type="text"
+                        class="js_quantity form-control"
+                        t-att-data-line-id="line.id"
+                        t-att-value="line.product_uom_qty"
+                    />
                     <span class="d-print-none input-group-text d-none d-md-inline-block">
-                        <a t-att-data-line-id="line.id" href="#" class="js_update_line_json" aria-label="Add one" title="Add one">
+                        <a
+                            title="Add one"
+                            aria-label="Add one"
+                            href="#"
+                            class="js_update_line_json"
+                            t-att-data-line-id="line.id"
+                        >
                             <span class="fa fa-plus"/>
                         </a>
                     </span>

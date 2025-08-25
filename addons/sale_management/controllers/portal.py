@@ -34,7 +34,7 @@ class CustomerPortal(portal.CustomerPortal):
             or order_line.order_id != order_sudo
             or not order_line._can_be_edited_on_portal()
         ):
-            # Do not allow updating non-optional products from a quotation
+            # Do not allow updating non-optional lines from a quotation
             return False
 
         if input_quantity is not False:
@@ -48,5 +48,3 @@ class CustomerPortal(portal.CustomerPortal):
             return False
 
         order_line.product_uom_qty = quantity
-
-        return None
