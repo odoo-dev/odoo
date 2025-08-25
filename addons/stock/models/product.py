@@ -492,6 +492,9 @@ class ProductProduct(models.Model):
             product.reordering_min_qty = product_min_qty_sum
             product.reordering_max_qty = product_max_qty_sum
 
+    def _get_invalid_routes(self, route_ids):
+        return self.env['stock.route']
+
     @api.onchange('tracking')
     def _onchange_tracking(self):
         if any(product.tracking != 'none' and product.qty_available > 0 for product in self):

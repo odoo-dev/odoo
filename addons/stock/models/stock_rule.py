@@ -600,6 +600,7 @@ class ProcurementGroup(models.Model):
         # For multi-company we need all warehouses accessible by the user.
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.company_ids.ids)])
         route_ids |= warehouse.route_ids
+        route_ids -= product._get_invalid_routes(route_ids)
         return route_ids
 
     @api.model

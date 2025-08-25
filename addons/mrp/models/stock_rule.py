@@ -289,14 +289,3 @@ class ProcurementGroup(models.Model):
         domain = super()._get_moves_to_assign_domain(company_id)
         domain = Domain.AND([domain, Domain('production_id', '=', False)])
         return domain
-
-    def _get_product_routes(self, product, valid_route_ids):
-        valid_route_ids = super()._get_product_routes(product, valid_route_ids)
-        manufacturing_routes = self.env['stock.rule'].search([
-            ('action', '=', 'manufacture'),
-            ('picking_type_id.code', '=', 'mrp_operation'),
-            ('active', '=', True),
-        ]).route_id
-        if not any(bom.type == 'normal' for bom in product.bom_ids) and not any(route_id in product.route_ids for route_id in manufacturing_routes):
-            valid_route_ids -= manufacturing_routes
-        return valid_route_ids
