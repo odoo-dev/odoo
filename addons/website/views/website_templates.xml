@@ -555,7 +555,7 @@
 
 <!-- "Hamburger" template -->
 <template id="template_header_hamburger" inherit_id="website.layout" name="Template Header Hamburger" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="d-none d-lg-block shadow-sm"/>
             <t t-set="_navbar_expand_class" t-valuef="None"/>
@@ -685,7 +685,7 @@
 
 <!-- "Stretch" template -->
 <template id="template_header_stretch" inherit_id="website.layout" name="Template Header Stretch" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="d-none d-lg-block py-0 shadow-sm"/>
 
@@ -771,7 +771,7 @@
 
 <!-- "Vertical" template -->
 <template id="template_header_vertical" inherit_id="website.layout" name="Template Header Vertical" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="d-none d-lg-block pt-3 shadow-sm"/>
 
@@ -840,7 +840,7 @@
 
 <!-- "Search" template -->
 <template id="template_header_search" inherit_id="website.layout" name="Template Header Search" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="d-none d-lg-block p-0 shadow-sm"/>
 
@@ -945,7 +945,7 @@
 
 <!-- "Sales one" template -->
 <template id="template_header_sales_one" inherit_id="website.layout" name="Template Header Sale 1" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="o_header_force_no_radius d-none d-lg-block p-0 shadow-sm"/>
 
@@ -1037,7 +1037,7 @@
 
 <!-- "Sales two" template -->
 <template id="template_header_sales_two" inherit_id="website.layout" name="Template Header Sale 2" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="o_header_force_no_radius d-none d-lg-block p-0 shadow-sm"/>
 
@@ -1141,7 +1141,7 @@
 
 <!-- "Sales three" template -->
 <template id="template_header_sales_three" inherit_id="website.layout" name="Template Header Sale 3" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="o_header_force_no_radius d-none d-lg-block p-0 shadow-sm rounded-0"/>
 
@@ -1226,7 +1226,7 @@
 
 <!-- "Sales four" template -->
 <template id="template_header_sales_four" inherit_id="website.layout" name="Template Header Sale 4" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="o_header_sales_four_top o_header_force_no_radius d-none d-lg-block p-0 shadow-sm z-index-1"/>
 
@@ -1330,7 +1330,7 @@
     <xpath expr="//header" position="attributes">
         <attribute name="t-attf-class" add="o_header_sidebar" separator=" "/>
     </xpath>
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <t t-call="website.navbar">
             <t t-set="_navbar_classes" t-valuef="o_border_right_only d-none d-lg-block shadow"/>
 
@@ -1450,7 +1450,7 @@
 
 <!-- "Rounded box" template -->
 <template id="template_header_boxed" inherit_id="website.layout" name="Template Header Rounded Box" active="False">
-    <xpath expr="//header//nav" position="replace">
+    <xpath expr="//t[@t-call='website.navbar']" position="replace">
         <div class="container py-3 px-0">
             <t t-call="website.navbar">
                 <t t-set="_navbar_classes" t-valuef="o_full_border d-none d-lg-block rounded-pill py-2 px-3 shadow-sm"/>
