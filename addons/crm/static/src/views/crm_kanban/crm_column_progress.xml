@@ -11,7 +11,7 @@
                     value="rrmAggregate.value"
                     title="rrmAggregate.title"
                     duration="1000"
-                    currency="props.aggregate.currency"
+                    currencyId="props.aggregate.currencyId"
                     animationClass="'o_animated_grow_huge'"
                 >
                     <t t-set-slot="prefix">
