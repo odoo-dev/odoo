@@ -8,6 +8,20 @@ class ProductTemplate(models.Model):
     l10n_in_hsn_code = fields.Char(string="HSN/SAC Code", help="Harmonized System Nomenclature/Services Accounting Code")
     l10n_in_hsn_warning = fields.Text(string="HSC/SAC warning", compute="_compute_l10n_in_hsn_warning")
     l10n_in_is_gst_registered_enabled = fields.Boolean(compute="_compute_l10n_in_is_gst_registered_enabled")
+    l10n_in_hsn_based_tax_id = fields.Many2one(
+        comodel_name='account.tax',
+        string="GST Rate",
+        domain="[('type_tax_use', '=', 'sale'), ('country_id.code', '=', 'IN')]",
+        help="Tax rates to be applied on sales of this product. When unit price exceeds the threshold limit, the tax will be applied based on the HSN/SAC code.",
+        company_dependent=True,
+        ondelete='restrict'
+    )
+    l10n_in_threshold_limit = fields.Float(
+        string="Threshold Price limit per Unit",
+        help="Threshold limit in INR beyond which GST is applied.",
+        company_dependent=True
+    )
+    l10n_in_is_aligible_for_hsn_taxation = fields.Boolean(string="Is Eligible for Tax Rate", help="Check if the product is eligible for GST tax rate.", compute="_compute_l10n_in_is_aligible_for_hsn_taxation", company_dependent=True)
 
     @api.depends('company_id.l10n_in_is_gst_registered')
     @api.depends_context('allowed_company_ids')
@@ -39,3 +53,12 @@ class ProductTemplate(models.Model):
                 )
                 continue
             record.l10n_in_hsn_warning = False
+
+    @api.depends('l10n_in_hsn_code')
+    def _compute_l10n_in_is_aligible_for_hsn_taxation(self):
+        for record in self:
+            aligible_hsn_code_starting_digits = ['61', '62', '63', '64', '9404']
+            if record.l10n_in_hsn_code and any(record.l10n_in_hsn_code.startswith(digit) for digit in aligible_hsn_code_starting_digits):
+                record.l10n_in_is_aligible_for_hsn_taxation = True
+            else:
+                record.l10n_in_is_aligible_for_hsn_taxation = False

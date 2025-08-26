@@ -13,6 +13,9 @@
                     invisible="country_code != 'IN'"
                     readonly="state not in ['draft', 'sent']"/>
             </field>
+            <xpath expr="//field[@name='order_line']/list//field[@name='price_unit']" position="after">
+                <field name="l10n_in_unit_price_after_discount" optional="hide" column_invisible="parent.country_code != 'IN'"/>
+            </xpath>
         </field>
     </record>
 

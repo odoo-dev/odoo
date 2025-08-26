@@ -54,6 +54,12 @@ class AccountMoveLine(models.Model):
     # withholding related fields
     l10n_in_withhold_tax_amount = fields.Monetary(string="TDS Tax Amount", compute='_compute_l10n_in_withhold_tax_amount')
     l10n_in_tds_tcs_section_id = fields.Many2one(related="account_id.l10n_in_tds_tcs_section_id")
+    l10n_in_unit_price_after_discount = fields.Float(
+        string="Unit Price After Discount",
+        compute='_compute_l10n_in_unit_price_after_discount',
+        store=True, precompute=True,
+        digits='Product Price',
+    )
 
     @api.depends('tax_ids')
     def _compute_l10n_in_withhold_tax_amount(self):
@@ -68,6 +74,31 @@ class AccountMoveLine(models.Model):
         for line in self:
             if line.move_id.country_code == 'IN' and line.parent_state == 'draft':
                 line.l10n_in_hsn_code = line.product_id.l10n_in_hsn_code
+
+    @api.depends('discount', 'price_unit')
+    def _compute_l10n_in_unit_price_after_discount(self):
+        indian_invoice = self.filtered(lambda l: l.move_id.country_code == 'IN' and l.parent_state == 'draft')
+        (self - indian_invoice).l10n_in_unit_price_after_discount = 0.0
+        for line in indian_invoice:
+            if line.discount:
+                line.l10n_in_unit_price_after_discount = line.price_unit * (1 - (line.discount / 100))
+            else:
+                line.l10n_in_unit_price_after_discount = line.price_unit
+
+    @api.depends('product_id', 'product_id.l10n_in_threshold_limit', 'l10n_in_unit_price_after_discount')
+    def _compute_tax_ids(self):
+        aml_apply_tax_based_on_hsn = self.filtered(lambda l:
+            l.move_id.country_code == 'IN' and l.parent_state == 'draft' and
+            l.product_id and
+            l.product_id.l10n_in_threshold_limit and l.product_id.l10n_in_hsn_based_tax_id and
+            l.l10n_in_unit_price_after_discount > l.product_id.l10n_in_threshold_limit
+        )
+        for line in aml_apply_tax_based_on_hsn:
+            fpos = line.move_id.fiscal_position_id
+            line.tax_ids = fpos and fpos.map_tax(line.product_id.l10n_in_hsn_based_tax_id) or line.product_id.l10n_in_hsn_based_tax_id
+
+        # For the rest, fallback to default Odoo computation
+        super(AccountMoveLine, self - aml_apply_tax_based_on_hsn)._compute_tax_ids()
 
     def _l10n_in_check_invalid_hsn_code(self):
         self.ensure_one()

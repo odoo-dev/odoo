@@ -8,6 +8,12 @@ class PosOrderLine(models.Model):
     _inherit = "pos.order.line"
 
     l10n_in_hsn_code = fields.Char(string="HSN/SAC Code", compute="_compute_l10n_in_hsn_code", store=True, readonly=False, copy=False)
+    l10n_in_unit_price_after_discount = fields.Float(
+        string="Unit Price After Discount",
+        compute='_compute_l10n_in_unit_price_after_discount',
+        store=True, precompute=True,
+        digits='Product Price',
+    )
 
     @api.depends('product_id')
     def _compute_l10n_in_hsn_code(self):
@@ -29,5 +35,16 @@ class PosOrderLine(models.Model):
         if self.company_id.l10n_in_is_gst_registered:
             res.update({
                 'l10n_in_hsn_code': self.l10n_in_hsn_code,
+                'l10n_in_unit_price_after_discount': self.l10n_in_unit_price_after_discount,
             })
         return res
+
+    @api.depends('discount', 'price_unit')
+    def _compute_l10n_in_unit_price_after_discount(self):
+        pos_lines = self.filtered(lambda l: l.order_id.country_code == 'IN')
+        (self - pos_lines).l10n_in_unit_price_after_discount = 0.0
+        for line in pos_lines:
+            if line.discount:
+                line.l10n_in_unit_price_after_discount = line.price_unit * (1 - (line.discount / 100))
+            else:
+                line.l10n_in_unit_price_after_discount = line.price_unit

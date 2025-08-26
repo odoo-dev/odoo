@@ -10,5 +10,5 @@ class ProductTemplate(models.Model):
     def _load_pos_data_fields(self, config):
         fields = super()._load_pos_data_fields(config)
         if self.env.company.country_id.code == 'IN':
-            fields += ['l10n_in_hsn_code']
+            fields += ['l10n_in_hsn_code', 'l10n_in_hsn_based_tax_id', 'l10n_in_threshold_limit']
         return fields

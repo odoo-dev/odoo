@@ -14,6 +14,14 @@
             <field name="categ_id" position="after">
                 <field name="l10n_in_hsn_code" widget="l10n_in_hsn_autocomplete" invisible="'IN' not in fiscal_country_codes or not l10n_in_is_gst_registered_enabled"/>
             </field>
+            <group name="group_standard_price" position="after">
+                <group string="HSN Based Taxation" invisible="'IN' not in fiscal_country_codes or not l10n_in_is_gst_registered_enabled or not l10n_in_is_aligible_for_hsn_taxation">
+                    <field name="l10n_in_hsn_based_tax_id"
+                        context="{'search_default_domestictax': True, 'append_fields': ['company_id']}"
+                    />
+                    <field name="l10n_in_threshold_limit"/>
+                </group>
+            </group>
         </field>
     </record>
 
