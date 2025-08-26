@@ -112,26 +112,17 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     }
 
     /**
-     * Check if a dropdown action should be visible for the given record.
-     *
-     * First check that all the specified fields exist in the list view.
-     * For subsection lines, the action is visible only if all the specified
-     * fields are falsy for parent section. For other lines, actions are always visible.
+     * Return whether action should be visible or not on subSection depending on the given
+     * sectionFields values and always true for section.
      *
      * @param {Object} record - The current record.
-     * @param {Array<string>} falsyParentFields - Parent fields that must be falsy.
-     * @returns {boolean} true if the action should be visible.
+     * @param {Array<string>} sectionFields - Parent section fields.
+     * @returns {boolean} true if all the sectionFields are falsy else false.
      */
-    showActionButton(record, falsyParentFields) {
-        if (!falsyParentFields.some(field => field in this.props.list.fields)) {
-            return false;
-        }
+    showActionButton(record, sectionFields) {
         if (this.isSubSection(record)) {
             const parent = this.getParentSectionRecord(record);
-            if (!parent?.data) {
-                return true;
-            }
-            return !falsyParentFields.some(field => parent.data[field]);
+            return !parent?.data || !sectionFields.some(field => parent.data[field]);
         }
         return true;
     }

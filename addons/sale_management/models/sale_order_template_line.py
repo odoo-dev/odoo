@@ -87,32 +87,31 @@ class SaleOrderTemplateLine(models.Model):
         for option in self:
             option.product_uom_id = option.product_id.uom_id
 
-    @api.depends('sale_order_template_id.sale_order_template_line_ids', 'sale_order_template_id')
+    @api.depends('sale_order_template_id')
     def _compute_parent_id(self):
-        for option in self:
-            if not option.display_type:
-                parent_types = ['line_section', 'line_subsection']
-            elif option.display_type == 'line_subsection':
-                parent_types = ['line_section']
-            else:
-                parent_types = []
-
-            if parent_types:
-                qualified_lines = option.sale_order_template_id.sale_order_template_line_ids.filtered(
-                    lambda l: l.display_type in parent_types and l.sequence < option.sequence,
-                )
-                option.parent_id = max(qualified_lines, key=lambda l: l.sequence, default=False)
-            else:
-                option.parent_id = False
+        for options in self.grouped('sale_order_template_id').values():
+            last_section = False
+            last_sub = False
+            for option in options.sorted('sequence'):
+                if option.display_type == 'line_section':
+                    last_section = option
+                    option.parent_id = False
+                    last_sub = False
+                elif option.display_type == 'line_subsection':
+                    option.parent_id = last_section
+                    last_sub = option
+                else:
+                    option.parent_id = last_sub or last_section or False
 
     @api.depends('parent_id.is_optional')
     def _compute_is_optional(self):
         for option in self:
-            if option.display_type == 'line_section':
-                continue # We want to retain the original(user-selected) value.
-            elif (
-                option.display_type != 'line_subsection'
-                or not option.is_optional
+            if (
+                option.display_type != 'line_section'
+                and (
+                    option.display_type != 'line_subsection'
+                    or not option.is_optional
+                )
             ):
                 option.is_optional = option.parent_id.is_optional
 
@@ -131,6 +130,15 @@ class SaleOrderTemplateLine(models.Model):
         return super().write(vals)
 
     #=== BUSINESS METHODS ===#
+
+    def _conditional_add_to_compute(self, fname, condition):
+        field = self._fields[fname]
+        to_reset = self.filtered(lambda option:
+            condition(option)
+            and not self.env.is_protected(field, option)
+        )
+        to_reset.invalidate_recordset([fname])
+        self.env.add_to_compute(field, to_reset)
 
     @api.model
     def _product_id_domain(self):

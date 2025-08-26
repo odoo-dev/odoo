@@ -310,8 +310,8 @@ class SaleOrderLine(models.Model):
         comodel_name='sale.order.line',
         compute='_compute_parent_id',
         index='btree_not_null',
-        store=True,
         precompute=True,
+        store=True,
     )  # The section or subsection this line belongs to.
     # The lines (not sections) that belong to this section or subsection.
     child_ids = fields.One2many(comodel_name='sale.order.line', inverse_name='parent_id')

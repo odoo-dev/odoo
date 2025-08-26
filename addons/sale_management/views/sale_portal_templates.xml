@@ -12,9 +12,9 @@
                             title="Remove one"
                             aria-label="Remove one"
                             href="#"
+                            t-att-class="'opacity-50' if line.product_uom_qty == 0 else 'js_update_line_json'"
                             t-att-data-line-id="line.id"
                             t-att-data-remove="True"
-                            t-att-class="'pe-none opacity-50' if line.product_uom_qty &lt;= 0 else 'js_update_line_json'"
                         >
                             <span class="fa fa-minus"/>
                         </a>
@@ -24,14 +24,14 @@
                         type="text"
                         class="js_quantity form-control"
                         t-att-data-line-id="line.id"
-                        t-att-value="line.product_uom_qty"
+                        t-att-value="line.product_uom_qty or '0.0'"
                     />
                     <span class="d-print-none input-group-text d-none d-md-inline-block">
                         <a
                             title="Add one"
                             aria-label="Add one"
-                            href="#"
                             class="js_update_line_json"
+                            href="#"
                             t-att-data-line-id="line.id"
                         >
                             <span class="fa fa-plus"/>

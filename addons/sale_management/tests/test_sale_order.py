@@ -56,7 +56,6 @@ class TestSaleOrder(SaleManagementCommon):
                 }),
                 Command.create({
                     'product_id': cls.optional_product.id,
-                    'is_optional': True,
                     'sequence': 12,
                 }),
             ],
@@ -127,7 +126,7 @@ class TestSaleOrder(SaleManagementCommon):
         self.assertEqual(
             len(self.sale_order.order_line),
             3,
-            "The sale order shall contains the same number of products as"
+            "The sale order shall contains the same number of lines as"
             "the quotation template.")
 
         self.assertEqual(
@@ -327,22 +326,6 @@ class TestSaleOrder(SaleManagementCommon):
             "If a pricelist is set without discount included,"
             " the discount should be correctly computed.")
 
-    def test_option_creation(self):
-        """Make sure the product uom is automatically added to the option when the product is specified"""
-        order_form = Form(self.sale_order)
-        with order_form.order_line.new() as section:
-            section.name = 'Optional product'
-            section.is_optional = True
-            section.sequence = 10
-            section.display_type = 'line_section'
-
-        with order_form.order_line.new() as option:
-            option.product_id = self.product_1
-            option.sequence = 11
-
-        order = order_form.save()
-        self.assertTrue(bool(self._get_optional_product_lines(order).product_uom_id))
-
     def test_option_price_unit_is_not_recomputed(self):
         """
         Verifies that user defined price unit for optional products remains the same after
@@ -354,22 +337,21 @@ class TestSaleOrder(SaleManagementCommon):
             'order_line': [
                 Command.create({
                     'display_type': 'line_section',
-                    'name': 'Optional products',
+                    'name': "Optional products",
                     'is_optional': True,
                 }),
                 Command.create({
                     'product_id': self.optional_product.id,
-                    'is_optional': True,
                 }),
             ],
         })
 
         optional_product_line = self._get_optional_product_lines(sale_order_with_option)
 
-        optional_product_line.price_unit = 10
+        optional_product_line.price_unit = 100
         # after changing the quantity of the product, the price unit should not be recomputed
         optional_product_line.product_uom_qty = 10
-        self.assertEqual(optional_product_line.price_unit, 10)
+        self.assertEqual(optional_product_line.price_unit, 100)
 
     def test_reload_template_translations(self):
         """
@@ -449,8 +431,9 @@ class TestSaleOrder(SaleManagementCommon):
             "Lines should change after manual template reload",
         )
 
-        # Reload template, save, and change partner again
         order_form.partner_id = partner_NL
+
+        # Reload template, save, and change partner again
         order_form.sale_order_template_id = self.quotation_template_no_discount
         order_form.save()
         order_form.partner_id = self.partner

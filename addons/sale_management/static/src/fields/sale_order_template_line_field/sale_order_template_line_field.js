@@ -8,7 +8,7 @@ import { x2ManyCommands } from '@web/core/orm_service';
 import { registry } from '@web/core/registry';
 
 export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRenderer {
-    static recordRowTemplate = "sale_management.ListRenderer.RecordRow";
+    static recordRowTemplate = 'sale_management.ListRenderer.RecordRow';
 
     getRowClass(record) {
         return super.getRowClass(record) + (record.data.is_optional ? ' text-primary' : '');
@@ -20,12 +20,12 @@ export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRendere
         }))];
 
         for (const sectionRecord of getSectionRecords(this.props.list, record)) {
-            let recordChanges = {}
-            if(!record.data.is_optional) {
-                recordChanges.product_uom_qty = 0;
-            }
-            recordChanges.is_optional = !record.data.is_optional;
-            commands.push(x2ManyCommands.update(sectionRecord.resId || sectionRecord._virtualId, recordChanges));
+            commands.push(
+                x2ManyCommands.update(sectionRecord.resId || sectionRecord._virtualId, {
+                    is_optional: !record.data.is_optional,
+                    ...(!record.data.is_optional ? { product_uom_qty: 0 } : {}),
+                })
+            );
         }
         await this.props.list.applyCommands(commands, { sort: true });
     }
@@ -42,4 +42,4 @@ export const saleOrderTemplateLineOne2Many = {
     component: SaleOrderTemplateLineOne2Many,
 };
 
-registry.category("fields").add("sol_template_lines_o2m", saleOrderTemplateLineOne2Many);
+registry.category('fields').add('so_template_line_o2m', saleOrderTemplateLineOne2Many);

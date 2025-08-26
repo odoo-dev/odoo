@@ -4,6 +4,7 @@ import { x2ManyCommands } from '@web/core/orm_service';
 import { getSectionRecords } from '@account/components/section_and_note_fields_backend/section_and_note_fields_backend';
 
 patch(SaleOrderLineListRenderer.prototype, {
+
     getRowClass(record) {
         return super.getRowClass(record) + (record.data.is_optional ? ' text-primary' : '');
     },
@@ -14,16 +15,15 @@ patch(SaleOrderLineListRenderer.prototype, {
         }))];
 
         for (const sectionRecord of getSectionRecords(this.props.list, record)) {
-            let recordChanges = {}
-            if(!record.data.is_optional) {
-                recordChanges.product_uom_qty = 0;
-                recordChanges.price_total = 0;
-                recordChanges.price_subtotal = 0;
-            }
-            recordChanges.is_optional = !record.data.is_optional;
-            commands.push(x2ManyCommands.update(sectionRecord.resId || sectionRecord._virtualId, recordChanges));
+            commands.push(x2ManyCommands.update(sectionRecord.resId || sectionRecord._virtualId, {
+                is_optional: !record.data.is_optional,
+                ...(!record.data.is_optional ? {
+                    product_uom_qty: 0,
+                    price_total: 0,
+                    price_subtotal: 0,
+                } : {}),
+            }));
         }
-
         await this.props.list.applyCommands(commands, { sort: true });
     },
 });

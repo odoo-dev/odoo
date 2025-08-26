@@ -26,7 +26,7 @@ class CustomerPortal(portal.CustomerPortal):
 
         # Redundant with can be edited on portal for line, ask sales if can rbe removed
         if not order_sudo._can_be_edited_on_portal():
-            return False
+            return
 
         order_line = request.env['sale.order.line'].sudo().browse(int(line_id)).exists()
         if (
@@ -35,16 +35,12 @@ class CustomerPortal(portal.CustomerPortal):
             or not order_line._can_be_edited_on_portal()
         ):
             # Do not allow updating non-optional lines from a quotation
-            return False
+            return
 
         if input_quantity is not False:
             quantity = input_quantity
         else:
             number = -1 if remove else 1
             quantity = order_line.product_uom_qty + number
-
-        if quantity < 0:
-            # Do not allow negative quantities
-            return False
 
         order_line.product_uom_qty = quantity

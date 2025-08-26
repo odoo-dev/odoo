@@ -36,12 +36,12 @@ export class SaleUpdateLineButton extends Interaction {
      */
     async onQuantityChange(ev, currentTargetEl) {
         const quantity = parseInt(currentTargetEl.value);
-        const data = await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
+        await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
             "access_token": this.orderDetail.token,
             "input_quantity": quantity >= 0 ? quantity : false,
             "line_id": currentTargetEl.dataset.lineId,
         }));
-        this.refreshOrderUI(data);
+        this.refreshOrderUI();
     }
 
     /**
@@ -49,12 +49,12 @@ export class SaleUpdateLineButton extends Interaction {
      * @param {HTMLElement} currentTargetEl
      */
     async onUpdateLineClick(ev, currentTargetEl) {
-        const data = await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
+        await this.waitFor(this.callUpdateLineRoute(this.orderDetail.orderId, {
             "access_token": this.orderDetail.token,
             "line_id": currentTargetEl.dataset.lineId,
             "remove": currentTargetEl.dataset.remove,
         }));
-        this.refreshOrderUI(data);
+        this.refreshOrderUI();
     }
 }
 

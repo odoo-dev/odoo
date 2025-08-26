@@ -75,6 +75,12 @@ class SaleOrderTemplate(models.Model):
 
     #=== ONCHANGE METHODS ===#
 
+    @api.onchange('sale_order_template_line_ids')
+    def _onchange_sale_order_template_line_ids(self):
+        self.sale_order_template_line_ids._conditional_add_to_compute('parent_id', lambda line: (
+            line
+        ))
+
     @api.onchange('prepayment_percent')
     def _onchange_prepayment_percent(self):
         for template in self:
@@ -160,7 +166,7 @@ class SaleOrderTemplate(models.Model):
                 'sequence': 13,
             }),
             Command.create({
-                'name': 'Optional Products Section',
+                'name': "Optional Products Section",
                 'display_type': 'line_section',
                 'is_optional': True,
                 'sequence': 14,
@@ -168,19 +174,16 @@ class SaleOrderTemplate(models.Model):
             }),
             Command.create({
                 'product_id': self.env.ref('product.product_product_16').id,
-                'is_optional': True,
                 'sequence': 15,
                 'product_uom_qty': 0,
             }),
             Command.create({
                 'product_id': self.env.ref('product.product_product_6').id,
-                'is_optional': True,
                 'sequence': 16,
                 'product_uom_qty': 0,
             }),
             Command.create({
                 'product_id': self.env.ref('product.product_product_12').id,
-                'is_optional': True,
                 'sequence': 17,
                 'product_uom_qty': 0,
             }),
