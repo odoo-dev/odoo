@@ -508,6 +508,16 @@ class TestUsersTweaks(TransactionCase):
 @tagged('post_install', '-at_install')
 class TestUsersIdentitycheck(HttpCase):
 
+    def test_change_password(self):
+        """Test that the change of users' password is correctly done and allowed by a check identity."""
+        self.env['res.users'].create({
+            'name': 'Internal',
+            'login': 'user_internal',
+            'password': 'oldpassword',
+            'group_ids': [self.env.ref('base.group_user').id],
+        })
+        self.start_tour('/odoo', 'test_change_password_tour', login='admin')
+
     @users('admin')
     def test_revoke_all_devices(self):
         """

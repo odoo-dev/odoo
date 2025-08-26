@@ -164,7 +164,7 @@ class ResDevice(models.Model):
     _auto = False
     _order = 'last_activity desc'
 
-    @check_identity
+    @check_identity()
     def revoke(self):
         return self._revoke()
 

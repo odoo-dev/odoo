@@ -84,47 +84,55 @@ def _jsonable(o):
     except TypeError: return False
     else: return True
 
-def check_identity(fn):
+
+def check_identity(timeout=10):
     """ Wrapped method should be an *action method* (called from a button
     type=object), and requires extra security to be executed. This decorator
-    checks if the identity (password) has been checked in the last 10mn, and
-    pops up an identity check wizard if not.
+    checks if the identity (password) has been checked in the last <timeout>
+    minutes (1 to 10 minutes), and pops up an identity check wizard if not.
 
     Prevents access outside of interactive contexts (aka with a request)
+
+    :param timeout: number of minutes before identity check expires (default/max: 10)
     """
-    @wraps(fn)
-    def wrapped(self, *args, **kwargs):
-        if not request:
-            raise UserError(_("This method can only be accessed over HTTP"))
 
-        if request.session.get('identity-check-last', 0) > time.time() - 10 * 60:
-            # update identity-check-last like github?
-            return fn(self, *args, **kwargs)
+    def decorator(fn):
+        @wraps(fn)
+        def wrapped(self, *args, **kwargs):
+            if not request:
+                raise UserError(_("This method can only be accessed over HTTP"))
 
-        w = self.sudo().env['res.users.identitycheck'].create({
-            'request': json.dumps([
-                { # strip non-jsonable keys (e.g. mapped to recordsets)
-                    k: v for k, v in self.env.context.items()
-                    if _jsonable(v)
-                },
-                self._name,
-                self.ids,
-                fn.__name__,
-                args,
-                kwargs
-            ])
-        })
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'res.users.identitycheck',
-            'res_id': w.id,
-            'name': _("Access Control"),
-            'target': 'new',
-            'views': [(False, 'form')],
-            'context': {'dialog_size': 'medium'},
-        }
-    wrapped.__has_check_identity = True
-    return wrapped
+            effective_timeout = max(1, min(timeout, 10))
+
+            if request.session.get('identity-check-last', 0) > time.time() - effective_timeout * 60:
+                # update identity-check-last like github?
+                return fn(self, *args, **kwargs)
+
+            w = self.sudo().env['res.users.identitycheck'].create({
+                'request': json.dumps([
+                    {  # strip non-jsonable keys (e.g. mapped to recordsets)
+                        k: v for k, v in self.env.context.items()
+                        if _jsonable(v)
+                    },
+                    self._name,
+                    self.ids,
+                    fn.__name__,
+                    args,
+                    kwargs
+                ])
+            })
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'res.users.identitycheck',
+                'res_id': w.id,
+                'name': _("Access Control"),
+                'target': 'new',
+                'views': [(False, 'form')],
+                'context': {'dialog_size': 'medium'},
+            }
+        wrapped.__has_check_identity = True
+        return wrapped
+    return decorator
 
 #----------------------------------------------------------
 # Basic res.users
@@ -989,7 +997,7 @@ class ResUsers(models.Model):
             'tag': 'reload_context',
         }
 
-    @check_identity
+    @check_identity()
     def preference_change_password(self):
         return {
             'type': 'ir.actions.act_window',
@@ -998,7 +1006,7 @@ class ResUsers(models.Model):
             'view_mode': 'form',
         }
 
-    @check_identity
+    @check_identity()
     def api_key_wizard(self):
         return {
             'type': 'ir.actions.act_window',
@@ -1008,7 +1016,7 @@ class ResUsers(models.Model):
             'views': [(False, 'form')],
         }
 
-    @check_identity
+    @check_identity()
     def action_revoke_all_devices(self):
         # self.env.user is sudo by default
         # Need sudo to bypass access error for removing the devices of portal user
@@ -1455,6 +1463,7 @@ class ChangePasswordWizard(models.TransientModel):
 
     user_ids = fields.One2many('change.password.user', 'wizard_id', string='Users', default=_default_user_ids)
 
+    @check_identity(timeout=1)
     def change_password_button(self):
         self.ensure_one()
         self.user_ids.change_password_button()
@@ -1493,7 +1502,7 @@ class ChangePasswordOwn(models.TransientModel):
         if self.confirm_password != self.new_password:
             raise ValidationError(_("The new password and its confirmation must be identical."))
 
-    @check_identity
+    @check_identity()
     def change_password(self):
         self.env.user._change_password(self.new_password)
         self.unlink()
@@ -1549,7 +1558,7 @@ class ResUsersApikeys(models.Model):
             table,
         ))
 
-    @check_identity
+    @check_identity()
     def remove(self):
         return self._remove()
 
@@ -1695,7 +1704,7 @@ class ResUsersApikeysDescription(models.TransientModel):
         self.env['res.users.apikeys']._check_expiration_date(res.expiration_date)
         return res
 
-    @check_identity
+    @check_identity()
     def make_key(self):
         # only create keys for users who can delete their keys
         self.check_access_make_key()
