@@ -151,7 +151,7 @@ class ResUsers(models.Model):
             ('limit_type', '=', limit_type),
         ]).unlink()
 
-    @check_identity
+    @check_identity()
     def action_totp_disable(self):
         logins = ', '.join(map(repr, self.mapped('login')))
         if not (self == self.env.user or self.env.user._is_admin() or self.env.su):
@@ -178,7 +178,7 @@ class ResUsers(models.Model):
             }
         }
 
-    @check_identity
+    @check_identity()
     def action_totp_enable_wizard(self):
         if self.env.user != self:
             raise UserError(_("Two-factor authentication can only be enabled for yourself"))
@@ -204,7 +204,7 @@ class ResUsers(models.Model):
             'context': self.env.context | {'dialog_size': 'medium'},
         }
 
-    @check_identity
+    @check_identity()
     def revoke_all_devices(self):
         self._revoke_all_devices()
 

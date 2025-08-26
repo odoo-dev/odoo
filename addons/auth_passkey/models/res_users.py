@@ -17,7 +17,7 @@ class ResUsers(models.Model):
     def SELF_READABLE_FIELDS(self):
         return super().SELF_READABLE_FIELDS + ['auth_passkey_key_ids']
 
-    @check_identity
+    @check_identity()
     def action_create_passkey(self):
         return {
             'name': _('Create Passkey'),

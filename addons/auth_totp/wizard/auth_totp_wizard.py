@@ -55,7 +55,7 @@ class Auth_TotpWizard(models.TransientModel):
             qrcode.make(url.encode(), box_size=4).save(data, optimise=True, format='PNG')
             w.qrcode = base64.b64encode(data.getvalue()).decode()
 
-    @check_identity
+    @check_identity()
     def enable(self):
         try:
             c = int(compress(self.env.context.get('code', '')))

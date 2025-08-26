@@ -120,7 +120,7 @@ class AuthPasskeyKey(models.Model):
             'credential_public_key': verification.credential_public_key,
         }
 
-    @check_identity
+    @check_identity()
     def action_delete_passkey(self):
         for key in self:
             if key.create_uid.id == self.env.user.id:
@@ -160,7 +160,7 @@ class AuthPasskeyKeyCreate(models.TransientModel):
 
     name = fields.Char('Name', required=True)
 
-    @check_identity
+    @check_identity()
     def make_key(self, registration=None):
         # We add in these fields with JS, if we didn't give them default values we would get a XML validation warning.
         assert registration, "registration can not be empty"
