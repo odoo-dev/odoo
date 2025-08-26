@@ -97,6 +97,20 @@
                     </field>
                 </page>
             </xpath>
+            <xpath expr="//div[@name='currency_conversion_div']" position="attributes">
+                <attribute name="invisible">currency_id == company_currency_id or country_code == 'IN'</attribute>
+            </xpath>
+            <xpath expr="//div[@name='currency_conversion_div']" position="after">
+                <div name="reverse_currency_conversion_div"
+                        class="d-flex gap-1 text-muted"
+                        invisible="currency_id == company_currency_id or country_code != 'IN'">
+                    <span>1</span>
+                    <field name="currency_id" readonly="True" options="{'no_open': True}" class="w-auto"/>
+                    <span>=</span>
+                    <field name="reverse_invoice_currency_rate" digits="[12,6]" readonly="state != 'draft'"/>
+                    <field name="company_currency_id" readonly="True" options="{'no_open': True}" class="w-auto"/>
+                </div>
+            </xpath>
         </field>
     </record>
 

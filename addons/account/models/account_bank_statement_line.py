@@ -97,6 +97,11 @@ class AccountBankStatementLine(models.Model):
         currency_field='foreign_currency_id',
         help="The amount expressed in an optional other currency if it is a multi-currency entry.",
     )
+    currency_rate = fields.Float(
+        compute='_compute_currency_rate',
+        string="Currency Exchange Rate",
+        help="The currency conversion rate from the company currency to foreign currency",
+    )
 
     # == Technical fields ==
     # The amount left to be reconciled on this statement line (signed according to its move lines' balance),
@@ -174,6 +179,21 @@ class AccountBankStatementLine(models.Model):
     def _compute_currency_id(self):
         for st_line in self:
             st_line.currency_id = st_line.journal_id.currency_id or st_line.company_id.currency_id
+
+    @api.depends('foreign_currency_id', 'currency_id', 'date')
+    def _compute_currency_rate(self):
+        for st_line in self:
+            if not st_line.foreign_currency_id or st_line.foreign_currency_id == st_line.currency_id:
+                st_line.currency_rate = 1.0
+            elif st_line.date:
+                st_line.currency_rate = st_line.currency_id._get_conversion_rate(
+                    from_currency=st_line.currency_id,
+                    to_currency=st_line.foreign_currency_id,
+                    company=st_line.company_id,
+                    date=st_line.date,
+                )
+            else:
+                st_line.currency_rate = 0.0
 
     def _compute_running_balance(self):
         # It looks back to find the latest statement and uses its balance_start as an anchor point for calculation, so

@@ -117,10 +117,34 @@ class AccountMove(models.Model):
     )
     l10n_in_show_gstin_status = fields.Boolean(compute="_compute_l10n_in_show_gstin_status")
     l10n_in_gstin_verified_date = fields.Date(compute="_compute_l10n_in_partner_gstin_status_and_date")
+    reverse_invoice_currency_rate = fields.Float(
+        string='Reverse Invoice Currency Rate',
+        compute='_compute_reverse_invoice_currency_rate',
+        inverse='_inverse_reverse_invoice_currency_rate',
+        readonly=False,
+        digits=0,
+        help="Currency rate from document currency to company currency",
+    )
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('currency_id', 'company_currency_id', 'company_id', 'invoice_date')
+    def _compute_reverse_invoice_currency_rate(self):
+        for move in self:
+            if move.country_code == 'IN':
+                move.reverse_invoice_currency_rate = (
+                    (move.invoice_currency_rate and 1.0 / move.invoice_currency_rate) or 0.0
+                )
+
+    @api.onchange('reverse_invoice_currency_rate')
+    def _inverse_reverse_invoice_currency_rate(self):
+        for move in self:
+            if move.country_code == 'IN':
+                move.invoice_currency_rate = (
+                    (move.reverse_invoice_currency_rate and 1.0 / move.reverse_invoice_currency_rate) or 0.0
+                )
 
     @api.depends('partner_id')
     def _compute_l10n_in_gst_treatment(self):
