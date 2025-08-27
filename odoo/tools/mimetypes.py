@@ -185,6 +185,10 @@ if magic:
         # https://github.com/file/file/commit/1a08bb5c235700ba623ffa6f3c95938fe295b262
         if mimetype == 'image/svg':
             return 'image/svg+xml'
+        # upgrade incorrect mimetype to correct one, fixed upstream
+        # https://github.com/file/file/commit/508f9a16ba9149811ef5034f52b43a85c0c84eaa
+        if mimetype == 'text/xml' and _check_svg(bin_data):
+            return 'image/svg+xml'
         return mimetype
 else:
     guess_mimetype = _odoo_guess_mimetype
