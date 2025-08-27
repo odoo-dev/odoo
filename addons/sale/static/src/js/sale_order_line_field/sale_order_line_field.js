@@ -16,6 +16,11 @@ import { CharField } from '@web/views/fields/char/char_field';
 export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRender {
     static recordRowTemplate = 'sale.ListRenderer.RecordRow';
 
+    setup(){
+        super.setup();
+        this.priceColumns.push('discount');
+    }
+
     /**
      * Product description widget logic
      */
@@ -44,16 +49,14 @@ export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRen
     /**
      * Combo logic
      */
-
     getCellClass(column, record) {
-        const classNames = super.getCellClass(column, record);
         if (
             this.isCombo(record)
             && ![this.titleField, 'product_uom_qty', 'discount'].includes(column.name)
         ) {
-            return `${classNames} opacity-0 pe-none`;
+            column.invisible = "product_type == 'combo'";
         }
-        return classNames;
+        return super.getCellClass(column, record);;
     }
 
     getRowClass(record) {
@@ -88,6 +91,10 @@ export class SaleOrderLineListRenderer extends ProductLabelSectionAndNoteListRen
 
     shouldDuplicateSectionItem(record) {
         return !this.isCombo(record) && !this.isComboItem(record);
+    }
+
+    displayDeleteIcon(record){
+        return super.displayDeleteIcon(record) && !this.isComboItem(record);
     }
 }
 

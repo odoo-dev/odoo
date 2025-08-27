@@ -17,6 +17,11 @@ const DISPLAY_TYPES = {
     SUBSECTION: "line_subsection",
 };
 
+function getParentSectionRecord(list, record) {
+    const { indexAtEnd } = getRecordsUntilSection(list, record, false, record.data.display_type !== DISPLAY_TYPES.SUBSECTION);
+    return list.records[indexAtEnd];
+}
+
 function getPreviousSectionRecords(list, record) {
     const { sectionRecords } = getRecordsUntilSection(list, record, false);
     return sectionRecords;
@@ -73,6 +78,9 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     static props = [
         ...super.props,
         "aggregatedFields",
+        "subsections",
+        "hidePrices",
+        "hideComposition",
     ];
 
     /**
@@ -84,15 +92,11 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     setup() {
         super.setup();
         this.titleField = "name";
+        this.priceColumns = ["price_unit", "price_subtotal", "price_total"];
         useEffect(
             (editedRecord) => this.focusToName(editedRecord),
             () => [this.editedRecord]
         );
-    }
-
-    get canAddSubSection() {
-        const selection = new Map(this.props.list.fields.display_type.selection);
-        return selection.has(DISPLAY_TYPES.SUBSECTION);
     }
 
     get disabledMoveDownItemTooltip() {
@@ -127,33 +131,9 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         return true;
     }
 
-    getParentSectionRecord(record) {
-        const parentRecord = this.props.list.records.filter((r) => r.resId === record.data?.parent_id?.id);
-        return parentRecord.length === 1 ? parentRecord[0] : false;
-    }
-
-    async toggleHidePrices(record) {
-        const sectionRecords = getSectionRecords(this.props.list, record);
-        const commands = [];
-        for (const sectionRecord of sectionRecords) {
-            commands.push(x2ManyCommands.update(sectionRecord.resId || sectionRecord._virtualId, {
-                collapse_prices: !record.data.collapse_prices,
-                collapse_composition: false,
-            }));
-        }
-        await this.props.list.applyCommands(commands, { sort: true });
-    }
-
-    async toggleHideComposition(record) {
-        const sectionRecords = getSectionRecords(this.props.list, record);
-        const commands = [];
-        for (const sectionRecord of sectionRecords) {
-            commands.push(x2ManyCommands.update(sectionRecord.resId || sectionRecord._virtualId, {
-                collapse_prices: false,
-                collapse_composition: !record.data.collapse_composition,
-            }));
-        }
-        await this.props.list.applyCommands(commands, { sort: true });
+    async toggleCollapse(record, fieldName) {
+        const changes = { [fieldName]: !record.data[fieldName] };
+        await record.update(changes);
     }
 
     async addRowAfterSection(record, addSubSection) {
@@ -331,30 +311,33 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         return record.data.display_type === DISPLAY_TYPES.SUBSECTION;
     }
 
-    isHidden(record, state) {
-        if (!this.isSection(record)) {
-            return true;
-        }
-
+    /**
+     * Determines whether the line should be collapsed.
+     * - If the parent is a section: use the parent’s field.
+     * - If the parent is a subsection: use parent subsection OR its section.
+     * @param {object} record
+     * @param {string} fieldName
+     * @returns {boolean}
+     */
+    shouldCollapse(record, fieldName) {
         if (this.isTopSection(record)) {
             return false;
-        }
-
-        if (this.isSubSection(record)) {
-            if (state === 'composition' && this.getParentSectionRecord(record)?.data?.collapse_composition) {
-                return true;
+        } else {
+            const parentSection = getParentSectionRecord(this.props.list, record);
+            if (parentSection?.data.display_type === DISPLAY_TYPES.SUBSECTION) {
+                return (
+                    parentSection.data[fieldName]
+                    || getParentSectionRecord(this.props.list, parentSection)?.data[fieldName]
+                );
             }
-
-            if (state === 'prices' && this.getParentSectionRecord(record)?.data?.collapse_prices) {
-                return true;
-            }
+            return parentSection?.data[fieldName];
         }
     }
 
     getRowClass(record) {
         const existingClasses = super.getRowClass(record);
         let newClasses = `${existingClasses} o_is_${record.data.display_type}`;
-        if (this.isHidden(record, 'composition') && record.data.collapse_composition) {
+        if (this.props.hideComposition && this.shouldCollapse(record, 'collapse_composition')) {
             newClasses += " text-muted";
         }
         return newClasses;
@@ -362,15 +345,20 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 
     getCellClass(column, record) {
         let classNames = super.getCellClass(column, record);
+        // For hiding columnns of section and note 
         if (
-            this.isSectionOrNote(record) &&
-            column.widget !== "handle" &&
-            ![column.name, ...this.props.aggregatedFields].includes(column.name)
+            this.isSectionOrNote(record)
+            && column.widget !== "handle"
+            && ![column.name, ...this.props.aggregatedFields].includes(column.name)
         ) {
             return `${classNames} o_hidden`;
         }
-
-        if (this.isHidden(record, 'prices') && this.props.aggregatedFields.includes(column.name) && record.data.collapse_prices) {
+        // For muting the price columns
+        if (
+            this.props.hidePrices
+            && this.shouldCollapse(record, 'collapse_prices')
+            && this.priceColumns.includes(column.name)
+        ) {
             classNames += " text-muted";
         }
 
@@ -468,12 +456,18 @@ export class SectionAndNoteFieldOne2Many extends X2ManyField {
     static props = {
         ...super.props,
         aggregatedFields: Array,
+        hideComposition: Boolean,
+        hidePrices: Boolean,
+        subsections: Boolean,
     };
 
     get rendererProps() {
         const rp = super.rendererProps;
         if (this.props.viewMode === "list") {
             rp.aggregatedFields = this.props.aggregatedFields;
+            rp.hideComposition = this.props.hideComposition;
+            rp.hidePrices = this.props.hidePrices;
+            rp.subsections = this.props.subsections;
         }
         return rp;
     }
@@ -506,6 +500,9 @@ export const sectionAndNoteFieldOne2Many = {
             aggregatedFields: staticInfo.attrs.aggregated_fields
                 ? staticInfo.attrs.aggregated_fields.split(/\s*,\s*/)
                 : [],
+            hideComposition: staticInfo.options?.hide_composition ?? false,
+            hidePrices: staticInfo.options?.hide_prices ?? false,
+            subsections: staticInfo.options?.subsections ?? false,
         };
     },
 };

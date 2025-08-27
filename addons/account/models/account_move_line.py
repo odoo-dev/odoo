@@ -339,12 +339,10 @@ class AccountMoveLine(models.Model):
     collapse_composition = fields.Boolean(
         string="Hide Composition",
         help="If checked, the lines below this section will not be displayed in reports and portal.",
-        compute="_compute_section_visibility_fields", store=True, readonly=False, precompute=True,
     )
     collapse_prices = fields.Boolean(
         string="Hide Prices",
         help="If checked, the prices of the lines below this section will not be displayed in reports and portal.",
-        compute="_compute_section_visibility_fields", store=True, readonly=False, precompute=True,
     )
     parent_id = fields.Many2one(
         'account.move.line',
@@ -1206,20 +1204,6 @@ class AccountMoveLine(models.Model):
                         line.parent_id = last_sub or last_section or False
                 elif line in amls:
                     line.parent_id = False
-
-    @api.depends('move_id.invoice_line_ids.parent_id')
-    def _compute_section_visibility_fields(self):
-        for move in self.filtered(lambda l: l.move_id.move_type != 'entry').grouped('move_id'):
-            for line in move.invoice_line_ids.sorted('sequence'):
-                if line.display_type not in ('line_subsection', 'line_note', 'product'):
-                    continue
-
-                if line.display_type == 'line_subsection':
-                    line.collapse_prices = line.collapse_prices or line.parent_id.collapse_prices
-                    line.collapse_composition = line.collapse_composition or line.parent_id.collapse_composition
-                else:
-                    line.collapse_prices = line.parent_id.collapse_prices
-                    line.collapse_composition = line.parent_id.collapse_composition
 
     @api.depends('move_id.move_type')
     def _compute_no_followup(self):

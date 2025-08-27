@@ -24,19 +24,19 @@
                                 <DropdownItem onSelected="() => this.addRowAfterSection(record, false)">
                                     <i class="me-1 fa fa-fw fa-level-down"/><span>Add a section</span>
                                 </DropdownItem>
-                                <t t-if="this.canAddSubSection">
+                                <t t-if="props.subsections">
                                     <DropdownItem onSelected="() => this.addRowInSection(record, true)">
                                         <i class="me-1 fa fa-fw fa-level-down"/><span>Add a subsection</span>
                                     </DropdownItem>
                                 </t>
                             </t>
-                            <t t-elif="this.canAddSubSection">
+                            <t t-elif="props.subsections">
                                 <DropdownItem onSelected="() => this.addRowAfterSection(record, true)">
                                     <i class="me-1 fa fa-fw fa-level-down"/><span>Add a subsection</span>
                                 </DropdownItem>
                             </t>
                             <DropdownItem
-                                t-if="this.showActionButton(
+                                t-if="props.hidePrices and this.showActionButton(
                                     record, ['collapse_prices', 'collapse_composition']
                                 )"
                                 onSelected="() => this.toggleHidePrices(record)"
@@ -44,7 +44,7 @@
                                 <i class="me-1 fa fa-fw" t-att-class="hidePrices ? 'fa-eye' : 'fa-eye-slash'"/><span t-out="hidePrices ? 'Show Prices' : 'Hide Prices'"/>
                             </DropdownItem>
                             <DropdownItem
-                                t-if="this.showActionButton(record, ['collapse_composition'])"
+                                t-if="props.hideComposition and this.showActionButton(record, ['collapse_composition'])"
                                 onSelected="() => this.toggleHideComposition(record)"
                             >
                                 <i class="me-1 fa fa-fw" t-att-class="hideCompositions ? 'fa-eye' : 'fa-eye-slash'"/><span t-out="hideCompositions ? 'Show Composition' : 'Hide Composition'"/>
