@@ -299,7 +299,7 @@ class StockLot(models.Model):
     def _get_outgoing_domain(self):
         return [
             '|',
-            '|', ('picking_code', '=', 'outgoing'), ('move_id.picking_code', '=', 'outgoing'),
+            ('move_id.picking_code', '=', 'outgoing'),
             ('produce_line_ids', '!=', False),
         ]
 
@@ -310,7 +310,7 @@ class StockLot(models.Model):
             ('lot_id', 'in', self.ids),
             ('state', '=', 'done'),
         ]) & Domain(self._get_outgoing_domain())
-        move_lines = self.env['stock.move.line'].search(domain)
+        move_lines = self.env['stock.move.line'].search(domain, order='id')
         moves_by_lot = {
             lot_id: {'producing_lines': set(), 'barren_lines': set()}
             for lot_id in move_lines.lot_id.ids
