@@ -703,7 +703,24 @@ class IrQweb(models.AbstractModel):
                     iterator = iter([])
                     try:
                         # Create the iterator from the template
-                        iterator = render_template(irQweb, values)
+                        if irQweb.env.context.get('_qweb_skip'):
+                            irQweb = irQweb.with_context(_qweb_skip=False)
+                            # Iterator[str | QwebCallParameters]
+                            iterator = render_template(irQweb, values)
+                        elif to_cache := self._rendering_is_in_cache(options, values):
+                            if to_cache[1]:
+                                # Iterator[str]
+                                irQweb = irQweb.with_context(_qweb_skip=True)
+                                raw_iterator = irQweb._render_iterall(params.view_ref, params.method, values)
+                            else:
+                                raw_iterator = render_template(irQweb, values)
+                            key = self._get_cache_key(to_cache[0])
+
+                            params = QwebCallParameters(*(params[0:-1] + (params[-1] and (params[-1][0], params[-1][1], params[-1][2] + ' <!-- cached -->'),)))
+
+                            iterator = iter(irQweb._rendering_is_cached(options['uniq_key'] + (params.method, key, to_cache[1]), raw_iterator))
+                        else:
+                            iterator = render_template(irQweb, values)
                     finally:
                         stack.append(QwebStackFrame(params, irQweb, iterator, values, options))
                     break
@@ -748,6 +765,45 @@ class IrQweb(models.AbstractModel):
 
             error.qweb = qweb_error_info
             raise
+
+    def _rendering_is_in_cache(self, options, values) -> tuple[tuple[int|str|bool], bool] | None:
+        """
+            :returns: None or a tuple of the cache key and a boolean to force full loading
+        """
+        return None
+
+    @tools.ormcache('key_cache', cache='templates')
+    def _rendering_is_cached(self, key_cache, iterator):
+        items = []
+        for item in iterator:
+            items.append(item)
+            if not isinstance(item, str):
+                for key, value in item.values.items():
+                    if value is not None and not isinstance(value, (str, int, float, bool)):
+                        raise ValueError(f'''The value {key!r} cannot be cached: {value!r}''')
+        return items
+
+    def _get_cache_key(self, cache_key):
+        """
+            Convert the template cache key item into a hashable key.
+            :param cache_key: tuple
+            :returns: tuple of hashable items
+        """
+        keys = []
+        dates = []
+        for item in cache_key:
+            if item is None or isinstance(cache_key, (bool, int, float, str)):
+                keys.append(item)
+                continue
+            keys.append(repr(item))
+            try:
+                # use try catch instead of isinstance to detect lazy values
+                dates += item.mapped('write_date')
+            except AttributeError:
+                pass
+        if dates:
+            keys.append((max(dates).timestamp()))
+        return tuple(keys)
 
     def _get_error_info(self, error, stack: list[QwebStackFrame], frame: QwebStackFrame) -> QWebErrorInfo:
         source = tuple(OrderedSet(info.params.path_xml for info in stack if info.params.path_xml))
@@ -945,6 +1001,9 @@ class IrQweb(models.AbstractModel):
             key: compile_context.get(key, False)
             for key in self._get_template_cache_keys() + ['ref', 'ref_name', 'ref_xml']
         }
+
+        options['uniq_key'] = (options['ref'],) + tuple(options.get(k) or False for k in self._get_template_cache_keys())
+
 
         # generate code
         ref_name = compile_context['ref_name'] or ''
@@ -2225,7 +2284,7 @@ class IrQweb(models.AbstractModel):
         if expr == T_CALL_SLOT and code_options != 'True':
             code.append(indent_code("if True:", level))
             code.extend(tag_open)
-            code.append(indent_code(f"yield from values.get({T_CALL_SLOT}, [])", level + 1))
+            code.append(indent_code(f"yield values.get({T_CALL_SLOT}, '')", level + 1))
             code.extend(tag_close)
             return code
         elif ttype == 't-field':
@@ -2242,7 +2301,7 @@ class IrQweb(models.AbstractModel):
             force_display_dependent = True
         else:
             if expr == T_CALL_SLOT:
-                code.append(indent_code(f"content = Markup(''.join(values.get({T_CALL_SLOT}, [])))", level))
+                code.append(indent_code(f"content = Markup(values.get({T_CALL_SLOT}, ''))", level))
             else:
                 code.append(indent_code(f"content = {self._compile_expr(expr)}", level))
 
@@ -2403,11 +2462,11 @@ class IrQweb(models.AbstractModel):
             compile_context['template_functions'][def_name] = code_content
             code.append(indent_code(f"""
                 t_call_values = values.copy()
-                t_call_values[{T_CALL_SLOT}] = list(self._render_iterall({compile_context['ref']!r}, {def_name!r}, t_call_values))
+                t_call_values[{T_CALL_SLOT}] = ''.join(self._render_iterall({compile_context['ref']!r}, {def_name!r}, t_call_values))
                 t_call_values = {{k: v for k, v in t_call_values.items() if k != '__qweb_attrs__' and (k == {T_CALL_SLOT} or values.get(k) is not v)}}
             """, level))
         else:
-            code.append(indent_code(f"t_call_values = {{ {T_CALL_SLOT}: [] }}", level))
+            code.append(indent_code(f"t_call_values = {{ {T_CALL_SLOT}: '' }}", level))
 
         template = expr if expr.isnumeric() else self._compile_format(expr)
 
