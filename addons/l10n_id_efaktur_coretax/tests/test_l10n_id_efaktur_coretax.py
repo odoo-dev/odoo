@@ -168,6 +168,33 @@ class TestEfakturCoretax(AccountTestInvoicingCommon):
         with self.assertRaisesRegex(ValidationError, "Document number for customer"):
             out_invoice.download_efaktur()
 
+    def test_download_efaktur_multiple_taxes(self):
+        """ Test to ensure that invoice containing multiple taxes are not allowed to download efaktur """
+        tax_1 = self.env['account.tax'].create({
+            'name': 'Tax 1',
+            'amount': 10,
+            'type_tax_use': 'sale',
+        })
+
+        tax_2 = self.env['account.tax'].create({
+            'name': 'Tax 2',
+            'amount': 5,
+            'type_tax_use': 'sale',
+        })
+
+        out_invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_date': '2019-05-01',
+            'date': '2019-05-01',
+            'invoice_line_ids': [
+                (0, 0, {'name': 'line1', 'price_unit': 100000, 'quantity': 1, 'tax_ids': [Command.set([tax_1.id, tax_2.id])]})
+            ],
+            'l10n_id_kode_transaksi': '01',
+        })
+        out_invoice.action_post()
+        out_invoice.download_efaktur()
+
     def test_efaktur_invalid_kode_07_08(self):
         """ Test to extra fields are filled in when code 07 or 08 is used """
         out_invoice = self.env['account.move'].create({

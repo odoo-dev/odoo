@@ -49,7 +49,7 @@ class AccountMoveLine(models.Model):
             line_val['OtherTaxBase'] = idr.round(self.price_subtotal * 11 / 12)
         # For all other code, OtherTaxBase will follow TaxBase and calculation of VAT should follow the amount of tax itself
         else:
-            line_val['VATRate'] = regular_tax.amount
+            line_val['VATRate'] = sum(regular_tax.mapped('amount'))
             line_val['OtherTaxBase'] = line_val['TaxBase']
 
         line_val['VAT'] = idr.round(line_val['OtherTaxBase'] * line_val['VATRate'] / 100)
