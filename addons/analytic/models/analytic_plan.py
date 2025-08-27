@@ -307,7 +307,8 @@ class AccountAnalyticPlan(models.Model):
 
     def _sync_plan_column(self, model):
         # Create/delete a new field/column on related models for this plan, and keep the name in sync.
-        for plan in self:
+        plans = self.search([('id', 'in', self.ids)], order='parent_path')
+        for plan in plans:
             prev_stored = plan._find_plan_column(model)
             depth, name_related = plan._hierarchy_name()
             prev_related = plan._find_related_field(model)
