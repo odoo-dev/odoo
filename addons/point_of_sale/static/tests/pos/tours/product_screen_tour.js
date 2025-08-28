@@ -587,7 +587,6 @@ registry.category("web_tour.tours").add("CustomerPopupTour", {
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
             negateStep(PartnerList.checkCustomerShown("Z partner to search")),
-            PartnerList.searchCustomerValue("Z partner to search", true),
             ProductScreen.clickCustomer("Z partner to search"),
             ProductScreen.clickPartnerButton(),
             negateStep(PartnerList.checkCustomerShown("Z partner to scroll")),
