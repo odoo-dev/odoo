@@ -824,8 +824,8 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
             move_form.save()
 
         self.assertEqual(len(subcontract_move._get_subcontract_production()), 3)
-        self.assertEqual(len(subcontract_move._get_subcontract_production().lot_producing_id), 3)
-        self.assertRecordValues(subcontract_move._get_subcontract_production().lot_producing_id.sorted('id'), [
+        self.assertEqual(len(subcontract_move._get_subcontract_production().lot_producing_ids), 3)
+        self.assertRecordValues(subcontract_move._get_subcontract_production().lot_producing_ids.sorted('id'), [
             {'id': finished_lots[0].id},
             {'id': finished_lots[1].id},
             {'id': finished_lots[2].id},
@@ -843,8 +843,8 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
             move_form.save()
 
         subcontracted_mo = subcontract_move._get_subcontract_production()
-        self.assertEqual(len(subcontracted_mo.filtered(lambda p: p.lot_producing_id == new_lot)), 1)
-        self.assertEqual(len(subcontracted_mo.filtered(lambda p: p.lot_producing_id != new_lot)), 2)
+        self.assertEqual(len(subcontracted_mo.filtered(lambda p: p.lot_producing_ids == new_lot)), 1)
+        self.assertEqual(len(subcontracted_mo.filtered(lambda p: p.lot_producing_ids != new_lot)), 2)
 
     def test_decrease_quantity_done(self):
         self.bom.consumption = 'flexible'
@@ -1133,7 +1133,7 @@ class TestSubcontractingTracking(TransactionCase):
         self.assertEqual(mos.mapped("state"), ["done"] * nb_finished_product)
         self.assertEqual(mos.picking_type_id, wh.subcontracting_type_id)
         self.assertFalse(mos.picking_type_id.active)
-        self.assertEqual(set(mos.lot_producing_id.mapped("name")), {f"subtracked_{i}" for i in range(nb_finished_product)})
+        self.assertEqual(set(mos.lot_producing_ids.mapped("name")), {f"subtracked_{i}" for i in range(nb_finished_product)})
 
         # Available quantities should be negative at the subcontracting location for each components
         avail_qty_comp1 = self.env['stock.quant']._get_available_quantity(self.comp1_sn, self.subcontractor_partner1.property_stock_subcontractor, allow_negative=True)

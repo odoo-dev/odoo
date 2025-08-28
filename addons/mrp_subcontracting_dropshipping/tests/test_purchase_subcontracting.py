@@ -559,5 +559,5 @@ class TestSubcontractingDropshippingPortal(TestSubcontractingPortal):
             ml.lot_id = finished_serial
         move_form.save()
         self.assertRecordValues(move._get_subcontract_production()[0], [{
-            'qty_producing': 0.0, 'lot_producing_id': finished_serial.id, 'state': 'confirmed',
+            'qty_producing': 0.0, 'lot_producing_ids': finished_serial.ids, 'state': 'confirmed',
         }])

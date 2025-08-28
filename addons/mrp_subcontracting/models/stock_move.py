@@ -101,7 +101,7 @@ class StockMove(models.Model):
         """ Display moves raw for subcontracted product self. """
         productions = self._get_subcontract_production().filtered(lambda m: m.state != 'cancel')
         if lot_id:
-            productions = productions.filtered(lambda p: p.lot_producing_id == self.env['stock.lot'].browse(lot_id))
+            productions = productions.filtered(lambda p: p.lot_producing_ids and p.lot_producing_ids[0] == self.env['stock.lot'].browse(lot_id))
         ctx = {"mrp_subcontracting": True}
         if self.env.user._is_portal():
             form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
@@ -252,19 +252,19 @@ class StockMove(models.Model):
                 if not productions:
                     continue
                 qty_by_lot = dict(move.move_line_ids._read_group([('move_id', '=', move.id)], ['lot_id'], ['quantity:sum']))
-                open_mo = productions.filtered(lambda p: not p.lot_producing_id and not p._has_been_recorded())
+                open_mo = productions.filtered(lambda p: not p.lot_producing_ids and not p._has_been_recorded())
                 if open_mo and qty_by_lot:
                     # No MOs created yet for the lots, split them from the default 'open' MO
                     productions = open_mo.sudo().with_context(allow_more=True)._split_productions({open_mo: list(qty_by_lot.values())}, cancel_remaining_qty=True, skip_procurement=False)
                     for production, lot_id in zip(productions, qty_by_lot.keys()):
-                        production.lot_producing_id = lot_id
+                        production.lot_producing_ids = lot_id
                         production.subcontracting_has_been_recorded = True
                 else:
                     # MOs already created for lots, update to enforce sync:
                     # 1. Ensure quantities of linked MOs still match the quantities on the move
                     mos_to_create = {}  # lot -> qty
                     for lot_id, ml_qty in qty_by_lot.items():
-                        lot_mo = productions.filtered(lambda p: p.lot_producing_id == lot_id)
+                        lot_mo = productions.filtered(lambda p: (p.lot_producing_ids and p.lot_producing_ids[0] == lot_id) or (not lot_id and not p.lot_producing_ids))
                         if not lot_mo:
                             mos_to_create[lot_id] = ml_qty
                         elif lot_mo.product_uom_id.compare(lot_mo.product_qty, ml_qty) != 0:
@@ -281,17 +281,17 @@ class StockMove(models.Model):
                             production_to_split: [production_to_split.product_qty] + list(mos_to_create.values())
                         }, cancel_remaining_qty=True)[1:]
                         for mo, lot_id in zip(new_mos, mos_to_create.keys()):
-                            mo.lot_producing_id = lot_id
+                            mo.lot_producing_ids = lot_id
                             mo.subcontracting_has_been_recorded = True
 
                     # 3. Delete 'orphan' MOs with lot not linked to any move line
                     productions = move._get_subcontract_production()
-                    orphan_productions = productions.filtered(lambda p: p.lot_producing_id not in qty_by_lot)
+                    orphan_productions = productions.filtered(lambda p: (p.lot_producing_ids and p.lot_producing_ids[0] not in qty_by_lot) or (not p.lot_producing_ids and self.env['stock.lot'] not in qty_by_lot))
                     if len(productions) == len(orphan_productions):
                         # Make sure not to delete all MOs, leave 1 subcontracting MO as 'open' MO for splitting later
                         production_to_keep = orphan_productions[-1]
                         production_to_keep.subcontracting_has_been_recorded = False
-                        production_to_keep.lot_producing_id = False
+                        production_to_keep.lot_producing_ids = False
                         orphan_productions = orphan_productions[:-1]
                     if orphan_productions:
                         orphan_productions.with_context(skip_activity=True).unlink()
