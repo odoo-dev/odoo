@@ -102,6 +102,7 @@ class StockMove(models.Model):
                 'move_id': move.id,
                 'value': move.value_manual,
                 'company_id': move.company_id.id,
+                'date': move.date,
             })
 
     def action_adjust_valuation(self):

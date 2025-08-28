@@ -311,6 +311,7 @@ class ProductProduct(models.Model):
                 in_qty = move._get_valued_qty()
                 in_value = move.value
             if at_date and not external_location:
+                in_qty = move._get_valued_qty(lot=lot)
                 in_value = move._get_value(at_date=at_date)
             if in_qty > quantity:
                 in_value = in_value * quantity / in_qty

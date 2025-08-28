@@ -54,7 +54,6 @@ def _create_accounting_data(env):
     return stock_input_account, stock_output_account, stock_valuation_account, expense_account, income_account, stock_journal
 
 
-@skip('Temporary to fast merge new valuation')
 class TestStockValuationBase(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -87,8 +86,6 @@ class TestStockValuationBase(TransactionCase):
 
         cls.stock_input_account, cls.stock_output_account, cls.stock_valuation_account, cls.expense_account, cls.income_account, cls.stock_journal = _create_accounting_data(cls.env)
         cls.product1.categ_id.write({
-            'property_stock_account_input_categ_id': cls.stock_input_account.id,
-            'property_stock_account_output_categ_id': cls.stock_output_account.id,
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
@@ -154,8 +151,14 @@ class TestStockValuationBase(TransactionCase):
         out_move._action_done()
         return out_move.with_context(svl=True)
 
+    def _set_quantity(self, move, quantity):
+        """Helper function to retroactively change the quantity of a move.
+           The total value of the product will be recomputed as a result,
+           regardless of the valuation method."""
+        move.quantity = quantity
+        move.value_manual = move.price_unit * quantity
 
-@skip('Temporary to fast merge new valuation')
+
 class TestStockValuation(TestStockValuationBase):
     def test_realtime(self):
         """ Stock moves update stock value with product x cost price,
@@ -3444,10 +3447,12 @@ class TestStockValuation(TestStockValuationBase):
         move1.picked = True
         move1._action_done()
         move1.date = date1
-        move1.stock_valuation_layer_ids._write({'create_date': date1})
+        move1.create_date = date1
+        move1.value_manual = 100.0
 
-        self.assertEqual(self.product1.quantity_svl, 10)
-        self.assertEqual(self.product1.value_svl, 100)
+        self.assertEqual(self.product1.qty_available, 10)
+        self.assertEqual(self.product1.total_value, 100)
+        self.product1._invalidate_cache()
 
         # receive 10@12
         move2 = self.env['stock.move'].create({
@@ -3464,10 +3469,12 @@ class TestStockValuation(TestStockValuationBase):
         move2.picked = True
         move2._action_done()
         move2.date = date2
-        move2.stock_valuation_layer_ids._write({'create_date': date2})
+        move2.create_date = date2
+        move2.value_manual = 120.0
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 20)
-        self.assertEqual(self.product1.value_svl, 220)
+        self.assertAlmostEqual(self.product1.qty_available, 20)
+        self.assertEqual(self.product1.total_value, 220)
+        self.product1._invalidate_cache()
 
         # send 15
         move3 = self.env['stock.move'].create({
@@ -3483,10 +3490,11 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
         move3.date = date3
-        move3.stock_valuation_layer_ids._write({'create_date': date3})
+        move3.create_date = date3
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 5.0)
-        self.assertEqual(self.product1.value_svl, 60)
+        self.assertAlmostEqual(self.product1.qty_available, 5.0)
+        self.assertEqual(self.product1.total_value, 60)
+        self.product1._invalidate_cache()
 
         # send 20
         move4 = self.env['stock.move'].create({
@@ -3502,10 +3510,11 @@ class TestStockValuation(TestStockValuationBase):
         move4.picked = True
         move4._action_done()
         move4.date = date4
-        move4.stock_valuation_layer_ids._write({'create_date': date4})
+        move4.create_date = date4
 
-        self.assertAlmostEqual(self.product1.quantity_svl, -15.0)
-        self.assertEqual(self.product1.value_svl, -180)
+        self.assertAlmostEqual(self.product1.qty_available, -15.0)
+        self.assertEqual(self.product1.total_value, 0) # not getting in negative
+        self.product1._invalidate_cache()
 
         # receive 100@15
         move5 = self.env['stock.move'].create({
@@ -3522,31 +3531,33 @@ class TestStockValuation(TestStockValuationBase):
         move5.picked = True
         move5._action_done()
         move5.date = date5
-        move5.stock_valuation_layer_ids._write({'create_date': date5})
+        move5.create_date = date5
+        move5.value_manual = 1500.0
 
-        # the vacuum ran
-        move4.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date6})
+        move4.create_date = date6
 
-        self.assertEqual(self.product1.quantity_svl, 85)
-        self.assertEqual(self.product1.value_svl, 1275)
+        self.assertEqual(self.product1.qty_available, 85)
+        self.assertEqual(self.product1.total_value, 1275)
+        self.product1._invalidate_cache()
+
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).qty_available, 10)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).total_value, 100)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).qty_available, 20)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).total_value, 220)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).qty_available, 5)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).total_value, 60)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).qty_available, -15)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).total_value, 0.0)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).qty_available, 85)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).total_value, 1275)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date6)).qty_available, 85)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date6)).total_value, 1275)
 
         # Edit the quantity done of move1, increase it.
-        move1.quantity = 20
-
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).quantity_svl, 10)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).value_svl, 100)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).quantity_svl, 20)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).value_svl, 220)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).quantity_svl, 5)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).value_svl, 60)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).quantity_svl, -15)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).value_svl, -180)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).quantity_svl, 85)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).value_svl, 1320)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date6)).quantity_svl, 85)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date6)).value_svl, 1275)
-        self.assertEqual(self.product1.quantity_svl, 95)
-        self.assertEqual(self.product1.value_svl, 1375)
+        self._set_quantity(move1, 20)
+        self.product1._invalidate_cache()
+        self.assertEqual(self.product1.qty_available, 95)
+        self.assertEqual(self.product1.total_value, 1425)
 
     def test_at_date_fifo_2(self):
         self.product1.categ_id.property_cost_method = 'fifo'
@@ -3573,10 +3584,11 @@ class TestStockValuation(TestStockValuationBase):
         move1.picked = True
         move1._action_done()
         move1.date = date1
-        move1.stock_valuation_layer_ids._write({'create_date': date1})
+        move1.value_manual = 100
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 10.0)
-        self.assertEqual(self.product1.value_svl, 100)
+        self.assertAlmostEqual(self.product1.qty_available, 10.0)
+        self.assertEqual(self.product1.total_value, 100)
+        self.product1._invalidate_cache()
 
         # receive 10@15
         move2 = self.env['stock.move'].create({
@@ -3593,10 +3605,11 @@ class TestStockValuation(TestStockValuationBase):
         move2.picked = True
         move2._action_done()
         move2.date = date2
-        move2.stock_valuation_layer_ids._write({'create_date': date2})
+        move2.value_manual = 150
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 20.0)
-        self.assertEqual(self.product1.value_svl, 250)
+        self.assertAlmostEqual(self.product1.qty_available, 20.0)
+        self.assertEqual(self.product1.total_value, 250)
+        self.product1._invalidate_cache()
 
         # send 30
         move3 = self.env['stock.move'].create({
@@ -3612,10 +3625,10 @@ class TestStockValuation(TestStockValuationBase):
         move3.picked = True
         move3._action_done()
         move3.date = date3
-        move3.stock_valuation_layer_ids._write({'create_date': date3})
 
-        self.assertAlmostEqual(self.product1.quantity_svl, -10.0)
-        self.assertEqual(self.product1.value_svl, -150)
+        self.assertAlmostEqual(self.product1.qty_available, -10.0)
+        self.assertEqual(self.product1.total_value, 0) # not getting negative
+        self.product1._invalidate_cache()
 
         # receive 10@20
         move4 = self.env['stock.move'].create({
@@ -3632,11 +3645,11 @@ class TestStockValuation(TestStockValuationBase):
         move4.picked = True
         move4._action_done()
         move4.date = date4
-        move3.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date4})
-        move4.stock_valuation_layer_ids._write({'create_date': date4})
+        move4.value_manual = 200.0
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 0.0)
-        self.assertEqual(self.product1.value_svl, 0)
+        self.assertAlmostEqual(self.product1.qty_available, 0.0)
+        self.assertEqual(self.product1.total_value, 0)
+        self.product1._invalidate_cache()
 
         # receive 10@10
         move5 = self.env['stock.move'].create({
@@ -3653,26 +3666,27 @@ class TestStockValuation(TestStockValuationBase):
         move5.picked = True
         move5._action_done()
         move5.date = date5
-        move5.stock_valuation_layer_ids._write({'create_date': date5})
+        move5.value_manual = 100.0
 
-        self.assertAlmostEqual(self.product1.quantity_svl, 10.0)
-        self.assertEqual(self.product1.value_svl, 100)
+        self.assertAlmostEqual(self.product1.qty_available, 10.0)
+        self.assertEqual(self.product1.total_value, 100)
+        self.product1._invalidate_cache()
 
         # ---------------------------------------------------------------------
         # ending: perpetual valuation
         # ---------------------------------------------------------------------
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).quantity_svl, 10)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).value_svl, 100)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).quantity_svl, 20)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).value_svl, 250)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).quantity_svl, -10)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).value_svl, -150)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).quantity_svl, 0)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).value_svl, 0)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).quantity_svl, 10)
-        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).value_svl, 100)
-        self.assertEqual(self.product1.quantity_svl, 10)
-        self.assertEqual(self.product1.value_svl, 100)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).qty_available, 10)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date1)).total_value, 100)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).qty_available, 20)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date2)).total_value, 250)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).qty_available, -10)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date3)).total_value, 0)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).qty_available, 0)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date4)).total_value, 0)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).qty_available, 10)
+        self.assertEqual(self.product1.with_context(to_date=Datetime.to_string(date5)).total_value, 100)
+        self.assertEqual(self.product1.qty_available, 10)
+        self.assertEqual(self.product1.total_value, 100)
 
     def test_inventory_fifo_1(self):
         """ Make an inventory from a location with a company set, and ensure the product has a stock
