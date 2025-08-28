@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo.tests import Form, tagged
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
-from odoo.exceptions import UserError
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
 
     @classmethod
@@ -51,8 +47,11 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.fifo_product.standard_price = 100
         self.fifo_product.taxes_id = False
 
-        self._make_in_move(self.fifo_product, unit_cost=10)
-        self._make_in_move(self.fifo_product, unit_cost=25)
+        move1 = self._make_in_move(self.fifo_product, unit_cost=10)
+        move2 = self._make_in_move(self.fifo_product, unit_cost=25)
+
+        move1.value_manual = 10
+        move2.value_manual = 25
 
         ro = self.env['repair.order'].create({
             'product_id': self.product_a.id,
@@ -80,6 +79,6 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.assertRecordValues(invoice.line_ids, [
             {'debit': 0, 'credit': 1, 'account_id': self.company_data['default_account_revenue'].id},
             {'debit': 1, 'credit': 0, 'account_id': self.company_data['default_account_receivable'].id},
-            {'debit': 0, 'credit': 10, 'account_id': self.company_data['default_account_stock_out'].id},
+            {'debit': 0, 'credit': 10, 'account_id': self.company_data['default_account_stock_valuation'].id},
             {'debit': 10, 'credit': 0, 'account_id': self.company_data['default_account_expense'].id},
         ])
