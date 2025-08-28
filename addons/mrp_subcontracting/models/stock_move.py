@@ -97,11 +97,14 @@ class StockMove(models.Model):
             return action
         return super().action_show_details()
 
-    def action_show_subcontract_details(self, lot_id=False):
+    def action_show_subcontract_details(self, lot_id=None):
         """ Display moves raw for subcontracted product self. """
         productions = self._get_subcontract_production().filtered(lambda m: m.state != 'cancel')
-        if lot_id:
-            productions = productions.filtered(lambda p: p.lot_producing_ids and p.lot_producing_ids[0] == self.env['stock.lot'].browse(lot_id))
+        if lot_id is not None:
+            if lot_id:
+                productions = productions.filtered(lambda p: p.lot_producing_ids and p.lot_producing_ids[0] == self.env['stock.lot'].browse(lot_id))
+            else:
+                productions = productions.filtered(lambda p: not p.lot_producing_ids)
         ctx = {"mrp_subcontracting": True}
         if self.env.user._is_portal():
             form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')

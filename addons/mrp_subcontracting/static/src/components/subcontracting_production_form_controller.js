@@ -14,6 +14,14 @@ class SubcontractingProductionFormController extends FormController {
                         this.model.orm.call('mrp.production', 'action_assign', [this.model.root.resId]);
                         this.model.load();
                     },
+                },
+                {
+                    key: "split",
+                    description: _t("Create New Production"),
+                    callback: async () => {
+                        const res = await this.model.orm.call('mrp.production', 'action_split_subcontracting', [this.model.root.resId]);
+                        this.model.action.doAction(res);
+                    }
                 }
             ]
         };

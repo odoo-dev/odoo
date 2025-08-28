@@ -117,3 +117,20 @@ class MrpProduction(models.Model):
 
     def _get_writeable_fields_portal_user(self):
         return ['move_line_raw_ids', 'lot_producing_ids', 'subcontracting_has_been_recorded', 'qty_producing', 'product_qty']
+
+    def action_split_subcontracting(self):
+        self.ensure_one()
+        if not self.lot_producing_ids:
+            raise UserError(_("Please set a lot/serial for the currently opened subcontracting MO first."))
+        move = self._get_subcontract_move()
+        if not move:
+            return False
+        empty_line = move.move_line_ids.filtered(lambda l: not l.lot_id)
+        if not empty_line:
+            move.move_line_ids.create({
+                'product_id': move.product_id.id,
+                'move_id': move.id,
+                'quantity': 1,
+                'lot_id': False,
+            })
+        return move.action_show_subcontract_details(lot_id=False)
