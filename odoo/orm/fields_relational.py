@@ -532,8 +532,10 @@ class Many2one(_Relational):
             return sql
 
         if isinstance(value, Domain):
-            value = comodel._search(value, active_test=False, bypass_access=bypass_access)
-        if isinstance(value, Query):
+            query = Query(comodel)
+            query.add_where(value._to_sql(query.table))
+            subselect = query.subselect()
+        elif isinstance(value, Query):
             subselect = value.subselect()
         elif isinstance(value, SQL):
             subselect = SQL("(%s)", value)
@@ -840,11 +842,13 @@ class _RelationalMulti(_Relational):
 
         comodel = table._model.env[self.comodel_name].sudo()
         if isinstance(value, Domain):
-            coquery = comodel._search(value, active_test=False)
+            coquery = Query(comodel)
+            coquery.add_where(value._to_sql(coquery.table))
         elif isinstance(value, Query):
             coquery = value
         elif isinstance(value, SQL):
-            coquery = comodel._search(Domain('id', 'any!', value), active_test=False)
+            coquery = Query(comodel)
+            coquery.add_where(SQL('id IN %s', value))
         else:
             assert False, f"Unimplemented condition on {self} for {type(value)}"
 
