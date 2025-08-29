@@ -969,7 +969,6 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         productions = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)]).sorted('id')
         self.assertRecordValues(productions, [
             {'product_qty': 19.8, 'qty_producing': 19.8, 'state': 'done'},
-            {'product_qty': 0.2, 'qty_producing': 0.2, 'state': 'cancel'},
         ])
 
 
@@ -1029,7 +1028,6 @@ class TestSubcontractingTracking(TransactionCase):
         with picking_form.move_ids.new() as move:
             move.product_id = self.finished_product
             move.product_uom_qty = 1
-            move.quantity = 1
             move.picked = True
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
@@ -1156,7 +1154,6 @@ class TestSubcontractingTracking(TransactionCase):
         with picking_form.move_ids.new() as move:
             move.product_id = self.finished_product
             move.product_uom_qty = todo_nb
-            move.quantity = todo_nb
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
 
@@ -1267,7 +1264,6 @@ class TestSubcontractingTracking(TransactionCase):
         with picking_form.move_ids.new() as move:
             move.product_id = finished_product
             move.product_uom_qty = todo_nb
-            move.quantity = todo_nb
             move.picked = True
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
@@ -1326,7 +1322,6 @@ class TestSubcontractingTracking(TransactionCase):
         with picking_form.move_ids.new() as move:
             move.product_id = finished_product
             move.product_uom_qty = todo_nb
-            move.picked = True
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
 
@@ -1338,7 +1333,7 @@ class TestSubcontractingTracking(TransactionCase):
         compo_picking.action_assign()
         compo_picking.button_validate()
 
-        action = mo.button_mark_done()
+        action = mo.action_generate_serial()
         wizard = Form.from_action(self.env, action)
         wizard.lot_name = 'sn#1'
         wizard.lot_quantity = todo_nb
@@ -1346,15 +1341,19 @@ class TestSubcontractingTracking(TransactionCase):
         wizard = Form.from_action(self.env, action)
         wizard.save().action_apply()
 
-        # One MO - multiple serials
+        # Each generated serial number should have its own mo
         self.assertRecordValues(mo.procurement_group_id.mrp_production_ids.sorted("name"), [
-            {"name": initial_name, "state": "to_close"},
+            {"name": initial_name + "-001", "state": "confirmed"},
+            {"name": initial_name + "-002", "state": "confirmed"},
+            {"name": initial_name + "-003", "state": "confirmed"},
         ])
         self.assertRecordValues(mo.procurement_group_id.mrp_production_ids.move_raw_ids, [
-            {"quantity": 3.0, "state": "assigned"},
+            {"quantity": 1.0, "state": "assigned"},
+            {"quantity": 1.0, "state": "assigned"},
+            {"quantity": 1.0, "state": "assigned"},
         ])
         mo.procurement_group_id.mrp_production_ids.button_mark_done()
-        self.assertEqual(mo.procurement_group_id.mrp_production_ids.mapped("state"), ['done'])
+        self.assertEqual(mo.procurement_group_id.mrp_production_ids.mapped("state"), ['done', 'done', 'done'])
 
 
 @tagged('post_install', '-at_install')
@@ -1655,29 +1654,28 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
             })],
         })
         receipt.action_confirm()
-        self.assertFalse(receipt.move_ids.show_subcontracting_details_visible)
-        with Form(receipt) as picking_form:
-            with picking_form.move_ids.edit(0) as move:
-                move.quantity = 5.0
-        self.assertTrue(receipt.move_ids.show_subcontracting_details_visible)
+        action = receipt.move_ids.action_show_subcontract_details()
+        mo = self.env['mrp.production'].browse(action['res_id'])
+        with Form(mo.with_context(**action['context']), view=action['views'][0][0]) as mo_form:
+            mo_form.product_qty = 5.0
         self.assertRecordValues(receipt.move_line_ids, [
             {'quantity': 5.0, 'state': 'partially_available', 'picked': False}
         ])
         receipt.button_validate()
         backorder = receipt.backorder_ids
-        self.assertFalse(backorder.move_ids.show_subcontracting_details_visible)
-        with Form(backorder) as picking_form:
-            with picking_form.move_ids.edit(0) as move:
-                move.quantity = 3.0
-        self.assertTrue(backorder.move_ids.show_subcontracting_details_visible)
+        action = backorder.move_ids.action_show_subcontract_details()
+        mo = self.env['mrp.production'].browse(action['res_id'])
+        with Form(mo.with_context(**action['context']), view=action['views'][0][0]) as mo_form:
+            mo_form.product_qty = 3.0
         self.assertRecordValues(backorder.move_line_ids, [
             {'quantity': 3.0, 'state': 'partially_available', 'picked': False}
         ])
         backorder.button_validate()
         backorder_backorder = backorder.backorder_ids
-        with Form(backorder_backorder) as picking_form:
-            with picking_form.move_ids.edit(0) as move:
-                move.quantity = 1.0
+        action = backorder_backorder.move_ids.action_show_subcontract_details()
+        mo = self.env['mrp.production'].browse(action['res_id'])
+        with Form(mo.with_context(**action['context']), view=action['views'][0][0]) as mo_form:
+            mo_form.product_qty = 1.0
         self.assertRecordValues(backorder_backorder.move_line_ids, [
             {'quantity': 1.0, 'state': 'partially_available', 'picked': False}
         ])
