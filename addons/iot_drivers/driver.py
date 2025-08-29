@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
+import traceback
 from threading import Thread, Event
 
 from odoo.addons.iot_drivers.main import drivers, iot_devices
@@ -55,12 +56,14 @@ class Driver(Thread):
             response = {'status': 'success', 'result': self._actions[action](data), 'action_args': {**data}}
         except Exception as e:
             _logger.exception("Error while executing action %s with params %s", action, data)
-            response = {'status': 'error', 'result': str(e), 'action_args': {**data}}
+            response = {'status': 'error', 'result': traceback.print_exc(), 'action_args': {**data}}
 
         # Make response available to /event route or websocket
         # printers handle their own events (low on paper, etc.)
         if self.device_type != "printer":
             event_manager.device_changed(self, response)
+
+        return response
 
     def disconnect(self):
         self._stopped.set()

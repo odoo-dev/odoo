@@ -24,10 +24,9 @@ DEVICE_TYPES = [
 class DriverController(http.Controller):
     @helpers.toggleable
     @route.iot_route('/iot_drivers/action', type='jsonrpc', cors='*', csrf=False)
-    def action(self, session_id, device_identifier, data):
+    def action(self, device_identifier, data):
         """This route is called when we want to make an action with device (take picture, printing,...)
-        We specify in data from which session_id that action is called
-        And call the action of specific device
+        We specify the data and call the action of specific device
         """
         # If device_identifier is a type of device, we take the first device of this type
         # required for longpolling with community db
@@ -38,12 +37,10 @@ class DriverController(http.Controller):
 
         if not iot_device:
             _logger.warning("IoT Device with identifier %s not found", device_identifier)
-            return False
+            return {'status': 'disconnected'}
 
-        data['session_id'] = session_id  # ensure session_id is in data as for websocket communication
         _logger.debug("Calling action %s for device %s", data.get('action', ''), device_identifier)
-        iot_device.action(data)
-        return True
+        return iot_device.action(data)
 
     @route.iot_route('/iot_drivers/check_certificate', type='http', cors='*', csrf=False)
     def check_certificate(self):
