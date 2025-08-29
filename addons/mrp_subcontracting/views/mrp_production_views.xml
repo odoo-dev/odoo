@@ -42,9 +42,7 @@
             <xpath expr="//field[@name='move_byproduct_ids']" position="replace"/>
             <xpath expr="//field[@name='forecast_availability']" position="replace"/>
             <xpath expr="//field[@name='workorder_ids']" position="replace"/>
-            <xpath expr="//button[@name='action_generate_serial']" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
+
             <xpath expr="//field[@name='move_finished_ids']" position="replace"/>
             <xpath expr="//chatter" position="replace"/>
         </field>
