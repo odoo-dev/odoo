@@ -25,20 +25,13 @@
             <field name="usage">view</field>
             <field name="company_id"></field>
         </record>
-        <record id="stock_location_locations_partner" model="stock.location">
-            <field name="name">Partners</field>
-            <field name="usage">view</field>
-            <field name="company_id"></field>
-        </record>
         <record id="stock_location_suppliers" model="stock.location">
             <field name="name">Vendors</field>
-            <field name="location_id" ref="stock_location_locations_partner"/>
             <field name="usage">supplier</field>
             <field name="company_id"></field>
         </record>
         <record id="stock_location_customers" model="stock.location">
             <field name="name">Customers</field>
-            <field name="location_id" ref="stock_location_locations_partner"/>
             <field name="usage">customer</field>
             <field name="company_id"></field>
         </record>

@@ -152,7 +152,6 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         reference_location_rules_count = self.env['stock.rule'].search_count(['|', ('location_src_id', '=', self.env.company.subcontracting_location_id.id), ('location_dest_id', '=', self.env.company.subcontracting_location_id.id)])
         partner_subcontract_location = self.env['stock.location'].create({
             'name': 'Specific partner location',
-            'location_id': self.env.ref('stock.stock_location_locations_partner').id,
             'usage': 'internal',
             'company_id': self.env.company.id,
             'is_subcontracting_location': True,
@@ -1081,7 +1080,6 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         """
         custom_subcontract_location = self.env['stock.location'].create({
             'name': 'custom partner location',
-            'location_id': self.env.ref('stock.stock_location_locations_partner').id,
             'usage': 'internal',
             'company_id': self.env.company.id,
             'is_subcontracting_location': True,
