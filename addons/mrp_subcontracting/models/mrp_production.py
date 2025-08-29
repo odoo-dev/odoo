@@ -79,9 +79,11 @@ class MrpProduction(models.Model):
                 if not sbc_move:
                     continue
                 if mo.product_tracking in ('lot', 'serial'):
-                    sbc_move_line = sbc_move.move_line_ids.filtered(lambda m: m.lot_id == old_lot)
+                    sbc_move_lines = sbc_move.move_line_ids.filtered(lambda m: m.lot_id == old_lot)
+                    sbc_move_line = sbc_move_lines[0]
                     sbc_move_line.quantity = mo.product_qty
                     sbc_move_line.lot_id = mo.lot_producing_ids
+                    sbc_move_lines[1:].unlink()
                 else:
                     sbc_move.quantity = mo.product_qty
 

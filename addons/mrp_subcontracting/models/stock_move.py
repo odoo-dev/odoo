@@ -280,7 +280,7 @@ class StockMove(models.Model):
                     # 2. Create new MOs where needed, by splitting them from an existing subcontracting MO
                     if mos_to_create:
                         production_to_split = move._get_subcontract_production()[0]
-                        new_mos = production_to_split.sudo().with_context(allow_more=True)._split_productions({
+                        new_mos = production_to_split.sudo().with_context(allow_more=True, mrp_subcontracting=False)._split_productions({
                             production_to_split: [production_to_split.product_qty] + list(mos_to_create.values())
                         }, cancel_remaining_qty=True)[1:]
                         for mo, lot_id in zip(new_mos, mos_to_create.keys()):
