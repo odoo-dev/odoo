@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, fields, models, Command
+from odoo import _, api, fields, models, Command
 from odoo.tools.misc import file_open, formatLang
 from odoo.exceptions import UserError, ValidationError
 
@@ -95,14 +95,6 @@ class AccountChartTemplate(models.AbstractModel):
                 move.action_post()
             except (UserError, ValidationError):
                 _logger.exception('Error while posting demo data')
-
-        # We want the initial balance to be set in the equity_unaffected account
-        cid = company.id or self.env.company.id
-        current_year_earnings_account = self.env['account.account'].search([
-            *self.env['account.account']._check_company_domain(cid),
-            ('account_type', '=', 'equity_unaffected')
-        ], limit=1)
-        self.ref('demo_bank_statement_1').line_ids[0].line_ids[1]['account_id'] = current_year_earnings_account.id
 
     @api.model
     def _get_demo_data_bank(self, company=False):
@@ -384,29 +376,30 @@ class AccountChartTemplate(models.AbstractModel):
             limit=1,
         )
         return {
-            'demo_bank_statement_1': {
-                'name': f'{bnk_journal.name} - {time.strftime("%Y")}-01-03/1',
-                'balance_end_real': 7028.0,
-                'balance_start': 0.0,
+            'demo_bank_statement_opening': {
+                'name': _("Opening Statement: First Synchronization"),
+                'balance_end_real': 5753.0,
+                'balance_start': 5103.0,
                 'line_ids': [
-                    Command.create({
-                        'journal_id': bnk_journal.id,
-                        'payment_ref': 'Initial balance',
-                        'amount': 5103.0,
-                        'date': (datetime.now() - relativedelta(years=1)).strftime("%Y-12-15"),
-                    }),
-                    Command.create({
-                        'journal_id': bnk_journal.id,
-                        'payment_ref': time.strftime('INV/%Y/00006 and INV/%Y/00007'),
-                        'amount': 1275.0,
-                        'date': time.strftime('%Y-01-03'),
-                        'partner_name': 'Open Wood Inc.',
-                    }),
                     Command.create({
                         'journal_id': bnk_journal.id,
                         'payment_ref': 'Prepayment',
                         'date': time.strftime('%Y-01-02'),
                         'amount': 650,
+                        'partner_name': 'Open Wood Inc.',
+                    }),
+                ]
+            },
+            'demo_bank_statement_1': {
+                'name': f'{bnk_journal.name} - {time.strftime("%Y")}-01-03/1',
+                'balance_end_real': 7028.0,
+                'balance_start': 5753.0,
+                'line_ids': [
+                    Command.create({
+                        'journal_id': bnk_journal.id,
+                        'payment_ref': time.strftime('INV/%Y/00006 and INV/%Y/00007'),
+                        'amount': 1275.0,
+                        'date': time.strftime('%Y-01-03'),
                         'partner_name': 'Open Wood Inc.',
                     }),
                 ]

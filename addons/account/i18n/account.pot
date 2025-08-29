@@ -11104,6 +11104,12 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/demo/account_demo.py:0
+msgid "Opening Statement: First Synchronization"
+msgstr ""
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/company.py:0
 msgid "Opening balance"
 msgstr ""
