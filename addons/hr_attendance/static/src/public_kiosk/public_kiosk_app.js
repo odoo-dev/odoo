@@ -165,7 +165,8 @@ class kioskAttendanceApp extends Component{
             {
                 'token': this.props.token,
                 'employee_id': employeeId,
-                'pin_code': enteredPin
+                'pin_code': enteredPin,
+                'active_display': this.state.active_display
             })
         if (result && result.attendance) {
             this.employeeData = result

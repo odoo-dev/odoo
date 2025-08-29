@@ -38,6 +38,11 @@ class ResCompany(models.Model):
     auto_check_out = fields.Boolean(string="Automatic Check Out", default=False)
     auto_check_out_tolerance = fields.Float(default=2, export_string_translation=False)
     absence_management = fields.Boolean(string="Absence Management", default=False)
+    geo_fence_attendance = fields.Boolean(string="Geo Fence Attendance", default=False)
+    workplace_latitude = fields.Float(string="Workplace latitude", digits=(10, 7), readonly=True, aggregator=None)
+    workplace_longitude = fields.Float(string="Workplace Longitude", digits=(10, 7), readonly=True, aggregator=None)
+    workplace_location = fields.Char(string="Location")
+    radius = fields.Float(string="Radius")
 
     @api.depends("attendance_kiosk_key")
     def _compute_attendance_kiosk_url(self):

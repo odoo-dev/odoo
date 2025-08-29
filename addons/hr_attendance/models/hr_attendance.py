@@ -76,6 +76,7 @@ class HrAttendance(models.Model):
                                            ('auto_check_out', 'Automatic Check-Out')],
                                 readonly=True,
                                 default='manual')
+    outside_geo_fence = fields.Boolean(string="Outside Geo-Fence", default=False, readonly=True)
     expected_hours = fields.Float(compute="_compute_expected_hours", store=True, aggregator="sum")
 
     @api.depends("worked_hours", "overtime_hours")

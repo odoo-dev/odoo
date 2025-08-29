@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr_attendance.WorkplaceMap">
+        <div class="o_workplace_map_container">
+            <div id="o_workplace_map"></div>
+        </div>
+    </t>
+</templates>

@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import pytz
+import math
 from dateutil.relativedelta import relativedelta
 
 from odoo import models, fields, api, exceptions, _
@@ -165,12 +166,34 @@ class HrEmployee(models.Model):
             att = employee.last_attendance_id.sudo()
             employee.attendance_state = att and not att.check_out and 'checked_in' or 'checked_out'
 
-    def _attendance_action_change(self, geo_information=None):
+    def calculate_employee_distance_from_workplace(self, company, lat, long):
+        """ Calculate the Haversine distance between company's workplace and employee's check-in location.
+
+        See https://en.wikipedia.org/wiki/Haversine_formula.
+
+        :return: The distance between the employee and workplace (in kilometers).
+        :rtype: float
+        """
+        R = 6371  # The radius of Earth.
+        lat1, long1 = company.workplace_latitude, company.workplace_longitude
+        dlat = math.radians(lat - lat1)
+        dlong = math.radians(long - long1)
+        arcsin = (
+            math.sin(dlat / 2) * math.sin(dlat / 2)
+            + math.cos(math.radians(lat1)) * math.cos(math.radians(lat))
+            * (math.sin(dlong / 2) * math.sin(dlong / 2))
+        )
+        d = 2 * R * math.atan2(math.sqrt(arcsin), math.sqrt(1 - arcsin))
+
+        return d
+
+    def _attendance_action_change(self, geo_information=None, active_display=None):
         """ Check In/Check Out action
             Check In: create a new attendance record
             Check Out: modify check_out field of appropriate attendance record
         """
         self.ensure_one()
+        company = self.company_id
         action_date = fields.Datetime.now()
 
         if self.attendance_state != 'checked_in':
@@ -180,6 +203,10 @@ class HrEmployee(models.Model):
                     'check_in': action_date,
                     **{'in_%s' % key: geo_information[key] for key in geo_information}
                 }
+                if company.geo_fence_attendance and active_display != 'manual':
+                    location_distance = self.calculate_employee_distance_from_workplace(company, vals['in_latitude'], vals['in_longitude'])
+                    if location_distance > company.radius:
+                        vals['outside_geo_fence'] = True
             else:
                 vals = {
                     'employee_id': self.id,

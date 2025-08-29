@@ -28,6 +28,20 @@
                         <setting string="Absence Management" company_dependent="1" help="If checked, days not covered by an attendance will be visible in the Report. Does not apply to employees with a flexible working schedule.">
                             <field name="absence_management"/>
                         </setting>
+                        <setting string="Geo Fence Attendances" company_dependent="1" help="Flag the attendances that are registered outside the radius area of the workspace location">
+                            <field name="geo_fence_attendance"/>
+                            <div invisible="not geo_fence_attendance">
+                                <div>
+                                    <span class="me-2">Location: </span><field name="workplace_location" class="w-25"/>
+                                    <span>
+                                        <button name="open_workplace_location_map" string="Open in Map" class="btn-link" icon="fa-arrow-right" type="object"/>
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="me-2">Radius: </span><field name="radius" style="width: 5ch;"/><span class="ms-2">KM</span>
+                                </div>
+                            </div>
+                        </setting>
                     </block>
                     <block title="Kiosk Settings">
                         <setting invisible="attendance_kiosk_mode == 'manual'" company_dependent="1" help="Define the camera used for the barcode scan.">

@@ -253,6 +253,7 @@
                         domain="['|', ('worked_hours', '&gt;=', 16), '&amp;', ('check_out', '=', False), ('check_in', '&lt;=', '-1d')]"/>
                 <filter string="Automatically Checked-Out" name="auto_check"
                         domain="[('out_mode', '=', 'auto_check_out')]"/>
+                <filter string="Offsite Attendances" name="flagged_attendances" domain="[('outside_geo_fence', '=', True)]"/>
                 <separator/>
                 <filter string="Date" name="check_in_filter" date="check_in"/>
                 <separator/>
