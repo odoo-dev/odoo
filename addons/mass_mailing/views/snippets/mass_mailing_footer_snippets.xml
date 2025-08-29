@@ -3,14 +3,16 @@
     <section class="s_footer_social o_mail_block_footer_social o_mail_footer_social_center o_mail_snippet_general bg-900 pt16" data-name="Footer Center">
         <div class="container">
             <div class="row">
-                <div class="col-md o_mail_footer_social bg-200" style="text-align: center;">
-                    <t t-call="mass_mailing.social_links"/>
+                <div class="col-md o_mail_footer_social" style="text-align: center;">
+                    <t t-call="mass_mailing.social_links">
+                        <t t-set="optionalTextStyle" t-value="'color: white;'"/>
+                    </t>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md">
-                    <p style="text-align: center; color: white;">
-                        © <t t-out="datetime.datetime.now().year"/> <t t-out="company_id.name or user.company_id.name"/>, All Rights Reserved
+                    <p style="text-align: center">
+                        <font style="color:white;">© <t t-out="datetime.datetime.now().year"/> <t t-out="company_id.name or user.company_id.name"/>, All Rights Reserved</font>
                     </p>
                 </div>
             </div>
@@ -63,19 +65,19 @@
 
     <t t-set="social_links" t-value="company_id._get_social_media_links()"/>
 
-    <a t-att-href="social_links.get('social_facebook')" aria-label="Facebook" title="Facebook">
+    <a t-att-href="social_links.get('social_facebook')" t-attf-style="{{optionalTextStyle}}" aria-label="Facebook" title="Facebook">
         <span class="fa fa-facebook"></span>
     </a>&amp;nbsp;&amp;nbsp;
-    <a t-att-href="social_links.get('social_linkedin')" style="margin-left:10px" aria-label="LinkedIn" title="LinkedIn">
+    <a t-att-href="social_links.get('social_linkedin')" t-attf-style="margin-left:10px; {{optionalTextStyle or ''}}" aria-label="LinkedIn" title="LinkedIn">
         <span class="fa fa-linkedin"></span>
     </a>&amp;nbsp;&amp;nbsp;
-    <a t-att-href="social_links.get('social_twitter')" style="margin-left:10px" aria-label="X" title="X">
+    <a t-att-href="social_links.get('social_twitter')" t-attf-style="margin-left:10px; {{optionalTextStyle or ''}}" aria-label="X" title="X">
         <span class="fa fa-twitter"></span>
     </a>&amp;nbsp;&amp;nbsp;
-    <a t-att-href="social_links.get('social_instagram')" style="margin-left:10px" aria-label="Instagram" title="Instagram">
+    <a t-att-href="social_links.get('social_instagram')" t-attf-style="margin-left:10px; {{optionalTextStyle or ''}}" aria-label="Instagram" title="Instagram">
         <span class="fa fa-instagram"></span>
     </a>&amp;nbsp;&amp;nbsp;
-    <a t-att-href="social_links.get('social_tiktok')" style="margin-left:10px" aria-label="TikTok" title="TikTok">
+    <a t-att-href="social_links.get('social_tiktok')" t-attf-style="margin-left:10px; {{optionalTextStyle or ''}}" aria-label="TikTok" title="TikTok">
         <span class="fa fa-tiktok"></span>
     </a>
 </template>

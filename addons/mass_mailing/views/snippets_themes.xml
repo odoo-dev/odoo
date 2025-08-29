@@ -92,6 +92,7 @@
                 <t t-snippet="mass_mailing.s_pricelist_boxed" string="Pricelist Boxed" group="text"/>
             </snippets>
             <snippets id="snippet_content" string="Inner Content">
+                <t t-snippet="mass_mailing.s_inline_text" string="Text" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_text_block.svg"/>
                 <t t-snippet="mass_mailing.s_alert" string="Alert" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_alert.svg"/>
                 <t t-snippet="mass_mailing.s_hr" string="Separator" t-thumbnail="/web_editor/static/src/img/snippets_thumbs/s_hr.svg"/>
                 <t t-snippet="mass_mailing.s_text_highlight" string="Text Highlight" t-thumbnail="/mass_mailing/static/src/img/snippets_thumbs/s_text_highlight.svg"/>
@@ -113,9 +114,7 @@
             <div class="row">
                 <div class="col-md-4 pt16 pb16">
                     <h1>
-                        <a t-att-href="(company_id.website) or '#'" target="_blank">
-                            My Company
-                        </a>
+                        <a t-att-href="(company_id.website) or '#'" target="_blank" t-out="company_id.partner_id.name"/>
                     </h1>
                 </div>
                 <div class="col-md-8 o_mail_header_social" style="text-align: right;">

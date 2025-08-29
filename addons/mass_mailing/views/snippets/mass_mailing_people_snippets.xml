@@ -8,10 +8,10 @@
                 <div class="col-md-6 pt32 pb32" data-name="Team Member">
                     <div class="row s_col_no_resize s_col_no_bgcolor">
                         <div class="col-md-3 pb24 o_not_editable" contenteditable="false">
-                            <img src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_1/html_builder/geometric_round/geo_round_circle.svg" class="img-fluid rounded-circle o_editable_media"/>
+                            <img src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_1/html_builder/geometric_round/geo_round_circle.svg" data-shape="html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_1" class="img-fluid rounded-circle o_editable_media"/>
                         </div>
                         <div class="col-md-9">
-                            <h4 class="h5-fs">Tony Fred</h4>
+                            <h4><font class="h5-fs">Tony Fred</font></h4>
                             <p class="text-muted mb-3">Chief Executive Officer</p>
                             <p>
                                 Founder and chief visionary, Tony is the driving force behind the company. He loves
@@ -24,10 +24,10 @@
                 <div class="col-md-6 pt32 pb32" data-name="Team Member">
                     <div class="row s_col_no_resize s_col_no_bgcolor">
                         <div class="col-md-3 pb24 o_not_editable" contenteditable="false">
-                            <img alt="" src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" class="img-fluid rounded-circle o_editable_media"/>
+                            <img alt="" src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" data-shape="html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" class="img-fluid rounded-circle o_editable_media"/>
                         </div>
                         <div class="col-md-9">
-                            <h4 class="h5-fs">Mich Stark</h4>
+                            <h4><font class="h5-fs">Mich Stark</font></h4>
                             <p class="text-muted mb-3">Chief Commercial Officer</p>
                             <p>Mich loves taking on challenges. With his multi-year experience as Commercial Director in the software industry, Mich has helped the company to get where it is today. Mich is among the best minds.</p>
                         </div>
@@ -36,10 +36,10 @@
                 <div class="col-md-6 pt32 pb32" data-name="Team Member">
                     <div class="row s_col_no_resize s_col_no_bgcolor">
                         <div class="col-md-3 pb24 o_not_editable" contenteditable="false">
-                            <img alt="" src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_3/html_builder/geometric_round/geo_round_circle.svg" class="img-fluid rounded-circle o_editable_media"/>
+                            <img alt="" src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_3/html_builder/geometric_round/geo_round_circle.svg" data-shape="html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_3" class="img-fluid rounded-circle o_editable_media"/>
                         </div>
                         <div class="col-md-9">
-                            <h4 class="h5-fs">Aline Turner</h4>
+                            <h4><font class="h5-fs">Aline Turner</font></h4>
                             <p class="text-muted mb-3">Chief Technical Officer</p>
                             <p>Aline is one of the iconic people in life who can say they love what they do. She mentors 100+ in-house developers and looks after the community of thousands of developers.</p>
                         </div>
@@ -48,10 +48,10 @@
                 <div class="col-md-6 pt32 pb32" data-name="Team Member">
                     <div class="row s_col_no_resize s_col_no_bgcolor">
                         <div class="col-md-3 pb24 o_not_editable" contenteditable="false">
-                            <img alt="" src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_4/html_builder/geometric_round/geo_round_circle.svg" class="img-fluid rounded-circle o_editable_media"/>
+                            <img alt="" src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_4/html_builder/geometric_round/geo_round_circle.svg" data-shape="html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_4" class="img-fluid rounded-circle o_editable_media"/>
                         </div>
                         <div class="col-md-9">
-                            <h4 class="h5-fs">Iris Joe</h4>
+                            <h4><font class="h5-fs">Iris Joe</font></h4>
                             <p class="text-muted mb-3">Chief Financial Officer</p>
                             <p>Iris, with her international experience, helps us easily understand the numbers and improves them. She is determined to drive success and delivers her professional acumen to bring the company to the next level.</p>
                         </div>
@@ -70,27 +70,27 @@
             <div class="row">
                 <div class="col-6 col-md-4 pb24">
                     <p><img src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_1/html_builder/geometric_round/geo_round_square.svg" class="img img-fluid" alt="" data-original-src="/web/image/mass_mailing.s_company_team_default_image_1" data-shape="html_builder/geometric_round/geo_round_square" data-original-mimetype="image/jpeg" data-file-name="s_company_team_image_1.svg" data-shape-colors=";;;;" style="width: 100% !important;"/></p>
-                    <h3 class="h5-fs" style="text-align: center;">Tony Fred</h3>
+                    <h3 style="text-align: center;"><font class="h5-fs">Tony Fred</font></h3>
                 </div>
                 <div class="col-6 col-md-4 pb24">
                     <p><img src="/web/image/mass_mailing.s_company_team_default_image_2" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" class="img-fluid rounded" alt="" style="width: 100% !important;"/></p>
-                    <h3 class="h5-fs" style="text-align: center;">Mich Stark</h3>
+                    <h3 style="text-align: center;"><font class="h5-fs">Mich Stark</font></h3>
                 </div>
                 <div class="col-6 col-md-4 pb24">
                     <p><img src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_3/html_builder/geometric/geo_sonar.svg" class="img img-fluid" alt="" data-shape="html_builder/geometric/geo_sonar" data-original-src="/web/image/mass_mailing.s_company_team_default_image_3" data-original-mimetype="image/jpeg" data-file-name="s_company_team_image_3.svg" data-shape-colors=";;;;" style="width: 100% !important;"/></p>
-                    <h3 class="h5-fs" style="text-align: center;">Aline Turner</h3>
+                    <h3 style="text-align: center;"><font class="h5-fs">Aline Turner</font></h3>
                 </div>
                 <div class="col-6 col-md-4 pb24">
                     <p><img src="/web/image/mass_mailing.s_company_team_default_image_4" data-original-src="/web/image/mass_mailing.s_company_team_default_image_4" class="img-fluid rounded" alt="" style="width: 100% !important;"/></p>
-                    <h3 class="h5-fs" style="text-align: center;">Iris Joe</h3>
+                    <h3 style="text-align: center;"><font class="h5-fs">Iris Joe</font></h3>
                 </div>
                 <div class="col-6 col-md-4 pb24">
                     <p><img src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_5/html_builder/geometric/geo_door.svg" class="img img-fluid" alt="" data-shape="html_builder/geometric/geo_door" data-original-src="/web/image/mass_mailing.s_company_team_default_image_5" data-original-mimetype="image/jpeg" data-file-name="s_company_team_image_5.svg" data-shape-colors=";;;;" style="width: 100% !important;"/></p>
-                    <h3 class="h5-fs" style="text-align: center;">Pete Bluestork</h3>
+                    <h3 style="text-align: center;"><font class="h5-fs">Pete Bluestork</font></h3>
                 </div>
                 <div class="col-6 col-md-4 pb24">
                     <p><img src="/web_editor/image_shape/mass_mailing.s_company_team_default_image_6/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_6" class="img img-fluid" alt="" data-shape="html_builder/geometric_round/geo_round_circle" data-original-mimetype="image/jpeg" data-file-name="s_company_team_image_6.svg" data-shape-colors=";;;;" style="width: 100% !important;"/></p>
-                    <h3 class="h5-fs" style="text-align: center;">Sophia Langston</h3>
+                    <h3 style="text-align: center;"><font class="h5-fs">Sophia Langston</font></h3>
                 </div>
             </div>
         </div>

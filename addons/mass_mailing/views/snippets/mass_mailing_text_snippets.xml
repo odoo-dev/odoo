@@ -54,7 +54,7 @@
                 </div>
             </div>
             <div class="s_hr o_mail_snippet_general pb16 pt4" data-snippet="s_hr" data-name="Separator">
-                <hr class="s_hr_1px s_hr_solid w-50"/>
+                <hr class="s_hr_1px s_hr_solid w-50 mx-auto"/>
             </div>
             <div class="s_text_block o_mail_snippet_general px-3 pt8 pb32" data-snippet="s_text_block" data-name="Text">
                 <div class="container s_allow_columns">
