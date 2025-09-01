@@ -67,4 +67,9 @@ export class AttributeSelectionHelper {
             this.isValueSelected(attribute, value)
         );
     }
+    missingAttribute(attributes) {
+        return attributes.find(
+            (attr) => attr.attribute_id.display_type !== "multi" && !this.hasValueSelected(attr)
+        );
+    }
 }

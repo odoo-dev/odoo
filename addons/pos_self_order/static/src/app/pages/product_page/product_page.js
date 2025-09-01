@@ -4,10 +4,11 @@ import { useService } from "@web/core/utils/hooks";
 import { AttributeSelection } from "@pos_self_order/app/components/attribute_selection/attribute_selection";
 import { computeProductPrice } from "../../services/card_utils";
 import { useScrollShadow } from "../../utils/scroll_shadow_hook";
+import { MissingRequireds } from "@pos_self_order/app/components/missing_requireds/missing_requireds";
 
 export class ProductPage extends Component {
     static template = "pos_self_order.ProductPage";
-    static components = { AttributeSelection };
+    static components = { AttributeSelection, MissingRequireds };
     static props = ["productTemplate"];
 
     setup() {
@@ -145,6 +146,19 @@ export class ProductPage extends Component {
 
     goBack() {
         this.router.navigate("product_list");
+    }
+
+    scrollUpToRequired() {
+        const selection = this.state.selectedValues[this.productTemplate.id];
+        if (!selection) {
+            return true;
+        }
+        const missingAttribute = selection.missingAttribute(
+            this.productTemplate.attribute_line_ids
+        );
+        document
+            .getElementById(missingAttribute?.attribute_id.id)
+            ?.scrollIntoView({ behavior: "smooth" });
     }
 
     /*

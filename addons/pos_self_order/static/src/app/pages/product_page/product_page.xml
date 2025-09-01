@@ -41,6 +41,7 @@
                  <div  t-if="showQtyButtons and selfOrder.ordering" class="d-flex container o_self_container justify-content-end pt-0 py-3">
                      <t t-call="pos_self_order.QuantityWidget" />
                  </div>
+                <MissingRequireds t-if="this.hasMissingAttributeValues()" scrollUpToRequired.bind="scrollUpToRequired"/>
             </div>
 
             <!-- Footer -->

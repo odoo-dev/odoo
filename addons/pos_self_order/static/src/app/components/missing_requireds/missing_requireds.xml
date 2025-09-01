@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_order.MissingRequireds">
+        <div class="start-0 w-100 bg-white bg-opacity-25 d-flex justify-content-center align-items-center flex-column p-3 text-center">
+            <button class="btn btn-primary mb-2 rounded-circle" t-on-click="props.scrollUpToRequired" style="width:60px; height: 60px">
+                <i class="fa fa-fw fa-arrow-up fa-fw" aria-hidden="true"/>
+            </button>
+            <h2 class="mb-3">See what you missed</h2>
+            <p class="mb-4">Make sure you choose all your options for this item. You're alomost there.</p>
+        </div>
+    </t>
+</templates>
