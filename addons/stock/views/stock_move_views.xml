@@ -208,7 +208,7 @@
                     <field name="state" column_invisible="True"/>
                     <field name="is_locked" column_invisible="True"/>
                     <field name="picking_code" column_invisible="True"/>
-                    <field name="picked" column_invisible="True"/>
+                    <field name="picked"/>
                     <field name="quantity" string="Quantity" readonly="(state == 'done' and is_locked) or is_entire_pack" sum="Quantity"/>
                     <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom" widget="many2one_uom"
                         readonly="is_entire_pack or (state == 'done' and id)"/>

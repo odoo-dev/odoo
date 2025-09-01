@@ -282,14 +282,15 @@ class StockMove(models.Model):
     @api.depends('move_line_ids.picked', 'state')
     def _compute_picked(self):
         for move in self:
-            if move.state == 'done' or any(ml.picked for ml in move.move_line_ids):
-                move.picked = True
-            elif move.move_line_ids:
+            if move.move_line_ids:
+                move.picked = all(ml.picked for ml in move.move_line_ids)
+            else:
                 move.picked = False
 
     def _inverse_picked(self):
         for move in self:
-            move.move_line_ids.picked = move.picked
+            if not self.env.context.get('button_validate_picking_ids'):
+                move.move_line_ids.picked = move.picked
 
     @api.depends('picking_id.priority')
     def _compute_priority(self):
@@ -739,8 +740,8 @@ Please change the quantity done or the rounding precision in your settings.""",
                 vals['group_id'] = picking_id.group_id.id
             if picking_id.state == 'done' and vals.get('state') != 'done':
                 vals['state'] = 'done'
-            if vals.get('state') == 'done':
-                vals['picked'] = True
+            # if vals.get('state') == 'done':
+            #     vals['picked'] = True
         res = super().create(vals_list)
         res._update_orderpoints()
         return res
