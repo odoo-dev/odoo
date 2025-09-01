@@ -1,7 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo.fields import Command
 from odoo.tests import Form, tagged
 
@@ -11,7 +9,6 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestStockValuation(ValuationReconciliationTestCommon):
 
     @classmethod
@@ -27,6 +24,13 @@ class TestStockValuation(ValuationReconciliationTestCommon):
             'categ_id': cls.stock_account_product_categ.id,
             'taxes_id': [(6, 0, [])],
         })
+        cls.stock_price_diff_acc_id = cls.env['account.account'].create({
+            'name': 'default_account_stock_price_diff',
+            'code': 'STOCKDIFF',
+            'reconcile': True,
+            'account_type': 'asset_current',
+        })
+        cls.stock_account_product_categ.property_price_difference_account_id = cls.stock_price_diff_acc_id
 
     def _dropship_product1(self):
         # enable the dropship route on the product
@@ -83,8 +87,8 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self.customer_invoice1.action_post()
 
         all_amls = self.vendor_bill1.line_ids + self.customer_invoice1.line_ids
-        if self.sale_order1.picking_ids.move_ids.account_move_ids:
-            all_amls |= self.sale_order1.picking_ids.move_ids.account_move_ids.line_ids
+        if self.sale_order1.picking_ids.move_ids.account_move_id:
+            all_amls |= self.sale_order1.picking_ids.move_ids.account_move_id.line_ids
         return all_amls
 
     def _check_results(self, expected_aml, expected_aml_count, all_amls):
@@ -119,12 +123,13 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         expected_aml = {
             self.company_data['default_account_payable'].id:        (0.0, 8.0),
-            self.company_data['default_account_expense'].id:        (8.0, 0.0),
+            self.company_data['default_account_expense'].id:        (10.0, 0.0),
+            self.company_data['default_account_stock_valuation'].id:(8.0, 10.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
         }
 
-        self._check_results(expected_aml, 4, all_amls)
+        self._check_results(expected_aml, 6, all_amls)
 
     def test_dropship_standard_perpetual_continental_delivered(self):
         self.env.company.anglo_saxon_accounting = False
@@ -137,12 +142,13 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         expected_aml = {
             self.company_data['default_account_payable'].id:        (0.0, 8.0),
-            self.company_data['default_account_expense'].id:        (8.0, 0.0),
+            self.company_data['default_account_expense'].id:        (10.0, 0.0),
+            self.company_data['default_account_stock_valuation'].id:(8.0, 10.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
         }
 
-        self._check_results(expected_aml, 4, all_amls)
+        self._check_results(expected_aml, 6, all_amls)
 
     def test_dropship_fifo_perpetual_continental_ordered(self):
         self.env.company.anglo_saxon_accounting = False
@@ -155,7 +161,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         expected_aml = {
             self.company_data['default_account_payable'].id:        (0.0, 8.0),
-            self.company_data['default_account_expense'].id:        (8.0, 0.0),
+            self.company_data['default_account_stock_valuation'].id:(8.0, 0.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
         }
@@ -174,7 +180,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         expected_aml = {
             self.company_data['default_account_payable'].id:        (0.0, 8.0),
-            self.company_data['default_account_expense'].id:        (8.0, 0.0),
+            self.company_data['default_account_stock_valuation'].id:(8.0, 0.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
         }
@@ -198,14 +204,14 @@ class TestStockValuation(ValuationReconciliationTestCommon):
             self.company_data['default_account_expense'].id:        (10.0, 0.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
-            self.company_data['default_account_stock_in'].id:       (8.0, 10.0),
-            self.company_data['default_account_stock_out'].id:      (10.0, 10.0),
+            self.company_data['default_account_stock_valuation'].id:(10.0, 10.0),
+            self.stock_price_diff_acc_id.id:                        (0.0, 2.0),
         }
         # Interim IN is not balanced because because there's a difference between the po line
         # price unit and the standard price. We could set a price difference account on the
         # category to compensate.
 
-        self._check_results(expected_aml, 10, all_amls)
+        self._check_results(expected_aml, 8, all_amls)
 
     def test_dropship_standard_perpetual_anglosaxon_delivered(self):
         self.env.company.anglo_saxon_accounting = True
@@ -221,14 +227,14 @@ class TestStockValuation(ValuationReconciliationTestCommon):
             self.company_data['default_account_expense'].id:        (10.0, 0.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
-            self.company_data['default_account_stock_in'].id:       (8.0, 10.0),
-            self.company_data['default_account_stock_out'].id:      (10.0, 10.0),
+            self.company_data['default_account_stock_valuation'].id:(10.0, 10.0),
+            self.stock_price_diff_acc_id.id:                        (0.0, 2.0),
         }
         # Interim IN is not balanced because because there's a difference between the po line
         # price unit and the standard price. We could set a price difference account on the
         # category to compensate.
 
-        self._check_results(expected_aml, 10, all_amls)
+        self._check_results(expected_aml, 8, all_amls)
 
     def test_dropship_fifo_perpetual_anglosaxon_ordered(self):
         self.env.company.anglo_saxon_accounting = True
@@ -241,14 +247,12 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         expected_aml = {
             self.company_data['default_account_payable'].id:        (0.0, 8.0),
-            self.company_data['default_account_expense'].id:        (8.0, 0.0),
+            self.company_data['default_account_stock_valuation'].id:(8.0, 0.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
-            self.company_data['default_account_stock_in'].id:       (8.0, 8.0),
-            self.company_data['default_account_stock_out'].id:      (8.0, 8.0),
         }
 
-        self._check_results(expected_aml, 10, all_amls)
+        self._check_results(expected_aml, 4, all_amls)
 
     def test_dropship_fifo_perpetual_anglosaxon_delivered(self):
         self.env.company.anglo_saxon_accounting = True
@@ -261,13 +265,11 @@ class TestStockValuation(ValuationReconciliationTestCommon):
 
         expected_aml = {
             self.company_data['default_account_payable'].id:        (0.0, 8.0),
-            self.company_data['default_account_expense'].id:        (8.0, 0.0),
+            self.company_data['default_account_stock_valuation'].id:(8.0, 0.0),
             self.company_data['default_account_receivable'].id:     (12.0, 0.0),
             self.company_data['default_account_revenue'].id:        (0.0, 12.0),
-            self.company_data['default_account_stock_in'].id:       (8.0, 8.0),
-            self.company_data['default_account_stock_out'].id:      (8.0, 8.0),
         }
-        self._check_results(expected_aml, 10, all_amls)
+        self._check_results(expected_aml, 4, all_amls)
 
     def test_dropship_standard_perpetual_anglosaxon_ordered_return(self):
         self.env.company.anglo_saxon_accounting = True
@@ -292,16 +294,20 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self.assertEqual(return_pick.move_ids._is_dropshipped_returned(), True)
 
         all_amls_return = self.vendor_bill1.line_ids + self.customer_invoice1.line_ids
-        if self.sale_order1.picking_ids.mapped('move_ids.account_move_ids'):
-            all_amls_return |= self.sale_order1.picking_ids.mapped('move_ids.account_move_ids.line_ids')
+        if self.sale_order1.picking_ids.mapped('move_ids.account_move_id'):
+            all_amls_return |= self.sale_order1.picking_ids.mapped('move_ids.account_move_id.line_ids')
 
-        # Two extra AML should have been created for the return
+        self.assertEqual(all_amls_return, all_amls)
         expected_aml = {
-            self.company_data['default_account_stock_in'].id:       (10.0, 0.0),
-            self.company_data['default_account_stock_out'].id:      (0.0, 10.0),
+            self.company_data['default_account_payable'].id:        (0.0, 8.0),
+            self.company_data['default_account_expense'].id:        (10.0, 0.0),
+            self.company_data['default_account_receivable'].id:     (12.0, 0.0),
+            self.company_data['default_account_revenue'].id:        (0.0, 12.0),
+            self.company_data['default_account_stock_valuation'].id:(10.0, 10.0),
+            self.stock_price_diff_acc_id.id:                        (0.0, 2.0),
         }
 
-        self._check_results(expected_aml, 4, all_amls_return - all_amls)
+        self._check_results(expected_aml, 8, all_amls_return)
 
     def test_dropship_fifo_return(self):
         """Test the return of a dropship order with a product set to FIFO costing
@@ -313,8 +319,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         self.product1.product_tmpl_id.invoice_policy = 'order'
 
         self._dropship_product1()
-        self.assertTrue(8 in self.purchase_order1.picking_ids.move_ids.stock_valuation_layer_ids.mapped('value'))
-        self.assertTrue(-8 in self.purchase_order1.picking_ids.move_ids.stock_valuation_layer_ids.mapped('value'))
+        self.assertEqual(self.purchase_order1.picking_ids.move_ids.mapped('value'), [0.0])
 
         # return what we've done
         stock_return_picking_form = Form(self.env['stock.return.picking']
@@ -328,8 +333,7 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         return_pick.move_ids[0].picked = True
         return_pick._action_done()
 
-        self.assertTrue(8 in return_pick.move_ids.stock_valuation_layer_ids.mapped('value'))
-        self.assertTrue(-8 in return_pick.move_ids.stock_valuation_layer_ids.mapped('value'))
+        self.assertEqual(return_pick.move_ids.mapped('value'), [0.0])
 
         # return again to have a new dropship picking from a dropship return
         stock_return_picking_form_2 = Form(self.env['stock.return.picking']
@@ -343,25 +347,26 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         return_pick_2.move_ids[0].picked = True
         return_pick_2._action_done()
 
-        self.assertTrue(8 in return_pick_2.move_ids.stock_valuation_layer_ids.mapped('value'))
-        self.assertTrue(-8 in return_pick_2.move_ids.stock_valuation_layer_ids.mapped('value'))
+        self.assertEqual(return_pick_2.move_ids.mapped('value'), [0.0])
 
     def test_dropship_cogs_multiple_invoices(self):
         self.env.company.anglo_saxon_accounting = True
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
         self.product1.product_tmpl_id.invoice_policy = 'order'
-        account_output = self.product1.product_tmpl_id.categ_id.property_stock_account_output_categ_id
 
         # --- Create Dropship 1 --- #
-        self._dropship_product1()
+        all_amls = self._dropship_product1()
 
-        # Check Dropship 1 COGS
-        dropship1_layers = self.purchase_order1.order_line.move_ids.stock_valuation_layer_ids
-        self.assertEqual(len(dropship1_layers), 2)
-        self.assertEqual(dropship1_layers[0].value, 8)
-        dropship1_cogs_line = self.customer_invoice1.line_ids.filtered(lambda aml: aml.account_id.id == account_output.id)
-        self.assertEqual(dropship1_cogs_line.balance, -8)
+        self.assertEqual(self.purchase_order1.picking_ids.move_ids.mapped('value'), [0.0])
+        expected_aml = {
+            self.company_data['default_account_payable'].id:        (0.0, 8.0),
+            self.company_data['default_account_stock_valuation'].id:(8.0, 0.0),
+            self.company_data['default_account_receivable'].id:     (12.0, 0.0),
+            self.company_data['default_account_revenue'].id:        (0.0, 12.0),
+        }
+
+        self._check_results(expected_aml, 4, all_amls)
 
         # --- Create Dropship 2 --- #
         self.sale_order1.order_line.product_uom_qty = 2  # Should create a new PO
@@ -382,12 +387,13 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         customer_invoice2 = self.sale_order1._create_invoices()
         customer_invoice2.action_post()
 
-        # Check Dropship 2 COGS
-        dropship2_layers = dropship2.move_ids.stock_valuation_layer_ids
-        self.assertEqual(len(dropship2_layers), 2)
-        self.assertEqual(dropship2_layers[0].value, 16)
-        dropship2_cogs_line = customer_invoice2.line_ids.filtered(lambda aml: aml.account_id.id == account_output.id)
-        self.assertEqual(dropship2_cogs_line.balance, -16)
+        self.assertEqual(dropship2.move_ids.mapped('value'), [0.0])
+        expected_aml = {
+            self.company_data['default_account_receivable'].id:     (12.0, 0.0),
+            self.company_data['default_account_revenue'].id:        (0.0, 12.0),
+        }
+
+        self._check_results(expected_aml, 2, customer_invoice2.line_ids)
 
         # --- Create Dropship 3 --- #
         self.sale_order1.order_line.product_uom_qty = 3  # Should create a new PO
@@ -428,10 +434,10 @@ class TestStockValuation(ValuationReconciliationTestCommon):
         customer_invoice3 = self.sale_order1._create_invoices()
         customer_invoice3.action_post()
 
-        # Check Dropship 3 COGS
         dropship3_pcks = dropship3 | dropship3_return | dropship3_return_return
-        dropship3_layers = dropship3_pcks.move_ids.stock_valuation_layer_ids
-        self.assertEqual(len(dropship3_layers), 6)
-        self.assertEqual(dropship3_layers[0].value, 24)
-        dropship3_cogs_line = customer_invoice3.line_ids.filtered(lambda aml: aml.account_id.id == account_output.id)
-        self.assertEqual(dropship3_cogs_line.balance, -24)
+        self.assertEqual(dropship3_pcks.move_ids.mapped('value'), [0.0, 0.0, 0.0])
+        expected_aml = {
+            self.company_data['default_account_receivable'].id:     (12.0, 0.0),
+            self.company_data['default_account_revenue'].id:        (0.0, 12.0),
+        }
+        self._check_results(expected_aml, 2, customer_invoice3.line_ids)
