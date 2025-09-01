@@ -1,4 +1,6 @@
 .o_kanban_colorpicker {
+    @include o-colorlist("button", "&");
+
     [class*="col-"]:has(&) {
         min-width: 150px;
     }
@@ -8,20 +10,16 @@
     }
 
     gap: map-get($spacers, 2);
-    grid-template-columns: repeat(auto-fit, minmax(28px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(20px, 1fr));
     padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
 
 
     > button {
-        border: 1px solid white;
-        box-shadow: 0 0 0 1px map-get($grays, '300');
-
-        aspect-ratio: 4 / 3;
-
         @for $size from 2 through length($o-colors) {
             // Note: the first color is not defined as it is the 'no color' for kanban
             &.o_kanban_color_#{$size - 1} {
                 background-color: nth($o-colors, $size);
+                border-color: transparent;
             }
         }
 

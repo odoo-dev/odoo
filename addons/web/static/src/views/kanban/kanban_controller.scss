@@ -1,5 +1,9 @@
 // ------- Kanban Menu -------
 .o-dropdown--kanban-record-menu {
+    --ColorListField-padding: 3px #{($o-dropdown-hpadding - $o-kanban-inner-hmargin) 3px $o-dropdown-hpadding};
+}
+
+.o-dropdown--kanban-record-menu {
     margin-top: -1px;
     margin-bottom: 0px;
     min-width: 9rem;
@@ -42,6 +46,9 @@
             > div:not(.o_kanban_card_manage_title) {
                 @include o-kanban-dashboard-dropdown-link($link-padding-gap: $o-kanban-dashboard-dropdown-complex-gap);
             }
+            &:has(.o_field_kanban_color_picker) {
+                flex: 0 0 45%;
+            }
         }
 
         .row.o_kanban_card_manage_settings {
@@ -52,6 +59,7 @@
             }
 
             .o_kanban_colorpicker {
+                --ColorListField-columns: 4;
                 padding: 0;
             }
 
@@ -390,5 +398,51 @@
     // progress bars and counters
     .o_kanban_counter {
         @include o-sample-data-disabled;
+    }
+}
+
+.o-bottom-sheet--kanban-record-menu:has(.o_kanban_card_manage_settings) {
+    div[class*="col-"] {
+        width: 100%;
+        padding: 0;
+    }
+    // Targets any main column not in o_kanban_card_manage_settings and not last
+    .container > .row:where(:not(.o_kanban_card_manage_settings)) > div[class*="col-"]:where(:not(:last-child)) {
+        padding-bottom: map-get($spacers, 2);
+        border-bottom: $border-width solid $border-color;
+        margin-bottom: map-get($spacers, 3);
+    }
+
+    div[role="menuitem"] {
+        display: block !important;
+
+        > a {
+            display: block;
+            padding: #{map-get($spacers, 3)} var(--BottomSheet-Entry-paddingX);
+            font-size: $h5-font-size;
+            font-weight: $o-font-weight-medium;
+            color: inherit;
+        }
+    }
+
+    .o_kanban_card_manage_title {
+        padding: #{map-get($spacers, 3)} var(--BottomSheet-Entry-paddingX) 0;
+        font-size: small;
+        color: $text-muted;
+    }
+    .o_kanban_card_manage_settings {
+        .o_field_kanban_color_picker {
+            --ColorListField-columns: 12;
+            --ColorListField-gap: #{map-get($spacers, 2)};
+            --ColorListField-padding: 0;
+            --ColorListField-Entry-minWidth: 2.5rem;
+            --ColorListField-Entry-aspectRatio: 1;
+                .o_kanban_colorpicker {
+                    overflow: auto;
+                    padding: map-get($spacers, 1) var(--BottomSheet-Entry-paddingX);
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
+                }
+        }
     }
 }
