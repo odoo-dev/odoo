@@ -507,10 +507,10 @@ export class RelationalModel extends Model {
                     currentConfig.fields,
                     currentConfig.domain
                 );
-                if (!currentConfig.groups[group.value]) {
-                    const isFolded =
+                const isFolded =
                         !Object.hasOwn(groupData, "__records") &&
                         !Object.hasOwn(groupData, "__groups");
+                if (!currentConfig.groups[group.value]) {
                     currentConfig.groups[group.value] = {
                         ...commonConfig,
                         groupByFieldName,
@@ -528,6 +528,9 @@ export class RelationalModel extends Model {
                                       this.constructor.DEFAULT_GROUP_LIMIT,
                         },
                     };
+                }
+                else {
+                    currentConfig.groups[group.value].isFolded = isFolded;
                 }
 
                 const groupConfig = currentConfig.groups[group.value];
