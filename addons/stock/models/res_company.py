@@ -51,12 +51,10 @@ class ResCompany(models.Model):
            in case of resuply routes between warehouses belonging to the same company, because
            we don't want to create accounting entries at that time.
         '''
-        parent_location = self.env.ref('stock.stock_location_locations', raise_if_not_found=False)
         for company in self:
             location = self.env['stock.location'].create({
                 'name': _('Inter-warehouse transit'),
                 'usage': 'transit',
-                'location_id': parent_location and parent_location.id or False,
                 'company_id': company.id,
                 'active': False
             })

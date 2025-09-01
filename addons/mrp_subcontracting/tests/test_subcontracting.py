@@ -844,7 +844,6 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         # Create a custom subcontracting location
         custom_subcontracting_location = self.env['stock.location'].create({
             'name': 'Custom Subcontracting Location',
-            'location_id': self.env.ref('stock.stock_location_locations').id,
             'usage': 'internal',
             'company_id': self.env.company.id,
             'is_subcontracting_location': True,
