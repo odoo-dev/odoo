@@ -64,14 +64,18 @@ class SaleOrderTemplateLine(models.Model):
         string="Parent Section Line",
         comodel_name='sale.order.template.line',
         compute='_compute_parent_id',
+        index='btree_not_null',
+        copy=False,
         store=True,
+        precompute=True,
+        readonly=False,
     )
     is_optional = fields.Boolean(
         string="Optional Line",
         compute='_compute_is_optional',
         store=True,
         readonly=False,
-        copy=True,
+        precompute=True,
         recursive=True,
     )
 
@@ -103,7 +107,7 @@ class SaleOrderTemplateLine(models.Model):
                 else:
                     option.parent_id = last_sub or last_section or False
 
-    @api.depends('parent_id.is_optional')
+    @api.depends('sale_order_template_id.sale_order_template_line_ids.is_optional')
     def _compute_is_optional(self):
         for option in self:
             if (
