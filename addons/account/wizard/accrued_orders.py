@@ -133,9 +133,16 @@ class AccountAccruedOrdersWizard(models.TransientModel):
             return string
 
         self.ensure_one()
+        import pudb; pudb.set_trace()
         move_lines = []
-        is_purchase = self.env.context.get('active_model') == 'purchase.order'
-        orders = self.env[self.env.context['active_model']].with_company(self.company_id).browse(self.env.context['active_ids'])
+        from_line = self.env.context.get('active_model') in ['purchase.order.line', 'sale.order.line']
+        if from_line:
+            lines = self.env[self.env.context['active_model']].with_company(self.company_id).browse(self.env.context['active_ids'])
+            orders = lines.order_id
+        else:
+            orders = self.env[self.env.context['active_model']].with_company(self.company_id).browse(self.env.context['active_ids'])
+            lines = orders.order_line.filtered(lambda x: x.product_id)
+        is_purchase = orders._name == 'purchase.order'
 
         if orders.filtered(lambda o: o.company_id != self.company_id):
             raise UserError(_('Entries can only be created for a single company at a time.'))
@@ -144,8 +151,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
         orders_with_entries = []
         fnames = []
         total_balance = 0.0
-        for order in orders:
-            product_lines = order.order_line.filtered(lambda x: x.product_id)
+        for order, product_lines in lines.grouped('order_id').items():
             if len(orders) == 1 and product_lines and self.amount and order.order_line:
                 total_balance = self.amount
                 order_line = product_lines[0]
