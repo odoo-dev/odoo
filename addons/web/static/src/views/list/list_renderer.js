@@ -35,6 +35,7 @@ import {
     useState,
 } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { debounce } from "@web/core/utils/timing";
 
 const formatters = registry.category("formatters");
 
@@ -111,6 +112,11 @@ export class ListRenderer extends Component {
         useExternalListener(document, "click", this.onGlobalClick.bind(this));
         this.tableRef = useRef("table");
 
+        this.debouncedOnDeleteRecord = debounce(this.onDeleteRecord.bind(this), 4000, {
+            leading: true,
+            trailing: false,
+        });
+
         this.longTouchTimer = null;
         this.touchStartMs = 0;
 
@@ -185,9 +191,7 @@ export class ListRenderer extends Component {
 
         useBus(this.props.list.model.bus, "FIELD_IS_DIRTY", (ev) => (this.lastIsDirty = ev.detail));
 
-        useBounceButton(this.rootRef, () => {
-            return this.showNoContentHelper;
-        });
+        useBounceButton(this.rootRef, () => this.showNoContentHelper);
         useEffect(
             (editedRecord) => {
                 if (editedRecord) {
@@ -613,9 +617,7 @@ export class ListRenderer extends Component {
         });
         keyParts.fields
             .sort((left, right) => (left < right ? -1 : 1))
-            .forEach((fieldName) => {
-                return viewIdentifier.push(fieldName);
-            });
+            .forEach((fieldName) => viewIdentifier.push(fieldName));
         return viewIdentifier.join(",");
     }
 
@@ -1181,7 +1183,7 @@ export class ListRenderer extends Component {
         }
     }
 
-    async onDeleteRecord(record, ev) {
+    async onDeleteRecord(record) {
         this.keepColumnWidths = true;
         if (this.editedRecord && this.editedRecord !== record) {
             const left = await this.props.list.leaveEditMode();
@@ -1190,14 +1192,6 @@ export class ListRenderer extends Component {
             }
         }
         if (this.activeActions.onDelete) {
-            if (ev) {
-                const element = ev.target.closest(".o_list_record_remove");
-                if (element.dataset.clicked) {
-                    return;
-                }
-                element.dataset.clicked = true;
-            }
-
             this.activeActions.onDelete(record);
         }
     }
