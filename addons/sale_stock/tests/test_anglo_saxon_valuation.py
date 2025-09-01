@@ -12,7 +12,6 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
 
     @classmethod
@@ -50,6 +49,13 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         sale_order.action_confirm()
         return sale_order
 
+    def _set_quantity(self, move, quantity):
+        """Helper function to retroactively change the quantity of a move.
+           The total value of the product will be recomputed as a result,
+           regardless of the valuation method."""
+        move.quantity = quantity
+        move.value_manual = move.price_unit * quantity
+
     def _fifo_in_one_eight_one_ten(self):
         # Put two items in stock.
         in_move_1 = self.env['stock.move'].create({
@@ -63,6 +69,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_1._action_confirm()
         in_move_1.write({'quantity': 1, 'picked': True})
         in_move_1._action_done()
+        self._set_quantity(in_move_1, in_move_1.quantity)
         in_move_2 = self.env['stock.move'].create({
             'product_id': self.product.id,
             'location_id': self.env.ref('stock.stock_location_suppliers').id,
@@ -74,6 +81,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_2._action_confirm()
         in_move_2.write({'quantity': 1, 'picked': True})
         in_move_2._action_done()
+        self._set_quantity(in_move_2, in_move_2.quantity)
 
     # -------------------------------------------------------------------------
     # Standard Ordered
@@ -102,18 +110,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 28)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 28)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 28.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 28.0},
+        ])
 
     def test_standard_ordered_invoice_post_partial_delivery_1(self):
         """Standard price set to 10. Get 2 units in stock. Sale order 2@12. Deliver 1, invoice 1,
@@ -124,7 +126,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.product.standard_price = 10.0
 
         # Put two items in stock.
-        sale_order = self._so_and_confirm_two_units()
+        self._inv_adj_two_units()
 
         # Create and confirm a sale order for 2@12
         sale_order = self._so_and_confirm_two_units()
@@ -144,18 +146,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 10)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 10)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 12)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 12)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 12.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 12.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 10.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 10.0},
+        ])
 
         # change the standard price to 14
         self.product.standard_price = 14.0
@@ -172,18 +168,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         invoice2.action_post()
         amls = invoice2.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 14)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 14)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 12)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 12)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 12.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 12.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 14.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 14.0},
+        ])
 
     def test_standard_ordered_invoice_post_delivery(self):
         """Standard price set to 10. Get 2 units in stock. Sale order 2@12. Deliver 1, change the
@@ -217,18 +207,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 24)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 24)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 24.0},
+        ])
 
     # -------------------------------------------------------------------------
     # Standard Delivered
@@ -259,7 +243,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.product.standard_price = 10
 
         # Put two items in stock.
-        sale_order = self._so_and_confirm_two_units()
+        self._inv_adj_two_units()
 
         # Create and confirm a sale order for 2@12
         sale_order = self._so_and_confirm_two_units()
@@ -279,18 +263,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 10)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 10)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 12)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 12)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 12.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 12.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 10.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 10.0},
+        ])
 
         # change the standard price to 14
         self.product.standard_price = 14.0
@@ -307,18 +285,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         invoice2.action_post()
         amls = invoice2.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 14)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 14)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 12)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 12)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 12.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 12.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 14.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 14.0},
+        ])
 
     def test_standard_delivered_invoice_post_delivery(self):
         """Standard price set to 10. Get 2 units in stock. Sale order 2@12. Deliver 1, change the
@@ -352,18 +324,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 24)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 24)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 24.0},
+        ])
 
     # -------------------------------------------------------------------------
     # AVCO Ordered
@@ -387,18 +353,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 20)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 20)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 20.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 20.0},
+        ])
 
     def test_avco_ordered_invoice_post_partial_delivery(self):
         """Standard price set to 10. Sale order 2@12. Invoice after delivering 1."""
@@ -423,18 +383,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 20)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 20)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 20.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 20.0},
+        ])
 
     def test_avco_ordered_invoice_post_delivery(self):
         """Standard price set to 10. Sale order 2@12. Invoice after full delivery."""
@@ -459,18 +413,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 20)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 20)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 20.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 20.0},
+        ])
 
     def test_avco_ordered_return_and_receipt(self):
         """ Sell and deliver some products before the user encodes the products receipt """
@@ -576,18 +524,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 10)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 10)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 12)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 12)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 12.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 12.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 10.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 10.0},
+        ])
 
     def test_avco_delivered_invoice_post_delivery(self):
         """Standard price set to 10. Sale order 2@12. Invoice after full delivery."""
@@ -611,18 +553,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 20)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 20)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 20.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 20.0},
+        ])
 
     def test_avco_partially_owned_and_delivered_invoice_post_delivery(self):
         """
@@ -651,13 +587,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
 
         invoice02 = sale_order._create_invoices()
         invoice02.action_post()
-
         # COGS should ignore the owned product
         self.assertRecordValues(invoice01.line_ids, [
             # pylint: disable=bad-whitespace
             {'account_id': self.company_data['default_account_revenue'].id,     'debit': 0,     'credit': 12},
             {'account_id': self.company_data['default_account_receivable'].id,  'debit': 12,    'credit': 0},
-            {'account_id': self.company_data['default_account_stock_out'].id,   'debit': 0,     'credit': 10},
+            {'account_id': self.company_data['default_account_stock_valuation'].id,   'debit': 0,     'credit': 10},
             {'account_id': self.company_data['default_account_expense'].id,     'debit': 10,    'credit': 0},
         ])
         self.assertRecordValues(invoice02.line_ids, [
@@ -700,7 +635,6 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         As no standard price is set, the Stock OUT and COGS amounts are 0."""
         self.product.categ_id.property_cost_method = 'fifo'
         self.product.invoice_policy = 'order'
-
         self._fifo_in_one_eight_one_ten()
 
         # Create and confirm a sale order for 2@12
@@ -709,22 +643,15 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Invoice the sale order.
         invoice = sale_order._create_invoices()
         invoice.action_post()
-
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertAlmostEqual(stock_out_aml.credit, 18)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertAlmostEqual(cogs_aml.debit, 18)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 18.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 18.0},
+        ])
 
     def test_fifo_ordered_invoice_post_partial_delivery(self):
         """Receive 1@8, 1@10, so 2@12, standard price 12, deliver 1, invoice 2: the COGS amount
@@ -740,7 +667,6 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Deliver one.
         sale_order.picking_ids.move_ids.write({'quantity': 1, 'picked': True})
         Form.from_action(self.env, sale_order.picking_ids.button_validate()).save().process()
-
         # upate the standard price to 12
         self.product.standard_price = 12
 
@@ -755,18 +681,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 20)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 20)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 20.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 20.0},
+        ])
 
     def test_fifo_ordered_invoice_post_delivery(self):
         """Receive at 8 then at 10. Sale order 2@12. Invoice after delivering everything."""
@@ -789,18 +709,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 18)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 18)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 18.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 18.0},
+        ])
 
     # -------------------------------------------------------------------------
     # FIFO Delivered
@@ -818,7 +732,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Invoice the sale order.
         # Nothing delivered = nothing to invoice.
         with self.assertRaises(UserError):
-            invoice_id = sale_order._create_invoices()
+            sale_order._create_invoices()
 
     def test_fifo_delivered_invoice_post_partial_delivery(self):
         """Receive 1@8, 1@10, so 2@12, standard price 12, deliver 1, invoice 2: the price used should be 10:
@@ -849,18 +763,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 20)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 20)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 20.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 20.0},
+        ])
 
     def test_fifo_delivered_invoice_post_delivery(self):
         """Receive at 8 then at 10. Sale order 2@12. Invoice after delivering everything."""
@@ -884,18 +792,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 18)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 18)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 24)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 24)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 18.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 18.0},
+        ])
 
     def test_fifo_delivered_invoice_post_delivery_2(self):
         """Receive at 8 then at 10. Sale order 10@12 and deliver without receiving the 2 missing.
@@ -915,6 +817,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_1._action_confirm()
         in_move_1.write({'quantity': 8, 'picked': True})
         in_move_1._action_done()
+        self._set_quantity(in_move_1, in_move_1.quantity)
 
         # Create and confirm a sale order for 2@12
         sale_order = self.env['sale.order'].sudo().create({
@@ -946,9 +849,10 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_2._action_confirm()
         in_move_2.write({'quantity': 2, 'picked': True})
         in_move_2._action_done()
-        self.assertEqual(self.product.stock_valuation_layer_ids[-1].value, -4)  # we sent two at 10 but they should have been sent at 12
-        self.assertEqual(self.product.stock_valuation_layer_ids[-1].quantity, 0)
-        self.assertEqual(sale_order.order_line.move_ids.stock_valuation_layer_ids[-1].quantity, 0)
+        self._set_quantity(in_move_2, in_move_2.quantity)
+
+        self.assertEqual(self.product.total_value, 0)  # we sent two at 10 but they should have been sent at 12
+        self.assertEqual(self.product.qty_available, 0)
 
         # Invoice the sale order.
         invoice = sale_order._create_invoices()
@@ -957,18 +861,12 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 104)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 104)
-        self.assertEqual(cogs_aml.credit, 0)
-        receivable_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml.debit, 120)
-        self.assertEqual(receivable_aml.credit, 0)
-        income_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml.debit, 0)
-        self.assertEqual(income_aml.credit, 120)
+        self.assertRecordValues(amls, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 120.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 120.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 104.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 104.0},
+        ])
 
     def test_fifo_delivered_invoice_post_delivery_3(self):
         """Receive 5@8, receive 8@12, sale 1@20, deliver, sale 6@20, deliver. Make sure no rouding
@@ -988,6 +886,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_1._action_confirm()
         in_move_1.write({'quantity': 5, 'picked': True})
         in_move_1._action_done()
+        self._set_quantity(in_move_1, in_move_1.quantity)
 
         # +8@12
         in_move_2 = self.env['stock.move'].create({
@@ -1001,6 +900,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_2._action_confirm()
         in_move_2.write({'quantity': 8, 'picked': True})
         in_move_2._action_done()
+        self._set_quantity(in_move_2, in_move_2.quantity)
 
         # sale 1@20, deliver, invoice
         sale_order = self.env['sale.order'].sudo().create({
@@ -1046,7 +946,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
 
     def test_fifo_delivered_invoice_post_delivery_4(self):
         """Receive 8@10. Sale order 10@12. Deliver and also invoice it without receiving the 2 missing.
-        Now, receive 2@12. Make sure price difference is correctly reflected in expense account."""
+        Now, receive 2@12. Make sure product valuation is balanced."""
         self.product.categ_id.property_cost_method = 'fifo'
         self.product.invoice_policy = 'delivery'
         self.product.standard_price = 10
@@ -1062,6 +962,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_1._action_confirm()
         in_move_1.write({'quantity': 8, 'picked': True})
         in_move_1._action_done()
+        self._set_quantity(in_move_1, in_move_1.quantity)
 
         # Create and confirm a sale order for 10@12
         sale_order = self.env['sale.order'].sudo().create({
@@ -1097,11 +998,11 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_2._action_confirm()
         in_move_2.write({'quantity': 2, 'picked': True})
         in_move_2._action_done()
+        self._set_quantity(in_move_2, in_move_2.quantity)
 
-        # check the last anglo saxon move line
-        revalued_anglo_expense_amls = sale_order.picking_ids.move_ids.stock_valuation_layer_ids[-1].stock_move_id.account_move_ids[-1].line_ids
-        revalued_cogs_aml = revalued_anglo_expense_amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(revalued_cogs_aml.debit, 4, 'Price difference should have correctly reflected in expense account.')
+        # check the product valuation
+        self.assertEqual(self.product.total_value, 0)
+        self.assertEqual(self.product.qty_available, 0)
 
     def test_fifo_delivered_invoice_post_delivery_with_return(self):
         """Receive 2@10. SO1 2@12. Return 1 from SO1. SO2 1@12. Receive 1@20.
@@ -1121,6 +1022,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_1._action_confirm()
         in_move_1.write({'quantity': 2, 'picked': True})
         in_move_1._action_done()
+        self._set_quantity(in_move_1, in_move_1.quantity)
 
         # Create, confirm and deliver a sale order for 2@12 (SO1)
         so_1 = self._so_and_confirm_two_units()
@@ -1168,6 +1070,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_2._action_confirm()
         in_move_2.write({'quantity': 1, 'picked': True})
         in_move_2._action_done()
+        self._set_quantity(in_move_2, in_move_2.quantity)
 
         # Re-deliver returned 1 from SO1
         stock_redeliver_picking_form = Form(
@@ -1191,33 +1094,21 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Check the resulting accounting entries
         amls_1 = invoice_1.line_ids
         self.assertEqual(len(amls_1), 4)
-        stock_out_aml_1 = amls_1.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml_1.debit, 0)
-        self.assertEqual(stock_out_aml_1.credit, 30)
-        cogs_aml_1 = amls_1.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml_1.debit, 30)
-        self.assertEqual(cogs_aml_1.credit, 0)
-        receivable_aml_1 = amls_1.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml_1.debit, 24)
-        self.assertEqual(receivable_aml_1.credit, 0)
-        income_aml_1 = amls_1.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml_1.debit, 0)
-        self.assertEqual(income_aml_1.credit, 24)
+        self.assertRecordValues(amls_1, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 24.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 24.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 30.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 30.0},
+        ])
 
         amls_2 = invoice_2.line_ids
         self.assertEqual(len(amls_2), 4)
-        stock_out_aml_2 = amls_2.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml_2.debit, 0)
-        self.assertEqual(stock_out_aml_2.credit, 10)
-        cogs_aml_2 = amls_2.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml_2.debit, 10)
-        self.assertEqual(cogs_aml_2.credit, 0)
-        receivable_aml_2 = amls_2.filtered(lambda aml: aml.account_id == self.company_data['default_account_receivable'])
-        self.assertEqual(receivable_aml_2.debit, 12)
-        self.assertEqual(receivable_aml_2.credit, 0)
-        income_aml_2 = amls_2.filtered(lambda aml: aml.account_id == self.company_data['default_account_revenue'])
-        self.assertEqual(income_aml_2.debit, 0)
-        self.assertEqual(income_aml_2.credit, 12)
+        self.assertRecordValues(amls_1, [
+            {'account_id': self.company_data['default_account_revenue'].id, 'credit': 12.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_receivable'].id, 'credit': 0.0, 'debit': 12.0},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'credit': 10.0, 'debit': 0.0},
+            {'account_id': self.company_data['default_account_expense'].id, 'credit': 0.0, 'debit': 10.0},
+        ])
 
     def test_fifo_uom_computation(self):
         self.env.company.anglo_saxon_accounting = True
@@ -1271,7 +1162,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Account Receivable
         self.assertEqual(aml[1].debit, 18.0)
         self.assertEqual(aml[1].credit, 0.0)
-        # Default Account Stock Out
+        # Default Account Stock Val
         self.assertEqual(aml[2].debit, 0.0)
         self.assertEqual(aml[2].credit, 24.0)
         # Expenses
@@ -1290,6 +1181,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move_1._action_confirm()
         in_move_1.write({'quantity': quantity, 'picked': True})
         in_move_1._action_done()
+        self._set_quantity(in_move_1, in_move_1.quantity)
 
         # Create, confirm and deliver a sale order for 12@1.5 with reception (50 * 1.0, 50 * 0.0)(SO2)
         so_2 = self.env['sale.order'].sudo().create({
@@ -1356,6 +1248,8 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        for move in in_moves:
+            self._set_quantity(move, move.quantity)
 
         # Sell 3 units
         so = self.env['sale.order'].sudo().create({
@@ -1397,6 +1291,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        self._set_quantity(in_moves, in_moves.quantity)
 
         # Return the second picking (i.e. 1@20)
         ctx = {'active_id': pickings[1].id, 'active_model': 'stock.picking'}
@@ -1419,7 +1314,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         reverse_invoice.action_post()
 
         amls = reverse_invoice.line_ids
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
+        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_valuation'])
         self.assertEqual(stock_out_aml.debit, 20, 'Should be to the value of the returned product')
         self.assertEqual(stock_out_aml.credit, 0)
         cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
@@ -1446,6 +1341,8 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        for move in in_moves:
+            self._set_quantity(move, move.quantity)
 
         # Sell 3 units
         so = self.env['sale.order'].sudo().create({
@@ -1487,6 +1384,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        self._set_quantity(move, move.quantity)
 
         # Return the second picking (i.e. 1@20)
         ctx = {'active_id': pickings[1].id, 'active_model': 'stock.picking'}
@@ -1508,7 +1406,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         reverse_invoice.action_post()
 
         amls = reverse_invoice.line_ids
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
+        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_valuation'])
         self.assertEqual(stock_out_aml.debit, 20, 'Should be to the value of the returned product')
         self.assertEqual(stock_out_aml.credit, 0)
         cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
@@ -1532,6 +1430,8 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        for move in in_moves:
+            self._set_quantity(move, move.quantity)
 
         so = self.env['sale.order'].sudo().create({
             'partner_id': self.partner_a.id,
@@ -1561,11 +1461,10 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
             invoice.action_post()
             invoices |= invoice
 
-        out_account = self.product.categ_id.property_stock_account_output_categ_id
+        out_account = self.product.categ_id.property_stock_valuation_account_id
         invoice01, _invoice02, invoice03 = invoices
         cogs = invoices.line_ids.filtered(lambda l: l.account_id == out_account)
         self.assertEqual(cogs.mapped('credit'), svl_values)
-
         # Reset and repost each invoice
         for i, inv in enumerate(invoices):
             inv.button_draft()
@@ -1619,6 +1518,8 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        for move in in_moves:
+            self._set_quantity(move, move.quantity)
 
         so = self.env['sale.order'].sudo().create({
             'partner_id': self.partner_a.id,
@@ -1642,24 +1543,22 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Clear the cache to ensure access rights
         self.env.invalidate_all()
         invoice01.with_user(accountman.id).action_post()
-
         move_reversal = self.env['account.move.reversal'].with_context(active_model="account.move", active_ids=invoice01.ids).create({
             'journal_id': invoice01.journal_id.id,
         })
         reversal = move_reversal.modify_moves()
         invoice02 = self.env['account.move'].browse(reversal['res_id'])
         invoice02.action_post()
-
         amls = invoice02.line_ids
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertEqual(stock_out_aml.credit, 10)
-        cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
-        self.assertEqual(cogs_aml.debit, 10)
-        self.assertEqual(cogs_aml.credit, 0)
+        stock_val_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_valuation'])
+        self.assertEqual(stock_val_aml.debit, 0)
+        self.assertEqual(stock_val_aml.credit, 10)
+        exp_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
+        self.assertEqual(exp_aml.debit, 10)
+        self.assertEqual(exp_aml.credit, 0)
 
     def test_fifo_edit_svl_without_reinvoice(self):
-        """Edit SVL move line after delivering. Check no reinvoicing occurs."""
+        """Edit move line after delivering. Check no reinvoicing occurs."""
         self.product.categ_id.property_cost_method = 'fifo'
         self.product.invoice_policy = 'delivery'
         self.product.standard_price = 10
@@ -1675,9 +1574,9 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         # Deliver one.
         sale_order.picking_ids.move_ids.write({'quantity': 2, 'picked': True})
         sale_order.picking_ids.button_validate()
-        svl_am = sale_order.order_line.move_ids.stock_valuation_layer_ids.account_move_id
-        svl_am.button_draft()
-        svl_am.action_post()
+        move = sale_order.order_line.move_ids
+        move.quantity = 3
+        move.value_manual = move.price_unit * 3
 
         # Check no reinvoice line addded to the sale order
         self.assertEqual(len(sale_order.order_line), 1)
@@ -1691,7 +1590,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.product.invoice_policy = 'delivery'
         self.product.standard_price = 10
         self.env['stock.quant'].with_context(inventory_mode=True).create({
-            'product_id': self.product.id,  # tracking serial
+            'product_id': self.product.id,
             'inventory_quantity': 20,
             'location_id': self.company_data['default_warehouse'].lot_stock_id.id,
         }).action_apply_inventory()
@@ -1749,7 +1648,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         invoice.action_post()
 
         # Check the resulting accounting entries
-        account_stock_out = self.company_data['default_account_stock_out']
+        account_stock_out = self.company_data['default_account_stock_valuation']
         account_expense = self.company_data['default_account_expense']
         invoice_1_cogs = credit_note.line_ids.filtered(lambda l: l.display_type == 'cogs')
         invoice_2_cogs = invoice.line_ids.filtered(lambda l: l.display_type == 'cogs')
@@ -1785,6 +1684,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         in_move.move_line_ids.quantity = 12
         in_move.picked = True
         in_move._action_done()
+        self._set_quantity(in_move, in_move.quantity)
 
         sale_order = self.env['sale.order'].sudo().create({
             'partner_id': self.partner_a.id,
