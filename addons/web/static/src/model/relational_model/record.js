@@ -1221,6 +1221,7 @@ export class Record extends DataPoint {
                 localChanges[this.config.relationField].id = this._parentRecord.resId;
             }
         }
+        debugger;
         return this.model._onchange(this.config, {
             changes: localChanges,
             fieldNames: onChangeFields,
