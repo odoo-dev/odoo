@@ -1447,8 +1447,11 @@ class SaleOrder(models.Model):
         precision = self.env['decimal.precision'].precision_get('Product Unit')
 
         for line in self.order_line:
-            if line.display_type in ('line_section', 'line_subsection'):
+            if line.display_type == 'line_section':
                 section_line_ids = [line.id]  # Start a new section.
+                continue
+            if line.display_type == 'line_subsection':
+                section_line_ids.append(line.id)
                 continue
             if line.display_type != 'line_note' and float_is_zero(line.qty_to_invoice, precision_digits=precision):
                 continue
