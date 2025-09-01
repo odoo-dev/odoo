@@ -108,7 +108,7 @@ class AutoCompleteController(http.Controller):
             }
 
         if results.get('error_message'):
-            _logger.error(results['error_message'])
+            _logger.warning(results['error_message'])
 
         results = results.get('predictions', [])
 
