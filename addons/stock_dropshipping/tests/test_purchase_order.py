@@ -1,14 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo import Command
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.tests.common import tagged
 
 
 @tagged('-at_install', 'post_install')
-@skip('Temporary to fast merge new valuation')
 class TestPurchaseOrder(ValuationReconciliationTestCommon):
 
     @classmethod
@@ -19,6 +16,13 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
             ('code', '=', 'dropship'),
             ('company_id', '=', cls.env.company.id),
         ], limit=1)
+
+    def _set_quantity(self, move, quantity):
+        """Helper function to retroactively change the quantity of a move.
+           The total value of the product will be recomputed as a result,
+           regardless of the valuation method."""
+        move.quantity = quantity
+        move.value_manual = move.price_unit * quantity
 
     def test_qty_received_does_sync_after_changing_validated_move_quantity(self):
         """ After validating a picking, if it is unlocked and has its move quantity modified,
@@ -53,7 +57,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
                 dropship.move_ids[0].quantity = 10.0
                 dropship.button_validate()
                 dropship.action_toggle_is_locked()
-                dropship.move_ids[0].quantity = 5.0
+                self._set_quantity(dropship.move_ids[0], 5.0)
 
                 self.assertEqual(
                     po.order_line[0].qty_received, 5.0,
