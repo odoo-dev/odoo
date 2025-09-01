@@ -45,8 +45,8 @@ class HrContract(models.Model):
         # Overriden in hr_work_entry_contract_holiday to select the
         # global time off first (eg: Public Holiday > Home Working)
         self.ensure_one()
-        if 'work_entry_type_id' in interval[2] and interval[2].work_entry_type_id.code in bypassing_codes:
-            return interval[2].work_entry_type_id
+        if 'work_entry_type_id' in interval[2] and any(code in bypassing_codes for code in interval[2].work_entry_type_id.mapped('code')):
+            return interval[2].work_entry_type_id[:1]
 
         interval_start = interval[0].astimezone(pytz.utc).replace(tzinfo=None)
         interval_stop = interval[1].astimezone(pytz.utc).replace(tzinfo=None)
