@@ -55,10 +55,9 @@ class ResourceCalendarLeaves(models.Model):
         for leave in self.filtered('resource_id'):
             leave.calendar_id = leave.resource_id.calendar_id
 
-    @api.depends('calendar_id')
     def _compute_company_id(self):
         for leave in self:
-            leave.company_id = leave.calendar_id.company_id or self.env.company
+            leave.company_id = leave.holiday_id.company_id or self.env.company
 
     @api.depends('date_from')
     def _compute_date_to(self):

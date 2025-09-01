@@ -881,6 +881,7 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             'resource_id': self.employee_id.resource_id.id,
             'calendar_id': self.resource_calendar_id.id,
             'time_type': self.holiday_status_id.time_type,
+            'company_id': self.company_id.id
         }
 
     def _create_resource_leave(self):
