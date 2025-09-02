@@ -471,6 +471,13 @@ export class SetAnimationEffectAction extends BuilderAction {
     static id = "setAnimationEffect";
     static dependencies = ["animateOption"];
     isApplied({ editingElement, value: className }) {
+        if (editingElement.classList.contains("s_social_media")) {
+            // Check if any .fa icon inside has the class
+            return Array.from(editingElement.querySelectorAll(".fa")).some((icon) =>
+                icon.classList.contains(className)
+            );
+        }
+        // Default behavior for other elements
         return editingElement.classList.contains(className);
     }
     clean({ editingElement }) {
@@ -492,6 +499,16 @@ export class SetAnimationEffectAction extends BuilderAction {
         if (directionClassName) {
             editingElement.classList.add(directionClassName);
         }
+        if (editingElement.classList.contains("s_social_media")) {
+            // Apply animation only to .fa icons inside the social media block
+            const icons = editingElement.querySelectorAll(".fa");
+            icons.forEach((icon) => {
+                icon.classList.add(effectClassName);
+                this.dependencies.animateOption.forceAnimation(icon);
+            });
+            return; // Do NOT apply to the container itself
+        }
+        // Default: apply to the element itself
         editingElement.classList.add(effectClassName);
         this.dependencies.animateOption.forceAnimation(editingElement);
     }
