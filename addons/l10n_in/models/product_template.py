@@ -22,6 +22,7 @@ class ProductTemplate(models.Model):
         company_dependent=True
     )
     l10n_in_is_aligible_for_hsn_taxation = fields.Boolean(string="Is Eligible for Tax Rate", help="Check if the product is eligible for GST tax rate.", compute="_compute_l10n_in_is_aligible_for_hsn_taxation", company_dependent=True)
+    l10n_in_hsn_taxation_information = fields.Text(string="HSN Taxation Information", help="Information about HSN/SAC code and its applicability for GST taxation.", compute="_compute_l10n_in_hsn_taxation_information")
 
     @api.depends('company_id.l10n_in_is_gst_registered')
     @api.depends_context('allowed_company_ids')
@@ -62,3 +63,20 @@ class ProductTemplate(models.Model):
                 record.l10n_in_is_aligible_for_hsn_taxation = True
             else:
                 record.l10n_in_is_aligible_for_hsn_taxation = False
+
+    @api.depends('list_price', 'taxes_id', 'l10n_in_is_aligible_for_hsn_taxation', 'l10n_in_threshold_limit', 'l10n_in_hsn_based_tax_id')
+    def _compute_l10n_in_hsn_taxation_information(self):
+        for product in self:
+            if not product.l10n_in_is_aligible_for_hsn_taxation:
+                product.l10n_in_hsn_taxation_information = False
+            elif product.list_price <= product.l10n_in_threshold_limit:
+                product.l10n_in_hsn_taxation_information = _("The unit price of this product does not exceed the threshold limit of %.2f INR. Therefore, GST will be applied based on the selected tax rates.", product.l10n_in_threshold_limit)
+            elif not product.l10n_in_hsn_based_tax_id:
+                product.l10n_in_hsn_taxation_information = _("The unit price of this product exceeds the threshold limit of %.2f INR. However, no GST rate is configured based on the HSN/SAC code. Please set a GST rate to ensure correct taxation.", product.l10n_in_threshold_limit)
+            else:
+                product.l10n_in_hsn_taxation_information = _(
+                    "The unit price of this product exceeds the threshold limit of %(limit).2f INR. "
+                    "Therefore, GST will be applied based on the HSN/SAC code with the selected tax rate: %(tax)s.",
+                    limit=product.l10n_in_threshold_limit,
+                    tax=product.l10n_in_hsn_based_tax_id.display_name,
+                )

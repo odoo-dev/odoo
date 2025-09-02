@@ -14,7 +14,7 @@ patch(PosOrderline.prototype, {
         const unit_price_after_discount = this.get_unit_price_after_discount();
         const threshold = this.product_id?.l10n_in_threshold_limit || 0;
         const taxRateIds = this.product_id?.l10n_in_hsn_based_tax_id;
-        if (unit_price_after_discount > threshold && taxRateIds) {
+        if (threshold && unit_price_after_discount > threshold && taxRateIds) {
             let taxIds = Array.isArray(taxRateIds) ? taxRateIds : [taxRateIds];
             if (this.order_id?.fiscal_position_id) {
                 taxIds = getTaxesAfterFiscalPosition(

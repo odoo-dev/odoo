@@ -117,6 +117,12 @@ class AccountMove(models.Model):
     )
     l10n_in_show_gstin_status = fields.Boolean(compute="_compute_l10n_in_show_gstin_status")
     l10n_in_gstin_verified_date = fields.Date(compute="_compute_l10n_in_partner_gstin_status_and_date")
+    l10n_in_need_to_modify_invoice_line_based_on_hsn_taxation = fields.One2many(
+        comodel_name='account.move.line',
+        string="Invoice Lines Need to Modify Tax Based on HSN Taxation",
+        compute='_compute_l10n_in_need_to_modify_invoice_line_based_on_hsn_taxation',
+        help="Invoice lines which need to modify tax based on HSN taxation.",
+    )
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -384,6 +390,54 @@ class AccountMove(models.Model):
                 )
             else:
                 move.l10n_in_display_higher_tcs_button = False
+
+    @api.depends('invoice_line_ids.l10n_in_unit_price_after_discount', 'invoice_line_ids.product_id')
+    def _compute_l10n_in_need_to_modify_invoice_line_based_on_hsn_taxation(self):
+        indian_moves = self.filtered(
+            lambda m: (
+                m.country_code == 'IN'
+                and m.company_id.l10n_in_is_gst_registered
+                and m.state == 'draft'
+                and m.is_sale_document(include_receipts=True)
+            )
+        )
+        (self - indian_moves).l10n_in_need_to_modify_invoice_line_based_on_hsn_taxation = False
+
+        for move in indian_moves:
+            fpos = move.fiscal_position_id
+            product_lines = move.invoice_line_ids.filtered(
+                lambda l: l.display_type == 'product'
+                and l.product_id
+                and l.product_id.l10n_in_threshold_limit
+                and l.product_id.l10n_in_hsn_based_tax_id
+                # and l.l10n_in_unit_price_after_discount > l.product_id.l10n_in_threshold_limit
+            )
+            move.l10n_in_need_to_modify_invoice_line_based_on_hsn_taxation = product_lines.filtered(
+                lambda l: (
+                    (
+                        l.l10n_in_unit_price_after_discount > l.product_id.l10n_in_threshold_limit
+                        and (
+                            (not fpos and l.product_id.l10n_in_hsn_based_tax_id in l.tax_ids)
+                            or (fpos and fpos.map_tax(l.product_id.l10n_in_hsn_based_tax_id) not in l.tax_ids)
+                        )
+                    ) or (
+                        l.l10n_in_unit_price_after_discount < l.product_id.l10n_in_threshold_limit
+                        and (
+                            (not fpos and all(tax not in l.tax_ids for tax in l.product_id.taxes_id))
+                            or (fpos and all(fpos.map_tax(tax) not in l.tax_ids for tax in l.product_id.taxes_id))
+                        )
+                    )
+                )
+            )._origin
+
+    def action_l10n_in_update_taxes_based_on_hsn_taxation(self):
+        self.ensure_one()
+        fpos = self.fiscal_position_id
+        for line in self.l10n_in_need_to_modify_invoice_line_based_on_hsn_taxation:
+            if line.l10n_in_unit_price_after_discount > line.product_id.l10n_in_threshold_limit:
+                line.tax_ids = fpos and fpos.map_tax(line.product_id.l10n_in_hsn_based_tax_id) or line.product_id.l10n_in_hsn_based_tax_id
+            elif line.l10n_in_unit_price_after_discount < line.product_id.l10n_in_threshold_limit:
+                line.tax_ids = fpos and fpos.map_tax(line.product_id.taxes_id) or line.product_id.taxes_id
 
     def action_l10n_in_withholding_entries(self):
         self.ensure_one()

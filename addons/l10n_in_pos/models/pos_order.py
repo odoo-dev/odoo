@@ -10,14 +10,15 @@ class PosOrder(models.Model):
             res.update({
                 'l10n_in_hsn_code': base_line_vals['l10n_in_hsn_code'],
             })
-            if self.l10n_in_unit_price_after_discount > self.product_id.l10n_in_threshold_limit:
-                res['tax_ids'] = self.product_id.l10n_in_hsn_based_tax_id
+            product = base_line_vals.get('product_id')
+            if product and product.l10n_in_threshold_limit and base_line_vals.get('l10n_in_unit_price_after_discount', 0) > product.l10n_in_threshold_limit:
+                res['tax_ids'] = product.l10n_in_hsn_based_tax_id
         return res
 
     def _process_order(self, order, existing_order):
         order_id = super()._process_order(order, existing_order)
         order = self.browse(order_id)
         for line in order.lines:
-            if line.l10n_in_unit_price_after_discount > line.product_id.l10n_in_threshold_limit:
+            if line.product_id.l10n_in_threshold_limit and line.l10n_in_unit_price_after_discount > line.product_id.l10n_in_threshold_limit:
                 line.tax_ids = line.product_id.l10n_in_hsn_based_tax_id
         return order_id

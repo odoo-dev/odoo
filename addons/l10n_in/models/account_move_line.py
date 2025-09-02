@@ -85,20 +85,20 @@ class AccountMoveLine(models.Model):
             else:
                 line.l10n_in_unit_price_after_discount = line.price_unit
 
-    @api.depends('product_id', 'product_id.l10n_in_threshold_limit', 'l10n_in_unit_price_after_discount')
-    def _compute_tax_ids(self):
-        aml_apply_tax_based_on_hsn = self.filtered(lambda l:
-            l.move_id.country_code == 'IN' and l.parent_state == 'draft' and
-            l.product_id and
-            l.product_id.l10n_in_threshold_limit and l.product_id.l10n_in_hsn_based_tax_id and
-            l.l10n_in_unit_price_after_discount > l.product_id.l10n_in_threshold_limit
-        )
-        for line in aml_apply_tax_based_on_hsn:
-            fpos = line.move_id.fiscal_position_id
-            line.tax_ids = fpos and fpos.map_tax(line.product_id.l10n_in_hsn_based_tax_id) or line.product_id.l10n_in_hsn_based_tax_id
+    # @api.depends('product_id', 'product_id.l10n_in_threshold_limit', 'l10n_in_unit_price_after_discount')
+    # def _compute_tax_ids(self):
+    #     aml_apply_tax_based_on_hsn = self.filtered(lambda l:
+    #         l.move_id.country_code == 'IN' and l.parent_state == 'draft' and
+    #         l.product_id and
+    #         l.product_id.l10n_in_threshold_limit and l.product_id.l10n_in_hsn_based_tax_id and
+    #         l.l10n_in_unit_price_after_discount > l.product_id.l10n_in_threshold_limit
+    #     )
+    #     for line in aml_apply_tax_based_on_hsn:
+    #         fpos = line.move_id.fiscal_position_id
+    #         line.tax_ids = fpos and fpos.map_tax(line.product_id.l10n_in_hsn_based_tax_id) or line.product_id.l10n_in_hsn_based_tax_id
 
-        # For the rest, fallback to default Odoo computation
-        super(AccountMoveLine, self - aml_apply_tax_based_on_hsn)._compute_tax_ids()
+    #     # For the rest, fallback to default Odoo computation
+    #     super(AccountMoveLine, self - aml_apply_tax_based_on_hsn)._compute_tax_ids()
 
     def _l10n_in_check_invalid_hsn_code(self):
         self.ensure_one()
