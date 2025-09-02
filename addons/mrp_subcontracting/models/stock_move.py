@@ -45,15 +45,6 @@ class StockMove(models.Model):
                 done_moves |= move
         return super(StockMove, self - done_moves)._compute_is_quantity_done_editable()
 
-    @api.depends('show_subcontracting_details_visible')
-    def _compute_show_details_visible(self):
-        done_moves = self.env['stock.move']
-        for move in self:
-            if move.show_subcontracting_details_visible:
-                move.show_details_visible = False
-                done_moves |= move
-        return super(StockMove, self - done_moves)._compute_show_details_visible()
-
     def copy_data(self, default=None):
         default = dict(default or {})
         vals_list = super().copy_data(default=default)
