@@ -125,7 +125,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
      */
     showActionButton(record, sectionFields) {
         if (this.isSubSection(record)) {
-            const parent = this.getParentSectionRecord(record);
+            const parent = getParentSectionRecord(this.props.list ,record);
             return !parent?.data || !sectionFields.some(field => parent.data[field]);
         }
         return true;

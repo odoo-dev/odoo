@@ -766,7 +766,7 @@
 
                                 <t t-set="padding_class" t-value="line_padding and ('px-' + str(line_padding)) or ''"/>
 
-                                <t t-if="not hide_composition">
+                                <t t-if="not line.collapse_composition">
                                     <tr
                                         t-if="is_section or is_subsection"
                                         name="tr_section"
@@ -823,7 +823,7 @@
                                             name="td_product_priceunit"
                                             t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}"
                                         >
-                                            <t t-if="not hide_prices">
+                                            <t t-if="not (line.parent_id.collapse_prices or line.parent_id.parent_id.collapse_prices)">
                                                 <div
                                                     t-if="line.discount &gt;= 0"
                                                     t-field="line.price_unit"
@@ -840,7 +840,7 @@
                                             </t>
                                         </td>
                                         <td t-if="display_discount" name="td_product_discount" t-attf-class="text-end {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
-                                            <t t-if="not hide_prices">
+                                            <t t-if="not (line.parent_id.collapse_prices or line.parent_id.parent_id.collapse_prices)">
                                                 <!-- ! Always check collapse_prices separately; keep discount condition below for XPath -->
                                                 <strong t-if="line.discount &gt; 0" class="text-info">
                                                     <t t-out="((line.discount % 1) and '%s' or '%d') % line.discount"/>%
@@ -851,7 +851,7 @@
                                             <span t-out="', '.join(map(lambda x: (x.name), line.tax_ids))"/>
                                         </td>
                                         <td t-if="not line.is_downpayment" name="td_product_subtotal" class="text-end">
-                                            <t t-if="not hide_prices">
+                                            <t t-if="not (line.parent_id.collapse_prices or line.parent_id.parent_id.collapse_prices)">
                                                 <span
                                                     t-if="price_field == 'price_subtotal'"
                                                     t-field="line.price_subtotal"

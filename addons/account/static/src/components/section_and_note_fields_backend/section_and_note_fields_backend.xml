@@ -39,13 +39,13 @@
                                 t-if="props.hidePrices and this.showActionButton(
                                     record, ['collapse_prices', 'collapse_composition']
                                 )"
-                                onSelected="() => this.toggleHidePrices(record)"
+                                onSelected="() => this.toggleCollapse(record, 'collapse_prices')"
                             >
                                 <i class="me-1 fa fa-fw" t-att-class="hidePrices ? 'fa-eye' : 'fa-eye-slash'"/><span t-out="hidePrices ? 'Show Prices' : 'Hide Prices'"/>
                             </DropdownItem>
                             <DropdownItem
                                 t-if="props.hideComposition and this.showActionButton(record, ['collapse_composition'])"
-                                onSelected="() => this.toggleHideComposition(record)"
+                                onSelected="() => this.toggleCollapse(record, 'collapse_composition')"
                             >
                                 <i class="me-1 fa fa-fw" t-att-class="hideCompositions ? 'fa-eye' : 'fa-eye-slash'"/><span t-out="hideCompositions ? 'Show Composition' : 'Hide Composition'"/>
                             </DropdownItem>

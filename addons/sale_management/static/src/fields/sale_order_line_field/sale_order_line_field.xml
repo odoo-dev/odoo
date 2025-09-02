@@ -6,7 +6,7 @@
         t-inherit-mode="extension"
     >
         <DropdownItem
-            onSelected="() => this.toggleHideComposition(record)"
+            onSelected="() => this.toggleCollapse(record, 'collapse_composition')"
             position="after"
         >
             <DropdownItem

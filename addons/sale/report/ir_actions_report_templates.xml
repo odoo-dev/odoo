@@ -196,7 +196,7 @@
                                 </td>
                                 <td name="td_product_priceunit" class="text-end text-nowrap">
                                     <span
-                                        t-if="not hide_prices"
+                                        t-if="not (line.parent_id.collapse_prices or line.parent_id.parent_id.collapse_prices)"
                                         t-field="line.price_unit"
                                         t-options="{'widget': 'monetary', 'display_currency': line.currency_id}"
                                     >
@@ -214,7 +214,7 @@
                                     <span t-out="taxes">Tax 15%</span>
                                 </td>
                                 <td t-if="not line.is_downpayment" name="td_product_subtotal" class="text-end o_price_total">
-                                    <t t-if="not hide_prices">
+                                    <t t-if="not (line.parent_id.collapse_prices or line.parent_id.parent_id.collapse_prices)">
                                         <span
                                             t-if="price_field == 'price_subtotal'"
                                             t-field="line.price_subtotal"
