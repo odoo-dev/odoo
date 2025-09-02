@@ -291,13 +291,6 @@ class StockMove(models.Model):
                         orphan_productions.with_context(skip_activity=True).unlink()
                         productions -= orphan_productions
 
-    def _split(self, qty, restrict_partner_id=False):
-        # Make sure that backordered subcontracting moves are disconnected from the sbc production linked to the original move
-        res = super()._split(qty, restrict_partner_id)
-        if self.is_subcontract:
-            res[0]['move_orig_ids'] = False
-        return res
-
     def _generate_serial_numbers(self, next_serial, next_serial_count=False, location_id=False):
         if self.is_subcontract:
             return super(StockMove, self.with_context(force_lot_m2o=True))._generate_serial_numbers(next_serial, next_serial_count, location_id)

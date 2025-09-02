@@ -102,8 +102,18 @@ class StockPicking(models.Model):
         group_move = defaultdict(list)
         group_by_company = defaultdict(list)
         for move, bom in subcontract_details:
-            # do not create extra production for move that have their quantity updated
             if move.move_orig_ids.production_id:
+                # Magic spicy sauce for the backorder case:
+                # To ensure correct splitting of the component moves of the SBC MO, we will invoke a split of the SBC
+                # MO here directly and then link the backorder MO to the backorder move.
+                # If we would just run _subcontracted_produce as usual for the newly created SBC receipt move, any
+                # reservations of raw component moves of the SBC MO would not be preserved properly (for example when
+                # using resupply subcontractor on order)
+                production_to_split = move.move_orig_ids[0].production_id
+                original_qty = move.move_orig_ids[0].product_qty
+                move.move_orig_ids = False
+                _, new_mo = production_to_split.with_context(allow_more=True)._split_productions({production_to_split: [original_qty, move.product_qty]})
+                new_mo.move_finished_ids.move_dest_ids = move
                 continue
             quantity = move.product_qty or move.quantity
             if move.product_uom.compare(quantity, 0) <= 0:
