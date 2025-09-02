@@ -35,6 +35,8 @@ export class CustomizeWebsitePlugin extends Plugin {
         "isPluginDestroyed",
         "reloadBundles",
         "setViewsOnSave",
+        "getCSSVariableValue",
+        "getComputedStyle",
     ];
 
     resources = {
@@ -58,7 +60,49 @@ export class CustomizeWebsitePlugin extends Plugin {
             }
         }),
         save_handlers: this.onSave.bind(this),
+        normalize_handlers: () => {
+            this.myCache = new Map();
+            this.myCache2 = new Map();
+            this.myCache3 = new Map();
+        },
     };
+
+    setup() {
+        this.myCache = new Map();
+        this.myCache2 = new Map();
+        this.myCache3 = new Map();
+    }
+
+    getComputedStyle(element, variable) {
+        // return getComputedStyle(element)[variable]
+        let styleCache = this.myCache3.get(element);
+        if (!styleCache) {
+            const computedStyle = getComputedStyle(element);
+            this.myCache2.set(element, computedStyle);
+            this.myCache3.set(element, new Map());
+            styleCache = this.myCache3.get(element);
+        }
+        if (!styleCache.has(variable)) {
+            styleCache.set(variable, this.myCache2.get(element)[variable]);
+            this.myCache3.set(element, styleCache);
+        }
+        return styleCache.get(variable);
+    }
+
+    getCSSVariableValue(variable, style) {
+        // return getCSSVariableValue(variable, style);
+        const styleCache = this.myCache;
+        // let x = true;
+        if (!styleCache.has(variable)) {
+            styleCache.set(variable, getCSSVariableValue(variable, style));
+            this.myCache.set(style, styleCache);
+            // x = false;
+        }
+        // if (x) {
+        //     console.log("Cache hit", variable);
+        // }
+        return styleCache.get(variable);
+    }
 
     async onSave() {
         if (this.viewsToEnableOnSave.size || this.viewsToDisableOnSave.size) {
@@ -101,7 +145,7 @@ export class CustomizeWebsitePlugin extends Plugin {
     }
     getWebsiteVariableValue(variable) {
         const style = getHtmlStyle(this.document);
-        let finalValue = getCSSVariableValue(variable, style);
+        let finalValue = this.getCSSVariableValue(variable, style);
         /* TODO dedicated action ?
         if (!params.colorNames) {
             return finalValue;
@@ -110,7 +154,7 @@ export class CustomizeWebsitePlugin extends Plugin {
         let tempValue = finalValue;
         while (tempValue) {
             finalValue = tempValue;
-            tempValue = getCSSVariableValue(tempValue.replaceAll("'", ""), style);
+            tempValue = this.getCSSVariableValue(tempValue.replaceAll("'", ""), style);
             if (tempValue === finalValue) {
                 // the CSS variable value is identical to its name.
                 break;
@@ -457,14 +501,15 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
         return [`'${value}'`, value].includes(currentValue);
     }
     getValue() {
-        const bgImage = getComputedStyle(this.document.querySelector("#wrapwrap"))[
+        const bgImage = this.dependencies.customizeWebsite.getComputedStyle(
+            this.document.querySelector("#wrapwrap"),
             "background-image"
-        ];
+        );
         if (bgImage === "none") {
             return "NONE";
         }
         const style = getHtmlStyle(this.document);
-        return getCSSVariableValue("body-image-type", style);
+        return this.dependencies.customizeWebsite.getCSSVariableValue("body-image-type", style);
     }
     async load({ editingElement: el, params, value, historyImageSrc }) {
         const getAction = this.dependencies.builderActions.getAction;
@@ -883,7 +928,7 @@ export class CustomizeWebsiteColorAction extends BuilderAction {
                 return el.style.getPropertyValue("background-image");
             }
         }
-        return getCSSVariableValue(color, style);
+        return this.dependencies.customizeWebsite.getCSSVariableValue(color, style);
     }
     async apply({
         params: { mainParam: color, colorType, gradientColor, combinationColor, nullValue },
@@ -939,8 +984,14 @@ export class CustomizeButtonStyleAction extends BuilderAction {
     }
     getValue({ params: { mainParam: which } }) {
         const style = getHtmlStyle(this.document);
-        const isOutline = getCSSVariableValue(`btn-${which}-outline`, style);
-        const isFlat = getCSSVariableValue(`btn-${which}-flat`, style);
+        const isOutline = this.dependencies.customizeWebsite.getCSSVariableValue(
+            `btn-${which}-outline`,
+            style
+        );
+        const isFlat = this.dependencies.customizeWebsite.getCSSVariableValue(
+            `btn-${which}-flat`,
+            style
+        );
         return isFlat === "true" ? "flat" : isOutline === "true" ? "outline" : "fill";
     }
     async apply({ params: { mainParam: which, nullValue }, value }) {

@@ -1,11 +1,11 @@
 import { onMounted } from "@odoo/owl";
 import { BaseOptionComponent, useDomState } from "@html_builder/core/utils";
-import { getCSSVariableValue } from "@html_editor/utils/formatting";
 
 export class ThemeColorsOption extends BaseOptionComponent {
     static template = "website.ThemeColorsOption";
     static props = {};
     setup() {
+        this.customizeWebsite = this.env.editor.shared.customizeWebsite;
         super.setup();
         this.palettes = this.getPalettes();
         this.state = useDomState(() => ({
@@ -20,7 +20,8 @@ export class ThemeColorsOption extends BaseOptionComponent {
     getPalettes() {
         const palettes = [];
         const style = window.getComputedStyle(document.documentElement);
-        const allPaletteNames = getCSSVariableValue("palette-names", style)
+        const allPaletteNames = this.customizeWebsite
+            .getCSSVariableValue("palette-names", style)
             .split(", ")
             .map((name) => name.replace(/'/g, ""));
         for (const paletteName of allPaletteNames) {
@@ -29,7 +30,10 @@ export class ThemeColorsOption extends BaseOptionComponent {
                 colors: [],
             };
             [1, 3, 2].forEach((c) => {
-                const color = getCSSVariableValue(`o-palette-${paletteName}-o-color-${c}`, style);
+                const color = this.customizeWebsite.getCSSVariableValue(
+                    `o-palette-${paletteName}-o-color-${c}`,
+                    style
+                );
                 palette.colors.push(color);
             });
             palettes.push(palette);
@@ -73,6 +77,6 @@ export class ThemeColorsOption extends BaseOptionComponent {
                 this.iframeDocument.documentElement
             );
         }
-        return getCSSVariableValue(color, this.iframeStyle);
+        return this.customizeWebsite.getCSSVariableValue(color, this.iframeStyle);
     }
 }
