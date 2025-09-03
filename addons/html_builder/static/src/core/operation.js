@@ -1,4 +1,5 @@
 import { Mutex } from "@web/core/utils/concurrency";
+import { memoize } from "@web/core/utils/functions";
 
 // TODO when making apply async:
 // - check `isDestroyed` instead of `this.editableDocument.defaultView`
@@ -46,18 +47,20 @@ export class Operation {
             shouldInterceptClick = false,
         } = {}
     ) {
-        this.cancelPrevious?.();
+        const memoLoad = memoize(load);
+        this.cancelPrevious?.(memoLoad);
         let isCancel = false;
         let cancelResolve;
         this.cancelPrevious =
             cancellable &&
-            (() => {
+            ((memoLoad) => {
                 this.cancelPrevious = null;
                 isCancel = true;
                 cancelResolve?.();
                 // Cancel in the mutex to wait for the revert before the next
                 // apply.
                 this.mutex.exec(async () => {
+                    await memoLoad();
                     await cancelPrevious?.();
                 });
             });
@@ -78,7 +81,7 @@ export class Operation {
                 shouldInterceptClick
             );
             const applyOperation = async () => {
-                const loadResult = await load();
+                const loadResult = await memoLoad();
 
                 if (isCancel) {
                     return;
