@@ -54,9 +54,16 @@ registerWebsitePreviewTour("add_and_remove_main_product_image_no_variant", {
         run: "dblclick",
     },
     {
+        trigger: ".o_select_media_dialog img",
+    },
+    {
         content: "Click on the new image",
         trigger: ".o_select_media_dialog img[title='s_default_image.jpg']",
-        run: "click",
+        run() {
+            this.anchor.click();
+            // now manually close the media dialog
+            document.querySelector(".o_select_media_dialog .btn-close").click()
+        },
     },
     {
         content: "Check that the snippet editor of the clicked image has been loaded",
