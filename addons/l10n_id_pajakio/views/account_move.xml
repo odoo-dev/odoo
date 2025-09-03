@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="account_move_form_view" model="ir.ui.view">
+        <field name="name">account.move.form.inherit</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="l10n_id_pajakio_generate" string="Create Pajak.io Faktur" type="object" class="btn btn-primary" invisible="l10n_id_pajakio_transaction_id"/>
+                <button name="l10n_id_pajakio_upload" string="Upload Pajak.io Faktur" type="object" class="btn btn-primary" invisible="l10n_id_pajakio_uploaded or not l10n_id_pajakio_transaction_id"/>
+                <button name="l10n_id_pajakio_update_status" string="Update Pajak.io Faktur" type="object" class="btn btn-primary" invisible="not(l10n_id_pajakio_transaction_id and l10n_id_pajakio_uploaded)"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Pajak.io Information">
+                    <group>
+                        <group>
+                            <field name="l10n_id_pajakio_transaction_id"/>
+                            <field name="l10n_id_pajakio_uploaded" />
+                            <field name="l10n_id_pajakio_trx_url"/>
+                            <field name="l10n_id_pajakio_nofa"/>
+                            <field name="l10n_id_pajakio_failure_reason" invisible="not l10n_id_pajakio_failure_reason"/>
+                            <field name="l10n_id_pajakio_status"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

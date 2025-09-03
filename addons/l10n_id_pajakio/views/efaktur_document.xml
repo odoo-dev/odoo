@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="l10n_id_efaktur_document_form_view_inherit" model="ir.ui.view">
+        <field name="name">l10n_id_efaktur_coretax.document.form.view.inherit</field>
+        <field name="model">l10n_id_efaktur_coretax.document</field>
+        <field name="inherit_id" ref="l10n_id_efaktur_coretax.l10n_id_efaktur_document_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="l10n_id_pajakio_generate_invoices" string="Generate Pajak.io Invoices" class="btn btn-primary" type="object"/>
+                <button name="l10n_id_pajakio_upload_invoices" string="Upload Pajak.io Invoices" class="btn btn-primary" type="object"/>
+                <button name="l10n_id_pajakio_check_status" string="Update Pajak.io Invoices Status" class="btn btn-primary" type="object"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
