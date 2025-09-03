@@ -2358,6 +2358,7 @@ class IrModelData(models.Model):
         # update loaded_xmlids
         self.pool.loaded_xmlids.update("%s.%s" % row[:2] for row in rows)
 
+        self.env.registry.clear_cache()
         if any(row[2] == 'res.groups' for row in rows):
             self.env.registry.clear_cache('groups')
 
