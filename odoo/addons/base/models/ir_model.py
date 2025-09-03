@@ -2269,6 +2269,7 @@ class IrModelData(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
+        self.env.registry.clear_cache()  # _xmlid_lookup
         if any(vals.get('model') == 'res.groups' for vals in vals_list):
             self.env.registry.clear_cache('groups')
         return res
