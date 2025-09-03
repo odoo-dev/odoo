@@ -5,19 +5,16 @@
             <t t-set-slot="control-panel-buttons">
                 <ForecastedButtons action="this.props.action" reloadReport.bind="this.reloadReport" resModel="this.resModel"/>
             </t>
-            <t t-set-slot="layout-actions">
-                <div class="d-flex gap-4">
-                    <div class="btn-group o_search_options position-static" role="search">
-                        <ForecastedWarehouseFilter action="this.props.action" warehouses="this.warehouses" setWarehouseInContext.bind="this.updateWarehouse"/>
-                    </div>
-                    <div class="btn-group o_search_options position-static" role="search">
-                        <ForecastedProductVariantFilter action="this.props.action" variants="this.variants" setVariantInContext.bind="this.updateVariant"/>
-                    </div>
-                </div>
+            <t t-set-slot="control-panel-navigation-additional">
+                <ForecastedProductVariantFilter action="this.props.action" variants="this.variants"
+                    setVariantInContext.bind="this.updateVariant"/>
+                <ForecastedWarehouseFilter action="this.props.action" warehouses="this.warehouses"
+                    setWarehouseInContext.bind="this.updateWarehouse"/>
             </t>
         </ControlPanel>
         <div class="o-content pt-3 container-fluid overflow-auto o_stock_forecasted_page">
-            <ForecastedHeader docs="this.docs" openView.bind="this.openView"/>
+            <ForecastedHeader docs="this.docs" openView.bind="this.openView"
+                selectedWarehouseIds="selectedWarehouseIds"/>
             <t t-if="this.context.warehouse_id !== undefined">
                 <View type="'graph'"
                 viewId="this.stock_report_view_graph"

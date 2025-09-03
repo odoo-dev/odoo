@@ -10,7 +10,7 @@ import { ForecastedDetails } from "./forecasted_details";
 import { ForecastedHeader } from "./forecasted_header";
 import { ForecastedWarehouseFilter } from "./forecasted_warehouse_filter";
 import { ForecastedProductVariantFilter } from "./forecasted_product_variant_filter";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component, markup, onWillStart } from "@odoo/owl";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 
 export class StockForecasted extends Component {
@@ -147,16 +147,17 @@ export class StockForecasted extends Component {
         return this.action.doAction(actionRequest, options);
     }
 
-    get graphDomain() {
-        let warehouseIds = [];
+    get selectedWarehouseIds() {
         if (this.warehouseId === 0) {
-            warehouseIds = this.warehouses.filter(warehouse => warehouse.id > 0).map(warehouse => warehouse.id);
-        } else {
-            warehouseIds = [this.warehouseId];
+            return this.warehouses.filter((warehouse) => warehouse.id > 0).map((warehouse) => warehouse.id);
         }
+        return [this.warehouseId];
+    }
+
+    get graphDomain() {
         const domain = [
             ["state", "=", "forecast"],
-            ["warehouse_id", "in", warehouseIds],
+            ["warehouse_id", "in", this.selectedWarehouseIds],
         ];
         if (this.resModel === "product.template") {
             domain.push(["product_tmpl_id", "=", this.productId]);
@@ -170,7 +171,9 @@ export class StockForecasted extends Component {
     }
 
     get graphInfo() {
-        return { noContentHelp: _t("Try to add some incoming or outgoing transfers.") };
+        return {
+            noContentHelp: markup(`<span class="text-muted">${_t("Try to add some incoming or outgoing transfers.")}</span>`),
+        };
     }
 
     async openView(resModel, view, resId=false, domain = false) {
