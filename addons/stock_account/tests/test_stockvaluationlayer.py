@@ -1,7 +1,5 @@
 """ Implementation of "INVENTORY VALUATION TESTS" spreadsheet. """
 
-from unittest import skip
-
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.stock_account.tests.test_stockvaluation import _create_accounting_data
@@ -10,7 +8,6 @@ from odoo.tests import Form, tagged
 from odoo.tests.common import TransactionCase
 
 
-@skip('Temporary to fast merge new valuation')
 class TestStockValuationCommon(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -1093,7 +1090,6 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestAngloSaxonAccounting(AccountTestInvoicingCommon, TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
