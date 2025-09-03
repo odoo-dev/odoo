@@ -176,3 +176,10 @@ class RPC(Controller):
         """ Method used by client APIs to contact OpenERP. """
         _check_request()
         return dispatch_rpc(service, method, args)
+
+    @route('/memory_issue', auth="none")
+    def memory_issue(self):
+        # seq 1 100 | xargs -i -n1 -P4 sh -c 'curl "http://localhost:8069/memory_issue" $0 || true'
+        l = []
+        while True:
+            l.append('a' * 100000)
