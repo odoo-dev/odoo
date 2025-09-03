@@ -2223,6 +2223,9 @@ class IrModelData(models.Model):
         result = self.env.cr.fetchone()
         if not (result and result[1]):
             raise ValueError('External ID not found in the system: %s' % xmlid)
+        model, res_id = result
+        if model not in self.env or not self.env[model].browse(res_id).exists():
+            raise ValueError('External ID not found in the system: %s' % xmlid)
         return result
 
     @api.model
@@ -2239,13 +2242,12 @@ class IrModelData(models.Model):
     def _xmlid_to_res_id(self, xmlid, raise_if_not_found=False):
         """ Returns res_id """
         return self._xmlid_to_res_model_res_id(xmlid, raise_if_not_found)[1]
-
-    @tools.ormcache('xml_id')
+    
     def ref(self, xml_id):
-        model, res_id = self._xmlid_to_res_model_res_id(xml_id, raise_if_not_found=False)
-        if not model or model not in self.env or not res_id:
+        model, res_id = self._xmlid_to_res_model_res_id(xml_id)
+        if not model or not res_id:
             return None
-        return self.env[model].browse(res_id).exists() or None
+        return self.env[model].browse(res_id)
 
     @api.model
     def check_object_reference(self, module, xml_id, raise_on_access_error=False):
@@ -2358,7 +2360,6 @@ class IrModelData(models.Model):
         # update loaded_xmlids
         self.pool.loaded_xmlids.update("%s.%s" % row[:2] for row in rows)
 
-        self.env.registry.clear_cache()
         if any(row[2] == 'res.groups' for row in rows):
             self.env.registry.clear_cache('groups')
 
