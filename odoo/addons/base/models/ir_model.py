@@ -2240,6 +2240,13 @@ class IrModelData(models.Model):
         """ Returns res_id """
         return self._xmlid_to_res_model_res_id(xmlid, raise_if_not_found)[1]
 
+    @tools.ormcache('xml_id')
+    def ref(self, xml_id):
+        model, res_id = self._xmlid_to_res_model_res_id(xml_id, raise_if_not_found=False)
+        if not model or model not in self.env or not res_id:
+            return None
+        return self.env[model].browse(res_id).exists() or None
+
     @api.model
     def check_object_reference(self, module, xml_id, raise_on_access_error=False):
         """Returns (model, res_id) corresponding to a given module and xml_id (cached), if and only if the user has the necessary access rights

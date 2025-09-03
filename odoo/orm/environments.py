@@ -163,17 +163,10 @@ class Environment(Mapping[str, "BaseModel"]):
         :returns: Found record or None
         :raise ValueError: if record wasn't found and ``raise_if_not_found`` is True
         """
-        res_model, res_id = self['ir.model.data']._xmlid_to_res_model_res_id(
-            xml_id, raise_if_not_found=raise_if_not_found
-        )
-
-        if res_model and res_id:
-            record = self[res_model].browse(res_id)
-            if record.exists():
-                return record
-            if raise_if_not_found:
-                raise ValueError('No record found for unique ID %s. It may have been deleted.' % (xml_id))
-        return None
+        ref = self['ir.model.data'].ref(xml_id)
+        if ref is None and raise_if_not_found:
+            raise ValueError('No record found for unique ID %s. It may have been deleted.' % (xml_id))
+        return ref
 
     def is_superuser(self) -> bool:
         """ Return whether the environment is in superuser mode. """
