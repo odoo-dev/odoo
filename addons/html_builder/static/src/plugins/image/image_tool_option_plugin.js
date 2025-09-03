@@ -121,11 +121,11 @@ class ImageToolOptionPlugin extends Plugin {
     }
 
     async canHaveHoverEffect(img) {
-        const getDataset = async () => Object.assign({}, img.dataset, await loadImageInfo(img));
+        const dataset = Object.assign({}, img.dataset, await loadImageInfo(img));
         return img.tagName === "IMG"
             ? !this.isDeviceShape(img) &&
-                  !this.isAnimatedShape(img) &&
-                  this.isImageSupportedForShapes(img, await getDataset()) &&
+                  this.getResource("can_hover_effect_predicates").every((cb) => cb(dataset)) &&
+                  this.isImageSupportedForShapes(img, dataset) &&
                   !(await isImageCorsProtected(img))
             : null;
     }
@@ -137,17 +137,16 @@ class ImageToolOptionPlugin extends Plugin {
         const shapeCategory = shapeName.split("/")[1];
         return shapeCategory === "devices";
     }
-    isAnimatedShape(img) {
-        // todo: to implement while implementing the animated shapes
-        return false;
-    }
     isImageSupportedForShapes(img, dataset = img.dataset) {
-        // todo: The hover effect code should probably be define somewhere else.
-        const isHoverEffect = !!dataset["hoverEffect"];
-        return (
-            isHoverEffect ||
-            (dataset.originalId && isImageSupportedForProcessing(getMimetype(img, dataset)))
-        );
+        // todo: The hover effect and shape code should probably be define somewhere else.
+        if (dataset["hoverEffect"] || dataset.shape) {
+            return true;
+        }
+        if (!dataset.originalId) {
+            return false;
+        }
+        const mimetype = getMimetype(img, dataset);
+        return ["image/jpeg", "image/png", "image/webp"].includes(mimetype);
     }
     // TODO Remove in master.
     migrateImages(rootEl) {

@@ -49,6 +49,12 @@ export class ImageShapeOptionPlugin extends Plugin {
         },
         process_image_warmup_handlers: this.processImageWarmup.bind(this),
         process_image_post_handlers: this.processImagePost.bind(this),
+        can_hover_effect_predicates: (dataset) => {
+            if (dataset.shape && this.isAnimableShape(dataset.shape)) {
+                return false;
+            }
+            return true;
+        },
     };
     setup() {
         this.shapeSvgTextCache = {};
