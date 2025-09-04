@@ -254,6 +254,7 @@ class StockMove(models.Model):
                         production.lot_producing_ids = lot_id
                         production.subcontracting_has_been_recorded = True
                 else:
+                    mos_to_assign = self.env['mrp.production']
                     # MOs already created for lots, update to enforce sync:
                     # 1. Ensure quantities of linked MOs still match the quantities on the move
                     mos_to_create = {}  # lot -> qty
@@ -266,7 +267,7 @@ class StockMove(models.Model):
                                 'mo_id': lot_mo.id,
                                 'product_qty': ml_qty
                             }]).change_prod_qty()
-                            lot_mo.action_assign()
+                            mos_to_assign |= lot_mo
 
                     # 2. Create new MOs where needed, by splitting them from an existing subcontracting MO
                     if mos_to_create:
@@ -274,6 +275,7 @@ class StockMove(models.Model):
                         new_mos = production_to_split.sudo().with_context(allow_more=True, mrp_subcontracting=False)._split_productions({
                             production_to_split: [production_to_split.product_qty] + list(mos_to_create.values())
                         }, cancel_remaining_qty=True)[1:]
+                        mos_to_assign |= new_mos
                         for mo, lot_id in zip(new_mos, mos_to_create.keys()):
                             mo.lot_producing_ids = lot_id
                             mo.subcontracting_has_been_recorded = True
@@ -290,6 +292,8 @@ class StockMove(models.Model):
                     if orphan_productions:
                         orphan_productions.with_context(skip_activity=True).unlink()
                         productions -= orphan_productions
+
+                    mos_to_assign.action_assign()
 
     def _generate_serial_numbers(self, next_serial, next_serial_count=False, location_id=False):
         if self.is_subcontract:
