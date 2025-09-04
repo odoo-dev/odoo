@@ -8,6 +8,7 @@ import { cleanTextNode, fillEmpty, splitTextNode, unwrapContents } from "../util
 import {
     areSimilarElements,
     isContentEditable,
+    isElement,
     isEmptyBlock,
     isEmptyTextNode,
     isSelfClosingElement,
@@ -30,6 +31,7 @@ import { boundariesIn, boundariesOut, DIRECTIONS, leftPos, rightPos } from "../u
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 
 const allWhitespaceRegex = /^[\s\u200b]*$/;
+export const FORMATTABLE_TAGS = ["SPAN", "FONT", "B", "STRONG", "I", "EM", "U", "S"];
 
 function isFormatted(formatPlugin, format) {
     return (sel, nodes) => formatPlugin.isSelectionFormat(format, nodes);
@@ -588,7 +590,7 @@ export class FormatPlugin extends Plugin {
      */
     mergeAdjacentInlines(root, { preserveSelection = true } = {}) {
         let selectionToRestore = null;
-        for (const node of [root, ...descendants(root)]) {
+        for (const node of [root, ...descendants(root)].filter(isElement)) {
             if (this.shouldBeMergedWithPreviousSibling(node)) {
                 if (preserveSelection) {
                     selectionToRestore ??= this.dependencies.selection.preserveSelection();
@@ -603,6 +605,7 @@ export class FormatPlugin extends Plugin {
 
     shouldBeMergedWithPreviousSibling(node) {
         const isMergeable = (node) =>
+            FORMATTABLE_TAGS.includes(node.nodeName) &&
             !this.getResource("unsplittable_node_predicates").some((predicate) => predicate(node));
         return (
             !isSelfClosingElement(node) &&
