@@ -1,5 +1,6 @@
 import { Mutex } from "@web/core/utils/concurrency";
 import { memoize } from "@web/core/utils/functions";
+import { Deferred } from "jquery";
 
 // TODO when making apply async:
 // - check `isDestroyed` instead of `this.editableDocument.defaultView`
@@ -47,28 +48,36 @@ export class Operation {
             shouldInterceptClick = false,
         } = {}
     ) {
+        // We memoize the load as it can be called through cancelPrevious or directly in applyOperation and we only want to run it once.
         const memoLoad = memoize(load);
-        this.cancelPrevious?.(memoLoad);
+        const cancelTimePromise = new Promise((resolve) => setTimeout(resolve, cancelTime));
+        const cancelLoadPromise = new Deferred();
         let isCancel = false;
-        let cancelResolve;
+        let workPromise;
+        this.cancelPrevious?.(() => Promise.race([memoLoad(), cancelLoadPromise]));
         this.cancelPrevious =
             cancellable &&
-            ((memoLoad) => {
+            ((nextOperationPromise) => {
                 this.cancelPrevious = null;
                 isCancel = true;
-                cancelResolve?.();
+                cancelLoadPromise.resolve();
                 // Cancel in the mutex to wait for the revert before the next
                 // apply.
                 this.mutex.exec(async () => {
-                    await memoLoad();
+                    // When we cancel this operation, either we did not finish
+                    // this work (because cancelTimePromise or applyOpreation
+                    // hasn't resolved yet). So we wait for the work to finish first.
+                    await workPromise;
+                    // We want to wait for the next load to finish, otherwise we
+                    // might revert the content (through cancelPrevious) and
+                    // therefore have a dom with a wrong state until the next
+                    // load is done. This can create visual glitches. In order
+                    // to avoid that, we wait for the next promise to either
+                    // load or be cancelled itself.
+                    await nextOperationPromise();
                     await cancelPrevious?.();
                 });
             });
-
-        const cancelTimePromise = new Promise((resolve) => setTimeout(resolve, cancelTime));
-        const cancelLoadPromise = new Promise((resolve) => {
-            cancelResolve = resolve;
-        });
 
         return this.mutex.exec(async () => {
             if (isCancel) {
@@ -98,7 +107,7 @@ export class Operation {
             };
 
             try {
-                await Promise.race([
+                workPromise = await Promise.race([
                     Promise.all([cancelLoadPromise, cancelTimePromise]),
                     applyOperation(),
                 ]);
