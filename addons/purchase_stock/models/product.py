@@ -127,17 +127,6 @@ class ProductProduct(models.Model):
             ]))
         return rfq_domain & Domain.OR(domains or [Domain.TRUE])
 
-    def _get_invalid_routes(self, route_ids):
-        invalid_route_ids = super()._get_invalid_routes(route_ids)
-        buy_routes = self.env['stock.rule'].search([
-            ('action', '=', 'buy'),
-            ('picking_type_id.code', '=', 'incoming'),
-            ('active', '=', True),
-        ]).route_id
-        if not self.purchase_ok and not any(route_id in self.route_ids for route_id in buy_routes):
-            invalid_route_ids += buy_routes
-        return invalid_route_ids
-
 
 class ProductSupplierinfo(models.Model):
     _inherit = 'product.supplierinfo'

@@ -430,17 +430,6 @@ class ProductProduct(models.Model):
     def _get_backend_root_menu_ids(self):
         return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
 
-    def _get_invalid_routes(self, route_ids):
-        invalid_route_ids = super()._get_invalid_routes(route_ids)
-        manufacturing_routes = self.env['stock.rule'].search([
-            ('action', '=', 'manufacture'),
-            ('picking_type_id.code', '=', 'mrp_operation'),
-            ('active', '=', True),
-        ]).route_id
-        if not any(bom.type == 'normal' for bom in self.bom_ids) and not any(route_id in self.route_ids for route_id in manufacturing_routes):
-            invalid_route_ids += manufacturing_routes
-        return invalid_route_ids
-
     def _update_uom(self, to_uom_id):
         for uom, product_template, boms in self.env['mrp.bom']._read_group(
             [('product_tmpl_id', 'in', self.product_tmpl_id.ids)],

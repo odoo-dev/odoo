@@ -24,16 +24,3 @@ class ProductProduct(models.Model):
         if params and params.get('subcontractor_ids'):
             return super()._prepare_sellers(params=params).filtered(lambda s: s.partner_id in params.get('subcontractor_ids'))
         return super()._prepare_sellers(params=params)
-
-    def _get_invalid_routes(self, route_ids):
-        invalid_route_ids = super()._get_invalid_routes(route_ids)
-        resupply_subcontractor_routes = self.env['stock.rule'].search([
-            ('action', '=', 'pull'),
-            ('picking_type_id.code', '=', 'internal'),
-            ('location_src_id.is_subcontracting_location', '=', True),
-            ('active', '=', True),
-        ]).route_id
-        has_subcontract_bom = any(bom_line.bom_id.type == 'subcontract' for bom_line in self.bom_line_ids)
-        if not has_subcontract_bom and not any(route_id in self.route_ids for route_id in resupply_subcontractor_routes):
-            invalid_route_ids += resupply_subcontractor_routes
-        return invalid_route_ids
