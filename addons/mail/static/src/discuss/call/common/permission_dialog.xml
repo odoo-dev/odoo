@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="discuss.PermissionDialog">
+        <div role="dialog" class="modal d-block" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-md">
+                <div class="modal-content d-flex flex-column align-items-center justify-content-center rounded-4">
+                    <header class="modal-header align-self-end border-0">
+                        <button type="button" class="btn-close" aria-label="Close" t-on-click="close"/>
+                    </header>
+                    <main class="modal-body text-center pt-2">
+                        <h5 class="fw-medium fs-2 mb-2"><t t-out="permissionPrompt"/></h5>
+                        <small class="text-muted"><t t-out="permissionNote"/></small>
+                    </main>
+                    <footer class="modal-footer border-0 justify-content-center gap-2 pt-0">
+                        <button class="btn btn-primary px-4 rounded-pill" t-on-click="onClickPrimary">
+                            <t t-out="primaryActionText"/>
+                        </button>
+                        <button class="btn btn-outline-primary px-4 rounded-pill" t-on-click="onClickSecondary">
+                            <t t-out="secondaryActionText"/>
+                        </button>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

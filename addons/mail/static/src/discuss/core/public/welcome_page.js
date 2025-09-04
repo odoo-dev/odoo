@@ -21,7 +21,7 @@ export class WelcomePage extends Component {
         this.notification = useService("notification");
         this.rtc = useService("discuss.rtc");
         this.state = useState({
-            userName: this.store.self.name || _t("Guest"),
+            userName: _t("Your Name"),
             audioStream: null,
             videoStream: null,
         });
@@ -60,7 +60,7 @@ export class WelcomePage extends Component {
     }
 
     onKeydownInput(ev) {
-        if (ev.key === "Enter") {
+        if (ev.key === "Enter" && this.state.userName.trim() !== "") {
             this.joinChannel();
         }
     }
@@ -194,5 +194,9 @@ export class WelcomePage extends Component {
     }
     getLoggedInAsText() {
         return _t("Logged in as %s", this.store.self.name);
+    }
+
+    get noActiveParticipants() {
+        return !this.store.discuss.thread.rtc_session_ids.length;
     }
 }

@@ -13,10 +13,10 @@ import {
 
 import { monitorAudio } from "@mail/utils/common/media_monitoring";
 import { browser } from "@web/core/browser/browser";
+import { _t } from "@web/core/l10n/translation";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { Deferred } from "@web/core/utils/concurrency";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
-import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
 export function useLazyExternalListener(target, eventName, handler, eventParams) {
@@ -402,6 +402,7 @@ export function useMicrophoneVolume() {
     let disconnectAudioMonitor;
     let audioMonitorPromise;
     const store = useService("mail.store");
+    const rtc = useService("discuss.rtc");
     const state = useState({
         isReady: true,
         isActive: false,
@@ -421,35 +422,77 @@ export function useMicrophoneVolume() {
                 state.value = 0;
                 return;
             }
-            let track;
-            try {
-                const audioStream = await browser.navigator.mediaDevices.getUserMedia({
-                    audio: store.settings.audioConstraints,
-                });
-                track = audioStream.getAudioTracks()[0];
-            } catch {
+
+            const startMonitoring = async (mediaTrack) => {
+                if (isClosed) {
+                    mediaTrack?.stop();
+                    return;
+                }
+                if (!mediaTrack) {
+                    state.isReady = true;
+                    return;
+                }
+                try {
+                    audioMonitorPromise = monitorAudio(mediaTrack, {
+                        onTic: (value) => {
+                            state.value = value;
+                        },
+                        processInterval: 100,
+                    });
+                    disconnectAudioMonitor = await audioMonitorPromise;
+                    audioTrack = mediaTrack;
+                    state.isActive = true;
+                    state.isReady = true;
+                } catch {
+                    mediaTrack?.stop();
+                    state.isReady = true;
+                }
+            };
+
+            const requestMicrophoneAccess = async () => {
+                try {
+                    const audioStream = await browser.navigator.mediaDevices.getUserMedia({
+                        audio: store.settings.audioConstraints,
+                    });
+                    await startMonitoring(audioStream.getAudioTracks()[0]);
+                } catch {
+                    const permissionState = await rtc.checkPermissionState("microphone");
+                    if (permissionState === "denied") {
+                        store.env.services.notification.add(
+                            _t(
+                                "Microphone access is blocked. Please enable microphone permission in your browser settings and refresh the page."
+                            ),
+                            { type: "warning" }
+                        );
+                    }
+                    state.isReady = true;
+                }
+            };
+
+            // Check permission state first
+            const permissionState = await rtc.checkPermissionState("microphone");
+            if (permissionState === "denied") {
                 store.env.services.notification.add(
-                    _t('"%(hostname)s" requires microphone access', {
-                        hostname: browser.location.host,
-                    }),
+                    _t(
+                        "Microphone access is blocked. Please enable microphone permission in your browser settings and refresh the page."
+                    ),
                     { type: "warning" }
                 );
+                state.isReady = true;
                 return;
-            }
-            if (isClosed) {
-                track.stop();
+            } else if (permissionState === "prompt") {
+                // Show permission dialog before requesting access
+                rtc.permissionManager.showPermissionDialog(
+                    "microphone-test",
+                    requestMicrophoneAccess,
+                    () => (state.isReady = true),
+                    () => (state.isReady = true)
+                );
                 return;
+            } else {
+                // Permission already granted, proceed directly
+                await requestMicrophoneAccess();
             }
-            audioMonitorPromise = monitorAudio(track, {
-                onTic: (value) => {
-                    state.value = value;
-                },
-                processInterval: 100,
-            });
-            disconnectAudioMonitor = await audioMonitorPromise;
-            audioTrack = track;
-            state.isActive = true;
-            state.isReady = true;
         },
     });
     onWillUnmount(async () => {

@@ -2,18 +2,31 @@
 <templates xml:space="preserve">
 
     <t t-name="discuss.CallActionList.button">
-        <button class="btn smaller d-flex m-1 border rounded-circle shadow opacity-75-hover align-items-center p-0"
-            t-att-class="{ 'bg-600 opacity-75': !props.action.available, 'opacity-100': props.action.available }"
+        <button
+            class="btn position-relative smaller d-flex m-1 border rounded-circle shadow opacity-75-hover align-items-center p-0"
+            t-att-class="{
+                'bg-600 opacity-75': !props.action.available,
+                'opacity-100': props.action.available,
+                'bg-danger': isPermissionMissing
+            }"
             t-att-data-hotkey="props.action.hotkey"
             t-att-aria-label="props.action.name"
             t-att-title="title"
-            t-on-click="props.action.select">
-            <i class="fa fa-fw m-2 fa-fw" t-att-class="{
+            t-on-click="props.action.select"
+        >
+            <i class="fa fa-fw m-2" t-att-class="{
                 'fa-lg': !props.isSmall,
                 [props.action.inactiveIcon]: !props.isActive,
+                'text-white': isPermissionMissing,
                 [props.action.icon]: props.isActive or !props.action.inactiveIcon,
-                [props.action.activeClass]: props.isActive,
-            }"/>
+                [props.action.activeClass]: props.isActive }"
+            />
+            <span
+                t-if="isPermissionMissing"
+                class="position-absolute text-dark fw-bolder mt-2 start-100 translate-middle p-1 badge rounded-circle bg-warning"
+            >
+                <i class="fa fa-exclamation-triangle"/>
+            </span>
         </button>
     </t>
 
