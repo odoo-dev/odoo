@@ -1202,7 +1202,7 @@ options.Class.include({
         if (this.options.isWebsite && !widget.$el.closest('[data-no-widget-refresh="true"]').length
             && !this.$target[0].matches(targetNoRefreshSelector)) {
             // TODO the flag should be retrieved through widget params somehow
-            await this._refreshPublicWidgets();
+            await this._refreshPublicWidgets(widget.$el);
         }
     },
 
