@@ -918,21 +918,45 @@ class IrActionsServer(models.Model):
         path = self[searched_field_name].split('.')
         if not path:
             return [], ""
+
+        field = None
+        property_defs = None
+
+        def get_field_data(model, field_name):
+            nonlocal field, property_defs
+            if field_name in model._fields:
+                if property_defs and field.type == "properties":
+                    # second property field traversed, raise as we do not support this
+                    raise UserError(_("Cannot traverse properties fields twice."))
+                field = model._fields[field_name]
+            if not property_defs and field.type == "properties":
+                virtual = model.new()
+                property_defs = {d["name"]: d for d in field._get_properties_definition(virtual)}
+            if property_defs and property_defs.get(field_name):
+                return field, property_defs[field_name]
+            return field, {
+                "type": field.type,
+                "string": field.get_description(self.env)["string"],
+                "comodel": field.comodel_name,
+            }
+
         model = self.env[self.model_id.model]
         chain = []
-        for field_name in path:
-            is_last_field = field_name == path[-1]
-            field = model._fields[field_name]
-            if not is_last_field:
-                if not field.relational:
+        strings = []
+        for name_part in path:
+            is_last = name_part == path[-1]
+            field, f_data = get_field_data(model, name_part)
+            field_string = f_data.get("string")
+            if f_data["type"] != "properties" and not is_last:
+                if not (comodel := f_data.get("comodel")):
                     # sanity check: this should be the last field in the path
-                    current_field = field.get_description(self.env)["string"]
                     searched_field = self._fields[searched_field_name].get_description(self.env)["string"]
-                    raise ValidationError(_("The path contained by the field '%(searched_field)s' contains a non-relational field (%(current_field)s) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational.", searched_field=searched_field, current_field=current_field))
-                model = self.env[field.comodel_name]
-            chain.append(field)
-        stringified_path = ' > '.join([field.get_description(self.env)["string"] for field in chain])
-        return chain, stringified_path
+                    raise ValidationError(_("The path contained by the field '%(searched_field)s' contains a non-relational field (%(current_field)s) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational.", searched_field=searched_field, current_field=field_string))
+                model = self.env[comodel]
+            if not chain or field != chain[-1]:
+                chain.append(field)
+            strings.append(field_string)
+        return chain, ' > '.join(strings)
 
     @api.depends('state', 'model_id', 'webhook_field_ids', 'name')
     def _compute_webhook_sample_payload(self):
