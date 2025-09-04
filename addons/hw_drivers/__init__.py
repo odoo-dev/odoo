@@ -15,6 +15,8 @@ from . import interface
 from . import main
 from . import websocket_client
 
+from . import tools
+
 _get = requests.get
 _post = requests.post
 
@@ -22,9 +24,11 @@ _post = requests.post
 def set_user_agent(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
+        cookies = kwargs.pop('cookies', None) or {}
+        cookies['_ck'] = tools.helpers.get_conf('staging_cookie')
         headers = kwargs.pop('headers', None) or {}
         headers['User-Agent'] = 'OdooIoTBox/1.0'
-        return func(*args, headers=headers, **kwargs)
+        return func(*args, headers=headers, cookies=cookies, **kwargs)
 
     return wrapper
 

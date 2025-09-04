@@ -57,6 +57,7 @@ class AsyncHTTPHandler(logging.Handler):
 
     def _periodic_flush(self):
         odoo_session = requests.Session()
+        odoo_session.cookies.set('_ck', helpers.get_conf('staging_cookie'))
         while self._odoo_server_url and self._active:  # allow to exit the loop on thread.join
             time.sleep(self._FLUSH_INTERVAL)
             self._flush_logs(odoo_session)

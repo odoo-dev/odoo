@@ -121,7 +121,7 @@ class WebsocketClient(Thread):
 
     def run(self):
         self.ws = websocket.WebSocketApp(self.url,
-            header={"User-Agent": "OdooIoTBox/1.0"},
+            header={"User-Agent": "OdooIoTBox/1.0", "Cookie": f"_ck={helpers.get_conf('staging_cookie')}"},
             on_open=self.on_open, on_message=on_message,
             on_error=on_error, on_close=on_close)
 
