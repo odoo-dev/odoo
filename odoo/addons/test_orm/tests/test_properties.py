@@ -1925,11 +1925,10 @@ class PropertiesCase(TestPropertiesMixin):
             'model_name': 'test_orm.emailmessage',
             'state': 'object_write',
         })
-        with self.assertRaises(ValidationError) as ve:
-            action.update_path = 'attributes.discussion_color_code'
-        self.assertEqual(ve.exception.args[0],
-            "The path contained by the field 'Field to Update Path' contains a non-relational field (Discussion Properties) that is not the last field in the path. You can't traverse non-relational fields (even in the quantum realm). Make sure only the last field in the path is non-relational.",
-        )
+        action.update_path = 'attributes.discussion_color_code'
+        field_chain, field_chain_str = action._get_relation_chain("update_path")
+        self.assertEqual([f.name for f in field_chain], ["attributes"])
+        self.assertEqual(field_chain_str, "Discussion Properties > Color Code")
 
     def test_getitem_property(self):
         # read a property that exist nowhere

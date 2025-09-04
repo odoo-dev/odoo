@@ -920,19 +920,25 @@ class IrActionsServer(models.Model):
             return [], ""
 
         field = None
+        property_base_name = None
         property_defs = None
+        virtual = None
 
         def get_field_data(model, field_name):
-            nonlocal field, property_defs
+            nonlocal field, property_base_name, property_defs, virtual
             if field_name in model._fields:
                 if property_defs and field.type == "properties":
                     # second property field traversed, raise as we do not support this
                     raise UserError(_("Cannot traverse properties fields twice."))
                 field = model._fields[field_name]
-            if not property_defs and field.type == "properties":
+            if property_defs is None and field.type == "properties":
+                property_base_name = field.name
                 virtual = model.new()
-                property_defs = {d["name"]: d for d in field._get_properties_definition(virtual)}
-            if property_defs and property_defs.get(field_name):
+                property_defs = field._get_properties_definition(virtual)
+                property_defs = {d["name"]: d for d in property_defs} if property_defs else {}
+            elif property_defs is not None and not property_defs and property_base_name:
+                return field, virtual.get_property_definition(f'{property_base_name}.{field_name}')
+            elif property_defs and property_defs.get(field_name):
                 return field, property_defs[field_name]
             return field, {
                 "type": field.type,
