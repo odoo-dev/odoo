@@ -340,9 +340,9 @@ export function convertColumnToGrid(rowEl, columnEl, columnWidth, columnHeight, 
  * @param {String} mobileBreakpoint - bootstrap breakpoint (sm - md - lg)
  */
 export function convertToNormalColumn(columnEl, mobileBreakpoint) {
-    const gridSizeClasses = columnEl.className.match(
-        new RegExp(`(g-col-${mobileBreakpoint}|g-height)-[0-9]+`, "g")
-    );
+    const gridSizeClasses =
+        columnEl.className.match(new RegExp(`(g-col-${mobileBreakpoint}|g-height)-[0-9]+`, "g")) ??
+        [];
     columnEl.classList.remove(
         "o_grid_item",
         "o_grid_item_image",
