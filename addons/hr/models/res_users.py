@@ -135,7 +135,7 @@ class ResUsers(models.Model):
         # Otherwise the fields of the 'search' view will take precedence
         # and will omit the fields that are requested as SUPERUSER
         # in `get_view()`.
-        preferences_view = self.env.ref("hr.res_users_view_form_preferences")
+        preferences_view = self.env.ref("hr.res_users_view_form_profile")
         preferences_form = preferences_view and [preferences_view.id, 'form']
         if preferences_form and preferences_form in views:
             views.remove(preferences_form)
@@ -153,7 +153,7 @@ class ResUsers(models.Model):
         # We make the front-end aware of those fields by sending all field definitions.
         # Note: limit the `sudo` to the only action of "editing own preferences" action in order to
         # avoid breaking `groups` mecanism on res.users form view.
-        preferences_view = self.env.ref("hr.res_users_view_form_preferences")
+        preferences_view = self.env.ref("hr.res_users_view_form_profile")
         if preferences_view and view_id == preferences_view.id:
             self = self.with_user(SUPERUSER_ID)
         result = super().get_view(view_id, view_type, **options)

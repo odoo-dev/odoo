@@ -21,14 +21,14 @@ class TestSelfAccessPreferences(TestHrCommon):
             'user_id': james.id,
             'bank_account_id': self.env['res.partner.bank'].create({'acc_number': 'BE1234567890', 'partner_id': james.partner_id.id}).id
         })
-        view = self.env.ref('hr.res_users_view_form_preferences')
+        view = self.env.ref('hr.res_users_view_form_profile')
         view_infos = james.get_view(view.id)
         fields = [el.get('name') for el in etree.fromstring(view_infos['arch']).xpath('//field[not(ancestor::field)]')]
         james.read(fields)
 
     def test_preferences_view_fields(self):
         """ A simple user should see all fields in preferences view, even if they are protected by groups """
-        view = self.env.ref('hr.res_users_view_form_preferences')
+        view = self.env.ref('hr.res_users_view_form_profile')
 
         # For reference, check the view with user with every groups protecting user fields
         all_groups_xml_ids = chain(*[
@@ -61,7 +61,7 @@ class TestSelfAccessPreferences(TestHrCommon):
             'name': 'James',
             'user_id': james.id,
         })
-        view = self.env.ref('hr.res_users_view_form_preferences')
+        view = self.env.ref('hr.res_users_view_form_profile')
         available_actions = james.get_views([(view.id, 'form')], {'toolbar': True})['views']['form']['toolbar'].get('action', {})
         change_password_action = self.env.ref("base.change_password_wizard_action")
 
@@ -74,7 +74,7 @@ class TestSelfAccessPreferences(TestHrCommon):
             'name': 'John',
             'user_id': john.id,
         })
-        view = self.env.ref('hr.res_users_view_form_preferences')
+        view = self.env.ref('hr.res_users_view_form_profile')
         available_actions = john.get_views([(view.id, 'form')], {'toolbar': True})['views']['form']['toolbar']['action']
         self.assertTrue(any(x['id'] == change_password_action.id for x in available_actions))
 
@@ -166,7 +166,7 @@ class TestSelfAccessRights(TestHrCommon):
             it should not cause an access error if these fields are in `SELF_READABLE_FIELDS`.
         """
         self.env['res.lang']._activate_lang("fr_FR")
-        with Form(self.richard.with_user(self.richard), view='hr.res_users_view_form_preferences') as form:
+        with Form(self.richard.with_user(self.richard), view='hr.res_users_view_form_profile') as form:
             # triggering an onchange should not trigger some access error
             form.lang = "fr_FR"
             form.tz = "Europe/Brussels"
