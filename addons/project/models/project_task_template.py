@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, SUPERUSER_ID
 from odoo.fields import Command, Domain
-from odoo.addons.web_editor.tools import handle_history_divergence
+from odoo.addons.html_editor.tools import handle_history_divergence
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import LazyTranslate
 
