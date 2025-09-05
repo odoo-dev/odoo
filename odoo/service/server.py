@@ -265,7 +265,7 @@ class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, werkzeug.serving.
         and set its start time as an attribute
         """
         t = threading.Thread(target = self.process_request_thread,
-                             args = (request, client_address))
+                             args = (request, client_address,))
         t.daemon = self.daemon_threads
         t.type = 'http'
         t.start_time = time.time()
