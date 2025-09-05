@@ -1,8 +1,5 @@
 $MAX-Z-INDEX : 2147483647 !default;
 
-// Retrive the tab's height by summ its properties
-$o-wslides-tabs-height: ($nav-link-padding-y*2) + ($font-size-base * $line-height-base);
-
 // Overal page bg-color: Blend it 'over' the color chosen by the user
 // ($body-bg), rather than force it replacing the variable's value.
 $o-wslides-color-bg: mix($body-bg, #efeff4);
@@ -241,146 +238,10 @@ $line-height-truncate: 1.5em;
     }
 }
 
-@mixin o-wslides-tabs($tab-active-color: $o-wslides-color-bg) {
-    margin-top: ($o-wslides-tabs-height * -1);
-    border-bottom: 0;
-
-    .nav-link {
-        border-radius: 0;
-        border-width: 0 1px;
-        line-height: $line-height-base;
-        @include o-hover-text-color(rgba(white, 0.8), white);
-
-        & {
-            border-color: transparent;
-        }
-
-        &:hover {
-            background: #3d2938;
-        }
-
-        &.active {
-            color: color-contrast($tab-active-color);
-            background: $tab-active-color;
-            border-color: $tab-active-color;
-        }
-    }
-}
-
-@mixin o-wslides-header-bar() {
-    &:before {
-        content: "";
-        @include o-position-absolute(auto, 0, 0, 0);
-        height: $o-wslides-tabs-height;
-        background: rgba(black, 0.2);
-    }
-}
-
-.o_wslides_course_nav {
-    @include o-position-absolute(0,0,auto,0);
-    border-width: 1px 0;
-
-    &, .o_wslides_course_nav_search {
-        background-color: rgba(white, 0.05);
-        border-color: rgba(white, 0.1);
-        border-style: solid;
-    }
-
-    .o_wslides_course_nav_search {
-        border-width: 0 1px;
-
-        button, button:hover, input, input::placeholder {
-            // Resolves into the color chosen for slide channel description through cover customization
-            color: inherit;
-            opacity: 0.8;
-        }
-    }
-
-    .breadcrumb-item {
-        --max-lines: 2;
-        position: relative;
-        max-height: calc(1.4rem * var(--max-lines));
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        a, a:hover, + .breadcrumb-item::before {
-            // Resolves into the color chosen for slide channel description through cover customization
-            color: inherit;
-            opacity: 0.8;
-        }
-    }
-}
-
-
-.o_wslides_course_header {
-    @include media-breakpoint-up(md)  {
-        @include o-wslides-header-bar();
-    }
-    .o_wslides_header_text {
-        color:inherit;
-    }
-}
-
-.o_wslides_course_doc_header {
-    @include o-wslides-header-bar();
-}
-
 .o_wslides_course_main {
     /* Goal of min-height: push the footer out of the screen (in most use-case) to avoid seeing it moving when switching
     from course to review tab */
     min-height: 70vh;
-
-    .o_wslides_nav_tabs {
-        @include media-breakpoint-up(md)  {
-            @include o-wslides-tabs();
-        }
-
-        @include media-breakpoint-only(xs) {
-            overflow-x: auto;
-            overflow-y: hidden;
-            line-height: 1.51;
-
-            li {
-                white-space: nowrap;
-            }
-        }
-    }
-
-    .o_wslides_doc_nav_tabs {
-        @include o-wslides-tabs($gray-100);
-    }
-
-    .o_wslides_tabs_content {
-        @include media-breakpoint-down(md) {
-            background-color: $nav-tabs-link-active-bg;
-            padding:0 ($grid-gutter-width * 0.5);
-        }
-
-        @include media-breakpoint-only(xs) {
-            margin: 0 ($grid-gutter-width * -0.5);
-        }
-
-        .o_wslides_lesson_nav {
-            .navbar {
-                @if ( not has-enough-contrast($body-bg, $dark) ) {
-                    .nav-link, .navbar-brand{
-                        color: $navbar-dark-color;
-                    }
-                    .navbar-toggler-icon {
-                        background-image: $navbar-dark-toggler-icon-bg;
-                    }
-                }
-                @else {
-                    .nav-link, .navbar-brand{
-                        color: $navbar-light-color;
-                    }
-                    .navbar-toggler-icon {
-                        background-image: $navbar-light-toggler-icon-bg;
-                    }
-                }
-            }
-        }
-    }
 
     // Slides list reordering widget
     .o_wslides_slides_list {

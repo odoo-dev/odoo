@@ -8,14 +8,14 @@
             <div class="row align-items-center justify-content-between">
                 <!-- Desktop Mode -->
                 <nav aria-label="breadcrumb" class="col-md-8 d-none d-md-flex">
-                    <ol class="breadcrumb flex-nowrap bg-transparent mb-0 ps-0 py-0 overflow-hidden">
-                        <li class="breadcrumb-item flex-shrink-0">
+                    <ol class="breadcrumb m-0 p-0">
+                        <li class="breadcrumb-item">
                             <a href="/slides" title="Courses">Courses</a>
                         </li>
-                        <t t-set="breadcrumb_class" t-value="'breadcrumb-item text-truncate %s' % ('fw-bold' if not slide else '')" />
-                        <li t-att-class="'breadcrumb-item text-truncate %s' % ('fw-bold' if not search_category and not search_tag and not search_slide_category and not slide else '')">
+                        <t t-set="breadcrumb_class" t-value="'breadcrumb-item %s' % ('fw-bold' if not slide else '')" />
+                        <li t-att-class="'breadcrumb-item %s' % ('active' if not slide else '')">
                             <a t-if="invite_preview" t-attf-href="/slides/#{channel.id}?#{keep_query('invite_hash', 'invite_partner_id')}" class="text-truncate d-block"><span t-out="channel.name" t-att-title="channel.name"/></a>
-                            <a t-else="" t-att-href="'/slides/%s' % slug(channel)" class="text-truncate d-block"><span t-out="channel.name" t-att-title="channel.name"/></a>
+                            <span t-else="" t-att-href="'/slides/%s' % slug(channel)" t-out="channel.name" t-att-title="channel.name"/>
                         </li>
                         <li t-att-class="breadcrumb_class" t-if="search_category">
                             <a t-if="invite_preview" t-attf-href="/slides/#{channel.id}/category/#{search_category.id}?#{keep_query('invite_hash', 'invite_partner_id')}" aria-current='page'><span t-out="search_category.name" t-att-title="search_category.name"/></a>
@@ -63,7 +63,7 @@
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="/slides">Home</a>
                                 <t t-set="dropdown_class" t-value="'dropdown-item %s' % ('active' if not slide else '')"/>
-                                <a t-attf-class="dropdown-item #{'active' if not search_category and not search_tag and not search_slide_category else ''}"
+                                <a t-att-class="dropdown_class"
                                     t-attf-href="/slides/#{channel.id if invite_preview else slug(channel)}?#{keep_query('invite_hash', 'invite_partner_id') if invite_preview else ''}">
                                     &#9492;<span class="ms-1" t-out="channel.name"/>
                                 </a>
@@ -120,7 +120,6 @@
     <t t-call="website.layout">
         <div id="wrap" t-attf-class="wrap mt-0">
             <div class="oe_structure oe_empty">
-            <t t-call="website.record_cover" _record="channel" use_filters="True" use_size="True" use_text_align="True">
                 <div t-attf-class="o_wslides_course_header position-relative pb-md-0 pt-2 pt-md-5 #{'pb-3' if channel.channel_type == 'training' else 'o_wslides_course_doc_header pb-5'}">
                     <t t-call="website_slides.course_nav"/>
                     <div class="container mt-5 mt-md-3 mt-xl-4">
@@ -161,7 +160,6 @@
                         </div>
                     </div>
                 </div>
-            </t>
             </div>
 
             <div class="o_wslides_course_main">
