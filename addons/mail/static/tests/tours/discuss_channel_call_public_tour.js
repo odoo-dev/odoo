@@ -14,8 +14,20 @@ registry.category("web_tour.tours").add("discuss_channel_call_public_tour.js", {
             },
         },
         {
-            content: "Click join",
-            trigger: "button[title='Join Channel']",
+            content: "Verify user can't join without a name",
+            trigger: ".o-mail-WelcomePage input[placeholder='Your name']",
+            run: "edit ",
+        },
+        {
+            trigger: ".o-mail-WelcomePage button[title='Join Channel'][disabled]",
+        },
+        {
+            content: "Verify user can join with a name",
+            trigger: ".o-mail-WelcomePage input[placeholder='Your name']",
+            run: "edit Guest",
+        },
+        {
+            trigger: ".o-mail-WelcomePage button[title='Join Channel']",
             run: "click",
         },
         {

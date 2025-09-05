@@ -18,14 +18,20 @@
                     <p t-if="!hasRtcSupport" class="position-absolute bottom-50 text-light">
                         Your browser does not support videoconference
                     </p>
-                    <div class="position-absolute bottom-0">
-                        <button class="btn fa-stack align-self-end p-0 m-3 rounded-circle fs-1 shadow" t-attf-class="{{ state.audioStream ? 'btn-dark' : 'btn-danger' }}" t-on-click="onClickMic">
+                    <div class="position-absolute d-flex gap-3 mb-3 bottom-0">
+                        <button class="btn fa-stack p-0 rounded-circle fs-2 shadow" t-attf-class="{{ state.audioStream ? 'btn-dark' : 'btn-danger' }}" t-on-click="onClickMic">
                             <i class="fa" t-attf-class="{{ state.audioStream ? 'fa-microphone' : 'fa-microphone-slash' }}"/>
+                            <span t-if="!state.audioStream" class="position-absolute text-dark fw-bolder mt-1 start-100 translate-middle p-1 badge rounded-circle bg-warning">
+                                <i class="fa fa-exclamation-triangle"/>
+                            </span>
                         </button>
-                        <button class="btn fa-stack align-self-end p-0 m-3 rounded-circle fs-1 shadow" t-attf-class="{{ state.videoStream ? 'btn-dark' : 'btn-danger' }}" t-on-click="onClickVideo">
+                        <button class="btn fa-stack p-0 rounded-circle fs-2 shadow" t-attf-class="{{ state.videoStream ? 'btn-dark' : 'btn-danger' }}" t-on-click="onClickVideo">
                             <i class="fa fa-camera"/>
+                            <span t-if="!state.videoStream" class="position-absolute text-dark fw-bolder mt-1 start-100 translate-middle p-1 badge rounded-circle bg-warning">
+                                <i class="fa fa-exclamation-triangle"/>
+                            </span>
                         </button>
-                        <button t-if="state.videoStream"  class="btn fa-stack p-0 m-3 rounded-circle fs-1 shadow" t-attf-class="{{ store.settings.useBlur ? 'btn-secondary' : 'btn-dark' }}" t-on-click="onClickBlur" t-att-title="blurButtonTitle">
+                        <button t-if="state.videoStream" class="btn fa-stack p-0 rounded-circle fs-2 shadow" t-attf-class="{{ store.settings.useBlur ? 'btn-secondary' : 'btn-dark' }}" t-on-click="onClickBlur" t-att-title="blurButtonTitle">
                             <i class="fa fa-photo" t-att-class="{ 'opacity-50': !store.settings.useBlur }"/>
                         </button>
                     </div>
@@ -46,14 +52,23 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex flex-column justify-content-center">
-                <t t-if="store.self_guest">
-                    <label class="text-center fs-4" >What's your name?</label>
+            <div class="d-flex flex-column text-center justify-content-around">
+                <div class="d-flex flex-column gap-2" t-if="store.self_guest and !store.self_partner">
+                    <label class="fs-4" >What's your name?</label>
                     <input class="form-control mb-3 bg-white rounded" type="text" placeholder="Your name" t-model="state.userName" t-on-keydown="onKeydownInput"/>
-                </t>
-                <p t-if="store.self_partner" class="fs-4" t-esc="getLoggedInAsText()"/>
-                <button class="btn btn-success fa-stack align-self-end p-0 rounded-circle fs-1 shadow" title="Join Channel" t-att-disabled="store.self.type === 'guest' and state.userName.trim() === ''" t-on-click="joinChannel">
-                    <i class="oi oi-arrow-right"/>
+                </div>
+                <div class="fs-3" t-if="store.self_partner">
+                    <p>Ready to join?</p>
+                    <p t-if="noActiveParticipants">No one else is here.</p>
+                </div>
+                <button class="d-flex btn btn-light rounded-pill align-items-center justify-content-center gap-3 px-4 fs-3"
+                        title="Join Channel"
+                        t-att-disabled="store.self_guest and state.userName.trim() === ''"
+                        t-on-click="joinChannel">
+                    <span class="mb-0 text-success">Join Call</span>
+                    <span class="rounded-circle bg-success d-flex align-items-center justify-content-center p-2">
+                        <i class="oi oi-arrow-right text-white"/>
+                    </span>
                 </button>
             </div>
         </div>
