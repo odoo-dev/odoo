@@ -231,3 +231,10 @@ class StockRule(models.Model):
         new_move_vals['production_group_id'] = move_to_copy.production_group_id.id
         new_move_vals['production_id'] = False
         return new_move_vals
+
+    def _filter_warehouse_routes(self, product, warehouses, route):
+        if any(rule.action == 'manufacture' for rule in route.rule_ids):
+            if product.bom_ids:
+                return super()._filter_warehouse_routes(product, warehouses, route)
+            return False
+        return super()._filter_warehouse_routes(product, warehouses, route)

@@ -377,3 +377,10 @@ class StockRule(models.Model):
 
     def _get_partner_id(self, values, rule):
         return values.get("supplierinfo_name") or (values.get("force_uom") and values.get("partner"))
+
+    def _filter_warehouse_routes(self, product, warehouses, route):
+        if any(rule.action == 'buy' for rule in route.rule_ids):
+            if product.seller_ids:
+                return super()._filter_warehouse_routes(product, warehouses, route)
+            return False
+        return super()._filter_warehouse_routes(product, warehouses, route)
