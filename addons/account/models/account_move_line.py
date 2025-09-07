@@ -8,6 +8,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError, RedirectWarning
 from odoo.fields import Command, Domain
 from odoo.tools import frozendict, float_compare, groupby, Query, SQL, OrderedSet
+from odoo.tools.query import _sql_from_join
 from odoo.addons.web.controllers.utils import clean_action
 
 from odoo.addons.account.models.account_move import MAX_HASH_VERSION
@@ -278,6 +279,27 @@ class AccountMoveLine(models.Model):
     reconciled_lines_excluding_exchange_diff_ids = fields.Many2many(
         comodel_name='account.move.line',
         compute='_compute_reconciled_lines_excluding_exchange_diff_ids',
+    )
+    open_on = fields.Date(
+        store=False,
+        search='_search_open_on_date',
+        help="Used to set the recon_limit in the context to enable the residual_at_date computations.",
+    )
+    residual_at_date = fields.Monetary(
+        string='Residual (at date)',
+        compute='_compute_amount_residual_at_date',
+        currency_field='company_currency_id',
+        help="The residual amount (at date) on a journal item expressed in the company currency.",
+    )
+    residual_currency_at_date = fields.Monetary(
+        string='Residual in currency (at date)',
+        compute='_compute_amount_residual_at_date',
+        help="The residual amount (at date) on a journal item expressed in its currency.",
+    )
+    include_recon_lines = fields.Date(
+        store=False,
+        search='_search_include_recon_lines',
+        # help="Specify an end date to include recon lines related to your original search.",
     )
 
     matching_number = fields.Char(
@@ -769,6 +791,148 @@ class AccountMoveLine(models.Model):
         )))
         for record in self:
             record.cumulated_balance = result[record.id]
+
+    def _search_open_on_date(self, operator, value):
+        return []
+
+    @api.model
+    def _search(self, domain, *args, **kwargs):
+        original_domain = Domain(domain)
+
+        recursive_conditions = {'include_recon_lines'}
+        non_recursive_domain = original_domain.map_conditions(lambda cond: Domain.FALSE if cond.field_expr in recursive_conditions else cond)
+        contextualized = self.with_context(non_recursive_domain=non_recursive_domain)
+
+        # To enable computing the residual_at_date, it needs to be included in the context
+        for condition in Domain(domain).iter_conditions():
+            if condition.field_expr == 'open_on':
+                contextualized = contextualized.with_context(recon_limit=condition.value)
+        return super(AccountMoveLine, contextualized)._search(original_domain, *args, **kwargs)
+
+    def _search_include_recon_lines(self, operator, value):
+        """ For a given domain, this will include lines that are reconciled with lines in the original domain.
+            Usage example: ['|', ('include_recon_lines', '<=', maximum_recon_date), ('id', 'in', [ids])]
+        """
+        sql_operator = {
+            '=': SQL('='),
+            '<': SQL('<'),
+            '<=': SQL('<='),
+            '>': SQL('>'),
+            '>=': SQL('>='),
+        }.get(operator)
+        if not sql_operator:
+            return NotImplemented
+
+        non_recursive_domain = Domain(self.env.context.get('non_recursive_domain', []))
+
+        # remove the date greater than condition to find all lines for the partner ledger case
+        # where some lines are included in the initial balance, and others are between the date_from and date_to range
+        # or should we rather include recon lines if they are after their matching line? use the inverse of operator?
+        start_date_leaf = [cond for cond in non_recursive_domain.iter_conditions() if cond.field_expr == 'date' and cond.operator in {'>=', '>'}]
+        non_recursive_domain = non_recursive_domain.map_conditions(lambda cond: Domain.TRUE if cond.field_expr == 'date' and cond.operator in {'>=', '>'} else cond)
+
+        def to_sql(model, alias, query):
+            # Create a duplicate of the original query with a different alias
+            matching_alias = 'matching_aml'
+            aliased_query = Query(self.env, matching_alias, self._table_sql)
+            aliased_query.add_where(
+                Domain(non_recursive_domain)
+                .optimize_full(self)
+                ._to_sql(self, matching_alias, aliased_query)
+            )
+
+            start_date_condition = SQL("AND %(default_alias)s.date >= %(start_date)s", default_alias=SQL.identifier(alias), start_date=start_date_leaf[0].value) if start_date_leaf else SQL('')
+
+            recon_check = query.make_alias(alias, 'recon_check')
+            query.add_join(
+                kind="LEFT JOIN LATERAL",
+                alias=recon_check,
+                table=SQL("""(
+                        SELECT TRUE AS is_recon_line
+                          FROM account_partial_reconcile partial
+                          JOIN account_move_line %(matching_alias)s  --the original line
+                            ON (%(matching_alias)s.id = partial.debit_move_id AND partial.credit_move_id = %(default_alias)s.id)
+                            OR (%(matching_alias)s.id = partial.credit_move_id AND partial.debit_move_id = %(default_alias)s.id)
+                      %(joins)s
+                         WHERE %(default_alias)s.date %(op)s %(include_to_date)s
+                           AND %(conditions)s
+                           %(start_condition)s -- only include recon lines after the start date
+                         LIMIT 1
+                    )""",
+                    matching_alias=SQL(matching_alias),
+                    default_alias=SQL.identifier(alias),
+                    op=sql_operator,
+                    joins=SQL(" ").join(_sql_from_join(kind, alias, table, condition) for alias, (kind, table, condition) in aliased_query._joins.items()),
+                    include_to_date=value,
+                    conditions=aliased_query.where_clause,
+                    start_condition=start_date_condition,
+                ),
+                condition=SQL("TRUE"),
+            )
+            return SQL("%s.is_recon_line", SQL.identifier(recon_check))
+
+        return Domain.custom(to_sql=to_sql)
+
+    @api.model
+    def _get_partial_summary_query(self):
+        # TODO: if this is not used again, move it back to field_to_sql (or consider using it in the existing compute residual)
+        recon_limit = self.env.context.get('recon_limit')
+        recon_limit_clause = SQL(
+            "WHERE partial.max_date <= %(recon_limit)s",
+            recon_limit=recon_limit
+        ) if recon_limit else SQL('')
+
+        sql = SQL("""
+            SELECT partial.debit_move_id as id,
+                   COALESCE(-SUM(partial.amount), 0.0) as amount_to_date,
+                   ROUND(SUM(partial.debit_amount_currency), curr.decimal_places) AS amount_currency_to_date,
+                   ARRAY_AGG(partial.credit_move_id) as reconciled_line_ids_to_date
+              FROM account_partial_reconcile partial
+              JOIN res_currency curr ON curr.id = partial.debit_currency_id
+           %(where_clause)s
+          GROUP BY partial.debit_move_id, curr.decimal_places
+         UNION ALL
+            SELECT partial.credit_move_id as id,
+                   COALESCE(SUM(partial.amount), 0.0) as amount_to_date,
+                   ROUND(SUM(partial.debit_amount_currency), curr.decimal_places) AS amount_currency_to_date,
+                   ARRAY_AGG(partial.debit_move_id) as reconciled_line_ids_to_date
+              FROM account_partial_reconcile partial
+              JOIN res_currency curr ON curr.id = partial.credit_currency_id
+           %(where_clause)s
+          GROUP BY partial.credit_move_id, curr.decimal_places
+            """,
+            where_clause=recon_limit_clause,
+        )
+        return sql
+
+    @api.depends_context('recon_limit')
+    def _compute_amount_residual_at_date(self):
+        query = self._search([('id', 'in', self.ids)])
+
+        # need residual lines? stored lines? flush? (see _compute_amount_residual)
+
+        self.env.cr.execute(SQL("""
+                SELECT %(id_field)s,
+                       %(residual_field)s,
+                       %(residual_currency_field)s
+                  FROM %(from_clause)s
+                 WHERE %(where_clause)s
+            """,
+            id_field=self._field_to_sql(self._table, 'id', query),
+            residual_field=self._field_to_sql(self._table, 'residual_at_date', query),
+            residual_currency_field=self._field_to_sql(self._table, 'residual_currency_at_date', query),
+            from_clause=query.from_clause,
+            where_clause=query.where_clause,
+        ))
+        residuals_at_date = {
+            id: (residual_at_date, residual_currency_at_date)
+            for id, residual_at_date, residual_currency_at_date in self.env.cr.fetchall()
+        }
+
+        for aml in self:
+            residuals = residuals_at_date.get(aml.id, (aml.amount_residual, aml.amount_residual_currency))
+            aml.residual_at_date = residuals[0]
+            aml.residual_currency_at_date = residuals[1]
 
     @api.depends('debit', 'credit', 'amount_currency', 'account_id', 'currency_id', 'company_id',
                  'matched_debit_ids', 'matched_credit_ids')
@@ -1523,6 +1687,11 @@ class AccountMoveLine(models.Model):
             domain_cumulated_balance=to_tuple(domain or []),
             order_cumulated_balance=order,
         )
+        # This is duplicating code from _search because we need the context key in _search_fetch too (for auditing the aged reports)
+        # Make it DRY
+        for condition in Domain(domain).iter_conditions():
+            if condition.field_expr == 'open_on':
+                contextualized = contextualized.with_context(recon_limit=condition.value)
         return super(AccountMoveLine, contextualized).search_fetch(domain, field_names, offset, limit, order)
 
     @api.model
@@ -1903,8 +2072,42 @@ class AccountMoveLine(models.Model):
 
     def _field_to_sql(self, alias: str, field_expr: str, query: (Query | None) = None) -> SQL:
         fname, property_name = fields.parse_field_expr(field_expr)
-        if fname != 'payment_date':
+
+        residual_at_date_fields = {'residual_at_date', 'residual_currency_at_date'}
+        sql_fields = {'payment_date'}.union(residual_at_date_fields)
+        if fname not in sql_fields:
             return super()._field_to_sql(alias, field_expr, query)
+
+        if fname in residual_at_date_fields:
+            partial_summary_alias = query.make_alias(alias=alias, link='partial_summary')
+            if partial_summary_alias not in query._joins:
+                query.add_join(
+                    kind='LEFT JOIN',
+                    alias=partial_summary_alias,
+                    table=SQL(
+                        "(%(sql)s)",
+                        sql=self._get_partial_summary_query(),
+                    ),
+                    condition=SQL("%(partial_id)s = %(account_move_line_id)s",
+                        partial_id=SQL.identifier(partial_summary_alias, 'id'),
+                        account_move_line_id=self._field_to_sql(alias, 'id', query),
+                    ),
+                )
+
+            if fname == 'residual_at_date':
+                return SQL(
+                    "%(account_move_line_balance)s + COALESCE(%(partial_summary_amount_to_date)s, 0.0)",
+                    account_move_line_balance=self._field_to_sql(alias, 'balance', query),
+                    partial_summary_amount_to_date=SQL.identifier(partial_summary_alias, 'amount_to_date'),
+                )
+
+            if fname == 'residual_currency_at_date':
+                return SQL(
+                    "%(account_move_line_amount_currency)s + COALESCE(%(partial_summary_amount_currency_to_date)s, 0.0)",
+                    account_move_line_amount_currency=self._field_to_sql(alias, 'amount_currency', query),
+                    partial_summary_amount_currency_to_date=SQL.identifier(partial_summary_alias, 'amount_currency_to_date'),
+                )
+
         sql = SQL("""
             CASE
                  WHEN %(discount_date)s >= %(today)s THEN %(discount_date)s
