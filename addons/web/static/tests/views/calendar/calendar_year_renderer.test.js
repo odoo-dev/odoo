@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { queryAllTexts } from "@odoo/hoot-dom";
+import { queryAllTexts, resize } from "@odoo/hoot-dom";
 import { mockTimeZone } from "@odoo/hoot-mock";
 import { mockService, mountWithCleanup, preloadBundle } from "@web/../tests/web_test_helpers";
 import { FAKE_MODEL, clickDate, selectDateRange } from "./calendar_test_helpers";
@@ -132,4 +132,13 @@ test(`display correct column header for days, independent of the timezone`, asyn
         "F",
         "S",
     ]);
+});
+
+test(`handle resizing`, async () => {
+    await start();
+    expect(".o_calendar_renderer").toHaveCount(1);
+    await resize({ height: 300 });
+    expect(".o_calendar_renderer").toHaveAttribute("style", "height: 300px");
+    await resize({ height: 500 });
+    expect(".o_calendar_renderer").toHaveAttribute("style", "height: 500px");
 });
