@@ -861,6 +861,7 @@ export function makeActionManager(env, router = _router) {
      * @returns {Promise<Number>}
      */
     async function _updateUI(controller, options = {}) {
+        env.bus.trigger("ACTION_MANAGER:UPDATE-UI");
         let resolve;
         let reject;
         let removeDialogFn;

@@ -76,7 +76,7 @@ class Home(http.Controller):
             session_info['browser_cache_secret'] = hmac(request.env(su=True), "browser_cache_key", hmac_payload)
 
             response = request.render('web.webclient_bootstrap', qcontext=context)
-            response.headers['X-Frame-Options'] = 'DENY'
+            response.headers['X-Frame-Options'] = 'SAMEORIGIN'
             response.headers['Cache-Control'] = 'no-store'
             return response
         except AccessError:
