@@ -10,7 +10,7 @@ from odoo.tools import consteq
 class PosSelfOrderController(http.Controller):
     @http.route("/pos-self-order/process-order/<device_type>/", auth="public", type="jsonrpc", website=True)
     def process_order(self, order, access_token, table_identifier, device_type):
-        pos_config, _ = self._verify_authorization(access_token, table_identifier, order)
+        pos_config, table = self._verify_authorization(access_token, table_identifier, order)
         pos_session = pos_config.current_session_id
         preset_id = order['preset_id'] if pos_config.use_presets else False
         preset_id = pos_config.env['pos.preset'].browse(preset_id) if preset_id else False
@@ -31,6 +31,9 @@ class PosSelfOrderController(http.Controller):
 
         if 'name' in order:
             del order['name']
+
+        if table:
+            order['table_id'] = table.id
 
         if device_type == 'kiosk':
             order['floating_order_name'] = f"Table tracker {order['table_stand_number']}" if order.get('table_stand_number') else tracking_number
