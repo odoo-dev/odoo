@@ -15,6 +15,7 @@ debugSectionRegistry
     .add("ui", { label: _t("User Interface"), sequence: 20 })
     .add("security", { label: _t("Security"), sequence: 30 })
     .add("testing", { label: _t("Tours & Testing"), sequence: 40 })
+    .add("offline", { label: _t("Offline"), sequence: 45 })
     .add("tools", { label: _t("Tools"), sequence: 50 });
 
 export class DebugMenuBasic extends Component {

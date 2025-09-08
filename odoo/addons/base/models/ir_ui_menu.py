@@ -295,14 +295,20 @@ class IrUiMenu(models.Model):
 
         # prefetch action.path
         for model_name, action_ids in action_ids_by_type.items():
-            self.env[model_name].sudo().browse(action_ids).fetch(['path'])
+            if model_name == 'ir.actions.act_window':
+                self.env[model_name].sudo().browse(action_ids).fetch(['path', 'cache', 'view_mode'])
+            else:
+                self.env[model_name].sudo().browse(action_ids).fetch(['path'])
 
         # set children + model_path
         for menu_dict in menus_dict.values():
             if menu_dict['action_model']:
-                menu_dict['action_path'] = self.env[menu_dict['action_model']].sudo().browse(menu_dict['action_id']).path
+                action = self.env[menu_dict['action_model']].sudo().browse(menu_dict['action_id'])
+                menu_dict['action_path'] = action.path
+                menu_dict['action_offline'] = menu_dict['action_model'] == 'ir.actions.act_window' and action.cache and ("list" in action.view_mode or "kanban" in action.view_mode)
             else:
                 menu_dict['action_path'] = False
+                menu_dict['action_offline'] = False
             menu_dict['children'] = children_dict[menu_dict['id']]
 
         menus_dict['root'] = {
