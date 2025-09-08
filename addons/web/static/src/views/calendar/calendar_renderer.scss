@@ -126,6 +126,8 @@
     }
 
     .o_calendar_widget {
+        max-height: 100%;
+
         // Remove background today color
         .fc-day-today:not(.o_calendar_disabled) {
             --fc-today-bg-color: none;

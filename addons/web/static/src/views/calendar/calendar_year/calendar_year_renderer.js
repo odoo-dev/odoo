@@ -5,7 +5,7 @@ import { CalendarYearPopover } from "./calendar_year_popover";
 import { makeWeekColumn } from "@web/views/calendar/calendar_common/calendar_common_week_column";
 import { getLocalWeekNumber } from "@web/core/l10n/dates";
 
-import { Component, useEffect, useRef } from "@odoo/owl";
+import { Component, useRef } from "@odoo/owl";
 
 export class CalendarYearRenderer extends Component {
     static components = {
@@ -33,10 +33,6 @@ export class CalendarYearRenderer extends Component {
         }
         this.popover = useCalendarPopover(this.constructor.components.Popover);
         this.rootRef = useRef("root");
-
-        useEffect(() => {
-            this.updateSize();
-        });
     }
 
     get options() {
@@ -72,8 +68,6 @@ export class CalendarYearRenderer extends Component {
             weekNumberCalculation: (date) => getLocalWeekNumber(date),
             weekNumbers: false,
             weekNumberFormat: { week: "numeric" },
-            windowResize: this.onWindowResize,
-            windowResizeDelay: 200,
             eventContent: this.onEventContent,
             viewDidMount: this.viewDidMount,
             weekends: this.props.isWeekendVisible,
@@ -134,10 +128,6 @@ export class CalendarYearRenderer extends Component {
         for (const fc of Object.values(this.fcs)) {
             fc.api.unselect();
         }
-    }
-    updateSize() {
-        const height = window.innerHeight - this.rootRef.el.getBoundingClientRect().top;
-        this.rootRef.el.style.height = `${height}px`;
     }
 
     onDateClick(info) {
@@ -215,9 +205,6 @@ export class CalendarYearRenderer extends Component {
             isAllDay: true,
         });
         this.unselect();
-    }
-    onWindowResize() {
-        this.updateSize();
     }
 
     onEventContent(info) {
