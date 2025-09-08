@@ -42,6 +42,7 @@ class IrUiMenu(models.Model):
                 action_id = menu['action_id']
                 action_model = menu['action_model']
                 action_path = menu['action_path']
+                action_offline = menu['action_offline']
                 web_icon = menu['web_icon']
                 web_icon_data = menu['web_icon_data']
 
@@ -52,6 +53,7 @@ class IrUiMenu(models.Model):
                         action_id = child['action_id']
                         action_model = child['action_model']
                         action_path = child['action_path']
+                        action_offline = child['action_offline']
                         child = menus[child['children'][0]] if child['children'] else False
 
                     webIcon = menu.get('web_icon', '')
@@ -79,6 +81,7 @@ class IrUiMenu(models.Model):
                     "actionID": action_id,
                     "actionModel": action_model,
                     "actionPath": action_path,
+                    "actionOffline": action_offline,
                     "webIcon": web_icon,
                     "webIconData": web_icon_data,
                     "webIconDataMimetype": menu['web_icon_data_mimetype'],
