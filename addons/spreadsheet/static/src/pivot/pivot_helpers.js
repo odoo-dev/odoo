@@ -56,13 +56,12 @@ for (const type in AGGREGATORS_BY_FIELD_TYPE) {
  */
 
 /**
- * Parses the positional char (#), the field and operator string of pivot group.
- * e.g. "create_date:month"
- * @param {Record<string, OdooField | undefined>} allFields
+ * Parses a group field string into its components: fieldName, granularity, and isPositional.
+ * e.g. "#create_date:month" => { fieldName: "create_date", granularity: "month", isPositional: true }
  * @param {string} groupFieldString
- * @returns {{field: OdooField, granularity: Granularity, isPositional: boolean, dimensionWithGranularity: string}}
+ * @returns {{ fieldName: string, granularity: Granularity | undefined, isPositional: boolean }}
  */
-export function parseGroupField(allFields, groupFieldString) {
+export function parseGroupFieldString(groupFieldString) {
     let fieldName = groupFieldString;
     let granularity = undefined;
     const index = groupFieldString.indexOf(":");
@@ -72,6 +71,23 @@ export function parseGroupField(allFields, groupFieldString) {
     }
     const isPositional = fieldName.startsWith("#");
     fieldName = isPositional ? fieldName.substring(1) : fieldName;
+    return { fieldName, granularity, isPositional };
+}
+
+/**
+ * Parses the positional char (#), the field and operator string of pivot group.
+ * e.g. "create_date:month"
+ * @param {Record<string, OdooField | undefined>} allFields
+ * @param {string} groupFieldString
+ * @returns {{field: OdooField, granularity: Granularity, isPositional: boolean, dimensionWithGranularity: string}}
+ */
+export function parseGroupField(allFields, groupFieldString) {
+    const {
+        fieldName,
+        granularity: initialGranularity,
+        isPositional,
+    } = parseGroupFieldString(groupFieldString);
+    let granularity = initialGranularity;
     const field = allFields[fieldName];
     if (field === undefined) {
         throw new EvaluationError(_t("Field %s does not exist", fieldName));
