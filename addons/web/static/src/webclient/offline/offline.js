@@ -171,7 +171,7 @@ async function populateViewsForm(env) {
                 `nav.o_cp_switch_buttons > button.o_switch_view.o_${viewType}`
             );
             if (target) {
-                triggerClick(target, `${viewType} view switcher`);
+                triggerClick(target);
             }
         }, 250);
         await waitForCondition(
@@ -179,7 +179,9 @@ async function populateViewsForm(env) {
         );
         if (viewType === "list") {
             //click on all rows
-            const number = document.querySelectorAll(".o_data_row").length;
+            const number = document.querySelector(".o_view_sample_data")
+                ? 0
+                : document.querySelectorAll(".o_data_row").length;
             for (const i of [...Array(number).keys()]) {
                 const row = document.querySelectorAll(".o_data_row")[i];
                 // Open the form
@@ -187,28 +189,29 @@ async function populateViewsForm(env) {
                 await triggerClick(row.querySelector(".o_data_cell"));
                 await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
 
-                if (document.querySelector(".o_form_view")) {
-                    // Go back to the list
-                    startActionCount = actionCount;
-                    await triggerClick(document.querySelector(".o_back_button"));
-                    await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
-                }
+                // Go back to the list
+                startActionCount = actionCount;
+                await triggerClick(document.querySelector(".o_back_button"));
+                await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
             }
         } else {
-            const number = document.querySelectorAll(".o_kanban_record.cursor-pointer").length;
+            const number = document.querySelector(".o_view_sample_data")
+                ? 0
+                : document.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost).cursor-pointer")
+                      .length;
             for (const i of [...Array(number).keys()]) {
-                const card = document.querySelectorAll(".o_kanban_record.cursor-pointer")[i];
+                const card = document.querySelectorAll(
+                    ".o_kanban_record:not(.o_kanban_ghost).cursor-pointer"
+                )[i];
                 // Open the form
                 let startActionCount = actionCount;
                 await triggerClick(card);
                 await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
 
-                if (document.querySelector(".o_form_view")) {
-                    // Go back to the kanban
-                    startActionCount = actionCount;
-                    await triggerClick(document.querySelector(".o_back_button"));
-                    await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
-                }
+                // Go back to the kanban
+                startActionCount = actionCount;
+                await triggerClick(document.querySelector(".o_back_button"));
+                await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
             }
         }
     }
