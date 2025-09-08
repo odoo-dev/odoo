@@ -22,6 +22,11 @@ patch(SelfOrder.prototype, {
             );
         }
     },
+    filterPaymentMethods(pms) {
+        const pm = super.filterPaymentMethods(...arguments);
+        const qfpay_pm = pms.filter((rec) => rec.use_payment_terminal === "stripe");
+        return [...new Set([...pm, ...qfpay_pm])];
+    },
     handleReaderConnection(state) {
         this.stripeState = state.status;
     },

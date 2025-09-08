@@ -281,9 +281,7 @@ export class SelfOrder extends Reactive {
 
     filterPaymentMethods(pms) {
         //based on _load_pos_self_data_domain from pos_payment_method.py
-        return this.config.self_ordering_mode === "kiosk"
-            ? pms.filter((rec) => ["adyen", "stripe"].includes(rec.use_payment_terminal))
-            : [];
+        return [];
     }
 
     async confirmOrder() {
@@ -292,7 +290,7 @@ export class SelfOrder extends Reactive {
         const service = this.selfService; // table, counter, delivery
         const paymentMethods = this.filterPaymentMethods(
             this.models["pos.payment.method"].getAll()
-        ); // Stripe, Adyen, Online
+        );
 
         let order = this.currentOrder;
         const orderHasChanges = Object.keys(order.changes).length > 0;

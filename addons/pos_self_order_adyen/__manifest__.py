@@ -7,4 +7,9 @@
     "auto_install": True,
     "author": "Odoo S.A.",
     "license": "LGPL-3",
+    'assets': {
+        'pos_self_order.assets': [
+            'pos_self_order_adyen/static/**/*',
+        ],
+    },
 }

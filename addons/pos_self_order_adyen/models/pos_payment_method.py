@@ -2,10 +2,18 @@ from datetime import datetime, timezone
 import random
 from odoo import models, api
 from odoo.addons.pos_adyen.models.pos_payment_method import UNPREDICTABLE_ADYEN_DATA
+from odoo.fields import Domain
 
 
 class PosPaymentMethod(models.Model):
     _inherit = "pos.payment.method"
+
+    @api.model
+    def _load_pos_self_data_domain(self, data, config):
+        domain = super()._load_pos_self_data_domain(data, config)
+        if config.self_ordering_mode == 'kiosk':
+            domain = Domain.OR([[('use_payment_terminal', '=', 'adyen'), ('id', 'in', config.payment_method_ids.ids)], domain])
+        return domain
 
     @api.model
     def _get_valid_acquirer_data(self):
