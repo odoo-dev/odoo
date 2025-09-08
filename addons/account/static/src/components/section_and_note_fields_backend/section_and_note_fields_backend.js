@@ -226,6 +226,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         });
         await this.props.list.duplicateRecords(recordsToDuplicate, {
             targetIndex: sectionIndex,
+            forcedFields: ["display_type"],
         });
     }
 
@@ -344,7 +345,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 
     getCellClass(column, record) {
         let classNames = super.getCellClass(column, record);
-        // For hiding columnns of section and note 
+        // For hiding columnns of section and note
         if (
             this.isSectionOrNote(record)
             && column.widget !== "handle"
