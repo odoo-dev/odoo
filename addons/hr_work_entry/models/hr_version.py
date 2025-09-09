@@ -111,7 +111,7 @@ class HrVersion(models.Model):
                 end_dt,
                 resources=employees.resource_id,
                 tz=pytz.timezone(calendar.tz) if calendar.tz else pytz.utc
-            ))
+            ))  # wrong resource
         return result
 
     def _get_lunch_intervals(self, start_dt, end_dt):
@@ -184,7 +184,7 @@ class HrVersion(models.Model):
             resource = employee.resource_id
             # if the version is fully flexible, we refer to the employee's timezone
             tz = pytz.timezone(resource.tz) if version._is_fully_flexible() else pytz.timezone(calendar.tz)
-            attendances = attendances_by_resource[resource.id]
+            attendances = attendances_by_resource[resource.id] if calendar == resource.calendar_id else attendances_by_resource[False]
 
             # Other calendars: In case the employee has declared time off in another calendar
             # Example: Take a time off, then a credit time.
