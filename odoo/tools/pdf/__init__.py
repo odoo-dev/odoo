@@ -316,7 +316,36 @@ def reshape_text(text):
     no_letter_is_ltr = not any(unicodedata.bidirectional(letter) == 'L' for letter in maybe_ltr_text)
     if first_letter_is_rtl and no_letter_is_ltr:
         text = reshape(text)
-        text = text[::-1]
+
+        segments = []
+        current_segment = []
+        current_is_number = False
+
+        for char in text:
+            bidi_type = unicodedata.bidirectional(char)
+            is_number = bidi_type in ('EN', 'AN', 'ES', 'ET', 'CS')  # European/Arabic numbers and separators
+
+            if is_number != current_is_number:
+                if current_segment:
+                    segments.append((''.join(current_segment), current_is_number))
+                current_segment = [char]
+                current_is_number = is_number
+            else:
+                current_segment.append(char)
+
+        if current_segment:
+            segments.append((''.join(current_segment), current_is_number))
+
+        result = []
+        for segment_text, is_number in reversed(segments):
+            if is_number:
+                # keep numbers in their original order
+                result.append(segment_text)
+            else:
+                # reverse non-number RTL text
+                result.append(segment_text[::-1])
+
+        text = ''.join(result)
 
     return text
 
