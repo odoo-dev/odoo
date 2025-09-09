@@ -226,6 +226,7 @@ export class ListController extends Component {
             multiEdit: this.archInfo.multiEdit,
             activeIdsLimit: session.active_ids_limit,
             hooks: {
+                huvw: this.props.huvw,
                 onRecordSaved: this.onRecordSaved.bind(this),
                 onWillSaveRecord: this.onWillSaveRecord.bind(this),
                 onWillSaveMulti: this.onWillSaveMulti.bind(this),

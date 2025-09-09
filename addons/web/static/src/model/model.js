@@ -205,7 +205,11 @@ export function useModelWithSampleData(ModelClass, params, options = {}) {
         const prom = load(component.props);
         if (options.lazy) {
             // in-house error handling as we're out of willStart
-            prom.catch((e) => {
+            prom
+                .then((e) => {
+                    params.hooks.huvw();
+                })
+                .catch((e) => {
                 if (e instanceof RPCError) {
                     component.env.config.historyBack();
                 }

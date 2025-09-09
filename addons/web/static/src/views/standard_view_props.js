@@ -23,4 +23,5 @@ export const standardViewProps = {
     state: { type: Object, optional: true },
     useSampleModel: { type: Boolean },
     updateActionState: { type: Function, optional: true },
+    huvw: { type: Function, optional: true },
 };

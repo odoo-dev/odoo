@@ -385,6 +385,7 @@ export class View extends Component {
             useSampleModel: false,
             className,
         };
+        viewProps.huvw = props.huvw
         if (viewDescription.custom_view_id) {
             // for dashboard
             viewProps.info.customViewId = viewDescription.custom_view_id;

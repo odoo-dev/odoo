@@ -19,13 +19,13 @@ import { PATH_KEYS, router as _router, stateToUrl } from "@web/core/browser/rout
 import {
     Component,
     markup,
+    onError,
     onMounted,
     onWillUnmount,
-    onError,
-    useChildSubEnv,
-    xml,
     reactive,
     status,
+    useChildSubEnv,
+    xml,
 } from "@odoo/owl";
 import { downloadReport, getReportUrl } from "./reports/utils";
 import { zip } from "@web/core/utils/arrays";
@@ -1016,6 +1016,9 @@ export function makeActionManager(env, router = _router) {
                     componentProps.__beforeLeave__ = this.__beforeLeave__;
                     componentProps.__getGlobalState__ = this.__getGlobalState__;
                     componentProps.__getLocalState__ = this.__getLocalState__;
+                }
+                componentProps.huvw = () => {
+                    env.bus.trigger("ACTION_MANAGER:UI-UPDATED", _getActionMode(_getCurrentController().action));
                 }
                 return componentProps;
             }
