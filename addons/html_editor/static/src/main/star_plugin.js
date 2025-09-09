@@ -1,10 +1,12 @@
 import { Plugin } from "@html_editor/plugin";
 import { parseHTML } from "@html_editor/utils/html";
 import { _t } from "@web/core/l10n/translation";
+import { paragraphRelatedElementsSelector } from "../utils/dom_info";
+import { closestElement } from "../utils/dom_traversal";
 
 export class StarPlugin extends Plugin {
     static id = "star";
-    static dependencies = ["dom", "history"];
+    static dependencies = ["dom", "history", "split", "selection"];
     resources = {
         user_commands: [
             {
@@ -32,6 +34,9 @@ export class StarPlugin extends Plugin {
                 commandParams: { length: 5 },
             },
         ],
+        split_element_block_overrides: this.handleSplitBlock.bind(this),
+        selectors_for_feff_providers: () =>
+            `:is(${paragraphRelatedElementsSelector}) :is(.o_stars)`,
     };
 
     setup() {
@@ -73,8 +78,22 @@ export class StarPlugin extends Plugin {
 
     addStars({ length }) {
         const stars = Array.from({ length }, () => '<i class="fa fa-star-o"></i>').join("");
-        const html = `\u200B<span contenteditable="false" class="o_stars">${stars}</span>\u200B`;
+        const html = `<span contenteditable="false" class="o_stars">${stars}</span>`;
         this.dependencies.dom.insert(parseHTML(this.document, html));
         this.dependencies.history.addStep();
     }
+
+    handleSplitBlock({ targetNode, blockToSplit }) {
+        if (!closestElement(targetNode, ".o_stars, .fa-star, .fa-star-o")) {
+            return;
+        }
+        const {anchorNode, anchorOffset} = this.dependencies.selection.getEditableSelection();
+        const [, afterElement] = this.dependencies.split.splitElementBlock({
+            targetNode: anchorNode,
+            targetOffset: anchorOffset,
+            blockToSplit: blockToSplit,
+        });
+        this.dependencies.selection.setCursorStart(afterElement);
+        return true;
+     }
 }
