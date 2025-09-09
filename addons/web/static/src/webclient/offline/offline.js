@@ -1,5 +1,7 @@
+import { App } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
+import { rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 
 function runPopulateIndexedDB() {
@@ -58,6 +60,7 @@ async function triggerClick(target, elDescription) {
             browser.console.log(`Clicking on: ${elDescription}`);
         }
     } else {
+        // debugger;
         throw new Error(`No element "${elDescription}" found.`);
     }
     MOUSE_EVENTS.forEach((type) => {
@@ -70,14 +73,40 @@ function uiUpdate() {
     actionCount++;
 }
 
+const calledRPC = {};
+
+function onRPCRequest({ detail }) {
+    calledRPC[detail.data.id] = detail.url;
+}
+
+function onRPCResponse({ detail }) {
+    delete calledRPC[detail.data.id];
+    // if (detail.error) {
+    //     errorRPC = { ...detail };
+    // }
+}
+
 /// END COPY .///////
 // NOT A FULL COPY BUT TO REFACTOR ...
 
 async function waitForCondition(stopCondition) {
     const interval = 25;
     let timeLimit = 30000;
-    while (!stopCondition()) {
+
+    function hasPendingRPC() {
+        return Object.keys(calledRPC).length > 0;
+    }
+    function hasScheduledTask() {
+        let size = 0;
+        for (const app of App.apps) {
+            size += app.scheduler.tasks.size;
+        }
+        return size > 0;
+    }
+
+    while (!stopCondition() || hasPendingRPC() || hasScheduledTask()) {
         if (timeLimit <= 0) {
+            // debugger;
             throw new Error("Timeout waiting for condition");
         }
         await new Promise((resolve) => browser.setTimeout(resolve, interval));
@@ -94,6 +123,8 @@ async function waitForCondition(stopCondition) {
 async function populateIndexDB(env, action) {
     // Copy and modify of clickAll .. refactor needed !
     env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", uiUpdate);
+    rpcBus.addEventListener("RPC:REQUEST", onRPCRequest);
+    rpcBus.addEventListener("RPC:RESPONSE", onRPCResponse);
     const apps = env.services.menu.getApps().filter((app) => app.actionOffline);
     for (const app of apps) {
         // Go Back to the App main menu
@@ -186,13 +217,20 @@ async function populateViewsForm(env) {
                 const row = document.querySelectorAll(".o_data_row")[i];
                 // Open the form
                 let startActionCount = actionCount;
-                await triggerClick(row.querySelector(".o_data_cell"));
+                if (document.querySelector(".o_list_record_open_form_view")) {
+                    await triggerClick(row.querySelector(".o_list_record_open_form_view"));
+                } else {
+                    await triggerClick(row.querySelector(".o_data_cell"));
+                }
                 await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
 
-                // Go back to the list
-                startActionCount = actionCount;
-                await triggerClick(document.querySelector(".o_back_button"));
-                await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                // FIXME:: Check why there is sometimes that we don't open the view !!!
+                if (document.querySelector(".o_back_button")) {
+                    // Go back to the list
+                    startActionCount = actionCount;
+                    await triggerClick(document.querySelector(".o_back_button"));
+                    await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                }
             }
         } else {
             const number = document.querySelector(".o_view_sample_data")
@@ -208,10 +246,14 @@ async function populateViewsForm(env) {
                 await triggerClick(card);
                 await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
 
-                // Go back to the kanban
-                startActionCount = actionCount;
-                await triggerClick(document.querySelector(".o_back_button"));
-                await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                // Mayube the click does nothing !!!
+                // FIXME: Check why there is sometimes that we don't open the view !!!
+                if (document.querySelector(".o_back_button")) {
+                    // Go back to the kanban
+                    startActionCount = actionCount;
+                    await triggerClick(document.querySelector(".o_back_button"));
+                    await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                }
             }
         }
     }
