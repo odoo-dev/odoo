@@ -750,17 +750,26 @@ class Field[T]:
         """ Inverse the related field ``self`` on ``records``. """
         # store record values, otherwise they may be lost by cache invalidation!
         record_value = {record: record[self.name] for record in records}
-        path = self.related.split('.')[:-1]
-        field = self.related_field
+        # update the value
+        path = self.related.split('.')
+        path.pop()  # remove last field name
         for record in records:
             target = record
+            # keep only the first one in path traversal
             for name in path:
-                # take the first record when traversing
-                target = target[name][:1]
+                target = target[name]
+                if len(target) > 1:
+                    target = target[0]
+            if not target:
+                if not record_value[record]:
+                    # no target and no value, skip
+                    continue
+                # XXX better message
+                raise MissingError(record.env._("Cannot write on record, relation missing for %s", self))
             # update 'target' only if 'record' and 'target' are both real or
             # both new (see `test_base_objects.py`, `test_basic`)
-            if target and bool(target.id) == bool(record.id):
-                target[field.name] = record_value[record]
+            if bool(target.id) == bool(record.id):
+                target[self.related_field.name] = record_value[record]
 
     def _search_related(self, records: BaseModel, operator: str, value) -> DomainType:
         """ Determine the domain to search on field ``self``. """
