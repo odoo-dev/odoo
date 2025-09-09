@@ -41,6 +41,9 @@ export class Form extends Interaction {
             })
         },
         "input[type=file]": { "t-on-change": this.changeFile },
+        "select.s_website_form_input, div.s_website_form_multiple": {
+            "t-on-change": this.changeSelect,
+        },
         "input.o_add_files_button": { "t-on-click": this.clickAddFilesButton },
         ".s_website_form_field[data-type=binary]": { "t-on-click": this.clickFileDelete }, // delegate on ".o_file_delete"
         ".s_website_form_field": {
@@ -57,6 +60,34 @@ export class Form extends Interaction {
             }),
         },
     };
+    changeSelect(ev) {
+        const select = ev.target;
+        const fieldEl = select.closest(".s_website_form_field");
+        let otherInput = fieldEl.querySelector(".o_other_input");
+
+        // If the input doesn't exist yet, create and insert it
+        if (!otherInput) {
+            otherInput = document.createElement("input");
+            otherInput.type = "text";
+            otherInput.className = "form-control s_website_form_input d-none o_other_input mt-3";
+            otherInput.name = select.name + "_other";
+            otherInput.required = select.required || false;
+            otherInput.placeholder = "Other Option...";
+            otherInput.id = select.id + "_other";
+            otherInput.setAttribute("data-fill-with", select.getAttribute("data-fill-with") || "");
+
+            // insert right after the select
+            select.insertAdjacentElement("afterend", otherInput);
+        }
+
+        // Toggle visibility depending on selected value
+        if (select.value === "__other__") {
+            otherInput.classList.remove("d-none");
+        } else {
+            otherInput.classList.add("d-none");
+            otherInput.value = "";
+        }
+    }
 
     setup() {
         this.isHidden = false;
