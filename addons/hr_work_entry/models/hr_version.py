@@ -106,12 +106,15 @@ class HrVersion(models.Model):
             employees_by_calendar[version.resource_calendar_id] |= version.employee_id
         result = dict()
         for calendar, employees in employees_by_calendar.items():
-            result.update(calendar._attendance_intervals_batch(
-                start_dt,
-                end_dt,
-                resources=employees.resource_id,
-                tz=pytz.timezone(calendar.tz) if calendar.tz else pytz.utc
-            ))
+            if not calendar:
+                result.update({employees.resource_id: Intervals([(start_dt, end_dt, self.env['resource.calendar.attendance'])])})
+            else:
+                result.update(calendar._attendance_intervals_batch(
+                    start_dt,
+                    end_dt,
+                    resources=employees.resource_id,
+                    tz=pytz.timezone(calendar.tz) if calendar.tz else pytz.utc
+                ))
         return result
 
     def _get_lunch_intervals(self, start_dt, end_dt):
@@ -121,6 +124,8 @@ class HrVersion(models.Model):
             employees_by_calendar[version.resource_calendar_id] |= version.employee_id
         result = {}
         for calendar, employees in employees_by_calendar.items():
+            if not calendar:
+                continue
             result.update(calendar._attendance_intervals_batch(
                 start_dt,
                 end_dt,
@@ -184,8 +189,10 @@ class HrVersion(models.Model):
             resource = employee.resource_id
             # if the version is fully flexible, we refer to the employee's timezone
             tz = pytz.timezone(resource.tz) if version._is_fully_flexible() else pytz.timezone(calendar.tz)
-            attendances = attendances_by_resource[resource.id]
-
+            if calendar:
+                attendances = attendances_by_resource[resource.id]
+            else:
+                attendances = Intervals([])
             # Other calendars: In case the employee has declared time off in another calendar
             # Example: Take a time off, then a credit time.
             resources_list = [self.env['resource.resource'], resource]
