@@ -664,15 +664,6 @@ class Field(typing.Generic[T]):
             delegate_field = model._fields[self.related.split('.')[0]]
             self._modules = tuple({*self._modules, *delegate_field._modules, *field._modules})
 
-    def traverse_related(self, record: BaseModel) -> tuple[BaseModel, Field]:
-        """ Traverse the fields of the related field `self` except for the last
-        one, and return it as a pair `(last_record, last_field)`. """
-        for name in self.related.split('.')[:-1]:
-            # take the first record when traversing
-            corecord = record[name]
-            record = next(iter(corecord), corecord)
-        return record, self.related_field
-
     def _compute_related(self, records: BaseModel) -> None:
         """ Compute the related field ``self`` on ``records``. """
         #
@@ -726,12 +717,45 @@ class Field(typing.Generic[T]):
         """ Inverse the related field ``self`` on ``records``. """
         # store record values, otherwise they may be lost by cache invalidation!
         record_value = {record: record[self.name] for record in records}
+        # get the fields
+        fields: list[Field] = []
+        model = records
+        for name in self.related.split('.')[:-1]:
+            field = model._fields[name]
+            fields.append(field)
+            model = model.env[field.comodel_name]
+
+        # update the value
         for record in records:
-            target, field = self.traverse_related(record)
+            target = record
+            for field in fields:
+                corecord = field.__get__(target)
+                # take the first record when traversing
+                if len(corecord) == 1:
+                    target = corecord
+                elif corecord:
+                    target = next(iter(corecord))
+                elif field.type == 'many2one':
+                    # create the record to store the value
+                    try:
+                        with corecord.env.cr.savepoint():
+                            prev_record = target
+                            if target.id:
+                                target = corecord.create({})
+                            else:
+                                target = corecord.new({})
+                            field.__set__(prev_record, target)
+                    except Exception:  # noqa: BLE001
+                        # could not create the record
+                        target = None
+                else:
+                    # skip, no record
+                    target = None
+                    break
             # update 'target' only if 'record' and 'target' are both real or
             # both new (see `test_base_objects.py`, `test_basic`)
             if target and bool(target.id) == bool(record.id):
-                target[field.name] = record_value[record]
+                target[self.related_field.name] = record_value[record]
 
     def _search_related(self, records: BaseModel, operator: str, value) -> DomainType:
         """ Determine the domain to search on field ``self``. """
