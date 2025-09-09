@@ -75,7 +75,7 @@ export class ImageSavePlugin extends Plugin {
      * @param {number} resId
      */
     async saveB64Image(el, resModel, resId) {
-        const imageData = el.getAttribute("src").split("base64,")[1];
+        const imageData = el.getAttribute("src")?.split("base64,")[1];
         if (!imageData) {
             // Checks if the image is in base64 format for RPC call. Relying
             // only on the presence of the class "o_b64_image_to_save" is not
@@ -126,6 +126,13 @@ export class ImageSavePlugin extends Plugin {
      */
     async saveModifiedImage(el, resModel, resId) {
         const isBackground = !el.matches("img");
+        if (!isBackground && !el.getAttribute("src")?.split("base64,")[1]) {
+            // Checks if the image is in base64 format for RPC call. Relying
+            // only on the presence of the class "o_modified_image_to_save" is
+            // not robust enough.
+            el.classList.remove("o_modified_image_to_save");
+            return;
+        }
         // Modifying an image always creates a copy of the original, even if
         // it was modified previously, as the other modified image may be used
         // elsewhere if the snippet was duplicated or was saved as a custom one.
