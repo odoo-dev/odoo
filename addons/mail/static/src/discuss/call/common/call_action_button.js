@@ -27,11 +27,11 @@ export class CallActionButton extends Component {
     get isPermissionMissing() {
         switch (this.props.action.id) {
             case "camera-on":
-                return this.rtc.state.videoPermission !== "granted";
+                return this.rtc.cameraPermission !== "granted";
             case "mute":
-                return this.rtc.state.audioPermission !== "granted";
+                return this.rtc.microphonePermission !== "granted";
             default:
-                return false;
+                return null;
         }
     }
 }

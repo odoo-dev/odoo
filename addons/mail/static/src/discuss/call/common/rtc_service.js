@@ -16,7 +16,7 @@ import { loadBundle, loadJS } from "@web/core/assets";
 import { memoize } from "@web/core/utils/functions";
 import { url } from "@web/core/utils/urls";
 import { isMobileOS } from "@web/core/browser/feature_detection";
-import { PermissionDialog } from "@mail/discuss/call/common/permission_dialog";
+import { CallPermissionDialog } from "@mail/discuss/call/common/call_permission_dialog";
 
 let sequence = 1;
 const getSequence = () => sequence++;
@@ -225,6 +225,10 @@ export class Rtc extends Record {
             return this.iceServers ? this.iceServers : GET_DEFAULT_ICE_SERVERS();
         },
     });
+    /** @type {"granted" | "denied" | "prompt" | undefined} */
+    microphonePermission;
+    /** @type {"granted" | "denied" | "prompt" | undefined} */
+    cameraPermission;
     /**
      * The RtcSession of the current user for the call hosted by this tab, this is only set if
      * the current tab is the cross-tab host (the tab that is maintaining the connections and streams).
@@ -374,73 +378,30 @@ export class Rtc extends Record {
             sourceCameraStream: null,
             sourceScreenStream: null,
             /**
-             * Permission states that are kept up to date with browser permissions
-             */
-            audioPermission: "granted",
-            videoPermission: "granted",
-            /**
              * Whether the network fell back to p2p mode in a SFU call.
              */
             fallbackMode: false,
             isPipMode: false,
             isFullscreen: false,
         });
-        this.activeDialog = null;
         this.blurManager = undefined;
-    }
-
-    closeDialog() {
-        this.activeDialog?.();
-        this.activeDialog = null;
-    }
-
-    showPermissionDialog(permissionType, onPrimary, onSecondary) {
-        this.closeDialog();
-        const closeDialog = this.overlay.add(PermissionDialog, {
-            permissionType,
-            close: () => this.closeDialog(),
-            onPrimaryAction: onPrimary,
-            onSecondaryAction: onSecondary,
+        browser.navigator.permissions?.query({ name: "microphone" }).then((status) => {
+            this.microphonePermission = status.state;
+            status.onchange = () => (this.microphonePermission = status.state);
         });
-        this.activeDialog = () => closeDialog();
-        return this.activeDialog;
-    }
-
-    /**
-     * Initialize permission states and set up listeners for permission changes
-     */
-    async _initializePermissions() {
-        const setupPermissionListener = async (permissionName, stateProperty) => {
-            try {
-                const permissionStatus = await browser.navigator.permissions?.query({
-                    name: permissionName,
-                });
-                if (permissionStatus) {
-                    this.state[stateProperty] = permissionStatus.state;
-                    permissionStatus.onchange = () => {
-                        this.state[stateProperty] = permissionStatus.state;
-                    };
-                }
-            } catch (error) {
-                console.debug(`Failed to setup permission listener for ${permissionName}:`, error);
-            }
-        };
-
-        await Promise.all([
-            setupPermissionListener("microphone", "audioPermission"),
-            setupPermissionListener("camera", "videoPermission"),
-        ]);
+        browser.navigator.permissions?.query({ name: "camera" }).then((status) => {
+            this.cameraPermission = status.state;
+            status.onchange = () => (this.cameraPermission = status.state);
+        });
     }
 
     start() {
         const services = this.store.env.services;
         this.notification = services.notification;
         this.overlay = services.overlay;
+        this.dialog = services.dialog;
         this.soundEffectsService = services["mail.sound_effects"];
         this.pttExtService = services["discuss.ptt_extension"];
-
-        this._initializePermissions();
-
         if (this._broadcastChannel) {
             this._broadcastChannel.onmessage = this._onBroadcastChannelMessage.bind(this);
             this._postToTabs({ type: CROSS_TAB_CLIENT_MESSAGE.INIT });
@@ -780,13 +741,11 @@ export class Rtc extends Record {
             await this.leaveCall(this.state.channel);
         }
         if (!isActiveCall) {
-            if (this.state.audioPermission !== "granted") {
-                audio = false;
+            const joinCallOpts = { audio, camera };
+            if (this.microphonePermission !== "granted") {
+                joinCallOpts.audio = false;
             }
-            if (!camera && this.state.videoPermission !== "granted") {
-                camera = false;
-            }
-            await this.joinCall(channel, { audio, camera });
+            await this.joinCall(channel, joinCallOpts);
         }
     }
 
@@ -829,48 +788,48 @@ export class Rtc extends Record {
         this.soundEffectsService.play("earphone-on");
     }
 
+    async askForPermission({ audio, video }) {
+        try {
+            const stream = await browser.navigator.mediaDevices.getUserMedia({
+                audio: audio ? this.store.settings.audioConstraints : false,
+                video: video ? this.store.settings.cameraConstraints : false,
+            });
+            closeStream(stream);
+        } catch {
+            let errorMessage;
+            if (audio && video) {
+                errorMessage = _t(
+                    "Camera and microphone access blocked. Enable in browser settings."
+                );
+            } else {
+                errorMessage = video
+                    ? _t("Camera access blocked. Enable in browser settings.")
+                    : _t("Microphone access blocked. Enable in browser settings.");
+            }
+            this.notification.add(errorMessage, { type: "warning" });
+        }
+        if (audio && video) {
+            return this.microphonePermission === "granted" && this.cameraPermission === "granted";
+        }
+        return audio
+            ? this.microphonePermission === "granted"
+            : this.cameraPermission === "granted";
+    }
+
     async unmute() {
         if (this.isRemote) {
             this._remoteAction({ is_muted: false });
             return;
         }
+        if (this.microphonePermission === "prompt") {
+            this.closeCallPermissionDialog = this.dialog.add(CallPermissionDialog, {
+                permissionType: "microphone",
+            });
+            return;
+        }
         if (this.state.micAudioTrack) {
             await this.setMute(false);
         } else {
-            if (this.state.audioPermission === "denied") {
-                this.notification.add(
-                    _t("Microphone access blocked. Enable in browser settings."),
-                    { type: "warning" }
-                );
-                return;
-            } else if (this.state.audioPermission === "prompt") {
-                this.showPermissionDialog(
-                    "microphone",
-                    async () => {
-                        await this.resetMicAudioTrack({ force: true });
-                    },
-                    async () => {
-                        try {
-                            const stream = await browser.navigator.mediaDevices.getUserMedia({
-                                audio: this.store.settings.audioConstraints,
-                                video: this.store.settings.cameraConstraints,
-                            });
-                            stream?.getAudioTracks()[0].stop();
-                            stream?.getVideoTracks()[0].stop();
-                            await this.resetMicAudioTrack({ force: true });
-                            await this.toggleVideo("camera", { force: true, refreshStream: true });
-                        } catch {
-                            this.notification.add(
-                                _t(
-                                    "Microphone and camera access blocked. Enable in browser settings."
-                                ),
-                                { type: "warning" }
-                            );
-                        }
-                    }
-                );
-                return;
-            }
             await this.resetMicAudioTrack({ force: true });
         }
         this.soundEffectsService.play("mic-on");
@@ -1672,7 +1631,7 @@ export class Rtc extends Record {
         this.audioContext?.close();
         this.audioContext = undefined;
         this._p2pRecoveryCount = 0;
-        this.closeDialog();
+        this.closeCallPermissionDialog?.();
         this.state.updateAndBroadcastDebounce?.cancel();
         this.state.disconnectAudioMonitor?.();
         this.state.micAudioTrack?.stop();
@@ -1819,40 +1778,15 @@ export class Rtc extends Record {
         }
         switch (type) {
             case "camera": {
+                if (this.cameraPermission === "prompt" && !this.state.cameraTrack) {
+                    this.closeCallPermissionDialog = this.dialog.add(CallPermissionDialog, {
+                        permissionType: "camera",
+                    });
+                    return;
+                }
                 const track = this.state.cameraTrack;
                 const sendCamera = force ?? !this.state.sendCamera;
                 this.state.sendCamera = false;
-                if (sendCamera && !track) {
-                    if (this.state.videoPermission === "denied") {
-                        this.notification.add(
-                            _t("Camera access blocked. Enable in browser settings."),
-                            { type: "warning" }
-                        );
-                        return;
-                    } else if (this.state.videoPermission === "prompt") {
-                        this.showPermissionDialog(
-                            "camera",
-                            async () => {
-                                try {
-                                    const stream = await navigator.mediaDevices.getUserMedia({
-                                        video: this.store.settings.cameraConstraints,
-                                    });
-                                    stream?.getVideoTracks()[0].stop();
-                                } catch {
-                                    this.notification.add(
-                                        _t("Camera access blocked. Enable in browser settings."),
-                                        { type: "warning" }
-                                    );
-                                }
-                                await this.toggleVideo(type, { force: true, env, refreshStream });
-                            },
-                            async () => {
-                                await this.resetMicAudioTrack({ force: true });
-                            }
-                        );
-                        return;
-                    }
-                }
                 await this.setVideo(track, type, { activateVideo: sendCamera, env, refreshStream });
                 break;
             }

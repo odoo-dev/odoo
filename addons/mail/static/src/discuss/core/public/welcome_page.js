@@ -93,17 +93,13 @@ export class WelcomePage extends Component {
     }
 
     async enableMicrophone() {
-        if (!this.hasRtcSupport) {
+        if (!this.hasRtcSupport || !this.rtc.askForPermission({ audio: true })) {
             return;
         }
-        try {
-            this.state.audioStream = await navigator.mediaDevices.getUserMedia({
-                audio: this.store.settings.audioConstraints,
-            });
-            this.audioRef.el.srcObject = this.state.audioStream;
-        } catch {
-            // TODO: display popup asking the user to re-enable their mic
-        }
+        this.state.audioStream = await navigator.mediaDevices.getUserMedia({
+            audio: this.store.settings.audioConstraints,
+        });
+        this.audioRef.el.srcObject = this.state.audioStream;
         if (this.isClosed) {
             this.stopTracksOnMediaStream(this.state.audioStream);
         }
@@ -116,17 +112,13 @@ export class WelcomePage extends Component {
     }
 
     async enableVideo() {
-        if (!this.hasRtcSupport) {
+        if (!this.hasRtcSupport || !(await this.rtc.askForPermission({ video: true }))) {
             return;
         }
-        try {
-            this.state.videoStream = await navigator.mediaDevices.getUserMedia({
-                video: this.store.settings.cameraConstraints,
-            });
-            await this.applyBlurConditionally();
-        } catch {
-            // TODO: display popup asking the user to re-enable their camera
-        }
+        this.state.videoStream = await navigator.mediaDevices.getUserMedia({
+            video: this.store.settings.cameraConstraints,
+        });
+        await this.applyBlurConditionally();
         if (this.isClosed) {
             this.stopTracksOnMediaStream(this.state.videoStream);
         }
