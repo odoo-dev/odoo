@@ -203,24 +203,31 @@ class StockMove(models.Model):
         """Set the value of the move"""
         # TODO groupby product to avoid using twice the same stack
         products_to_recompute = set()
+        products_to_invalidate_cache = set()
+        lots_to_invalidate_cache = set()
         lots_to_recompute = set()
 
         for move in self:
             # Incoming moves
             if move.is_dropship or move.is_in:
+                products_to_invalidate_cache.add(move.product_id.id)
                 products_to_recompute.add(move.product_id.id)
                 if move.product_id.lot_valuated:
-                    lots_to_recompute.update(move.move_line_ids.lot_id.ids)
+                    lot_ids = move.move_line_ids.lot_id.ids
+                    lots_to_invalidate_cache.update(lot_ids)
+                    lots_to_recompute.update(lot_ids)
             if move.is_in:
                 move.value = move.sudo()._get_value()
                 continue
             # Outgoing moves
             if not move._is_out():
                 continue
+            products_to_invalidate_cache.add(move.product_id.id)
             if move.product_id.lot_valuated:
                 value = 0.0
                 for move_line in move.move_line_ids:
                     if move_line.lot_id:
+                        lots_to_invalidate_cache.add(move_line.lot_id.id)
                         value += move_line.lot_id.standard_price * move_line.quantity_product_uom
                     else:
                         value += move.product_id.standard_price * move_line.quantity_product_uom
@@ -233,7 +240,10 @@ class StockMove(models.Model):
                 move.value = move.product_id.standard_price * move.quantity
 
         # Recompute the standard price
+        # Avoid the depends in the computed field to avoid useless recomputation
+        self.env['product.product'].browse(products_to_invalidate_cache).invalidate_recordset(['total_value'])
         self.env['product.product'].browse(products_to_recompute)._update_standard_price()
+        self.env['stock.lot'].browse(lots_to_invalidate_cache).invalidate_recordset(['total_value'])
         self.env['stock.lot'].browse(lots_to_recompute)._update_standard_price()
 
     def _get_value(self, forced_std_price=False, at_date=False, ignore_manual_update=False):
