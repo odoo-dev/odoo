@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="receipt" name="Receipt Request">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_breadcrumbs" t-value="True"/>
+            <div class="row justify-content-md-center">
+                <form method="post" target="_self" t-att-action="'/pos/receipt'">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <div class="col-12 col-md-6 mt-4 offset-md-3">
+                        <div class="row">
+                            <h2>Receipt Request</h2>
+                            <hr class="mt-1 mb-0"/>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row">
+                                        <div t-attf-class="col-12 mb-6 col-xl-8">
+                                            <label class="col-form-label" for="contact_number">Contact Number</label>
+                                            <input type="number" name="contact_number" placeholder="9999999999"
+                                                   t-attf-class="form-control #{errors.get('contact_number') and 'is-invalid' or ''}"
+                                                   t-attf-value="#{form_values.get('contact_number')}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button class="btn btn-primary">Request Receipt</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div t-if="orders" class="container mt-2">
+                    <div class="row justify-content-center">
+                        <t t-foreach="orders" t-as="order" t-key="order_inded">
+                            <div class="col-md-3 mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-baseline mb-2 justify-content-between">
+                                            <span t-out="order.get('tracking_number')" class="fw-bolder fs-5 me-2"/>
+                                            <span t-out="order.get('pos_reference')"/>
+                                        </div>
+                                        <footer class="d-flex justify-content-between align-items-center">
+                                            <span t-out="order.get('date_order')" class="me-2 text-muted"/>
+                                            <a class="text-decoration-none download-pos-receipt cursor-pointer" t-att-data-orderId="order.get('id')" t-att-data-orderobj="order.get('order_obj')">
+                                                <i class="fa fa-download" aria-hidden="true"></i>
+                                            </a>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+                <div t-else="">
+                    <div class="alert alert-warning text-center my-3">
+                        <strong>No orders found!</strong><br/>
+                        Please check your contact number and try again.
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_order_extended.OrderReceipt" owl="1">
+        <div class="d-flex justify-content-center align-items-center"
+             style="font-size: 18px; color: #000000; width: 512px">
+            <div class="d-flex flex-column align-items-center p-3 w-100">
+    
+                <!-- Header -->
+                <div class="fw-bold text-center w-100 mb-2">
+                    <t t-esc="props.order.pos_reference"/>
+                </div>
+                <div class="text-center mb-3">
+                    <t t-esc="props.order.tracking_number"/>
+                </div>
+
+                <!-- Order Lines -->
+                <table class="table table-sm w-100" style="font-size: 16px;">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-end">Qty</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="props.order.lines" t-as="line" t-key="line.product_name">
+                            <tr>
+                                <td>
+                                    <t t-esc="line.product_name"/>
+                                </td>
+                                <td class="text-end">
+                                    <t t-esc="line.qty"/>
+                                </td>
+                                <td class="text-end">
+                                    <t t-esc="line.price_subtotal_incl"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <!-- Totals -->
+                <div class="w-100 mt-2 border-top pt-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span><t t-esc="props.order.amount_subtotal"/></span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Tax</span>
+                        <span><t t-esc="props.order.amount_tax"/></span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total</span>
+                        <span><t t-esc="props.order.amount_total.toFixed(2)"/></span>
+                    </div>
+                </div>
+
+                <div class="w-100 mt-4 text-center">
+                    <div>
+                        Contact: <t t-esc="props.order.contact_number or '-'"/>
+                    </div>
+                    <div>
+                        Date: <t t-esc="props.order.date_order"/>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </t>
+</templates>
