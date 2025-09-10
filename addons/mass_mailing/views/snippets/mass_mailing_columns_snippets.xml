@@ -167,7 +167,7 @@
                     <p>Useful options</p>
                 </div>
                 <div class="col-md-4 pt24 pb24 o_cc o_cc4" style="text-align: center;">
-                    <p><font style="font-size: 48px;">45</font></p>
+                    <p><font style="font-size: 48px; color: white;">45</font></p>
                     <p><font style="color: white;">Beautiful snippets</font></p>
                 </div>
                 <div class="col-md-4 pt24 pb24 o_cc o_cc2" style="text-align: center;">
@@ -263,7 +263,7 @@
                             <div class="col-md-2 px-0" style="text-align: center;">
                                 <i class="fa fa-2x fa-font-awesome bg-primary" style="padding: 10px; border-radius: 50px !important;"></i>
                             </div>
-                            <div class="col-md-10 pb16">
+                            <div class="col-md-10 pb16 px-0">
                                 <h3>Change Icons</h3>
                                 <p>Double click an icon to replace it with one of your choice.</p>
                             </div>
@@ -272,7 +272,7 @@
                             <div class="col-md-2 px-0" style="text-align: center;">
                                 <i class="fa fa-2x fa-files-o bg-primary" style="padding: 10px; border-radius: 50px !important;"></i>
                             </div>
-                            <div class="col-md-10 pb16">
+                            <div class="col-md-10 pb16 px-0">
                                 <h3>Duplicate</h3>
                                 <p>Duplicate blocks and columns to add more features.</p>
                             </div>
@@ -281,7 +281,7 @@
                             <div class="col-md-2 px-0" style="text-align: center;">
                                 <i class="fa fa-2x fa-trash bg-primary" style="padding: 10px; border-radius: 50px !important;"></i>
                             </div>
-                            <div class="col-md-10 pb16">
+                            <div class="col-md-10 pb16 px-0">
                                 <h3>Delete Blocks</h3>
                                 <p>Select and delete blocks to remove features.</p>
                             </div>
@@ -300,7 +300,7 @@
                             <div class="col-md-2 px-0" style="text-align: center;">
                                 <i class="fa fa-2x fa-magic bg-secondary" style="padding: 10px; border-radius: 3px !important; color: white;"></i>
                             </div>
-                            <div class="col-md-10 pb16">
+                            <div class="col-md-10 pb16 px-0">
                                 <h3>Great Value</h3>
                                 <p>Turn every feature into a benefit for your reader.</p>
                             </div>
@@ -309,7 +309,7 @@
                             <div class="col-md-2 px-0" style="text-align: center;">
                                 <i class="fa fa-2x fa-eyedropper bg-secondary" style="padding: 10px; border-radius: 3px !important; color: white;"></i>
                             </div>
-                            <div class="col-md-10 pb16">
+                            <div class="col-md-10 pb16 px-0">
                                 <h3>Edit Styles</h3>
                                 <p>You can edit colors and backgrounds to highlight features.</p>
                             </div>
@@ -318,7 +318,7 @@
                             <div class="col-md-2 px-0" style="text-align: center;">
                                 <i class="fa fa-2x fa-picture-o bg-secondary" style="padding: 10px; border-radius: 3px !important; color: white;"></i>
                             </div>
-                            <div class="col-md-10 pb16">
+                            <div class="col-md-10 pb16 px-0">
                                 <h3>Sample Icons</h3>
                                 <p>All these icons are completely free for commercial use.</p>
                             </div>

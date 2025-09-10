@@ -17,7 +17,7 @@
 
 <template id="s_author" name="Author">
     <section class="s_author o_mail_snippet_general">
-        <div class="container">
+        <div class="container pt8 pb8">
             <div class="row">
                 <h1 style="text-align:center">Your Title</h1>
             </div>

@@ -1,6 +1,6 @@
 <odoo>
 <template id="s_text_highlight" name="Text Highlight">
-    <div class="s_text_highlight s_mail_text_highlight o_mail_snippet_general o_cc o_cc3 pt32 pb32 text-center" style="border-radius: 6px;">
+    <div class="s_text_highlight s_mail_text_highlight o_mail_snippet_general o_cc o_cc3 pt32 pb32 text-center mx-auto w-100" style="border-radius: 6px;">
         <h3><font class="text-white">Text Highlight</font></h3>
         <p><font class="text-white">Put the focus on what you have to say!</font></p>
     </div>
