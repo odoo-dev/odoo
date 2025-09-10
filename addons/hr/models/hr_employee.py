@@ -73,13 +73,12 @@ class HrEmployee(models.Model):
 
     # resource and user
     # required on the resource, make sure required="True" set in the view
-    name = fields.Char(string="Employee Name", related='resource_id.name', store=True, readonly=False, tracking=True)
-    resource_id = fields.Many2one('resource.resource', required=True)
+    name = fields.Char(string="Employee Name", related='version_id.resource_id.name', store=True, readonly=False, tracking=True)
     # required because the mixin already creates it so it is not related to the version_id
     resource_calendar_id = fields.Many2one(related='version_id.resource_calendar_id', inherited=True, index=False, store=False, check_company=True)
     user_id = fields.Many2one(
         'res.users', 'User',
-        related='resource_id.user_id',
+        related='version_id.resource_id.user_id',
         store=True,
         readonly=False,
         check_company=True,
@@ -107,7 +106,7 @@ class HrEmployee(models.Model):
     show_hr_icon_display = fields.Boolean(compute='_compute_presence_icon')
     newly_hired = fields.Boolean('Newly Hired', compute='_compute_newly_hired', search='_search_newly_hired')
 
-    active = fields.Boolean('Active', related='resource_id.active', default=True, store=True, readonly=False)
+    active = fields.Boolean('Active', related='version_id.resource_id.active', default=True, store=True, readonly=False)
     company_id = fields.Many2one('res.company', required=True, tracking=True)
     company_country_id = fields.Many2one('res.country', 'Company Country', related='company_id.country_id', readonly=True, groups="base.group_system,hr.group_hr_user")
     company_country_code = fields.Char(related='company_country_id.code', depends=['company_country_id'], readonly=True, groups="base.group_system,hr.group_hr_user", string='Company Country Code')
@@ -1374,13 +1373,13 @@ class HrEmployee(models.Model):
             resources_per_calendar_id = defaultdict(lambda: self.env['resource.resource'])
             for employee in self:
                 if employee.version_id == employee.current_version_id:
-                    resources_per_calendar_id[employee.resource_calendar_id.id] += employee.resource_id
+                    resources_per_calendar_id[employee.resource_calendar_id.id] += employee.version_id.resource_id
             for calendar_id, resources in resources_per_calendar_id.items():
                 resources.write({'calendar_id': calendar_id})
         return res
 
     def unlink(self):
-        resources = self.mapped('resource_id')
+        resources = self.mapped('version_ids.resource_id')
         super().unlink()
         return resources.unlink()
 
@@ -1508,7 +1507,7 @@ class HrEmployee(models.Model):
         for employee in self.sudo():
             for version in employee._get_versions_with_contract_overlap_with_period(start.date(), stop.date()):
                 # if employee is under fully flexible contract, use timezone of the employee
-                calendar_tz = timezone(version.resource_calendar_id.tz) if version.resource_calendar_id else timezone(employee.resource_id.tz)
+                calendar_tz = timezone(version.resource_calendar_id.tz) if version.resource_calendar_id else timezone(version.resource_id.tz)
                 date_start = datetime.combine(
                     version.date_start,
                     time(0, 0, 0)
@@ -1565,7 +1564,7 @@ class HrEmployee(models.Model):
             valid_versions = self.sudo()._get_versions_with_contract_overlap_with_period(start.date(), stop.date())
             if not valid_versions:
                 calendar = self.resource_calendar_id or self.company_id.resource_calendar_id
-                return calendar._attendance_intervals_batch(start, stop, self.resource_id, lunch=True)[self.resource_id.id]
+                return calendar._attendance_intervals_batch(start, stop, lunch=True)[self.version.resource_id.id]
             employee_tz = timezone(self.tz) if self.tz else None
             duration_data = Intervals()
             for version in valid_versions:
@@ -1575,8 +1574,8 @@ class HrEmployee(models.Model):
                 lunch_intervals = calendar._attendance_intervals_batch(
                     max(start, version_start),
                     min(stop, version_end),
-                    resources=self.resource_id,
-                    lunch=True)[self.resource_id.id]
+                    resources=version.resource_id,
+                    lunch=True)[version.resource_id.id]
                 duration_data = duration_data | lunch_intervals
             return duration_data
 
@@ -1590,9 +1589,8 @@ class HrEmployee(models.Model):
                 date_from,
                 date_to,
                 tz=employee_tz,
-                resources=self.resource_id,
                 compute_leaves=True,
-                domain=[('company_id', 'in', [False, self.company_id.id])])[self.resource_id.id]
+                domain=[('company_id', 'in', [False, self.company_id.id])])[self.version.resource_id.id]
             return calendar_intervals
         duration_data = Intervals()
         for version in valid_versions:
@@ -1603,9 +1601,9 @@ class HrEmployee(models.Model):
                                     max(date_from, version_start),
                                     min(date_to, version_end),
                                     tz=employee_tz,
-                                    resources=self.resource_id,
+                                    resources=version.resource_id,
                                     compute_leaves=True,
-                                    domain=[('company_id', 'in', [False, self.company_id.id])])[self.resource_id.id]
+                                    domain=[('company_id', 'in', [False, self.company_id.id])])[version.resource_id.id]
             duration_data = duration_data | version_intervals
         return duration_data
 

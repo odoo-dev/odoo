@@ -23,7 +23,7 @@ def format_date_abbr(env, date):
 class HrVersion(models.Model):
     _name = 'hr.version'
     _description = 'Version'
-    _inherit = ['mail.thread', 'mail.activity.mixin']  # TODO: remove later ? (see if still needed because contract template)
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'resource.mixin']  # TODO: remove later ? (see if still needed because contract template)
     _mail_post_access = 'read'
     _order = 'date_version'
     _rec_name = 'name'
@@ -55,6 +55,7 @@ class HrVersion(models.Model):
                                         default=lambda self: self.env.uid, required=True, groups="hr.group_hr_user")
     last_modified_date = fields.Datetime(string='Last Modified on', default=fields.Datetime.now, required=True,
                                          groups="hr.group_hr_user")
+    resource_id = fields.Many2one('resource.resource', required=True)
 
     # Personal Information
     country_id = fields.Many2one(

@@ -387,7 +387,7 @@ class ResourceCalendar(models.Model):
             res_intervals = Intervals(res, keep_distinct=True)
             start_datetime = start_dt.astimezone(tz)
             end_datetime = end_dt.astimezone(tz)
-            # problem with resource link to version
+
             for resource in resources:
                 if resource and resource._is_fully_flexible():
                     # If the resource is fully flexible, return the whole period from start_dt to end_dt with a dummy attendance
@@ -398,7 +398,7 @@ class ResourceCalendar(models.Model):
                         'duration_days': days,
                     })
                     result_per_resource_id[resource.id] = Intervals([(start_dt, end_dt, dummy_attendance)], keep_distinct=True)
-                elif (resource and resource.calendar_id.flexible_hours) or self.flexible_hours:
+                elif resource and resource.calendar_id.flexible_hours:
                     # For flexible Calendars, we create intervals to fill in the weekly intervals with the average daily hours
                     # until the full time required hours are met. This gives us the most correct approximation when looking at a daily
                     # and weekly range for time offs and overtime calculations and work entry generation
