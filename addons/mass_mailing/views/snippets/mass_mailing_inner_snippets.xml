@@ -92,26 +92,26 @@
 <!-- Assets -->
 <record id="mass_mailing.s_alert_001_scss" model="ir.asset">
     <field name="name">Alert 001 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
+    <field name="bundle">mass_mailing.assets_iframe_style</field>
     <field name="path">mass_mailing/static/src/snippets/s_alert/000.scss</field>
 </record>
 
 <record id="mass_mailing.s_hr_000_scss" model="ir.asset">
     <field name="name">Hr 000 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
+    <field name="bundle">mass_mailing.assets_iframe_style</field>
     <field name="path">mass_mailing/static/src/snippets/s_hr/000.scss</field>
 </record>
 
 <record id="mass_mailing.s_rating_000_scss" model="ir.asset">
     <field name="name">Rating 000 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
+    <field name="bundle">mass_mailing.assets_iframe_style</field>
     <field name="path">mass_mailing/static/src/snippets/s_rating/000.scss</field>
     <field name="active" eval="False"/>
 </record>
 
 <record id="mass_mailing.s_rating_001_scss" model="ir.asset">
     <field name="name">Rating 001 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
+    <field name="bundle">mass_mailing.assets_iframe_style</field>
     <field name="path">mass_mailing/static/src/snippets/s_rating/001.scss</field>
 </record>
 

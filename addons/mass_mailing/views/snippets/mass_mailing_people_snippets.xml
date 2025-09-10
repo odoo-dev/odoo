@@ -253,16 +253,14 @@
                 <div>
                     <p>" Write a quote here from one of your customers. Quotes are a great way to build confidence in your products or services. "</p>
                     <div class="row pt8">
-                        <p class="mb-0">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" style="padding: 0px;" class="img col-md-4" data-shape="html_builder/geometric_round/geo_round_circle" data-file-name="team_member_2-circle.svg" data-shape-colors=";;;;" data-original-mimetype="image/png"/>
-                        </p>
-                        <div class="s_blockquote_author col-md-8">
-                            <div>
-                                <p>
-                                    <strong><span class="h6-fs">John DOE</span></strong><br/>
-                                    <span class="h6-fs"><font class="text-600">CEO of MyCompany</font></span>
-                                </p>
-                            </div>
+                        <div class="mb-0 col-1 px-0 o_not_editable">
+                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" style="padding: 0px;" class="img-fluid" data-shape="html_builder/geometric_round/geo_round_circle" data-file-name="team_member_2-circle.svg" data-shape-colors=";;;;" data-original-mimetype="image/png"/>
+                        </div>
+                        <div class="s_blockquote_author col-8">
+                            <p>
+                                <strong><span class="h6-fs">John DOE</span></strong><br/>
+                                <span class="h6-fs"><font class="text-600">CEO of MyCompany</font></span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -274,13 +272,13 @@
 <!-- Assets -->
 <record id="mass_mailing.s_company_team_000_scss" model="ir.asset">
     <field name="name">Company team 000 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
+    <field name="bundle">mass_mailing.assets_iframe_style</field>
     <field name="path">mass_mailing/static/src/snippets/s_company_team/000.scss</field>
 </record>
 
 <record id="mass_mailing.s_blockquote_000_scss" model="ir.asset">
     <field name="name">Blockquote 000 SCSS</field>
-    <field name="bundle">web.assets_frontend</field>
+    <field name="bundle">mass_mailing.assets_iframe_style</field>
     <field name="path">mass_mailing/static/src/snippets/s_blockquote/000.scss</field>
 </record>
 </odoo>
