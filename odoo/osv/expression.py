@@ -1178,6 +1178,7 @@ class expression(object):
 
             elif not field.store:
                 # Non-stored field should provide an implementation of search.
+                model.check_field_access_rights('read', [field.name])
                 if not field.search:
                     # field does not support search!
                     _logger.error("Non-stored field %s cannot be searched.", field, exc_info=True)

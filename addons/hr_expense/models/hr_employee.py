@@ -6,7 +6,7 @@ from odoo import fields, models, api
 class EmployeeBase(models.AbstractModel):
     _inherit = 'hr.employee.base'
 
-    filter_for_expense = fields.Boolean(store=False, search='_search_filter_for_expense', groups="hr.group_hr_user")
+    filter_for_expense = fields.Boolean(store=False, search='_search_filter_for_expense')
 
     def _search_filter_for_expense(self, operator, value):
         assert operator == '=' and value, "Operation not supported"

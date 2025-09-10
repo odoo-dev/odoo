@@ -113,7 +113,6 @@ class MailThread(models.AbstractModel):
         compute='_compute_message_partner_ids',
         inverse='_inverse_message_partner_ids',
         search='_search_message_partner_ids',
-        groups='base.group_user',
     )
     message_ids = fields.One2many(
         'mail.message', 'res_id', string='Messages',
@@ -137,10 +136,23 @@ class MailThread(models.AbstractModel):
 
     @api.depends('message_follower_ids')
     def _compute_message_partner_ids(self):
-        for thread in self:
-            thread.message_partner_ids = thread.message_follower_ids.mapped('partner_id')
+        is_internal = self.env.su or self.env.user.has_group('base.group_user')
+        if is_internal:
+            for thread in self:
+                thread.message_partner_ids = thread.message_follower_ids.partner_id
+        else:
+            # see only partners that can be searched
+            user_partner = self.env.user.partner_id
+            allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
+            for thread in self:
+                partners = thread.sudo().message_follower_ids.partner_id.filtered(lambda p: p.id in allow_partner_ids)
+                thread.message_partner_ids = partners
 
     def _inverse_message_partner_ids(self):
+        is_internal = self.env.su or self.env.user.has_group('base.group_user')
+        if not is_internal:
+            raise AccessError(self.env._("Cannot write on message partners"))
+
         # The unsubscription is postponed until the end of the method because the
         # message_unsubscribe() unlinks records that invalidates all the cache including
         # `message_partner_ids` in `self`.
