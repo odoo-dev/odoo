@@ -14,6 +14,7 @@
             <t t-set-slot="footer">
                 <t t-if="props.multiSelect">
                     <button class="btn btn-primary o_select_button"
+                        t-if="env.isSmall"
                         t-att-disabled="state.resIds.length === 0"
                         data-hotkey="v"
                         t-on-click="() => this.select(state.resIds)"
