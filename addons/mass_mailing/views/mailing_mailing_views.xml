@@ -262,6 +262,7 @@
                                 <div class="position-relative">
                                     <field name="body_arch" class="o_mail_body_mailing" widget="mass_mailing_html"
                                         options="{
+                                            'allowChecklist': false,
                                             'inline_field': 'body_html',
                                             'dynamic_placeholder': true,
                                             'dynamic_placeholder_model_reference_field': 'mailing_model_real',

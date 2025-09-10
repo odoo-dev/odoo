@@ -350,6 +350,9 @@ export const htmlField = {
         if ("allowFile" in options) {
             editorConfig.allowFile = Boolean(options.allowFile);
         }
+        if ("allowChecklist" in options) {
+            editorConfig.allowChecklist = Boolean(options.allowChecklist);
+        }
         if ("allowAttachmentCreation" in options) {
             editorConfig.allowImage = Boolean(options.allowAttachmentCreation);
             editorConfig.allowFile = Boolean(options.allowAttachmentCreation);
@@ -361,9 +364,6 @@ export const htmlField = {
             editorConfig.cleanEmptyStructuralContainers = Boolean(
                 options.cleanEmptyStructuralContainers
             );
-        }
-        if ("disable_checkbox" in options) {
-            editorConfig.disableCheckbox = Boolean(options.disable_checkbox);
         }
         return {
             editorConfig,

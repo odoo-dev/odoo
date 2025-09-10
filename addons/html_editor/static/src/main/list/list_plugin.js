@@ -76,6 +76,9 @@ export class ListPlugin extends Plugin {
         "dom",
         "color",
     ];
+    static defaultConfig = {
+        allowChecklist: true,
+    };
     toolbarListSelectorKey = reactive({ value: 0 });
     resources = {
         user_commands: [
@@ -95,21 +98,21 @@ export class ListPlugin extends Plugin {
                 run: () => this.toggleListCommand({ mode: "OL" }),
                 isAvailable: this.canToggleList.bind(this),
             },
-            {
+            this.config.allowChecklist && {
                 id: "toggleListCL",
                 title: _t("Checklist"),
                 description: _t("Track tasks with a checklist"),
                 icon: "fa-check-square-o",
-                isAvailable: () => !this.config.disableCheckbox,
                 run: () => this.toggleListCommand({ mode: "CL" }),
-                isAvailable: this.canToggleList.bind(this),
+                isAvailable: (selection) =>
+                    this.config.allowChecklist && this.canToggleList(selection),
             },
-        ],
+        ].filter(Boolean),
         shortcuts: [
             { hotkey: "control+shift+7", commandId: "toggleListOL" },
             { hotkey: "control+shift+8", commandId: "toggleListUL" },
-            { hotkey: "control+shift+9", commandId: "toggleListCL" },
-        ],
+            this.config.allowChecklist && { hotkey: "control+shift+9", commandId: "toggleListCL" },
+        ].filter(Boolean),
         toolbar_items: [
             withSequence(5, {
                 id: "list",
@@ -133,16 +136,20 @@ export class ListPlugin extends Plugin {
                 categoryId: "structure",
                 commandId: "toggleListOL",
             },
-            {
+            this.config.allowChecklist && {
                 categoryId: "structure",
                 commandId: "toggleListCL",
             },
-        ].map((item) => withSequence(5, item)),
+        ]
+            .filter(Boolean)
+            .map((item) => withSequence(5, item)),
         power_buttons: [
             { commandId: "toggleListUL" },
             { commandId: "toggleListOL" },
-            { commandId: "toggleListCL" },
-        ].map((item) => withSequence(15, item)),
+            this.config.allowChecklist && { commandId: "toggleListCL" },
+        ]
+            .filter(Boolean)
+            .map((item) => withSequence(15, item)),
 
         hints: [{ selector: `LI, LI > ${baseContainerGlobalSelector}`, text: _t("List") }],
 
@@ -1281,19 +1288,17 @@ export class ListPlugin extends Plugin {
     }
 
     getListSelectorButtons() {
-        const getCommand = (item) => this.resources.user_commands.find((cmd) => cmd.id === item.commandId);
-            const button = composeToolbarButton(command, item);
-            return {
-                ...pick(button, "id", "icon", "run", "mode"),
-            return listSelectorItems
-            .filter((item) => {
-                const command = getCommand(item);
-                return command && (!command.isAvailable || command.isAvailable());
-            })
-            .map((item) => {
-                const command = getCommand(item);
+        return listSelectorItems.reduce((buttons, item) => {
+            const command = this.resources.user_commands.find((cmd) => cmd.id === item.commandId);
+            if (command) {
+                const button = composeToolbarButton(command, item);
+                buttons.push({
+                    ...pick(button, "id", "icon", "run", "mode"),
+                    // We want short descriptions for these buttons.
                     description: command.title,
-                };
-            });
+                });
+            }
+            return buttons;
+        }, []);
     }
 }

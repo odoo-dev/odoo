@@ -285,7 +285,6 @@ export class ToolbarPlugin extends Plugin {
             description:
                 item.description instanceof Function ? item.description : () => item.description,
         });
-
         return toolbarItems.map((item) =>
             "Component" in item ? componentItemToButton(item) : commandItemToButton(item)
         );
