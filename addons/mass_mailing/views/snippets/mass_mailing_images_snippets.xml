@@ -18,12 +18,14 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 pt16 pb16">
-                    <img src="/web/image/mass_mailing.s_image_text_default_image" class="img w-100" />
+                    <p class="mb-0">
+                        <img src="/web/image/mass_mailing.s_image_text_default_image" class="img img-fluid w-100" />
+                    </p>
                 </div>
                 <div class="col-md-5 o_cc offset-md-1 pt16 pb16">
                     <h2><span class="h3-fs">Discover New <strong>Opportunities</strong></span></h2>
                     <p>Write one or two paragraphs describing your product or services. To be successful your content needs to be useful to your readers.</p>
-                    <p>Start with the customer – find out what they want and give it to them.</p>
+                    <p>Start with the customer - find out what they want and give it to them.</p>
                     <p><a href="https://www.example.com" class="btn btn-secondary o_translate_inline">Learn more</a></p>
                 </div>
             </div>
@@ -38,11 +40,13 @@
                 <div class="col-md-5 pt16 pb16">
                     <h2><span class="h3-fs">Enhance Your <strong>Experience</strong></span></h2>
                     <p>Write one or two paragraphs describing your product or services. To be successful your content needs to be useful to your readers.</p>
-                    <p>Start with the customer – find out what they want and give it to them.</p>
+                    <p>Start with the customer - find out what they want and give it to them.</p>
                     <p><a href="https://www.example.com" class="btn btn-secondary">Learn more</a></p>
                 </div>
                 <div class="col-md-6 offset-md-1 pt16 pb16">
-                    <img src="/web/image/mass_mailing.s_text_image_default_image" class="img img-fluid mx-auto rounded" alt="" data-mimetype="image/webp"/>
+                    <p class="mb-0">
+                        <img src="/web/image/mass_mailing.s_text_image_default_image" class="img img-fluid mx-auto rounded" alt="" data-mimetype="image/webp"/>
+                    </p>
                 </div>
             </div>
         </div>
@@ -56,7 +60,9 @@
             <p style="text-align: center;">Experience unparalleled comfort, cutting-edge design, and performance-enhancing<br/>technology with this latest innovation, crafted to elevate every athlete's journey.</p>
             <div class="row">
                 <div class="col-md-12 pt24" style="text-align: center;">
-                    <img src="/web/image/mass_mailing.s_picture_default_image" style="padding: 10px;" class="mx-auto d-block mw-100" width="500" alt=""/>
+                    <p class="mb-0">
+                        <img src="/web/image/mass_mailing.s_picture_default_image" style="padding: 10px;" class="mx-auto d-block mw-100" width="500" alt=""/>
+                    </p>
                     <p style="text-align: center;"><font style="font-size: 12px;">Where innovation meets performance</font></p>
                 </div>
             </div>

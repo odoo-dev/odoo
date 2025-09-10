@@ -126,9 +126,9 @@
 
 <template id="s_mail_block_header_view" name="View Online">
     <section class="o_snippet_view_in_browser o_mail_snippet_general pt16 pb16" style="text-align: center; padding-left: 15px; padding-right: 15px;" data-name="View Online">
-        <a href="/view">
-            View Online
-        </a>
+        <p class="mb-0">
+            <a href="/view">View Online</a>
+        </p>
     </section>
 </template>
 

@@ -65,7 +65,7 @@
     <div class="s_video o_snippet_drop_in_only">
         <a href="https://www.youtube.com/embed/G8b4UZIcTfg?rel=0&amp;autoplay=0">
             <div>
-                <img data-original-src="https://img.youtube.com/vi/G8b4UZIcTfg/0.jpg" src="https://img.youtube.com/vi/G8b4UZIcTfg/0.jpg"/>
+                <img class="img img-fluid" data-original-src="https://img.youtube.com/vi/G8b4UZIcTfg/0.jpg" src="https://img.youtube.com/vi/G8b4UZIcTfg/0.jpg"/>
             </div>
         </a>
     </div>

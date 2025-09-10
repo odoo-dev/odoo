@@ -109,7 +109,7 @@
                 <div class="col-md-6 pt16 pb16">
                     <blockquote class="s_mail_blockquote s_blockquote o_mail_snippet_general o_cc o_cc1 d-flex flex-column gap-4 w-100 h-100 mx-auto p-4 rounded fst-normal" data-snippet="s_blockquote" data-name="Review" style="border: 0;border-radius: 6.4px !important;">
                         <div class="s_rating s_rating_no_title" data-snippet="s_rating" data-name="Rating" data-vcss="001" data-icon="fa-star" aria-label="4 out of 5 stars">
-                            <strong class="s_rating_title">Rating</strong>
+                            <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
                                     <i class="fa fa-star" role="presentation"/>
@@ -124,7 +124,9 @@
                         </div>
                         <p class="mb-auto">"Engaging with this team was effortless from start to end. Their proficiency and meticulous approach greatly enhanced our project. I couldn’t be happier with the final product!"</p>
                         <div class="row flex-row align-items-start justify-content-start text-start s_blockquote_infos">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_1/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar col-md-4 img" data-original-src="/web/image/mass_mailing.s_company_team_default_image_1" alt=""/>
+                            <p class="mb-0">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_1/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar col-md-4 img" data-original-src="/web/image/mass_mailing.s_company_team_default_image_1" alt=""/>
+                            </p>
                             <div class="s_blockquote_author col-md-8">
                                 <p><strong>Sullivan Mitchell</strong></p>
                                 <p><span class="text-muted">Marketing Director</span></p>
@@ -135,7 +137,7 @@
                 <div class="col-md-6 pt16 pb16">
                     <blockquote class="s_mail_blockquote s_blockquote o_mail_snippet_general o_cc o_cc1 d-flex flex-column gap-4 w-100 h-100 mx-auto p-4 rounded fst-normal" data-snippet="s_blockquote" data-name="Review" style="border: 0;border-radius: 6.4px !important;">
                         <div class="s_rating s_rating_no_title" data-snippet="s_rating" data-name="Rating" data-vcss="001" data-icon="fa-star" aria-label="4 out of 5 stars">
-                            <strong class="s_rating_title">Rating</strong>
+                            <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
                                     <i class="fa fa-star" role="presentation"/>
@@ -150,7 +152,9 @@
                         </div>
                         <p class="mb-auto">"Working with this team was smooth and efficient at every stage. Their skills and commitment to quality had a major impact on our project. I am thrilled with the final results!"</p>
                         <div class="row s_blockquote_infos flex-row align-items-start justify-content-start text-start">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" class="col-md-4 s_blockquote_author_avatar img" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" alt=""/>
+                            <p class="mb-0">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" class="col-md-4 s_blockquote_author_avatar img" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" alt=""/>
+                            </p>
                             <div class="s_blockquote_author col-md-8">
                                 <p><strong>James Carter</strong></p>
                                 <p><span class="text-muted">Chief Technical Officer</span></p>
@@ -161,7 +165,7 @@
                 <div class="col-md-6 pt16 pb16">
                     <blockquote class="s_mail_blockquote s_blockquote o_mail_snippet_general o_cc o_cc1 d-flex flex-column gap-4 w-100 h-100 mx-auto p-4 rounded fst-normal" data-snippet="s_blockquote" data-name="Review" style="border: 0;border-radius: 6.4px !important;">
                         <div class="s_rating s_rating_no_title" data-snippet="s_rating" data-name="Rating" data-vcss="001" data-icon="fa-star" aria-label="4 out of 5 stars">
-                            <strong class="s_rating_title">Rating</strong>
+                            <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
                                     <i class="fa fa-star" role="presentation"/>
@@ -176,7 +180,9 @@
                         </div>
                         <p class="mb-auto">"From the first meeting, it was clear we were in good hands. They took our vision and turned it into something even better than we had imagined. Highly recommend!"</p>
                         <div class="row flex-row align-items-start justify-content-start text-start s_blockquote_infos">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_4/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_4" class="s_blockquote_author_avatar col-md-4 img rounded-circle" alt=""/>
+                            <p class="mb-0">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_4/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_4" class="s_blockquote_author_avatar col-md-4 img rounded-circle" alt=""/>
+                            </p>
                             <div class="s_blockquote_author col-md-8">
                                 <p><strong>Jody Roberts</strong></p>
                                 <p><span class="text-muted">Chief Financial Officer</span></p>
@@ -187,7 +193,7 @@
                 <div class="col-md-6 pt16 pb16">
                     <blockquote class="s_mail_blockquote s_blockquote o_mail_snippet_general o_cc o_cc1 d-flex flex-column gap-4 w-100 h-100 mx-auto p-4 rounded fst-normal" data-snippet="s_blockquote" data-name="Review" style="border: 0;border-radius: 6.4px !important;">
                         <div class="s_rating s_rating_no_title" data-snippet="s_rating" data-name="Rating" data-vcss="001" data-icon="fa-star" aria-label="4 out of 5 stars">
-                            <strong class="s_rating_title">Rating</strong>
+                            <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
                                     <i class="fa fa-star" role="presentation"/>
@@ -202,7 +208,9 @@
                         </div>
                         <p class="mb-auto">"Exceptional service and great communication throughout the entire process. They went above and beyond to ensure our project was a complete success."</p>
                         <div class="row flex-row align-items-start justify-content-start text-start s_blockquote_infos">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_5/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar img rounded-circle col-md-4" data-original-src="/web/image/mass_mailing.s_company_team_default_image_5" alt=""/>
+                            <p class="mb-0">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_5/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar img rounded-circle col-md-4" data-original-src="/web/image/mass_mailing.s_company_team_default_image_5" alt=""/>
+                            </p>
                             <div class="s_blockquote_author col-md-8">
                                 <p><strong>Emil Foster</strong></p>
                                 <p><span class="text-muted">Creative Director</span></p>
@@ -222,16 +230,16 @@
             <p style="text-align: center;">We are in good company.</p>
             <div class="row">
                 <div class="col-md-3 pt16 pb16">
-                    <img src="/web/image/mass_mailing.s_reference_default_image_1" class="img img-fluid mx-auto" alt=""/>
+                    <p class="mb-0"><img src="/web/image/mass_mailing.s_reference_default_image_1" class="img img-fluid mx-auto" alt=""/></p>
                 </div>
                 <div class="col-md-3 pt16 pb16">
-                    <img src="/web/image/mass_mailing.s_reference_default_image_2" class="img img-fluid mx-auto" alt=""/>
+                    <p class="mb-0"><img src="/web/image/mass_mailing.s_reference_default_image_2" class="img img-fluid mx-auto" alt=""/></p>
                 </div>
                 <div class="col-md-3 pt16 pb16">
-                    <img src="/web/image/mass_mailing.s_reference_default_image_3" class="img img-fluid mx-auto" alt=""/>
+                    <p class="mb-0"><img src="/web/image/mass_mailing.s_reference_default_image_3" class="img img-fluid mx-auto" alt=""/></p>
                 </div>
                 <div class="col-md-3 pt16 pb16">
-                    <img src="/web/image/mass_mailing.s_reference_default_image_4" class="img img-fluid mx-auto" alt=""/>
+                    <p class="mb-0"><img src="/web/image/mass_mailing.s_reference_default_image_4" class="img img-fluid mx-auto" alt=""/></p>
                 </div>
             </div>
         </div>
@@ -245,11 +253,15 @@
                 <div>
                     <p class="my-auto">" Write a quote here from one of your customers. Quotes are a great way to build confidence in your products or services. "</p>
                     <div class="row">
-                        <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" style="width: 40px; padding: 0px;" class="img col-md-4" data-shape="html_builder/geometric_round/geo_round_circle" data-file-name="team_member_2-circle.svg" data-shape-colors=";;;;" data-original-mimetype="image/png"/>
+                        <div class="col-md-2">
+                            <p class="mb-0">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" style="width: 40px; padding: 0px;" class="img col-md-4" data-shape="html_builder/geometric_round/geo_round_circle" data-file-name="team_member_2-circle.svg" data-shape-colors=";;;;" data-original-mimetype="image/png"/>
+                            </p>
+                        </div>
                         <div class="s_blockquote_author col-md-8">
-                            <div class="o_small">
-                                <p><strong>John DOE</strong></p>
-                                <p><span class="text-muted">CEO of MyCompany</span></p>
+                            <div>
+                                <p><span class="h6-fs"><strong>John DOE</strong></span></p>
+                                <p><span class="text-muted h6-fs">CEO of MyCompany</span></p>
                             </div>
                         </div>
                     </div>
