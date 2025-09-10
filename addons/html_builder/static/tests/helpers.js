@@ -1,5 +1,5 @@
 import { Builder } from "@html_builder/builder";
-import { CORE_PLUGINS } from "@html_builder/core/core_plugins";
+import { BUILDER_CORE_PLUGINS } from "@html_builder/plugin_sets";
 import { Img } from "@html_builder/core/img";
 import { SetupEditorPlugin } from "@html_builder/core/setup_editor_plugin";
 import { unformat } from "@html_editor/../tests/_helpers/format";
@@ -207,7 +207,7 @@ export async function setupHTMLBuilder(
         render_public_asset: () => getSnippetView(snippets),
     });
 
-    const Plugins = [...CORE_PLUGINS];
+    const Plugins = [...BUILDER_CORE_PLUGINS];
 
     if (dropzoneSelectors) {
         const pluginId = uniqueId("test-dropzone-selector");

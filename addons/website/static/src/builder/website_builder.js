@@ -1,6 +1,6 @@
 import { Builder } from "@html_builder/builder";
 import { BuilderOptionsTranslationPlugin } from "@html_builder/core/builder_options_plugin_translate";
-import { CORE_PLUGINS, MAIN_PLUGINS } from "@html_builder/core/core_plugins";
+import { BUILDER_CORE_PLUGINS, BUILDER_MAIN_PLUGINS } from "@html_builder/plugin_sets";
 import { DisableSnippetsPlugin } from "@html_builder/core/disable_snippets_plugin_translation";
 import { OperationPlugin } from "@html_builder/core/operation_plugin";
 import { SavePlugin } from "@html_builder/core/save_plugin";
@@ -157,7 +157,7 @@ export class WebsiteBuilder extends Component {
             ? [...builderPluginsToRemove, ...pluginsBlockedInTranslationMode]
             : builderPluginsToRemove;
         const coreBuilderPlugins = removePlugins(
-            this.props.translation ? MAIN_PLUGINS : CORE_PLUGINS,
+            this.props.translation ? BUILDER_MAIN_PLUGINS : BUILDER_CORE_PLUGINS,
             pluginsToRemove
         );
         const Plugins = [...coreBuilderPlugins, ...(websitePlugins || [])];
