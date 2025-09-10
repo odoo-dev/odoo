@@ -1,5 +1,34 @@
 import { Component, onMounted, useRef, useState } from "@odoo/owl";
 import { useFileUploader } from "@web/core/utils/files";
+import { _t } from "../l10n/translation";
+
+function resizeBlobImg(blob, width=256, height=256) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            if (width < img.width || height < img.height) {
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.imageSmoothingQuality = "high";
+                ctx.mozImageSmoothingEnabled = true;
+                ctx.webkitImageSmoothingEnabled = true;
+                ctx.msImageSmoothingEnabled = true;
+                ctx.imageSmoothingEnabled = true;
+                ctx.drawImage(img, 0, 0, width, height);
+                ctx.scale(width/img.width,  height/img.height);
+                canvas.toBlob(resolve);
+            } else {
+                resolve(blob)
+            }
+        }
+        img.onerror = () => {
+            reject(new Error(_t("The resizing of the image failed")));
+        };
+        img.src = URL.createObjectURL(blob);
+    })
+}
 
 /**
  * Custom file input
@@ -85,7 +114,12 @@ export class FileInput extends Component {
      */
     async onFileInputChange() {
         this.state.isDisable = true;
-        const parsedFileData = await this.uploadFiles(this.props.route, this.httpParams);
+        const httpParams = this.httpParams;
+        if (this.props.onWillSendFiles) {
+            const files = await this.props.onWillSendFiles(httpParams.ufile);
+            httpParams.ufile = files;
+        }
+        const parsedFileData = await this.uploadFiles(this.props.route, httpParams);
         if (parsedFileData) {
             // When calling onUpload, also pass the files to allow to get data like their names
             this.props.onUpload(
