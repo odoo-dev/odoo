@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.PopulateCache">
+        <DropdownItem class="'o_populate_cache_menu'" onSelected.bind="onPopulateCache">
+            <i class="fa fa-fw fa-download me-1"/>Populate Cache
+        </DropdownItem>
+    </t>
+
+</templates>
