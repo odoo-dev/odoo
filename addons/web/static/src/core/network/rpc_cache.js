@@ -93,6 +93,12 @@ export class RPCCache {
         this.pendingRequests = {};
     }
 
+    populateIndexedDB(table, key, value) {
+        this.crypto
+            .encrypt(value)
+            .then((encryptedResult) => this.indexedDB.write(table, key, encryptedResult));
+    }
+
     /**
      * @typedef {{
      * callback?: function;
