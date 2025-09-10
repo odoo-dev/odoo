@@ -174,6 +174,24 @@ export class Dialog extends Component {
     }
 
     async dismiss() {
+        if (this.isFullscreen) {
+            const modalEl = this.modalRef.el;
+            const modalCard = modalEl.querySelector(".modal-content");
+
+            // Add the CSS class that triggers the dismissal animation and
+            // force a browser redraw
+            [modalEl, modalCard].forEach((el) => {
+                el.style.animation = "none";
+                void el.offsetWidth; // Force reflow
+                el.style.animation = "";
+            });
+            modalEl.classList.add("o_modal_is_dismissing");
+
+            await new Promise((resolve) => {
+                // Wait for the animation to finish.
+                modalCard.addEventListener("animationend", resolve, { once: true });
+            });
+        }
         if (this.data.dismiss) {
             await this.data.dismiss();
         }
