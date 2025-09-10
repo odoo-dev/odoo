@@ -69,8 +69,11 @@ async function triggerClick(target, elDescription) {
     });
     await waitForNextAnimationFrame();
 }
-function uiUpdate() {
+function updateUi() {
     actionCount++;
+}
+function uiUpdate() {
+    actionCount--;
 }
 
 const calledRPC = {};
@@ -89,12 +92,15 @@ function onRPCResponse({ detail }) {
 /// END COPY .///////
 // NOT A FULL COPY BUT TO REFACTOR ...
 
-async function waitForCondition(stopCondition) {
+async function waitForCondition(stopCondition = () => true) {
     const interval = 25;
     let timeLimit = 30000;
 
     function hasPendingRPC() {
         return Object.keys(calledRPC).length > 0;
+    }
+    function hasPendingUIUpdate() {
+        return actionCount > 0;
     }
     function hasScheduledTask() {
         let size = 0;
@@ -104,7 +110,7 @@ async function waitForCondition(stopCondition) {
         return size > 0;
     }
 
-    while (!stopCondition() || hasPendingRPC() || hasScheduledTask()) {
+    while (!stopCondition() || hasPendingUIUpdate() || hasPendingRPC() || hasScheduledTask()) {
         if (timeLimit <= 0) {
             // debugger;
             throw new Error("Timeout waiting for condition");
@@ -123,6 +129,7 @@ async function waitForCondition(stopCondition) {
 async function populateIndexDB(env, action) {
     // Copy and modify of clickAll .. refactor needed !
     env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", uiUpdate);
+    env.bus.addEventListener("ACTION_MANAGER:UPDATE-UI", updateUi);
     rpcBus.addEventListener("RPC:REQUEST", onRPCRequest);
     rpcBus.addEventListener("RPC:RESPONSE", onRPCResponse);
     const apps = env.services.menu.getApps().filter((app) => app.actionOffline);
@@ -135,9 +142,8 @@ async function populateIndexDB(env, action) {
 
         // Open the App
         const appEl = document.querySelector(`a.o_app.o_menuitem[data-menu-xmlid="${app.xmlid}"]`);
-        const startActionCount = actionCount;
         await triggerClick(appEl);
-        await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+        await waitForCondition(); // wait for action to be loaded
 
         // Open the menus !
         const menus = app.childrenTree.filter((m) => m.actionOffline);
@@ -147,9 +153,8 @@ async function populateIndexDB(env, action) {
                 const menuEl = document.querySelector(
                     `.o_menu_sections [data-menu-xmlid="${menu.xmlid}"]`
                 );
-                const startActionCount = actionCount;
                 await triggerClick(menuEl);
-                await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                await waitForCondition(); // wait for action to be loaded
                 await populateViewsForm(env);
             } else {
                 // This is in the hope that there is no sub-sub-menu ...
@@ -174,9 +179,8 @@ async function populateIndexDB(env, action) {
                     const childEl = document.querySelector(
                         `.o-dropdown-item[data-menu-xmlid="${child.xmlid}"]`
                     );
-                    const startActionCount = actionCount;
                     await triggerClick(childEl);
-                    await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                    await waitForCondition(); // wait for action to be loaded
                     await populateViewsForm(env);
                 }
             }
@@ -216,20 +220,18 @@ async function populateViewsForm(env) {
             for (const i of [...Array(number).keys()]) {
                 const row = document.querySelectorAll(".o_data_row")[i];
                 // Open the form
-                let startActionCount = actionCount;
                 if (document.querySelector(".o_list_record_open_form_view")) {
                     await triggerClick(row.querySelector(".o_list_record_open_form_view"));
                 } else {
                     await triggerClick(row.querySelector(".o_data_cell"));
                 }
-                await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                await waitForCondition(); // wait for action to be loaded
 
                 // FIXME:: Check why there is sometimes that we don't open the view !!!
                 if (document.querySelector(".o_back_button")) {
                     // Go back to the list
-                    startActionCount = actionCount;
                     await triggerClick(document.querySelector(".o_back_button"));
-                    await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                    await waitForCondition(); // wait for action to be loaded
                 }
             }
         } else {
@@ -242,17 +244,15 @@ async function populateViewsForm(env) {
                     ".o_kanban_record:not(.o_kanban_ghost).cursor-pointer"
                 )[i];
                 // Open the form
-                let startActionCount = actionCount;
                 await triggerClick(card);
-                await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                await waitForCondition(); // wait for action to be loaded
 
                 // Mayube the click does nothing !!!
                 // FIXME: Check why there is sometimes that we don't open the view !!!
                 if (document.querySelector(".o_back_button")) {
                     // Go back to the kanban
-                    startActionCount = actionCount;
                     await triggerClick(document.querySelector(".o_back_button"));
-                    await waitForCondition(() => startActionCount !== actionCount); // wait for action to be loaded
+                    await waitForCondition(); // wait for action to be loaded
                 }
             }
         }
