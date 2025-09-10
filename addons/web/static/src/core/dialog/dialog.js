@@ -12,6 +12,7 @@ import {
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { makeDraggableHook } from "../utils/draggable_hook_builder_owl";
 import { isVisible } from "@web/core/utils/ui";
+import { prefersReducedMotion } from "@web/core/browser/feature_detection";
 
 const useDialogDraggable = makeDraggableHook({
     name: "useDialogDraggable",
@@ -166,6 +167,30 @@ export class Dialog extends Component {
     }
 
     async dismiss() {
+        if (this.isFullscreen) {
+            const modalEl = this.modalRef.el;
+            const modalCard = modalEl.querySelector(".modal-content");
+            if (!prefersReducedMotion(modalCard)) {
+                // Add the CSS class that triggers the dismissal animation and
+                // force a browser redraw
+                [modalEl, modalCard].forEach((el) => {
+                    el.style.animation = "none";
+                    void el.offsetWidth; // Force reflow
+                    el.style.animation = "";
+                });
+                modalEl.classList.add("o_modal_is_dismissing");
+
+                await new Promise((resolve) => {
+                    // Wait for the animation to finish.
+                    modalCard.addEventListener("animationend", resolve, {
+                        once: true,
+                    });
+                    modalCard.addEventListener("animationcancel", resolve, {
+                        once: true,
+                    });
+                });
+            }
+        }
         if (this.data.dismiss) {
             await this.data.dismiss();
         }
