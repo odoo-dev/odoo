@@ -305,7 +305,8 @@ class ProductProduct(models.Model):
         """ Returns the value for the next outgoing product base on the qty give as argument."""
         self.ensure_one()
         external_location = location and location.is_valued_external
-
+        if quantity <= 0:
+            return quantity * self.standard_price
         fifo_cost = 0
         fifo_stack, qty_on_first_move = self._run_fifo_get_stack(lot=lot, at_date=at_date, location=location)
         # Going up to get the quantity in the argument
