@@ -3412,6 +3412,7 @@ class NameManager:
             action = False
             try:
                 action_id = int(name)
+                action = view.env['ir.actions.actions'].browse(action_id).exists()
             except ValueError:
                 model, action_id = view.env['ir.model.data']._xmlid_to_res_model_res_id(name, raise_if_not_found=False)
                 if not action_id:
@@ -3423,7 +3424,7 @@ class NameManager:
                         xmlid=name, xmlid_model=model,
                     )
                     view._raise_view_error(msg, node)
-            action = view.env['ir.actions.actions'].browse(action_id).exists()
+                action = view.env['ir.actions.actions'].browse(action_id)
             if not action:
                 msg = _(
                     "Action %(action_reference)s (id: %(action_id)s) does not exist for button of type action.",
