@@ -13,7 +13,7 @@
             <View t-props="viewProps" />
             <t t-set-slot="footer">
                 <t t-if="props.multiSelect">
-                    <button class="btn btn-primary o_select_button d-none d-md-inline-block"
+                    <button class="btn btn-primary o_select_button"
                         t-att-disabled="state.resIds.length === 0"
                         data-hotkey="v"
                         t-on-click="() => this.select(state.resIds)"
