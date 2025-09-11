@@ -19,7 +19,9 @@ class IrModelField(models.Model):
         set to 100. """
         vals = super(IrModelField, self)._reflect_field_params(field, model_id)
         tracking = getattr(field, 'tracking', None)
-        if tracking is True:
+        if vals['ttype'] == 'html' and tracking == 1:
+            raise NotImplementedError(f"Unsupported tracking on field type {vals['ttype']}'")
+        elif tracking is True:
             tracking = 100
         elif tracking is False:
             tracking = None
