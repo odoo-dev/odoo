@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import json
 
 from odoo import _, api, fields, models, modules
 
@@ -149,7 +150,12 @@ class ResCompany(models.Model):
     @api.model
     def create_missing_scrap_location(self):
         company_ids  = self.env['res.company'].search([])
-        companies_having_scrap_loc = self.env['stock.location'].search([('usage', '=', 'inventory')]).mapped('company_id')
+        inventory_loss_product_template_field = self.env['ir.model.fields']._get('product.template', 'property_stock_inventory')
+        inv_loss_loc_ids = [
+            json.loads(d.json_value)
+            for d in self.env['ir.default'].sudo().search([('field_id', '=', inventory_loss_product_template_field.id)])
+        ]
+        companies_having_scrap_loc = self.env['stock.location'].search([('usage', '=', 'inventory'), ('id', 'not in', inv_loss_loc_ids)]).mapped('company_id')
         company_without_property = company_ids - companies_having_scrap_loc
         company_without_property._create_scrap_location()
 
