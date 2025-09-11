@@ -1,4 +1,5 @@
 import { expect, test } from "@odoo/hoot";
+import { animationFrame } from "@odoo/hoot-mock";
 import { waitFor } from "@odoo/hoot-dom";
 import {
     contains,
@@ -31,6 +32,7 @@ async function start(params = {}) {
         params.dialogOptions
     );
     await waitFor(`.o_dialog`);
+    await animationFrame();
 }
 
 preloadBundle("web.fullcalendar_lib");

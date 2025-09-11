@@ -110,6 +110,10 @@ export function touching(elements, targetRect) {
     });
 }
 
+export function hasAnimation(element) {
+    return getComputedStyle(element).animationName !== "none";
+}
+
 // -----------------------------------------------------------------------------
 // Get Tabable Elements
 // -----------------------------------------------------------------------------
