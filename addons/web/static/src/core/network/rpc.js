@@ -64,6 +64,10 @@ rpc.setCache = function (cache) {
     rpcCache = cache;
 };
 
+rpc.getCache = function () {
+    return rpcCache;
+};
+
 rpcBus.addEventListener("CLEAR-CACHES", (event) => {
     rpcCache?.invalidate(event.detail);
 });
