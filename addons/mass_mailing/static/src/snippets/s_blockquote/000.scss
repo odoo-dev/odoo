@@ -1,6 +1,10 @@
 [data-snippet="s_blockquote"] {
     div:has(> img) {
         min-width: 40px;
+        width: 40px;
+        flex: 0 0 auto;
+    }
+    div.s_blockquote_author {
         width: auto;
     }
     img {

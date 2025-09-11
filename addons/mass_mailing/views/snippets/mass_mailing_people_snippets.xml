@@ -123,13 +123,15 @@
                             </div>
                         </div>
                         <p class="mb-auto">"Engaging with this team was effortless from start to end. Their proficiency and meticulous approach greatly enhanced our project. I couldn’t be happier with the final product!"</p>
-                        <div class="row flex-row align-items-start justify-content-start text-start s_blockquote_infos">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_1/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar col-md-4 img p-0" data-original-src="/web/image/mass_mailing.s_company_team_default_image_1" alt=""/>
-                            <!-- <p class="mb-0"> -->
-                            <!-- </p> -->
-                            <div class="s_blockquote_author col-md-8">
-                                <p><strong>Sullivan Mitchell</strong></p>
-                                <p><span class="text-muted">Marketing Director</span></p>
+                        <div class="row ms-0 flex-row align-items-start justify-content-start text-start s_blockquote_infos">
+                            <div class="px-0 o_not_editable">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_1/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar col-md-4 img p-0" data-original-src="/web/image/mass_mailing.s_company_team_default_image_1" alt=""/>
+                            </div>
+                            <div class="s_blockquote_author">
+                                <p>
+                                    <strong>Sullivan Mitchell</strong><br/>
+                                    <span class="text-muted">Marketing Director</span>
+                                </p>
                             </div>
                         </div>
                     </blockquote>
@@ -151,13 +153,15 @@
                             </div>
                         </div>
                         <p class="mb-auto">"Working with this team was smooth and efficient at every stage. Their skills and commitment to quality had a major impact on our project. I am thrilled with the final results!"</p>
-                        <div class="row s_blockquote_infos flex-row align-items-start justify-content-start text-start">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" class="col-md-4 s_blockquote_author_avatar img p-0" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" alt=""/>
-                            <!-- <p class="mb-0">
-                            </p> -->
-                            <div class="s_blockquote_author col-md-8">
-                                <p><strong>James Carter</strong></p>
-                                <p><span class="text-muted">Chief Technical Officer</span></p>
+                        <div class="row ms-0 s_blockquote_infos flex-row align-items-start justify-content-start text-start">
+                            <div class="px-0 o_not_editable">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" class="col-md-4 s_blockquote_author_avatar img p-0" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" alt=""/>
+                            </div>
+                            <div class="s_blockquote_author col">
+                                <p>
+                                    <strong>James Carter</strong><br/>
+                                    <span class="text-muted">Chief Technical Officer</span>
+                                </p>
                             </div>
                         </div>
                     </blockquote>
@@ -179,13 +183,15 @@
                             </div>
                         </div>
                         <p class="mb-auto">"From the first meeting, it was clear we were in good hands. They took our vision and turned it into something even better than we had imagined. Highly recommend!"</p>
-                        <div class="row flex-row align-items-start justify-content-start text-start s_blockquote_infos">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_4/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_4" class="s_blockquote_author_avatar col-md-4 img rounded-circle p-0" alt=""/>
-                            <!-- <p class="mb-0">
-                            </p> -->
-                            <div class="s_blockquote_author col-md-8">
-                                <p><strong>Jody Roberts</strong></p>
-                                <p><span class="text-muted">Chief Financial Officer</span></p>
+                        <div class="row ms-0 flex-row align-items-start justify-content-start text-start s_blockquote_infos">
+                            <div class="px-0 o_not_editable">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_4/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_4" class="s_blockquote_author_avatar col-md-4 img rounded-circle p-0" alt=""/>
+                            </div>
+                            <div class="s_blockquote_author col">
+                                <p>
+                                    <strong>Jody Roberts</strong><br/>
+                                    <span class="text-muted">Chief Financial Officer</span>
+                                </p>
                             </div>
                         </div>
                     </blockquote>
@@ -207,13 +213,15 @@
                             </div>
                         </div>
                         <p class="mb-auto">"Exceptional service and great communication throughout the entire process. They went above and beyond to ensure our project was a complete success."</p>
-                        <div class="row flex-row align-items-start justify-content-start text-start s_blockquote_infos">
-                            <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_5/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar img rounded-circle col-md-4 p-0" data-original-src="/web/image/mass_mailing.s_company_team_default_image_5" alt=""/>
-                            <!-- <p class="mb-0">
-                            </p> -->
-                            <div class="s_blockquote_author col-md-8">
-                                <p><strong>Emil Foster</strong></p>
-                                <p><span class="text-muted">Creative Director</span></p>
+                        <div class="row ms-0 flex-row align-items-start justify-content-start text-start s_blockquote_infos">
+                            <div class="px-0 o_not_editable">
+                                <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_5/html_builder/geometric_round/geo_round_circle.svg" class="s_blockquote_author_avatar img rounded-circle col-md-4 p-0" data-original-src="/web/image/mass_mailing.s_company_team_default_image_5" alt=""/>
+                            </div>
+                            <div class="s_blockquote_author col">
+                                <p>
+                                    <strong>Emil Foster</strong><br/>
+                                    <span class="text-muted">Creative Director</span>
+                                </p>
                             </div>
                         </div>
                     </blockquote>
@@ -253,10 +261,10 @@
                 <div>
                     <p>" Write a quote here from one of your customers. Quotes are a great way to build confidence in your products or services. "</p>
                     <div class="row ms-0 pt8">
-                        <div class="col-2 px-0 o_not_editable">
+                        <div class="px-0 o_not_editable">
                             <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" style="padding: 0px;" class="img-fluid" data-shape="html_builder/geometric_round/geo_round_circle" data-file-name="team_member_2-circle.svg" data-shape-colors=";;;;" data-original-mimetype="image/png"/>
                         </div>
-                        <div class="s_blockquote_author col-8">
+                        <div class="s_blockquote_author col">
                             <p>
                                 <strong><span class="h6-fs">John DOE</span></strong><br/>
                                 <span class="h6-fs"><font class="text-600">CEO of MyCompany</font></span>
