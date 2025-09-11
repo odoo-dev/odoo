@@ -257,7 +257,7 @@ class StockMove(models.Model):
                     if not lot_mo:
                         mos_to_create[lot_id] = ml_qty
                     elif lot_mo.product_uom_id.compare(lot_mo.product_qty, ml_qty) != 0:
-                        self.sudo().env['change.production.qty'].with_context(skip_activity=True).create([{
+                        self.sudo().env['change.production.qty'].with_context(skip_activity=True, no_procurement=True).create([{
                             'mo_id': lot_mo.id,
                             'product_qty': ml_qty
                         }]).change_prod_qty()
