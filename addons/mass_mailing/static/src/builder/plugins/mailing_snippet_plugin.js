@@ -12,6 +12,7 @@ class MailingSnippetPlugin extends Plugin {
             withSequence(before(WIDTH), {
                 OptionComponent: LayoutColumnOption,
                 selector: ".o_mail_snippet_general",
+                exclude: ".s_reviews_wall",
                 applyTo: ":scope > *:has(> .row:not(.s_nb_column_fixed)), * > .s_allow_columns",
             }),
             withSequence(after(LAYOUT_COLUMN), {
