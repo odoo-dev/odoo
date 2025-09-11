@@ -90,10 +90,10 @@
 
             # useful scss from /web web.assets_frontend
             ('include', 'web._assets_helpers'),
+            'web/static/src/scss/bootstrap_overridden.scss',
             ('include', 'web._assets_frontend_helpers'),
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
-            'web/static/lib/bootstrap/scss/_variables-dark.scss',
             'web/static/lib/bootstrap/scss/_maps.scss',
             ('include', 'web._assets_bootstrap_frontend'),
 
