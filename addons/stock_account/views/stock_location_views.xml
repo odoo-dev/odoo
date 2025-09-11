@@ -9,6 +9,8 @@
                 <xpath expr="//group[@name='additional_info']" position="after">
                     <div>
                         <group string="Accounting Information" invisible="usage not in ('inventory', 'production')">
+                            <label for="valuation_account_id" string="Inventory Variation" invisible="usage != 'inventory'"/>
+                            <label for="valuation_account_id" string="Cost of Production" invisible="usage != 'production'"/>
                             <field name="valuation_account_id" options="{'no_create': True}"/>
                         </group>
                     </div>
