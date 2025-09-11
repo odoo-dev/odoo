@@ -102,7 +102,7 @@ export class AddSnippetDialog extends Component {
         });
         const loadOptions = { targetDoc: this.iframeRef.el.contentDocument, js: false };
         await Promise.all([
-            loadCSSBundleFromEditor("web.assets_frontend", loadOptions),
+            loadCSSBundleFromEditor("mass_mailing.assets_iframe_style", loadOptions),
             loadBundle("html_builder.iframe_add_dialog", loadOptions),
         ]);
     }

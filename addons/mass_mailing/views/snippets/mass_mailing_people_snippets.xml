@@ -252,8 +252,8 @@
             <div class="row fst-normal">
                 <div>
                     <p>" Write a quote here from one of your customers. Quotes are a great way to build confidence in your products or services. "</p>
-                    <div class="row pt8">
-                        <div class="mb-0 col-1 px-0 o_not_editable">
+                    <div class="row ms-0 pt8">
+                        <div class="col-2 px-0 o_not_editable">
                             <img src="/html_editor/image_shape/mass_mailing.s_company_team_default_image_2/html_builder/geometric_round/geo_round_circle.svg" data-original-src="/web/image/mass_mailing.s_company_team_default_image_2" style="padding: 0px;" class="img-fluid" data-shape="html_builder/geometric_round/geo_round_circle" data-file-name="team_member_2-circle.svg" data-shape-colors=";;;;" data-original-mimetype="image/png"/>
                         </div>
                         <div class="s_blockquote_author col-8">

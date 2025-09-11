@@ -1,5 +1,11 @@
-[data-snippet="s_blockquote"] img {
-    height: 40px;
-    aspect-ratio: 1;
-    width: unset;
+[data-snippet="s_blockquote"] {
+    div:has(> img) {
+        min-width: 40px;
+        width: auto;
+    }
+    img {
+        height: 40px;
+        aspect-ratio: 1;
+        width: unset;
+    }
 }
