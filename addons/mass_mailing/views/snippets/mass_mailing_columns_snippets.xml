@@ -5,9 +5,9 @@
             <div class="row d-flex align-items-stretch">
                 <div class="col-md-4 s_col_no_bgcolor pt16 pb16">
                     <div class="card text-bg-white h-100">
-                        <p class="mb-0">
-                            <img class="card-img-top" src="/web/image/mass_mailing.s_three_columns_default_image_1" alt=""/>
-                        </p>
+                        <div class="o_not_editable">
+                            <img class="card-img-top o_editable_media" src="/web/image/mass_mailing.s_three_columns_default_image_1" alt=""/>
+                        </div>
                         <div class="card-body">
                             <h3 class="card-title" style="font-size: 18px;">Feature One</h3>
                             <p class="card-text">Adapt these three columns to fit your design need. To duplicate, delete or move columns, select the column and use the top icons to perform your action.</p>
@@ -16,9 +16,9 @@
                 </div>
                 <div class="col-md-4 s_col_no_bgcolor pt16 pb16">
                     <div class="card text-bg-white h-100">
-                        <p class="mb-0">
-                            <img class="card-img-top" src="/web/image/mass_mailing.s_three_columns_default_image_2" alt=""/>
-                        </p>
+                        <div class="o_not_editable">
+                            <img class="card-img-top o_editable_media" src="/web/image/mass_mailing.s_three_columns_default_image_2" alt=""/>
+                        </div>
                         <div class="card-body">
                             <h3 class="card-title" style="font-size: 18px;">Feature Two</h3>
                             <p class="card-text">To add a fourth column, reduce the size of these three columns using the right icon of each block. Then, duplicate one of the columns to create a new one as a copy.</p>
@@ -27,9 +27,9 @@
                 </div>
                 <div class="col-md-4 s_col_no_bgcolor pt16 pb16">
                     <div class="card text-bg-white h-100">
-                        <p class="mb-0">
-                            <img class="card-img-top" src="/web/image/mass_mailing.s_three_columns_default_image_3" alt=""/>
-                        </p>
+                        <div class="o_not_editable">
+                            <img class="card-img-top o_editable_media" src="/web/image/mass_mailing.s_three_columns_default_image_3" alt=""/>
+                        </div>
                         <div class="card-body">
                             <h3 class="card-title" style="font-size: 18px;">Feature Three</h3>
                             <p class="card-text">Delete the above image or replace it with a picture that illustrates your message. Click on the picture to change its <em>rounded corner</em> style.</p>
@@ -66,8 +66,8 @@
             <div class="row s_nb_column_fixed">
                 <div class="col-md-12 s_media_list_item pt16 pb16" data-name="Media item">
                     <div class="row s_col_no_resize s_col_no_bgcolor g-0 align-items-center o_colored_level o_cc o_cc1">
-                        <div class="col-md-4 align-self-stretch s_media_list_img_wrapper">
-                            <img src="/web/image/mass_mailing.s_media_list_default_image_1" class="s_media_list_img h-100 w-100" alt=""/>
+                        <div class="col-md-4 align-self-stretch s_media_list_img_wrapper o_not_editable">
+                            <img src="/web/image/mass_mailing.s_media_list_default_image_1" class="s_media_list_img o_editable_media h-100 w-100" alt=""/>
                         </div>
                         <div class="col-md-8 s_media_list_body ps-md-4">
                             <h2>Media heading</h2>
@@ -78,8 +78,8 @@
                 </div>
                 <div class="col-md-12 s_media_list_item pt16 pb16" data-name="Media item">
                     <div class="row s_col_no_resize s_col_no_bgcolor g-0 align-items-center o_colored_level o_cc o_cc1">
-                        <div class="col-md-4 align-self-stretch s_media_list_img_wrapper">
-                            <img src="/web/image/mass_mailing.s_media_list_default_image_2" class="s_media_list_img h-100 w-100" alt=""/>
+                        <div class="col-md-4 align-self-stretch s_media_list_img_wrapper o_not_editable">
+                            <img src="/web/image/mass_mailing.s_media_list_default_image_2" class="s_media_list_img o_editable_media h-100 w-100" alt=""/>
                         </div>
                         <div class="col-md-8 s_media_list_body ps-md-4">
                             <h2>Event heading</h2>
@@ -89,8 +89,8 @@
                 </div>
                 <div class="col-md-12 s_media_list_item pt16 pb16" data-name="Media item">
                     <div class="row s_col_no_resize s_col_no_bgcolor g-0 align-items-center o_colored_level o_cc o_cc1">
-                        <div class="col-md-4 align-self-stretch s_media_list_img_wrapper">
-                            <img src="/web/image/mass_mailing.s_media_list_default_image_3" class="s_media_list_img h-100 w-100" alt=""/>
+                        <div class="col-md-4 align-self-stretch s_media_list_img_wrapper o_not_editable">
+                            <img src="/web/image/mass_mailing.s_media_list_default_image_3" class="s_media_list_img o_editable_media h-100 w-100" alt=""/>
                         </div>
                         <div class="col-md-8 s_media_list_body ps-md-4">
                             <h2>Post heading</h2>
@@ -111,13 +111,15 @@
                 <div class="s_attributes_horizontal_col col-md-4 pt24 pb24" data-name="Column">
                     <div class="row align-items-center h-100 mx-0 s_col_no_resize s_col_no_bgcolor">
                         <div class="col-2 col-md-3 px-0">
-                            <img
-                                src="/html_editor/shape/mass_mailing/s_attributes_1.svg?c1=rgba(0,0,0,.25)&amp;c4=o-color-4&amp;c5=o-color-5"
-                                data-original-src="/mass_mailing/static/shapes/s_attributes_1.svg"
-                                class="s_attributes_horizontal_img img img-fluid"
-                                alt=""
-                                style="width: 100% !important;"
-                                />
+                            <div class="o_not_editable">
+                                <img
+                                    src="/html_editor/shape/mass_mailing/s_attributes_1.svg?c1=rgba(0,0,0,.25)&amp;c4=o-color-4&amp;c5=o-color-5"
+                                    data-original-src="/mass_mailing/static/shapes/s_attributes_1.svg"
+                                    class="s_attributes_horizontal_img img img-fluid o_editable_media"
+                                    alt=""
+                                    style="width: 100% !important;"
+                                    />
+                            </div>
                         </div>
                         <div class="col-10 col-md-9 d-flex flex-column pe-0">
                             <h6>Easy returns</h6>
@@ -128,13 +130,15 @@
                 <div class="s_attributes_horizontal_col col-md-4 pt24 pb24" data-name="Column">
                     <div class="row align-items-center h-100 mx-0 s_col_no_resize s_col_no_bgcolor">
                         <div class="col-2 col-md-3 px-0">
-                            <img
-                                src="/html_editor/shape/mass_mailing/s_attributes_2.svg?c1=rgba(0,0,0,.25)&amp;c2=rgba(0,0,0,.5)&amp;c4=o-color-4&amp;c5=o-color-5"
-                                data-original-src="/mass_mailing/static/shapes/s_attributes_2.svg"
-                                class="s_attributes_horizontal_img img img-fluid"
-                                alt=""
-                                style="width: 100% !important;"
-                                />
+                            <div class="o_not_editable">
+                                <img
+                                    src="/html_editor/shape/mass_mailing/s_attributes_2.svg?c1=rgba(0,0,0,.25)&amp;c2=rgba(0,0,0,.5)&amp;c4=o-color-4&amp;c5=o-color-5"
+                                    data-original-src="/mass_mailing/static/shapes/s_attributes_2.svg"
+                                    class="s_attributes_horizontal_img img img-fluid o_editable_media"
+                                    alt=""
+                                    style="width: 100% !important;"
+                                    />
+                            </div>
                         </div>
                         <div class="col-10 col-md-9 d-flex flex-column pe-0">
                             <h6>Free shipping</h6>
@@ -145,13 +149,15 @@
                 <div class="s_attributes_horizontal_col col-md-4 pt24 pb24" data-name="Column">
                     <div class="row align-items-center h-100 mx-0 s_col_no_resize s_col_no_bgcolor">
                         <div class="col-2 col-md-3 px-0">
-                            <img
-                                src="/html_editor/shape/mass_mailing/s_attributes_3.svg?c1=rgba(0,0,0,.25)&amp;c4=o-color-4&amp;c5=o-color-5"
-                                data-original-src="/mass_mailing/static/shapes/s_attributes_3.svg"
-                                class="s_attributes_horizontal_img img img-fluid"
-                                alt=""
-                                style="width: 100% !important;"
-                                />
+                            <div class="o_not_editable">
+                                <img
+                                    src="/html_editor/shape/mass_mailing/s_attributes_3.svg?c1=rgba(0,0,0,.25)&amp;c4=o-color-4&amp;c5=o-color-5"
+                                    data-original-src="/mass_mailing/static/shapes/s_attributes_3.svg"
+                                    class="s_attributes_horizontal_img img img-fluid o_editable_media"
+                                    alt=""
+                                    style="width: 100% !important;"
+                                    />
+                            </div>
                         </div>
                         <div class="col-10 col-md-9 d-flex flex-column pe-0">
                             <h6>Secure payment</h6>
@@ -191,7 +197,9 @@
             <div class="row align-items-center">
                 <div class="s_col_no_bgcolor col-md-6 pt32 pb32">
                     <div class="card bg-white h-100 rounded" style="border-radius: 5px !important; border-color: rgb(233, 236, 239) !important;">
-                        <img class="card-img-top" src="/web/image/mass_mailing.s_event_default_image_1" alt=""/>
+                        <div class="o_not_editable">
+                            <img class="card-img-top o_editable_media" src="/web/image/mass_mailing.s_event_default_image_1" alt=""/>
+                        </div>
                         <div class="card-body">
                             <h3 class="card-title">
                                 <span style="font-size: 18px;">Event One</span>
@@ -206,7 +214,9 @@
                 </div>
                 <div class="s_col_no_bgcolor col-md-6 pt32 pb32">
                     <div class="card bg-white h-100 rounded" style="border-radius: 5px !important; border-color: rgb(233, 236, 239) !important;">
-                        <img class="card-img-top" src="/web/image/mass_mailing.s_event_default_image_2" alt=""/>
+                        <div class="o_not_editable">
+                            <img class="card-img-top o_editable_media" src="/web/image/mass_mailing.s_event_default_image_2" alt=""/>
+                        </div>
                         <div class="card-body">
                             <h3 class="card-title">
                                 <span style="font-size: 18px">Event Two</span>
@@ -231,21 +241,27 @@
             <h2><span class="h3-fs">Our finest selection</span></h2>
             <div class="row">
                 <div class="col-md-4 o_cc pt16 pb16">
-                    <a href="">
-                        <img src="/web/image/mass_mailing.s_product_list_default_image_1" alt="" class="img img-fluid" style="padding: 15px 0px"/>
-                    </a>
+                    <div class="o_not_editable mb-3">
+                        <a href="">
+                            <img src="/web/image/mass_mailing.s_product_list_default_image_1" alt="" class="img img-fluid o_editable_media mx-auto"/>
+                        </a>
+                    </div>
                     <h3 class="card-title" style="text-align: center;"><a href="#"><span class="h5-fs">Elegant</span></a></h3>
                 </div>
                 <div class="col-md-4 o_cc pt16 pb16">
-                    <a href="">
-                        <img src="/web/image/mass_mailing.s_product_list_default_image_2" alt="" class="img img-fluid" style="padding: 15px 0px"/>
-                    </a>
+                    <div class="o_not_editable mb-3">
+                        <a href="">
+                            <img src="/web/image/mass_mailing.s_product_list_default_image_2" alt="" class="img img-fluid o_editable_media mx-auto"/>
+                        </a>
+                    </div>
                     <h3 class="card-title" style="text-align: center;"><a href="#"><span class="h5-fs">Simple</span></a></h3>
                 </div>
                 <div class="col-md-4 o_cc pt16 pb16">
-                    <a href="">
-                        <img src="/web/image/mass_mailing.s_product_list_default_image_3" alt="" class="img img-fluid" style="padding: 15px 0px"/>
-                    </a>
+                    <div class="o_not_editable mb-3">
+                        <a href="">
+                            <img src="/web/image/mass_mailing.s_product_list_default_image_3" alt="" class="img img-fluid o_editable_media mx-auto"/>
+                        </a>
+                    </div>
                     <h3 class="card-title" style="text-align: center;"><a ref="#"><span class="h5-fs">Balanced</span></a></h3>
                 </div>
             </div>

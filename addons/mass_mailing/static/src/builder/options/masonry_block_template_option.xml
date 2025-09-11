@@ -27,12 +27,12 @@
                         <p>And a great subtitle</p>
                     </div>
                     <div class="col-md-6 pt24 pb8 text-center o_cc o_cc3" data-name="Block">
-                        <h3>A great title</h3>
-                        <p>And a great subtitle</p>
+                        <h3><font style="color: white">A great title</font></h3>
+                        <p><font style="color: white">And a great subtitle</font></p>
                     </div>
                     <div class="col-md-6 pt24 pb8 text-center o_cc o_cc4" data-name="Block">
-                        <h3>A great title</h3>
-                        <p>And a great subtitle</p>
+                        <h3><font style="color: white">A great title</font></h3>
+                        <p><font style="color: white">And a great subtitle</font></p>
                     </div>
                     <div class="col-md-6 pt24 pb8 text-center o_cc o_cc2" data-name="Block">
                         <h3>A great title</h3>
