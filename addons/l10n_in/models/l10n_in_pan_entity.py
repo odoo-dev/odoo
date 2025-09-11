@@ -65,7 +65,7 @@ class L10nInPanEntity(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         for record in records:
-            record.name = record.name.upper()
+            record.name = record.name.upper() if record.name else record.name
         return records
 
     def write(self, vals):
