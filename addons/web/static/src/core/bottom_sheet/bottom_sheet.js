@@ -10,7 +10,7 @@ import { useThrottleForAnimation } from "@web/core/utils/timing";
 import { compensateScrollbar } from "@web/core/utils/scrolling";
 import { getViewportDimensions, useViewportChange } from "@web/core/utils/dvu";
 import { clamp } from "@web/core/utils/numbers";
-import { browser } from "@web/core/browser/browser";
+import { prefersReducedMotion } from "@web/core/browser/feature_detection";
 
 export class BottomSheet extends Component {
     static template = "web.BottomSheet";
@@ -86,12 +86,7 @@ export class BottomSheet extends Component {
         useExternalListener(window, "popstate", this.handlePopState);
 
         onMounted(() => {
-            const isReduced =
-                browser.matchMedia(`(prefers-reduced-motion: reduce)`) === true ||
-                browser.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
-
-            this.prefersReducedMotion =
-                isReduced || getComputedStyle(this.containerRef.el).animationName === "none";
+            this.prefersReducedMotion = prefersReducedMotion(this.containerRef.el);
 
             this.initializeSheet();
             compensateScrollbar(this.scrollRailRef.el, true, true, "padding-right");
