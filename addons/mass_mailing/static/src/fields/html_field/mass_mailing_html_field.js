@@ -329,6 +329,7 @@ export const massMailingHtmlField = {
             isCollaborative: false,
             sandboxedPreview: false,
             codeview: true,
+            signatureCommand: true,
         });
         return props;
     },

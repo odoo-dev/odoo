@@ -4,6 +4,7 @@ import { CORE_PLUGINS } from "@html_builder/core/core_plugins";
 import { removePlugins } from "@html_builder/utils/utils";
 import { DYNAMIC_PLACEHOLDER_PLUGINS } from "@html_editor/backend/plugin_sets";
 import { registry } from "@web/core/registry";
+import { SIGNATURE_PLUGIN } from "@html_editor/plugin_sets";
 
 export class MassMailingBuilder extends Component {
     static template = "mass_mailing.MassMailingBuilder";
@@ -30,7 +31,10 @@ export class MassMailingBuilder extends Component {
             "FilePlugin",
             "AddDocumentsAttachmentPlugin",
         ];
-        const builderEditorPlugins = removePlugins([...CORE_PLUGINS], pluginsToRemove);
+        const builderEditorPlugins = removePlugins(
+            [...CORE_PLUGINS, ...SIGNATURE_PLUGIN],
+            pluginsToRemove
+        );
         const optionalPlugins = [
             ...(this.props.builderProps.config.dynamicPlaceholder
                 ? removePlugins(

@@ -213,3 +213,5 @@ export const EXTRA_PLUGINS = [
     EditorVersionPlugin,
     QWebPlugin,
 ];
+
+export const SIGNATURE_PLUGIN = [];
