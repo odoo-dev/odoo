@@ -7,18 +7,30 @@ import { registry } from "@web/core/registry";
 registry.category("web_tour.tours").add('mailing_portal_unsubscribe_from_document', {
     steps: () => [
         {
+            content: "Confirm unsubscribe form displays",
+            trigger: "#info_state button.btn-primary",
+            run: "click",
+            expectUnloadPage: true,
+        },
+        {
             content: "Confirmation unsubscribe is done",
             trigger: "div#o_mailing_subscription_info span:contains('You are no longer part of our services and will not be contacted again.')",
             run: "click",
-        }, {
+        },
+        // FIXME: this displays a warning that "you will not hear from us anymore" (mailing-list-less version) sometimes; why?
+        // Seems to be because Déboulonneur user is part of a mailing list before the test is run,
+        // triggering the first message "not receive any news" instead of second "will not receive anythinbg"
+        {
             content: "No warning should be displayed",
             trigger: "div#o_mailing_subscription_form_blocklisted:not(:has(p:contains('You will not receive any news from those mailing lists you are a member of')))",
             run: "click",
-        }, {
+        },
+        {
             content: "Warning will not receive anything anymore",
             trigger: "div#o_mailing_subscription_form_blocklisted p:contains('You will not hear from us anymore.')",
             run: "click",
-        }, {
+        },
+        {
             content: "Feedback textarea not displayed (see data)",
             trigger: "div#o_mailing_portal_subscription:not(textarea)",
             run: "click",
@@ -67,6 +79,12 @@ registry.category("web_tour.tours").add('mailing_portal_unsubscribe_from_documen
  */
 registry.category("web_tour.tours").add('mailing_portal_unsubscribe_from_document_with_lists', {
     steps: () => [
+        {
+            content: "Confirm unsubscribe form displays",
+            trigger: "#info_state button.btn-primary",
+            run: "click",
+            expectUnloadPage: true,
+        },
         {
             content: "Confirmation unsubscribe is done",
             trigger: "div#o_mailing_subscription_info span:contains('You are no longer part of our services and will not be contacted again.')",

@@ -174,9 +174,6 @@ class TestMailingControllers(TestMailingControllersCommon):
         mailing lists or contacts). Primary effect is to automatically exclude
         the email (see tour).
 
-        Two tests are performed (with and without existing list subscriptions)
-        as it triggers the display of the mailing list part of the UI.
-
         Tour effects
           * unsubscribe from mailing based on a document = blocklist;
           * add feedback (block list): Other reason, with 'My feedback' feedback;
@@ -204,7 +201,7 @@ class TestMailingControllers(TestMailingControllersCommon):
                 hash_token = test_mailing._generate_mailing_recipient_token(test_partner.id, test_partner.email_normalized)
                 with freeze_time(self._reference_now):
                     self.start_tour(
-                        f"/mailing/{test_mailing.id}/unsubscribe?email={test_partner.email_normalized}&document_id={test_partner.id}&hash_token={hash_token}",
+                        f"/mailing/{test_mailing.id}/confirm_unsubscribe?email={test_partner.email_normalized}&document_id={test_partner.id}&hash_token={hash_token}",
                         tour_name,
                         login=None,
                     )
@@ -281,29 +278,79 @@ class TestMailingControllers(TestMailingControllersCommon):
             'email': tools.formataddr(("Déboulonneur", "fleurus@example.com")),
             'group_ids': [(3, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
         })
-        test_mailing = self.test_mailing_on_documents.with_env(self.env)
-        self.authenticate('user_marketing', 'user_marketing')
+        test_partner = self.user_marketing.partner_id
+        test_mailing = self.test_mailing_on_documents
+        test_feedback = 'My feedback'
+        opt_out_reasons = self.env['mailing.subscription.optout'].search([])
 
-        # no group -> no direct access to /unsubscribe
-        res = self.url_open(
-            tools.urls.urljoin(
-                test_mailing.get_base_url(),
-                f'mailing/{test_mailing.id}/unsubscribe',
-            )
+        self.assertFalse(test_partner.is_blacklisted)
+        previous_messages = test_partner.message_ids
+        test_email_normalized = tools.email_normalize(self.test_email)
+        hash_token = test_mailing._generate_mailing_recipient_token(test_partner.id, test_partner.email_normalized)
+
+        # launch request on mailing/test_mailing.id/unsubscribe (GET) and check that this doesn't unsubscribe
+        self.url_open(
+            f'/mailing/{test_mailing.id}/unsubscribe?email={test_partner.email_normalized}&document_id={test_partner.id}&hash_token={hash_token}'
         )
-        self.assertEqual(res.status_code, 400)
+        self.assertFalse(test_partner.is_blacklisted)
 
-        # group -> direct access to /unsubscribe should wokr
-        self.user_marketing.write({
-            'group_ids': [(4, self.env.ref('mass_mailing.group_mass_mailing_user').id)],
-        })
         # launch unsubscription tour
         with freeze_time(self._reference_now):
             self.start_tour(
-                f"/mailing/{test_mailing.id}/unsubscribe",
-                "mailing_portal_unsubscribe_from_document_with_lists",
-                login=self.user_marketing.login,
+                f"/mailing/{test_mailing.id}/confirm_unsubscribe?email={test_partner.email_normalized}&document_id={test_partner.id}&hash_token={hash_token}",
+                'mailing_portal_unsubscribe_from_document',
+                debug=True,
+                login=None,
             )
+
+        # status update check
+        self.assertTrue(test_partner.is_blacklisted)
+
+        # partner (document): new message for blocklist addition with feedback
+        self.assertEqual(len(test_partner.message_ids), len(previous_messages) + 1)
+        msg_fb = test_partner.message_ids[0]
+        self.assertMessageFields(
+            msg_fb, {
+                'body': f'<p>Feedback from {test_email_normalized}<br>{test_feedback}</p>',
+            },
+        )
+
+        # posted messages on exclusion list record: activated, feedback, deactivated, activated again
+        bl_record = self.env['mail.blacklist'].search([('email', '=', test_partner.email_normalized)])
+        self.assertEqual(len(bl_record.message_ids), 5)
+        self.assertEqual(bl_record.opt_out_reason_id, opt_out_reasons[-1])
+        msg_bl2, msg_unbl, msg_fb, msg_bl, msg_create = bl_record.message_ids
+        self.assertMessageFields(
+            msg_bl2, {
+                'body': f'<p>Blocklist request from portal of mailing <a href="#" data-oe-model="{test_mailing._name}" '
+                    f'data-oe-id="{test_mailing.id}">{test_mailing.subject}</a> (document <a href="#" '
+                    f'data-oe-model="{test_partner._name}" data-oe-id="{test_partner.id}">Contact</a>)</p>',
+            },
+        )
+        self.assertMessageFields(
+            msg_unbl, {
+                'body': f'<p>Blocklist removal request from portal of mailing <a href="#" data-oe-model="{test_mailing._name}" '
+                    f'data-oe-id="{test_mailing.id}">{test_mailing.subject}</a> (document <a href="#" '
+                    f'data-oe-model="{test_partner._name}" data-oe-id="{test_partner.id}">Contact</a>)</p>',
+            },
+        )
+        self.assertMessageFields(
+            msg_fb, {
+                'body': f'<p>Feedback from {test_email_normalized}<br>{test_feedback}</p>',
+            },
+        )
+        self.assertTracking(msg_fb, [('opt_out_reason_id', 'many2one', False, opt_out_reasons[-1])])
+        self.assertMessageFields(
+            msg_bl, {
+                'body': f'<p>Blocklist request from unsubscribe link of mailing <a href="#" data-oe-model="{test_mailing._name}" '
+                    f'data-oe-id="{test_mailing.id}">{test_mailing.subject}</a> (document <a href="#" '
+                    f'data-oe-model="{test_partner._name}" data-oe-id="{test_partner.id}">Contact</a>)</p>',
+            },
+        )
+        self.assertMessageFields(msg_create, {
+            'body': '<p>Mail Blacklist created</p>',
+            },
+        )
 
     def test_mailing_unsubscribe_from_list_tour(self):
         """ Test portal unsubscribe on mailings performed on mailing lists. Their
@@ -330,7 +377,7 @@ class TestMailingControllers(TestMailingControllersCommon):
         hash_token = test_mailing._generate_mailing_recipient_token(contact_l1.id, contact_l1.email)
         with freeze_time(self._reference_now):
             self.start_tour(
-                f"/mailing/{test_mailing.id}/unsubscribe?email={self.test_email_normalized}&document_id={contact_l1.id}&hash_token={hash_token}",
+                f"/mailing/{test_mailing.id}/confirm_unsubscribe?email={self.test_email_normalized}&document_id={contact_l1.id}&hash_token={hash_token}",
                 "mailing_portal_unsubscribe_from_list",
                 login=None,
             )
@@ -406,7 +453,7 @@ class TestMailingControllers(TestMailingControllersCommon):
         hash_token = test_mailing._generate_mailing_recipient_token(contact_l1.id, contact_l1.email)
         with freeze_time(self._reference_now):
             self.start_tour(
-                f"/mailing/{test_mailing.id}/unsubscribe?email={contact_l1.email}&document_id={contact_l1.id}&hash_token={hash_token}",
+                f"/mailing/{test_mailing.id}/confirm_unsubscribe?email={contact_l1.email}&document_id={contact_l1.id}&hash_token={hash_token}",
                 "mailing_portal_unsubscribe_from_list_with_update",
                 login=None,
             )
@@ -596,7 +643,7 @@ class TestMailingControllers(TestMailingControllersCommon):
             f'<p>{contact_l1.name} unsubscribed from the following mailing list(s)</p>'
             f'<ul><li>{self.mailing_list_1.name}</li></ul>'
         )
-        # message on contact for list 2: opt-in L3 and L2
+        # messages on contact for list 2: opt-in L3 and L2
         msg_fb, msg_sub = contact_l3.message_ids
         self.assertEqual(
             msg_fb.body,
