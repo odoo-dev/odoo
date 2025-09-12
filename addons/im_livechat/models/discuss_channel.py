@@ -435,6 +435,14 @@ class DiscussChannel(models.Model):
                 predicate=is_livechat_channel,
                 sudo=True,
             ),
+            Store.Many(
+                "livechat_agent_partner_ids",
+                self.env["discuss.channel"]._store_livechat_operator_id_fields(),
+                sudo=True,
+            ),
+            Store.Many("livechat_customer_partner_ids", sudo=True),
+            Store.Many("livechat_customer_guest_ids", sudo=True),
+            Store.Many("livechat_bot_partner_ids", sudo=True),
         ]
         if target.is_internal(self.env):
             fields.append(

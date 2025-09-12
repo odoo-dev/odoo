@@ -61,7 +61,7 @@
             <field name="name">im_livechat.channel.form</field>
             <field name="model">im_livechat.channel</field>
             <field name="arch" type="xml">
-                <form>
+                <form js_class="livechat_chat_window_form">
                     <header>
                         <button type="object" name="action_join" class="oe_highlight" string="Join Channel" invisible="are_you_inside"/>
                         <button type="object" name="action_quit" class="btn btn-primary" string="Leave Channel" invisible="not are_you_inside"/>
@@ -93,6 +93,7 @@
                                 <field name="name" placeholder="e.g. YourWebsite.com"/>
                             </h1>
                         </div>
+                        <field name="preview_channel_data" invisible="1"/>
                         <notebook>
                             <page string="Agents" name="Agents">
                                     <field name="user_ids"
@@ -217,6 +218,19 @@
                                     </p>
                                     <field class="text-muted" name="web_page" readonly="1" widget="CopyClipboardChar"/>
                                 </div>
+                            </page>
+                            <page string="Design" name="design">
+                                    <group string="Livechat Window">
+                                        <field name="default_message" placeholder="e.g. Hello, how may I help you?"/>
+                                        <field name="input_placeholder"/>
+                                        <label for="header_background_color" string="Channel Header Color" />
+                                        <div class="o_livechat_layout_colors d-flex align-items-center align-middle">
+                                            <field name="header_background_color" widget="color" class="mb-4 w-auto o_im_livechat_field_widget_color"/>
+                                            <field name="title_color" widget="color" class="mb-4 w-auto o_im_livechat_field_widget_color"/>
+                                            <widget name="colors_reset_button" options="{'default_colors': {'header_background_color': '#875A7B', 'title_color': '#FFFFFF'}}" />
+                                        </div>
+                                        <field name="review_link" placeholder="Do not redirect visitors"/>
+                                    </group>
                             </page>
                         </notebook>
                     </sheet>

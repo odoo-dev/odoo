@@ -579,7 +579,6 @@ export class FormCompiler extends ViewCompiler {
             }
             pageSlot.setAttribute("fieldNames", `${JSON.stringify(params.notebookPageFields)}`);
         }
-
         return noteBook;
     }
 

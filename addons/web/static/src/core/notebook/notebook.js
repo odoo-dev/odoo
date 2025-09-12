@@ -156,7 +156,6 @@ export class Notebook extends Component {
         if (!current || (current && !pages.includes(current))) {
             return pages[0];
         }
-
         return current;
     }
 

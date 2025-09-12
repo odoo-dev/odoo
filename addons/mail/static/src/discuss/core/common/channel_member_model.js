@@ -108,6 +108,16 @@ export class ChannelMember extends Record {
             browser.clearTimeout(this.typingTimeoutId);
         },
     });
+    threadAsLivechatVisitorMember = fields.One("Thread", {
+        compute() {
+            const partnerVisitor = this.channel_id.livechat_customer_partner_ids[0];
+            const guestVisitor = this.channel_id.livechat_customer_guest_ids[0];
+            return partnerVisitor
+                ? this.partner_id?.eq(partnerVisitor)
+                : this.guest_id?.eq(guestVisitor);
+        },
+        eager: true,
+    });
     /** @type {number} */
     typingTimeoutId;
     unpin_dt = fields.Datetime();

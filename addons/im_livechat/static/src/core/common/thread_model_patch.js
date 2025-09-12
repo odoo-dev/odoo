@@ -7,6 +7,10 @@ import { patch } from "@web/core/utils/patch";
 patch(Thread.prototype, {
     setup() {
         super.setup();
+        this.livechat_agent_partner_ids = fields.Many("Persona");
+        this.livechat_bot_partner_ids = fields.Many("Persona");
+        this.livechat_customer_guest_ids = fields.Many("Persona");
+        this.livechat_customer_partner_ids = fields.Many("Persona");
         this.livechat_end_dt = fields.Datetime();
         this.livechat_operator_id = fields.One("res.partner");
         this.livechat_conversation_tag_ids = fields.Many("im_livechat.conversation.tag");
@@ -39,11 +43,33 @@ patch(Thread.prototype, {
                 }
             },
         });
+        this.livechatWelcomeMessage = fields.One("mail.message", {
+            compute() {
+                if (this.hasWelcomeMessage) {
+                    const livechatService = this.store.env.services["im_livechat.livechat"];
+                    return {
+                        id: -0.2 - this.id,
+                        body: livechatService.options.default_message,
+                        thread: this,
+                        author_id: this.livechat_operator_id,
+                    };
+                }
+            },
+        });
+        this.requested_by_operator = false;
     },
     get autoOpenChatWindowOnNewMessage() {
         return (
             (this.channel_type === "livechat" && !this.store.chatHub.compact) ||
             super.autoOpenChatWindowOnNewMessage
+        );
+    },
+    get hasWelcomeMessage() {
+        return (
+            this.channel_type === "livechat" &&
+            this.isSelfCustomer &&
+            !this.livechat_bot_partner_ids.length &&
+            !this.requested_by_operator
         );
     },
     get showCorrespondentCountry() {
@@ -74,6 +100,15 @@ patch(Thread.prototype, {
         return this.channel_type === "livechat" && this.livechat_end_dt
             ? _t("This livechat conversation has ended")
             : "";
+    },
+    get isSelfCustomer() {
+        return (
+            this.store.self_partner?.in(this.livechat_customer_partner_ids) ??
+            this.store.self_guest.in(this.livechat_customer_guest_ids)
+        );
+    },
+    get isSelfAgent() {
+        return this.store.self_partner?.in(this.livechat_agent_partner_ids);
     },
     /**
      * @override

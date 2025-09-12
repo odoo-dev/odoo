@@ -68,6 +68,8 @@ class Im_LivechatChannel(models.Model):
     script_external = fields.Html('Script (external)', compute='_compute_script_external', store=False, readonly=True, sanitize=False)
     nbr_channel = fields.Integer('Number of conversation', compute='_compute_nbr_channel', store=False, readonly=True)
 
+    image_128 = fields.Image("Image", max_width=128, max_height=128)
+    preview_channel_data = fields.Json(help="Channel data used for chat window preview in channel configuration", compute="_compute_preview_channel_data")
     # relationnal fields
     user_ids = fields.Many2many('res.users', 'im_livechat_channel_im_user', 'channel_id', 'user_id', string='Agents', default=_default_user_ids)
     channel_ids = fields.One2many('discuss.channel', 'livechat_channel_id', 'Sessions')
@@ -143,6 +145,29 @@ class Im_LivechatChannel(models.Model):
                 raise ValidationError(
                     self.env._("Invalid URL '%s'. The Review Link must start with 'http://' or 'https://'.") % record.review_link
                 )
+
+    def _compute_preview_channel_data(self):
+        for channel in self:
+            id_ = f"im_livechat.preview_{channel.id}"
+            channel.preview_channel_data = {
+                "channel_id": id_,
+                "store_data": Store()
+                .add_model_values(
+                    "discuss.channel",
+                    {
+                        "fetchChannelInfoState": "fetched",
+                        "id": id_,
+                        "isLoaded": True,
+                        "livechat_operator_id": Store.One(
+                            self.env.ref("base.partner_root"),
+                            self.env["discuss.channel"]._store_livechat_operator_id_fields(),
+                        ),
+                        "scrollUnread": False,
+                        "channel_type": "livechat",
+                    },
+                )
+                .get_result(),
+            }
 
     def _get_available_operators_by_livechat_channel(self, users=None):
         """Return a dictionary mapping each livechat channel in ``self`` to the users that are

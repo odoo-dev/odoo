@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="im_livechat.LivechatDesign">
+        <div class="py-4 px-3">
+            <PreviewChatWindow chatWindow="chatWindow"/>
+        </div>
+    </t>
+    <t t-name="im_livechat.ChatWindowPreview" t-inherit="mail.ChatWindow" t-inherit-mode="primary">
+        <xpath expr="//*[hasclass('o-mail-ChatWindow')]" position="attributes">
+            <attribute name="class" remove="fixed-bottom" separator=" "/>
+        </xpath>
+        <xpath expr="//*[hasclass('o-mail-ChatWindow-header')]" position="attributes">
+            <attribute name="t-attf-style" add="color: {{ options.title_color }}; background-color: {{ options.header_background_color }} !important;" separator=" "/>
+        </xpath>
+        <xpath expr="//*[hasclass('o-actionsMenu')]" position="attributes">
+            <attribute name="t-attf-style" add="color: {{ options.title_color }}; background-color: {{ options.header_background_color }} !important; transition: none!important;" separator=" "/>
+        </xpath>
+
+    </t>
+
+
+    <t t-name="im_livechat.ChatWindowPreviewNotebook" t-inherit="web.Notebook" t-inherit-mode="primary">
+        <xpath expr="//div[@t-ref='activePane']" position="attributes">
+            <attribute name="t-att-class">isDesignPage ? "flex-grow-1" : ""</attribute>
+        </xpath>
+        <xpath expr="//*[@t-ref='activePane']" position="replace">
+            <t t-if="!isDesignPage">$0</t>
+            <div t-else="" class="d-flex">
+                <t>$0</t>
+                <LivechatPreview t-if="isDesignPage"/>
+            </div>
+        </xpath>
+    </t>
+</templates>
