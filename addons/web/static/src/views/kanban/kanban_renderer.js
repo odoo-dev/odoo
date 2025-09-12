@@ -9,7 +9,6 @@ import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
 import { MOVABLE_RECORD_TYPES } from "@web/model/relational_model/dynamic_group_list";
-import { isNull } from "@web/views/utils";
 import { ColumnProgress } from "@web/views/view_components/column_progress";
 import { useBounceButton } from "@web/views/view_hook";
 import { KanbanColumnExamplesDialog } from "./kanban_column_examples_dialog";
@@ -369,9 +368,9 @@ export class KanbanRenderer extends Component {
         if (list.isGrouped) {
             return [...list.groups]
                 .sort((a, b) => (a.value && !b.value ? 1 : !a.value && b.value ? -1 : 0))
-                .map((group, i) => ({
+                .map((group) => ({
                     group,
-                    key: isNull(group.value) ? `group_key_${i}` : String(group.value),
+                    key: group.id,
                 }));
         } else {
             return list.records.map((record) => ({ record, key: record.id }));

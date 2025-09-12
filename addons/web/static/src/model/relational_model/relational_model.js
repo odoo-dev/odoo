@@ -557,20 +557,10 @@ export class RelationalModel extends Model {
                 groupConfig.list.context = context;
                 groupConfig.context = context;
                 if (nextLevelGroupBy.length) {
-                    if (!groupConfig.isFolded) {
-                        const { groups, length } = groupData.__groups;
-                        group.groups = await extractGroups(groupConfig.list, groups);
-                        group.length = length;
-                    } else {
-                        group.groups = [];
-                    }
+                    const { groups } = groupData.__groups || {};
+                    group.groups = groups ? await extractGroups(groupConfig.list, groups) : [];
                 } else {
-                    if (!groupConfig.isFolded) {
-                        group.records = groupData.__records;
-                        group.length = groupData.__count;
-                    } else {
-                        group.records = [];
-                    }
+                    group.records = groupData.__records || [];
                 }
                 if (Object.hasOwn(groupData, "__offset")) {
                     groupConfig.list.offset = group.__offset;
