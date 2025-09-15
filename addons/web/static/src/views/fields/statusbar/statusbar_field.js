@@ -253,12 +253,21 @@ export class StatusBarField extends Component {
         const currentValue = record.data[name];
         if (this.field.type === "many2one") {
             // Many2one
-            return this.specialData.data.map((option) => ({
-                value: option.id,
-                label: option.display_name,
-                isFolded: option[foldField],
-                isSelected: Boolean(currentValue && option.id === currentValue.id),
-            }));
+            return (
+                this.specialData.data?.map((option) => ({
+                    value: option.id,
+                    label: option.display_name,
+                    isFolded: option[foldField],
+                    isSelected: Boolean(currentValue && option.id === currentValue.id),
+                })) || [
+                    {
+                        value: currentValue.id,
+                        label: currentValue.display_name,
+                        isFolded: false,
+                        isSelected: true,
+                    },
+                ]
+            );
         } else {
             // Selection
             let { selection } = this.field;
