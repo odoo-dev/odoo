@@ -1542,7 +1542,7 @@ class Website(models.Model):
         return all(p.name in rule._converters for p in params
                    if p.kind in supported_kinds and p.default is inspect.Parameter.empty)
 
-    def _enumerate_pages(self, query_string=None, force=False):
+    def _enumerate_pages(self, query_string=None, force=False, no_homepage=False):
         """ Available pages in the website/CMS. This is mostly used for links
             generation and can be overridden by modules setting up new HTML
             controllers for dynamic pages (e.g. blog).
@@ -1568,9 +1568,16 @@ class Website(models.Model):
         if query_string:
             domain += [('url', 'like', query_string)]
 
+        homepage_url = self.homepage_url
+
+        def skip_homepage(loc):
+            return no_homepage and homepage_url != '/' and loc == homepage_url
+
         pages = self._get_website_pages(domain)
 
         for page in pages:
+            if skip_homepage(page['url']):
+                continue
             record = {'loc': page['url'], 'id': page['id'], 'name': page['name']}
             if page.view_id.priority != 16:
                 record['priority'] = min(round(page.view_id.priority / 32.0, 1), 1)
@@ -1612,7 +1619,7 @@ class Website(models.Model):
                 for loc in sitemap_func(self.with_context(lang=self.default_lang_id.code).env, rule, query_string):
                     loc_norm = {**loc, 'loc': _norm(loc['loc'])}
                     url = loc_norm['loc']
-                    if url not in url_set:
+                    if url not in url_set and not skip_homepage(url):
                         yield loc_norm
                         url_set.add(url)
                 continue
@@ -1660,7 +1667,7 @@ class Website(models.Model):
                 pattern = query_string and '*%s*' % "*".join(query_string.split('/'))
                 if not query_string or fnmatch.fnmatch(url.lower(), pattern):
                     page = {'loc': url}
-                    if url in url_set:
+                    if url in url_set or skip_homepage(url):
                         continue
                     url_set.add(url)
 

@@ -132,7 +132,7 @@ function testCommonProperties(url, canPublish, modifiedUrl = undefined) {
                 trigger: `:visible :iframe #top_menu a[href="${modifiedUrl}"]`,
             },
             stepUtils.goToUrl(getClientActionUrl("/")),
-            ...assertPageCanonicalUrlIs(modifiedUrl),
+            ...assertPageCanonicalUrlIs("/"),
             stepUtils.goToUrl(getClientActionUrl(modifiedUrl)),
         ],
         teardown: [
@@ -260,7 +260,7 @@ function testWebsitePageProperties() {
             content: "Verify page title",
             trigger: ":iframe head:hidden title:contains(/Cool Page/)",
         },
-        ...assertPageCanonicalUrlIs("/cool-page"),
+        ...assertPageCanonicalUrlIs("/"),
         stepUtils.goToUrl(getClientActionUrl("/new-page")),
         assertPathName("/cool-page", "body"),
         {
