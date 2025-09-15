@@ -444,10 +444,10 @@ class Website(Home):
 
     @http.route('/website/snippet/filter_templates', type='jsonrpc', auth='public', website=True, readonly=True)
     def get_dynamic_snippet_templates(self, filter_name=False):
-        domain = [['key', 'ilike', '.dynamic_filter_template_'], ['type', '=', 'qweb']]
+        domain = [['key', 'ilike', '.dynamic_filter_template_']]
         if filter_name:
             domain.append(['key', 'ilike', escape_psql('_%s_' % filter_name)])
-        templates = request.env['ir.ui.view'].sudo().search_read(domain, ['key', 'name', 'arch_db'])
+        templates = request.env['ir.qweb'].sudo().search_read(domain, ['key', 'name', 'arch_db'])
 
         for t in templates:
             children = etree.fromstring(t.pop('arch_db')).getchildren()

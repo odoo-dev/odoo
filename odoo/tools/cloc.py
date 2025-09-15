@@ -233,16 +233,16 @@ class Cloc(object):
         # Count qweb view only from imported module and not studio
         query = """
             SELECT view.id, min(mod.name), array_agg(data.module)
-              FROM ir_ui_view view
-        INNER JOIN ir_model_data data ON view.id = data.res_id AND data.model = 'ir.ui.view'
+              FROM ir_qweb view
+        INNER JOIN ir_model_data data ON view.id = data.res_id AND data.model = 'ir.qweb'
          LEFT JOIN ir_module_module mod ON mod.name = data.module AND mod.imported = True
-             WHERE view.type = 'qweb' AND data.module != 'studio_customization'
+             WHERE data.module != 'studio_customization'
           GROUP BY view.id
             HAVING count(mod.name) > 0
         """
         env.cr.execute(query)
         custom_views = {r[0]: (r[1], r[2]) for r in env.cr.fetchall()}
-        for view in env['ir.ui.view'].browse(custom_views.keys()):
+        for view in env['ir.qweb'].browse(custom_views.keys()):
             module_name = custom_views[view.id][0]
             self.book(
                 module_name,

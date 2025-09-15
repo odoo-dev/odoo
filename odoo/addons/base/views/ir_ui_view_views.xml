@@ -83,7 +83,6 @@
                     <filter string="List" name="list" domain="[('type', '=', 'list')]"/>
                     <filter string="Kanban" name="kanban" domain="[('type', '=', 'kanban')]"/>
                     <filter string="Search" name="search" domain="[('type', '=', 'search')]"/>
-                    <filter string="QWeb" name="qweb" domain="[('type', '=', 'qweb')]"/>
                     <separator/>
                     <filter string="Modified Architecture" name="arch_updated" domain="[('arch_updated', '=',True)]"/>
                     <separator/>

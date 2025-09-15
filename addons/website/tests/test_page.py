@@ -16,18 +16,17 @@ from odoo.tools import config, mute_logger
 class TestPage(common.TransactionCase):
     def setUp(self):
         super(TestPage, self).setUp()
-        View = self.env['ir.ui.view']
+        Qweb = self.env['ir.qweb']
         Page = self.env['website.page']
         Menu = self.env['website.menu']
 
-        self.base_view = View.create({
+        self.base_view = Qweb.create({
             'name': 'Base',
-            'type': 'qweb',
             'arch': '<div>content</div>',
             'key': 'test.base_view',
         })
 
-        self.extension_view = View.create({
+        self.extension_view = Qweb.create({
             'name': 'Extension',
             'mode': 'extension',
             'inherit_id': self.base_view.id,
@@ -47,13 +46,12 @@ class TestPage(common.TransactionCase):
         })
 
     def test_copy_page(self):
-        View = self.env['ir.ui.view']
+        Qweb = self.env['ir.qweb']
         Page = self.env['website.page']
         Menu = self.env['website.menu']
         # Specific page
-        self.specific_view = View.create({
+        self.specific_view = Qweb.create({
             'name': 'Base',
-            'type': 'qweb',
             'arch': '<div>Specific View</div>',
             'key': 'test.specific_view',
         })
@@ -106,16 +104,16 @@ class TestPage(common.TransactionCase):
     def test_cow_page(self):
         Menu = self.env['website.menu']
         Page = self.env['website.page']
-        View = self.env['ir.ui.view']
+        Qweb = self.env['ir.qweb']
 
         # backend write, no COW
         total_pages = Page.search_count([])
         total_menus = Menu.search_count([])
-        total_views = View.search_count([])
+        total_views = Qweb.search_count([])
         self.page_1.write({'arch': '<div>modified base content</div>'})
         self.assertEqual(total_pages, Page.search_count([]))
         self.assertEqual(total_menus, Menu.search_count([]))
-        self.assertEqual(total_views, View.search_count([]))
+        self.assertEqual(total_views, Qweb.search_count([]))
 
         # edit through frontend
         self.page_1.with_context(website_id=1).write({'arch': '<div>website 1 content</div>'})
@@ -127,7 +125,7 @@ class TestPage(common.TransactionCase):
         # 3. and shouldn't have touched original records
         self.assertEqual(total_pages + 1, Page.search_count([]))
         self.assertEqual(total_menus, Menu.search_count([]))
-        self.assertEqual(total_views + 2, View.search_count([]))
+        self.assertEqual(total_views + 2, Qweb.search_count([]))
 
         self.assertEqual(self.page_1.arch, '<div>modified base content</div>')
         self.assertEqual(bool(self.page_1.website_id), False)
@@ -141,17 +139,17 @@ class TestPage(common.TransactionCase):
         ''' test cow on extension view itself (like web_editor would do in the frontend) '''
         Menu = self.env['website.menu']
         Page = self.env['website.page']
-        View = self.env['ir.ui.view']
+        Qweb = self.env['ir.qweb']
 
         # nothing special should happen when editing through the backend
         total_pages = Page.search_count([])
         total_menus = Menu.search_count([])
-        total_views = View.search_count([])
+        total_views = Qweb.search_count([])
         self.extension_view.write({'arch': '<div>modified extension content</div>'})
         self.assertEqual(self.extension_view.arch, '<div>modified extension content</div>')
         self.assertEqual(total_pages, Page.search_count([]))
         self.assertEqual(total_menus, Menu.search_count([]))
-        self.assertEqual(total_views, View.search_count([]))
+        self.assertEqual(total_views, Qweb.search_count([]))
 
         # When editing through the frontend a website-specific copy
         # for the extension view should be created. When rendering the
@@ -160,29 +158,29 @@ class TestPage(common.TransactionCase):
         self.extension_view.with_context(website_id=1).write({'arch': '<div>website 1 content</div>'})
         self.assertEqual(total_pages, Page.search_count([]))
         self.assertEqual(total_menus, Menu.search_count([]))
-        self.assertEqual(total_views + 1, View.search_count([]))
+        self.assertEqual(total_views + 1, Qweb.search_count([]))
 
         self.assertEqual(self.extension_view.arch, '<div>modified extension content</div>')
         self.assertEqual(bool(self.page_1.website_id), False)
 
-        new_view = View.search([('name', '=', 'Extension'), ('website_id', '=', 1)])
+        new_view = Qweb.search([('name', '=', 'Extension'), ('website_id', '=', 1)])
         self.assertEqual(new_view.arch, '<div>website 1 content</div>')
         self.assertEqual(new_view.website_id.id, 1)
 
     def test_cou_page_backend(self):
         Page = self.env['website.page']
-        View = self.env['ir.ui.view']
+        Qweb = self.env['ir.qweb']
 
         # currently the view unlink of website.page can't handle views with inherited views
         self.extension_view.unlink()
 
         self.page_1.unlink()
         self.assertEqual(Page.search_count([('url', '=', '/page_1')]), 0)
-        self.assertEqual(View.search_count([('name', 'in', ('Base', 'Extension'))]), 0)
+        self.assertEqual(Qweb.search_count([('name', 'in', ('Base', 'Extension'))]), 0)
 
     def test_cou_page_frontend(self):
         Page = self.env['website.page']
-        View = self.env['ir.ui.view']
+        Qweb = self.env['ir.qweb']
         Website = self.env['website']
 
         self.env['website'].create({
@@ -203,7 +201,7 @@ class TestPage(common.TransactionCase):
         pages = Page.search([('url', '=', '/page_1')])
         self.assertEqual(len(pages), Website.search_count([]) - 1, "A specific page for every website should have been created, except for the one from where we deleted the generic one.")
         self.assertTrue(website_id not in pages.mapped('website_id').ids, "The website from which we deleted the generic page should not have a specific one.")
-        self.assertTrue(website_id not in View.search([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').ids, "Same for views")
+        self.assertTrue(website_id not in Qweb.search([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').ids, "Same for views")
 
 
 @tagged('-at_install', 'post_install')
@@ -211,10 +209,9 @@ class WithContext(HttpCase):
     def setUp(self):
         super().setUp()
         Page = self.env['website.page']
-        View = self.env['ir.ui.view']
-        self.base_view = View.create({
+        Qweb = self.env['ir.qweb']
+        self.base_view = Qweb.create({
             'name': 'Base',
-            'type': 'qweb',
             'arch': '''<t name="Homepage" t-name="test.base_view">
                         <t t-call="website.layout">
                             I am a generic page
@@ -313,7 +310,6 @@ class WithContext(HttpCase):
 
         test_page = self.env['website.page'].with_context(website_id=website.id).create({
             'name': 'HomepageUrlTest',
-            'type': 'qweb',
             'arch': '<div>HomepageUrlTest</div>',
             'key': 'test.homepage_url_test',
             'url': '/homepage_url_test',

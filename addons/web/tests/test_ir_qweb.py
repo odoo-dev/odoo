@@ -6,9 +6,8 @@ from odoo.tools.mimetypes import guess_mimetype
 
 class TestIrQweb(TransactionCase):
     def test_image_field(self):
-        view = self.env["ir.ui.view"].create({
+        view = self.env["ir.qweb"].create({
             "key": "web.test_qweb",
-            "type": "qweb",
             "arch": """<t t-name="test_qweb">
                 <span t-field="record.avatar_128" t-options-widget="'image'" t-options-qweb_img_raw_data="is_raw_image" />
             </t>"""
@@ -37,9 +36,8 @@ class TestIrQweb(TransactionCase):
         webp_decoded = base64.b64decode(webp)
         self.assertEqual(guess_mimetype(webp_decoded), "image/webp")
 
-        view = self.env["ir.ui.view"].create({
+        view = self.env["ir.qweb"].create({
             "key": "web.test_qweb",
-            "type": "qweb",
             "arch": """<t t-name="test_qweb">
                 <span t-field="record.flag_image" t-options-widget="'image'" t-options-qweb_img_raw_data="is_raw_image" />
             </t>"""
@@ -81,9 +79,8 @@ class TestIrQweb(TransactionCase):
         </svg>"""
 
         b64_image = base64.b64encode(image.encode()).decode()
-        view = self.env["ir.ui.view"].create({
+        view = self.env["ir.qweb"].create({
             "key": "web.test_qweb",
-            "type": "qweb",
             "arch": """<t t-name="test_qweb">
                 <span t-field="record.flag_image" t-options-widget="'image'" t-options-qweb_img_raw_data="True" />
             </t>"""

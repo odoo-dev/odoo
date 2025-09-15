@@ -110,18 +110,16 @@ class TestClocFields(test_cloc.TestClocCustomization):
         })
         self.create_studio_module()
 
-        qweb_view = self.env['ir.ui.view'].create({
+        qweb_view = self.env['ir.qweb'].create({
             "name": "Qweb Test",
-            "type": "qweb",
             "mode": "primary",
             "arch_base": "<html>\n  <body>\n    <t t-out=\"Hello World\"/>\n  </body>\n</html>",
         })
         self.create_xml_id('test_imported_module', "qweb_view_test", qweb_view)
 
         # Add qweb view from non imported module
-        qweb_view = self.env['ir.ui.view'].create({
+        qweb_view = self.env['ir.qweb'].create({
             "name": "Qweb Test",
-            "type": "qweb",
             "arch_base": "<html>\n  <body>\n    <t t-out=\"Hello World\"/>\n  </body>\n</html>",
         })
         self.create_xml_id("studio_customization", "qweb_view_test", qweb_view)
@@ -177,9 +175,8 @@ class TestClocFields(test_cloc.TestClocCustomization):
             'summary': 'Test imported module for cloc',
         })
 
-        qweb_view = self.env['ir.ui.view'].create({
+        qweb_view = self.env['ir.qweb'].create({
             "name": "Qweb Test",
-            "type": "qweb",
             "mode": "primary",
             "arch_base": "<html>\n  <body>\n    <t t-out=\"Hello World\"/>\n  </body>\n</html>",
         })

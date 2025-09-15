@@ -11,7 +11,7 @@ from odoo.tools.translate import _
 
 class WebsitePage(models.Model):
     _name = 'website.page'
-    _inherits = {'ir.ui.view': 'view_id'}
+    _inherits = {'ir.qweb': 'view_id'}
     _inherit = [
         'website.published.multi.mixin',
         'website.searchable.mixin',
@@ -21,7 +21,7 @@ class WebsitePage(models.Model):
     _order = 'website_id'
 
     url = fields.Char('Page URL', required=True)
-    view_id = fields.Many2one('ir.ui.view', string='View', required=True, index=True, ondelete="cascade")
+    view_id = fields.Many2one('ir.qweb', string='View', required=True, index=True, ondelete="cascade")
 
     view_write_uid = fields.Many2one('res.users', "Last Content Update by",
         related='view_id.write_uid')
@@ -36,7 +36,7 @@ class WebsitePage(models.Model):
     is_visible = fields.Boolean(compute='_compute_visible', string='Is Visible')
     is_new_page_template = fields.Boolean(string="New Page Template", help='Add this page to the "+New" page templates. It will be added to the "Custom" category.')
 
-    # don't use mixin website_id but use website_id on ir.ui.view instead
+    # don't use mixin website_id but use website_id on ir.qweb instead
     website_id = fields.Many2one(related='view_id.website_id', store=True, readonly=False, ondelete='cascade')
     arch = fields.Text(related='view_id.arch', readonly=False, depends_context=('website_id',))
 

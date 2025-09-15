@@ -742,9 +742,8 @@ class TestAssetsBundleInBrowser(HttpCase):
             </xpath>
         </data>
         """
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'test bundle inheritance inline js',
-            'type': 'qweb',
             'arch': view_arch,
             'inherit_id': self.browse_ref('test_assetsbundle.bundle1').id,
         })
@@ -874,10 +873,9 @@ class TestAssetsManifest(AddonManifestPatched):
             'attrs': attrs
         }
 
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'test asset',
             'arch': arch,
-            'type': 'qweb',
         })
         return view
 

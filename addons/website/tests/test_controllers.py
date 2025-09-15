@@ -25,7 +25,6 @@ class TestControllers(tests.HttpCase):
         for i in range(0, 10):
             new_page = Page.create({
                 'name': 'Generic',
-                'type': 'qweb',
                 'arch': '''
                     <div>content</div>
                 ''',

@@ -21,8 +21,7 @@ from . import website_page_properties
 from . import website_page
 from . import website_rewrite
 from . import ir_rule
-from . import ir_ui_menu
-from . import ir_ui_view
+from . import ir_qweb
 from . import res_company
 from . import res_partner
 from . import res_users

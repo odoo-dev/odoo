@@ -13,7 +13,6 @@ class TestWebsiteSitemap(TransactionCase):
             'name': 'Test Page',
             'website_id': website.id,
             'url': page_url,
-            'type': 'qweb',
             'arch': '<t t-call="website.layout"/>',
             'is_published': True,
         })

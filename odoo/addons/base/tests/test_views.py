@@ -36,6 +36,7 @@ class ViewCase(TransactionCaseWithUserDemo):
     def setUp(self):
         super(ViewCase, self).setUp()
         self.View = self.env['ir.ui.view']
+        self.Qweb = self.env['ir.qweb']
 
     def assertValid(self, arch, name='valid view', inherit_id=False, model='ir.ui.view'):
         return self.View.create({
@@ -1032,11 +1033,10 @@ class TestApplyInheritanceMoveSpecs(ViewCase):
 
 class TestNoModel(ViewCase):
     def test_create_view_nomodel(self):
-        view = self.View.create({
+        view = self.Qweb.create({
             'name': 'dummy',
             'arch': '<template name="foo"/>',
             'inherit_id': False,
-            'type': 'qweb',
         })
         fields = ['name', 'arch', 'type', 'priority', 'inherit_id', 'model']
         [data] = view.read(fields)
@@ -1044,7 +1044,6 @@ class TestNoModel(ViewCase):
             'id': view.id,
             'name': 'dummy',
             'arch': '<template name="foo"/>',
-            'type': 'qweb',
             'priority': 16,
             'inherit_id': False,
             'model': False,
@@ -1070,11 +1069,10 @@ class TestNoModel(ViewCase):
         ARCH = '<template name="foo">%s</template>'
         TEXT_EN = "Copyright copyrighter"
         TEXT_FR = u"Copyrighter, tous droits réservés"
-        view = self.View.create({
+        view = self.Qweb.create({
             'name': 'dummy',
             'arch': ARCH % TEXT_EN,
             'inherit_id': False,
-            'type': 'qweb',
         })
         view.update_field_translations('arch_db', {'fr_FR': {TEXT_EN: TEXT_FR}})
         view = view.with_context(lang='fr_FR')
@@ -1087,9 +1085,8 @@ class TestTemplating(ViewCase):
         self.patch(self.registry, '_init', False)
 
     def test_branding_t0(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<root>
                 <div role="search">
                     <input type="search" name="search"/>
@@ -1100,9 +1097,8 @@ class TestTemplating(ViewCase):
             </root>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension view",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//div[@role='search']" position="replace">
                 <form>
@@ -1113,7 +1109,7 @@ class TestTemplating(ViewCase):
         })
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
         [initial] = arch.xpath("//div[@role='search']")
         self.assertEqual(
             '1',
@@ -1121,17 +1117,15 @@ class TestTemplating(ViewCase):
             'Injected view must be marked as no-branding')
 
     def test_branding_inherit(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<root>
                 <item order="1"/>
             </root>
             """
         })
-        view2 = self.View.create({
+        view2 = self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//item" position="before">
                 <item order="2"/>
@@ -1142,7 +1136,7 @@ class TestTemplating(ViewCase):
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         [initial] = arch.xpath('//item[@order=1]')
         self.assertEqual(
@@ -1161,9 +1155,8 @@ class TestTemplating(ViewCase):
             "second should come from the extension view")
 
     def test_branding_inherit_replace_node(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<hello>
                 <world></world>
                 <world><t t-esc="hello"/></world>
@@ -1171,9 +1164,8 @@ class TestTemplating(ViewCase):
             </hello>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="/hello/world[1]" position="replace">
                 <world>Is a ghetto</world>
@@ -1185,7 +1177,7 @@ class TestTemplating(ViewCase):
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # First world - has been replaced by inheritance
         [initial] = arch.xpath('/hello[1]/world[1]')
@@ -1216,9 +1208,8 @@ class TestTemplating(ViewCase):
             "The node's xpath position should be correct")
 
     def test_branding_inherit_replace_node2(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<hello>
                 <world></world>
                 <world><t t-esc="hello"/></world>
@@ -1226,9 +1217,8 @@ class TestTemplating(ViewCase):
             </hello>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="/hello/world[1]" position="replace">
                 <war>Is a ghetto</war>
@@ -1240,7 +1230,7 @@ class TestTemplating(ViewCase):
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         [initial] = arch.xpath('/hello[1]/war[1]')
         self.assertEqual(
@@ -1270,9 +1260,8 @@ class TestTemplating(ViewCase):
             "The node's xpath position should be correct")
 
     def test_branding_inherit_remove_node(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             # The t-esc node is to ensure branding is distributed to both
             # <world/> elements from the start
             'arch': """
@@ -1284,9 +1273,8 @@ class TestTemplating(ViewCase):
                 </hello>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <data>
@@ -1298,7 +1286,7 @@ class TestTemplating(ViewCase):
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # Only remaining world but still the second in original view
         [initial] = arch.xpath('/hello[1]/world[1]')
@@ -1308,9 +1296,8 @@ class TestTemplating(ViewCase):
             "The node's xpath position should be correct")
 
     def test_branding_inherit_remove_node2(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """
                 <hello>
                     <world></world>
@@ -1318,9 +1305,8 @@ class TestTemplating(ViewCase):
                 </hello>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <data>
@@ -1332,7 +1318,7 @@ class TestTemplating(ViewCase):
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # Note: this test is a variant of the test_branding_inherit_remove_node
         # -> in this case, we expect the branding to not be distributed on the
@@ -1350,9 +1336,8 @@ class TestTemplating(ViewCase):
             "The node's xpath position should be correct")
 
     def test_branding_inherit_multi_replace_node(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """
                 <hello>
                     <world class="a"></world>
@@ -1361,9 +1346,8 @@ class TestTemplating(ViewCase):
                 </hello>
             """
         })
-        view2 = self.View.create({
+        view2 = self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <data>
@@ -1374,9 +1358,8 @@ class TestTemplating(ViewCase):
                 </data>
             """
         })
-        self.View.create({  # Inherit from the child view and target the added element
+        self.Qweb.create({  # Inherit from the child view and target the added element
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view2.id,
             'arch': """
                 <data>
@@ -1389,7 +1372,7 @@ class TestTemplating(ViewCase):
 
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # Check if the replacement inside the child view did not mess up the
         # branding of elements in that child view
@@ -1408,9 +1391,8 @@ class TestTemplating(ViewCase):
             "The node's xpath position should be correct")
 
     def test_branding_inherit_multi_replace_node2(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """
                 <hello>
                     <world class="a"></world>
@@ -1419,9 +1401,8 @@ class TestTemplating(ViewCase):
                 </hello>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <data>
@@ -1432,10 +1413,9 @@ class TestTemplating(ViewCase):
                 </data>
             """
         })
-        self.View.create({  # Inherit from the parent view but actually target
+        self.Qweb.create({  # Inherit from the parent view but actually target
                             # the element added by the first child view
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <data>
@@ -1448,7 +1428,7 @@ class TestTemplating(ViewCase):
 
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # Check if the replacement inside the child view did not mess up the
         # branding of elements in that child view
@@ -1467,9 +1447,8 @@ class TestTemplating(ViewCase):
             "The node's xpath position should be correct")
 
     def test_branding_inherit_remove_added_from_inheritance(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """
                 <hello>
                     <world class="a"></world>
@@ -1477,9 +1456,8 @@ class TestTemplating(ViewCase):
                 </hello>
             """
         })
-        view2 = self.View.create({
+        view2 = self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             # Note: class="x" instead of t-field="x" in this arch, should lead
             # to the same result that this test is ensuring but was actually
@@ -1493,9 +1471,8 @@ class TestTemplating(ViewCase):
                 </data>
             """
         })
-        self.View.create({  # Inherit from the child view and target the added element
+        self.Qweb.create({  # Inherit from the child view and target the added element
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view2.id,
             'arch': """
                 <data>
@@ -1506,7 +1483,7 @@ class TestTemplating(ViewCase):
 
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # Check if the replacement inside the child view did not mess up the
         # branding of elements in that child view, should not be the case as
@@ -1526,9 +1503,8 @@ class TestTemplating(ViewCase):
             "The node's xpath position should be correct")
 
     def test_branding_inherit_remove_node_processing_instruction(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """
                 <html>
                     <head>
@@ -1540,9 +1516,8 @@ class TestTemplating(ViewCase):
                 </html>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <data>
@@ -1577,7 +1552,7 @@ class TestTemplating(ViewCase):
             'world',
             "The processing instruction should mention the tag of the node that was removed")
 
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # Test that both head and body have their processing instruction
         # 'apply-inheritance-specs-node-removal' removed after branding
@@ -1593,9 +1568,8 @@ class TestTemplating(ViewCase):
             "The processing instruction of the <body> should have been removed")
 
     def test_branding_inherit_top_t_field(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """
                 <hello>
                     <world></world>
@@ -1605,9 +1579,8 @@ class TestTemplating(ViewCase):
                 </hello>
             """
         })
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <xpath expr="/hello/world[3]" position="after">
@@ -1617,7 +1590,7 @@ class TestTemplating(ViewCase):
         })
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         # First t-field should have an indication of xpath
         [node] = arch.xpath('//*[@t-field="a"]')
@@ -1643,9 +1616,8 @@ class TestTemplating(ViewCase):
 
         # Also test inherit via non-xpath t-field node, direct children of data,
         # is not impacted by the feature
-        self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <data>
@@ -1657,7 +1629,7 @@ class TestTemplating(ViewCase):
         })
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         node = arch.xpath('//world')[1]
         self.assertEqual(
@@ -1666,17 +1638,15 @@ class TestTemplating(ViewCase):
             "The node has properly been replaced")
 
     def test_branding_primary_inherit(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<root>
                 <item order="1"/>
             </root>
             """
         })
-        view2 = self.View.create({
+        view2 = self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'mode': 'primary',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//item" position="after">
@@ -1688,7 +1658,7 @@ class TestTemplating(ViewCase):
         arch_string = view2.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         [initial] = arch.xpath('//item[@order=1]')
         self.assertEqual(
@@ -1714,16 +1684,14 @@ class TestTemplating(ViewCase):
         """ Checks that the branding is correctly distributed within a view
         extension
         """
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<root>
                 <item order="1"/>
             </root>"""
         })
-        view2 = self.View.create({
+        view2 = self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//item" position="before">
                 <item order="2">
@@ -1735,7 +1703,7 @@ class TestTemplating(ViewCase):
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         self.assertEqual(
             arch,
@@ -1761,9 +1729,8 @@ class TestTemplating(ViewCase):
         )
 
     def test_branding_attribute_groups(self):
-        view = self.View.create({
+        view = self.Qweb.create({
             'name': "Base View",
-            'type': 'qweb',
             'arch': """<root>
                 <item groups="base.group_no_one"/>
             </root>""",
@@ -1771,7 +1738,7 @@ class TestTemplating(ViewCase):
 
         arch_string = view.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         self.assertEqual(arch, E.root(E.item({
             'groups': 'base.group_no_one',
@@ -1782,9 +1749,8 @@ class TestTemplating(ViewCase):
         })))
 
     def test_call_no_branding(self):
-        view = self.View.create({
+        view = self.Qweb.create({
             'name': "Base View",
-            'type': 'qweb',
             'arch': """<root>
                 <item><span><t t-call="foo"/></span></item>
             </root>""",
@@ -1792,14 +1758,13 @@ class TestTemplating(ViewCase):
 
         arch_string = view.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         self.assertEqual(arch, E.root(E.item(E.span(E.t({'t-call': "foo"})))))
 
     def test_esc_no_branding(self):
-        view = self.View.create({
+        view = self.Qweb.create({
             'name': "Base View",
-            'type': 'qweb',
             'arch': """<root>
                 <item><span t-esc="foo"/></item>
             </root>""",
@@ -1807,23 +1772,21 @@ class TestTemplating(ViewCase):
 
         arch_string = view.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         self.assertEqual(arch, E.root(E.item(E.span({'t-esc': "foo"}))))
 
     def test_ignore_unbrand(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<root>
                 <item order="1" t-ignore="true">
                     <t t-esc="foo"/>
                 </item>
             </root>"""
         })
-        view2 = self.View.create({
+        self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//item[@order='1']" position="inside">
                 <item order="2">
@@ -1835,7 +1798,7 @@ class TestTemplating(ViewCase):
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
 
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         self.assertEqual(
             arch,
@@ -1856,18 +1819,16 @@ class TestTemplating(ViewCase):
         )
 
     def test_branding_remove_add_text(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "Base view",
-            'type': 'qweb',
             'arch': """<root>
                 <item order="1">
                     <item/>
                 </item>
             </root>""",
         })
-        view2 = self.View.create({
+        view2 = self.Qweb.create({
             'name': "Extension",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
             <data>
@@ -1879,7 +1840,7 @@ class TestTemplating(ViewCase):
 
         arch_string = view1.with_context(inherit_branding=True).get_combined_arch()
         arch = etree.fromstring(arch_string)
-        self.View.distribute_branding(arch)
+        self.Qweb.distribute_branding(arch)
 
         expected = etree.fromstring(f"""
         <root>
@@ -3676,42 +3637,41 @@ Forbidden use of `__comp__` in arch."""
         #   E3  E4  P2  E5
         #
         # If we update the E4, we should check the P1 and P2 views
-        View = self.env['ir.ui.view']
-        p1 = View.create({
+        Qweb = self.env['ir.qweb']
+        p1 = Qweb.create({
             'name': 'test_view_p1',
-            'type': 'qweb',
             'key': 'website.test_view_p1',
             'arch_db': '''<div><p1/></div>'''
         })
-        View.create({
+        Qweb.create({
             'name': 'test_view_e1',
             'mode': 'extension',
             'inherit_id': p1.id,
             'arch_db': '<div position="inside"><e1/></div>',
             'key': 'website.test_view_e1',
         })
-        e2 = View.create({
+        e2 = Qweb.create({
             'name': 'test_view_e2',
             'mode': 'extension',
             'inherit_id': p1.id,
             'arch_db': '<div position="inside"><e2/></div>',
             'key': 'website.test_view_e2',
         })
-        View.create({
+        Qweb.create({
             'name': 'test_view_e3',
             'mode': 'extension',
             'inherit_id': p1.id,
             'arch_db': '<div position="inside"><e3/></div>',
             'key': 'website.test_view_e3',
         })
-        e4 = View.create({
+        e4 = Qweb.create({
             'name': 'test_view_e4',
             'mode': 'extension',
             'inherit_id': p1.id,
             'arch_db': '<div position="inside"><e4/></div>',
             'key': 'website.test_view_e4',
         })
-        p2 = View.create({
+        p2 = Qweb.create({
             'name': 'test_view_p2',
             'mode': 'primary',
             'inherit_id': e2.id,
@@ -3719,7 +3679,7 @@ Forbidden use of `__comp__` in arch."""
             'key': 'website.test_view_p2',
             'active': False,
         })
-        View.create({
+        Qweb.create({
             'name': 'test_view_e5',
             'mode': 'extension',
             'inherit_id': p1.id,
@@ -3745,7 +3705,7 @@ Forbidden use of `__comp__` in arch."""
         self.assertIn("Element '<e4>' cannot be located in parent view", str(catcher.exception.args[0]))
 
         with self.assertRaises(ValidationError) as catcher:
-            View.create({
+            Qweb.create({
                 'name': 'test_view_e6',
                 'mode': 'extension',
                 'inherit_id': e2.id,
@@ -4049,16 +4009,16 @@ class TestDefaultView(ViewCase):
             'inherit_id': False,
             'priority': 10,
             'mode': 'primary',
-            'arch': '<qweb/>',
+            'arch': '<form/>',
         })
         view2 = self.View.create({
             'inherit_id': False,
             'priority': 1,
             'mode': 'primary',
-            'arch': '<qweb/>',
+            'arch': '<form/>',
         })
 
-        default = self.View.default_view(False, 'qweb')
+        default = self.View.default_view(False, 'form')
         self.assertEqual(
             default, view2.id,
             "default_view should get the view with the lowest priority for "
@@ -4070,22 +4030,22 @@ class TestDefaultView(ViewCase):
             'inherit_id': False,
             'priority': 10,
             'mode': 'primary',
-            'arch': '<qweb/>',
+            'arch': '<form/>',
         })
         self.View.create({
             'inherit_id': False,
             'priority': 5,
             'mode': 'primary',
-            'arch': '<qweb/>',
+            'arch': '<form/>',
         })
         view3 = self.View.create({
             'inherit_id': view1.id,
             'priority': 1,
             'mode': 'primary',
-            'arch': '<qweb/>',
+            'arch': '<form/>',
         })
 
-        default = self.View.default_view(False, 'qweb')
+        default = self.View.default_view(False, 'form')
         self.assertEqual(
             default, view3.id,
             "default_view should get the view with the lowest priority for "
@@ -4644,18 +4604,16 @@ class TestXPathExtentions(common.BaseCase):
 class TestQWebRender(ViewCase):
 
     def test_render(self):
-        view1 = self.View.create({
+        view1 = self.Qweb.create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <div><span>something</span></div>
                 </t>
         """
         })
-        view2 = self.View.create({
+        view2 = self.Qweb.create({
             'name': "dummy_ext",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <xpath expr="//div" position="inside">
@@ -4663,9 +4621,8 @@ class TestQWebRender(ViewCase):
                 </xpath>
             """
         })
-        view3 = self.View.create({
+        view3 = self.Qweb.create({
             'name': "dummy_primary_ext",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'mode': 'primary',
             'arch': """

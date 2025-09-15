@@ -1967,11 +1967,10 @@ class MailCommon(MailCase):
         </span>
     </div>
 </body>"""
-        view = cls.env['ir.ui.view'].create({
+        view = cls.env['ir.qweb'].create({
             'arch_db': layout_arch_db,
             'key': 'test_layout',
             'name': 'test_layout',
-            'type': 'qweb',
         })
         cls.env['ir.model.data'].create({
             'model': 'ir.ui.view',

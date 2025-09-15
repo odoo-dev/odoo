@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <odoo>
 
-<record id="website_pages_form_view" model="ir.ui.view">
+<record id="website_pages_form_view" model="ir.qweb">
     <field name="name">website.page.form</field>
     <field name="model">website.page</field>
     <field name="arch" type="xml">
@@ -28,7 +28,7 @@
     </field>
 </record>
 
-<record id="website_page_properties_base_view_form" model="ir.ui.view">
+<record id="website_page_properties_base_view_form" model="ir.qweb">
     <field name="name">website.page.properties.base.form.view</field>
     <field name="model">website.page.properties.base</field>
     <field name="arch" type="xml">
@@ -47,7 +47,7 @@
     </field>
 </record>
 
-<record id="website_page_properties_view_form" model="ir.ui.view">
+<record id="website_page_properties_view_form" model="ir.qweb">
     <field name="name">website.page.properties.form.view</field>
     <field name="inherit_id" ref="website_page_properties_base_view_form"/>
     <field name="model">website.page.properties</field>
@@ -92,7 +92,7 @@
     </field>
 </record>
 
-<record id="website_pages_tree_view" model="ir.ui.view">
+<record id="website_pages_tree_view" model="ir.qweb">
     <field name="name">website.page.list</field>
     <field name="model">website.page</field>
     <field name="priority">99</field>
@@ -122,7 +122,7 @@
     </field>
 </record>
 
-<record id="website_pages_kanban_view" model="ir.ui.view">
+<record id="website_pages_kanban_view" model="ir.qweb">
     <field name="name">website.page.kanban</field>
     <field name="model">website.page</field>
     <field name="priority">99</field>
@@ -162,7 +162,7 @@
     </field>
 </record>
 
-<record id="website_pages_view_search" model="ir.ui.view">
+<record id="website_pages_view_search" model="ir.qweb">
     <field name="name">website.page.view.search</field>
     <field name="model">website.page</field>
     <field name="arch" type="xml">
@@ -196,10 +196,10 @@
     name="Pages"
     action="action_website_pages_list"/>
 
-<!-- Extension of views for ir.ui.view and link with the page manager -->
+<!-- Extension of views for ir.qweb and link with the page manager -->
 
-<record id="view_view_form_extend" model="ir.ui.view">
-    <field name="model">ir.ui.view</field>
+<record id="view_view_form_extend" model="ir.qweb">
+    <field name="model">ir.qweb</field>
     <field name="inherit_id" ref="base.view_view_form"/>
     <field name="arch" type="xml">
         <field name="inherit_id" position="attributes">
@@ -210,13 +210,13 @@
             <label for="key"/>
             <div class='o_row'>
                 <field name="key"/>
-                <button title="Show site map" invisible="type != 'qweb'" name="website.action_website_view_hierarchy" icon="fa-sitemap" type="action" class="btn btn-link"/>
+                <button title="Show site map" name="website.action_website_view_hierarchy" icon="fa-sitemap" type="action" class="btn btn-link"/>
             </div>
             <field name="page_ids" invisible="1" />
             <field name="first_page_id" invisible="not page_ids" />
             <label for="visibility"/>
             <div>
-                <field name="visibility" invisible="type != 'qweb'" />
+                <field name="visibility" />
                 <span class="o_wrap_label" invisible="visibility != 'restricted_group'"/>
                 <div class="oe_edit_only alert alert-info" role="alert" invisible="visibility != 'restricted_group'">
                     Add groups in the "Access Rights" tab below.
@@ -231,13 +231,13 @@
             </header>
         </sheet>
         <field name="active" position="after">
-            <field name="track" invisible="type != 'qweb'" widget="boolean_toggle"/>
+            <field name="track" widget="boolean_toggle"/>
         </field>
     </field>
 </record>
 
-<record id="view_view_tree_inherit_website" model="ir.ui.view">
-    <field name="model">ir.ui.view</field>
+<record id="view_view_tree_inherit_website" model="ir.qweb">
+    <field name="model">ir.qweb</field>
     <field name="inherit_id" ref="base.view_view_tree"/>
     <field name="arch" type="xml">
         <list position="attributes">

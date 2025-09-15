@@ -14,16 +14,15 @@ from lxml.etree import LxmlError
 from lxml.builder import E
 from markupsafe import Markup
 from contextlib import suppress
-from collections.abc import Sequence
 
 from odoo import api, fields, models, tools
-from odoo.exceptions import ValidationError, AccessError, UserError, MissingError
+from odoo.exceptions import ValidationError, AccessError, UserError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.modules.module import get_resource_from_path
-from odoo.tools import _, config, frozendict, partition, unique, SQL
+from odoo.tools import _, config, frozendict, unique, SQL
 from odoo.tools.convert import _fix_multiple_roots
-from odoo.tools.misc import file_path, get_diff, ConstantMapping
+from odoo.tools.misc import file_path, get_diff
 from odoo.tools.template_inheritance import apply_inheritance_specs, locate_node
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS
 from odoo.tools.view_validation import valid_view, get_domain_value_names, get_expression_field_names, get_dict_asts
@@ -152,8 +151,7 @@ class IrUiView(models.Model):
                              ('pivot', 'Pivot'),
                              ('calendar', 'Calendar'),
                              ('kanban', 'Kanban'),
-                             ('search', 'Search'),
-                             ('qweb', 'QWeb')], string='View Type')
+                             ('search', 'Search')], string='View Type')
     arch = fields.Text(compute='_compute_arch', inverse='_inverse_arch', string='View Architecture',
                        help="""This field should be used when accessing view arch. It will use translation.
                                Note that it will read `arch_db` or `arch_fs` if in dev-xml mode.""")
@@ -190,11 +188,7 @@ actual arch.
     warning_info = fields.Html(string="Warning information", compute='_compute_warning_info')
 
     # The "active" field is not updated during updates if <template> is used
-    # instead of <record> to define the view in XML, see _tag_template. For
-    # qweb views, you should not rely on the active field being updated anyway
-    # as those views, if used in frontend layouts, can be duplicated (see COW)
-    # and will thus always require upgrade scripts if you really want to change
-    # the default value of their "active" field.
+    # instead of <record> to define the view in XML, see _tag_template.
     active = fields.Boolean(default=True,
                             help="""If this view is inherited,
 * if True, the view always extends its parent
@@ -548,10 +542,6 @@ actual arch.
         "CHECK (mode != 'extension' OR inherit_id IS NOT NULL)",
         "Invalid inheritance mode: if the mode is 'extension', the view must extend an other view",
     )
-    _qweb_required_key = models.Constraint(
-        "CHECK (type != 'qweb' OR key IS NOT NULL)",
-        "Invalid key: QWeb view should have a key",
-    )
     _model_type_inherit_id = models.Index('(model, inherit_id)')
 
     def _compute_defaults(self, values):
@@ -571,8 +561,7 @@ actual arch.
                     view_arch = etree.fromstring(view.arch)
                     view._valid_inheritance(view_arch)
                 combined_arch = view._get_combined_arch()
-                if view.type != 'qweb':
-                    view._postprocess_view(combined_arch, view.model, is_compute_warning_info=True)
+                view._postprocess_view(combined_arch, view.model, is_compute_warning_info=True)
             except (etree.ParseError, ValueError) as e:
                 view.warning_info = str(e)
 
@@ -613,8 +602,6 @@ actual arch.
                         # don't raise here, the constraint that runs `self._check_xml` will
                         # do the job properly.
                         pass
-            if not values.get('key') and values.get('type') == 'qweb':
-                values['key'] = "gen_key.%s" % str(uuid.uuid4())[:6]
             if not values.get('name'):
                 values['name'] = "%s %s" % (values.get('model'), values['type'])
             # Create might be called with either `arch` (xml files), `arch_base` (form view) or `arch_db`.
@@ -1108,180 +1095,8 @@ actual arch.
             for m in ref_re.finditer(node.get('context'))
         }
 
-    # ------------------------------------------------------
-    # Get views and cache
-    # ------------------------------------------------------
-
-    @api.model
-    def _get_cached_template_prefetched_keys(self):
-        return ['id', 'key', 'active']
-
-    def _get_template_minimal_cache_keys(self):
-        return (bool(self.env.context.get('active_test', True)),)
-
-    @api.model
-    @tools.ormcache('id_or_xmlid', 'isinstance(id_or_xmlid, str) and self._get_template_minimal_cache_keys()', cache='templates')
-    def _get_cached_template_info(self, id_or_xmlid, _view=None):
-        """ Return the ir.ui.view id from the xml id, use `_preload_views`.
-        """
-        view = None
-        error = False
-        if _view is not None:
-            view = _view
-        elif isinstance(id_or_xmlid, int):
-            view = self.env['ir.ui.view'].sudo().browse(id_or_xmlid)
-            try:
-                view.key
-            except MissingError:
-                view = None
-                error = MissingError(self.env._("Template not found: '%s'", id_or_xmlid))
-            except UserError as e:
-                view = None
-                error = e
-        else:
-            preload = self.sudo()._preload_views([id_or_xmlid])
-            if id_or_xmlid in preload:
-                info = preload[id_or_xmlid]
-                view = info['view']
-                error = info['error']
-            else:
-                error = SyntaxError('Error compiling template')
-        info = {
-            f: view[f] if view else None
-            for f in self._get_cached_template_prefetched_keys()}
-        info['error'] = error
-        return info
-
-    @api.model
-    def _get_template_view(self, id_or_xmlid: int | str, raise_if_not_found=True) -> models.BaseModel:
-        info = self._get_cached_template_info(id_or_xmlid)
-        if info['error'] and raise_if_not_found:
-            raise info['error']
-        return self.env['ir.ui.view'].browse(info['id'])
-
-    @api.model
-    def _get_template_domain(self, xmlids: list[str]) -> Domain:
-        return Domain('key', 'in', xmlids)
-
-    @api.model
-    def _get_template_order(self) -> str:
-        return "priority, id"
-
-    @api.model
-    def _fetch_template_views(self, ids_or_xmlids: Sequence[int | str]) -> dict[int | str, models.BaseModel | Exception]:
-        """ Return the view corresponding to ``template``, which may be a
-            view ID or an XML ID. Note that this method may be overridden for other
-            kinds of template values.
-        """
-        IrUiView = self.env['ir.ui.view'].sudo().with_context(load_all_views=True, raise_if_not_found=True)
-
-        ids, xmlids = partition(lambda v: isinstance(v, int), ids_or_xmlids)
-
-        # search view in ir.ui.view
-        view_by_id = {}
-        field_names = [f.name for f in IrUiView._fields.values() if f.prefetch is True]
-        if xmlids:
-            domain = Domain('id', 'in', ids) | Domain(self._get_template_domain(xmlids))
-            views = IrUiView.search_fetch(domain, field_names, order=self._get_template_order())
-        else:
-            views = IrUiView.browse(ids)
-
-        for view in views:
-            try:
-                if view.key in view_by_id:
-                    # keeps views according to their priority order
-                    continue
-            except MissingError:
-                continue
-            view_by_id[view.id] = view
-            if view.key:
-                view_by_id[view.key] = view
-
-        # search missing view from xmlid in ir.model.data
-        missing_xmlid_views = [xmlid for xmlid in xmlids if '.' in xmlid and xmlid not in view_by_id]
-        if missing_xmlid_views:
-            domain = Domain.OR(
-                Domain('model', '=', 'ir.ui.view') & Domain('module', '=', res[0]) & Domain('name', '=', res[1])
-                for xmlid in missing_xmlid_views
-                if (res := xmlid.split('.', 1))
-            )
-
-            for model_data in self.env['ir.model.data'].sudo().search(domain):
-                view = IrUiView.browse(model_data.res_id)
-                if view.exists():
-                    view_by_id[view.id] = view
-                    xmlid = f"{model_data.module}.{model_data.name}"
-                    view_by_id[xmlid] = view
-                    if view.key:
-                        view_by_id[view.key] = view
-
-        for key, view in view_by_id.items():
-            # push information in cache
-            self._get_cached_template_info(key, _view=view)
-
-        # create data and errors
-        for view_id in ids:
-            if view_id not in view_by_id:
-                # push information in cache
-                self._get_cached_template_info(view_id, _view=False)
-                view_by_id[view_id] = MissingError(self.env._("Template does not exist or has been deleted: %s", view_id))
-        for xmlid in xmlids:
-            if xmlid not in view_by_id:
-                # push information in cache
-                self._get_cached_template_info(xmlid, _view=False)
-                view_by_id[xmlid] = MissingError(self.env._("Template not found: '%s'", xmlid))
-        return view_by_id
-
-    @tools.ormcache(cache='templates')
-    def _clear_preload_views_cache_if_needed(self):
-        """ Invalidate the local cache when the orm cache is cleared
-        """
-        self.env.cr.cache.pop('_compile_batch_', None)
-
-    def _preload_views(self, refs: Sequence[int | str]) -> dict[int | str, dict]:
-        """
-        Return self's arch combined with its inherited views archs.
-
-        :param refs: list of id or xmlid
-        :return: dictionary of preloaded information {id or xmlid: {xmlid, ref, view, error}}
-        """
-        self._clear_preload_views_cache_if_needed()
-
-        context = {k: self.env.context.get(k) for k in self.env['ir.qweb']._get_template_cache_keys()}
-        cache_key = tuple(context.values())
-
-        compile_batch = self.env.cr.cache.setdefault('_compile_batch_', {}).setdefault(cache_key, {})
-
-        refs = [int(ref) if isinstance(ref, int) or ref.isdigit() else ref for ref in refs]
-        missing_refs = [ref for ref in refs if ref and ref not in compile_batch]
-        if not missing_refs:
-            return compile_batch
-
-        unknown_views = self._fetch_template_views(missing_refs)
-
-        # add in cache
-        for id_or_xmlid, view in unknown_views.items():
-            if isinstance(view, models.BaseModel):
-                compile_batch[view.id] = compile_batch[id_or_xmlid] = {
-                    'xmlid': view.key or id_or_xmlid,
-                    'ref': view.id,
-                    'view': view,
-                    'error': False,
-                }
-            else:
-                compile_batch[id_or_xmlid] = {
-                    'xmlid': id_or_xmlid,
-                    'view': None,
-                    'ref': None,
-                    'error': view,  # MissingError
-                }
-
-        return compile_batch
-
     #------------------------------------------------------
     # Postprocessing: translation, groups and modifiers
-    #------------------------------------------------------
-    # TODO: remove group processing from ir_qweb
     #------------------------------------------------------
     def postprocess_and_fields(self, node, model=None, **options):
         """ Return an architecture and a description of all the fields.
@@ -2410,128 +2225,6 @@ actual arch.
                 Model = self.pool.get(field.comodel_name)
 
     #------------------------------------------------------
-    # QWeb template views
-    #------------------------------------------------------
-
-    def _read_template_keys(self):
-        """ Return the list of context keys to use for caching ``_read_template``. """
-        return ['lang', 'inherit_branding', 'edit_translations']
-
-    def _get_view_etrees(self):
-        if not self:
-            return []
-        arch_trees = self._get_combined_archs()
-        for arch_tree in arch_trees:
-            self.distribute_branding(arch_tree)
-        return arch_trees
-
-    def _contains_branded(self, node):
-        return node.tag == 't'\
-            or 't-raw' in node.attrib\
-            or 't-call' in node.attrib\
-            or any(self.is_node_branded(child) for child in node.iterdescendants())
-
-    def _pop_view_branding(self, element):
-        distributed_branding = dict(
-            (attribute, element.attrib.pop(attribute))
-            for attribute in MOVABLE_BRANDING
-            if element.get(attribute))
-        return distributed_branding
-
-    def distribute_branding(self, e, branding=None, parent_xpath='',
-                            index_map=ConstantMapping(1)):
-        if e.get('t-ignore') or e.tag == 'head':
-            # remove any view branding possibly injected by inheritance
-            attrs = set(MOVABLE_BRANDING)
-            for descendant in e.iterdescendants(tag=etree.Element):
-                if not attrs.intersection(descendant.attrib):
-                    continue
-                self._pop_view_branding(descendant)
-
-            # Remove the processing instructions indicating where nodes were
-            # removed (see apply_inheritance_specs)
-            for descendant in e.iterdescendants(tag=etree.ProcessingInstruction):
-                if descendant.target == 'apply-inheritance-specs-node-removal':
-                    descendant.getparent().remove(descendant)
-            return
-
-        node_path = e.get('data-oe-xpath')
-        if node_path is None:
-            # Handle special case for jump points defined by the magic template
-            # <t>$0</t>. No branding is allowed in this case since it points to
-            # a generic template.
-            if e.get('data-oe-no-branding'):
-                e.attrib.pop('data-oe-no-branding')
-                return
-            node_path = "%s/%s[%d]" % (parent_xpath, e.tag, index_map[e.tag])
-        if branding:
-            if e.get('t-field'):
-                e.set('data-oe-xpath', node_path)
-            elif not e.get('data-oe-model'):
-                e.attrib.update(branding)
-                e.set('data-oe-xpath', node_path)
-        if not e.get('data-oe-model'):
-            return
-
-        if {'t-esc', 't-raw', 't-out'}.intersection(e.attrib):
-            # nodes which fully generate their content and have no reason to
-            # be branded because they can not sensibly be edited
-            self._pop_view_branding(e)
-        elif self._contains_branded(e):
-            # if a branded element contains branded elements distribute own
-            # branding to children unless it's t-raw, then just remove branding
-            # on current element
-            distributed_branding = self._pop_view_branding(e)
-
-            if 't-raw' not in e.attrib:
-                # TODO: collections.Counter if remove p2.6 compat
-                # running index by tag type, for XPath query generation
-                indexes = collections.defaultdict(lambda: 0)
-                for child in e.iterchildren(etree.Element, etree.ProcessingInstruction):
-                    if child.get('data-oe-xpath'):
-                        # injected by view inheritance, skip otherwise
-                        # generated xpath is incorrect
-                        self.distribute_branding(child)
-                    elif child.tag is etree.ProcessingInstruction:
-                        # If a node is known to have been replaced during
-                        # applying an inheritance, increment its index to
-                        # compute an accurate xpath for subsequent nodes
-                        if child.target == 'apply-inheritance-specs-node-removal':
-                            indexes[child.text] += 1
-                            e.remove(child)
-                    else:
-                        indexes[child.tag] += 1
-                        self.distribute_branding(
-                            child, distributed_branding,
-                            parent_xpath=node_path, index_map=indexes)
-
-    def is_node_branded(self, node):
-        """ Finds out whether a node is branded or qweb-active (bears a
-        @data-oe-model or a @t-* *which is not t-field* as t-field does not
-        section out views)
-
-        :param node: an etree-compatible element to test
-        :type node: etree._Element
-        :rtype: boolean
-        """
-        return any(
-            (attr in ('data-oe-model', 'groups') or (attr.startswith('t-')))
-            for attr in node.attrib
-        ) or (
-            node.tag is etree.ProcessingInstruction
-            and node.target == 'apply-inheritance-specs-node-removal'
-        )
-
-    @api.readonly
-    @api.model
-    def render_public_asset(self, template, values=None):
-        self._get_template_view(template).sudo()._check_view_access()
-        return self.env['ir.qweb'].sudo()._render(template, values)
-
-    def _render_template(self, template, values=None):
-        return self.env['ir.qweb']._render(template, values)
-
-    #------------------------------------------------------
     # Misc
     #------------------------------------------------------
 
@@ -2579,54 +2272,6 @@ actual arch.
         """, module, names)))
 
         views._check_xml()
-
-    def _create_all_specific_views(self, processed_modules):
-        """To be overriden and have specific view behaviour on create"""
-        pass
-
-    def _get_specific_views(self):
-        """ Given a view, return a record set containing all the specific views
-            for that view's key.
-        """
-        self.ensure_one()
-        # Only qweb views have a specific conterpart
-        if self.type != 'qweb':
-            return self.env['ir.ui.view']
-        # A specific view can have a xml_id if exported/imported but it will not be equals to it's key (only generic view will).
-        return self.with_context(active_test=False).search([('key', '=', self.key)]).filtered(lambda r: not r.xml_id == r.key)
-
-    def _load_records_write(self, values):
-        """ During module update, when updating a generic view, we should also
-            update its specific views (COW'd).
-            Note that we will only update unmodified fields. That will mimic the
-            noupdate behavior on views having an ir.model.data.
-        """
-        if self.type == 'qweb':
-            for cow_view in self._get_specific_views():
-                authorized_vals = {}
-                for key in values:
-                    if key != 'inherit_id' and cow_view[key] == self[key]:
-                        authorized_vals[key] = values[key]
-                # if inherit_id update, replicate change on cow view but
-                # only if that cow view inherit_id wasn't manually changed
-                inherit_id = values.get('inherit_id')
-                if inherit_id and self.inherit_id.id != inherit_id and \
-                   cow_view.inherit_id.key == self.inherit_id.key:
-                    self._load_records_write_on_cow(cow_view, inherit_id, authorized_vals)
-                else:
-                    cow_view.with_context(no_cow=True).write(authorized_vals)
-        super()._load_records_write(values)
-
-    def _load_records_write_on_cow(self, cow_view, inherit_id, values):
-        # for modules updated before `website`, we need to
-        # store the change to replay later on cow views
-        if not hasattr(self.pool, 'website_views_to_adapt'):
-            self.pool.website_views_to_adapt = []
-        self.pool.website_views_to_adapt.append((
-            cow_view.id,
-            inherit_id,
-            values,
-        ))
 
 
 class ResetViewArchWizard(models.TransientModel):

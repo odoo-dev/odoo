@@ -158,7 +158,6 @@ class TestWebsitePerformanceCommon(UtilPerf):
         page = self.env['website.page'].create({
             'url': url,
             'name': name,
-            'type': 'qweb',
             'arch': '<t name="%s" t-name="website.page_test_%s"> \
                        <t t-call="website.layout"> \
                          <div id="wrap"><div class="oe_structure"/></div> \

@@ -20,8 +20,8 @@ EDITING_ATTRIBUTES = MOVABLE_BRANDING + [
 ]
 
 
-class IrUiView(models.Model):
-    _inherit = 'ir.ui.view'
+class IrQweb(models.Model):
+    _inherit = 'ir.qweb'
 
     def _get_cleaned_non_editing_attributes(self, attributes):
         """
@@ -48,7 +48,7 @@ class IrUiView(models.Model):
 
     @api.model
     def extract_embedded_fields(self, arch):
-        return arch.xpath('//*[@data-oe-model != "ir.ui.view"]')
+        return arch.xpath('//*[@data-oe-model != "ir.qweb"]')
 
     @api.model
     def extract_oe_structures(self, arch):
@@ -108,11 +108,10 @@ class IrUiView(models.Model):
             'name': '%s (%s)' % (self.name, el.get('id')),
             'arch': etree.tostring(arch, encoding='unicode'),
             'key': '%s_%s' % (self.key, el.get('id')),
-            'type': 'qweb',
             'mode': 'extension',
         }
         vals.update(self._save_oe_structure_hook())
-        oe_structure_view = self.env['ir.ui.view'].create(vals)
+        oe_structure_view = self.env['ir.qweb'].create(vals)
         self._copy_custom_snippet_translations(oe_structure_view, 'arch_db')
 
         return True
@@ -145,7 +144,7 @@ class IrUiView(models.Model):
         one in the current language).
 
         For instance, copy the translations of a
-        ``product.template.html_description`` field to a ``ir.ui.view.arch_db``
+        ``product.template.html_description`` field to a ``ir.qweb.arch_db``
         field.
 
         The method takes care of read and write access of both records/fields.
@@ -456,7 +455,6 @@ class IrUiView(models.Model):
         new_snippet_view_values = {
             'name': name,
             'key': full_snippet_key,
-            'type': 'qweb',
             'arch': xml_arch,
         }
         new_snippet_view_values.update(self._snippet_save_view_values_hook())
@@ -484,7 +482,6 @@ class IrUiView(models.Model):
             'name': name + ' Block',
             'key': self._get_snippet_addition_view_key(template_key, snippet_key),
             'inherit_id': custom_section.id,
-            'type': 'qweb',
             'arch': """
                 <data inherit_id="%s">
                     <xpath expr="//snippets[@id='snippet_custom']" position="inside">

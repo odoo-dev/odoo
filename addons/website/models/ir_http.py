@@ -394,7 +394,7 @@ class IrHttp(models.AbstractModel):
         if hasattr(exception, 'qweb'):
             qweb_error = exception.qweb
             exception_template = qweb_error.ref
-            View = env["ir.ui.view"].sudo()
+            View = env["ir.qweb"].sudo()
             view = exception_template and View._get_template_view(exception_template)
             if not view or qweb_error.element and qweb_error.element in view.arch:
                 values['view'] = view
@@ -417,7 +417,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _get_error_html(cls, env, code, values):
         if code in ('page_404', 'protected_403'):
-            return code.split('_')[1], env['ir.ui.view']._render_template('website.%s' % code, values)
+            return code.split('_')[1], env['ir.qweb']._render_template('website.%s' % code, values)
         return super()._get_error_html(env, code, values)
 
     @api.model

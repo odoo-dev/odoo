@@ -67,9 +67,8 @@ class TestQWebTField(TransactionCase):
             self.engine._render(field, {'company': None})
 
     def test_render_t_options(self):
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy"><root><span t-esc="5" t-options="{'widget': 'char'}" t-options-widget="'float'" t-options-precision="4"/></root></t>
             """
@@ -78,8 +77,8 @@ class TestQWebTField(TransactionCase):
         self.assertEqual(text, '5.0000')
 
     def test_xss_breakout(self):
-        view = self.env['ir.ui.view'].create({
-            'name': 'dummy', 'type': 'qweb',
+        view = self.env['ir.qweb'].create({
+            'name': 'dummy',
             'arch': """
                 <t t-name="base.dummy">
                     <root>
@@ -97,9 +96,8 @@ class TestQWebTField(TransactionCase):
 
     def test_default_value(self):
         Partner = self.env['res.partner']
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="out-field-default">
                 <div t-field="record.name">
                     DEFAULT
@@ -140,9 +138,8 @@ class TestQWebTField(TransactionCase):
 
     def test_no_value_no_default_value(self):
         # no value, no default value with attributes on t-field
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="out-field-default">
                 <div t-field="record.name"/>
             </t>''',
@@ -176,9 +173,8 @@ class TestQWebNS(TransactionCase):
             </root>
         """
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">%s</t>
             """ % expected_result
@@ -214,9 +210,8 @@ class TestQWebNS(TransactionCase):
             </html>
         """
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">%s</t>
             """ % expected_result
@@ -227,9 +222,8 @@ class TestQWebNS(TransactionCase):
     def test_render_static_xml_with_useless_distributed_namespace(self):
         """ Test that redundant namespaces are stripped upon rendering.
         """
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <root>
@@ -262,9 +256,8 @@ class TestQWebNS(TransactionCase):
             <cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd"></cfdi:Comprobante>
         """
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">%s</t>
             """ % expected_result
@@ -298,9 +291,8 @@ class TestQWebNS(TransactionCase):
 
         values = dict(h1="http://www.example.org/table", h2="http://www.w3.org/TD/html4/")
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">%s</t>
             """ % tempate
@@ -343,9 +335,8 @@ class TestQWebNS(TransactionCase):
 
         values = dict(h1="http://www.example.org/table", h2="http://www.w3.org/TD/html4/", f="http://www.example.org/furniture")
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">%s</t>
             """ % tempate
@@ -359,9 +350,8 @@ class TestQWebNS(TransactionCase):
         """ Test that rendering a template containing a node having both an ns declaration and a t-esc attribute correctly
         handles the t-esc attribute and keep the ns declaration.
         """
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" t-esc="'test'"/>
@@ -377,9 +367,8 @@ class TestQWebNS(TransactionCase):
         """ Test that rendering a template containing a node having both an ns declaration and a t-esc attribute correctly
         handles the t-esc attribute and keep the ns declaration, and distribute correctly the ns declaration to its children.
         """
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" t-attf-test="test">
@@ -401,9 +390,8 @@ class TestQWebNS(TransactionCase):
         """ Test that rendering a template containing a node having both an ns declaration and a t-attf attribute correctly
         handles the t-attf attribute and keep the ns declaration.
         """
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <root>
@@ -441,9 +429,8 @@ class TestQWebNS(TransactionCase):
         """ Test that rendering a template containing a node having both an ns declaration and a t-attf attribute correctly
         handles the t-attf attribute and that redundant namespaces are stripped upon rendering.
         """
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                 <root>
@@ -480,9 +467,8 @@ class TestQWebNS(TransactionCase):
         self.assertEqual(etree.fromstring(self.env['ir.qweb']._render(view1.id)), expected_result)
 
     def test_render_dynamic_xml_with_namespace_2(self):
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
@@ -513,9 +499,8 @@ class TestQWebNS(TransactionCase):
         self.assertEqual(etree.fromstring(self.env['ir.qweb']._render(view1.id, {'version_id': 1.0})), expected_result)
 
     def test_render_static_xml_with_namespaced_attributes(self):
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd">abc</cfdi:Comprobante>
@@ -528,9 +513,8 @@ class TestQWebNS(TransactionCase):
         self.assertEqual(etree.fromstring(self.env['ir.qweb']._render(view1.id)), expected_result)
 
     def test_render_dynamic_xml_with_namespaced_attributes(self):
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv32.xsd" t-esc="'abc'"/>
@@ -543,10 +527,9 @@ class TestQWebNS(TransactionCase):
         self.assertEqual(etree.fromstring(self.env['ir.qweb']._render(view1.id)), expected_result)
 
     def test_render_static_xml_with_t_call(self):
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'key': 'base.dummy',
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <cac:fruit xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
@@ -561,9 +544,8 @@ class TestQWebNS(TransactionCase):
         })
 
         # view2 will t-call view1
-        view2 = self.env['ir.ui.view'].create({
+        view2 = self.env['ir.qweb'].create({
             'name': "dummy2",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy2">
                     <root xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
@@ -596,9 +578,8 @@ class TestQWebNS(TransactionCase):
         """ Test the extension of a view by an xpath expression on a ns prefixed element.
         """
         # primary view
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <root>
@@ -613,9 +594,8 @@ class TestQWebNS(TransactionCase):
             """
         })
         # extension patching the primary view
-        view2 = self.env['ir.ui.view'].create({
+        view2 = self.env['ir.qweb'].create({
             'name': "dummy_ext",
-            'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
                 <xpath expr="//{http://www.example.org/table}table/{http://www.example.org/table}tr">
@@ -645,9 +625,8 @@ class TestQWebNS(TransactionCase):
         """ Test that, when rendering a template containing a namespaced node
             that evaluates code with errors, the proper exception is raised
         """
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <Invoice xmlns:od="http://odoo.com/od">
@@ -684,9 +663,8 @@ class TestQWebNS(TransactionCase):
 
         """
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">%s</t>
             """ % tempate
@@ -752,9 +730,8 @@ class TestQWebBasic(TransactionCase):
             self.assertDictEqual(q_values, q_result, "Should compile: %s" % expr)
 
     def test_foreach_as_error_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="iter-list">
                 <t t-foreach="[3, 2, 1]">
                     [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]</t>
@@ -771,9 +748,8 @@ class TestQWebBasic(TransactionCase):
             self.assertIn('<t t-foreach="[3, 2, 1]"/>', str(e.qweb))
 
     def test_foreach_as_error_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="iter-list">
                 <t t-foreach="[3, 2, 1]" t-as="">
                     [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]</t>
@@ -791,9 +767,8 @@ class TestQWebBasic(TransactionCase):
             self.assertIn('<t t-foreach="[3, 2, 1]" t-as=""/>', error)
 
     def test_foreach_as_error_3(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="iter-list">
                 <t t-foreach="[3, 2, 1]" t-as="b-2">
                     [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]</t>
@@ -811,9 +786,8 @@ class TestQWebBasic(TransactionCase):
             self.assertIn('<t t-foreach="[3, 2, 1]" t-as="b-2"/>', error)
 
     def test_compile_expr_security(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-escaping">
                 <div>
                     <t t-set="o" t-value="(lambda a=open: a)()"/>
@@ -826,9 +800,8 @@ class TestQWebBasic(TransactionCase):
             self.env['ir.qweb']._render(t.id, values)
 
     def test_foreach_iter_list(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="iter-list">
                 <t t-foreach="[3, 2, 1]" t-as="item">
                     [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]</t>
@@ -844,9 +817,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_foreach_iter_dict(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="iter-dict">
                 <t t-foreach="{'a': 3, 'b': 2, 'c': 1}" t-as="item">
                     [<t t-esc="item_index"/>: <t t-esc="item"/> <t t-esc="item_value"/>]</t>
@@ -862,9 +834,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_att_escaping_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-escaping">
                 <div t-att-bibi="json.dumps(bibi)">1</div>
                 <div t-att-toto="toto">2</div>
@@ -880,9 +851,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_att_escaping_2(self):
 
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-escaping">
                 <t t-set="abc"> <t t-if="add_abc"><t t-out="add_abc"/> <span a="b"> | </span></t><t t-out="efg"/> </t>
                 <div t-att-abc="abc">123</div>
@@ -896,9 +866,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_attf_escaping_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-escaping">
                 <div t-attf-bibi="a, b &gt; c &gt; #{d}">1</div>
             </t>'''
@@ -911,9 +880,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_attf_escaping_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-escaping">
                 <a t-attf-href="/link/#{ url }/#{other and 'sub'}">link</a>
                 <a t-attf-href="/link/#{ url }/#{(not other) and 'sub'}">link2</a>
@@ -929,9 +897,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_attf_escaping_3(self):
 
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-escaping">
                 <div t-attf-abc="abc #{val} { other }">123</div>
             </t>'''
@@ -944,9 +911,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_att_no_propagation_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="bibi">
                 <div t-foreach="[1, 2]" t-as="v" class="toto"/>
                 <t class="remove_me" t-set="data">a</t>
@@ -961,9 +927,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_att_no_propagation_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="bibi">
                 <section>
                     <div t-foreach="[1, 2]" t-as="v">
@@ -995,9 +960,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(etree.fromstring(rendered), etree.fromstring(result))
 
     def test_set_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set="a" t-value="'abc %s' % 1"/>
                 <div t-out="a"/>
@@ -1010,9 +974,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_set_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set="a" t-valuef="abc {{1}}"/>
                 <div t-out="a"/>
@@ -1025,9 +988,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_set_3(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set='{"a": "abc %s" % 1,
                     "b": 2}'/>
@@ -1041,9 +1003,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_set_body_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set="abc"> <span a="b"> [%s] </span> </t>
                 <div t-att-abc="abc % add_abc">123</div>
@@ -1057,9 +1018,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_set_body_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set="abc"> <span a="b"> toto </span> </t>
                 <div t-att-abc="'[%s]' % abc">123</div>
@@ -1077,9 +1037,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_set_body_3(self):
         # test if the cached result don't fail
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.test_set_body_3',
             'arch_db': '''<t t-name="set">
                 <t t-set="a_empty"><t t-out="''"/></t>
@@ -1102,9 +1061,8 @@ class TestQWebBasic(TransactionCase):
 
     @mute_logger('odoo.addons.base.models.ir_qweb')
     def test_set_error_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set="" t-value="1"/>
             </t>'''
@@ -1122,9 +1080,8 @@ class TestQWebBasic(TransactionCase):
 
     @mute_logger('odoo.addons.base.models.ir_qweb')
     def test_set_error_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set="b-2" t-value="1"/>
             </t>'''
@@ -1141,9 +1098,8 @@ class TestQWebBasic(TransactionCase):
             self.assertIn('<t t-set="b-2" t-value="1"/>', error)
 
     def test_out(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="out-format"><div t-out="a">Default</div></t>'''
         })
         result = """<div>1</div>"""
@@ -1151,9 +1107,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_out_format_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="out-format">
                 <t t-set="final_message">Powered by %s%s</t>
                 <div t-out="final_message % (a, b and ('-%s' % b) or '')"/>
@@ -1166,9 +1121,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_out_format_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="set">
                 <t t-set="toto">Toto %s</t>
                 <t t-set="abc"> <span a="b"> [%s , %s] </span> </t>
@@ -1183,9 +1137,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_out_format_3(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-set">
                 <t t-set="toto">Toto %s</t>
                 <t t-set="abc"> <span a="b"> a </span> </t>
@@ -1200,9 +1153,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_out_format_4(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-set">
                 <t t-set="abc"> <span a="b"> a </span> </t>
                 <div t-out="(v + abc)">123</div>
@@ -1216,9 +1168,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_out_format_5(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-set">
                 <t t-set="abc"> <span a="b"> a </span> </t>
                 <div t-out="(abc + v)">123</div>
@@ -1233,9 +1184,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_out_format_6(self):
         # Use str method will use the string value. t-out will escape this str
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-set">
                 <t t-set="abc"> <span a="b"> a </span> </t>
                 <div t-out="(abc.strip() + v)">123</div>
@@ -1250,9 +1200,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_out_format_7(self):
         # Use str method will use the string value. t-out will escape this str
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="test-lazy">
                 <t t-set="val"><b>TOTO %s</b></t>
                 <t t-if="'TOTO' in val">OK</t>
@@ -1268,9 +1217,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_out_format_8(self):
         # Use str method will use the string value. t-out will escape this str
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="test-lazy">
                 <t t-set="val"><b>TOTO %s</b></t>
                 <t t-if="'TOTO' in val">if 'TOTO' in val</t>
@@ -1290,9 +1238,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_out_format_9(self):
         # Use str method will use the string value. t-out will escape this str
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="test-lazy">
                 <t t-set="val"><b>TOTO %s</b></t>
                 <a t-out="val.replace('T', '_')"/>
@@ -1304,9 +1251,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_out_json(self):
         # Use str method will use the string value. t-out will escape this str
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-set">
                 <t t-set="abc"> <span> a </span> </t>
                 <t t-set="props" t-value="{ 'a': 1, 'abc': abc }"/>
@@ -1321,9 +1267,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(str(rendered.strip()), result.strip())
 
     def test_out_escape_text(self):
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy"><root><span t-out="text" t-options-widget="'text'"/></root></t>
             """
@@ -1334,9 +1279,8 @@ class TestQWebBasic(TransactionCase):
         b &lt;b&gt;c&lt;/b&gt;</span></root>""")
 
     def test_out_markup(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="esc-markup">
                 <t t-set="content"><span>toto</span></t>
                 <div t-out="content"/>
@@ -1349,9 +1293,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_out_default_value(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="out-default">
                 <span rows="10" t-out="a">
                     DEFAULT
@@ -1376,17 +1319,15 @@ class TestQWebBasic(TransactionCase):
 
     def test_esc_markup(self):
         # t-esc is equal to t-out
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="esc-markup">
                 <t t-set="content"><span>toto</span></t>
                 <div t-esc="content"/>
             </t>'''
         })
-        ref = self.env['ir.ui.view'].create({
+        ref = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="esc-markup">
                 <t t-set="content"><span>toto</span></t>
                 <div t-out="content"/>
@@ -1397,9 +1338,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_if_from_body(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="attr-set">
                 <t t-set="abc"> <span a="b"> a </span> </t>
                 <div t-if="abc">123</div>
@@ -1413,9 +1353,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_if_spaces(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="test">
                 <div>
                     0
@@ -1455,9 +1394,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_if_comment(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="test">
                 <div>
                     <!-- comment 0 -->
@@ -1499,9 +1437,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(rendered.strip(), result.strip())
 
     def test_error_message_1(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="test">
                 <section>
                     <div t-esc="abc + def">
@@ -1520,9 +1457,8 @@ class TestQWebBasic(TransactionCase):
             self.assertIn('<div t-esc="abc + def"/>', error)
 
     def test_error_message_2(self):
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name="test">
                 <section>
                     <div t-esc="abc + def + (">
@@ -1625,9 +1561,8 @@ class TestQWebBasic(TransactionCase):
             self.env['ir.qweb']._render(-9999)
 
     def test_error_message_9(self):
-        target = self.env['ir.ui.view'].create({
+        target = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.test_qweb_error',
             'arch_db': '''<t t-name="test">
                 <section>
@@ -1637,15 +1572,13 @@ class TestQWebBasic(TransactionCase):
                 </section>
             </t>'''
         })
-        wrap = self.env['ir.ui.view'].create({
+        wrap = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'key': 'base.test_qweb_wrap',
             'arch': """<div><t t-call="base.test_qweb_error"/></div>"""
         })
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'arch': """<div><t t-call="base.test_qweb_wrap"/></div>"""
         })
 
@@ -1668,21 +1601,18 @@ class TestQWebBasic(TransactionCase):
             )
 
     def test_error_message_10(self):
-        a = self.env['ir.ui.view'].create({
+        a = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.test_qweb_error',
             'arch_db': '''<t t-name="test"><section><div t-out="0"/></section></t>'''
         })
-        wrap = self.env['ir.ui.view'].create({
+        wrap = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'key': 'base.test_qweb_wrap',
             'arch': """<div><t t-call="base.test_qweb_error"><span t-out="abc + def"/></t></div>"""
         })
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'arch': """<div><t t-call="base.test_qweb_wrap"/></div>"""
         })
 
@@ -1707,15 +1637,13 @@ class TestQWebBasic(TransactionCase):
             self.env['ir.qweb']._render(t.id)
 
     def test_error_message_11(self):
-        v = self.env['ir.ui.view'].create({
+        v = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.view_test_error_11_callee',
             'arch_db': '<article><t t-out="b % 99"/></article>'
         })
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.view_test_error_11',
             'arch_db': '''<section>
                     <t t-set="a"><div><t t-out="1/div"/> (%s)</div></t>
@@ -1766,15 +1694,13 @@ class TestQWebBasic(TransactionCase):
             )
 
     def test_error_message_12(self):
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.view_test_error_9_callee',
             'arch_db': '<article><t t-out="b"/></article>'
         })
-        t = self.env['ir.ui.view'].create({
+        t = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.view_test_error_9',
             'arch_db': '''<section>
                     <t t-set="a"><div><t t-out="1/div"/> (%s)</div></t>
@@ -1815,9 +1741,8 @@ class TestQWebBasic(TransactionCase):
             self.assertIn("""'/section/t[2]', '<t t-call="base.view_test_error_9_callee" b="a"/>'""", error)
 
     def test_error_message_13(self):
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<section><t t-set="a" t-value="env.__stuff"/></section>'''
         })
 
@@ -1838,9 +1763,8 @@ class TestQWebBasic(TransactionCase):
             )
 
     def test_error_message_14(self):
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''
                 <section>
                     <t t-set="val"><b>TOTO</b></t>
@@ -1860,9 +1784,8 @@ class TestQWebBasic(TransactionCase):
             self.assertIn("indices must be integers", err)
 
     def test_call_set(self):
-        view0 = self.env['ir.ui.view'].create({
+        view0 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
                     <table>
@@ -1873,11 +1796,10 @@ class TestQWebBasic(TransactionCase):
             """
         })
         self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
-                            "VALUES ('dummy', 'ir.ui.view', %s, 'base')", [view0.id])
+                            "VALUES ('dummy', 'ir.qweb', %s, 'base')", [view0.id])
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.other">
                     <div>
@@ -1905,9 +1827,8 @@ class TestQWebBasic(TransactionCase):
         """), 'render t-call use lexical scoping, t-call content use independant scoping')
 
     def test_call_error(self):
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.other">
                     <div>
@@ -1928,15 +1849,13 @@ class TestQWebBasic(TransactionCase):
             self.assertIn('<t t-call="base.dummy"/>', error)
 
     def test_call_infinite_recursion(self):
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'dummy',
-            'type': 'qweb',
             'key': 'base.dummy',
             'arch_db': '<article><t t-call="base.dummy"/></article>'
         })
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'arch': '<div><t t-call="base.dummy"/></div>'
         })
 
@@ -1951,27 +1870,23 @@ class TestQWebBasic(TransactionCase):
             self.assertIn("""'/article/t', '<t t-call="base.dummy"/>'""", error)
 
     def test_call_call_0(self):
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'micro_child',
-            'type': 'qweb',
             'key': 'base.micro_child',
             'arch_db': '<article><t t-out="0"/></article>'
         })
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'wrap',
-            'type': 'qweb',
             'key': 'base.wrap',
             'arch_db': '<wrap><t t-out="0"/></wrap>'
         })
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'child',
-            'type': 'qweb',
             'key': 'base.child',
             'arch_db': '<t t-call="base.wrap"><section><t t-call="base.micro_child"><t t-out="0"/></t></section></t>'
         })
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'arch': '<div><t t-call="base.child">test</t></div>'
         })
 
@@ -1979,21 +1894,18 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(str(result), "<div><wrap><section><article>test</article></section></wrap></div>")
 
     def test_call_foreach_call(self):
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'child',
-            'type': 'qweb',
             'key': 'base.child',
             'arch_db': '<article><t t-out="toto"/></article>'
         })
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'wrap',
-            'type': 'qweb',
             'key': 'base.wrap',
             'arch_db': '<wrap><t t-out="0"/></wrap>'
         })
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "other",
-            'type': 'qweb',
             'arch': '<t t-call="base.wrap"><div><t t-foreach="[1,2,3]" t-as="toto"><t t-call="base.child">test</t></t></div></t>'
         })
 
@@ -2010,9 +1922,8 @@ class TestQWebBasic(TransactionCase):
             'thousands_sep': '/'
         })
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "callee",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.callee">
                     <t t-esc="9000000.00" t-options="{'widget': 'float', 'precision': 2}" />
@@ -2021,14 +1932,13 @@ class TestQWebBasic(TransactionCase):
         })
         self.env['ir.model.data'].create({
             'name': 'callee',
-            'model': 'ir.ui.view',
+            'model': 'ir.qweb',
             'module': 'base',
             'res_id': view1.id,
         })
 
-        view2 = self.env['ir.ui.view'].create({
+        view2 = self.env['ir.qweb'].create({
             'name': "calling",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.calling">
                     <t t-call="base.callee" t-lang="'%s'" />
@@ -2045,9 +1955,8 @@ class TestQWebBasic(TransactionCase):
             'barcode': 'test'
         })
 
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': "a_barcode_view",
-            'type': 'qweb',
         })
 
         view.arch = """<div t-field="partner.barcode" t-options="{'widget': 'barcode', 'width': 100, 'height': 30}"/>"""
@@ -2067,9 +1976,8 @@ class TestQWebBasic(TransactionCase):
         """ Test the rendering of a tail text, near a comment.
         """
 
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': "qweb",
             'arch': """
             <t>
                 <!-- it is a comment -->
@@ -2090,9 +1998,8 @@ class TestQWebBasic(TransactionCase):
             preserve_comments option.
         """
         comment = '<!-- Hello, world! -->'
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'dummy',
-            'type': 'qweb',
             'arch': f'<t><p>{comment}</p></t>'
         })
         QWeb = self.env['ir.qweb']
@@ -2111,9 +2018,8 @@ class TestQWebBasic(TransactionCase):
             preserve_comments option.
         """
         p_instruction = '<?hello world?>'
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'dummy',
-            'type': 'qweb',
             'arch': f'<t><p>{p_instruction}</p></t>'
         })
         QWeb = self.env['ir.qweb']
@@ -2133,9 +2039,8 @@ class TestQWebBasic(TransactionCase):
             'login': 'test@example.com',
         })
         u.name = ""
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy"><root><span t-esc="user" t-options='{"widget": "contact", "fields": ["name"]}' /></root></t>
             """
@@ -2144,9 +2049,8 @@ class TestQWebBasic(TransactionCase):
 
     def test_render_widget_duration_fallback(self):
         self.env['res.lang'].with_context(active_test=False).search([('code', '=', 'pt_BR')]).active = True
-        view1 = self.env['ir.ui.view'].create({
+        view1 = self.env['ir.qweb'].create({
             'name': "dummy",
-            'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy"><root><span t-esc="3600" t-options='{"widget": "duration", "format": "short"}' /></root></t>
             """
@@ -2190,9 +2094,8 @@ class TestQWebBasic(TransactionCase):
             self.env['ir.qweb']._render('base/tests/file_template/unreadable_file_template.xml', values={})
 
     def test_void_element(self):
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'master',
-            'type': 'qweb',
             'arch_db': '''<t t-name='master'>
                 <meta name="1"/>
                 <t t-set="data" t-value="1"/>
@@ -2213,9 +2116,8 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(str(rendered).strip(), result.strip())
 
     def test_space_remove_technical_space_t_foreach(self):
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'master',
-            'type': 'qweb',
             'arch_db': '''<t t-name='master'>
                     <section>
                         <article t-foreach="[0, 1, 2]" t-as="value" t-esc="value"/>
@@ -2238,15 +2140,13 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(str(rendered), result)
 
     def test_t_foreach_t_call(self):
-        self.env['ir.ui.view'].create({
+        self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.test',
             'arch_db': '''<t t-out="value"/>'''
         })
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'master',
-            'type': 'qweb',
             'arch_db': '''<t t-name='master'>
                     <t t-set="value" t-value="3"/>
                     a) <t t-call="base.test"/>
@@ -2264,19 +2164,17 @@ class TestQWebBasic(TransactionCase):
         self.assertEqual(str(rendered).strip(), result.strip())
 
     def test_space_remove_technical_all(self):
-        test = self.env['ir.ui.view'].create({
+        test = self.env['ir.qweb'].create({
             'name': 'test',
-            'type': 'qweb',
             'arch_db': '''<t t-name='test'>
                 <span t-out="value"/>
             </t>'''
         })
         self.env.cr.execute("INSERT INTO ir_model_data(name, model, res_id, module)"
-                            "VALUES ('test', 'ir.ui.view', %s, 'base')", [test.id])
+                            "VALUES ('test', 'ir.qweb', %s, 'base')", [test.id])
 
-        view = self.env['ir.ui.view'].create({
+        view = self.env['ir.qweb'].create({
             'name': 'master',
-            'type': 'qweb',
             'arch_db': '''<t t-name='master'>
 
                     <section>
@@ -2373,21 +2271,18 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         cls.user_demo.group_ids = cls.env.ref('base.group_user')
 
     def test_render_queries(self):
-        IrUiView = self.env['ir.ui.view']
+        IrUiView = self.env['ir.qweb']
         header_0 = IrUiView.create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_header_0',
             'arch_db': '''<span>0</span>'''
         })
         IrUiView.create([{
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_header_1',
             'arch_db': '''<span>1</span>'''
         }, {
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_header',
             'arch_db': f'''<t t-name="base.testing_header">
                 <t t-call="{header_0.id}"/>
@@ -2396,17 +2291,14 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
             </t>'''
         }, {
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_footer_0',
             'arch_db': '''<span>0</span>'''
         }, {
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_footer_1',
             'arch_db': '''<span>1</span>'''
         }, {
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_footer',
             'arch_db': '''<t t-name="base.testing_footer">
                 <t t-call="base.testing_footer_0"/>
@@ -2415,7 +2307,6 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
             </t>'''
         }, {
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_layout',
             'arch_db': '''<t t-name="base.testing_layout">
                 <section>
@@ -2427,7 +2318,6 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         }])
         view = IrUiView.create({
             'name': 'test',
-            'type': 'qweb',
             'key': 'base.testing_content',
             'arch_db': '''<t t-call="base.testing_layout"><div><t t-call="base.testing_header_0"/><t t-out="doc.name"/></div></t>'''
         })

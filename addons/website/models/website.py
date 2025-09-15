@@ -746,12 +746,11 @@ class Website(models.Model):
         if cta_data['cta_btn_text']:
             xpath_view = 'website.snippets'
             parent_view = self.env['website'].with_context(website_id=website.id).viewref(xpath_view)
-            self.env['ir.ui.view'].create({
+            self.env['ir.qweb'].create({
                 'name': parent_view.key + ' CTA',
                 'key': parent_view.key + "_cta",
                 'inherit_id': parent_view.id,
                 'website_id': website.id,
-                'type': 'qweb',
                 'priority': 32,
                 'arch_db': """
                     <data>

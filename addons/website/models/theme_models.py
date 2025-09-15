@@ -67,8 +67,8 @@ class ThemeIrUiView(models.Model):
     active = fields.Boolean(default=True)
     arch = fields.Text(translate=xml_translate)
     arch_fs = fields.Char(default=compute_arch_fs)
-    inherit_id = fields.Reference(selection=[('ir.ui.view', 'ir.ui.view'), ('theme.ir.ui.view', 'theme.ir.ui.view')])
-    copy_ids = fields.One2many('ir.ui.view', 'theme_template_id', 'Views using a copy of me', copy=False, readonly=True)
+    inherit_id = fields.Reference(selection=[('ir.qweb', 'ir.qweb'), ('theme.ir.ui.view', 'theme.ir.ui.view')])
+    copy_ids = fields.One2many('ir.qweb', 'theme_template_id', 'Views using a copy of me', copy=False, readonly=True)
     customize_show = fields.Boolean()
 
     def _convert_to_base_model(self, website, **kwargs):
@@ -81,7 +81,7 @@ class ThemeIrUiView(models.Model):
                 return False
 
         if inherit and inherit.website_id != website:
-            website_specific_inherit = self.env['ir.ui.view'].with_context(active_test=False).search([
+            website_specific_inherit = self.env['ir.qweb'].with_context(active_test=False).search([
                 ('key', '=', inherit.key),
                 ('website_id', '=', website.id)
             ], limit=1)
@@ -89,7 +89,6 @@ class ThemeIrUiView(models.Model):
                 inherit = website_specific_inherit
 
         new_view = {
-            'type': self.type or 'qweb',
             'name': self.name,
             'arch': self.arch,
             'key': self.key,
