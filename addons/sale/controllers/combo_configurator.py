@@ -20,7 +20,7 @@ class SaleComboConfiguratorController(Controller):
         selected_combo_items=None,
         **kwargs,
     ):
-        """ Return data about the specified combo product.
+        """Return data about the specified combo product.
 
         :param int product_tmpl_id: The product for which to get data, as a `product.template` id.
         :param int quantity: The quantity of the product.
@@ -91,7 +91,7 @@ class SaleComboConfiguratorController(Controller):
         pricelist_id=None,
         **kwargs,
     ):
-        """ Return the price of the specified combo product.
+        """Return the price of the specified combo product.
 
         :param int product_tmpl_id: The product for which to get the price, as a `product.template`
             id.
@@ -120,7 +120,7 @@ class SaleComboConfiguratorController(Controller):
     def _get_combo_item_data(
         self, combo, combo_item, selected_combo_item, date, currency, pricelist, **kwargs
     ):
-        """ Return the price of the specified combo product.
+        """Return the price of the specified combo product.
 
         :param product.combo combo: The combo for which to get the data.
         :param product.combo.item combo_item: The combo for which to get the data.
@@ -162,7 +162,7 @@ class SaleComboConfiguratorController(Controller):
         }
 
     def _get_ptals_data(self, product, selected_combo_item):
-        """ Return data about the PTALs of the specified product.
+        """Return data about the PTALs of the specified product.
 
         :param product.product product: The product for which to get the PTALs.
         :param dict selected_combo_item: The selected combo item, in the following format:
@@ -203,7 +203,7 @@ class SaleComboConfiguratorController(Controller):
         } for ptal in product.attribute_line_ids]
 
     def _get_selected_ptavs_data(self, selected_ptavs, custom_value_by_ptav_id):
-        """ Return data about the selected PTAVs of the specified product.
+        """Return data about the selected PTAVs of the specified product.
 
         :param list(product.template.attribute.value) selected_ptavs: The selected PTAVs.
         :param dict custom_value_by_ptav_id: A mapping from PTAV ids to custom values.

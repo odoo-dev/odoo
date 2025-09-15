@@ -7,7 +7,9 @@ from odoo.http import Controller, request, route
 
 class SaleProductConfiguratorController(Controller):
 
-    @route(route='/sale/product_configurator/get_values', type='jsonrpc', auth='user', readonly=True)
+    @route(
+        route='/sale/product_configurator/get_values', type='jsonrpc', auth='user', readonly=True,
+    )
     def sale_product_configurator_get_values(
         self,
         product_template_id,

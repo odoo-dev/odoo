@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import _, api, fields, models
-from odoo.tools import groupby, OrderedSet
+from odoo.tools import OrderedSet, groupby
 
 
 class AccountMove(models.Model):
