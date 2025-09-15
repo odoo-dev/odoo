@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
+
+// Variables
+$primary-color: #714B67;
+$primary-hover: #5a3a52;
+$bg-light-gray: #f8f9fa;
+$border-color: #dee2e6;
+$success-color: #28a745;
+
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: "Inter", "Odoo Unicode Support Noto", sans-serif;
+}
+
+.omni-signup-widget {
+    min-height: 100vh;
+    background-color: $bg-light-gray;
+    color: #4c4c4c;
+}
+
+.omni-title {
+    font-family: "Caveat", cursive;
+    font-weight: 700;
+    font-size: calc(1.225rem + 3.5vw);
+    color: #212529;
+}
+
+.omni-subtitle {
+    font-size: 1.1rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.x_wd_green_highlight_01 {
+    background-image: url(https://www.odoo.com/openerp_website/static/src/img/highlights/green_highlight_01.svg);
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: contain;
+    white-space: nowrap;
+}
+
+.x_wd_green_highlight_03 {
+    background-image: url(https://www.odoo.com/openerp_website/static/src/img/highlights/green_highlight_03.svg);
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: contain;
+    white-space: nowrap;
+}
+
+// App Selection
+.omni-app-category-title {
+    font-family: "Caveat", cursive;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #080808;
+}
+
+.omni-app-card .form-check-label {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 1px solid $border-color;
+    border-radius: 0px;
+    background-color: #fff;
+
+    &.selected {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba(113, 75, 103, 0.25);
+        position: relative;
+
+        &::after {
+            content: '\2713';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: $primary-color;
+            font-size: 16px;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 0 2px $primary-color;
+        }
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+}
+
+.omni-side-panel {
+    .omni-side-card {
+        background-color: #f0eef2;
+        border-radius: 8px;
+        border: 1px solid $border-color;
+        margin-bottom: 20px;
+    }
+}
+
+
+// Form
+.omni-form {
+    .form-control, .form-select {
+        font-size: 1rem;
+        border: 0px;
+        border-radius: 4px;
+        border-bottom: 1px solid #D8DADD;
+        
+        &:focus {
+            outline: none;
+            box-shadow: none;
+            border-bottom: 1px solid;
+        }
+
+        &:hover {
+            border-bottom: 1px solid;
+        }
+    }
+}
+
+.omni-label-error {
+    color: #dc3545;
+    font-size: 0.85em;
+    font-weight: normal;
+    margin-left: 8px;
+}
+
+.omni-link {
+    color: $primary-color;
+    text-decoration: none;
+    font-weight: 600;
+    
+    &:hover {
+        text-decoration: underline;
+        color: $primary-hover;
+    }
+}
+
+.omni-btn-primary {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 12px 24px;
+
+    &:hover, &:focus {
+        color: white;
+        background-color: $primary-hover;
+        border-color: $primary-hover;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .omni-title {
+        font-size: 2.5rem;
+    }
+    
+    .omni-side-panel {
+        margin-top: 2rem;
+    }
+    
+    .omni-app-card .form-check-label {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-lg {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+// Background colors
+.bg-100 {
+    background-color: #F9FAFB !important;
+}
+
+.bg-200 {
+    background-color: #F3F4F6 !important;
+}
+
+.omni-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    margin-bottom: 15px;
+
+    label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #495057;
+        text-align: left;
+    }
+}
+
+.omni-legal-text {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 25px;
+}
+
+.omni-instruction-text {
+    text-align: left;
+    font-family: "caveat";
+    font-size: calc(1.125rem + 0.7vw);
+    margin-bottom: 10px;
+    margin-top: 10px;
+    font-weight: 700;
+}
+
+.x_wd_green_highlight_01 {
+    background-image: url(https://www.odoo.com/openerp_website/static/src/img/highlights/green_highlight_01.svg);
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: contain;
+    white-space: nowrap;
+}
+
+.omni-apps-selected-bar {
+    @media (max-width: 576px) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.5rem;
+        .btn {
+            width: 80%;
+            margin-top: 0.5rem;
+        }
+        span {
+            text-align: left;
+        }
+    }
+}
+
+.omni-back-to-choose-app {
+    height: 40px;
+    color: #714b67;
+    align-content: center;
+    font-weight: 550;
+    font-size: 0.875rem;
+}

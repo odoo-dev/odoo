@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="marketplace_account_form" model="ir.ui.view">
+        <field name="name">marketplace.account.form.inherit.marketplace.magento</field>
+        <field name="model">marketplace.account</field>
+        <field name="inherit_id" ref="marketplace.marketplace_account_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='credentials']" position="inside">
+                <group invisible="channel_code != 'magento'">
+                    <field name="magento_base_url" required="channel_code == 'magento'"/>
+                    <field name="magento_username" required="channel_code == 'magento'"/>
+                    <field name="magento_password" required="channel_code == 'magento'" password="True"/>
+                    <field name="magento_store_view_code"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="product_variant_easy_edit_view" model="ir.ui.view">
+            <field name="name">product.product.view.form.easy</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="action_view_marketplace_offer" type="object" class="oe_stat_button" icon="fa-life-bouy" invisible="offer_count &lt; 1">
+                        <field name="offer_count" widget="statinfo" string="Offers"/>
+                    </button>
+                </xpath>
+            </field>
+        </record>
+        <record id="product_normal_form_view" model="ir.ui.view">
+            <field name="name">product.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <div name="button_box" position="inside">
+                    <button name="action_view_marketplace_offer" type="object" class="oe_stat_button" icon="fa-life-bouy" invisible="offer_count &lt; 1">
+                        <field name="offer_count" widget="statinfo" string="Offers"/>
+                    </button>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

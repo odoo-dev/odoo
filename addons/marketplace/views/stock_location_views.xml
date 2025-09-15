@@ -1,0 +1,25 @@
+<odoo>
+    <record id="action_marketplace_location" model="ir.actions.act_window">
+        <field name="name">Marketplace Locations</field>
+        <field name="res_model">marketplace.location</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'group_by': 'marketplace_account_id', 'create': False}</field>
+    </record>
+    <record id="view_location_form" model="ir.ui.view">
+        <field name="name">stock.location.form.inherit.marketplace</field>
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button type="action" name="%(marketplace.action_marketplace_location)d"
+                    class="oe_stat_button" icon="fa-wrench">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">
+                            Marketplace Locations
+                        </span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="vpicktree" model="ir.ui.view">
+        <field name="name">stock.picking.list.inherit.marketplace</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                <field
+                    name="marketplace_sync_status"
+                    widget="badge"
+                    optional="hide"
+                    decoration-info="marketplace_sync_status == 'pending'"
+                    decoration-success="marketplace_sync_status == 'done'"
+                    decoration-danger="marketplace_sync_status == 'error'"
+                />
+                <field
+                    name="marketplace_picking_identifier"
+                    groups="base.group_no_one"
+                    optional="hide"
+                />
+            </field>
+        </field>
+    </record>
+    <record id="view_picking_form" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.marketplace</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="after">
+                <div class="badge rounded-pill text-bg-info fs-6 float-end"
+                     invisible="not marketplace_order_identifier or marketplace_sync_status != 'pending'">
+                    Scheduled for Marketplace Synchronization
+                </div>
+                <div class="badge rounded-pill text-bg-success fs-6 float-end"
+                     invisible="marketplace_sync_status != 'done'">
+                    Synchronized with Marketplace
+                </div>
+                <div class="badge rounded-pill text-bg-danger fs-6 float-end"
+                     invisible="marketplace_sync_status != 'error'">
+                    Synchronization with Marketplace failed
+                </div>
+            </div>
+            <field name="origin" position="after">
+                <field name="marketplace_picking_identifier" invisible="not marketplace_picking_identifier" groups="base.group_no_one"/>
+            </field>
+            <xpath expr="//button[@name='%(stock.act_stock_return_picking)d']" position="after">
+                <button
+                    name="action_push_deliveries_to_marketplace"
+                    string="Retry Marketplace Sync"
+                    invisible="not marketplace_order_identifier  or state != 'done' or marketplace_sync_status == 'done'"
+                    type="object"
+                />
+            </xpath>
+            <!-- <xpath expr="//button[@name='action_assign']" position="before">
+                <button name="mark_as_delivered" string="Mark As Delivered" type="object" invisible="state!='done'" class="oe_highlight"/>
+            </xpath>
+            <xpath expr="//field[@statusbar_visible='draft,assigned,done']" position="attributes">
+                <attribute name="statusbar_visible">draft,assigned,done,delivered</attribute>
+            </xpath>
+            <xpath expr="//field[@statusbar_visible='draft,confirmed,assigned,done']" position="attributes">
+                <attribute name="statusbar_visible">draft,confirmed,assigned,done,delivered</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_validate' and @class='oe_highlight']" position="attributes">
+                <attribute name="invisible">state in ('draft', 'confirmed', 'done', 'delivered', 'cancel')</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_validate' and @class='o_btn_validate']" position="attributes">
+                <attribute name="invisible">state in ('waiting', 'assigned', 'done', 'delivered', 'cancel')</attribute>
+            </xpath> -->
+        </field>
+    </record>
+    <record id="action_process_failed_delivery" model="ir.actions.server">
+        <field name="name">Process Failed Delivery</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_push_failed_deliveries_to_marketplace()</field>
+    </record>
+</odoo>

@@ -1,0 +1,134 @@
+<odoo>
+    <!-- group defination -->
+    <record id="group_omni_company_admin" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="name">Omni Company Admin</field>
+    </record>
+
+    <!-- record rule: Only see companies they created or are linked to -->
+    <record id="omni_company_admin_rule" model="ir.rule">
+        <field name="name">OmniCompany Access Own Only</field>
+        <field name="model_id" ref="base.model_res_company"/>
+        <field name="groups" eval="[(4, ref('omnicommerce.group_omni_company_admin'))]"/>
+        <field name="domain_force">['|', ('id', 'in', user.company_ids.ids), ('create_uid', '=', user.id)]</field>
+    </record>
+
+    <!-- Global rules: All global rules for a model are combined with AND (intersection).
+    Group rules: All group rules for a user are combined with OR (union).
+    Final allowed records:
+    allowed_records = intersection_of_global_rules ∩ union_of_group_rules -->
+
+    <!--There is already 'res.partner company' rule which is global rule 
+    ['|', '|', ('partner_share', '=', False), ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]-->
+    <!--patner_share {False-> Internal user, True: customer/contact, portal user}-->
+    <!--odoobot has partner_share = False and is associated with default company created in db-->
+    <!--access to odoobot is causing error (on hold)-->
+
+    <!-- <record id="omni_company_contacts_rule" model="ir.rule">
+        <field name="name">Omni Company contacts Rule</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|', ('company_id', 'in', company_ids.ids), ('partner_share', '=', 'False')]</field>
+    </record> -->
+
+    <record id="product_attribute_rule_company" model="ir.rule">
+        <field name="name">Product Attribute: multi-company</field>
+        <field name="model_id" ref="model_product_attribute"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="product_attribute_value_rule_company" model="ir.rule">
+        <field name="name">Product Attribute Value: multi-company</field>
+        <field name="model_id" ref="product.model_product_attribute_value"/>
+        <field name="domain_force">[('attribute_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="product_category_rule_company" model="ir.rule">
+        <field name="name">Product Category: multi-company</field>
+        <field name="model_id" ref="model_product_category"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!--access group for each marketplace channel-->
+    <!--Shopify-->
+    <record id="group_marketplace_shopify_user" model="res.groups">
+        <field name="name">Shopify Marketplace</field>
+    </record>
+
+    <!--Record Rule for shopify-->
+    <record id="omni_shopify_rule" model="ir.rule">
+        <field name="name">Shopify Marketplace Access</field>
+        <field name="model_id" ref="marketplace.model_marketplace_channel"/>
+        <field name="domain_force">[('code', '=', 'shopify')]</field>
+        <field name="groups" eval="[(4, ref('omnicommerce.group_marketplace_shopify_user'))]"/>
+    </record>
+
+    <!--woocommerce-->
+    <record id="group_marketplace_woocommerce_user" model="res.groups">
+        <field name="name">WooCommerce Marketplace</field>
+    </record>
+
+    <!--Record Rule for woocommerce-->
+    <record id="omni_woocommerce_rule" model="ir.rule">
+        <field name="name">WooCommerce Marketplace Access</field>
+        <field name="model_id" ref="marketplace.model_marketplace_channel"/>
+        <field name="domain_force">[('code', '=', 'wc')]</field>
+        <field name="groups" eval="[(4, ref('omnicommerce.group_marketplace_woocommerce_user'))]"/>
+    </record>
+
+    <!--magento-->
+    <record id="group_marketplace_magento_user" model="res.groups">
+        <field name="name">Magento Marketplace</field>
+    </record>
+
+    <!--Record Rule for magento-->
+    <record id="omni_magento_rule" model="ir.rule">
+        <field name="name">Magento Marketplace Access</field>
+        <field name="model_id" ref="marketplace.model_marketplace_channel"/>
+        <field name="domain_force">[('code', '=', 'magento')]</field>
+        <field name="groups" eval="[(4, ref('omnicommerce.group_marketplace_magento_user'))]"/>
+    </record>
+
+    <!--amazon-->
+    <record id="group_marketplace_amazon_user" model="res.groups">
+        <field name="name">Amazon Marketplace</field>
+    </record>
+
+    <!--Record Rule for amazon-->
+    <record id="omni_amazon_rule" model="ir.rule">
+        <field name="name">Amazon Marketplace Access</field>
+        <field name="model_id" ref="marketplace.model_marketplace_channel"/>
+        <field name="domain_force">[('code', '=', 'amazon')]</field>
+        <field name="groups" eval="[(4, ref('omnicommerce.group_marketplace_amazon_user'))]"/>
+    </record>
+
+    <!--prestashop-->
+    <record id="group_marketplace_prestashop_user" model="res.groups">
+        <field name="name">PrestaShop Marketplace</field>
+    </record>
+
+    <!--Record Rule for prestashop-->
+    <record id="omni_prestashop_rule" model="ir.rule">
+        <field name="name">PrestaShop Marketplace Access</field>
+        <field name="model_id" ref="marketplace.model_marketplace_channel"/>
+        <field name="domain_force">[('code', '=', 'prestashop')]</field>
+        <field name="groups" eval="[(4, ref('omnicommerce.group_marketplace_prestashop_user'))]"/>
+    </record>
+
+    <!--bigcommerce-->
+    <record id="group_marketplace_bigcommerce_user" model="res.groups">
+        <field name="name">BigCommerce Marketplace</field>
+    </record>
+
+    <!--Record Rule for bigcommerce-->
+    <record id="omni_bigcommerce_rule" model="ir.rule">
+        <field name="name">BigCommerce Marketplace Access</field>
+        <field name="model_id" ref="marketplace.model_marketplace_channel"/>
+        <field name="domain_force">[('code', '=', 'bigcommerce')]</field>
+        <field name="groups" eval="[(4, ref('omnicommerce.group_marketplace_bigcommerce_user'))]"/>
+    </record>
+
+</odoo>

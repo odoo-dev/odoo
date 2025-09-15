@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="marketplace_channel_shopify" model="marketplace.channel">
+        <field name="name">WooCommerce</field>
+        <field name="code">wc</field>
+        <field name="support_location">False</field>
+        <field name="type">ecommerce_platform</field>
+        <field name="image_128" type="base64" file="marketplace_wc/static/img/wc.png"/>
+    </record>
+</odoo>

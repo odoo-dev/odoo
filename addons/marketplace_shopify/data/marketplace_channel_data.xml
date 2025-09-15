@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="marketplace_channel_shopify" model="marketplace.channel">
+        <field name="name">Shopify</field>
+        <field name="code">shopify</field>
+        <field name="support_location">True</field>
+        <field name="type">ecommerce_platform</field>
+        <field name="image_128" type="base64" file="marketplace_shopify/static/img/shopify.png"/>
+    </record>
+</odoo>

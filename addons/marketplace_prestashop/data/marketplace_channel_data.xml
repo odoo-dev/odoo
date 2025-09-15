@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="marketplace_channel_prestashop" model="marketplace.channel">
+        <field name="name">Prestashop</field>
+        <field name="code">prestashop</field>
+        <field name="support_location">False</field>
+        <field name="type">ecommerce_platform</field>
+        <field name="image_128" type="base64" file="marketplace_prestashop/static/img/prestashop.png"/>
+    </record>
+</odoo>

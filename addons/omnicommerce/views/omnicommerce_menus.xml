@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+     <menuitem parent="sale.sale_menu_root"
+        id="omnicommerce_companies"
+        name="My Companies"
+        action="omnicommerce.action_view_companies"
+        sequence="100"
+    />
+</odoo>

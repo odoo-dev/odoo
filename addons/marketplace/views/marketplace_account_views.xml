@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="marketplace_account_form" model="ir.ui.view">
+        <field name="name">marketplace.account.form</field>
+        <field name="model">marketplace.account</field>
+        <field name="arch" type="xml">
+            <form string="Marketplace Account">
+                <header>
+                    <button type="object" name="action_connect" class="btn btn-primary" invisible="state == 'connected'">Connect</button>
+                    <button type="object" name="action_disconnect" class="btn btn-secondary" invisible="state == 'disconnected'">Disconnect</button>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_marketplace_offers" type="object" class="oe_stat_button" icon="fa-life-bouy" invisible="offer_count &lt; 1">
+                            <field name="offer_count" widget="statinfo" string="Offers"/>
+                        </button>
+                        <button name="action_view_marketplace_orders" type="object" class="oe_stat_button" icon="fa-dollar" invisible="order_count &lt; 1">
+                            <field name="order_count" widget="statinfo" string="Orders"/>
+                        </button>
+                        <button name="action_view_marketplace_location" type="object" class="oe_stat_button" icon="fa-cubes" invisible="location_count &lt; 1">
+                            <field name="location_count" widget="statinfo" string="Locations"/>
+                        </button>
+                    </div>
+                    <div class="badge rounded-pill text-bg-success fs-6 float-end" invisible="state == 'disconnected'">
+                        Connected
+                    </div>
+                    <div class="badge rounded-pill text-bg-danger fs-6 float-end" invisible="state == 'connected'">
+                        Disconnected
+                    </div>
+                    <div class="oe_title" id="title">
+                        <h1>
+                            <field name="name" placeholder="e.g. American Market"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="marketplace_channel_id" readonly="id" options="{'no_create': True}"/>
+                            <field name="user_id"/>
+                            <field name="team_id"/>
+                            <field name="default_marketplace_location_id" invisible="location_count &lt;= 1"/>
+                        </group>
+                        <group>
+                            <!-- <field name="fulfillment_type"/> -->
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="credentials" string="Credentials"/>
+                        <page name="product_management" string="Product management" invisible="state == 'disconnected'">
+                            <div>
+                                <group>
+                                    <group>
+                                        <label for="last_products_pull" string="Pull products created after"/>
+                                        <field name="last_products_pull" nolabel="1"/>
+                                    </group>
+                                    <group>
+                                        <button type="object" string="Pull products" name="action_pull_products" class="btn-link mb-1 px-0" icon="fa-download"/>
+                                    </group>
+                                </group>
+                                <!-- <group>
+                                    <group>
+                                        <label for="last_products_push" string="Push products updated after"/>
+                                        <field name="last_products_push"/>
+                                    </group>
+                                    <group>
+                                        <button type="object" string="Push products" name="action_push_products" class="btn-link mb-1 px-0" icon="fa-upload"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group/>
+                                    <group>
+                                        <button type="object" string="Sync products" name="action_sync_products" class="btn-link mb-1 px-0" icon="fa-refresh"/>
+                                    </group>
+                                </group> -->
+                            </div>
+                        </page>
+                        <page name="order_management" string="Order management" invisible="state == 'disconnected'">
+                            <group>
+                                <group>
+                                    <label for="last_orders_pull" string="Pull orders updated after"/>
+                                    <field name="last_orders_pull" nolabel="1"/>
+                                </group>
+                                <group>
+                                    <button type="object" string="Pull orders" name="action_pull_orders" class="btn-link mb-1 px-0" icon="fa-download"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group></group>
+                                <group>
+                                    <button type="object" string="Push deliveries" name="action_push_deliveries" class="btn-link mb-1 px-0" icon="fa-upload"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page name="inventory_management" string="Inventory management" invisible="state == 'disconnected'">
+                            <div>
+                                <group invisible="not support_location">
+                                    <group>
+                                        <label for="last_location_pull" string="Pull locations created after"/>
+                                        <field name="last_location_pull" nolabel="1"/>
+                                    </group>
+                                    <group>
+                                        <button type="object" string="Pull Locations" name="action_pull_locations" class="btn-link mb-1 px-0" icon="fa-download"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <field name="push_inventory"/>
+                                    </group>
+                                    <group>
+                                        <button type="object" name="action_push_inventory" string="Push inventory" invisible="not push_inventory"
+                                            class="btn-link mb-1 px-0" icon="fa-upload"/>
+                                    </group>
+                                </group>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="marketplace_account_list" model="ir.ui.view">
+        <field name="name">marketplace.account.list</field>
+        <field name="model">marketplace.account</field>
+        <field name="arch" type="xml">
+            <list string="Marketplace Account">
+                <field name="name" placeholder="e.g. American Market"/>
+                <field name="marketplace_channel_id" readonly="True"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'" decoration-danger="state == 'disconnected'"/>
+            </list>
+        </field>
+    </record>
+    <record id="marketplace_account_search" model="ir.ui.view">
+        <field name="name">marketplace.account.search</field>
+        <field name="model">marketplace.account</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Account"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_marketplace_account" model="ir.actions.act_window">
+        <field name="name">Marketplace Accounts</field>
+        <field name="res_model">marketplace.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

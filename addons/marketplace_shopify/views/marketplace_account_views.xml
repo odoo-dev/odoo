@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="marketplace_account_form_inherited" model="ir.ui.view">
+            <field name="name">marketplace.account.form.inherit</field>
+            <field name="model">marketplace.account</field>
+            <field name="inherit_id" ref="marketplace.marketplace_account_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='credentials']" position="inside">
+                    <group invisible="channel_code != 'shopify'">
+                        <group>
+                            <field name="channel_code" invisible="1"/>
+                            <field name="state" invisible="1"/>
+                            <field name="shopify_api_version" readonly="state == 'connected'" required="channel_code == 'shopify'" groups="base.group_no_one"/>
+                            <field name="shopify_access_token" readonly="state == 'connected'" required="channel_code == 'shopify'"/>
+                            <field name="shopify_store" readonly="state == 'connected'" required="channel_code == 'shopify'"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

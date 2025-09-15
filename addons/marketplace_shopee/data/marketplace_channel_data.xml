@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="marketplace_channel_shopee" model="marketplace.channel">
+        <field name="name">Shopee</field>
+        <field name="code">shopee</field>
+        <field name="type">online_marketplace</field>
+        <field name="support_location">False</field>
+        <field name="image_128" type="base64" file="marketplace_shopee/static/img/shopee.png"/>
+    </record>
+</odoo>

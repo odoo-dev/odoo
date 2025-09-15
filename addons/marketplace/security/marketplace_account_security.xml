@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="marketplace_account_rule_company" model="ir.rule">
+        <field name="name">Marketplace Account: multi-company</field>
+        <field name="model_id" ref="model_marketplace_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="marketplace_offer_rule_company" model="ir.rule">
+        <field name="name">Marketplace Offer: multi-company</field>
+        <field name="model_id" ref="model_marketplace_offer"/>
+        <field name="domain_force">[('marketplace_account_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="marketplace_location_rule_company" model="ir.rule">
+        <field name="name">Marketplace Location: multi-company</field>
+        <field name="model_id" ref="model_marketplace_location"/>
+        <field name="domain_force">[('marketplace_account_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+</odoo>

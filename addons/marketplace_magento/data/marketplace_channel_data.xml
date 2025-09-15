@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="marketplace_channel_magento" model="marketplace.channel">
+        <field name="name">Magento</field>
+        <field name="code">magento</field>
+        <field name="type">ecommerce_platform</field>
+        <field name="support_location">True</field>
+        <field name="sequence">50</field>
+        <field name="image_128" type="base64" file="marketplace_magento/static/img/magento.png"/>
+    </record>
+</odoo>

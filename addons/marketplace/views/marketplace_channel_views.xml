@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="marketplace_channel_view_form" model="ir.ui.view">
+        <field name="name">marketplace.channel.form</field>
+        <field name="model">marketplace.channel</field>
+        <field name="arch" type="xml">
+            <form string="Marketplace Channel">
+                <sheet>
+                    <aside>
+                        <field name="image_128" widget="image" class="mb-0 o_image_64_max" alt="marketplace"/>
+                    </aside>
+                    <group>
+                        <group>
+                            <field name="name" class="mb-0 fw-bold fs-4" readonly="1"/>
+                            <field name="code" class="fs-6 text-muted mb-1" readonly="1"/>
+                            <field name="type" readonly="1"/>
+                            <button type="object" name="open_marketplace_account_list" string="Accounts" class="btn btn-sm btn-secondary ms-auto"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="marketplace_channel_kanban" model="ir.ui.view">
+        <field name="name">marketplace.channel.kanban</field>
+        <field name="model">marketplace.channel</field>
+        <field name="arch" type="xml">
+            <kanban create="false" quick_create="false">
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside>
+                            <field name="image_128" widget="image" class="mb-0 o_image_64_max" alt="marketplace"/>
+                        </aside>
+                        <main class="ms-2">
+                            <field name="name" class="mb-0 fw-bold fs-4"/>
+                            <field name="code" class="fs-6 text-muted mb-1"/>
+                            <footer>
+                                <button type="object" name="open_marketplace_account_list" string="Accounts" class="btn btn-sm btn-secondary ms-auto"/>
+                            </footer>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- <record id="marketplace_channel_view_search" model="ir.ui.view">
+        <field name="name">marketplace.channel.search</field>
+        <field name="model">marketplace.channel</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <group string="Group By">
+                    <filter string="Type" name="type" context="{'group_by':'type'}"/>
+                </group>
+            </search>
+        </field>
+    </record> -->
+    <record id="action_marketplace_channel" model="ir.actions.act_window">
+        <field name="name">Marketplace Channels</field>
+        <field name="res_model">marketplace.channel</field>
+        <field name="view_mode">kanban</field>
+    </record>
+</odoo>

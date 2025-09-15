@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="crm_team_marketplace_shopify" model="crm.team">
+        <field name="name">WooCommerce</field>
+        <field name="marketplace_code">wc</field>
+    </record>
+</odoo>

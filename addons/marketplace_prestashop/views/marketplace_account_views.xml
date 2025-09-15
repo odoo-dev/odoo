@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="marketplace_account_form_inherited" model="ir.ui.view">
+            <field name="name">marketplace.account.form.inherit</field>
+            <field name="model">marketplace.account</field>
+            <field name="inherit_id" ref="marketplace.marketplace_account_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='credentials']" position="inside">
+                    <group invisible="channel_code != 'prestashop'">
+                        <group>
+                            <field name="webservice_key" readonly="state == 'connected'" required="channel_code == 'prestashop'" password="True"/>
+                            <field name="prestashop_store" readonly="state == 'connected'" required="channel_code == 'prestashop'"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

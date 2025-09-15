@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="omnicommerce.OmniSignupPage" owl="1">
+        <div class="omni-signup-widget bg-200">
+
+            <!-- step 1: choose apps -->
+            <div t-if="state.step === 1">
+                <section class="text-center bg-white pt-4 pb-5">
+                    <div class="container-lg">
+                        <h1 class="omni-title">
+                            Choose your
+                            <span class="x_wd_green_highlight_01">Apps</span>
+                        </h1>
+                        <h6 class="omni-subtitle">Free instant access. No credit card required.</h6>
+                    </div>
+                </section>
+
+                <section class="container-lg mt-5">
+                    <div class="row justify-content-center">
+                        <!-- apps selection 3 column -->
+                        <div class="col-lg-8">
+                            <div class="omni-app-list o_animate_in_children o_visible">
+                                
+                                <!-- Marketplaces Section -->
+                                <div t-if="marketplaces.length > 0" class="omni-app-category-title mb-3">Marketplaces</div>
+                                <div class="row g-3 mb-5" t-if="marketplaces.length > 0">
+                                    <t t-foreach="marketplaces" t-as="app" t-key="app.id">
+                                        <div class="col-sm-6 col-md-4 col-lg-4">
+                                            <div class="omni-app-card form-check h-100 ps-0">
+                                                <input type="checkbox" class="form-check-input d-none" t-att-id="'app_' + app.id" t-on-click="() => this.toggleChannel(app.id)"/>
+                                                <label t-att-for="'app_' + app.id" t-att-class="'form-check-label d-flex align-items-center h-100 rounded-1 shadow-sm p-3' + (state.selectedApps.includes(app.id) ? ' selected' : '')">
+                                                    <img t-att-src="`data:image/png;base64,${app.image_128}`" width="32px" class="me-3" alt="App Icon" loading="lazy"/>
+                                                    <div class="omni-app-name fs-6 fw-bold" t-esc="app.name"/>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <!-- E-commerce Platforms Section -->
+                                <div t-if="ecommercePlatforms.length > 0" class="omni-app-category-title mb-3">Shopping Carts</div>
+                                <div class="row g-3 mb-5" t-if="ecommercePlatforms.length > 0">
+                                    <t t-foreach="ecommercePlatforms" t-as="app" t-key="app.id">
+                                        <div class="col-sm-6 col-md-4 col-lg-4">
+                                            <div class="omni-app-card form-check h-100 ps-0">
+                                                <input type="checkbox" class="form-check-input d-none" t-att-id="'app_' + app.id" t-on-click="() => this.toggleChannel(app.id)"/>
+                                                <label t-att-for="'app_' + app.id" t-att-class="'form-check-label d-flex align-items-center h-100 rounded-1 shadow-sm p-3' + (state.selectedApps.includes(app.id) ? ' selected' : '')">
+                                                    <img t-att-src="`data:image/png;base64,${app.image_128}`" width="32px" class="me-3" alt="App Icon" loading="lazy"/>
+                                                    <div class="omni-app-name fs-6 fw-bold" t-esc="app.name"/>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Side Panel -->
+                        <div class="col-lg-4" t-if="state.selectedApps.length > 0">
+                            <div class="omni-side-panel sticky-lg-top">
+                                <div class="omni-side-card bg-100 rounded-1 p-4">
+                                    <h5 class="mb-4">
+                                        <b t-esc="state.selectedApps.length"/>
+                                        <span t-esc="state.selectedApps.length > 1 ? ' Apps' : ' App'"/> selected
+                                    </h5>
+                                    <ul class="list-unstyled mb-4">
+                                        <t t-foreach="channels" t-as="app" t-key="app.id">
+                                            <li t-if="state.selectedApps.includes(app.id)" class="d-flex align-items-center mb-2">
+                                                <img t-att-src="`data:image/png;base64,${app.image_128}`" width="20px" class="me-2" alt="Selected App Icon"/>
+                                                <span t-esc="app.name"/>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                    <button class="btn omni-btn-primary btn-lg w-100" t-on-click="goToStep2">
+                                        Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- step 2: form -->
+            <div t-if="state.step === 2">
+                <section class="text-center bg-white pt-4">
+                    <div class="container-lg">
+                        <div class="omni-title">Get <span class="x_wd_green_highlight_03">Started</span></div>
+                        <h6 class="omni-subtitle mb-5">Free instant access. No credit card required.</h6>
+                        <div class="row justify-content-center">
+                            <div class="col-lg-10 col-xxl-8">
+                                <div class="d-sm-flex align-items-center justify-content-between bg-100 p-3 rounded omni-apps-selected-bar">
+                                    <h6><span style="font-size:calc(0.65rem + 0.5vw)">
+                                        <t t-esc="state.selectedApps.length"/>
+                                        <t t-if="state.selectedApps.length > 1"> apps selected</t>
+                                        <t t-if="state.selectedApps.length === 1"> app selected</t>
+                                    </span></h6>
+                                    <a href="#" class="btn btn-sm btn-light omni-back-to-choose-app" t-on-click.prevent="goToStep1">Change apps selection</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="container py-4">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10 col-xxl-8">
+                            <form class="omni-form" role="form" t-on-submit.prevent="startNow">
+                                <!-- name field -->
+                                <div class="field-name form-floating mb-4" style="transition-delay: 0.1s">
+                                    <input type="text" id="name" class="form-control" placeholder="First and Last Name" t-model="state.name" required="required"/>
+                                    <label for="name">First and Last Name</label>
+                                </div>
+
+                                <!-- company name field -->
+                                <div class="field-company form-floating mb-4" style="transition-delay: 0.2s">
+                                    <input type="text" id="companyName" class="form-control" placeholder="Company Name" t-model="state.companyName" required="required"/>
+                                    <label for="companyName">Company Name</label>
+                                </div>
+
+                                <!-- Country Row -->
+                                <div class="form-floating mb-4" style="transition-delay: 0.3s">
+                                    <select id="country" class="form-select" t-model="state.country" required="required">
+                                        <option value="">Select Country</option>
+                                        <t t-foreach="countries" t-as="country" t-key="country.id">
+                                            <option t-att-value="country.id" t-esc="country.name"/>
+                                        </t>
+                                    </select>
+                                    <label for="country">Country</label>
+                                </div>
+
+                                <!-- email and phone field -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-4" style="transition-delay: 0.4s">
+                                            <input type="email" id="email" class="form-control" placeholder="Email" t-model="state.email" required="required"/>
+                                            <label for="email">Email</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-4" style="transition-delay: 0.5s">
+                                            <input type="tel" id="phone" class="form-control" placeholder="Phone Number" t-model="state.phone" required="required"/>
+                                            <label for="phone">Phone Number</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div t-if="state.errorMessage" class="alert alert-danger mb-4" t-esc="state.errorMessage"/>
+
+                                <!-- Legal Text -->
+                                <div class="small text-center mb-4" style="transition-delay: 0.6s">
+                                    By clicking on Start Now, you accept our 
+                                    <a href="#" class="text-decoration-underline" style="color: #007895">Subscription Agreement</a> 
+                                    and 
+                                    <a href="#" class="text-decoration-underline" style="color: #007895">Privacy Policy</a>.
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="text-center" style="transition-delay: 0.7s">
+                                    <button type="submit" class="btn omni-btn-primary btn-lg px-5" t-att-disabled="state.isLoading">
+                                        <span t-if="state.isLoading" class="spinner-border spinner-border-sm me-2"/>
+                                        Start Now
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </t>
+</templates>

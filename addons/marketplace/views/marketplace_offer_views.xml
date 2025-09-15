@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="marketplace_offer_list" model="ir.ui.view">
+        <field name="name">marketplace.offer.list</field>
+        <field name="model">marketplace.offer</field>
+        <field name="arch" type="xml">
+            <list string="Marketplace Offer" editable="bottom">
+                <field name="name"/>
+                <field name="sku"/>
+                <field name="matched_product_id"/>
+                <field name="marketplace_account_id"/>
+                <field name="mp_product_identifier" optional="hide" groups="base.group_no_one"/>
+                <field name="mp_product_template_identifier" optional="hide" groups="base.group_no_one"/>
+                <button
+                    string="View on Marketplace"
+                    type="object"
+                    name="action_view_online"
+                    icon="fa-external-link"
+                />
+            </list>
+        </field>
+    </record>
+    <record id="action_marketplace_offer" model="ir.actions.act_window">
+        <field name="name">Marketplace Offers</field>
+        <field name="res_model">marketplace.offer</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'group_by': 'marketplace_account_id', 'create': False}</field>
+    </record>
+    <record id="model_offer_action_matched_products" model="ir.actions.server">
+        <field name="name">Auto Match Products</field>
+        <field name="model_id" ref="marketplace.model_marketplace_offer"/>
+        <field name="binding_model_id" ref="marketplace.model_marketplace_offer"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.auto_match_products()</field>
+    </record>
+</odoo>

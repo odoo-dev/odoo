@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="sale_order_tree" model="ir.ui.view">
+        <field name="name">sale.order.list.inherit.marketplace</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="priority">2000</field>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="marketplace_account_id" groups="base.group_no_one" optional="hide"/>
+                <field name="marketplace_order_identifier" groups="base.group_no_one" optional="hide"/>
+            </field>
+        </field>
+    </record>
+    <record id="view_order_form" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.marketplace</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="after">
+                <div class="badge rounded-pill text-bg-info fs-6 float-end ms-2 pt-2">
+                    <field name="fulfillment_type" invisible="not fulfillment_type" readonly="True"/>
+                </div>
+            </div>
+            <group name="order_details" position="inside">
+                <field name="marketplace_account_id" invisible="not marketplace_account_id"/>
+                <field name="marketplace_order_identifier" invisible="not marketplace_account_id"/>
+            </group>
+        </field>
+    </record>
+</odoo>

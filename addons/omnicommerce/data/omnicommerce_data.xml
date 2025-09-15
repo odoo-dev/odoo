@@ -1,0 +1,11 @@
+<odoo>
+    <data noupdate="1">
+        <!-- Turning a few settings on automatically on the database level -->
+        <record id="base.group_user" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('product.group_product_variant'))]"/>
+        </record>
+        <record id="base.group_user" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_multi_locations'))]"/>
+        </record>
+    </data>
+</odoo>

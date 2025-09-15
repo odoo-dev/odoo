@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="omni_signup_page" name="OmniCommerce Signup">
+        <t t-call="website.layout">
+            <owl-component name="omnicommerce.OmniSignupPage"/>
+        </t>
+    </template>
+</odoo>

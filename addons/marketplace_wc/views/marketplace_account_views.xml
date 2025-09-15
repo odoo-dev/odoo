@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="marketplace_account_form_inherited" model="ir.ui.view">
+            <field name="name">marketplace.account.form.inherit</field>
+            <field name="model">marketplace.account</field>
+            <field name="inherit_id" ref="marketplace.marketplace_account_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='credentials']" position="inside">
+                    <group>
+                        <group invisible="channel_code != 'wc'">
+                            <field name="authorization_type"
+                                   widget="radio" options="{'horizontal': true}"
+                                   invisible="state == 'connected'"/>
+                            <field name="wc_store_url"
+                                   readonly="state == 'connected'"
+                                   placeholder="Enter your store URL: https://example.woocommerce.com"/>
+                            <field name="wc_consumer_key"
+                                   readonly="state == 'connected' and authorization_type != 'self_access'"
+                                   invisible="state == 'disconnected' and authorization_type != 'self_access'"/>
+                            <field name="wc_consumer_secret"
+                                   readonly="state == 'connected' and authorization_type != 'self_access'"
+                                   invisible="state == 'disconnected' and authorization_type != 'self_access'"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

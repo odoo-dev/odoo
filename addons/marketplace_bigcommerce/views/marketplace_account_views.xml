@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="marketplace_account_form_inherited" model="ir.ui.view">
+            <field name="name">marketplace.account.form.inherit</field>
+            <field name="model">marketplace.account</field>
+            <field name="inherit_id" ref="marketplace.marketplace_account_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='credentials']" position="inside">
+                    <group invisible="channel_code != 'bigcommerce'">
+                        <group>
+                            <field name="channel_code" invisible="1"/>
+                            <field name="state" invisible="1"/>
+                            <field name="bigcommerce_access_token" readonly="state == 'connected'" required="channel_code == 'bigcommerce'"/>
+                            <field name="bigcommerce_store_hash" readonly="state == 'connected'" required="channel_code == 'bigcommerce'"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

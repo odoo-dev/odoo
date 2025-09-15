@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- TODO: FIXME: this all default data should be company specific??? -->
+    <record id="marketplace_default_customer" model="res.partner">
+        <field name="name">Marketplace Default Customer</field>
+    </record>
+
+    <record id="marketplace_default_product" model="product.product">
+        <field name="name">Marketplace Sale</field>
+        <field name="type">consu</field>
+        <field name="list_price">0.0</field>
+        <field name="weight">1.0</field>
+        <field name="volume">1.0</field>
+        <field name="sale_ok">False</field>
+        <field name="purchase_ok">False</field>
+    </record>
+    <record id="omnicommerce_default_shipping" model="product.product">
+        <field name="name">OmniCommerce Shipping</field>
+        <field name="type">service</field>
+        <field name="list_price">0.0</field>
+        <field name="sale_ok">False</field>
+        <field name="purchase_ok">False</field>
+    </record>
+
+    <function model="product.product" name="_configure_for_marketplace">
+        <value eval="[
+            ref('marketplace.marketplace_default_product'),
+            ref('marketplace.omnicommerce_default_shipping')
+        ]"/>
+    </function>
+
+    <!-- <record id="default_location_marketplace" model="stock.location">
+        <field name="name">Default Location</field>
+        <field name="usage">internal</field>
+        <field name="location_id" ref="stock.warehouse0"/>
+    </record> -->
+</odoo>

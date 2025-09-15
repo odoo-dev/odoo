@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="marketplace_channel_amazon" model="marketplace.channel">
+        <field name="name">Amazon</field>
+        <field name="code">amazon</field>
+        <field name="support_location">False</field>
+        <field name="type">online_marketplace</field>
+        <field name="image_128" type="base64" file="marketplace_amazon/static/img/amazon.png"/>
+    </record>
+</odoo>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="marketplace_account_form_inherited" model="ir.ui.view">
+            <field name="name">marketplace.account.form.inherit</field>
+            <field name="model">marketplace.account</field>
+            <field name="inherit_id" ref="marketplace.marketplace_account_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='credentials']" position="inside">
+                    <group invisible="channel_code != 'amazon'">
+                        <group>
+                            <field name="channel_code" invisible="1"/>
+                            <field name="state" invisible="1"/>
+                            <field name="amazon_client_id" readonly="state == 'connected'" required="channel_code == 'amazon'"/>
+                            <field name="amazon_client_secret" readonly="state == 'connected'" required="channel_code == 'amazon'"/>
+                            <field name="amazon_base_marketplace_id" readonly="state == 'connected'" required="channel_code == 'amazon'"/>
+                            <field name="amazon_seller_key" readonly="1"/>
+                            <field name="amazon_refresh_token" readonly="1" password="True"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
