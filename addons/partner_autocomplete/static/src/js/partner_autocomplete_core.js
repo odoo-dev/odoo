@@ -19,6 +19,7 @@ import { status, useComponent } from "@odoo/owl";
 export function usePartnerAutocomplete() {
     const keepLastOdoo = new KeepLast();
 
+    const component = useComponent();
     const notification = useService("notification");
     const orm = useService("orm");
 
@@ -34,7 +35,6 @@ export function usePartnerAutocomplete() {
 
         // Protect the method if the component is destroyed.
         // Same behaviour as : _protectMethod in web/static/src/core/utils/hooks.js
-        const component = useComponent();
         if (status(component) === "destroyed") {
             return new Promise(() => {});
         }
