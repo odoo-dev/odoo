@@ -12,7 +12,26 @@ class LoyaltyCard(models.Model):
 
     @api.model
     def _load_pos_data_domain(self, data):
-        return [('program_id', 'in', [program["id"] for program in data["loyalty.program"]['data']])]
+        # promotion, promo_code and buy_x_get_y_free are never created in advance.
+        # They are created at order sync an assigned to the order that created them.
+        # So we don't need to load them in the POS.
+        coupon_gift_program_ids = []
+        loyalty_wallet_program_ids = []
+        for program in data['loyalty.program']['data']:
+            if program['program_type'] in ['coupons', 'gift_card', 'next_order_coupons']:
+                coupon_gift_program_ids.append(program['id'])
+            elif program['program_type'] in ['loyalty', 'ewallet']:
+                loyalty_wallet_program_ids.append(program['id'])
+        return [
+            '|',
+            '&',
+            ('program_id', 'in', coupon_gift_program_ids),
+            ('points', '>', 0),  # coupons and gift cards are one off, so no need to load the empty ones.
+            ('program_id', 'in', loyalty_wallet_program_ids),
+            '|',
+            ('expiration_date', '>=', fields.Date.today()),
+            ('expiration_date', '=', False),
+        ]
 
     @api.model
     def _load_pos_data_fields(self, config_id):
