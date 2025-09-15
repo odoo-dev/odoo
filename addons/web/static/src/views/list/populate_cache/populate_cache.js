@@ -22,7 +22,9 @@ class PopulateCache extends Component {
         const originalRPC = rpc._rpc;
         let ids;
         if (this.env.model.root.groups) {
-            ids = this.env.model.root.groups.map((g) => g.records.map((r) => r.data.id)).flat();
+            ids = this.env.model.root.groups
+                .map((g) => g.records.map((datapoint) => datapoint.resId))
+                .flat();
         } else {
             ids = this.env.model.root.records.map((datapoint) => datapoint.resId);
         }
