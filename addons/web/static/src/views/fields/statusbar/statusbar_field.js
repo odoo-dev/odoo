@@ -1,5 +1,4 @@
 import { Component, onWillRender, useEffect, useExternalListener, useRef } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { useCommand } from "@web/core/commands/command_hook";
 import { Domain } from "@web/core/domain";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -72,7 +71,6 @@ export class StatusBarField extends Component {
             status = "adjusting";
             this.adjustVisibleItems();
             this.render();
-            browser.requestAnimationFrame(() => (status = "idle"));
         };
 
         useEffect(
@@ -84,6 +82,8 @@ export class StatusBarField extends Component {
             if (status !== "adjusting") {
                 Object.assign(this.items, this.getSortedItems());
                 status = "shouldAdjust";
+            } else {
+                status = "idle";
             }
         });
 
