@@ -592,6 +592,17 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="product_product_view_list_at_date">
+            <field name="name">product.product.list.inherit.stock.at.date</field>
+            <field name="model">product.product</field>
+            <field name="mode">primary</field>
+            <field name="priority">1000</field>
+            <field name="inherit_id" ref="product_product_stock_tree"/>
+            <field name="arch" type="xml">
+                <field name="free_qty" position="replace"/>
+            </field>
+        </record>
+        
         <!-- Search view for product view with quantity -->
         <record id="product_search_form_view_stock_report" model="ir.ui.view">
             <field name="name">product.product.search.stock.form.stock.report</field>

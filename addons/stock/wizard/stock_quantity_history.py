@@ -14,7 +14,7 @@ class StockQuantityHistory(models.TransientModel):
         default=fields.Datetime.now)
 
     def open_at_date(self):
-        tree_view_id = self.env.ref('stock.view_stock_product_tree').id
+        tree_view_id = self.env.ref('stock.product_product_view_list_at_date').id
         form_view_id = self.env.ref('stock.product_form_view_procurement_button').id
         domain = Domain('is_storable', '=', True)
         product_id = self.env.context.get('product_id', False)
