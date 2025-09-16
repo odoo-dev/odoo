@@ -3,6 +3,22 @@ import { odooExceptionTitleMap, ErrorDialog } from "@web/core/errors/error_dialo
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { Component, onError, useState, xml } from "@odoo/owl";
+
+export class ErrorBoundary extends Component {
+    static template = xml`
+        <t t-if="state.hasError" t-slot="fallback">Oops You Fucked Up.</t>
+        <t t-else="" t-slot="default" />
+    `;
+
+    setup() {
+        this.state = useState({ hasError: false });
+        onError((err) => {
+            console.error(err);
+            this.state.hasError = true;
+        });
+    }
+}
 
 export function handleRPCError(error, dialog) {
     const { data } = error;
