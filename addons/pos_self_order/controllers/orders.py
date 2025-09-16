@@ -98,18 +98,26 @@ class PosSelfOrderController(http.Controller):
 
             fiscal_pos = preset_id.fiscal_position_id or pos_config.default_fiscal_position_id if preset_id else pos_config.default_fiscal_position_id
             if len(line.combo_line_ids) > 0:
-                original_total = sum(line.combo_line_ids.mapped("combo_item_id").combo_id.mapped("base_price"))
+                # original_total = sum(line.combo_line_ids.mapped("combo_item_id").combo_id.mapped("base_price"))
+                original_total = sum(
+                    pol.combo_item_id.combo_id.base_price * pol.qty
+                    for pol in line.combo_line_ids
+                ) or 0.0
                 remaining_total = lst_price
                 factor = lst_price / original_total if original_total > 0 else 1
 
                 for i, pos_order_line in enumerate(line.combo_line_ids):
                     child_product = pos_order_line.product_id
                     price_unit = float_round(pos_order_line.combo_item_id.combo_id.base_price * factor, precision_digits=sale_price_digits)
-                    remaining_total -= price_unit
+                    # subtract the total value allocated to this child (unit * qty)
+                    # remaining_total -= price_unit
+                    remaining_total -= price_unit * pos_order_line.qty
 
                     if i == len(line.combo_line_ids) - 1:
                         price_unit += remaining_total
-
+                        # distribute any rounding remainder per unit on the last child
+                        # if pos_order_line.qty:
+                        #     price_unit += remaining_total / pos_order_line.qty
                     selected_attributes = pos_order_line.attribute_value_ids
                     price_extra_child = sum(attr.price_extra for attr in selected_attributes)
                     price_unit += pos_order_line.combo_item_id.extra_price + price_extra_child
