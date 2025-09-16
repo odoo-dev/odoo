@@ -36,7 +36,14 @@ export class Many2ManyCheckboxesField extends Component {
     }
 
     get items() {
-        return this.specialData.data;
+        if (this.specialData.data) {
+            return this.specialData.data;
+        }
+        if (this.props.record.data[this.props.name].currentIds.length) {
+            //FIXME: record will not have displayName Need to fix this !!! it shouldn't return just list of IDs but ids with displayNames !
+            return this.props.record.data[this.props.name].currentIds.map((id) => [id, ""]);
+        }
+        return [];
     }
 
     isSelected(item) {
