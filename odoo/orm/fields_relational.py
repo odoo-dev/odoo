@@ -998,14 +998,16 @@ class One2many(_RelationalMulti):
 
         # optimization: fetch the inverse and active fields with search()
         domain = self.get_comodel_domain(records) & Domain(inverse, 'in', records.ids)
-        field_names = OrderedSet((inverse,))
-        if comodel._active_name:
-            # add the active field
-            field_names.add(comodel._active_name)
-        if not comodel.env.su:
-            # add fields for security rules
-            sec_domain = comodel._access_domain('read')
-            field_names.update(c.field_expr for c in sec_domain.optimize(comodel.sudo()).iter_conditions())
+        if records.env.context.get('prefetch_fields', True):
+            field_names = None  # prefetch all prefetchable fields by default
+        else:
+            field_names = OrderedSet((inverse,))
+            if comodel._active_name:
+                field_names.add(comodel._active_name)
+            if not comodel.env.su:
+                # add fields for security rules
+                sec_domain = comodel._access_domain('read')
+                field_names.update(c.field_expr for c in sec_domain.optimize(comodel.sudo()).iter_conditions())
         lines = comodel.sudo().search_fetch(domain, field_names)
 
         # group lines by inverse field (without prefetching other fields)
