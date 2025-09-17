@@ -33,7 +33,6 @@ window.stopPopulateIndexedDB = stopPopulateIndexedDB;
 
 registry.category("debug").category("default").add("populateIndexDB", runPopulateIndexedDB);
 
-let actionCount = 0;
 //// COPY FROM clickbot, this need to be refactored later ////
 const MOUSE_EVENTS = ["mouseover", "mouseenter", "mousedown", "mouseup", "click"];
 
@@ -69,12 +68,6 @@ async function triggerClick(target, elDescription) {
     });
     await waitForNextAnimationFrame();
 }
-function updateUi() {
-    actionCount++;
-}
-function uiUpdate() {
-    actionCount--;
-}
 
 const calledRPC = {};
 
@@ -99,9 +92,6 @@ async function waitForCondition(stopCondition = () => true) {
     function hasPendingRPC() {
         return Object.keys(calledRPC).length > 0;
     }
-    function hasPendingUIUpdate() {
-        return actionCount > 0;
-    }
     function hasScheduledTask() {
         let size = 0;
         for (const app of App.apps) {
@@ -110,9 +100,8 @@ async function waitForCondition(stopCondition = () => true) {
         return size > 0;
     }
 
-    while (!stopCondition() || hasPendingUIUpdate() || hasPendingRPC() || hasScheduledTask()) {
+    while (!stopCondition() || hasPendingRPC() || hasScheduledTask()) {
         if (timeLimit <= 0) {
-            // debugger;
             throw new Error("Timeout waiting for condition");
         }
         await new Promise((resolve) => browser.setTimeout(resolve, interval));
@@ -124,12 +113,9 @@ async function waitForCondition(stopCondition = () => true) {
 
 /**
  * @param {import("@web/env").OdooEnv} env
- * @param {object} action
  */
-async function populateIndexDB(env, action) {
+async function populateIndexDB(env) {
     // Copy and modify of clickAll .. refactor needed !
-    env.bus.addEventListener("ACTION_MANAGER:UI-UPDATED", uiUpdate);
-    env.bus.addEventListener("ACTION_MANAGER:UPDATE-UI", updateUi);
     rpcBus.addEventListener("RPC:REQUEST", onRPCRequest);
     rpcBus.addEventListener("RPC:RESPONSE", onRPCResponse);
     const apps = env.services.menu.getApps().filter((app) => app.actionOffline);
@@ -194,6 +180,8 @@ async function populateViewsForm(env) {
         "button.o_switch_view.o_kanban, button.o_switch_view.o_list"
     );
 
+    let populated = false;
+
     for (const switchButton of switchButtons) {
         // Only way to get the viewType from the switchButton
         const viewType = [...switchButton.classList]
@@ -212,50 +200,64 @@ async function populateViewsForm(env) {
         await waitForCondition(
             () => document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null
         );
-        if (viewType === "list") {
-            //click on all rows
-            const number = document.querySelector(".o_view_sample_data")
-                ? 0
-                : document.querySelectorAll(".o_data_row").length;
-            for (const i of [...Array(number).keys()]) {
-                const row = document.querySelectorAll(".o_data_row")[i];
-                // Open the form
-                if (document.querySelector(".o_list_record_open_form_view")) {
-                    await triggerClick(row.querySelector(".o_list_record_open_form_view"));
-                } else {
-                    await triggerClick(row.querySelector(".o_data_cell"));
-                }
-                await waitForCondition(); // wait for action to be loaded
+        if (!populated) {
+            await triggerClick(
+                document.querySelector(".o_control_panel_breadcrumbs_actions .dropdown")
+            );
+            await waitForCondition(
+                () => document.querySelector(`.o_popover.o-dropdown--menu`) !== null
+            );
 
-                // FIXME:: Check why there is sometimes that we don't open the view !!!
-                if (document.querySelector(".o_back_button")) {
-                    // Go back to the list
-                    await triggerClick(document.querySelector(".o_back_button"));
-                    await waitForCondition(); // wait for action to be loaded
-                }
+            if (document.querySelector(`.o_populate_cache_menu`)) {
+                await triggerClick(document.querySelector(`.o_populate_cache_menu`));
             }
-        } else {
-            const number = document.querySelector(".o_view_sample_data")
-                ? 0
-                : document.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost).cursor-pointer")
-                      .length;
-            for (const i of [...Array(number).keys()]) {
-                const card = document.querySelectorAll(
-                    ".o_kanban_record:not(.o_kanban_ghost).cursor-pointer"
-                )[i];
-                // Open the form
-                await triggerClick(card);
-                await waitForCondition(); // wait for action to be loaded
 
-                // Mayube the click does nothing !!!
-                // FIXME: Check why there is sometimes that we don't open the view !!!
-                if (document.querySelector(".o_back_button")) {
-                    // Go back to the kanban
-                    await triggerClick(document.querySelector(".o_back_button"));
-                    await waitForCondition(); // wait for action to be loaded
-                }
-            }
+            populated = true;
         }
+        // if (viewType === "list") {
+        //     //click on all rows
+        //     const number = document.querySelector(".o_view_sample_data")
+        //         ? 0
+        //         : document.querySelectorAll(".o_data_row").length;
+        //     for (const i of [...Array(number).keys()]) {
+        //         const row = document.querySelectorAll(".o_data_row")[i];
+        //         // Open the form
+        //         if (document.querySelector(".o_list_record_open_form_view")) {
+        //             await triggerClick(row.querySelector(".o_list_record_open_form_view"));
+        //         } else {
+        //             await triggerClick(row.querySelector(".o_data_cell"));
+        //         }
+        //         await waitForCondition(); // wait for action to be loaded
+        //
+        //         // FIXME:: Check why there is sometimes that we don't open the view !!!
+        //         if (document.querySelector(".o_back_button")) {
+        //             // Go back to the list
+        //             await triggerClick(document.querySelector(".o_back_button"));
+        //             await waitForCondition(); // wait for action to be loaded
+        //         }
+        //     }
+        // } else {
+        //     const number = document.querySelector(".o_view_sample_data")
+        //         ? 0
+        //         : document.querySelectorAll(".o_kanban_record:not(.o_kanban_ghost).cursor-pointer")
+        //               .length;
+        //     for (const i of [...Array(number).keys()]) {
+        //         const card = document.querySelectorAll(
+        //             ".o_kanban_record:not(.o_kanban_ghost).cursor-pointer"
+        //         )[i];
+        //         // Open the form
+        //         await triggerClick(card);
+        //         await waitForCondition(); // wait for action to be loaded
+        //
+        //         // Mayube the click does nothing !!!
+        //         // FIXME: Check why there is sometimes that we don't open the view !!!
+        //         if (document.querySelector(".o_back_button")) {
+        //             // Go back to the kanban
+        //             await triggerClick(document.querySelector(".o_back_button"));
+        //             await waitForCondition(); // wait for action to be loaded
+        //         }
+        //     }
+        // }
     }
 }
 
