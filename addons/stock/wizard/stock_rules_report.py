@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 class StockRulesReport(models.TransientModel):
@@ -33,6 +34,12 @@ class StockRulesReport(models.TransientModel):
         if 'warehouse_ids' in fields:
             company = product_tmpl_id.company_id or self.env.company
             warehouse_id = self.env['stock.warehouse'].search(self.env['stock.warehouse']._check_company_domain(company), limit=1).id
+            if not warehouse_id:
+                raise UserError(_(
+                    "No warehouse found for company %(company)s. "
+                    "You must create a warehouse to use this feature.",
+                    company=company.name
+                ))
             res['warehouse_ids'] = [(6, 0, [warehouse_id])]
         return res
 
