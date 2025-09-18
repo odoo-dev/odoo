@@ -14,7 +14,8 @@ export const setupPosEnv = async () => {
     odoo.pos_config_id = 1;
     odoo.login_number = 1;
     odoo.from_backend = 0;
-    odoo.access_token = uuidv4(); // Avoid indexedDB conflicts
+    odoo.last_data_change = "2025-07-03 13:40:15"; // Avoid indexedDB conflicts
+    odoo.access_token = uuidv4();
     odoo.info = {
         db: "pos",
         isEnterprise: true,

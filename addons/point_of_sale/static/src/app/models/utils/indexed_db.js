@@ -46,6 +46,7 @@ export default class IndexedDB {
                 `IndexedDB ${this.dbVersion} Ready`,
                 CONSOLE_COLOR
             );
+            this.db.onversionchange = () => this.closeDBInstance();
             whenReady();
         };
         dbInstance.onupgradeneeded = (event) => {
@@ -55,6 +56,18 @@ export default class IndexedDB {
                 }
             }
         };
+    }
+
+    closeDBInstance() {
+        // Close the database connection to allow safe
+        // deletion or upgrade without conflicts.
+        this.db.close();
+        logPosMessage(
+            "IndexedDB",
+            "databaseEventListener",
+            "Closed IndexedDB connection",
+            CONSOLE_COLOR
+        );
     }
 
     async promises(storeName, arrData, method) {
@@ -182,8 +195,11 @@ export default class IndexedDB {
         if (!this.dbInstance) {
             return false;
         }
-        this.dbInstance.deleteDatabase(this.dbName);
-        return true;
+        const dbDeleteRequest = this.dbInstance.deleteDatabase(this.dbName);
+        return new Promise((resolve) => {
+            dbDeleteRequest.onsuccess = () => resolve(true);
+            dbDeleteRequest.onerror = () => resolve(false);
+        });
     }
 
     create(storeName, arrData) {
