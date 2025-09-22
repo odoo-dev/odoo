@@ -66,6 +66,10 @@ export const getTaxesAfterFiscalPosition = (taxes, fiscalPosition, models) => {
     if (!fiscalPosition) {
         return taxes;
     }
+    // empty fiscal positions (like those created by tax units) remove all taxes
+    if (!fiscalPosition.tax_ids?.length) {
+        return [];
+    }
 
     const newTaxIds = [];
     for (const tax of taxes) {
