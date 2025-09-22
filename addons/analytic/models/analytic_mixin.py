@@ -129,7 +129,7 @@ class AnalyticMixin(models.AbstractModel):
         return super()._read_group_groupby(alias, groupby_spec, query)
 
     def _read_group_select(self, aggregate_spec: str, query: Query) -> SQL:
-        if query.table == 'distribution' and aggregate_spec != '__count':
+        if query.table._alias == 'distribution' and aggregate_spec != '__count':
             raise ValueError(f"analytic_distribution grouping does not accept {aggregate_spec} as aggregate.")
         return super()._read_group_select(aggregate_spec, query)
 
@@ -140,9 +140,9 @@ class AnalyticMixin(models.AbstractModel):
             'account_asset': "id",
             'hr_expense': "id",
         }
-        if query.table not in ids:
-            raise ValueError(f"{query.table} does not support analytic_distribution grouping.")
-        return SQL(ids.get(query.table))
+        if query.table._alias not in ids:
+            raise ValueError(f"{query.table._alias} does not support analytic_distribution grouping.")
+        return SQL(ids.get(query.table._alias))
 
     def filtered_domain(self, domain):
         # Filter based on the accounts used (i.e. allowing a name_search) instead of the distribution

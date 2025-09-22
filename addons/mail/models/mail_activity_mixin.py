@@ -176,7 +176,7 @@ class MailActivityMixin(models.AbstractModel):
         # find activities
         Activity = self.activity_ids
         act_query = Activity._search(Domain('res_model', '=', self._name) & Domain('active', '=', True))
-        res_id_sql = SQL.identifier(act_query.table, 'res_id')
+        res_id_sql = act_query.table.res_id
         # group them by res_id and compute the state (as int)
         act_query.groupby = res_id_sql
         act_sql = act_query.subselect(res_id_sql, SQL(
@@ -192,9 +192,9 @@ class MailActivityMixin(models.AbstractModel):
                 )))
             )::INT AS activity_state
             """,
-            Activity._field_to_sql(act_query.table, 'date_deadline', act_query),
+            act_query.table.date_deadline,
             fields.Datetime.now().astimezone(pytz.utc),
-            Activity._field_to_sql(act_query.table, 'user_tz', act_query),
+            act_query.table.user_tz,
         ))
 
         # join the results and translate int into the state value

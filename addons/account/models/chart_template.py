@@ -1408,14 +1408,14 @@ class AccountChartTemplate(models.AbstractModel):
 
             # We only want records that have at least 1 missing translation in any of its translatable fields
             missing_translation_clauses = [
-                SQL("(%s ->> %s) IS NULL", SQL.identifier(query.table, field), lang)
+                SQL("(%s.%s ->> %s) IS NULL", query.table, SQL.identifier(field), lang)
                 for field in translatable_fields
                 for lang in langs
             ]
 
             translatable_field_column_args = []
             for field in translatable_fields:
-                translatable_field_column_args.extend((SQL("%s", field), SQL.identifier(query.table, field)))
+                translatable_field_column_args.extend((SQL("%s", field), SQL.identifier(query.table._alias, field)))
 
             queries.append(SQL(
                 """
@@ -1432,7 +1432,7 @@ class AccountChartTemplate(models.AbstractModel):
                 model=model,
                 translatable_field_column_args=SQL(", ").join(translatable_field_column_args),
                 from_clause=query.from_clause,
-                model_id=SQL.identifier(query.table, 'id'),
+                model_id=query.table.id,
                 where_clause=query.where_clause or SQL("TRUE"),
                 missing_translation_clauses=SQL(" OR ").join(missing_translation_clauses),
             ))

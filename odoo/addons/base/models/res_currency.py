@@ -122,39 +122,38 @@ class ResCurrency(models.Model):
         """ Get the query to fetch all current rate/date by currency for a specific company/date. """
 
         # _unique_name_per_day and _reversed_unique_name_per_day ensure that this query is optimal.
-        Currency = self.env['res.currency'].sudo()
-        Rate = self.env['res.currency.rate'].sudo()
-
-        currency_query = Currency._search(
+        currency_query = self.sudo()._search(
             [] if currency_ids is None else [('id', 'in', currency_ids)],
             active_test=False,
         )
-        currency_id_field = self.env['res.currency']._field_to_sql(currency_query.table, 'id')
+        currency_table = currency_query.table
 
-        rate_query = Rate._search(
+        # before_rate
+        rate_query = self.env['res.currency.rate'].sudo()._search(
             [('name', '<=', date), ('company_id', 'in', (False, company.root_id.id))],
             order='company_id.id, name DESC', limit=1)
-        rate_query.add_where(
-            SQL("%s = %s", Rate._field_to_sql(rate_query.table, 'currency_id'), currency_id_field))
-        rate_query = rate_query.subselect(
-            Rate._field_to_sql(Rate._table, 'rate', rate_query),
-            Rate._field_to_sql(Rate._table, 'name', rate_query),
-        )
-        currency_query.add_join('LEFT JOIN LATERAL', 'before_rate', rate_query, SQL('TRUE'))
+        rate_table = rate_query.table
+        rate_query.add_where(SQL("%s = %s", rate_table.currency_id, currency_table.id))
+        currency_query.add_join(
+            'LEFT JOIN LATERAL',
+            'before_rate',
+            rate_query.subselect(rate_table.rate, rate_table.name),
+            SQL('TRUE'))
 
-        rate_query_fallback = Rate._search(
+        # after_rate
+        rate_query = self.env['res.currency.rate'].sudo()._search(
             [('company_id', 'in', (False, company.root_id.id))],
             order='company_id.id, name ASC', limit=1)
-        rate_query_fallback.add_where(
-            SQL("%s = %s", Rate._field_to_sql(rate_query_fallback.table, 'currency_id'), currency_id_field))
-        rate_query_fallback = rate_query_fallback.subselect(
-            Rate._field_to_sql(Rate._table, 'rate', rate_query_fallback),
-            Rate._field_to_sql(Rate._table, 'name', rate_query_fallback),
-        )
-        currency_query.add_join('LEFT JOIN LATERAL', 'after_rate', rate_query_fallback, SQL('TRUE'))
+        rate_table = rate_query.table
+        rate_query.add_where(SQL("%s = %s", rate_table.currency_id, currency_table.id))
+        currency_query.add_join(
+            'LEFT JOIN LATERAL',
+            'after_rate',
+            rate_query.subselect(rate_table.rate, rate_table.name),
+            SQL('TRUE'))
 
         return currency_query.select(
-            SQL.identifier('res_currency', 'id'),
+            currency_table.id,
             SQL('COALESCE("before_rate"."rate", "after_rate"."rate", 1.0) AS "rate"'),
             SQL('COALESCE("before_rate"."name", "after_rate"."name") AS "name"'),
         )

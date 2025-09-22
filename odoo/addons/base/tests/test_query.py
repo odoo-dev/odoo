@@ -125,7 +125,7 @@ class TestQuery(TransactionCase):
 
     def test_raw_aliases(self):
         query = Query(None, 'foo', SQL('SELECT id FROM table'))
-        table = query.alias
+        table = query.table
         self.assertIsInstance(table, SQL)
         self.assertEqual(table, SQL('"foo"'))
 
@@ -136,7 +136,7 @@ class TestQuery(TransactionCase):
     def test_model_aliases(self):
         model = self.env['res.partner.category']
         query = Query(model)
-        category = query.alias
+        category = query.table
         self.assertIsInstance(category, SQL)
         self.assertEqual(category, SQL('"res_partner_category"'))
         self.assertEqual(category._alias, 'res_partner_category')
@@ -155,7 +155,7 @@ class TestQuery(TransactionCase):
 
         model = self.env['res.partner']
         query = Query(model)
-        partner = query.alias
+        partner = query.table
         self.assertIsInstance(partner, SQL)
         self.assertEqual(partner, SQL('"res_partner"'))
 

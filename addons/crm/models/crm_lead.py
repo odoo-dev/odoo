@@ -2774,7 +2774,7 @@ class CrmLead(models.Model):
             # active_test = False as domain should take active into 'active' field it self
             query = self.env['crm.lead'].with_context(active_test=False)._search(domain, bypass_access=True)
             table = query.table
-            query.order = SQL("%(table)s.team_id asc, %(table)s.id desc", table=SQL.identifier(table))
+            query.order = SQL("%(table)s.team_id asc, %(table)s.id desc", table=table)
             sql_fields = [SQL.identifier(field) for field in pls_fields]
             self.env.cr.execute(query.select(
                 SQL("id"),
@@ -2785,10 +2785,10 @@ class CrmLead(models.Model):
 
             if use_tags:
                 # Get tags values
-                tag_rel_alias = query.left_join(table, 'id', 'crm_tag_rel', 'lead_id', 'crm_tag_rel')
+                tag_rel_alias = query.left_join(table._alias, 'id', 'crm_tag_rel', 'lead_id', 'crm_tag_rel')
                 tag_alias = query.left_join(tag_rel_alias, 'tag_id', 'crm_tag', 'id', 'crm_tag')
                 self.env.cr.execute(query.select(
-                    SQL("%s AS lead_id", SQL.identifier(table, "id")),
+                    SQL("%s AS lead_id", table.id),
                     SQL("%s AS tag_id", SQL.identifier(tag_alias, "id")),
                 ))
                 tag_results = self.env.cr.dictfetchall()
