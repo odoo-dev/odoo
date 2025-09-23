@@ -22,6 +22,12 @@ import { Plugin } from "../plugin";
 export class UserCommandPlugin extends Plugin {
     static id = "userCommand";
     static shared = ["getCommand"];
+    static resourcesDefinition = {
+        user_commands: {
+            type: Array,
+            public: false,
+        },
+    };
 
     setup() {
         this.commands = {};

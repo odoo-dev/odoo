@@ -54,6 +54,16 @@ export class BuilderOptionsPlugin extends Plugin {
 
     setup() {
         this.builderOptions = withIds(this.getResource("builder_options"));
+        const parents = new Set();
+        function getParents(Option) {
+            if (!Option) {
+                return;
+            }
+            parents.push(Option.prototype);
+            getParents(Object.getPrototypeOf(Option));
+        }
+        this.builderOptions.forEach(getParents);
+        this.builderOptions = this.builderOptions.filter((o) => !parents.has(o));
         this.elementsToOptionsTitleComponents = withIds(
             this.getResource("elements_to_options_title_components")
         );
