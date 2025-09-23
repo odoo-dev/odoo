@@ -3,7 +3,13 @@
     @include o-mail-call-bordered(.5);
 
     &.o-is-talking {
+<<<<<<< e3f8e4ecbd9b96602c9d9a961d31d124d52cc8f5
         box-shadow: 0 0 0 1px var(--discuss-talkingColor, $o-discuss-talkingColor);
+||||||| a5447ae78fa15f25e69ce44fd154bf1d2f1e383a
+        box-shadow: inset 0 0 0 2px var(--discuss-talkingColor, $o-discuss-talkingColor);
+=======
+        box-shadow: inset 0 0 0 1px var(--discuss-talkingColor, $o-discuss-talkingColor);
+>>>>>>> 5e122be8d40be5e99edea49be77305faafaa8ba7
     }
 
     &.o-isOdooCommunity {
