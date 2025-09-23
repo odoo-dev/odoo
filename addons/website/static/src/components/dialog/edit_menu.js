@@ -68,6 +68,28 @@ export class MenuDialog extends Component {
             }
         }
     }
+
+    onUrlInput(ev) {
+        const value = ev.target.value;
+        if (value.startsWith("/")) {
+            const urlParts = value.match(/^([^?#]*)(\?[^#]*)?(#.*)?$/);
+            const pathname = urlParts[1] || "";
+            const search = urlParts[2] || "";
+            const hash = urlParts[3] || "";
+
+            const slugifiedPath = pathname
+                .normalize("NFKD") // `NFKD` as in `http_routing` python `slugify()`
+                .toLowerCase()
+                .replace(/\s+/g, "-") // Replace spaces with -
+                .replace(/[^\w\-\/]+/g, "") // Remove all non-word chars
+                .replace(/--+/g, "-"); // Replace multiple - with single -
+
+            const finalUrl = slugifiedPath + search + hash;
+
+            this.url.input.value = finalUrl;
+            ev.target.value = finalUrl;
+        }
+    }
 }
 MenuDialog.template = 'website.MenuDialog';
 MenuDialog.props = {
