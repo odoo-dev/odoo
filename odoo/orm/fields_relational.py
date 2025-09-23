@@ -18,7 +18,7 @@ from .fields import IR_MODELS, Field, _logger
 from .fields_reference import Many2oneReference
 from .identifiers import NewId
 from .models import BaseModel
-from .query import Query
+from .query import Query, TableSQL
 from .utils import COLLECTION_TYPES, SQL_OPERATORS, check_pg_name
 
 if typing.TYPE_CHECKING:
@@ -499,7 +499,7 @@ class Many2one(_Relational):
             comodel = comodel.with_env(model.env)
             if not positive:
                 value = (~value).optimize_full(comodel)
-            sql = value._to_sql(comodel, coalias, query)
+            sql = value._to_sql(TableSQL(comodel, coalias, query))
             if self.company_dependent:
                 sql = self._condition_to_sql_company(sql, field_expr, operator, value, model, alias, query)
             if can_be_null:
@@ -833,7 +833,7 @@ class _RelationalMulti(_Relational):
             domain = field_domain.optimize_full(comodel)
             if not domain.is_true():
                 # TODO should clone/copy Query value
-                value.add_where(domain._to_sql(comodel, value.table._alias, value))
+                value.add_where(domain._to_sql(TableSQL(comodel, value.table._alias, value)))
             return value
         raise NotImplementedError(f"Cannot build query for {value}")
 
@@ -1168,7 +1168,7 @@ class One2many(_RelationalMulti):
 
     def _condition_to_sql_relational(self, model: BaseModel, alias: str, exists: bool, coquery: Query, query: Query) -> SQL:
         if coquery.is_empty():
-            return Domain(not exists)._to_sql(model, alias, query)
+            return Domain(not exists)._to_sql(TableSQL(model, alias, query))
 
         comodel = model.env[self.comodel_name].sudo()
         inverse_field = comodel._fields[self.inverse_name]

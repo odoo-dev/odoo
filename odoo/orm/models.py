@@ -63,7 +63,7 @@ from .fields_temporal import Date, Datetime
 from .fields_textual import Char
 
 from .identifiers import NewId
-from .query import Query
+from .query import Query, TableSQL
 from .utils import (
     OriginIds, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
@@ -4753,7 +4753,7 @@ class BaseModel(metaclass=MetaModel):
             return self.browse()._as_query()
         query = Query(self)
         if not domain.is_true():
-            query.add_where(domain._to_sql(self, self._table, query))
+            query.add_where(domain._to_sql(query.table))
 
         # security access domain
         if check_access:
@@ -4763,7 +4763,7 @@ class BaseModel(metaclass=MetaModel):
             if sec_domain.is_false():
                 return self.browse()._as_query()
             if not sec_domain.is_true():
-                query.add_where(sec_domain._to_sql(self_sudo, self._table, query))
+                query.add_where(sec_domain._to_sql(TableSQL(self_sudo, query.table._alias, query)))
 
         # add order and limits
         if order:
