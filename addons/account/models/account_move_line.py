@@ -7,10 +7,10 @@ import re
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError, RedirectWarning
 from odoo.fields import Command, Domain
-from odoo.models import Query
+from odoo.models import Query, TableSQL
 from odoo.tools import frozendict, float_compare, groupby, SQL, OrderedSet
-from odoo.addons.web.controllers.utils import clean_action
 
+from odoo.addons.web.controllers.utils import clean_action
 from odoo.addons.account.models.account_move import MAX_HASH_VERSION
 
 
@@ -1157,14 +1157,15 @@ class AccountMoveLine(models.Model):
             line.payment_date = line.discount_date if line.discount_date and date.today() <= line.discount_date else line.date_maturity
 
     def _compute_sql_payment_date(self, alias, query):
+        table = query.table._with_model(self)
         return SQL("""
             CASE
                 WHEN %(discount_date)s IS NOT NULL AND %(today)s <= %(discount_date)s THEN %(discount_date)s
                 ELSE %(date_maturity)s
             END""",
             today=fields.Date.context_today(self),
-            discount_date=self._field_to_sql(alias, "discount_date", query),
-            date_maturity=self._field_to_sql(alias, "date_maturity", query),
+            discount_date=table.discount_date,
+            date_maturity=table.date_maturity,
         )
 
     @api.depends('matched_debit_ids', 'matched_credit_ids')

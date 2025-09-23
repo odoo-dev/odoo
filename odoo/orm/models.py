@@ -2059,10 +2059,10 @@ class BaseModel(metaclass=MetaModel):
                 raise ValueError(f"Granularity specification isn't correct: {granularity!r}")
 
             if granularity in READ_GROUP_NUMBER_GRANULARITY:
-                sql_expr = field.property_to_sql(sql_expr, granularity, self, alias, query)
+                sql_expr = field.property_to_sql(sql_expr, granularity, TableSQL(self, alias, query))
             elif field.type == 'datetime':
                 # set the timezone only
-                sql_expr = field.property_to_sql(sql_expr, 'tz', self, alias, query)
+                sql_expr = field.property_to_sql(sql_expr, 'tz', TableSQL(self, alias, query))
 
             if granularity == 'week':
                 # first_week_day: 0=Monday, 1=Tuesday, ...
@@ -2296,9 +2296,10 @@ class BaseModel(metaclass=MetaModel):
 
         self._check_field_access(field, 'read')
 
-        sql = field.to_sql(self, alias, query)
+        table = TableSQL(self, alias, query)
+        sql = field.to_sql(table)
         if property_name:
-            sql = field.property_to_sql(sql, property_name, self, alias, query)
+            sql = field.property_to_sql(sql, property_name, table)
         return sql
 
     def _read_group_groupby_properties(self, alias: str, field: Field, property_name: str, query: Query) -> SQL:
