@@ -289,7 +289,7 @@ class Domain:
     @staticmethod
     def custom(
         *,
-        to_sql: Callable[[BaseModel, str, Query], SQL],
+        to_sql: Callable[[TableSQL], SQL],
         predicate: Callable[[BaseModel], bool] | None = None,
     ) -> DomainCustom:
         """Create a custom domain.
@@ -756,7 +756,7 @@ class DomainCustom(Domain):
 
     def __new__(
         cls,
-        sql: Callable[[BaseModel, str, Query], SQL],
+        sql: Callable[[TableSQL], SQL],
         filtered: Callable[[BaseModel], bool] | None = None,
     ):
         """Create a new domain.
@@ -793,7 +793,7 @@ class DomainCustom(Domain):
         yield self
 
     def _to_sql(self, table: TableSQL) -> SQL:
-        return self._sql(table._model, table._alias, table._query)
+        return self._sql(table)
 
 
 class DomainCondition(Domain):
