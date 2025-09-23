@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_provider_form" model="ir.ui.view">
+        <field name="name">Easebuzz Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form" />
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position="inside">
+                <group name="easebuzz_credentials"
+                    invisible="code != 'easebuzz'">
+                    <field name="easebuzz_key"
+                           string="Easebuzz Key"
+                           required="code == 'easebuzz' and state != 'disabled'"
+                           password="True" />
+                     <field name="easebuzz_salt"
+                           string="Easebuzz Salt"
+                           required="code == 'easebuzz' and state != 'disabled'" />
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

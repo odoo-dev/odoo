@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_provider_form" model="ir.ui.view">
+        <field name="name">Phonepe Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position='inside'>
+                <group name="phonepe_credentials"
+                       invisible="code != 'phonepe'">
+                    <field name="phonepe_client_version"
+                           string="Client Version"
+                           required="code == 'phonepe' and state != 'disabled'"/>
+                    <field name="phonepe_client_id"
+                           string="Client Id"
+                           required="code == 'phonepe' and state != 'disabled'"/>
+                    <field name="phonepe_client_secret"
+                           string="Client Secret"
+                           required="code == 'phonepe' and state != 'disabled'"
+                           password="True"/>
+                    <field name="phonepe_webhook_username"
+                           string="Webhook Username"
+                           required="code == 'phonepe' and state != 'disabled'"
+                           password="True"/>
+                    <field name="phonepe_webhook_password"
+                           string="Webhook Password"
+                           required="code == 'phonepe' and state != 'disabled'"
+                           password="True"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="payment_provider_easebuzz" model="payment.provider">
+        <field name="code">easebuzz</field>
+        <field name="name">Easebuzz</field>
+        <field name="image_128" type="base64" file="payment_easebuzz/static/description/icon.png"/>
+        <field name="module_id" ref="base.module_payment_easebuzz" />
+        <field name="payment_method_ids"
+               eval="[Command.set([
+                        ref('payment.payment_method_netbanking'),
+                        ref('payment.payment_method_card'),
+                        ref('payment.payment_method_wallets_india'),
+                        ref('payment.payment_method_upi'),
+                        ref('payment.payment_method_emi_india'),
+                        ref('payment.payment_method_paylater_india'),
+                     ])]"
+        />
+    </record>
+</odoo>
