@@ -465,13 +465,14 @@ class Many2one(_Relational):
             )
         return sql_field
 
-    def condition_to_sql(self, field_expr: str, operator: str, value, model: BaseModel, alias: str, query: Query) -> SQL:
+    def condition_to_sql(self, field_expr: str, operator: str, value, table: TableSQL) -> SQL:
         if operator not in ('any', 'not any', 'any!', 'not any!') or field_expr != self.name:
             # for other operators than 'any', just generate condition based on column type
-            return super().condition_to_sql(field_expr, operator, value, model, alias, query)
+            return super().condition_to_sql(field_expr, operator, value, table)
 
+        model = table._model
         comodel = model.env[self.comodel_name]
-        sql_field = model._field_to_sql(alias, field_expr, query)
+        sql_field = table[field_expr]
         can_be_null = self not in model.env.registry.not_null_fields
         bypass_access = operator in ('any!', 'not any!') or self.bypass_search_access
         positive = operator in ('any', 'any!')
@@ -495,13 +496,13 @@ class Many2one(_Relational):
 
         if left_join:
             assert bypass_access
-            comodel, coalias = self.join(model.sudo(), alias, query)
+            comodel, coalias = self.join(model.sudo(), table._alias, table._query)
             comodel = comodel.with_env(model.env)
             if not positive:
                 value = (~value).optimize_full(comodel)
-            sql = value._to_sql(TableSQL(comodel, coalias, query))
+            sql = value._to_sql(TableSQL(comodel, coalias, table._query))
             if self.company_dependent:
-                sql = self._condition_to_sql_company(sql, field_expr, operator, value, model, alias, query)
+                sql = self._condition_to_sql_company(sql, field_expr, operator, value, table)
             if can_be_null:
                 if positive:
                     sql = SQL("(%s IS NOT NULL AND %s)", sql_field, sql)
@@ -526,7 +527,7 @@ class Many2one(_Relational):
         if can_be_null and not positive:
             sql = SQL("(%s IS NULL OR %s)", sql_field, sql)
         if self.company_dependent:
-            sql = self._condition_to_sql_company(sql, field_expr, operator, value, model, alias, query)
+            sql = self._condition_to_sql_company(sql, field_expr, operator, value, table)
         return sql
 
     def join(self, model: BaseModel, alias: str, query: Query) -> tuple[BaseModel, str]:
@@ -777,8 +778,9 @@ class _RelationalMulti(_Relational):
             return comodel.sudo(False).with_user(comodel.env.transaction.default_env.uid)
         return comodel
 
-    def condition_to_sql(self, field_expr: str, operator: str, value, model: BaseModel, alias: str, query: Query) -> SQL:
+    def condition_to_sql(self, field_expr: str, operator: str, value, table: TableSQL) -> SQL:
         assert field_expr == self.name, "Supporting condition only to field"
+        model = table._model
         comodel = model.env[self.comodel_name]
         if not self.store:
             raise ValueError(f"Cannot convert {self} to SQL because it is not stored")
@@ -802,8 +804,8 @@ class _RelationalMulti(_Relational):
                     in_operator = 'in' if exists else 'not in'
                     return SQL(
                         "(%s OR %s)" if exists else "(%s AND %s)",
-                        self.condition_to_sql(field_expr, in_operator, (False,), model, alias, query),
-                        self.condition_to_sql(field_expr, in_operator, value - {False}, model, alias, query),
+                        self.condition_to_sql(field_expr, in_operator, (False,), table),
+                        self.condition_to_sql(field_expr, in_operator, value - {False}, table),
                     )
                 #  in (False) => not any (Domain.TRUE)
                 #  not in (False) => any (Domain.TRUE)
@@ -816,7 +818,7 @@ class _RelationalMulti(_Relational):
             comodel = comodel.sudo()
             value = Domain('id', 'any', value)
         coquery = self._get_query_for_condition_value(model, comodel, operator, value)
-        return self._condition_to_sql_relational(model, alias, exists, coquery, query)
+        return self._condition_to_sql_relational(model, table._alias, exists, coquery, table._query)
 
     def _get_query_for_condition_value(self, model: BaseModel, comodel: BaseModel, operator: str, value: Domain | Query) -> Query:
         """ Return Query run on the comodel with the field.domain injected."""
