@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import fields, Command
 from odoo.tests import Form, HttpCase, new_test_user, tagged
+from odoo.tools import file_path, file_open
 from odoo.tools.float_utils import float_round
 
 from odoo.addons.product.tests.common import ProductCommon
@@ -10,7 +11,9 @@ import json
 import base64
 import copy
 import logging
+import os
 from contextlib import contextmanager
+from freezegun import freeze_time
 from functools import wraps
 from itertools import count
 from lxml import etree
@@ -18,6 +21,20 @@ from unittest import SkipTest
 from unittest.mock import patch
 
 _logger = logging.getLogger(__name__)
+
+
+class AccountFlowException(Exception):
+    """
+    Raised to stop a method and collect the raised data.
+    The XML element object is in the format of `etree._Element`, and is stored in the exception's `data` field.
+    When raising, it should receive the XML data in the format of either str, bytes, or `etree._Element` directly.
+    """
+
+    def __init__(self, data: str | bytes | etree._Element):
+        super().__init__(data)
+        if isinstance(data, str | bytes):
+            data = etree.fromstring(data)
+        self.data = data
 
 
 class AccountTestInvoicingCommon(ProductCommon):
@@ -63,6 +80,7 @@ class AccountTestInvoicingCommon(ProductCommon):
             'property_account_expense_categ_id': cls.company_data['default_account_expense'].id,
         })
         cls.tax_number = 0
+        cls.in_save_mode = bool(os.getenv('SAVE_MODE'))
 
         # ==== Taxes ====
         cls.tax_sale_a = cls.company_data['default_tax_sale']
@@ -128,6 +146,15 @@ class AccountTestInvoicingCommon(ProductCommon):
                     'nb_days': 0,
                 }),
             ],
+        })
+        cls.pay_term_epd_mixed = cls.env['account.payment.term'].create({
+            'name': "2/7 Net 30",
+            'note': "Payment terms: 30 Days, 2% Early Payment Discount under 7 days",
+            'early_discount': True,
+            'discount_percentage': 2,
+            'discount_days': 7,
+            'early_pay_discount_computation': 'mixed',
+            'line_ids': [Command.create({'value': 'percent', 'value_amount': 100.0, 'nb_days': 30})],
         })
 
         # ==== Partners ====
@@ -289,9 +316,7 @@ class AccountTestInvoicingCommon(ProductCommon):
     def _use_chart_template(cls, company, chart_template_ref=None):
         chart_template_ref = chart_template_ref or cls.env['account.chart.template']._guess_chart_template(company.country_id)
         template_vals = cls.env['account.chart.template']._get_chart_template_mapping()[chart_template_ref]
-        template_module = cls.env['ir.module.module']._get(template_vals['module'])
-        if template_module.state != 'installed':
-            raise SkipTest(f"Module required for the test is not installed ({template_module.name})")
+        cls.ensure_installed(template_vals['module'])
 
         # Install the chart template
         cls.env['account.chart.template'].try_loading(chart_template_ref, company=company, install_demo=False)
@@ -387,6 +412,216 @@ class AccountTestInvoicingCommon(ProductCommon):
             else:
                 return account.copy(default={'code': new_code, 'name': account.name, **(default or {})})
 
+    @classmethod
+    def ensure_installed(cls, module_name: str):
+        if cls.env['ir.module.module']._get(module_name).state != 'installed':
+            raise SkipTest(f"Module required for the test is not installed ({module_name})")
+
+    # -------------------------------------------------------------------------
+    # Standard Accounting Flow Test Suite Hooks & Helpers
+    # -------------------------------------------------------------------------
+
+    @contextmanager
+    def setup_flow_subtest(self, test_index: str, xml_element: etree._Element):
+        """
+        If the test is run with `SAVE_MODE=1` environment variable, this will return a generator containing None element.
+        Otherwise, it will process the referred test file path and return a generator containing the expected XML tree object.
+        """
+        with self.subTest(test_index=test_index):
+            test_file_path = self._get_test_file_path(test_index)
+            if self.in_save_mode:
+                _logger.info("Saved the generated xml content to %s", test_file_path.split('/')[-1])
+                with open(file_path(test_file_path, check_exists=False), "w") as f:
+                    f.write(etree.tostring(xml_element, pretty_print=True).decode())
+                    yield None
+            else:
+                with file_open(test_file_path) as f:
+                    expected_xml_str = f.read()
+                    expected_xml_tree = etree.fromstring(expected_xml_str)
+                    yield expected_xml_tree
+
+    @contextmanager
+    def optional_freeze_time(self, date):
+        if date:
+            with freeze_time(date):
+                yield
+        else:
+            yield
+
+    def raise_flow_exception(self, xml_data):
+        raise AccountFlowException(xml_data)
+
+    def _get_test_file_path(self, test_index: str, file_extension='xml'):
+        return f"{self.test_module}/tests/test_files/{self.test_module}_{test_index}.{file_extension}"
+
+    def hook_flow_invoice_after_init(self, invoice):
+        """
+        This hook is called everytime an invoice is created from the test flow suite.
+        Localizations that uses this test suite can add their custom fields and/or post the invoice, so that they're ready for generating XML.
+        :param account.move invoice:
+        """
+        # TO EXTEND
+
+    def hook_flow_get_xml_element(self, invoice):
+        """
+        Every EDI has their own way of generating an XML from an invoice.
+        Each of them should override this method and patch the final send method that receives the XML,
+        make it raises the XML data (with ``raise_flow_exception``), catch the exception,
+        and finally return the exception ``data`` from their override method.
+        :param account.move invoice:
+        """
+        # TO OVERRIDE
+        return etree.fromstring("<XmlNotFound/>")
+
+    def apply_sale_order_discount(self, sale_order, amount_type: str, amount: float):
+        """
+        :param sale_order:      The SO as a sale.order record.
+        :param amount_type:     The type of the global discount: 'percent' or 'fixed'.
+        :param amount:          The amount to consider.
+                                For 'percent', it should be a percentage [0-100].
+                                For 'fixed', any amount.
+        """
+        self.ensure_installed('sale')
+
+        if amount_type == 'percent':
+            discount_type = 'so_discount'
+            discount_percentage = amount / 100.0
+            discount_amount = None
+        else:  # amount_type == 'fixed'
+            discount_type = 'amount'
+            discount_percentage = None
+            discount_amount = amount
+
+        discount_wizard = (
+            self.env['sale.order.discount']
+            .with_context({'active_model': sale_order._name, 'active_id': sale_order.id})
+            .create({
+                'discount_type': discount_type,
+                'discount_percentage': discount_percentage,
+                'discount_amount': discount_amount,
+            })
+        )
+        discount_wizard.action_apply_discount()
+
+    def _test_standard_flow_down_payment(self):
+        self.ensure_installed('sale')
+
+        # Step 1: before sale order creation
+        step_pre_init_sale_order = {
+            'sale_order_values': {
+                'partner_id': self.partner_a.id,
+                'order_line': [
+                    Command.create({'product_id': self.product_a.id}),
+                    Command.create({'product_id': self.product_b.id}),
+                ],
+            },
+            'freeze_time': None,
+            'confirm': True,
+        }
+        yield 'pre_init_sale_order', step_pre_init_sale_order
+        with self.optional_freeze_time(step_pre_init_sale_order['freeze_time']):
+            sale_order = self.env['sale.order'].create([step_pre_init_sale_order['sale_order_values']])
+            if step_pre_init_sale_order['confirm']:
+                sale_order.action_confirm()
+
+        # Step 2: after sale order creation
+        yield 'post_init_sale_order', {
+            'sale_order': sale_order,
+        }
+
+        # Step 3: before down payment wizard + invoice creation
+        step_pre_init_down_payment = {
+            'amount_type': 'percent',
+            'amount': 5,
+            'freeze_time': None,
+        }
+        yield 'pre_init_down_payment', step_pre_init_down_payment
+        with self.optional_freeze_time(step_pre_init_down_payment['freeze_time']):
+            amount_type = step_pre_init_down_payment['amount_type']
+            amount = step_pre_init_down_payment['amount']
+            down_payment_invoice = self.create_down_payment_invoice(sale_order, amount_type, amount)
+
+        # Step 4: after down payment wizard + invoice creation
+        yield 'post_init_down_payment', {
+            'sale_order': sale_order,
+            'down_payment_invoice': down_payment_invoice,
+            'down_payment_invoice_xml': self.hook_flow_get_xml_element(down_payment_invoice),
+        }
+
+        # (Optional) Step 5: before second down payment wizard + invoice creation
+        second_down_payment_invoice = self.env['account.move']
+        step_pre_init_second_down_payment = {
+            'activate_second_down_payment': False,
+            'amount_type': 'percent',
+            'amount': 5,
+            'freeze_time': None,
+        }
+        yield 'pre_init_second_down_payment', step_pre_init_second_down_payment
+        if step_pre_init_second_down_payment['activate_second_down_payment']:
+            with self.optional_freeze_time(step_pre_init_second_down_payment['freeze_time']):
+                amount_type = step_pre_init_second_down_payment['amount_type']
+                amount = step_pre_init_second_down_payment['amount']
+                second_down_payment_invoice = self.create_down_payment_invoice(sale_order, amount_type, amount)
+
+            # (Optional) Step 6: after second down payment wizard + invoice creation (only if step 5 was activated)
+            yield 'post_init_second_down_payment', {
+                'sale_order': sale_order,
+                'second_down_payment_invoice': second_down_payment_invoice,
+                'second_down_payment_invoice_xml': self.hook_flow_get_xml_element(second_down_payment_invoice),
+            }
+
+        # Step 7: before final invoice creation
+        step_pre_init_final_invoice = {
+            'freeze_time': None,
+        }
+        yield 'pre_init_final_invoice', step_pre_init_final_invoice
+        with self.optional_freeze_time(step_pre_init_final_invoice['freeze_time']):
+            final_invoice = self.create_down_payment_invoice(sale_order, 'delivered', 0)
+
+        # Step 8: after final invoice creation
+        yield 'post_init_final_invoice', {
+            'sale_order': sale_order,
+            'down_payment_invoice': down_payment_invoice,
+            'second_down_payment_invoice': second_down_payment_invoice,
+            'final_invoice': final_invoice,
+            'final_invoice_xml': self.hook_flow_get_xml_element(final_invoice),
+        }
+
+    def _test_standard_flow_global_discount(self):
+        self.ensure_installed('sale')
+
+        # Step 1: before sale order creation
+        step_pre_init_sale_order = {
+            'sale_order_values': {
+                'partner_id': self.partner_a.id,
+                'order_line': [
+                    Command.create({'product_id': self.product_a.id}),
+                    Command.create({'product_id': self.product_b.id}),
+                ],
+            },
+            'freeze_time': None,
+            'confirm': True,
+        }
+        yield 'pre_init_sale_order', step_pre_init_sale_order
+        with self.optional_freeze_time(step_pre_init_sale_order['freeze_time']):
+            sale_order = self.env['sale.order'].create([step_pre_init_sale_order['sale_order_values']])
+            if step_pre_init_sale_order['confirm']:
+                sale_order.action_confirm()
+
+        # Step 2: after sale order creation
+        yield 'post_init_sale_order', {
+            'sale_order': sale_order,
+        }
+
+        # Step 3: before applying discount on sale order
+        step_pre_apply_discount = {
+
+        }
+
+    # -------------------------------------------------------------------------
+    # Helper: Generation of Tax / Invoice / Sale Order / etc.
+    # -------------------------------------------------------------------------
+
     def group_of_taxes(self, taxes, **kwargs):
         self.tax_number += 1
         return self.env['account.tax'].create({
@@ -424,10 +659,7 @@ class AccountTestInvoicingCommon(ProductCommon):
         })
 
     def python_tax(self, formula, **kwargs):
-        account_tax_python = self.env['ir.module.module']._get('account_tax_python')
-        if account_tax_python.state != 'installed':
-            raise SkipTest("Module 'account_tax_python' is not installed!")
-
+        self.ensure_installed('account_tax_python')
         self.tax_number += 1
         return self.env['account.tax'].create({
             **kwargs,
@@ -522,6 +754,7 @@ class AccountTestInvoicingCommon(ProductCommon):
 
     @classmethod
     def init_invoice(cls, move_type, partner=None, invoice_date=None, post=False, products=None, amounts=None, taxes=None, company=False, currency=None, journal=None):
+        """ :rtype: account.move """
         products = [] if products is None else products
         amounts = [] if amounts is None else amounts
         move_form = Form(cls.env['account.move'] \
@@ -633,6 +866,55 @@ class AccountTestInvoicingCommon(ProductCommon):
             ],
             **invoice_args,
         })
+
+    def _init_sale_order(self, **values):
+        self.ensure_installed('sale')
+        return self.env['sale.order'].create([{
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({'product_id': self.product_a.id}),
+                Command.create({'product_id': self.product_b.id}),
+            ],
+            **values,
+        }])
+
+    def create_down_payment_invoice(self, sale_order, amount_type: str, amount: float):
+        """
+        :param sale_order:      The SO as a sale.order record.
+        :param amount_type:     The type of the global discount: ('percent'/'percentage'), 'fixed', or 'delivered'.
+        :param amount:          The amount to consider.
+                                For 'percent', it should be a percentage [0-100].
+                                For 'fixed', any amount.
+                                For 'delivered', this value is not used.
+        """
+        self.ensure_installed('sale')
+
+        if amount_type in ('percent', 'percentage'):
+            create_values = {
+                'advance_payment_method': 'percentage',
+                'amount': amount,
+            }
+        elif amount_type == 'fixed':
+            create_values = {
+                'advance_payment_method': 'fixed',
+                'fixed_amount': amount,
+            }
+        else:  # amount_type == 'delivered'
+            create_values = {
+                'advance_payment_method': 'delivered',
+            }
+
+        down_payment_wizard = (
+            self.env['sale.advance.payment.inv']
+            .with_context({'active_model': sale_order._name, 'active_ids': sale_order.ids})
+            .create(create_values)
+        )
+        action_values = down_payment_wizard.create_invoices()
+        return self.env['account.move'].browse(action_values['res_id'])
+
+    # -------------------------------------------------------------------------
+    # Assertions
+    # -------------------------------------------------------------------------
 
     def assertInvoiceValues(self, move, expected_lines_values, expected_move_values):
         def sort_lines(lines):
@@ -843,6 +1125,85 @@ class AccountTestInvoicingCommon(ProductCommon):
         :return:                An instance of etree.
         '''
         return etree.fromstring(xml_tree_str)
+
+
+class AccountGenericFlowCommon(AccountTestInvoicingCommon):
+
+    def _test_generic_flow_down_payment(self):
+        # To test in each flow: diff amounts, diff taxes (& number of lines with tax), foreign currency
+        # specific to Down Payment flow: down payment percentage, down payment fixed
+        # sale -> order -> create invoice (down payment...)
+        # do down payment setup... , and then
+        self.ensure_installed('sale')
+
+        with freeze_time('2020-01-01'):
+            for test_index, amount_type, amount in (
+                    ('down_payment_01', 'percent', 15),
+                    ('down_payment_02', 'percent', 45),
+                    ('down_payment_03', 'fixed', 235),
+                    ('down_payment_04', 'fixed', 777),
+            ):
+                sale_order = self._init_sale_order()
+                sale_order.action_confirm()
+                invoice = self.create_down_payment_invoice(sale_order, amount_type, amount)
+                self.hook_flow_invoice_after_init(invoice)
+                invoice_xml = self.hook_flow_get_xml_element(invoice)
+                yield test_index, invoice_xml
+
+                final_invoice = self.create_down_payment_invoice(sale_order, 'delivered', 0)
+                self.hook_flow_invoice_after_init(final_invoice)
+                final_invoice_xml = self.hook_flow_get_xml_element(final_invoice)
+                yield f"{test_index}_final", final_invoice_xml
+
+    def _test_generic_flow_global_discount(self):
+        # sale -> activate settings -> order -> click discount -> global disc -> create invoice
+        self.ensure_installed('sale')
+
+        with freeze_time('2020-01-01'):
+            for test_index, amount_type, amount in (
+                    ('global_discount_01', 'percent', 15),
+                    ('global_discount_02', 'percent', 45),
+                    ('global_discount_03', 'fixed', 235),
+                    ('global_discount_04', 'fixed', 777),
+            ):
+                sale_order = self._init_sale_order()
+                sale_order.action_confirm()
+                self.apply_sale_order_discount(sale_order, amount_type, amount)
+                invoice = self.create_down_payment_invoice(sale_order, amount_type, amount)
+                self.hook_flow_invoice_after_init(invoice)
+                invoice_xml = self.hook_flow_get_xml_element(invoice)
+                yield test_index, invoice_xml
+
+    def _test_generic_flow_early_payment_discount(self):
+        # TODO: Only for l10n_be* ?
+        # account invoice -> payment term: 2/7
+        invoice = self.init_invoice('out_invoice', invoice_date='2020-01-01', products=self.product_a)
+        invoice.invoice_payment_term_id = self.pay_term_epd_mixed
+        self.hook_flow_invoice_after_init(invoice)
+        invoice_xml = self.hook_flow_get_xml_element(invoice)
+        yield "epd_mixed_01", invoice_xml
+
+    def _test_generic_flow_cash_rounding(self):
+        # add inv setup
+        # setting cash rounding: add invoice line -> account invoice -> select cash rounding
+        self.env.user.group_ids += self.env.ref('account.group_cash_rounding')
+        self.product_a.list_price = 999.0
+
+        invoice = self.init_invoice('out_invoice', invoice_date='2020-01-05', products=self.product_a)
+        invoice.invoice_cash_rounding_id = self.cash_rounding_a
+        self.hook_flow_invoice_after_init(invoice)
+        invoice_xml = self.hook_flow_get_xml_element(invoice)
+        yield "cash_rounding_add_inv_line_01", invoice_xml
+
+        invoice = self.init_invoice('out_invoice', invoice_date='2020-01-01', products=self.product_a)
+        invoice.invoice_cash_rounding_id = self.cash_rounding_b
+        self.hook_flow_invoice_after_init(invoice)
+        invoice_xml = self.hook_flow_get_xml_element(invoice)
+        yield "cash_rounding_biggest_tax_01", invoice_xml
+
+    def _test_generic_flow_account_tax_python(self):
+        self.ensure_installed('account_tax_python')
+        # TODO
 
 
 class AccountTestMockOnlineSyncCommon(HttpCase):
