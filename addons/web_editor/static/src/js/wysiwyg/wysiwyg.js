@@ -146,6 +146,8 @@ export class Wysiwyg extends Component {
         toolbarProps: {},
     });
 
+    _isRollingBack = false;
+
     setup() {
         this.orm = useService('orm');
         this.rpc = useService('rpc');
@@ -1173,13 +1175,27 @@ export class Wysiwyg extends Component {
      * Undo one step of change in the editor.
      */
     undo() {
-        this.odooEditor.historyUndo();
+        this._isRollingBack = true;
+        try {
+            this.odooEditor.historyUndo();
+        } finally {
+            setTimeout(() => {
+                this._isRollingBack = false;
+            }, 0);
+        }
     }
     /**
      * Redo one step of change in the editor.
      */
     redo() {
-        this.odooEditor.historyRedo();
+        this._isRollingBack = true;
+        try {
+            this.odooEditor.historyRedo();
+        } finally {
+            setTimeout(() => {
+                this._isRollingBack = false;
+            }, 0);
+        }
     }
     /**
      * Focus inside the editor.
@@ -1245,6 +1261,7 @@ export class Wysiwyg extends Component {
 
             $odooFields.each((i, field) => {
                 const observer = new MutationObserver((mutations) => {
+                    if (this._isRollingBack) return;
                     mutations = this.odooEditor.filterMutationRecords(mutations);
                     mutations = mutations.filter(rec =>
                         !(rec.type === "attributes" && (rec.attributeName.startsWith("data-oe-t")))
