@@ -2,7 +2,7 @@ import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
 import { CalendarCommonRenderer } from "./calendar_common/calendar_common_renderer";
 import { CalendarYearRenderer } from "./calendar_year/calendar_year_renderer";
 
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 
 export class CalendarRenderer extends Component {
     static template = "web.CalendarRenderer";
@@ -24,6 +24,11 @@ export class CalendarRenderer extends Component {
         onSquareSelection: Function,
         cleanSquareSelection: Function,
     };
+    setup() {
+        this.state = useState({
+            initialDate: this.props.model.date,
+        });
+    }
     get concreteRenderer() {
         return this.constructor.components[this.props.model.scale];
     }
@@ -31,7 +36,7 @@ export class CalendarRenderer extends Component {
         if (this.props.model.scale === "year") {
             return {
                 model: this.props.model,
-                initialDate: this.props.model.date,
+                initialDate: this.state.initialDate,
                 isWeekendVisible: this.props.isWeekendVisible,
                 createRecord: this.props.createRecord,
                 editRecord: this.props.editRecord,
@@ -40,7 +45,7 @@ export class CalendarRenderer extends Component {
         }
         return {
             ...this.props,
-            initialDate: this.props.model.date,
+            initialDate: this.state.initialDate,
         };
     }
     get calendarKey() {
@@ -48,35 +53,27 @@ export class CalendarRenderer extends Component {
     }
     get actionSwiperProps() {
         return {
-            onLeftSwipe: this.env.isSmall
-                ? {
-                      action: () => this.props.setDate("next"),
-                      slot: {
-                          component: this.concreteRenderer,
-                          props: {
-                              ...this.concreteRendererProps,
-                              initialDate: this.props.model.date.plus({
-                                  [`${this.props.model.scale}s`]: 1,
-                              }),
-                          },
-                      },
-                  }
-                : undefined,
-            onRightSwipe: this.env.isSmall
-                ? {
-                      action: () => this.props.setDate("previous"),
-                      slot: {
-                          component: this.concreteRenderer,
-                          props: {
-                              ...this.concreteRendererProps,
-                              initialDate: this.props.model.date.minus({
-                                  [`${this.props.model.scale}s`]: 1,
-                              }),
-                          },
-                      },
-                  }
-                : undefined,
+            onLeftSwipe: this.getSwiperProps("next"),
+            onRightSwipe: this.getSwiperProps("previous"),
             animationType: "forwards",
+        };
+    }
+    getSwiperProps(direction) {
+        const targetDate = this.state.initialDate[direction === "next" ? "plus" : "minus"]({
+            [`${this.props.model.scale}s`]: 1,
+        });
+        return {
+            action: () => {
+                this.state.initialDate = targetDate;
+                this.props.setDate(direction);
+            },
+            slot: {
+                component: this.concreteRenderer,
+                props: {
+                    ...this.concreteRendererProps,
+                    initialDate: targetDate,
+                },
+            },
         };
     }
 }

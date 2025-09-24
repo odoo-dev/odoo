@@ -208,8 +208,8 @@ export class ActionSwiper extends Component {
                     this.state.containerStyle = `transform: translateX(0)`;
                     prom.resolve();
                     this._reset();
-                }, 200);
-            }, 200);
+                }, 250); //FIXME check swipe when reset not effective
+            }, 250);
         } else {
             return action(Promise.resolve());
         }
