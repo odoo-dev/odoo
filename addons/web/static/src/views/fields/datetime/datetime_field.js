@@ -202,14 +202,15 @@ export class DateTimeField extends Component {
         this.startDate = useRef("start-date");
         this.endDate = useRef("end-date");
 
-        useEffect(() => {
-            [this.startDate, this.endDate].forEach((ref, index) => {
-                if (ref.el?.getAttribute("data-field") === this.picker.activeInput) {
-                    ref.el.focus();
-                    this.openPicker(index);
-                }
-            });
-        });
+        useEffect(
+            (ref) => ref?.el?.focus(),
+            () =>
+                [this.startDate, this.endDate].filter(
+                    (ref) =>
+                        ref.el?.getAttribute("data-field") === this.picker.activeInput &&
+                        ref.el?.tagName === "INPUT"
+                )
+        );
 
         onWillRender(() => this.triggerIsDirty());
 

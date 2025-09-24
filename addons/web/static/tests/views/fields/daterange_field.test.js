@@ -449,6 +449,7 @@ test("Render with initial empty value and optional start date", async () => {
 
     // Select a value (today)
     await contains(".o_today").click();
+    await animationFrame();
     expect(".o_field_daterange input:eq(0)").toHaveValue("08/14/2014 13:00:00");
     expect(".o_toggle_range").toBeVisible();
 
@@ -508,9 +509,10 @@ test("initial empty date with optional end date", async () => {
 
     // Add a start date
     await contains(".o_toggle_range").click();
+    await animationFrame();
 
-    expect("button[data-field=datetime]").toHaveValue("03/12/2017 23:00:00");
-    expect("input[data-field=datetime_end]").toHaveValue("03/13/2017 00:00:00");
+    expect("input[data-field=datetime]").toHaveValue("03/12/2017 23:00:00");
+    expect("button[data-field=datetime_end]").toHaveValue("03/13/2017 00:00:00");
 });
 
 test("Datetime field - open datepicker and toggle range with optional end date", async () => {

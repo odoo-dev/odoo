@@ -247,12 +247,7 @@ export const datetimePickerService = {
                     }
                 }
 
-                /**
-                 * @param {number} inputIndex Input from which to open the picker
-                 */
-                function open(inputIndex) {
-                    pickerProps.focusedDateIndex = inputIndex;
-
+                function open() {
                     if (!isOpen()) {
                         const popoverTarget = getPopoverTarget();
                         if (ensureVisibility()) {

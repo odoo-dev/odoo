@@ -13,7 +13,8 @@
                         t-ref="start-date" 
                         t-att-data-tooltip="getFormattedValue(0, true)"
                         t-att-id="showSeparator ? props.endDateField and props.id : props.id"
-                        t-on-focus="() => picker.activeInput = startDateField"
+                        t-on-pointerdown="openPicker"
+                        t-on-focus="() => {picker.activeInput = startDateField;}"
                         t-att-data-field="startDateField"
                         t-att-class="'o_input o_daterange_start w-100 text-start ' + (props.warnFuture and isDateInTheFuture(0) ? 'text-danger' : '')">
                         <t t-esc="getFormattedValue(0)" />
@@ -50,7 +51,8 @@
                         <button 
                             t-ref="end-date" 
                             t-att-data-tooltip="getFormattedValue(1, true)"
-                            t-on-focus="() => picker.activeInput = endDateField" 
+                            t-on-pointerdown="openPicker"
+                            t-on-focus="() => picker.activeInput = endDateField"
                             t-att-id="props.startDateField and props.id"
                             t-att-data-field="endDateField"
                             t-att-class="'o_input o_daterange_end w-100 text-start ' + (props.warnFuture and isDateInTheFuture(1) ? 'text-danger' : '')">
@@ -68,6 +70,8 @@
                             t-att-data-field="endDateField"
                             t-on-input="onInput"
                             t-on-focus="() => picker.activeInput = endDateField"
+                            t-on-blur="() => picker.activeInput = null"
+                            t-on-keydown="(ev) => ev.key === 'Enter' ? picker.activeInput = null : undefined"
                             t-att-title="props.warnFuture and isDateInTheFuture(1) ? futureWarningMsg : ''"
                         />
                     </t>
