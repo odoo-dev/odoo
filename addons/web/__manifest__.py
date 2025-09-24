@@ -444,15 +444,15 @@ This module provides the core of the Odoo Web Client.
 
             # Assets for features to test (views, services, fields, ...)
             # Typically includes most files in 'web.web.assets_backend'
-            ('include', 'web.assets_backend'),
-            ('include', 'web.assets_backend_lazy'),
+            # ('include', 'web.assets_backend'),
+            # ('include', 'web.assets_backend_lazy'),
 
             'web/static/src/polyfills/set.js',
             'web/static/src/public/**/*.js',
             'web/static/src/public/**/*.xml',
-            'web/static/tests/public/**/*.xml',
-            ('remove', 'web/static/src/public/database_manager.js'),
-            ('remove', 'web/static/src/public/error_notifications.js'),
+            # 'web/static/tests/public/**/*.xml',
+            # ('remove', 'web/static/src/public/database_manager.js'),
+            # ('remove', 'web/static/src/public/error_notifications.js'),
             'web/static/src/webclient/clickbot/clickbot.js',
         ],
         # Lazy-loaded assets needed by test framework when not in headless mode
