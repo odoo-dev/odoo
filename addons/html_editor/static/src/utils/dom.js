@@ -26,7 +26,8 @@ export function makeContentsInline(node) {
             if (childIndex && isParagraphRelatedElement(child)) {
                 child.before(document.createElement("br"));
             }
-            for (const grandChild of child.childNodes) {
+            while (child.firstChild) {
+                const grandChild = child.firstChild;
                 child.before(grandChild);
                 makeContentsInline(grandChild);
             }
