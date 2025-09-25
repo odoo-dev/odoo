@@ -5,6 +5,10 @@ import * as Dialog from "@point_of_sale/../tests/tours/utils/dialog_util";
 import * as Chrome from "@point_of_sale/../tests/tours/utils/chrome_util";
 import * as Notification from "@point_of_sale/../tests/tours/utils/generic_components/notification_util";
 import * as TicketScreen from "@point_of_sale/../tests/tours/utils/ticket_screen_util";
+import * as PaymentScreen from "@point_of_sale/../tests/tours/utils/payment_screen_util";
+import * as ReceiptScreen from "@point_of_sale/../tests/tours/utils/receipt_screen_util";
+import * as OfflineUtil from "@point_of_sale/../tests/tours/utils/offline_util";
+
 import { registry } from "@web/core/registry";
 import { scan_barcode } from "@point_of_sale/../tests/tours/utils/common";
 
@@ -589,5 +593,36 @@ registry.category("web_tour.tours").add("test_scan_loyalty_card_select_customer"
             Dialog.confirm("Open Register"),
             scan_barcode("0444-e050-4548"),
             ProductScreen.customerIsSelected("A Test Partner"),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_offline_loyalty_points", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("A Partner"),
+            ProductScreen.clickDisplayedProduct("Test Product A"),
+            PosLoyalty.orderTotalIs("100"),
+            PosLoyalty.pointsAwardedAre("10"),
+            PosLoyalty.finalizeOrder("Cash", "100"),
+            // Do an offline sale
+            OfflineUtil.setOfflineMode(),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("A Partner"),
+            ProductScreen.clickDisplayedProduct("Test Product A"),
+            PosLoyalty.orderTotalIs("100"),
+            PosLoyalty.pointsAwardedAre("10"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Cash"),
+            PaymentScreen.clickNumpad("1 0 0"),
+            PaymentScreen.clickValidate(),
+            Dialog.confirm("Continue with limited functionality"),
+            ReceiptScreen.clickNextOrder(),
+            // Do an online sale to trigger the post sync
+            OfflineUtil.setOnlineMode(),
+            ProductScreen.clickDisplayedProduct("Test Product A"),
+            PosLoyalty.finalizeOrder("Cash", "100"),
         ].flat(),
 });

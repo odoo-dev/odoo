@@ -3074,3 +3074,53 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertEqual(gift_cards[0].points, 20)
         self.assertNotEqual(gift_cards[1].code, 'Card Name')
         self.assertEqual(gift_cards[1].points, 50)
+
+    def test_offline_loyalty_points(self):
+        """Test the points awarded on reconecting after offline mode"""
+        LoyaltyProgram = self.env['loyalty.program']
+        (LoyaltyProgram.search([])).write({'pos_ok': False})
+        self.loyalty_program = self.env['loyalty.program'].create({
+            'name': 'Loyalty Program Test',
+            'program_type': 'loyalty',
+            'trigger': 'auto',
+            'applies_on': 'both',
+            'pricelist_ids': [(4, self.main_pos_config.pricelist_id.id)],
+            'pos_ok': True,
+            'pos_config_ids': [Command.link(self.main_pos_config.id)],
+            'rule_ids': [(0, 0, {
+                'reward_point_mode': 'money',
+                'reward_point_amount': 0.1,
+                'minimum_amount': 1,
+            })],
+            'reward_ids': [(0, 0, {
+                'reward_type': 'discount',
+                'required_points': 100,
+                'discount': 1,
+                'discount_mode': 'per_point',
+            })],
+        })
+
+        self.product_a = self.env["product.product"].create({
+            "name": "Test Product A",
+            "is_storable": True,
+            "list_price": 100,
+            "available_in_pos": True,
+            "taxes_id": False,
+        })
+
+        partner_a = self.env['res.partner'].create({'name': 'A Partner'})
+        self.env['loyalty.card'].create({
+            'partner_id': partner_a.id,
+            'program_id': self.loyalty_program.id,
+            'points': 0,
+        })
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour(
+            "/pos/web?config_id=%d" % self.main_pos_config.id,
+            "test_offline_loyalty_points",
+            login="pos_user",
+            watch=True,
+            step_delay=400,
+        )
+        self.assertEqual(self.loyalty_program.coupon_ids.points, 20)
