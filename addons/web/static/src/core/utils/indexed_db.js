@@ -32,6 +32,21 @@ export class IndexedDB {
     }
 
     /**
+     * Reads all keys from a given table.
+     *
+     * @param {string} table
+     * @returns Promise
+     */
+    async getAllKeys(table) {
+        this._tables.add(table);
+        return this.execute((db) => {
+            if (db) {
+                return this._getAllKeys(db, table);
+            }
+        });
+    }
+
+    /**
      * Write data into the given table
      *
      * @param {string} table
@@ -209,6 +224,16 @@ export class IndexedDB {
             const transaction = db.transaction(table, "readonly");
             const objectStore = transaction.objectStore(table);
             const r = objectStore.get(key);
+            r.onsuccess = () => resolve(r.result);
+            transaction.onerror = () => reject(transaction.error);
+        });
+    }
+
+    async _getAllKeys(db, table) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(table, "readonly");
+            const objectStore = transaction.objectStore(table);
+            const r = objectStore.getAllKeys();
             r.onsuccess = () => resolve(r.result);
             transaction.onerror = () => reject(transaction.error);
         });
