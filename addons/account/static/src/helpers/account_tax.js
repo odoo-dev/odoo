@@ -588,10 +588,7 @@ export const accountTaxHelpers = {
         );
         Object.assign(base_line, {
             computation_key: load("computation_key", extra_tax_data.computation_key || null),
-            manual_tax_amounts: load(
-                "manual_tax_amounts",
-                extra_tax_data.manual_tax_amounts || null
-            ),
+            manual_tax_amounts: extra_tax_data.manual_tax_amounts || null,
         });
         if ("price_unit" in extra_tax_data) {
             base_line.price_unit = extra_tax_data.price_unit;
@@ -1830,7 +1827,6 @@ export const accountTaxHelpers = {
                 price_unit: base_line.quantity * price_unit_after_discount,
                 quantity: 1.0,
                 discount: 0.0,
-                manual_tax_amounts: null,
             });
             const raw_grouping_key = {
                 tax_ids: new_base_line.tax_ids.map((tax) => tax.id),

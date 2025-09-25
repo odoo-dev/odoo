@@ -1573,7 +1573,7 @@ class AccountTax(models.Model):
 
             # For all computation that are inferring a base amount in order to reach a total you know in advance, you have to force some
             # base/tax amounts for the computation (E.g. down payment, combo products, global discounts etc).
-            'manual_tax_amounts': load('manual_tax_amounts', extra_tax_data.get('manual_tax_amounts'), from_base_line=True),
+            'manual_tax_amounts': extra_tax_data.get('manual_tax_amounts'),
         })
         if 'price_unit' in extra_tax_data:
             base_line['price_unit'] = extra_tax_data['price_unit']
@@ -3299,7 +3299,6 @@ class AccountTax(models.Model):
                 price_unit=base_line['quantity'] * price_unit_after_discount,
                 quantity=1.0,
                 discount=0.0,
-                manual_tax_amounts=None,
             )
             grouping_key = {
                 'tax_ids': new_base_line['tax_ids'],
