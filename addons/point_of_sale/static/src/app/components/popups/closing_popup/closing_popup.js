@@ -214,7 +214,7 @@ export class ClosePosPopup extends Component {
 
         try {
             const bankPaymentMethodDiffPairs = this.props.non_cash_payment_methods
-                .filter((pm) => pm.type == "bank")
+                .filter((pm) => pm.record.type == "bank")
                 .map((pm) => [pm.id, this.getDifference(pm.id)]);
             const response = await this.pos.data.call(
                 "pos.session",
@@ -308,7 +308,8 @@ export class ClosePosPopup extends Component {
     }
     get validPms() {
         return this.props.non_cash_payment_methods.filter(
-            (item) => item.number == 1 && (item.type === "bank" || item.type === "cash")
+            (item) =>
+                item.number == 1 && (item.record.type === "bank" || item.record.type === "cash")
         );
     }
     isTheLastPM(pm) {

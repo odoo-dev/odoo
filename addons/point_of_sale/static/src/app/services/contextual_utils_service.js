@@ -32,8 +32,8 @@ export const contextualUtilsService = {
         const formatProductQty = (qty, trailingZeros = true) =>
             formatFloat(qty, { digits: [true, ProductUnit.digits], trailingZeros: trailingZeros });
 
-        const formatCurrency = (value, hasSymbol = true) =>
-            webFormatCurrency(value, res_currency.id, {
+        const formatCurrency = (value, currency = res_currency.id, hasSymbol = true) =>
+            webFormatCurrency(value, currency, {
                 noSymbol: !hasSymbol,
             });
 

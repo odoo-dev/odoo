@@ -739,11 +739,9 @@ class PosSession(models.Model):
                 'id': default_cash_payment_method_id.id
             } if default_cash_payment_method_id else {},
             'non_cash_payment_methods': [{
-                'name': pm.name,
                 'amount': sum(non_cash_payments_grouped_by_method_id[pm].mapped('amount')),
                 'number': len(non_cash_payments_grouped_by_method_id[pm]),
                 'id': pm.id,
-                'type': pm.type,
             } for pm in non_cash_payment_method_ids],
             'is_manager': self.env.user.has_group("point_of_sale.group_pos_manager"),
             'amount_authorized_diff': self.config_id.amount_authorized_diff if self.config_id.set_maximum_difference else None
@@ -1472,8 +1470,8 @@ class PosSession(models.Model):
         if journal_currency == self.currency_id:
             return {'amount': amount}
         return {
-            'amount': self.currency_id._convert(amount, journal_currency, self.company_id, self.stop_at),
-            'amount_currency': amount,
+            'amount': amount,
+            'amount_currency': journal_currency._convert(amount, self.currency_id, self.company_id, self.stop_at),
             'foreign_currency_id': self.currency_id.id,
         }
 

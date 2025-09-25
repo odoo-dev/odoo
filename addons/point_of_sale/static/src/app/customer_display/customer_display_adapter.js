@@ -77,7 +77,7 @@ export class CustomerDisplayPosAdapter {
     getPaymentData(payment) {
         return {
             name: payment.payment_method_id.name,
-            amount: formatCurrency(payment.amount, this.currency),
+            amount: formatCurrency(payment.amount, payment.currency_id),
         };
     }
 

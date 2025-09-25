@@ -521,7 +521,9 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async closeSession() {
         const info = await this.getClosePosInfo();
-
+        info.non_cash_payment_methods.forEach((pm) => {
+            pm.record = this.models["pos.payment.method"].get(pm.id);
+        });
         if (info) {
             this.dialog.add(ClosePosPopup, info);
         }

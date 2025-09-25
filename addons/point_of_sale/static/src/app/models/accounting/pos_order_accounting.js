@@ -2,6 +2,7 @@ import { Base } from "../related_models";
 import { accountTaxHelpers } from "@account/helpers/account_tax";
 import { logPosMessage } from "../../utils/pretty_console_log";
 import { formatCurrency } from "@web/core/currency";
+import { convertCurrency } from "@point_of_sale/app/models/utils/currency";
 
 const CONSOLE_COLOR = "#4EFF4D";
 
@@ -148,7 +149,12 @@ export class PosOrderAccounting extends Base {
                 // Return lines are created after the sync, should not be taken into account in
                 // the paid amount otherwise, the change would be wrong.
                 if (paymentLine.isDone() && !paymentLine.is_change) {
-                    sum += paymentLine.getAmount();
+                    const amount = convertCurrency(
+                        paymentLine.getAmount(),
+                        paymentLine.currency_id,
+                        { inverse: true }
+                    );
+                    sum += amount;
                 }
                 return sum;
             }, 0)

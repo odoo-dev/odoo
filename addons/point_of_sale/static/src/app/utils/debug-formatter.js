@@ -170,8 +170,12 @@ function getDebugObject(obj, dismissFields = new Set()) {
                 debugObject[key] = descriptor.value;
                 hasValue = true;
             } else if (typeof descriptor.get === "function") {
-                Object.defineProperty(debugObject, key, { get: () => obj[key] });
-                hasValue = true;
+                try {
+                    Object.defineProperty(debugObject, key, { get: () => obj[key] });
+                    hasValue = true;
+                } catch {
+                    //
+                }
             }
         });
         obj = Object.getPrototypeOf(obj);

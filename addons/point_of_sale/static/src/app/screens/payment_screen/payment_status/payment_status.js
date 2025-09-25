@@ -2,6 +2,7 @@ import { Component } from "@odoo/owl";
 import { PriceFormatter } from "@point_of_sale/app/components/price_formatter/price_formatter";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { _t } from "@web/core/l10n/translation";
+import { convertCurrency } from "@point_of_sale/app/models/utils/currency";
 
 export class PaymentScreenStatus extends Component {
     static template = "point_of_sale.PaymentScreenStatus";
@@ -65,11 +66,27 @@ export class PaymentScreenStatus extends Component {
         return Boolean(this.order.remainingDue || this.order.change);
     }
 
+    get paymentMethodsCurrency() {
+        let currencyId = this.order.payment_ids?.[0]?.currency_id || this.pos.currency;
+        const allSameCurrency = this.order.payment_ids.every(
+            (line) => line.currency_id.id === currencyId.id
+        );
+
+        if (!allSameCurrency) {
+            console.error("Not all payment lines share the same currency ID!");
+            currencyId = this.order.currency;
+            //empty the payment line ?
+        }
+        return currencyId;
+    }
+
     get amountText() {
+        const currency = this.paymentMethodsCurrency;
         if (!this.isRemaining) {
-            return this.env.utils.formatCurrency(this.order.change);
+            return this.env.utils.formatCurrency(this.order.change, currency.id);
         } else {
-            return this.env.utils.formatCurrency(this.order.remainingDue);
+            const remainingDue = convertCurrency(this.order.remainingDue, currency);
+            return this.env.utils.formatCurrency(remainingDue, currency.id);
         }
     }
 }

@@ -18,7 +18,7 @@ export class PosPayment extends Base {
 
     setAmount(value) {
         this.pos_order_id.assertEditable();
-        this.amount = this.pos_order_id.currency.round(parseFloat(value) || 0);
+        this.amount = this.currency_id.round(parseFloat(value) || 0);
     }
 
     getAmount() {

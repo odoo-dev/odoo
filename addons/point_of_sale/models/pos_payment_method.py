@@ -62,6 +62,7 @@ class PosPaymentMethod(models.Model):
         help='Type of QR-code to be generated for this payment method.',
     )
     hide_qr_code_method = fields.Boolean(compute='_compute_hide_qr_code_method')
+    currency_id = fields.Many2one('res.currency', related='journal_id.currency_id')
 
     @api.model
     def get_provider_status(self, modules_list):
@@ -75,7 +76,7 @@ class PosPaymentMethod(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config):
-        return ['id', 'name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence', 'payment_method_type', 'default_qr']
+        return ['id', 'name', 'is_cash_count', 'use_payment_terminal', 'split_transactions', 'type', 'image', 'sequence', 'payment_method_type', 'default_qr', 'currency_id']
 
     @api.depends('type', 'payment_method_type')
     def _compute_hide_use_payment_terminal(self):

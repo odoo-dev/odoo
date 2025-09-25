@@ -5,6 +5,7 @@ import { localization } from "@web/core/l10n/localization";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { getStrNotes } from "./utils/order_change";
 import { PosOrderAccounting } from "./accounting/pos_order_accounting";
+import { convertCurrency } from "@point_of_sale/app/models/utils/currency";
 
 const { DateTime } = luxon;
 
@@ -482,10 +483,15 @@ export class PosOrder extends PosOrderAccounting {
             return { status: false, data: _t("There is already a cash payment line.") };
         }
 
-        const totalAmountDue = this.getDefaultAmountDueToPayIn(payment_method);
+        const currency = payment_method.currency_id || this.currency;
+        const totalAmountDue = convertCurrency(
+            this.getDefaultAmountDueToPayIn(payment_method),
+            currency
+        );
         const newPaymentLine = this.models["pos.payment"].create({
             pos_order_id: this,
             payment_method_id: payment_method,
+            currency_id: currency,
         });
         this.selectPaymentline(newPaymentLine);
         newPaymentLine.setAmount(totalAmountDue);

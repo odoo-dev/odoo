@@ -16,6 +16,7 @@ import { Component, onMounted } from "@odoo/owl";
 import { Numpad, enhancedButtons } from "@point_of_sale/app/components/numpad/numpad";
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 import OrderPaymentValidation from "@point_of_sale/app/utils/order_payment_validation";
+import { convertCurrency } from "@point_of_sale/app/models/utils/currency";
 
 export class PaymentScreen extends Component {
     static template = "point_of_sale.PaymentScreen";
@@ -157,6 +158,21 @@ export class PaymentScreen extends Component {
                 body: _t("There is already an electronic payment in progress."),
             });
             return;
+        }
+
+        const normalizeCurrencyId = (currencyId) => currencyId || this.pos.currency;
+
+        const newCurrencyId = normalizeCurrencyId(paymentMethod.currency_id);
+
+        for (const line of this.paymentLines) {
+            const existingCurrencyId = normalizeCurrencyId(line.currency_id);
+            if (existingCurrencyId !== newCurrencyId) {
+                this.dialog.add(AlertDialog, {
+                    title: _t("Currency Mismatch"),
+                    body: _t(`You can not use different currencies to validate the order payment.`),
+                });
+                return;
+            }
         }
 
         if (this.paymentLines.length === 0) {
@@ -427,6 +443,14 @@ export class PaymentScreen extends Component {
     }
     async clickTableGuests() {
         this.pos.setCustomerCount();
+    }
+    conversion(pm) {
+        if (pm.currency_id && pm.currency_id.id != this.pos.currency.id) {
+            return this.env.utils.formatCurrency(
+                convertCurrency(this.currentOrder.getDefaultAmountDueToPayIn(pm), pm.currency_id),
+                pm.currency_id.id
+            );
+        }
     }
 }
 

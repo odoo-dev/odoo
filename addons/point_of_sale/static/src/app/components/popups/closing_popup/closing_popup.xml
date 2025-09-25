@@ -40,20 +40,20 @@
                         </div>
                     </div>
                     <div class="w-100 mb-3" t-foreach="props.non_cash_payment_methods" t-as="pm" t-key="pm.id">
-                        <t t-set="_showDiff" t-value="pm.type === 'bank' and pm.number !== 0" />
+                        <t t-set="_showDiff" t-value="pm.record.type === 'bank' and pm.number !== 0" />
                         <t t-set="diff" t-value="_showDiff ? getDifference(pm.id) : 0" />
                         <t t-set="counted" t-value="_showDiff ? env.utils.parseValidFloat(state.payments[pm.id].counted) : 0" />
                         <div class="d-flex align-items-center justify-content-between fs-3">
-                            <span t-esc="pm.name" />
-                            <span t-esc="env.utils.formatCurrency(pm.amount)" />
+                            <span t-esc="pm.record.name" />
+                            <span t-esc="env.utils.formatCurrency(pm.amount, pm.record.currency_id?.id)" />
                         </div>
                         <div class="d-flex align-items-center justify-content-between text-muted border-start ps-2">
                             <span>Counted</span>
-                            <span t-esc="env.utils.formatCurrency(counted)" />
+                            <span t-esc="env.utils.formatCurrency(counted, pm.record.currency_id?.id)" />
                         </div>
                         <div class="d-flex align-items-center justify-content-between text-muted border-start ps-2" t-att-class="{'text-danger fw-bold': diff}">
                             <span>Difference</span>
-                            <span t-esc="env.utils.formatCurrency(diff)" />
+                            <span t-esc="env.utils.formatCurrency(diff, pm.record.currency_id?.id)" />
                         </div>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                     <t t-foreach="validPms" t-as="pm" t-key="pm.id">
                         <div class="col-12" t-att-class="{'col-md-6': !this.isTheLastPM(pm)}">
                             <label class="form-label">
-                                <t t-esc="pm.name" /> Count
+                                <t t-esc="pm.record.name" /> Count
                             </label>
                             <div class="d-flex w-100 gap-2 mt-1">
                                 <Input
