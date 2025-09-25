@@ -102,4 +102,15 @@
             </field>
         </field>
     </record>
+
+    <record id="purchase_order_view_search" model="ir.ui.view">
+        <field name="name">purchase.order.view.search.inherit.purchase.stock</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='not_acknowledged']" position="attributes">
+                <attribute name="domain">[('state', '=', 'purchase'), ('acknowledged', '=', False), ('picking_ids.state', '!=', 'done')]</attribute>
+            </xpath>
+        </field>
+    </record>
 </odoo>

@@ -183,6 +183,12 @@ class PurchaseOrder(models.Model):
         return self._get_action_view_picking(self.picking_ids)
 
     @api.model
+    def _get_rfq_not_acknowledge_domain(self):
+        domain = super()._get_rfq_not_acknowledge_domain()
+        domain.append(('picking_ids.state', 'not in', ['done']))
+        return domain
+
+    @api.model
     def retrieve_dashboard(self):
         result = super().retrieve_dashboard()
         three_months_ago = fields.Datetime.to_string(fields.Datetime.now() - relativedelta(months=3))

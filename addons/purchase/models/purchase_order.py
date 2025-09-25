@@ -875,6 +875,10 @@ class PurchaseOrder(models.Model):
         return result
 
     @api.model
+    def _get_rfq_not_acknowledge_domain(self):
+        return [('state', '=', 'purchase'), ('acknowledged', '=', False)]
+
+    @api.model
     def retrieve_dashboard(self):
         """ This function returns the values to populate the custom dashboard in
             the purchase order views.
@@ -928,7 +932,7 @@ class PurchaseOrder(models.Model):
         rfq_late_group = self.env['purchase.order']._read_group(rfq_late_domain, groupby, aggregate)
         _update('late', result, rfq_late_group)
 
-        rfq_not_acknowledge = [('state', '=', 'purchase'), ('acknowledged', '=', False)]
+        rfq_not_acknowledge = self._get_rfq_not_acknowledge_domain()
         rfq_not_acknowledge_group = self.env['purchase.order']._read_group(rfq_not_acknowledge, groupby, aggregate)
         _update('not_acknowledged', result, rfq_not_acknowledge_group)
 
