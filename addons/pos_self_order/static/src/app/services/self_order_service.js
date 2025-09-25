@@ -64,6 +64,7 @@ export class SelfOrder extends Reactive {
         this.currentCategory = null;
         this.productByCategIds = {};
         this.availableCategories = [];
+        this.preservedOrderState = null;
 
         this.initData();
         if (this.config.self_ordering_mode === "kiosk") {
@@ -302,6 +303,11 @@ export class SelfOrder extends Reactive {
             return;
         }
 
+        this.preservedOrderState = {
+            orderUuid: order.uuid,
+            lineChanges: { ...order.uiState.lineChanges },
+        };
+
         order = await this.sendDraftOrderToServer();
 
         if (!order) {
@@ -330,6 +336,21 @@ export class SelfOrder extends Reactive {
                 this.router.navigate("payment");
             }
         }
+    }
+
+    restoreOrderState() {
+        if (this.preservedOrderState) {
+            const { orderUuid, lineChanges } = this.preservedOrderState;
+            const currentOrder = this.currentOrder;
+
+            if (currentOrder.uuid === orderUuid) {
+                currentOrder.uiState.lineChanges = { ...lineChanges };
+            }
+
+            this.preservedOrderState = null;
+            return true;
+        }
+        return false;
     }
 
     get currentOrder() {

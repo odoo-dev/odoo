@@ -39,3 +39,19 @@ registry.category("web_tour.tours").add("test_online_payment_kiosk_qr_code", {
         Utils.checkQRCodeGenerated(),
     ],
 });
+
+registry.category("web_tour.tours").add("tour_kiosk_online_payment_cart_check", {
+    test: true,
+    steps: () => [
+        Utils.clickBtn("Order Now"),
+        ProductPage.clickProduct("Coca-Cola"),
+        ProductPage.clickProduct("Fanta"),
+        Utils.clickBtn("Checkout"),
+        CartPage.checkProduct("Coca-Cola", "2.53", "1"),
+        CartPage.checkProduct("Fanta", "2.53", "1"),
+        Utils.clickBtn("Pay"),
+        Utils.clickBtn("Back"),
+        CartPage.checkProduct("Coca-Cola", "2.53", "1"),
+        CartPage.checkProduct("Fanta", "2.53", "1"),
+    ],
+});
