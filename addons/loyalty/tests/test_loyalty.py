@@ -27,6 +27,16 @@ class TestLoyalty(TransactionCase):
             'list_price': 20.0,
         })
 
+    def create_program_with_code(self, code):
+        return self.env['loyalty.program'].create({
+            'name': 'Discount delivery',
+            'program_type': 'promo_code',
+            'rule_ids': [Command.create({
+                'code': code,
+                'minimum_amount': 0,
+            })],
+        })
+
     def test_loyalty_program_default_values(self):
         # Test that the default values are correctly set when creating a new program
         program = self.env['loyalty.program'].create({'name': "Test"})
@@ -310,3 +320,24 @@ class TestLoyalty(TransactionCase):
             "Free Product - [Test Product, Test Product 2]",
             "Reward description for reward with tag should be 'Free Product - [Test Product, Test Product 2]'"
         )
+
+    def test_prevent_unarchive_when_conflicting_active_program_exists(self):
+        """ Unarchiving a program should fail if another active program already has the same rule code."""
+        program = self.create_program_with_code("FREE")
+        program.action_archive()
+        # creating second program
+        self.create_program_with_code("FREE")
+        # unarchiving the first program
+        with self.assertRaises(ValidationError):
+            program.action_unarchive()
+
+    def test_prevent_unarchive_when_batch_contains_duplicate_codes(self):
+        """Unarchiving multiple programs at once should fail if they share the same rule code."""
+        program = self.create_program_with_code("FREE")
+        program.action_archive()
+        # creating second program
+        program2 = self.create_program_with_code("FREE")
+        program2.action_archive()
+        # unarchiving both programs
+        with self.assertRaises(ValidationError):
+            (program + program2).action_unarchive()
