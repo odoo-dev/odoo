@@ -373,6 +373,11 @@ export class FormOptionPlugin extends Plugin {
                 );
                 locationEl.insertAdjacentElement("beforebegin", renderField(_field));
             });
+            formInfo.fields?.forEach(field => {
+                if (field.defaultValue) {
+                    this.addHiddenField(el, field.defaultValue, field.name);
+                }
+            });
         }
     }
     /**
