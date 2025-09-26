@@ -14,24 +14,30 @@
                 </button>
                 <t t-set-slot="content">
                     <div class="o_tour_recorder p-2">
-                        <h4>Steps:</h4>
+                        <h4 class="ms-2">Steps:</h4>
                         <table class="table table-striped">
                             <thead>
                                 <tr>
                                     <td>n°</td>
                                     <td>trigger</td>
+                                    <td>run</td>
                                     <td></td>
                                 </tr>
                             </thead>
                             <tbody>
+                                <t t-set="stepsLength" t-value="state.steps.length"/>
                                 <t t-foreach="state.steps" t-as="step" t-key="step_index">
-                                    <tr class="o_tour_step" t-att-class="step.triggerNotUnique ? 'text-danger' : ''">
-                                        <td><t t-esc="step_index + 1"/>.</td>
+                                    <t t-set="revIndex" t-value="stepsLength - 1 - step_index"/>
+                                    <t t-set="revStep" t-value="state.steps[revIndex]"/>
+                                    <tr class="o_tour_step" t-att-class="revStep.triggerNotUnique ? 'text-danger' : ''">
+                                        <td><t t-esc="revIndex + 1"/>.</td>
                                         <td class="o_tour_step_trigger">
-                                            <t t-esc="step.trigger"/>
-                                            <span t-if="step.run and step.run != 'click'" class="fst-italic fw-lighter"><br/>(run: <t t-esc="step.run"/>) </span>
+                                            <t t-esc="revStep.trigger"/>
                                         </td>
-                                        <td><button class="o_button_delete_step btn btn-link text-danger fa fa-trash mx-1" t-on-click.prevent.stop="() => state.steps.splice(step_index, 1)"/></td>
+                                        <td class="fst-italic fw-lighter">
+                                            <t t-esc="revStep.run"/>
+                                        </td>
+                                        <td><button class="o_button_delete_step btn btn-link text-danger fa fa-trash mx-1" t-on-click.prevent.stop="() => this.removeStep(revIndex)"/></td>
                                     </tr>
                                 </t>
                             </tbody>

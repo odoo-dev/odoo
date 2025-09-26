@@ -7,10 +7,12 @@ import { Component, useState, useExternalListener } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { x2ManyCommands } from "@web/core/orm_service";
 import { tourRecorderState } from "./tour_recorder_state";
+import { capitalize } from "@web/core/utils/strings";
 
 const PRECISE_IDENTIFIERS = ["data-menu-xmlid", "name", "contenteditable"];
 const ODOO_CLASS_REGEX = /^oe?(-|_)[\w-]+$/;
 const VALIDATING_KEYS = ["Enter", "Tab"];
+const FORBIDDEN_TRIGGERS = [".o_loading"];
 
 /**
  * @param {EventTarget[]} paths composedPath of an click event
@@ -25,7 +27,7 @@ const getShortestSelector = (paths) => {
         (currentElem && queryAll(filteredPath.join(" > ")).length !== 1) || !hasOdooClass;
         currentElem = paths.pop()
     ) {
-        if (currentElem.parentElement.contentEditable === "true") {
+        if (currentElem.parentElement?.contentEditable === "true") {
             continue;
         }
 
@@ -139,7 +141,12 @@ export class TourRecorder extends Component {
             return;
         }
         const pathElements = ev.composedPath().filter((p) => p instanceof Element);
-        this.addTourStep([...pathElements]);
+        const trigger = getShortestSelector([...pathElements]);
+        const target = queryOne(trigger);
+        this.state.editedElement =
+            target.matches(
+                "input:not(:disabled), textarea:not(:disabled), [contenteditable=true]"
+            ) && target;
 
         const lastStepInput = this.state.steps.at(-1);
         // Check that pointerdown and pointerup paths are different to know if it's a drag&drop or a click
@@ -147,11 +154,15 @@ export class TourRecorder extends Component {
             JSON.stringify(pathElements.map((e) => e.tagName)) !==
             JSON.stringify(this.originClickEvent.map((e) => e.tagName))
         ) {
-            lastStepInput.run = `drag_and_drop ${lastStepInput.trigger}`;
-            lastStepInput.trigger = getShortestSelector(this.originClickEvent);
+            this.addStep({
+                trigger: getShortestSelector(this.originClickEvent),
+                run: `drag_and_drop ${lastStepInput.trigger}`,
+            });
         } else {
-            const lastStepInput = this.state.steps.at(-1);
-            lastStepInput.run = "click";
+            this.addStep({
+                trigger,
+                run: `click`,
+            });
         }
 
         tourRecorderState.setCurrentTourRecorder(this.state.steps);
@@ -176,7 +187,7 @@ export class TourRecorder extends Component {
             const selectedRow = queryFirst(".ui-state-active", {
                 root: this.state.editedElement.parentElement,
             });
-            this.state.steps.push({
+            this.addStep({
                 trigger: `.o-autocomplete--dropdown-item > a:contains('${selectedRow.textContent}'), .fa-circle-o-notch`,
                 run: "click",
             });
@@ -189,6 +200,19 @@ export class TourRecorder extends Component {
      * @param {KeyboardEvent} ev
      */
     recordKeyboardEvent(ev) {
+        if (
+            this.state.editedElement &&
+            this.state.recording &&
+            VALIDATING_KEYS.includes(ev.key) &&
+            !ev.target.closest(".o_tour_recorder")
+        ) {
+            this.addStep({
+                trigger: "body",
+                run: `press ${ev.key}`,
+            });
+            this.state.editedElement = undefined;
+        }
+
         if (
             !this.state.recording ||
             VALIDATING_KEYS.includes(ev.key) ||
@@ -204,16 +228,12 @@ export class TourRecorder extends Component {
                 )
             ) {
                 this.state.editedElement = ev.target;
-                this.state.steps.push({
+                this.addStep({
                     trigger: getShortestSelector(ev.composedPath()),
                 });
             } else {
                 return;
             }
-        }
-
-        if (!this.state.editedElement) {
-            return;
         }
 
         const lastStep = this.state.steps.at(-1);
@@ -260,18 +280,22 @@ export class TourRecorder extends Component {
         tourRecorderState.clear();
     }
 
-    /**
-     * @param {Element[]} path
-     */
-    addTourStep(path) {
-        const shortestPath = getShortestSelector(path);
-        const target = queryOne(shortestPath);
-        this.state.editedElement =
-            target.matches(
-                "input:not(:disabled), textarea:not(:disabled), [contenteditable=true]"
-            ) && target;
-        this.state.steps.push({
-            trigger: shortestPath,
-        });
+    addStep(step) {
+        if (FORBIDDEN_TRIGGERS.some((f) => step.trigger.includes(f))) {
+            return;
+        }
+        const previousStep = this.state.steps.at(-1);
+        const jsonPreviousStep = JSON.stringify(previousStep);
+        const jsonNewStep = JSON.stringify(step);
+        if (jsonNewStep === jsonPreviousStep) {
+            return;
+        }
+        step.content = step.content || `${step.run} on ${step.trigger}`;
+        step.content = capitalize(step.content);
+        this.state.steps.push(step);
+    }
+
+    removeStep(index) {
+        this.state.steps.splice(index, 1);
     }
 }
