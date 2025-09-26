@@ -39,6 +39,20 @@ import { NotificationMessage } from "./notification_message";
 import { useLongPress } from "@mail/utils/common/hooks";
 import { ActionList } from "@mail/core/common/action_list";
 
+let loadedDeferred;
+async function loadOdooIcons(targetDocument) {
+    if (!loadedDeferred) {
+        loadedDeferred = fetch(url("/web/static/lib/odoo_ui_icons/style.css"))
+            .then((response) => response.text())
+            .then((css) => {
+                const sheet = new CSSStyleSheet();
+                sheet.replaceSync(css);
+                return sheet;
+            });
+    }
+    const sheet = await loadedDeferred;
+    targetDocument.adoptedStyleSheets.push(sheet);
+}
 /**
  * @typedef {Object} Props
  * @property {boolean} [hasActions=true]
@@ -157,6 +171,7 @@ export class Message extends Component {
                 if (!this.store.isOdooWhiteTheme) {
                     this.shadowRoot.appendChild(shadowStyle);
                 }
+                loadOdooIcons(this.shadowRoot);
                 const ellipsisStyle = document.createElement("style");
                 ellipsisStyle.textContent = `
                     .o-mail-ellipsis {
