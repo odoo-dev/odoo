@@ -96,7 +96,10 @@ export class SplitBillScreen extends Component {
     }
 
     async paySplittedOrder() {
-        if (this.getNumberOfProducts() > 0) {
+        if (
+            this.getNumberOfProducts() > 0 &&
+            this.currentOrder.amount_total != this.newOrderPrice
+        ) {
             const originalOrder = this.currentOrder;
             await this.createSplittedOrder();
             originalOrder.setScreenData({ name: "SplitBillScreen" });
