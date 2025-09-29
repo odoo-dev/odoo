@@ -2344,8 +2344,8 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         refunded_order_line = self.env['pos.order.line'].search([('product_id', '=', product.id), ('qty', '=', -2)])
         self.assertEqual(refunded_order_line.total_cost, -20)
 
-    def test_cancel_order_with_past_preset(self):
-        # Test that cancelling an order with a past preset does not raise an error and does cancel the order.
+    def test_cancel_order_with_past_and_future_preset(self):
+        # Ensure orders with past or future presets can be cancelled.
         preset_takeaway = self.env['pos.preset'].create({
             'name': 'Takeaway',
         })
@@ -2370,14 +2370,16 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         })
         self.pos_config.open_ui()
         current_session = self.pos_config.current_session_id
+        product = self.env['product.product'].search([('available_in_pos', '=', True)], limit=1)
 
-        order = self.PosOrder.create({
+        # Case 1: Past preset order -> should cancel successfully
+        past_order = self.PosOrder.create({
             'company_id': self.env.company.id,
             'session_id': current_session.id,
             'partner_id': False,
             'lines': [(0, 0, {
                 'name': "OL/0001",
-                'product_id': self.env['product.product'].search([('available_in_pos', '=', True)], limit=1).id,
+                'product_id': product.id,
                 'price_unit': 49.99,
                 'discount': 0,
                 'qty': 1,
@@ -2385,7 +2387,6 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
                 'price_subtotal': 49.99,
                 'price_subtotal_incl': 49.99,
             })],
-            'pricelist_id': False,
             'amount_paid': 49.99,
             'amount_total': 49.99,
             'amount_tax': 0.0,
@@ -2395,8 +2396,38 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'preset_id': preset_takeaway.id,
             'preset_time': fields.Datetime.to_string(fields.Datetime.now() + timedelta(days=-2)),
         })
-        order.action_pos_order_cancel()
-        self.assertEqual(order.state, 'cancel')
+        past_order.action_pos_order_cancel()
+        self.assertEqual(past_order.state, 'cancel')
+
+        # Case 2: Future preset order -> cancel only from backend, not through POS
+        future_order = self.PosOrder.create({
+            'company_id': self.env.company.id,
+            'session_id': current_session.id,
+            'partner_id': False,
+            'lines': [(0, 0, {
+                'name': "OL/0002",
+                'product_id': product.id,
+                'price_unit': 29.99,
+                'discount': 0,
+                'qty': 1,
+                'tax_ids': [],
+                'price_subtotal': 29.99,
+                'price_subtotal_incl': 29.99,
+            })],
+            'amount_paid': 29.99,
+            'amount_total': 29.99,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': False,
+            'last_order_preparation_change': '{}',
+            'preset_id': preset_takeaway.id,
+            'preset_time': fields.Datetime.to_string(fields.Datetime.now() + timedelta(days=2)),
+        })
+        future_order.action_pos_order_cancel()
+        self.assertEqual(future_order.state, 'draft')
+
+        future_order.with_context(active_ids=[future_order.id]).action_pos_order_cancel()
+        self.assertEqual(future_order.state, 'cancel')
 
     def test_pos_order_partner_bank_id(self):
         # Setup a running session, with a paid pos order that is not invoiced
