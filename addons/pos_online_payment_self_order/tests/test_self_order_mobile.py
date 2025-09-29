@@ -57,7 +57,6 @@ class TestSelfOrderMobile(SelfOrderCommonTest, OnlinePaymentCommon):
         self.pos_config.write({
             'self_ordering_mode': 'mobile',
             'self_ordering_pay_after': 'each',
-            'self_ordering_service_mode': 'table',
             'self_order_online_payment_method_id': self.online_payment_method.id,
             'use_presets': False,
         })

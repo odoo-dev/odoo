@@ -333,7 +333,6 @@ registry.category("web_tour.tours").add("test_mobile_self_order_preparation_chan
             CartPage.checkProduct("Fanta", "2.53", "1"),
             CartPage.checkProduct("Coca-Cola", "2.53", "1"),
             Utils.clickBtn("Pay"),
-            CartPage.selectTable("3"),
             ConfirmationPage.isShown(),
             Utils.clickBtn("Ok"),
         ].flat(),

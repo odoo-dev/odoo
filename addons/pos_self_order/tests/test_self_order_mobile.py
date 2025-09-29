@@ -163,7 +163,6 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
         self.pos_config.write({
             'self_ordering_mode': 'mobile',
             'self_ordering_pay_after': 'each',
-            'self_ordering_service_mode': 'table',
             'use_presets': False,
         })
 

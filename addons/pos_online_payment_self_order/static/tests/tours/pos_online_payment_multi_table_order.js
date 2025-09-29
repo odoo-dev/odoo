@@ -39,9 +39,7 @@ registry.category("web_tour.tours").add("test_online_payment_pos_self_order_prep
             Chrome.clickOrders(),
             TicketScreen.checkStatus("Self-order", "Ongoing"),
             TicketScreen.selectOrder("Self-order"),
-            TicketScreen.loadSelectedOrder(),
-            ProductScreen.isShown(),
             ProductScreen.clickReview(),
-            ProductScreen.clickOrderButton(),
+            ProductScreen.orderlineIsToOrder("Fanta"),
         ].flat(),
 });
