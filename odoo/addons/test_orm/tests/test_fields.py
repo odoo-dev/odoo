@@ -1848,7 +1848,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         # sanitize should have closed tags left open in the original html for user0
         self.assertIn('</table>', record.with_user(user0).html2, 'Error in HTML field: content does not seem to have been sanitized despise sanitize=True')
         self.assertIn('</td>', record.with_user(user0).html2, 'Error in HTML field: content does not seem to have been sanitized despise sanitize=True')
-        self.assertNotIn('<tr class="', record.with_user(user0).html2, 'Class attr should have been stripped')
         self.assertNotIn('<tr style="', record.with_user(user0).html2, 'Style attr should have been stripped')
 
         record.with_user(user1).write({
@@ -1863,7 +1862,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         # sanitize should have closed tags left open in the original html for user1
         self.assertIn('</table>', record.with_user(user1).html2, 'Error in HTML field: content does not seem to have been sanitized despise sanitize=True')
         self.assertIn('</td>', record.with_user(user1).html2, 'Error in HTML field: content does not seem to have been sanitized despise sanitize=True')
-        self.assertNotIn('<tr class="', record.with_user(user1).html2, 'Class attr should have been stripped')
         self.assertNotIn('<tr style="', record.with_user(user1).html2, 'Style attr should have been stripped')
 
     def test_30_read(self):
@@ -3751,9 +3749,6 @@ class TestHtmlField(TransactionCase):
     def test_00_sanitize(self):
         self.assertEqual(self.model._fields['comment1'].sanitize, False)
         self.assertEqual(self.model._fields['comment2'].sanitize_attributes, True)
-        self.assertEqual(self.model._fields['comment2'].strip_classes, False)
-        self.assertEqual(self.model._fields['comment3'].sanitize_attributes, True)
-        self.assertEqual(self.model._fields['comment3'].strip_classes, True)
 
         some_ugly_html = """<p>Oops this should maybe be sanitized
 % if object.some_field and not object.oriented:
@@ -3775,20 +3770,12 @@ class TestHtmlField(TransactionCase):
         record = self.model.create({
             'comment1': some_ugly_html,
             'comment2': some_ugly_html,
-            'comment3': some_ugly_html,
             'comment4': some_ugly_html,
         })
 
         self.assertEqual(record.comment1, some_ugly_html, 'Error in HTML field: content was sanitized but field has sanitize=False')
 
         self.assertIn('<tr class="', record.comment2)
-
-        # sanitize should have closed tags left open in the original html
-        self.assertIn('</table>', record.comment3, 'Error in HTML field: content does not seem to have been sanitized despise sanitize=True')
-        self.assertIn('</td>', record.comment3, 'Error in HTML field: content does not seem to have been sanitized despise sanitize=True')
-        self.assertIn('<tr style="', record.comment3, 'Style attr should not have been stripped')
-        # sanitize does not keep classes if asked to
-        self.assertNotIn('<tr class="', record.comment3)
 
         self.assertNotIn('<tr style="', record.comment4, 'Style attr should have been stripped')
 

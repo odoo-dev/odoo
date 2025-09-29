@@ -307,9 +307,6 @@
                                         <field name="strip_style"
                                             invisible="ttype != 'html' or sanitize == False"
                                             readonly="ttype != 'html' or sanitize == False" />
-                                        <field name="strip_classes"
-                                            invisible="ttype != 'html' or sanitize == False"
-                                            readonly="ttype != 'html' or sanitize == False" />
                                     </group>
                                 </group>
                                 <group invisible="ttype not in ['selection', 'reference']" readonly="ttype not in ['selection', 'reference']">

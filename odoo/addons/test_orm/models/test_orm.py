@@ -371,8 +371,7 @@ class TestOrmMixed(models.Model):
         selection='_reference_models')
     comment0 = fields.Html()
     comment1 = fields.Html(sanitize=False)
-    comment2 = fields.Html(sanitize_attributes=True, strip_classes=False)
-    comment3 = fields.Html(sanitize_attributes=True, strip_classes=True)
+    comment2 = fields.Html(sanitize_attributes=True)
     comment4 = fields.Html(sanitize_attributes=True, strip_style=True)
     comment5 = fields.Html(sanitize_overridable=True, sanitize_attributes=False)
 
@@ -719,7 +718,7 @@ class TestOrmCompany(models.Model):
     count = fields.Integer(company_dependent=True)
     phi = fields.Float(company_dependent=True, digits=(2, 5))
     html1 = fields.Html(company_dependent=True, sanitize=False)
-    html2 = fields.Html(company_dependent=True, sanitize_attributes=True, strip_classes=True, strip_style=True)
+    html2 = fields.Html(company_dependent=True, sanitize_attributes=True, strip_style=True)
     company_id = fields.Many2one('res.company', company_dependent=True)  # child_of and parent_of is optimized
     partner_id = fields.Many2one('res.partner', company_dependent=True)
 

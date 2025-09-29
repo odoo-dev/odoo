@@ -576,7 +576,6 @@ class IrModelFields(models.Model):
     sanitize_style = fields.Boolean(string='Sanitize HTML Style', default=False)
     sanitize_form = fields.Boolean(string='Sanitize HTML Form', default=True)
     strip_style = fields.Boolean(string='Strip Style Attribute', default=False)
-    strip_classes = fields.Boolean(string='Strip Class Attribute', default=False)
 
 
     @api.depends('relation', 'relation_field')
@@ -1164,7 +1163,6 @@ class IrModelFields(models.Model):
             'sanitize_style': field.sanitize_style if field.type == 'html' else None,
             'sanitize_form': field.sanitize_form if field.type == 'html' else None,
             'strip_style': field.strip_style if field.type == 'html' else None,
-            'strip_classes': field.strip_classes if field.type == 'html' else None,
         }
 
     def _reflect_fields(self, model_names):
@@ -1278,7 +1276,6 @@ class IrModelFields(models.Model):
                 attrs['sanitize_style'] = field_data['sanitize_style']
                 attrs['sanitize_form'] = field_data['sanitize_form']
                 attrs['strip_style'] = field_data['strip_style']
-                attrs['strip_classes'] = field_data['strip_classes']
         elif field_data['ttype'] in ('selection', 'reference'):
             attrs['selection'] = self.env['ir.model.fields.selection']._get_selection_data(field_data['id'])
             if field_data['ttype'] == 'selection':

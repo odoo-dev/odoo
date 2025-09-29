@@ -553,7 +553,6 @@ class Html(BaseString):
     :param bool sanitize_output_method: whether to sanitize using html or xhtml (default: ``html``)
     :param bool strip_style: whether to strip style attributes
         (removed and therefore not sanitized, default: ``False``)
-    :param bool strip_classes: whether to strip classes attributes (default: ``False``)
     """
     type = 'html'
     _column_type = ('text', 'text')
@@ -567,7 +566,6 @@ class Html(BaseString):
     sanitize_conditional_comments: bool = True  # whether to kill conditional comments. Otherwise keep them but with their content sanitized.
     sanitize_output_method: str = 'html'      # whether to sanitize using html or xhtml
     strip_style: bool = False                 # whether to strip style attributes (removed and therefore not sanitized)
-    strip_classes: bool = False               # whether to strip classes attributes
 
     def _get_attrs(self, model_class, name):
         # called by _setup_attrs__(), working together with BaseString._setup_attrs__()
@@ -598,14 +596,12 @@ class Html(BaseString):
     _related_sanitize_attributes = property(attrgetter('sanitize_attributes'))
     _related_sanitize_style = property(attrgetter('sanitize_style'))
     _related_strip_style = property(attrgetter('strip_style'))
-    _related_strip_classes = property(attrgetter('strip_classes'))
 
     _description_sanitize = property(attrgetter('sanitize'))
     _description_sanitize_tags = property(attrgetter('sanitize_tags'))
     _description_sanitize_attributes = property(attrgetter('sanitize_attributes'))
     _description_sanitize_style = property(attrgetter('sanitize_style'))
     _description_strip_style = property(attrgetter('strip_style'))
-    _description_strip_classes = property(attrgetter('strip_classes'))
 
     def convert_to_column(self, value, record, values=None, validate=True):
         value = self._convert(value, record, validate=validate)
@@ -630,7 +626,6 @@ class Html(BaseString):
             'sanitize_conditional_comments': self.sanitize_conditional_comments,
             'output_method': self.sanitize_output_method,
             'strip_style': self.strip_style,
-            'strip_classes': self.strip_classes
         }
 
         if self.sanitize_overridable:
