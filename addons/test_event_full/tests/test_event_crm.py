@@ -176,3 +176,7 @@ class TestEventCrm(TestEventFullCommon):
         })
         self.assertIn(self.test_event.question_ids[1].answer_ids[0].name, event_registration.lead_ids[0].description,
             "lead description not updated with the answer to the question")
+
+    def test_event_crm_company_name_propagates_to_lead(self):
+        """Company name from registration should be set on the generated lead"""
+        pass
