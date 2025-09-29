@@ -1800,6 +1800,9 @@ export function makeActionManager(env, router = _router) {
                     actionState.resId = controller.currentState.resId || "new";
                 }
             }
+            if (action.target === "fullscreen") {
+                actionState.fullscreen = true;
+            }
             if (action.type === "ir.actions.client" && controller.currentState?.resId) {
                 actionState.resId = controller.currentState.resId;
             }
@@ -1816,7 +1819,7 @@ export function makeActionManager(env, router = _router) {
         const newState = {
             actionStack: actions,
         };
-        const stateKeys = [...PATH_KEYS];
+        const stateKeys = [...PATH_KEYS, "fullscreen"];
         const { action, props, currentState } = cStack.at(-1);
         if (props.type !== "form" && props.type !== action.views?.[0][1]) {
             // add view_type only when it's not already known implicitly

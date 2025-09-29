@@ -30,7 +30,7 @@ registry.category("actions").add("display_notification", displayNotificationActi
  * If action.params.action_id, it opens the given action.
  */
 function reload(env, action) {
-    const { menu_id, action_id } = action.params || {};
+    const { menu_id, action_id, fullscreen } = action.params || {};
     let route = { ...router.current };
 
     if (menu_id || action_id) {
@@ -40,6 +40,9 @@ function reload(env, action) {
         }
         if (action_id) {
             route.action = action_id;
+        }
+        if (fullscreen) {
+            route.fullscreen = true;
         }
     }
 

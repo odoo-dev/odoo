@@ -37,7 +37,7 @@ export class WebClient extends Component {
         }
         this.localization = localization;
         this.state = useState({
-            fullscreen: false,
+            fullscreen: !!router.current.fullscreen,
         });
         useBus(routerBus, "ROUTE_CHANGE", async () => {
             document.body.style.pointerEvents = "none";
@@ -77,9 +77,7 @@ export class WebClient extends Component {
 
             if (matchingMenus.length > 0) {
                 // Use sessionStorage context to determine the correct menu
-                menuId = matchingMenus.find(m => 
-                    m.appID === storedMenuId
-                )?.appID;
+                menuId = matchingMenus.find((m) => m.appID === storedMenuId)?.appID;
                 if (!menuId) {
                     menuId = matchingMenus[0]?.appID;
                 }
