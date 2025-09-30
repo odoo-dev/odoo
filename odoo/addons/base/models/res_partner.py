@@ -181,12 +181,14 @@ class ResPartner(models.Model):
     _description = 'Contact'
     _inherit = ['format.address.mixin', 'format.vat.label.mixin', 'avatar.mixin', 'properties.base.definition.mixin']
     _order = "complete_name ASC, id DESC"
-    _rec_names_search = ['complete_name', 'email', 'ref', 'vat', 'company_registry']  # TODO vat must be sanitized the same way for storing/searching
+    _rec_names_search = ['complete_name', 'email', 'ts']
     _allow_sudo_commands = False
     _check_company_domain = models.check_company_domain_parent_of
 
     # the partner types that must be added to a partner's complete name, like "Delivery"
     _complete_name_displayed_types = ('invoice', 'delivery', 'other')
+
+    ts = fields.TextSearch(source_fields=('complete_name', 'email'))
 
     def _default_category(self):
         return self.env['res.partner.category'].browse(self.env.context.get('category_id'))
