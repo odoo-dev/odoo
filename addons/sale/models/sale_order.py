@@ -357,10 +357,48 @@ class SaleOrder(models.Model):
         for order in self:
             order.require_payment = order.company_id.portal_confirmation_pay
 
-    @api.depends('require_payment')
+    @api.depends('require_payment', 'payment_term_id', 'company_id')
     def _compute_prepayment_percent(self):
+        """
+        Set prepayment_percent based on the selected payment term.
+        """
         for order in self:
-            order.prepayment_percent = order.company_id.prepayment_percent
+            if not order.require_payment:
+                order.prepayment_percent = order.company_id.prepayment_percent
+                continue
+
+            term = order.payment_term_id
+            if not term:
+                order.prepayment_percent = order.company_id.prepayment_percent
+                continue
+
+            def _is_now(line):
+                days = (getattr(line, 'days', 0) or getattr(line, 'nb_days', 0) or 0)
+                months = getattr(line, 'months', 0) or 0
+                return days == 0 and months == 0
+
+            p_now = 0.0
+            p_future = 0.0
+            has_balance_now = False
+
+            for ln in getattr(term, 'line_ids', []):
+                kind = ln.value            # 'percent' | 'fixed' | 'balance'
+                amt = float(ln.value_amount or 0.0)
+                if kind == 'balance' and _is_now(ln):
+                    has_balance_now = True
+                    continue
+                if kind in ('percent', 'fixed'):
+                    if _is_now(ln):
+                        p_now += amt
+                    else:
+                        p_future += amt
+
+            percent_now = p_now
+            if has_balance_now:
+                percent_now += max(0.0, 100.0 - p_future)
+
+            ratio = max(0.0, min(1.0, percent_now / 100.0))
+            order.prepayment_percent = ratio
 
     @api.depends('company_id')
     def _compute_validity_date(self):
