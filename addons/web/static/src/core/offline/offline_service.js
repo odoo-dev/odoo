@@ -11,9 +11,9 @@ const offlineSerice = {
         // TODO: Here we are going to depend on the first RPC that crash with a ConnectionLostError
         // Maybe could be interesting to be pro-active and call checkConnection at the beginning.
 
-        let closeNotification = () => {};
+        // let closeNotification = () => {};
         const offlineS = reactive({
-            offline: false,
+            offline: true,
             views: ["list", "kanban", "form"],
             setOffline: () => {
                 if (offlineS.offline) {
@@ -22,7 +22,7 @@ const offlineSerice = {
                     return;
                 }
                 offlineS.offline = true;
-                closeNotification = notification.add(_t("Connection lost."), {
+                notification.add(_t("Connection lost."), {
                     type: "danger",
                 });
                 let delay = 2000;
@@ -43,13 +43,14 @@ const offlineSerice = {
         });
 
         function setOnline() {
-            if (offlineS.offline) {
-                offlineS.offline = false;
-                closeNotification();
-                env.services.notification.add(_t("Connection restored."), {
-                    type: "success",
-                });
-            }
+            return;
+            // if (offlineS.offline) {
+            //     offlineS.offline = false;
+            //     closeNotification();
+            //     env.services.notification.add(_t("Connection restored."), {
+            //         type: "success",
+            //     });
+            // }
         }
 
         rpcBus.addEventListener("RPC:RESPONSE", (ev) => {
