@@ -97,6 +97,9 @@ export class ListController extends Component {
         this.optionalActiveFields = {};
 
         this.editedRecord = null;
+
+        this.offlineService = useState(useService("offline"));
+
         onWillRender(() => {
             this.editedRecord = this.model.root.editedRecord;
         });

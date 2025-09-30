@@ -162,6 +162,7 @@ export class FormController extends Component {
         this.orm = useService("orm");
         this.viewService = useService("view");
         this.ui = useService("ui");
+        this.offlineService = useState(useService("offline"));
         useBus(this.ui.bus, "resize", this.render);
 
         this.archInfo = this.props.archInfo;

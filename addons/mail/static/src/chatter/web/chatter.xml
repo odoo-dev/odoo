@@ -13,22 +13,24 @@
                         'btn-primary': state.composerType !== 'note',
                         'btn-secondary': state.composerType === 'note',
                         'active': state.composerType === 'message',
-                        'my-2': !props.compactHeight
-                    }" t-att-disabled="!state.thread.hasWriteAccess and !(state.thread.hasReadAccess and state.thread.canPostOnReadonly) and props.threadId" data-hotkey="m" t-on-click="() => this.toggleComposer('message')">
+                        'my-2': !props.compactHeight,
+                        'o_offline_cursor': offlineService.offline
+                    }" t-att-disabled="offlineService.offline or !state.thread.hasWriteAccess and !(state.thread.hasReadAccess and state.thread.canPostOnReadonly) and props.threadId" data-hotkey="m" t-on-click="() => this.toggleComposer('message')">
                         Send message
                     </button>
                     <button class="o-mail-Chatter-logNote btn text-nowrap me-1" t-att-class="{
                         'btn-primary active': state.composerType === 'note',
                         'btn-secondary': state.composerType !== 'note',
-                        'my-2': !props.compactHeight
-                    }" t-att-disabled="!state.thread.hasWriteAccess and !(state.thread.hasReadAccess and state.thread.canPostOnReadonly) and props.threadId" data-hotkey="shift+m" t-on-click="() => this.toggleComposer('note')">
+                        'my-2': !props.compactHeight,
+                        'o_offline_cursor': offlineService.offline
+                    }" t-att-disabled="offlineService.offline or !state.thread.hasWriteAccess and !(state.thread.hasReadAccess and state.thread.canPostOnReadonly) and props.threadId" data-hotkey="shift+m" t-on-click="() => this.toggleComposer('note')">
                         Log note
                     </button>
-                    <button t-if="props.has_activities" class="o-mail-Chatter-activity btn btn-secondary text-nowrap" t-att-class="{ 'my-2': !props.compactHeight }" data-hotkey="shift+a" t-on-click="scheduleActivity">
+                    <button t-if="props.has_activities" class="o-mail-Chatter-activity btn btn-secondary text-nowrap" t-att-class="{ 'my-2': !props.compactHeight, 'o_offline_cursor': offlineService.offline }" data-hotkey="shift+a" t-on-click="scheduleActivity" t-att-disabled="offlineService.offline">
                         <span>Activity</span>
                     </button>
                     <span class="o-mail-Chatter-topbarGrow flex-grow-1 pe-2"/>
-                    <button class="btn btn-link text-action" aria-label="Search Messages" title="Search Messages" t-on-click="onClickSearch">
+                        <button class="btn btn-link text-action" t-att-class="{'o_offline_cursor': offlineService.offline}" aria-label="Search Messages" title="Search Messages" t-on-click="onClickSearch" t-att-disabled="offlineService.offline">
                         <i class="oi oi-search" role="img"/>
                     </button>
                 </t>
@@ -43,7 +45,7 @@
                 <t t-else="" t-call="mail.Chatter.attachFiles"/>
                 <div class="o-mail-Followers d-flex me-1">
                     <Dropdown position="'bottom-end'" menuClass="'o-mail-Followers-dropdown ' + store.discussDropdownMenuClass(this)" state="followerListDropdown">
-                        <button t-att-class="'o-mail-Followers-button btn btn-link d-flex align-items-center text-action px-1 ' + (props.compactHeight ? '' : 'my-2') + ' ' + (state.thread.selfFollower ? 'active' : '')" t-att-disabled="isDisabled" t-att-title="followerButtonLabel">
+                        <button t-att-class="'o-mail-Followers-button btn btn-link d-flex align-items-center text-action px-1 ' + (props.compactHeight ? '' : 'my-2') + ' ' + (state.thread.selfFollower ? 'active' : '') + ' ' + (offlineService.offline ? 'o_offline_cursor' : '')" t-att-disabled="offlineService.offline or isDisabled" t-att-title="followerButtonLabel">
                             <i class="fa fa-fw" role="img" t-attf-class="{{ state.thread.selfFollower ? 'fa-user' : 'fa-user-o' }}"/>
                             <i t-if="state.thread.id and state.thread.followersCount === undefined" class="fa fa-circle-o-notch fa-spin"/>
                             <sup t-else="" class="o-mail-Followers-counter" t-esc="state.thread.followersCount ?? 0"/>
@@ -141,7 +143,7 @@
 </t>
 
 <t t-name="mail.Chatter.attachFiles">
-    <button class="o-mail-Chatter-attachFiles btn btn-link text-action px-1 d-flex align-items-center" aria-label="Attach files" t-att-class="{ 'my-2': !props.compactHeight }" t-on-click="onClickAddAttachments" t-att-disabled="state.isSearchOpen">
+    <button class="o-mail-Chatter-attachFiles btn btn-link text-action px-1 d-flex align-items-center" aria-label="Attach files" t-att-class="{ 'my-2': !props.compactHeight }" t-on-click="onClickAddAttachments" t-att-disabled="offlineService.offline or state.isSearchOpen">
         <i class="fa fa-paperclip fa-lg me-1"/>
         <sup t-if="attachments.length > 0" t-esc="attachments.length"/>
         <i t-if="!state.thread.areAttachmentsLoaded and state.thread.isLoadingAttachments and state.showAttachmentLoading" class="fa fa-circle-o-notch fa-spin" aria-label="Attachment counter loading..."/>

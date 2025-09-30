@@ -223,6 +223,7 @@ export class View extends Component {
         }
 
         this.viewService = useService("view");
+        this.offlineService = useService("offline");
         this.withSearchProps = null;
 
         useSubEnv({
@@ -341,9 +342,13 @@ export class View extends Component {
             }
         }
 
-        const jsClass = archXmlDoc.hasAttribute("js_class")
+        let jsClass = archXmlDoc.hasAttribute("js_class")
             ? archXmlDoc.getAttribute("js_class")
             : props.jsClass || type;
+
+        if (this.offlineService.offline) {
+            jsClass = type;
+        }
         if (!viewRegistry.contains(jsClass)) {
             await loadBundle(
                 cookie.get("color_scheme") === "dark"

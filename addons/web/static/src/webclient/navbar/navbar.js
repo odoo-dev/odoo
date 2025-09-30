@@ -15,6 +15,7 @@ import {
     useRef,
     useState,
     onWillUnmount,
+    onWillRender,
 } from "@odoo/owl";
 const systrayRegistry = registry.category("systray");
 
@@ -43,6 +44,16 @@ export class NavBar extends Component {
         this.pwa = useService("pwa");
         this.root = useRef("root");
         this.appSubMenus = useRef("appSubMenus");
+        this.offlineService = useState(useService("offline"));
+        onWillRender(() => {
+            if (this.root.el && this.offlineService.offline) {
+                this.root.el.querySelectorAll(".o_menu_systray button").forEach((el) => {
+                    el.setAttribute("disabled", "");
+                    el.classList.add("opacity-50");
+                    el.classList.add("o_offline_cursor");
+                });
+            }
+        });
         const debouncedAdapt = debounce(this.adapt.bind(this), 250);
         onWillDestroy(() => debouncedAdapt.cancel());
         useExternalListener(window, "resize", debouncedAdapt);

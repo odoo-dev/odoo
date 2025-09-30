@@ -6,7 +6,7 @@
             <div class="o_form_view_container">
                 <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                     <t t-set-slot="control-panel-create-button">
-                        <button t-if="canCreate" type="button" class="btn btn-outline-primary o_form_button_create" data-hotkey="c" t-on-click.stop="create">New</button>
+                        <button t-if="canCreate" type="button" class="btn btn-outline-primary o_form_button_create" data-hotkey="c" t-on-click.stop="create" t-att-disabled="offlineService.offline" t-att-class="{'o_offline_cursor': offlineService.offline}">New</button>
                     </t>
 
                     <t t-set-slot="layout-buttons">

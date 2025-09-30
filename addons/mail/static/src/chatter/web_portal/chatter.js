@@ -35,6 +35,7 @@ export class Chatter extends Component {
         });
         this.rootRef = useRef("root");
         this.onScrollDebounced = useThrottleForAnimation(this.onScroll);
+        this.offlineService = useState(useService("offline"));
         useChildSubEnv(this.childSubEnv);
 
         onMounted(this._onMounted);

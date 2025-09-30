@@ -5,7 +5,7 @@
         <div t-attf-class="{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }}" t-ref="root">
             <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
                 <t t-set-slot="control-panel-create-button">
-                    <button t-if="canCreate and props.showButtons" type="button" t-att-disabled="isNewButtonDisabled" class="btn btn-primary o-kanban-button-new" accesskey="c" t-on-click="() => this.createRecord()" data-bounce-button="">
+                    <button t-if="canCreate and props.showButtons" type="button" t-att-disabled="offlineService.offline or isNewButtonDisabled" class="btn btn-primary o-kanban-button-new" accesskey="c" t-on-click="() => this.createRecord()" data-bounce-button="" t-att-class="{'o_offline_cursor': offlineService.offline}">
                         New
                     </button>
                 </t>

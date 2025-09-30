@@ -2,7 +2,8 @@ import { registry } from "@web/core/registry";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { ActionMenus } from "@web/search/action_menus/action_menus";
 import { _t } from "@web/core/l10n/translation";
-import { onWillStart, onWillUpdateProps } from "@odoo/owl";
+import { onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -45,6 +46,7 @@ export class CogMenu extends ActionMenus {
         onWillUpdateProps(async () => {
             this.registryItems = await this._registryItems();
         });
+        this.offlineService = useState(useService("offline"));
     }
 
     get hasItems() {

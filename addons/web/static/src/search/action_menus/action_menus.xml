@@ -5,7 +5,7 @@
         <div class="o_cp_action_menus d-flex pe-2 gap-1">
             <div t-if="props.items.print?.length" class="d-inline-block">
                 <Dropdown beforeOpen.bind="loadPrintItems">
-                    <button class="btn btn-secondary" data-hotkey="shift+u">
+                    <button class="btn btn-secondary" t-att-class="{'o_offline_cursor': offlineService.offline}" data-hotkey="shift+u" t-att-disabled="offlineService.offline">
                         <i class="fa fa-print me-1"/>
                         <span class="o_dropdown_title" t-out="props.printDropdownTitle"/>
                     </button>
@@ -23,7 +23,7 @@
 
             <div t-if="actionItems.length" class="d-inline-block">
                 <Dropdown>
-                    <button class="btn btn-secondary" data-hotkey="u">
+                    <button class="btn btn-secondary" t-att-class="{'o_offline_cursor': offlineService.offline}" data-hotkey="u" t-att-disabled="offlineService.offline">
                         <i class="fa fa-cog me-1"/>
                         <span class="o_dropdown_title">Actions</span>
                     </button>

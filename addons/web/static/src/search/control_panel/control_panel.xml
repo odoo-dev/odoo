@@ -82,12 +82,13 @@
                         <t t-call="web.embeddedActionsDropdown" />
                     </t>
                     <div t-if="pagerProps and pagerProps.total > 0" class="o_cp_pager text-nowrap " role="search">
-                        <Pager t-props="pagerProps"/>
+                        <t t-component="pagerComponent" t-props="pagerProps"/>
                     </div>
                     <button t-if="state.embeddedInfos.embeddedActions?.length and !env.isSmall" name="embedded_actions" class="btn btn-secondary"
-                            t-att-class="{active: state.embeddedInfos.showEmbedded}"
+                            t-att-class="{active: state.embeddedInfos.showEmbedded, 'o_offline_cursor': offlineService.offline}"
                             t-on-click="onClickShowEmbedded"
-                            title="View related documents">
+                            title="View related documents"
+                            t-att-disabled="offlineService.offline">
                         <i class="fa fa-sliders" />
                     </button>
                     <t t-if="env.config.viewSwitcherEntries?.length > 1">
@@ -99,9 +100,13 @@
                                 </button>
                                 <t t-set-slot="content">
                                     <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
-                                        <DropdownItem onSelected="() => this.switchView(view.type)" class="view.active ? 'selected' : ''">
-                                            <i class="oi-fw" t-att-class="view.icon"/>
-                                            <span class="ms-1" t-out="view.name"/>
+                                        <DropdownItem 
+                                            tag="'button'"
+                                            attrs="{ disabled: offlineService.offline and !view.offlineAvailable}"
+                                            onSelected="() => this.switchView(view.type)"
+                                            class="view.active ? 'selected' : '' + ' ' + offlineService.offline ? 'o_offline_cursor' : ''">
+                                                <i class="oi-fw" t-att-class="view.icon"/>
+                                                <span class="ms-1" t-out="view.name"/>
                                         </DropdownItem>
                                     </t>
                                 </t>
@@ -111,9 +116,11 @@
                             <t t-foreach="env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
                                 <button class="btn btn-secondary o_switch_view "
                                     t-attf-class="o_{{view.type}} {{view.active ? 'active' : ''}}"
+                                    t-att-class="{'o_offline_cursor': offlineService.offline}"
                                     t-att-data-tooltip="view.name"
                                     t-custom-click="(ev, isMiddleClick) => this.switchView(view.type, isMiddleClick)"
                                     t-att-aria-label="view.name + ' View'"
+                                    t-att-disabled="offlineService.offline and !view.offlineAvailable"
                                 >
                                     <i class="oi-fw" t-att-class="view.icon" />
                                 </button>

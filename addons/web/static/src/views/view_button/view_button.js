@@ -1,5 +1,6 @@
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { useDropdownCloser } from "@web/core/dropdown/dropdown_hooks";
+import { useService } from "@web/core/utils/hooks";
 import { pick } from "@web/core/utils/objects";
 import { debounce as debounceFn } from "@web/core/utils/timing";
 
@@ -62,6 +63,7 @@ export class ViewButton extends Component {
     };
 
     setup() {
+        this.offlineService = useState(useService("offline"));
         if (this.props.icon) {
             this.icon = iconFromString(this.props.icon);
         }
@@ -104,7 +106,7 @@ export class ViewButton extends Component {
 
     get disabled() {
         const { name, type, special } = this.clickParams;
-        return (!name && !type && !special) || this.props.disabled;
+        return this.offlineService.offline || (!name && !type && !special) || this.props.disabled;
     }
 
     /**
@@ -158,6 +160,10 @@ export class ViewButton extends Component {
             if (this.props.size) {
                 classNames.push(`btn-${this.props.size}`);
             }
+        }
+        if (this.offlineService.offline) {
+            classNames.push("opacity-50");
+            classNames.push("o_offline_cursor");
         }
         return classNames.join(" ");
     }

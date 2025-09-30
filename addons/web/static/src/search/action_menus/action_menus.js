@@ -55,7 +55,8 @@ export class ActionMenus extends Component {
     setup() {
         this.orm = useService("orm");
         this.actionService = useService("action");
-        this.state = useState({ printItems: []})
+        this.offlineService = useState(useService("offline"));
+        this.state = useState({ printItems: [] });
         onWillStart(async () => {
             this.actionItems = await this.getActionItems(this.props);
         });
