@@ -36,6 +36,7 @@ from . import report_paperformat
 from . import ir_profile
 from . import image_mixin
 from . import avatar_mixin
+from . import full_text_search
 
 from . import res_country
 from . import res_lang
