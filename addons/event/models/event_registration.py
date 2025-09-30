@@ -265,6 +265,17 @@ class EventRegistration(models.Model):
         all_partner_ids = set(values['partner_id'] for values in vals_list if values.get('partner_id'))
         all_event_ids = set(values['event_id'] for values in vals_list if values.get('event_id'))
         for values in vals_list:
+            # Find the first answer where the related question is of type "company"
+            company_answer = next(
+                (
+                    ans[2] for ans in values.get('registration_answer_ids', [])
+                    if self.env['event.question'].browse(ans[2]['question_id']).question_type == 'company_name'
+                ),
+                None,
+            )
+            if company_answer:
+                values['company_name'] = company_answer.get('value_text_box')
+
             if not values.get('phone'):
                 continue
 

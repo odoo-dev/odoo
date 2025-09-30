@@ -3,6 +3,7 @@
 
 from unittest.mock import patch
 
+from odoo import Command
 from odoo.addons.base.tests.test_ir_cron import CronMixinCase
 from odoo.addons.event_crm.tests.common import TestEventCrmCommon
 from odoo.tests import tagged
@@ -234,3 +235,24 @@ class TestEventCrmFlow(TestEventCrmCommon, CronMixinCase):
         })
         self.assertEqual(len(self.test_rule_order.lead_ids), 1)
         self.assertEqual(len(test_rule_order_2.lead_ids), 0)
+
+    def test_event_crm_company_name_propagates_to_lead(self):
+        """Company name from registration should be set on the generated lead"""
+        test_event = self.event_0
+        # test_event.question_ids = [Command.clear()]
+        test_company_type_question = self.env['event.question'].create({
+            'title': 'Company Name',
+            'question_type': 'company_name',
+            'event_ids': [Command.set(test_event.ids)],
+            'once_per_order': True,
+        })
+        self.env["event.registration"].create({
+            "name": "Tony Stark",
+            "event_id": self.event_0.id,
+            "email": "tony.stark@test.example.com",
+            "registration_answer_ids": [Command.create({
+                "question_id": test_company_type_question.id,
+                "value_text_box": "Stark Industries",
+            })],
+        })
+        pass
