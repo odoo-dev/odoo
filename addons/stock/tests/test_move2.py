@@ -3930,3 +3930,92 @@ class TestAutoAssign(TestStockCommon):
         move.lot_ids = [(4, lot2.id)]
         move.lot_ids = [(4, lot3.id)]
         self.assertEqual(move.quantity, 3.0/12.0)
+
+class TestPickShipBackorder(TestStockCommon):
+
+    def setUp(self):
+        super(TestPickShipBackorder, self).setUp()
+        self.picking_type_out = self.env['stock.picking.type'].search([
+            ('code', '=', 'outgoing')
+        ], limit=1)
+        self.picking_type_out.use_create_lots = True
+        self.picking_type_out.write({'sequence_code': 'WH/OUT'})
+
+        self.product_lot = self.env['product.product'].create({
+            'name': 'Lot Product',
+            'type': 'product',
+            'tracking': 'lot',
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'uom_po_id': self.env.ref('uom.product_uom_unit').id,
+        })
+
+        self.lot1 = self.env['stock.lot'].create({
+            'name': 'LOT001',
+            'product_id': self.product_lot.id,
+        })
+        self.lot2 = self.env['stock.lot'].create({
+            'name': 'LOT002',
+            'product_id': self.product_lot.id,
+        })
+
+        self.stock_location = self.env.ref('stock.stock_location_stock')
+
+        self.env['stock.quant']._update_available_quantity(self.product_lot, self.stock_location, 5.0, lot_id=self.lot1)
+        self.env['stock.quant']._update_available_quantity(self.product_lot, self.stock_location, 5.0, lot_id=self.lot2)
+
+    def test_pick_assign_and_backorder(self):
+        picking = self.env['stock.picking'].create({
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.ref('stock.stock_location_output'),
+            'picking_type_id': self.picking_type_out.id,
+        })
+
+        move = self.env['stock.move'].create({
+            'name': self.product_lot.name,
+            'product_id': self.product_lot.id,
+            'product_uom_qty': 10.0,
+            'product_uom': self.product_lot.uom_id.id,
+            'picking_id': picking.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.ref('stock.stock_location_output'),
+        })
+
+        picking.action_confirm()
+        picking.action_assign()
+
+        move_line_obj = picking.move_ids.move_line_ids
+
+        move_line_obj[0].write({'quantity': 1.0, 'lot_id': self.lot1})
+        move_line_obj[1].write({'quantity': 3.0, 'lot_id': self.lot2})
+
+        package = self.env['stock.quant.package'].create({'name': 'PKG1'})
+
+        move_line_obj.create({
+            'picking_id': picking.id,
+            'move_id': move.id,
+            'product_id': self.product_lot.id,
+            'lot_id': self.lot1.id,
+            'quantity': 2.0,
+            'package_id': package.id,
+        })
+
+        picking.move_ids[0].picked = True
+        picking._action_done()
+
+        backorder = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+
+        self.assertTrue(backorder, "Backorder should exist")
+
+        backorder.action_assign()
+
+        backorder.move_ids.move_line_ids.write({'quantity': 2.0, 'lot_id': self.lot1})
+        backorder.move_ids.move_line_ids.create({
+            'picking_id': backorder.id,
+            'move_id': backorder.move_ids[0].id,
+            'product_id': self.product_lot.id,
+            'lot_id': self.lot2.id,
+            'quantity': 2.0,
+        })
+
+        backorder.button_validate()
+        self.assertEqual(backorder.state, 'done')
