@@ -109,14 +109,18 @@ describe("Selection collapsed", () => {
                 contentBefore: "<div><p>ab</p><br><i>c[]</i></div>",
                 stepFunction: deleteBackward,
                 contentAfterEdit:
-                    '<div><p>ab</p><br><i data-oe-zws-empty-inline="">[]\u200B</i></div>',
+                    '<p data-selection-placeholder=""><br></p>' +
+                    '<div><p>ab</p><br><i data-oe-zws-empty-inline="">[]\u200B</i></div>' +
+                    '<p data-selection-placeholder=""><br></p>',
                 contentAfter: "<div><p>ab</p><br><br>[]</div>",
             });
             await testEditor({
                 contentBefore: '<div><p>uv</p><br><span class="style">w[]</span></div>',
                 stepFunction: deleteBackward,
                 contentAfterEdit:
-                    '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>',
+                    '<p data-selection-placeholder=""><br></p>' +
+                    '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>' +
+                    '<p data-selection-placeholder=""><br></p>',
                 contentAfter: '<div><p>uv</p><br><span class="style">[]\u200B</span></div>',
             });
             await testEditor({
@@ -125,7 +129,10 @@ describe("Selection collapsed", () => {
                     deleteBackward(editor);
                     await insertText(editor, "x");
                 },
-                contentAfterEdit: '<div><p>cd</p><br><span class="a">x[]</span></div>',
+                contentAfterEdit:
+                    '<p data-selection-placeholder=""><br></p>' +
+                    '<div><p>cd</p><br><span class="a">x[]</span></div>' +
+                    '<p data-selection-placeholder=""><br></p>',
                 contentAfter: '<div><p>cd</p><br><span class="a">x[]</span></div>',
             });
         });
@@ -1568,7 +1575,9 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
             },
             contentAfterEdit:
-                '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
+                '<p data-selection-placeholder=""><br></p>' +
+                '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>' +
+                '<p data-selection-placeholder=""><br></p>',
             contentAfter: '<div><p>ab <span class="style">[]\u200B</span> d</p></div>',
         });
         await testEditor({
@@ -1577,7 +1586,10 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
                 await insertText(editor, "x");
             },
-            contentAfterEdit: '<div><p>ab <span class="style">x[]</span> d</p></div>',
+            contentAfterEdit:
+                '<p data-selection-placeholder=""><br></p>' +
+                '<div><p>ab <span class="style">x[]</span> d</p></div>' +
+                '<p data-selection-placeholder=""><br></p>',
             contentAfter: '<div><p>ab <span class="style">x[]</span> d</p></div>',
         });
         await testEditor({
@@ -1586,7 +1598,9 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
             },
             contentAfterEdit:
-                '<div><p>ab <span data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
+                '<p data-selection-placeholder=""><br></p>' +
+                '<div><p>ab <span data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>' +
+                '<p data-selection-placeholder=""><br></p>',
             contentAfter: "<div><p>ab []&nbsp;d</p></div>",
         });
         await testEditor({
@@ -1595,7 +1609,10 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
                 await insertText(editor, "x");
             },
-            contentAfterEdit: '<div><p>ab<span class="style">x[]</span>d</p></div>',
+            contentAfterEdit:
+                '<p data-selection-placeholder=""><br></p>' +
+                '<div><p>ab<span class="style">x[]</span>d</p></div>' +
+                '<p data-selection-placeholder=""><br></p>',
             contentAfter: '<div><p>ab<span class="style">x[]</span>d</p></div>',
         });
         await testEditor({
@@ -1604,7 +1621,10 @@ describe("Selection not collapsed", () => {
                 deleteBackward(editor);
                 await insertText(editor, "x");
             },
-            contentAfterEdit: '<div><p>ab <span class="style">x[]</span> f</p></div>',
+            contentAfterEdit:
+                '<p data-selection-placeholder=""><br></p>' +
+                '<div><p>ab <span class="style">x[]</span> f</p></div>' +
+                '<p data-selection-placeholder=""><br></p>',
             contentAfter: '<div><p>ab <span class="style">x[]</span> f</p></div>',
         });
     });
