@@ -1,0 +1,18 @@
+.field-history {
+    left: -12px;
+    place-content: center;
+    place-items: center;
+}
+
+.field-history .fa-history {
+  opacity: 0;
+}
+
+.hr-field:not(:has(.hr-property)):hover .field-history, .hr-property:hover .field-history {
+    .fa-history {
+        opacity: 1;
+    }
+    .fa-circle {
+        opacity: 0;
+    }
+}

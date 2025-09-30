@@ -3,6 +3,7 @@
 import re
 
 from collections import defaultdict
+from itertools import tee, chain
 
 from pytz import timezone, UTC, utc
 from datetime import datetime, time, timedelta, date
@@ -14,7 +15,7 @@ from markupsafe import Markup
 from odoo import api, fields, models, _, tools
 from odoo.fields import Domain
 from odoo.exceptions import ValidationError, AccessError, RedirectWarning, UserError
-from odoo.tools import convert, format_time, email_normalize, SQL, Query
+from odoo.tools import convert, format_time, email_normalize, SQL, Query, format_amount
 from odoo.tools.intervals import Intervals
 from odoo.addons.hr.models.hr_version import format_date_abbr
 from odoo.addons.mail.tools.discuss import Store
@@ -1744,6 +1745,65 @@ class HrEmployee(models.Model):
 
         remaining = 100.0 - allocated
         return max(0.0, remaining)
+
+    def get_formatted_field_differences(self):
+
+        def get_field_value(field_value, field_name, field_info, raw_value=None):
+            if raw_value is not None: return raw_value
+            if field_info.type != "boolean":
+                raw_value = field_value or "Not Set"
+            else:
+                raw_value = field_value
+            if field_info.type == "many2one":
+                raw_value = field_value.name or "Not Set"
+            elif field_info.type == "monetary":
+                raw_value = format_amount(self.env, field_value, self.currency_id)
+            elif field_info.type == "selection":
+                raw_value = dict(field_info._description_selection(self.env)).get(field_value) or "Not Set"
+            elif field_info.type == "properties":
+                raw_value = {
+                    key: value for key, value in field_value._values.items() if not key.startswith('separator_')
+                }
+            return raw_value
+
+        self.ensure_one()
+        non_tracked_fields = ['date_version', 'contract_date_start', 'contract_date_end']
+        res = defaultdict(lambda: defaultdict(dict))
+        all_fields = self.version_id._fields
+        all_version_normal, all_version_shifted = tee(self.version_ids)
+        first_version = next(all_version_shifted, None)
+        all_version_shifted = chain(all_version_shifted, [None])
+        for current_version, next_version in zip(all_version_normal, all_version_shifted):
+            if not next_version:
+                continue
+            for field_name, field_info in all_fields.items():
+                if current_version[field_name] != next_version[field_name] and hasattr(field_info, 'inherited') and field_name not in non_tracked_fields:
+                    first_field_value = next_field_value = None
+                    if field_info.type == "properties":
+                        all_properties = first_version[field_name].record.structure_id.version_properties_definition
+                        first_field_value = dict(current_version[field_name]._values)
+                        first_field_value |= { property_info['name']: 0 for property_info in all_properties if property_info['name'] not in first_field_value or property_info['type'] != 'boolean' }
+                        current_field_value = dict(current_version[field_name]._values)
+                        next_field_value = dict(next_version[field_name]._values)
+                        for key, value in current_field_value.items():
+                            if key in next_field_value and next_field_value[key] == value:
+                                del next_field_value[key]
+                    if field_name not in res:
+                        res[field_name][str(first_version.date_version)] = {
+                            'version_id': first_version.id,
+                            'date_version': first_version.date_version,
+                            'value': first_version[field_name],
+                            'formatted_date': str(first_version.display_name),
+                            'formatted_value': get_field_value(first_version[field_name], field_name, field_info, first_field_value),
+                        }
+                    res[field_name][str(next_version.date_version)] = {
+                        'version_id': next_version.id,
+                        'date_version': next_version.date_version,
+                        'value': next_version[field_name],
+                        'formatted_date': str(next_version.display_name),
+                        'formatted_value': get_field_value(next_version[field_name], field_name, field_info, next_field_value),
+                    }
+        return res
 
     def action_open_allocation_wizard(self):
         self.ensure_one()

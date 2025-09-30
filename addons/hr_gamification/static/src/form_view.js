@@ -1,10 +1,8 @@
-import { registry } from "@web/core/registry";
-import { formView } from "@web/views/form/form_view";
-import { FormRenderer } from "@web/views/form/form_renderer";
-import { EmployeeFormController } from "@hr/views/form_view";
+import { EmployeeFormRenderer } from "@hr/views/form_view";
 import { onMounted } from "@odoo/owl";
+import { patch } from "@web/core/utils/patch";
 
-class BadgeTabRenderer extends FormRenderer {
+patch(EmployeeFormRenderer, {
     setup() {
         super.setup();
 
@@ -31,13 +29,5 @@ class BadgeTabRenderer extends FormRenderer {
                 }
             }
         });
-    }
-}
-
-const hrEmployeeFormView = {
-    ...formView,
-    Controller: EmployeeFormController,
-    Renderer: BadgeTabRenderer,
-}
-
-registry.category("views").add("hr_employee_form", hrEmployeeFormView, { force: true });
+    },
+});

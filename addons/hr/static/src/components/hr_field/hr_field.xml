@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr.HrField">
+        <div class="hr-field position-relative" t-att-name="props.name" t-att-class="classNames" t-att-style="props.style" t-att-data-tooltip-template="tooltip and 'web.FieldTooltip'" t-att-data-tooltip-info="tooltip">
+            <span class="field-history position-absolute d-flex text-info cursor-pointer" style="width: 10px !important; height: 10px !important;"
+                  t-if="isFieldHistory" t-on-click.prevent.stop="onClickHistory">
+                <i class="fa fa-history position-absolute" style="font-size: 0.85em;" t-if="isFieldHistory"/>
+                <i class="fa fa-circle position-absolute" style="font-size: 0.3em;" t-if="isFieldDifferent"/>
+            </span>
+            <t t-component="field.component" t-props="fieldComponentProps"/>
+        </div>
+    </t>
+
+    <t t-name="hr.HrFieldDifferences">
+        <div class="p-2 d-flex flex-column">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th class="py-1 text-end">Effective Date</th>
+                        <th class="py-1" t-att-class="{'text-end': props.fieldType === 'monetary'}" t-out="props.fieldName"/>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="Object.values(props.fieldDifferences)" t-as="difference" t-key="id">
+                        <tr t-att-class="{ 'fw-bold': difference.version_id === props.currentVersionId }">
+                            <td t-att-class="{'border-bottom-0': difference_index === Object.values(props.fieldDifferences).length - 1}"
+                                class="py-1 text-end"
+                                t-out="difference.formatted_date"/>
+                            <td t-att-class="{
+                                    'border-bottom-0': difference_index === Object.values(props.fieldDifferences).length - 1,
+                                    'text-end': props.fieldType === 'monetary'
+                                }"
+                                class="py-1"
+                                t-out="difference.formatted_value"/>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </t>
+</templates>
