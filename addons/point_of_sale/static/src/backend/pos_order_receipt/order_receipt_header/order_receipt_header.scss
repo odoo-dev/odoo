@@ -1,0 +1,10 @@
+.pos-receipt-logo {
+    width: 35%;
+    display: block;
+    margin: auto;
+}
+@media screen and (min-width:728px) {
+    .pos-receipt-logo {
+        width: 20%;
+    }
+}

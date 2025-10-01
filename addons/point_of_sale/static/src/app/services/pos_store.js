@@ -8,7 +8,7 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { deduceUrl, random5Chars, uuidv4, Counter } from "@point_of_sale/utils";
 import { HWPrinter } from "@point_of_sale/app/utils/printer/hw_printer";
 import { ConnectionLostError } from "@web/core/network/rpc";
-import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
+import { POSOrderReceipt } from "@point_of_sale/backend/pos_order_receipt/pos_order_receipt";
 import { _t } from "@web/core/l10n/translation";
 import { OpeningControlPopup } from "@point_of_sale/app/components/popups/opening_control_popup/opening_control_popup";
 import { SelectLotPopup } from "@point_of_sale/app/components/popups/select_lot_popup/select_lot_popup";
@@ -1681,7 +1681,7 @@ export class PosStore extends WithLazyGetterTrap {
         printBillActionTriggered = false,
     } = {}) {
         const result = await this.printer.print(
-            OrderReceipt,
+            POSOrderReceipt,
             {
                 order,
                 basic_receipt: basic,

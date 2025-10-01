@@ -83,6 +83,9 @@
             'point_of_sale/static/src/backend/pos_payment_provider_cards/*',
             'point_of_sale/static/src/app/hooks/hooks.js',
             'point_of_sale/static/src/backend/many2many_placeholder_list_view/*',
+            'point_of_sale/static/src/backend/pos_order_receipt/**/*',
+            'point_of_sale/static/src/backend/order_display/**/*',
+            'point_of_sale/static/src/backend/orderline/**/*',
         ],
         "web.assets_web_dark": [
             'point_of_sale/static/src/scss/pos_dashboard.dark.scss',
@@ -180,6 +183,9 @@
             'point_of_sale/static/src/**/*',
             ('remove', 'point_of_sale/static/src/backend/**/*'),
             ('remove', 'point_of_sale/static/src/customer_display/**/*'),
+            'point_of_sale/static/src/backend/pos_order_receipt/**/*',
+            'point_of_sale/static/src/backend/orderline/**/*',
+            'point_of_sale/static/src/backend/order_display/**/*',
             'point_of_sale/static/src/customer_display/utils.js',
             # main.js boots the pos app, it is only included in the prod bundle as tests mount the app themselves
             ('remove', 'point_of_sale/static/src/app/main.js'),

@@ -14,6 +14,7 @@ import pytz
 
 from odoo import api, fields, models, tools, _
 from odoo.tools import float_is_zero, float_round, float_repr, float_compare, formatLang
+from odoo.tools.image import image_data_uri
 from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Command, Domain
 import base64
@@ -1312,6 +1313,139 @@ class PosOrder(models.Model):
                 'default_template_id': template.id,
             },
             'target': 'new'
+        }
+
+    def print_order_receipt(self):
+        config = self.config_id
+        partner = self.partner_id
+        data = {
+            "headerData": {
+                "logo": image_data_uri(self.config_id.company_id.logo),
+                "pos_reference": self.pos_reference,
+                "date_order": self.date_order,
+                "cashier": self.user_id.name.split()[0] if self.user_id else "",
+                "preset_id": self.preset_id.id if self.preset_id else False,
+                "preset_name": self.preset_id.name if self.preset_id else "",
+                "presetDateTime": self.preset_id.preset_time if self.preset_id else "",
+                "preset_identifier": self.preset_id.identification if self.preset_id else "",
+                "tracking_number": self.tracking_number,
+                "receipt_header": config.receipt_header,
+                "is_restaurant": config.module_pos_restaurant,
+                "_IS_VAT": self.env.company.country_id.id in self.env.ref("base.europe").country_ids.ids,
+                "displayTrackingNumber": config.module_pos_restaurant,
+                "displayBigTrackingNumber": False,
+            },
+        }
+        order_data = {}
+        order_data["lines"] = []
+        for line in self.lines:
+            line_data = {
+                "name": line.name,
+                "order_id": {
+                    "config": {
+                        "iface_tax_included": config.iface_tax_included,
+                        "currency_id": {
+                            "id": config.company_id.currency_id.id,
+                            "name": config.company_id.currency_id.name,
+                        },
+                    },
+                },
+                "combo_parent_id": line.combo_parent_id.id if line.combo_parent_id else "",
+                "qty": line.qty,
+                "price": line.price_unit,
+                "discount": line.discount,
+                "tax_ids": [{"id": tax.id, "name": tax.name} for tax in line.tax_ids],
+                "company": {
+                    "id": config.company_id.id,
+                    "name": config.company_id.name,
+                    "currency_id": {
+                        "rounding": config.company_id.currency_id.rounding,
+                    },
+                    "account_fiscal_country_id": {
+                        "code": config.company_id.account_fiscal_country_id.code,
+                    }
+                },
+                "product_id": {
+                    "id": line.product_id.id,
+                    "name": line.product_id.name,
+                    "taxes_id": [{"id": tax.id, "name": tax.name} for tax in line.product_id.taxes_id],
+                    "uom_id": {
+                        "id": line.product_id.uom_id.id if line.product_id.uom_id else "",
+                        "name": line.product_id.uom_id.name if line.product_id.uom_id else "",
+                    },
+                },
+                "config": {
+                    "iface_tax_included": config.iface_tax_included,
+                    "currency_id": {
+                        "id": config.company_id.currency_id.id,
+                        "name": config.company_id.currency_id.name,
+                    },
+                },
+                "full_product_name": line.full_product_name,
+                "combo_line_ids": [
+                    {
+                        "qty": cl.qty,
+                        "product_id": {
+                            "id": cl.product_id.id,
+                            "name": cl.product_id.name,
+                            "taxes_id": [{"id": tax.id, "name": tax.name} for tax in cl.product_id.taxes_id],
+                        },
+                        "tax_ids": [{"id": tax.id, "name": tax.name} for tax in cl.tax_ids],
+                        "company": {
+                            "id": config.company_id.id,
+                            "name": config.company_id.name,
+                        },
+                    }
+                    for cl in line.combo_line_ids
+                ],
+                "custom_attribute_value_ids": [
+                    {
+                        "custom_product_template_attribute_value_id": {
+                            "id": av.custom_product_template_attribute_value_id.id,
+                            "name": av.custom_product_template_attribute_value_id.name,
+                        },
+                    }
+                    for av in line.custom_attribute_value_ids
+                ],
+                "attribute_value_ids": [
+                    {
+                        "id": av.id,
+                        "name": av.name,
+                        "is_custom": av.is_custom,
+                        "attribute_id": {
+                            "id": av.attribute_id.id,
+                            "name": av.attribute_id.name,
+                        },
+                    }
+                    for av in line.attribute_value_ids
+                ],
+            }
+            order_data["lines"].append(line_data)
+
+        data["order"] = order_data
+
+        if partner:
+            partner_address = (
+                ", ".join(filter(None, (partner.pos_contact_address or "").split("\n")))
+                if partner.pos_contact_address
+                else ""
+            )
+
+            data["headerData"]["partner"] = {
+                "id": partner.id,
+                "name": partner.name,
+                "parent_name": partner.parent_name,
+                "pos_contact_address": partner.pos_contact_address,
+                "vat": partner.vat,
+                "partnerAddress": partner_address,
+            }
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "pos_order_receipt",
+            "params": {
+                "data": data,
+            },
         }
 
     def action_send_receipt(self, email, ticket_image, basic_image):

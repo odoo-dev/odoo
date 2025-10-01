@@ -1,7 +1,7 @@
 import { Component } from "@odoo/owl";
-import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
+import { Orderline } from "@point_of_sale/backend/orderline/orderline";
 import { ReceiptHeader } from "@point_of_sale/app/screens/receipt_screen/receipt/receipt_header/receipt_header";
-import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
+import { OrderDisplay } from "@point_of_sale/backend/order_display/order_display";
 import { qrCodeSrc } from "@point_of_sale/utils";
 import { _t } from "@web/core/l10n/translation";
 import { formatCurrency } from "@web/core/currency";

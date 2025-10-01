@@ -2,10 +2,8 @@ import { registry } from "@web/core/registry";
 import { constructFullProductName, constructAttributeString } from "@point_of_sale/utils";
 import { Base } from "./related_models";
 import { parseFloat } from "@web/views/fields/parsers";
-import { formatFloat } from "@web/core/utils/numbers";
 import { formatCurrency } from "./utils/currency";
 import { _t } from "@web/core/l10n/translation";
-import { localization as l10n } from "@web/core/l10n/localization";
 import { getTaxesAfterFiscalPosition } from "@point_of_sale/app/models/utils/tax_utils";
 import { accountTaxHelpers } from "@account/helpers/account_tax";
 
@@ -65,40 +63,6 @@ export class PosOrderline extends Base {
 
     get preparationKey() {
         return this.uuid;
-    }
-
-    get quantityStr() {
-        let unitPart = "";
-        let decimalPart = "";
-        const unit = this.product_id.uom_id;
-        const decimalPoint = l10n.decimalPoint;
-
-        if (unit) {
-            if (unit.rounding) {
-                const ProductUnit = this.models["decimal.precision"].find(
-                    (dp) => dp.name === "Product Unit"
-                );
-
-                if (this.qty % 1 === 0) {
-                    unitPart = this.qty.toFixed(0);
-                } else {
-                    const formatted = formatFloat(this.qty, { digits: [69, ProductUnit.digits] });
-                    const parts = formatted.split(decimalPoint);
-                    unitPart = parts[0];
-                    decimalPart = parts[1] || "";
-                }
-            } else {
-                unitPart = this.qty.toFixed(0);
-            }
-        } else {
-            unitPart = "" + this.qty;
-        }
-        return {
-            qtyStr: unitPart + (decimalPart ? decimalPoint + decimalPart : ""),
-            unitPart: unitPart,
-            decimalPoint: decimalPoint,
-            decimalPart: decimalPart,
-        };
     }
 
     get company() {
@@ -682,9 +646,6 @@ export class PosOrderline extends Base {
     }
     getQuantity() {
         return this.qty;
-    }
-    getQuantityStr() {
-        return this.quantityStr;
     }
     getUnit() {
         return this.product_id.uom_id;

@@ -59,13 +59,13 @@
                     </div>
                     <div class="pos-receipt-container d-flex flex-grow-1 flex-lg-grow-0 w-100 w-lg-50 user-select-none justify-content-center bg-200 text-center overflow-hidden">
                         <div t-att-class="{ 'w-50': !ui.isSmall }" class="d-inline-block m-2 m-lg-3 p-3 border rounded text-start overflow-y-auto">
-                            <OrderReceipt order="this.currentOrder" />
+                            <POSOrderReceipt data="this.receiptData" />
                         </div>
                     </div>
                 </div>
                 <div  id="action_btn_mobile" t-if="ui.isSmall" class="switchpane d-flex gap-2 p-2">
                     <div class="btn-switchpane validation-button btn btn-primary btn-lg py-3 flex-fill lh-lg" t-att-class="{ highlight: !locked }" t-on-click="() => this.pos.orderDone(this.currentOrder)" name="done">
-                                New Order
+                        New Order
                     </div>
                 </div>
             </div>

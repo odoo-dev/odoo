@@ -1,14 +1,15 @@
 import { Component, useEffect, useRef } from "@odoo/owl";
-import { CenteredIcon } from "@point_of_sale/app/components/centered_icon/centered_icon";
-import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
+// import { CenteredIcon } from "@point_of_sale/app/components/centered_icon/centered_icon";
+import { Orderline } from "@point_of_sale/backend/orderline/orderline";
 import { formatCurrency } from "@web/core/currency";
 import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
 import { BadgeTag } from "@web/core/tags_list/badge_tag";
 
 // This methods is service-less, see PoS knowledges for more information
 export class OrderDisplay extends Component {
     static template = "point_of_sale.OrderDisplay";
-    static components = { CenteredIcon, Orderline, BadgeTag };
+    static components = { Orderline, BadgeTag };
     static props = {
         order: Object,
         slots: Object,
@@ -43,3 +44,5 @@ export class OrderDisplay extends Component {
         return JSON.parse(this.props.order.internal_note || "[]");
     }
 }
+
+registry.category("actions").add("pos_order_display", OrderDisplay);

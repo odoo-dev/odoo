@@ -7,7 +7,7 @@ import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/action_pad/action_pad";
 import { BackButton } from "@point_of_sale/app/screens/product_screen/action_pad/back_button/back_button";
 import { InvoiceButton } from "@point_of_sale/app/screens/ticket_screen/invoice_button/invoice_button";
-import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
+import { Orderline } from "@point_of_sale/backend/orderline/orderline";
 import { CenteredIcon } from "@point_of_sale/app/components/centered_icon/centered_icon";
 import { SearchBar } from "@point_of_sale/app/screens/ticket_screen/search_bar/search_bar";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
@@ -22,7 +22,7 @@ import {
 import { PosOrderLineRefund } from "@point_of_sale/app/models/pos_order_line_refund";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
-import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
+import { OrderDisplay } from "@point_of_sale/backend/order_display/order_display";
 import { BarcodeVideoScanner } from "@web/core/barcode/barcode_video_scanner";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";

@@ -3,7 +3,7 @@ import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 import { Component, onWillDestroy, useState } from "@odoo/owl";
 import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
-import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
+import { OrderDisplay } from "@point_of_sale/backend/order_display/order_display";
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 import { PriceFormatter } from "@point_of_sale/app/components/price_formatter/price_formatter";
 import { _t } from "@web/core/l10n/translation";

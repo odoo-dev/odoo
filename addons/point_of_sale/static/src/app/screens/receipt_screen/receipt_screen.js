@@ -1,17 +1,17 @@
 import { _t } from "@web/core/l10n/translation";
 import { useErrorHandlers, useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { registry } from "@web/core/registry";
-import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { useState, Component } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
+import { POSOrderReceipt } from "@point_of_sale/backend/pos_order_receipt/pos_order_receipt";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { isValidEmail } from "@point_of_sale/utils";
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 
 export class ReceiptScreen extends Component {
     static template = "point_of_sale.ReceiptScreen";
-    static components = { OrderReceipt };
+    static components = { POSOrderReceipt };
     static props = {
         orderUuid: { type: String },
     };
@@ -69,13 +69,55 @@ export class ReceiptScreen extends Component {
     get isValidPhone() {
         return this.state.phone && /^\+?[()\d\s-.]{8,18}$/.test(this.state.phone);
     }
+    get receiptData() {
+        const order = this.currentOrder;
+        const config = order.config;
+        const partner = order.partner_id;
+        const data = {
+            headerData: {
+                logo: config.receiptLogoUrl,
+                pos_reference: order.pos_reference,
+                date_order: order.date_order && order.formatDateOrTime("date_order"),
+                cashier: order?.getCashierName(),
+                preset_id: order.preset_id,
+                preset_name: order.preset_id?.name,
+                presetDateTime: order.presetDateTime,
+                preset_identifier: order.preset_id?.identification,
+                tracking_number: order.tracking_number,
+                anyLineHaveTaxLabel: order.lines?.some((line) => line.taxGroupLabels),
+                // config fields
+                receipt_header: config.receipt_header,
+                is_restaurant: config.is_restaurant,
+                _IS_VAT: config._IS_VAT,
+                displayTrackingNumber: config.displayTrackingNumber,
+                displayBigTrackingNumber: config.displayBigTrackingNumber,
+            },
+            receipt_footer: config.receipt_footer,
+            order: order,
+            taxTotals: order.taxTotals,
+            basic_receipt: false,
+        };
+        if (partner) {
+            data["headerData"]["partner"] = {
+                name: partner.name,
+                parent_name: partner.parent_name,
+                pos_contact_address: partner.pos_contact_address,
+                vat: partner.vat,
+                partnerAddress: partner.pos_contact_address
+                    .split("\n")
+                    .filter((line) => line.trim() !== "")
+                    .join(", "),
+            };
+        }
+        return data;
+    }
     showPhoneInput() {
         return false;
     }
 
     generateTicketImage = async (basicReceipt = false) =>
         await this.renderer.toJpeg(
-            OrderReceipt,
+            POSOrderReceipt,
             {
                 order: this.currentOrder,
                 basic_receipt: basicReceipt,

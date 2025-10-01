@@ -1,6 +1,6 @@
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
-import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
+import { OrderDisplay } from "@point_of_sale/backend/order_display/order_display";
 
 patch(OrderDisplay.prototype, {
     get buttonToShow() {

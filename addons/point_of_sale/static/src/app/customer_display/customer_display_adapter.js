@@ -50,7 +50,7 @@ export class CustomerDisplayPosAdapter {
             internalNote: line.getNote() || "[]",
             productName: line.getFullProductName(),
             price: line.getPriceString(),
-            qty: line.getQuantityStr().qtyStr,
+            qty: line.qty.toString(),
             unit: line.product_id.uom_id ? line.product_id.uom_id.name : "",
             unitPrice: formatCurrency(line.unitDisplayPrice, line.currency),
             packLotLines: line.packLotLines,

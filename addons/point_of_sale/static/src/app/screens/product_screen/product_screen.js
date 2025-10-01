@@ -16,7 +16,7 @@ import {
     SWITCHSIGN,
 } from "@point_of_sale/app/components/numpad/numpad";
 import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/action_pad/action_pad";
-import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
+import { Orderline } from "@point_of_sale/backend/orderline/orderline";
 import { OrderSummary } from "@point_of_sale/app/screens/product_screen/order_summary/order_summary";
 import { ProductCard } from "@point_of_sale/app/components/product_card/product_card";
 import {

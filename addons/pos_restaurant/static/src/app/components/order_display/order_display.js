@@ -1,5 +1,5 @@
 import { patch } from "@web/core/utils/patch";
-import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
+import { OrderDisplay } from "@point_of_sale/backend/order_display/order_display";
 import { OrderCourse } from "@pos_restaurant/app/components/order_course/order_course";
 patch(OrderDisplay.prototype, {
     get displayCourses() {

@@ -1,0 +1,50 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.OrderReceiptHeader">
+    <img t-att-src="data.logo" alt="Logo" class="pos-receipt-logo"/>
+        <div class="text-center pt-3" style="font-size: 75%;">
+            <span class="pos-receipt-vat">
+                <span class="ticket-name-prefix">
+                    <t t-if="data._IS_VAT"> VAT </t>
+                    Ticket
+                </span>
+                <t t-out="data.pos_reference"/>
+            </span>
+            <div t-if="data.date_order" id="order-date" t-out="data.date_order"/>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+            <div class="pos-receipt-contact">
+                <div t-if="data.receipt_header" style="white-space:pre-line" t-esc="data.receipt_header" />
+                <div t-if="data.cashier and (!data.preset_id or data.preset_identifier === 'name')" class="cashier">
+                    <div>Served by: <t t-esc="data.cashier" /></div>
+                </div>
+                <div t-if="data.tracking_number and data.displayTrackingNumber and !data.displayBigTrackingNumber">
+                    <span class="tracking-number fs-1" t-esc="data.tracking_number" />
+                </div>
+            </div>
+            <div t-if="data.partner" class="pos-receipt-customer mt-2">
+                <div t-if="data.partner.name">
+                    <t t-if="data.partner.parent_name">
+                        <span t-esc="data.partner.parent_name" />,
+                    </t>
+                    <span t-esc="data.partner.name" />
+                </div>
+                <div t-if="data.partner.pos_contact_address">
+                    <span t-esc="data.partner.pos_contact_address" />
+                </div>
+                <div t-if="data.partner.vat">
+                    <span t-esc="data.partner.vat" />
+                </div>
+            </div>
+        </div>
+        <div t-if="data?.presetDateTime" class="pt-2">
+            <span>
+                <t t-out="data.preset_name"/>: <t t-out="data.presetDateTime"/>
+            </span>
+        </div>
+        <div t-if="data.preset_identifier === 'address'" t-attf-class="{{ data?.presetDateTime ? '' : 'pt-2'}}">
+            <div class="text-break">
+                <span class="fw-bolder" t-out="data.partner.name"/> (<span t-out="data.partner.partnerAddress"/>)
+            </div>
+        </div>
+    </t>
+</templates>
