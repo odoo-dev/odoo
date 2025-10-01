@@ -3,13 +3,14 @@
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { registry } from "@web/core/registry";
 import { kanbanView } from "@web/views/kanban/kanban_view";
-import { onWillStart, useState, onWillRender } from "@odoo/owl";
+import { onWillStart, useState, onWillRender, useSubEnv } from "@odoo/owl";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { useTrackedAsync } from "@point_of_sale/app/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
+import { hasTouch } from "@web/core/browser/feature_detection";
 
 async function updatePosKanbanViewState(orm, stateObj) {
     const result = await orm.call("pos.config", "get_pos_kanban_view_state");
@@ -21,6 +22,13 @@ export class PosKanbanController extends KanbanController {
     setup() {
         super.setup();
         this.orm = useService("orm");
+        this.ui = useService("ui");
+        useSubEnv({
+            config: {
+                ...this.env.config,
+                disableSearchBarAutofocus: !this.ui.isSmall && hasTouch(),
+            },
+        });
         this.initialPosState = {
             has_pos_config: true,
             has_chart_template: true,
