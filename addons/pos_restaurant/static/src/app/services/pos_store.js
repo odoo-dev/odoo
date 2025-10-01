@@ -577,7 +577,7 @@ patch(PosStore.prototype, {
     async editFloatingOrderName(order) {
         const payload = await makeAwaitable(this.dialog, EditOrderNamePopup, {
             title: _t("Edit Order Name"),
-            placeholder: _t("18:45 John 4P"),
+            placeholder: _t("e.g. John"),
             startingValue: order.floating_order_name || "",
         });
         if (payload) {

@@ -445,6 +445,9 @@ export class FloorScreen extends Component {
             ? "data:image/png;base64," + this.activeFloor.floor_background_image
             : "none";
     }
+    get showBackBtn() {
+        return this.pos.selectedOrderUuid;
+    }
     getTableHandleOffset(table) {
         // min(width/2, height/2) is the real border radius
         // 0.2929 is (1 - cos(45°)) to get in the middle of the border's arc

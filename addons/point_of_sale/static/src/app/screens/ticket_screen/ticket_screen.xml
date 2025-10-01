@@ -124,11 +124,15 @@
                                 </div>
                             </t>
                         </t>
-                        <CenteredIcon
-                            t-else=""
-                            icon="this.pos.data.network.loading ? 'fa-circle-o-notch fa-spin' : 'fa-shopping-cart fa-4x'"
-                            text="this.pos.data.network.loading ? 'Loading...' : 'No orders found'"
-                            class="'h-100'"/>
+                        <div t-else="" class="d-flex h-100 flex-column align-items-center justify-content-center flex-grow-1 rounded-3 gap-3">
+                            <CenteredIcon
+                                icon="this.pos.data.network.loading ? 'fa-circle-o-notch fa-spin' : 'fa-shopping-cart fa-4x'"
+                                text="this.pos.data.network.loading ? 'Loading...' : 'No orders found'"
+                                class="'w-100'"/>
+                            <div class="d-flex flex-column align-items-center gap-2">
+                                <button class="btn btn-secondary btn-lg py-2" t-on-click="onClickNewOrder">New Order</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="switchpane d-flex gap-2 m-2" t-if="ui.isSmall">
                         <t t-set="_selectedSyncedOrder" t-value="getSelectedOrder()" />
@@ -138,7 +142,8 @@
                             t-on-click="() => this.setOrder(_selectedSyncedOrder)">
                             <span class="d-block">Load Order</span>
                         </button>
-                        <button class="btn-switchpane btn btn-lg lh-lg w-50 py-3 secondary review-button" t-att-class="{'btn-primary': isOrderSynced, 'btn-light': !isOrderSynced}" t-on-click="switchPane">
+                        <button class="btn-switchpane btn btn-lg lh-lg w-50 py-3 secondary review-button" 
+                            t-att-class="{'btn-primary': isOrderSynced, 'btn-light': !isOrderSynced}" t-on-click="switchPane">
                             <span class="d-block">Review</span>
                         </button>
                     </div>

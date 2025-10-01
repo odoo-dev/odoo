@@ -18,12 +18,15 @@ export class NoteButton extends Component {
         this.dialog = useService("dialog");
     }
 
+    get selectedOrderline() {
+        return this.pos.getOrder().getSelectedOrderline();
+    }
+
     async onClick() {
-        const selectedOrderline = this.pos.getOrder().getSelectedOrderline();
         const selectedNote = this.currentNote || "";
         const payload = await this.openTextInput(selectedNote);
-        if (selectedOrderline) {
-            this.setChanges(selectedOrderline, payload);
+        if (this.selectedOrderline) {
+            this.setChanges(this.selectedOrderline, payload);
         } else {
             this.pos.getOrder().setGeneralCustomerNote(payload);
         }
@@ -61,9 +64,12 @@ export class NoteButton extends Component {
                 class: note.color ? `o_colorlist_item_color_${note.color}` : "",
             }));
         }
-
+        let titlePrefix = "";
+        if (this.selectedOrderline) {
+            titlePrefix = this.selectedOrderline.product_id.name + ": ";
+        }
         return await makeAwaitable(this.dialog, TextInputPopup, {
-            title: _t("Add %s", this.props.label),
+            title: titlePrefix + _t("Add a %s", this.props.label),
             buttons,
             rows: 4,
             startingValue: selectedNote,
@@ -78,18 +84,18 @@ export class NoteButton extends Component {
     }
 
     get orderlineNote() {
-        const orderline = this.pos.getOrder().getSelectedOrderline();
+        const orderline = this.selectedOrderline;
         return this.type === "internal" ? orderline.getNote() : orderline.getCustomerNote();
     }
 
     get currentNote() {
-        return this.pos.getOrder().getSelectedOrderline() ? this.orderlineNote : this.orderNote;
+        return this.selectedOrderline ? this.orderlineNote : this.orderNote;
     }
     get type() {
         return "customer";
     }
     setOrderlineNote(value) {
-        return this.pos.getOrder().getSelectedOrderline().setCustomerNote(value);
+        return this.selectedOrderline.setCustomerNote(value);
     }
 }
 export class InternalNoteButton extends NoteButton {
@@ -117,12 +123,11 @@ export class InternalNoteButton extends NoteButton {
     }
 
     async onClick() {
-        const selectedOrderline = this.pos.getOrder().getSelectedOrderline();
         const selectedNote = JSON.parse(this.currentNote || "[]");
         const payload = await this.openTextInput(selectedNote.map((n) => n.text).join("\n"));
         const coloredNotes = payload ? this.reframeNotes(payload) : "[]";
-        if (selectedOrderline) {
-            this.setChanges(selectedOrderline, coloredNotes);
+        if (this.selectedOrderline) {
+            this.setChanges(this.selectedOrderline, coloredNotes);
         } else {
             this.pos.getOrder().setInternalNote(coloredNotes);
         }
@@ -133,6 +138,6 @@ export class InternalNoteButton extends NoteButton {
         };
     }
     setOrderlineNote(value) {
-        return this.pos.getOrder().getSelectedOrderline().setNote(value);
+        return this.selectedOrderline.setNote(value);
     }
 }
