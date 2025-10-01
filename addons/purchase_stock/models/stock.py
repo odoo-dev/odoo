@@ -137,13 +137,12 @@ class StockReturnPicking(models.TransientModel):
 class StockWarehouseOrderpoint(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
-    show_supplier = fields.Boolean('Show supplier column', compute='_compute_show_supplier')
-    supplier_id = fields.Many2one(
-        'product.supplierinfo', string='Vendor Pricelist', check_company=True,
-        domain="['|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]",
-        inverse='_inverse_supplier_id',
-    )
-    supplier_id_placeholder = fields.Char(compute='_compute_supplier_id_placeholder')
+    supplier_id = fields.Many2one('product.supplierinfo', compute='_compute_supplier_id', store=True)
+    show_partner = fields.Boolean(compute='_compute_show_partner')
+    allowed_partner_ids = fields.Many2many('res.partner', compute='_compute_allowed_partner_ids')
+    partner_id = fields.Many2one('res.partner', string='Vendor', domain="[('id', 'in', allowed_partner_ids)]",
+        compute='_compute_partner_id', inverse='_inverse_partner_id', store=True)
+    partner_id_placeholder = fields.Char(compute='_compute_partner_id_placeholder')
     vendor_ids = fields.One2many(related='product_id.seller_ids', string="Vendors")
     effective_vendor_id = fields.Many2one(
         'res.partner', search='_search_effective_vendor_id', compute='_compute_effective_vendor_id',
@@ -157,6 +156,11 @@ class StockWarehouseOrderpoint(models.Model):
                 orderpoint.supplier_id = False
         super()._inverse_route_id()
 
+    def _inverse_partner_id(self):
+        orderpoints = self.filtered(lambda o: not o.route_id and o.partner_id)
+        if orderpoints:
+            orderpoints.route_id = self.env['stock.rule'].search([('action', '=', 'buy')])[0].route_id
+
     @api.depends('supplier_id')
     def _compute_deadline_date(self):
         """ Extend to add more depends values """
@@ -167,7 +171,11 @@ class StockWarehouseOrderpoint(models.Model):
         """ Extend to add more depends values
         TODO: Probably performance costly due to x2many in depends
         """
-        return super()._compute_qty_to_order_computed()
+        res = super()._compute_qty_to_order_computed()
+        for orderpoint in self:
+            if not orderpoint.env.context.get('skip_compute_supplier') and orderpoint.qty_to_order_computed != orderpoint.qty_to_order:
+                self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['supplier_id'], orderpoint)
+        return res
 
     @api.depends('supplier_id')
     def _compute_lead_days(self):
@@ -186,28 +194,48 @@ class StockWarehouseOrderpoint(models.Model):
         return res
 
     @api.depends('effective_route_id')
-    def _compute_show_supplier(self):
+    def _compute_show_partner(self):
         buy_route = []
         for res in self.env['stock.rule'].search_read([('action', '=', 'buy')], ['route_id']):
             buy_route.append(res['route_id'][0])
         for orderpoint in self:
-            orderpoint.show_supplier = orderpoint.effective_route_id.id in buy_route
+            orderpoint.show_partner = orderpoint.effective_route_id.id in buy_route
 
-    def _inverse_supplier_id(self):
+    @api.depends('partner_id', 'effective_route_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
+    def _compute_supplier_id(self):
         for orderpoint in self:
-            if not orderpoint.route_id and orderpoint.supplier_id:
-                orderpoint.route_id = self.env['stock.rule'].search([('action', '=', 'buy')])[0].route_id
+            if orderpoint.env.context.get('skip_compute_supplier'):
+                continue
+            default_supplier = orderpoint._get_default_supplier() if orderpoint.partner_id else False
+            if orderpoint.supplier_id != default_supplier:
+                orderpoint.supplier_id = default_supplier
+                self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['qty_to_order_computed'], orderpoint)
 
-    @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
-    def _compute_supplier_id_placeholder(self):
+    @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay', 'product_id.seller_ids.partner_id')
+    def _compute_partner_id_placeholder(self):
         for orderpoint in self:
-            default_supplier = orderpoint._get_default_supplier()
-            orderpoint.supplier_id_placeholder = default_supplier.display_name if default_supplier else ''
+            if orderpoint.show_partner and not orderpoint.partner_id:
+                default_supplier = orderpoint._get_default_supplier()
+                orderpoint.partner_id_placeholder = default_supplier.partner_id.name if default_supplier else ''
+            else:
+                orderpoint.partner_id_placeholder = False
+
+    @api.depends('supplier_id', 'supplier_id.partner_id')
+    def _compute_partner_id(self):
+        orderpoints = self.filtered(lambda o: o.supplier_id and o.supplier_id.partner_id != o.partner_id)
+        for orderpoint in orderpoints:
+            orderpoint.partner_id = orderpoint.supplier_id.partner_id
 
     @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
     def _compute_effective_vendor_id(self):
         for orderpoint in self:
             orderpoint.effective_vendor_id = (orderpoint.supplier_id if orderpoint.supplier_id else orderpoint._get_default_supplier()).partner_id
+
+    @api.depends('product_id', 'product_id.seller_ids', 'product_id.seller_ids.partner_id')
+    def _compute_allowed_partner_ids(self):
+        for orderpoint in self:
+            sellers = orderpoint.product_id.seller_ids.filtered_domain(self.env['product.supplierinfo']._check_company_domain(orderpoint.company_id))
+            orderpoint.allowed_partner_ids = sellers.mapped('partner_id')
 
     def _search_effective_vendor_id(self, operator, value):
         vendors = self.env['res.partner'].search([('id', operator, value)])
@@ -256,9 +284,9 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _get_default_supplier(self):
         self.ensure_one()
-        if self.show_supplier:
+        if self.show_partner:
             return self._get_default_rule()._get_matching_supplier(
-                self.product_id, self.qty_to_order, self.product_uom, self.company_id, {}
+                self.product_id, self.qty_to_order, self.product_uom, self.company_id, {'supplierinfo_name': self.partner_id}
             )
         else:
             return self.env['product.supplierinfo']

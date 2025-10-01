@@ -269,7 +269,7 @@ class ProductSupplierinfo(models.Model):
         orderpoint_id = self.env.context.get('orderpoint_id')
         if not orderpoint_id:
             return
-        orderpoint = self.env['stock.warehouse.orderpoint'].browse(orderpoint_id)
+        orderpoint = self.env['stock.warehouse.orderpoint'].browse(orderpoint_id).with_context(skip_compute_supplier=True)
         if 'buy' not in orderpoint.route_id.rule_ids.mapped('action'):
             domain = Domain.AND([
                 [('action', '=', 'buy')],
