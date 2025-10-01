@@ -57,7 +57,9 @@ export class BuilderAction {
      * @param {Object} [context.params]
      * @returns {boolean}
      */
-    isApplied(context) {}
+    isApplied(context) {
+        return this.getValue(context) === context.value;
+    }
 
     /**
      * Clean/reset the value if needed.
