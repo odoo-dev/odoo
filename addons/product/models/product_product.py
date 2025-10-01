@@ -65,6 +65,7 @@ class ProductProduct(models.Model):
         comodel_name='product.pricelist.item',
         inverse_name='product_id',
         compute='_compute_pricelist_rule_ids',
+        store=True,
         readonly=False,
     )
 
