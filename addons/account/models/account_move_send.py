@@ -707,7 +707,7 @@ class AccountMoveSend(models.AbstractModel):
         :param allow_fallback_pdf:  In case of error when generating the documents for invoices, generate a proforma PDF report instead.
         :param custom_settings: settings to apply instead of related partner's defaults settings.
         """
-        self._check_sending_data(moves, **custom_settings)
+        self.with_context(allow_raising=allow_raising)._check_sending_data(moves, **custom_settings)
         moves_data = {
             move.sudo(): {
                 **self._get_default_sending_settings(move, from_cron=from_cron, **custom_settings),
