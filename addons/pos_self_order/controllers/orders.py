@@ -207,6 +207,15 @@ class PosSelfOrderController(http.Controller):
 
         return {'order': self.env['pos.order']._load_pos_self_data_read(order_sudo, pos_config), 'payment_status': status}
 
+    @http.route("/kiosk/terminal_payment", auth="public", type="jsonrpc", website=True)
+    def pos_self_order_kiosk_terminal_payment(self, access_token, order_id, payment_line):
+        pos_config = self._verify_pos_config(access_token)
+        order = pos_config.env["pos.order"].search([("id", "=", order_id), ("config_id", "=", pos_config.id)])
+
+        order.add_payment(payment_line)
+        order.action_pos_order_paid()
+        order._send_payment_result('Success')
+
     @http.route('/pos_self_order/kiosk/increment_nb_print/', auth='public', type='jsonrpc', website=True)
     def pos_kiosk_increment_nb_print(self, access_token, order_id, order_access_token):
         pos_config = self._verify_pos_config(access_token)

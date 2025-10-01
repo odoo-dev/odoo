@@ -137,6 +137,11 @@
             'iot_base/static/src/device_controller.js',
         ],
 
+        # Payment terminal assets, also loaded by self_order
+        'point_of_sale.payment_terminals': [
+            'point_of_sale/static/src/app/utils/payment/payment_interface.js',
+        ],
+
         # Main PoS assets, they are loaded in the PoS UI
         'point_of_sale._assets_pos': [
             'web/static/src/scss/functions.scss',
@@ -181,6 +186,7 @@
             ('remove', 'point_of_sale/static/src/backend/**/*'),
             ('remove', 'point_of_sale/static/src/customer_display/**/*'),
             'point_of_sale/static/src/customer_display/utils.js',
+            ('include', 'point_of_sale.payment_terminals'),
             # main.js boots the pos app, it is only included in the prod bundle as tests mount the app themselves
             ('remove', 'point_of_sale/static/src/app/main.js'),
             ("include", "point_of_sale.base_tests"),

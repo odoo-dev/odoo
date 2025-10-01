@@ -40,19 +40,39 @@ export class PaymentPage extends Component {
         );
     }
 
+    get paymentLine() {
+        return this.selfOrder.currentOrder.getSelectedPaymentline();
+    }
+
     // this function will be override by pos_online_payment_self_order module
     // in mobile is the only available payment method
     async startPayment() {
         this.selfOrder.paymentError = false;
         try {
-            await rpc(`/kiosk/payment/${this.selfOrder.config.id}/kiosk`, {
-                order: this.selfOrder.currentOrder.serializeForORM(),
-                access_token: this.selfOrder.access_token,
-                payment_method_id: this.state.paymentMethodId,
-            });
+            if (this.selectedPaymentMethod.payment_terminal) {
+                this.selfOrder.currentOrder.addPaymentline(this.selectedPaymentMethod);
+                const paymentSuccessful = await this.paymentLine.pay();
+                if (!paymentSuccessful) {
+                    throw new Error("Payment terminal payment failed");
+                }
+                await rpc(`/kiosk/terminal_payment`, {
+                    order_id: this.selfOrder.currentOrder.id,
+                    access_token: this.selfOrder.access_token,
+                    payment_line: this.paymentLine.serializeForORM(),
+                });
+            } else {
+                await rpc(`/kiosk/payment/${this.selfOrder.config.id}/kiosk`, {
+                    order: this.selfOrder.currentOrder.serializeForORM(),
+                    access_token: this.selfOrder.access_token,
+                    payment_method_id: this.state.paymentMethodId,
+                });
+            }
         } catch (error) {
             this.selfOrder.handleErrorNotification(error);
             this.selfOrder.paymentError = true;
+            if (this.paymentLine) {
+                this.selfOrder.currentOrder.removePaymentline(this.paymentLine);
+            }
         }
     }
 }

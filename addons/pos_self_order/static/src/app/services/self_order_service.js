@@ -275,23 +275,13 @@ export class SelfOrder extends Reactive {
         this.printKioskChanges(access_token);
     }
     hasPaymentMethod() {
-        return this.filterPaymentMethods(this.models["pos.payment.method"].getAll()).length > 0;
-    }
-
-    filterPaymentMethods(pms) {
-        //based on _load_pos_self_data_domain from pos_payment_method.py
-        return this.config.self_ordering_mode === "kiosk"
-            ? pms.filter((rec) => ["adyen", "stripe"].includes(rec.use_payment_terminal))
-            : [];
+        return this.models["pos.payment.method"].getAll().length > 0;
     }
 
     async confirmOrder() {
         const payAfter = this.config.self_ordering_pay_after; // each, meal
         const device = this.config.self_ordering_mode; // kiosk, mobile
         const service = this.selfService; // table, counter, delivery
-        const paymentMethods = this.filterPaymentMethods(
-            this.models["pos.payment.method"].getAll()
-        ); // Stripe, Adyen, Online
 
         let order = this.currentOrder;
         const orderHasChanges = Object.keys(order.changes).length > 0;
@@ -315,7 +305,7 @@ export class SelfOrder extends Reactive {
 
         // When no payment methods redirect to confirmation page
         // the client will be able to pay at counter
-        if (paymentMethods.length === 0) {
+        if (!this.hasPaymentMethod()) {
             let screenMode = "pay";
 
             if (orderHasChanges) {
@@ -338,30 +328,39 @@ export class SelfOrder extends Reactive {
     }
 
     get currentOrder() {
-        const orderAvailable = (o) => {
-            const isDraft = o.state === "draft";
-            const isPaid = o.state === "paid";
-            const isZeroAmount = o.amount_total === 0;
-            const isKiosk = this.config.self_ordering_mode === "kiosk";
-
-            return (
-                isDraft ||
-                (isPaid && isZeroAmount && isKiosk) ||
-                (isPaid && this.router.activeSlot === "confirmation")
-            );
-        };
-
-        const order = this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
-        if (order && orderAvailable(order)) {
-            return order;
+        const currentOrder = this.getOrder();
+        if (currentOrder) {
+            return currentOrder;
         }
 
-        const existingOrder = this.models["pos.order"].find((o) => orderAvailable(o));
+        const existingOrder = this.models["pos.order"].find((o) => this.isOrderAvailable(o));
         if (existingOrder) {
             this.selectedOrderUuid = existingOrder.uuid;
             return existingOrder;
         }
         return this.createNewOrder();
+    }
+
+    isOrderAvailable(order) {
+        const isDraft = order.state === "draft";
+        const isPaid = order.state === "paid";
+        const isZeroAmount = order.amount_total === 0;
+        const isKiosk = this.config.self_ordering_mode === "kiosk";
+
+        return (
+            isDraft ||
+            (isPaid && isZeroAmount && isKiosk) ||
+            (isPaid && this.router.activeSlot === "confirmation")
+        );
+    }
+
+    getOrder() {
+        const order = this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
+        if (order && this.isOrderAvailable(order)) {
+            return order;
+        } else {
+            return null;
+        }
     }
 
     createNewOrder() {
@@ -438,6 +437,15 @@ export class SelfOrder extends Reactive {
             if (printer) {
                 printer.config = printerConfig;
                 this.kitchenPrinters.push(printer);
+            }
+        }
+
+        for (const pm of this.models["pos.payment.method"].getAll()) {
+            const PaymentInterface = registry
+                .category("electronic_payment_interfaces")
+                .get(pm.use_payment_terminal, null);
+            if (PaymentInterface) {
+                pm.payment_terminal = new PaymentInterface(this, pm);
             }
         }
     }
@@ -862,6 +870,18 @@ export class SelfOrder extends Reactive {
 
     hasPresets() {
         return this.config.use_presets && this.models["pos.preset"].length > 1;
+    }
+
+    getPendingPaymentLine(terminalName) {
+        const currentPaymentLine = this.getOrder()?.getSelectedPaymentline();
+        if (
+            currentPaymentLine &&
+            currentPaymentLine.payment_method_id.use_payment_terminal === terminalName
+        ) {
+            return currentPaymentLine;
+        } else {
+            return null;
+        }
     }
 
     get kioskBackgroundImageUrl() {

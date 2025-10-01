@@ -109,6 +109,8 @@
             "point_of_sale/static/src/app/utils/devices_identifier_sequence.js",
             "point_of_sale/static/src/app/hooks/hooks.js",
             "point_of_sale/static/src/app/utils/debug-formatter.js",
+
+            ('include', 'point_of_sale.payment_terminals'),
         ],
         # Assets tests
         "pos_self_order.assets_tests": [
