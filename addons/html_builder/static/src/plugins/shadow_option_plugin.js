@@ -65,9 +65,6 @@ registry.category("builder-plugins").add(ShadowOptionPlugin.id, ShadowOptionPlug
 
 export class SetShadowModeAction extends BuilderAction {
     static id = "setShadowMode";
-    isApplied({ editingElement, value: shadowMode }) {
-        return shadowMode === getShadowMode(editingElement);
-    }
     getValue({ editingElement }) {
         return getShadowMode(editingElement, "mode");
     }

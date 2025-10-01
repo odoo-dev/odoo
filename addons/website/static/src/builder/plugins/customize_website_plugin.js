@@ -451,8 +451,7 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
     static id = "customizeBodyBgType";
     static dependencies = ["builderActions", "history", "customizeWebsite"];
     isApplied({ value }) {
-        const getAction = this.dependencies.builderActions.getAction;
-        const currentValue = getAction("customizeBodyBgType").getValue();
+        const currentValue = this.getValue();
         // NONE has no extra quote, other values have
         return [`'${value}'`, value].includes(currentValue);
     }
@@ -538,7 +537,7 @@ export class WebsiteConfigAction extends BuilderAction {
         const records = [...(params.views || []), ...(params.assets || [])];
         return records.length;
     }
-    isApplied({ params }) {
+    getValue({ params }) {
         const records = [...(params.views || []), ...(params.assets || [])];
         const configKeysIsApplied = records.every((v) =>
             this.dependencies.customizeWebsite.getConfigKey(v)
@@ -716,7 +715,7 @@ export class PreviewableWebsiteConfigAction extends BuilderAction {
     getPriority({ params }) {
         return (params.previewClass || "")?.trim().split(/\s+/).filter(Boolean).length || 0;
     }
-    isApplied({ editingElement: el, params }) {
+    getValue({ editingElement: el, params }) {
         if (params.previewClass === undefined || params.previewClass === "") {
             return true;
         }
@@ -831,7 +830,7 @@ export class SelectTemplateAction extends BuilderAction {
     async prepare({ actionParam }) {
         return await this.dependencies.customizeWebsite.loadTemplateKey(actionParam.view);
     }
-    isApplied({ editingElement, params: { templateClass } }) {
+    getValue({ editingElement, params: { templateClass } }) {
         if (templateClass) {
             return !!editingElement.querySelector(`.${templateClass}`);
         }
@@ -853,15 +852,14 @@ export class CustomizeWebsiteVariableAction extends BuilderAction {
         this.dependencies.customizeWebsite.withCustomHistory(this);
     }
     isApplied({ params: { mainParam: variable } = {}, value }) {
-        const currentValue = this.dependencies.customizeWebsite.getWebsiteVariableValue(variable);
+        const currentValue = this.getValue({ params: { mainParam: variable } });
         return (
             // There might be unquoted values in existing databases.
             currentValue === value || `'${currentValue}'` === value
         );
     }
     getValue({ params: { mainParam: variable } }) {
-        const currentValue = this.dependencies.customizeWebsite.getWebsiteVariableValue(variable);
-        return currentValue;
+        return this.dependencies.customizeWebsite.getWebsiteVariableValue(variable);
     }
     async apply({ params: { mainParam: variable, nullValue = "null" }, value }) {
         await this.dependencies.customizeWebsite.customizeWebsiteVariables(
@@ -945,9 +943,6 @@ export class CustomizeButtonStyleAction extends BuilderAction {
     setup() {
         this.preview = false;
         this.dependencies.customizeWebsite.withCustomHistory(this);
-    }
-    isApplied({ params, value }) {
-        return this.getValue({ params }) === value;
     }
     getValue({ params: { mainParam: which } }) {
         const style = getHtmlStyle(this.document);

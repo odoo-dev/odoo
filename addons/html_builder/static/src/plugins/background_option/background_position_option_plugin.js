@@ -34,7 +34,7 @@ export class BackgroundTypeAction extends BuilderAction {
             value !== "repeat-pattern" ? "" : "100px"
         );
     }
-    isApplied({ editingElement, value }) {
+    getValue({ editingElement, value }) {
         const hasElRepeatStyle = getComputedStyle(editingElement).backgroundRepeat === "repeat";
         return value === "repeat-pattern" ? hasElRepeatStyle : !hasElRepeatStyle;
     }

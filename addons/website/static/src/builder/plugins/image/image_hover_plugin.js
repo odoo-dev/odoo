@@ -199,8 +199,8 @@ export class SetHoverEffectAction extends BuilderAction {
     static id = "setHoverEffect";
     static dependencies = ["imageHover"];
 
-    isApplied({ editingElement, value: hoverEffectId }) {
-        return editingElement.dataset.hoverEffect === hoverEffectId;
+    getValue({ editingElement }) {
+        return editingElement.dataset.hoverEffect;
     }
     async apply({ editingElement, value: hoverEffectId, isPreviewing }) {
         await this.dependencies.imageHover.setHoverEffect(editingElement, hoverEffectId);

@@ -29,7 +29,7 @@ export class SetIconsAction extends BuilderAction {
         delete editingElement.dataset.activeCustomIcon;
         delete editingElement.dataset.inactiveCustomIcon;
     }
-    isApplied({ editingElement, params: { mainParam: iconParam } }) {
+    getValue({ editingElement, params: { mainParam: iconParam } }) {
         return getIconType(editingElement) === iconParam;
     }
 }

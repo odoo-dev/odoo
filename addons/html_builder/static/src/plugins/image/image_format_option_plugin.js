@@ -72,7 +72,7 @@ class ImageFormatOptionPlugin extends Plugin {
 export class SetImageFormatAction extends BuilderAction {
     static id = "setImageFormat";
     static dependencies = ["imagePostProcess"];
-    isApplied({ editingElement, params: { width, mimetype, isOriginal } }) {
+    getValue({ editingElement, params: { width, mimetype, isOriginal } }) {
         const isOriginalUntouched =
             (!editingElement.dataset.resizeWidth || !editingElement.dataset.formatMimetype) &&
             isOriginal;

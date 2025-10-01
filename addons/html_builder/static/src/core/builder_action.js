@@ -58,7 +58,8 @@ export class BuilderAction {
      * @returns {boolean}
      */
     isApplied(context) {
-        return this.getValue(context) === context.value;
+        const currentValue = this.getValue(context);
+        return context.value === undefined ? currentValue : context.value === currentValue;
     }
 
     /**

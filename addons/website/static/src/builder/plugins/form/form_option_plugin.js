@@ -654,7 +654,11 @@ export class FormOptionPlugin extends Plugin {
                     for (const el of inputsInDependencyContainer) {
                         conditionValueList.push({
                             value: el.value,
-                            textContent: inputsInDependencyContainer.length === 1 ? el.value : dependencyContainerEl.querySelector(`label[for="${el.id}"]`).textContent,
+                            textContent:
+                                inputsInDependencyContainer.length === 1
+                                    ? el.value
+                                    : dependencyContainerEl.querySelector(`label[for="${el.id}"]`)
+                                          .textContent,
                         });
                     }
                     if (!inputContainerEl.dataset.visibilityCondition) {
@@ -833,7 +837,7 @@ export class SelectAction extends BuilderAction {
             loadResult.formInfo
         );
     }
-    isApplied({ editingElement: el, value: modelId }) {
+    getValue({ editingElement: el, value: modelId }) {
         const models = this.dependencies.websiteFormOption.getModelsCache(el);
         const targetModelName = getModelName(el);
         const activeForm = models.find((m) => m.model === targetModelName);
@@ -887,13 +891,6 @@ export class AddActionFieldAction extends BuilderAction {
         } else {
             return params.isSelect ? "0" : "";
         }
-    }
-    isApplied({ editingElement, params, value }) {
-        const currentValue = this.getValue({
-            editingElement,
-            params,
-        });
-        return currentValue === value;
     }
 }
 export class PromptSaveRedirectAction extends BuilderAction {
@@ -959,9 +956,8 @@ export class OnSuccessAction extends BuilderAction {
             el.classList.remove("o_show_form_success_message");
         }
     }
-    isApplied({ editingElement: el, value }) {
-        const currentValue = el.dataset.successMode;
-        return currentValue === value;
+    getValue({ editingElement: el }) {
+        return el.dataset.successMode;
     }
 }
 export class ToggleEndMessageAction extends BuilderAction {
@@ -979,7 +975,7 @@ export class ToggleEndMessageAction extends BuilderAction {
         el.classList.remove("o_show_form_success_message");
         this.dependencies.builderOptions.setNextTarget(el);
     }
-    isApplied({ editingElement: el, value }) {
+    getValue({ editingElement: el }) {
         return el.classList.contains("o_show_form_success_message");
     }
 }
@@ -997,7 +993,7 @@ export class FormToggleRecaptchaLegalAction extends BuilderAction {
         const recaptchaLegalEl = el.querySelector(".s_website_form_recaptcha");
         recaptchaLegalEl.remove();
     }
-    isApplied({ editingElement: el }) {
+    getValue({ editingElement: el }) {
         const recaptchaLegalEl = el.querySelector(".s_website_form_recaptcha");
         return !!recaptchaLegalEl;
     }
@@ -1015,9 +1011,8 @@ export class CustomFieldAction extends BuilderAction {
         setActiveProperties(fieldEl, field);
         this.dependencies.websiteFormOption.replaceField(fieldEl, field, fields);
     }
-    isApplied({ editingElement: fieldEl, value }) {
-        const currentValue = isFieldCustom(fieldEl) ? getFieldType(fieldEl) : "";
-        return currentValue === value;
+    get({ editingElement: fieldEl, value }) {
+        return isFieldCustom(fieldEl) ? getFieldType(fieldEl) : "";
     }
 }
 export class ExistingFieldAction extends BuilderAction {
@@ -1031,9 +1026,8 @@ export class ExistingFieldAction extends BuilderAction {
         setActiveProperties(fieldEl, field);
         this.dependencies.websiteFormOption.replaceField(fieldEl, field, fields);
     }
-    isApplied({ editingElement: fieldEl, value }) {
-        const currentValue = isFieldCustom(fieldEl) ? "" : getFieldName(fieldEl);
-        return currentValue === value;
+    getValue({ editingElement: fieldEl, value }) {
+        return isFieldCustom(fieldEl) ? "" : getFieldName(fieldEl);
     }
 }
 export class SelectTypeAction extends BuilderAction {
@@ -1047,9 +1041,8 @@ export class SelectTypeAction extends BuilderAction {
         field.type = value;
         this.dependencies.websiteFormOption.replaceField(fieldEl, field, fields);
     }
-    isApplied({ editingElement: fieldEl, value }) {
-        const currentValue = getFieldType(fieldEl);
-        return currentValue === value;
+    getValue({ editingElement: fieldEl, value }) {
+        return getFieldType(fieldEl);
     }
 }
 export class ExistingFieldSelectTypeAction extends BuilderAction {
@@ -1063,9 +1056,8 @@ export class ExistingFieldSelectTypeAction extends BuilderAction {
         field.type = value;
         this.dependencies.websiteFormOption.replaceField(fieldEl, field, fields);
     }
-    isApplied({ editingElement: fieldEl, value }) {
-        const currentValue = getFieldType(fieldEl);
-        return currentValue === value;
+    getValue({ editingElement: fieldEl, value }) {
+        return getFieldType(fieldEl);
     }
 }
 export class MultiCheckboxDisplayAction extends BuilderAction {
@@ -1079,10 +1071,9 @@ export class MultiCheckboxDisplayAction extends BuilderAction {
         }
         targetEl.dataset.display = value;
     }
-    isApplied({ editingElement: fieldEl, value }) {
+    getValue({ editingElement: fieldEl, value }) {
         const targetEl = getMultipleInputs(fieldEl);
-        const currentValue = targetEl ? targetEl.dataset.display : "";
-        return currentValue === value;
+        return targetEl ? targetEl.dataset.display : "";
     }
 }
 export class SetLabelTextAction extends BuilderAction {
@@ -1153,9 +1144,8 @@ export class SelectLabelPositionAction extends BuilderAction {
         field.formatInfo.labelPosition = value;
         this.dependencies.websiteFormOption.replaceField(fieldEl, field, fields);
     }
-    isApplied({ editingElement: fieldEl, value }) {
-        const currentValue = getLabelPosition(fieldEl);
-        return currentValue === value;
+    getValue({ editingElement: fieldEl, value }) {
+        return getLabelPosition(fieldEl);
     }
 }
 export class ToggleDescriptionAction extends BuilderAction {
@@ -1171,7 +1161,7 @@ export class ToggleDescriptionAction extends BuilderAction {
         field.description = !hasDescription; // Will be changed to default description in qweb
         this.dependencies.websiteFormOption.replaceField(fieldEl, field, fields);
     }
-    isApplied({ editingElement: fieldEl }) {
+    getValue({ editingElement: fieldEl }) {
         const description = fieldEl.querySelector(".s_website_form_field_description");
         return !!description;
     }
@@ -1203,7 +1193,7 @@ export class ToggleRequiredAction extends BuilderAction {
             .forEach((el) => el.removeAttribute("required"));
         this.dependencies.websiteFormOption.setLabelsMark(fieldEl.closest("form"));
     }
-    isApplied({ editingElement: fieldEl, params: { mainParam: activeValue } }) {
+    getValue({ editingElement: fieldEl, params: { mainParam: activeValue } }) {
         return fieldEl.classList.contains(activeValue);
     }
 }
@@ -1228,7 +1218,7 @@ export class SetVisibilityAction extends BuilderAction {
         }
         deleteConditionalVisibility(fieldEl);
     }
-    isApplied() {
+    getValue() {
         return true;
     }
 }

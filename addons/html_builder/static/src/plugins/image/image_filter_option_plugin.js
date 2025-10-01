@@ -18,7 +18,7 @@ class ImageFilterOptionPlugin extends Plugin {
 export class GlFilterAction extends BuilderAction {
     static id = "glFilter";
     static dependencies = ["imagePostProcess"];
-    isApplied({ editingElement, params: { mainParam: glFilterName } }) {
+    getValue({ editingElement, params: { mainParam: glFilterName } }) {
         if (glFilterName) {
             return editingElement.dataset.glFilter === glFilterName;
         } else {
@@ -44,13 +44,7 @@ export class SetCustomFilterAction extends BuilderAction {
         const filterOptions = JSON.parse(editingElement.dataset.filterOptions || "{}");
         return filterOptions[filterProperty] || defaultImageFilterOptions[filterProperty];
     }
-    isApplied({ editingElement, params: { mainParam: filterProperty }, value: filterValue }) {
-        const filterOptions = JSON.parse(editingElement.dataset.filterOptions || "{}");
-        return (
-            filterValue ===
-            (filterOptions[filterProperty] || defaultImageFilterOptions[filterProperty])
-        );
-    }
+
     async load({ editingElement: img, params: { mainParam: filterProperty }, value }) {
         const filterOptions = JSON.parse(img.dataset.filterOptions || "{}");
         filterOptions[filterProperty] =

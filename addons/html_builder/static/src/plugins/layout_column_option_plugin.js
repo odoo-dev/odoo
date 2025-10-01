@@ -89,7 +89,7 @@ export class ChangeColumnCountAction extends BuilderAction {
             this.dependencies.builderOptions.setNextTarget(firstColumnEl);
         }
     }
-    isApplied({ editingElement, value }) {
+    getValue({ editingElement, value }) {
         const columnEls = getRow(editingElement)?.children;
         return getNbColumns(columnEls, isMobileView(this.editable)) === value;
     }

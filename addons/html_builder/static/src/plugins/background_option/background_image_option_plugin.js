@@ -195,7 +195,7 @@ export class ToggleBgImageAction extends BuilderAction {
     apply(context) {
         return this.dependencies.backgroundImageOption.applyReplaceBackgroundImage(context);
     }
-    isApplied({ editingElement }) {
+    getValue({ editingElement }) {
         return !!getBgImageURLFromEl(editingElement);
     }
     clean({ editingElement }) {

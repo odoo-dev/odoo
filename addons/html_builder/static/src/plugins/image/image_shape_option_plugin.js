@@ -484,7 +484,7 @@ export class ToggleImageShapeRatioAction extends BuilderAction {
     static id = "toggleImageShapeRatio";
     static dependencies = ["imageShapeOption"];
 
-    isApplied({ editingElement: img }) {
+    getValue({ editingElement: img }) {
         return img.dataset.aspectRatio !== "1/1";
     }
     async load({ editingElement: img }) {

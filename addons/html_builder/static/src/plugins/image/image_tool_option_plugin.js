@@ -150,7 +150,7 @@ class ImageToolOptionPlugin extends Plugin {
 export class CropImageAction extends BuilderAction {
     static id = "cropImage";
     static dependencies = ["imageCrop", "imagePostProcess"];
-    isApplied({ editingElement }) {
+    getValue({ editingElement }) {
         return cropperDataFieldsWithAspectRatio.some((field) => editingElement.dataset[field]);
     }
     load({ editingElement: img }) {
@@ -206,7 +206,7 @@ export class SetLinkAction extends BuilderAction {
             parentEl.replaceWith(fragment);
         }
     }
-    isApplied({ editingElement }) {
+    getValue({ editingElement }) {
         const parentEl = searchSupportedParentLinkEl(editingElement);
         return parentEl.tagName === "A";
     }
@@ -251,7 +251,7 @@ export class SetNewWindowAction extends BuilderAction {
         const linkEl = searchSupportedParentLinkEl(editingElement);
         linkEl.removeAttribute("target");
     }
-    isApplied({ editingElement }) {
+    getValue({ editingElement }) {
         const linkEl = searchSupportedParentLinkEl(editingElement);
         return linkEl.getAttribute("target") === "_blank";
     }

@@ -57,7 +57,7 @@ export class SetGridLayoutAction extends BuilderAction {
         }
         toggleGridMode(editingElement, this.dependencies.selection.preserveSelection);
     }
-    isApplied({ editingElement }) {
+    getValue({ editingElement }) {
         return isGrid(editingElement);
     }
 }
@@ -87,7 +87,7 @@ export class SetColumnLayoutAction extends BuilderAction {
         rowEl.style.removeProperty("--grid-item-padding-y");
         rowEl.style.removeProperty("gap");
     }
-    isApplied({ editingElement }) {
+    getValue({ editingElement }) {
         return !isGrid(editingElement);
     }
 }

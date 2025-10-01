@@ -41,7 +41,7 @@ export class AlertIconAction extends BuilderAction {
         }
         icon.classList.remove(className);
     }
-    isApplied({ editingElement, params: { mainParam: className } }) {
+    getValue({ editingElement, params: { mainParam: className } }) {
         const iconEl = editingElement.querySelector(".s_alert_icon");
         if (!iconEl) {
             return;
