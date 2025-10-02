@@ -30,6 +30,8 @@ class RegistrationEditor(models.TransientModel):
         so_line_to_reg = registrations.grouped('sale_order_line_id')
         attendee_list = []
         for so_line in so_lines:
+            if so_line.combo_item_id:
+                continue
             registrations = so_line_to_reg.get(so_line, self.env['event.registration'])
             # Add existing registrations
             attendee_list += [[0, 0, {

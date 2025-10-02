@@ -27,6 +27,8 @@ class EventTypeTicket(models.Model):
     price_reduce = fields.Float(
         string="Price Reduce", compute="_compute_price_reduce",
         compute_sudo=True, digits='Product Price')
+    product_type = fields.Selection(related="product_id.type")
+    product_combo_ids = fields.Many2many(related="product_id.combo_ids")
 
     @api.depends('product_id')
     def _compute_price(self):

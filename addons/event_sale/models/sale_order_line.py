@@ -44,10 +44,12 @@ class SaleOrderLine(models.Model):
     def _init_registrations(self):
         """ Create registrations linked to a sales order line. A sale
         order line has a product_uom_qty attribute that will be the number of
-        registrations linked to this line. """
+        registrations linked to this line.
+        Sale order lines linked to a combo item (aka a selected combo option) are ignored.
+        """
         registrations_vals = []
         for so_line in self:
-            if so_line.service_tracking != 'event':
+            if so_line.service_tracking != 'event' or so_line.combo_item_id:
                 continue
 
             for _count in range(int(so_line.product_uom_qty) - len(so_line.registration_ids)):
@@ -112,6 +114,8 @@ class SaleOrderLine(models.Model):
         return super()._use_template_name()
 
     def _get_display_price(self):
+        if self.product_type == 'combo' or self.combo_item_id:
+            return super()._get_display_price()
         if self.event_ticket_id and self.event_id:
             event_ticket = self.event_ticket_id
             company = event_ticket.company_id or self.env.company

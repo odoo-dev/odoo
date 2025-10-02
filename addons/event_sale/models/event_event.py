@@ -53,3 +53,19 @@ class EventEvent(models.Model):
             'context': {'create': 0},
         })
         return sale_order_action
+
+    def _verify_seats_availability_combo(self, slot_tickets):
+        self.ensure_one()
+
+        new_slot_tickets = []
+        for slot, _ticket, product_combo_items, count in slot_tickets:
+            tickets = self.env['event.event.ticket'].search([
+                ('event_id', '=', self.id),
+                ('product_id', 'in', product_combo_items.product_id.ids)])
+            if not tickets:
+                continue
+            for ticket in tickets:
+                new_slot_tickets.append((slot, ticket, count))
+        if not new_slot_tickets:
+            return True
+        return self._verify_seats_availability(new_slot_tickets)

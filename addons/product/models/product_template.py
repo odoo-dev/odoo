@@ -190,7 +190,7 @@ class ProductTemplate(models.Model):
 
     @api.depends('type')
     def _compute_service_tracking(self):
-        self.filtered(lambda product: product.type != 'service').service_tracking = 'no'
+        self.filtered(lambda product: product.type not in ['combo', 'service']).service_tracking = 'no'
 
     def _compute_purchase_ok(self):
         pass

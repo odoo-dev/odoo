@@ -27,7 +27,15 @@ patch(SaleOrderLineProductField.prototype, {
             super._onProductUpdate();
         }
     },
-    async _openEventConfigurator() {
+
+    async handleComboSave(comboProductData, selectedComboItems, edit, hasOptionalProducts) {
+        await super.handleComboSave(...arguments);
+        if (this.isEvent) {
+            await this._openEventConfigurator(selectedComboItems);
+        }
+    },
+
+    async _openEventConfigurator(selectedComboItems) {
         const actionContext = {
             default_product_id: this.props.record.data.product_id.id,
         };
@@ -39,6 +47,9 @@ patch(SaleOrderLineProductField.prototype, {
         }
         if (this.props.record.data.event_ticket_id) {
             actionContext.default_event_ticket_id = this.props.record.data.event_ticket_id.id;
+        }
+        if (selectedComboItems) {
+            actionContext.default_event_selected_product_ids = selectedComboItems.map(comboItem => comboItem.product.id);
         }
         this.action.doAction(
             'event_sale.event_configurator_action',
@@ -55,7 +66,17 @@ patch(SaleOrderLineProductField.prototype, {
                         }
                     } else {
                         const eventConfiguration = closeInfo.eventConfiguration;
+                        const eventComboConfiguration = closeInfo.eventComboConfiguration;
                         this.props.record.update(eventConfiguration);
+                        if (eventComboConfiguration?.combo_ticket_id) {
+                            const orderLines = this.props.record.model.root.data.order_line.records;
+                            const selectedTicketLine = orderLines.filter(line => line.data.product_id.id === eventComboConfiguration.combo_ticket_product_id.id)[0];
+                            selectedTicketLine.update({
+                                event_id: eventConfiguration.event_id,
+                                event_slot_id: eventConfiguration.event_slot_id,
+                                event_ticket_id: eventComboConfiguration.combo_ticket_id,
+                            });
+                        }
                     }
                 }
             }

@@ -6,6 +6,8 @@
         <field name="arch" type="xml">
             <form js_class="event_configurator_form">
                 <field name="has_available_tickets" invisible="1"/>
+                <field name="combo_ticket_id" invisible="1"/>
+                <field name="combo_ticket_product_id" invisible="1"/>
                 <div invisible="has_available_tickets">
                     We could not find a matching event ticket for this product. <br/>
                     <a role="button" class="btn btn-link" target="_blank"

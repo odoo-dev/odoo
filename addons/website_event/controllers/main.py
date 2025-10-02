@@ -256,10 +256,10 @@ class WebsiteEventController(http.Controller):
                 continue
             ticket_order[int(registration_items[1])] = int(value)
 
-        ticket_dict = dict((ticket.id, ticket) for ticket in request.env['event.event.ticket'].sudo().search([
-            ('id', 'in', [tid for tid in ticket_order.keys() if tid]),
+        ticket_dict = {ticket.id: ticket for ticket in request.env['event.event.ticket'].sudo().search([
+            ('id', 'in', [tid for tid in ticket_order if tid]),
             ('event_id', '=', event.id)
-        ]))
+        ])}
 
         tickets = request.env['event.event.ticket'].browse(ticket_dict.keys())
         slot = request.env['event.slot'].browse(int(slot)) if (slot := form_details.get("event_slot_id", False)) else slot
@@ -416,7 +416,7 @@ class WebsiteEventController(http.Controller):
             for registration in registrations.values():
                 registration.update(general_identification_answers)
 
-        return list(registrations.values())
+        return registrations
 
     def _create_attendees_from_registration_post(self, event, registration_data):
         """ Also try to set a visitor (from request) and
@@ -450,7 +450,15 @@ class WebsiteEventController(http.Controller):
             request.env['ir.http']._verify_request_recaptcha_token('website_event_registration')
         except UserError:
             return request.redirect('/event/%s/register?registration_error_code=recaptcha_failed' % event.id)
-        registrations_data = self._process_attendees_form(event, post)
+        registrations = self._process_attendees_form(event, post)
+        registrations_data = list(registrations.values())
+        if not self._check_seats_availability(event, registrations_data):
+            return request.redirect('/event/%s/register?registration_error_code=insufficient_seats' % event.id)
+        attendees_sudo = self._create_attendees_from_registration_post(event, registrations_data)
+
+        return request.redirect(('/event/%s/registration/success?' % event.id) + werkzeug.urls.url_encode({'registration_ids': ",".join([str(id) for id in attendees_sudo.ids])}))
+
+    def _check_seats_availability(self, event, registrations_data):
         counter_per_combination = Counter((registration.get('event_slot_id', False), registration['event_ticket_id']) for registration in registrations_data)
         slot_ids = {slot_id for slot_id, _ in counter_per_combination if slot_id}
         ticket_ids = {ticket_id for _, ticket_id in counter_per_combination if ticket_id}
@@ -462,10 +470,8 @@ class WebsiteEventController(http.Controller):
                 for (slot_id, ticket_id), count in counter_per_combination.items()
             }))
         except ValidationError:
-            return request.redirect('/event/%s/register?registration_error_code=insufficient_seats' % event.id)
-        attendees_sudo = self._create_attendees_from_registration_post(event, registrations_data)
-
-        return request.redirect(('/event/%s/registration/success?' % event.id) + werkzeug.urls.url_encode({'registration_ids': ",".join([str(id) for id in attendees_sudo.ids])}))
+            return False
+        return True
 
     @http.route(['/event/<model("event.event"):event>/registration/success'], type='http', auth="public", methods=['GET'], website=True, sitemap=False)
     def event_registration_success(self, event, registration_ids):

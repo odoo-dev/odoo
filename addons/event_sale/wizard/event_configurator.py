@@ -11,10 +11,15 @@ class EventEventConfigurator(models.TransientModel):
 
     product_id = fields.Many2one('product.product', string="Product", readonly=True)
     event_id = fields.Many2one('event.event', string="Event")
+    event_selected_product_ids = fields.Many2many('product.product', string="Selected Product")
     event_slot_id = fields.Many2one('event.slot', string="Slot", domain="[('event_id', '=', event_id)]",
         compute="_compute_event_slot_id", readonly=False, store=True)
     event_ticket_id = fields.Many2one('event.event.ticket', string="Ticket Type", domain="[('event_id', '=', event_id)]",
         compute="_compute_event_ticket_id", readonly=False, store=True)
+    combo_ticket_id = fields.Many2one('event.event.ticket', string="Combo Ticket Type",
+        compute="_compute_combo_ticket_id")
+    combo_ticket_product_id = fields.Many2one('product.product', string="Combo Ticket Product",
+        related="combo_ticket_id.product_id")
     is_multi_slots = fields.Boolean(related="event_id.is_multi_slots")
     has_available_tickets = fields.Boolean("Has Available Tickets", compute="_compute_has_available_tickets")
 
@@ -61,3 +66,12 @@ class EventEventConfigurator(models.TransientModel):
                 ('event_id', '=', configurator.event_id.id),
                 ('product_id', '=', configurator.product_id.id)], limit=2)
             configurator.event_ticket_id = event_ticket_ids if len(event_ticket_ids) == 1 else False
+
+    @api.depends('event_id', 'event_selected_product_ids')
+    def _compute_combo_ticket_id(self):
+        for configurator in self:
+            event_ticket_id = self.env['event.event.ticket'].search([
+                ('event_id', '=', configurator.event_id.id),
+                ('product_id', 'in', configurator.event_selected_product_ids.ids),
+            ], limit=1)
+            configurator.combo_ticket_id = event_ticket_id

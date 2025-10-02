@@ -18,9 +18,31 @@ class EventRegistration(models.Model):
         store=True, ondelete="set null")
     utm_medium_id = fields.Many2one(compute='_compute_utm_medium_id', readonly=False,
         store=True, ondelete="set null")
+    product_combo_item_ids = fields.Many2many('product.combo.item',
+        relation="event_registration_product_combo_item_rel",
+        column1="registration_id", column2="product_combo_item_id",
+        string="Combo Choices", store=True)
+    related_event_ticket_id = fields.Many2one('event.event.ticket', string='Related Ticket',
+        compute="_compute_related_event_ticket_id", store=True, ondelete="set null")
 
     def _has_order(self):
         return super()._has_order() or self.sale_order_id
+
+    @api.depends('product_combo_item_ids')
+    def _compute_related_event_ticket_id(self):
+        mapped_data = {
+            product.id: tickets
+            for product, tickets in self.env['event.event.ticket'].sudo()._read_group(
+                [('event_id', 'in', self.event_id.ids), ('product_id', 'in', self.product_combo_item_ids.product_id.ids)],
+                ['product_id'],
+                ['id:recordset'],
+            )
+        }
+        for registration in self:
+            ticket_product = next(
+                (product for product in registration.product_combo_item_ids.product_id if product.id in mapped_data),
+                self.env['product.product'])
+            registration.related_event_ticket_id = mapped_data.get(ticket_product.id, False)
 
     @api.depends('sale_order_id.state', 'sale_order_id.currency_id', 'sale_order_id.amount_total')
     def _compute_registration_status(self):

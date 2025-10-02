@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import SQL
 from odoo.tools.misc import formatLang
 
 
@@ -86,19 +87,20 @@ class EventEventTicket(models.Model):
         # aggregate registrations by ticket and by state
         results = {}
         if self.ids:
-            state_field = {
-                'open': 'seats_reserved',
-                'done': 'seats_used',
-            }
-            query = """ SELECT event_ticket_id, state, count(event_id)
-                        FROM event_registration
-                        WHERE event_ticket_id IN %s AND state IN ('open', 'done') AND active = true
-                        GROUP BY event_ticket_id, state
-                    """
-            self.env['event.registration'].flush_model(['event_id', 'event_ticket_id', 'state', 'active'])
-            self.env.cr.execute(query, (tuple(self.ids),))
-            for event_ticket_id, state, num in self.env.cr.fetchall():
-                results.setdefault(event_ticket_id, {})[state_field[state]] = num
+            query = SQL(
+                """
+                    SELECT %(args)s
+                    FROM event_registration
+                    WHERE event_ticket_id IN %(tickets)s AND state IN ('open', 'done') AND active = true
+                    GROUP BY %(orderby)s
+                """,
+                args=SQL(','.join(self._get_compute_seats_args())),
+                tickets=tuple(self.ids),
+                orderby=SQL(','.join(self._get_compute_seats_orderby())),
+            )
+            self.env['event.registration'].flush_model(self._get_compute_seats_fields_to_flush())
+            self.env.cr.execute(query)
+            results = self._get_compute_seats_query_results(self.env.cr.fetchall())
 
         # compute seats_available
         for ticket in self:
@@ -106,6 +108,30 @@ class EventEventTicket(models.Model):
             if ticket.seats_max > 0:
                 ticket.seats_available = ticket.seats_max - (ticket.seats_reserved + ticket.seats_used)
             ticket.seats_taken = ticket.seats_reserved + ticket.seats_used
+
+    @api.model
+    def _get_compute_seats_fields_to_flush(self):
+        return ['event_id', 'event_ticket_id', 'state', 'active']
+
+    @api.model
+    def _get_compute_seats_args(self):
+        return ['event_ticket_id', 'state', 'count(event_id)']
+
+    @api.model
+    def _get_compute_seats_orderby(self):
+        return ['event_ticket_id', 'state']
+
+    @api.model
+    def _get_compute_seats_query_results(self, query_res):
+        """Overriden in event_sale to take into account the related ticket in case of combo"""
+        state_field = {
+            'open': 'seats_reserved',
+            'done': 'seats_used',
+        }
+        results = {}
+        for event_ticket_id, state, num in query_res:
+            results.setdefault(event_ticket_id, {})[state_field[state]] = num
+        return results
 
     @api.depends('seats_limited', 'seats_available', 'event_id.event_registrations_sold_out')
     def _compute_is_sold_out(self):

@@ -1,6 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+<template id="modal_ticket_registration_combo_details">
+    <div t-if="ticket.product_type == 'combo'" t-attf-id="ticket_combo_options_#{ticket.id}" class="o_wevent_combo d-none">
+        <div t-foreach="ticket.product_combo_ids" t-as="combo" class="o_wevent_combo_options">
+            <t t-set="has_single_option" t-value="len(combo.combo_item_ids) == 1"/>
+            <input type="hidden" t-attf-name="choice_combo-#{ticket.id}.#{combo.id}"
+                t-att-value="combo.combo_item_ids.id if has_single_option else False"/>
+            <h8 t-if="not has_single_option" t-out="combo.name" class="d-inline-block mt-2 mb-2"/>
+            <div t-attf-name="combo-#{combo.id}"
+                t-attf-class="o_wevent_sale_combo row row-cols-1 row-cols-md-2 g-3 #{'d-none' if has_single_option else ''}">
+                <div t-foreach="combo.combo_item_ids" t-as="combo_item" class="col">
+                    <t t-set="combo_item_product" t-value="combo_item.product_id"/>
+                    <article
+                        t-attf-class="o_wevent_combo_item_product product-card d-flex align-items-start h-100 rounded p-2 cursor-pointer #{'selected' if has_single_option else ''}"
+                        t-att-data-ticket-id="ticket.id"
+                        t-att-data-combo-item-id="combo_item.id">
+                        <img
+                            class="w-25 border rounded"
+                            t-attf-src="/web/image/product.product/#{combo_item_product.id}/image_256"
+                            alt="Product Image"/>
+                        <div class="w-75 p-2">
+                            <h6 class="mb-1" t-out="combo_item_product.name"/>
+                            <span t-if="combo_item.extra_price != 0" class="badge rounded-pill border ps-1 text-bg-primary">
+                                <span t-out="'+' if combo_item.extra_price > 0 else '-'"/>
+                                <span t-out="combo_item.extra_price"
+                                    t-options="{'widget': 'monetary', 'from_currency': combo_item.currency_id, 'display_currency': website.currency_id}"/>
+                            </span>
+                            <span t-out="combo_item_product.description"/>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
 <template id="modal_ticket_registration" inherit_id="website_event.modal_ticket_registration">
     <!-- Change pricelist -->
     <xpath expr="//div[hasclass('o_wevent_price_range')]" position="after">
@@ -83,6 +118,18 @@
             </t>
             <span t-else="" class="badge text-bg-secondary fs-6 text-uppercase">Free</span>
         </div>
+    </xpath>
+    <xpath expr="//div[@id='o_wevent_tickets_collapse']/div" position="inside">
+        <t t-call="website_event_sale.modal_ticket_registration_combo_details"/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_wevent_registration_single')]/div" position="inside">
+        <t t-call="website_event_sale.modal_ticket_registration_combo_details">
+            <t t-set="ticket" t-value="tickets"/>
+        </t>
+    </xpath>
+    <xpath expr="//div[hasclass('o_wevent_registration_single_select')]//input[hasclass('o_wevent_input_nb_tickets')]" position="attributes">
+        <attribute name="value"/>
+        <attribute name="t-att-value">'0' if tickets.product_combo_ids else '1'</attribute>
     </xpath>
 </template>
 
