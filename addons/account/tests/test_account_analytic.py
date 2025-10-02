@@ -1064,13 +1064,13 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
 
     def test_vendor_bill_with_analytic_lines(self):
         """
-        Ensure that, if analytic lines are created when a move is in draft state (as happens when importing a move
-        with analytics), the analytic lines are unlinked. AMLs should still have the correct analytic distribution.
+        Ensure that, if analytic lines are created when a move is in draft state and its journal has
+        'Auto-check on post' disabled, the analytic lines are created correctly on post.
         """
         journal = self.company_data['default_journal_purchase']
         journal.autocheck_on_post = False
         # Create a move with commands to create analytic lines
-        journal_entry = self.env['account.move'].create({
+        move = self.env['account.move'].create({
             'move_type': 'in_invoice',
             'partner_id': self.partner_b.id,
             'date': '2017-01-01',
@@ -1109,19 +1109,20 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
         })
 
         # No analytic line should be created at this point
-        self.assertFalse(self.get_analytic_lines(journal_entry))
+        self.assertFalse(self.get_analytic_lines(move))
 
         # Confirm that the analytic distribution was correctly set based on the analytic_line_ids values
-        self.assertRecordValues(journal_entry.line_ids, [
+        self.assertRecordValues(move.line_ids, [
             {'analytic_distribution': {
                 f"{self.analytic_account_a.id},{self.analytic_account_1.id},{self.analytic_account_3.id}": 100.0,
             }},
             {'analytic_distribution': {f"{self.analytic_account_a.id}": 100.0}},
             {'analytic_distribution': False},
+            {'analytic_distribution': False},
         ])
 
         # Write to an existing draft move, with a command to create analytic lines
-        journal_entry.line_ids[0].write({
+        move.line_ids[0].write({
             'analytic_line_ids': [Command.create({
                 'name': 'Analytic Line 1',
                 'account_id': False,
@@ -1132,18 +1133,19 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
         })
 
         # Still no analytic line
-        self.assertFalse(self.get_analytic_lines(journal_entry))
+        self.assertFalse(self.get_analytic_lines(move))
 
         # Confirm that the analytic distribution is correct
-        self.assertRecordValues(journal_entry.line_ids, [
+        self.assertRecordValues(move.line_ids, [
             {'analytic_distribution': {f"{self.analytic_account_1.id}": 100.0}},
             {'analytic_distribution': {f"{self.analytic_account_a.id}": 100.0}},
+            {'analytic_distribution': False},
             {'analytic_distribution': False},
         ])
 
         # After posting the move, the analytic line should be created as usual
-        journal_entry.action_post()
-        self.assertTrue(self.get_analytic_lines(journal_entry))
+        move.action_post()
+        self.assertTrue(self.get_analytic_lines(move))
 
     def test_multicurrency_different_rounding_analytic_line(self):
         """If using a foreign currency, the rounding of the analytic_line amount should the one from the company currency"""
