@@ -860,6 +860,54 @@ patch(PosStore.prototype, {
     setOrder(order) {
         order?.ensureCourseSelection();
         super.setOrder(order);
+        // If the order comes from self-order (kiosk/mobile) and we have no
+        // previous preparation baseline, initialize it so Product Screen
+        // doesn't show the "Order" button for already-sent items.
+        if (
+            order &&
+            order.lines.length &&
+            // Self-order orders carry an access_token; waiter-created orders typically don't.
+            order.access_token &&
+            Object.keys(order.last_order_preparation_change?.lines || {}).length === 0
+        ) {
+            order.updateLastOrderChange();
+            // Seed a printable lastPrints entry so the Reprint action prints something
+            if (!order.uiState.lastPrints.length) {
+                const products = this.models["product.product"];
+                const baselineLines = Object.values(
+                    order.last_order_preparation_change.lines || {}
+                );
+                const newChanges = baselineLines
+                    .filter((l) => (l.quantity || 0) > 0)
+                    .map((l) => {
+                        const prod = products.get(l.product_id);
+                        const firstCateg = prod?.pos_categ_ids?.[0];
+                        return {
+                            uuid: l.uuid,
+                            product_id: l.product_id,
+                            name: l.name,
+                            basic_name: l.basic_name,
+                            display_name: l.display_name,
+                            isCombo: l.isCombo,
+                            note: l.note,
+                            customer_note: l.customer_note,
+                            attribute_value_names: l.attribute_value_names,
+                            quantity: l.quantity,
+                            pos_categ_id: firstCateg?.id || 0,
+                            pos_categ_sequence: firstCateg?.sequence || 0,
+                            group: undefined,
+                        };
+                    });
+                order.uiState.lastPrints.push({
+                    new: newChanges,
+                    cancelled: [],
+                    noteUpdate: [],
+                    printNoteUpdateData: false,
+                    internal_note: order.internal_note,
+                    general_customer_note: order.general_customer_note,
+                });
+            }
+        }
     },
     addCourse({ backendCourse } = {}) {
         const order = this.getOrder();
