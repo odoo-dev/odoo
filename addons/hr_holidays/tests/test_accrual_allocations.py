@@ -10,7 +10,7 @@ from odoo.tests import tagged, Form
 from odoo.exceptions import ValidationError
 from odoo.tools import mute_logger
 
-from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
+from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon, assert_virtual_leaves_equal
 
 
 @tagged('post_install', '-at_install', 'accruals')
@@ -4014,3 +4014,87 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         self.assertEqual(allocation_data[self.employee_emp][0][1]['virtual_remaining_leaves'], 28, "The carryover did not expire yet so the remaining leaves should be 28")
         allocation_data = leave_type.get_allocation_data(self.employee_emp, '2031-09-01')
         self.assertEqual(allocation_data[self.employee_emp][0][1]['virtual_remaining_leaves'], 23, "The carryover expired after 6 month so the remaining leaves should be 23")
+
+    def _get_allocation_sample(self, leave_type, accrual_plan, date_from, date_to=False):
+        with Form(self.env['hr.leave.allocation'], 'hr_holidays.hr_leave_allocation_view_form_manager') as f:
+            f.name = 'Accrual allocation for employee'
+            f.allocation_type = 'accrual'
+            f.accrual_plan_id = accrual_plan
+            f.employee_id = self.employee_emp
+            f.holiday_status_id = leave_type
+            f.date_from = date_from
+            if date_to:
+                f.date_to = date_to
+        return f.record
+
+    def _get_leave_type_day_sample1(self):
+        return self.env['hr.leave.type'].create({
+            'name': 'Test Leave Type',
+            'time_type': 'leave',
+            'requires_allocation': 'yes',
+            'allocation_validation_type': 'no_validation',
+            'request_unit': 'day',
+        })
+
+    def _get_accrual_plan_sample0(self, added_value, accrued_gain_time):
+        return self.env['hr.leave.accrual.plan'].create({
+            'name': 'Accrual Plan For Test',
+            'is_based_on_worked_time': False,
+            'accrued_gain_time': accrued_gain_time,
+            'carryover_date': 'allocation',
+            'level_ids': [(0, 0, {
+                'start_count': 0,
+                'added_value_type': 'day',
+                'added_value': added_value,
+                'frequency': 'monthly',
+                'action_with_unused_accruals': 'all',
+                'cap_accrued_time_yearly': True,
+                'maximum_leave_yearly': 21,
+            })],
+        })
+
+    def test_frozen_available_days_accrual_plan(self):
+        with freeze_time('2023-09-29'):
+            accrued_days = 2
+            accrual_plan = self._get_accrual_plan_sample0(accrued_days, 'end')
+            leave_type_day = self._get_leave_type_day_sample1()
+            allocation = self._get_allocation_sample(leave_type_day, accrual_plan, '2021-01-01')
+            allocation.action_approve()
+
+            # 17 days leave
+            leave = self.env['hr.leave'].create({
+                'name': 'Leave',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': leave_type_day.id,
+                'request_date_from': '2023-02-06',
+                'request_date_to': '2023-02-28',
+            })
+            leave.action_validate()
+
+        assertions = [
+            # 13 months accrual
+            ('2023-02-01', 58), # min(11 * accrued_days, 21) + min(12 * accrued_days, 21) + accrued_days + 17),
+        ]
+
+        for test_date, remaining_leaves in assertions:
+            with freeze_time(test_date):
+                assert_virtual_leaves_equal(self, test_date, allocation, leave_type_day, remaining_leaves, self.employee_emp, digits=2)
+
+        with freeze_time('2023-09-29'):
+            # 20 days leave
+            leave = self.env['hr.leave'].create({
+                'name': 'Leave',
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': leave_type_day.id,
+                'request_date_from': '2024-03-04',
+                'request_date_to': '2024-03-29',
+            })
+            leave.action_validate()
+
+        assertions = [
+            ('2025-10-01', 58),
+        ]
+
+        for test_date, remaining_leaves in assertions:
+            with freeze_time(test_date):
+                assert_virtual_leaves_equal(self, test_date, allocation, leave_type_day, remaining_leaves, self.employee_emp, digits=2)
