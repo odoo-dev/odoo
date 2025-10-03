@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+l10n_us_account.access_l10n_mx_register_factoring,access_l10n_mx_register_factoring,l10n_us_account.model_l10n_mx_register_factoring,base.group_user,1,1,1,1
+l10n_us_account.access_l10n_mx_register_factoring_line,access_l10n_mx_register_factoring_line,l10n_us_account.model_l10n_mx_register_factoring_line,base.group_user,1,1,1,1

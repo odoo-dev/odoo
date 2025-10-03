@@ -11,6 +11,7 @@
     """,
     'depends': ['l10n_us', 'account'],
     'data': [
+        'data/ir.model.access.csv',
         'views/res_bank_views.xml',
         'data/tax_report.xml',
         'data/uom_data.xml',
@@ -22,4 +23,9 @@
     'auto_install': ['account'],
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
+    'assets': {
+        'web.assets_backend': [
+            'l10n_us_account/static/src/components/**/*',
+        ],
+    },
 }
