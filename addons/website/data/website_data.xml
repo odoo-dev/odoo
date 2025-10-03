@@ -126,12 +126,9 @@
         </t>
     </template>
 
-    <record id="website.contactus_thanks" model="website.page">
+    <record id="website.contactus_thanks" model="ir.ui.view">
         <field name="name">Thanks (Contact us)</field>
         <field name="type">qweb</field>
-        <field name="url">/contactus-thank-you</field>
-        <field name="website_indexed" eval="False"/>
-        <field name="is_published">True</field>
         <field name="key">website.contactus_thanks</field>
         <field name="arch" type="xml">
             <t name="Thanks (Contact us)" t-name="website.contactus_thanks">
@@ -165,6 +162,14 @@
                 </t>
             </t>
         </field>
+    </record>
+
+    <record id="website.page_contactus_thanks" model="website.page">
+        <field name="name">Thanks (Contact us)</field>
+        <field name="url">/contactus-thank-you</field>
+        <field name="website_indexed" eval="False"/>
+        <field name="is_published">True</field>
+        <field name="view_id" ref="website.contactus_thanks"/>
     </record>
 
     <!-- Template for cookie (optional) -->

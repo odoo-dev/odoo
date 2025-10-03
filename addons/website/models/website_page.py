@@ -1,27 +1,31 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import re
+import werkzeug
 
 from odoo.addons.website.tools import text_from_html
 from odoo import api, fields, models
+from odoo.exceptions import AccessError
 from odoo.fields import Domain
+from odoo.http import request
 from odoo.tools import escape_psql, SQL
 from odoo.tools.translate import _
 
 
 class WebsitePage(models.Model):
     _name = 'website.page'
-    _inherits = {'ir.ui.view': 'view_id'}
     _inherit = [
         'website.published.multi.mixin',
         'website.searchable.mixin',
         'website.page_options.mixin',
+        'website.seo.metadata',
     ]
     _description = 'Page'
     _order = 'website_id'
 
     url = fields.Char('Page URL', required=True)
     view_id = fields.Many2one('ir.ui.view', string='View', required=True, index=True, ondelete="cascade")
+    name = fields.Char(related='view_id.name', readonly=False)
 
     view_write_uid = fields.Many2one('res.users', "Last Content Update by",
         related='view_id.write_uid')
@@ -38,7 +42,34 @@ class WebsitePage(models.Model):
 
     # don't use mixin website_id but use website_id on ir.ui.view instead
     website_id = fields.Many2one(related='view_id.website_id', store=True, readonly=False, ondelete='cascade')
-    arch = fields.Text(related='view_id.arch', readonly=False, depends_context=('website_id',))
+
+    visibility = fields.Selection(
+        [
+            ('', 'Public'),
+            ('connected', 'Signed In'),
+            ('restricted_group', 'Restricted Group'),
+            ('password', 'With Password')
+        ],
+        default='',
+    )
+    visibility_password = fields.Char(groups='base.group_system', copy=False)
+    visibility_password_display = fields.Char(compute='_get_pwd', inverse='_set_pwd', groups='website.group_website_designer')
+    track = fields.Boolean(string='Track', default=False, help="Allow to specify for one page of the website to be trackable or not")
+
+    group_ids = fields.Many2many('res.groups', 'website_page_group_rel', 'page_id', 'group_id',
+        string='Groups', help="If this field is empty, the page is available to all users. Otherwise, the page is abailable to the users of those groups only.")
+
+    @api.depends('visibility_password')
+    def _get_pwd(self):
+        for r in self:
+            r.visibility_password_display = r.sudo().visibility_password and '********' or ''
+
+    def _set_pwd(self):
+        crypt_context = self.env.user._crypt_context()
+        for r in self:
+            if r.type == 'qweb':
+                r.sudo().visibility_password = (r.visibility_password_display and crypt_context.hash(r.visibility_password_display)) or ''
+                r.visibility = r.visibility  # double check access
 
     def _compute_is_homepage(self):
         website = self.env['website'].get_current_website()
@@ -50,6 +81,53 @@ class WebsitePage(models.Model):
             page.is_visible = page.website_published and (
                 not page.date_publish or page.date_publish < fields.Datetime.now()
             )
+
+    def _handle_visibility(self, do_raise=True):
+        """ Check the visibility set on the main view and raise 403 if you should not have access.
+            Order is: Public, Connected, Has group, Password
+
+            It only check the visibility on the main content, others views called stay available in rpc.
+        """
+        error = False
+
+        self = self.sudo()
+
+        visibility = self.visibility
+
+        if visibility and not request.env.user.has_group('website.group_website_designer'):
+            if (visibility == 'connected' and request.website.is_public_user()):
+                error = werkzeug.exceptions.Forbidden()
+            elif visibility == 'password' and \
+                    (request.website.is_public_user() or self.id not in request.session.get('views_unlock', [])):
+                pwd = request.params.get('visibility_password')
+                if pwd and self.env.user._crypt_context().verify(
+                        pwd, self.visibility_password):
+                    request.session.setdefault('views_unlock', list()).append(self.id)
+                else:
+                    error = werkzeug.exceptions.Forbidden('website_visibility_password_required')
+
+            if visibility not in ('password', 'connected'):
+                try:
+                    self._check_view_access()
+                except AccessError:
+                    error = werkzeug.exceptions.Forbidden()
+
+        if error:
+            if do_raise:
+                raise error
+            else:
+                return False
+        return True
+
+    def _render_template(self, template, values=None):  # TODO: CHECK
+        """ Render the template. If website is enabled on request, then extend rendering context with website values. """
+        view = self._get_template_view(template).sudo()
+        self._handle_visibility(do_raise=True)
+        if values is None:
+            values = {}
+        if 'main_object' not in values:
+            values['main_object'] = view
+        return super()._render_template(template, values=values)
 
     @api.depends('menu_ids')
     def _compute_website_menu(self):
@@ -271,7 +349,7 @@ class WebsitePage(models.Model):
             if search and with_description:
                 # Search might have matched words in the xml tags and parameters therefore we make
                 # sure the terms actually appear inside the text.
-                text = '%s %s %s' % (page.name, page.url, text_from_html(page.arch))
+                text = '%s %s %s' % (page.name, page.url, text_from_html(page.view_id.arch))
                 pattern = '|'.join([re.escape(search_term) for search_term in search.split()])
                 return re.findall('(%s)' % pattern, text, flags=re.I) if pattern else False
             return True

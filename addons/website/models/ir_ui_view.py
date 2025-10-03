@@ -2,10 +2,9 @@
 
 import logging
 import uuid
-import werkzeug
 
 from odoo import api, fields, models
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import MissingError
 from odoo.fields import Domain
 from odoo.http import request
 
@@ -14,37 +13,12 @@ _logger = logging.getLogger(__name__)
 
 class IrUiView(models.Model):
     _name = 'ir.ui.view'
-
-    _inherit = ["ir.ui.view", "website.seo.metadata"]
+    _inherit = ["ir.ui.view"]
 
     website_id = fields.Many2one('website', ondelete='cascade', string="Website")
     page_ids = fields.One2many('website.page', 'view_id')
     controller_page_ids = fields.One2many('website.controller.page', 'view_id')
     first_page_id = fields.Many2one('website.page', string='Website Page', help='First page linked to this view', compute='_compute_first_page_id')
-    track = fields.Boolean(string='Track', default=False, help="Allow to specify for one page of the website to be trackable or not")
-    visibility = fields.Selection(
-        [
-            ('', 'Public'),
-            ('connected', 'Signed In'),
-            ('restricted_group', 'Restricted Group'),
-            ('password', 'With Password')
-        ],
-        default='',
-    )
-    visibility_password = fields.Char(groups='base.group_system', copy=False)
-    visibility_password_display = fields.Char(compute='_get_pwd', inverse='_set_pwd', groups='website.group_website_designer')
-
-    @api.depends('visibility_password')
-    def _get_pwd(self):
-        for r in self:
-            r.visibility_password_display = r.sudo().visibility_password and '********' or ''
-
-    def _set_pwd(self):
-        crypt_context = self.env.user._crypt_context()
-        for r in self:
-            if r.type == 'qweb':
-                r.sudo().visibility_password = (r.visibility_password_display and crypt_context.hash(r.visibility_password_display)) or ''
-                r.visibility = r.visibility  # double check access
 
     def _compute_first_page_id(self):
         for view in self:
@@ -362,7 +336,7 @@ class IrUiView(models.Model):
 
     @api.model
     def _get_cached_template_prefetched_keys(self):
-        return super()._get_cached_template_prefetched_keys() + ['active', 'visibility']
+        return super()._get_cached_template_prefetched_keys() + ['active']
 
     @api.model
     def _get_template_minimal_cache_keys(self):
@@ -394,49 +368,6 @@ class IrUiView(models.Model):
     def _get_template_order(self):
         return f"website_id asc, {super()._get_template_order()}"
 
-    def _get_cached_visibility(self):
-        info = self._get_cached_template_info(self.id, _view=self)
-        if info['error']:
-            raise info['error']
-        return info['visibility']
-
-    def _handle_visibility(self, do_raise=True):
-        """ Check the visibility set on the main view and raise 403 if you should not have access.
-            Order is: Public, Connected, Has group, Password
-
-            It only check the visibility on the main content, others views called stay available in rpc.
-        """
-        error = False
-
-        self = self.sudo()
-
-        visibility = self._get_cached_visibility()
-
-        if visibility and not request.env.user.has_group('website.group_website_designer'):
-            if (visibility == 'connected' and request.website.is_public_user()):
-                error = werkzeug.exceptions.Forbidden()
-            elif visibility == 'password' and \
-                    (request.website.is_public_user() or self.id not in request.session.get('views_unlock', [])):
-                pwd = request.params.get('visibility_password')
-                if pwd and self.env.user._crypt_context().verify(
-                        pwd, self.visibility_password):
-                    request.session.setdefault('views_unlock', list()).append(self.id)
-                else:
-                    error = werkzeug.exceptions.Forbidden('website_visibility_password_required')
-
-            if visibility not in ('password', 'connected'):
-                try:
-                    self._check_view_access()
-                except AccessError:
-                    error = werkzeug.exceptions.Forbidden()
-
-        if error:
-            if do_raise:
-                raise error
-            else:
-                return False
-        return True
-
     @api.readonly
     @api.model
     def render_public_asset(self, template, values=None):
@@ -448,7 +379,6 @@ class IrUiView(models.Model):
     def _render_template(self, template, values=None):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """
         view = self._get_template_view(template).sudo()
-        view._handle_visibility(do_raise=True)
         if values is None:
             values = {}
         if 'main_object' not in values:

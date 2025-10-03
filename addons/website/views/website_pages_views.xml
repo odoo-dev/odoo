@@ -19,6 +19,16 @@
                         <field name="website_indexed"/>
                         <field name="is_published"/>
                         <field name="date_publish"/>
+
+                        <label for="visibility"/>
+                        <div>
+                            <field name="visibility"/>
+                            <span class="o_wrap_label" invisible="visibility != 'restricted_group'"/>
+                            <div class="oe_edit_only alert alert-info" role="alert" invisible="visibility != 'restricted_group'">
+                                Add groups in the "Access Rights" tab below.
+                            </div>
+                        </div>
+                        <field name="visibility_password_display" invisible="visibility != 'password'" password="True" string="Visibility Password" />
                     </group>
                 </group>
                 <label for="menu_ids" string="Related Menu Items"/>
@@ -214,15 +224,6 @@
             </div>
             <field name="page_ids" invisible="1" />
             <field name="first_page_id" invisible="not page_ids" />
-            <label for="visibility"/>
-            <div>
-                <field name="visibility" invisible="type != 'qweb'" />
-                <span class="o_wrap_label" invisible="visibility != 'restricted_group'"/>
-                <div class="oe_edit_only alert alert-info" role="alert" invisible="visibility != 'restricted_group'">
-                    Add groups in the "Access Rights" tab below.
-                </div>
-            </div>
-            <field name="visibility_password_display" invisible="visibility != 'password'" password="True" string="Visibility Password" />
         </field>
         <sheet position="before">
             <header>
@@ -230,9 +231,6 @@
                     string="Go to Page Manager" invisible="not page_ids"/>
             </header>
         </sheet>
-        <field name="active" position="after">
-            <field name="track" invisible="type != 'qweb'" widget="boolean_toggle"/>
-        </field>
     </field>
 </record>
 
