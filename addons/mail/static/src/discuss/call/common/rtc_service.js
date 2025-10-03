@@ -21,6 +21,10 @@ let sequence = 1;
 const getSequence = () => sequence++;
 
 /**
+ * TEST IOS
+ */
+
+/**
  * @typedef {'audio' | 'camera' | 'screen' } streamType
  */
 
