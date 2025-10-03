@@ -270,7 +270,7 @@ class ProductProduct(models.Model):
                     in_value = move._get_value(at_date=at_date)
                 if lot:
                     lot_qty = move._get_valued_qty(lot)
-                    in_value = in_value * lot_qty / in_qty
+                    in_value = in_value * lot_qty / in_qty if in_qty else 0
                     in_qty = lot_qty
                 if quantity < 0 and quantity + in_qty >= 0:
                     positive_qty = quantity + in_qty
