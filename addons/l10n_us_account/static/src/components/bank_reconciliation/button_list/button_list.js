@@ -31,4 +31,13 @@ patch(BankRecButtonList.prototype, {
         }
         return buttonsToDisplay;
     },
+
+    getBankRecSelectCreateDialogOptions() {
+        const options = super.getBankRecSelectCreateDialogOptions();
+        options.onFactor = async (moveLines) => {
+            console.log(`should factor amls ${moveLines}`);
+            // probably open another dialog for it
+        };
+        return options;
+    }
 });

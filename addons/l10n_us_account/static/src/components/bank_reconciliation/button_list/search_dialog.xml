@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="l10n_mx.BankRecSelectCreateDialog" t-inherit="account_accountant.BankRecSelectCreateDialog" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('btn-primary')]" position="after">
+            <button class="btn o_select_button btn-secondary"
+                    t-att-disabled="state.resIds.length === 0"
+                    t-on-click="() => this.factor(state.resIds)"
+            >
+                Factor
+            </button>
+        </xpath>
+    </t>
+
+</templates>
