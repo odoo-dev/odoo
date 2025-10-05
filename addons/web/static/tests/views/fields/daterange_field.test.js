@@ -1361,6 +1361,32 @@ test("daterange in readonly with same dates but different hours", async () => {
     });
 });
 
+test("daterange in editable list view - open/close picker", async () => {
+    Partner._records[0].datetime_end = Partner._records[0].datetime;
+    Partner._records[0].datetime = false;
+
+    await mountView({
+        type: "list",
+        resModel: "partner",
+        arch: /* xml */ `
+            <list editable="bottom">
+                <field name="datetime_end" widget="daterange" options="{'start_date_field': 'datetime'}" />
+            </list>
+        `,
+    });
+
+    expect(".o_field_daterange[name=datetime_end]").toHaveText("Feb 8, 2017, 3:30 PM");
+    await contains(".o_field_daterange[name=datetime_end]").click();
+    await animationFrame();
+    await animationFrame();
+    expect(".o_datetime_picker").toBeDisplayed();
+    expect("input[data-field=datetime_end]").toBeFocused();
+
+    // Close picker
+    await contains(".o_view_controller").click();
+    expect(".o_datetime_picker").toHaveCount(0);
+});
+
 test("daterange in list view with missing first date", async () => {
     Partner._records[0].datetime_end = Partner._records[0].datetime;
     Partner._records[0].datetime = false;
