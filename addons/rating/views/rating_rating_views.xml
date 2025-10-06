@@ -25,11 +25,8 @@
                         <group>
                             <group>
                                 <field name="resource_ref" string="Document"/>
-                                <field name="res_name" string="Document" invisible="1"/>
                                 <field name="parent_ref" string="Parent Holder"/>
-                                <field name="parent_res_name" string="Parent Holder" invisible="1"/>
                                 <field name="rated_partner_id" widget="many2one_avatar"/>
-                                <field name="rating" invisible="1"/>
                                 <field name="is_internal"/>
                                 <field name="consumed" groups="base.group_no_one"/>
                             </group>
@@ -159,9 +156,7 @@
                     <field name="rated_partner_id" type="row"/>
                     <field name="rated_on" type="col"/>
                     <field name="rating" type="measure" string="Rating (/5)"/>
-                    <field name="parent_res_id" invisible="1"/>
-                    <field name="res_id" invisible="1"/>
-                </pivot>
+                    </pivot>
             </field>
         </record>
 
@@ -172,9 +167,7 @@
                 <graph string="Ratings" sample="1">
                     <field name="rated_on"/>
                     <field name="rating" type="measure" string="Rating (/5)"/>
-                    <field name="parent_res_id" invisible="1"/>
-                    <field name="res_id" invisible="1"/>
-                </graph>
+                    </graph>
             </field>
         </record>
 
