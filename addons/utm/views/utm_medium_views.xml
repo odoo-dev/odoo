@@ -6,8 +6,7 @@
         <field name="arch" type="xml">
             <list string="Mediums" editable="bottom" sample="1">
                 <field name="name" placeholder='e.g. "Email"'/>
-                <field name="active" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
 
