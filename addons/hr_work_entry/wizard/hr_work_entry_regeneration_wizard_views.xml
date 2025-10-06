@@ -9,7 +9,6 @@
                     <field name="employee_ids" widget="many2many_avatar_employee_class"
                            in_error="validated_work_entry_employee_ids"
                            domain="[('company_id', 'in', allowed_company_ids), ('version_ids.id','!=', False)]"/>
-                    <field name="date_to" invisible="1"/>
                     <label for="date_from" string="Period"/>
                     <field name="date_from" style="width: 200px;" nolabel="1" widget="daterange" options="{'end_date_field': 'date_to'}"/>
                     <div colspan="2" class="text-info" invisible="earliest_available_date_message == ''">
@@ -24,7 +23,6 @@
                 <div>
                     <span class="text-muted">Warning: The work entry regeneration will delete all manual changes on the selected period.</span>
                 </div>
-                <field name="search_criteria_completed" invisible="1"/>
                 <div invisible="not search_criteria_completed or not validated_work_entry_employee_ids">
                     <div class="text-danger"><i class="fa fa-exclamation-triangle me-1" title="Warning"/>Employees in red will be skipped because they have at least one validated work entry.</div>
                 </div>

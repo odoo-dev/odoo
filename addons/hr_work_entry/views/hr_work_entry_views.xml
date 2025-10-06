@@ -38,10 +38,7 @@
                     <div class='d-flex'><field name="duration" widget="float_time"/>hours</div>
                     <field name="name" string="Description" placeholder="Additional Description..."/>
                 </group>
-                <field name="employee_id" invisible="1"/>
-                <field name="color" invisible="1"/>
-                <field name="display_code" invisible="1"/>
-            </form>
+                </form>
         </field>
     </record>
 
@@ -64,11 +61,7 @@
                 js_class="work_entries_calendar">
                 <field name="state"/>
                 <field name="name" string="Description" invisible="not name"/>
-                <field name="duration" invisible="1"/>
-                <field name="display_code" invisible="1"/>
-                <field name="employee_id" invisible="1"/>
-                <field name="work_entry_type_id" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 
@@ -107,8 +100,7 @@
                                     readonly="state != 'draft'"/>
                                 <span>Hours</span>
                             </div>
-                            <field name="company_id" invisible="1"/>
-                        </group>
+                            </group>
                     </group>
                 </sheet>
             </form>
@@ -251,7 +243,6 @@
                     </div>
                     <group name="main_group">
                         <group name="identification" class="o_form_fw_labels">
-                            <field name="active" invisible="1"/>
                             <field name="code"/>
                             <field name="display_code"/>
                             <field name="external_code"/>
