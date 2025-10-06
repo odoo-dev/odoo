@@ -5,7 +5,6 @@
             <field name="model">account.analytic.account</field>
             <field name="arch" type="xml">
                 <form string="Analytic Account">
-                    <field name="company_id" invisible="1"/>
                     <sheet string="Analytic Account">
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" type="action" name="%(account_analytic_line_action)d" icon="fa-usd">
@@ -27,7 +26,6 @@
                         <div name="project"/>
                         <group name="main">
                             <group>
-                                <field name="active" invisible="1"/>
                                 <field name="partner_id"/>
                                 <field name="code"/>
                             </group>
@@ -50,16 +48,11 @@
             <field eval="8" name="priority"/>
             <field name="arch" type="xml">
                 <list string="Analytic Accounts" multi_edit="1">
-                    <field name="company_id" column_invisible="True"/>
-                    <field name="currency_id" column_invisible="True"/>
                     <field name="name" string="Name"/>
                     <field name="code"/>
                     <field name="partner_id"/>
                     <field name="plan_id"/>
-                    <field name="active" column_invisible="True"/>
                     <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="debit" sum="Debit" column_invisible="True"/>
-                    <field name="credit" sum="Credit" column_invisible="True"/>
                     <field name="balance" sum="Balance"/>
                 </list>
             </field>

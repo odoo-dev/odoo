@@ -4829,7 +4829,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'account_sepa',
             'account_sepa_direct_debit',
             'account_winbooks_import',
-            'analytic',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
