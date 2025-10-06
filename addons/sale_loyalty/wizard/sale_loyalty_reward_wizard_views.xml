@@ -7,10 +7,6 @@
             <form>
                 <sheet>
                     <group>
-                        <field name="order_id" invisible="1"/>
-                        <field name="reward_ids" invisible="1"/>
-                        <field name="multi_product_reward" invisible="1"/>
-                        <field name="reward_product_ids" invisible="1"/>
                         <a invisible="reward_ids">
                             No rewards available for this customer!
                         </a>
