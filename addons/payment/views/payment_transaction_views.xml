@@ -28,12 +28,10 @@
                             <field name="source_transaction_id"
                                    invisible="not source_transaction_id"/>
                             <field name="amount"/>
-                            <field name="currency_id" invisible="1"/>
                             <field name="payment_method_id"/>
                             <field name="provider_id"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <!-- Used by some provider-specific views -->
-                            <field name="provider_code" invisible="1"/>
                             <field name="provider_reference"/>
                             <field name="token_id" invisible="not token_id"/>
                             <field name="create_date"/>
@@ -78,7 +76,6 @@
                 <field name="partner_id"/>
                 <field name="partner_name"/>
                 <!-- Needed to display the currency of the amounts -->
-                <field name="currency_id" column_invisible="True"/>
                 <field name="amount"/>
                 <field name="state"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>

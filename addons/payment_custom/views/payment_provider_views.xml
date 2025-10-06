@@ -8,8 +8,6 @@
         <!-- Load after account_payment for the invisible attr. of the payment_followup group. -->
         <field name="priority">32</field>
         <field name="arch" type="xml">
-            <field name="code" invisible="1" position="after">
-                <field name="custom_mode" invisible="1"/>
             </field>
             <page name="credentials" position="attributes">
                 <attribute name="invisible" separator="or" add="code == 'custom'"/>

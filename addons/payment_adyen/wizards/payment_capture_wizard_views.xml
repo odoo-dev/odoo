@@ -7,7 +7,6 @@
         <field name="inherit_id" ref="payment.payment_capture_wizard_view_form"/>
         <field name="arch" type="xml">
             <footer position="before">
-                <field name="has_adyen_tx" invisible="1"/>
                 <div id="alert_delayed_capture_tx"
                      role="alert"
                      class="alert alert-info mb-2"
