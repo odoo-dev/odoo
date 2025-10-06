@@ -9,8 +9,7 @@
                 <sheet>
                     <group>
                         <field name="name"/>
-                        <field name="script_step_id" invisible="1"/>
-                    </group>
+                        </group>
                 </sheet>
             </form>
         </field>

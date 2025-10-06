@@ -88,8 +88,6 @@
                                     <span class="fw-bold">Date: <field name="create_date" class="fw-normal"/></span>
                                     <span class="fw-bold">Duration: <field class="d-inline fw-normal" name="duration" widget="float_time" options="{'displaySeconds': True}"/></span>
                                     <span class="fw-bold">Messages: <field name="message_count" class="fw-normal"/></span>
-                                    <field name="livechat_failure" invisible="1"/>
-                                    <field name="livechat_is_escalated" invisible="1"/>
                                     <span t-if="record.livechat_is_escalated.raw_value or record.livechat_failure.raw_value" class="fw-bold">
                                         Status:
                                         <span class="fw-normal">
