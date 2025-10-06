@@ -25,11 +25,8 @@
         <field name="priority">64</field>
         <field name="arch" type="xml">
             <graph string="Reviews" type="bar" sample="1">
-                <field name="res_name" invisible="1"/>
                 <field name="rating" type="measure"/>
-                <field name="res_id" invisible="1"/>
-                <field name="parent_res_id" invisible="1"/>
-            </graph>
+                </graph>
         </field>
     </record>
 
