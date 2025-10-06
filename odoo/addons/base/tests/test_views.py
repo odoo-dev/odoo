@@ -5068,7 +5068,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'mrp_workorder_expiry',
             'mrp_workorder_iot',
             'onboarding',
-            'partner_autocomplete',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
