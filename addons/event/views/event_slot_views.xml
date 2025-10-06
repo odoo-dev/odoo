@@ -6,7 +6,6 @@
         <field name="model">event.slot</field>
         <field name="arch" type="xml">
             <form>
-                <field name="event_id" invisible="1"/>
                 <group>
                     <group>
                         <label for="start_hour" string="Hour range"/>
@@ -31,7 +30,6 @@
         <field name="priority">20</field>
         <field name="arch" type="xml">
             <form>
-                <field name="event_id" invisible="1"/>
                 <group>
                     <field name="date_tz" string="Timezone"/>
                     <field name="color" widget="color_picker"/>
@@ -62,10 +60,7 @@
             <calendar js_class="event_slot_calendar" date_start="start_datetime" date_stop="end_datetime"
                 string="Slots" scales="month" color="color" quick_create_view_id="%(event.view_event_slot_form)d"
                 multi_create_view="event.view_event_slot_multi_create_form">
-                <field name="start_datetime" invisible="1"/>
-                <field name="end_datetime" invisible="1"/>
-                <field name="date_tz" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 

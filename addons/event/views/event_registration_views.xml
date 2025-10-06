@@ -9,8 +9,6 @@
             <list string="Registration" multi_edit="1" sample="1"
                   expand="1" default_order="create_date desc"
                   class="o_event_registration_view_tree" js_class="registration_summary_dialog_list">
-                <field name="barcode" column_invisible="True"/>
-                <field name="active" column_invisible="True"/>
                 <field name="create_date" optional="show" string="Registration Date"/>
                 <field name="name"/>
                 <field name="partner_id" optional="hide"/>
@@ -25,7 +23,6 @@
                        decoration-success="state == 'done'"
                        decoration-muted="state == 'cancel'" widget="badge"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide" readonly="state != 'draft'"/>
-                <field name="message_needaction" column_invisible="True"/>
                 <button name="action_confirm" string="Registered" type="object" icon="fa-check"
                         invisible="not active or state != 'draft'"/>
                 <button name="action_set_done" string="Mark as Attending" type="object" icon="fa-level-down"
@@ -43,7 +40,6 @@
         <field name="model">event.registration</field>
         <field name="arch" type="xml">
             <form string="Event Registration">
-                <field name="active" invisible="1"/>
                 <header>
                     <button name="action_send_badge_email" string="Send by Email" type="object" class="oe_highlight"
                             invisible="not active or state != 'open' and state != 'done'"/>
@@ -92,7 +88,6 @@
                         <page string="Questions" name="questions">
                             <field name="registration_answer_ids" widget="one2many">
                                 <list editable="bottom">
-                                    <field name="event_id" column_invisible="True" />
                                     <field name="question_id" domain="[('event_ids', 'in', event_id)]" options="{'no_create': True}"/>
                                     <field name="question_type" string="Type" />
                                     <field name="value_answer_id"
@@ -207,8 +202,6 @@
                 <field name="partner_id"/>
                 <field name="event_ticket_id" string="Ticket"/>
                 <field name="event_id"/>
-                <field name="event_user_id" string="Responsible" invisible="1"/>
-                <field name="event_organizer_id" string="Organizer" invisible="1"/>
                 <filter string="Ongoing Events" name="filter_is_ongoing" domain="[('event_id.is_ongoing', '=', True)]"/>
                 <filter string="Taken" name="taken" domain="[('state', 'in', ['open', 'done'])]"/>
                 <separator/>

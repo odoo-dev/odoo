@@ -7,8 +7,7 @@
             <graph string="Revenues" sample="1" type="line">
                 <field name="sale_price" type="measure"/>
                 <field name="event_registration_create_date" interval="day"/>
-                <field name="event_ticket_price" type="measure" invisible="True"/>
-            </graph>
+                </graph>
         </field>
     </record>
 
@@ -59,8 +58,7 @@
                 <field name="sale_price" type="measure"/>
                 <field name="event_id" type="row"/>
                 <field name="product_id" type="row"/>
-                <field name="event_ticket_price" invisible="True"/>
-            </pivot>
+                </pivot>
         </field>
     </record>
 

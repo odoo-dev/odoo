@@ -5,7 +5,6 @@
         <field name="model">event.event.configurator</field>
         <field name="arch" type="xml">
             <form js_class="event_configurator_form">
-                <field name="has_available_tickets" invisible="1"/>
                 <div invisible="has_available_tickets">
                     We could not find a matching event ticket for this product. <br/>
                     <a role="button" class="btn btn-link" target="_blank"
@@ -38,8 +37,7 @@
                         required="event_id"
                         context="{'name_with_seats_availability': True}"
                         options="{'no_open': True, 'no_create': True}"/>
-                    <field name="product_id" invisible="1"/>
-                </group>
+                    </group>
                 <footer>
                     <button string="Add" invisible="not has_available_tickets"
                         class="btn-primary o_event_sale_js_event_configurator_ok" special="save" data-hotkey="q"/>

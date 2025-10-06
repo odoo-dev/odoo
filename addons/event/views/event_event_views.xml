@@ -41,8 +41,6 @@
                             <field name="seats_taken" widget="statinfo" string="Attendees"/>
                         </button>
                     </div>
-                    <field name="active" invisible="1"/>
-                    <field name="company_id" invisible="1"/>
                     <widget name="web_ribbon" text="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="kanban_state" widget="event_state_selection" class="ms-auto float-end"/>
                     <div class="oe_title">
@@ -51,9 +49,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="active" invisible="1"/>
                             <field name="date_begin" string="Date" widget="daterange" options="{'end_date_field': 'date_end'}" />
-                            <field name="date_end" invisible="1" />
                             <field name="date_tz"/>
                             <label for="is_multi_slots"/>
                             <div class="o_row">
@@ -185,7 +181,6 @@
                 <field name="seats_max" string="Maximum Seats" sum="Total" readonly="1" optional="hide"/>
                 <field name="seats_reserved" sum="Total" readonly="1" optional="hide"/>
                 <field name="stage_id" readonly="1"/>
-                <field name="message_needaction" readonly="1" column_invisible="True"/>
                 <field name="activity_exception_decoration" widget="activity_exception" readonly="1"/>
             </list>
         </field>
@@ -218,8 +213,7 @@
                 <group>
                     <field name="name" placeholder="e.g. Conference for Architects"/>
                     <field name="date_begin" string="Date" widget="daterange" options="{'end_date_field': 'date_end'}" />
-                    <field name="date_end" invisible="1" />
-                </group>
+                    </group>
             </form>
         </field>
     </record>
@@ -284,8 +278,7 @@
                 <field name="seats_taken"/>
                 <field name="seats_reserved"/>
                 <field name="seats_used"/>
-                <field name="event_type_id" filters="1" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 

@@ -14,8 +14,7 @@
                         <h1><field name="name" placeholder="e.g. Premium Booth"/></h1>
                     </div>
                     <group name="main">
-                        <field name="active" invisible="1"/>
-                    </group>
+                        </group>
                     <notebook>
                         <page string="Description" name="description">
                             <field name="description" placeholder='e.g. "Those stands will be place near the entrance and..."'/>
