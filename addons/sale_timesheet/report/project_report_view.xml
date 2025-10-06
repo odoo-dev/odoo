@@ -29,8 +29,7 @@
             <field name="inherit_id" ref="project.view_task_project_user_fsm_graph_base"/>
             <field name="arch" type="xml">
                 <field name="remaining_hours" position="after">
-                    <field name="remaining_hours_so" invisible="1"/>
-                </field>
+                    </field>
              </field>
         </record>
     </data>
