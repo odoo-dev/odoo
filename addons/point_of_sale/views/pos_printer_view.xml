@@ -6,7 +6,6 @@
             <form string="POS Printer">
                 <sheet>
                     <group>
-                        <field name="company_id" invisible="1" />
                         <field name="name" />
                         <field name="printer_type" widget="radio"/>
                         <field name="epson_printer_ip" invisible="printer_type != 'epson_epos'"/>

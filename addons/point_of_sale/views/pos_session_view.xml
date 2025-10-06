@@ -14,8 +14,6 @@
                     <field name="state" widget="statusbar" statusbar_visible="opened,closing_control,closed" nolabel="1" />
                 </header>
                 <sheet>
-                    <field name="failed_pickings" invisible="1"/>
-                    <field name="rescue" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_order"
                             class="oe_stat_button"
@@ -62,9 +60,7 @@
                         <field name="name" invisible="name == '/'" class="oe_inline"/>
                     </h1>
                     <group>
-                        <field name="cash_control" invisible="1" />
                         <field name="user_id" readonly="state != 'opening_control'"/>
-                        <field name="currency_id" invisible="1"/>
                         <field name="config_id" readonly="1"/>
                         <field name="move_id" readonly="1" groups="account.group_account_readonly" />
                         <field name="start_at" invisible="state == 'opening_control'"/>

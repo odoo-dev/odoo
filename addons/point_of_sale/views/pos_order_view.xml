@@ -13,10 +13,8 @@
                         invisible="state == 'draft' or not has_refundable_lines"/>
                     <field name="state" widget="statusbar" invisible="state == 'cancel'" statusbar_visible="draft,paid,done"/>
                     <field name="state" widget="statusbar" invisible="state != 'cancel'" statusbar_visible="draft,cancel"/>
-                    <field name="has_refundable_lines" invisible="1" />
-                </header>
+                    </header>
                 <sheet>
-                <field name="failed_pickings" invisible="1"/>
                 <div class="oe_button_box" name="button_box">
                     <button name="action_stock_picking"
                         type="object"
@@ -54,7 +52,6 @@
                     <field name="date_order"/>
                     <field name="session_id"  readonly="state != 'draft'"/>
                     <field string="User" name="user_id" readonly="account_move or state == 'done'"/>
-                    <field name="order_edit_tracking" invisible="1"/>
                     <field name="is_edited" readonly="1" invisible="not order_edit_tracking"/>
                     <field name="partner_id" context="{'res_partner_search_mode': 'customer'}" readonly="account_move"/>
                     <field name="fiscal_position_id" options="{'no_create': True}" readonly="state != 'draft'"/>
@@ -82,7 +79,6 @@
                                 </t>
                             </kanban>
                             <list string="Order lines" editable="bottom">
-                                <field name="name" column_invisible="True"/>
                                 <field name="full_product_name" optional="hide" readonly="1"/>
                                 <field name="product_id" widget="product_label_section_and_note_field" />
                                 <field name="is_edited" readonly="1" column_invisible="not parent.order_edit_tracking"/>
@@ -91,16 +87,13 @@
                                 <field name="customer_note" optional="hide"/>
                                 <field name="product_uom_id" groups="uom.group_uom"/>
                                 <field name="price_unit" widget="monetary"/>
-                                <field name="is_total_cost_computed" column_invisible="True"/>
                                 <field name="total_cost" invisible="not is_total_cost_computed" optional="hide" widget="monetary"/>
                                 <field name="margin" invisible="not is_total_cost_computed" optional="hide" widget="monetary"/>
                                 <field name="margin_percent" invisible="not is_total_cost_computed" optional="hide" widget="percentage"/>
                                 <field name="discount" width="50px" string="Disc.%"/>
                                 <field name="tax_ids_after_fiscal_position" widget="many2many_tax_tags" string="Taxes"/>
-                                <field name="tax_ids" widget="many2many_tax_tags" column_invisible="True"/>
                                 <field name="price_subtotal" widget="monetary" force_save="1"/>
                                 <field name="price_subtotal_incl" widget="monetary" force_save="1"/>
-                                <field name="currency_id" column_invisible="True"/>
                                 <field name="refunded_qty" optional="hide" />
                             </list>
                             <form string="Order lines">
@@ -109,13 +102,9 @@
                                     <field name="qty"/>
                                     <field name="discount"/>
                                     <field name="price_unit" widget="monetary"/>
-                                    <field name="price_subtotal" invisible="1" widget="monetary" force_save="1"/>
-                                    <field name="price_subtotal_incl" invisible="1" widget="monetary" force_save="1"/>
                                     <field name="tax_ids_after_fiscal_position" widget="many2many_tax_tags" string="Taxes"/>
-                                    <field name="tax_ids" widget="many2many_tax_tags" invisible="1"/>
                                     <field name="pack_lot_ids" widget="many2many_tags" groups="stock.group_production_lot"/>
                                     <field name="notice"/>
-                                    <field name="currency_id" invisible="1"/>
                                     <field name="full_product_name" readonly="1" />
                                 </group>
                             </form>
@@ -145,15 +134,12 @@
                                 </span>
                                 <span class="float-end" invisible="is_total_cost_computed">To be determined</span>
                             </div>
-                            <field name="is_total_cost_computed" invisible="1"/>
-                            <field name="currency_id" invisible="1"/>
-                        </group>
+                            </group>
                         <div class="clearfix"/>
                     </page>
                     <page string="Payments" name="payments">
                         <field name="payment_ids" colspan="4" nolabel="1" readonly="account_move or state == 'done' or nb_print > 0">
                             <list string="Payments" create="1" editable="bottom" open_form_view="True">
-                                <field name="currency_id" column_invisible="True" />
                                 <field name="payment_date"/>
                                 <field name="payment_method_id" domain="[('id', 'in', parent.available_payment_method_ids)]" />
                                 <field name="amount"/>
@@ -180,7 +166,6 @@
                             <group string="Other Information" name="other_information">
                                 <field name="pos_reference"/>
                                 <field name="tracking_number"/>
-                                <field name="country_code" invisible="1"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                                 <field name="pricelist_id" groups="product.group_product_pricelist" readonly="state != 'draft'"/>
                                 <field name="preset_id" readonly="True" />
@@ -247,7 +232,6 @@
             <pivot string="PoS Orders" sample="1">
                 <field name="date_order" type="row"/>
                 <field name="margin"/>
-                <field name="margin_percent" invisible="1"/>
                 <field name="amount_total" type="measure"/>
             </pivot>
         </field>
@@ -291,7 +275,6 @@
                 <header>
                     <button name="action_create_invoices" type="object" string="Create Invoices"/>
                 </header>
-                <field name="currency_id" column_invisible="True"/>
                 <field name="name" decoration-bf="1"/>
                 <field name="session_id"  readonly="state != 'draft'"/>
                 <field name="date_order"/>
@@ -343,8 +326,7 @@
                 <field name="price_subtotal" readonly="1" sum="Sum of subtotals" widget="monetary"/>
                 <field name="price_subtotal_incl" readonly="1" sum="Sum of subtotals" widget="monetary"/>
                 <field name="create_date" readonly="1"/>
-                <field name="currency_id" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
 
@@ -397,8 +379,7 @@
                 <field name="product_id" />
                 <field name="qty" />
                 <field name="price_unit" widget="monetary"/>
-                <field name="currency_id" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
      <record id="action_pos_all_sales_lines" model="ir.actions.act_window">

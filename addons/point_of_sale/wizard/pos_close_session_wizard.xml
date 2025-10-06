@@ -7,7 +7,6 @@
             <form string="Force Close Session">
                 <p><field name="message" readonly="1" /></p>
                 <group>
-                    <field name="account_readonly" invisible="1" />
                     <field name="amount_to_balance" readonly="1" />
                     <field name="account_id" readonly="account_readonly"/>
                 </group>

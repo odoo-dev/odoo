@@ -8,15 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
                 <t groups="point_of_sale.group_pos_manager">
-                    <field name="is_kiosk_mode" invisible="1"/>
-                    <field name="pos_selectable_categ_ids" invisible="1"/>
-                    <field name="pos_has_active_session" invisible="1"/>
-                    <field name="pos_allowed_pricelist_ids" invisible="1"/>
-                    <field name="pos_cash_control" invisible="1"/>
-                    <field name="pos_iface_print_via_proxy" invisible="1"/>
-                    <field name="pos_company_has_template" invisible="1"/>
-                    <field name="group_cash_rounding" invisible="1"/>
-                </t>
+                    </t>
 
                 <app data-string="Point of sale" string="Point of Sale" name="point_of_sale" groups="point_of_sale.group_pos_manager">
                     <div class="pos_res_config_container">
