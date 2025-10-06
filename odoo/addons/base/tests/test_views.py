@@ -4930,7 +4930,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'industry_fsm_sale',
             'industry_fsm_sale_report',
             'industry_fsm_stock',
-            'iot',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
