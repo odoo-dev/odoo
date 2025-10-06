@@ -5099,14 +5099,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'purchase_product_matrix',
             'purchase_requisition',
             'purchase_stock',
-            'quality',
-            'quality_control',
-            'quality_control_iot',
-            'quality_control_picking_batch',
-            'quality_control_worksheet',
-            'quality_iot',
-            'quality_mrp',
-            'quality_mrp_workorder',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
