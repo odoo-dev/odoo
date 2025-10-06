@@ -5118,7 +5118,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'sale_external_tax',
             'sale_loyalty',
             'sale_management',
-            'sale_margin',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
