@@ -12,8 +12,7 @@
         </xpath>
         <xpath expr="//form" position="inside">
             <!-- We need this for `computePath` used in `onAddContent` to redirect to the event after creation. -->
-            <field name="website_url" invisible="1"/>
-        </xpath>
+            </xpath>
         <xpath expr="//header" position="replace"/>
         <xpath expr="//div[hasclass('oe_button_box')]" position="replace"/>
         <xpath expr="//field[@name='kanban_state']" position="replace"/>
