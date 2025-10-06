@@ -5122,7 +5122,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'sale_pdf_quote_builder',
             'sale_planning',
             'sale_product_matrix',
-            'sale_project',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
