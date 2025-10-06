@@ -68,8 +68,7 @@
                         </div>
                         <group>
                             <field name="karma_min"/>
-                            <field name="create_date" invisible="1"/>
-                        </group>
+                            </group>
                         <notebook>
                             <page string="Description" name="description">
                                 <field name="description" placeholder="e.g. A Master Chief knows quite everything on the forum! You cannot beat him!"/>
