@@ -1,0 +1,121 @@
+<odoo>
+    <data>
+        <template id="portal_my_hackathon" name="Hackathons" inherit_id="portal.portal_my_home">
+            <div id="portal_common_category" position="after">
+                <div class="o_portal_category row g-2 mt-3" id="portal_my_bills">
+                    <t t-call="portal.portal_docs_entry">
+                        <t t-set="icon" t-value="'/hackathon_registration/static/src/img/upload_logo.png'"/>
+                        <t t-set="text">Manage your hackathons and teams</t>
+                        <t t-set="title">Hackathons</t>
+                        <t t-set="url" t-value="'/my/hackathons'"/>
+                        <t t-set="config_card" t-value="True"/>
+                    </t>
+                </div>
+            </div>
+        </template>
+
+        <template id="my_hackathons_page" name="My Hackathons Page">
+            <t t-call="website.layout">
+                <style>
+                    .hackathon-table {
+                        table-layout: fixed;
+                        width: 100%;
+                    }
+                    .hackathon-table th:nth-child(1),
+                    .hackathon-table td:nth-child(1) { width: 25%; }
+                    .hackathon-table th:nth-child(2),
+                    .hackathon-table td:nth-child(2) { width: 25%; }
+                    .hackathon-table th:nth-child(3),
+                    .hackathon-table td:nth-child(3) { width: 20%; }
+                    .hackathon-table th:nth-child(4),
+                    .hackathon-table td:nth-child(4) { width: 20%; }
+                    .hackathon-table th:nth-child(5),
+                    .hackathon-table td:nth-child(5) { width: 10%; }
+                </style>
+                <div class="container mt-5">
+                    <h4 class="text-danger">My Hackathons</h4>
+                    <table class="table table-hover hackathon-table">
+                        <thead style="border-bottom: 2px solid #adb5bd;">
+                            <tr>
+                                <th>Hackathon</th>
+                                <th>Venue</th>
+                                <th>Date From</th>
+                                <th>Date To</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="my_hackathons" t-as="hackathon">
+                                <tr>
+                                    <td style="border: none;">
+                                        <a t-att-href="'#'" style="color: #007bff; font-weight: 500;">
+                                            <t t-esc="hackathon.event_id.name or ''"/>
+                                        </a>
+                                    </td>
+                                    <td style="color: #6c757d; border: none;"><t t-esc="hackathon.event_id.address_id.name or ''"/></td>
+                                    <td style="color: #6c757d; border: none;">
+                                        <time t-out="hackathon.event_id.date_begin" t-att-datetime="hackathon.event_id.date_begin" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'format': 'dd', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.event_id.date_begin" t-att-datetime="hackathon.event_id.date_begin" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'format': 'MMMM Y', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.event_id.date_begin"  t-att-datetime="hackathon.event_id.date_begin" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'time_only': 'true', 'format': 'short'}"/>
+                                    </td>
+                                    <td style="color: #6c757d; border: none;">
+                                        <time t-out="hackathon.event_id.date_end" t-att-datetime="hackathon.event_id.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'format': 'dd', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.event_id.date_end" t-att-datetime="hackathon.event_id.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'format': 'MMMM Y', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.event_id.date_end"  t-att-datetime="hackathon.event_id.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'time_only': 'true', 'format': 'short'}"/>
+                                    </td>
+                                    <td style="border: none;"><t t-esc="hackathon.state"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="not my_hackathons">
+                                <tr>
+                                    <td colspan="5" class="text-center">No hackathons found.</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <h4 class="text-danger">Upcoming Hackathons</h4>
+                    <table class="table table-hover hackathon-table">
+                        <thead style="border-bottom: 2px solid #adb5bd;">
+                            <tr>
+                                <th>Hackathon</th>
+                                <th>Venue</th>
+                                <th>Date From</th>
+                                <th>Date To</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="upcoming_hackathons" t-as="hackathon">
+                                <tr>
+                                    <td style="border: none;">
+                                        <a t-att-href="'/event/%s/register' % (slug(hackathon))" style="color: #007bff; font-weight: 500;">
+                                            <t t-esc="hackathon.name or ''"/>
+                                        </a>
+                                    </td>
+                                    <td style="color: #6c757d; border: none;"><t t-esc="hackathon.address_id.name or ''"/></td>
+                                    <td style="color: #6c757d; border: none;">
+                                        <time t-out="hackathon.date_begin" t-att-datetime="hackathon.date_begin" t-options="{'widget': 'datetime', 'tz_name': hackathon.date_tz, 'format': 'dd', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.date_begin" t-att-datetime="hackathon.date_begin" t-options="{'widget': 'datetime', 'tz_name': hackathon.date_tz, 'format': 'MMMM Y', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.date_begin"  t-att-datetime="hackathon.date_begin" t-options="{'widget': 'datetime', 'tz_name': hackathon.date_tz, 'time_only': 'true', 'format': 'short'}"/>
+                                    </td>
+                                    <td style="color: #6c757d; border: none;">
+                                        <time t-out="hackathon.date_end" t-att-datetime="hackathon.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.date_tz, 'format': 'dd', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.date_end" t-att-datetime="hackathon.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.date_tz, 'format': 'MMMM Y', 'date_only': 'true'}"/>
+                                        <time t-out="hackathon.date_end"  t-att-datetime="hackathon.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.date_tz, 'time_only': 'true', 'format': 'short'}"/>
+                                    </td>
+                                    <td style="border: none;"><span t-att-class="'badge bg-warning' if hackathon.stage_id.name=='New' else 'badge bg-success'" style="padding: 0.4rem 1.0rem; font-size: 1rem;"><t t-esc="hackathon.stage_id.name or ''"/></span></td>
+                                </tr>
+                            </t>
+                            <t t-if="not upcoming_hackathons">
+                                <tr>
+                                    <td colspan="5" class="text-center">No upcoming hackathons.</td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>
