@@ -4923,7 +4923,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'hr_timesheet',
             'hr_work_entry',
             'hr_work_entry_holidays_enterprise',
-            'iap',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
