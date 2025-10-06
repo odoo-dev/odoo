@@ -9,9 +9,6 @@
                 <page name="withholdings_page" string="Withholdings" invisible="country_code != 'AR'">
                     <field name="l10n_ar_withholding_ids" nolabel="1" colspan="2">
                         <list editable="bottom">
-                            <field name="withholding_sequence_id" column_invisible="True"/>
-                            <field name="company_id" column_invisible="True"/>
-                            <field name="currency_id" column_invisible="True"/>
                             <field name="tax_id" options="{'no_open': True, 'no_create': True}"/>
                             <field name="name" readonly="withholding_sequence_id"/>
                             <field name="base_amount"/>
@@ -25,7 +22,6 @@
                     <label for="l10n_ar_net_amount" string="Net Amount" invisible="l10n_latam_move_check_ids or l10n_latam_new_check_ids"/>
                     <label for="l10n_ar_net_amount" string="Check amount" invisible="not l10n_latam_move_check_ids and not l10n_latam_new_check_ids"/>
                     <field name="l10n_ar_net_amount" nolabel="1" />
-                    <field name="l10n_ar_adjustment_warning" invisible="True"/>
                     <p colspan="2" invisible="not l10n_ar_adjustment_warning" class="alert alert-warning" role="alert">
                             Adjust total amount or withholdings amount so that the check amount is the correct one.
                     </p>

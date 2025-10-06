@@ -7,7 +7,6 @@
             <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//button[@name='action_pos_order_invoice']" position="attributes">
-                    <field name="l10n_es_tbai_post_document_id" invisible="1"/>
                     <attribute name="invisible" add="l10n_es_tbai_post_document_id" separator="or"></attribute>
                 </xpath>
                 <xpath expr="//header" position="inside">
@@ -22,7 +21,6 @@
                         <group>
                             <field name="l10n_es_tbai_state"/>
                             <field name="l10n_es_tbai_chain_index" groups="base.group_no_one"/>
-                            <field name="l10n_es_tbai_post_file_name" invisible="1"/>
                             <field name="l10n_es_tbai_post_file" widget="binary" filename="l10n_es_tbai_post_file_name"/>
                         </group>
                     </page>

@@ -9,7 +9,6 @@
                 <group string="Electronic Tax" invisible="country_code != 'ID'">
                     <field name="l10n_id_kode_transaksi" invisible="not l10n_id_coretax_efaktur_available" required="l10n_id_coretax_efaktur_available" readonly="state == 'posted'"/>
                     <field name="l10n_id_coretax_document"/>
-                    <field name="l10n_id_coretax_efaktur_available" invisible="1"/>
                     <field name="l10n_id_coretax_add_info_07" invisible="l10n_id_kode_transaksi != '07'" string="Additional Information"/>
                     <field name="l10n_id_coretax_facility_info_07" invisible="l10n_id_kode_transaksi != '07'" string="Facility Stamp"/>
                     <field name="l10n_id_coretax_add_info_08" invisible="l10n_id_kode_transaksi != '08'" string="Additional Information"/>

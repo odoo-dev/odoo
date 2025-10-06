@@ -13,7 +13,6 @@
                     </button>
                 </div>
                 <field name="myinvois_issuance_date" position="before">
-                    <field name="linked_order_count" invisible="1"/>
                     <field name="pos_config_id"/>
                     <field name="pos_order_date_range"/>
                 </field>

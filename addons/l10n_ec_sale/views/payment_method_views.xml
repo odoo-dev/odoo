@@ -6,7 +6,6 @@
         <field name="inherit_id" ref="payment.payment_method_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='supported_currency_ids']/.." position="after">
-                <field name="fiscal_country_codes" invisible="True"/>
                 <label for="l10n_ec_sri_payment_id"
                        invisible="'EC' not in fiscal_country_codes"/>
                 <div invisible="'EC' not in fiscal_country_codes">

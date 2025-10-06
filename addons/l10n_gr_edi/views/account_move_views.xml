@@ -21,7 +21,6 @@
             </header>
 
             <xpath expr="//group[@id='header_right_group']" position="inside">
-                <field name="l10n_gr_edi_available_inv_type" invisible="1"/>
                 <field name="l10n_gr_edi_inv_type"
                        string="Invoice Type"
                        widget="dynamic_selection"
@@ -53,9 +52,6 @@
             </xpath>
 
             <xpath expr="//notebook/page[@name='invoice_tab']//list/field[@name='name']" position="after">
-                <field name="l10n_gr_edi_available_cls_category" column_invisible="1"/>
-                <field name="l10n_gr_edi_available_cls_type" column_invisible="1"/>
-                <field name="l10n_gr_edi_available_cls_vat" column_invisible="1"/>
                 <field name="l10n_gr_edi_detail_type" optional="hide" column_invisible="parent.country_code != 'GR'"/>
                 <field name="l10n_gr_edi_cls_category"
                        widget="dynamic_selection"
@@ -75,7 +71,6 @@
             </xpath>
 
             <xpath expr="//notebook/page[@name='invoice_tab']//list/field[@name='tax_ids']" position="after">
-                <field name="l10n_gr_edi_need_exemption_category" column_invisible="True"/>
                 <field name="l10n_gr_edi_tax_exemption_category"
                        optional="hide"
                        column_invisible="parent.country_code != 'GR'"
@@ -91,8 +86,6 @@
                         <list create="false" delete="false" edit="false" no_open="1"
                               decoration-danger="state in ('invoice_error', 'bill_error')"
                               decoration-success="state in ('invoice_sent', 'bill_sent')">
-                            <field name="message" column_invisible="1"/>
-                            <field name="attachment_id" column_invisible="1"/>
                             <field name="datetime"/>
                             <field name="state" widget="account_document_state"/>
                             <button name="action_download"

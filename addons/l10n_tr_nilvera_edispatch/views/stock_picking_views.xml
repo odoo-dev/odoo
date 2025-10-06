@@ -53,7 +53,6 @@
                 </page>
             </xpath>
             <xpath expr="//sheet" position="before">
-                <field name="l10n_tr_nilvera_edispatch_warnings" invisible="1"/>
                 <div class="m-0" name="warnings" invisible="not l10n_tr_nilvera_edispatch_warnings or (state == 'done' and not partner_id)">
                     <field name="l10n_tr_nilvera_edispatch_warnings" class="o_field_html" widget="actionable_errors"/>
                 </div>

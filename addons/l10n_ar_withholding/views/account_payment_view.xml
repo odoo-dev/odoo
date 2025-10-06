@@ -9,7 +9,6 @@
                 <page name="withholdings_page" string="Withholdings" invisible="country_code != 'AR'">
                     <field name="l10n_ar_withholding_ids" nolabel="1" colspan="2" readonly="True">
                         <list>
-                            <field name="move_name" column_invisible="True"/>
                             <field name="tax_line_id" string="Tax"/>
                             <field name="name" string="Withholding Number" required="1"/>
                             <field name="tax_base_amount"/>

@@ -8,10 +8,6 @@
             <field name="inherit_id" ref="account.view_account_journal_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//notebook" position="inside">
-                    <field name="l10n_sa_csr" invisible="1"/>
-                    <field name="l10n_sa_compliance_csid_json" invisible="1"/>
-                    <field name="l10n_sa_production_csid_json" invisible="1"/>
-                    <field name="l10n_sa_compliance_checks_passed" invisible="1"/>
                     <page name="zatca_einvoicing" string="ZATCA" invisible="country_code != 'SA' or type != 'sale'">
                         <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert"
                              invisible="l10n_sa_csr_errors or l10n_sa_compliance_csid_json" groups="base.group_system">

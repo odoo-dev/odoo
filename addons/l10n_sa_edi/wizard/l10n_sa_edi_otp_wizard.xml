@@ -8,8 +8,6 @@
             <form string="Use an OTP to request for a CSID">
                 Please input the OTP generated from the Fatoora Portal.
                 <group>
-                    <field name="journal_id" invisible="1"/>
-                    <field name="l10n_sa_renewal" invisible="1"/>
                     <field name="l10n_sa_otp"/>
                 </group>
                 <footer>

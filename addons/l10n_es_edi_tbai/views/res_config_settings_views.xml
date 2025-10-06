@@ -10,7 +10,6 @@
             </xpath>
             <xpath expr="//block[@name='spain_localization']" position="inside">
                 <!-- Invisible fields -->
-                <field name="l10n_es_tbai_certificate_ids" invisible="1"/>
                 <setting string="Registro de Libros connection TicketBAI" company_dependent="1">
                     <div class="content-group">
                         <div class="mt16">
