@@ -17,8 +17,7 @@
 
         <field name="name" position="after">
             <field name="website_url"/>
-            <field name="company_id" column_invisible="True"/>
-        </field>
+            </field>
         <xpath expr="//list">
             <field name="is_seo_optimized"/>
             <field name="is_published" position="move"/>
