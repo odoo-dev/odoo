@@ -5169,7 +5169,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'website_appointment',
             'website_blog',
             'website_crm_iap_reveal',
-            'website_crm_partner_assign',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
