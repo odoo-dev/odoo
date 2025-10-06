@@ -15,8 +15,7 @@
             </field>
 
             <field name="collapse_prices" position="after">
-                <field name="is_optional" column_invisible="True"/>
-            </field>
+                </field>
         </field>
     </record>
 
