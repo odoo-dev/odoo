@@ -29,8 +29,7 @@
         <field name="inherit_id" ref="crm.crm_lead_view_pivot"/>
         <field name="arch" type="xml">
             <xpath expr="//pivot" position="inside">
-                <field name="reveal_iap_credits" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
@@ -40,8 +39,7 @@
         <field name="inherit_id" ref="crm.crm_lead_view_graph"/>
         <field name="arch" type="xml">
             <xpath expr="//graph" position="inside">
-                <field name="reveal_iap_credits" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
@@ -51,8 +49,7 @@
         <field name="inherit_id" ref="crm.crm_opportunity_report_view_graph"/>
         <field name="arch" type="xml">
             <xpath expr="//graph" position="inside">
-                <field name="reveal_iap_credits" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
@@ -62,8 +59,7 @@
         <field name="inherit_id" ref="crm.crm_opportunity_report_view_graph_lead"/>
         <field name="arch" type="xml">
             <xpath expr="//graph" position="inside">
-                <field name="reveal_iap_credits" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
@@ -73,8 +69,7 @@
         <field name="inherit_id" ref="crm.crm_lead_view_graph_forecast"/>
         <field name="arch" type="xml">
             <xpath expr="//graph" position="inside">
-                <field name="reveal_iap_credits" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
@@ -84,8 +79,7 @@
         <field name="inherit_id" ref="crm.crm_lead_view_pivot_forecast"/>
         <field name="arch" type="xml">
             <xpath expr="//pivot" position="inside">
-                <field name="reveal_iap_credits" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
@@ -95,8 +89,7 @@
         <field name="inherit_id" ref="crm.crm_opportunity_report_view_pivot_lead"/>
         <field name="arch" type="xml">
             <xpath expr="//pivot" position="inside">
-                <field name="reveal_iap_credits" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
