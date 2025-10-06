@@ -4864,14 +4864,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'delivery_ups_rest',
             'delivery_usps',
             'digest',
-            'documents',
-            'documents_account',
-            'documents_approvals',
-            'documents_fleet',
-            'documents_l10n_be_hr_payroll',
-            'documents_project',
-            'documents_project_sale',
-            'documents_spreadsheet',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
