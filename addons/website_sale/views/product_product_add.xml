@@ -11,8 +11,7 @@
                 <attribute name="js_class">website_new_content_form</attribute>
             </xpath>
             <xpath expr="//field[@name='company_id']" position="before">
-                <field name="website_url" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
