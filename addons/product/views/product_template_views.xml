@@ -6,10 +6,6 @@
         <field name="priority">10</field>
         <field name="arch" type="xml">
             <list string="Product" multi_edit="1" sample="1">
-                <field name="product_variant_count" column_invisible="True"/>
-                <field name="sale_ok" column_invisible="True"/>
-                <field name="currency_id" column_invisible="True"/>
-                <field name="cost_currency_id" column_invisible="True"/>
                 <field name="is_favorite" widget="boolean_favorite" optional="show" nolabel="1"/>
                 <field name="name" string="Product Name"/>
                 <field name="default_code" optional="show"/>
@@ -22,7 +18,6 @@
                 <field name="categ_id" optional="hide"/>
                 <field name="type" optional="hide" readonly="1"/>
                 <field name="uom_id" readonly="1" optional="show" groups="uom.group_uom"/>
-                <field name="active" column_invisible="True"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
             </list>
         </field>
@@ -64,7 +59,6 @@
             </xpath>
             <field name="categ_id" position="after">
                 <field name="default_code" string="Reference" invisible="product_variant_count &gt; 1"/>
-                <field name="valid_product_template_attribute_line_ids" invisible="1"/>
                 <field name="barcode"
                     invisible="product_variant_count &gt; 1
                         or (product_variant_count == 0
@@ -90,7 +84,6 @@
                 >
                     <field name="attribute_line_ids" widget="one2many" context="{'show_attribute': False}" force_save="1">
                         <list string="Variants" editable="bottom" decoration-info="value_count &lt;= 1">
-                            <field name="value_count" column_invisible="True"/>
                             <field name="sequence" widget="handle"/>
                             <field name="attribute_id" readonly="id"/>
                             <field name="value_ids" widget="many2many_tags" options="{'no_create_edit': True, 'color_field': 'color'}" context="{'default_attribute_id': attribute_id, 'show_attribute': False}"/>

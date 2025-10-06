@@ -18,7 +18,6 @@
         <field name="model">product.attribute</field>
         <field name="arch" type="xml">
             <form string="Product Attribute">
-            <field name="number_related_products" invisible="1"/>
             <sheet>
                 <widget
                     name="web_ribbon"
@@ -56,7 +55,6 @@
                             <list string="Values" editable="bottom">
                                 <field name="sequence" widget="handle"/>
                                 <field name="name"/>
-                                <field name="display_type" column_invisible="True"/>
                                 <field name="is_custom" width="120px"
                                        column_invisible="parent.display_type == 'multi'"/>
                                 <field name="html_color"
@@ -138,8 +136,7 @@
                 <field name="image" invisible="display_type != 'color'" widget="image" options="{'size': [70, 70]}"/>
                 <field name="ptav_active" optional="hide"/>
                 <field name="price_extra" widget="monetary" options="{'field_digits': True}"/>
-                <field name="currency_id" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
 
@@ -152,11 +149,9 @@
                     <group>
                         <field name="ptav_active" readonly="1" invisible="ptav_active"/>
                         <field name="name"/>
-                        <field name="display_type" invisible="1"/>
                         <field name="html_color" invisible="display_type != 'color' or image"/>
                         <field name="image" invisible="display_type != 'color' or not image" widget="image" options="{'size': [70, 70]}"/>
                         <field name="price_extra" widget="monetary" options="{'field_digits': True}"/>
-                        <field name="currency_id" invisible="1"/>
                         <field name="exclude_for" widget="one2many" mode="list">
                             <list editable="bottom">
                                 <field name="product_tmpl_id" />

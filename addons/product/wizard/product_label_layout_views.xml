@@ -8,8 +8,6 @@
             <form>
                 <group>
                     <group>
-                        <field name="product_ids" invisible="1"/>
-                        <field name="product_tmpl_ids" invisible="1"/>
                         <field name="custom_quantity"/>
                         <field name="print_format" widget="radio"/>
                     </group>

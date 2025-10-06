@@ -7,7 +7,6 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <field name="res_model" invisible="True"/>
                     <h1>
                         <field name="name" readonly="not datas and type != 'url'"/>
                     </h1>
@@ -95,7 +94,6 @@
         <field name="model">product.document</field>
         <field name="arch" type="xml">
             <list editable="top" multi_edit="true">
-                <field name="res_model" column_invisible="True"/>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>

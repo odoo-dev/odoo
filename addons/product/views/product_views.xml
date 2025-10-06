@@ -9,10 +9,6 @@
         <field name="arch" type="xml">
             <form string="Product">
                 <sheet name="product_form">
-                    <field name='product_variant_count' invisible='1'/>
-                    <field name='is_product_variant' invisible='1'/>
-                    <field name='attribute_line_ids' invisible='1'/>
-                    <field name="company_id" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <!-- Dummy tag for organizing buttons, using position='replace' when inheriting -->
                         <span id="button_website" invisible="1"/>
@@ -24,7 +20,6 @@
                         </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    <field name="id" invisible="True"/>
                     <field
                         name="image_1920"
                         widget="image"
@@ -50,7 +45,6 @@
                         <page string="General Information" name="general_information">
                             <group>
                                 <group name="group_general">
-                                    <field name="active" invisible="1"/>
                                     <field name="type" widget="radio" options="{'horizontal': True}"/>
                                     <field
                                         name="combo_ids"
@@ -129,10 +123,7 @@
                                         groups="base.group_multi_company"
                                         options="{'no_create': True}"
                                         placeholder="Visible to all"/>
-                                    <field name="currency_id" invisible="1"/>
-                                    <field name="cost_currency_id" invisible="1"/>
-                                    <field name="product_variant_id" invisible="1"/>
-                                </group>
+                                    </group>
                             </group>
                             <group name="internal_notes" string="Internal Notes">
                                 <field colspan="2" name="description" nolabel="1" placeholder="This note is only for internal purposes."/>
@@ -184,8 +175,7 @@
                                     <field name="company_id" groups="base.group_multi_company" optional="hide"/>
 
                                     <!-- Needed for rule edition & creation on product.product form -->
-                                    <field name="product_tmpl_id" column_invisible="True"/>
-                                </list>
+                                    </list>
                             </field>
                         </page>
                         <page
@@ -330,9 +320,6 @@
                     <sheet>
                         <div class="oe_button_box" name="button_box"/>
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                        <field name="active" invisible="1"/>
-                        <field name="id" invisible="1"/>
-                        <field name="company_id" invisible="1"/>
                         <field name="image_1920" widget="image" class="oe_avatar" options="{'convert_to_webp': True,'preview_image': 'image_128'}"/>
                         <div class="oe_title">
                             <label for="name" string="Product Name"/>
@@ -347,10 +334,8 @@
                             <group name="codes" string="Codes">
                                 <field name="default_code"/>
                                 <field name="barcode"/>
-                                <field name="type" invisible="1"/>
-                            </group>
+                                </group>
                             <group name="pricing" string="Pricing">
-                                <field name="product_variant_count" invisible="1"/>
                                 <label for="lst_price" string="Sales Price"/>
                                 <div class="o_row">
                                     <field name="lst_price" class="oe_inline" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" readonly="product_variant_count &gt; 1"/>
@@ -362,9 +347,7 @@
                                         widget="monetary"
                                         options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
                                 </div>
-                                <field name="currency_id" invisible='1'/>
-                                <field name="cost_currency_id" invisible="1"/>
-                            </group>
+                                </group>
                         </group>
                         <group>
                             <group name="weight" string="Logistics" invisible="type != 'consu'">
@@ -437,9 +420,7 @@
                     <field name="additional_product_tag_ids" widget="many2many_tags" optional="hide"/>
                     <field name="type" optional="hide" readonly="1"/>
                     <field name="uom_id" groups="uom.group_uom" optional="show" readonly="1"/>
-                    <field name="product_tmpl_id" readonly="1" column_invisible="True"/>
-                    <field name="active" column_invisible="True"/>
-                </list>
+                    </list>
             </field>
         </record>
 
@@ -509,8 +490,7 @@
                    <field name="lst_price" class="oe_inline" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                 </field>
                 <field name="name" position="after">
-                    <field name="product_tmpl_id" class="oe_inline" readonly="1" invisible="1" required="id"/>
-                </field>
+                    </field>
                 <xpath expr="//div[hasclass('oe_title')]" position="inside">
                     <field name="product_template_variant_value_ids" widget="many2many_tags" readonly="1" invisible="not product_template_variant_value_ids" groups="product.group_product_variant"/>
                 </xpath>
@@ -535,9 +515,6 @@
                     <sheet>
                         <field name="image_1920" widget="image" class="oe_avatar" nolabel="1" options="{'convert_to_webp': True,'preview_image': 'image_128'}"/>
                         <group name="name">
-                                <field name="company_id" invisible="1"/>
-                                <field name="currency_id" invisible="1"/>
-                                <field name="cost_currency_id" invisible="1"/>
                                 <field name="name" class="oe_inline" placeholder="e.g. Cheese Burger" string="Product Name"/>
                                 <field name="barcode" class="oe_inline" placeholder="e.g. 1234567890"/>
                                 <field name="list_price" class="oe_inline" widget="monetary"

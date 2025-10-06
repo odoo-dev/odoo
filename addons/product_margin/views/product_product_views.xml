@@ -76,11 +76,7 @@
                     <field name="expected_margin"/>
                     <field name="total_margin_rate"  widget="progressbar"/>
                     <field name="expected_margin_rate" widget="progressbar"/>
-                    <field name="categ_id" column_invisible="True"/>
-                    <field name="uom_id" column_invisible="True"/>
-                    <field name="type" column_invisible="True"/>
-                    <field name="company_id" column_invisible="True"/>
-            </list>
+                    </list>
             </field>
         </record>
 
