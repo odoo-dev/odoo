@@ -46,8 +46,6 @@
             <field name="priority">20</field>
             <field name="arch" type="xml">
                 <form string="Planning">
-                    <field name="company_id" invisible="1"/>
-                    <field name="active" invisible="1"/>
                     <sheet>
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                         <div class="oe_title">
@@ -69,8 +67,6 @@
                                 <!-- Pass on the model to ensure the correct dynamic selection (in e.g. hr) on unsaved plans -->
                                 <field name="template_ids" nolabel="1" context="{'default_res_model': res_model}">
                                     <list>
-                                        <field name="company_id" column_invisible="1"/>
-                                        <field name="note" column_invisible="1"/>
                                         <field name="sequence" widget="handle"/>
                                         <field name="activity_type_id"
                                                options="{'no_quick_create': True}"/>

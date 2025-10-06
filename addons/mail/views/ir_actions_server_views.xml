@@ -81,8 +81,7 @@
                                     </span>
                                 </div>
                             </div>
-                            <field name="mail_post_autofollow" invisible="1"/>
-                        </group>
+                            </group>
                     </group>
                 </xpath>
             </field>

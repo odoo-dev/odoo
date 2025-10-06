@@ -13,7 +13,6 @@
                     </div>
                     <group>
                         <group name="activity_details" string="Activity Settings">
-                            <field name="active" invisible="1"/>
                             <field name="category"/>
                             <field name="default_user_id" options="{'no_create': True}" domain="[('share', '=', False)]"
                                    widget="many2one_avatar_user"/>
@@ -137,11 +136,6 @@
                         </button>
                     </div>
                     <group invisible="1">
-                        <field name="activity_category" invisible="1" />
-                        <field name="res_model" invisible="1"/>
-                        <field name="res_model_id" invisible="1"/>
-                        <field name="res_id" invisible="1"/>
-                        <field name="chaining_type" invisible="1"/>
                         <field name="previous_activity_type_id"/>
                         <field name="has_recommended_activities"/>
                     </group>
@@ -161,7 +155,6 @@
                     </group>
                     <field name="note" class="oe-bordered-editor embedded-editor-height-4" placeholder="Log a note..."/>
                     <footer>
-                        <field name="id" invisible="1"/>
                         <button id="mail_activity_schedule" string="Schedule" close="1" name="action_close_dialog" type="object" class="btn-primary"
                             invisible="id" data-hotkey="q"/>
                         <button id="mail_activity_save" string="Save" name="action_close_dialog" type="object" class="btn-primary"
@@ -204,7 +197,6 @@
                             name="action_done_redirect_to_other" type="object"/>
                 </header>
                 <sheet string="Activity">
-                    <field name="display_name" invisible="1"/>
                     <group>
                         <field name="activity_type_id" required="1"
                         widget="selection_badge_icons" iconField="icon" nolabel="1"/>
@@ -334,8 +326,6 @@
         <field name="arch" type="xml">
             <kanban string="Activity" action="action_open_document" type="object" js_class="mail_activity_my_kanban">
                 <templates>
-                    <field name="active" invisible="1"/>
-                    <field name="icon" invisible="1"/>
                     <t t-name="card">
                         <div class="d-flex justify-content-between">
                             <span class="text-truncate" invisible="not res_name">
@@ -414,8 +404,7 @@
                 <field name="res_name" string="Name"/>
                 <field name="date_deadline"/>
                 <field name="summary"/>
-                <field name="activity_type_id" filters="1" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 

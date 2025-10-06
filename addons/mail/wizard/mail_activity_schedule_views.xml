@@ -6,14 +6,6 @@
             <field name="model">mail.activity.schedule</field>
             <field name="arch" type="xml">
                 <form>
-                    <field name="activity_category" invisible="1"/>
-                    <field name="chaining_type" invisible="1"/>
-                    <field name="company_id" invisible="1"/>
-                    <field name="has_error" invisible="1"/>
-                    <field name="has_warning" invisible="1"/>
-                    <field name="plan_has_user_on_demand" invisible="1"/>
-                    <field name="res_ids" invisible="1"/>
-                    <field name="plan_available_ids" invisible="1"/>
                     <sheet class="o_mail_activity_schedule_wizard">
                         <field name="plan_id"
                             options="{'no_open': True, 'no_create': True}"
