@@ -56,7 +56,6 @@
             <field name="inherit_id" ref="stock.product_product_stock_tree"/>
             <field name="arch" type="xml">
                 <field name="qty_available" position="before">
-                    <field name="company_currency_id" column_invisible="True"/>
                     <field name="cost_method" optional="hide"/>
                     <field name="avg_cost"
                         string="Unit Cost" optional="show" widget='stock_action_field'
