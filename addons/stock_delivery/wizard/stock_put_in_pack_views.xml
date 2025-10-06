@@ -7,10 +7,6 @@
         <field name="arch" type="xml">
             <field name="result_package_id" position="after">
                 <!-- Required for weight onchange -->
-                <field name="move_line_ids" invisible="1"/>
-                <field name="package_ids" invisible="1"/>
-                <field name="package_carrier_type" invisible="1"/>
-
                 <label for="shipping_weight" invisible="not package_carrier_type or (not package_type_id and not result_package_id)"/>
                 <div class="o_row" invisible="not package_carrier_type or (not package_type_id and not result_package_id)" name="package_weight">
                     <field name="shipping_weight"/>

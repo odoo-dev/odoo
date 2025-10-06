@@ -19,10 +19,7 @@
               <data>
                 <xpath expr="//group[@name='other_infos']" position="before">
                     <group name='carrier_data' string="Shipping Information">
-                        <field name="is_return_picking" invisible="1"/>
                         <field name="carrier_id" readonly="state in ('done', 'cancel')" options="{'no_create': True, 'no_open': True}"/>
-                        <field name="integration_level" invisible="1"/>
-                        <field name="delivery_type" invisible="True"/>
                         <label for="carrier_tracking_ref"/>
                         <div name="tracking">
                             <field name="carrier_tracking_ref" class="oe_inline text-break"/>
