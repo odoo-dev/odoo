@@ -5138,7 +5138,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'snailmail_account',
             'social',
             'social_crm',
-            'social_facebook',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
