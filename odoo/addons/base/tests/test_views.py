@@ -5053,7 +5053,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'mass_mailing_event',
             'mass_mailing_slides',
             'mass_mailing_sms',
-            'membership',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
