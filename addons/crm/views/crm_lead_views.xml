@@ -21,11 +21,6 @@
                             invisible="type == 'lead'" readonly="won_status == 'lost' or not active"/>
                     </header>
                     <sheet>
-                        <field name="won_status" invisible="1"/>
-                        <field name="active" invisible="1"/>
-                        <field name="company_id" invisible="1"/>
-                        <field name="is_rotting" invisible="1"/>
-                        <field name="rotting_days" invisible="1"/>
                         <div class="oe_button_box" name="button_box">
                             <button name="action_schedule_meeting" type="object"
                                 class="oe_stat_button" icon="fa-calendar"
@@ -59,7 +54,6 @@
                                 <div class="col-auto pb-2 pb-md-0 w-100 w-sm-auto" invisible="type == 'lead'">
                                     <label for="expected_revenue" class="oe_edit_only"/>
                                     <div class="d-flex flex-wrap align-items-baseline">
-                                        <field name="company_currency" invisible="1"/>
                                         <field name="expected_revenue" class="o_input_13ch" widget='monetary' options="{'currency_field': 'company_currency'}"/>
                                         <span class="opacity-50 p-2" groups="crm.group_use_recurring_revenues"> + </span>
                                         <span class="opacity-50 p-2" groups="!crm.group_use_recurring_revenues"> at </span>
@@ -90,7 +84,6 @@
                                         ~<field class="mb-0" name="automated_probability" force_save="1"/> %
                                     </small>
                                     <div id="probability" class="d-flex align-items-baseline">
-                                        <field name="is_automated_probability" invisible="1"/>
                                         <field name="probability" widget="float" class="oe_inline o_input_6ch" readonly="won_status != 'pending'"/>
                                         <span class="opacity-50 p-2"> %</span>
                                     </div>
@@ -100,7 +93,6 @@
                         <group>
                             <group name="lead_partner" invisible="type == 'opportunity'">
                                 <!-- Preload all the partner's information -->
-                                <field name="is_partner_visible" invisible='1'/>
                                 <field name="partner_id" widget="res_partner_many2one"
                                     context="{
                                         'default_parent_id': commercial_partner_id,
@@ -130,8 +122,6 @@
                                     <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
                                 </div>
                                 <field name="website" widget="url" placeholder="e.g. https://www.odoo.com"/>
-                                <field name="lang_active_count" invisible="1"/>
-                                <field name="lang_code" invisible="1"/>
                                 <field name="lang_id" invisible="lang_active_count &lt;= 1"
                                     options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
                             </group>
@@ -159,13 +149,6 @@
                                         'show_vat': True,
                                     }"
                                 />
-                                <field name="is_blacklisted" invisible="1"/>
-                                <field name="partner_is_blacklisted" invisible="1"/>
-                                <field name="phone_blacklisted" invisible="1"/>
-                                <field name="email_state" invisible="1"/>
-                                <field name="phone_state" invisible="1"/>
-                                <field name="partner_email_update" invisible="1"/>
-                                <field name="partner_phone_update" invisible="1"/>
                                 <label for="email_from" class="oe_inline"/>
                                 <div class="o_row o_row_readonly">
                                     <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
@@ -190,20 +173,12 @@
                                 </div>
                                 <field name="lost_reason_id" invisible="won_status != 'lost'"
                                     placeholder="Not specified"/>
-                                <field name="date_conversion" invisible="1"/>
-                                <field name="user_company_ids" invisible="1"/>
-                            </group>
+                                </group>
                             <group name="lead_info" invisible="type == 'opportunity'">
                                 <label for="contact_name"/>
                                 <div class="o_row">
                                     <field name="contact_name"/>
                                 </div>
-                                <field name="is_blacklisted" invisible="1"/>
-                                <field name="phone_blacklisted" invisible="1"/>
-                                <field name="email_state" invisible="1"/>
-                                <field name="phone_state" invisible="1"/>
-                                <field name="partner_email_update" invisible="1"/>
-                                <field name="partner_phone_update" invisible="1"/>
                                 <label for="email_from_group_lead_info" class="oe_inline"/>
                                 <div class="o_row o_row_readonly">
                                     <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
@@ -229,7 +204,6 @@
                                         invisible="not partner_phone_update"/>
                                 </div>
                             </group>
-                            <field name="type" invisible="1"/>
                             <group invisible="type == 'lead'">
                                 <field name="user_id" context="{'default_sales_team_id': team_id}"
                                     widget="many2one_avatar_leader_user" teamField="team_id"/>
@@ -291,7 +265,6 @@
                                             <field name="zip" placeholder="ZIP" class="o_address_zip"/>
                                             <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
                                         </div>
-                                        <field name="lang_active_count" invisible="1"/>
                                         <field name="lang_id" invisible="lang_active_count &lt;= 1"
                                             options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
                                     </group>
@@ -315,8 +288,7 @@
                                             options="{'no_create': True}"
                                             placeholder="Visible to all"/>
                                         <field name="team_id" options="{'no_open': True, 'no_create': True}" context="{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}"/>
-                                        <field name="type" invisible="1"/>
-                                    </group>
+                                        </group>
                                 </group>
                             </page>
                         </notebook>
@@ -345,9 +317,6 @@
                     <header>
                         <button name="%(crm.crm_lead_lost_action)d" type="action" string="Mark Lost"/>
                     </header>
-                    <field name="company_id" column_invisible="True"/>
-                    <field name="user_company_ids" column_invisible="True"/>
-                    <field name="date_deadline" column_invisible="True"/>
                     <field name="create_date" optional="hide"/>
                     <field name="name" string="Lead" readonly="1"/>
                     <field name="contact_name" optional="hide"/>
@@ -363,13 +332,10 @@
                     <field name="user_id" optional="show"  widget="many2one_avatar_user"
                         domain="[('share', '=', False)]"/>
                     <field name="team_id" optional="show"/>
-                    <field name="active" column_invisible="True"/>
                     <field name="campaign_id" optional="hide"/>
-                    <field name="referred" column_invisible="True"/>
                     <field name="medium_id" optional="hide"/>
                     <field name="source_id" optional="hide"/>
                     <field name="probability" string="Probability (%)" optional="hide"/>
-                    <field name="message_needaction" column_invisible="True"/>
                     <field name="tag_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="priority" optional="hide"/>
                 </list>
@@ -409,8 +375,6 @@
                 <calendar string="Leads Generation" create="0" mode="month" date_start="activity_date_deadline" color="user_id" hide_time="true" event_limit="5">
                     <field name="expected_revenue"/>
                     <field name="partner_id" avatar_field="avatar_128"/>
-                    <field name="user_id" filters="1" invisible="1"/>
-                    <field name="team_id" invisible="1"/>
                     <field name="lead_properties"/>
                 </calendar>
             </field>
@@ -490,24 +454,7 @@
                                     required="recurring_revenue != 0" options="{'no_create': True, 'no_open': True}"/>
                             </div>
                         </div>
-                        <field name="company_currency" invisible="1"/>
-                        <field name="company_id" invisible="1"/>
-                        <field name="user_id" invisible="1"/>
-                        <field name="user_company_ids" invisible="1"/>
-                        <field name="team_id" invisible="1"/>
-                        <field name="type" invisible="1"/>
-                        <field name="partner_name" invisible="1"/>
-                        <field name="contact_name" invisible="1"/>
-                        <field name="country_id" invisible="1"/>
-                        <field name="state_id" invisible="1"/>
-                        <field name="city" invisible="1"/>
-                        <field name="street" invisible="1"/>
-                        <field name="street2" invisible="1"/>
-                        <field name="zip" invisible="1"/>
-                        <field name="website" invisible="1"/>
-                        <field name="function" invisible="1"/>
-                        <field name="activity_ids" invisible="1"/>
-                    </group>
+                        </group>
                 </form>
             </field>
         </record>
@@ -531,7 +478,6 @@
                                 <div class="d-flex justify-content-between">
                                     <field name="partner_id" muted="1" display="full" class="o_text_block"/>
                                     <div class="m-1"/>
-                                    <field name="stage_id_color" invisible="1"/>
                                     <field name="stage_id" widget="badge" options="{'color_field': 'stage_id_color'}"/>
                                 </div>
                             </div>
@@ -593,7 +539,6 @@
                                     <field name="activity_ids" widget="kanban_activity"/>
                                 </div>
                                 <div class="ms-auto d-flex">
-                                    <field name="is_rotting" invisible="1"/>
                                     <field name="rotting_days" class="d-flex" widget="rotting"/>
                                     <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" class="ms-2"/>
                                 </div>
@@ -756,11 +701,6 @@
                         <button name="%(crm.crm_lead_lost_action)d" type="action" string="Mark Lost" />
                         <button name="%(crm.action_lead_mass_mail)d" type="action" string="Email" />
                     </header>
-                    <field name="company_id" column_invisible="True"/>
-                    <field name="user_company_ids" column_invisible="True"/>
-                    <field name="date_deadline" column_invisible="True"/>
-                    <field name="activity_calendar_event_id" column_invisible="True"/>
-                    <field name="won_status" column_invisible="True"/>
                     <field name="create_date" optional="hide"/>
                     <field name="name" string="Opportunity" readonly="1"/>
                     <field name="partner_id" optional="hide"/>
@@ -782,7 +722,6 @@
                     <field name="campaign_id" optional="hide"/>
                     <field name="medium_id" optional="hide"/>
                     <field name="source_id" optional="hide"/>
-                    <field name="company_currency" column_invisible="True"/>
                     <field name="expected_revenue" sum="Expected Revenues" optional="show" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                     <field name="date_deadline" optional="hide"/>
                     <field name="recurring_revenue_monthly" sum="Expected MRR" optional="show" widget="monetary"
@@ -790,17 +729,11 @@
                     <field name="recurring_revenue" sum="Recurring Revenue" optional="hide" widget="monetary"
                         options="{'currency_field': 'company_currency'}" groups="crm.group_use_recurring_revenues"/>
                     <field name="recurring_plan" optional="hide" groups="crm.group_use_recurring_revenues"/>
-                    <field name="stage_id_color" column_invisible="1"/>
                     <field name="stage_id" optional="show" widget="badge_rotting" options="{'color_field': 'stage_id_color'}"/>
-                    <field name="active" column_invisible="True"/>
                     <field name="probability" string="Probability (%)" optional="hide"/>
                     <field name="lost_reason_id" optional="hide"/>
                     <field name="tag_ids" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                    <field name="referred" column_invisible="True"/>
-                    <field name="message_needaction" column_invisible="True"/>
                     <field name="lead_properties"/>
-                    <field name="is_rotting" column_invisible="True"/>
-                    <field name="rotting_days" column_invisible="True"/>
                     <widget name="mail_activity_mixin_list_reschedule_dropdown"/>
                     <button name="%(crm.action_lead_mail_compose)d" type="action" string="Email" icon="fa-envelope" invisible="won_status == 'lost'"/>
                 </list>
@@ -880,15 +813,7 @@
                 <graph string="Opportunities" sample="1">
                     <field name="stage_id"/>
                     <field name="user_id"/>
-                    <field name="color" invisible="1"/>
-                    <field name="automated_probability" invisible="1"/>
-                    <field name="message_bounce" invisible="1"/>
-                    <field name="recurring_revenue_monthly" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_monthly_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="stage_id_color" invisible="1"/>
-                </graph>
+                    </graph>
             </field>
         </record>
 
@@ -900,18 +825,7 @@
                 <graph string="Opportunities Forecast" sample="1" js_class="forecast_graph">
                     <field name="date_deadline"/>
                     <field name="prorated_revenue" type="measure"/>
-                    <field name="automated_probability" invisible="1"/>
-                    <field name="color" invisible="1"/>
-                    <field name="day_open" invisible="1"/>
-                    <field name="day_close" invisible="1"/>
-                    <field name="message_bounce" invisible="1"/>
-                    <field name="probability" invisible="1"/>
-                    <field name="recurring_revenue_monthly" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_monthly_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="stage_id_color" invisible="1"/>
-                </graph>
+                    </graph>
             </field>
         </record>
 
@@ -923,16 +837,7 @@
                     <field name="create_date" interval="month" type="row"/>
                     <field name="stage_id" type="col"/>
                     <field name="expected_revenue" type="measure"/>
-                    <field name="color" invisible="1"/>
-                    <field name="stage_id_color" invisible="1"/>
-                    <field name="automated_probability" invisible="1"/>
-                    <field name="message_bounce" invisible="1"/>
-                    <field name="probability" invisible="1"/>
-                    <field name="recurring_revenue_monthly" type="measure" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_monthly_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                </pivot>
+                    </pivot>
             </field>
         </record>
 
@@ -945,18 +850,7 @@
                     <field name="date_deadline" interval="month" type="row"/>
                     <field name="stage_id" type="col"/>
                     <field name="prorated_revenue" type="measure"/>
-                    <field name="automated_probability" invisible="1"/>
-                    <field name="color" invisible="1"/>
-                    <field name="day_open" invisible="1"/>
-                    <field name="day_close" invisible="1"/>
-                    <field name="message_bounce" invisible="1"/>
-                    <field name="probability" invisible="1"/>
-                    <field name="recurring_revenue_monthly" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_monthly_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="recurring_revenue_prorated" groups="!crm.group_use_recurring_revenues" invisible="1"/>
-                    <field name="stage_id_color" invisible="1"/>
-                </pivot>
+                    </pivot>
             </field>
         </record>
 

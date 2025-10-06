@@ -54,8 +54,7 @@
                             <field name="is_won"/>
                             <field name="rotting_threshold_days" invisible="is_won"/>
                         </group>
-                        <field name="team_count" invisible="1"/>
-                    </group>
+                        </group>
                     <separator string="Requirements"/>
                     <field name="requirements" nolabel="1" placeholder="Give your team the requirements to move an opportunity to this stage."/>
                 </sheet>
