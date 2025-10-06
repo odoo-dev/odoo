@@ -5048,11 +5048,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'maintenance_worksheet',
             'marketing_automation',
             'marketing_automation_sms',
-            'mass_mailing',
-            'mass_mailing_crm',
-            'mass_mailing_event',
-            'mass_mailing_slides',
-            'mass_mailing_sms',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))

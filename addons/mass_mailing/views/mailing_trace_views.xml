@@ -92,7 +92,6 @@
                                 </div>
                         </button>
                     </div>
-                    <field name="is_test_trace" invisible="1"/>
                     <widget name="web_ribbon" title="Test" bg_color="text-bg-danger" invisible="is_test_trace != True"/>
                     <group>
                         <group string="Status">
@@ -106,7 +105,6 @@
                             <field name="reply_datetime" invisible="not reply_datetime"/>
                         </group>
                         <group string="Mailing">
-                            <field name="trace_type" invisible="1"/>
                             <field name="email" string="Recipient Address"/>
                             <field name="mass_mailing_id"/>
                             <field name="mail_mail_id_int" string="Mail ID" groups="base.group_no_one"/>

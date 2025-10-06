@@ -7,8 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='name']" position="after">
                 <field name="mobile"/>
-                <field name="phone_sanitized" invisible="1"/>
-            </xpath>
+                </xpath>
             <xpath expr="//filter[@name='filter_blacklisted']" position="attributes">
                 <attribute name="domain">['|', ('is_blacklisted','=',True), ('phone_sanitized_blacklisted','=',True)]</attribute>
             </xpath>
@@ -36,7 +35,6 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='country_id']" position="after">
                 <field name="mobile" class="o_force_ltr" readonly="1"/>
-                <field name="phone_sanitized" column_invisible="True"/>
                 <field name="phone_sanitized_blacklisted"/>
             </xpath>
         </field>
@@ -55,8 +53,7 @@
                         type="object" context="{'default_phone': mobile}" groups="base.group_user"
                         invisible="not phone_blacklisted"/>
                     <field name="mobile" widget="phone" options="{'enable_sms': True}"/>
-                    <field name="phone_sanitized" invisible="1"/>
-                </div>
+                    </div>
             </xpath>
         </field>
     </record>

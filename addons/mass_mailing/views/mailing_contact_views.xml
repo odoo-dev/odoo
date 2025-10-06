@@ -97,7 +97,6 @@
         <field name="priority">10</field>
         <field name="arch" type="xml">
             <form string="Mailing List Contacts">
-                <field name="id" invisible="1"/>
                 <sheet>
                     <div class="oe_title">
                         <label for="name" string="Contact Name"/>
@@ -114,8 +113,7 @@
                                     type="object" context="{'default_email': email}" groups="base.group_user"
                                     invisible="not is_blacklisted"/>
                                 <field name="email" widget="email"/>
-                                <field name="is_blacklisted" invisible="1"/>
-                            </div>
+                                </div>
                             <field name="company_name"/>
                             <field name="country_id" options="{'no_open': True, 'no_create': True}"/>
                         </group>

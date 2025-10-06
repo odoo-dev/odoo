@@ -9,7 +9,6 @@
                 <sheet>
                     <group>
                         <field name="list_id"/>
-                        <field name="is_blacklisted" invisible="1"/>
                         <label for="contact_id" class="oe_inline"/>
                         <div class="o_row o_row_readonly">
                             <i class="fa fa-ban text-danger" role="img" title="This email is blacklisted for mass mailings"
@@ -34,8 +33,7 @@
             <graph js_class="subscription_graph" string="Mailing List Subscriptions" type="pie" sample="1">
                 <field name="opt_out_datetime" interval="week"/>
                 <!-- Hide the bounce measure from the measures dropdown -->
-                <field name="message_bounce" type="measure" invisible="1"/>
-            </graph>
+                </graph>
         </field>
     </record>
 

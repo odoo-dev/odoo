@@ -97,7 +97,6 @@
                             <span widget="statinfo">Open Recipient</span>
                         </button>
                     </div>
-                    <field name="is_test_trace" invisible="1"/>
                     <widget name="web_ribbon" title="Test" bg_color="text-bg-danger" invisible="is_test_trace != True"/>
                     <div class="alert alert-info text-center"
                         invisible="trace_status != 'error' or
@@ -118,7 +117,6 @@
                             <field name="reply_datetime" invisible="not reply_datetime"/>
                         </group>
                         <group string="Mailing">
-                            <field name="trace_type" invisible="1"/>
                             <field name="sms_number"/>
                             <field name="mass_mailing_id"/>
                             <field name="sms_id_int" string="SMS ID" groups="base.group_no_one"/>

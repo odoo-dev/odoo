@@ -8,8 +8,7 @@
                 <form string="Send a Sample Mail">
                     <group>
                         <field name="mailing_list_id" options="{'no_create_edit': True, 'no_open': True}"/>
-                        <field name="contact_ids" invisible="1"/>
-                    </group>
+                        </group>
                     <footer>
                         <button string="Add" name="action_add_contacts" type="object" class="btn-primary" data-hotkey="q"/>
                         <button string="Add and Send Mailing" name="action_add_contacts_and_send_mailing" type="object" class="btn-primary" data-hotkey="w"/>

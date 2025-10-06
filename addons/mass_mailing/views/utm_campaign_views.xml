@@ -6,7 +6,6 @@
         <field name="inherit_id" ref="utm.utm_campaign_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <field name="is_mailing_campaign_activated" invisible="1"/>
                 <button name="%(action_create_mass_mailings_from_campaign)d"
                     type="action" class="oe_highlight" invisible="not is_mailing_campaign_activated"
                     groups="mass_mailing.group_mass_mailing_user" string="Send Mailing"/>
@@ -45,10 +44,8 @@
                 </page>
             </xpath>
             <xpath expr="//notebook" position="after">
-                <field name="ab_testing_mailings_count" invisible="1"/>
                 <group name="ab_test_group" groups="mass_mailing.group_mass_mailing_campaign" invisible="ab_testing_mailings_count == 0">
                     <group string="A/B Test">
-                        <field name="ab_testing_completed" invisible="1"/>
                         <field name="ab_testing_winner_selection" readonly="ab_testing_completed"/>
                         <field name="ab_testing_schedule_datetime"
                             invisible="ab_testing_winner_selection == 'manual'"
