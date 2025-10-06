@@ -5085,7 +5085,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'pos_restaurant',
             'pos_restaurant_appointment',
             'pos_self_order',
-            'privacy_lookup',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
