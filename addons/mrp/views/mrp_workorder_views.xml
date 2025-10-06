@@ -61,17 +61,6 @@
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
             <list multi_edit="1">
-                <field name="consumption" column_invisible="True"/>
-                <field name="company_id" column_invisible="True"/>
-                <field name="is_produced" column_invisible="True"/>
-                <field name="is_user_working" column_invisible="True"/>
-                <field name="product_uom_id" readonly="0" column_invisible="True"/>
-                <field name="production_state" column_invisible="True"/>
-                <field name="production_bom_id" column_invisible="True"/>
-                <field name="qty_producing" column_invisible="True"/>
-                <field name="time_ids" column_invisible="True"/>
-                <field name="working_state" column_invisible="True"/>
-                <field name="operation_id" column_invisible="True" domain="['|', ('bom_id', '=', production_bom_id), ('bom_id', '=', False)]" context="{'default_workcenter_id': workcenter_id, 'default_company_id': company_id}"/>
                 <field name="name" string="Operation" readonly="state in ['cancel', 'done']"/>
                 <field name="workcenter_id" readonly="state in ['cancel', 'done', 'progress']"/>
                 <field name="product_id" optional="show"/>
@@ -143,11 +132,6 @@
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <form string="Production Workcenter" delete="0" create="0">
-            <field name="is_user_working" invisible="1"/>
-            <field name="working_state" invisible="1"/>
-            <field name="production_state" invisible="1"/>
-            <field name="operation_id" invisible="1"/>
-            <field name="sequence" invisible="1"/>
             <header>
                 <field name="state" widget="statusbar" statusbar_visible="blocked,ready,progress,done"/>
             </header>
@@ -160,10 +144,6 @@
                         </div>
                     </button>
                 </div>
-                <field name="company_id" invisible="1"/>
-                <field name="product_tracking" invisible="1"/>
-                <field name="product_id" invisible="1"/>
-                <field name="finished_lot_ids" invisible="1"/>
                 <group>
                     <group>
                         <field name="name" readonly="state in ['cancel', 'done']" force_save="1"/>
@@ -180,11 +160,9 @@
                     <group>
                         <label for="date_start" string="Start Date"/>
                         <div class="oe_inline">
-                            <field name="is_planned" invisible="1"/>
                             <field name="date_start" class="mr8 oe_inline" readonly="state in ['cancel', 'done']"/>
                             <strong class="mr8 oe_inline">to</strong>
                             <field name="date_finished" class="oe_inline" readonly="state in ['cancel', 'done']"/>
-                            <field name="show_json_popover" invisible="1"/>
                             <field name="json_popover" widget="mrp_workorder_popover" class="oe_inline mx-2" invisible="not show_json_popover"/>
                         </div>
                         <label for="duration_expected"/>
@@ -205,8 +183,6 @@
                                 <field name="duration" widget="float_time" readonly="id"/>
                                 <field name="date_start"/>
                                 <field name="date_end"/>
-                                <field name="workcenter_id" column_invisible="True"/>
-                                <field name="company_id" column_invisible="True"/>
                                 <field name="loss_id" string="Productivity" optional="show"/>
                             </list>
                             <form>
@@ -215,12 +191,10 @@
                                         <field name="date_start"/>
                                         <field name="date_end"/>
                                         <field name="duration" widget="float_time"/>
-                                        <field name="company_id" invisible="1"/>
-                                    </group>
+                                        </group>
                                     <group>
                                         <field name="user_id"/>
                                         <field name="workcenter_id"/>
-                                        <field name="company_id" invisible="1"/>
                                         <field name="loss_id"/>
                                     </group>
                                 </group>
@@ -235,7 +209,6 @@
                 <page string="Components" name="components">
                     <field name="move_raw_ids" readonly="1">
                         <list>
-                            <field name="state" column_invisible="True"/>
                             <field name="product_id" readonly="state == 'done'"/>
                             <field name="product_qty" string="To Consume"/>
                             <field name="quantity" string="Quantity"/>
@@ -245,18 +218,15 @@
                         </list>
                     </field>
                 </page>
-                <field name="allow_workorder_dependencies" invisible="1"/>
                 <page string="Blocked By" name="dependencies" invisible="not allow_workorder_dependencies">
                     <field name="blocked_by_workorder_ids" nolabel="1" readonly="1">
                         <list>
-                            <field name="company_id" column_invisible="True"/>
                             <field name="name" string="Operation" readonly="state in ['cancel', 'done']"/>
                             <field name="company_id" optional="hide" groups="base.group_multi_company"/>
                             <field name="workcenter_id" readonly="state in ['cancel', 'done', 'progress']"/>
                             <field name="date_start" readonly="1"/>
                             <field name="date_finished" readonly="1"/>
                             <field name="duration_expected" widget="float_time" sum="expected duration" readonly="state in ['cancel', 'done']"/>
-                            <field name="production_state" column_invisible="True"/>
                             <field name="state" widget="badge" decoration-warning="state == 'progress'" decoration-success="state == 'done'" decoration-info="state not in ('progress', 'done', 'cancel')"
                                 column_invisible="parent.state == 'draft'"
                                 invisible="production_state == 'draft'"/>
@@ -345,8 +315,6 @@
         <field name="arch" type="xml">
             <kanban class="o_mrp_workorder_kanban" create="0" sample="1">
                 <field name="last_working_user_id"/>
-                <field name="workcenter_id" invisible="True"/>
-                <field name="product_uom_id" invisible="True" force_save="True"/>
                 <field name="working_user_ids"/>
                 <field name="working_state"/>
                 <field name="date_start"/>

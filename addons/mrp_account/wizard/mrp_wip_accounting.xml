@@ -16,15 +16,13 @@
                             <field name="reversal_date"/>
                         </group>
                     </group>
-                    <field name="mo_ids" invisible="1"/>
                     <field name="line_ids">
                         <list editable="bottom">
                             <field name="account_id"/>
                             <field name="label"/>
                             <field name="debit" sum="Total Debit"/>
                             <field name="credit" sum="Total Credit"/>
-                            <field name="currency_id" column_invisible="True"/>
-                        </list>
+                            </list>
                     </field>
                     <footer>
                         <button name="confirm" string="Post WIP" data-hotkey="q" colspan="1" type="object" class="btn-primary"/>

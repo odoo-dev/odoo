@@ -6,10 +6,7 @@
         <field name="inherit_id" ref="product_expiry.confirm_expiry_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='description']" position="after">
-                <field name="picking_ids" invisible="1"/>
-                <field name="production_ids" invisible="1"/>
-                <field name="workorder_id" invisible="1"/>
-            </xpath>
+                </xpath>
             <xpath expr="//button[@name='process']" position="attributes">
                 <attribute name="invisible">not picking_ids</attribute>
             </xpath>

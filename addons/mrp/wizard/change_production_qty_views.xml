@@ -17,7 +17,6 @@
                         </group>
                     </group>
                     <span class="text-muted">Modifying the quantity to produce will also modify the quantities of components to consume for this manufacturing order.</span>
-                    <field name="mo_id" invisible="1"/>
                     <footer>
                         <button name="change_prod_qty" string="Set Quantity" data-hotkey="q"
                             colspan="1" type="object" class="btn-primary"/>

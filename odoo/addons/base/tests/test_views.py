@@ -5054,19 +5054,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'mass_mailing_slides',
             'mass_mailing_sms',
             'membership',
-            'mrp',
-            'mrp_account',
-            'mrp_account_enterprise',
-            'mrp_landed_costs',
-            'mrp_maintenance',
-            'mrp_mps',
-            'mrp_plm',
-            'mrp_product_expiry',
-            'mrp_subcontracting',
-            'mrp_subcontracting_dropshipping',
-            'mrp_workorder',
-            'mrp_workorder_expiry',
-            'mrp_workorder_iot',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))

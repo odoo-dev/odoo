@@ -8,8 +8,7 @@
             <field name="inherit_id" ref="stock.view_template_property_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='product_variant_count']" position="after">
-                    <field name="is_kits" invisible="1"/>
-                </xpath>
+                    </xpath>
             </field>
         </record>
 

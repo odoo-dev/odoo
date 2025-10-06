@@ -74,7 +74,6 @@
             <field name="model">mrp.unbuild</field>
             <field name="arch" type="xml">
                 <form string="Unbuild Orders">
-                    <field name="company_id" invisible="1" readonly="state == 'done'"/>
                     <header>
                         <button name="action_validate" string="Unbuild" type="object" invisible="state != 'draft'" class="oe_highlight" data-hotkey="v"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
@@ -94,7 +93,6 @@
                         <group>
                             <group>
                                 <field name="product_id" readonly="mo_id or state == 'done'" force_save="1"/>
-                                <field name="mo_bom_id" invisible="1"/>
                                 <field name="bom_id" invisible="mo_id and not mo_bom_id" readonly="mo_id or state == 'done'" required="not mo_id" force_save="1"/>
                                 <label for="product_qty"/>
                                 <div class="o_row">
@@ -106,7 +104,6 @@
                                 <field name="mo_id" readonly="state == 'done'"/>
                                 <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
                                 <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
-                                <field name="has_tracking" invisible="1"/>
                                 <field name="lot_id" invisible="has_tracking == 'none'" readonly="state == 'done'" required="has_tracking != 'none'" groups="stock.group_production_lot" force_save="1"/>
                                 <field name="company_id" groups="base.group_multi_company" readonly="state == 'done'"/>
                             </group>
@@ -127,10 +124,6 @@
                     <sheet>
                         <group>
                             <group>
-                                <field name="company_id" invisible="1" readonly="state == 'done'"/>
-                                <field name="state" invisible="1"/>
-                                <field name="product_id" invisible="1" readonly="state == 'done'"/>
-                                <field name="bom_id" invisible="1" readonly="state == 'done'"/>
                                 <label for="product_qty"/>
                                 <div class="o_row">
                                     <field name="product_qty" readonly="has_tracking == 'serial'"/>
@@ -138,10 +131,8 @@
                                 </div>
                             </group>
                             <group>
-                                <field name="mo_id" invisible="1" readonly="state == 'done'"/>
                                 <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
                                 <field name="location_dest_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations" readonly="state == 'done'"/>
-                                <field name="has_tracking" invisible="1"/>
                                 <field name="lot_id" invisible="has_tracking == 'none'" required="has_tracking != 'none'" groups="stock.group_production_lot"/>
                                 <field name="company_id" groups="base.group_multi_company" readonly="1"/>
                             </group>
