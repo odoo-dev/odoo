@@ -15,8 +15,7 @@
                             <h1>
                                 <field name="name"/>
                             </h1>
-                            <field name="active" invisible="1"/>
-                        </div>
+                            </div>
                         <group>
                             <field name="template_id" context="{'default_model': 'hr.applicant'}"/>
                         </group>

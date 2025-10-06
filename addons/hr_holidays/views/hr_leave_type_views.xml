@@ -73,12 +73,10 @@
                         <group>
                             <field name="company_id" groups="base.group_multi_company" readonly="is_used" placeholder="Visible to all"/>
                             <field name="country_id" groups="base.group_multi_company" readonly="company_id or is_used"/>
-                            <field name="country_id" invisible="1"/>
-                        </group>
+                            </group>
                     </group>
                     <group>
                         <group name="leave_validation" id="time_off_requests" string="Time Off Requests">
-                            <field name="active" invisible="1"/>
                             <field name="leave_validation_type" string="Approval" widget="radio"/>
                         </group>
                         <group name="allocation_validation" id="allocation_requests" string="Allocation Requests">

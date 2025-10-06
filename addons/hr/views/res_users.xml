@@ -27,8 +27,7 @@
                     <attribute name="required">1</attribute>
                 </field>
                 <field name="tz" position="after">
-                    <field name="is_system" invisible="1"/>
-                </field>
+                    </field>
                 <xpath expr="//button[@name='%(base.action_view_base_language_install)d']" position="attributes">
                     <attribute name="invisible">not is_system</attribute>
                 </xpath>
@@ -81,7 +80,6 @@
                     <page name="private_information" string="Private">
                         <group>
                             <group string="Private Information">
-                                <field name="employee_ids" invisible="1"/>
                                 <label for="private_street" string="Private Address"/>
                                 <div class="o_address_format">
                                     <field name="private_street" placeholder="Street..." class="o_address_street"/>
@@ -122,7 +120,6 @@
                     </div>
                 </xpath>
                 <xpath expr="//group[@name='access_groups']" position="inside">
-                    <field name="create_employee_id" force_save="1" invisible="1"/>
                     <field name="create_employee" force_save="1" string="Create Employee" invisible="1" groups="hr.group_hr_user"/>
                     <!-- It is required to stay create_employee field defined here to make it true because store value is false -->
                 </xpath>
@@ -159,9 +156,6 @@
             <field name="arch" type="xml">
 
                 <xpath expr="//header" position="inside">
-                    <field name="share" invisible="1"/>
-                    <field name="employee_ids" invisible="1"/>
-                    <field name="employee_id" invisible="1"/>
                     <button string="Create employee"
                             type="object" name="action_create_employee"
                             invisible="not id or share or employee_id"/>
@@ -203,7 +197,6 @@
                 <xpath expr="//div[hasclass('oe_title')]" position="inside">
                     <h5 class="d-flex align-items-baseline mb-0" invisible="not employee_id or login == work_email">
                         <i class="fa fa-envelope fa-fw me-1 text-primary" title="Work Email"/>
-                        <field name="email_domain_placeholder" invisible="1" />
                         <field name="work_email" widget="email" string="Work Email" class="w-75" options="{'placeholder_field': 'email_domain_placeholder'}"/>
                     </h5>
                     <h5 class="d-flex align-items-baseline mb-0" invisible="not employee_id">

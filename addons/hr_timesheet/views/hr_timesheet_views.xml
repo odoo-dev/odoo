@@ -6,9 +6,7 @@
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <list editable="top" string="Timesheet Activities" sample="1" decoration-muted="readonly_timesheet == True">
-                    <field name="readonly_timesheet" column_invisible="True"/>
                     <field name="date" readonly="readonly_timesheet"/>
-                    <field name="employee_id" column_invisible="True" readonly="readonly_timesheet"/>
                     <field name="project_id" options="{'no_create_edit': True}" required="1" readonly="readonly_timesheet"
                         context="{'search_default_my_projects': True}"/>
                     <field name="task_id" optional="show" options="{'no_create_edit': True, 'no_open': True}" widget="task_with_hours"
@@ -17,9 +15,7 @@
                     <field name="name" optional="show" required="0" readonly="readonly_timesheet"/>
                     <field name="unit_amount" string="Time Spent" optional="show" widget="timesheet_uom" sum="Total" readonly="readonly_timesheet"
                         decoration-danger="unit_amount &gt; 24 or unit_amount &lt; 0" decoration-muted="unit_amount == 0"/>
-                    <field name="company_id" column_invisible="True"/>
-                    <field name="user_id" column_invisible="True"/>
-                </list>
+                    </list>
             </field>
         </record>
 
@@ -162,7 +158,6 @@
                     <sheet string="Analytic Entry">
                         <group>
                             <group>
-                                <field name="readonly_timesheet" invisible="1"/>
                                 <field name="project_id" options="{'no_create_edit': True}"
                                     context="{'search_default_my_projects': True}"
                                     required="1"
@@ -170,16 +165,12 @@
                                 <field name="task_id" widget="task_with_hours" options="{'no_create_edit': True}"
                                     context="{'default_project_id': project_id, 'search_default_my_tasks': True, 'search_default_open_tasks': True}"
                                     readonly="readonly_timesheet"/>
-                                <field name="company_id" groups="base.group_multi_company" invisible="1"/>
-                            </group>
+                                </group>
                             <group>
                                 <field name="date" readonly="readonly_timesheet"/>
-                                <field name="amount" invisible="1"/>
                                 <field name="unit_amount" string="Time Spent" widget="timesheet_uom" decoration-danger="unit_amount &gt; 24"
                                     readonly="readonly_timesheet" decoration-muted="unit_amount == 0"/>
-                                <field name="currency_id" invisible="1"/>
-                                <field name="company_id" invisible="1"/>
-                            </group>
+                                </group>
                         </group>
                         <field name="name" placeholder="Describe your activity" widget="text" nolabel="1" required="0" readonly="readonly_timesheet"/>
                     </sheet>
@@ -198,8 +189,7 @@
                     <field name="employee_id" groups="hr_timesheet.group_hr_timesheet_approver" widget="many2one_avatar_employee"
                         required="1"
                         readonly="readonly_timesheet" context="{'active_test': True}"/>
-                    <field name="user_id" invisible="1" groups="hr_timesheet.group_hr_timesheet_approver"/>
-                </xpath>
+                    </xpath>
             </field>
         </record>
 
@@ -288,7 +278,6 @@
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile" sample="1">
-                    <field name="company_id" invisible="1"/>
                     <templates>
                         <t t-name="card">
                             <div class="d-flex gap-1">

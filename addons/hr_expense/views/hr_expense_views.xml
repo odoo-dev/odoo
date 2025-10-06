@@ -5,12 +5,6 @@
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <list string="Expenses" multi_edit="1" sample="1" js_class="hr_expense_tree" decoration-info="state == 'draft'">
-                    <field name="is_editable" column_invisible="True"/>
-                    <field name="company_id" column_invisible="True"/>
-                    <field name="company_currency_id" column_invisible="True"/>
-                    <field name="nb_attachment" column_invisible="True"/>
-                    <field name="is_multiple_currency" column_invisible="True"/>
-                    <field name="product_has_cost" column_invisible="True"/>
                     <field name="selectable_payment_method_line_ids" column_invisible="True"/>
 
                     <!--  Always Shown start -->
@@ -176,20 +170,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="product_has_cost" invisible="1"/>
-                            <field name="product_has_tax" invisible="1"/>
-                            <field name="is_multiple_currency" invisible="1"/>
-                            <field name="is_editable" invisible="1"/>
-                            <field name="currency_id" invisible="1"/>
-                            <field name="company_currency_id" invisible="1"/>
-                            <field name="tax_amount" invisible="1"/>
-                            <field name="price_unit" invisible="1"/>
-                            <field name="nb_attachment" invisible="1"/>
-                            <field name="total_amount" invisible="1"/>
-                            <field name="duplicate_expense_ids" invisible="1"/>
-                            <field name="currency_rate" invisible="1"/>
-                            <field name="selectable_payment_method_line_ids" invisible="1"/>
-
                             <label for="product_id"/>
                             <div>
                                 <field name="product_id" required="1" readonly="not is_editable"
@@ -265,8 +245,6 @@
                             <field name="date" readonly="not is_editable" class="w-50"/>
                             <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
                             <field name="manager_id" widget="many2one_avatar_user" readonly="state != 'draft'" placeholder="Auto-validation"/>
-                            <field name="department_id" invisible="1" readonly="not is_editable"
-                                   context="{'default_company_id': company_id}"/>
                             <field name="vendor_id" invisible="payment_mode != 'company_account'"/>
                             <field name="account_id" options="{'no_create': True}"
                                    domain="[('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card')), ('company_ids', 'parent_of', company_id)]"
@@ -400,8 +378,6 @@
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <graph string="Expenses Analysis" sample="1">
-                    <field name="price_unit" invisible="1"/>
-                    <field name="quantity" invisible="1"/>
                     <field name="date"/>
                     <field name="employee_id"/>
                     <field name="total_amount" type="measure" />

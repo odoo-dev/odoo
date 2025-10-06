@@ -7,7 +7,6 @@
             <form string="Skills" class="o_hr_skills_dialog_form">
                 <sheet>
                     <group>
-                        <field name="applicant_id" invisible="1"/>
                         <field name="skill_type_id" widget="selection_badge" string="Category"/>
                         <field name="skill_id" widget="selection_badge"
                             context="{'default_skill_type_id': skill_type_id}"

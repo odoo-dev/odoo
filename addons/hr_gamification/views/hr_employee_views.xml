@@ -9,7 +9,6 @@
 
             <xpath expr="//page[@name='hr_settings']" position="before">
                 <page string="Badges" name="received_badges" invisible="not user_id">
-                    <field name="has_badges" invisible="1"/>
                     <div class="o_field_nocontent" invisible="has_badges">
                         <div class="o_nocontent_help">
                             <p class="o_view_nocontent_neutral_face"></p>
@@ -38,7 +37,6 @@
 
             <page name="resume" position="after">
                 <page string="Badges" name="received_badges" invisible="not user_id">
-                    <field name="has_badges" invisible="1"/>
                     <div class="o_field_nocontent" invisible="has_badges">
                         <div class="o_nocontent_help">
                             <p class="o_view_nocontent_neutral_face"></p>

@@ -499,11 +499,7 @@
                     hide_time="True"
                     mode="year">
                 <field name="display_name" string=""/>
-                <field name="holiday_status_id" filters="1" invisible="1" color="color"/>
-                <field name="state" invisible="1"/>
-                <field name="is_hatched" invisible="1" />
-                <field name="is_striked" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 
@@ -524,11 +520,7 @@
                     color="color"
                     hide_time="True">
                 <field name="display_name" string=""/>
-                <field name="holiday_status_id" filters="1" invisible="1" color="color"/>
-                <field name="state" invisible="1"/>
-                <field name="is_hatched" invisible="1" />
-                <field name="is_striked" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 
@@ -564,14 +556,9 @@
                     show_unusual_days="True"
                     quick_create="0"
                     color="color">
-                <field name="holiday_status_id" color="color" filters="1" invisible="1"/>
                 <field name="employee_id" filters="1" widget="many2one_avatar_employee"/>
                 <field name="name"/>
-                <field name="state" invisible="1"/>
-                <field name="is_hatched" invisible="1" />
-                <field name="is_striked" invisible="1"/>
-                <field name="state" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 
@@ -607,9 +594,6 @@
                 <field name="duration_display" string="Duration"/>
                 <field name="name" optional="hidden"/>
                 <field name="state" widget="badge" decoration-warning="state in ('confirm','validate1')" decoration-success="state == 'validate'" decoration-danger="state == 'refuse'"/>
-                <field name="active_employee" column_invisible="True"/>
-                <field name="user_id" column_invisible="True"/>
-                <field name="message_needaction" column_invisible="True"/>
                 <button string="Approve" name="action_approve" type="object"
                     icon="fa-thumbs-up"
                     invisible="not can_approve"/>
@@ -885,9 +869,6 @@
         <field name="priority">20</field>
         <field name="arch" type="xml">
             <pivot string="Time Off Summary" sample="1">
-                <field name="request_hour_from" invisible="1"/>
-                <field name="request_hour_to" invisible="1"/>
-                <field name="color" invisible="1"/>
                 <field name="employee_id" type="row"/>
                 <field name="date_from" type="col"/>
                 <field name="number_of_days" type="measure"/>
@@ -901,9 +882,6 @@
         <field name="priority">20</field>
         <field name="arch" type="xml">
             <graph string="Time Off Summary" sample="1">
-                <field name="request_hour_from" invisible="1"/>
-                <field name="request_hour_to" invisible="1"/>
-                <field name="color" invisible="1"/>
                 <field name="employee_id"/>
                 <field name="number_of_hours" widget="float_time"/>
                 <field name="number_of_days" type="measure"/>

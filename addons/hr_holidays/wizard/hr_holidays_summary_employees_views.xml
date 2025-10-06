@@ -11,8 +11,7 @@
                         <newline/>
                         <field name="holiday_type"/>
                         <newline/>
-                        <field name="emp" invisible="True"/>
-                    </group>
+                        </group>
                     <footer>
                         <button name="print_report" string="Print" type="object" class="btn-primary" data-hotkey="q"/>
                         <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="x" />

@@ -133,8 +133,7 @@
                         <div class="row flex-column flex-sm-row align-items-center">
                             <div class="o_employee_avatar ms-2 p-0 h-100 mw-25 align-self-start align-self-sm-center">
                                 <field name="image_1920" widget='image' class="m-0" options='{"size": [128,158], "zoom": true, "preview_image":"avatar_128"}'/>
-                                <field name="show_hr_icon_display" invisible="1" />
-                            </div>
+                                </div>
                             <div class="align-self-start o_employee_form_header_info">
                                 <div class="oe_title ps-0 pe-2 mw-100">
                                     <h1 class="d-flex flex-row align-items-center">
@@ -228,10 +227,6 @@
                                     <group string="Private Contact">
                                         <field name="private_email" placeholder="e.g. myprivateemail@example.com" string="Email"/>
                                         <field name="private_phone" widget="phone" string="Phone"/>
-                                        <field name="has_multiple_bank_accounts" invisible="1"/>
-                                        <field name="is_trusted_bank_account" invisible="1"/>
-                                        <field name="bank_account_ids" invisible="1"
-                                            widget="many2many_tags" options="{'color_field': 'color'}"/>
                                         <label for="bank_account_ids"/>
                                         <div class="d-flex align-items-start justify-content-between" invisible="not has_multiple_bank_accounts">
                                                 <field name="bank_account_ids"
@@ -311,7 +306,6 @@
                                             <label for="work_permit_expiration_date" class="flex-shrink-0" invisible="not permit_no" string="Expires on"/>
                                             <field name="work_permit_expiration_date" invisible="not permit_no"/>
                                         </div>
-                                        <field name="work_permit_name" invisible="1"/>
                                         <field name="has_work_permit" widget="work_permit_upload" filename="work_permit_name" string="Document"/>
                                     </group>
                                     <group name="citizenship" string="Citizenship">
@@ -356,7 +350,6 @@
                                 </group>
                             </page>
                             <page name="payroll_information" string="Payroll" groups="hr.group_hr_manager">
-                                <field name="currency_id" invisible="1"/>
                                 <group name="payroll_group">
                                     <group name="contract" groups="hr.group_hr_user">
                                         <div colspan="2" class="col-lg-6 w-100 mt-4 mb-3 o_horizontal_separator text-uppercase fw-bolder small d-flex">
@@ -451,12 +444,7 @@
                 <graph string="New Employees Over Time" type="line" sample="1">
                     <field name="contract_date_start" interval="month"/>
                     <field name="id"/>
-                    <field name="color" type="measure" invisible="1"/>
-                    <field name="distance_home_work" type="measure" invisible="1"/>
-                    <field name="km_home_work" type="measure" invisible="1"/>
-                    <field name="children" type="measure" invisible="1"/>
-                    <field name="department_color" type="measure" invisible="1"/>
-                </graph>
+                    </graph>
             </field>
         </record>
 
@@ -468,12 +456,7 @@
                     <field name="job_id" type="row"/>
                     <field name="contract_date_start" interval="year" type="col"/>
                     <field name="id"/>
-                    <field name="color" type="measure" invisible="1"/>
-                    <field name="distance_home_work" type="measure" invisible="1"/>
-                    <field name="km_home_work" type="measure" invisible="1"/>
-                    <field name="children" type="measure" invisible="1"/>
-                    <field name="department_color" type="measure" invisible="1"/>
-                </pivot>
+                    </pivot>
             </field>
         </record>
 
@@ -492,7 +475,6 @@
                     <field name="hr_presence_state" string="Presence" optional="hide"/>
                     <field name="contract_date_start" optional="hide"/>
                     <field name="contract_date_end" optional="hide"/>
-                    <field name="currency_id" column_invisible="1"/>
                     <field name="wage" widget="monetary" optional="hide"/>
                     <field name="employee_type" optional="hide"/>
                     <field name="contract_type_id" optional="hide"/>
@@ -504,13 +486,10 @@
                     <field name="department_id" optional="show"/>
                     <field name="job_id" context="{'default_no_of_recruitment': 0, 'default_is_favorite': False}" optional="show"/>
                     <field name="parent_id" widget="many2one_avatar_employee" optional="show"/>
-                    <field name="address_id" column_invisible="True"/>
-                    <field name="company_id" column_invisible="True"/>
                     <field name="birthday" optional="hide"/>
                     <field name="work_location_id" optional="hide"/>
                     <field name="coach_id" widget="many2one_avatar_employee" optional="hide"/>
                     <field name="user_id" string="Related User" widget="many2one_avatar_user" optional="hide"/>
-                    <field name="active" column_invisible="True"/>
                     <field name="category_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                     <field name="country_id" optional="hide"/>
                 </list>
@@ -544,7 +523,6 @@
                     <field name="work_email" optional="hide"/>
                     <field name="contract_date_start" optional="hide"/>
                     <field name="contract_date_end" optional="hide"/>
-                    <field name="currency_id" column_invisible="1"/>
                     <field name="wage" widget="monetary" optional="hide"/>
                     <field name="employee_type" optional="hide"/>
                     <field name="contract_type_id" optional="hide"/>
@@ -556,13 +534,10 @@
                     <field name="department_id" optional="show"/>
                     <field name="job_id" context="{'default_no_of_recruitment': 0, 'default_is_favorite': False}" optional="show"/>
                     <field name="parent_id" widget="many2one_avatar_employee" optional="hide"/>
-                    <field name="address_id" column_invisible="True"/>
-                    <field name="company_id" column_invisible="True"/>
                     <field name="birthday" optional="hide"/>
                     <field name="work_location_id" optional="hide"/>
                     <field name="coach_id" widget="many2one_avatar_employee" optional="hide"/>
                     <field name="user_id" string="Related User" widget="many2one_avatar_user" optional="hide"/>
-                    <field name="active" column_invisible="True"/>
                     <field name="category_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                     <field name="country_id" optional="hide"/>
                 </list>

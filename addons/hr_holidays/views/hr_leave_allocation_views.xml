@@ -94,15 +94,12 @@
         <field name="priority">32</field>
         <field name="arch" type="xml">
             <form string="Allocation Request" duplicate="false">
-                <field name="can_approve" invisible="1"/>
                 <field name="validation_type" invisible="1"/>
                 <!--
                 The following two lines are required so that the two fields are sent as part of the `vals_list`
                 to the create method when the allocation is created. Otherwise, carried_over_days_expiration_date
                 wouldn't be set and the days won't expire on that date.
                 -->
-                <field name="expiring_carryover_days" invisible="1"/>
-                <field name="carried_over_days_expiration_date" invisible="1"/>
                 <header>
                     <button string="Approve" name="action_approve" type="object" class="oe_highlight" invisible="not can_approve or not id"/>
                     <button string="Validate" name="action_approve" invisible="not can_validate or can_approve or not id" type="object" class="oe_highlight"/>
@@ -123,15 +120,9 @@
                             <field name="is_name_custom" invisible="1"/> <!-- needed for triggering reasons -->
                             <field name="type_request_unit" invisible="1"/>
                             <!-- Save already_accrued when creating record to avoid double allocation when cron runs -->
-                            <field name="already_accrued" invisible="1"/>
                             <field name="holiday_status_id"
                                 context="{'employee_id':employee_id, 'default_date_from':current_date, 'request_type':'allocation'}"
                                 readonly="state == 'validate'"/>
-                            <field name="allocation_type"
-                                widget="radio"
-                                invisible="1"
-                                readonly="not is_officer or state == 'validate'"/>
-                            <field name="is_officer" invisible="1"/>
                             <field name="accrual_plan_id"
                                 invisible="allocation_type == 'regular'"
                                 required="allocation_type == 'accrual'"
@@ -158,7 +149,6 @@
                                  invisible="id or not date_to or not (date_to &lt; 'today') or (date_from and (date_to &lt; date_from))">
                                 <span>The allocated days cannot be used, because the allocation is set to finish in the past.</span>
                             </div>
-                            <field name="number_of_days" invisible="1"/>
                             <div class="o_td_label">
                                 <label for="number_of_days_display" string="Allocation"
                                     readonly="allocation_type == 'accrual' or state == 'validate'"/>
@@ -175,8 +165,7 @@
                             </div>
                         </group>
                         <group name="alloc_right_col">
-                            <field name="employee_id" invisible="1" readonly="state in ['refuse', 'validate']"/>
-                        </group>
+                            </group>
                     </group>
                     <field name="notes" nolabel="1" placeholder="Add a reason..." readonly="state not in ['confirm']"/>
                 </sheet>
@@ -311,8 +300,6 @@
                 <field name="allocation_type" readonly="state not in ['confirm']"/>
                 <field name="accrual_plan_id"/>
                 <field name="notes" string="Reason" optional="hide"/>
-                <field name="message_needaction" column_invisible="True"/>
-                <field name="active_employee" column_invisible="True"/>
                 <field name="state" widget="badge" decoration-warning="state in ['confirm', 'validate1']" decoration-success="state == 'validate'" decoration-danger="state == 'refuse'"/>
                 <button string="Approve" name="action_approve" type="object" class="text-success"
                     icon="fa-thumbs-up"

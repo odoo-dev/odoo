@@ -6,9 +6,7 @@
         <field name="inherit_id" ref="hr_recruitment.crm_case_tree_view_job"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='source_id']" position="after">
-                <field name="survey_id" column_invisible="True"/>
-                <field name="response_ids" column_invisible="True"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 
@@ -34,9 +32,7 @@
                 </button>
             </xpath>
             <xpath expr="//field[@name='job_id']" position="before">
-                <field name="survey_id" invisible="1"/>
-                <field name="response_ids" invisible="1"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 

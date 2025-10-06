@@ -14,8 +14,7 @@
                         </setting>
                         <setting company_dependent="1" help="Time unit used to record your timesheets" id="time_unit_timesheets_setting">
                             <field name="timesheet_encode_method" class="col-lg-5 ps-0" widget="radio"/>
-                            <field name="is_encode_uom_days" invisible="1"/>
-                        </setting>
+                            </setting>
                     </block>
                     <block title="Timesheets Control">
                         <setting id="reminder_user_allow" company_dependent="1" help="Send a periodical email reminder to timesheets users that still have timesheets to encode">

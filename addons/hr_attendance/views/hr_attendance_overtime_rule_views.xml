@@ -94,7 +94,6 @@
         <field name="model">hr.attendance.overtime.ruleset</field>
         <field name="arch" type="xml">
             <form string="Extra Hours Rules">
-                <field name="active" invisible="1"/>
                 <header>
                     <button name="action_regenerate_overtimes"
                         class="btn"

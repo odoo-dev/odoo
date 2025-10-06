@@ -35,19 +35,13 @@
                     </div>
                     <sheet>
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                        <field name='product_variant_count' invisible='1'/>
-                        <field name="id" invisible="1"/>
                         <field name="image_1920" widget="image" class="oe_avatar" options="{'image_preview': 'image_128'}"/>
-                        <field name="type" invisible="1"/>
                         <div class="oe_title px-3">
                             <label for="name" string="Product Name"/>
                             <h1><field name="name" placeholder="e.g. Lunch"/></h1>
                         </div>
                         <group name="product_details">
                             <group>
-                                <field name="active" invisible="1"/>
-                                <field name="type" invisible="1"/>
-                                <field name="currency_id" invisible="1"/>
                                 <label for="standard_price"/>
                                 <div class="o_row" groups="base.group_user">
                                     <field name="standard_price"
@@ -117,7 +111,6 @@
             <field name="arch" type="xml">
                 <list class="o_expense_categories" default_order="is_favorite desc, default_code, name, id">
                     <field name="name" readonly="1"/>
-                    <field name="currency_id" column_invisible="True"/>
                     <field name="default_code" optional="show" string="Reference" readonly="1"/>
                     <field name="description" string="Note" optional="show" readonly="1"/>
                     <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" optional="show" string="Sales Price"/>

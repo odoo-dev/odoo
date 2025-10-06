@@ -5,7 +5,6 @@
         <field name="model">hr.expense.refuse.wizard</field>
         <field name="arch" type="xml">
             <form string="Expense refuse reason">
-                <field name="expense_ids" invisible="1"/>
                 <group>
                     <field string="Reason" name="reason" class="w-100"/>
                 </group>

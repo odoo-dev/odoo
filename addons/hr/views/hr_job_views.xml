@@ -8,7 +8,6 @@
             <field name="arch" type="xml">
                 <form string="Job">
                     <header/> <!-- inherited in other module -->
-                    <field name="active" invisible="1"/>
                     <sheet>
                         <div class="oe_button_box" name="button_box"/>
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>

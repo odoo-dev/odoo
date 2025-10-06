@@ -16,11 +16,7 @@
                 create="0"
                 show_unusual_days="True">
                 <field name="name"/>
-                <field name="employee_id" filters="1" invisible="1"/>
-                <field name="is_hatched" invisible="1"/>
-                <field name="state" invisible="1"/>
-                <field name="leave_manager_id" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 
@@ -39,11 +35,7 @@
                 js_class="time_off_report_calendar"
                 show_unusual_days="True">
                 <field name="name"/>
-                <field name="employee_id" filters="1" invisible="1"/>
-                <field name="is_hatched" invisible="1"/>
-                <field name="state" invisible="1"/>
-                <field name="leave_manager_id" invisible="1"/>
-            </calendar>
+                </calendar>
         </field>
     </record>
 
@@ -67,7 +59,6 @@
                                 widget="daterange"
                                 readonly='1'
                                 options="{'end_date_field': 'stop_datetime', 'show_time': false}"/>
-                            <field name="start_datetime" invisible="1"/>
                             <div style="margin-left: 4.82rem;">
                             ( <field name="duration_display" readonly="1" class="w-auto"/> )
                             </div>

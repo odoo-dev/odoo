@@ -7,8 +7,7 @@
             <field name="inherit_id" ref="mail.mail_activity_schedule_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='plan_available_ids']" position="after">
-                    <field name="department_id" invisible="1"/>
-                </xpath>
+                    </xpath>
             </field>
         </record>
     </data>

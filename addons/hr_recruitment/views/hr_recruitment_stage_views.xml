@@ -64,7 +64,6 @@
                         <group name="stage_details">
                             <field name="fold"/>
                             <field name="hired_stage"/>
-                            <field name="is_warning_visible" invisible="1"/>
                             <span invisible="not is_warning_visible">
                                 <span
                                     class="fa fa-exclamation-triangle text-danger ps-3">

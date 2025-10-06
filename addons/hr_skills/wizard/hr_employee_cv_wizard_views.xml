@@ -5,11 +5,8 @@
         <field name="model">hr.employee.cv.wizard</field>
         <field name="arch" type="xml">
             <form string="Print Resume">
-                <field name="can_show_others" invisible="1"/>
-                <field name="can_show_skills" invisible="1"/>
                 <group>
                     <group>
-                        <field name="employee_ids" widget="many2many_tags" invisible="1"/>
                         <label for="color_primary" string="Colors"/>
                         <div class="d-flex flex-row">
                             <field name="color_primary" widget="color" nolabel="1" style="width: 35px;"/>

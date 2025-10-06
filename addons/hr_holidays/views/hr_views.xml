@@ -125,9 +125,6 @@
                 <attribute name="widget">hr_presence_status_private</attribute>
             </xpath>
             <button name="action_open_versions" position="before">
-                <field name="show_leaves" invisible="1"/>
-                <field name="is_absent" invisible="1"/>
-                <field name="hr_icon_display" invisible="1"/>
                 <button name="action_time_off_dashboard"
                         type="object"
                         class="oe_stat_button"
@@ -165,7 +162,6 @@
         <field name="inherit_id" ref="hr.hr_employee_public_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='button_box']" position="inside">
-                <field name="show_leaves" invisible="1"/>
                 <button name="action_open_time_off_calendar"
                         type="object"
                         class="oe_stat_button"
@@ -182,7 +178,6 @@
             </xpath>
 
             <xpath expr="//div[@name='button_box']" position="inside">
-                <field name="show_leaves" invisible="1"/>
                 <button name="%(hr_leave_action_new_request)d"
                         type="action"
                         class="oe_stat_button"

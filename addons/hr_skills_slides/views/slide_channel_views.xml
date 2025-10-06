@@ -17,8 +17,7 @@
                 <field name="visibility" optional="hide"/>
                 <field name="enroll" widget="badge" decoration-success="enroll == 'public'" decoration-info="enroll == 'invite'" decoration-warning="enroll == 'payment'" optional="hide"/>
                 <field name="is_published" string="Published" optional="hide"/>
-                <field name="active" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
 
