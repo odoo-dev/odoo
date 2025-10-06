@@ -29,8 +29,7 @@
             </field>
 
             <field name="currency_id" position="after">
-                <field name="open_installments" invisible="1"/>
-            </field>
+                </field>
 
             <group name="payment_info" position="after">
                 <group name="next_installments"

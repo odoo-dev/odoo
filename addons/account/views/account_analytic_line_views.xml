@@ -75,8 +75,7 @@
             <field name="inherit_id" ref="analytic.view_account_analytic_line_pivot"/>
             <field name="arch" type="xml">
                 <field name="account_id" position="after">
-                    <field name="partner_id" type="row" invisible="1"/>
-                </field>
+                    </field>
             </field>
         </record>
 

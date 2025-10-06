@@ -10,7 +10,6 @@
                     <attribute name="invisible">not compatible_edi_ids</attribute>
                 </xpath>
                 <xpath expr="//group[@name='group_edi_config']" position="inside">
-                    <field name="compatible_edi_ids" invisible="1" />
                     <field name="edi_format_ids" widget="many2many_checkboxes" invisible="not compatible_edi_ids"/>
                 </xpath>
             </field>

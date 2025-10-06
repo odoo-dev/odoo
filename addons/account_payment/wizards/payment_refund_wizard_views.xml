@@ -6,7 +6,6 @@
         <field name="model">payment.refund.wizard</field>
         <field name="arch" type="xml">
             <form string="Refund">
-                <field name="has_pending_refund" invisible="1"/>
                 <div class="alert alert-warning"
                      id="alert_draft_refund_tx"
                      role="alert"
@@ -19,10 +18,6 @@
                 </div>
                 <group>
                     <group>
-                        <field name="payment_id" invisible="1"/>
-                        <field name="transaction_id" invisible="1"/>
-                        <field name="currency_id" invisible="1"/>
-                        <field name="support_refund" invisible="1"/>
                         <field name="payment_amount"/>
                         <field name="refunded_amount"
                                invisible="refunded_amount &lt;= 0"/>

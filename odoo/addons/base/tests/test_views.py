@@ -4797,38 +4797,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
     def test_uncommented_invisible_field(self):
         # NEVER add new name in this list ! The new addons must add comment for all always invisible field.
         only_log_modules = (
-            'account',
-            'account_accountant',
-            'account_asset',
-            'account_asset_fleet',
-            'account_auto_transfer',
-            'account_avatax',
-            'account_avatax_geolocalize',
-            'account_avatax_sale',
-            'account_base_import',
-            'account_batch_payment',
-            'account_budget',
-            'account_check_printing',
-            'account_consolidation',
-            'account_debit_note',
-            'account_disallowed_expenses',
-            'account_edi',
-            'account_edi_proxy_client',
-            'account_edi_ubl_cii',
-            'account_external_tax',
-            'account_fleet',
-            'account_followup',
-            'account_intrastat',
-            'account_invoice_extract',
-            'account_online_synchronization',
-            'account_payment',
-            'account_peppol',
-            'account_qr_code_emv',
-            'account_reports',
-            'account_saft_import',
-            'account_sepa',
-            'account_sepa_direct_debit',
-            'account_winbooks_import',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))

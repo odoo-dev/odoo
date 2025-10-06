@@ -35,8 +35,6 @@
                                 invisible="trigger == 'auto_reconcile'"/>
                         <field name="trigger" widget="statusbar"/>
                     </header>
-                    <field name="active" invisible="1"/>
-                    <field name="company_id" invisible="1"/>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button type="object" name="action_reconcile_stat" string="Journal Entries"
@@ -91,8 +89,6 @@
                                            default="{'default_model_id': self, 'default_company_id': self.company_id}"
                                            nolabel="1">
                                         <list editable="bottom">
-                                            <field name="company_id" column_invisible="True"/>
-
                                             <field name="sequence"
                                                    widget="handle"/>
                                             <field name="partner_id"/>

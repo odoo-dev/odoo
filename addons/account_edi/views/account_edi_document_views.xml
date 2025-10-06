@@ -11,8 +11,7 @@
                       decoration-danger="blocking_level == 'error'">
                     <field name="edi_format_name" />
                     <field name="error" />
-                    <field name="blocking_level" column_invisible="True" />
-                </list>
+                    </list>
             </field>
         </record>
     </data>

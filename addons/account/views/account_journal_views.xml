@@ -17,8 +17,7 @@
                     <field name="default_account_id" optional="show"/>
                     <field name="active" optional="hide"/>
                     <field name="company_id" groups="base.group_multi_company" optional="hide"/>
-                    <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
-                </list>
+                    </list>
             </field>
         </record>
 
@@ -28,8 +27,6 @@
             <field name="priority">1</field>
             <field name="arch" type="xml">
                 <form string="Account Journal">
-                    <field name="company_id" invisible="1"/>
-                    <field name="bank_statements_source" invisible="1"/>
                     <sheet>
                         <div name="button_box" class="oe_button_box">
                             <button class="oe_stat_button" type="action"
@@ -43,25 +40,21 @@
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                         <div class="oe_title">
                             <label for="name"/>
-                            <field name="name_placeholder" invisible="1" force_save="1"/>
                             <h1><field name="name" options="{'placeholder_field': 'name_placeholder'}" required="not type"/></h1>
                         </div>
                         <group>
                             <group>
-                                <field name="active" invisible="1"/>
                                 <field name="type"/>
                                 <field name="code" placeholder="e.g. INV"/>
                             </group>
                             <group>
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
-                                <field name="country_code" invisible="1"/>
-                            </group>
+                                </group>
                         </group>
                         <notebook>
                             <page name="bank_account" string="Journal Entries">
                                 <group>
                                     <group>
-                                        <field name="default_account_type" invisible="1"/>
                                         <label for="default_account_id" string="Bank Account"
                                                invisible="type != 'bank'" groups="account.group_account_readonly"/>
                                         <label for="default_account_id" string="Journal Account"
@@ -105,7 +98,6 @@
                                         <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
                                     </group>
                                     <group name="bank_account_number" invisible="type != 'bank'">
-                                        <field name="company_partner_id" invisible="1"/>
                                         <field name="bank_account_id" string="Bank Account Number" context="{'default_partner_id': company_partner_id}"/>
                                         <field name="bank_id" invisible="not bank_account_id"/>
                                         <field name="bank_statements_source" widget="radio" required="type == 'bank'"  groups="account.group_account_basic"/>
@@ -117,12 +109,8 @@
                                 </group>
                             </page>
                             <page id="inbound_payment_settings" string="Incoming Payments" name="page_incoming_payments" invisible="type not in ['cash', 'bank', 'credit']">
-                                <field name="available_payment_method_ids" invisible="1"/>
                                 <field name="inbound_payment_method_line_ids" nolabel="1" context="{'default_payment_type': 'inbound'}">
                                     <list string="Payment Methods" editable="bottom">
-                                        <field name="available_payment_method_ids" column_invisible="True"/>
-                                        <field name="payment_type" column_invisible="True"/>
-                                        <field name="company_id" column_invisible="True"/>
                                         <field name="sequence" widget="handle"/>
                                         <field name="payment_method_id" options="{'no_create': True, 'no_open': True}"/>
                                         <field name="name"/>
@@ -137,9 +125,6 @@
                             <page id="outbound_payment_settings" string="Outgoing Payments" name="page_outgoing_payments" invisible="type not in ['cash', 'bank', 'credit']">
                                     <field name="outbound_payment_method_line_ids" nolabel="1" context="{'default_payment_type': 'outbound'}">
                                         <list string="Payment Methods" editable="bottom">
-                                            <field name="available_payment_method_ids" column_invisible="True"/>
-                                            <field name="payment_type" column_invisible="True"/>
-                                            <field name="company_id" column_invisible="True"/>
                                             <field name="sequence" widget="handle"/>
                                             <field name="payment_method_id" options="{'no_create': True, 'no_open': True}"/>
                                             <field name="name"/>
@@ -150,7 +135,6 @@
                                                    groups="account.group_account_readonly"/>
                                         </list>
                                     </field>
-                                    <field name="selected_payment_method_codes" invisible="1"/>
                                     <group name="outgoing_payment" />
                             </page>
                             <page name="advanced_settings" string="Advanced Settings" invisible="type in ['bank', 'cash']">
@@ -162,7 +146,6 @@
                                     </group>
                                     <group string="Emails" name="group_email_alias"
                                            invisible="type not in ('general', 'sale', 'purchase')">
-                                        <field name="display_alias_fields" invisible="1"/>
                                         <div class="o_row" colspan="2" invisible="display_alias_fields">
                                             <a type='action' name='%(action_open_settings)d' class="btn btn-link" role="button">
                                                 <i class="oi oi-fw o_button_icon oi-arrow-right"/> Configure Alias Domain
@@ -255,7 +238,6 @@
             <field name="priority">1</field>
             <field name="arch" type="xml">
                 <list editable="bottom">
-                    <field name="company_id" column_invisible="True"/>
                     <field name="sequence"  widget="handle"/>
                     <field name="name" placeholder="e.g. GAAP, IFRS, ..."/>
                     <field name="excluded_journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
@@ -272,7 +254,6 @@
                 <form string="Multi-ledger">
                     <sheet>
                         <group>
-                            <field name="company_id" invisible="1"/>
                             <field name="name" placeholder="e.g. GAAP, IFRS, ..."/>
                             <field name="excluded_journal_ids" widget="many2many_tags" options="{'no_create': True}"/>
                             <field name="sequence" groups="base.group_no_one"/>

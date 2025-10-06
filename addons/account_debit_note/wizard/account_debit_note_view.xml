@@ -6,9 +6,6 @@
             <field name="model">account.debit.note</field>
             <field name="arch" type="xml">
                 <form string="Create Debit Note">
-                    <field name="move_type" invisible="1"/>
-                    <field name="journal_type" invisible="1"/>
-                    <field name="move_ids" invisible="1"/>
                     <group>
                          <group>
                              <field name="reason"/>

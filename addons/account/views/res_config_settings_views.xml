@@ -19,10 +19,7 @@
             <field name="inherit_id" ref="base.res_config_settings_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//form" position="inside">
-                    <field name="country_code" invisible="1" groups="account.group_account_manager"/>
                     <app data-string="Invoicing" string="Invoicing" name="account" groups="account.group_account_manager">
-                        <field name="has_chart_of_accounts" invisible="1"/>
-                        <field name="has_accounting_entries" invisible="1"/>
                         <block title="Fiscal Localization" name="fiscal_localization_setting_container" invisible="not is_root_company">
                             <setting string="Fiscal Localization" company_dependent="1" help="Taxes, fiscal positions, chart of accounts &amp; legal statements for your country"
                                 documentation="/applications/finance/fiscal_localizations.html">
@@ -99,8 +96,7 @@
                                     <div class="row mt16">
                                         <label for="currency_id" class="col-lg-3 o_light_label"/>
                                         <field name="currency_id" options="{'no_create_edit': True, 'no_open': True}" context="{'active_test': False}"/>
-                                        <field name="group_multi_currency" invisible="1"/>
-                                    </div>
+                                        </div>
                                     <div class="mt8">
                                         <button type="action" name="%(base.action_currency_form)d" string="Currencies" class="btn-link" icon="oi-arrow-right"/>
                                     </div>
@@ -153,7 +149,6 @@
                                         <div class="mt8" invisible="terms_type != 'html'">
                                             <button name="action_update_terms" icon="oi-arrow-right" type="object" string="Update Terms" class="btn-link"/>
                                         </div>
-                                        <field name="preview_ready" invisible="1"/>
                                         <div class="mt4 ms-1" invisible="not preview_ready">
                                             <a class="btn-link" href="/terms" role="button">
                                                 <i class="oi oi-arrow-right"/>
@@ -356,7 +351,6 @@
                                 <field name="restrictive_audit_trail"/>
                             </setting>
                         </block>
-                        <field name="is_account_peppol_eligible" invisible="1"/>
                         <block title="PEPPOL Electronic Invoicing" id="peppol" invisible="not is_account_peppol_eligible">
                             <div id="account_peppol_install" class="col-12 col-lg-12 o_setting_box">
                                 <div class="o_setting_left_pane">

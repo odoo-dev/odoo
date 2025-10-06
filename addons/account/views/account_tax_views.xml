@@ -51,9 +51,7 @@
                     <field name="use_in_tax_closing"
                            optional="hidden"
                            invisible="repartition_type == 'base'"/>
-                    <field name="company_id" column_invisible="True"/>
-                    <field name="tag_ids_domain" column_invisible="True"/>
-                </list>
+                    </list>
             </field>
         </record>
 
@@ -138,7 +136,6 @@
             <field name="model">account.tax</field>
             <field name="arch" type="xml">
                 <form string="Account Tax">
-                    <field name="company_id" invisible="1"/>
                     <sheet>
                     <group>
                         <group>
@@ -147,7 +144,6 @@
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                         <group>
-                            <field name="is_used" invisible="1"/>
                             <field name="type_tax_use"/>
                             <field name="tax_scope"/>
                             <label for="amount" invisible="amount_type not in ('fixed', 'percent', 'division')"/>
@@ -166,7 +162,6 @@
                     <notebook>
                         <page string="Definition" name="definition">
                             <group invisible="amount_type == 'group'">
-                                <field name="country_code" invisible="1"/>
                                 <group string="Distribution for Invoices" class="mw-100">
                                     <field name="invoice_repartition_line_ids" nolabel="1" colspan="2"/>
                                 </group>
@@ -195,7 +190,6 @@
                                     <field name="invoice_legal_notes"/>
                                 </group>
                                 <group name="advanced_booleans">
-                                    <field name="price_include" invisible="1"/>
                                     <field name="price_include_override"
                                            invisible="amount_type == 'group'"
                                            placeholder="Default"
@@ -204,7 +198,6 @@
                                     <field name="is_base_affected"
                                            invisible="amount_type == 'group' or price_include"
                                            groups="base.group_no_one"/>
-                                    <field name="hide_tax_exigibility" invisible="1"/>
                                     <field name="tax_exigibility" widget="radio" invisible="amount_type == 'group' or not hide_tax_exigibility"/>
                                     <field name="cash_basis_transition_account_id" options="{'no_create': True}" invisible="tax_exigibility == 'on_invoice'" required="tax_exigibility == 'on_payment'" groups="account.group_account_readonly"/>
                                 </group>
@@ -253,10 +246,7 @@
                     <field name="sequence" widget="handle"/>
                     <field name="name"/>
                     <field name="country_id"/>
-                    <field name="company_id" column_invisible="True"/>
                     <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="country_code" column_invisible="True"/>
-
                     <field name="tax_payable_account_id"/>
                     <field name="tax_receivable_account_id"/>
                     <field name="advance_tax_payment_account_id"/>
@@ -271,7 +261,6 @@
             <field name="model">account.tax.group</field>
             <field name="arch" type="xml">
                 <form string="Account Tax Group">
-                    <field name="company_id" invisible="1"/>
                     <sheet>
                         <group>
                             <group>

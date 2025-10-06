@@ -12,7 +12,6 @@
                     </div>
                     <sheet>
                         <group>
-                            <field name="opening_move_posted" invisible="1"/>
                             <field name="opening_date" readonly="opening_move_posted"/>
 
                             <label for="fiscalyear_last_month" string="Fiscal Year End"/>
@@ -89,7 +88,6 @@
                 <list editable="top" create="1" delete="1" decoration-muted="opening_debit == 0 and opening_credit == 0" open_form_view="True">
                     <field name="code"/>
                     <field name="name"/>
-                    <field name="company_ids" column_invisible="True"/>
                     <field name="account_type" widget="account_type_selection"/>
                     <field name="reconcile" optional="hide" widget="boolean_toggle"/>
                     <field name="active" optional="show" widget="boolean_toggle"/>
