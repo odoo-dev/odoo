@@ -848,8 +848,7 @@ class AccountMoveLine(models.Model):
                 kind="LEFT JOIN LATERAL",
                 alias=recon_check,
                 table=SQL("""(
-                        SELECT TRUE AS is_recon_line,
-                               partial.amount as partial_amount  --not used in the report
+                        SELECT TRUE AS is_recon_line
                           FROM account_partial_reconcile partial
                           JOIN account_move_line %(matching_alias)s  --the original line
                             ON (%(matching_alias)s.id = partial.debit_move_id AND partial.credit_move_id = %(default_alias)s.id)
