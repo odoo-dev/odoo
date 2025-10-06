@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <template id="event_details" name="Event Header">
+        <t t-call="website_event.layout">
+            <div class="h-100" name="event" itemscope="itemscope" itemtype="http://schema.org/Event">
+                <meta itemprop="startDate" t-attf-content="{{event.date_begin}}Z"/>
+                <meta itemprop="endDate" t-attf-content="{{event.date_end}}Z"/>
+                <t t-out="0"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- Event - Description -->
+    <template id="hackathon_event_details_page_template" name="Event Description">
+        <t t-set="hide_submenu" t-value="True"/>
+        <t t-set="hide_register_cta" t-value="True"/>
+        <t t-set="opt_event_description_cover_hidden" t-value="False"/>
+        <t t-set="opt_event_description_cover_top" t-value="True"/>
+        <t t-set="opt_event_fixed_sidebar" t-value="True"/>
+        <t t-set="opt_event_registration_block" t-value="True"/>
+        <t t-set="opt_event_dates_block" t-value="True"/>
+        <t t-set="opt_event_calendar_block" t-value="True"/>
+        <t t-set="opt_event_location_block" t-value="True"/>
+        <t t-set="opt_event_organizer_block" t-value="True"/>
+        <t t-set="opt_event_share_block" t-value="True"/>
+        <t t-set="edition_cover_only" t-value="False"/>
+
+        <t t-call="website_event.event_details">
+            <!-- <div t-att-data-message="toast_message or 'Registration successful!'" class="o_wevent_register_toaster d-none"/> -->
+
+            <t t-if="not opt_event_description_cover_top" t-call="website.record_cover">
+                <t t-set="additionnal_classes" t-value="'o_wevent_event_main_cover o_wevent_event_main_cover_top overflow-hidden h-auto'"/>
+
+                <div class="container d-flex flex-grow-1 h-100 w-100">
+                    <div id="o_wevent_event_main_cover_content" class="d-flex flex-column align-items-baseline w-100 py-3">
+                        <span t-if="event.is_participating or True" class="badge text-bg-success o_wevent_badge">
+                            <i class="fa fa-check me-2" role="img"/>
+Registered
+                        </span>
+                        <div class="w-100 mt-auto">
+                            <h2 itemprop="name" placeholder="Event Title" class="mt-3">
+                                <span t-esc="event.name or 'The Annual Tech Innovators Hackathon 2026'"/>
+                            </h2>
+                            <p class="lead" placeholder="Event Subtitle">
+                                <span t-esc="event.subtitle or 'Building the Future, One Line of Code at a Time.'"/>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <section id="o_wevent_event_main" class="h-100">
+                <div class="container pb-5 sticky-top align-self-start">
+                    <div class="row">
+
+
+                          <!-- main content -->
+                        <div class="col pe-xxl-5">
+                            <t t-call="website_event.navbar"/>
+                            <div t-if="opt_event_registration_block" class="o_wevent_event_main_cta_block d-lg-none mb-3">
+                                <t t-call="website_event.registration_template">
+                                    <t t-set="cta_additional_classes">w-100 py-sm-3 mt-sm-2</t>
+                                </t>
+                            </div>
+                            <div id="o_wevent_event_main_col">
+                                <t t-if="not opt_event_description_cover_top" t-call="website.record_cover">
+                                    <t t-set="additionnal_classes" t-value="'o_wevent_event_main_cover overflow-hidden rounded'"/>
+
+                                    <div id="o_wevent_event_main_cover_content" class="p-3 mt-auto">
+                                        <span t-if="event.is_participating or True" class="badge text-bg-success o_wevent_badge">
+                                            <i class="fa fa-check me-2" role="img"/>
+Registered
+                                        </span>
+                                        <h1 itemprop="name" placeholder="Event Title" class="mt-3 h2-fs">
+                                            <span t-esc="event.name or 'The Annual Tech Innovators Hackathon 2026'"/>
+                                        </h1>
+                                        <p class="lead" placeholder="Event Subtitle">
+                                            <span t-esc="event.subtitle or 'Building the Future, One Line of Code at a Time.'"/>
+                                        </p>
+                                    </div>
+                                </t>
+                                <div class="mt-4" itemprop="description">
+                                    <t>
+                                        <div>
+                                            <h2>Odoo Hackathon 2025</h2>
+                                            <br/>
+                                            <h4>Welcome to Event</h4>
+                                            <p>Every year we invite our community, partners and end-users to come and meet us! It's the ideal event to get together and present new features, roadmap of future versions, achievements of the software, workshops, training sessions, etc... This event is also an opportunity to showcase our partners' case studies, methodology or developments. Be there and see directly from the source the features of the new version!</p>
+                                        </div>
+                                        <div>
+                                            <br/>
+                                            <h4>Select Problem Statement</h4>
+                                            <br/>
+                                            <ol>
+                                                <li class="fw-bold">
+                                                    <span class="d-flex gap-2 flex-wrap">
+                                                        <p>Problem statement 1 : </p>
+                                                        <t t-out="'this-is-problem-statement-1'"/>
+                                                        <a href="/path/to/your/document.pdf" class="text-info text-decoration-none">
+    Download PDF
+                                                        </a>
+                                                    </span>
+                                                </li>
+                                                <li class="fw-bold">
+                                                    <span class="d-flex gap-2 flex-wrap">
+                                                        <p>Problem statement 2 : </p>
+                                                        <t t-out="'this-is-problem-statement-2'"/>
+                                                        <a href="/path/to/your/document.pdf" class="text-info text-decoration-none">
+    Download PDF
+                                                        </a>
+                                                    </span>
+                                                </li>
+                                                <li class="fw-bold">
+                                                    <span class="d-flex gap-2 flex-wrap">
+                                                        <p>Problem statement 3 : </p>
+                                                        <t t-out="'this-is-problem-statement-3'"/>
+                                                        <a href="/path/to/your/document.pdf" class="text-info text-decoration-none">
+    Download PDF
+                                                        </a>
+                                                    </span>
+                                                </li>
+                                            </ol>
+                                        </div>
+                                        <div>
+                                            <br/>
+                                            <h4>Practical Information</h4>
+                                            <p>Every year we invite our community, partners and end-users to come and meet us! It's the ideal event to get together and present new features, roadmap of future versions, achievements of the software, workshops, training sessions, etc... This event is also an opportunity to showcase our partners' case studies, methodology or developments. Be there and see directly from the source the features of the new version!</p>
+                                        </div>
+                                        <div>
+                                            <br/>
+                                            <h4>Rules and Regulations</h4>
+                                            <p>Every year we invite our community, partners and end-users to come and meet us! It's the ideal event to get together and present new features, roadmap of future versions, achievements of the software, workshops, training sessions, etc... This event is also an opportunity to showcase our partners' case studies, methodology or developments. Be there and see directly from the source the features of the new version!</p>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- sidebar -->
+                        <aside t-if="opt_event_registration_block or opt_event_dates_block or opt_event_calendar_block or
+                        opt_event_location_block or opt_event_organizer_block or opt_event_share_block" id="o_wevent_event_main_sidebar" t-attf-class="col-lg-4 py-3 pb-lg-0 d-print-none {{'sticky-top align-self-start' if opt_event_fixed_sidebar else ''}}">
+                            <!-- CTA (desktop only) -->
+                            <!-- <div t-if="opt_event_registration_block" class="d-none d-lg-block mb-3">
+                                <t t-call="website_event.registration_template">
+                                    <t t-set="cta_additional_classes">w-100</t>
+                                </t>
+                            </div> -->
+                            <div class="d-flex flex-column gap-3 mb-4">
+                                <button class="btn btn-primary">View Ticket</button>
+                                <button class="btn btn-primary">Download Certificate</button>
+                            </div>
+
+
+                            <!-- Team Information -->
+                            <div class="mb-4 d-flex flex-column gap-4">
+
+                                <!-- Team Leader -->
+                                <div>
+                                    <h5>Team Leader</h5>
+                                    <hr/>
+                                    <span class="d-flex gap-2">
+                                        <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+ Mantavya Gajjar (mga-odoo)
+                                    </span>
+                                </div>
+
+                                <!-- Team Members -->
+                                <div>
+                                    <h5>Team Members</h5>
+                                    <hr/>
+                                    <div class="d-flex flex-column gap-1">
+                                        <span class="d-flex gap-2">
+                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+ Mantavya Gajjar (mga-odoo)
+                                        </span>
+                                        <span class="d-flex gap-2">
+                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+ Mantavya Gajjar (mga-odoo)
+                                        </span>
+                                        <span class="d-flex gap-2">
+                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+ Mantavya Gajjar (mga-odoo)
+                                        </span>
+                                        <button class="btn btn-info mt-2">Add Member</button>
+                                    </div>
+                                </div>
+
+                                <!-- Problem Statement -->
+                                <div>
+                                    <h5>Problem Statement</h5>
+                                    <hr/>
+                                    <div class="dropdown">
+                                        <button role="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Select Problem Statement
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <t t-foreach="['Problem 1', 'Problem 2', 'Problem 3']" t-as="Problem">
+                                                <t t-if="Problem">
+                                                    <a t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{is_active and 'active'}">
+                                                        <t t-out="Problem"/>
+                                                        <!-- <span t-if="date == 2" t-out="2" t-attf-class="badge pagination ms-3 text-bg-primary"/> -->
+                                                    </a>
+                                                </t>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!-- Mentor -->
+                                <div>
+                                    <h5>Mentor</h5>
+                                    <hr/>
+                                    <span class="d-flex gap-2">
+                                        <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+ Mantavya Gajjar (+9876543211)
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Location -->
+                            <meta itemprop="eventAttendanceMode" t-attf-content="https://schema.org/{{'Offline' if event.address_id else 'Online'}}EventAttendanceMode"/>
+                            <div t-if="opt_event_location_block and event.address_id" class="o_wevent_sidebar_block o_wevent_bordered_block pb-3 mb-4" itemprop="location" itemscope="itemscope" itemtype="https://schema.org/Place">
+                                <div>
+                                    <h6 class="o_wevent_sidebar_title">Event Address</h6>
+                                </div>
+                                <div itemprop="name" class="mb-1" t-field="event.address_id"/>
+                                <small class="d-block mb-2" t-field="event.address_id" t-options='{
+                                "widget": "contact",
+                                "fields": ["address"],
+                                "no_marker": True,
+                                "with_microdata": True,
+                            }'/>
+                                <small t-field="event.address_id" class="d-block mb-2" t-options='{
+                                "widget": "contact",
+                                "fields": ["phone", "mobile", "email"]
+                            }'/>
+                                <a t-att-href="event._google_map_link()" target="_blank" class="btn btn-light" title="Get directions">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="align-text-top" role="img" style="height: 1em; width: 1em">
+                                        <rect width="24" height="24" opacity="0"/>
+                                        <path role="presentation" fill="currentColor" d="M13.67 22h-.06a1 1 0 0 1-.92-.8l-1.54-7.57a1 1 0 0 0-.78-.78L2.8 11.31a1 1 0 0 1-.12-1.93l16-5.33A1 1 0 0 1 20 5.32l-5.33 16a1 1 0 0 1-1 .68z"/>
+                                    </svg>
+                                Get directions
+                                </a>
+                            </div>
+                            <div t-elif="opt_event_location_block" class="o_wevent_sidebar_block o_wevent_bordered_block pb-3 mb-4">
+                                <h6 class="o_wevent_sidebar_title">Location</h6>
+                                <i class="fa fa-map-marker" title="Location"/>
+ Online event
+                            </div>
+                            <!-- Social -->
+                            <div t-if="opt_event_share_block" class="o_wevent_sidebar_block">
+                                <div class="d-flex flex-column mb-4 w-100">
+                                    <button class="btn btn-danger">Download Photos</button>
+                                </div>
+                                <t t-snippet-call="website.s_share">
+                                    <t t-set="_no_title" t-value="True"/>
+                                    <t t-set="_classes" t-valuef="o_wevent_sidebar_social mx-n1"/>
+                                    <t t-set="_link_classes" t-valuef="o_wevent_social_link"/>
+                                </t>
+                            </div>
+                        </aside>
+
+                      
+
+                    </div>
+                </div>
+            </section>
+        </t>
+    </template>
+
+    <!-- Sidebar Blocks Visibility Options -->
+    <template id="opt_event_registration_block" name="Registrations" inherit_id="website_event.event_description_full" active="True"/>
+    <template id="opt_event_dates_block" name="Dates" inherit_id="website_event.event_description_full" active="True"/>
+    <template id="opt_event_calendar_block" name="Calendar links" inherit_id="website_event.event_description_full" active="True"/>
+    <template id="opt_event_location_block" name="Location" inherit_id="website_event.event_description_full" active="True"/>
+    <template id="opt_event_organizer_block" name="Organizer" inherit_id="website_event.event_description_full" active="True"/>
+    <template id="opt_event_share_block" name="Share" inherit_id="website_event.event_description_full" active="True"/>
+    <!-- Sidebar Position Option -->
+    <template id="opt_event_fixed_sidebar" name="Fixed Sidebar Option" inherit_id="website_event.event_description_full" active="False"/>
+
+</odoo>
