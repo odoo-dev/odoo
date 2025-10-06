@@ -17,8 +17,6 @@
                                 icon="fa-list"
                             />
                         </div>
-                        <field name="active" invisible="1" />
-                        <field name="model_name" invisible="1" force_save="True" />
                         <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
                         <div class="oe_title">
                             <h1><field name="name" placeholder="Set an explicit name"/></h1>
@@ -54,8 +52,7 @@
                                             invisible="trigger not in ['on_stage_set', 'on_tag_set']"
                                             required="trigger in ['on_stage_set', 'on_tag_set']"
                                         />
-                                        <field name="trg_field_ref_model_name" invisible="1" />
-                                    </div>
+                                        </div>
                                     <div class="text-muted" invisible="trigger != 'on_change'"><i class="fa fa-warning"/> Automation rules triggered by UI changes will be executed <em>every time</em> the watched fields change, <em>whether you save or not</em>.</div>
                                 </div>
                                 <label for="url" string="Secret URL" invisible="trigger != 'on_webhook'"/>
@@ -100,7 +97,6 @@
                                             'on_time_updated'
                                         ]"
                                 />
-                                <field name="previous_domain" invisible="1"/>
                                 <field name="filter_domain" widget="domain" groups="base.group_no_one"
                                     options="{'model': 'model_name', 'in_dialog': True, 'allow_expressions':True}"
                                     invisible="trigger in ['on_webhook']"
