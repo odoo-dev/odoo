@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <list string="Working Time" editable="bottom" default_order="sequence, week_type, dayofweek, hour_from">
                 <field name="sequence" widget="handle"/>
-                <field name="display_type" column_invisible="True"/>
                 <field name="display_name" width="1" string=" " invisible="display_type != 'line_section'"/>
                 <field name="name" invisible="display_type == 'line_section'"/>
                 <field name="dayofweek"/>

@@ -32,8 +32,6 @@
         <field name="arch" type="xml">
             <form string="Resource">
             <sheet>
-                <field name="active" invisible="1" />
-                <field name="company_id" invisible="1"/>
                 <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                 <group>
                     <group name="user_details">
@@ -58,7 +56,6 @@
         <field name="model">resource.resource</field>
         <field name="arch" type="xml">
             <list string="Resources" multi_edit="1" default_order="name">
-                <field name="company_id" column_invisible="True"/>
                 <field name="name" />
                 <field name="user_id" />
                 <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" optional="show"/>

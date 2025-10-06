@@ -5109,7 +5109,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'quality_mrp_workorder',
             'rating',
             'repair',
-            'resource',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
