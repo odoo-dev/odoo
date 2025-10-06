@@ -4851,18 +4851,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'data_cleaning',
             'data_merge',
             'data_recycle',
-            'delivery',
-            'delivery_dhl',
-            'delivery_easypost',
-            'delivery_fedex',
-            'delivery_iot',
-            'delivery_mondialrelay',
-            'delivery_sendcloud',
-            'delivery_shiprocket',
-            'delivery_starshipit',
-            'delivery_ups',
-            'delivery_ups_rest',
-            'delivery_usps',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))

@@ -8,8 +8,7 @@
         <field name="arch" type="xml">
             <header position="inside">
                 <!-- modified through an onchange, must be present but not readonly -->
-                <field name="recompute_delivery_price" invisible="1"/>
-            </header>
+                </header>
             <div name="so_button_below_order_lines" position="inside">
                 <button
                     string="Add shipping"

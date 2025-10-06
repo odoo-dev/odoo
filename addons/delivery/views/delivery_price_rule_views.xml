@@ -7,8 +7,7 @@
         <field name="arch" type="xml">
             <form string="Price Rules">
                 <group>
-                    <field name="name" invisible="1"/>
-                </group>
+                    </group>
                 <group>
                     <label for="variable" string="Condition"/>
                     <div class="o_row">
@@ -16,7 +15,6 @@
                         <field name="operator"/>
                         <field name="max_value"/>
                     </div>
-                    <field name="currency_id" invisible="1"/>
                     <label for="list_base_price" string="Delivery Cost"/>
                     <div>
                         <field name="list_base_price" widget="monetary" class="oe_inline"/>
