@@ -21,8 +21,7 @@
                             <field name="lead_location" readonly="1"/>
                             <field name="partner_assigned_id"/>
                             <field name="partner_location" readonly="1"/>
-                            <field name="lead_link" column_invisible="True"/>
-                        </list>
+                            </list>
                     </field>
                     <notebook colspan="4" groups="base.group_no_one">
                         <page string="Email Template" name="email_template">
