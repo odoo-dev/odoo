@@ -4836,7 +4836,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'auth_signup',
             'auth_totp',
             'barcodes_gs1_nomenclature',
-            'base_address_extended',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
