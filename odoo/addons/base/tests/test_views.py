@@ -5181,7 +5181,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'website_event_track_quiz',
             'website_event_track_social',
             'website_event_twitter_wall',
-            'website_forum',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
