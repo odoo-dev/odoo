@@ -5,7 +5,6 @@
         <field name="model">base.module.install.request</field>
         <field name="arch" type="xml">
             <form>
-                <field name="module_id" invisible="1"/>
                 <group string="Send to:">
                     <field colspan="2" name="user_ids" widget="many2many_tags" nolabel="1"/>
                 </group>
@@ -25,8 +24,6 @@
         <field name="model">base.module.install.review</field>
         <field name="arch" type="xml">
             <form>
-                <field name="module_id" invisible="1"/>
-                <field name="module_ids" widget="many2many_tags" invisible="1"/>
                 <field name="modules_description"/>
                 <footer>
                     <button string="Install App" class="btn-primary" type="object" name="action_install_module" data-hotkey="q"/>
