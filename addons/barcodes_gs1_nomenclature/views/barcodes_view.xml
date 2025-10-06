@@ -53,8 +53,7 @@
                     <field name="gs1_content_type" invisible="not parent.is_gs1_nomenclature"/>
                     <field name="gs1_decimal_usage" invisible="not parent.is_gs1_nomenclature or gs1_content_type != 'measure'"/>
                     <field name="associated_uom_id" invisible="not parent.is_gs1_nomenclature or gs1_content_type != 'measure'"/>
-                    <field name="is_gs1_nomenclature" invisible="1"/>
-                </xpath>
+                    </xpath>
             </field>
         </record>
 </odoo>
