@@ -43,7 +43,6 @@
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
-                    <field name="attempts_count" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_redirect_to_attempts"
                             type="object"
@@ -53,7 +52,6 @@
                             <field string="Attempts" name="attempts_count" widget="statinfo"/>
                         </button>
                     </div>
-                    <field name="test_entry" invisible="1"/>
                     <widget name="web_ribbon" title="Test Entry" bg_color="text-bg-info"
                         invisible="not test_entry"/>
                     <widget name="web_ribbon" title="Failed" bg_color="text-bg-danger"
@@ -65,7 +63,6 @@
                             <field name="survey_id"/>
                             <field name="create_date"/>
                             <field name="deadline" invisible="state == 'done' and not deadline"/>
-                            <field name="is_attempts_limited" invisible="1"/>
                             <label for="attempts_number" string="Attempt n°" invisible="not is_attempts_limited or test_entry or state != 'done'"/>
                             <div invisible="not is_attempts_limited or test_entry or state != 'done'" class="d-inline-flex">
                                 <field name="attempts_number" nolabel="1"/>
@@ -75,8 +72,6 @@
                             <field name="test_entry" groups="base.group_no_one"/>
                         </group>
                         <group>
-                            <field name="scoring_type" invisible="1"/>
-                            <field name="scoring_success" invisible="1"/>
                             <label for="scoring_percentage" string="Score" invisible="scoring_type == 'no_scoring'"/>
                             <div invisible="scoring_type == 'no_scoring'" class="d-inline-flex">
                                 <field name="scoring_percentage" nolabel="1"/>
@@ -91,7 +86,6 @@
                         <page string="Answers" name="page_answers">
                             <field name="user_input_line_ids" mode="list" readonly="True" no_label="1">
                                 <list decoration-muted="skipped == True">
-                                    <field name="question_sequence" column_invisible="True"/>
                                     <field name="create_date" optional="hidden"/>
                                     <field name="page_id" optional="hidden"/>
                                     <field name="question_id"/>
@@ -122,7 +116,6 @@
                 <field name="email" optional="show"/>
                 <field name="attempts_number"/>
                 <field name="deadline"/>
-                <field name="test_entry" column_invisible="True"/>
                 <field name="scoring_success"/>
                 <field name="scoring_percentage"/>
                 <field name="state" widget="badge"

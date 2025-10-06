@@ -6,10 +6,6 @@
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <form string="Survey" class="o_survey_form">
-                <field name="id" invisible="1"/>
-                <field name="session_state" invisible="1"/>
-                <field name="question_ids" invisible="1"/>
-                <field name="session_available" invisible="1"/>
                 <header>
                     <button name="action_send_survey" string="Share" type="object" class="oe_highlight" invisible="not active"/>
                     <button name="action_result_survey" string="See results" type="object" class="oe_highlight"
@@ -49,7 +45,6 @@
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="background_image" widget="image" class="oe_avatar"/>
-                    <field name="allowed_survey_types" invisible="True"/>
                     <field name="survey_type" widget="radio_selection_with_filter"
                         options="{'horizontal': True, 'allowed_selection_field': 'allowed_survey_types'}"
                         class="o_field_radio" invisible="not allowed_survey_types"/>
@@ -61,8 +56,6 @@
                     <group>
                         <group class="ps-md-0">
                             <field name="user_id" domain="[('share', '=', False)]" widget="many2one_avatar_user"/>
-                            <field name="active" invisible="1"/>
-                            <field name="has_conditional_questions" invisible="1"/>
                             <field name="lang_ids" widget="many2many_tags" placeholder="All installed languages"
                                    options="{'no_quick_create': True, 'no_create_edit': True, 'no_open': True}"/>
                         </group>
@@ -76,21 +69,15 @@
                                 <list decoration-bf="is_page">
                                     <field name="sequence" widget="handle"/>
                                     <field name="title" widget="survey_description_page"/>
-                                    <field name="background_image" column_invisible="True"/>
                                     <field name="question_type" />
                                     <field name="is_time_limited" string="Time Limit" optional="hide"
                                         column_invisible="not parent.session_available"/>
                                     <field name="time_limit" optional="hide" invisible="not is_time_limited"
                                         column_invisible="not parent.session_available"/>
-                                    <field name="is_time_customized" column_invisible="True"/>
                                     <field name="constr_mandatory" optional="hide"/>
-                                    <field name="is_page" column_invisible="True"/>
-                                    <field name="questions_selection" column_invisible="True"/>
-                                    <field name="survey_id" column_invisible="True"/>
                                     <field name="random_questions_count"
                                         column_invisible="parent.questions_selection == 'all'"
                                         invisible="not is_page"/>
-                                    <field name="triggering_question_ids" column_invisible="True"/>
                                     <field name="triggering_answer_ids" column_invisible="True" widget="many2many_tags"/> <!-- widget to fetch display_name -->
                                     <widget name="survey_question_trigger" width="30px"/>
                                     <button name="copy" type="object" icon="fa-clone" title="Duplicate Question"/>
@@ -205,8 +192,6 @@
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <list string="Survey" js_class="survey_view_tree">
-                <field name="active" column_invisible="True"/>
-                <field name="certification" column_invisible="True"/>
                 <field name="title"/>
                 <button name="certification" type="button" disabled="disabled"
                     icon="fa-trophy" title="Certification" aria-label="Certification"
@@ -401,8 +386,7 @@
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <graph>
-                <field type="measure" name="color" invisible="1"/>
-            </graph>
+                </graph>
         </field>
     </record>
 
@@ -411,8 +395,7 @@
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <pivot>
-                <field type="measure" name="color" invisible="1"/>
-            </pivot>
+                </pivot>
         </field>
     </record>
 

@@ -8,14 +8,6 @@
                 <form string="Compose Email" class="o_mail_composer_form">
                     <group col="1">
                         <group col="2">
-                            <field name="author_id" invisible="1"/>
-                            <field name="survey_access_mode" invisible="1"/>
-                            <field name="survey_users_login_required" invisible="1"/>
-                            <field name="survey_users_can_signup" invisible="1"/>
-                            <field name="survey_id" invisible="1"/>
-                            <field name="existing_mode" widget="radio" invisible="1" />
-                            <field name="lang" invisible="1"/>
-                            <field name="render_model" invisible="1"/>
                             <label class="o_survey_label_survey_start_url" for="survey_start_url" string="Survey Link"
                                  invisible="survey_access_mode != 'public'"/>
                             <field name="survey_start_url" nolabel="1" widget="CopyClipboardChar"
@@ -33,8 +25,6 @@
                                 invisible="survey_users_login_required or not send_email"
                                 placeholder="e.g.  'Rick Sanchez' &lt;rick_sanchez@example.com&gt;, hictor_vugo@example.com"/>
                         </group>
-                        <field name="existing_partner_ids" invisible="1"/>
-                        <field name="existing_emails" invisible="1"/>
                         <div col="2" class="alert alert-warning" role="alert"
                             invisible="survey_access_mode == 'public' or not existing_text">
                             <field name="existing_text"/>
@@ -50,7 +40,6 @@
                         <group col="2">
                             <field name="subject" invisible="not send_email" placeholder="Subject..."/>
                         </group>
-                        <field name="can_edit_body" invisible="1"/>
                         <field name="body" class="oe-bordered-editor border border-1 m-3 p-0 flex-fill"
                             widget="html_mail"
                             options="{'height': 380}"
