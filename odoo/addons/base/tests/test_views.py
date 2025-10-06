@@ -4880,17 +4880,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'fleet',
             'frontdesk',
             'gamification',
-            'helpdesk',
-            'helpdesk_account',
-            'helpdesk_fsm',
-            'helpdesk_fsm_report',
-            'helpdesk_repair',
-            'helpdesk_sale',
-            'helpdesk_sale_loyalty',
-            'helpdesk_sale_timesheet',
-            'helpdesk_stock',
-            'helpdesk_stock_account',
-            'helpdesk_timesheet',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
