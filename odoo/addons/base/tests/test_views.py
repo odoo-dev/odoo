@@ -5140,7 +5140,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'social_crm',
             'social_facebook',
             'social_instagram',
-            'social_linkedin',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
