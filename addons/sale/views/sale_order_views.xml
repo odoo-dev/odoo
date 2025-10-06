@@ -33,8 +33,6 @@
         <field name="model">sale.order</field>
         <field name="arch" type="xml">
             <calendar string="Sales Orders" create="0" mode="month" date_start="activity_date_deadline" color="state" event_limit="5" quick_create="0">
-                <field name="currency_id" invisible="1"/>
-                <field name="state" filters="1" invisible="1"/>
                 <field name="activity_ids" options="{'icon': 'fa fa-clock-o'}" invisible="not activity_ids"/>
                 <field name="partner_id" avatar_field="avatar_128" options="{'icon': 'fa fa-users'}"/>
                 <field name="amount_total" widget="monetary"/>
@@ -124,9 +122,6 @@
                         type="action"
                         class="btn-secondary"/>
                 </header>
-                <field name="message_needaction" column_invisible="True"/>
-                <field name="currency_id" column_invisible="True"/>
-
                 <field name="name" string="Number" readonly="1" decoration-bf="1"/>
                 <field name="date_order" optional="show" readonly="state in ['cancel', 'sale']"/>
                 <field name="commitment_date" optional="hide"/>
@@ -135,7 +130,6 @@
                 <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                 <field name="activity_ids" widget="list_activity" optional="show"/>
                 <field name="team_id" optional="hide"/>
-                <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
                 <field name="company_id"
                        groups="base.group_multi_company"
                        optional="show"
@@ -480,7 +474,6 @@
                                 confirm="This will update the unit price of all products based on the new pricelist."
                                 invisible="not show_update_pricelist or state in ['sale', 'cancel']"/>
                         </div>
-                        <field name="currency_id" invisible="1"/>
                         <field
                             name="pricelist_id"
                             invisible="1"
@@ -510,7 +503,6 @@
                                 -->
                                 <field name="sequence" invisible="1"/>
                                 <!-- Display_type must be specified as non readonly (which would be the case with the default field added by ORM) -->
-                                <field name="display_type" invisible="1"/>
                                 <group>
                                     <group invisible="display_type">
                                         <label for="product_id"/>
@@ -601,21 +593,11 @@
 
                                 <!-- Non readonly invisible fields, must be specified manually, because fields added automatically by the ORM
                                     are readonly, widgets fieldDependencies too -->
-                                <field name="display_type" column_invisible="True"/>
-                                <field name="product_custom_attribute_value_ids" column_invisible="1" >
-                                    <list>
+                                <list>
                                         <field name="custom_product_template_attribute_value_id" />
                                         <field name="custom_value" />
                                     </list>
                                 </field>
-                                <field name="product_no_variant_attribute_value_ids" column_invisible="1"/>
-                                <field name="technical_price_unit" column_invisible="1"/>
-                                <field name="linked_line_id" column_invisible="1"/>
-                                <field name="combo_item_id" column_invisible="1"/>
-                                <field name="selected_combo_items" column_invisible="1"/>
-                                <field name="virtual_id" column_invisible="1"/>
-                                <field name="linked_virtual_id" column_invisible="1"/>
-                                <field name="collapse_prices" column_invisible="1"/>
                                 <field name="collapse_composition" column_invisible="1"/>
 
                                 <!-- Currency, needed for monetary widgets to display the currency symbol -->
@@ -855,7 +837,6 @@
                                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                             </group>
                             <group name="sale_info" string="Invoicing">
-                                <field name="show_update_fpos" invisible="1"/>
                                 <label for="fiscal_position_id"/>
                                 <div class="o_row">
                                     <field name="fiscal_position_id" options="{'no_create': True}"/>
@@ -870,12 +851,10 @@
                                         invisible="not show_update_fpos or state in ['sale', 'cancel']"/>
                                 </div>
                                 <field name="preferred_payment_method_line_id"/>
-                                <field name="partner_invoice_id" groups="!account.group_delivery_invoice_address" invisible="1"/>
                                 <field name="journal_id" groups="base.group_no_one" readonly="invoice_count != 0 and state == 'sale'"/>
                                 <field name="invoice_status" invisible="state != 'sale'" groups="base.group_no_one"/>
                                 <!-- test_event_configurator -->
-                                <field name="invoice_status" invisible="1" groups="!base.group_no_one"/>
-                            </group>
+                                </group>
                             <group name="sale_shipping" string="Shipping">
                                 <label for="commitment_date" string="Delivery Date"/>
                                 <div name="commitment_date_div" class="o_row">

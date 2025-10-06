@@ -10,9 +10,7 @@
                 <attribute name="invisible" remove="1" separator="or"/>
             </page>
             <field name="product_variant_count" position="after">
-                <field name="service_type" widget="radio" invisible="True"/>
-                <field name="visible_expense_policy" invisible="1"/>
-            </field>
+                </field>
             <field name="type" position="after">
                 <field
                     name="invoice_policy"

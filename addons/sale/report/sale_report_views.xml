@@ -68,8 +68,7 @@
                 <field name="state" optional="hide"/>
                 <field name="pricelist_id" optional="hide"/>
                 <field name="line_invoice_status" optional="hide"/>
-                <field name="currency_id" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
 
