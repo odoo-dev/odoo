@@ -35,7 +35,6 @@
                             <button class="oe_stat_button" name="action_get_stock_picking"
                                     string="Stock Operation" type="object"
                                     invisible="not picking_id" icon="fa-cogs"/>
-                            <field name="picking_id" invisible="1" readonly="state == 'done'"/>
                             <button class="oe_stat_button" name="action_get_stock_move_lines"
                                     type="object"
                                     invisible="not move_ids" icon="fa-exchange">
@@ -43,15 +42,13 @@
                                         <span class="o_stat_text">Product Moves</span>
                                     </div>
                             </button>
-                            <field name="move_ids" invisible="1"/>
-                        </div>
+                            </div>
                         <div class="oe_title">
                             <h1><field name="name" nolabel="1"/></h1>
                         </div>
                         <group>
                             <group>
                                 <field name="product_id" context="{'default_is_storable': True}" readonly="state == 'done'"/>
-                                <field name="tracking" invisible="1"/>
                                 <label for="scrap_qty"/>
                                 <div class="o_row">
                                     <field name="scrap_qty" readonly="state == 'done' or tracking == 'serial'"/>
@@ -62,7 +59,6 @@
                                 <field name="scrap_reason_tag_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
                             </group>
                             <group>
-                                <field name="company_id" invisible="1" readonly="state == 'done'"/>
                                 <field name="package_id" groups="stock.group_tracking_lot" readonly="state == 'done'"/>
                                 <field name="owner_id" groups="stock.group_tracking_owner" readonly="state == 'done'"/>
                                 <field name="location_id" options="{'no_create': True, 'no_open': True}" groups="stock.group_stock_multi_locations" force_save="1" readonly="state == 'done'"/>
@@ -110,7 +106,6 @@
             <field name="model">stock.scrap</field>
             <field name="arch" type="xml">
                 <list multi_edit="1" sample="1" decoration-info="state == 'draft'">
-                    <field name="company_id" column_invisible="True" readonly="state == 'done'"/>
                     <field name="name" decoration-bf="1"/>
                     <field name="date_done"/>
                     <field name="product_id" readonly="1"/>
@@ -146,9 +141,7 @@
                 <form string="Scrap">
                     <group>
                         <group>
-                            <field name="state" invisible="1"/>
                             <field name="product_id" options="{'no_create': True}" domain="[('id', 'in', context.get('product_ids', []))]" readonly="state == 'done'"/>
-                            <field name="tracking" invisible="1"/>
                             <label for="scrap_qty"/>
                             <div class="o_row">
                                 <field name="scrap_qty" readonly="tracking == 'serial'"/>
@@ -162,10 +155,8 @@
                             <field name="scrap_reason_tag_ids" widget="many2many_tags" options="{'no_create_edit': True}"/>
                         </group>
                         <group>
-                            <field name="picking_id" invisible="1" readonly="state == 'done'"/>
                             <field name="package_id" groups="stock.group_tracking_lot" readonly="state == 'done'"/>
                             <field name="owner_id" groups="stock.group_tracking_owner" readonly="state == 'done'"/>
-                            <field name="company_id" invisible="1" readonly="state == 'done'"/>
                             <field name="location_id" groups="stock.group_stock_multi_locations" options="{'no_open': True, 'no_create': True}" readonly="state == 'done'"/>
                             <field name="scrap_location_id" groups="stock.group_stock_multi_locations" options="{'no_open': True, 'no_create': True}"  readonly="state == 'done'"/>
                             <field name="should_replenish" readonly="state == 'done'"/>

@@ -5,8 +5,6 @@
         <field name="model">stock.replenishment.info</field>
         <field name="arch" type="xml">
             <form class="o_stock_replenishment_info">
-                <field name="orderpoint_id" invisible="1"/>
-                <field name="qty_to_order" invisible="1"/>
                 <div class="alert alert-info" role="alert">
                     <span>When the stock level at the forecasted date is below the minimum (<field name="product_min_qty" readonly="True"/> <field name="product_uom_name"/>), a replenishment must be done to reach the maximum level of stock (<field name="product_max_qty" readonly="True"/> <field name="product_uom_name"/>).</span>
                 </div>
@@ -38,7 +36,6 @@
                     </group>
                 </group>
                 <notebook>
-                    <field name="warehouseinfo_ids" invisible="1"/>
                     <page string="Warehouses" name="page_warehouses" invisible="not warehouseinfo_ids">
                         <field name="wh_replenishment_option_ids"/>
                     </page>
@@ -64,7 +61,6 @@
         <field name="model">stock.replenishment.option</field>
         <field name="arch" type="xml">
             <list>
-                <field name="qty_to_order" column_invisible="True"/>
                 <field name="warehouse_id" string="Warehouse"/>
                 <field name="location_id" string="Warehouse Location"/>
                 <field name="free_qty" decoration-danger="free_qty &lt; qty_to_order" string="Available Quantity"/>

@@ -62,12 +62,10 @@
             <list string="Operation Types">
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="active" column_invisible="True"/>
                 <field name="warehouse_id" groups="stock.group_stock_multi_warehouses"/>
                 <field name="sequence_id" groups="base.group_no_one"/>
                 <field name="company_id" groups="base.group_multi_company"/>
-                <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
 
@@ -85,10 +83,6 @@
                             <group name="first">
                                 <group>
                                     <field name="code"/>
-                                    <field name="active" invisible="1"/>
-                                    <field name="company_id" invisible="1"/>
-                                    <field name="hide_reservation_method" invisible="1"/>
-                                    <field name="show_picking_type" invisible="1"/>
                                     <field name="sequence_id" groups="base.group_no_one"/>
                                     <field name="sequence_code"/>
                                     <field name="warehouse_id" groups="stock.group_stock_multi_warehouses" force_save="1"/>
@@ -185,7 +179,6 @@
                 <field name="color"/>
                 <field name="code" readonly="1"/>
                 <field name="count_move_ready"/>
-                <field name="show_picking_type" invisible="1"/>
                 <templates>
                     <t t-name="menu" t-if="!selection_mode">
                         <div class="container" t-if="record.show_picking_type.raw_value">

@@ -119,7 +119,6 @@
             <field name="inherit_id" ref="product.product_template_tree_view"/>
             <field name="arch" type="xml">
                 <field name="uom_id" position="before">
-                    <field name="show_on_hand_qty_status_button" column_invisible="True" groups="stock.group_stock_user"/>
                     <field name="qty_available" invisible="not show_on_hand_qty_status_button" string="On Hand" optional="show" decoration-danger="qty_available &lt; 0" groups="stock.group_stock_user" sum="Total On Hand"/>
                     <field name="virtual_available" invisible="not show_on_hand_qty_status_button" string="Forecasted" optional="show" decoration-danger="virtual_available &lt; 0" decoration-bf="1" groups="stock.group_stock_user" sum="Total Forecasted"/>
                 </field>
@@ -183,7 +182,6 @@
                         <field name="is_storable"/>
                         <field name="tracking" invisible="not is_storable" groups="stock.group_production_lot"/>
                     </div>
-                    <field name="show_qty_update_button" invisible="1"/>
                     <label for="qty_available" class="oe_inline" invisible="not is_storable" groups="stock.group_stock_user"/>
                     <div class="o_row" invisible="not is_storable" groups="stock.group_stock_user">
                         <a type="object" name="action_open_quants"
@@ -204,7 +202,6 @@
                     </div>
                 </xpath>
                 <xpath expr="//group[@name='group_lots_and_weight']" position="before">
-                    <field name="has_available_route_ids" invisible="1"/>
                     <group string="Operations" name="operations" invisible="not (has_available_route_ids or route_from_categ_ids)">
                         <label for="route_ids" invisible="not has_available_route_ids"/>
                         <div invisible="not has_available_route_ids">
@@ -316,9 +313,6 @@
                 <data>
                     <div name="button_box" position="inside">
                         <t groups="stock.group_stock_user">
-                            <field name="tracking" invisible="1"/>
-                            <field name="show_on_hand_qty_status_button" invisible="1"/>
-                            <field name="show_forecasted_qty_status_button" invisible="1"/>
                             <button type="object"
                                 name="action_product_forecast_report"
                                 invisible="not show_forecasted_qty_status_button"
@@ -433,9 +427,6 @@
                 <data>
                     <button name="action_open_documents" position="before">
                         <t groups="stock.group_stock_user">
-                            <field name="tracking" invisible="1"/>
-                            <field name="show_on_hand_qty_status_button" invisible="1"/>
-                            <field name="show_forecasted_qty_status_button" invisible="1"/>
                             <button type="object"
                                 name="action_product_tmpl_forecast_report"
                                 invisible="not show_forecasted_qty_status_button"
@@ -566,7 +557,6 @@
                     <header>
                         <button name="%(action_inventory_at_date)d" invisible="((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))" string="Inventory at Date" type="action" class="btn-primary ms-1" display="always"/>
                     </header>
-                    <field name="id" column_invisible="True"/>
                     <field name="display_name" string="Product"/>
                     <field name="categ_id" optional="hide"/>
                     <!-- <button name="%(action_view_inventory_tree)d" type="action" class="btn-link"
