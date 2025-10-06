@@ -47,6 +47,7 @@ Wizards provided by this module:
         'data/account_tax_report_data.xml',
         'data/l10n_be_sequence_data.xml',
         'data/menuitem_data.xml',
+        'data/test_tax_tags.xml',
     ],
     'demo': [
         'demo/demo_company.xml',

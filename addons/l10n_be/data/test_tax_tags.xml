@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <record id="test_account_codes_engine_hupo" model="account.report">
+        <field name="name">Test Hupo Account Codes</field>
+        <field name="root_report_id" ref="account_reports.profit_and_loss"/>
+        <field name="country_id" ref="base.be"/>
+        <field name="allow_foreign_vat" eval="True"/>
+        <field name="filter_unfold_all" eval="True"/>
+        <field name="filter_date_range" eval="True"/>
+        <field name="filter_analytic_groupby" eval="True"/>
+        <field name="filter_journals" eval="True"/>
+        <field name="availability_condition">country</field>
+        <field name="allow_account_audit_status_on_lines" eval="True"/>
+        <field name="column_ids">
+            <record id="test_account_codes_hupo_column" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="test_account_codes_hupo_line_1" model="account.report.line">
+                <field name="name">First Line (no groupby)</field>
+                <field name="code">account_codes_1</field>
+                <field name="expression_ids">
+                    <record id="test_account_codes_hupo_line_1_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">account_codes</field>
+                        <field name="formula">5</field>
+                    </record>
+                </field>
+            </record>
+            <record id="test_account_codes_hupo_line_2" model="account.report.line">
+                <field name="name">Second line (groupby accounts)</field>
+                <field name="code">account_codes_2</field>
+                <field name="groupby">account_id</field>
+                <field name="foldable">True</field>
+                <field name="expression_ids">
+                    <record id="test_account_codes_hupo_line_2_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">account_codes</field>
+                        <field name="formula">6</field>
+                    </record>
+                </field>
+            </record>
+            <record id="test_account_codes_hupo_line_3" model="account.report.line">
+                <field name="name">Third line (groupby accounts -> aml)</field>
+                <field name="code">account_codes_3</field>
+                <field name="groupby">account_id, partner_id</field>
+                <field name="foldable">True</field>
+                <field name="expression_ids">
+                    <record id="test_account_codes_hupo_line_3_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">account_codes</field>
+                        <field name="formula">7</field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+
+    <record id="test_tax_tag_hupo" model="account.report">
+        <field name="name">VAT Return Test Hupo</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.be"/>
+        <field name="allow_foreign_vat" eval="True"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="test_tax_tag_hupo_column" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="test_tax_tag_hupo_line_1_1" model="account.report.line">
+                <field name="name">First Line (no groupby)</field>
+                <field name="code">hupo_47</field>
+                <field name="expression_ids">
+                    <record id="test_tax_tag_hupo_line_1_1_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-47</field>
+                    </record>
+                </field>
+            </record>
+            <record id="test_tax_tag_hupo_line_1_2" model="account.report.line">
+                <field name="name">Second Line (groupby account)</field>
+                <field name="code">hupo_49</field>
+                <field name="groupby">account_id</field>
+                <field name="foldable">True</field>
+                <field name="expression_ids">
+                    <record id="test_tax_tag_hupo_line_1_2_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">49</field>
+                    </record>
+                </field>
+            </record>
+            <record id="test_tax_tag_hupo_line_1_3" model="account.report.line">
+                <field name="name">Third Line (groupby account)</field>
+                <field name="code">hupo_87</field>
+                <field name="groupby">account_id</field>
+                <field name="foldable">True</field>
+                <field name="expression_ids">
+                    <record id="test_tax_tag_hupo_line_1_3_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">87</field>
+                    </record>
+                </field>
+            </record>
+            <record id="test_tax_tag_hupo_line_1_4" model="account.report.line">
+                <field name="name">Fourth Line (groupby partner, aml)</field>
+                <field name="code">hupo_57</field>
+                <field name="groupby">partner_id, id</field>
+                <field name="foldable">True</field>
+                <field name="expression_ids">
+                    <record id="test_tax_tag_hupo_line_1_4_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">57</field>
+                    </record>
+                </field>
+            </record>
+            <record id="test_tax_tag_hupo_line_1_5" model="account.report.line">
+                <field name="name">5th line (positive 47 + groupby partner)</field>
+                <field name="groupby">partner_id</field>
+                <field name="code">hupo_47_pos</field>
+                <field name="expression_ids">
+                    <record id="test_tax_tag_hupo_line_1_5_expr_1" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">47</field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>
