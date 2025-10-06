@@ -24,7 +24,6 @@
         <field name="model">calendar.alarm</field>
         <field name="arch" type="xml">
             <list string="Calendar Alarm" sample="1">
-                <field name="name" column_invisible="True"/>
                 <field name="alarm_type"/>
                 <field name="duration"/>
                 <field name="interval"/>
@@ -40,7 +39,6 @@
                 <sheet>
                     <group>
                         <group name="left_details">
-                            <field name="name" invisible="1"/>
                             <field name="alarm_type"/>
                             <field name="mail_template_id" context="{'default_model': 'calendar.event'}"
                                    invisible="alarm_type != 'email'"
@@ -91,9 +89,7 @@
                 <field name="location" optional="show" readonly="recurrency"/>
                 <field name="duration" widget="float_time" readonly="1"/>
                 <field name="description" optional="hide" readonly="recurrency"/>
-                <field name="allday" column_invisible="True"/>
-                <field name="message_needaction" column_invisible="True"/>
-            </list>
+                </list>
         </field>
     </record>
 
@@ -117,8 +113,6 @@
                         </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    <field name="active" invisible="1"/>
-                    <field name="user_can_edit" invisible="1"/>
                     <field name="invalid_email_partner_ids" invisible="1"/> <!-- this field will be used in
                         many2many_attendees widget -->
                     <div class="oe_title mb-3">
@@ -133,8 +127,6 @@
                         <group>
                             <field name="start_date" widget="daterange" options="{'end_date_field': 'stop_date'}" invisible="not allday" required="allday" readonly="not user_can_edit"/>
                             <field name="start" widget="daterange" options="{'end_date_field': 'stop'}" invisible="allday" required="not allday" readonly="not user_can_edit"/>
-                            <field name="stop_date" invisible="1"/>
-                            <field name="stop" invisible="1" />
                             <field name="unavailable_partner_ids" invisible="1" /> <!-- this field will be used in many2many_attendees widget -->
                             <label for="duration" class="fw-bold text-900 opacity-100"/>
                             <div class="d-flex gap-2">
@@ -172,10 +164,7 @@
                                 </div>
                             </div>
                             <field name="res_id" string="Linked to" invisible="not res_id" readonly="1" />
-                            <field name="res_model" invisible="1"/>
-                            <field name="videocall_source" invisible="1"/>
-                            <field name="access_token" invisible="1" force_save="1"/>
-                        </group>
+                            </group>
                         <group>
                             <field name="current_status" class="o_calendar_form_status_selection_badge" string="Going?"
                                 widget="selection_badge" options="{'horizontal': true, 'size': 'sm'}"
@@ -186,7 +175,6 @@
                                 <field name="privacy" class="oe_inline me-2" readonly="not user_can_edit" nolabel="1" placeholder="User default"
                                     help="Set whether you're available for other simultaneous events and the privacy of this event to others. Manage your default privacy in your user preferences."/>
                             </div>
-                            <field name="should_show_status" invisible="1"/>
                             <div class="d-flex mb-2" colspan="2">
                                 <div>
                                     <span class="fw-medium o_form_label">
@@ -245,8 +233,6 @@
                                 </group>
                                 <group>
                                     <field name="alarm_ids" widget="many2many_tags" options="{'no_quick_create': True}" readonly="not user_can_edit"/>
-                                    <field name="recurrence_id" invisible="1" />
-                                    <field name="rrule_type" invisible="1" />
                                     <label for="recurrency" string="Recurrent"/>
                                     <div class="d-flex align-items-baseline gap-1">
                                         <field name="recurrency" widget="boolean_toggle" options="{'autosave': False}" class="w-auto" readonly="not user_can_edit"/>
@@ -260,8 +246,6 @@
                                     </div>
                                     <span class="fw-bold text-nowrap" invisible="rrule_type_ui not in ['weekly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'weekly')">Repeat on</span>
                                     <div invisible="rrule_type_ui not in ['weekly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'weekly')" ><widget name="calendar_week_days" readonly="not user_can_edit"/></div>
-                                    <field name="recurrence_id" invisible="1" />
-
                                     <label string="Day of Month" for="month_by" class="fw-bold text-900" style="width: fit-content;" invisible="rrule_type_ui not in ['monthly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'monthly')"/>
                                     <div class="d-flex gap-2" invisible="rrule_type_ui not in ['monthly', 'custom'] or (rrule_type_ui == 'custom' and rrule_type != 'monthly')">
                                         <field name="month_by" nolabel="1" class="oe_inline w-auto" required="rrule_type_ui == 'monthly' or rrule_type == 'monthly'"/>
@@ -348,7 +332,6 @@
                     keep the last computed duration in the front-end model and send it with "start"
                     when it changes-->
                     <!--field is also used for custom behavior in default_get, check before removing-->
-                    <field name="duration" invisible="1" force_save="1"/>
                     <field name="start" nolabel="1"
                         widget="daterange" options="{'end_date_field': 'stop'}"
                         placeholder="Dates" class="w-100 mb-0"
@@ -363,8 +346,7 @@
                         <field name="allday" class="mb-0" title="All Day" nolabel="1"/>
                         <span>All day</span>
                     </span>
-                    <field name="stop" invisible="1"/>
-                </div>
+                    </div>
                 <div class="d-flex" colspan="2">
                     <i class="fa fa-user mt-1 text-600" title="Participants"/>
                     <field name="partner_ids" nolabel="1"
@@ -380,10 +362,6 @@
                         class="w-100 mb-0"
                     />
                     <!--fields set via the fake front-end only actions must be force saved (see calendar_form)-->
-                    <field name="recurrence_update" invisible="1"/>
-                    <field name="access_token" force_save="1" invisible="1"/>
-                    <field name="videocall_location" force_save="1" invisible="1"/>
-                    <field name="videocall_source" force_save="1" invisible="1"/>
                     <button name="set_discuss_videocall_location" type="object" class="mx-1 btn-link text-nowrap"
                         invisible="videocall_location" context="{'recurrence_update': recurrence_update}">
                         <span class="fa fa-plus me-1"/>Video
@@ -420,17 +398,8 @@
                 quick_create="true"
                 quick_create_view_id="%(calendar.view_calendar_event_form_quick_create)d"
                 color="partner_ids">
-                <field name="attendees_count" invisible="1"/>
-                <field name="accepted_count" invisible="1"/>
-                <field name="declined_count" invisible="1"/>
-                <field name="user_can_edit" invisible="1"/>
-                <field name="is_highlighted" invisible="1"/>
-                <field name="privacy" invisible="1"/>
                 <field name="effective_privacy" invisible="1"/>
                 <!-- For recurrence update Dialog -->
-                <field name="recurrency" invisible="1"/>
-                <field name="recurrence_update" invisible="1"/>
-
                 <field name="location" invisible="not location" options="{'icon': 'fa fa-map-marker'}"/>
                 <field name="partner_ids" options="{'block': True, 'icon': 'fa fa-users'}"
                        filters="1" widget="many2manyattendeeexpandable" write_model="calendar.filters"
