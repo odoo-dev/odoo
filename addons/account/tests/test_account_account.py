@@ -3,8 +3,13 @@ from odoo.addons.account.tests.common import TestAccountMergeCommon
 from odoo.tests import Form, tagged, new_test_user
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import mute_logger
+
+import logging
 import psycopg2
 from freezegun import freeze_time
+
+_logger = logging.getLogger(__name__)
+
 
 @tagged('post_install', '-at_install')
 class TestAccountAccount(TestAccountMergeCommon):
@@ -15,6 +20,11 @@ class TestAccountAccount(TestAccountMergeCommon):
 
         cls.company_data_2 = cls.setup_other_company()
         cls.other_currency = cls.setup_other_currency('EUR')
+
+    def test_aaa_get_postgres_version(self):
+        self.env.cr.execute("SELECT version()")
+        version = self.env.cr.fetchone()[0]
+        _logger.warning("PostgreSQL version: %s", version)
 
     def test_shared_accounts(self):
         ''' Test that creating an account with a given company in company_ids sets the code for that company.
