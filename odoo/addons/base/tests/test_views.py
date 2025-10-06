@@ -4831,8 +4831,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'account_winbooks_import',
             'analytic',
             'appointment',
-            'approvals',
-            'approvals_purchase_stock',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
