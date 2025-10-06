@@ -4795,11 +4795,6 @@ class TestRenderAllViews(TransactionCaseWithUserDemo):
 @common.tagged('post_install', '-at_install', 'post_install_l10n')
 class TestInvisibleField(TransactionCaseWithUserDemo):
     def test_uncommented_invisible_field(self):
-        # NEVER add new name in this list ! The new addons must add comment for all always invisible field.
-        only_log_modules = (
-        )
-
-        modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
         module_log_views = defaultdict(list)
         module_error_views = defaultdict(lambda: defaultdict(list))
         uncommented_regexp = r'''(<field [^>]*invisible=['"](True|1)['"][^>]*>)[\s\t\n ]*(.*)'''
@@ -4809,12 +4804,7 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             view_name = view.model_data_id.name
             for field, _val, comment in re.findall(uncommented_regexp, view.arch_db):
                 if (not comment or not comment.startswith('<!--')):
-                    if module_name in only_log_modules:
-                        modules_without_error.discard(module_name)
-                        module_log_views[module_name].append(view_name)
-                        break
-                    else:
-                        module_error_views[module_name][view_name].append(field)
+                    module_log_views[module_name].append(view_name)
 
         msg = 'Please indicate why the always invisible fields are present in the view, or remove the field tag.'
 
@@ -4830,9 +4820,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
                     error_lines.extend([f"{' ' * 3}View: {view}\n{' ' * 6}Fields:"])
                     error_lines.extend(["\n".join(f"{' ' * 9}{field}" for field in fields)])
             _logger.error("%s\n%s", msg, "\n".join(error_lines))
-
-        if modules_without_error:
-            _logger.error('Please remove this module names from the white list of this current test: %r', sorted(modules_without_error))
 
 class CompRegexTest(common.TransactionCase):
     def test_comp_regex(self):
