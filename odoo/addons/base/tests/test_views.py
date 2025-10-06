@@ -5174,7 +5174,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'website_delivery_sendcloud',
             'website_event',
             'website_event_booth_exhibitor',
-            'website_event_exhibitor',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
