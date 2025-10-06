@@ -38,7 +38,6 @@
         <field name="model">lunch.product</field>
         <field name="arch" type="xml">
             <list string="Products List">
-                <field name="currency_id" column_invisible="True"/>
                 <field name="name"/>
                 <field name="category_id"/>
                 <field name="supplier_id"/>
@@ -67,8 +66,6 @@
         <field name="model">lunch.product</field>
         <field name="arch" type="xml">
             <form string="Products Form">
-                <field name="company_id" invisible="1"/>
-                <field name="currency_id" invisible="1"/>
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
@@ -80,7 +77,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="active" invisible="1"/>
                             <field name='category_id'/>
                             <field name='supplier_id'/>
                             <field name='price' widget="monetary"/>
