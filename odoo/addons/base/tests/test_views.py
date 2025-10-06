@@ -5160,7 +5160,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'survey',
             'test_testing_utilities',
             'timesheet_grid',
-            'uom',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
