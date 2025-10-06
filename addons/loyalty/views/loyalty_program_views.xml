@@ -32,8 +32,6 @@
                             </div>
                         </button>
                     </div>
-                    <field name="active" invisible="1"/>
-                    <field name="applies_on" invisible="1"/>
                     <div class="oe_title">
                         <label for="name" string="Program Name"/>
                         <h1>
@@ -105,18 +103,14 @@
                             <field name="payment_program_discount_product_id" groups="base.group_no_one" invisible="program_type not in ('gift_card', 'ewallet')"/>
                             <field name="mail_template_id" invisible="program_type not in ('gift_card', 'ewallet')"/>
                             <field name="currency_id"/>
-                            <field name="currency_symbol" invisible="1"/>
                             <field name="pricelist_ids"
                                    widget="many2many_tags"
                                    invisible="program_type in ('gift_card', 'ewallet')"
                                    groups="product.group_product_pricelist"/>
                             <field name="portal_point_name" invisible="program_type in ('loyalty', 'gift_card', 'ewallet')" string="Points Unit" groups="base.group_no_one"/>
                             <field name="portal_point_name" invisible="program_type in ('gift_card', 'ewallet') or program_type != 'loyalty'" string="Points Unit"/>
-                            <field name="portal_visible" invisible="1"/>
                             <field name="portal_visible" groups="base.group_no_one" string="Show points Unit" invisible="program_type in ('gift_card', 'ewallet')"/>
-                            <field name="trigger" invisible="1"/>
                             <field name="trigger" string="Program trigger" groups="base.group_no_one" widget="selection" readonly="1" force_save="1"/>
-                            <field name="applies_on" invisible="1"/>
                             <field name="applies_on" string="Use points on" groups="base.group_no_one" widget="radio" force_save="1" readonly="program_type != 'loyalty'"/>
                         </group>
                         <group>
@@ -130,9 +124,7 @@
                                     <span class="text-muted">(<field name="total_order_count" class="oe_inline" readonly="1"/> used)</span>
                                 </span>
                             </span>
-                            <field name="company_id" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
-                            <field name="available_on" invisible="1"/>
                             <label class="o_form_label" for="available_on" string="Available On" invisible="1"/>
                             <div id="o_loyalty_program_availabilities" invisible="1"/>
                             <field name="portal_point_name" invisible="program_type not in ('gift_card', 'ewallet')" string="Displayed as" groups="base.group_no_one"/>

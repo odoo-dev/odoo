@@ -5039,7 +5039,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'l10n_us_hr_payroll',
             'l10n_us_hr_payroll_adp',
             'l10n_uy_edi',
-            'loyalty',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))

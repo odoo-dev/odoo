@@ -12,8 +12,7 @@
                             <field name="card_id"/>
                             <field name="description"/>
                             <field name="order_id" invisible="not order_id"/>
-                            <field name="order_model" invisible="True"/>
-                        </group>
+                            </group>
                         <group>
                             <field name="issued"/>
                             <field name="used"/>
