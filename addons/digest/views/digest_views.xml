@@ -18,7 +18,6 @@
         <field name="model">digest.digest</field>
         <field name="arch" type="xml">
             <form string="KPI Digest">
-                <field name="is_subscribed" invisible="1"/>
                 <header>
                     <button type="object" name="action_send_manual" string="Send Now"
                         class="oe_highlight"
@@ -40,8 +39,7 @@
                     <group>
                         <group>
                             <field name="periodicity" widget="radio" options="{'horizontal': true}"/>
-                            <field name="company_id" options="{'no_create': True}" invisible="1"/>
-                        </group>
+                            </group>
                         <group>
                             <field name="next_run_date" groups="base.group_system"/>
                         </group>
