@@ -8,7 +8,6 @@
             <xpath expr="//page[@name='variants']" position="inside">
                 <group name="product_mode" invisible="not has_configurable_attributes">
                     <group string="Sales Variant Selection">
-                        <field name="has_configurable_attributes" invisible="1"/>
                         <field name="product_add_mode" widget="radio" nolabel="1" colspan="2"/>
                     </group>
                 </group>
@@ -22,8 +21,7 @@
         <field name="inherit_id" ref="sale.product_template_view_form"/>
         <field name="arch" type="xml">
             <field name="optional_product_ids" position="before">
-                <field name="product_add_mode" widget="radio" invisible="1"/>
-            </field>
+                </field>
             <field name="optional_product_ids" position="attributes">
                 <attribute name="invisible">product_add_mode == 'grid'</attribute>
             </field>
