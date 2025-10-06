@@ -5144,7 +5144,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'social_push_notifications',
             'social_twitter',
             'social_youtube',
-            'spreadsheet_dashboard_edition',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
