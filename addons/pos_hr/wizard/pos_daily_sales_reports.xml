@@ -15,8 +15,7 @@
                     <field name="add_report_per_employee" readonly="pos_session_id and not employee_ids"/>
                     <label for="add_report_per_employee"/>
                 </div>
-                <field name="employee_ids" invisible="True"/>
-            </xpath>
+                </xpath>
         </field>
     </record>
 </odoo>

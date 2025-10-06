@@ -25,15 +25,12 @@
         <field name="inherit_id" ref="point_of_sale.view_pos_config_kanban" />
         <field name="arch" type="xml">
             <xpath expr="//div[@name='card_left']" position="inside">
-                <field name="self_ordering_mode" invisible="1" />
-                 <button invisible="not self_ordering_mode == 'mobile' and not self_ordering_mode == 'consultation'"
+                <button invisible="not self_ordering_mode == 'mobile' and not self_ordering_mode == 'consultation'"
                          class="btn btn-secondary" name="preview_self_order_app" type="object">
                         Mobile Menu
                  </button>
             </xpath>
             <xpath expr="//div[@name='card_left']" position="after">
-                <field name="self_ordering_mode" invisible="1" />
-                <field name="current_session_id" invisible="1" />
                 <div class="col-6 d-flex flex-wrap align-items-center gap-2" invisible="not self_ordering_mode == 'kiosk'">
                     <button t-if="!record.current_session_id.raw_value" class="btn btn-primary pos_open_session_btn" name="action_open_wizard" type="object">
                         Start Kiosk
@@ -47,7 +44,6 @@
                 </div>
             </xpath>
             <xpath expr="//div[@name='card_left']" position="attributes">
-                <field name="self_ordering_mode" invisible="1" />
                 <attribute name="invisible">self_ordering_mode == 'kiosk'</attribute>
             </xpath>
         </field>
