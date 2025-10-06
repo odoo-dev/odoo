@@ -4839,7 +4839,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'base_address_extended',
             'base_automation',
             'base_geolocalize',
-            'base_import_module',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))
