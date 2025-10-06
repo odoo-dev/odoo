@@ -33,7 +33,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="active" invisible="1"/>
                             <field name="vehicle_type"/>
                             <field name="category_id" options="{'no_create_edit': True}"/>
                         </group>
