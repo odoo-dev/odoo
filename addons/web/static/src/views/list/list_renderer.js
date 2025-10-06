@@ -288,10 +288,11 @@ export class ListRenderer extends Component {
                     const column = this.cellToFocus.column;
                     const forward = this.cellToFocus.forward;
                     this.focusCell(column, forward);
-                } else if (this.lastEditedCell) {
-                    this.focusCell(this.lastEditedCell.column, true);
                 } else {
-                    this.focusCell(this.columns[0]);
+                    const column = this.lastEditedCell?.column || column[0];
+                    if (column.widget !== "daterange" || !this.editedRecord.data[column.name]) {
+                        this.focusCell(column, true);
+                    }
                 }
             }
             this.cellToFocus = null;
@@ -2129,10 +2130,6 @@ export class ListRenderer extends Component {
             return;
         }
         if (this.activeElement !== this.uiService.activeElement) {
-            return;
-        }
-        // DateTime picker
-        if (target.closest(".o_datetime_picker")) {
             return;
         }
         // Save, Discard
