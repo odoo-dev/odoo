@@ -21,13 +21,10 @@
                 </button>
             </xpath>
             <xpath expr="//field[@name='currency_id']" position="after">
-                <field name="is_shipped" invisible="1"/>
-            </xpath>
+                </xpath>
             <xpath expr="//field[@name='order_line']/list//field[@name='date_planned']" position="after">
-                <field name="move_dest_ids" column_invisible="True"/>
-            </xpath>
+                </xpath>
             <xpath expr="//page/field[@name='order_line']/list/field[@name='product_qty']" position="after">
-                <field name="forecasted_issue" column_invisible="True"/>
                 <button type="object" name="action_product_forecast_report" title="Forecast Report" icon="fa-area-chart" invisible="not id or not forecasted_issue or not is_storable" class="text-danger"/>
                 <button type="object" name="action_product_forecast_report" title="Forecast Report" icon="fa-area-chart" invisible="not id or forecasted_issue or not is_storable"/>
             </xpath>
@@ -65,7 +62,6 @@
                 <attribute name="readonly">product_type == 'consu'</attribute>
             </xpath>
             <xpath expr="//page[@name='purchase_delivery_invoice']/group/group" position="inside">
-                <field name="default_location_dest_id_usage" invisible="1"/>
                 <field name="incoterm_id" readonly="locked"/>
                 <field name="incoterm_location"  readonly="locked"/>
             </xpath>
@@ -94,7 +90,6 @@
         <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
         <field name="arch" type="xml">
             <field name="invoice_status" position="before">
-                <field name="effective_date" column_invisible="True"/>
                 <field name="receipt_status" optional="hide" widget="badge"
                 decoration-success="receipt_status=='full'"
                 decoration-danger="date_planned and (date_planned &lt; effective_date or date_planned &lt; datetime.datetime.combine(datetime.date.today(), datetime.time(0,0,0)).to_utc().strftime('%Y-%m-%d %H:%M:%S') and receipt_status!='full' and effective_date &lt;= date_planned)"

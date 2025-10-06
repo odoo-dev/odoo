@@ -13,8 +13,7 @@
                     <attribute name="editable">bottom</attribute>
                 </xpath>
                 <xpath expr="//list" position="inside">
-                    <field name="company_id" column_invisible="True"/>
-                </xpath>
+                    </xpath>
                 <xpath expr="//field[@name='company_id']" position="attributes">
                     <attribute name="readonly">0</attribute>
                     <attribute name="optional">hide</attribute>

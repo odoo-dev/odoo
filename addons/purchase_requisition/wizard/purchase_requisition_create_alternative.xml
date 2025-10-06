@@ -7,7 +7,6 @@
             <field name="arch" type="xml">
                 <form string="Create Alternative">
                     <group>
-                        <field name="origin_po_id" invisible="1"/>
                         <group>
                             <field name="partner_ids" widget="many2many_tags" />
                             <field name="copy_products"/>
