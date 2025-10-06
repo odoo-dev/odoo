@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <search string="Search Update">
                 <field name="name"/>
-                <field name="project_id" invisible="1"/>
                 <field name="user_id"/>
                 <field name="description"/>
                 <field name="status"/>
@@ -35,8 +34,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="project_id" invisible="1"/>
-                            <field name="color" invisible="1"/>
                             <field name="status" widget="status_with_color"/>
                             <field name="progress" widget="progressbar" options="{'editable': true}"/>
                         </group>
@@ -74,7 +71,6 @@
                         </div>
                         <div class="flex-grow-1 flex-shrink-0 w-50 w-md-auto px-2 px-md-0">
                             <span>Status</span>
-                            <field name="color" invisible="1"/>
                             <field name="status" class="fw-bolder" readonly="1" widget="status_with_color"/>
                         </div>
                         <div class="flex-grow-1 flex-shrink-0 w-50 w-md-auto px-2 px-md-0">
@@ -108,7 +104,6 @@
                 <field name="user_id" widget="many2one_avatar_user" class="fw-bolder" optional="show"/>
                 <field name="date" optional="show"/>
                 <field name="progress" string="Progress" widget="progressbar" optional="show"/>
-                <field name="color" column_invisible="True"/>
                 <field name="status" widget="status_with_color"/>
             </list>
         </field>

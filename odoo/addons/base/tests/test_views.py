@@ -5090,11 +5090,6 @@ class TestInvisibleField(TransactionCaseWithUserDemo):
             'product_email_template',
             'product_expiry',
             'product_margin',
-            'project',
-            'project_enterprise',
-            'project_timesheet_forecast',
-            'project_timesheet_holidays',
-            'project_todo',
         )
 
         modules_without_error = set(self.env['ir.module.module'].search([('state', '=', 'intalled'), ('name', 'in', only_log_modules)]).mapped('name'))

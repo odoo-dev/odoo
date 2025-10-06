@@ -83,14 +83,12 @@
             <form string="To-do"
                   class="o_todo_form_view"
                   js_class="todo_form">
-                <field name="html_field_history_metadata" invisible="1"/>
                 <header>
                     <field name="personal_stage_type_id"
                            domain="[('user_id','=',uid)]"
                            widget="statusbar"
                            options="{'clickable': '1', 'fold_field': 'fold'}"/>
-                    <field name="active" invisible="1"/>
-                </header>
+                    </header>
                 <sheet class="o_todo_form_sheet_bg">
                     <widget name="web_ribbon" class="todo_archived" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="d-flex justify-content-between align-items-center">
@@ -168,7 +166,6 @@
                         <!-- company_id field is used in the domain filtering project_id in
                              hr_timesheet. Creating a bridge module just to add that field is
                              overkill so it is added here. -->
-                        <field name="company_id" invisible="1"/>
                         <field name="project_id"
                                required="1"
                                default_focus="1"/>

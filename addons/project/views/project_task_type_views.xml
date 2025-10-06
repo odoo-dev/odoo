@@ -22,14 +22,12 @@
             <field name="model">project.task.type</field>
             <field name="arch" type="xml">
                 <form string="Task Stage" delete="0">
-                    <field name="active" invisible="1" />
                     <sheet>
                         <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active" />
                         <group>
                             <group>
                                 <field name="name" placeholder="e.g. To Do"/>
                                 <field name="fold"/>
-                                <field name="user_id" invisible="True"/>
                                 <field name="auto_validation_state" invisible="not rating_template_id"/>
                                 <field name="project_ids" widget="many2many_tags" options="{'color_field': 'color', 'edit_tags': True}" invisible="user_id" required="not user_id"/>
                                 <field name="rotting_threshold_days"/>

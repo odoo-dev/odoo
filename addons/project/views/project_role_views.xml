@@ -20,7 +20,6 @@
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <group>
-                        <field name="active" invisible="1"/>
                         <field name="name"/>
                         <field name="color" widget="color_picker"/>
                     </group>

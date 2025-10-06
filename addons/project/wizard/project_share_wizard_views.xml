@@ -6,8 +6,6 @@
         <field name="model">project.share.wizard</field>
         <field name="arch" type="xml">
             <form string="Share Project">
-                <field name="res_model" invisible="1"/>
-                <field name="res_id" invisible="1"/>
                 <group>
                     <field name="share_link" widget="CopyClipboardChar"/>
                 </group>

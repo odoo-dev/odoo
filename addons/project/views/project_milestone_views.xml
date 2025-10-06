@@ -30,7 +30,6 @@
                     </div>
                     <group>
                         <group name="main_details">
-                            <field name="project_id" invisible="1"/>
                             <field name="name" placeholder="e.g: Product Launch"/>
                             <field name="deadline"/>
                             <field name="is_reached"/>
@@ -49,7 +48,6 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="deadline" optional="show"/>
-                <field name="project_id" column_invisible="1"/>
                 <field name="is_reached" optional="show"/>
                 <button name="action_view_tasks"
                         type="object"
