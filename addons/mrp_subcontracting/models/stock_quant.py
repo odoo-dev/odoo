@@ -15,3 +15,9 @@ class StockQuant(models.Model):
             raise UserError(_('Operation not supported'))
 
         return [('location_id.is_subcontracting_location', operator, value)]
+
+    # def _get_quants_by_products_locations(self, product_ids, location_ids, extra_domain=False):
+    #     if not extra_domain:
+    #         extra_domain = []
+    #     extra_domain.append(('location_id.is_subcontracting_location', '=', False))
+    #     return super()._get_quants_by_products_locations(product_ids, location_ids, extra_domain=extra_domain)

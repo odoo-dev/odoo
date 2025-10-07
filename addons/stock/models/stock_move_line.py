@@ -682,7 +682,7 @@ class StockMoveLine(models.Model):
         ml_ids_to_ignore = OrderedSet()
         quants_cache = self.env['stock.quant']._get_quants_by_products_locations(
             mls_todo.product_id, mls_todo.location_id | mls_todo.location_dest_id,
-            extra_domain=['|', ('lot_id', 'in', mls_todo.lot_id.ids), ('lot_id', '=', False)])
+            extra_domain=self._get_extra_domain(mls_todo))
 
         for ml in mls_todo.with_context(quants_cache=quants_cache):
             # if this move line is force assigned, unreserve elsewhere if needed
@@ -699,6 +699,9 @@ class StockMoveLine(models.Model):
         mls_todo.write({
             'date': fields.Datetime.now(),
         })
+
+    def _get_extra_domain(self, mls):
+        return ['|', ('lot_id', 'in', mls.lot_id.ids), ('lot_id', '=', False)]
 
     def _synchronize_quant(self, quantity, location, action="available", in_date=False, **quants_value):
         """ quantity should be express in product's UoM"""

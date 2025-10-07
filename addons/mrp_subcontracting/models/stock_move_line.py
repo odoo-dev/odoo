@@ -27,3 +27,12 @@ class StockMoveLine(models.Model):
                 if subcontracted_production:
                     subcontracted_production.lot_producing_id = vals['lot_id']
         return super().write(vals)
+
+    def _get_extra_domain(self, mls):
+        if mls:
+            locations = (mls.location_id | mls.location_dest_id)
+            subcontracting_locations = locations.filtered(lambda l: l.is_subcontracting_location)
+            lots = mls.mapped('lot_id')
+            if subcontracting_locations and lots:
+                return [('lot_id', 'in', lots.ids)]
+        return super()._get_extra_domain(mls)
