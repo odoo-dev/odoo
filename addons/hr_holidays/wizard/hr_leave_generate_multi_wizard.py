@@ -1,11 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from pytz import UTC, timezone
 
 from odoo import api, fields, models
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError
 from odoo.fields import Domain
 
 
@@ -72,6 +72,17 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
     def action_generate_time_off(self):
         self.ensure_one()
         employees = self._get_employees_from_allocation_mode()
+        if not employees:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': 'warning',
+                    'sticky': False,
+                    'title': self.env._('No Employees Found'),
+                    'message': self.env._('No employees found for the selected criteria.'),
+                },
+            }
 
         tz = timezone(self.company_id.resource_calendar_id.tz or self.env.user.tz or 'UTC')
         date_from_tz = tz.localize(datetime.combine(self.date_from, datetime.min.time())).astimezone(UTC).replace(tzinfo=None)
@@ -87,16 +98,15 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
             ('state', 'not in', ['cancel', 'refuse']),
             ('employee_id', 'in', employees.ids)])
 
+        employees_with_blocking_conflicts = self.env['hr.employee']
+        allowed_conflicting_leaves = self.env['hr.leave']
         if conflicting_leaves:
-            # YTI: More complex use cases could be managed later
-            invalid_time_off = conflicting_leaves.filtered(lambda leave: leave.leave_type_request_unit == 'hour')
-            if invalid_time_off:
-                raise UserError(self.env._('Some employees already have time off requests in hours that overlap with the selected period, Odoo cannot automatically adjust or split hourly leaves during batch generation. Conflicting time off:\n%s', '\n'.join(f"- {l.display_name}" for l in invalid_time_off)))
-            one_day_leaves = conflicting_leaves.filtered(lambda leave: leave.request_date_from == leave.request_date_to)
-            one_day_leaves.action_refuse()
-            (conflicting_leaves - one_day_leaves)._split_leaves(self.date_from, self.date_to + timedelta(days=1))
-
-        vals_list = self._prepare_employees_holiday_values(employees, date_from_tz, date_to_tz)
+            allowed_conflicting_leaves = conflicting_leaves.filtered(lambda leave: leave.holiday_status_id.allow_request_on_top)
+            blocking_leaves = conflicting_leaves - allowed_conflicting_leaves
+            if blocking_leaves:
+                employees_with_blocking_conflicts = blocking_leaves.employee_id
+        employees_to_process = employees - employees_with_blocking_conflicts
+        vals_list = self._prepare_employees_holiday_values(employees_to_process, date_from_tz, date_to_tz)
         leaves = self.env['hr.leave'].with_context(
             tracking_disable=True,
             mail_activity_automation_skip=True,
@@ -109,16 +119,70 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
             leave_compute_date_from_to=True,
         ).create(vals_list)
         leaves._validate_leave_request()
+        created_on_top = bool(leaves.employee_id & allowed_conflicting_leaves.employee_id)
+
+        notify_type = notify_title = notify_message = None
+        next_action = {'type': 'ir.actions.act_window_close'}
+        if employees_with_blocking_conflicts and not leaves:
+            notify_type = 'danger'
+            notify_title = self.env._('Time Off Generation Failed')
+            notify_message = self.env._(
+                'No time off requests were created. %(failure_count)s employee(s) have overlapping time off that does not allow requests on top: %(employees)s',
+                failure_count=len(employees_with_blocking_conflicts),
+                employees=', '.join(employees_with_blocking_conflicts.mapped('name')),
+            )
+        elif employees_with_blocking_conflicts:
+            notify_type = 'warning'
+            notify_title = self.env._('Time Off Partially Generated')
+            if created_on_top:
+                notify_message = self.env._(
+                    '%(success_count)s time off request(s) created successfully, including overlapping requests where existing time off allows requests on top. %(failure_count)s employee(s) skipped due to overlapping time off that does not allow requests on top: %(employees)s',
+                    success_count=len(leaves),
+                    failure_count=len(employees_with_blocking_conflicts),
+                    employees=', '.join(employees_with_blocking_conflicts.mapped('name')),
+                )
+            else:
+                notify_message = self.env._(
+                    '%(success_count)s time off request(s) created successfully. %(failure_count)s employee(s) skipped due to overlapping time off that does not allow requests on top: %(employees)s',
+                    success_count=len(leaves),
+                    failure_count=len(employees_with_blocking_conflicts),
+                    employees=', '.join(employees_with_blocking_conflicts.mapped('name')),
+                )
+        elif leaves:
+            notify_type = 'success'
+            notify_title = self.env._('Time Off Generated')
+            next_action = {
+                'type': 'ir.actions.act_window',
+                'name': self.env._('Generated Time Off'),
+                'views': [
+                    [self.env.ref('hr_holidays.hr_leave_view_tree').id, "list"],
+                    [self.env.ref('hr_holidays.hr_leave_view_form_manager').id, "form"]
+                ],
+                'view_mode': 'list',
+                'res_model': 'hr.leave',
+                'domain': [('id', 'in', leaves.ids)],
+                'context': {'active_id': False},
+            }
+            if created_on_top:
+                notify_message = self.env._(
+                    '%(success_count)s time off request(s) created successfully, including overlapping requests where existing time off allows requests on top.',
+                    success_count=len(leaves),
+                )
+            else:
+                notify_message = self.env._(
+                    '%(success_count)s time off request(s) created successfully.',
+                    success_count=len(leaves),
+                )
 
         return {
-            'type': 'ir.actions.act_window',
-            'name': self.env._('Generated Time Off'),
-            "views": [[self.env.ref('hr_holidays.hr_leave_view_tree').id, "list"], [self.env.ref('hr_holidays.hr_leave_view_form_manager').id, "form"]],
-            'view_mode': 'list',
-            'res_model': 'hr.leave',
-            'domain': [('id', 'in', leaves.ids)],
-            'context': {
-                'active_id': False,
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': notify_type,
+                'sticky': False,
+                'title': notify_title,
+                'message': notify_message,
+                'next': next_action,
             },
         }
 
