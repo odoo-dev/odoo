@@ -247,7 +247,10 @@ export class Many2One extends Component {
 
     async openRecord(mode) {
         if (this.props.openRecordAction) {
-            return this.props.openRecordAction(mode);
+            const result = await this.props.openRecordAction(mode);
+            if (result !== false) {
+                return;
+            }
         }
 
         switch (mode) {
