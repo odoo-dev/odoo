@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="account.Many2OneBank" t-inherit="web.Many2One">
-        <xpath expr="//t[@t-if='props.readonly']" position="before">
-            <t t-if="this.props.value.id">
-                <i t-if="this.props.value.allow_out_payment" class="me-1 fa fa-shield text-success align-self-center" title="Trusted"/>
+    <t t-name="account.Many2OneBankField">
+        <t t-set="value" t-value="this.props.record.data[this.props.name]"/>
+        <div class="d-flex align-items-center">
+            <t t-if="value !== false">
+                <i t-if="value.allow_out_payment" class="me-1 fa fa-shield text-success align-self-center" title="Trusted"/>
                 <i t-else="" class="me-1 fa fa-exclamation-circle text-danger align-self-center" title="Untrusted"/>
             </t>
-        </xpath>
+            <Many2One t-props="m2oProps">
+                <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                    <i t-if="autoCompleteItemScope.record.allow_out_payment" class="me-1 fa fa-shield text-success" title="Trusted"/>
+                    <i t-else="" class="me-1 fa fa-exclamation-circle text-danger" title="Untrusted"/>
+                    <span t-out="autoCompleteItemScope.label"/>
+                </t>
+            </Many2One>
+        </div>
     </t>
 </templates>
