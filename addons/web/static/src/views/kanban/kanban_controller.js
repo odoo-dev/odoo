@@ -485,13 +485,13 @@ export class KanbanController extends Component {
     }
 
     onPageChangeScroll() {
-        if (this.rootRef && this.rootRef.el) {
-            if (this.env.isSmall) {
-                this.rootRef.el.scrollTop = 0;
-            } else {
-                this.rootRef.el.querySelector(".o_content").scrollTop = 0;
-            }
-        }
+        // if (this.rootRef && this.rootRef.el) {
+        //     if (this.env.isSmall) {
+        //         this.rootRef.el.scrollTop = 0;
+        //     } else {
+        //         this.rootRef.el.querySelector(".o_content").scrollTop = 0;
+        //     }
+        // }
     }
 
     async beforeExecuteActionButton(clickParams) {}
