@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <template id="inherited_navbar_hackathon" name="Hackathon Navbar" inherit_id="website_event.navbar">
+            <xpath expr="//ul[@class='breadcrumb p-0 m-0']/li[1]" position="replace">
+                <li class="breadcrumb-item" t-if="event.header_visible and is_hackathon_page">
+                    <a href="/my/hackathons" title="Back to Hackathons">Hackathons</a>
+                </li>
+                <li class="breadcrumb-item" t-if="event.header_visible and not is_hackathon_page">
+                    <a href="/event" title="Back to Events">All Events</a>
+                </li>
+            </xpath>
+        </template>
+    </data>
+</odoo>
