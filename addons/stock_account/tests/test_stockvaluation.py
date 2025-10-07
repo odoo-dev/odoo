@@ -54,7 +54,6 @@ def _create_accounting_data(env):
     return stock_input_account, stock_output_account, stock_valuation_account, expense_account, income_account, stock_journal
 
 
-@skip('Temporary to fast merge new valuation')
 class TestStockValuationBase(TransactionCase):
     @classmethod
     def setUpClass(cls):
@@ -155,7 +154,6 @@ class TestStockValuationBase(TransactionCase):
         return out_move.with_context(svl=True)
 
 
-@skip('Temporary to fast merge new valuation')
 class TestStockValuation(TestStockValuationBase):
     def test_realtime(self):
         """ Stock moves update stock value with product x cost price,
