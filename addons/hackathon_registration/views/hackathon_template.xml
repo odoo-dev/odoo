@@ -48,7 +48,7 @@
                             <t t-foreach="my_hackathons" t-as="hackathon">
                                 <tr>
                                     <td style="border: none;">
-                                        <a t-att-href="'#'" style="color: #007bff; font-weight: 500;">
+                                        <a t-att-href="'/hackathon/details/%s' % hackathon.id" style="color: #007bff; font-weight: 500;">
                                             <t t-esc="hackathon.event_id.name or ''"/>
                                         </a>
                                     </td>

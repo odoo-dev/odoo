@@ -9,7 +9,7 @@ from odoo import api, fields, models, Command
 class MyHackathon(http.Controller):
 
     @http.route(['/my/hackathons',
-                 ], type='http', auth='user', website=True, methods=['GET', 'POST'])
+                 ], type='http', auth='user', website=True)
     def my_hackathons(self):
         """Portal page showing user's hackathons and upcoming events"""
         user = request.env.user
@@ -19,9 +19,18 @@ class MyHackathon(http.Controller):
         new_state = self.env.ref('event.event_stage_new')
         announced_state = self.env.ref('event.event_stage_announced')
         upcoming_hackathons = request.env['event.event'].sudo().search([
-            ('stage_id', 'in', [new_state.id, announced_state.id])
+            ('stage_id', 'in', [new_state.id, announced_state.id]), ('is_published', '=', True)
         ])
         return request.render('hackathon_registration.my_hackathons_page', {
             'my_hackathons': my_hackathons,
             'upcoming_hackathons': upcoming_hackathons,
         })
+
+    @http.route(['/hackathon/details/<int:hackathon_id>',
+                 ], type='http', auth='user', website=True)
+    def hackathon_details(self, hackathon_id):
+        event_registration = request.env['event.registration'].sudo().browse(hackathon_id)
+        values = {
+            'event': event_registration.event_id,
+        }
+        return request.render('hackathon_registration.hackathon_event_details_page_template', values)
