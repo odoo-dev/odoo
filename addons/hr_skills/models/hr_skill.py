@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-
+from odoo.exceptions import ValidationError
 
 class HrSkill(models.Model):
     _name = 'hr.skill'
@@ -21,3 +21,9 @@ class HrSkill(models.Model):
             return super()._compute_display_name()
         for record in self:
             record.display_name = f"{record.name} ({record.skill_type_id.name})"
+
+    def unlink(self):
+        if len(self.skill_type_id.skill_ids) < 2:
+            raise ValidationError(
+                _("The following skill type must contain at least one skill: %s", self.skill_type_id.name))
+        return super().unlink()
