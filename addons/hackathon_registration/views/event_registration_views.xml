@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="event_registration_view_form" model="ir.ui.view">
+        <field name="name">event.registration.form.inherit.event.hackathon</field>
+        <field name="model">event.registration</field>
+        <field name="inherit_id" ref="event.view_event_registration_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="replace">
+                <field name="stage_ids" invisible="1"/>
+                <field name="stage_id" widget="statusbar" options="{'clickable': '1'}" domain="[('id', 'in', stage_ids)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_event_registration_ticket_tree" model="ir.ui.view">
+        <field name="name">event.registration.list.inherit.event.hackathon</field>
+        <field name="model">event.registration</field>
+        <field name="inherit_id" ref="event.view_event_registration_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="replace">
+                <field name="stage_id" widget="badge"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

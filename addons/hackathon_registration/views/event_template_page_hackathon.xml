@@ -2,15 +2,18 @@
 <odoo>
 
 
-    <!-- <template id="event_details" name="Event Header">
+    <template id="event_details" name="Event Header">
         <t t-call="website_event.layout">
+
+            <t t-call="website_event.event_details" t-call-context="{'event': event}"/>
+
             <div class="h-100" name="event" itemscope="itemscope" itemtype="http://schema.org/Event">
-                <meta itemprop="startDate" t-attf-content="{{event.event_begin_date}}Z"/>
-                <meta itemprop="endDate" t-attf-content="{{event.event_end_date}}Z"/>
+                <meta itemprop="startDate" t-attf-content="{{event.date_begin}}Z"/>
+                <meta itemprop="endDate" t-attf-content="{{event.date_end}}Z"/>
                 <t t-out="0"/>
             </div>
         </t>
-    </template> -->
+    </template>
 
     <!-- Event - Description -->
     <template id="hackathon_event_details_page_template" name="Event Description">
@@ -26,6 +29,7 @@
         <t t-set="opt_event_organizer_block" t-value="True"/>
         <t t-set="opt_event_share_block" t-value="True"/>
         <t t-set="edition_cover_only" t-value="False"/>
+        <t t-call="hackathon_registration.modal_add_team_member_popup"/>
 
         <t t-call="website_event.event_details">
             <!-- <div t-att-data-message="toast_message or 'Registration successful!'" class="o_wevent_register_toaster d-none"/> -->
@@ -35,10 +39,6 @@
 
                 <div class="container d-flex flex-grow-1 h-100 w-100">
                     <div id="o_wevent_event_main_cover_content" class="d-flex flex-column align-items-baseline w-100 py-3">
-                        <span t-if="event.is_participating or True" class="badge text-bg-success o_wevent_badge">
-                            <i class="fa fa-check me-2" role="img"/>
-Registered
-                        </span>
                         <div class="w-100 mt-auto">
                             <h2 itemprop="name" placeholder="Event Title" class="mt-3">
                                 <span t-esc="event.name or 'The Annual Tech Innovators Hackathon 2026'"/>
@@ -60,14 +60,18 @@ Registered
                         <aside t-if="opt_event_registration_block or opt_event_dates_block or opt_event_calendar_block or
                         opt_event_location_block or opt_event_organizer_block or opt_event_share_block" id="o_wevent_event_main_sidebar" t-attf-class="col-lg-4 py-3 pb-lg-0 d-print-none {{'sticky-top align-self-start' if opt_event_fixed_sidebar else ''}}">
                             <div class="d-flex flex-column gap-3 mb-4">
-                                <t t-if="event.event_ticket_id">
-                                    <button class="btn btn-primary">View Ticket</button>
+                                <t t-if="registration.event_ticket_id">
+
+                                    <t t-if="registration.state == 'open'">
+                                        <button class="btn btn-primary">View Ticket</button>
+                                    </t>
                                 </t>
-                                <t t-if="event.state == 'done'">
-                                    <!-- another condition must be added : status = 'qualified' -->
-                                    <button class="btn btn-primary">View Ticket</button>
+
+
+                                <!-- another condition must be added : status = 'qualified' -->
+                                <t t-if="registered_event.stage_id.name == 'Ended'">
+                                    <button class="btn btn-primary">Download Certificate</button>
                                 </t>
-                                <button class="btn btn-primary">Download Certificate</button>
                             </div>
 
 
@@ -78,10 +82,12 @@ Registered
                                 <div>
                                     <h5>Team Leader</h5>
                                     <hr/>
-                                    <span class="d-flex gap-2">
-                                        <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
- Mantavya Gajjar (mga-odoo)
-                                    </span>
+                                    <t t-if="registration.name">
+                                        <span class="d-flex gap-2">
+                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+                                            <t t-out="registration.name"/>
+                                        </span>
+                                    </t>
                                 </div>
 
                                 <!-- Team Members -->
@@ -89,19 +95,21 @@ Registered
                                     <h5>Team Members</h5>
                                     <hr/>
                                     <div class="d-flex flex-column gap-1">
-                                        <span class="d-flex gap-2">
-                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
- Mantavya Gajjar (mga-odoo)
-                                        </span>
-                                        <span class="d-flex gap-2">
-                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
- Mantavya Gajjar (mga-odoo)
-                                        </span>
-                                        <span class="d-flex gap-2">
-                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
- Mantavya Gajjar (mga-odoo)
-                                        </span>
-                                        <button class="btn btn-info mt-2">Add Member</button>
+                                        <t t-if="false">
+                                            <t t-foreach="registration.members" t-as="member">
+                                                <span class="d-flex gap-2">
+                                                    <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+                                                    <t t-out="member.name"/>
+                                                </span>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <p class="text-muted fs-6">No member added yet</p>
+                                        </t>
+
+                                        <button type="button" data-bs-toggle="modal" t-attf-class="btn btn-info mt-2 {{cta_additional_classes}}" t-attf-data-bs-target="#modal_add_team_member_popup">
+        Add Member
+                                        </button>
                                     </div>
                                 </div>
 
@@ -110,52 +118,71 @@ Registered
                                     <h5>Problem Statement</h5>
                                     <hr/>
                                     <div class="dropdown">
-                                        <button role="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Select Problem Statement
+                                        <!-- Button stays as placeholder -->
+                                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Select Problem Statement
                                         </button>
-                                        <div class="dropdown-menu">
-                                            <t t-foreach="['Problem 1', 'Problem 2', 'Problem 3']" t-as="Problem">
-                                                <t t-if="Problem">
-                                                    <a t-attf-class="dropdown-item d-flex align-items-center justify-content-between #{is_active and 'active'}">
-                                                        <t t-out="Problem"/>
-                                                        <!-- <span t-if="date == 2" t-out="2" t-attf-class="badge pagination ms-3 text-bg-primary"/> -->
+
+                                        <ul class="dropdown-menu">
+                                            <t t-foreach="registered_event.question_ids" t-as="question" t-index="i">
+                                                <li>
+                                                    <a t-att-class="'dropdown-item' + (' active' if i == 0 else '')" href="#">
+                                                        <t t-out="question.title"/>
                                                     </a>
-                                                </t>
+                                                </li>
                                             </t>
-                                        </div>
+                                        </ul>
                                     </div>
+
                                 </div>
+
+                                <!-- Team Rank -->
+                                <t t-if="registration.state == 'done'">
+                                    <div>
+                                        <h5>Team Rank</h5>
+                                        <hr/>
+                                        <!-- _compute_team_rank method will be applied here -->
+                                        <t t-out="20"/>
+ out of <t t-out="len(registration) and state == 'done'"/>
+                                    </div>
+                                </t>
 
 
                                 <!-- Mentor -->
                                 <div>
                                     <h5>Mentor</h5>
                                     <hr/>
-                                    <span class="d-flex gap-2">
-                                        <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
- Mantavya Gajjar (+9876543211)
-                                    </span>
+                                    <!-- This will be change as new field mentor_id will be added in attendee model -->
+                                    <t t-if="registration.name">
+                                        <span class="d-flex gap-2">
+                                            <input class="form-check-input" type="checkbox" t-att-checked="false" t-on-click="() => console.log('working')" />
+                                            <t t-out="registration.name"/>
+ (                                            <t t-out="registration.phone"/>
+)
+                                        </span>
+                                    </t>
                                 </div>
                             </div>
 
                             <!-- Location -->
                             <meta itemprop="eventAttendanceMode" t-attf-content="https://schema.org/{{'Offline' if event.address_id else 'Online'}}EventAttendanceMode"/>
                             <div t-if="opt_event_location_block and event.address_id" class="o_wevent_sidebar_block o_wevent_bordered_block pb-3 mb-4" itemprop="location" itemscope="itemscope" itemtype="https://schema.org/Place">
+                                <t t-set="event_info" t-value="registration.event_id"/>
                                 <div>
                                     <h6 class="o_wevent_sidebar_title">Event Address</h6>
                                 </div>
-                                <div itemprop="name" class="mb-1" t-field="event.address_id"/>
-                                <small class="d-block mb-2" t-field="event.address_id" t-options='{
+                                <div itemprop="name" class="mb-1" t-field="event_info.address_id"/>
+                                <small class="d-block mb-2" t-field="event_info.address_id" t-options='{
                                 "widget": "contact",
                                 "fields": ["address"],
                                 "no_marker": True,
                                 "with_microdata": True,
                             }'/>
-                                <small t-field="event.address_id" class="d-block mb-2" t-options='{
+                                <small t-field="event_info.address_id" class="d-block mb-2" t-options='{
                                 "widget": "contact",
                                 "fields": ["phone", "mobile", "email"]
                             }'/>
-                                <a t-att-href="event._google_map_link()" target="_blank" class="btn btn-light" title="Get directions">
+                                <a t-att-href="event_info._google_map_link()" target="_blank" class="btn btn-light" title="Get directions">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="align-text-top" role="img" style="height: 1em; width: 1em">
                                         <rect width="24" height="24" opacity="0"/>
                                         <path role="presentation" fill="currentColor" d="M13.67 22h-.06a1 1 0 0 1-.92-.8l-1.54-7.57a1 1 0 0 0-.78-.78L2.8 11.31a1 1 0 0 1-.12-1.93l16-5.33A1 1 0 0 1 20 5.32l-5.33 16a1 1 0 0 1-1 .68z"/>
@@ -208,58 +235,67 @@ Registered
                                     <t>
                                         <header class="d-flex justify-content-end gap-2 align-items-center">
                                             <span class="fs-6">Status : </span>
-                                            <span class="badge bg-warning">2nd Round</span>
+
+                                            <!-- remove the below tag once status field is integrated -->
+
+                                            <span class="badge bg-warning">
+                                                    2nd Round
+                                            </span>
+
+                                            <!-- <t t-if="registration.status == 'registration'">
+                                                <span class="badge bg-info">
+                                                    <t t-out="registration.status"/>
+                                                </span>
+                                            </t>
+                                            <t t-elif="registration.status in ['qualified', 'first_round', 'second_round']">
+                                                <span class="badge bg-warning">
+                                                    <t t-out="registration.status"/>
+                                                </span>
+                                            </t>
+                                            <t t-elif="registration.status == 'won'">
+                                                <span class="badge bg-success">
+                                                    <t t-out="registration.status"/>
+                                                </span>
+                                            </t>
+                                            -->
                                         </header>
+
                                         <div>
                                             <h2>Odoo Hackathon 2025</h2>
                                             <br/>
                                             <h4>Welcome to Event</h4>
-                                            <p>Every year we invite our community, partners and end-users to come and meet us! It's the ideal event to get together and present new features, roadmap of future versions, achievements of the software, workshops, training sessions, etc... This event is also an opportunity to showcase our partners' case studies, methodology or developments. Be there and see directly from the source the features of the new version!</p>
+                                            <p>Join us for an exciting two-day hackathon where participants from around the world will collaborate to build innovative solutions on the Odoo platform. Expect fun coding challenges, networking with industry experts, and hands-on workshops covering the latest features and modules. Enjoy interactive sessions, live demos, and a chance to win exciting prizes!</p>
                                         </div>
+
                                         <div>
                                             <br/>
                                             <h4>Select Problem Statement</h4>
                                             <br/>
                                             <ol>
-                                                <li class="fw-bold">
-                                                    <span class="d-flex gap-2 flex-wrap">
-                                                        <p>Problem statement 1 : </p>
-                                                        <t t-out="'this-is-problem-statement-1'"/>
-                                                        <a href="/path/to/your/document.pdf" class="text-info text-decoration-none">
-    Download PDF
-                                                        </a>
-                                                    </span>
-                                                </li>
-                                                <li class="fw-bold">
-                                                    <span class="d-flex gap-2 flex-wrap">
-                                                        <p>Problem statement 2 : </p>
-                                                        <t t-out="'this-is-problem-statement-2'"/>
-                                                        <a href="/path/to/your/document.pdf" class="text-info text-decoration-none">
-    Download PDF
-                                                        </a>
-                                                    </span>
-                                                </li>
-                                                <li class="fw-bold">
-                                                    <span class="d-flex gap-2 flex-wrap">
-                                                        <p>Problem statement 3 : </p>
-                                                        <t t-out="'this-is-problem-statement-3'"/>
-                                                        <a href="/path/to/your/document.pdf" class="text-info text-decoration-none">
-    Download PDF
-                                                        </a>
-                                                    </span>
-                                                </li>
+                                                <t t-foreach="registered_event.question_ids" t-as="question">
+                                                    <li class="fw-bold" t-att-data-id="question.id">
+                                                        <span class="d-flex gap-2 flex-wrap">
+                                                            <p>Problem statement : </p>
+                                                            <t t-out="question.title"/>
+                                                            <a href="/path/to/your/document.pdf" class="text-info text-decoration-none">
+        Download PDF
+                                                            </a>
+                                                        </span>
+                                                    </li>
+                                                </t>
                                             </ol>
                                         </div>
                                         <div>
                                             <br/>
                                             <h4>Practical Information</h4>
-                                            <p>Every year we invite our community, partners and end-users to come and meet us! It's the ideal event to get together and present new features, roadmap of future versions, achievements of the software, workshops, training sessions, etc... This event is also an opportunity to showcase our partners' case studies, methodology or developments. Be there and see directly from the source the features of the new version!</p>
+                                            <p>The hackathon will take place from 10:00 AM to 6:00 PM each day. Participants are encouraged to bring their laptops, chargers, and any required software installed in advance. Meals and refreshments will be provided, and free Wi-Fi will be available throughout the venue. Please make sure to check in at the registration desk before the event starts.</p>
                                         </div>
                                         <div>
                                             <br/>
                                             <h4>Rules and Regulations</h4>
-                                            <p>Every year we invite our community, partners and end-users to come and meet us! It's the ideal event to get together and present new features, roadmap of future versions, achievements of the software, workshops, training sessions, etc... This event is also an opportunity to showcase our partners' case studies, methodology or developments. Be there and see directly from the source the features of the new version!</p>
+                                            <p>Participants must work in teams of up to 4 members. All submissions should be original work created during the hackathon. Any inappropriate behavior or violation of the code of conduct may result in disqualification. Judges’ decisions are final, and participants must follow all instructions provided by the event organizers. Safety and collaboration are key priorities.</p>
                                         </div>
+
                                     </t>
                                 </div>
                             </div>
@@ -273,6 +309,66 @@ Registered
             </section>
         </t>
     </template>
+
+
+
+    <!-- Add Member Modal -->
+    <template id="modal_add_team_member_popup" name="Modal for adding team members">
+        <!-- Modal -->
+        <div id="modal_add_team_member_popup" t-attf-class="modal fade {{'o_wevent_modal_slot_ticket_registration' if event.is_multi_slots else ''}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabelTicket" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="o_wevent_registration_title modal-title fs-5" id="staticBackdropLabelTicket">Add Team Members</div>
+                        <div t-if="len(event.event_ticket_ids) &gt; 2" class="o_wevent_price_range ms-2"/>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="px-3">
+                        <p class="text-start mt-1 fs-6 text-muted">
+                            Invite your team members using their Github Id or Github Email address
+                        </p>
+                        <div>
+                            <div id="errors"/>
+                            <!-- for js -->
+                            <form action="/hackathon/team-member/submit" method="post" name="member_form" t-att-data-company-country-code="res_company.country_id.code" t-att-data-submit-url="'/hackathon/team-member/submit'">
+                                <div name="address_details" class="row">
+                                    <t t-call="hackathon_registration.add_member_details_form"/>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </template>
+
+
+    <!-- Add member from -->
+    <template id="add_member_details_form" name="Team Members Details">
+        <t t-set="team_size" t-value="2"/>
+        <t t-set="team_array" t-value="list(range(1, team_size + 1))"/>
+
+        <t t-foreach="team_array" t-as="member">
+            <div id="div_member_2_github" class="mb-2">
+                <label class="col-form-label" for="'github_url_' + member">Member #<t t-out="member + 1"/>
+                </label>
+                <input id="'github_url_' + member" type="text" name="member_github_url" class="form-control" />
+            </div>
+        </t>
+
+        <div class="modal-footer flex-lg-row mt-2">
+            <button type="button" class="btn btn-light js_goto_event" data-bs-dismiss="modal">
+                        close
+            </button>
+            <button type="submit" class="btn btn-primary a-submit" t-attf-id="#{event.id}">
+                        Register
+            </button>
+        </div>
+    </template>
+
+
 
     <!-- Sidebar Blocks Visibility Options -->
     <template id="opt_event_registration_block" name="Registrations" inherit_id="website_event.event_description_full" active="True"/>

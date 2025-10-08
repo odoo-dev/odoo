@@ -63,7 +63,14 @@
                                         <time t-out="hackathon.event_id.date_end" t-att-datetime="hackathon.event_id.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'format': 'MMMM Y', 'date_only': 'true'}"/>
                                         <time t-out="hackathon.event_id.date_end"  t-att-datetime="hackathon.event_id.date_end" t-options="{'widget': 'datetime', 'tz_name': hackathon.event_id.date_tz, 'time_only': 'true', 'format': 'short'}"/>
                                     </td>
-                                    <td style="border: none;"><t t-esc="hackathon.state"/></td>
+                                    <td style="border: none;">
+                                        <span t-att-class="(
+                                                'badge bg-danger' if hackathon.state=='open' else
+                                                'badge bg-info' if hackathon.state=='qualified' else
+                                                'badge bg-warning' if hackathon.state in ['1st_round','2nd_round'] else 'badge bg-success')" style="padding: 0.4rem 1.0rem; font-size: 1rem;">
+                                            <t t-out="dict(hackathon._fields['state'].selection).get(hackathon.state)"/>
+                                        </span>
+                                    </td>
                                 </tr>
                             </t>
                             <t t-if="not my_hackathons">

@@ -1,9 +1,5 @@
-import base64
-
 from odoo import http
 from odoo.http import request
-from odoo.addons.portal.controllers import portal
-from odoo import api, fields, models, Command
 
 
 class MyHackathon(http.Controller):
@@ -34,6 +30,7 @@ class MyHackathon(http.Controller):
             hackathon_id)
         values = {
             'event': event_registration.event_id,
+            'registration': event_registration,
         }
         return request.render('hackathon_registration.hackathon_event_details_page_template', values)
 
