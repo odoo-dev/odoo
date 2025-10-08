@@ -26,6 +26,18 @@ class StockMove(models.Model):
         return distinct_fields
 
     @api.model
+    def _prepare_merge_move_defaults(self, transfer):
+        defaults = super()._prepare_merge_move_defaults(transfer)
+        defaults['purchase_line_id'] = self.purchase_line_id.id
+        return defaults
+
+    def _is_mergeable(self, move):
+        self.ensure_one()
+        if self.purchase_line_id != move.purchase_line_id:
+            return False
+        return super()._is_mergeable(move)
+
+    @api.model
     def _prepare_merge_negative_moves_excluded_distinct_fields(self):
         return super()._prepare_merge_negative_moves_excluded_distinct_fields() + ['created_purchase_line_ids']
 

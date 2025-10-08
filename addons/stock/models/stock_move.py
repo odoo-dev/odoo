@@ -1526,6 +1526,30 @@ Please change the quantity done or the rounding precision in your settings.""",
             vals['location_dest_id'] = self.location_dest_id.id
         return vals
 
+    @api.model
+    def _prepare_merge_move_defaults(self, transfer):
+        self.ensure_one()
+        return {
+            'state': 'confirmed',
+            'picking_id': transfer.id,
+            'origin': transfer.origin,
+            'reference_ids': transfer.move_ids.reference_ids,
+            'move_line_ids': [Command.create({
+                'product_id': self.product_id.id,
+                'quantity': self.quantity,
+                'product_uom_id': self.product_uom.id,
+                'location_id': self.location_id.id,
+                'location_dest_id': self.location_dest_id.id,
+                'picking_id': transfer.id,
+                'company_id': self.company_id.id,
+                'result_package_id': self.move_line_ids.result_package_id.id if self.move_line_ids.result_package_id else False,
+            })]
+        }
+
+    def _is_mergeable(self, move):
+        self.ensure_one()
+        return not self.reference_ids
+
     def _should_be_assigned(self):
         self.ensure_one()
         return bool(not self.picking_id and self.picking_type_id)

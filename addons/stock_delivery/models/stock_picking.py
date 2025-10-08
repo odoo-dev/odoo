@@ -232,3 +232,7 @@ class StockPicking(models.Model):
     def _should_generate_commercial_invoice(self):
         self.ensure_one()
         return self.picking_type_id.warehouse_id.partner_id.country_id != self.partner_id.country_id
+
+    def _prepare_grouped_data(self, picking):
+        grouped_fields = super()._prepare_grouped_data(picking)
+        return grouped_fields + (picking.carrier_id.id,)

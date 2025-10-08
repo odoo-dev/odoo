@@ -89,6 +89,18 @@ class StockMove(models.Model):
         distinct_fields.append('sale_line_id')
         return distinct_fields
 
+    @api.model
+    def _prepare_merge_move_defaults(self, transfer):
+        defaults = super()._prepare_merge_move_defaults(transfer)
+        defaults['sale_line_id'] = self.sale_line_id.id
+        return defaults
+
+    def _is_mergeable(self, move):
+        self.ensure_one()
+        if self.sale_line_id != move.sale_line_id:
+            return False
+        return super()._is_mergeable(move)
+
     def _get_related_invoices(self):
         """ Overridden from stock_account to return the customer invoices
         related to this stock move.

@@ -1469,6 +1469,84 @@ class StockPicking(models.Model):
         backorder_moves += self.move_ids.filtered(lambda m: m.quantity == 0)
         self._create_backorder(backorder_moves=backorder_moves)
 
+    def action_merge_pickings(self):
+        if len(self) < 2:
+            raise UserError(self.env._("Please select at least two transfers to merge."))
+        if len(self.picking_type_id) > 1:
+            raise UserError(self.env._("Transfers with different operation types cannot be merged."))
+        if len(set(self.mapped('state'))) > 1:
+            raise UserError(self.env._("Transfers with different states cannot be merged."))
+        if self[0].state in ['done', 'cancel']:
+            raise UserError(self.env._("Transfers with done or cancel states cannot be merged."))
+
+        picking_grouped = defaultdict(lambda: self.env['stock.picking'])
+        for picking in self:
+            key = picking._prepare_grouped_data(picking)
+            picking_grouped[key] += picking
+
+        if any(len(picking_bunch) == 1 for picking_bunch in picking_grouped.values()):
+            raise UserError(self.env._(
+                "Selected transfers cannot be merged. They must share the same partner, carrier, source, and destination locations."
+            ))
+
+        latest_transfer = self.sorted(key=lambda p: p.scheduled_date)[-1]
+        other_transfers = self - latest_transfer
+
+        for picking in other_transfers:
+            for move in picking.move_ids:
+                # Find an existing move in the latest picking that matches product, packaging UoM, final location,
+                # and has a date within 24 hours of the current move.
+                existing_move = latest_transfer.move_ids.filtered(
+                    lambda m: m.product_id == move.product_id
+                    and m.product_uom == move.product_uom
+                    and m.location_final_id == move.location_final_id
+                    and m.package_ids == move.package_ids
+                    and abs(m.date - move.date).total_seconds() <= 86400
+                )
+                target_moves = self.env['stock.move']
+                if existing_move and move._is_mergeable(existing_move):
+                    target_moves |= existing_move
+                    existing_move.product_uom_qty += move.product_uom_qty
+                else:
+                    moves_vals = move.copy_data(move._prepare_merge_move_defaults(latest_transfer))
+                    target_moves |= self.env['stock.move'].create(moves_vals)
+
+                target_moves._action_assign()
+            message = self.env._(
+                "This transfer has been merged into %(latest_transfer)s.",
+                latest_transfer=latest_transfer._get_html_link(),
+            )
+            picking.message_post(body=message)
+
+        pickings_names = ', '.join(other_transfers.mapped('name'))
+        merged_message = self.env._(
+            "The following transfers have been merged into this one: %s.",
+            pickings_names,
+        )
+        latest_transfer.message_post(body=merged_message)
+        merged_batch_vals = latest_transfer._get_merged_picking_vals()
+        latest_transfer.write(merged_batch_vals)
+        other_transfers.action_cancel()
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': self.env._("Merged Transfer"),
+            'res_model': 'stock.picking',
+            'res_id': latest_transfer.id,
+            'view_mode': 'form',
+            'views': [[False, 'form']],
+            'context': self.env.context,
+        }
+
+    def _prepare_grouped_data(self, picking):
+        return (picking.partner_id.id, picking.location_id.id, picking.location_dest_id.id)
+
+    def _get_merged_picking_vals(self):
+        self.ensure_one()
+        return {
+            'scheduled_date': self.scheduled_date,
+        }
+
     def _pre_action_done_hook(self):
         for picking in self:
             has_quantity = False
