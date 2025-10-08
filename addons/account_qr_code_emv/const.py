@@ -19,6 +19,7 @@ CURRENCY_MAPPING = {
     'JPY': '392',
     'KRW': '410',
     'KWD': '414',
+    'MMK': '104',
     'MYR': '458',
     'MUR': '480',
     'MXN': '484',
