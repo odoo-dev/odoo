@@ -193,7 +193,7 @@ export class MassMailingIframe extends Component {
     }
 
     async setupIframe() {
-        await this.loadIframeAssets();
+        const visualIframeAssetsPromise = await this.loadIframeAssets();
         if (status(this) === "destroyed") {
             return;
         }
@@ -219,7 +219,7 @@ export class MassMailingIframe extends Component {
         this.iframeRef.el.contentWindow.addEventListener("beforeUnload", () => {
             this.iframeRef.el.removeAttribute("is-ready");
         });
-        this.iframeLoaded.resolve(this.iframeRef.el);
+        this.iframeLoaded.resolve({ iframe: this.iframeRef.el, visualIframeAssetsPromise });
         this.props.onIframeLoad?.(this.iframeLoaded);
         this.state.ready = true;
     }
@@ -235,13 +235,19 @@ export class MassMailingIframe extends Component {
     }
 
     async loadIframeAssets() {
-        await Promise.all([
+        const visualPromise = await Promise.all([
+            loadBundle("mass_mailing.assets_inside_builder_iframe", {
+                targetDoc: this.iframeRef.el.contentDocument,
+                css: true,
+                js: false,
+            }),
             loadBundle("mass_mailing.assets_iframe_style", {
                 targetDoc: this.iframeRef.el.contentDocument,
                 css: true,
                 js: false,
             }),
-        ]);
+        ]).then((value) => value[0]);
+        return visualPromise;
     }
 
     onBlur(ev) {
@@ -261,7 +267,7 @@ export class MassMailingIframe extends Component {
     getBuilderProps() {
         return {
             overlayRef: this.overlayRef,
-            iframeLoaded: this.iframeLoaded,
+            iframeLoaded: this.iframeLoaded.then((value) => value.iframe),
             snippetsName: "mass_mailing.email_designer_snippets",
             config: this.props.config,
             isMobile: this.state.isMobile,

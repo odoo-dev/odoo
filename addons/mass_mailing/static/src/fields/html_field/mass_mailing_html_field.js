@@ -292,7 +292,8 @@ export class MassMailingHtmlField extends HtmlField {
      * @override
      */
     async updateValue(value) {
-        await this.lastIframeLoaded;
+        const { visualIframeAssetsPromise } = await this.lastIframeLoaded;
+        visualIframeAssetsPromise.forEach((loadedBundle) => loadedBundle.target?.remove());
         this.lastValue = normalizeHTML(value, this.clearElementToCompare.bind(this));
         this.isDirty = false;
         const shouldRestoreDisplayNone = this.iframeRef.el.classList.contains("d-none");
@@ -310,6 +311,9 @@ export class MassMailingHtmlField extends HtmlField {
         await toInline(processingEl, cssRules);
         const inlineValue = processingEl.innerHTML;
         processingEl.remove();
+        visualIframeAssetsPromise.forEach((loadedBundle) =>
+            this.iframeRef.el.contentDocument.head.prepend(loadedBundle.target)
+        );
         this.iframeRef.el.style.width = "";
         if (shouldRestoreDisplayNone) {
             this.iframeRef.el.classList.add("d-none");
