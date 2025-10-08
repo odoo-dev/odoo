@@ -43,6 +43,13 @@ export class CarouselSlider extends Interaction {
         this.updateContent();
         const carouselBS = window.Carousel.getOrCreateInstance(this.el, this.carouselOptions);
         this.registerCleanup(() => carouselBS.dispose());
+        // const originalSetActive = carouselBS._setActiveIndicatorElement;
+        // carouselBS._setActiveIndicatorElement = (index) => {
+        //     // Dynamically refresh the indicators element
+        //     carouselBS._indicatorsElement = this.el.querySelector(".carousel-indicators");
+        //     // Call the original method
+        //     originalSetActive.call(carouselBS, index);
+        // };
 
         this.carouselInnerEl = this.el.querySelector(".carousel-inner");
 

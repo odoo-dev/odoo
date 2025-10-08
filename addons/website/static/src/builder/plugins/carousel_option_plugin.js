@@ -43,7 +43,7 @@ export class CarouselCardsOption extends BaseOptionComponent {
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
     static dependencies = ["clone", "builderOptions", "builderActions"];
-    static shared = ["addSlide", "removeSlide", "slideCarousel"];
+    static shared = ["addSlide", "removeSlide", "slideCarousel", "assignUniqueID"];
 
     resources = {
         builder_options: [
@@ -75,6 +75,7 @@ export class CarouselOptionPlugin extends Plugin {
             SlideCarouselAction,
             ToggleControllersAction,
             ToggleCardImgAction,
+            UpdateQuotesCarouselOptionAction,
         },
         on_cloned_handlers: this.onCloned.bind(this),
         on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
@@ -126,20 +127,21 @@ export class CarouselOptionPlugin extends Plugin {
         newItemEl.classList.remove("active");
 
         // Show the controllers (now that there is always more than one item).
-        const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
-        controlEls.forEach((controlEl) => {
-            controlEl.classList.remove("d-none");
-        });
+        if (!editingElement.classList.contains("o_carousel_multi_items")) {
+            const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
+            controlEls.forEach((controlEl) => {
+                controlEl.classList.remove("d-none");
+            });
 
-        // Add the new indicator.
-        const indicatorsEl = editingElement.querySelector(".carousel-indicators");
-        const newIndicatorEl = this.document.createElement("button");
-        newIndicatorEl.setAttribute("data-bs-target", "#" + editingElement.id);
-        newIndicatorEl.setAttribute("aria-label", _t("Carousel indicator"));
-        indicatorsEl.appendChild(newIndicatorEl);
-
-        // Slide to the new item.
-        await this.slide(editingElement, "next");
+            // Add the new indicator.
+            const indicatorsEl = editingElement.querySelector(".carousel-indicators");
+            const newIndicatorEl = this.document.createElement("button");
+            newIndicatorEl.setAttribute("data-bs-target", "#" + editingElement.id);
+            newIndicatorEl.setAttribute("aria-label", _t("Carousel indicator"));
+            indicatorsEl.appendChild(newIndicatorEl);
+            // Slide to the new item.
+            await this.slide(editingElement, "next");
+        }
     }
 
     /**
@@ -157,16 +159,17 @@ export class CarouselOptionPlugin extends Plugin {
             );
             // Slide to the previous item.
             await this.slide(editingElement, "prev");
-
             // Remove the carousel item and the indicator.
             activeItemEl.remove();
-            activeIndicatorEl.remove();
+            if (!editingElement.classList.contains("o_carousel_multi_items")) {
+                activeIndicatorEl.remove();
 
-            // Hide the controllers if there is only one slide left.
-            const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
-            controlEls.forEach((controlEl) =>
-                controlEl.classList.toggle("d-none", newLength === 1)
-            );
+                // Hide the controllers if there is only one slide left.
+                const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
+                controlEls.forEach((controlEl) =>
+                    controlEl.classList.toggle("d-none", newLength === 1)
+                );
+            }
         }
     }
 
@@ -215,9 +218,10 @@ export class CarouselOptionPlugin extends Plugin {
                             ".carousel-indicators > *"
                         );
                         const activeIndicatorEl = [...indicatorEls][activeIndex];
-                        activeIndicatorEl.classList.add("active");
-                        activeIndicatorEl.setAttribute("aria-current", "true");
-
+                        if (activeIndicatorEl) {
+                            activeIndicatorEl.classList.add("active");
+                            activeIndicatorEl.setAttribute("aria-current", "true");
+                        }
                         // Activate the active item.
                         this.dependencies["builderOptions"].setNextTarget(activeItemEl);
 
@@ -385,6 +389,65 @@ export class ToggleCardImgAction extends BuilderAction {
         const carouselEl = editingElement.closest(".carousel");
         const cardImgEl = carouselEl.querySelector(".o_card_img_wrapper");
         return !!cardImgEl;
+    }
+}
+
+export class UpdateQuotesCarouselOptionAction extends BuilderAction {
+    static id = "updateQuotesCarouselOption";
+    static dependencies = ["builderActions", "carouselOption"];
+
+    setup() {
+        this.getAction = this.dependencies.builderActions.getAction;
+    }
+
+    isApplied({ editingElement, params: { scrollMode, numberOfElements } }) {
+        if (!scrollMode) {
+            const currentMode = editingElement.dataset.numberOfElements || "1";
+            return currentMode === numberOfElements;
+        }
+        const currentMode = editingElement.dataset.scrollMode || "all";
+        return currentMode === scrollMode;
+    }
+
+    async apply({ editingElement, params: { scrollMode, numberOfElements } }) {
+        const { dataset, style } = editingElement;
+        numberOfElements ||= dataset.numberOfElements;
+        scrollMode = numberOfElements === "1" ? "" : scrollMode ?? dataset.scrollMode;
+        const templateSuffix =
+            scrollMode === "single" ? "single_scrolling_mode" : `card_count_${numberOfElements}`;
+        const actionParam = {
+            view: `website.${dataset.snippetName}_${templateSuffix}`,
+        };
+        const selectTemplate = this.getAction("selectTemplate");
+        await selectTemplate.prepare({ actionParam });
+        selectTemplate.apply({ editingElement, params: actionParam, actionParam });
+        if (scrollMode === "single") {
+            const widthPercentage = 100 / parseInt(numberOfElements, 10);
+            style.setProperty("--o-carousel-item-width-percentage", `${widthPercentage}%`);
+            editingElement.querySelectorAll(".carousel-item").forEach((carouselItemEl) => {
+                numberOfElements === "3"
+                    ? (carouselItemEl.style.padding = "100px")
+                    : numberOfElements === "4"
+                    ? (carouselItemEl.style.padding = "70px")
+                    : carouselItemEl.style.removeProperty("padding");
+            });
+            editingElement
+                .querySelectorAll(".quotes_single_scrolling_mode button")
+                .forEach((btn) => {
+                    numberOfElements === "3"
+                        ? (btn.style.width = "8%")
+                        : numberOfElements === "4"
+                        ? (btn.style.width = "5%")
+                        : btn.style.removeProperty("width");
+                });
+        } else {
+            style.removeProperty("--o-carousel-item-width-percentage");
+        }
+        editingElement.classList.toggle("o_carousel_multi_items", scrollMode === "single");
+        dataset.scrollMode = scrollMode;
+        dataset.numberOfElements = numberOfElements;
+        const carouselPlugin = this.dependencies.carouselOption;
+        carouselPlugin.assignUniqueID(editingElement.parentElement);
     }
 }
 
