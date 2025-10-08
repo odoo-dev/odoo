@@ -1,5 +1,6 @@
 import { Message } from "@mail/core/common/message_model";
 import { fields } from "@mail/core/common/record";
+import { rpc } from "@web/core/network/rpc";
 
 import { patch } from "@web/core/utils/patch";
 
@@ -73,6 +74,27 @@ const messagePatch = {
      */
     showSeenIndicator(thread) {
         return this.isSelfAuthored && thread?.hasSeenFeature;
+    },
+
+    get editable() {
+        return super.editable && !this.started_poll_ids.length && !this.ended_poll_ids.length;
+    },
+
+    async _removeFromServer() {
+        if (this.started_poll_ids.length || this.ended_poll_ids.length) {
+            return rpc("/discuss/poll/delete", {
+                poll_id: this.started_poll_ids[0]?.id ?? this.ended_poll_ids[0]?.id,
+            });
+        }
+        return super._removeFromServer();
+    },
+
+    computeIsEmpty() {
+        return (
+            super.computeIsEmpty() &&
+            this.started_poll_ids.length === 0 &&
+            this.ended_poll_ids.length === 0
+        );
     },
 };
 patch(Message.prototype, messagePatch);

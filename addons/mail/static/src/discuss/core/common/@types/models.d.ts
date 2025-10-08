@@ -1,9 +1,13 @@
 declare module "models" {
     import { ChannelMember as ChannelMemberClass } from "@mail/discuss/core/common/channel_member_model";
     import { DiscussChannel as DiscussChannelClass } from "@mail/discuss/core/common/discuss_channel_model";
+    import { DiscussPollModel as DiscussPollModelClass } from "@mail/discuss/core/common/discuss_poll_model";
+    import { DiscussPollOptionModel as DiscussPollOptionModelClass } from "@mail/discuss/core/common/discuss_poll_option_model";
 
     export interface ChannelMember extends ChannelMemberClass {}
     export interface DiscussChannel extends DiscussChannelClass {}
+    export interface DiscussPollModel extends DiscussPollModelClass {}
+    export interface DiscussPollOptionModel extends DiscussPollOptionModelClass {}
 
     export interface DiscussChannel {
         allowCalls: Readonly<boolean>;
@@ -59,6 +63,7 @@ declare module "models" {
     }
     export interface Message {
         channelMemberHaveSeen: Readonly<ChannelMember[]>;
+        ended_poll_ids: DiscussPollModel[];
         hasEveryoneSeen: boolean|undefined;
         hasNewMessageSeparator: boolean;
         hasSomeoneFetched: boolean|undefined;
@@ -75,6 +80,8 @@ declare module "models" {
         createGroupChat: (param0: { default_display_mode: string, partners_to: number[], name: string }) => Promise<Thread>;
         "discuss.channel": StaticMailRecord<DiscussChannel, typeof DiscussChannelClass>;
         "discuss.channel.member": StaticMailRecord<ChannelMember, typeof ChannelMemberClass>;
+        "discuss.poll": StaticMailRecord<DiscussPollModel, typeof DiscussPollModelClass>;
+        "discuss.poll.option": StaticMailRecord<DiscussPollOptionModel, typeof DiscussPollOptionModelClass>;
         fetchChannel: (channelId: number) => Promise<void>;
         getRecentChatPartnerIds: () => number[];
         onlineMemberStatuses: Readonly<string[]>;
@@ -147,5 +154,7 @@ declare module "models" {
     export interface Models {
         "discuss.channel": DiscussChannel;
         "discuss.channel.member": ChannelMember;
+        "discuss.poll": DiscussPollModel;
+        "discuss.poll.option": DiscussPollOptionModel;
     }
 }

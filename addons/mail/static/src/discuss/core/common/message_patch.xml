@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-inherit="mail.Message" t-inherit-mode="extension">
+        <xpath expr="//*[hasclass('o-mail-Message-content')]" position="inside">
+            <Poll t-if="props.message?.started_poll_ids.length" poll="props.message.started_poll_ids[0]"/>
+            <PollResult t-elif="props.message?.ended_poll_ids.length" poll="props.message.ended_poll_ids[0]"/>
+        </xpath>
         <xpath expr="//div[hasclass('o-mail-Message-body')]" position="after">
             <div class="o-mail-Message-seenContainer position-absolute">
                 <MessageSeenIndicator
@@ -20,4 +24,5 @@
             </div>
         </xpath>
     </t>
+
 </templates>

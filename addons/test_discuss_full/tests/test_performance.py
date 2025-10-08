@@ -133,7 +133,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch livechat_conversation_tag_ids
     #       - read livechat_conversation_tag_ids
     #   1: _get_last_messages
-    #   20: message _to_store:
+    #   22: message _to_store:
     #       - search mail_message_schedule
     #       - fetch mail_message
     #       - search mail_message_res_partner_starred_rel
@@ -143,6 +143,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search mail_message_reaction
     #       - search mail_notification
     #       - search rating_rating
+    #       - search started_poll_ids
+    #       - search ended_poll_ids
     #       - fetch mail_notification
     #       - search mail_message_subtype
     #       - search discuss_call_history
@@ -154,7 +156,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch discuss_call_history
     #       - search mail_tracking_value
     #       - _compute_rating_stats
-    _query_count_discuss_channels = 64
+    _query_count_discuss_channels = 66
 
     def setUp(self):
         super().setUp()

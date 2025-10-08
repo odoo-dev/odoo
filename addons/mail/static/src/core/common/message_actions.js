@@ -142,7 +142,7 @@ registerMessageAction("edit", {
     sequence: ({ message }) => (message.isSelfAuthored ? 20 : 55),
 });
 registerMessageAction("delete", {
-    condition: ({ message }) => message.editable,
+    condition: ({ message }) => message.deletable,
     icon: "fa fa-trash",
     name: _t("Delete"),
     onSelected: async ({ message: msg, owner, store }) => {

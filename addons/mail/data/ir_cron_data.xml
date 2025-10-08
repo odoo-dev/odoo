@@ -84,5 +84,13 @@
             <field name="code">model._cleanup_expired_mutes()</field>
             <field name="state">code</field>
         </record>
+        <record id="ir_cron_discuss_end_polls" model="ir.cron">
+            <field name="name">Discuss: End polls</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="model_id" ref="model_discuss_poll"/>
+            <field name="code">model._end_expired_polls()</field>
+            <field name="state">code</field>
+        </record>
     </data>
 </odoo>

@@ -174,6 +174,8 @@ export class Message extends Record {
     needaction;
     starred = false;
     showTranslation = false;
+    ended_poll_ids = fields.Many("discuss.poll", { inverse: "end_message_id" });
+    started_poll_ids = fields.Many("discuss.poll", { inverse: "start_message_id" });
 
     /**
      * True if the backend would technically allow edition
@@ -203,7 +205,14 @@ export class Message extends Record {
         if (this.isEmpty || !this.allowsEdition) {
             return false;
         }
-        return this.message_type === "comment";
+        return ["comment", "mail_poll"].includes(this.message_type);
+    }
+
+    get deletable() {
+        if (this.isEmpty || !this.allowsEdition) {
+            return false;
+        }
+        return ["comment", "mail_poll"].includes(this.message_type);
     }
 
     get dateDay() {
@@ -657,14 +666,17 @@ export class Message extends Record {
             )
         );
     }
-
-    async remove({ removeFromThread = false } = {}) {
+    async _removeFromServer() {
         const data = await rpc("/mail/message/update_content", {
             message_id: this.id,
             update_data: this.removeParams,
             ...this.thread.rpcParams,
         });
         this.store.insert(data);
+        return data;
+    }
+    async remove({ removeFromThread = false } = {}) {
+        const data = await this._removeFromServer();
         if (this.thread && removeFromThread) {
             this.thread.messages = this.thread.messages.filter((message) => message.notEq(this));
         }
