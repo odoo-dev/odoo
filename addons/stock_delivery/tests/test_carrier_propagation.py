@@ -55,39 +55,6 @@ class TestCarrierPropagation(TransactionCase):
         })
         cls.rule_pack = cls.warehouse.delivery_route_id.rule_ids.filtered(lambda r: r.picking_type_id == cls.warehouse.pack_type_id)
 
-    def test_carrier_no_propagation(self):
-        """
-            Set the carrier propagation to False on stock.rule
-            Create a Sale Order, confirm it
-            Check that the carrier is set on the OUT
-            Check that the carrier is not set on the PACK
-        """
-        self.rule_pack.propagate_carrier = False
-
-        so = self.SaleOrder.create({
-            'name': 'Sale order',
-            'partner_id': self.partner_propagation.id,
-            'partner_invoice_id': self.partner_propagation.id,
-            'order_line': [
-                (0, 0, {'name': self.super_product.name, 'product_id': self.super_product.id, 'product_uom_qty': 1, 'price_unit': 1,}),
-            ]
-        })
-        delivery_wizard = Form(self.env['choose.delivery.carrier'].with_context({
-            'default_order_id': so.id,
-            'default_carrier_id': self.normal_delivery.id,
-        }))
-        choose_delivery_carrier = delivery_wizard.save()
-        choose_delivery_carrier.button_confirm()
-        # Confirm the SO
-        so.action_confirm()
-
-        pick = so.picking_ids
-        self.assertEqual(self.normal_delivery, pick.carrier_id)
-        pick.button_validate()
-
-        pack = pick.move_ids.move_dest_ids.picking_id
-        self.assertFalse(pack.carrier_id)
-
     def test_carrier_propagation(self):
         """
             Set the carrier propagation to True on stock.rule
@@ -125,6 +92,35 @@ class TestCarrierPropagation(TransactionCase):
 
             ship = pack.move_ids.move_dest_ids.picking_id
             self.assertEqual(self.normal_delivery, ship.carrier_id)
+
+    def test_carrier_propagation_with_all_pull_rules(self):
+        """
+            This tests the carrier propagation with all pull rules.
+            It also checks that for rule having propagate_carrier = False, the carrier is not propagated.
+            The Pack rule is set to not propagate the carrier.
+        """
+        self.warehouse.delivery_route_id.rule_ids[0].location_dest_id = self.rule_pack.location_src_id
+        self.warehouse.delivery_route_id.rule_ids[1].write({'action': 'pull', 'propagate_carrier': False})
+        self.warehouse.delivery_route_id.rule_ids[2].write({'action': 'pull'})
+        so = self.SaleOrder.create({
+            'name': 'Sale order',
+            'partner_id': self.partner_propagation.id,
+            'order_line': [(0, 0, {'product_id': self.super_product.id})],
+        })
+        so.action_confirm()
+        pickings = so.picking_ids
+        self.assertTrue(all(not p.carrier_id for p in pickings), "No carrier is set on the sale order, so all pickings should have no carrier.")
+        pickings[0].carrier_id = self.normal_delivery.id
+        pickings[0].button_validate()
+        self.assertEqual(pickings[1].carrier_id.id, False, "The carrier should not propagate because the pack rule has propagate_carrier = False.")
+        self.assertEqual(pickings[2].carrier_id.id, False, "The carrier is not yet set on the packing transfer.",)
+        pickings[1].write({'carrier_id': self.normal_delivery.id, 'carrier_tracking_ref': 'NORMALDELIVERYTRACK0001'})
+        pickings[1].button_validate()
+        self.assertEqual(
+            (pickings[2].carrier_id.id, pickings[2].carrier_tracking_ref),
+            (self.normal_delivery.id, 'NORMALDELIVERYTRACK0001'),
+            "Carrier and tracking ref should propagate from the pack transfer."
+        )
 
     def test_route_based_on_carrier_delivery(self):
         """
