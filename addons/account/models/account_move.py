@@ -876,6 +876,9 @@ class AccountMove(models.Model):
         if self.statement_line_ids.statement_id.journal_id:
             return self.statement_line_ids.statement_id.journal_id[:1]
 
+        if self.env.context.get('active_model') == 'account.journal':
+            return self.env['account.journal'].browse(self.env.context.get('active_id'))
+
         journal_types = self._get_valid_journal_types()
         company = self.company_id or self.env.company
         domain = [
