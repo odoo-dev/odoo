@@ -26,7 +26,16 @@ class HrWorkEntry(models.Model):
     work_entry_source = fields.Selection(related='version_id.work_entry_source')
     date = fields.Date(required=True)
     duration = fields.Float(string="Duration", default=8)
-    work_entry_type_id = fields.Many2one('hr.work.entry.type', index=True, default=lambda self: self.env['hr.work.entry.type'].search([], limit=1), domain="['|', ('country_id', '=', False), ('country_id', '=', country_id)]")
+    work_entry_type_id = fields.Many2one(
+        'hr.work.entry.type', 
+        index=True, 
+        default=lambda self: self.env['hr.work.entry.type'].search([], limit=1), 
+        domain="[('id', 'in', allowed_work_entry_type_ids)]"
+    )
+    allowed_work_entry_type_ids = fields.Many2many(
+        'hr.work.entry.type', 
+        compute='_compute_allowed_work_entry_type_ids'
+    )
     display_code = fields.Char(related='work_entry_type_id.display_code')
     code = fields.Char(related='work_entry_type_id.code')
     external_code = fields.Char(related='work_entry_type_id.external_code')
@@ -46,6 +55,16 @@ class HrWorkEntry(models.Model):
 
     # FROM 7s by query to 2ms (with 2.6 millions entries)
     _contract_date_start_stop_idx = models.Index("(version_id, date) WHERE state IN ('draft', 'validated')")
+
+    def _compute_allowed_work_entry_type_ids(self):
+        for record in self:
+            if record.country_id:
+                domain = ['|', ('country_id', '=', False), ('country_id', '=', record.country_id)]
+            if len(self.env.companies) > 1 or not self.env.companies:
+                domain = [('country_id', '=', False)]
+            else:
+                domain = ['|', ('country_id', '=', False), ('country_id', '=', self.env.company.country_id.id)]
+            record.allowed_work_entry_type_ids = self.env['hr.work.entry.type'].search(domain).ids
 
     @api.depends('display_code', 'duration')
     def _compute_display_name(self):
