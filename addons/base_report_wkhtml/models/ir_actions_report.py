@@ -439,7 +439,10 @@ class IrActionsReport(models.Model):
         data = self._initialize_pdf_data(data)
         report_sudo = self._get_report(report_ref)
         has_duplicated_ids = res_ids and len(res_ids) != len(set(res_ids))
-        collected_streams = self._collect_existing_streams(report_sudo, res_ids, has_duplicated_ids)
+        collected_streams = self._collect_existing_streams(
+            report_ref=report_ref,
+            res_ids=res_ids,
+        )
 
         res_ids_wo_stream = [res_id for res_id, s in collected_streams.items() if not s['stream']]
         all_streams_ready = res_ids and not res_ids_wo_stream

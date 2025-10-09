@@ -1,0 +1,13 @@
+@page {
+    @top-center {
+        content: element(header);
+    }
+
+    @bottom-center {
+        content: counter(page);
+    }
+
+    .header {
+        position: running(header);
+    }
+}

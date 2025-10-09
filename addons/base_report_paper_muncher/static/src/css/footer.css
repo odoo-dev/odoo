@@ -1,0 +1,9 @@
+@page {
+    @bottom-center {
+        content: element(footer);
+    }
+
+    .paper-muncher-footer {
+        position: running(footer);
+    }
+}

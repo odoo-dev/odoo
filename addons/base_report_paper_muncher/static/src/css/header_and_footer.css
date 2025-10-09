@@ -1,0 +1,18 @@
+
+@page {
+    @top-center {
+        content: element(header);
+    }
+
+    @bottom-center {
+        content: element(footer);
+    }
+
+    .header {
+        position: running(header);
+    }
+
+    .footer {
+        position: running(footer);
+    }
+}

@@ -38,7 +38,10 @@ def consume_paper_muncher_request(
     :rtype: None
     """
     deadline = time.monotonic() + timeout
-    while line := readline_with_timeout(stdout, timeout=remaining_time(deadline)):
+    while line := readline_with_timeout(
+        stdout,
+        timeout=remaining_time(deadline)
+    ):
         _logger.debug("Paper Muncher request line: %s", line.rstrip())
         if line == b"\r\n":
             return

@@ -11,13 +11,16 @@ from odoo.addons.base_report_paper_muncher.engine import (
     can_use_paper_muncher,
     rendered,
 )
-from odoo.addons.base_report_paper_muncher.engine.utils.html import (
-    patch_html_etree,
-)
 
 
 REPORT_HEADER_ID = 'minimal_layout_report_headers'
 REPORT_FOOTER_ID = 'minimal_layout_report_footers'
+REPORT_LOCAL_CSS_BLOCK = '''<link
+    type="text/css"
+    rel="stylesheet"
+    href="/base_report_paper_muncher/static/src/css/%(css)s.css"
+/>
+'''
 
 
 class IrActionsReport(models.Model):
@@ -67,6 +70,25 @@ class IrActionsReport(models.Model):
             node.getparent().remove(node)
             footer_node.append(node)
 
+        if (header_len := len(header_node)) \
+            and (footer_len := len(footer_node)
+        ):
+            pm_style = REPORT_LOCAL_CSS_BLOCK % {
+                'css': 'header_and_footer',
+            }
+        elif header_len:
+            pm_style = REPORT_LOCAL_CSS_BLOCK % {
+                'css': 'header_and_footer_counter',
+            }
+        elif footer_len:
+            pm_style = REPORT_LOCAL_CSS_BLOCK % {
+                'css': 'footer',
+            }
+        else:
+            pm_style = REPORT_LOCAL_CSS_BLOCK % {
+                'css': 'footer_counter',
+            }
+
         # Retrieve bodies
         for node in root.xpath(match_css_class.format('article')):
             if node.get('data-oe-lang'):
@@ -78,6 +100,12 @@ class IrActionsReport(models.Model):
                     'report_xml_id': self.xml_id,
                     'debug': self.env.context.get("debug"),
                 }, raise_if_not_found=False)
+
+            body = body.replace(
+                Markup('<head>'),
+                Markup('<head>\n' + pm_style)
+            )
+
             if node.get('data-oe-model') == report_model:
                 documents_by_html_id[int(node.get('data-oe-id', 0))].append(body)
             else:
@@ -132,7 +160,9 @@ class IrActionsReport(models.Model):
                 ) as (file_stream, _unused_stream):
                     if mode == 'print':
                         pdf_file = self.post_process_pm_pdf_stream(
-                            file_stream, document_id, documents_by_html_id)
+                            file_stream,
+                            document_id,
+                            documents_by_html_id)
 
     def _render_qweb_pdf_prepare_streams_paper_muncher(
         self, report_ref, data, res_ids=None
