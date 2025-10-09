@@ -121,13 +121,6 @@ class StockMove(models.Model):
     def _get_all_related_sm(self, product):
         return super()._get_all_related_sm(product) | self.filtered(lambda m: m.sale_line_id.product_id == product)
 
-    def _prepare_procurement_values(self):
-        res = super()._prepare_procurement_values()
-        # to pass sale_line_id fom SO to MO in mto
-        if self.sale_line_id:
-            res['sale_line_id'] = self.sale_line_id.id
-        return res
-
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"

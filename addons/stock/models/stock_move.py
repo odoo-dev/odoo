@@ -1661,7 +1661,7 @@ Please change the quantity done or the rounding precision in your settings.""",
 
         product_id = self.product_id.with_context(lang=self._get_lang())
         dates_info = {'date_planned': self._get_mto_procurement_date()}
-        route = []
+        route =[]
         if self.location_id.warehouse_id and self.location_id.warehouse_id.lot_stock_id.parent_path in self.location_id.parent_path:
             dates_info = self.product_id._get_dates_info(self.date, self.location_id, route_ids=self.route_ids)
         warehouse = self.warehouse_id or self.picking_type_id.warehouse_id
@@ -1669,6 +1669,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             warehouse = self.env['stock.warehouse']
             route = self.route_ids or self.move_line_ids.result_package_id.package_type_id.route_ids
         move_dest_ids = False
+        route = self.route_ids
         if self.procure_method == "make_to_order":
             move_dest_ids = self
         return {
