@@ -3,7 +3,7 @@
 from collections import defaultdict
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command
 from odoo.tools import float_repr
 
@@ -157,9 +157,16 @@ class SaleOrderDiscount(models.TransientModel):
             for values in self._prepare_global_discount_so_lines(global_discount_base_lines)
         ]
 
+    def _check_amount_is_positive(self):
+        if self.discount_percentage <= 0:
+            raise UserError(self.env._('The value of the discount percentage must be positive.'))
+        elif self.discount_amount <= 0:
+            raise UserError(self.env._('The value of the discount amount must be positive.'))
+
     def action_apply_discount(self):
         self.ensure_one()
         self = self.with_company(self.company_id)
+        self._check_amount_is_positive()
         if self.discount_type == 'sol_discount':
             self.sale_order_id.order_line.write({'discount': self.discount_percentage * 100})
         else:
