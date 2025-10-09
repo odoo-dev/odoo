@@ -96,14 +96,17 @@ export class ImagePlugin extends Plugin {
                 isAvailable: isHtmlContentSupported,
             },
         ],
-        toolbar_namespaces: [
-            {
-                id: "image",
-                isApplied: (targetedNodes) =>
+        toolbar_namespace_providers: [
+            (targetedNodes) => {
+                if (
+                    targetedNodes.length &&
                     targetedNodes.every(
                         // All nodes should be images or its ancestors
                         (node) => node.nodeName === "IMG" || node.querySelector?.("img")
-                    ),
+                    )
+                ) {
+                    return "image";
+                }
             },
         ],
         toolbar_groups: [

@@ -151,6 +151,7 @@ export class ToolbarPlugin extends Plugin {
         user_commands: {
             id: "expandToolbar",
             run: () => {
+                console.log(">> expandToolbar command");
                 this.isToolbarExpanded = true;
                 this.updateToolbar();
             },
@@ -167,8 +168,16 @@ export class ToolbarPlugin extends Plugin {
             icon: "oi-ellipsis-v",
         },
         toolbar_namespaces: [
-            withSequence(99, { id: "compact", isApplied: () => !this.isToolbarExpanded }),
-            withSequence(100, { id: "expanded", isApplied: () => true }),
+            withSequence(5, {
+                id: "expanded",
+                // expanded namespace is managed in _updateToolbar() because it relies on
+                // the compact namespace state
+                isApplied: () => false,
+            }),
+            withSequence(100, {
+                id: "compact",
+                isApplied: this.isCompactToolbarVisible.bind(this),
+            }),
         ],
     };
 
@@ -335,24 +344,73 @@ export class ToolbarPlugin extends Plugin {
     }
 
     /**
+     * TODO : rewrite
      * Different handlers might call updateToolbar (e.g. step added and
      * selection change) in the same tick. To avoid unnecessary updates, we
      * batch the calls.
      */
     updateToolbar = debounce(this._updateToolbar, 0, { trailing: true });
     _updateToolbar(selectionData = this.dependencies.selection.getSelectionData()) {
-        const targetedNodes = this.getFilteredTargetedNodes();
-        this.updateNamespace(targetedNodes);
-        this.updateToolbarVisibility(selectionData, targetedNodes);
-        if (!this.overlay.isOpen) {
-            return;
+        console.group("_updateToolbar");
+
+        this.getResource("can_display_toolbar").every((fn) =>
+            console.warn("!!! deprecated can_display_toolbar resource")
+        );
+        this.getResource("collapsed_selection_toolbar_predicate").some((fn) =>
+            console.warn("!!! deprecated collapsed_selection_toolbar_predicate resource")
+        );
+
+        let currentNamespace = null;
+        // Prevent toolbar to open if the selection is not in the editable area,
+        // or if the selection is protected or protecting.
+        let toolbarAllowed =
+            selectionData.currentSelectionIsInEditable &&
+            !selectionData.documentSelectionIsProtected &&
+            !selectionData.documentSelectionIsProtecting;
+        // Prevent toolbar to open if the selection is only non-editable nodes.
+        const targetedNodes = this.dependencies.selection.getTargetedNodes();
+        if (targetedNodes.every((node) => !this.dependencies.selection.isNodeEditable(node))) {
+            toolbarAllowed = false;
         }
-        this.updateButtonsStates(selectionData.editableSelection, targetedNodes);
+        let filteredtargetedNodes = [];
+        // loop over the namespaces, ordered by priority, and find the first one that should apply
+        if (toolbarAllowed) {
+            filteredtargetedNodes = this.getFilteredTargetedNodes(targetedNodes);
+            for (const ns of this.getResource("toolbar_namespaces")) {
+                const isApplied = ns.isApplied(
+                    filteredtargetedNodes,
+                    selectionData.editableSelection
+                );
+                console.log("check namespace [", ns.id, "], result =", isApplied);
+                if (isApplied) {
+                    currentNamespace = ns.id;
+                    break;
+                }
+            }
+        }
+        // if the current namespace is compact, but the toolbar is expanded, we switch to expanded
+        if (this.isToolbarExpanded && currentNamespace === "compact") {
+            currentNamespace = "expanded";
+        }
+        this.state.namespace = currentNamespace;
+        // If the current selection found a valid namespace, update the toolbar.
+        // otherwise, close it.
+        if (this.state.namespace) {
+            console.log("open toolbar with namespace : ", currentNamespace);
+            this.state.namespace = currentNamespace;
+            // Do not reposition the toolbar if it's already open.
+            if (!this.overlay.isOpen) {
+                this.overlay.open({ props: this.toolbarProps });
+            }
+            this.updateButtonsStates(selectionData.editableSelection, filteredtargetedNodes);
+        } else if (this.overlay.isOpen && !this.shouldPreventClosing()) {
+            this.closeToolbar();
+        }
+        console.groupEnd();
     }
 
-    getFilteredTargetedNodes() {
-        return this.dependencies.selection
-            .getTargetedNodes()
+    getFilteredTargetedNodes(targetedNodes) {
+        return targetedNodes
             .filter(
                 (node) =>
                     this.dependencies.selection.isNodeEditable(node) &&
@@ -365,41 +423,25 @@ export class ToolbarPlugin extends Plugin {
             });
     }
 
-    updateToolbarVisibility(selectionData, targetedNodes) {
-        if (this.shouldBeVisible(selectionData, targetedNodes)) {
-            // Do not reposition the toolbar if it's already open.
-            if (!this.overlay.isOpen) {
-                this.overlay.open({ props: this.toolbarProps });
-            }
-        } else if (this.overlay.isOpen && !this.shouldPreventClosing()) {
-            this.closeToolbar();
-        }
-    }
-
-    shouldBeVisible(selectionData, targetedNodes) {
-        const inEditable =
-            selectionData.currentSelectionIsInEditable &&
-            !selectionData.documentSelectionIsProtected &&
-            !selectionData.documentSelectionIsProtecting;
-        if (!inEditable) {
-            return false;
-        }
-        const canDisplayToolbar = this.getResource("can_display_toolbar").every((fn) =>
-            fn(this.state.namespace)
-        );
-        if (!canDisplayToolbar) {
-            return false;
-        }
+    isCompactToolbarVisible(targetedNodes, editableSelection) {
         if (this.isMobileToolbar) {
             return true;
         }
-        const isCollapsed = selectionData.editableSelection.isCollapsed;
+
+        const isCollapsed = editableSelection.isCollapsed;
         if (isCollapsed) {
-            return this.getResource("collapsed_selection_toolbar_predicate").some((fn) =>
-                fn(selectionData)
-            );
+            return false;
         }
-        return !!targetedNodes.length;
+        // Only allow the toolbar to open if the selection contains visible selected characters.
+        const selectionText = editableSelection.textContent();
+        const textCleaned = selectionText.replace(/(\r\n|\n|\r|\u200B)/gm, "");
+        if (textCleaned.length) {
+            return true;
+        }
+        // Even without textContent we display the toolbar if the selection contains a <br>
+        return targetedNodes.some(
+            (node) => node.nodeType === Node.ELEMENT_NODE && node.tagName === "BR"
+        );
     }
 
     shouldPreventClosing() {
@@ -484,6 +526,7 @@ export class ToolbarPlugin extends Plugin {
     }
 
     closeToolbar() {
+        console.log(" > close toolbar");
         this.overlay.close();
         this.isToolbarExpanded = false;
     }
