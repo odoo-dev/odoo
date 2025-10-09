@@ -325,6 +325,11 @@ class SaleOrder(models.Model):
     show_update_pricelist = fields.Boolean(
         string="Has Pricelist Changed", store=False)  # True if the pricelist was changed
 
+    # filter related fields
+    is_unfulfilled = fields.Boolean(
+        string="Unfulfilled Orders", compute='_compute_is_unfulfilled', search='_search_is_unfulfilled',
+    )
+
     _date_order_id_idx = models.Index("(date_order desc, id desc)")
 
     #=== COMPUTE METHODS ===#
@@ -527,6 +532,36 @@ class SaleOrder(models.Model):
             order.amount_untaxed = tax_totals['base_amount_currency']
             order.amount_tax = tax_totals['tax_amount_currency']
             order.amount_total = tax_totals['total_amount_currency']
+
+    @api.depends(
+        'order_line.qty_delivered',
+        'order_line.product_uom_qty',
+    )
+    def _compute_is_unfulfilled(self):
+        for order in self:
+            order.is_unfulfilled = (
+                any(
+                    line.qty_delivered < line.product_uom_qty
+                    for line in order.order_line
+                )
+                and order.state == 'sale'
+            )
+
+    def _search_is_unfulfilled(self, operator, value):
+        if operator not in ('=', '!='):
+            return NotImplemented
+
+        operator = 'any' if operator == '=' else 'not any'
+
+        line_domain = Domain.custom(
+            to_sql=lambda model, alias, query: SQL(
+                '%s < %s',
+                model._field_to_sql(alias, 'qty_delivered', query),
+                model._field_to_sql(alias, 'product_uom_qty', query),
+            ),
+        )
+
+        return Domain('state', '=', 'sale') & Domain('order_line', operator, line_domain)
 
     def _add_base_lines_for_early_payment_discount(self):
         """

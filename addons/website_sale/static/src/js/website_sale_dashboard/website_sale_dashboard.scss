@@ -1,0 +1,73 @@
+.o_dashboard_card {
+    min-width: 120px;
+    min-height: 90px;
+    align-content: center;
+}
+
+.o_purple_card {
+    background-color: $purple-300;
+}
+
+.o_orange_card {
+    background-color: $orange-300;
+}
+
+.o_blue_card {
+    background-color: $blue-300;
+}
+
+@media (max-width: 768px) {
+    .o_website_sale_dashboard {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 1.5rem !important;
+    }
+
+    /* Left Section: 3 cards in one row */
+    .o_left_section {
+        flex-direction: row !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+
+    /* Right Section: DateFilterButton first, then metrics in one row */
+    .o_right_section {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 1rem !important;
+    }
+
+    .o_date_filter_wrapper {
+        order: -1;
+        justify-content: center !important;
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .o_cards_container {
+        flex-direction: row !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 0.8rem !important;
+    }
+
+    /* Card Sizing */
+    .o_dashboard_card {
+        width: 90px !important;
+        max-width: 130px !important;
+        text-align: center !important;
+    }
+
+    /* Font Adjustments */
+    .o_dashboard_card_data {
+        font-size: 1.1rem !important;
+    }
+
+    .o_dashboard_card_text {
+        margin-top: 4px;
+        font-size: 0.7rem !important;
+    }
+}

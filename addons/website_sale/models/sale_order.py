@@ -9,7 +9,7 @@ from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
 from odoo.http import request
-from odoo.tools import float_is_zero
+from odoo.tools import float_is_zero, float_round
 
 from odoo.addons.website_sale.models.website import (
     FISCAL_POSITION_SESSION_CACHE_KEY,
@@ -899,3 +899,150 @@ class SaleOrder(models.Model):
         """Recompute taxes and prices for the current cart."""
         self._recompute_taxes()
         self._recompute_prices()
+
+    @api.model
+    def retrieve_dashboard(self, period):
+        """
+        Retrieve eCommerce dashboard statistics for a given period.
+
+        The data includes both period-based figures (total visitors, total sales, total orders)
+        and global order counts (to fulfill, to confirm, to invoice).
+
+        :param str period: Identifier for the selected time period.
+        :return: A dictionary containing dashboard statistics.
+        :rtype: dict
+        """
+        # Shape of the return value
+        matrix = {
+            'current_period': {
+                'total_visitors': 0,
+                'total_sales': 0.0,
+                'total_orders': 0,
+            },
+            'period_gain': {
+                'total_visitors': 0,
+                'total_sales': 0,
+                'total_orders': 0,
+            },
+            'overall': {
+                'to_fulfill': 0,
+                'to_confirm': 0,
+                'to_invoice': 0,
+            },
+        }
+
+        # Build domain for the given period
+        ecommerce_orders_domain = Domain('website_id', '!=', False) & Domain('state', '=', 'sale')
+        order_period_domain = self._get_period_domain(period, 'date_order') & ecommerce_orders_domain
+        order_previous_period_domain = self._get_previous_period_domain(period, 'date_order') & ecommerce_orders_domain
+        visitor_period_domain = self._get_period_domain(period, 'last_connection_datetime')
+        visitor_previous_period_domain = self._get_previous_period_domain(period, 'last_connection_datetime')
+
+        if order_period_domain or visitor_period_domain or order_previous_period_domain or visitor_previous_period_domain:
+            # Compute period-based figures
+            current_period_order_data = self._get_orders_period_data(order_period_domain)
+            current_period_visitor_data = self._get_visitors_period_data(visitor_period_domain)
+            matrix['current_period']['total_sales'] = current_period_order_data['total_sales']
+            matrix['current_period']['total_orders'] = current_period_order_data['total_orders']
+            matrix['current_period']['total_visitors'] = current_period_visitor_data['total_visitors']
+
+            previous_period_order_data = self._get_orders_period_data(order_previous_period_domain)
+            previous_period_visitor_data = self._get_visitors_period_data(visitor_previous_period_domain)
+            matrix['period_gain']['total_sales'] = (
+                round(
+                    (
+                        (
+                            current_period_order_data['total_sales']
+                            - previous_period_order_data['total_sales']
+                        )
+                        / previous_period_order_data['total_sales']
+                    )
+                    * 100
+                )
+                if previous_period_order_data.get('total_sales')
+                else None
+            )
+            matrix['period_gain']['total_orders'] = (
+                round(
+                    (
+                        (
+                            current_period_order_data['total_orders']
+                            - previous_period_order_data['total_orders']
+                        )
+                        / previous_period_order_data['total_orders']
+                    )
+                    * 100
+                )
+                if previous_period_order_data.get('total_orders')
+                else None
+            )
+            matrix['period_gain']['total_visitors'] = (
+                round(
+                    (
+                        (
+                            current_period_visitor_data['total_visitors']
+                            - previous_period_visitor_data['total_visitors']
+                        )
+                        / previous_period_visitor_data['total_visitors']
+                    )
+                    * 100
+                )
+                if previous_period_visitor_data.get('total_visitors')
+                else None
+            )
+
+        # Compute overall counts
+        matrix['overall']['to_fulfill'] = self.search_count(
+            Domain('is_unfulfilled', '=', True) & ecommerce_orders_domain,
+        )
+        matrix['overall']['to_confirm'] = self.search_count(
+            Domain('state', '=', 'sent') & Domain('website_id', '!=', False),
+        )
+        matrix['overall']['to_invoice'] = self.search_count(
+            Domain('invoice_status', '=', 'to invoice') & ecommerce_orders_domain,
+        )
+
+        return matrix
+
+    def _get_period_domain(self, period, field):
+        if period == 'last_7_days':
+            return Domain(field, '>', 'today -7d +1d')
+        if period == 'last_30_days':
+            return Domain(field, '>', 'today -30d +1d')
+        if period == 'last_90_days':
+            return Domain(field, '>', 'today -90d +1d')
+        if period == 'last_365_days':
+            return Domain(field, '>', 'today -365d +1d')
+
+        return False
+
+    def _get_previous_period_domain(self, period, field):
+        if period == 'last_7_days':
+            return Domain(field, '>', 'today -14d +1d') & Domain(field, '<', 'today -7d +1d')
+        if period == 'last_30_days':
+            return Domain(field, '>', 'today -60d +1d') & Domain(field, '<', 'today -30d +1d')
+        if period == 'last_90_days':
+            return Domain(field, '>', 'today -180d +1d') & Domain(field, '<', 'today -90d +1d')
+        if period == 'last_365_days':
+            return Domain(field, '>', 'today -730d +1d') & Domain(field, '<', 'today -365d +1d')
+
+        return False
+
+    def _get_orders_period_data(self, period_domain):
+        aggregated_order_data = self._read_group(
+            domain=period_domain,
+            aggregates=['amount_total:sum', '__count'],
+        )
+        total_sales, total_orders = aggregated_order_data[0]
+
+        return {
+            'total_sales': float_round(total_sales, precision_rounding=0.01),
+            'total_orders': total_orders,
+        }
+
+    def _get_visitors_period_data(self, period_domain):
+        visitor_count = self.env['website.visitor'].search_count(period_domain)
+
+        return {
+            'total_visitors': visitor_count,
+        }

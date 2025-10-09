@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="website_sale.DateFilterButton">
+        <Dropdown navigationOptions="{ 'shouldFocusChildInput': false }">
+            <button class="btn btn-secondary">
+                <i class="fa fa-calendar me-2"/>
+                <span t-esc="props.selectedFilter.label"/>
+            </button>
+            <t t-set-slot="content">
+                <t t-foreach="dateFilters" t-as="filter" t-key="filter.id">
+                    <DropdownItem
+                        tag="'div'"
+                        class="{ 'selected': props.selectedFilter.id === filter.id, 'd-flex justify-content-between': true }"
+                        closingMode="'none'"
+                        onSelected="() => this.props.update(filter)"
+                    >
+                        <div t-esc="filter.label"/>
+                    </DropdownItem>
+                </t>
+            </t>
+        </Dropdown>
+    </t>
+</templates>
