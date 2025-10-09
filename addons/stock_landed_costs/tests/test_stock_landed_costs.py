@@ -1,7 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo.addons.stock_landed_costs.tests.common import TestStockLandedCostsCommon
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
@@ -9,7 +7,6 @@ from odoo import fields
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestStockLandedCosts(TestStockLandedCostsCommon):
 
     def test_stock_landed_costs(self):
@@ -34,23 +31,23 @@ class TestStockLandedCosts(TestStockLandedCostsCommon):
             'is_storable': True,
         })
 
-        self.assertEqual(product_landed_cost_1.value_svl, 0)
-        self.assertEqual(product_landed_cost_1.quantity_svl, 0)
-        self.assertEqual(product_landed_cost_2.value_svl, 0)
-        self.assertEqual(product_landed_cost_2.quantity_svl, 0)
+        self.assertEqual(product_landed_cost_1.total_value, 0)
+        self.assertEqual(product_landed_cost_1.qty_available, 0)
+        self.assertEqual(product_landed_cost_2.total_value, 0)
+        self.assertEqual(product_landed_cost_2.qty_available, 0)
 
         picking_default_vals = self.env['stock.picking'].default_get(list(self.env['stock.picking'].fields_get()))
 
         # I create 2 picking moving those products
         vals = dict(picking_default_vals, **{
             'name': 'LC_pick_1',
-            'picking_type_id': self.warehouse.out_type_id.id,
+            'picking_type_id': self.warehouse.in_type_id.id,
             'move_ids': [(0, 0, {
                 'product_id': product_landed_cost_1.id,
                 'product_uom_qty': 15,
                 'product_uom': self.ref('uom.product_uom_unit'),
-                'location_id': self.warehouse.lot_stock_id.id,
-                'location_dest_id': self.ref('stock.stock_location_customers'),
+                'location_id': self.env.ref('stock.stock_location_suppliers').id,
+                'location_dest_id': self.warehouse.lot_stock_id.id,
             })],
         })
         picking_landed_cost_1 = self.env['stock.picking'].new(vals)
@@ -69,13 +66,13 @@ class TestStockLandedCosts(TestStockLandedCostsCommon):
 
         vals = dict(picking_default_vals, **{
             'name': 'LC_pick_2',
-            'picking_type_id': self.warehouse.out_type_id.id,
+            'picking_type_id': self.warehouse.in_type_id.id,
             'move_ids': [(0, 0, {
                 'product_id': product_landed_cost_2.id,
                 'product_uom_qty': 10,
                 'product_uom': self.ref('uom.product_uom_unit'),
-                'location_id': self.warehouse.lot_stock_id.id,
-                'location_dest_id': self.ref('stock.stock_location_customers'),
+                'location_id': self.env.ref('stock.stock_location_suppliers').id,
+                'location_dest_id': self.warehouse.lot_stock_id.id,
             })],
         })
         picking_landed_cost_2 = self.env['stock.picking'].new(vals)
@@ -90,10 +87,12 @@ class TestStockLandedCosts(TestStockLandedCostsCommon):
         picking_landed_cost_2.move_ids.quantity = 10
         picking_landed_cost_2.button_validate()
 
-        self.assertEqual(product_landed_cost_1.value_svl, 0)
-        self.assertEqual(product_landed_cost_1.quantity_svl, -5)
-        self.assertEqual(product_landed_cost_2.value_svl, 0)
-        self.assertEqual(product_landed_cost_2.quantity_svl, -10)
+        product_landed_cost_1._invalidate_cache()
+        product_landed_cost_2._invalidate_cache()
+        self.assertEqual(product_landed_cost_1.total_value, 0)
+        self.assertEqual(product_landed_cost_1.qty_available, 5)
+        self.assertEqual(product_landed_cost_2.total_value, 0)
+        self.assertEqual(product_landed_cost_2.qty_available, 10)
 
         # I create a landed cost for those 2 pickings
         default_vals = self.env['stock.landed.cost'].default_get(list(self.env['stock.landed.cost'].fields_get()))
@@ -153,14 +152,16 @@ class TestStockLandedCosts(TestStockLandedCostsCommon):
         # I check that the landed cost is now "Closed" and that it has an accounting entry
         self.assertEqual(stock_landed_cost_1.state, "done")
         self.assertTrue(stock_landed_cost_1.account_move_id)
-        self.assertEqual(len(stock_landed_cost_1.account_move_id.line_ids), 48)
+        self.assertEqual(len(stock_landed_cost_1.account_move_id.line_ids), 16)
 
-        lc_value = sum(stock_landed_cost_1.account_move_id.line_ids.filtered(lambda aml: aml.account_id.name.startswith('Expenses')).mapped('debit'))
-        product_value = abs(product_landed_cost_1.value_svl) + abs(product_landed_cost_2.value_svl)
+        lc_value = sum(stock_landed_cost_1.account_move_id.line_ids.filtered(lambda aml: aml.account_id.name.startswith('default_account_stock_valuation')).mapped('debit'))
+        product_landed_cost_1._invalidate_cache()
+        product_landed_cost_2._invalidate_cache()
+        product_value = abs(product_landed_cost_1.total_value) + abs(product_landed_cost_2.total_value)
         self.assertEqual(lc_value, product_value)
 
-        self.assertEqual(len(picking_landed_cost_1.move_ids.stock_valuation_layer_ids), 5)
-        self.assertEqual(len(picking_landed_cost_2.move_ids.stock_valuation_layer_ids), 5)
+        self.assertEqual(picking_landed_cost_1.move_ids.value, 110)
+        self.assertEqual(picking_landed_cost_2.move_ids.value, 320)
 
     def test_aml_account_selection(self):
         """
@@ -173,7 +174,7 @@ class TestStockLandedCosts(TestStockLandedCostsCommon):
 
         for valuation in ['periodic', 'real_time']:
             self.landed_cost.categ_id.property_valuation = valuation
-            account_name = 'stock_input' if valuation == 'real_time' else 'expense'
+            account_name = 'expense'
             account = self.landed_cost.product_tmpl_id.get_product_accounts()[account_name]
             po = self.env['purchase.order'].create({
                 'partner_id': self.partner_a.id,
