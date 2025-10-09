@@ -414,7 +414,9 @@ class Website(models.Model):
     def _check_domain(self):
         for record in self:
             try:
-                urlparse(record.domain)
+                parsed = urlparse(record.domain)
+                if record.domain and any(seg in ('.', '..') for seg in (parsed.path or '').split('/')):
+                    raise ValidationError(_("The domain path cannot contain '.' or '..' segments."))
             except ValueError:
                 raise ValidationError(_("The provided website domain is not a valid URL."))
 
