@@ -320,7 +320,7 @@ class Survey(http.Controller):
                         answer_sudo,
                         answer_sudo.last_displayed_page_id.id if answer_sudo.last_displayed_page_id else 0)
                     # fallback to skipped page so that there is a next_page_or_question otherwise this should be a submit
-                    if not next_page_or_question:
+                    if not next_page_or_question and answer_sudo.survey_first_submitted:
                         next_page_or_question = answer_sudo._get_next_skipped_page_or_question()
 
                 if next_page_or_question:
@@ -329,6 +329,9 @@ class Survey(http.Controller):
                     else:
                         survey_last = survey_sudo._is_last_page_or_question(answer_sudo, next_page_or_question)
                     data.update({'survey_last': survey_last})
+                else:
+                    next_page_or_question = answer_sudo.last_displayed_page_id  # current page
+                    data.update({'survey_last': True})
 
             if answer_sudo.is_session_answer and next_page_or_question.is_time_limited:
                 data.update({
@@ -568,7 +571,8 @@ class Survey(http.Controller):
                     next_page = request.env['survey.question']
                 else:
                     next_page = survey_sudo._get_next_page_or_question(answer_sudo, page_or_question_id)
-                if not next_page:
+                is_auto_submit = post.get('is_auto_submit', False)
+                if not next_page and not is_auto_submit:
                     if survey_sudo.users_can_go_back and answer_sudo.user_input_line_ids.filtered(
                             lambda a: a.skipped and a.question_id.constr_mandatory):
                         answer_sudo.write({

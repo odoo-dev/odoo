@@ -177,14 +177,11 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
         this._applyCommentAreaVisibility($choiceItemGroup);
         const isQuestionComplete = this._checkConditionalQuestionsConfiguration($target, $choiceItemGroup);
         if (isQuestionComplete && this.options.usersCanGoBack) {
-            const isLastQuestion = this.$('button[value="finish"]').length !== 0;
-            if (!isLastQuestion) {
-                const questionHasComment = $target.hasClass('o_survey_js_form_other_comment') || $target
-                    .closest('.o_survey_form_choice')
-                    .find('.o_survey_comment').length !== 0;
-                if (!questionHasComment) {
-                    this._submitForm({'nextSkipped': $choiceItemGroup.data('isSkippedQuestion')});
-                }
+            const questionHasComment = $target.hasClass('o_survey_js_form_other_comment') || $target
+                .closest('.o_survey_form_choice')
+                .find('.o_survey_comment').length !== 0;
+            if (!questionHasComment) {
+                this._submitForm({'nextSkipped': $choiceItemGroup.data('isSkippedQuestion'), 'isAutoSubmit': true});
             }
         }
     },
@@ -382,6 +379,9 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend(SurveyPreloa
         }
         if (options.nextSkipped) {
             params.next_skipped_page_or_question = true;
+        }
+        if (options.isAutoSubmit) {
+        params.is_auto_submit = true;
         }
         var route = "/survey/submit";
 
