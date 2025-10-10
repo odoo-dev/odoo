@@ -19,4 +19,29 @@
         <field name='interval_type'>days</field>
         <field name="priority">8</field>
     </record>
+
+    <record id="ir_cron_mega_sale_order" model="ir.actions.server">
+        <field name="name">Create Mega Sale.order</field>
+        <field name="model_id" ref="model_ir_actions_server"/>
+        <field name="binding_model_id" ref="model_ir_actions_server"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+try:
+    so = env['sale.order'].sudo().create({'name': 'toto', 'partner_id': env.user.partner_id.id})
+    last_id = env['sale.order.line'].sudo().search_read([], order="id desc", limit=1)[0]['id']
+
+    env.cr.execute('SELECT * FROM sale_order_line LIMIT 1')
+    row = env.cr.fetchone()[2:]
+
+    for r in range(0,10000):
+        last_id += 1
+        values = (last_id, so.id) + row
+        env.cr.execute('INSERT INTO sale_order_line VALUES %s', (values,))
+    record.message_post(body=f'Sale order {so.id}')
+except Exception as e:
+    env.cr.rollback()
+    record.message_post(body=f'ERROR: {e}')
+        </field>
+    </record>
 </odoo>

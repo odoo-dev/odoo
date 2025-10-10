@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <!-- Top-level Menu -->
+    <menuitem id="paper_muncher_root_menu"
+              name="Paper Muncher Playground"
+              sequence="1"/>
+
+    <!-- Action -->
+    <record id="paper_muncher_playground_action" model="ir.actions.act_window">
+        <field name="name">Paper Muncher Playground</field>
+        <field name="res_model">paper.muncher.playground</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'default_name': 'Paper Muncher Playground'}</field>
+    </record>
+
+    <!-- Child Menu with Action -->
+    <menuitem id="paper_muncher_playground_menu"
+              name="Playground"
+              parent="paper_muncher_root_menu"
+              action="paper_muncher_playground_action"
+              sequence="10"/>
+
+    <!-- list View -->
+    <record id="paper_muncher_playground_view_list" model="ir.ui.view">
+        <field name="name">paper.muncher.playground.list</field>
+        <field name="model">paper.muncher.playground</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Paper Muncher Playground">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="paper_muncher_playground_view_form" model="ir.ui.view">
+        <field name="name">paper.muncher.playground.form</field>
+        <field name="model">paper.muncher.playground</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Paper Muncher Playground">
+                <header>
+                    <button name="action_compute_pdf"
+                            type="object"
+                            string="Render PDF"
+                            class="btn-primary"
+                            icon="fa-file-pdf-o"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="html" widget="code" options="{'mode': 'xml'}"/>
+                        <field name="paper_format"/>
+                        <field name="is_landscape"/>
+                        <field name="pdf" filename="name"/>
+                    </group>
+                </sheet>
+                <!-- PDF Preview -->
+
+                <div class="o_preview" style="width: 50%;">
+                    <field  name="pdf" widget="pdf_viewer" invisible="not pdf"/>
+                </div>
+
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -29,3 +29,18 @@
         top: -50%;
     }
 }
+
+.o_table_boxed table:not(.o_ignore_layout_styling)::before,
+.o_table_boxed-rounded table:not(.o_ignore_layout_styling)::before {
+    border: none;
+}
+
+.table-wrapper {
+    border-radius: 0.9rem 0.9rem 0 0.9rem;
+    overflow: hidden;
+    border: 1px solid #374151;
+}
+
+.table {
+    margin-bottom: 0;
+}

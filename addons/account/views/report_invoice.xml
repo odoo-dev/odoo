@@ -394,9 +394,7 @@
             <t t-set="same_tax_base" t-value="tax_totals['same_tax_base']"/>
             <t t-foreach="tax_totals['subtotals']" t-as="subtotal">
                 <tr class="o_subtotal">
-                    <td>
-                        <span t-out="subtotal['name']">Untaxed Amount</span>
-                    </td>
+                    <td><span t-out="subtotal['name']">Untaxed Amount</span></td>
                     <td class="text-end">
                         <span t-att-class="oe_subtotal_footer_separator"
                               t-out="subtotal['base_amount_currency']"
@@ -408,9 +406,7 @@
                 <t t-foreach="subtotal['tax_groups']" t-as="tax_group">
                     <tr class="o_taxes">
                         <t t-if="same_tax_base or tax_group['display_base_amount_currency'] is None">
-                            <td style="max-width: 200px;">
-                                <span t-out="tax_group['group_name']">Tax 15%</span>
-                            </td>
+                            <td style="max-width: 200px;"><span t-out="tax_group['group_name']">Tax 15%</span></td>
                             <td class="text-end o_price_total">
                                 <span class="text-nowrap"
                                       t-out="tax_group['tax_amount_currency']"

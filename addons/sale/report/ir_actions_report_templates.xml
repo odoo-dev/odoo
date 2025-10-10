@@ -72,6 +72,7 @@
             <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
 
             <div class="oe_structure"></div>
+            <div class="table-wrapper">
             <table class="o_has_total_table table o_main_table table-borderless">
                 <!-- In case we want to repeat the header, remove "display: table-row-group" -->
                 <thead style="display: table-row-group">
@@ -167,9 +168,15 @@
                     </t>
                 </tbody>
             </table>
+            </div>
             <div class="clearfix" name="so_total_summary">
                 <div id="total" class="row mt-n3" name="total">
-                    <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ms-auto">
+                    <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ms-auto " style="border: 1px solid #374151;
+                        border-top: 0px;
+                        padding-right: 0;
+                        padding-left: 0;
+                        margin-right: calc(var(--gutter-x) * .5);
+                        border-radius: 0 0 0.8rem 0.8rem;">
                         <table class="o_total_table table table-borderless">
                             <!-- Tax totals -->
                             <t t-call="sale.document_tax_totals">
