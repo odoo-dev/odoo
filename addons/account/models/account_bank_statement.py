@@ -175,7 +175,7 @@ class AccountBankStatement(models.Model):
     @api.depends('line_ids.journal_id')
     def _compute_journal_id(self):
         for statement in self:
-            statement.journal_id = statement.line_ids.journal_id
+            statement.journal_id = statement.line_ids.journal_id[:1]
 
     @api.depends('balance_end', 'balance_end_real', 'line_ids.amount', 'line_ids.state')
     def _compute_is_complete(self):
