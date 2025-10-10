@@ -19,26 +19,26 @@ $poll-color-map: (
     --poll-bg-opacity: #{$opacity};
 }
 
-@mixin o-discuss-poll() {
-    .o-discuss-Poll {
+@mixin o-mail-poll() {
+    .o-mail-Poll {
         @include o-poll-bg("secondary");
 
-        &.o-ongoing .o-discuss-PollOption.o-selected,
-        &.o-ongoing.o-showResults .o-discuss-PollOption.o-hasVotes {
+        &.o-ongoing .o-mail-PollOption.o-selected,
+        &.o-ongoing.o-showResults .o-mail-PollOption.o-hasVotes {
             @include o-poll-bg("o-action");
         }
 
-        &:not(.o-ongoing) .o-discuss-PollOption.o-winningOption {
+        &:not(.o-ongoing) .o-mail-PollOption.o-winningOption {
             @include o-poll-bg("o-brand-primary");
         }
 
-        &.o-showResults .o-discuss-PollOption {
+        &.o-showResults .o-mail-PollOption {
             --poll-bg-color: rgba(var(--poll-bg-r), var(--poll-bg-g), var(--poll-bg-b), var(--poll-bg-opacity));
             background: linear-gradient(to right, var(--poll-bg-color), var(--poll-bg-color)) no-repeat;
         }
     }
 
-    .o-discuss-PollOption {
+    .o-mail-PollOption {
         --poll-border-color: rgba(var(--poll-bg-r), var(--poll-bg-g), var(--poll-bg-b), 0.5);
         border: 1px solid var(--poll-border-color);
         background-size: 0%;
@@ -54,4 +54,4 @@ $poll-color-map: (
     }
 }
 
-@include o-discuss-poll();
+@include o-mail-poll();

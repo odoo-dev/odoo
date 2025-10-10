@@ -1,4 +1,4 @@
-.o-mail-Message-content:has(.o-discuss-Poll, .o-discuss-PollResult) {
+.o-mail-Message-content:has(.o-mail-Poll, .o-mail-PollResult) {
     flex-grow: 1;
     max-width: 500px;
 }

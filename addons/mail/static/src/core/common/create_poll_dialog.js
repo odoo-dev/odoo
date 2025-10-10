@@ -1,11 +1,11 @@
-import { CreatePollOptionDialog } from "@mail/discuss/core/common/create_poll_option_dialog";
+import { CreatePollOptionDialog } from "@mail/core/common/create_poll_option_dialog";
 
 import { Component, useState } from "@odoo/owl";
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { EmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 import { rpc } from "@web/core/network/rpc";
-import { useAutofocus } from "@web/core/utils/hooks";
+import { useAutofocus, useService } from "@web/core/utils/hooks";
 
 export class CreatePollDialog extends Component {
     static template = "mail.CreatePollDialog";
@@ -17,14 +17,15 @@ export class CreatePollDialog extends Component {
         this.state = useState({
             allowMultipleOptions: false,
             duration: "10",
-            options: [{ choice: "" }, { choice: "" }],
+            options: [{ label: "" }, { label: "" }],
             question: "",
             submitted: false,
         });
+        this.orm = useService("orm");
     }
 
     onClickAddOption() {
-        this.state.options.push({ choice: "" });
+        this.state.options.push({ label: "" });
     }
 
     onClickRemoveOption(index) {
@@ -36,12 +37,13 @@ export class CreatePollDialog extends Component {
         if (this.optionsMissing || this.questionMissing) {
             return;
         }
-        rpc("/discuss/poll/create", {
+        rpc("/mail/poll/create", {
             allow_multiple_options: this.state.allowMultipleOptions,
-            options: this.state.options.map(({ choice }) => choice).filter(Boolean),
-            channel_id: this.props.thread.id,
-            poll_duration: this.state.duration,
-            poll_question: this.state.question,
+            option_labels: this.state.options.map(({ label }) => label).filter(Boolean),
+            duration: this.state.duration,
+            question: this.state.question,
+            thread_id: this.props.thread.id,
+            thread_model: this.props.thread.model,
         });
         this.props.close();
     }
@@ -49,7 +51,7 @@ export class CreatePollDialog extends Component {
     get optionsMissing() {
         return (
             this.state.submitted &&
-            this.state.options.filter(({ choice }) => Boolean(choice.trim())).length < 2
+            this.state.options.filter(({ label }) => Boolean(label.trim())).length < 2
         );
     }
 
@@ -58,6 +60,6 @@ export class CreatePollDialog extends Component {
     }
 
     get canAddOption() {
-        return this.state.options.every(({ choice }) => Boolean(choice));
+        return this.state.options.every(({ label }) => Boolean(label));
     }
 }

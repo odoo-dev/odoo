@@ -30,10 +30,10 @@ export class CreatePollOptionDialog extends Component {
         useAutofocus({ refName: "root" });
         useEmojiPicker(this.pickerRef, {
             onSelect: (str) => {
-                const choice = this.props.model.choice;
-                const firstPart = choice.slice(0, this.props.model.start);
-                const secondPart = choice.slice(this.props.model.end, choice.length);
-                this.props.model.choice = firstPart + str + secondPart;
+                const label = this.props.model.label;
+                const firstPart = label.slice(0, this.props.model.start);
+                const secondPart = label.slice(this.props.model.end, label.length);
+                this.props.model.label = firstPart + str + secondPart;
                 this.selection.moveCursor((firstPart + str).length);
                 if (!this.ui.isSmall) {
                     this.ref.el.focus();

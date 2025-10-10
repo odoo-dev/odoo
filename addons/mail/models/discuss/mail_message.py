@@ -9,12 +9,12 @@ class MailMessage(models.Model):
 
     call_history_ids = fields.One2many("discuss.call.history", "start_call_message_id")
     channel_id = fields.Many2one("discuss.channel", compute="_compute_channel_id")
-    ended_poll_ids = fields.One2many("discuss.poll", "end_message_id")
+    ended_poll_ids = fields.One2many("mail.poll", "end_message_id")
     message_type = fields.Selection(
-        selection_add=[("discuss_poll", "Discuss Poll")],
-        ondelete={"discuss_poll": "cascade"},
+        selection_add=[("mail_poll", "Mail Poll")],
+        ondelete={"mail_poll": "cascade"},
     )
-    started_poll_ids = fields.One2many("discuss.poll", "start_message_id")
+    started_poll_ids = fields.One2many("mail.poll", "start_message_id")
 
     @api.depends("model", "res_id")
     def _compute_channel_id(self):
@@ -26,9 +26,6 @@ class MailMessage(models.Model):
 
     def _to_store_defaults(self, target):
         return super()._to_store_defaults(target) + [
-            # sudo - discuss.poll: reading poll of accessible message is allowed.
-            Store.Many("started_poll_ids", predicate=lambda m: m.message_type == "discuss_poll", sudo=True),
-            Store.Many("ended_poll_ids", predicate=lambda m: m.message_type == "discuss.poll", sudo=True),
             Store.Many(
                 "call_history_ids",
                 ["duration_hour", "end_dt"],

@@ -6,19 +6,19 @@ from odoo.fields import Domain
 from odoo.tools import format_list
 
 
-class DiscussPollOption(models.Model):
+class MailPollOption(models.Model):
     _description = "Poll option"
-    _name = "discuss.poll.option"
+    _name = "mail.poll.option"
 
-    choice = fields.Char(required=True)
     number_of_votes = fields.Integer(compute="_compute_number_of_votes")
-    poll_id = fields.Many2one("discuss.poll", ondelete="cascade", required=True, index=True)
+    option_label = fields.Char(required=True)
+    poll_id = fields.Many2one("mail.poll", ondelete="cascade", required=True, index=True)
     selected_by_self = fields.Boolean(compute="_compute_selected_by_self")
-    vote_ids = fields.One2many("discuss.poll.vote", "option_id")
+    vote_ids = fields.One2many("mail.poll.vote", "option_id")
     vote_percentage = fields.Integer(compute="_compute_vote_percentage")
 
-    _check_choice = models.Constraint(
-        "CHECK (TRIM(choice) <> '')", "Options must have a non-empty choice."
+    _check_option_label = models.Constraint(
+        "CHECK (TRIM(option_label) <> '')", "Options must have a non-empty option label."
     )
 
     def write(self, vals):
@@ -26,7 +26,7 @@ class DiscussPollOption(models.Model):
             raise UserError(
                 self.env._(
                     'Cannot change the poll linked to the following options: %(options)s.',
-                    options=format_list(self.env, self.mapped("choice")),
+                    options=format_list(self.env, self.mapped("option_label")),
                 )
             )
         return super().write(vals)
@@ -43,14 +43,14 @@ class DiscussPollOption(models.Model):
             domain &= Domain("guest_id", "=", guest.id)
         else:
             domain &= Domain("user_id", "=", self.env.user.id)
-        selected_options = self.env["discuss.poll.vote"].search_fetch(domain).option_id
+        selected_options = self.env["mail.poll.vote"].search_fetch(domain).option_id
         for option in self:
             option.selected_by_self = option in selected_options
 
     @api.depends("vote_ids")
     def _compute_number_of_votes(self):
         count_by_option = dict(
-            self.env["discuss.poll.vote"]._read_group(
+            self.env["mail.poll.vote"]._read_group(
                 [("option_id", "in", self.ids)], ["option_id"], ["__count"]
             )
         )
@@ -98,7 +98,7 @@ class DiscussPollOption(models.Model):
         fields = [
             "number_of_votes",
             "poll_id",
-            "choice",
+            "option_label",
             "vote_percentage",
         ]
         if target.is_current_user(self.env):

@@ -1083,6 +1083,9 @@ class MailMessage(models.Model):
             Store.Attr("reactions", value=lambda m: Store.Many(m.sudo().reaction_ids)),
             "record_name",  # keep for iOS app
             "res_id",  # keep for iOS app
+            # sudo - mail.poll: reading poll of accessible message is allowed.
+            Store.Many("started_poll_ids", predicate=lambda m: m.message_type == "mail_poll", sudo=True),
+            Store.Many("ended_poll_ids", predicate=lambda m: m.message_type == "mail.poll", sudo=True),
             "subject",
             # sudo: mail.message.subtype - reading subtype on accessible message is allowed
             Store.One("subtype_id", ["description"], sudo=True),

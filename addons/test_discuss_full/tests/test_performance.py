@@ -143,8 +143,6 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search mail_message_reaction
     #       - search mail_notification
     #       - search rating_rating
-    #       - search started_poll_ids
-    #       - search ended_poll_ids
     #       - fetch mail_notification
     #       - search mail_message_subtype
     #       - search discuss_call_history
@@ -156,7 +154,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch discuss_call_history
     #       - search mail_tracking_value
     #       - _compute_rating_stats
-    _query_count_discuss_channels = 66
+    _query_count_discuss_channels = 64
 
     def setUp(self):
         super().setUp()

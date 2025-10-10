@@ -1,13 +1,13 @@
 declare module "models" {
     import { ChannelMember as ChannelMemberClass } from "@mail/discuss/core/common/channel_member_model";
     import { DiscussChannel as DiscussChannelClass } from "@mail/discuss/core/common/discuss_channel_model";
-    import { DiscussPollModel as DiscussPollModelClass } from "@mail/discuss/core/common/discuss_poll_model";
-    import { DiscussPollOptionModel as DiscussPollOptionModelClass } from "@mail/discuss/core/common/discuss_poll_option_model";
+    import { MailPollModel as MailPollModelClass } from "@mail/core/common/mail_poll_model";
+    import { MailPollOptionModel as MailPollOptionModelClass } from "@mail/core/common/mail_poll_option_model";
 
     export interface ChannelMember extends ChannelMemberClass {}
     export interface DiscussChannel extends DiscussChannelClass {}
-    export interface DiscussPollModel extends DiscussPollModelClass {}
-    export interface DiscussPollOptionModel extends DiscussPollOptionModelClass {}
+    export interface MailPollModel extends MailPollModelClass {}
+    export interface MailPollOptionModel extends MailPollOptionModelClass {}
 
     export interface DiscussChannel {
         allowCalls: Readonly<boolean>;
@@ -63,7 +63,7 @@ declare module "models" {
     }
     export interface Message {
         channelMemberHaveSeen: Readonly<ChannelMember[]>;
-        ended_poll_ids: DiscussPollModel[];
+        ended_poll_ids: MailPollModel[];
         hasEveryoneSeen: boolean|undefined;
         hasNewMessageSeparator: boolean;
         hasSomeoneFetched: boolean|undefined;
@@ -80,8 +80,8 @@ declare module "models" {
         createGroupChat: (param0: { default_display_mode: string, partners_to: number[], name: string }) => Promise<Thread>;
         "discuss.channel": StaticMailRecord<DiscussChannel, typeof DiscussChannelClass>;
         "discuss.channel.member": StaticMailRecord<ChannelMember, typeof ChannelMemberClass>;
-        "discuss.poll": StaticMailRecord<DiscussPollModel, typeof DiscussPollModelClass>;
-        "discuss.poll.option": StaticMailRecord<DiscussPollOptionModel, typeof DiscussPollOptionModelClass>;
+        "mail.poll": StaticMailRecord<MailPollModel, typeof MailPollModelClass>;
+        "mail.poll.option": StaticMailRecord<MailPollOptionModel, typeof MailPollOptionModelClass>;
         fetchChannel: (channelId: number) => Promise<void>;
         getRecentChatPartnerIds: () => number[];
         onlineMemberStatuses: Readonly<string[]>;
@@ -154,7 +154,7 @@ declare module "models" {
     export interface Models {
         "discuss.channel": DiscussChannel;
         "discuss.channel.member": ChannelMember;
-        "discuss.poll": DiscussPollModel;
-        "discuss.poll.option": DiscussPollOptionModel;
+        "mail.poll": MailPollModel;
+        "mail.poll.option": MailPollOptionModel;
     }
 }

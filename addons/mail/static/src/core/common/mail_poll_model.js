@@ -4,25 +4,29 @@ import { Record } from "@mail/model/record";
 import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
 
-export class DiscussPollModel extends Record {
+export class MailPollModel extends Record {
     static id = "id";
-    static _name = "discuss.poll";
+    static _name = "mail.poll";
 
     /** @type {boolean|undefined} */
     allow_multiple_options;
     create_date = fields.Datetime();
     /** @type {number|undefined} */
     create_uid;
-    /** @type {number|undefined} */
-    poll_duration;
-    end_message_id = fields.One("mail.message");
     /** @type {number[undefined]} */
     id;
-    option_ids = fields.Many("discuss.poll.option");
+    end_message_id = fields.One("mail.message");
+    /** @type {number|undefined} */
+    poll_duration;
     /** @type {string|undefined} */
     poll_question;
+    option_ids = fields.Many("mail.poll.option");
     start_message_id = fields.One("mail.message");
-    winning_option_id = fields.One("discuss.poll.option");
+    winning_option_id = fields.One("mail.poll.option");
+
+    get createdBySelf() {
+        return this.create_uid === user.userId;
+    }
 
     get endDateTime() {
         return this.create_date.plus({ minutes: this.poll_duration });
@@ -36,16 +40,12 @@ export class DiscussPollModel extends Record {
         return this.option_ids.some((option) => option.selected_by_self);
     }
 
-    get createdBySelf() {
-        return this.create_uid === user.userId;
+    removeVote() {
+        rpc("/mail/poll/remove_vote", { poll_id: this.id });
     }
 
     async vote(optionIds) {
-        await rpc("/discuss/poll/vote", { poll_id: this.id, option_ids: optionIds });
-    }
-
-    removeVote() {
-        rpc("/discuss/poll/remove_vote", { poll_id: this.id });
+        await rpc("/mail/poll/vote", { poll_id: this.id, option_ids: optionIds });
     }
 }
-DiscussPollModel.register();
+MailPollModel.register();

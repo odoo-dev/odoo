@@ -6,16 +6,14 @@ from odoo.fields import Domain
 from odoo.tools import format_list
 
 
-class DiscussPollVote(models.Model):
+class MailPollVote(models.Model):
     _description = "Poll vote"
-    _name = "discuss.poll.vote"
+    _name = "mail.poll.vote"
 
-    user_id = fields.Many2one("res.users", ondelete="cascade")
     guest_id = fields.Many2one("mail.guest", ondelete="cascade")
     is_self_vote = fields.Boolean(compute="_compute_is_self_vote", search="_search_is_self_vote")
-    option_id = fields.Many2one(
-        "discuss.poll.option", ondelete="cascade", required=True, index=True
-    )
+    option_id = fields.Many2one("mail.poll.option", ondelete="cascade", required=True, index=True)
+    user_id = fields.Many2one("res.users", ondelete="cascade")
 
     _check_user_or_guest_set = models.Constraint(
         "CHECK (user_id IS NOT NULL OR guest_id IS NOT NULL)",
@@ -44,7 +42,7 @@ class DiscussPollVote(models.Model):
 
     @api.constrains("guest_id", "user_id")
     def _check_allow_multiple_options(self):
-        result = self.env["discuss.poll.vote"]._read_group(
+        result = self.env["mail.poll.vote"]._read_group(
             [
                 ("option_id.poll_id", "in", self.option_id.poll_id.ids),
                 ("option_id.poll_id.allow_multiple_options", "=", False),
@@ -53,7 +51,7 @@ class DiscussPollVote(models.Model):
             ["__count"],
             [("__count", ">", 1)],
         )
-        if failing_polls := self.env["discuss.poll"].browse([r[0].id for r in result]):
+        if failing_polls := self.env["mail.poll"].browse([r[0].id for r in result]):
             raise ValidationError(
                 self.env._('Cannot vote on poll "%(polls)s": only one vote is allowed per user.')
                 % {"polls": format_list(self.env, failing_polls.mapped("poll_question"))}

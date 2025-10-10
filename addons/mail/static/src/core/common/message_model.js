@@ -174,8 +174,8 @@ export class Message extends Record {
     needaction;
     starred = false;
     showTranslation = false;
-    ended_poll_ids = fields.Many("discuss.poll", { inverse: "end_message_id" });
-    started_poll_ids = fields.Many("discuss.poll", { inverse: "start_message_id" });
+    ended_poll_ids = fields.Many("mail.poll", { inverse: "end_message_id" });
+    started_poll_ids = fields.Many("mail.poll", { inverse: "start_message_id" });
 
     /**
      * True if the backend would technically allow edition
@@ -202,7 +202,12 @@ export class Message extends Record {
     }
 
     get editable() {
-        if (this.isEmpty || !this.allowsEdition) {
+        if (
+            this.isEmpty ||
+            !this.allowsEdition ||
+            this.started_poll_ids.length ||
+            this.ended_poll_ids.length
+        ) {
             return false;
         }
         return ["comment", "mail_poll"].includes(this.message_type);
@@ -349,7 +354,9 @@ export class Message extends Record {
             this.isBodyEmpty &&
             this.attachment_ids.length === 0 &&
             this.trackingValues.length === 0 &&
-            !this.subtype_id?.description
+            !this.subtype_id?.description &&
+            this.started_poll_ids.length === 0 &&
+            this.ended_poll_ids.length === 0
         );
     }
 
@@ -666,17 +673,21 @@ export class Message extends Record {
             )
         );
     }
-    async _removeFromServer() {
-        const data = await rpc("/mail/message/update_content", {
-            message_id: this.id,
-            update_data: this.removeParams,
-            ...this.thread.rpcParams,
-        });
-        this.store.insert(data);
-        return data;
-    }
+
     async remove({ removeFromThread = false } = {}) {
-        const data = await this._removeFromServer();
+        let data;
+        if (this.started_poll_ids.length || this.ended_poll_ids.length) {
+            await rpc("/mail/poll/delete", {
+                poll_id: this.started_poll_ids[0]?.id ?? this.ended_poll_ids[0]?.id,
+            });
+        } else {
+            data = await rpc("/mail/message/update_content", {
+                message_id: this.id,
+                update_data: this.removeParams,
+                ...this.thread.rpcParams,
+            });
+            this.store.insert(data);
+        }
         if (this.thread && removeFromThread) {
             this.thread.messages = this.thread.messages.filter((message) => message.notEq(this));
         }
