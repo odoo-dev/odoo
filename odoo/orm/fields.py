@@ -984,10 +984,6 @@ class Field(typing.Generic[T]):
     def _description_falsy_value_label(self, env) -> str | None:
         return env._(self.falsy_value_label) if self.falsy_value_label else None # pylint: disable=gettext-variable
 
-    def is_editable(self) -> bool:
-        """ Return whether the field can be editable in a view. """
-        return not self.readonly
-
     ############################################################################
     #
     # Conversion of values

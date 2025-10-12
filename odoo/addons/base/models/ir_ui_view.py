@@ -1741,7 +1741,7 @@ actual arch.
 
     def _editable_tag_field(self, node, name_manager):
         field = name_manager.model._fields.get(node.get('name'))
-        return field is None or field.is_editable() and node.get('readonly') not in ('1', 'True')
+        return field is None or (not field.readonly and node.get('readonly') not in ('1', 'True'))
 
     def _onchange_able_view(self, node):
         func = getattr(self, f"_onchange_able_view_{node.tag}", None)
