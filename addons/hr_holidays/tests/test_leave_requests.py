@@ -1329,7 +1329,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         """
         self.assertFalse(self.env['hr.leave.allocation'].search([['holiday_status_id', '=', self.holidays_type_2.id]]))
 
-        self.env.user.employee_id = self.employee_hruser_id
+        self.env.user.employee_ids = self.employee_hruser_id
         allocation = self.env['hr.leave.allocation'].create({
             'employee_id': self.employee_hruser_id,
             'holiday_status_id': self.holidays_type_2.id,

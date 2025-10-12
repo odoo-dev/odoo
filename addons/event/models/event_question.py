@@ -25,7 +25,7 @@ class EventQuestion(models.Model):
     event_count = fields.Integer('# Events', compute='_compute_event_count')
     is_default = fields.Boolean('Default question', help="Include by default in new events.")
     is_reusable = fields.Boolean('Is Reusable',
-                                 compute='_compute_is_reusable', default=True, store=True,
+                                 compute='_compute_is_reusable', default=True, store=True, readonly=False,
                                  help='Allow this question to be selected and reused for any future event. Always true for default questions.')
     answer_ids = fields.One2many('event.question.answer', 'question_id', "Answers", copy=True)
     sequence = fields.Integer(default=10)

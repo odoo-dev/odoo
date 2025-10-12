@@ -808,7 +808,6 @@
         <field name="amount">650</field>
         <field name="service_type_id" ref="type_service_service_7"/>
         <field name="date" eval="(DateTime.now() - timedelta(days=60)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="inv_ref">4586</field>
         <field name="vendor_id" ref="base.res_partner_2" />
         <field name="notes">Usual vehicle repairing</field>
@@ -820,7 +819,6 @@
         <field name="amount">350</field>
         <field name="service_type_id" ref="type_service_service_7"/>
         <field name="date" eval="(DateTime.now() - timedelta(days=30)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="inv_ref">4814</field>
         <field name="vendor_id" ref="base.res_partner_2" />
         <field name="notes">After crash repairing</field>
@@ -832,7 +830,6 @@
         <field name="amount">513</field>
         <field name="service_type_id" ref="type_service_service_7"/>
         <field name="date" eval="(DateTime.now() - timedelta(days=15)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="inv_ref">124</field>
         <field name="vendor_id" ref="base.res_partner_2" />
         <field name="notes">Maintenance</field>
@@ -844,7 +841,6 @@
         <field name="amount">412</field>
         <field name="service_type_id" ref="type_service_service_7"/>
         <field name="date" eval="(DateTime.now() - timedelta(days=120)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="inv_ref">20984</field>
         <field name="vendor_id" ref="base.res_partner_2" />
         <field name="notes">Maintenance</field>
@@ -856,7 +852,6 @@
         <field name="amount">275</field>
         <field name="service_type_id" ref="type_service_service_7"/>
         <field name="date" eval="(DateTime.now() - timedelta(days=100)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="inv_ref">241</field>
         <field name="vendor_id" ref="base.res_partner_2" />
         <field name="notes">Maintenance</field>
@@ -868,7 +863,6 @@
         <field name="amount">302</field>
         <field name="service_type_id" ref="type_service_service_7"/>
         <field name="date" eval="(DateTime.now() - timedelta(days=65)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="inv_ref">22513</field>
         <field name="vendor_id" ref="base.res_partner_2" />
         <field name="notes">Maintenance</field>
@@ -884,7 +878,6 @@
         <field name="cost_frequency">daily</field>
         <field name="expiration_date" eval="(DateTime.now() - timedelta(days=233)).strftime('%Y-%m-%d')" />
         <field name="expiration_date" eval="(DateTime.now() + timedelta(5)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="insurer_id" ref="base.res_partner_2" />
         <field name="notes">Daily leasing contract</field>
         <field name="state">open</field>
@@ -902,7 +895,6 @@
         <field name="date" eval="time.strftime('%Y-01-01')" />
         <field name="start_date" eval="(DateTime.now() - timedelta(days=289)).strftime('%Y-%m-%d')" />
         <field name="expiration_date" eval="(DateTime.now() + timedelta(-1)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="insurer_id" ref="base.res_partner_2" />
         <field name="notes">Weekly leasing contract</field>
         <field name="state">open</field>
@@ -920,7 +912,6 @@
         <field name="date" eval="time.strftime('%Y-01-01')"/>
         <field name="start_date" eval="time.strftime('%Y-01-01')" />
         <field name="expiration_date" eval="time.strftime('%Y-12-31')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="insurer_id" ref="base.res_partner_2" />
         <field name="notes">Monthly leasing contract</field>
         <field name="state">open</field>
@@ -938,7 +929,6 @@
         <field name="date" eval="time.strftime('%Y-01-01')" />
         <field name="start_date" eval="time.strftime('%Y-01-01')" />
         <field name="expiration_date" eval="time.strftime('%Y-12-31')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="insurer_id" ref="base.res_partner_2" />
         <field name="notes">Yearly leasing contract</field>
         <field name="state">open</field>
@@ -956,7 +946,6 @@
         <field name="date" eval="(DateTime.now() - timedelta(days=300)).strftime('%Y-%m-%d')" />
         <field name="start_date" eval="(DateTime.now() - timedelta(days=300)).strftime('%Y-%m-%d')" />
         <field name="expiration_date" eval="(DateTime.now() + timedelta(-60)).strftime('%Y-%m-%d')" />
-        <field name="purchaser_id" ref="base.res_partner_address_18" />
         <field name="insurer_id" ref="base.res_partner_2" />
         <field name="notes">Unique leasing contract</field>
         <field name="state">open</field>

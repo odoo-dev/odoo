@@ -598,7 +598,6 @@ class CalendarEvent(models.Model):
                 'name': vals.get('name', defaults.get('name')),
                 # when res_id is not defined or vals['res_id'] == 0, fallback on default
                 'res_id': vals.get('res_id') or defaults.get('res_id'),
-                'res_model': vals.get('res_model', defaults.get('res_model')),
                 'res_model_id': vals.get('res_model_id', defaults.get('res_model_id')),
                 'start': vals.get('start', defaults.get('start')),
                 'user_id': vals.get('user_id', defaults.get('user_id', self.env.user.id)),

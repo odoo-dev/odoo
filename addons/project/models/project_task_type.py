@@ -47,7 +47,7 @@ class ProjectTaskType(models.Model):
     rotting_threshold_days = fields.Integer('Days to rot', default=0, help='Day count before tasks in this stage become stale. Set to 0 to disable \
         Changing this parameter will not affect the rotting status/date of resources last updated before this change.')
 
-    user_id = fields.Many2one('res.users', 'Stage Owner', default=_default_user_id, compute='_compute_user_id', store=True, index=True)
+    user_id = fields.Many2one('res.users', 'Stage Owner', compute='_compute_user_id', store=True, index=True)
 
     # rating fields
     rating_request_deadline = fields.Datetime(compute='_compute_rating_request_deadline', store=True, export_string_translation=False)
@@ -222,7 +222,11 @@ class ProjectTaskType(models.Model):
             project_ids is set after stage creation (e.g. when setting demo data). In such case, the
             default user_id has to be removed.
         """
-        self.sudo().filtered('project_ids').user_id = False
+        types = self.sudo()
+        project_types = types.filtered('project_ids')
+        project_types.user_id = False
+        if remaining := (types - project_types):
+            remaining.user_id = self._default_user_id()
 
     @api.constrains('user_id', 'project_ids')
     def _check_personal_stage_not_linked_to_projects(self):

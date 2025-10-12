@@ -832,8 +832,6 @@ class CrmLead(models.Model):
         # lead does not have the same stage
         if 'stage_id' in vals:
             stage_updated = any(lead.stage_id.id != vals['stage_id'] for lead in self)
-            if stage_updated:
-                vals['date_last_stage_update'] = now
             if stage_updated and vals.get('stage_id'):
                 stage = self.env['crm.stage'].browse(vals['stage_id'])
                 if stage.is_won:
@@ -1121,7 +1119,7 @@ class CrmLead(models.Model):
     def action_set_lost(self, **additional_values):
         """ Lost semantic: probability = 0 AND active = False """
         res = self.action_archive()
-        self.write({**additional_values, 'probability': 0, 'automated_probability': 0})
+        self.write({**additional_values, 'probability': 0})
         return res
 
     def action_set_won(self):

@@ -2753,6 +2753,8 @@ class BaseModel(metaclass=MetaModel):
         :param operation: one of ``read``, ``write``
         :return: whether the field is accessible
         """
+        if operation == 'write' and field.readonly and field.compute and not self.env.protected(field):
+            return False
         if not field.groups or self.env.su:
             return True
         if field.groups == NO_ACCESS:

@@ -105,28 +105,24 @@
         <record id="res_company_rule_portal" model="ir.rule">
             <field name="name">company rule portal</field>
             <field name="model_id" ref="model_res_company"/>
-            <field eval="False" name="global"/>
             <field name="groups" eval="[Command.set([ref('base.group_portal')])]"/>
             <field name="domain_force">[('id','in', company_ids)]</field>
         </record>
         <record id="res_company_rule_employee" model="ir.rule">
             <field name="name">company rule employee</field>
             <field name="model_id" ref="model_res_company"/>
-            <field eval="False" name="global"/>
             <field name="groups" eval="[Command.set([ref('base.group_user')])]"/>
             <field name="domain_force">[('id','in', company_ids)]</field>
         </record>
         <record id="res_company_rule_public" model="ir.rule">
             <field name="name">company rule public</field>
             <field name="model_id" ref="model_res_company"/>
-            <field eval="False" name="global"/>
             <field name="groups" eval="[Command.set([ref('base.group_public')])]"/>
             <field name="domain_force">[('id','in', company_ids)]</field>
         </record>
         <record id="res_company_rule_erp_manager" model="ir.rule">
             <field name="name">company rule erp manager</field>
             <field name="model_id" ref="model_res_company"/>
-            <field eval="False" name="global"/>
             <field name="groups" eval="[Command.set([ref('base.group_erp_manager')])]"/>
             <field name="domain_force">[(1,'=',1)]</field>
         </record>
@@ -141,7 +137,6 @@
         <record id="res_users_rule" model="ir.rule">
             <field name="name">user rule</field>
             <field name="model_id" ref="model_res_users"/>
-            <field eval="True" name="global"/>
             <field name="domain_force">['|', ('share', '=', False), ('company_ids', 'in', company_ids)]</field>
         </record>
 

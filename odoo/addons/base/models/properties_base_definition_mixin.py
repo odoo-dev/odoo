@@ -37,14 +37,7 @@ class PropertiesBaseDefinitionMixin(models.AbstractModel):
             value = (value,)
         return Domain.TRUE if properties_base_definition_id in value else Domain.FALSE
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        parent = self.env["properties.base.definition"] \
-            ._get_definition_id_for_property_field(self._name, "properties")
-        for vals in vals_list:
-            # Needed to add the default properties values
-            vals["properties_base_definition_id"] = parent
-        return super().create(vals_list)
+    # XXX hack
 
     def _field_to_sql(self, alias, fname, query=None):
         if fname == 'properties_base_definition_id':
