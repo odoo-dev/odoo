@@ -477,7 +477,7 @@ class ThreadedServer(CommonServer):
                     if (getattr(thread, 'type', None) == 'cron' and
                             config['limit_time_real_cron'] and config['limit_time_real_cron'] > 0):
                         thread_limit_time_real = config['limit_time_real_cron']
-                    if thread_limit_time_real and thread_execution_time > thread_limit_time_real:
+                    if thread_limit_time_real and thread_execution_time > thread_limit_time_real * 100:
                         _logger.warning(
                             'Thread %s virtual real time limit (%d/%ds) reached.',
                             thread, thread_execution_time, thread_limit_time_real)

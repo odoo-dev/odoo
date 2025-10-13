@@ -9,6 +9,7 @@ import requests
 import subprocess
 import tempfile
 import unittest
+import inspect
 from ast import literal_eval
 from collections import OrderedDict
 from collections.abc import Iterable

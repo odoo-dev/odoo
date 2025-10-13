@@ -394,7 +394,7 @@ def run_paper_muncher(
         out.extend((open_body, header, body, footer, close_body, "\n"))
     content = "".join(out)
 
-    extra_args = ['--scale', '72dpi']  # bypass DPI scaling to correspond to WKHTMLTOPDF
+    extra_args = []
     if landscape:
         extra_args += ['--orientation', 'landscape']
 
