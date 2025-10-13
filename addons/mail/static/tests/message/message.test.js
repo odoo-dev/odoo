@@ -164,12 +164,24 @@ test("Editing message keeps the mentioned channels", async () => {
     await click(".o-mail-Composer-suggestion strong", { text: "other" });
     await press("Enter");
     await contains(".o_channel_redirect", { count: 1, text: "other" });
+    // Test editing via menu button
     await click(".o-mail-Message [title='Expand']");
     await click(".o-mail-Message-moreMenu [title='Edit']");
     await contains(".o-mail-Message .o-mail-Composer-input", { value: "#other" });
     await insertText(".o-mail-Message .o-mail-Composer-input", "#other bye", { replace: true });
     await click(".o-mail-Message a", { text: "save" });
     await contains(".o-mail-Message-content", { text: "other bye (edited)" });
+    await click(".o_channel_redirect", { text: "other" });
+    await contains(".o-mail-Discuss-threadName", { value: "other" });
+    // Go back to general channel
+    await click(".o-mail-DiscussSidebarChannel", { text: "general" });
+    // Test editing via arrow up shortcut
+    await animationFrame();
+    triggerHotkey("ArrowUp");
+    await contains(".o-mail-Message .o-mail-Composer-input", { value: "#other bye" });
+    await insertText(".o-mail-Message .o-mail-Composer-input", "#other hello", { replace: true });
+    await click(".o-mail-Message a", { text: "save" });
+    await contains(".o-mail-Message-content", { text: "other hello (edited)" });
     await click(".o_channel_redirect", { text: "other" });
     await contains(".o-mail-Discuss-threadName", { value: "other" });
 });
