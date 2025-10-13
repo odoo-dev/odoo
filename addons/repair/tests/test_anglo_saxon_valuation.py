@@ -9,7 +9,6 @@ from odoo.exceptions import UserError
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
 
     @classmethod
@@ -40,6 +39,7 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
             'product_uom': product.uom_id.id,
             'product_uom_qty': quantity,
             'price_unit': unit_cost,
+            'value_manual': unit_cost * quantity,
         })
         move._action_confirm()
         move.quantity = quantity
@@ -80,6 +80,6 @@ class TestAngloSaxonValuation(ValuationReconciliationTestCommon):
         self.assertRecordValues(invoice.line_ids, [
             {'debit': 0, 'credit': 1, 'account_id': self.company_data['default_account_revenue'].id},
             {'debit': 1, 'credit': 0, 'account_id': self.company_data['default_account_receivable'].id},
-            {'debit': 0, 'credit': 10, 'account_id': self.company_data['default_account_stock_out'].id},
+            {'debit': 0, 'credit': 10, 'account_id': self.company_data['default_account_stock_valuation'].id},
             {'debit': 10, 'credit': 0, 'account_id': self.company_data['default_account_expense'].id},
         ])
