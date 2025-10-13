@@ -202,6 +202,29 @@ class AccountMoveSend(models.AbstractModel):
 
         anchor_index = tree.index(anchor_elements[0])
         tree.insert(anchor_index, etree.fromstring(to_inject))
+
+        for attachment in invoice_data.get('extra_attachments_to_embed', []):
+            if attachment.name in [invoice_data['ubl_cii_xml_attachment_values']['name'], pdf_values['name']]:
+                continue
+            filename = attachment.name
+            content = attachment.raw
+            to_inject = f'''
+                <cac:AdditionalDocumentReference
+                    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+                    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+                    <cbc:ID>{escape(filename)}</cbc:ID>
+                    {doc_type_node}
+                    <cac:Attachment>
+                        <cbc:EmbeddedDocumentBinaryObject
+                            mimeCode={quoteattr(attachment.mimetype)}
+                            filename={quoteattr(filename)}>
+                            {base64.b64encode(content).decode()}
+                        </cbc:EmbeddedDocumentBinaryObject>
+                    </cac:Attachment>
+                </cac:AdditionalDocumentReference>
+            '''
+            tree.insert(anchor_index, etree.fromstring(to_inject))
+
         invoice_data['ubl_cii_xml_attachment_values']['raw'] = etree.tostring(
             cleanup_xml_node(tree), xml_declaration=True, encoding='UTF-8'
         )

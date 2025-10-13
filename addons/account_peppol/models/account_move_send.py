@@ -181,6 +181,11 @@ class AccountMoveSend(models.AbstractModel):
                     )
                     continue
 
+                if len(xml_file) > 10000000:
+                    invoice.peppol_move_state = 'error'
+                    invoice_data['error'] = _("Too much attachments to send via peppol, the size limit is 10MB.")
+                    continue
+
                 receiver_identification = f"{partner.peppol_eas}:{partner.peppol_endpoint}"
                 params['documents'].append({
                     'filename': filename,
