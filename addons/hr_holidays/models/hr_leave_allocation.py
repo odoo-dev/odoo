@@ -688,8 +688,10 @@ class HolidaysAllocation(models.Model):
     def _onchange_allocation_type(self):
         if self.allocation_type == 'accrual':
             self.number_of_days = 0.0
-        elif not self.number_of_days_display:
-            self.number_of_days = 1.0
+        else:
+            self.accrual_plan_id = False
+            if not self.number_of_days_display:
+                self.number_of_days = 1.0
 
     # ------------------------------------------------------------
     # Activity methods
