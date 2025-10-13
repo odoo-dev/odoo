@@ -9,5 +9,6 @@ from . import product_configurator
 from . import product_feed
 from . import reorder
 from . import sale
+from . import utils
 from . import variant
 from . import website
