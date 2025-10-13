@@ -35,5 +35,6 @@ class IrWebsocket(models.AbstractModel):
             for c in all_user_channels
             if not self.env.user.share
         ]
-        channels.extend([*all_user_channels, *internal_specific_channels])
+        thread_channels = [(c, "thread") for c in all_user_channels]
+        channels.extend([*all_user_channels, *internal_specific_channels, *thread_channels])
         return super()._build_bus_channel_list(channels)
