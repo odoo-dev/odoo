@@ -1,0 +1,59 @@
+{
+    "name": "Parallel testing",
+    "docker": "Docker19",
+    "steps": [
+        {
+            "name": "create_at_install",
+            "job_type": "create_children",
+            "children": [
+                {
+                    "name": "Test at install", 
+                    "steps":[{
+                        "job_type": "odoo", 
+                        "install": true, 
+                        "test_tags": "-post_install,%auto_tags"
+                    }]
+                },
+                {
+                    "name": "test_pylint", 
+                    "job_type": "odoo", 
+                    "install": true, 
+                    "modules": "test_lint",
+                    "test_tags": "/test_lint"
+                }
+            ]
+        },
+        {
+            "name": "install_all", 
+            "db_name": "all",
+            "job_type": "odoo",
+            "install": true
+        },
+        {
+            "name": "create_post_install",
+            "job_type": "create_children",
+            "children": [{
+                "name": "Test Post Install",
+                "steps": [
+                    {"name": "restore", "job_type": "restore", "db_name": "all"},
+                    {"name": "test_post_install", "job_type": "odoo", "test_tags": "-at_install,%make_module_tags(module_selection)%,%auto_tags%", "db_name": "all"}
+                ]
+            }],
+            "per_child_params": [
+                {"module_selection": "%M < account_auto_transfer"},
+                {"module_selection": "account_auto_transfer <= %M < auth_totp"},
+                {"module_selection": "auth_totp <= %M < mrp"},
+                {"module_selection": "mrp <= %M < pos"},
+                {"module_selection": "pos <= %M < sale"},
+                {"module_selection": "sale <= %M < sale_timesheet"},
+                {"module_selection": "sale_timesheet <= %M < stock_barcode_mrp_subcontracting"},
+                {"module_selection": "stock_barcode_mrp_subcontracting <= %M < test_main_flows"},
+                {"module_selection": "test_main_flows <= %M < web"},
+                {"module_selection": "%M = web"},
+                {"module_selection": "web < %M < website"},
+                {"module_selection": "%M = website"},
+                {"module_selection": "website < %M"}
+            ]
+        }
+    ]
+}

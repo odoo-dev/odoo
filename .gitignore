@@ -3,6 +3,7 @@ _build/
 
 # dotfiles
 .*
+!.runbot
 !.gitignore
 !.gitkeep
 !.github
