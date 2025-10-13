@@ -46,6 +46,8 @@ export const ACTION_TAGS = Object.freeze({
  */
 
 export class Action {
+    /** @type {ActionPanel} */
+    actionPanel;
     /** @type {ActionDefinition}  User-defined explicit definition of this action */
     definition;
     /** @type {ActionOwner} Entity that is using this action */

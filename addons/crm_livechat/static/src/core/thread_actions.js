@@ -31,10 +31,21 @@ registerThreadAction("create-lead", {
         }
     },
     toggle: true,
-    open({ owner, thread }) {
-        this.popover?.open(owner.root.el.querySelector(`[name="${this.id}"]`), {
-            thread,
-            ...this.actionPanelComponentProps,
-        });
+    open({ action, actionPanel, owner, thread }) {
+        const props = {
+            close: () => action.close(),
+            commandName: "lead",
+            placeholderText: _t("e.g. Product pricing"),
+            title: _t("Create Lead"),
+            icon: "fa fa-handshake-o",
+        };
+        if (actionPanel) {
+            actionPanel.open(LivechatCommandDialog, props);
+        } else {
+            this.popover?.open(owner.root.el.querySelector(`[name="${this.id}"]`), {
+                thread,
+                ...this.actionPanelComponentProps,
+            });
+        }
     },
 });

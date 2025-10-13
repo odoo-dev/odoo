@@ -11,6 +11,7 @@ import { ImStatus } from "@mail/core/common/im_status";
 import { _t } from "@web/core/l10n/translation";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { useService } from "@web/core/utils/hooks";
+import { UseActionPanel } from "./use_action_panel";
 
 export class DiscussContent extends Component {
     static components = {
@@ -21,6 +22,7 @@ export class DiscussContent extends Component {
         Composer,
         FileUploader,
         ImStatus,
+        UseActionPanel,
     };
     static props = ["thread?"];
     static template = "mail.DiscussContent";
@@ -28,9 +30,13 @@ export class DiscussContent extends Component {
     setup() {
         super.setup();
         this.store = useService("mail.store");
+        this.actionPanel = useActionPanel();
         this.ui = useService("ui");
         this.notification = useService("notification");
-        this.threadActions = useThreadActions({ thread: () => this.thread });
+        this.threadActions = useThreadActions({
+            actionPanel: this.actionPanel,
+            thread: () => this.thread,
+        });
         this.root = useRef("root");
         this.state = useState({ jumpThreadPresent: 0 });
         this.isDiscussContent = true;

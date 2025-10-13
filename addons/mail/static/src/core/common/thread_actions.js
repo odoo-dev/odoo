@@ -218,13 +218,17 @@ class UseThreadActions extends UseActions {
 
 /**
  * @param {Object} [params0={}]
- * @param {Thread|() => Thread} thread
+ * @param {ActionPanel} [param0.actionPanel]
+ * @param {Thread|() => Thread} param0.thread
  */
-export function useThreadActions({ thread } = {}) {
+export function useThreadActions({ actionPanel, thread } = {}) {
     const component = useComponent();
     const transformedActions = threadActionsRegistry
         .getEntries()
-        .map(([id, definition]) => new ThreadAction({ owner: component, id, definition, thread }));
+        .map(
+            ([id, definition]) =>
+                new ThreadAction({ actionPanel, owner: component, id, definition, thread })
+        );
     for (const action of transformedActions) {
         action.setup();
     }
