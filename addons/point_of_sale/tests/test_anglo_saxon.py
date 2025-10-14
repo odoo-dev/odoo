@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo import Command
 from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
@@ -66,7 +64,6 @@ class TestAngloSaxonCommon(AccountTestInvoicingCommon):
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestAngloSaxonFlow(TestAngloSaxonCommon):
 
     def test_create_account_move_line(self):
@@ -151,8 +148,8 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
             'inventory_quantity': 10.0,
             'location_id': self.warehouse.lot_stock_id.id,
         }).action_apply_inventory()
-        self.assertEqual(self.product.value_svl, 30, "Value should be (5*5 + 5*1) = 30")
-        self.assertEqual(self.product.quantity_svl, 10)
+        self.assertEqual(self.product.total_value, 30, "Value should be (5*5 + 5*1) = 30")
+        self.assertEqual(self.product.qty_available, 10)
 
 
         self.pos_config.open_ui()
@@ -288,27 +285,22 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         current_session.picking_ids.button_validate()
         self.assertEqual(len(current_session.picking_ids), 2, "There should be 2 pickings")
         current_session.picking_ids.button_validate()
+        current_session.order_ids.action_pos_order_invoice()
 
         # I test that the generated journal entries are correct.
-        account_output = self.category.property_stock_account_output_categ_id
+        valuation_account = self.category.property_stock_valuation_account_id
         expense_account = self.category.property_account_expense_categ_id
         aml = current_session._get_related_account_moves().line_ids
-        aml_output = aml.filtered(lambda l: l.account_id.id == account_output.id)
+        aml_valuation = aml.filtered(lambda l: l.account_id.id == valuation_account.id)
         aml_expense = aml.filtered(lambda l: l.account_id.id == expense_account.id)
 
-        self.assertEqual(len(aml_output), 2, "There should be 2 output account move lines")
-        # 2 moves in POS journal (Pos order + manual entry at delivery)
-        self.assertEqual(len(aml_output.move_id.filtered(lambda l: l.journal_id == self.pos_config.journal_id)), 1)
-        # 1 move in stock journal (delivery from stock layers)
-        self.assertEqual(len(aml_output.move_id.filtered(lambda l: l.journal_id == self.category.property_stock_journal)), 1)
+        self.assertEqual(len(aml_valuation), 1, "There should be 1 valuation account move lines")
+        self.assertEqual(len(aml_valuation.move_id.filtered(lambda l: l.journal_id == self.pos_config.invoice_journal_id)), 1)
         #Check the lines created after the picking validation
-        self.assertEqual(aml_output[1].credit, self.product.standard_price, "Cost of Good Sold entry missing or mismatching")
-        self.assertEqual(aml_output[1].debit, 0.0, "Cost of Good Sold entry missing or mismatching")
         self.assertEqual(aml_expense[0].debit, self.product.standard_price, "Cost of Good Sold entry missing or mismatching")
         self.assertEqual(aml_expense[0].credit, 0.0, "Cost of Good Sold entry missing or mismatching")
-        #Check the lines created by the PoS session
-        self.assertEqual(aml_output[0].debit, 100.0, "Cost of Good Sold entry missing or mismatching")
-        self.assertEqual(aml_output[0].credit, 0.0, "Cost of Good Sold entry missing or mismatching")
+        self.assertEqual(aml_valuation[0].debit, 0.0, "Cost of Good Sold entry missing or mismatching")
+        self.assertEqual(aml_valuation[0].credit, 100.0, "Cost of Good Sold entry missing or mismatching")
 
     def test_action_pos_order_invoice(self):
         self.company.point_of_sale_update_stock_quantities = 'closing'
@@ -344,11 +336,13 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         self.pos_order_pos0.action_pos_order_invoice()
 
         # Check that the stock output journal item from the invoice is reconciled (with its counterpart from the valuation entry)
-        stock_output_account = self.category.property_stock_account_output_categ_id
+        stock_valuation_account = self.category.property_stock_valuation_account_id
         related_amls = current_session._get_related_account_moves().line_ids
-        stock_output_amls = related_amls.filtered_domain([('account_id', '=', stock_output_account.id)])
+        stock_valuation_amls = related_amls.filtered_domain([('account_id', '=', stock_valuation_account.id)])
+        receivable_amls = related_amls.filtered_domain([('account_id', '=', self.account.id)])
 
-        self.assertTrue(all(stock_output_amls.mapped('reconciled')))
+        self.assertEqual(stock_valuation_amls[0].credit, 100.0, "Cost of Good Sold entry missing or mismatching")
+        self.assertTrue(all(receivable_amls.mapped('reconciled')))
 
     def test_action_pos_order_invoice_with_discount(self):
         """This test make sure that the line containing 'Discoun from' is correctly added to the invoice"""
@@ -481,21 +475,26 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         current_session.picking_ids.move_ids.filtered(lambda m: m.product_id == self.product_2).write({'quantity': 1, 'picked': True})
         res_dict = current_session.picking_ids.button_validate()
         self.env['stock.backorder.confirmation'].with_context(res_dict['context']).process()
+        current_session.order_ids.action_pos_order_invoice()
 
         # I test that the generated journal entries are correct.
-        out = self.product_1.categ_id.property_stock_account_output_categ_id
+        val = self.category.property_stock_valuation_account_id
         exp = self.product_1._get_product_accounts()['expense']
         aml = current_session._get_related_account_moves().line_ids
-        aml_output = aml.filtered(lambda l: l.account_id.id == out.id and l.journal_id == self.pos_config.journal_id)
-        aml_expense = aml.filtered(lambda l: l.account_id.id == exp.id and l.journal_id == self.pos_config.journal_id)
+        aml_valuation = aml.filtered(lambda l: l.account_id.id == val.id and l.journal_id == self.pos_config.invoice_journal_id)
+        aml_expense = aml.filtered(lambda l: l.account_id.id == exp.id and l.journal_id == self.pos_config.invoice_journal_id)
 
-        self.assertEqual(len(aml_expense), 1, "There should be 1 output account move lines")
-        self.assertEqual(aml_expense.debit, 20)
-        self.assertEqual(aml_expense.credit, 0)
+        self.assertEqual(len(aml_expense), 2, "There should be 2 output account move lines")
+        self.assertEqual(aml_expense[0].debit, 20)
+        self.assertEqual(aml_expense[0].credit, 0)
+        self.assertEqual(aml_expense[1].debit, 20)
+        self.assertEqual(aml_expense[1].credit, 0)
 
-        self.assertEqual(len(aml_output), 1, "There should be 1 output account move lines")
-        self.assertEqual(aml_output.debit, 0)
-        self.assertEqual(aml_output.credit, 20)
+        self.assertEqual(len(aml_valuation), 2, "There should be 2 output account move lines")
+        self.assertEqual(aml_valuation[0].debit, 0)
+        self.assertEqual(aml_valuation[0].credit, 20)
+        self.assertEqual(aml_valuation[1].debit, 0)
+        self.assertEqual(aml_valuation[1].credit, 20)
 
         backorder_picking = current_session.picking_ids.filtered(lambda p: p.state == 'confirmed')
         backorder_picking.move_ids.write({'quantity': 1, 'picked': True})
@@ -503,13 +502,8 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
 
         # As the second item has no cost, the account move line should be the same as before
         aml = current_session._get_related_account_moves().line_ids
-        aml_output = aml.filtered(lambda l: l.account_id.id == out.id and l.journal_id == self.pos_config.journal_id)
-        aml_expense = aml.filtered(lambda l: l.account_id.id == exp.id and l.journal_id == self.pos_config.journal_id)
+        aml_valuation = aml.filtered(lambda l: l.account_id.id == val.id and l.journal_id == self.pos_config.invoice_journal_id)
+        aml_expense = aml.filtered(lambda l: l.account_id.id == exp.id and l.journal_id == self.pos_config.invoice_journal_id)
 
-        self.assertEqual(len(aml_expense), 1, "There should be 1 output account move lines")
-        self.assertEqual(aml_expense.debit, 20)
-        self.assertEqual(aml_expense.credit, 0)
-
-        self.assertEqual(len(aml_output), 1, "There should be 1 output account move lines")
-        self.assertEqual(aml_output.debit, 0)
-        self.assertEqual(aml_output.credit, 20)
+        self.assertEqual(len(aml_expense), 2, "There should be 2 output account move lines")
+        self.assertEqual(len(aml_valuation), 2, "There should be 2 output account move lines")
