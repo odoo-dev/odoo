@@ -118,7 +118,8 @@ class ResConfigSettings(models.TransientModel):
     pos_basic_receipt = fields.Boolean(related='pos_config_id.basic_receipt', readonly=False)
     pos_fallback_nomenclature_id = fields.Many2one(related='pos_config_id.fallback_nomenclature_id', domain="[('id', '!=', barcode_nomenclature_id)]", readonly=False)
     group_pos_preset = fields.Boolean(string="Presets", implied_group="point_of_sale.group_pos_preset", help="Hide or show the Presets menu in the Point of Sale configuration.")
-    pos_epson_printer_ip = fields.Char(related='pos_config_id.epson_printer_ip', readonly=False)
+    # pos_epson_printer_ip = fields.Char(related='pos_config_id.epson_printer_ip', readonly=False)
+    pos_printer_list_display = fields.Char(related='pos_config_id.printer_list_display', readonly=True)
     use_epson_server_direct_print = fields.Boolean(related='pos_config_id.use_epson_server_direct_print', readonly=False)
     epson_server_direct_print_url = fields.Char(related='pos_config_id.epson_server_direct_print_url', readonly=True)
     epson_server_direct_print_id = fields.Char(related='pos_config_id.epson_server_direct_print_id', string="Print ID", help="Set this ID in printer settings to secure your printing", readonly=True)
@@ -232,8 +233,9 @@ class ResConfigSettings(models.TransientModel):
             pos_config = self.env['pos.config'].browse(pos_config_id)
             return pos_config.open_ui()
 
-    @api.model
+    # @api.model
     def _is_cashdrawer_displayed(self, res_config):
+        return False
         return res_config.pos_iface_print_via_proxy or (
             res_config.pos_other_devices
             and bool(res_config.pos_epson_printer_ip)
@@ -262,7 +264,8 @@ class ResConfigSettings(models.TransientModel):
             else:
                 res_config.pos_selectable_categ_ids = self.env['pos.category'].search([])
 
-    @api.depends('pos_iface_print_via_proxy', 'pos_config_id', 'pos_epson_printer_ip', 'pos_other_devices')
+    # @api.depends('pos_iface_print_via_proxy', 'pos_config_id', 'pos_epson_printer_ip', 'pos_other_devices')
+    @api.depends('pos_iface_print_via_proxy', 'pos_config_id', 'pos_other_devices')
     def _compute_pos_iface_cashdrawer(self):
         for res_config in self:
             if self._is_cashdrawer_displayed(res_config):
@@ -364,3 +367,22 @@ class ResConfigSettings(models.TransientModel):
         for rec in self:
             if rec.pos_epson_printer_ip:
                 rec.pos_epson_printer_ip = format_epson_certified_domain(rec.pos_epson_printer_ip)
+
+    def pos_open_epos_printer_config(self):
+        printers = self.env['pos.printer'].search([])
+        for rec in self:
+            if len(printers) == 0:
+                return {
+                    'res_model': 'pos.printer',
+                    'view_mode': 'form',
+                    'res_id': printers.id,
+                    'type': 'ir.actions.act_window',
+                    'target': 'new'
+                }
+            else:
+                return {
+                    'name': 'POS Printers',
+                    'res_model': 'pos.printer',
+                    'view_mode': 'list,form',
+                    'type': 'ir.actions.act_window',
+                }

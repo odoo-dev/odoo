@@ -4,22 +4,48 @@
         <field name="model">pos.printer</field>
         <field name="arch" type="xml">
             <form string="POS Printer">
+                <header>
+                    <widget name="point_of_sale_test_epos" invisible="printer_type != 'epson_epos'"/>
+                </header>
                 <sheet>
-                <group>
                     <group>
-                        <field name="company_id" invisible="1" />
-                        <field name="name" />
-                        <field name="printer_type" widget="radio"/>
-                        <field name="epson_printer_ip" invisible="printer_type != 'epson_epos'"/>
-                        <field name="proxy_ip" invisible="printer_type != 'iot'"/>
-                        <field name="product_categories_ids" />
+                        <group colspan="4">
+                            <field name="name"/>
+                        </group>
                     </group>
                     <group>
-                        <div style="display:flex; justify-content:flex-end; align-items:flex-start; height:100%;">
+                        <group>
+                            <field name="use_kitchen_print"/>
+                            <field name="product_categories_ids" widget="many2many_tags" invisible="not use_kitchen_print"/>
+                        </group>
+                        <group>
+                            <field name="use_reciept_print"/>
+                            <field name="use_cashdrawer" invisible="not use_reciept_print"/>
+                        </group>
+                        <!-- <group colspan="4" style="text-align:right;">
                             <widget name="point_of_sale_test_epos" invisible="printer_type != 'epson_epos'"/>
-                        </div>
+                        </group> -->
                     </group>
-                </group>
+                    <!-- <group>
+                        <group colspan="4" style="text-align:right;">
+                            <widget name="point_of_sale_test_epos" invisible="printer_type != 'epson_epos'"/>
+                        </group>
+                    </group> -->
+                    <notebook>
+                        <page string="Configuration">
+                            <group>
+                                <group>
+                                    <field name="pos_config_ids" widget="many2many_tags" placeholder="Select Config"/>
+                                    <field name="printer_type" widget="radio"/>
+                                </group>
+                                <group>
+                                    <field name="epson_printer_ip" invisible="printer_type != 'epson_epos'" placeholder="Epson Receipt Printer IP Address"/>
+                                    <field name="proxy_ip" invisible="printer_type != 'iot'"/>
+                                    <!-- <field name="epson_direct_url" string="Direct Print" invisible="printer_type != 'epson_epos'"/> -->
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -49,9 +75,14 @@
         <field name="arch" type="xml">
             <list string="Preparation Printers">
                 <field name="name" />
+                <field name="pos_config_ids" widget="many2many_tags" placeholder="Select Config"/>
+                <field name="use_reciept_print" string="Reciept"/>
+                <field name="use_kitchen_print" string="Kitchen Ticket"/>
                 <field name="product_categories_ids" widget="many2many_tags"/>
+                <field name="printer_type"/>
+                <field name="epson_printer_ip"/>
                 <field name="proxy_ip" optional="hide"/>
-                <field name="company_id" optional="hide"/>
+                <field name="company_id" optional="show"/>
             </list>
         </field>
     </record>

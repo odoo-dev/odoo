@@ -52,25 +52,34 @@
                         </setting>
                         <setting id="other_devices" string="ePos Printer" help="Connect device to your PoS without an IoT Box">
                             <field name="other_devices" />
-                            <div class="content-group" invisible="not other_devices">
-                                <div class="row mb-2">
-                                    <div class="col-lg-6">
-                                        <field name="epson_printer_ip" placeholder="Epson Receipt Printer IP Address" class="w-100 pt-1" />
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <widget name="point_of_sale_test_epos" />
-                                    </div>
-                                </div>
-                                <div class="row" invisible="epson_printer_ip in [False, '']">
-                                    <div class="col-lg-6 o_light_label">
-                                        <label string="Link Cashdrawer" for="iface_cashdrawer"/>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <field name="iface_cashdrawer"/>
-                                    </div>
-                                </div>
+                            <div class="content-group mt-2" invisible="not other_devices">
+                                <button type="object" name="open_epos_printer_config" class="btn p-0 w-100 text-start" style="border:none;background:none;">
+                                    <span class="d-block p-3"
+                                        style="border:1px solid var(--border-color,#ddd); border-radius:10px; background:var(--bg,#fff); cursor:pointer;">
+                                        <span class="d-flex align-items-center mb-2">
+                                            <span class="fa fa-print fa-lg me-3 text-primary"></span>
+                                            <span class="flex-grow-1">
+                                                <span style="font-weight:600;">Configure ePos Printer</span><br/>
+                                                <span class="text-muted small">
+                                                    Set up printer, kitchen printing, and link cashdrawer
+                                                </span>
+                                            </span>
+                                            <span class="fa fa-chevron-right text-muted ms-2"></span>
+                                        </span>
+                                        <hr style="margin:0 0 8px 0; opacity:0.2;"/>
+                                        <div invisible="not printer_list_display" class="text-muted small mb-1" style="font-weight:600;">
+                                            Available Printers:
+                                        </div>
+                                        <div invisible="not printer_list_display" class="ms-2 small text-muted" style="white-space: pre-line;">
+                                            <field name="printer_list_display"/>
+                                        </div>
+                                        <div invisible="printer_list_display" class="text-center text-muted small">
+                                            No printers configured yet.
+                                        </div>
+                                    </span>
+                                </button>
                             </div>
-                            <div role="alert" class="alert alert-warning" invisible="not iface_print_via_proxy or not other_devices or epson_printer_ip in [False, '']">
+                            <div role="alert" class="alert alert-warning" invisible="not iface_print_via_proxy or not other_devices">
                                 The Epson receipt printer will be used instead of the receipt printer connected to the IoT Box.
                             </div>
                         </setting>

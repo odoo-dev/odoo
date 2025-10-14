@@ -53,6 +53,9 @@ class PosPrinter(models.Model):
         ),
         default="0.0.0.0"
     )
+    use_kitchen_print = fields.Boolean(string='Use Kitchen Printing')
+    use_reciept_print = fields.Boolean(string='Use Reciept Printing', default=True)
+    use_cashdrawer = fields.Boolean(string='Use Cashdrawer')
 
     @api.model
     def _load_pos_data_domain(self, data, config):
@@ -60,13 +63,7 @@ class PosPrinter(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config):
-        return ['id', 'name', 'proxy_ip', 'product_categories_ids', 'printer_type', 'epson_printer_ip']
-
-    @api.constrains('epson_printer_ip')
-    def _constrains_epson_printer_ip(self):
-        for record in self:
-            if record.printer_type == 'epson_epos' and not record.epson_printer_ip:
-                raise ValidationError(_("Epson Printer IP Address cannot be empty."))
+        return ['id', 'name', 'proxy_ip', 'product_categories_ids', 'printer_type', 'epson_printer_ip', 'use_reciept_print', 'use_kitchen_print', 'use_cashdrawer', 'pos_config_ids']
 
     @api.onchange("epson_printer_ip")
     def _onchange_epson_printer_ip(self):

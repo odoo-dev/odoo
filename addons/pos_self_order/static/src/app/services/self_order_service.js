@@ -153,8 +153,13 @@ export class SelfOrder extends Reactive {
             this.addToCart(productTemplate, 1, "", {}, {});
             this.router.navigate("cart");
         });
-        if (this.config.epson_printer_ip && this.config.other_devices) {
-            this.printer.setPrinter(new EpsonPrinter({ ip: this.config.epson_printer_ip }));
+        const epson_receipt_printer = this.config.printer_ids.find(
+            (p) => p.use_reciept_print && p.pos_config_ids.some((c) => c.id === this.config.id)
+        );
+        // if (this.config.epson_printer_ip && this.config.other_devices) {
+        if (epson_receipt_printer && this.config.other_devices) {
+            // this.printer.setPrinter(new EpsonPrinter({ ip: this.config.epson_printer_ip }));
+            this.printer.setPrinter(new EpsonPrinter({ ip: epson_receipt_printer }));
         }
     }
 
@@ -433,7 +438,10 @@ export class SelfOrder extends Reactive {
         this.initProducts();
         this._initLanguages();
 
-        for (const printerConfig of this.models["pos.printer"].getAll()) {
+        const epson_printers = this.models["pos.printer"].filter(
+            (p) => p.use_reciept_print && p.pos_config_ids.some((c) => c.id === this.config.id)
+        );
+        for (const printerConfig of epson_printers) {
             const printer = this.createPrinter(printerConfig);
             if (printer) {
                 printer.config = printerConfig;

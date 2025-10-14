@@ -48,10 +48,11 @@ export class TestEPos extends Component {
     async onClick() {
         try {
             const data = this.props.record.data;
-            const printer_ip =
-                data.epson_printer_ip !== undefined
-                    ? data.epson_printer_ip
-                    : data.pos_epson_printer_ip;
+            // const printer_ip =
+            //     data.epson_printer_ip !== undefined
+            //         ? data.epson_printer_ip
+            //         : data.pos_epson_printer_ip;
+            const printer_ip = data.epson_printer_ip;
             if (!printer_ip) {
                 this.notification.add(
                     _t("Please configure a valid ePoS url in order to test the printer"),

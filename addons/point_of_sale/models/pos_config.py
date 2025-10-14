@@ -200,14 +200,15 @@ class PosConfig(models.Model):
     order_edit_tracking = fields.Boolean(string="Track orders edits", help="Store edited orders in the backend", default=False)
     last_data_change = fields.Datetime(string='Last Write Date', readonly=True, compute='_compute_local_data_integrity', store=True)
     fallback_nomenclature_id = fields.Many2one('barcode.nomenclature', string="Fallback Nomenclature")
+    printer_list_display = fields.Char(compute='_compute_printer_list_display')
     # Epson ePoS Printer Configuration
-    epson_printer_ip = fields.Char(
-        string='Epson Printer IP',
-        help=(
-            "Local IP address of an Epson receipt printer, or its serial number if the "
-            "'Automatic Certificate Update' option is enabled in the printer settings."
-        ),
-    )
+    # epson_printer_ip = fields.Char(
+    #     string='Epson Printer IP',
+    #     help=(
+    #         "Local IP address of an Epson receipt printer, or its serial number if the "
+    #         "'Automatic Certificate Update' option is enabled in the printer settings."
+    #     ),
+    # )
     # Epson Server Direct Print printer configuration
     use_epson_server_direct_print = fields.Boolean(
         string="Use Epson Server Direct Printer",
@@ -1236,8 +1237,47 @@ class PosConfig(models.Model):
     def _is_quantities_set(self):
         return self.use_closing_entry_by_product
 
-    @api.onchange("epson_printer_ip")
-    def _onchange_epson_printer_ip(self):
+    # @api.onchange("epson_printer_ip")
+    # def _onchange_epson_printer_ip(self):
+    #     for rec in self:
+    #         if rec.epson_printer_ip:
+    #             rec.epson_printer_ip = format_epson_certified_domain(rec.epson_printer_ip)
+
+    def open_epos_printer_config(self):
+        printers = self.env['pos.printer'].search([])
+        if len(printers) == 0:
+            return {
+                'res_model': 'pos.printer',
+                'view_mode': 'form',
+                'res_id': printers.id,
+                'type': 'ir.actions.act_window',
+                'target': 'new'
+            }
+        else:
+            return {
+                'name': 'POS Printers',
+                'res_model': 'pos.printer',
+                'view_mode': 'list,form',
+                'type': 'ir.actions.act_window',
+            }
+
+    def _compute_printer_list_display(self):
+        printers = self.printer_ids
         for rec in self:
-            if rec.epson_printer_ip:
-                rec.epson_printer_ip = format_epson_certified_domain(rec.epson_printer_ip)
+            # printers = self.env['pos.printer'].search([])
+            receipt = printers.filtered(lambda p: p.use_reciept_print)
+            kitchen = printers.filtered(lambda p: p.use_kitchen_print)
+
+            if not receipt and not kitchen:
+                rec.printer_list_display = ""
+                continue
+
+            rec_list = ", ".join(p.name for p in receipt) or "None"
+            kit_list = ", ".join(p.name for p in kitchen) or "None"
+
+            result = (
+                f"Receipt: {rec_list}\n"
+                f"Kitchen: {kit_list}"
+            )
+
+            rec.printer_list_display = result

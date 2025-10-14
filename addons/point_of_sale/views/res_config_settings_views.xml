@@ -393,21 +393,50 @@
                                 <!-- Use ePoS printer for receipts -->
                                 <setting id="pos_other_devices" string="ePos Printer" help="Connect device to your PoS without an IoT Box" documentation="/applications/sales/point_of_sale/configuration/epos_ssc.html">
                                     <field name="pos_other_devices"/>
-                                    <div class="row" invisible="not pos_other_devices">
+                                    <!-- <div class="row" invisible="not pos_other_devices">
                                         <div class="col-lg-6">
-                                            <field name="pos_epson_printer_ip" placeholder="Epson Receipt Printer IP Address" class="w-100 pt-1" />
+                                            <<field name="pos_epson_printer_ip" placeholder="Epson Receipt Printer IP Address" class="w-100 pt-1" /> 
                                         </div>
                                         <div class="col-lg-6">
                                             <widget name="point_of_sale_test_epos" />
                                         </div>
                                         <div class="col-12 mt-2">
                                             <div class="row" invisible="pos_epson_printer_ip in [False, '']">
+                                            <div class="row">   
                                                 <label string="Link Cashdrawer" for="pos_iface_cashdrawer" class="col-lg-4 o_light_label"/>
                                                 <field name="pos_iface_cashdrawer" class="col" />
                                             </div>
                                         </div>
+                                    </div> -->
+                                    <div class="content-group mt-2" invisible="not pos_other_devices">
+                                        <button type="object" name="pos_open_epos_printer_config" class="btn p-0 w-100 text-start" style="border:none;background:none;">
+                                            <span class="d-block p-3"
+                                                style="border:1px solid var(--border-color,#ddd); border-radius:10px; background:var(--bg,#fff); cursor:pointer;">
+                                                <span class="d-flex align-items-center mb-2">
+                                                    <span class="fa fa-print fa-lg me-3 text-primary"></span>
+                                                    <span class="flex-grow-1">
+                                                        <span style="font-weight:600;">Configure ePos Printer</span><br/>
+                                                        <span class="text-muted small">
+                                                            Set up printer, kitchen printing, and link cashdrawer
+                                                        </span>
+                                                    </span>
+                                                    <span class="fa fa-chevron-right text-muted ms-2"></span>
+                                                </span>
+                                                <hr style="margin:0 0 8px 0; opacity:0.2;"/>
+                                                <div invisible="not pos_printer_list_display" class="text-muted small mb-1" style="font-weight:600;">
+                                                    Available Printers:
+                                                </div>
+                                                <div invisible="not pos_printer_list_display" class="ms-2 small text-muted" style="white-space: pre-line;">
+                                                    <field name="pos_printer_list_display"/>
+                                                </div>
+                                                <div invisible="pos_printer_list_display" class="text-center text-muted small">
+                                                    No printers configured yet.
+                                                </div>
+                                            </span>
+                                        </button>
                                     </div>
-                                    <div role="alert" class="alert alert-warning" invisible="not pos_iface_print_via_proxy or not pos_other_devices or pos_epson_printer_ip in [False, '']">
+                                    <div role="alert" class="alert alert-warning" invisible="not pos_iface_print_via_proxy or not pos_other_devices">
+                                    <!-- <div role="alert" class="alert alert-warning" invisible="not pos_iface_print_via_proxy or not pos_other_devices or pos_epson_printer_ip in [False, '']"> -->
                                         The Epson receipt printer will be used instead of the receipt printer connected to the IoT Box.
                                     </div>
                                 </setting>

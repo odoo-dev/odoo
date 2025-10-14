@@ -419,7 +419,10 @@ export class PosStore extends WithLazyGetterTrap {
 
         // Create printer with hardware proxy, this will override related model data
         this.unwatched.printers = [];
-        for (const relPrinter of this.models["pos.printer"].getAll()) {
+        const epson_printers = this.models["pos.printer"].filter(
+            (p) => p.use_kitchen_print && p.pos_config_ids.some((c) => c.id === this.config.id)
+        );
+        for (const relPrinter of epson_printers) {
             const printer = relPrinter.raw;
             const HWPrinter = this.createPrinter(printer);
 
@@ -657,8 +660,15 @@ export class PosStore extends WithLazyGetterTrap {
         await this.deviceSync.readDataFromServer();
 
         // Epson ePoS printer
-        if (this.config.other_devices && this.config.epson_printer_ip) {
-            this.hardwareProxy.printer = new EpsonPrinter({ ip: this.config.epson_printer_ip });
+        // if (this.config.other_devices && this.config.epson_printer_ip) {
+        const epson_receipt_printer = this.config.printer_ids.find(
+            (p) => p.use_reciept_print && p.pos_config_ids.some((c) => c.id === this.config.id)
+        );
+
+        if (this.config.other_devices && epson_receipt_printer) {
+            this.hardwareProxy.printer = new EpsonPrinter({
+                ip: epson_receipt_printer.epson_printer_ip,
+            });
         } else if (this.config.use_epson_server_direct_print) {
             // Epson Server Direct Print printer
             this.hardwareProxy.printer = new EpsonServerDirectPrinter({
