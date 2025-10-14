@@ -2283,3 +2283,27 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
             {'location_id': loc_perso.id, 'location_dest_id': out_location.id, 'quantity': 1},
             {'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'quantity': 1},
         ])
+
+    def test_helper_assh(self):
+        so2 = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'name': self.product_a.name,
+                'product_id': self.product_a.id,
+                'product_uom_qty': 1,
+                'price_unit': self.product_a.list_price,
+            })],
+        })
+        so = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'name': self.product_a.name,
+                'product_id': self.product_a.id,
+                'product_uom_qty': 1,
+                'price_unit': self.product_a.list_price,
+            })],
+        })
+
+        so.action_confirm()
+        picking = so.picking_ids[0]
+        picking.sale_id = so2
