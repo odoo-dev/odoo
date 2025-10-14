@@ -8,7 +8,7 @@ from odoo.addons.website_sale.const import SHOP_PATH
 
 
 def validate_and_get_category(category):
-    """ Validate and return the `product.public.category` record corresponding to the provided
+    """Validate and return the `product.public.category` record corresponding to the provided
     category, which can be a record, a record id, or a slug.
 
     - If no category is provided, return an empty recordset.
@@ -20,8 +20,12 @@ def validate_and_get_category(category):
     :rtype: product.public.category
     """
     ProductCategory = request.env['product.public.category']
-    if not isinstance(category, ProductCategory.__class__) and category and not str(category).isdigit():
-        raise ValidationError(_("Invalid category."))
+    if (
+        not isinstance(category, ProductCategory.__class__)
+        and category
+        and not str(category).isdigit()
+    ):
+        raise ValidationError(request.env._("Invalid category."))
     if (
         (category := ProductCategory.browse(category and int(category)).exists())
         and category.can_access_from_current_website()
@@ -30,7 +34,7 @@ def validate_and_get_category(category):
     return ProductCategory
 
 def get_filtered_query_string(query_string, keys_to_remove):
-    """ Return a filtered copy of the provided query string, where all keys in `keys_to_remove`
+    """Return a filtered copy of the provided query string, where all keys in `keys_to_remove`
     are removed.
 
     Note: the query string shouldn't include the leading '?'.
