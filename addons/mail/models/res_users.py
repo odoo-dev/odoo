@@ -663,7 +663,7 @@ class ResUsers(models.Model):
     def _get_mail_server_setup_end_action(self, smtp_server):
         raise NotImplementedError()
 
-    def _webpush_notification(self, body, model, res_id, icon, title='Odoo', author=None, extra_payload=None):
+    def _webpush_notification(self, body, model, res_id, icon, title='Odoo', author=None, extra_payload=None, force_direct_send=False):
         if extra_payload is None:
             extra_payload = {}
         devices, private_key, public_key = self.env['mail.thread']._web_push_get_partners_parameters(self.partner_id.ids)
@@ -682,4 +682,4 @@ class ResUsers(models.Model):
                     },
                 }
             } | extra_payload
-            self.env['mail.thread']._web_push_send_notification(devices, private_key, public_key, payload=payload_webpush)
+            self.env['mail.thread']._web_push_send_notification(devices, private_key, public_key, payload=payload_webpush, force_direct_send=force_direct_send)
