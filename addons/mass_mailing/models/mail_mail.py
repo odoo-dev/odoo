@@ -128,7 +128,7 @@ class MailMail(models.Model):
         months_limit = int(self.env['ir.config_parameter'].sudo().get_param("mass_mailing.cancelled_mails_months_limit", 6))
         if months_limit <= 0:
             return
-        history_deadline = datetime.utcnow() - relativedelta(months=months_limit)  # 6 months history will be kept
+        history_deadline = datetime.now() - relativedelta(months=months_limit)  # 6 months history will be kept
         canceled_mails = self.with_context(active_test=False).search([('state', '=', 'cancel'), ('write_date', '<=', history_deadline)], order="id asc", limit=10000)
         # about linked mail_message: 'is_notification' is in charge of choosing to
         # delete the mail.message or not, see MailMail.unlink()

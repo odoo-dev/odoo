@@ -31,7 +31,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        now = datetime.utcnow()
+        now = datetime.now()
         cls.customer = cls.env['res.partner'].create({
             'name': 'a',
             'email': 'a@example.com',
@@ -156,7 +156,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
         website.write(
             {
                 "send_abandoned_cart_email_activation_time": (
-                    datetime.utcnow()
+                    datetime.now()
                     - relativedelta(hours=website.cart_abandoned_delay)
                 )
                 - relativedelta(minutes=10)
@@ -175,7 +175,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'website_id': website.id,
             'state': 'draft',
-            'date_order': (datetime.utcnow() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(minutes=1),
+            'date_order': (datetime.now() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(minutes=1),
             'order_line': order_line
         })
         self.assertTrue(abandoned_sale_order.is_abandoned_cart)
@@ -202,7 +202,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'website_id': website.id,
             'state': 'draft',
-            'date_order': (datetime.utcnow() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
+            'date_order': (datetime.now() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
                 minutes=1),
             'order_line': order_line
         })
@@ -213,7 +213,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'website_id': website.id,
             'state': 'draft',
-            'date_order': (datetime.utcnow() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
+            'date_order': (datetime.now() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
                 minutes=1),
             'order_line': order_line,
             'cart_recovery_email_sent': True
@@ -235,7 +235,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'website_id': website.id,
             'state': 'draft',
-            'date_order': (datetime.utcnow() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
+            'date_order': (datetime.now() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
                 minutes=1),
             'order_line': order_line
         })
@@ -246,7 +246,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'website_id': website.id,
             'state': 'draft',
-            'date_order': (datetime.utcnow() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
+            'date_order': (datetime.now() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
                 minutes=1),
             'order_line': order_line,
         })
@@ -269,7 +269,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'website_id': website.id,
             'state': 'draft',
-            'date_order': (datetime.utcnow() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
+            'date_order': (datetime.now() - relativedelta(hours=website.cart_abandoned_delay)) - relativedelta(
                 minutes=1),
             'order_line': order_line,
         })
@@ -277,7 +277,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
             'partner_id': self.customer.id,
             'website_id': website.id,
             'state': 'draft',
-            'date_order': datetime.utcnow(),
+            'date_order': datetime.now(),
             'order_line': order_line,
         })
         self.assertFalse(self.send_mail_patched(abandoned_sale_order.id))
