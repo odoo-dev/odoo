@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 
 from odoo import api, fields, models, tools
-from odoo.http import GeoIP, request, root, STORED_SESSION_BYTES
+from odoo.http import GeoIP, request, root
 from odoo.tools import SQL, OrderedSet, unique
 from odoo.tools.translate import _
 from .res_users import check_identity
@@ -64,7 +64,7 @@ class ResDeviceLog(models.Model):
 
     def _order_field_to_sql(self, alias, field_name, direction, nulls, query):
         if field_name == 'is_current' and request and request.session.sid:
-            return SQL("session_identifier = %s DESC", request.session.sid[:STORED_SESSION_BYTES])
+            return SQL("session_identifier = %s DESC", request.session.static_sid)
         return super()._order_field_to_sql(alias, field_name, direction, nulls, query)
 
     def _is_mobile(self, platform):
@@ -87,7 +87,7 @@ class ResDeviceLog(models.Model):
 
         geoip = GeoIP(trace['ip_address'])
         user_id = request.session.uid
-        session_identifier = request.session.sid[:STORED_SESSION_BYTES]
+        session_identifier = request.session.static_sid
 
         if self.env.cr.readonly:
             self.env.cr.rollback()
@@ -145,7 +145,7 @@ class ResDeviceLog(models.Model):
         ):
             device_logs_by_session_identifier[session_identifier] = device_logs
 
-        revoked_session_identifiers = root.session_store.get_missing_session_identifiers(
+        revoked_session_identifiers = root.session_cls.get_missing_session_identifiers(
             device_logs_by_session_identifier.keys()
         )
         device_logs_to_revoke = self.env['res.device.log'].concat(*map(
@@ -171,7 +171,7 @@ class ResDevice(models.Model):
     def _revoke(self):
         ResDeviceLog = self.env['res.device.log']
         session_identifiers = list(unique(device.session_identifier for device in self))
-        root.session_store.delete_from_identifiers(session_identifiers)
+        root.session_cls.delete_from_identifiers(session_identifiers)
         revoked_devices = ResDeviceLog.sudo().search([('session_identifier', 'in', session_identifiers)])
         revoked_devices.write({'revoked': True})
         _logger.info("User %d revokes devices (%s)", self.env.uid, ', '.join(session_identifiers))

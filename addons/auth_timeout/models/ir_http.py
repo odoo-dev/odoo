@@ -146,11 +146,11 @@ class IrHttp(models.AbstractModel):
             if not session.get("identity-check-next") or next_check < session["identity-check-next"]:
                 session["identity-check-next"] = next_check
                 # Save manually, websocket requests do not save the session automatically
-                root.session_store.save(session)
+                session.save()
         elif not inactive and (timestamp := session.get("identity-check-next")) and timestamp > time.time():
             session.pop("identity-check-next")
             # Save manually, websocket requests do not save the session automatically
-            root.session_store.save(session)
+            session.save()
 
     @classmethod
     def _authenticate(cls, endpoint):

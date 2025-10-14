@@ -190,7 +190,7 @@ class TestWebsocketCaryall(WebsocketCase):
         # specific) or a known language that is uninstalled; in all cases this
         # should not crash the notif. dispatching.
         self.session.context['lang'] = 'fr_LU'
-        http.root.session_store.save(self.session)
+        self.session.save()
         self.subscribe(websocket, ['my_channel'], self.env['bus.bus']._bus_last_id())
         self.env['bus.bus']._sendone('my_channel', 'notif_type', 'message')
         self.trigger_notification_dispatching(["my_channel"])

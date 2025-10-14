@@ -214,9 +214,7 @@ class TestDatabaseOperations(BaseCase):
         close_db.assert_called_once_with(test_db_name)
 
         # simulate that some customers were connected to that dropped db
-        session_store = odoo.http.root.session_store
-        session = session_store.new()
-        session.update(odoo.http.get_default_session(), db=test_db_name)
+        session = odoo.http.root.session_cls(db=test_db_name)
         session.context['lang'] = odoo.http.DEFAULT_LANG
         self.session.cookies['session_id'] = session.sid
 
@@ -232,12 +230,12 @@ class TestDatabaseOperations(BaseCase):
         # The other worker doesn't have a registry in its LRU cache for
         # that session database.
         with self.subTest(msg="Registry.init() fails"):
-            session_store.save(session)
+            session.save()
             registries.pop('test_db_name', None)
             with self.assertLogs('odoo.sql_db', logging.INFO) as capture:
                 res = self.session.get(self.url('/web/health'))
             self.assertEqual(res.status_code, 200)
-            self.assertEqual(session_store.get(session.sid)['db'], None)
+            self.assertEqual(odoo.http.root.session_cls(session.sid)['db'], None)
             self.assertEqual(capture.output, [
                 "INFO:odoo.sql_db:Connection to the database failed",
             ])
@@ -247,13 +245,13 @@ class TestDatabaseOperations(BaseCase):
         # session database. But it doesn't have a connection to the sql
         # database.
         with self.subTest(msg="Registry.cursor() fails"):
-            session_store.save(session)
+            session.save()
             registries[test_db_name] = registry
             with self.assertLogs('odoo.sql_db', logging.INFO) as capture, \
                  patch.object(Registry, '__new__', return_value=registry):
                 res = self.session.get(self.url('/web/health'))
             self.assertEqual(res.status_code, 200)
-            self.assertEqual(session_store.get(session.sid)['db'], None)
+            self.assertEqual(odoo.http.root.session_cls(session.sid)['db'], None)
             self.assertEqual(capture.output, [
                 "INFO:odoo.sql_db:Connection to the database failed",
             ])
@@ -262,14 +260,14 @@ class TestDatabaseOperations(BaseCase):
         # session database. It also has a (now broken) connection to the
         # sql database.
         with self.subTest(msg="Registry.check_signaling() fails"):
-            session_store.save(session)
+            session.save()
             registries[test_db_name] = registry
             with self.assertLogs('odoo.sql_db', logging.ERROR) as capture, \
                  patch.object(Registry, '__new__', return_value=registry), \
                  patch.object(Registry, 'cursor', return_value=cr):
                 res = self.session.get(self.url('/web/health'))
             self.assertEqual(res.status_code, 200)
-            self.assertEqual(session_store.get(session.sid)['db'], None)
+            self.assertEqual(odoo.http.root.session_cls(session.sid)['db'], None)
             self.maxDiff = None
             self.assertRegex(capture.output[0], (
                 r"^ERROR:odoo\.sql_db:bad query:(?s:.*?)"

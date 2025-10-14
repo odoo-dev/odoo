@@ -503,7 +503,7 @@ class BaseCase(case.TestCase):
             httprequest=Mock(host='localhost'),
             db=self.env.cr.dbname,
             env=self.env,
-            session=DotDict(odoo.http.get_default_session(), debug='1'),
+            session=odoo.http.root.session_cls(debug='1'),
         )
         try:
             self.env.flush_all()
@@ -2114,7 +2114,7 @@ class HttpCase(TransactionCase):
     browser = None
     browser_size = '1366x768'
     touch_enabled = False
-    session: odoo.http.Session = None
+    session: odoo.http.session.Session = None
 
     _logger: logging.Logger = None
 
@@ -2265,14 +2265,13 @@ class HttpCase(TransactionCase):
 
     def logout(self, keep_db=True):
         self.session.logout(keep_db=keep_db)
-        odoo.http.root.session_store.save(self.session)
+        self.session.save()
 
     def authenticate(self, user, password, browser: ChromeBrowser = None):
         if getattr(self, 'session', None):
-            odoo.http.root.session_store.delete(self.session)
+            self.session.delete()
 
-        self.session = session = odoo.http.root.session_store.new()
-        session.update(odoo.http.get_default_session(), db=get_db_name())
+        self.session = session = odoo.http.root.session_cls(db=get_db_name())
         session.context['lang'] = odoo.http.DEFAULT_LANG
 
         if user: # if authenticated
@@ -2296,7 +2295,7 @@ class HttpCase(TransactionCase):
             session.session_token = uid and security.compute_session_token(session, env)
             session.context = dict(env['res.users'].context_get())
 
-        odoo.http.root.session_store.save(session)
+        session.save()
         # Reset the opener: turns out when we set cookies['foo'] we're really
         # setting a cookie on domain='' path='/'.
         #

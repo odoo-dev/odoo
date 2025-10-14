@@ -241,19 +241,19 @@ class TestAuthTimeoutHttp(HttpCase):
         ).json()
 
     def set_session_create_time(self, session_id, timestamp):
-        session = odoo.http.root.session_store.get(session_id)
+        session = odoo.http.root.session_cls(session_id)
         session["create_time"] = timestamp
-        odoo.http.root.session_store.save(session)
+        session.save()
 
     def set_session_last_check_identity(self, session_id, timestamp):
-        session = odoo.http.root.session_store.get(session_id)
+        session = odoo.http.root.session_cls(session_id)
         session["identity-check-last"] = timestamp
-        odoo.http.root.session_store.save(session)
+        session.save()
 
     def set_session_next_check_identity(self, session_id, timestamp):
-        session = odoo.http.root.session_store.get(session_id)
+        session = odoo.http.root.session_cls(session_id)
         session["identity-check-next"] = timestamp
-        odoo.http.root.session_store.save(session)
+        session.save()
 
     def set_auth_totp_mail(self):
         config = self.env["res.config.settings"].create({})

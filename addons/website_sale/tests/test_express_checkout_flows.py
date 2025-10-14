@@ -126,7 +126,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         """Test that when using express checkout as a public user, a new partner is created."""
         session = self.authenticate(None, None)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
 
         self.make_jsonrpc_request(
             urls.urljoin(
@@ -151,7 +151,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
 
         self.make_jsonrpc_request(
             urls.urljoin(
@@ -199,7 +199,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
 
         self.make_jsonrpc_request(
             urls.urljoin(
@@ -220,7 +220,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
 
         self.make_jsonrpc_request(
             urls.urljoin(
@@ -244,7 +244,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         """
         session = self.authenticate(None, None)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
         with patch(
             'odoo.addons.delivery.models.delivery_carrier.DeliveryCarrier.rate_shipment',
             return_value=self.rate_shipment_result
@@ -275,7 +275,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         """
         session = self.authenticate(None, None)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
         with patch(
             'odoo.addons.delivery.models.delivery_carrier.DeliveryCarrier.rate_shipment',
             return_value=self.rate_shipment_result
@@ -316,7 +316,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
         with patch(
             'odoo.addons.delivery.models.delivery_carrier.DeliveryCarrier.rate_shipment',
             return_value=self.rate_shipment_result
@@ -342,7 +342,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
         with patch(
             'odoo.addons.delivery.models.delivery_carrier.DeliveryCarrier.rate_shipment',
             return_value=self.rate_shipment_result
@@ -375,7 +375,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
         with patch(
             'odoo.addons.delivery.models.delivery_carrier.DeliveryCarrier.rate_shipment',
             return_value=self.rate_shipment_result
@@ -434,7 +434,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
         with patch(
             'odoo.addons.delivery.models.delivery_carrier.DeliveryCarrier.rate_shipment',
             return_value=self.rate_shipment_result
@@ -473,7 +473,7 @@ class TestWebsiteSaleExpressCheckoutFlows(WebsiteSaleCommon, HttpCase):
         self.sale_order.partner_id = self.user_demo.partner_id.id
         session = self.authenticate(self.user_demo.login, self.user_demo.login)
         session['sale_order_id'] = self.sale_order.id
-        root.session_store.save(session)
+        session.save()
         with patch(
             'odoo.addons.delivery.models.delivery_carrier.DeliveryCarrier.rate_shipment',
             return_value=self.rate_shipment_result

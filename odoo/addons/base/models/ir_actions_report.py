@@ -550,16 +550,11 @@ class IrActionsReport(models.Model):
             # Passing the cookie to wkhtmltopdf in order to resolve internal links.
             if request and request.db:
                 # Create a temporary session which will not create device logs
-                temp_session = root.session_store.new()
-                temp_session.update({
-                    **request.session,
-                    'debug': '',
-                    '_trace_disable': True,
-                })
+                temp_session = root.session_cls(**request.session, debug='', _trace_disable=True)
                 if temp_session.uid:
                     temp_session.session_token = security.compute_session_token(temp_session, self.env)
-                root.session_store.save(temp_session)
-                stack.callback(root.session_store.delete, temp_session)
+                temp_session.save()
+                stack.callback(temp_session.delete, temp_session)
 
                 base_url = self._get_report_url()
                 domain = urlparse(base_url).hostname

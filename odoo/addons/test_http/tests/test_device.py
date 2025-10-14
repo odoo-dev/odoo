@@ -77,7 +77,7 @@ class TestDevice(TestHttpBase):
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
 
     def test_detection_device_no_readonly(self):
         session = self.authenticate(self.user_admin.login, self.user_admin.login)
@@ -86,7 +86,7 @@ class TestDevice(TestHttpBase):
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
 
     def test_detection_user_public(self):
         self.authenticate(None, None)
@@ -103,14 +103,14 @@ class TestDevice(TestHttpBase):
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
 
         self.hit('2024-01-01 08:00:00', '/test_http/greeting-public?readonly=0')
 
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
 
     def test_detection_device_according_to_time(self):
         session = self.authenticate(self.user_admin.login, self.user_admin.login)
@@ -119,32 +119,32 @@ class TestDevice(TestHttpBase):
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
-        self.assertEqual(self.info_trace(session['_trace'][0])['elapsed_time'], 0)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][0])['elapsed_time'], 0)
 
         self.hit('2024-01-01 08:30:00', '/test_http/greeting-public?readonly=0')
 
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
-        self.assertEqual(self.info_trace(session['_trace'][0])['elapsed_time'], 0)  # No trace update (< 3600 sec)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][0])['elapsed_time'], 0)  # No trace update (< 3600 sec)
 
         self.hit('2024-01-01 09:00:00', '/test_http/greeting-public?readonly=0')
 
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 2)
-        self.assertEqual(len(session['_trace']), 1)
-        self.assertEqual(self.info_trace(session['_trace'][0])['elapsed_time'], 3600)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][0])['elapsed_time'], 3600)
 
         self.hit('2024-01-01 10:00:00', '/test_http/greeting-public?readonly=0')
 
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 3)
-        self.assertEqual(len(session['_trace']), 1)
-        self.assertEqual(self.info_trace(session['_trace'][0])['elapsed_time'], 7200)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][0])['elapsed_time'], 7200)
 
     def test_detection_device_according_to_useragent(self):
         session = self.authenticate(self.user_admin.login, self.user_admin.login)
@@ -154,18 +154,18 @@ class TestDevice(TestHttpBase):
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
-        self.assertEqual(self.info_trace(session['_trace'][0])['platform'], 'linux')
-        self.assertEqual(self.info_trace(session['_trace'][0])['browser'], 'chrome')
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][0])['platform'], 'linux')
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][0])['browser'], 'chrome')
 
         self.hit('2024-01-01 08:00:00', '/test_http/greeting-public?readonly=0', headers={'User-Agent': USER_AGENT_linux_firefox})
 
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 2)
         self.assertEqual(len(logs), 2)
-        self.assertEqual(len(session['_trace']), 2)
-        self.assertEqual(self.info_trace(session['_trace'][1])['platform'], 'linux')
-        self.assertEqual(self.info_trace(session['_trace'][1])['browser'], 'firefox')
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 2)
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][1])['platform'], 'linux')
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][1])['browser'], 'firefox')
 
     def test_detection_device_according_to_ipaddress(self):
         session = self.authenticate(self.user_admin.login, self.user_admin.login)
@@ -174,16 +174,16 @@ class TestDevice(TestHttpBase):
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 1)
-        self.assertEqual(len(session['_trace']), 1)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 1)
 
         self.hit('2024-01-01 08:00:01', '/test_http/greeting-public?readonly=0', ip=TEST_IP)
 
         devices, logs = self.get_devices_logs(self.user_admin)
         self.assertEqual(len(devices), 1)
         self.assertEqual(len(logs), 2)
-        self.assertEqual(len(session['_trace']), 2)
-        self.assertNotEqual(self.info_trace(session['_trace'][0])['ip_address'], TEST_IP)
-        self.assertEqual(self.info_trace(session['_trace'][1])['ip_address'], TEST_IP)
+        self.assertEqual(len(odoo.http.root.session_cls(session.sid)['_trace']), 2)
+        self.assertNotEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][0])['ip_address'], TEST_IP)
+        self.assertEqual(self.info_trace(odoo.http.root.session_cls(session.sid)['_trace'][1])['ip_address'], TEST_IP)
 
         localized_device = devices.filtered(lambda device: device.ip_address == TEST_IP)
         self.assertEqual(localized_device.country, 'France')
@@ -275,7 +275,7 @@ class TestDevice(TestHttpBase):
     def test_detection_no_trace_mechanism(self):
         session = self.authenticate(self.user_admin.login, self.user_admin.login)
         session['_trace_disable'] = True
-        odoo.http.root.session_store.save(session)
+        session.save()
         res = self.hit('2024-01-01 08:00:00', '/test_http/greeting-public?readonly=0')
         self.assertEqual(res.status_code, 200)
         devices, logs = self.get_devices_logs(self.user_admin)
@@ -351,7 +351,7 @@ class TestDevice(TestHttpBase):
     def _create_device_log_for_user(self, session, count):
         for _ in range(count):
             self.DeviceLog.create({
-                'session_identifier': odoo.http.root.session_store.generate_key(),
+                'session_identifier': odoo.http.root.session_cls(session.sid).static_sid,
                 'user_id': session.uid,
                 'revoked': False,
             })
@@ -367,6 +367,7 @@ class TestDevice(TestHttpBase):
         self.assertEqual(len(logs), 10)
         self.assertEqual(len(self.user_internal.device_ids), 10)
 
+        odoo.http.root.session_cls.cleanup()
         self.DeviceLog.with_user(self.user_internal)._ResDeviceLog__update_revoked()
         self.DeviceLog.flush_model()  # Because write on ``res.device.log`` and so we have new values in cache
         self.Device.invalidate_model()  # Because it depends on the ``res.device.log`` model (updated in database)
@@ -397,6 +398,7 @@ class TestDevice(TestHttpBase):
         self.assertEqual(len(logs), 10)
         self.assertEqual(len(self.user_internal.device_ids), 10)
 
+        odoo.http.root.session_cls.cleanup()
         # Admin can update all device logs
         self.DeviceLog.with_user(self.user_admin)._ResDeviceLog__update_revoked()
         self.DeviceLog.flush_model()
@@ -430,4 +432,4 @@ class TestDevice(TestHttpBase):
         # we can check that there is no `_trace`.
         # This means that the device logic will not create a session file
         # (because we are not passing in the `_update_device` logic).
-        self.assertFalse(session['_trace'])
+        self.assertFalse(odoo.http.root.session_cls(session.sid)['_trace'])

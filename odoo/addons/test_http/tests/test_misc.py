@@ -223,7 +223,7 @@ class TestHttpEnsureDb(TestHttpBase):
         res.raise_for_status()
         self.assertEqual(res.status_code, 302)
         self.assertURLEqual(res.headers.get('Location'), '/test_http/ensure_db?db=db0')
-        self.assertEqual(odoo.http.root.session_store.get(res.cookies['session_id']).db, 'db0')
+        self.assertEqual(odoo.http.root.session_cls(res.cookies['session_id']).db, 'db0')
 
         # follow the redirection
         res = self.multidb_url_open('/test_http/ensure_db')
@@ -234,7 +234,7 @@ class TestHttpEnsureDb(TestHttpBase):
     def test_ensure_db2_use_session_db(self):
         session = self.authenticate(None, None)
         session.db = 'db0'
-        odoo.http.root.session_store.save(session)
+        session.save()
 
         res = self.multidb_url_open('/test_http/ensure_db')
         res.raise_for_status()
@@ -244,14 +244,14 @@ class TestHttpEnsureDb(TestHttpBase):
     def test_ensure_db3_change_db(self):
         session = self.authenticate(None, None)
         session.db = 'db0'
-        odoo.http.root.session_store.save(session)
+        session.save()
 
         res = self.multidb_url_open('/test_http/ensure_db?db=db1')
         res.raise_for_status()
         self.assertEqual(res.status_code, 302)
         self.assertURLEqual(res.headers.get('Location'), '/test_http/ensure_db?db=db1')
 
-        new_session = odoo.http.root.session_store.get(res.cookies['session_id'])
+        new_session = odoo.http.root.session_cls(res.cookies['session_id'])
         self.assertNotEqual(session.sid, new_session.sid)
         self.assertEqual(new_session.db, 'db1')
         self.assertEqual(new_session.uid, None)
@@ -273,7 +273,7 @@ class TestHttpEnsureDb(TestHttpBase):
             res.headers.get('Location'),
             '/test_http/ensure_db?db=basededonnée1')
         self.assertEqual(
-            odoo.http.root.session_store.get(res.cookies['session_id']).db,
+            odoo.http.root.session_cls(res.cookies['session_id']).db,
             'basededonnée1')
 
         # follow the redirection

@@ -432,7 +432,7 @@ class TestHttpStatic(TestHttpStaticCommon):
         session = self.authenticate(None, None)
         for debug in ('', 'assets'):
             session.debug = debug
-            http.root.session_store.save(self.session)
+            self.session.save()
             with self.subTest(debug=debug):
                 res = self.db_url_open('/test_http/static/src/img/gizeh.png', headers={
                     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '

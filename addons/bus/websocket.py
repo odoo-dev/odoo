@@ -28,7 +28,7 @@ from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
 import odoo
 from odoo import api, modules
 from .models.bus import dispatch
-from odoo.http import root, Request, Response, SessionExpiredException, get_default_session
+from odoo.http import root, Request, Response, SessionExpiredException
 from odoo.modules.registry import Registry
 from odoo.service import model as service_model
 from odoo.service.server import CommonServer
@@ -732,11 +732,11 @@ class Websocket:
         `SESSION_EXPIRED` close code. If no cursor can be acquired,
         close the connection with the `TRY_LATER` close code.
         """
-        session = root.session_store.get(self._session.sid)
+        session = root.session_cls(self._session.sid)
         if not session:
             raise SessionExpiredException()
         if 'next_sid' in session:
-            self._session = root.session_store.get(session['next_sid'])
+            self._session = root.session_cls(session['next_sid'])
             return self._dispatch_bus_notifications()
          # Mark the notification request as processed.
         self._waiting_for_dispatch = False
@@ -922,9 +922,9 @@ class WebsocketRequest:
         self.env["ir.websocket"]._serve_ir_websocket(event_name, data)
 
     def _get_session(self):
-        session = root.session_store.get(self.ws._session.sid)
+        session = root.session_cls(self.ws._session.sid)
         if 'next_sid' in session:
-            self.ws._session = root.session_store.get(session['next_sid'])
+            self.ws._session = root.session_cls(session['next_sid'])
             return self._get_session()
         if not session:
             raise SessionExpiredException()
@@ -1049,9 +1049,8 @@ class WebsocketConnectionHandler:
                     'scheme': request.httprequest.scheme,
                 },
             )
-            session = root.session_store.new()
-            session.update(get_default_session(), db=request.session.db)
-            root.session_store.save(session)
+            session = root.session_cls(db=request.session.db)
+            session.save()
             return session
         return None
 

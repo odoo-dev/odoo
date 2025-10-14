@@ -95,8 +95,7 @@ def ensure_db(redirect='/web/database/selector', db=None):
 
     # always switch the session to the computed db
     if db != request.session.db:
-        request.session = http.root.session_store.new()
-        request.session.update(http.get_default_session(), db=db)
+        request.session = http.root.session_cls(db=db)
         request.session.context['lang'] = request.default_lang()
         werkzeug.exceptions.abort(request.redirect(request.httprequest.url, 302))
 

@@ -76,10 +76,9 @@ class TestHttpRegistry(BaseCase):
         return db_duplicate
 
     def authenticate(self, *, db=None):
-        session = odoo.http.root.session_store.new()
-        session.update(odoo.http.get_default_session(), db=db or get_db_name())
+        session = odoo.http.root.session_cls(db=db or get_db_name())
         session.context['lang'] = odoo.http.DEFAULT_LANG
-        odoo.http.root.session_store.save(session)
+        session.save()
         self.opener.cookies.set("session_id", session.sid, domain=HOST)
         return session
 

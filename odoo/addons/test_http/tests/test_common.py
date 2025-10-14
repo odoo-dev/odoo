@@ -7,10 +7,9 @@ from werkzeug.datastructures import ResponseCacheControl
 from werkzeug.http import parse_cache_control_header
 
 import odoo
-from odoo.http import Session
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
 from odoo.tools import config, reset_cached_properties
-from odoo.addons.test_http.utils import MemoryGeoipResolver, MemorySessionStore
+from odoo.addons.test_http.utils import MemoryGeoipResolver
 
 HTTP_DATETIME_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
@@ -20,20 +19,19 @@ class TestHttpBase(HttpCaseWithUserDemo):
     def setUpClass(cls):
         super().setUpClass()
         geoip_resolver = MemoryGeoipResolver()
-        session_store = MemorySessionStore(session_cls=Session)
 
         reset_cached_properties(odoo.http.root)
         cls.addClassCleanup(reset_cached_properties, odoo.http.root)
         cls.classPatch(config, 'options', config.options.new_child({
             'server_wide_modules': ['base', 'web', 'rpc', 'test_http']
         }))
-        cls.classPatch(odoo.http.Application, 'session_store', session_store)
+        cls.classPatch(odoo.http.Application, 'session_cls', odoo.session.MemorySession)
         cls.classPatch(odoo.http.Application, 'geoip_city_db', geoip_resolver)
         cls.classPatch(odoo.http.Application, 'geoip_country_db', geoip_resolver)
 
     def setUp(self):
         super().setUp()
-        odoo.http.root.session_store.store.clear()
+        odoo.http.root.session_cls.cleanup()
 
     def db_url_open(self, url, *args, allow_redirects=False, **kwargs):
         return self.url_open(url, *args, allow_redirects=allow_redirects, **kwargs)

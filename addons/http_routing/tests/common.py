@@ -54,7 +54,7 @@ def MockRequest(
         params={},
         redirect=env['ir.http']._redirect,
         session=DotDict(
-            odoo.http.get_default_session(),
+            odoo.http.Session.get_default(),
             context={'lang': ''},
             force_website_id=website and website.id,
         ),

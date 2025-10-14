@@ -20,7 +20,7 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
         session = self.authenticate(None, None)
         self.env.ref('base.lang_fr').active = False
         session.context['lang'] = 'fr_FR'
-        odoo.http.root.session_store.save(session)
+        session.save()
 
         # ensure that _get_current_website_id will be able to match a website
         current_website_id = self.env["website"]._get_current_website_id(odoo.tests.HOST)
@@ -33,7 +33,7 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
         session = self.authenticate(None, None)
         self.env.ref('base.lang_fr').active = False
         session.context['lang'] = 'fr_FR'
-        odoo.http.root.session_store.save(session)
+        session.save()
 
         # ensure that _get_current_website_id will be able to match a website
         current_website_id = self.env["website"]._get_current_website_id(odoo.tests.HOST)
@@ -54,7 +54,7 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
 
         # Force a browser language that is not installed
         session.context['lang'] = 'fr_MC'
-        http.root.session_store.save(session)
+        session.save()
 
         # Disable cache in order to make sure that values would be fetched at any time
         get_cached_values_without_cache = Website._get_cached_values.__cache__.method

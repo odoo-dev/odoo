@@ -409,7 +409,7 @@ class IrHttp(models.AbstractModel):
     def _gc_sessions(self):
         if os.getenv("ODOO_SKIP_GC_SESSIONS"):
             return
-        http.root.session_store.vacuum(max_lifetime=http.get_session_max_inactivity(self.env))
+        http.root.session_cls.vacuum(max_lifetime=http.get_session_max_inactivity(self.env))
 
     @api.model
     def _get_translations_for_webclient(self, modules, lang):
