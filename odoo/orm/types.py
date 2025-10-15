@@ -1,7 +1,7 @@
 # ruff: noqa: E402, F401
 import typing
 from collections.abc import Mapping
-from typing import Self
+# from typing import Self
 
 from .commands import Command
 from .domains import Domain

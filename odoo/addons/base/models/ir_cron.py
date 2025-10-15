@@ -54,7 +54,7 @@ _intervalTypes = {
 }
 
 
-class CompletionStatus(enum.StrEnum):
+class CompletionStatus:  # inherit from enum.StrEnum in 3.11
     FULLY_DONE = 'fully done'
     PARTIALLY_DONE = 'partially done'
     FAILED = 'failed'
