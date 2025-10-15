@@ -103,7 +103,7 @@ export class Action {
 
     /** Closes the action panel of this action. */
     actionPanelClose() {
-        if (this.actions) {
+        if (this.actions && !this.popover) {
             this.actions.activeAction = this.actions.actionStack.pop();
         }
         this.definition.actionPanelClose?.call(this, this.params);
@@ -133,7 +133,7 @@ export class Action {
      * to the previous one.
      * */
     actionPanelOpen({ keepPrevious } = {}) {
-        if (this.actions) {
+        if (this.actions && !this.popover) {
             if (this.actions.activeAction) {
                 if (keepPrevious) {
                     this.actions.actionStack.push(this.actions.activeAction);

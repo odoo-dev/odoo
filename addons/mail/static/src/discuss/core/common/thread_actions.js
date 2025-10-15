@@ -23,7 +23,6 @@ class ChannelActionDialog extends Component {
 }
 
 registerThreadAction("notification-settings", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: NotificationSettings,
     actionPanelComponentProps: ({ thread }) => ({ thread }),
     actionPanelOpen({ owner, store, thread }) {
@@ -46,7 +45,6 @@ registerThreadAction("notification-settings", {
     setup({ owner }) {
         if (!owner.props.chatWindow) {
             this.popover = usePopover(NotificationSettings, {
-                onClose: () => this.actionPanelClose(),
                 position: "bottom-end",
                 fixedPosition: true,
                 popoverClass: this.actionPanelOuterClass,
@@ -74,7 +72,6 @@ registerThreadAction("attachments", {
     sequenceGroup: 10,
 });
 registerThreadAction("invite-people", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: ChannelInvitation,
     actionPanelComponentProps: ({ action, thread }) => ({
         close: () => action.actionPanelClose(),
@@ -111,7 +108,6 @@ registerThreadAction("invite-people", {
     setup({ owner }) {
         if (!owner.props.chatWindow && !owner.env.inMeetingView) {
             this.popover = usePopover(ChannelInvitation, {
-                onClose: () => this.actionPanelClose(),
                 popoverClass: this.actionPanelOuterClass,
             });
         }
@@ -160,7 +156,6 @@ registerThreadAction("mark-read", {
     sequenceGroup: 20,
 });
 registerThreadAction("delete-thread", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: DeleteThreadDialog,
     actionPanelComponentProps: ({ action, thread }) => ({
         close: () => action.actionPanelClose(),

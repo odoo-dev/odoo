@@ -6,7 +6,6 @@ import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 
 registerThreadAction("show-threads", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: SubChannelList,
     actionPanelComponentProps: ({ action, thread }) => ({
         close: () => action.actionPanelClose(),
@@ -25,7 +24,6 @@ registerThreadAction("show-threads", {
     setup({ owner, store }) {
         if (owner.env.inDiscussApp && !store.env.isSmall) {
             this.popover = usePopover(SubChannelList, {
-                onClose: () => this.actionPanelClose(),
                 fixedPosition: true,
                 popoverClass: this.actionPanelOuterClass,
             });

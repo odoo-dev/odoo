@@ -7,7 +7,6 @@ import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 
 registerThreadAction("create-lead", {
-    actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: LivechatCommandDialog,
     actionPanelComponentProps: ({ action, thread }) => ({
         close: () => action.actionPanelClose(),
@@ -32,7 +31,6 @@ registerThreadAction("create-lead", {
     setup({ owner }) {
         if (!owner.env.inChatWindow) {
             this.popover = usePopover(LivechatCommandDialog, {
-                onClose: () => this.actionPanelClose(),
                 popoverClass: this.actionPanelOuterClass,
             });
         }
