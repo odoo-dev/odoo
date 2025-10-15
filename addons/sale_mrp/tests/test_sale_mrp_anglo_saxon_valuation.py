@@ -10,7 +10,6 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTestCommon):
 
     @classmethod
@@ -24,6 +23,11 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         if create_vals.get('is_storable'):
             create_vals['categ_id'] = cls.stock_account_product_categ.id
         return super()._create_product(**create_vals)
+
+    def _set_value(self, moves):
+        """Update the manual value of each move based on its current quantity and unit price."""
+        for move in moves:
+            move.value_manual = move.price_unit * move.quantity
 
     def test_sale_mrp_kit_bom_cogs(self):
         """Check invoice COGS aml after selling and delivering a product
@@ -102,9 +106,9 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertAlmostEqual(stock_out_aml.credit, 1.53, msg="Should not include the value of consumable component")
+        stock_val_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_valuation'])
+        self.assertEqual(stock_val_aml.debit, 0)
+        self.assertAlmostEqual(stock_val_aml.credit, 1.53, msg="Should not include the value of consumable component")
         cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
         self.assertAlmostEqual(cogs_aml.debit, 1.53, msg="Should not include the value of consumable component")
         self.assertEqual(cogs_aml.credit, 0)
@@ -239,6 +243,7 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        self._set_value(in_moves)
 
         # Sell 3 kits
         so = self.env['sale.order'].create({
@@ -280,6 +285,7 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        self._set_value(in_moves)
 
         # Return the second picking (i.e. one component @20)
         ctx = {'active_id': pickings[1].id, 'active_model': 'stock.picking'}
@@ -302,9 +308,9 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         reverse_invoice.action_post()
 
         amls = reverse_invoice.line_ids
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 20, 'Should be to the value of the returned component')
-        self.assertEqual(stock_out_aml.credit, 0)
+        stock_val_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_valuation'])
+        self.assertEqual(stock_val_aml.debit, 20, 'Should be to the value of the returned component')
+        self.assertEqual(stock_val_aml.credit, 0)
         cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
         self.assertEqual(cogs_aml.debit, 0)
         self.assertEqual(cogs_aml.credit, 20, 'Should be to the value of the returned component')
@@ -340,6 +346,7 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        self._set_value(in_moves)
 
         # Sell 3 kits
         so = self.env['sale.order'].create({
@@ -381,6 +388,7 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        self._set_value(in_moves)
 
         # Return the second picking (i.e. one component @20)
         ctx = {'active_id': pickings[1].id, 'active_model': 'stock.picking'}
@@ -402,9 +410,9 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         reverse_invoice.action_post()
 
         amls = reverse_invoice.line_ids
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 20, 'Should be to the value of the returned component')
-        self.assertEqual(stock_out_aml.credit, 0)
+        stock_val_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_valuation'])
+        self.assertEqual(stock_val_aml.debit, 20, 'Should be to the value of the returned component')
+        self.assertEqual(stock_val_aml.credit, 0)
         cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
         self.assertEqual(cogs_aml.debit, 0)
         self.assertEqual(cogs_aml.credit, 20, 'Should be to the value of the returned component')
@@ -510,7 +518,7 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
             # pylint: disable=bad-whitespace
             {'account_id': self.company_data['default_account_revenue'].id,     'debit': 0,     'credit': 10},
             {'account_id': self.company_data['default_account_receivable'].id,  'debit': 10,    'credit': 0},
-            {'account_id': self.company_data['default_account_stock_out'].id,   'debit': 0,     'credit': 30},
+            {'account_id': self.company_data['default_account_stock_valuation'].id, 'debit': 0, 'credit': 30},
             {'account_id': self.company_data['default_account_expense'].id,     'debit': 30,    'credit': 0},
         ])
 
@@ -605,9 +613,9 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         # Check the resulting accounting entries
         amls = invoice.line_ids
         self.assertEqual(len(amls), 4)
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_out'])
-        self.assertEqual(stock_out_aml.debit, 0)
-        self.assertAlmostEqual(stock_out_aml.credit, 8.00, msg="Should include include the components from all subkits, with the price adapted for 1 Main kit")
+        stock_val_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_stock_valuation'])
+        self.assertEqual(stock_val_aml.debit, 0)
+        self.assertAlmostEqual(stock_val_aml.credit, 8.00, msg="Should include include the components from all subkits, with the price adapted for 1 Main kit")
         cogs_aml = amls.filtered(lambda aml: aml.account_id == self.company_data['default_account_expense'])
         self.assertAlmostEqual(cogs_aml.debit, 8.00, msg="Should include include the components from all subkits, with the price adapted for 1 Main kit")
         self.assertEqual(cogs_aml.credit, 0)
@@ -657,13 +665,15 @@ class TestSaleMRPAngloSaxonValuation(TestSaleCommon, ValuationReconciliationTest
         delivery = sale_order.picking_ids
         # would fail due to attempted re-reconciliation prior to this commit
         delivery.button_validate()
-        stock_output_amls = self.env['account.move.line'].search([('account_id', '=', self.company_data['default_account_stock_out'].id)], order='id asc')
-        self.assertRecordValues(stock_output_amls,
+        self.assertRecordValues(invoice.line_ids,
             [
-                {'product_id': kit.id,       'reconciled': True,    'debit': 0.0,     'credit':  30.0},
-                {'product_id': compo02.id,   'reconciled': True,    'debit': 0.0,     'credit':  20.0},
-                {'product_id': compo01.id,   'reconciled': True,    'debit': 10.0,    'credit':  0.0},
-                {'product_id': compo02.id,   'reconciled': True,    'debit': 20.0,    'credit':  0.0},
-                {'product_id': compo02.id,   'reconciled': True,    'debit': 20.0,    'credit':  0.0},
+                {'product_id': kit.id, 'account_id': self.company_data['default_account_revenue'].id, 'debit': 0.0, 'credit': 10.0},
+                {'product_id': compo02.id, 'account_id': self.company_data['default_account_revenue'].id, 'debit': 0.0, 'credit': 5.0},
+                {'product_id': False, 'account_id': self.company_data['default_account_tax_sale'].id, 'debit': 0.0, 'credit': 2.25},
+                {'product_id': False, 'account_id': self.company_data['default_account_receivable'].id, 'debit': 17.25, 'credit': 0.0},
+                {'product_id': kit.id, 'account_id': self.company_data['default_account_stock_valuation'].id, 'debit': 0.0, 'credit': 30.0},
+                {'product_id': kit.id, 'account_id': self.company_data['default_account_expense'].id, 'debit': 30.0, 'credit': 0.0},
+                {'product_id': compo02.id, 'account_id': self.company_data['default_account_stock_valuation'].id, 'debit': 0.0, 'credit': 20.0},
+                {'product_id': compo02.id, 'account_id': self.company_data['default_account_expense'].id, 'debit': 20.0, 'credit': 0.0},
             ]
         )
