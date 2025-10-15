@@ -89,6 +89,11 @@
         ],
         'web.assets_tests': [
             'barcodes/static/tests/legacy/helpers.js',
+            'mail/static/src/views/web/fields/many2one_avatar_user_field/*',
+            'mail/static/src/views/web/fields/assign_user_command_hook.js',
+            'mail/static/src/views/web/fields/avatar/avatar.js',
+            'mail/static/src/discuss/web/avatar_card/avatar_card_popover.js',
+            'mail/static/src/core/web/open_chat_hook.js',
             'point_of_sale/static/tests/pos/tours/**/*',
             'point_of_sale/static/tests/generic_helpers/**/*',
             'point_of_sale/static/tests/customer_display/**/*',
