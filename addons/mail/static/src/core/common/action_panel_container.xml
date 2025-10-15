@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.ActionPanelContainer">
+        <div t-if="props.actions.activeAction?.actionPanelComponentCondition" t-attf-class="{{ props.actions.activeAction.actionPanelOuterClass }} {{ props.class }}">
+            <t t-component="props.actions.activeAction.actionPanelComponent" t-props="props.actions.activeAction.actionPanelComponentProps"/>
+        </div>
+    </t>
+</templates>

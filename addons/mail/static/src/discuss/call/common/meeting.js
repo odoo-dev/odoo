@@ -1,3 +1,4 @@
+import { ActionPanelContainer } from "@mail/core/common/action_panel_container";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread";
 import { Call } from "@mail/discuss/call/common/call";
@@ -16,6 +17,7 @@ import { useService } from "@web/core/utils/hooks";
 import { MeetingSideActions } from "./meeting_side_actions";
 import { useThreadActions } from "@mail/core/common/thread_actions";
 import { useMessageSearch } from "@mail/core/common/message_search_hook";
+import { attClassObjectToString } from "@mail/utils/common/format";
 
 /** @typedef {"chat"|"invite"} MeetingPanel */
 
@@ -28,6 +30,7 @@ export class Meeting extends Component {
     static template = "mail.Meeting";
     static props = ["autoOpenAction?", ...inDiscussCallViewProps];
     static components = {
+        ActionPanelContainer,
         Call,
         CallActionList,
         ChannelInvitation,
@@ -41,6 +44,7 @@ export class Meeting extends Component {
         this.store = useService("mail.store");
         this.ui = useService("ui");
         this.rtc = useService("discuss.rtc");
+        this.attClassObjectToString = attClassObjectToString;
         onMounted(() => {
             if (this.props.autoOpenAction) {
                 this.threadActions.actions

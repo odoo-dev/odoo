@@ -30,7 +30,7 @@ registerThreadAction("camera-call", {
 });
 registerThreadAction("call-settings", {
     actionPanelComponent: CallSettings,
-    actionPanelComponentProps: () => ({ isCompact: true }),
+    actionPanelComponentProps: ({ thread }) => ({ isCompact: true, thread }),
     condition: ({ owner, store, thread }) =>
         thread?.allowCalls &&
         (owner.props.chatWindow?.isOpen || store.inPublicPage) &&

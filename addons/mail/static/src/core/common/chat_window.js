@@ -1,4 +1,5 @@
 import { ActionList } from "@mail/core/common/action_list";
+import { ActionPanelContainer } from "@mail/core/common/action_panel_container";
 import { Composer } from "@mail/core/common/composer";
 import { ImStatus } from "@mail/core/common/im_status";
 import { Thread } from "@mail/core/common/thread";
@@ -28,6 +29,7 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
 export class ChatWindow extends Component {
     static components = {
         ActionList,
+        ActionPanelContainer,
         CountryFlag,
         Dropdown,
         Thread,
