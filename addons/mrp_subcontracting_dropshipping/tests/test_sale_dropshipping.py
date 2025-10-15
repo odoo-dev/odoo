@@ -1,13 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo.tests import Form
 
 from odoo.addons.mrp_subcontracting.tests.common import TestMrpSubcontractingCommon
 
 
-@skip('Temporary to fast merge new valuation')
 class TestSaleDropshippingFlows(TestMrpSubcontractingCommon):
 
     @classmethod
