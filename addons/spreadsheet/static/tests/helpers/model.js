@@ -1,3 +1,4 @@
+import { markRaw } from "@odoo/owl";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Model } from "@odoo/o-spreadsheet";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
@@ -45,6 +46,7 @@ export async function createModelWithDataSource(params = {}) {
             ...config?.custom,
         },
     });
+    markRaw(model);
     env.model = model;
     // if (params.serverData) {
     //     await addRecordsFromServerData(params.serverData);

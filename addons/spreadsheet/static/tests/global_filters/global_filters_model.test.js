@@ -1636,7 +1636,7 @@ test("Export global filters for excel", async function () {
     expect(filterSheet.cells["C2"]).toBe(
         String(model.getters.getFilterDisplayValue(filter.label)[1][0].value)
     );
-    model.exportXLSX(); // should not crash
+    await model.exportXLSX(); // should not crash
 });
 
 test("Export from/to global filters for excel", async function () {
