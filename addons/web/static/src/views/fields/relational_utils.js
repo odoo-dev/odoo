@@ -74,7 +74,7 @@ export function useSelectCreate({ resModel, activeActions, onSelected, onCreateE
     return selectCreate;
 }
 
-const STANDARD_ACTIVE_ACTIONS = ["create", "createEdit", "delete", "link", "unlink", "write"];
+const STANDARD_ACTIVE_ACTIONS = ["create", "createEdit", "delete", "link", "unlink"];
 
 /**
  * FIXME: this should somehow be merged with 'getActiveActions' (@web/views/utils.js)
@@ -107,7 +107,6 @@ export function useActiveActions({
         if (isMany2Many) {
             result.link = !readonly && evalAction("link");
             result.unlink = !readonly && evalAction("unlink");
-            result.write = evalAction("write");
         }
 
         if (result.unlink || (!isMany2Many && result.delete)) {
@@ -123,7 +122,7 @@ export function useActiveActions({
     // Define eval functions
     const evals = {};
     for (const actionName of STANDARD_ACTIVE_ACTIONS) {
-        let evalFn = () => actionName !== "write";
+        let evalFn = () => true;
         if (!isNull(crudOptions[actionName])) {
             const action = crudOptions[actionName];
             evalFn = (evalContext) => Boolean(action && new Domain(action).contains(evalContext));
@@ -623,14 +622,14 @@ export function useOpenMany2XRecord({
             title = resId ? _t("Open: %s", fieldString) : _t("Create %s", fieldString);
         }
 
-        const { create: canCreate, write: canWrite } = activeActions;
-        const readonly = !(resId ? canWrite : canCreate);
+        const { create: canCreate } = activeActions;
+        const readonly = !(resId ? true : canCreate);
 
         addDialog(
             component,
             {
                 preventCreate: !canCreate,
-                preventEdit: !canWrite,
+                preventEdit: false,
                 title,
                 context,
                 nextRecordsContext,
