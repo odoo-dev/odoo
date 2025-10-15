@@ -25,7 +25,15 @@ class ChannelActionDialog extends Component {
 registerThreadAction("notification-settings", {
     actionPanelComponent: NotificationSettings,
     actionPanelComponentProps: ({ thread }) => ({ thread }),
-    actionPanelOpen({ owner, store, thread }) {
+    actionPanelOuterClass: "bg-100 border border-secondary",
+    condition: ({ channel, owner, store }) =>
+        channel && store.self_partner && (!owner.props.chatWindow || owner.props.chatWindow.isOpen),
+    icon: ({ channel }) =>
+        channel.self_member_id?.mute_until_dt
+            ? "fa fa-fw text-danger fa-bell-slash"
+            : "fa fa-fw fa-bell",
+    name: _t("Notification Settings"),
+    onSelected({ owner, store, thread }) {
         if (owner.isDiscussSidebarChannelActions || owner.env.inMeetingView) {
             store.env.services.dialog?.add(ChannelActionDialog, {
                 title: thread.name,
@@ -39,9 +47,8 @@ registerThreadAction("notification-settings", {
             });
         }
     },
-    actionPanelOuterClass: "bg-100 border border-secondary",
-    condition: ({ channel, owner, store }) =>
-        channel && store.self_partner && (!owner.props.chatWindow || owner.props.chatWindow.isOpen),
+    sequence: 10,
+    sequenceGroup: 30,
     setup({ owner }) {
         if (!owner.props.chatWindow) {
             this.popover = usePopover(NotificationSettings, {
@@ -51,13 +58,6 @@ registerThreadAction("notification-settings", {
             });
         }
     },
-    icon: ({ channel }) =>
-        channel.self_member_id?.mute_until_dt
-            ? "fa fa-fw text-danger fa-bell-slash"
-            : "fa fa-fw fa-bell",
-    name: _t("Notification Settings"),
-    sequence: 10,
-    sequenceGroup: 30,
 });
 registerThreadAction("attachments", {
     actionPanelComponent: AttachmentPanel,
@@ -77,7 +77,15 @@ registerThreadAction("invite-people", {
         close: () => action.actionPanelClose(),
         thread,
     }),
-    actionPanelOpen({ owner, store, thread }) {
+    actionPanelOuterClass: ({ owner }) =>
+        `o-discuss-ChannelInvitation ${
+            owner.props.chatWindow ? "bg-inherit" : ""
+        } bg-100 border border-secondary`,
+    condition: ({ channel, owner }) =>
+        channel && (!owner.props.chatWindow || owner.props.chatWindow.isOpen),
+    icon: "oi oi-fw oi-user-plus",
+    name: _t("Invite People"),
+    onSelected({ owner, store, thread }) {
         if (owner.isDiscussSidebarChannelActions) {
             store.env.services.dialog?.add(ChannelActionDialog, {
                 title: thread.name,
@@ -95,14 +103,6 @@ registerThreadAction("invite-people", {
             });
         }
     },
-    actionPanelOuterClass: ({ owner }) =>
-        `o-discuss-ChannelInvitation ${
-            owner.props.chatWindow ? "bg-inherit" : ""
-        } bg-100 border border-secondary`,
-    condition: ({ channel, owner }) =>
-        channel && (!owner.props.chatWindow || owner.props.chatWindow.isOpen),
-    icon: "oi oi-fw oi-user-plus",
-    name: _t("Invite People"),
     sequence: ({ owner }) => (owner.isDiscussSidebarChannelActions ? 20 : 10),
     sequenceGroup: 20,
     setup({ owner }) {
@@ -172,7 +172,7 @@ registerThreadAction("delete-thread", {
     icon: "fa fa-fw fa-trash",
     iconLarge: "fa fa-fw fa-lg fa-trash",
     name: _t("Delete Thread"),
-    actionPanelOpen: ({ owner, store, thread }) => {
+    onSelected: ({ owner, store, thread }) => {
         if (owner.isDiscussSidebarChannelActions) {
             store.env.services.dialog?.add(ChannelActionDialog, {
                 title: thread.name,

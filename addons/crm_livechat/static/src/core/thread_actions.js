@@ -16,16 +16,16 @@ registerThreadAction("create-lead", {
         thread,
         icon: "fa fa-handshake-o",
     }),
-    actionPanelOpen({ owner }) {
+    actionPanelOuterClass: "bg-100",
+    condition: false, // managed by ThreadAction patch
+    icon: "fa fa-handshake-o",
+    name: _t("Create Lead"),
+    onSelected({ owner }) {
         this.popover?.open(
             owner.root.el.querySelector(`[name="${this.id}"]`),
             this.actionPanelComponentProps
         );
     },
-    actionPanelOuterClass: "bg-100",
-    condition: false, // managed by ThreadAction patch
-    icon: "fa fa-handshake-o",
-    name: _t("Create Lead"),
     sequence: 10,
     sequenceGroup: 25,
     setup({ owner }) {

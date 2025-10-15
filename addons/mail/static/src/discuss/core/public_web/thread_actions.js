@@ -7,13 +7,12 @@ import { usePopover } from "@web/core/popover/popover_hook";
 
 registerThreadAction("show-threads", {
     actionPanelComponent: SubChannelList,
-    actionPanelComponentProps: ({ action, thread }) => ({
-        close: () => action.actionPanelClose(),
-        thread,
-    }),
-    actionPanelOpen({ owner, thread }) {
+    actionPanelComponentProps: ({ action, thread }) => {
         const channel = thread?.parent_channel_id || thread;
-        this.popover?.open(owner.root.el.querySelector(`[name="${this.id}"]`), { thread: channel });
+        return {
+            close: () => action.actionPanelClose(),
+            thread: channel,
+        };
     },
     actionPanelOuterClass: "bg-100 border border-secondary",
     condition: ({ owner, thread }) =>
@@ -21,6 +20,12 @@ registerThreadAction("show-threads", {
         !owner.isDiscussSidebarChannelActions,
     icon: "fa fa-fw fa-comments-o",
     name: _t("Threads"),
+    onSelected({ owner }) {
+        this.popover?.open(
+            owner.root.el.querySelector(`[name="${this.id}"]`),
+            this.actionPanelComponentProps
+        );
+    },
     setup({ owner, store }) {
         if (owner.env.inDiscussApp && !store.env.isSmall) {
             this.popover = usePopover(SubChannelList, {
