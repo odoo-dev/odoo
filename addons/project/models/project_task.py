@@ -457,13 +457,13 @@ class ProjectTask(models.Model):
     @api.model
     def _get_default_personal_stage_create_vals(self, user_id):
         return [
-            {'sequence': 1, 'name': _('Inbox'), 'user_id': user_id, 'fold': False},
-            {'sequence': 2, 'name': _('Today'), 'user_id': user_id, 'fold': False},
-            {'sequence': 3, 'name': _('This Week'), 'user_id': user_id, 'fold': False},
-            {'sequence': 4, 'name': _('This Month'), 'user_id': user_id, 'fold': False},
-            {'sequence': 5, 'name': _('Later'), 'user_id': user_id, 'fold': False},
-            {'sequence': 6, 'name': _('Done'), 'user_id': user_id, 'fold': True},
-            {'sequence': 7, 'name': _('Cancelled'), 'user_id': user_id, 'fold': True},
+            {'sequence': 1, 'name': _('Inbox'), 'user_ids': [Command.set((user_id,))], 'fold': False},
+            {'sequence': 2, 'name': _('Today'), 'user_ids': [Command.set((user_id,))], 'fold': False},
+            {'sequence': 3, 'name': _('This Week'), 'user_ids': [Command.set((user_id,))], 'fold': False},
+            {'sequence': 4, 'name': _('This Month'), 'user_ids': [Command.set((user_id,))], 'fold': False},
+            {'sequence': 5, 'name': _('Later'), 'user_ids': [Command.set((user_id,))], 'fold': False},
+            {'sequence': 6, 'name': _('Done'), 'user_ids': [Command.set((user_id,))], 'fold': True},
+            {'sequence': 7, 'name': _('Cancelled'), 'user_ids': [Command.set((user_id,))], 'fold': True},
         ]
 
     def _populate_missing_personal_stages(self):
