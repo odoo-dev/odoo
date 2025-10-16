@@ -1,5 +1,5 @@
 from odoo import models, api, fields
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 import time
 from dateutil.relativedelta import relativedelta
 import logging
@@ -179,8 +179,10 @@ class PayrollMassGenerator(models.Model):
             ("company_id", "in", [company.id, False])
         ], limit=10)
         if not jobs:
-            raise UserError(f"No demo job positions found for {company.name}")
-
+            jobs = self.env["hr.job"].create({
+                "name": "Demo Job Position",
+                "company_id": company.id,
+            })
         created_employees = 0
         batch_no = 0
 
@@ -295,7 +297,22 @@ class PayrollMassGenerator(models.Model):
                 if payslip_vals:
                     payslips = env["hr.payslip"].sudo().create(payslip_vals)
                     payslips.compute_sheet()
-                    payslips.action_payslip_done()
+                    try:
+                        payslips.action_payslip_done()
+                    except ValidationError as VE:
+                        if 'journal' in str(VE).lower():
+                            # create a journal
+                            journal = env["account.journal"].create({
+                                "name": f"Salary Journal {company.name}",
+                                "code": f"SAL{company.name[:3].upper()}",
+                                "type": "general",
+                                "company_id": company.id,
+                            })
+                            _logger.info("Created missing salary journal: %s", journal.name)
+                            payslips.write({"journal_id": journal.id})
+                            payslips.action_payslip_done()
+                        else:
+                            raise VE
                     created_payslips += len(payslips)
                     cr.commit()
                     _logger.info("Batch %s for month %s done — total payslips created: %s", batch_no, month, created_payslips)
