@@ -345,6 +345,7 @@ export function clickOnText(snippet, element, position = "bottom") {
  * contains a group it means that the snippet is shown in the "add snippets"
  * dialog.
  * @param {*} position Where the purple arrow will show up
+ * a
  */
 export function insertSnippet(snippet, { position = "bottom", ignoreLoading = false } = {}) {
     const blockEl = snippet.groupName || snippet.name;
