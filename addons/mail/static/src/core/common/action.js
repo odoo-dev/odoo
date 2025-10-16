@@ -403,7 +403,7 @@ export class Action {
     _isActive(action) {}
     /** States whether this action is currently active. */
     get isActive() {
-        if (this.actions && this.actionPanel) {
+        if (this.actions && this.actionPanel && !this.popover) {
             return this.id === this.actions.activeAction?.id;
         }
         return (
@@ -440,7 +440,10 @@ export class Action {
         if (ev) {
             markEventHandled(ev, "Action.onSelected");
         }
-        if (this.actionPanel) {
+        if (this.popover?.isOpen) {
+            this.popover.close();
+            return;
+        } else if (this.actionPanel) {
             if (this.isActive) {
                 this.actionPanelClose();
             } else {

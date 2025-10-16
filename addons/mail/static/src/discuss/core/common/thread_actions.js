@@ -114,25 +114,13 @@ registerThreadAction("invite-people", {
     },
 });
 registerThreadAction("member-list", {
-    actionPanelClose: ({ owner, store }) => {
-        if (owner.env.inDiscussApp) {
-            store.discuss.isMemberPanelOpenByDefault = false;
-        }
-    },
     actionPanelComponent: ChannelMemberList,
     actionPanelComponentProps: ({ actions, thread }) => ({
         openChannelInvitePanel({ keepPrevious } = {}) {
-            actions.actions
-                .find(({ id }) => id === "invite-people")
-                ?.actionPanelOpen({ keepPrevious });
+            actions.actions.find(({ id }) => id === "invite-people")?.onSelected({ keepPrevious });
         },
         thread,
     }),
-    actionPanelOpen: ({ owner, store }) => {
-        if (owner.env.inDiscussApp) {
-            store.discuss.isMemberPanelOpenByDefault = true;
-        }
-    },
     actionPanelOuterClass: "o-discuss-ChannelMemberList bg-inherit",
     condition: ({ owner, thread }) =>
         thread?.hasMemberList &&
@@ -140,6 +128,11 @@ registerThreadAction("member-list", {
         !owner.isDiscussSidebarChannelActions,
     icon: "oi oi-fw oi-users",
     name: _t("Members"),
+    onSelected({ owner, store }) {
+        if (owner.env.inDiscussApp) {
+            store.discuss.isMemberPanelOpenByDefault = this.isActive;
+        }
+    },
     sequence: 30,
     sequenceGroup: 10,
 });

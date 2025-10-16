@@ -69,12 +69,8 @@ registerThreadAction("search-messages", {
     setup: ({ action }) =>
         useSubEnv({
             searchMenu: {
-                open: () => action.actionPanelOpen(),
-                close: () => {
-                    if (action.isActive) {
-                        action.actionPanelClose();
-                    }
-                },
+                open: () => !action.isActive && action.onSelected(),
+                close: () => action.isActive && action.onSelected(),
             },
         }),
 });

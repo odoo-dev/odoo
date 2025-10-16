@@ -33,7 +33,7 @@ registerThreadAction("show-threads", {
                 popoverClass: this.actionPanelOuterClass,
             });
         }
-        useChildSubEnv({ subChannelMenu: { open: () => this.actionPanelOpen() } });
+        useChildSubEnv({ subChannelMenu: { open: () => !this.isActive && this.onSelected() } });
     },
     sequence: ({ owner }) => (owner.props.chatWindow ? 40 : 5),
     sequenceGroup: 10,

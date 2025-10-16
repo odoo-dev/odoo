@@ -20,12 +20,8 @@ registerThreadAction("pinned-messages", {
     setup() {
         useChildSubEnv({
             pinMenu: {
-                open: () => this.actionPanelOpen(),
-                close: () => {
-                    if (this.isActive) {
-                        this.actionPanelClose();
-                    }
-                },
+                open: () => !this.active && this.onSelected(),
+                close: () => this.active && this.onSelected(),
             },
         });
     },

@@ -55,10 +55,12 @@ export class Meeting extends Component {
         useInDiscussCallView();
         useSubEnv({
             inMeetingView: {
-                openChat: () =>
-                    this.threadActions.actions
-                        .find((action) => action.id === "meeting-chat")
-                        ?.actionPanelOpen(),
+                openChat: () => {
+                    const chatAction = this.threadActions.actions.find(
+                        (action) => action.id === "meeting-chat"
+                    );
+                    chatAction && !chatAction.isActive && chatAction.onSelected();
+                },
             },
         });
         this.threadActions = useThreadActions({ thread: () => this.thread });

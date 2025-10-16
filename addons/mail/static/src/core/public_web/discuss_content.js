@@ -49,7 +49,7 @@ export class DiscussContent extends Component {
         }
         if (this.store.discuss.isMemberPanelOpenByDefault) {
             if (!this.threadActions.activeAction) {
-                memberListAction.actionPanelOpen();
+                memberListAction.onSelected();
             } else if (this.threadActions.activeAction === memberListAction) {
                 return; // no-op (already open)
             } else {
