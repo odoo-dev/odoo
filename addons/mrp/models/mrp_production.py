@@ -1288,6 +1288,8 @@ class MrpProduction(models.Model):
 
             new_qty = float_round((self.qty_producing - self.qty_produced) * move.unit_factor, precision_rounding=move.product_uom.rounding)
             move._set_quantity_done(new_qty)
+            if move in self.move_raw_ids and move.product_id.tracking != 'none':
+                move._action_assign()
             if (not move.manual_consumption or pick_manual_consumption_moves) \
                     and move.quantity \
                     and (move.product_id != self.product_id or not move.production_id or move.product_id.tracking != 'serial'):
