@@ -20,13 +20,6 @@ patch(ProductScreen.prototype, {
 
         return _t("From %s", this.pos.getProductPrice(productTemplate, false, true));
     },
-    getProductImage(product) {
-        if (!product.event_id) {
-            return super.getProductImage(product);
-        }
-
-        return `/web/image?model=event.event&id=${product.event_id.id}&field=image_1024&unique=${product.event_id.write_date}`;
-    },
     async addProductToOrder(product) {
         if (!product.event_id) {
             return await super.addProductToOrder(product);

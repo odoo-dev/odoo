@@ -17,6 +17,21 @@
             }
         }
     }
+    .ripple-container {
+        height: calc(100% + 6px);
+        bottom: -6px;
+
+        .ripple {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            opacity: 0.10;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.05s linear, height 0.05s linear, opacity 0.05s linear;
+            z-index: 60;
+        }
+    }
 }
 
 .product-img img {

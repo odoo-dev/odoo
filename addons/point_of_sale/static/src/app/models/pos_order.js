@@ -180,6 +180,18 @@ export class PosOrder extends Base {
         }
     }
 
+    get qtyInCartByProductTemplate() {
+        return this.lines.reduce((acc, line) => {
+            const productTmplId = line.product_id.product_tmpl_id.id;
+            if (!acc[productTmplId]) {
+                acc[productTmplId] = 0;
+            }
+
+            acc[productTmplId] += line.getQuantity();
+            return acc;
+        }, {});
+    }
+
     /**
      * Get the details total amounts with and without taxes, the details of taxes per subtotal and per tax group.
      * @returns See '_get_tax_totals_summary' in account_tax.py for the full details.

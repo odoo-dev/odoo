@@ -18,15 +18,13 @@
                         <label class="combo-item h-100 w-100 rounded cursor-pointer transition-base"
                             t-att-class="{ 'selected': state.qty[combo.id][combo_item.id] and combo.qty_max == 1 }"
                             t-attf-for="combo-{{combo.id}}-combo_item-{{combo_item.id}}">
-                            <ProductCard name="product.display_name"
+                            <ProductCard
                                 class="'flex-column h-100 border'"
-                                isComboPopup="true"
-                                productId="product.id"
+                                mode="'combo-popup'"
                                 product="product"
-                                comboExtraPrice="formattedComboPrice(combo_item)"
-                                imageUrl="product.getImageUrl()"
+                                extraPrice="formattedComboPrice(combo_item)"
                                 onClick="() => this.onClickProduct(product, combo_item)">
-                                <t t-if="this.showQuantityButtons(combo_item)" t-set-slot="quantityButtons">
+                                <t t-if="this.showQuantityButtons(combo_item)" t-set-slot="footer">
                                     <QuantityButtons
                                         quantity="state.qty[combo.id][combo_item.id]"
                                         setQuantity="quantity => this.setQuantity(combo_item, quantity)"

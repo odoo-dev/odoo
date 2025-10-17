@@ -696,6 +696,10 @@ export class PosStore extends WithLazyGetterTrap {
         }
     }
     async onProductInfoClick(productTemplate) {
+        if (typeof productTemplate.id !== "number") {
+            return;
+        }
+
         const info = await this.getProductInfo(productTemplate, 1);
         this.dialog.add(ProductInfoPopup, { info: info, productTemplate: productTemplate });
     }

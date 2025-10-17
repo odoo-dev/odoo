@@ -33,4 +33,10 @@ patch(ProductCard.prototype, {
         }
         return eventTickets.reduce((acc, ticket) => acc + ticket.seats_available, 0) || -1;
     },
+    get productImage() {
+        if (!this.product.event_id) {
+            return super.productImage;
+        }
+        return `/web/image?model=event.event&id=${this.product.event_id.id}&field=image_1024&unique=${this.product.event_id.write_date}`;
+    },
 });
