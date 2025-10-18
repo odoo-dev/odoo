@@ -1061,21 +1061,14 @@ class TestDomainOptimize(TransactionCase):
             self.assertEqual((~d1 & ~d2).optimize(model), ~d2)
             self.assertEqual((~d1 | ~d2).optimize(model), ~d1)
 
-        with self.subTest(field_type='one2many'):
-            d1 = Domain('messages', 'in', [1]).optimize(model)
-            d2 = Domain('messages', 'in', [1, 2]).optimize(model)
-            self.assertEqual((d1 & d2).optimize(model), (d1 & d2))
-            self.assertEqual((d1 | d2).optimize(model), d2)
-            self.assertEqual((~d1 & ~d2).optimize(model), ~d2)
-            self.assertEqual((~d1 | ~d2).optimize(model), ~d1 | ~d2)
-
+        # just check for an x2m field that they are no longer merged
+        # the 'in' operator will be transformed into 'any' and merged at that
+        # point
         with self.subTest(field_type='many2many'):
             d1 = Domain('categories', 'in', [1]).optimize(model)
             d2 = Domain('categories', 'in', [1, 2]).optimize(model)
             self.assertEqual((d1 & d2).optimize(model), (d1 & d2))
-            self.assertEqual((d1 | d2).optimize(model), d2)
-            self.assertEqual((~d1 & ~d2).optimize(model), ~d2)
-            self.assertEqual((~d1 | ~d2).optimize(model), ~d1 | ~d2)
+            self.assertEqual((d1 | d2).optimize(model), (d1 | d2))
 
     def test_nary_optimize_any(self):
         model = self.env['test_orm.discussion']
