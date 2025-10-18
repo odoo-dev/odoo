@@ -12,8 +12,9 @@ class TestSQL(BaseCase):
 
     def test_sql_empty(self):
         sql = SQL()
-        self.assertEqual(sql.code, "")
-        self.assertEqual(sql.params, [])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "")
+        self.assertEqual(params, ())
 
     def test_sql_bool(self):
         self.assertFalse(SQL())
@@ -23,13 +24,15 @@ class TestSQL(BaseCase):
 
     def test_sql_with_no_parameter(self):
         sql = SQL("SELECT id FROM table WHERE foo=bar")
-        self.assertEqual(sql.code, "SELECT id FROM table WHERE foo=bar")
-        self.assertEqual(sql.params, [])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "SELECT id FROM table WHERE foo=bar")
+        self.assertEqual(params, ())
 
     def test_sql_with_literal_parameters(self):
         sql = SQL("SELECT id FROM table WHERE foo=%s AND bar=%s", 42, 'baz')
-        self.assertEqual(sql.code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
-        self.assertEqual(sql.params, [42, 'baz'])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
+        self.assertEqual(params, (42, 'baz'))
 
     def test_sql_with_wrong_pattern(self):
         with self.assertRaises(TypeError):
@@ -46,7 +49,8 @@ class TestSQL(BaseCase):
 
     def test_escape_percent(self):
         sql = SQL("'%%' || %s", 'a')
-        self.assertEqual(sql.code, "'%%' || %s")
+        code, _, _ = sql._sql_tuple
+        self.assertEqual(code, "'%%' || %s")
         with self.assertRaises(TypeError):
             SQL("'%'")  # not enough arguments
         with self.assertRaises(ValueError):
@@ -54,12 +58,12 @@ class TestSQL(BaseCase):
         with self.assertRaises(TypeError):
             SQL("'%%' || %s")  # not enough arguments
 
-        self.assertEqual(SQL("'foo%%'").code, "'foo%%'")
-        self.assertEqual(SQL("'foo%%' || %s", 'bar').code, "'foo%%' || %s")
-        self.assertEqual(SQL("'foo%%' || %(bar)s", bar='bar').code, "'foo%%' || %s")
+        self.assertEqual(SQL("'foo%%'")._sql_tuple[0], "'foo%%'")
+        self.assertEqual(SQL("'foo%%' || %s", 'bar')._sql_tuple[0], "'foo%%' || %s")
+        self.assertEqual(SQL("'foo%%' || %(bar)s", bar='bar')._sql_tuple[0], "'foo%%' || %s")
 
-        self.assertEqual(SQL("%(foo)s AND bar='baz%%'", foo=SQL("qrux='%%'")).code, "qrux='%%' AND bar='baz%%'")
-        self.assertEqual(SQL("%(foo)s AND bar='baz%%'", foo=SQL("%s='%%s'", "qrux")).code, "%s='%%s' AND bar='baz%%'")
+        self.assertEqual(SQL("%(foo)s AND bar='baz%%'", foo=SQL("qrux='%%'"))._sql_tuple[0], "qrux='%%' AND bar='baz%%'")
+        self.assertEqual(SQL("%(foo)s AND bar='baz%%'", foo=SQL("%s='%%s'", "qrux"))._sql_tuple[0], "%s='%%s' AND bar='baz%%'")
 
     def test_sql_equality(self):
         sql1 = SQL("SELECT id FROM table WHERE foo=%s", 42)
@@ -84,38 +88,45 @@ class TestSQL(BaseCase):
 
     def test_sql_join(self):
         sql = SQL(" AND ").join([])
-        self.assertEqual(sql.code, "")
-        self.assertEqual(sql.params, [])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "")
+        self.assertEqual(params, ())
         self.assertEqual(sql, SQL(""))
 
         sql = SQL(" AND ").join([SQL("foo=%s", 1)])
-        self.assertEqual(sql.code, "foo=%s")
-        self.assertEqual(sql.params, [1])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "foo=%s")
+        self.assertEqual(params, (1,))
 
         sql = SQL(" AND ").join([
             SQL("foo=%s", 1),
             SQL("bar=%s", 2),
             SQL("baz=%s", 3),
         ])
-        self.assertEqual(sql.code, "foo=%s AND bar=%s AND baz=%s")
-        self.assertEqual(sql.params, [1, 2, 3])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "foo=%s AND bar=%s AND baz=%s")
+        self.assertEqual(params, (1, 2, 3))
 
         sql = SQL(", ").join([1, 2, 3])
-        self.assertEqual(sql.code, "%s, %s, %s")
-        self.assertEqual(sql.params, [1, 2, 3])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "%s, %s, %s")
+        self.assertEqual(params, (1, 2, 3))
 
     def test_sql_identifier(self):
         sql = SQL.identifier('foo')
-        self.assertEqual(sql.code, '"foo"')
-        self.assertEqual(sql.params, [])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, '"foo"')
+        self.assertEqual(params, ())
 
         sql = SQL.identifier('année')
-        self.assertEqual(sql.code, '"année"')
-        self.assertEqual(sql.params, [])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, '"année"')
+        self.assertEqual(params, ())
 
         sql = SQL.identifier('foo', 'bar')
-        self.assertEqual(sql.code, '"foo"."bar"')
-        self.assertEqual(sql.params, [])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, '"foo"."bar"')
+        self.assertEqual(params, ())
 
         with self.assertRaises(AssertionError):
             sql = SQL.identifier('foo"')
@@ -128,24 +139,28 @@ class TestSQL(BaseCase):
 
     def test_sql_with_sql_parameters(self):
         sql = SQL("SELECT id FROM table WHERE foo=%s AND %s", 1, SQL("bar=%s", 2))
-        self.assertEqual(sql.code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
-        self.assertEqual(sql.params, [1, 2])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
+        self.assertEqual(params, (1, 2))
         self.assertEqual(sql, SQL("SELECT id FROM table WHERE foo=%s AND bar=%s", 1, 2))
 
         sql = SQL("SELECT id FROM table WHERE %s AND bar=%s", SQL("foo=%s", 1), 2)
-        self.assertEqual(sql.code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
-        self.assertEqual(sql.params, [1, 2])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
+        self.assertEqual(params, (1, 2))
         self.assertEqual(sql, SQL("SELECT id FROM table WHERE foo=%s AND bar=%s", 1, 2))
 
         sql = SQL("SELECT id FROM table WHERE %s AND %s", SQL("foo=%s", 1), SQL("bar=%s", 2))
-        self.assertEqual(sql.code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
-        self.assertEqual(sql.params, [1, 2])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
+        self.assertEqual(params, (1, 2))
         self.assertEqual(sql, SQL("SELECT id FROM table WHERE foo=%s AND bar=%s", 1, 2))
 
     def test_sql_with_named_parameters(self):
         sql = SQL("SELECT id FROM table WHERE %(one)s AND bar=%(two)s", one=SQL("foo=%s", 1), two=2)
-        self.assertEqual(sql.code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
-        self.assertEqual(sql.params, [1, 2])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "SELECT id FROM table WHERE foo=%s AND bar=%s")
+        self.assertEqual(params, (1, 2))
         self.assertEqual(sql, SQL("SELECT id FROM table WHERE foo=%s AND bar=%s", 1, 2))
 
         # the parameters are bound locally
@@ -154,8 +169,9 @@ class TestSQL(BaseCase):
             SQL("foo=%(value)s", value=1),
             SQL("bar=%(value)s", value=2),
         )
-        self.assertEqual(sql.code, "foo=%s AND bar=%s")
-        self.assertEqual(sql.params, [1, 2])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, "foo=%s AND bar=%s")
+        self.assertEqual(params, (1, 2))
         self.assertEqual(sql, SQL("foo=%s AND bar=%s", 1, 2))
 
     def test_complex_sql(self):
@@ -168,8 +184,9 @@ class TestSQL(BaseCase):
                 SQL("%s=%s", SQL.identifier('table', 'bar'), 2),
             ]),
         )
-        self.assertEqual(sql.code, 'SELECT "id" FROM "table" WHERE "table"."foo"=%s AND "table"."bar"=%s')
-        self.assertEqual(sql.params, [1, 2])
+        code, params, _ = sql._sql_tuple
+        self.assertEqual(code, 'SELECT "id" FROM "table" WHERE "table"."foo"=%s AND "table"."bar"=%s')
+        self.assertEqual(params, (1, 2))
         self.assertEqual(sql, SQL('SELECT "id" FROM "table" WHERE "table"."foo"=%s AND "table"."bar"=%s', 1, 2))
         self.assertEqual(
             repr(sql),

@@ -43,7 +43,17 @@ _CONFDELTYPES = {
 }
 
 
-class SQL:
+class MetaSQL(type):
+    def identifier(self, name: str, subname: (str | None) = None, to_flush: (Field | None) = None) -> SQL:
+        """ Return an SQL object that represents an identifier. """
+        assert name.isidentifier() or IDENT_RE.match(name), f"{name!r} invalid for SQL.identifier()"
+        if subname is None:
+            return SQL(f'"{name}"', to_flush=to_flush)
+        assert subname.isidentifier() or IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
+        return SQL(f'"{name}"."{subname}"', to_flush=to_flush)
+
+
+class SQL(metaclass=MetaSQL):
     """ An object that wraps SQL code with its parameters, like::
 
         sql = SQL("UPDATE TABLE foo SET a = %s, b = %s", 'hello', 42)
@@ -79,20 +89,59 @@ class SQL:
     its value is a field which the SQL code depends on.  The metadata of a
     wrapper and its parts can be accessed by the iterator ``sql.to_flush``.
     """
-    __slots__ = ('__code', '__params', '__to_flush')
+    __slots__ = ()
 
-    __code: str
-    __params: tuple
-    __to_flush: tuple[Field, ...]
+    def __new__(cls, *args, **kwargs):
+        if cls is SQL:
+            cls = _SQL  # noqa: PLW0642
+        return object.__new__(cls)
+
+    @property
+    def _sql_tuple(self) -> tuple[str, tuple, tuple]:
+        raise NotImplementedError
+
+    def __bool__(self):
+        return bool(self._sql_tuple[0])
+
+    def __eq__(self, other):
+        if not isinstance(other, SQL):
+            return False
+        self_data = self._sql_tuple
+        other_data = other._sql_tuple
+        return self_data[0] == other_data[0] and self_data[1] == other_data[1]
+
+    def __hash__(self):
+        self_data = self._sql_tuple
+        return hash((self_data[0], self_data[1]))
+
+    def join(self, args: Iterable) -> SQL:
+        """ Join SQL objects or parameters with ``self`` as a separator. """
+        args = list(args)
+        # optimizations for special cases
+        if len(args) == 0:
+            return _SQL()
+        if len(args) == 1 and isinstance(args[0], SQL):
+            return args[0]
+        code, params, _to_flush = self._sql_tuple
+        if not params:
+            return _SQL(code.join("%s" for arg in args), *args)
+        # general case: alternate args with self
+        items = [self] * (len(args) * 2 - 1)
+        for index, arg in enumerate(args):
+            items[index * 2] = arg
+        return SQL("%s" * len(items), *items)
+
+
+class _SQL(SQL):
+    """ The implementation of SQL wrapper. """
+    __slots__ = ('_sql_tuple',)
 
     # pylint: disable=keyword-arg-before-vararg
     def __init__(self, code: (str | SQL) = "", /, *args, to_flush: (Field | Iterable[Field] | None) = None, **kwargs):
         if isinstance(code, SQL):
             if args or kwargs or to_flush:
                 raise TypeError("SQL() unexpected arguments when code has type SQL")
-            self.__code = code.__code
-            self.__params = code.__params
-            self.__to_flush = code.__to_flush
+            self._sql_tuple = code._sql_tuple
             return
 
         # validate the format of code and parameters
@@ -103,14 +152,13 @@ class SQL:
             code, args = named_to_positional_printf(code, kwargs)
         elif not args:
             code % ()  # check that code does not contain %s
-            self.__code = code
-            self.__params = ()
             if to_flush is None:
-                self.__to_flush = ()
+                to_flush = ()
             elif hasattr(to_flush, '__iter__'):
-                self.__to_flush = tuple(to_flush)
+                to_flush = tuple(to_flush)
             else:
-                self.__to_flush = (to_flush,)
+                to_flush = (to_flush,)
+            self._sql_tuple = (code, (), to_flush)
             return
 
         code_list = []
@@ -118,9 +166,10 @@ class SQL:
         to_flush_list = []
         for arg in args:
             if isinstance(arg, SQL):
-                code_list.append(arg.__code)
-                params_list.extend(arg.__params)
-                to_flush_list.extend(arg.__to_flush)
+                arg_data = arg._sql_tuple
+                code_list.append(arg_data[0])
+                params_list.extend(arg_data[1])
+                to_flush_list.extend(arg_data[2])
             else:
                 code_list.append("%s")
                 params_list.append(arg)
@@ -130,75 +179,11 @@ class SQL:
             else:
                 to_flush_list.append(to_flush)
 
-        self.__code = code.replace('%%', '%%%%') % tuple(code_list)
-        self.__params = tuple(params_list)
-        self.__to_flush = tuple(to_flush_list)
-
-    @property
-    def code(self) -> str:
-        """ Return the combined SQL code string. """
-        return self.__code
-
-    @property
-    def params(self) -> list:
-        """ Return the combined SQL code params as a list of values. """
-        return list(self.__params)
-
-    @property
-    def to_flush(self) -> Iterable[Field]:
-        """ Return an iterator on the fields to flush in the metadata of
-        ``self`` and all of its parts.
-        """
-        return self.__to_flush
+        code = code.replace('%%', '%%%%') % tuple(code_list)
+        self._sql_tuple = (code, tuple(params_list), tuple(to_flush_list))
 
     def __repr__(self):
-        return f"SQL({', '.join(map(repr, [self.__code, *self.__params]))})"
-
-    def __bool__(self):
-        return bool(self.__code)
-
-    def __eq__(self, other):
-        return isinstance(other, SQL) and self.__code == other.__code and self.__params == other.__params
-
-    def __hash__(self):
-        return hash((self.__code, self.__params))
-
-    def __iter__(self):
-        """ Yields ``self.code`` and ``self.params``. This was introduced for
-        backward compatibility, as it enables to access the SQL and parameters
-        by deconstructing the object::
-
-            sql = SQL(...)
-            code, params = sql
-        """
-        warnings.warn("Deprecated since 19.0, use code and params properties directly", DeprecationWarning)
-        yield self.code
-        yield self.params
-
-    def join(self, args: Iterable) -> SQL:
-        """ Join SQL objects or parameters with ``self`` as a separator. """
-        args = list(args)
-        # optimizations for special cases
-        if len(args) == 0:
-            return SQL()
-        if len(args) == 1 and isinstance(args[0], SQL):
-            return args[0]
-        if not self.__params:
-            return SQL(self.__code.join("%s" for arg in args), *args)
-        # general case: alternate args with self
-        items = [self] * (len(args) * 2 - 1)
-        for index, arg in enumerate(args):
-            items[index * 2] = arg
-        return SQL("%s" * len(items), *items)
-
-    @classmethod
-    def identifier(cls, name: str, subname: (str | None) = None, to_flush: (Field | None) = None) -> SQL:
-        """ Return an SQL object that represents an identifier. """
-        assert name.isidentifier() or IDENT_RE.match(name), f"{name!r} invalid for SQL.identifier()"
-        if subname is None:
-            return cls(f'"{name}"', to_flush=to_flush)
-        assert subname.isidentifier() or IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
-        return cls(f'"{name}"."{subname}"', to_flush=to_flush)
+        return f"SQL({', '.join(map(repr, [self._sql_tuple[0], *self._sql_tuple[1]]))})"
 
 
 def existing_tables(cr, tablenames):
@@ -608,7 +593,7 @@ def add_index(cr, indexname, tablename, definition, *, unique: bool, comment='')
     cr.execute(query, log_exceptions=False)
     if query_comment:
         cr.execute(query_comment, log_exceptions=False)
-    _schema.debug("Table %r: created index %r (%s)", tablename, indexname, definition.code)
+    _schema.debug("Table %r: created index %r (%s)", tablename, indexname, definition._sql_tuple[0])
 
 
 def create_unique_index(cr, indexname, tablename, expressions):

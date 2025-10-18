@@ -3241,8 +3241,9 @@ class BaseModel(metaclass=MetaModel):
                     # flushing is necessary to retrieve the en_US value of fields without a translation
                     # otherwise, re-create the SQL without flushing
                     if not field.translate:
-                        to_flush = (f for f in sql.to_flush if f != field)
-                        sql = SQL(sql.code, *sql.params, to_flush=to_flush)
+                        code, params, to_flush = sql._sql_tuple
+                        to_flush = (f for f in to_flush if f != field)
+                        sql = SQL(code, *params, to_flush=to_flush)
                 sql_terms.append(sql)
 
             # select the given columns from the rows in the query
@@ -4679,9 +4680,9 @@ class BaseModel(metaclass=MetaModel):
             # instead of ordering by the field's raw value, use the comodel's
             # order on many2one values
             terms = []
-            if nulls.code == 'NULLS FIRST':
+            if nulls == SQL('NULLS FIRST'):
                 terms.append(SQL("%s IS NOT NULL", sql_field))
-            elif nulls.code == 'NULLS LAST':
+            elif nulls == SQL('NULLS LAST'):
                 terms.append(SQL("%s IS NULL", sql_field))
 
             # LEFT JOIN the comodel table, in order to include NULL values, too
@@ -4690,7 +4691,7 @@ class BaseModel(metaclass=MetaModel):
             _comodel, coalias = field.join(self.sudo(), alias, query)
 
             # delegate the order to the comodel
-            reverse = direction.code == 'DESC'
+            reverse = direction == SQL('DESC')
             term = comodel._order_to_sql(coorder, query, alias=coalias, reverse=reverse)
             if term:
                 terms.append(term)

@@ -535,7 +535,7 @@ class Environment(Mapping[str, "BaseModel"]):
 
     def flush_query(self, query: SQL) -> None:
         """ Flush all the fields in the metadata of ``query``. """
-        fields_to_flush = tuple(query.to_flush)
+        fields_to_flush = query._sql_tuple[2]
         if not fields_to_flush:
             return
 
