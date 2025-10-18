@@ -584,6 +584,7 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         # The PDF has been successfully generated.
         pdf_report = invoice.invoice_pdf_report_id
         self.assertTrue(pdf_report)
+        # XXX not found, must sudo???
         invoice_attachments = self.env['ir.attachment'].search([
             ('res_model', '=', invoice._name),
             ('res_id', '=', invoice.id),
