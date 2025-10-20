@@ -170,7 +170,7 @@
             </table>
             </div>
             <div class="clearfix" name="so_total_summary">
-                <div id="total" class="row mt-n3" name="total">
+                <div id="total" class="row" name="total">
                     <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'} ms-auto " style="border: 1px solid #374151;
                         border-top: 0px;
                         padding-right: 0;

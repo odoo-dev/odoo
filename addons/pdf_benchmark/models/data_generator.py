@@ -20,7 +20,7 @@ class SaleMassGenerator(models.Model):
         return company
 
     @api.model
-    def action_generate_mass_data(self, total_count=10_000, batch_size=100, journal_name="Sales"):
+    def action_generate_mass_data(self, total_count=10, batch_size=10, journal_name="Sales"):
         """Generate massive sales + invoices targeting a specific journal"""
 
         # Check required models
@@ -189,7 +189,7 @@ class PayrollMassGenerator(models.Model):
         return company
 
 
-    def action_generate_mass_employees_with_active_contracts(self, total_count=1000, batch_size=100):
+    def action_generate_mass_employees_with_active_contracts(self, total_count=10, batch_size=10):
         """Generate massive employees with active contracts"""
 
         # Check required models
