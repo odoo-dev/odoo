@@ -12,6 +12,7 @@
         "account_avatax_sale",
         "sale_stock",
         "sale_management",
+        "crm_sale_subscription",
     ],
     'data': [
     'views/data_generator_views.xml',
