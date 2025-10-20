@@ -1,4 +1,5 @@
 import { Domain } from "@web/core/domain";
+import { useOfflineStatus } from "@web/core/offline/offline_service";
 import { evaluateBooleanExpr, evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { utils } from "@web/core/ui/ui_service";
@@ -355,6 +356,7 @@ export class Field extends Component {
     };
 
     setup() {
+        this.offlineStatus = useOfflineStatus();
         if (this.props.fieldInfo) {
             this.field = this.props.fieldInfo.field;
         } else {
@@ -416,6 +418,7 @@ export class Field extends Component {
             let fieldInfo = this.props.fieldInfo;
             readonly =
                 readonly ||
+                this.offlineStatus.offline || // disable edition in offline mode
                 evaluateBooleanExpr(fieldInfo.readonly, record.evalContextWithVirtualIds);
 
             if (this.field.extractProps) {

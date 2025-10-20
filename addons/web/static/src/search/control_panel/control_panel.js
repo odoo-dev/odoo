@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import { Pager } from "@web/core/pager/pager";
+import { OfflinePager, Pager } from "@web/core/pager/pager";
 import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useCommand } from "@web/core/commands/command_hook";
@@ -13,9 +13,9 @@ import { AccordionItem } from "@web/core/dropdown/accordion_item";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { makeContext } from "@web/core/context";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { useOfflineStatus } from "@web/core/offline/offline_service";
 import { Transition } from "@web/core/transition";
 import { Breadcrumbs } from "../breadcrumbs/breadcrumbs";
-import { SearchBar } from "../search_bar/search_bar";
 
 import { Component, useState, onMounted, useRef, useEffect } from "@odoo/owl";
 
@@ -91,7 +91,7 @@ export class ControlPanel extends Component {
     static template = "web.ControlPanel";
     static components = {
         Pager,
-        SearchBar,
+        OfflinePager,
         Dropdown,
         DropdownItem,
         Breadcrumbs,
@@ -113,6 +113,7 @@ export class ControlPanel extends Component {
         this.breadcrumbs = useState(this.env.config.breadcrumbs);
         this.orm = useService("orm");
         this.dialogService = useService("dialog");
+        this.offlineStatus = useOfflineStatus();
 
         this.root = useRef("root");
         this.newActionNameRef = useRef("newActionNameRef");
@@ -306,6 +307,10 @@ export class ControlPanel extends Component {
             layoutActions: true,
             ...this.props.display,
         };
+    }
+
+    get pagerComponent() {
+        return this.offlineStatus.offline ? OfflinePager : Pager;
     }
 
     async onClickShowEmbedded() {
