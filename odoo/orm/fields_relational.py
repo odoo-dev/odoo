@@ -835,7 +835,7 @@ class _RelationalMulti(_Relational):
             domain = field_domain.optimize_full(comodel)
             if not domain.is_true():
                 # TODO should clone/copy Query value
-                value.add_where(domain._to_sql(TableSQL(comodel, value.table._alias, value)))
+                value.add_where(domain._to_sql(value.table._with_model(comodel)))
             return value
         raise NotImplementedError(f"Cannot build query for {value}")
 

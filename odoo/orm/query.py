@@ -290,6 +290,9 @@ class TableSQL(SQL):
     def _sql_tuple(self):
         return (f'"{self._alias}"', (), ())
 
+    def _with_model(self, model: BaseModel):
+        return TableSQL(model, self._alias, self._query)
+
     def __getattr__(self, field_name: str) -> SQL:
         if (model := self._model) is None:
             return SQL.identifier(self._alias, field_name)

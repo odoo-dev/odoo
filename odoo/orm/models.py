@@ -4764,7 +4764,7 @@ class BaseModel(metaclass=MetaModel):
             if sec_domain.is_false():
                 return self.browse()._as_query()
             if not sec_domain.is_true():
-                query.add_where(sec_domain._to_sql(TableSQL(self_sudo, query.table._alias, query)))
+                query.add_where(sec_domain._to_sql(query.table._with_model(self_sudo)))
 
         # add order and limits
         if order:

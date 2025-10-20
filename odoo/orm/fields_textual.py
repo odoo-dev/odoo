@@ -20,11 +20,11 @@ from odoo.tools.sql import pattern_to_translated_trigram_pattern, pg_varchar, va
 from odoo.tools.translate import html_translate
 
 from .fields import Field, _logger
-from .query import TableSQL
 from .utils import COLLECTION_TYPES, SQL_OPERATORS
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable
+    from .query import TableSQL
 
 
 class BaseString(Field[str | typing.Literal[False]]):
@@ -385,8 +385,8 @@ class BaseString(Field[str | typing.Literal[False]]):
             self._update_cache(record, new_translation, dirty=True)
 
     def to_sql(self, table: TableSQL) -> SQL:
-        sql_field = super().to_sql(TableSQL(model.with_context(prefetch_langs=True), alias, query))
         model = table._model
+        sql_field = super().to_sql(table._with_model(model.with_context(prefetch_langs=True)))
         if self.translate and not model.env.context.get('prefetch_langs'):
             langs = self.get_translation_fallback_langs(model.env)
             sql_field_langs = [SQL("%s->>%s", sql_field, lang) for lang in langs]
@@ -442,7 +442,7 @@ class BaseString(Field[str | typing.Literal[False]]):
             if value == '%':
                 return base_condition
 
-            raw_sql_field = self.to_sql(TableSQL(model.with_context(prefetch_langs=True), table._alias, table._query))
+            raw_sql_field = self.to_sql(table._with_model(model.with_context(prefetch_langs=True)))
             sql_left = SQL("jsonb_path_query_array(%s, '$.*')::text", raw_sql_field)
             sql_operator = SQL_OPERATORS['like' if operator == 'in' else operator]
             sql_right = SQL("%s", self.convert_to_column(value, model, validate=False))
