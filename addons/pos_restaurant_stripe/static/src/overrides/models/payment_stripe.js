@@ -20,4 +20,32 @@ patch(PaymentStripe.prototype, {
             (!line.card_type || !line.card_type.includes("eftpos"))
         );
     },
+
+    async sendPaymentAdjust(uuid) {
+        var order = this.pos.getOrder();
+        var line = order.getPaymentlineByUuid(uuid);
+
+        // Copy-paste of capturePayment to pass in a custom amount and context
+        try {
+            const data = await this.pos.data.silentCall(
+                "pos.payment.method",
+                "stripe_capture_payment",
+                [line.transaction_id],
+                {
+                    amount: line.amount,
+                    context: {
+                        stripe_currency_rounding: line.currency_id.rounding,
+                    },
+                },
+            );
+            if (data.error) {
+                throw data.error;
+            }
+            return data;
+        } catch (error) {
+            const { message } = error.data || error;
+            this._showError(message, "Capture Payment");
+            return false;
+        }
+    }
 });

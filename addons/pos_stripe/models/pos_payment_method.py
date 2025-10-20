@@ -54,7 +54,8 @@ class PosPaymentMethod(models.Model):
 
     def _stripe_calculate_amount(self, amount):
         currency = self.journal_id.currency_id or self.company_id.currency_id
-        return round(amount/currency.rounding)
+        rounding = self.env.context.get('stripe_currency_rounding') or currency.rounding
+        return round(amount/rounding)
 
     def stripe_payment_intent(self, amount):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
@@ -91,6 +92,8 @@ class PosPaymentMethod(models.Model):
         """
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Stripe"))
+
+        print(f"[JOV] capturing {paymentIntentId} with amount {amount}")
 
         endpoint = ('payment_intents/%s/capture') % (werkzeug.urls.url_quote(paymentIntentId))
 

@@ -37,7 +37,7 @@ export class PaymentStripe extends PaymentInterface {
     }
 
     async discoverReaders() {
-        const discoverResult = await this.terminal.discoverReaders({});
+        const discoverResult = await this.terminal.discoverReaders({simulated: true});
         if (discoverResult.error) {
             this._showError(_t("Failed to discover: %s", discoverResult.error));
         } else if (discoverResult.discoveredReaders.length === 0) {
@@ -90,7 +90,7 @@ export class PaymentStripe extends PaymentInterface {
         const line = this.pos.getOrder().getSelectedPaymentline();
         const discoveredReaders = JSON.parse(this.pos.discoveredReaders);
         for (const selectedReader of discoveredReaders) {
-            if (selectedReader.serial_number == this.payment_method_id.stripe_serial_number) {
+            if (true || selectedReader.serial_number == this.payment_method_id.stripe_serial_number) {
                 try {
                     const connectResult = await this.terminal.connectReader(selectedReader, {
                         fail_if_in_use: true,
