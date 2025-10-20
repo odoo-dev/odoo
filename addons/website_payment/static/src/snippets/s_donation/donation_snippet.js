@@ -15,7 +15,9 @@ export class DonationSnippet extends Interaction {
             "t-on-click.withTarget": this.onPrefilledClick,
             "t-att-class": (el) => ({ "active": el === this.activeButtonEl }),
         },
-        ".s_donation_donate_btn": { "t-on-click.withTarget": this.onDonateClick },
+        ".s_donation_donate_btn": {
+            "t-on-click.withTarget": this.locked(this.onDonateClick, true),
+        },
         "#s_donation_range_slider": { "t-on-input": this.onRangeSliderInput },
         "#s_donation_amount_input": {
             "t-on-input": () => {
@@ -36,20 +38,27 @@ export class DonationSnippet extends Interaction {
     }
 
     async willStart() {
-        this.currency = await rpc("/website/get_current_currency", { cache: true });
+        // Note: we do not await the rpc call as we want to be able to click on
+        // the send button without having to wait for the currency. This will be
+        // up to the handler to properly wait for the currency, with a loading
+        // effect once needed (thanks to `locked`).
+        // FIXME It seems impossible to make it work without making start async
+        // (see explanation in start)
+        //
+        // TODO the "cached" parameters has no effect: the actual cache is not
+        // initialized on the frontend side at the moment.
+        // TODO Also it should be the third param of rpc, not the second one...
+        this.currencyProm = rpc("/website/get_current_currency", { cache: true });
+        this.currencyProm.then(currency => {
+            this.currency = currency;
+        });
     }
 
     start() {
-        const prefilledButtonEls = this.el.querySelectorAll(".s_donation_btn, .s_range_bubble");
-        for (const prefilledButtonEl of prefilledButtonEls) {
-            // Remove existing currency
-            prefilledButtonEl.querySelector(".s_donation_currency")?.remove();
-            const insertBefore = this.currency.position === "before";
-            const currencyEl = document.createElement("span");
-            currencyEl.innerText = this.currency.symbol;
-            currencyEl.classList.add("s_donation_currency", insertBefore ? "pe-1" : "ps-1");
-            this.insert(currencyEl, prefilledButtonEl, insertBefore ? "afterbegin" : "beforeend");
-        }
+        // FIXME this should probably be awaited somehow... but start is not
+        // async anymore... how to achieve this? This actually triggers a
+        // warning in edit mode (on runbot only somehow)...
+        this.currencyProm.then(() => this.displayCurrency());
 
         const customButtonEl = this.el.querySelector("#s_donation_amount_input");
         if (customButtonEl) {
@@ -59,6 +68,19 @@ export class DonationSnippet extends Interaction {
             context.font = window.getComputedStyle(customButtonEl).font;
             const width = context.measureText(customButtonEl.placeholder).width;
             customButtonEl.style.maxWidth = `${Math.ceil(width) + CUSTOM_BUTTON_EXTRA_WIDTH}px`;
+        }
+    }
+
+    displayCurrency() {
+        const prefilledButtonEls = this.el.querySelectorAll(".s_donation_btn, .s_range_bubble");
+        for (const prefilledButtonEl of prefilledButtonEls) {
+            // Remove existing currency
+            prefilledButtonEl.querySelector(".s_donation_currency")?.remove();
+            const insertBefore = this.currency.position === "before";
+            const currencyEl = document.createElement("span");
+            currencyEl.innerText = this.currency.symbol;
+            currencyEl.classList.add("s_donation_currency", insertBefore ? "pe-1" : "ps-1");
+            this.insert(currencyEl, prefilledButtonEl, insertBefore ? "afterbegin" : "beforeend");
         }
     }
 
@@ -100,7 +122,9 @@ export class DonationSnippet extends Interaction {
      * @param {Event} ev
      * @param {HTMLElement} currentTargetEl
      */
-    onDonateClick(ev, currentTargetEl) {
+    async onDonateClick(ev, currentTargetEl) {
+        await this.currencyProm;
+
         this.el.querySelector(".alert-danger")?.remove();
         const donationButtonEls = this.el.querySelectorAll(".s_donation_btn");
         let amount = this.activeButtonEl ? parseFloat(this.activeButtonEl.dataset.donationValue) : 0;
@@ -151,6 +175,8 @@ export class DonationSnippet extends Interaction {
         }
 
         formEl.submit();
+        // Keep the button locked with loading effect during page reload
+        return new Promise(() => {});
     }
 
     onRangeSliderInput() {
