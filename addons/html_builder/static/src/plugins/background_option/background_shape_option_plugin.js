@@ -28,6 +28,7 @@ export class BackgroundShapeOptionPlugin extends Plugin {
             editingElement.querySelector(":scope > .o_we_bg_filter")
         ),
         force_not_editable_selector: ".o_we_shape",
+        system_node_selectors: ".o_we_shape",
     };
     static shared = [
         "getShapeStyleUrl",

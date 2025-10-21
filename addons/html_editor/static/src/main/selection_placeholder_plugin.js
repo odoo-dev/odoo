@@ -37,10 +37,10 @@ export class SelectionPlaceholderPlugin extends Plugin {
             }
         },
         is_selection_blocker_predicates: isNotEditableNode,
-        should_skip_node_predicates: (leaf) => closestElement(leaf, PLACEHOLDER_SELECTOR),
         power_buttons_visibility_predicates: ({ anchorNode }) =>
             !closestElement(anchorNode, PLACEHOLDER_SELECTOR),
         move_node_blacklist_selectors: PLACEHOLDER_SELECTOR,
+        system_node_selectors: PLACEHOLDER_SELECTOR,
         system_classes: BLINKER_CLASS,
         uncrossable_context_blocks_providers: (root) => [
             root,

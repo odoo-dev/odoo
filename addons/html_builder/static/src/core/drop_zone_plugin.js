@@ -1,6 +1,7 @@
 import { isVisible } from "@html_builder/utils/utils";
 import { Plugin } from "@html_editor/plugin";
 import { isElement } from "@html_editor/utils/dom_info";
+import { closestElement } from "@html_editor/utils/dom_traversal";
 import { _t } from "@web/core/l10n/translation";
 
 export class DropZonePlugin extends Plugin {
@@ -446,7 +447,10 @@ export class DropZonePlugin extends Plugin {
             parentEl.prepend(this.createDropzone(parentEl));
         }
         hookEls.push(...selectorSiblings);
-        hookEls = hookEls.filter((el) => !el.hasAttribute?.("data-selection-placeholder"));
+        const systemNodesSelectors = this.getResource("system_node_selectors").join(",");
+        if (systemNodesSelectors) {
+            hookEls = hookEls.filter((el) => !closestElement(el, systemNodesSelectors));
+        }
 
         // Inserting the normal dropzones.
         for (const hookEl of hookEls) {
