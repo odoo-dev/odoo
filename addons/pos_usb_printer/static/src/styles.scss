@@ -1,0 +1,38 @@
+.pos-receipt {
+    .pos-receipt-amount,
+    .paymentlines,
+    .pos-receipt-taxes,
+    .pos-receipt-orderline,
+    .pos-receipt-header-data {
+        font-size: 80%;
+    }
+
+    .tracking-number{
+        font-size: 160%;
+        font-weight: bold;
+    }
+
+    &.offline-print {
+        .pos-receipt-amount,
+        .paymentlines,
+        .pos-receipt-taxes,
+        .pos-receipt-orderline,
+        .pos-receipt-header-data {
+            font-size: 115%;
+        }
+
+        .tracking-number{
+            font-size: 160%;
+            font-weight: bold;
+        }
+
+        .pos-receipt-order-data,
+        .pos-receipt-contact{
+            font-size: 110%;
+        }
+
+        .pos-receipt-contact{
+            max-width: 425px;
+        }
+    }
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="farki_pos_printer_windows.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//DropdownItem[contains(text(), 'Cash In/Out')]" position="attributes">
+            <attribute name="t-if">!this.pos.data.network.offline</attribute>
+        </xpath>
+        <xpath expr="//DropdownItem[contains(text(), 'Install App')]" position="attributes">
+            <attribute name="t-if">!this.isDeskTopView</attribute>
+        </xpath>
+        <xpath expr="//DropdownItem[contains(text(), 'Print Report')]" position="attributes">
+            <attribute name="t-if">!this.pos.data.network.offline</attribute>
+        </xpath>
+    </t>
+</templates>
