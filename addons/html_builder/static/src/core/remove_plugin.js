@@ -24,6 +24,14 @@ export class RemovePlugin extends Plugin {
         get_overlay_buttons: withSequence(3, {
             getButtons: this.getActiveOverlayButtons.bind(this),
         }),
+        empty_node_predicates: (el) => {
+            const systemNodesSelectors = this.getResource("system_node_selectors").join(",");
+            return (
+                el.textContent.trim() === "" &&
+                (!systemNodesSelectors ||
+                    [...el.children].every((child) => closestElement(child, systemNodesSelectors)))
+            );
+        },
     };
     static shared = ["removeElement"];
 
@@ -60,27 +68,8 @@ export class RemovePlugin extends Plugin {
     }
 
     isEmptyAndRemovable(el, optionsTargetEls) {
-        const childrenEls = [...el.children];
-        // Consider a <figure> element as empty if it only contains a
-        // <figcaption> element (e.g. when its image has just been
-        // removed).
-        const isEmptyFigureEl =
-            el.matches("figure") &&
-            childrenEls.length === 1 &&
-            childrenEls[0].matches("figcaption");
-
-        const systemNodesSelectors = this.getResource("system_node_selectors").join(",");
-        const isEmpty =
-            isEmptyFigureEl ||
-            (el.textContent.trim() === "" &&
-                (!systemNodesSelectors ||
-                    childrenEls.every((el) =>
-                        // Consider layout-only elements (like bg-shapes) as empty
-                        closestElement(el, systemNodesSelectors)
-                    )));
-
         return (
-            isEmpty &&
+            this.getResource("empty_node_predicates").some((predicate) => predicate(el)) &&
             !el.classList.contains("oe_structure") &&
             !el.parentElement.classList.contains("carousel-item") &&
             (!optionsTargetEls.includes(el) ||
