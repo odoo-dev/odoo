@@ -83,13 +83,13 @@ test("Use the 'grid' overlay buttons", async () => {
 
     await contains(":iframe .g-col-lg-5").click();
     expect(".overlay .o_overlay_options").toHaveCount(1);
-    expect(".overlay .o_send_back").toHaveCount(1);
-    expect(".overlay .o_bring_front").toHaveCount(1);
+    expect(".overlay .oi-move-down").toHaveCount(1);
+    expect(".overlay .oi-move-up").toHaveCount(1);
 
-    await contains(".overlay .o_send_back").click();
+    await contains(".overlay .oi-move-down").click();
     expect(":iframe .g-col-lg-5").toHaveStyle({ zIndex: "0" });
 
-    await contains(".overlay .o_bring_front").click();
+    await contains(".overlay .oi-move-up").click();
     expect(":iframe .g-col-lg-5").toHaveStyle({ zIndex: "2" });
 });
 
@@ -114,13 +114,13 @@ test("Refresh the overlay buttons when toggling the mobile preview", async () =>
 
     await contains(":iframe .g-col-lg-4").click();
     await contains("[data-action='mobile']").click();
-    expect(".overlay .o_send_back, .overlay .o_bring_front").toHaveCount(0);
+    expect(".overlay .oi-move-down, .overlay .oi-move-up").toHaveCount(0);
     expect(".overlay .fa-angle-left").toHaveCount(1);
     expect(".overlay .fa-angle-right").toHaveCount(1);
 
     await contains("[data-action='mobile']").click();
-    expect(".overlay .o_send_back").toHaveCount(1);
-    expect(".overlay .o_bring_front").toHaveCount(1);
+    expect(".overlay .oi-move-down").toHaveCount(1);
+    expect(".overlay .oi-move-up").toHaveCount(1);
     expect(".overlay .fa-angle-left, .overlay .fa-angle-right").toHaveCount(0);
 });
 
