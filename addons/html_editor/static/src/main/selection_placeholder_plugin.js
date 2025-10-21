@@ -36,19 +36,25 @@ export class SelectionPlaceholderPlugin extends Plugin {
                 return true;
             }
         },
-        is_selection_blocker_predicates: isNotEditableNode,
+        selection_blocker_predicates: (blocker) => {
+            if (blocker.hasAttribute(PLACEHOLDER_ATTRIBUTE) || !isBlock(blocker)) {
+                return false;
+            } else if (isNotEditableNode(blocker)) {
+                return true;
+            }
+        },
+        selection_placeholder_parent_predicates: (parent) => {
+            if (!parent.isContentEditable || !allowsParagraphRelatedElements(parent)) {
+                return false;
+            } else if (parent.getAttribute("contenteditable") === "true") {
+                return true;
+            }
+        },
         power_buttons_visibility_predicates: ({ anchorNode }) =>
             !closestElement(anchorNode, PLACEHOLDER_SELECTOR),
         move_node_blacklist_selectors: PLACEHOLDER_SELECTOR,
         system_node_selectors: PLACEHOLDER_SELECTOR,
         system_classes: BLINKER_CLASS,
-        uncrossable_context_blocks_providers: (root) => [
-            root,
-            ...root.querySelectorAll("*[contenteditable=true]"),
-        ],
-        is_safe_for_selection_placeholder_predicates: (blocker) =>
-            blocker.parentElement.isContentEditable &&
-            allowsParagraphRelatedElements(blocker.parentElement),
     };
 
     setup() {
@@ -61,6 +67,21 @@ export class SelectionPlaceholderPlugin extends Plugin {
         this.addDomListener(this.editable, "focusin", () => this.resetBlinkerClasses(), {
             isGlobal: true,
         });
+        const parentsPredicates = this.getResource("selection_placeholder_parent_predicates");
+        this.getPlaceholderParents = () =>
+            [this.editable, ...this.editable.querySelectorAll("*")].filter((parent) => {
+                const results = parentsPredicates
+                    .map((p) => p(parent))
+                    .filter((result) => result !== undefined);
+                return results.length && results.every(Boolean);
+            });
+        const blockerPredicates = this.getResource("selection_blocker_predicates");
+        this.isSelectionBlocker = (node) => {
+            const results = blockerPredicates
+                .map((p) => p(node))
+                .filter((result) => result !== undefined);
+            return results.length && results.every(Boolean);
+        };
     }
 
     /**
@@ -68,6 +89,8 @@ export class SelectionPlaceholderPlugin extends Plugin {
      * everywhere we need them, and absent wherever they are not useful.
      */
     updatePlaceholders() {
+        const placeholderParents = this.getPlaceholderParents();
+
         // 1. Update current placeholders.
         for (const placeholder of this.editable.querySelectorAll(PLACEHOLDER_SELECTOR)) {
             const siblings = ["before", "after"].map((side) =>
@@ -76,7 +99,10 @@ export class SelectionPlaceholderPlugin extends Plugin {
             if (!isEmpty(placeholder) || !siblings.filter(Boolean).length) {
                 // Persist non-empty placeholders and any suddenly lonely placeholder.
                 this.persistPlaceholder(placeholder);
-            } else if (!siblings.every((sibling) => !sibling || this.isSelectionBlocker(sibling))) {
+            } else if (
+                !placeholderParents.includes(placeholder.parentElement) ||
+                !siblings.every((sibling) => !sibling || this.isSelectionBlocker(sibling))
+            ) {
                 // Remove illegitimate placeholders.
                 placeholder.remove();
             } else {
@@ -85,14 +111,10 @@ export class SelectionPlaceholderPlugin extends Plugin {
             }
         }
 
-        // Get the blocks and predicates to check.
-        const uncrossableContextBlocks = this.getResource(
-            "uncrossable_context_blocks_providers"
-        ).flatMap((p) => p(this.editable));
+        // Get the blocks to check.
         const blockers = [
-            ...new Set(uncrossableContextBlocks.flatMap((element) => [...element.children])),
+            ...new Set(placeholderParents.flatMap((element) => [...element.children])),
         ].filter(this.isSelectionBlocker.bind(this));
-        const predicates = this.getResource("is_safe_for_selection_placeholder_predicates");
 
         // 2. Add placeholders before and after every blocker where necessary.
         for (const blocker of blockers) {
@@ -101,10 +123,7 @@ export class SelectionPlaceholderPlugin extends Plugin {
                 const sibling = getNonWhitespaceSibling(side, blocker);
                 // Insert a placeholder if there is no such sibling or if it's a
                 // selection blocker.
-                if (
-                    (!sibling || this.isSelectionBlocker(sibling)) &&
-                    predicates.every((p) => p(blocker, sibling))
-                ) {
+                if (!sibling || this.isSelectionBlocker(sibling)) {
                     // Create the placeholder.
                     const placeholder = this.dependencies.baseContainer.createBaseContainer();
                     fillEmpty(placeholder);
@@ -165,23 +184,6 @@ export class SelectionPlaceholderPlugin extends Plugin {
         } else {
             blinker.classList.remove(BLINKER_CLASS);
         }
-    }
-
-    /**
-     * Return true if the given node is a selection blocker, false otherwise. A
-     * selection blocker is a node that can't be at the edge or the editor or
-     * following another selection blocker, lest the selection cannot get past
-     * it. Working around that problem is the purpose of this plugin.
-     *
-     * @param {Node} node
-     * @returns {Boolean}
-     */
-    isSelectionBlocker(node) {
-        return (
-            !node.hasAttribute?.(PLACEHOLDER_ATTRIBUTE) &&
-            isBlock(node) &&
-            this.getResource("is_selection_blocker_predicates").some((p) => p(node))
-        );
     }
 
     /**

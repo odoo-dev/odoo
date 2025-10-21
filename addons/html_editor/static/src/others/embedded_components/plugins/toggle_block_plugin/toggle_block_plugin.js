@@ -51,6 +51,12 @@ export class ToggleBlockPlugin extends Plugin {
             ),
         ],
         move_node_blacklist_selectors: `${toggleSelector} ${titleSelector} *`,
+        selection_blocker_predicates: (blocker) => {
+            // Prevent the insertion of selection placeholders around toggle blocks.
+            if (blocker.dataset.embedded === "toggleBlock") {
+                return false;
+            }
+        },
         powerbox_items: [
             {
                 commandId: "insertToggleBlock",
@@ -85,18 +91,6 @@ export class ToggleBlockPlugin extends Plugin {
         shift_tab_overrides: this.handleShiftTab.bind(this),
         split_element_block_overrides: withSequence(1, this.handleSplitElementBlock.bind(this)),
         tab_overrides: this.handleTab.bind(this),
-        is_safe_for_selection_placeholder_predicates: [
-            (blocker, sibling) =>
-                // Prevent the insertion of selection placeholders around toggle blocks.
-                ![blocker, sibling].some(
-                    (element) => element && element.dataset.embedded === "toggleBlock"
-                ),
-            (blocker) =>
-                !(
-                    blocker.dataset.embedded === "toggleBlock" &&
-                    closestElement(blocker.parentElement, '[data-embedded="toggleBlock"]')
-                ),
-        ],
 
         power_buttons_visibility_predicates: this.showPowerButtons.bind(this),
 

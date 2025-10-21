@@ -70,7 +70,11 @@ export class SplitPlugin extends Plugin {
             },
             (node) => node.nodeName === "SECTION",
         ],
-        is_selection_blocker_predicates: this.isUnsplittable.bind(this),
+        selection_blocker_predicates: (blocker) => {
+            if (this.isUnsplittable(blocker)) {
+                return true;
+            }
+        },
     };
 
     // --------------------------------------------------------------------------

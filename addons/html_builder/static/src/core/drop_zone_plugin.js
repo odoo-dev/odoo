@@ -26,8 +26,8 @@ export class DropZonePlugin extends Plugin {
             }
             return true;
         },
-        is_safe_for_selection_placeholder_predicates: (blocker) =>
-            !blocker.parentElement.classList.contains("oe_structure"),
+        selection_placeholder_parents_blacklist_predicates: (parent) =>
+            parent.classList.contains("oe_structure"),
     };
 
     setup() {

@@ -128,9 +128,16 @@ export class TablePlugin extends Plugin {
         move_node_whitelist_selectors: "table",
         collapsed_selection_toolbar_predicate: (selectionData) =>
             !!closestElement(selectionData.editableSelection.anchorNode, ".o_selected_td"),
-        is_selection_blocker_predicates: (node) => node.tagName === "TABLE",
-        is_safe_for_selection_placeholder_predicates: (blocker) =>
-            blocker.parentElement.nodeName !== "TABLE",
+        selection_blocker_predicates: (node) => {
+            if (node.nodeName === "TABLE") {
+                return true;
+            }
+        },
+        selection_placeholder_parent_predicates: (parent) => {
+            if (parent.nodeName === "TABLE") {
+                return false;
+            }
+        },
         normalize_handlers: this.distributeTableColorsToAllCells.bind(this),
     };
 
