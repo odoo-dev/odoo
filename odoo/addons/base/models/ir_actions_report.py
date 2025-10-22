@@ -168,6 +168,7 @@ class IrActionsReport(models.Model):
     report_type = fields.Selection([
         ('qweb-html', 'HTML'),
         ('qweb-pdf', 'PDF'),
+        ('qweb-pdf-pm', 'PDF-PM'),
         ('qweb-text', 'Text'),
     ], required=True, default='qweb-pdf',
     help='The type of the report that will be rendered, each one having its own'
@@ -518,7 +519,8 @@ class IrActionsReport(models.Model):
             footer=None,
             landscape=False,
             specific_paperformat_args=None,
-            set_viewport_size=False):
+            set_viewport_size=False,
+            force_use_paper_muncher = False):
         '''Execute wkhtmltopdf as a subprocess in order to convert html given in input into a pdf
         document.
 
@@ -534,7 +536,7 @@ class IrActionsReport(models.Model):
         '''
         paperformat_id = self._get_report(report_ref).get_paperformat() if report_ref else self.get_paperformat()
 
-        if can_use_paper_muncher():
+        if can_use_paper_muncher() or force_use_paper_muncher:
             try:
                 return run_paper_muncher(
                     paperformat_id,
@@ -822,6 +824,11 @@ class IrActionsReport(models.Model):
 
         # access the report details with sudo() but evaluation context as current user
         report_sudo = self._get_report(report_ref)
+        if report_sudo.report_type == 'qweb-pdf-pm':
+            force_use_paper_muncher = True
+        else:
+            force_use_paper_muncher = False
+ 
         has_duplicated_ids = res_ids and len(res_ids) != len(set(res_ids))
 
         collected_streams = OrderedDict()
@@ -900,6 +907,7 @@ class IrActionsReport(models.Model):
                 landscape=self._context.get('landscape'),
                 specific_paperformat_args=specific_paperformat_args,
                 set_viewport_size=self._context.get('set_viewport_size'),
+                force_use_paper_muncher=force_use_paper_muncher
             )
             pdf_content_stream = io.BytesIO(pdf_content)
 
@@ -1149,6 +1157,8 @@ class IrActionsReport(models.Model):
     def _render(self, report_ref, res_ids, data=None):
         report = self._get_report(report_ref)
         report_type = report.report_type.lower().replace('-', '_')
+        if "_" in (r := report_type.rsplit('_')[0]):
+            report_type = r
         render_func = getattr(self, '_render_' + report_type, None)
         if not render_func:
             return None
