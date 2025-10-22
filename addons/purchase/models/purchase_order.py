@@ -401,6 +401,13 @@ class PurchaseOrder(models.Model):
             kwargs['notify_author'] = self.env.user.partner_id.id in (kwargs.get('partner_ids') or [])
         return super(PurchaseOrder, self.with_context(**po_ctx)).message_post(**kwargs)
 
+    def _get_model_description(self, model_name):
+        if 'lang' in self.env.context and model_name == self._name:
+            if self.state in ['draft', 'sent']:
+                return _('Request for Quotation')
+            return _('Purchase Order')
+        return super()._get_model_description(model_name)
+
     def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
         """ Tweak 'view document' button for portal customers, calling directly
         routes for confirm specific to PO model. """
@@ -502,12 +509,6 @@ class PurchaseOrder(models.Model):
             template = self.env['mail.template'].browse(ctx['default_template_id'])
             if template and template.lang:
                 lang = template._render_lang([ctx['default_res_id']])[ctx['default_res_id']]
-
-        self = self.with_context(lang=lang)
-        if self.state in ['draft', 'sent']:
-            ctx['model_description'] = _('Request for Quotation')
-        else:
-            ctx['model_description'] = _('Purchase Order')
 
         return {
             'name': _('Compose Email'),
@@ -981,8 +982,6 @@ class PurchaseOrder(models.Model):
             template = self.env['mail.template'].browse(ctx['default_template_id'])
             if template and template.lang:
                 lang = template._render_lang([ctx['default_res_id']])[ctx['default_res_id']]
-        self = self.with_context(lang=lang)
-        ctx['model_description'] = _('Purchase Order')
         return {
             'name': _('Compose Email'),
             'type': 'ir.actions.act_window',

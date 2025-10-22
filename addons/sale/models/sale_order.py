@@ -1056,7 +1056,6 @@ class SaleOrder(models.Model):
         else:
             ctx.update({
                 'force_email': True,
-                'model_description': self.with_context(lang=lang).type_name,
             })
             if not self.env.context.get('hide_default_template'):
                 mail_template = self._find_mail_template()
@@ -1291,7 +1290,6 @@ class SaleOrder(models.Model):
                 'default_order_id': self.id,
                 'mark_so_as_canceled': True,
                 'default_email_layout_xmlid': "mail.mail_notification_layout_with_responsible_signature",
-                'model_description': self.with_context(lang=lang).type_name,
             }
             return {
                 'name': _('Cancel %s', self.type_name),
@@ -1728,6 +1726,11 @@ class SaleOrder(models.Model):
         if self.env.context.get('mark_so_as_sent') and 'mail_notify_author' not in kwargs:
             kwargs['notify_author'] = self.env.user.partner_id.id in (kwargs.get('partner_ids') or [])
         return super(SaleOrder, self.with_context(**so_ctx)).message_post(**kwargs)
+
+    def _get_model_description(self, model_name):
+        if 'lang' in self.env.context and model_name == self._name:
+            return self.type_name
+        return super()._get_model_description(model_name)
 
     def _notify_get_recipients_groups(self, message, model_description, msg_vals=None):
         """ Give access button to users and portal customer as portal is integrated
