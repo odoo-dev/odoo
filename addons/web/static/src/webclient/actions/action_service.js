@@ -1323,10 +1323,12 @@ export function makeActionManager(env, router = _router) {
         if (action.report_type === "qweb-html") {
             return _executeReportClientAction(action, options);
         } else if (action.report_type.startsWith("qweb-pdf") || action.report_type === "qweb-text") {
-            var type = action.report_type.slice(5);
-            if (type === "pdf-pm") {
-                type = "pdf";
+            let _type = action.report_type.slice(5);
+            if (_type === "pdf-pm") {
+                _type = "pdf";
             }
+            console.log("report type pdf or text")
+            console.log(_type)
             let success, message;
             env.services.ui.block();
             try {
@@ -1334,7 +1336,7 @@ export function makeActionManager(env, router = _router) {
                 if (action.context) {
                     Object.assign(downloadContext, action.context);
                 }
-                ({ success, message } = await downloadReport(rpc, action, type, downloadContext));
+                ({ success, message } = await downloadReport(rpc, action, _type, downloadContext));
             } finally {
                 env.services.ui.unblock();
             }
@@ -1349,7 +1351,7 @@ export function makeActionManager(env, router = _router) {
             }
             const { onClose } = options;
             if (action.close_on_report_download) {
-                return doAction({ type: "ir.actions.act_window_close" }, { onClose });
+                return doAction({ _type: "ir.actions.act_window_close" }, { onClose });
             } else if (onClose) {
                 onClose();
             }
