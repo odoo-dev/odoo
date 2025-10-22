@@ -22,6 +22,10 @@ from itertools import count
 from typing import BinaryIO, Optional
 from wsgiref.types import WSGIEnvironment
 from lxml import etree, html
+from io import BytesIO
+from PyPDF2 import PdfMerger
+
+import inspect
 
 from werkzeug.test import create_environ, run_wsgi_app
 
@@ -430,20 +434,24 @@ def run_paper_muncher(
     :rtype: bytes
     :raises RuntimeError: If Paper Muncher fails during any phase.
     """
-    
-    out = []
+
     if len(bodies) > 1:
         documents = make_multi_docs_html(bodies, header, footer)
-        content = "".join(documents)
     else:
         header = partition_on_body(header)[1]
         footer = partition_on_body(footer)[1]
-        for n in bodies:
-            open_body, body, close_body = partition_on_body(n)
-            out.extend((open_body, header, body, footer, close_body, "\n"))
-        content = "".join(out)
+        open_body, body, close_body = partition_on_body(bodies[0])
+        documents = ["".join((open_body, header, body, footer, close_body, "\n"))]
 
-    extra_args = ['--scale', '72dpi']  # bypass DPI scaling to correspond to WKHTMLTOPDF
+    # hack for general ledger
+    fname = str(inspect.stack()[2].function)
+    if fname  == "_render_qweb_pdf_prepare_streams":
+        extra_args = ['--scale', '72dpi']  
+    elif fname == "export_to_pdf":
+        extra_args = ['--scale', '50dpi'] 
+    else:
+        extra_args = []
+
     if landscape:
         extra_args += ['--orientation', 'landscape']
 
@@ -460,6 +468,26 @@ def run_paper_muncher(
             "Ensure it is installed and available in the system PATH."
         )
 
+    # hack for multi body    
+    if bodies == 1:
+        return run_process(binary, extra_args, documents[0])
+
+    merger = PdfMerger()
+    for content in documents:
+        pdf_bytes = run_process(binary, extra_args, content)
+        merger.append(BytesIO(pdf_bytes))
+    output = BytesIO()
+    merger.write(output)
+    merger.close()
+
+    return output.getvalue()
+
+
+def run_process(
+    binary,
+    extra_args,
+    content,
+):
     with subprocess.Popen(
         [binary, "print", "pipe:", '-o', "pipe:"] + extra_args,
         stdin=subprocess.PIPE,
