@@ -26,7 +26,7 @@ export class DateFilterButton extends Component {
 	static template = 'website_sale.DateFilterButton';
 	static components = { Dropdown, DropdownItem };
 	static props = {
-		selectedFilter: {
+		selectedDateFilter: {
 			type: Object,
 			optional: true,
 			shape: {

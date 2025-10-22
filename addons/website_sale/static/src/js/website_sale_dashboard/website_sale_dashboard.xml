@@ -1,85 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="website_sale.WebsiteSaleDashboard">
-        <div class="o_website_sale_dashboard container-fluid d-flex flex-wrap justify-content-between align-items-start gap-3 p-3 border-bottom">
+        <div class="o_website_sale_dashboard container-fluid d-flex flex-column-reverse flex-lg-row justify-content-between align-items-center gap-3 p-3 pt-0 pt-md-3">
 
             <!-- Left Section -->
-            <div class="o_left_section align-content-center d-flex flex-wrap gap-4 flex-grow-1 justify-content-start">
-                <div
+            <div class="d-flex justify-content-lg-start justify-content-md-center gap-1 gap-md-3 gap-lg-2 px-md-5 px-lg-0 w-100 w-lg-auto">
+                <button
                     title="Orders to Fulfill"
-                    class="o_dashboard_card o_purple_card text-center rounded-3 p-2 shadow-sm flex-shrink-1"
-                    t-on-click="setSearchContext"
+                    class="o_dashboard_card btn flex-grow-1 d-md-flex d-lg-block align-items-md-baseline justify-content-md-center gap-md-1 py-2 px-4 lh-sm"
+                    t-att-class="this.getDashboardCardAdditionalClass('to_fulfill')"
+                    t-on-click="state.eCommerceData['overall']['to_fulfill'] > 0 ? setSearchContext : () => {}"
                     filter_name="to_fulfill,from_website,order_confirmed"
                 >
-                    <a href="#" class="btn p-1 p-lg-2 text-truncate text-wrap">
-                        <h2 class="m-0 fw-bold o_dashboard_card_data" t-esc="state.eCommerceData['overall']['to_fulfill']"/>
-                        <h4 class="fw-semibold text-muted o_dashboard_card_text">To Fulfill</h4>
-                    </a>
-                </div>
+                    <span class="o_dashboard_card_data fs-4 fw-bolder" t-esc="state.eCommerceData['overall']['to_fulfill']"/>
+                    <span class="d-block">To Fulfill</span>
+                </button>
 
-                <div
+                <button
+                    t-if="state.eCommerceData['overall']['to_confirm'] > 0"
                     title="Orders to Confirm"
-                    class="o_dashboard_card o_orange_card text-center rounded-3 p-2 shadow-sm flex-shrink-1"
-                    t-on-click="setSearchContext"
+                    class="o_dashboard_card btn flex-grow-1 d-md-flex d-lg-block align-items-md-baseline justify-content-md-center gap-md-1 py-2 px-4 lh-sm"
+                    t-att-class="this.getDashboardCardAdditionalClass('to_confirm')"
+                    t-on-click="state.eCommerceData['overall']['to_confirm'] > 0 ? setSearchContext : () => {}"
                     filter_name="to_confirm,from_website"
                 >
-                    <a href="#" class="btn p-1 p-lg-2 text-truncate text-wrap">
-                        <h2 class="m-0 fw-bold o_dashboard_card_data" t-esc="state.eCommerceData['overall']['to_confirm']"/>
-                        <h4 class="fw-semibold text-muted o_dashboard_card_text">To Confirm</h4>
-                    </a>
-                </div>
+                    <span class="o_dashboard_card_data fs-4 fw-bolder" t-esc="state.eCommerceData['overall']['to_confirm']"/>
+                    <span class="d-block">To Confirm</span>
+                </button>
 
-                <div
+                <button
                     title="Orders to Invoice"
-                    class="o_dashboard_card o_blue_card text-center rounded-3 p-2 shadow-sm flex-shrink-1"
-                    t-on-click="setSearchContext"
+                    class="o_dashboard_card btn flex-grow-1 d-md-flex d-lg-block align-items-md-baseline justify-content-md-center gap-md-1 py-2 px-4 lh-sm"
+                    t-att-class="this.getDashboardCardAdditionalClass('to_invoice')"
+                    t-on-click="state.eCommerceData['overall']['to_invoice'] > 0 ? setSearchContext : () => {}"
                     filter_name="to_invoice,from_website,order_confirmed"
                 >
-                    <a href="#" class="btn p-1 p-lg-2 text-truncate text-wrap">
-                        <h2 class="m-0 fw-bold o_dashboard_card_data" t-esc="state.eCommerceData['overall']['to_invoice']"/>
-                        <h4 class="fw-semibold text-muted o_dashboard_card_text">To Invoice</h4>
-                    </a>
-                </div>
+                    <span class="o_dashboard_card_data fs-4 fw-bolder" t-esc="state.eCommerceData['overall']['to_invoice']"/>
+                    <span class="d-block">To Invoice</span>
+                </button>
             </div>
 
             <!-- Right Section -->
-            <div class="o_right_section align-content-center d-flex flex-wrap gap-4 flex-grow-1 justify-content-end">
-                <div class="o_date_filter_wrapper d-flex align-items-center w-100 w-md-auto mb-3 mb-md-0">
-                    <DateFilterButton update.bind="updateDashboardState" selectedFilter="state.selectedFilter"/>
+            <div class="d-flex flex-column flex-md-row border rounded-3 pb-2 py-md-2 w-100 w-md-auto gap-2 gap-md-0">
+                <div class="o_date_filter_wrapper d-flex align-items-center py-2 px-3 bg-200 bg-opacity-75">
+                    <DateFilterButton update.bind="updateDashboardState" selectedDateFilter="state.selectedDateFilter"/>
                 </div>
 
-                <div class="o_cards_container d-flex flex-wrap justify-content-end gap-4">
+                <div class="o_cards_container d-flex align-items-center gap-4 border-md-start px-3 px-md-4">
                     <!-- Sales -->
-                    <div class="o_dashboard_card o_visitors_card text-center bg-secondary rounded-3 p-3 shadow-sm flex-shrink-1">
-                        <h3
-                            class="m-0 fw-bold o_dashboard_card_data"
-                            t-att-class="this.getPeriodCardClass('total_visitors')"
-                        >
-                            <t t-esc="state.eCommerceData['current_period']['total_visitors']"/>
-                        </h3>
-                        <div class="fw-semibold text-muted o_dashboard_card_text">Visitors</div>
+                    <div class="d-flex flex-column px-1 lh-sm">
+                        <span class="text-body fw-bold">Visitors</span>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <span class="fs-4 fw-bold">
+                                <t t-esc="state.eCommerceData['current_period']['total_visitors']"/>
+                            </span>
+                            <span
+                                class="o_dashboard_card_evolution smaller"
+                                t-att-class="this.getPeriodCardClass('total_visitors')"
+                            >
+                                <t t-esc="state.eCommerceData['period_gain']['total_visitors'] != null ? state.eCommerceData['period_gain']['total_visitors'] : 0" />%
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Conversion -->
-                    <div class="o_dashboard_card o_orders_card text-center bg-secondary rounded-3 p-3 shadow-sm flex-shrink-1">
-                        <h3
-                            class="m-0 fw-bold o_dashboard_card_data"
-                            t-att-class="this.getPeriodCardClass('total_orders')"
-                        >
-                            <t t-esc="state.eCommerceData['current_period']['total_orders']"/>
-                        </h3>
-                        <div class="fw-semibold text-muted o_dashboard_card_text">Orders</div>
+                    <div class="d-flex flex-column px-1 lh-sm">
+                        <span class="text-body fw-bold">Orders</span>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <span class="fs-4 fw-bold">
+                                <t t-esc="state.eCommerceData['current_period']['total_orders']"/>
+                            </span>
+                            <span
+                                class="o_dashboard_card_evolution"
+                                t-att-class="this.getPeriodCardClass('total_orders')"
+                            >
+                                <t t-esc="state.eCommerceData['period_gain']['total_orders'] != null ? state.eCommerceData['period_gain']['total_orders'] : 0" />%
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Average Cart -->
-                    <div class="o_dashboard_card o_sales_card text-center bg-secondary rounded-3 p-3 shadow-sm flex-shrink-1">
-                        <h3
-                            class="m-0 fw-bold o_dashboard_card_data"
-                            t-att-class="this.getPeriodCardClass('total_sales')"
-                        >
-                            $ <t t-esc="state.eCommerceData['current_period']['total_sales']"/>
-                        </h3>
-                        <div class="fw-semibold text-muted o_dashboard_card_text">Sales</div>
+                    <div class="d-flex flex-column px-1 lh-sm">
+                        <span class="text-body fw-bold">Sales</span>
+                        <div class="d-flex align-items-baseline gap-1">
+                            <span class="fs-4 fw-bold text-nowrap">
+                                $ <t t-esc="state.eCommerceData['current_period']['total_sales']"/>
+                            </span>
+                            <span
+                                class="o_dashboard_card_evolution"
+                                t-att-class="this.getPeriodCardClass('total_sales')"
+                            >
+                                <t t-esc="state.eCommerceData['period_gain']['total_sales'] != null ? state.eCommerceData['period_gain']['total_sales'] : 0" />%
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

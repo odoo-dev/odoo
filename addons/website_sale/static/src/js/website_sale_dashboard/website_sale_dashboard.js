@@ -1,4 +1,4 @@
-import { useService } from '@web/core/utils/hooks';
+import { useService, useBus } from '@web/core/utils/hooks';
 import { Component, onWillStart, onWillUpdateProps, useState } from '@odoo/owl';
 import { DateFilterButton, DATE_OPTIONS } from './date_filter_button/date_filter_button';
 
@@ -10,9 +10,16 @@ export class WebsiteSaleDashboard extends Component {
 	setup() {
 		this.state = useState({
 			eCommerceData: {},
-			selectedFilter: DATE_OPTIONS[0],
+			selectedDateFilter: DATE_OPTIONS[0],
+			selectedFilter: [],
 		});
 		this.orm = useService('orm');
+
+		useBus(this.env.searchModel, 'update', () => {
+			if(!this.isSameFilter(this.state.selectedFilter)) {
+				this.state.selectedFilter = null;
+			}
+		});
 
 		onWillStart(async () => {
 			await this.updateDashboardState();
@@ -24,10 +31,10 @@ export class WebsiteSaleDashboard extends Component {
 
 	async updateDashboardState(filter = false) {
 		if (filter) {
-			this.state.selectedFilter = filter;
+			this.state.selectedDateFilter = filter;
 		}
 		this.state.eCommerceData = await this.orm.call('sale.order', 'retrieve_dashboard', [
-			this.state.selectedFilter.id,
+			this.state.selectedDateFilter.id,
 		]);
 	}
 
@@ -45,6 +52,15 @@ export class WebsiteSaleDashboard extends Component {
 		for (const item of searchItems) {
 			this.env.searchModel.toggleSearchItem(item.id);
 		}
+		this.state.selectedFilter = filters;
+	}
+
+	isSameFilter(filters) {
+		if (!filters) {
+			return false;
+		}
+		const activeSearchFilterNames = this.env.searchModel.getSearchItems(el => el.isActive && el.type === 'filter')?.map(el => el.name).sort();
+		return filters.length === activeSearchFilterNames?.length && filters.sort().every((val, i) => val === activeSearchFilterNames[i]);
 	}
 
 	getPeriodCardClass(dataName) {
@@ -53,6 +69,26 @@ export class WebsiteSaleDashboard extends Component {
 		} else if (this.state.eCommerceData['period_gain'][dataName] < 0) {
 			return 'text-danger';
 		}
-		return 'text-muted';
+		return '';
+	}
+
+	getDashboardCardAdditionalClass(filterName) {
+		const dashboardCardColor = {
+			'to_fulfill': 'purple',
+			'to_confirm': 'orange',
+			'to_invoice': 'cyan',
+		};
+		let dashboardCardClasses = [];
+		const noData = this.state.eCommerceData['overall'][filterName] == 0;
+		if(noData) {
+			dashboardCardClasses.push('bg-secondary text-secondary-emphasis disabled');
+		} else {
+			dashboardCardClasses.push('o_dashboard_card_' + dashboardCardColor[filterName]);
+		}
+		const filters = filterName == 'to_confirm' ? [filterName, 'from_website'] : [filterName, 'from_website','order_confirmed'];
+		if(this.isSameFilter(filters)) {
+			dashboardCardClasses.push('active');
+		}
+		return dashboardCardClasses.join(' ');
 	}
 }

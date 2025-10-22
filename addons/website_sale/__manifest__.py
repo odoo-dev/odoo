@@ -159,6 +159,10 @@
             'website_sale/static/src/scss/kanban_record.scss',
             'website_sale/static/src/js/website_sale_dashboard/**/*',
             'website_sale/static/src/views/**/*',
+            ('remove', 'website_sale/static/src/js/website_sale_dashboard/**/*.dark.scss'),
+        ],
+        "web.assets_web_dark": [
+            'website_sale/static/src/js/website_sale_dashboard/**/*.dark.scss',
         ],
         'website.website_builder_assets': [
             'website_sale/static/src/js/website_sale_form_editor.js',
