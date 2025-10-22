@@ -21,6 +21,7 @@ from email.utils import format_datetime
 from itertools import count
 from typing import BinaryIO, Optional
 from wsgiref.types import WSGIEnvironment
+from lxml import etree, html
 
 from werkzeug.test import create_environ, run_wsgi_app
 
@@ -364,6 +365,49 @@ def partition_on_body(html: str) -> tuple[str, str, str]:
     return pre + open_tag, body_content, close_tag + post
 
 
+def make_multi_docs_html(bodies, header='', footer=''):
+    """Combine multi header and footer with their respective bodies.
+
+    :param bodies: List of HTML body strings.
+    :param header: HTML header fragment.
+    :param footer: HTML footer fragment.
+    :return: Combined HTML document.
+    :rtype: list[str]
+    """
+    
+    footers_encapsulated = partition_on_body(footer)[1]
+    footers_tree = html.fromstring(footers_encapsulated)
+    footers = []
+    for footer in footers_tree.findall('./div'):
+        # encapsulate each footer in a div with the same classes as the englobing divs
+        footers.append(etree.tostring(footer, encoding='unicode'))
+
+    headers_encapsulated = partition_on_body(header)[1]
+    headers_tree = html.fromstring(headers_encapsulated)
+    headers = []
+    for header in headers_tree.findall('./div'):
+        # encapsulate each header in a div with the same classes as the englobing divs
+        headers.append(etree.tostring(header, encoding='unicode'))
+
+    is_same_length_h = (len(headers) == len(bodies))
+    is_same_length_f = (len(footers) == len(bodies))
+
+    documents = []
+    for i, body in enumerate(bodies):
+        open_body, body, close_body = partition_on_body(body)
+        header_fragment = headers[i] if is_same_length_h else (headers[0] if headers else '')
+        footer_fragment = footers[i] if is_same_length_f else (footers[0] if footers else '')
+        documents.append("".join((
+            open_body,
+            header_fragment,
+            body,
+            footer_fragment,
+            close_body,
+            "\n",
+        )))
+
+    return documents
+
 def run_paper_muncher(
     paperformat,
     bodies: Sequence[str],
@@ -386,13 +430,18 @@ def run_paper_muncher(
     :rtype: bytes
     :raises RuntimeError: If Paper Muncher fails during any phase.
     """
-    header = partition_on_body(header)[1]
-    footer = partition_on_body(footer)[1]
+    
     out = []
-    for html in bodies:
-        open_body, body, close_body = partition_on_body(html)
-        out.extend((open_body, header, body, footer, close_body, "\n"))
-    content = "".join(out)
+    if len(bodies) > 1:
+        documents = make_multi_docs_html(bodies, header, footer)
+        content = "".join(documents)
+    else:
+        header = partition_on_body(header)[1]
+        footer = partition_on_body(footer)[1]
+        for n in bodies:
+            open_body, body, close_body = partition_on_body(n)
+            out.extend((open_body, header, body, footer, close_body, "\n"))
+        content = "".join(out)
 
     extra_args = ['--scale', '72dpi']  # bypass DPI scaling to correspond to WKHTMLTOPDF
     if landscape:

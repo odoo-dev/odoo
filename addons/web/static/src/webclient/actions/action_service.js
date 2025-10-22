@@ -1327,6 +1327,7 @@ export function makeActionManager(env, router = _router) {
             if (_type === "pdf-pm") {
                 _type = "pdf";
             }
+            action.report_type = "qweb-pdf"
             console.log("report type pdf or text")
             console.log(_type)
             let success, message;
