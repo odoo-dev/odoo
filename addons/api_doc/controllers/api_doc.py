@@ -421,7 +421,7 @@ def enhance_signature_using_docstring(signature, method):
                         param.annotations = field_body.children[0].astext().strip()
                 # :returns: <rst>
                 case ('returns', ''):
-                    signature.return_.doc = _DocUtils.html_firstchild(field_body)
+                    signature.return_.doc = _DocUtils.html_childs(field_body)
                 # :rtype: <annotation>
                 case ('rtype', ''):
                     if not signature.return_.annotation:
@@ -648,3 +648,10 @@ class _DocUtils:
         if not tree.children:
             return ''
         return cls.html(tree.children[0])
+
+    @classmethod
+    def html_childs(cls, tree):
+        return "".join(
+            cls.html(child)
+            for child in tree.children
+        )
