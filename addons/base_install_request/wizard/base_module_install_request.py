@@ -12,7 +12,7 @@ class BaseModuleInstallRequest(models.TransientModel):
 
     module_id = fields.Many2one(
         'ir.module.module', string="Module", required=True,
-        domain=[('state', '=', "uninstalled")],
+        domain=[('state', 'in', ("uninstalled", "installed"))],
         ondelete='cascade', readonly=True,
     )
     user_id = fields.Many2one('res.users', default=lambda self: self.env.user, required=True)
@@ -26,6 +26,8 @@ class BaseModuleInstallRequest(models.TransientModel):
 
     def action_send_request(self):
         mail_template = self.env.ref('base_install_request.mail_template_base_install_request')
+        module_sudo = self.module_id.sudo()
+        module_sudo.requested_version = module_sudo.installed_version
         menu_id = self.env.ref('base.menu_apps').id
         for user in self.user_ids:
             render_ctx = dict(self.env.context, partner=user.partner_id, menu_id=menu_id)
@@ -51,11 +53,12 @@ class BaseModuleInstallReview(models.TransientModel):
 
     module_id = fields.Many2one(
         'ir.module.module', string="Module", required=True,
-        domain=[('state', '=', "uninstalled")],
+        domain=[('state', 'in', ("uninstalled", "installed"))],
         ondelete='cascade', readonly=True,
     )
     module_ids = fields.Many2many(
         'ir.module.module', string="Depending Apps", compute='_compute_modules_description')
+    module_state = fields.Selection(related="module_id.state")
     modules_description = fields.Html(compute='_compute_modules_description')
 
     @api.depends('module_id')
@@ -81,6 +84,13 @@ class BaseModuleInstallReview(models.TransientModel):
     def action_install_module(self):
         self.ensure_one()
         self.module_id.button_immediate_install()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'home',
+        }
+
+    def action_update_module(self):
+        self.module_id.button_immediate_upgrade()
         return {
             'type': 'ir.actions.client',
             'tag': 'home',

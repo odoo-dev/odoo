@@ -974,6 +974,35 @@ class IrModuleModule(models.Model):
     def _extract_resource_attachment_translations(self, module, lang):
         yield from ()
 
+    def _check_module_version(self):
+        if (
+            'bus.bus' in self.env
+            and parse_version(self.installed_version) > parse_version(self.latest_version)
+        ):
+            self._request_module_update()
+
+    def _request_module_update(self):
+        if self.env.user.has_group('base.group_system'):
+            self.env.user._bus_send('simple_notification', {
+                'type': 'info',
+                'sticky': True,
+                'message': self.env._("The following module is out of date"),
+                'buttons': [{
+                    'name': self.shortdesc,
+                    'action': self._get_records_action(),
+                }],
+            })
+        else:
+            self.env.user._bus_send('simple_notification', {
+                'type': 'info',
+                'sticky': False,
+                'message': self.env._(
+                    "The following module is out of date: %s.\n"
+                    "Ask your administrator to upgrade it.",
+                    self.shortdesc,
+                ),
+            })
+
 
 DEP_STATES = STATES + [('unknown', 'Unknown')]
 

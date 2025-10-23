@@ -29,7 +29,8 @@
                 <field name="module_ids" widget="many2many_tags" invisible="1"/>
                 <field name="modules_description"/>
                 <footer>
-                    <button string="Install App" class="btn-primary" type="object" name="action_install_module" data-hotkey="q"/>
+                    <button string="Install App" invisible="module_state != 'uninstalled'" class="btn-primary" type="object" name="action_install_module" data-hotkey="q"/>
+                    <button string="Update App" invisible="module_state != 'installed'" class="btn-primary" type="object" name="action_install_module" data-hotkey="q"/>
                     <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="x"/>
                 </footer>
             </form>
