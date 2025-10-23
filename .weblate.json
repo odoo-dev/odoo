@@ -1,6 +1,6 @@
 {
     "projects": {
-        "odoo-19": [
+        "test-odoo-19": [
             {
                 "name": "account",
                 "filemask": "addons/account/i18n/*.po",
