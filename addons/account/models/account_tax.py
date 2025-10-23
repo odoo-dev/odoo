@@ -1263,6 +1263,439 @@ class AccountTax(models.Model):
             ],
         }
 
+    @api.model
+    def _prepare_computation_default_tax_grouping_key(self, tax, base_line_results, setup):
+        """ Compute the default grouping key saying how the base lines will be aggregated together
+        before performing the taxes computation.
+
+        :param tax:                 The tax.
+        :param base_line_results:   A dictionary containing the base line and extra info about how taxes are grouped together.
+        :param setup:               Global setup for this taxes computation.
+        :return:                    The grouping key saying how the base lines will be aggregated together.
+        """
+        base_line = base_line_results['base_line']
+        batch = base_line_results['batching_results']['batch_per_tax'][tax.id]
+        special_mode = base_line['special_mode']
+
+        if tax.has_negative_factor:
+            price_include = False
+        elif special_mode == 'total_included':
+            price_include = True
+        elif special_mode == 'total_excluded':
+            price_include = False
+        else:
+            price_include = tax.price_include
+
+        return {
+            'tax': tax,
+            'batch': batch,
+            'has_negative_factor': tax.has_negative_factor,
+            'price_include': price_include,
+            'is_independent': tax.amount_type == 'fixed',
+
+            'currency': base_line['currency_id'],
+            'is_refund': base_line['is_refund'],
+            'computation_key': base_line['computation_key'],
+        }
+
+    @api.model
+    def _prepare_computation_tax_grouping_key(self, tax, base_line_results, index, setup):
+        """ Compute the grouping key saying how the base lines will be aggregated together
+        before performing the taxes computation.
+
+        :param tax:                 The tax.
+        :param base_line_results:   A dictionary containing the base line and extra info about how taxes are grouped together.
+        :param index:               A unique index allowing the split the key per base_line (e.g. for round_per_line).
+        :param setup:               Global setup for this taxes computation.
+        :return:                    The grouping key saying how the base lines will be aggregated together.
+        """
+        rounding_method = setup['rounding_method']
+        tax_key = self._prepare_computation_default_tax_grouping_key(tax, base_line_results, setup)
+
+        if rounding_method == 'round_per_line':
+            tax_key['index'] = index
+
+        return tax_key
+
+    @api.model
+    def _setup_to_prepare_taxes_computation(self, base_lines, company, rounding_method=None, filter_tax_function=None):
+        computation_graph = {}
+        base_lines_results = []
+        setup = {
+            'company': company,
+            'rounding_method': rounding_method or company.tax_calculation_rounding_method,
+            'computation_graph': computation_graph,
+            'base_lines_results': base_lines_results,
+        }
+
+        def get_tax_before(base_line_results):
+            batching_results = base_line_results['batching_results']
+            for tax_before in batching_results['sorted_taxes']:
+                if tax_before in batching_results['batch_per_tax'][tax.id]:
+                    break
+                yield tax_before
+
+        def get_tax_after(base_line_results):
+            batching_results = base_line_results['batching_results']
+            for tax_after in reversed(list(batching_results['sorted_taxes'])):
+                if tax_after in batching_results['batch_per_tax'][tax.id]:
+                    break
+                yield tax_after
+
+        def add_dependency(base_line_results, tax_key, to_tax, sign):
+            map_tax_to_key_and_node = base_line_results['map_tax_to_key_and_node']
+            to_tax_key, to_node = map_tax_to_key_and_node[to_tax.id]
+            scope = ('base',) if to_tax_key['is_independent'] else ('base', 'tax')
+            to_node['dependencies'].add((tax_key, sign, scope))
+
+        for index, base_line in enumerate(base_lines):
+            special_mode = base_line['special_mode']
+
+            # Flatten the taxes, order them and filter them if necessary.
+            batching_results = base_line['tax_ids']._batch_for_taxes_computation(special_mode=special_mode, filter_tax_function=filter_tax_function)
+            sorted_taxes = batching_results['sorted_taxes']
+
+            # Prepare to collect data per base line too.
+            raw_computation_amount = base_line['price_unit'] * base_line['quantity'] * (1 - (base_line['discount'] / 100.0))
+            if rounding_method == 'round_per_line':
+                raw_computation_amount = base_line['currency_id'].round(raw_computation_amount)
+            base_line_results = {
+                'base_line': base_line,
+                'batching_results': batching_results,
+                'raw_computation_amount': raw_computation_amount,
+                'tax_amounts': {},
+                'map_tax_to_key_and_node': {},
+            }
+            base_lines_results.append(base_line_results)
+
+            # Build a graph with all base lines and taxes.
+            map_tax_to_key_and_node = base_line_results['map_tax_to_key_and_node']
+            for tax in sorted_taxes:
+                tax_key = frozendict(self._prepare_computation_tax_grouping_key(tax, base_line_results, index, setup))
+                node = computation_graph.setdefault(tax_key, {
+                    'base_lines_results': [],
+                    'batch_keys': set(),
+                    'dependencies': set(),
+                })
+                map_tax_to_key_and_node[tax.id] = (tax_key, node)
+
+            for tax in sorted_taxes:
+                tax_key, node = map_tax_to_key_and_node[tax.id]
+                node['base_lines_results'].append(base_line_results)
+
+                if tax.price_include:
+
+                    # Suppose:
+                    # 1.
+                    # t1: price-excluded fixed tax of 1, include_base_amount
+                    # t2: price-included 10% tax
+                    # On a price unit of 120, t1 is computed first since the tax amount affects the price unit.
+                    # Then, t2 can be computed on 120 + 1 = 121.
+                    # However, since t1 is not price-included, its base amount is computed by removing first the tax amount of t2.
+                    # 2.
+                    # t1: price-included fixed tax of 1
+                    # t2: price-included 10% tax
+                    # On a price unit of 122, base amount of t2 is computed as 122 - 1 = 121
+                    if special_mode in (False, 'total_included'):
+                        if tax.include_base_amount:
+                            for other_tax in get_tax_after(base_line_results):
+                                if not other_tax.is_base_affected:
+                                    add_dependency(base_line_results, tax_key, other_tax, -1)
+                        else:
+                            for other_tax in get_tax_after(base_line_results):
+                                add_dependency(base_line_results, tax_key, other_tax, -1)
+                        for other_tax in get_tax_before(base_line_results):
+                            add_dependency(base_line_results, tax_key, other_tax, -1)
+
+                    # Suppose:
+                    # 1.
+                    # t1: price-included 10% tax
+                    # t2: price-excluded 10% tax
+                    # If the price unit is 121, the base amount of t1 is computed as 121 / 1.1 = 110
+                    # With special_mode = 'total_excluded', 110 is provided as price unit.
+                    # To compute the base amount of t2, we need to add back the tax amount of t1.
+                    # 2.
+                    # t1: price-included fixed tax of 1, include_base_amount
+                    # t2: price-included 10% tax
+                    # On a price unit of 121, with t1 being include_base_amount, the base amount of t2 is 121
+                    # With special_mode = 'total_excluded' 109 is provided as price unit.
+                    # To compute the base amount of t2, we need to add the tax amount of t1 first
+                    else:  # special_mode == 'total_excluded'
+                        if tax.include_base_amount:
+                            for other_tax in get_tax_after(base_line_results):
+                                if other_tax.is_base_affected:
+                                    add_dependency(base_line_results, tax_key, other_tax, 1)
+
+                elif not tax.price_include:
+
+                    # Case of a tax affecting the base of the subsequent ones, no price included taxes.
+                    if special_mode in (False, 'total_excluded'):
+                        if tax.include_base_amount:
+                            for other_tax in get_tax_after(base_line_results):
+                                if other_tax.is_base_affected:
+                                    add_dependency(base_line_results, tax_key, other_tax, 1)
+
+                    # Suppose:
+                    # 1.
+                    # t1: price-excluded 10% tax, include base amount
+                    # t2: price-excluded 10% tax
+                    # On a price unit of 100,
+                    # The tax of t1 is 100 * 1.1 = 110.
+                    # The tax of t2 is 110 * 1.1 = 121.
+                    # With special_mode = 'total_included', 121 is provided as price unit.
+                    # The tax amount of t2 is computed like a price-included tax: 121 / 1.1 = 110.
+                    # Since t1 is 'include base amount', t2 has already been subtracted from the price unit.
+                    # 2.
+                    # t1: price-excluded fixed tax of 1
+                    # t2: price-excluded 10% tax
+                    # On a price unit of 110, the tax of t2 is 110 * 1.1 = 121
+                    # With special_mode = 'total_included', 122 is provided as price unit.
+                    # The base amount of t2 should be computed by removing the tax amount of t1 first
+                    else:  # special_mode == 'total_included'
+                        if not tax.include_base_amount:
+                            for other_tax in get_tax_after(base_line_results):
+                                add_dependency(base_line_results, tax_key, other_tax, -1)
+                        for other_tax in get_tax_before(base_line_results):
+                            add_dependency(base_line_results, tax_key, other_tax, -1)
+
+            # Compute 'subsequent_taxes'.
+            subsequent_taxes = self.env['account.tax']
+            for tax in reversed(sorted_taxes):
+                tax_key = map_tax_to_key_and_node[tax.id][0]
+                base_line_tax_amounts = base_line_results['tax_amounts']
+                base_line_tax_amounts[tax.id] = {
+                    'tax': tax,
+                    'taxes': self.env['account.tax'],
+                    'group': batching_results['group_per_tax'].get(tax.id) or self.env['account.tax'],
+                    'batch': batching_results['batch_per_tax'][tax.id],
+                    'price_include': tax_key['price_include'],
+                    'is_reverse_charge': tax_key['has_negative_factor'],
+                }
+                if tax.include_base_amount:
+                    base_line_tax_amounts[tax.id]['taxes'] |= subsequent_taxes
+
+                if tax.is_base_affected:
+                    subsequent_taxes |= tax
+
+        return setup
+
+    @api.model
+    def _compute_raw_tax_amount(self, tax_key, node, setup):
+        """ Get the base amount to be used to compute the tax amount on.
+
+        :param tax_key: The grouping key generated from the tax and the base_line saying how amounts a
+                        grouped together.
+        :param node:    The current values associated to this key containing all the aggregated values.
+        :param setup:   Global setup for this taxes computation.
+        :return:
+        """
+        tax = tax_key['tax']
+        price_include = tax_key['price_include']
+
+        batch = tax_key['batch']
+        raw_tax_computation_amount = node['raw_tax_computation_amount']
+
+        if tax.amount_type == 'fixed':
+            raw_computation_amount = sum(base_line_results['raw_computation_amount'] for base_line_results in node['base_lines_results'])
+            raw_base_sign = -1 if raw_computation_amount < 0.0 else 1
+            quantity = sum(base_line_results['base_line']['quantity'] for base_line_results in node['base_lines_results'])
+            return raw_base_sign * quantity * tax.amount
+
+        if tax.amount_type == 'percent':
+            if price_include:
+                total_percentage = sum(tax.amount for tax in batch) / 100.0
+                to_price_excluded_factor = 1 / (1 + total_percentage) if total_percentage != -1 else 0.0
+            else:
+                to_price_excluded_factor = 1
+            return raw_tax_computation_amount * to_price_excluded_factor * tax.amount / 100.0
+
+        if tax.amount_type == 'division':
+            if price_include:
+                incl_base_multiplicator = 1
+            else:
+                total_percentage = sum(tax.amount for tax in batch) / 100.0
+                incl_base_multiplicator = 1.0 if total_percentage == 1.0 else 1 - total_percentage
+            return raw_tax_computation_amount * tax.amount / 100.0 / incl_base_multiplicator
+
+    @api.model
+    def _round_raw_tax_amount(self, tax_key, node, setup):
+        currency = tax_key['currency']
+        return currency.round(node['raw_tax_amount'])
+
+    @api.model
+    def _add_tax_computation_amount_for(self, tax_key, node, setup, scope):
+        tax = tax_key['tax']
+
+        field = f'raw_{scope}_computation_amount'
+        node[field] = 0.0
+        for base_line_results in node['base_lines_results']:
+            base_line_tax_amounts = base_line_results['tax_amounts']
+            raw_tax_computation_amount = base_line_results['raw_computation_amount']
+
+            for dep_tax_key, dep_sign, dep_scope in node['dependencies']:
+                if scope not in dep_scope:
+                    continue
+
+                dep_tax = dep_tax_key['tax']
+                if not dep_tax:
+                    continue
+
+                dep_tax_amounts = base_line_tax_amounts.get(dep_tax.id)
+                if not dep_tax_amounts:
+                    continue
+
+                raw_tax_computation_amount += dep_sign * dep_tax_amounts['raw_tax_amount']
+
+            base_line_tax_amounts[tax.id][field] = raw_tax_computation_amount
+            node[field] += raw_tax_computation_amount
+
+    @api.model
+    def _add_tax_amounts_to_base_lines_results_grouped(self, tax_key, node, setup):
+        tax = tax_key['tax']
+        rounding_method = setup['rounding_method']
+
+        # Compute the raw tax amount globally.
+        node['raw_tax_amount'] = self._compute_raw_tax_amount(tax_key, node, setup)
+        if node['raw_tax_amount'] is None:
+            node['tax_amount'] = None
+        else:
+            node['tax_amount'] = self._round_raw_tax_amount(tax_key, node, setup)
+            if rounding_method == 'round_per_line':
+                node['raw_tax_amount'] = node['tax_amount']
+
+        # Reflect to 'base_lines_results'.
+        total_raw_computation_amount = sum(
+            base_line_results['tax_amounts'][tax.id]['raw_tax_computation_amount']
+            for base_line_results in node['base_lines_results']
+        )
+        for base_line_results in node['base_lines_results']:
+            base_line_tax_amounts = base_line_results['tax_amounts']
+            if total_raw_computation_amount:
+                factor = (
+                    base_line_tax_amounts[tax.id]['raw_tax_computation_amount']
+                    / total_raw_computation_amount
+                )
+            else:
+                factor = 0.0
+            base_line_tax_amounts[tax.id]['raw_tax_amount'] = node['raw_tax_amount'] * factor
+
+    @api.model
+    def _add_tax_amounts_to_base_lines_results_split(self, tax_key, node, setup):
+        rounding_method = setup['rounding_method']
+
+        # Compute the raw tax amounts per base_line.
+        tax = tax_key['tax']
+        copy_node = dict(node)
+        node['raw_tax_amount'] = 0.0
+        for base_line_results in node['base_lines_results']:
+            base_line_tax_amounts = base_line_results['tax_amounts']
+            sub_node = {
+                **copy_node,
+                'base_lines_results': [base_line_results],
+            }
+            sub_node['raw_tax_amount'] = self._compute_raw_tax_amount(tax_key, sub_node, setup)
+            if rounding_method == 'round_per_line':
+                sub_node['raw_tax_amount'] = self._round_raw_tax_amount(tax_key, sub_node, setup)
+                node.setdefault('tax_amount', 0.0)
+                node['tax_amount'] += sub_node['raw_tax_amount']
+
+            base_line_tax_amounts[tax.id]['raw_tax_amount'] = sub_node['raw_tax_amount']
+            node['raw_tax_amount'] += sub_node['raw_tax_amount']
+
+        if rounding_method != 'round_per_line':
+            node['tax_amount'] = self._round_raw_tax_amount(tax_key, node, setup)
+
+    @api.model
+    def _add_base_amounts_to_base_line_results(self, tax_key, node, setup):
+        tax = tax_key['tax']
+
+        for base_line_results in node['base_lines_results']:
+            base_line = base_line_results['base_line']
+            special_mode = base_line['special_mode']
+            base_line_tax_amounts = base_line_results['tax_amounts']
+            map_tax_to_key_and_node = base_line_results['map_tax_to_key_and_node']
+
+            total_tax_amount = 0.0
+            for batch_tax in tax_key['batch']:
+                batch_tax_key = map_tax_to_key_and_node[batch_tax.id][0]
+                if not batch_tax_key['has_negative_factor']:
+                    total_tax_amount += base_line_tax_amounts[batch_tax.id]['raw_tax_amount'] or 0.0
+
+            raw_base_amount = base_line_tax_amounts[tax.id]['raw_base_computation_amount']
+            if tax_key['price_include'] and special_mode in (False, 'total_included'):
+                raw_base_amount -= total_tax_amount
+            base_line_tax_amounts[tax.id]['raw_base_amount'] = raw_base_amount
+
+    @api.model
+    def _add_tax_details_to_base_line(self, base_line_results, setup):
+        company = setup['company']
+        rounding_method = setup['rounding_method']
+
+        base_line = base_line_results['base_line']
+        rate = base_line['rate']
+        raw_computation_amount = base_line_results['raw_computation_amount']
+        base_line_tax_amounts = base_line_results['tax_amounts']
+        sorted_taxes = base_line_results['batching_results']['sorted_taxes']
+        map_tax_to_key_and_node = base_line_results['map_tax_to_key_and_node']
+
+        if sorted_taxes:
+            raw_total_excluded_currency = base_line_tax_amounts[sorted_taxes[0].id]['raw_base_amount']
+        else:
+            raw_total_excluded_currency = raw_computation_amount
+        raw_total_excluded = raw_total_excluded_currency / rate if rate else 0.0
+        raw_total_included_currency = raw_total_excluded_currency
+        raw_total_included = raw_total_included_currency / rate if rate else 0.0
+        if rounding_method == 'round_per_line':
+            raw_total_excluded = company.currency_id.round(raw_total_excluded)
+
+        taxes_data = []
+        for tax in sorted_taxes:
+            tax_key = map_tax_to_key_and_node[tax.id][0]
+            tax_amounts = base_line_tax_amounts[tax.id]
+            tax_amount = tax_amounts['raw_tax_amount'] / rate if rate else 0.0
+            base_amount = tax_amounts['raw_base_amount'] / rate if rate else 0.0
+
+            if not tax_key['has_negative_factor']:
+                raw_total_included_currency += tax_amounts['raw_tax_amount']
+                raw_total_included += tax_amount
+
+            if rounding_method == 'round_per_line':
+                tax_amount = company.currency_id.round(tax_amount)
+                base_amount = company.currency_id.round(base_amount)
+
+            tax_data = {
+                'tax': tax_key['tax'],
+                'price_include': tax_key['price_include'],
+                'is_reverse_charge': False,
+
+                'taxes': tax_amounts['taxes'],
+                'group': tax_amounts['group'],
+                'batch': tax_amounts['batch'],
+                'raw_tax_amount_currency': tax_amounts['raw_tax_amount'],
+                'raw_tax_amount': tax_amount,
+                'raw_base_amount_currency': tax_amounts['raw_base_amount'],
+                'raw_base_amount': base_amount,
+            }
+            taxes_data.append(tax_data)
+            if tax_key['has_negative_factor']:
+                taxes_data.append({
+                    **tax_data,
+                    'is_reverse_charge': True,
+                    'raw_tax_amount_currency': -tax_data['raw_tax_amount_currency'],
+                    'raw_tax_amount': -tax_data['raw_tax_amount'],
+                })
+
+        if rounding_method == 'round_per_line':
+            raw_total_included = company.currency_id.round(raw_total_included)
+
+        base_line['tax_details'] = {
+            'raw_total_excluded_currency': raw_total_excluded_currency,
+            'raw_total_excluded': raw_total_excluded,
+            'raw_total_included_currency': raw_total_included_currency,
+            'raw_total_included': raw_total_included,
+            'taxes_data': taxes_data,
+        }
+
     # -------------------------------------------------------------------------
     # MAPPING PRICE_UNIT
     # -------------------------------------------------------------------------
@@ -1736,8 +2169,62 @@ class AccountTax(models.Model):
         :param base_lines:  A list of base lines.
         :param company:     The company owning the base lines.
         """
-        for base_line in base_lines:
-            self._add_tax_details_in_base_line(base_line, company)
+        # for base_line in base_lines:
+        #     self._add_tax_details_in_base_line(base_line, company)
+        self._add_tax_details_in_base_lines_bis(base_lines, company)
+
+    @api.model
+    def _add_tax_details_in_base_lines_bis(
+        self,
+        base_lines,
+        company,
+        rounding_method=None,
+        filter_tax_function=None,
+    ):
+        setup = self._setup_to_prepare_taxes_computation(
+            base_lines=base_lines,
+            company=company,
+            rounding_method=rounding_method,
+            filter_tax_function=filter_tax_function,
+        )
+        computation_graph = setup['computation_graph']
+        # TODO: check for cycling dependencies
+
+        # Compute the tax amounts.
+        while True:
+            tax_key, node = None, None
+            for iter_tax_key, iter_node in computation_graph.items():
+                if (
+                    all(
+                        'tax_amount' in computation_graph[dep_tax_key]
+                        for dep_tax_key, _sign, scope in iter_node['dependencies']
+                        if 'tax' in scope
+                    )
+                    and 'tax_amount' not in iter_node
+                ):
+                    tax_key = iter_tax_key
+                    node = iter_node
+                    break
+
+            if not tax_key:
+                break
+
+            # Compute the tax amounts.
+            self._add_tax_computation_amount_for(tax_key, node, setup, 'tax')
+
+            if tax_key['is_independent']:
+                self._add_tax_amounts_to_base_lines_results_split(tax_key, node, setup)
+            else:
+                self._add_tax_amounts_to_base_lines_results_grouped(tax_key, node, setup)
+
+        # Compute the base amounts.
+        for tax_key, node in computation_graph.items():
+            self._add_tax_computation_amount_for(tax_key, node, setup, 'base')
+            self._add_base_amounts_to_base_line_results(tax_key, node, setup)
+
+        # Build the final amounts.
+        for base_line_results in setup['base_lines_results']:
+            self._add_tax_details_to_base_line(base_line_results, setup)
 
     @api.model
     def _distribute_delta_amount_smoothly(self, precision_digits, delta_amount, target_factors):
