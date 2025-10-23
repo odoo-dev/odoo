@@ -30,11 +30,6 @@ class ResCompany(models.Model):
         remaining = self - recs_requires_vat
         remaining.l10n_ar_company_requires_vat = False
 
-    def _localization_use_documents(self):
-        """ Argentinean localization use documents """
-        self.ensure_one()
-        return self.account_fiscal_country_id.code == "AR" or super()._localization_use_documents()
-
     def write(self, vals):
         if 'l10n_ar_afip_responsibility_type_id' in vals:
             for company in self:

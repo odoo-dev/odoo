@@ -6,6 +6,9 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    def _localization_use_documents(self, template_code):
+        return template_code == 'uy' or super()._localization_use_documents(template_code)
+
     @template('uy')
     def _get_uy_template_data(self):
         return {

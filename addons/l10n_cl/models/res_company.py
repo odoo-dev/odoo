@@ -8,8 +8,3 @@ class ResCompany(models.Model):
 
     l10n_cl_activity_description = fields.Char(
         string='Company Activity Description', related='partner_id.l10n_cl_activity_description', readonly=False)
-
-    def _localization_use_documents(self):
-        """ Chilean localization use documents """
-        self.ensure_one()
-        return self.account_fiscal_country_id.code == "CL" or super()._localization_use_documents()
