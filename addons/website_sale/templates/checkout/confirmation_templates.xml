@@ -78,7 +78,7 @@
             <t t-set="tx_sudo" t-value="order.get_portal_last_transaction()"/>
             <div
                 t-if="tx_sudo"
-                t-attf-class="alert px-3 pb-0 pt-3 #{
+                t-attf-class="alert pb-0 #{
                     (tx_sudo.state == 'pending' and 'alert-info') or
                     (tx_sudo.state == 'done' and order.amount_total == tx_sudo.amount and 'alert-success') or
                     (tx_sudo.state == 'done' and order.amount_total != tx_sudo.amount and 'alert-warning') or
@@ -86,18 +86,7 @@
                     'alert-danger'}"
                 role="alert"
             >
-                <a
-                    title="Edit"
-                    class="btn btn-sm btn-link text-dark float-end"
-                    role="button"
-                    groups="base.group_system"
-                    target="_blank"
-                    aria-label="Edit"
-                    t-attf-href="/odoo/action-payment.action_payment_provider/{{tx_sudo.provider_id.id}}"
-                >
-                    <i class="fa fa-pencil"/>
-                </a>
-                <div class="d-flex justify-content-between me-5">
+                <div class="d-flex justify-content-between">
                     <t t-if="tx_sudo.state == 'pending'">
                         <t t-out="tx_sudo.provider_id.sudo().pending_msg"/>
                     </t>
@@ -118,11 +107,24 @@
                     <t t-if="tx_sudo.state == 'error'">
                         <span t-out="tx_sudo.state_message"/>
                     </t>
-                    <t t-if="tx_sudo.state == 'cancel' or tx_sudo.state == 'error'">
-                        <a class="text-decoration-none color-inherit" href="/shop/payment">
-                            <i class="oi oi-arrow-left me-3" aria-hidden="true"/>Retry
+                    <div class="d-flex gap-4">
+                        <t t-if="tx_sudo.state == 'cancel' or tx_sudo.state == 'error'">
+                            <a class="alert-link" href="/shop/payment">
+                                <i class="fa fa-rotate-left me-2" aria-hidden="true"/>Retry
+                            </a>
+                        </t>
+                        <a
+                            title="Edit"
+                            class="alert-link"
+                            role="button"
+                            groups="base.group_system"
+                            target="_blank"
+                            aria-label="Edit"
+                            t-attf-href="/odoo/action-payment.action_payment_provider/{{tx_sudo.provider_id.id}}"
+                        >
+                            <i class="fa fa-pencil"/>
                         </a>
-                    </t>
+                    </div>
                 </div>
                 <t t-if="tx_sudo.provider_code == 'custom'">
                     <div id="order_reference" t-if="order.reference" class="mt-2">

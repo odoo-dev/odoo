@@ -49,14 +49,14 @@
             </t>
         </xpath>
 
-        <xpath expr="//t[@t-set='o_payment_status_alert_class']" position="replace">
+        <!-- <xpath expr="//t[@t-set='o_payment_status_icon_class']" position="replace">
             <t t-if="tx.provider_id.sudo().code == 'custom'">
-               <t t-set="o_payment_status_alert_class"
+               <t t-set="o_payment_status_icon_class"
                   t-value="'d-flex flex-column flex-md-row align-items-stretch gap-2 gap-md-3 mb32'"
                />
             </t>
             <t t-else="">$0</t>
-        </xpath>
+        </xpath> -->
 
         <xpath expr="//div[@id='o_payment_status_icon']" position="attributes">
             <attribute name="t-if">tx.provider_id.sudo().code != 'custom'</attribute>

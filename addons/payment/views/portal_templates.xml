@@ -127,13 +127,11 @@
                                 </p>
                                 <p>Don't hesitate to contact us if you don't receive it.</p>
                             </div>
-                            <div t-else="" name="o_payment_status">
+                            <div t-else="" name="o_payment_status" class="d-flex flex-column">
                                 <t t-call="payment.state_header">
                                     <t t-set="is_processing" t-value="True"/>
                                 </t>
-                                <div class="text-bg-light row row-cols-1 row-cols-md-2 mx-0 mb-3
-                                            py-2 rounded"
-                                >
+                                <div class="o_payment_summary d-flex gap-3">
                                     <t t-call="payment.summary_item">
                                         <t t-set="name" t-value="'amount'"/>
                                         <t t-set="label">Amount</t>
@@ -332,35 +330,29 @@
         </t>
 
         <t t-if="not status_message" t-set="status_message" t-value="''"/>
-        <t t-set="o_payment_status_alert_class"
-           t-value="'alert alert-'+ alert_style +' d-flex gap-3'"
-        />
 
-        <div t-if="status_heading or status_message or tx.state_message"
-             name="o_payment_status_alert"
-             t-attf-class="{{o_payment_status_alert_class}}"
+        <div
+            t-if="status_heading or status_message or tx.state_message"
+            name="o_payment_status_alert"
+            class="d-flex flex-column align-items-center text-center"
         >
-            <t t-set="alert_icon"
-               t-value="'fa-cog fa-spin' if is_processing and alert_style != 'danger'
+            <t
+                t-set="alert_icon"
+                t-value="'fa-cog fa-spin' if is_processing and alert_style != 'danger'
                         else 'fa-check' if alert_style == 'success'
                         else 'fa-info-circle' if alert_style == 'info'
                         else 'fa-exclamation-triangle'"
             />
-            <div id="o_payment_status_icon">
-                <i t-attf-class="fa {{alert_icon}}"/>
-            </div>
-            <div id="o_payment_status_message" class="w-100">
-                <h5 t-if="status_heading" t-out="status_heading" class="alert-heading mb-0"/>
+            <div id="o_payment_status_icon" class="spinner-border mb-4 text-muted" role="status"/>
+            <div id="o_payment_status_message">
+                <h1 t-if="status_heading" t-out="status_heading" class="h3-fs"/>
                 <t t-if="status_message" t-out="status_message" class="mb-0"/>
                 <t t-if="tx.state_message" t-out="tx.state_message" class="mb-0"/>
             </div>
-            <a t-if="is_processing"
-               t-att-href="tx.landing_route"
-               class="alert-link ms-auto text-nowrap"
-            >
-                Skip <i class="oi oi-arrow-right ms-1 small"/>
-            </a>
         </div>
+        <a class="order-3 ms-auto" t-if="is_processing" t-att-href="tx.landing_route">
+            Skip Waiting <i class="oi oi-arrow-right ms-1"/>
+        </a>
     </template>
 
     <!-- "Manage payment methods" card on /my -->
