@@ -42,9 +42,11 @@ class _Relational(Field[BaseModel]):
         if records is None or len(records._ids) <= 1:
             return super().__get__(records, owner)
 
-        # check field access
+        # check field and record access
         env = records.env
-        env.su or self in env._field_access_memo or records.check_field_access(self, 'read')
+        if not env.su:
+            self in env._field_access_memo or records.check_field_access(self, 'read')
+            records.check_access('read')
 
         # multi-record case
         if self.compute and self.store and env.transaction.tocompute.get(self):
@@ -448,7 +450,7 @@ class Many2one(_Relational):
             return
         corecord = self.convert_to_record(value, records)
         for invf in records.pool.field_inverses[self]:
-            valid_records = records.filtered_domain(invf.get_comodel_domain(corecord))
+            valid_records = records.sudo().filtered_domain(invf.get_comodel_domain(corecord))
             if not valid_records:
                 continue
             ids0 = invf._get_cache(corecord.env).get(corecord.id)
@@ -720,7 +722,11 @@ class _RelationalMulti(_Relational):
             Comodel._active_name
             and self.context.get('active_test', env.context.get('active_test', True))
         ):
-            corecords = corecords.filtered(Comodel._active_name).with_prefetch(prefetch_ids)
+            if self.bypass_search_access and not env.su:
+                # if bypassed search access, filter as sudo to avoid access errors
+                corecords = corecords.sudo(True).filtered(Comodel._active_name).sudo(False)
+            else:
+                corecords = corecords.filtered(Comodel._active_name)
         return corecords
 
     def convert_to_record_multi(self, values, records: BaseModel):

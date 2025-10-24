@@ -1829,8 +1829,12 @@ class Field[T]:
                 record.ensure_one()
                 assert False, "unreachable"
             # null record -> return the null value for this field
+            record.check_access('read')
             value = self.convert_to_cache(False, record, validate=False)
             return self.convert_to_record(value, record)
+
+        record_id = record._ids[0]
+        env.su or env._access_cache[record._name].get(record_id) or record.check_access('read')
 
         if self.compute and self.store and env.transaction.tocompute.get(self):
             # process pending computations
@@ -1841,7 +1845,6 @@ class Field[T]:
         except KeyError:
             field_cache = self._get_cache(env)
 
-        record_id = record._ids[0]
         try:
             value = field_cache[record_id]
             # convert to record may also throw a KeyError if the value is not

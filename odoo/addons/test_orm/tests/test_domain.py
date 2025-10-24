@@ -972,7 +972,7 @@ class TestDomainOptimize(TransactionCase):
             Domain('moderator', 'any', Domain('login', 'like', 'one')).optimize_full(model.sudo()),
             Domain('moderator', 'any!', Domain('login', 'like', 'one')),
         )
-        query = model.moderator._search(Domain.TRUE)
+        query = model.sudo().moderator._search(Domain.TRUE)
         self.assertEqual(
             Domain('moderator', 'any', query).optimize(model),
             Domain('moderator', 'any!', query),

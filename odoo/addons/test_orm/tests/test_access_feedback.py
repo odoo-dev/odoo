@@ -357,12 +357,13 @@ If you really, really need access, perhaps you can win over your friendly admini
         child_record = ChildModel.create({'parent_id': self.record.id}).with_user(self.user)
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             _ = child_record.parent_id
+        record = child_record.sudo()
         self.assertEqual(
             ctx.exception.args[0],
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'read' access to:
-- {child_record._description}, {child_record.display_name} ({child_record._name}: {child_record.id})
+- {record._description}, {record.display_name} ({record._name}: {record.id})
 
 Blame the following accesses:
 - rule 0
@@ -379,12 +380,13 @@ If you really, really need access, perhaps you can win over your friendly admini
         self._make_rule('rule 0', "[('company_id', '=', user.company_id.id)]", attr='read')
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             _ = self.record.val
+        record = self.record.sudo()
         self.assertEqual(
             ctx.exception.args[0],
             f"""Uh-oh! Looks like you have stumbled upon some top-secret records.
 
 Sorry, {self.user.name} (id={self.user.id}) doesn't have 'read' access to:
-- {self.record._description}, {self.record.display_name} ({self.record._name}: {self.record.id}, company={self.record.sudo().company_id.display_name})
+- {record._description}, {record.display_name} ({record._name}: {record.id}, company={record.company_id.display_name})
 
 Blame the following accesses:
 - rule 0
