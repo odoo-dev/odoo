@@ -7,6 +7,7 @@ import { deepCopy } from "../utils/objects";
  * callback?: function;
  * type?: "ram" | "disk";
  * update?: "once" | "always";
+ * maxAge?: number; // Max age in milliseconds. If the cached data is older, it will be refetched.
  * }} RPCCacheSettings
  */
 
@@ -24,6 +25,7 @@ function validateSettings({ type, update }) {
 }
 
 const CRYPTO_ALGO = "AES-GCM";
+const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
 class Crypto {
     constructor(secret) {
@@ -120,10 +122,13 @@ export class RPCCache {
      * @param {function} fallback
      * @param {RPCCacheSettings} settings
      */
-    read(table, key, fallback, { callback = () => {}, type = "ram", update = "once" } = {}) {
+    read(table, key, fallback, { callback = () => {}, type = "ram", update = "once", maxAge = ONE_WEEK } = {}) {
         validateSettings({ type, update });
 
-        let ramValue = this.ramCache.read(table, key);
+        let ramEntry = this.ramCache.read(table, key);
+        let ramValue = ramEntry?.data;
+        const ts = ramEntry?.timestamp;
+        const isExpired = ts && (Date.now() - ts) > maxAge;
 
         const requestKey = `${table}/${key}`;
         const hasPendingRequest = requestKey in this.pendingRequests;
@@ -134,9 +139,10 @@ export class RPCCache {
             return ramValue.then((result) => deepCopy(result));
         }
 
-        if (!ramValue || update === "always") {
+        if (!ramValue || isExpired || update === "always") {
             this.pendingRequests[requestKey] = [];
             this.pendingRequests[requestKey].push(callback);
+            const now = Date.now();
 
             // execute the fallback and write the result in the caches
             const prom = new Promise((resolve, reject) => {
@@ -151,10 +157,11 @@ export class RPCCache {
                     );
                     delete this.pendingRequests[requestKey];
                     // update the ram and optionally the disk caches with the latest data
-                    this.ramCache.write(table, key, Promise.resolve(result));
+                    this.ramCache.write(table, key, { data: Promise.resolve(result), timestamp: now });
                     if (type === "disk") {
                         this.crypto.encrypt(result).then((encryptedResult) => {
-                            this.indexedDB.write(table, key, encryptedResult);
+                            const diskEntry = { data: encryptedResult, timestamp: now };
+                            this.indexedDB.write(table, key, diskEntry);
                         });
                     }
                     return result;
@@ -172,7 +179,7 @@ export class RPCCache {
                 fallback().then(onFullfilled, onRejected);
 
                 // speed up the request by using the caches
-                if (ramValue) {
+                if (ramValue && !isExpired) {
                     // ramValue is always already resolved here, as it can't be pending (otherwise
                     // we would have early returned because of `pendingRequests`) and it would have
                     // been removed from the ram cache if it had been rejected
@@ -187,9 +194,14 @@ export class RPCCache {
                         .read(table, key)
                         .then(async (result) => {
                             if (result) {
+                                const encryptedData = result.data;
+                                const isExpired = (Date.now() - result.timestamp) > maxAge;
+                                if (isExpired) {
+                                    return;
+                                }
                                 let decrypted;
                                 try {
-                                    decrypted = await this.crypto.decrypt(result);
+                                    decrypted = await this.crypto.decrypt(encryptedData);
                                 } catch {
                                     // Do nothing ! The cryptoKey is probably different.
                                     // The data will be updated with the new cryptoKey.
@@ -204,7 +216,7 @@ export class RPCCache {
                     fromCache.resolve(); // fromCacheValue will remain undefined
                 }
             });
-            this.ramCache.write(table, key, prom);
+            this.ramCache.write(table, key, { data: prom, timestamp: now });
             ramValue = prom;
         }
 

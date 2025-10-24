@@ -1,6 +1,6 @@
 import { expect, test } from "@odoo/hoot";
 import { tick } from "@odoo/hoot-dom";
-import { Deferred, microTick } from "@odoo/hoot-mock";
+import { Deferred, microTick, advanceTime, freezeTime } from "@odoo/hoot-mock";
 import { RPCCache } from "@web/core/network/rpc_cache";
 
 const symbol = Symbol("Promise");
@@ -38,6 +38,8 @@ test("RamCache: ram is set with promises", async () => {
         "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
     );
 
+    freezeTime();
+    const timestamp = Date.now();
     // If two identical calls are made in succession, only one fallback will be made.
     // The second call will get the result of the first call (or a promise if the first call is not yet finish).
     const promFirst = rpcCache.read("table", "key", () => def);
@@ -45,7 +47,9 @@ test("RamCache: ram is set with promises", async () => {
 
     // Only one record in cache
     expect(Object.keys(rpcCache.ramCache.ram.table).length).toBe(1);
-    let promInRamCache = rpcCache.ramCache.ram.table.key;
+    // Timestamp is set in cache entry
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
+    let promInRamCache = rpcCache.ramCache.ram.table.key.data;
 
     // Note that proms, promisea and promiseb are the same promise.
     expect(await promiseState(promInRamCache)).toEqual({ status: "pending" });
@@ -55,8 +59,9 @@ test("RamCache: ram is set with promises", async () => {
     def.resolve({ test: 123 });
     await microTick();
 
-    // The cache is updated when the fetch is back
-    promInRamCache = rpcCache.ramCache.ram.table.key;
+    // The cache is updated when the fetch is back with same timestamp
+    promInRamCache = rpcCache.ramCache.ram.table.key.data;
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
     expect(await promInRamCache).toEqual({ test: 123 });
     expect(await promFirst).toEqual({ test: 123 });
     expect(await promsSecond).toEqual({ test: 123 });
@@ -69,6 +74,8 @@ test("PersistentCache: can cache a simple call", async () => {
         "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
     );
 
+    freezeTime();
+    const timestamp = Date.now();
     expect(
         await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }), {
             type: "disk",
@@ -79,13 +86,17 @@ test("PersistentCache: can cache a simple call", async () => {
     // Both caches are correctly updated with the fetch values
     await microTick();
     await microTick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         'encrypted data:{"test":123}'
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    // timestamp is set in disk entry
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.timestamp).toBe(timestamp);
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
+    // same timestamp is set in ram entry
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
 
     // simulate a reload (clear ramCache)
     rpcCache.ramCache.invalidate();
@@ -93,6 +104,8 @@ test("PersistentCache: can cache a simple call", async () => {
     const def = new Deferred();
 
     // we return the disk cache value.
+    await advanceTime(500);
+    const new_timestamp = timestamp + 500;
     expect(
         await rpcCache.read(
             "table",
@@ -111,14 +124,16 @@ test("PersistentCache: can cache a simple call", async () => {
     await microTick();
     await microTick();
     await microTick();
-    // Both caches are updated with the last value
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    // Both caches are updated with the last value and timestamps updated
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         'encrypted data:{"test":456}'
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.timestamp).toBe(new_timestamp);
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 456 },
     });
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(new_timestamp);
 });
 
 test("invalidate table", async () => {
@@ -127,6 +142,8 @@ test("invalidate table", async () => {
         1,
         "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
     );
+    freezeTime();
+    const timestamp = Date.now();
 
     expect(
         await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }), {
@@ -136,16 +153,18 @@ test("invalidate table", async () => {
         test: 123,
     });
 
-    // Both caches are correctly updated with the fetch values
+    // Both caches are correctly updated with the fetch values and timestamp
     await microTick();
     await microTick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         'encrypted data:{"test":123}'
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.timestamp).toBe(timestamp);
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
 
     //invalidate the table
     rpcCache.invalidate("table");
@@ -181,17 +200,17 @@ test("invalidate multiple tables", async () => {
     // Both caches are correctly updated with the fetch values
     await microTick();
     await microTick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         'encrypted data:{"test":123}'
     );
-    expect(rpcCache.indexedDB.mockIndexedDB.table2.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table2.key.data.ciphertext).toBe(
         'encrypted data:{"test":456}'
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
-    expect(await promiseState(rpcCache.ramCache.ram.table2.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table2.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 456 },
     });
@@ -224,10 +243,10 @@ test("IndexedDB Crypt: can cache a simple call", async () => {
     // Both caches are correctly updated with the fetch values
     await microTick();
     await microTick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         'encrypted data:{"test":123}'
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -265,7 +284,7 @@ test("update callback - Ram Value", async () => {
     expect(await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }))).toEqual({
         test: 123,
     });
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -296,7 +315,7 @@ test("update callback - Ram Value", async () => {
     def.resolve({ test: 456 });
     await microTick();
     expect.verifySteps(["Callback"]);
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 456 },
     });
@@ -319,10 +338,10 @@ test("update callback - Disk Value", async () => {
     // Both caches are correctly updated with the fetch values
     await microTick();
     await microTick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         `encrypted data:{"test":123}`
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -359,10 +378,10 @@ test("update callback - Disk Value", async () => {
     await microTick();
     expect.verifySteps(["Callback"]);
     // Both caches are updated with the last value
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         `encrypted data:{"test":456}`
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 456 },
     });
@@ -380,7 +399,7 @@ test("Ram value shouldn't change (update the rpc response)", async () => {
     expect(res).toEqual({
         test: 123,
     });
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -388,7 +407,7 @@ test("Ram value shouldn't change (update the rpc response)", async () => {
     expect(res).toEqual({ test: 123 });
     res.plop = true;
 
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -406,7 +425,7 @@ test("Ram value shouldn't change (update the Ram response)", async () => {
     expect(res).toEqual({
         test: 123,
     });
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -418,7 +437,7 @@ test("Ram value shouldn't change (update the Ram response)", async () => {
     expect(res).toEqual({ test: 123 });
     res.plop = true;
 
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -441,10 +460,10 @@ test("Ram value shouldn't change (update the IndexedDB response)", async () => {
     // Both caches are correctly updated with the fetch values
     await microTick();
     await microTick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         `encrypted data:{"test":123}`
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -460,7 +479,7 @@ test("Ram value shouldn't change (update the IndexedDB response)", async () => {
     expect(res).toEqual({ test: 123 });
     res.plop = true;
 
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -479,7 +498,7 @@ test("Changing the result shouldn't force the call to callback with hasChanged (
     expect(res).toEqual({
         test: 123,
     });
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -526,10 +545,10 @@ test("Changing the result shouldn't force the call to callback with hasChanged (
     // Both caches are correctly updated with the fetch values
     await microTick();
     await microTick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         `encrypted data:{"test":123}`
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -671,10 +690,10 @@ test("DiskCache: multiple consecutive calls, value already in disk cache", async
         type: "disk",
     });
     await tick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         `encrypted data:{"test":123}`
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -742,10 +761,10 @@ test("DiskCache: multiple consecutive calls, fallback fails", async () => {
         type: "disk",
     });
     await tick();
-    expect(rpcCache.indexedDB.mockIndexedDB.table.key.ciphertext).toBe(
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
         `encrypted data:{"test":123}`
     );
-    expect(await promiseState(rpcCache.ramCache.ram.table.key)).toEqual({
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
         status: "fulfilled",
         value: { test: 123 },
     });
@@ -838,4 +857,170 @@ test("DiskCache: multiple consecutive calls, empty cache, fallback fails", async
         "error call 2: my RPCError",
         "error call 3: my RPCError",
     ]);
+});
+
+test("RamCache: entry not expired, fallback not executed, data returned", async () => {
+    const rpcCache = new RPCCache(
+        "mockRpc",
+        1,
+        "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
+    );
+
+    freezeTime();
+    const maxAge = 60 * 60 * 1000; // 60 minutes
+    const timestamp = Date.now();
+
+    // fill the ramcache
+    expect(
+        await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }), {
+            maxAge,
+        })
+    ).toEqual({
+        test: 123,
+    });
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
+        status: "fulfilled",
+        value: { test: 123 },
+    });
+
+    await advanceTime(30 * 60 * 1000); // 30 minutes
+
+    expect(
+        await rpcCache.read("table", "key",
+            () => {
+                expect.step("Fallback Shouldn't be called");
+                Promise.resolve();
+            },
+            {
+                maxAge,
+            }
+        )
+    ).toEqual({ test: 123 });
+    expect.verifySteps([]);
+    // timestamp doesn't change
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
+
+});
+
+test("RamCache: entry expired, fallback executed, cache refilled with new timestamp", async () => {
+    const rpcCache = new RPCCache(
+            "mockRpc",
+            1,
+            "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
+        );
+
+    freezeTime();
+    const maxAge = 60 * 60 * 1000; // 60 minutes
+    const timestamp = Date.now();
+    // fill the ramcache
+    expect(
+        await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }), {
+            maxAge,
+        })
+    ).toEqual({
+        test: 123,
+    });
+    await microTick();
+
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
+        status: "fulfilled",
+        value: { test: 123 },
+    });
+
+    await advanceTime(maxAge + 10);
+
+    const new_timestamp = Date.now();
+    const def = new Deferred();
+    const res = rpcCache.read("table", "key",
+        () => {
+            expect.step("Fallback");
+            return def;
+        },
+        { maxAge }
+    );
+    await microTick();
+
+    expect(await promiseState(res)).toEqual({ status: "pending" });
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({ status: "pending" });
+    expect.verifySteps(["Fallback"]);
+
+    def.resolve({ test: 456 });
+    await microTick();
+
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
+        status: "fulfilled",
+        value: { test: 456 },
+    });
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(new_timestamp);
+});
+
+test("PersistanceCache: entry expired, fallback executed, cache refilled with new timestamps", async () => {
+    const rpcCache = new RPCCache(
+            "mockRpc",
+            1,
+            "85472d41873cdb504b7c7dfecdb8993d90db142c4c03e6d94c4ae37a7771dc5b"
+        );
+
+    freezeTime();
+    const maxAge = 60 * 60 * 1000; // 60 minutes
+    const timestamp = Date.now();
+
+    // fill the cache
+    expect(
+        await rpcCache.read("table", "key", () => Promise.resolve({ test: 123 }), {
+            maxAge,
+            type: 'disk',
+        })
+    ).toEqual({
+        test: 123,
+    });
+    await microTick();
+    await microTick();
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
+        'encrypted data:{"test":123}'
+    );
+    // timestamp is set in disk entry and ram entry
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.timestamp).toBe(timestamp);
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
+        status: "fulfilled",
+        value: { test: 123 },
+    });
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(timestamp);
+
+    await advanceTime(maxAge + 10);
+    const new_timestamp = Date.now();
+    const def = new Deferred();
+    const res = rpcCache.read("table", "key",
+        () => {
+            expect.step("Fallback");
+            return def;
+        },
+        { 
+            maxAge,
+            type: "disk",
+        }
+    );
+    await microTick();
+    // Old entry still in Disk but not returned
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.timestamp).toBe(timestamp);
+    expect(await promiseState(res)).toEqual({ status: "pending" });
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({ status: "pending" });
+    expect.verifySteps(["Fallback"]);
+
+    def.resolve({ test: 456 });
+    await microTick();
+    await microTick();
+    // Disk and Ram entries updated with new value and new timestamp
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.data.ciphertext).toBe(
+        'encrypted data:{"test":456}'
+    );
+    // timestamp is set in disk entry and ram entry
+    expect(rpcCache.indexedDB.mockIndexedDB.table.key.timestamp).toBe(new_timestamp);
+    expect(await promiseState(rpcCache.ramCache.ram.table.key.data)).toEqual({
+        status: "fulfilled",
+        value: { test: 456 },
+    });
+    expect(rpcCache.ramCache.ram.table.key.timestamp).toBe(new_timestamp);
 });
