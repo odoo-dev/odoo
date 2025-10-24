@@ -41,6 +41,7 @@ const StorePatch = {
             eager: true,
         });
         this.meetingViewOpened = false;
+        this.rtcSessionAwaitedRecords = new Map();
     },
     _hasFullscreenUrlOnUpdate() {
         router.pushState({
