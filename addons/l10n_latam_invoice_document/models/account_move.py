@@ -66,7 +66,7 @@ class AccountMove(models.Model):
     l10n_latam_document_type_id_code = fields.Char(related='l10n_latam_document_type_id.code', string='Doc Type')
 
     @api.depends('l10n_latam_document_type_id')
-    def _compute_name(self):
+    def _compute_name(self):  # TODO JOV what
         """ Change the way that the use_document moves name is computed:
 
         * If move use document but does not have document type selected then name = 'False' to do not show the name.
@@ -103,7 +103,7 @@ class AccountMove(models.Model):
 
     def _compute_l10n_latam_use_documents(self):
         for rec in self:
-            rec.l10n_latam_use_documents = rec.journal_id.l10n_latam_use_documents and rec.move_type != 'in_receipt'
+            rec.l10n_latam_use_documents = rec.journal_id.l10n_latam_use_documents and rec.move_type != 'in_receipt'  # TODO JOV: specifically in_receipt...
 
     @api.depends('name')
     def _compute_l10n_latam_document_number(self):
