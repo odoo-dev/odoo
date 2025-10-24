@@ -1,5 +1,7 @@
 import { toRaw } from "@odoo/owl";
 import { ATTR_SYM, MANY_SYM, ONE_SYM } from "./misc";
+import { parseVersion } from "@mail/utils/common/misc";
+import { getCurrentLocalStorageVersion } from "@mail/utils/common/local_storage";
 
 export class ModelInternal {
     /** @type {Map<string, boolean>} */
@@ -75,12 +77,13 @@ export class ModelInternal {
                 function fieldLocalStorageCompute() {
                     const record = toRaw(this)._raw;
                     const lse = record._.fieldsLocalStorage.get(fieldName);
-                    const value = lse.get();
-                    if (value === undefined) {
+                    const parsed = lse.parse();
+                    const currentOdooVersion = getCurrentLocalStorageVersion();
+                    if (!parsed || parseVersion(currentOdooVersion).isLowerThan(parsed.version)) {
                         lse.remove();
                         return this[fieldName];
                     }
-                    return value;
+                    return parsed.value;
                 }
             );
 

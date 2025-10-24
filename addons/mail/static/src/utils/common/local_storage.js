@@ -26,32 +26,28 @@ export class LocalStorageEntry {
         this.key = key;
     }
     get() {
-        const rawValue = this.rawGet();
-        if (rawValue === null) {
-            return undefined;
-        }
-        return parseRawValue(rawValue)?.value;
-    }
-    set(value) {
-        const oldValue = this.get();
-        if (oldValue !== undefined && oldValue === value) {
-            return;
-        }
-        browser.localStorage.setItem(this.key, toRawValue(value));
-    }
-    rawGet() {
         return browser.localStorage.getItem(this.key);
     }
+    parse() {
+        return parseRawValue(this.get());
+    }
+    set(value, version = getCurrentLocalStorageVersion()) {
+        const parsed = this.parse();
+        if (parsed && parsed.value === value && parsed.version === version) {
+            return;
+        }
+        browser.localStorage.setItem(this.key, toRawValue(value, version));
+    }
     remove() {
-        if (this.rawGet() === null) {
+        if (this.get() === null) {
             return;
         }
         browser.localStorage.removeItem(this.key);
     }
 }
 
-export function toRawValue(value) {
-    return JSON.stringify({ value });
+export function toRawValue(value, version = getCurrentLocalStorageVersion()) {
+    return JSON.stringify({ value, version });
 }
 
 /**

@@ -6,7 +6,7 @@ import { RecordInternal } from "./record_internal";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 import { IS_DELETED_SYM, isCommand, isMany } from "./misc";
 import { browser } from "@web/core/browser/browser";
-import { parseRawValue } from "@mail/utils/common/local_storage";
+import { getCurrentLocalStorageVersion, parseRawValue } from "@mail/utils/common/local_storage";
 
 const Markup = markup().constructor;
 
@@ -55,7 +55,7 @@ export class StoreInternal extends RecordInternal {
                 record._proxy[fieldName] = record._.fieldsDefault.get(fieldName);
             } else {
                 const parsed = parseRawValue(ev.newValue);
-                if (!parsed) {
+                if (!parsed || parsed.version !== getCurrentLocalStorageVersion()) {
                     record._proxy[fieldName] = record._.fieldsDefault.get(fieldName);
                 } else {
                     record._proxy[fieldName] = parsed.value;

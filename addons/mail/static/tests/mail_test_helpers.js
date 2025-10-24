@@ -785,7 +785,7 @@ export function setDiscussSidebarCategoryFoldState(categoryId, val) {
 export function isDiscussSidebarCategoryFolded(categoryId) {
     const localId = DiscussAppCategory.localId(categoryId);
     const lse = new LocalStorageEntry(makeRecordFieldLocalId(localId, "is_open"));
-    return !(lse.get() ?? true);
+    return !(lse.parse()?.value ?? true);
 }
 
 export function assertChatHub({ opened = [], folded = [] }) {
