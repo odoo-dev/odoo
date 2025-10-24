@@ -654,20 +654,24 @@ class MrpWorkorder(models.Model):
     def button_finish(self):
         date_finished = fields.Datetime.now()
         all_vals_dict = defaultdict(lambda: self.env['mrp.workorder'])
+        workorders_to_end = self.env['mrp.workorder']
+        moves = self.move_raw_ids + self.production_id.move_byproduct_ids.filtered(lambda m: (m.operation_id == self.operation_id))
         for workorder in self:
             if workorder.state in ('done', 'cancel'):
                 continue
-            moves = (self.move_raw_ids + self.production_id.move_byproduct_ids.filtered(lambda m: m.operation_id == self.operation_id))
-            for move in moves:
-                if not move.picked:
-                    if float_is_zero(workorder.production_id.qty_producing, precision_rounding=workorder.production_id.product_uom_id.rounding):
-                        qty_available = workorder.production_id.product_qty
-                    else:
-                        qty_available = workorder.production_id.qty_producing
-                    new_qty = float_round(qty_available * move.unit_factor, precision_rounding=move.product_uom.rounding)
-                    move._set_quantity_done(new_qty)
-            moves.picked = True
-            workorder.end_all()
+            moves_unpicked = moves.filtered(lambda move: not move.picked)
+            for move in moves_unpicked:
+                if float_is_zero(workorder.production_id.qty_producing, precision_rounding=workorder.production_id.product_uom_id.rounding):
+                    qty_available = workorder.production_id.product_qty
+                else:
+                    qty_available = workorder.production_id.qty_producing
+                new_qty = float_round(qty_available * move.unit_factor, precision_rounding=move.product_uom.rounding)
+                move._set_quantity_done(new_qty)
+            moves_unpicked.picked = True
+            workorders_to_end += workorder
+        workorders_to_end.end_all()
+
+        for workorder in workorders_to_end:
             vals = {
                 'qty_produced': workorder.qty_produced or workorder.qty_producing or workorder.qty_production,
                 'state': 'done',
