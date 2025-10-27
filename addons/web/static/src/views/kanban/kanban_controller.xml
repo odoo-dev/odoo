@@ -69,7 +69,7 @@
                         </t>
                     </CogMenu>
                 </t>
-                <t t-set-slot="layout-actions">
+                <t t-set-slot="control-panel-actions">
                     <SearchBar toggler="searchBarToggler" autofocus="firstLoad"/>
                 </t>
                 <t t-set-slot="control-panel-navigation-additional">

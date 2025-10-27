@@ -23,7 +23,7 @@
                         </t>
                     </t>
 
-                    <t t-set-slot="layout-actions">
+                    <t t-set-slot="control-panel-actions">
                         <t t-if="!env.isSmall and buttonBoxTemplate">
                             <t t-call="{{ buttonBoxTemplate }}" t-call-context="{ __comp__: Object.assign(Object.create(this), { this, props: { ...this.props, record: this.model.root } }) }"/>
                         </t>

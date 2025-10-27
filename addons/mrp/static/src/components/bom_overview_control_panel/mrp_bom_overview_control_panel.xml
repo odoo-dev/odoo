@@ -12,7 +12,7 @@
                 </t> -->
                 <button t-if="props.foldable" t-on-click="clickTogglefold" type="button" class="btn btn-secondary" t-esc="foldButtonText"/>
             </t>
-            <t t-set-slot="layout-actions">
+            <t t-set-slot="control-panel-actions">
                 <div t-if="props.showVariants" class="input-group align-items-center">
                     <div class="col-4 col-md-auto pe-2 fw-bold">Variant</div>
                     <div class="col">
