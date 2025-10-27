@@ -12,6 +12,7 @@ def test_isolated_install(env):
     other modules.  In particular, the module that was installed just before is
     correctly marked as 'installed'.
     """
+    raise AssertionError()
     MODULE_NAMES = ['test_install_base', 'test_install_auto', 'test_install_fail']
     modules = {
         module.name: module
