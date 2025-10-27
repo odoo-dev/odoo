@@ -759,7 +759,7 @@ class SaleOrderLine(models.Model):
             + self.product_id._get_no_variant_attributes_price_extra(
                 self.product_no_variant_attribute_value_ids
             )
-        )
+        ) if combo_prices.get(self.combo_item_id.combo_id) else 0
 
     @api.depends('product_id', 'product_uom_id', 'product_uom_qty')
     def _compute_discount(self):
@@ -1301,8 +1301,16 @@ class SaleOrderLine(models.Model):
                     _('It is forbidden to modify the following fields in a locked order:\n%s',
                       '\n'.join(fields.mapped('field_description')))
                 )
+        res = super().write(values)
+        rm_combo_product_lines = self.filtered(
+            lambda r: r.product_type != 'combo'
+            and r.combo_item_id
+            and r.combo_item_id.combo_id not in r._get_linked_line().product_template_id.sudo().combo_ids
+        )
+        if not self.env.context.get('skip_combo_qty_check') and rm_combo_product_lines:
+            rm_combo_product_lines.with_context(skip_combo_qty_check=True).write({'product_uom_qty': 0})
 
-        return super().write(values)
+        return res
 
     def _get_protected_fields(self):
         """ Give the fields that should not be modified on a locked SO.
