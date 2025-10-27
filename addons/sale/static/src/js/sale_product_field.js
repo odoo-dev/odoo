@@ -57,10 +57,6 @@ async function applyProduct(record, product) {
 
 export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
     static template = "sale.SaleProductField";
-    static props = {
-        ...super.props,
-        readonlyField: { type: Boolean, optional: true },
-    };
 
     setup() {
         super.setup();
@@ -106,7 +102,12 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         // product form should be accessible if the widget field is readonly
         // or if the line cannot be edited (e.g. locked SO)
         return (
-            this.props.readonlyField ||
+            this.props.record._isReadonly(this.props.name)
+            // TODO request access to the parent field inside record
+            // we already have _parentRecord, but no knowledge of which
+            // field is the one we should look for if we wanna evaluate
+            // whether it's readonly
+            ||
             (this.props.record.model.root.activeFields.order_line &&
                 this.props.record.model.root._isReadonly("order_line"))
         );
@@ -170,7 +171,6 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         }
         return {
             ...p,
-            canOpen: this.props.canOpen || !this.props.readonly || this.isProductClickable,
             update: (value) => {
                 this.isInternalUpdate = true;
                 this.wasCombo = this.isCombo;
@@ -442,12 +442,6 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
 export const saleOrderLineProductField = {
     ...productLabelSectionAndNoteField,
     component: SaleOrderLineProductField,
-    extractProps(fieldInfo, dynamicInfo) {
-        return {
-            ...productLabelSectionAndNoteField.extractProps(fieldInfo, dynamicInfo),
-            readonlyField: dynamicInfo.readonly,
-        };
-    },
     fieldDependencies: [
         { name: 'is_configurable_product', type: 'boolean' },
         { name: 'product_type', type: 'selection' },
