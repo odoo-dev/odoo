@@ -3,7 +3,7 @@
 
     <t t-name="mrp.BomOverviewControlPanel">
         <ControlPanel display="controlPanelDisplay">
-            <t t-set-slot="layout-buttons">
+            <t t-set-slot="control-panel-buttons">
                 <button t-if="props.showOptions.mode == 'forecast'" t-on-click="manufactureFromBoM" type="button" class="btn btn-primary">Manufacture</button>
                 <button t-on-click="() => this.props.print()" type="button" class="btn btn-secondary">Print</button>
                 <!-- <t t-if="props.showVariants"> commented, waiting for ui update

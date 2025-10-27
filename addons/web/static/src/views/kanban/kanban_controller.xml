@@ -4,7 +4,7 @@
     <t t-name="web.KanbanView">
         <div t-attf-class="{{ className }} {{ hasSelectedRecords ? 'o_kanban_selection_active' : 'o_kanban_selection_available' }}" t-ref="root">
             <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
-                <t t-if="props.showButtons" t-set-slot="layout-buttons">
+                <t t-if="props.showButtons" t-set-slot="control-panel-buttons">
                     <button t-if="canCreate" type="button" t-att-disabled="isNewButtonDisabled" class="btn btn-primary o-kanban-button-new" accesskey="c" t-on-click="() => this.createRecord()" data-bounce-button="">
                         New
                     </button>

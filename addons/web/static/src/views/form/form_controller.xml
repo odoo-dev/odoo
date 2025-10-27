@@ -5,7 +5,7 @@
         <div t-att-class="className" t-ref="root">
             <div class="o_form_view_container">
                 <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="display">
-                    <t t-set-slot="layout-buttons">
+                    <t t-set-slot="control-panel-buttons">
                         <t t-if="env.inDialog">
                             <t t-if="footerArchInfo">
                                 <t t-component="props.Renderer" record="model.root" Compiler="props.Compiler" archInfo="footerArchInfo">

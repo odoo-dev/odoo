@@ -5,7 +5,7 @@
     <t t-name="product.ProductPricelistReport">
         <div class="o_action">
             <Layout display="{ controlPanel: {} }">
-                <t t-set-slot="layout-buttons">
+                <t t-set-slot="control-panel-buttons">
                     <button t-on-click="onClickPrint" type="button" class="btn btn-primary" title="Print">Print</button>
                     <select name="formats" id="formats" class="form-select border-1 w-auto">
                         <option value="pdf">pdf</option>
