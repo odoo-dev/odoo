@@ -110,7 +110,9 @@ class ProductTemplateAttributeLine(models.Model):
             else:
                 create_values.append(value)
         res = activated_lines + super().create(create_values)
-        if self.env.context.get("create_product_product", True):
+
+        default = self.env['ir.config_parameter'].sudo().get_bool('product.create_product_product', True)
+        if self.env.context.get("create_product_product", default):
             res._update_product_template_attribute_values()
         return res
 
@@ -153,7 +155,8 @@ class ProductTemplateAttributeLine(models.Model):
             self.env['product.template'].invalidate_model(['attribute_line_ids'])
         # If coming from `create`, no need to update the values and the variants
         # before all lines are created.
-        if self.env.context.get('update_product_template_attribute_values', True):
+        default = self.env['ir.config_parameter'].sudo().get_bool('product.update_product_template_attribute_values', True)
+        if self.env.context.get('update_product_template_attribute_values', default):
             self._update_product_template_attribute_values()
         return res
 

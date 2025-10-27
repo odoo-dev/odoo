@@ -105,10 +105,6 @@ class ProductProduct(models.Model):
     can_image_1024_be_zoomed = fields.Boolean("Can Image 1024 be zoomed", compute='_compute_can_image_1024_be_zoomed')
     write_date = fields.Datetime(compute='_compute_write_date', store=True)
 
-    # Ensure there is at most one active variant for each combination.
-    # There could be no variant for a combination if using dynamic attributes.
-    _combination_unique = models.UniqueIndex("(product_tmpl_id, combination_indices) WHERE active IS TRUE")
-
     is_favorite = fields.Boolean(related='product_tmpl_id.is_favorite', readonly=False, store=True)
     _is_favorite_index = models.Index("(is_favorite) WHERE is_favorite IS TRUE")
     is_in_selected_section_of_order = fields.Boolean(search='_search_is_in_selected_section_of_order')
