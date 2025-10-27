@@ -7,11 +7,9 @@
                 <MoOverviewDisplayFilter showOptions="state.showOptions" limited="isProductionDone" changeDisplay.bind="onChangeDisplay" isProductionDraft="isProductionDraft"/>
             </t>
 
-            <t t-set-slot="control-panel-create-button">
-                <div class="d-flex gap-1">
-                    <button class="btn btn-primary" t-on-click="onPrint">Print</button>
-                    <button class="btn btn-primary" t-on-click="onUnfold">Unfold</button>
-                </div>
+            <t t-set-slot="layout-buttons">
+                <button class="btn btn-primary" t-on-click="onPrint">Print</button>
+                <button class="btn btn-primary" t-on-click="onUnfold">Unfold</button>
             </t>
 
             <div class="overflow-auto border-bottom bg-view container-fluid">

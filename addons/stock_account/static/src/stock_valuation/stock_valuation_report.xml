@@ -4,7 +4,7 @@
         <div class="o_action account_report">
             <ControlPanel>
                 <!-- Buttons bar -->
-                <t t-set-slot="control-panel-create-button">
+                <t t-set-slot="layout-buttons">
                     <StockValuationReportButtonsBar/>
                 </t>
                 <!-- <t t-set-slot="control-panel-additional-actions">

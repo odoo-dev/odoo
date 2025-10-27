@@ -3,7 +3,7 @@
 
     <t t-name="mrp.BomOverviewControlPanel">
         <ControlPanel display="controlPanelDisplay">
-            <t t-set-slot="control-panel-create-button">
+            <t t-set-slot="layout-buttons">
                 <button t-if="props.showOptions.mode == 'forecast'" t-on-click="manufactureFromBoM" type="button" class="btn btn-primary">Manufacture</button>
             </t>
             <t t-set-slot="control-panel-always-buttons">
