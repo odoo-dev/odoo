@@ -30,6 +30,13 @@ export class HWPrinter extends BasePrinter {
     /**
      * @override
      */
+    async ping() {
+        return true;
+    }
+
+    /**
+     * @override
+     */
     sendPrintingJob(img) {
         return this.sendAction({ action: "print_receipt", receipt: img });
     }

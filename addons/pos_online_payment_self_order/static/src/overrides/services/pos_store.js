@@ -33,12 +33,25 @@ patch(PosStore.prototype, {
 
     async printSelfOrderReceipt(orderId) {
         try {
-            const result = await this.data.callRelated("pos.order", "get_order_to_print", [
-                orderId,
-            ]);
-            const order = result["pos.order"][0];
-            await this.sendOrderInPreparation(order, { bypassPdis: true });
-            await this.printReceipt({ order });
+            let canPingPrepPrinters = [];
+            const hasPrepPrinter = this.unwatched.printers;
+            if (hasPrepPrinter) {
+                canPingPrepPrinters = await Promise.all(
+                    this.unwatched.printers.map((printer) => printer.ping())
+                );
+            }
+
+            if (!hasPrepPrinter || canPingPrepPrinters.some((ping) => ping === true)) {
+                const result = await this.data.callRelated("pos.order", "get_order_to_print", [
+                    orderId,
+                ]);
+                const order = result["pos.order"][0];
+                await this.sendOrderInPreparation(order, { bypassPdis: true });
+                const res = await this.printReceipt({ order });
+                if (!res) {
+                    //TODO-manv: nb_print -1
+                }
+            }
         } catch {
             logPosMessage(
                 "Store",

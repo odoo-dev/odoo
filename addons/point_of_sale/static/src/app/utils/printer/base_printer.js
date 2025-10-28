@@ -53,6 +53,10 @@ export class BasePrinter {
         throw new Error("Not implemented");
     }
 
+    async ping() {
+        throw new Error("Not implemented");
+    }
+
     openCashbox() {
         throw new Error("Not implemented");
     }

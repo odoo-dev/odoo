@@ -58,6 +58,20 @@ export class EpsonPrinter extends BasePrinter {
     /**
      * @override
      */
+    async ping() {
+        try {
+            const res = await fetch(this.address, {
+                method: "POST",
+            });
+            return res.ok;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * @override
+     */
     async sendPrintingJob(img) {
         try {
             const res = await fetch(this.address, {
