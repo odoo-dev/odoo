@@ -323,6 +323,8 @@ class StockWarehouseOrderpoint(models.Model):
     def _prepare_procurement_values(self, date=False):
         values = super()._prepare_procurement_values(date=date)
         values['supplierinfo_id'] = self.supplier_id
+        if self.replenishment_uom_id:
+            values['force_uom'] = True
         return values
 
     def _get_replenishment_multiple_alternative(self, qty_to_order):
