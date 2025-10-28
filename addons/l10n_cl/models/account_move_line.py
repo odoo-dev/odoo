@@ -59,8 +59,8 @@ class AccountMoveLine(models.Model):
             }
         line_sign = self.price_subtotal / abs(self.price_subtotal) if self.price_subtotal else 0
         domestic_invoice_other_currency = self.move_id.currency_id != self.move_id.company_id.currency_id and not \
-            self.move_id.l10n_latam_document_type_id._is_doc_type_export()
-        export = self.move_id.l10n_latam_document_type_id._is_doc_type_export()
+            self.move_id.l10n_cl_document_type_id._is_doc_type_export()
+        export = self.move_id.l10n_cl_document_type_id._is_doc_type_export()
         if not export:
             # This is to manage case 1, 2, 3 and 4
             # cases 1 and 2: domestic invoice in same currency and cases 3 and 4 with other currency
@@ -81,7 +81,7 @@ class AccountMoveLine(models.Model):
         price_subtotal = abs(self[main_currency_field]) * line_sign
         if self.quantity and self.discount != 100.0:
             price_unit = (price_subtotal / abs(self.quantity)) / (1 - self.discount / 100)
-            if self.move_id.l10n_latam_document_type_id._is_doc_type_electronic_ticket():
+            if self.move_id.l10n_cl_document_type_id._is_doc_type_electronic_ticket():
                 price_item_document = (self.price_total / abs(self.quantity)) / (1 - self.discount / 100)
                 price_line_document = self.price_total
             else:
@@ -127,5 +127,5 @@ class AccountMoveLine(models.Model):
             values['second_currency']['currency_name'],
             float_repr(values['second_currency']['price'], values['second_currency']['round_currency']),
             self.move_id._float_repr_float_round(values['second_currency']['conversion_rate'], values['second_currency']['round_currency']),
-        ) if values.get('second_currency') and not self.l10n_latam_document_type_id._is_doc_type_export() else self.name
+        ) if values.get('second_currency') and not self.move_id.l10n_cl_document_type_id._is_doc_type_export() else self.name
         return values
