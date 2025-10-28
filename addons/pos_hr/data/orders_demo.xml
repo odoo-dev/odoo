@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- additional demo data from past months for pretty graphs in Point of Sale dashboard -->
+    <data noupdate="1">
+
+        <!-- Last Month Closed Session 1 -->
+        <record id="pos_hr_session_1" model="pos.session">
+            <field name="name">FurnitureShopPastMonthsSession/0001</field>
+            <field name="config_id" ref="point_of_sale.pos_config_main"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="start_at" eval="(DateTime.today() + relativedelta(months=-1, days=-3, hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="stop_at" eval="(DateTime.today() + relativedelta(months=-1, days=-3, hours=12)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <!-- Order 1 -->
+        <record id="pos_hr_order_1_1" model="pos.order">
+            <field name="session_id" ref="pos_hr_session_1"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="state">paid</field>
+            <field name="amount_total">2.48</field>
+            <field name="amount_paid">2.48</field>
+            <field name="amount_return">0.0</field>
+            <field name="amount_tax">0.0</field>
+            <field name="date_order" eval="(DateTime.today() + relativedelta(months=-1, days=-3, hours=10)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <record id="pos_hr_orderline_1_1_1" model="pos.order.line">
+            <field name="product_id" ref="point_of_sale.newspaper_rack"/>
+            <field name="price_unit">1.28</field>
+            <field name="price_subtotal">1.28</field>
+            <field name="price_subtotal_incl">1.28</field>
+            <field name="order_id" ref="pos_hr_order_1_1"/>
+            <field name="full_product_name">Newspaper Rack</field>
+        </record>
+
+        <record id="pos_hr_orderline_1_1_2" model="pos.order.line">
+            <field name="product_id" ref="point_of_sale.whiteboard_pen"/>
+            <field name="price_unit">1.20</field>
+            <field name="price_subtotal">1.20</field>
+            <field name="price_subtotal_incl">1.20</field>
+            <field name="order_id" ref="pos_hr_order_1_1"/>
+            <field name="full_product_name">Whiteboard Pen</field>
+        </record>
+
+        <record id="pos_hr_payment_1" model="pos.payment">
+            <field name="payment_method_id" ref="point_of_sale.cash_payment_method_furniture"/>
+            <field name="pos_order_id" ref="pos_hr_order_1_1"/>
+            <field name="amount">2.48</field>
+        </record>
+
+        <!-- Order 2 -->
+        <record id="pos_hr_order_1_2" model="pos.order">
+            <field name="session_id" ref="pos_hr_session_1"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="state">paid</field>
+            <field name="amount_total">7.28</field>
+            <field name="amount_paid">7.28</field>
+            <field name="amount_return">0.0</field>
+            <field name="amount_tax">0.0</field>
+            <field name="date_order" eval="(DateTime.today() + relativedelta(months=-1, days=-3, hours=11)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <record id="pos_hr_orderline_1_2_1" model="pos.order.line">
+            <field name="product_id" ref="point_of_sale.led_lamp"/>
+            <field name="price_unit">0.90</field>
+            <field name="price_subtotal">0.90</field>
+            <field name="price_subtotal_incl">0.90</field>
+            <field name="order_id" ref="pos_hr_order_1_2"/>
+            <field name="full_product_name">LED Lamp</field>
+        </record>
+
+        <record id="pos_hr_orderline_1_2_2" model="pos.order.line">
+            <field name="product_id" ref="point_of_sale.letter_tray"/>
+            <field name="price_unit">6.38</field>
+            <field name="price_subtotal">6.38</field>
+            <field name="price_subtotal_incl">6.38</field>
+            <field name="order_id" ref="pos_hr_order_1_2"/>
+            <field name="full_product_name">Letter Tray</field>
+        </record>
+
+        <record id="pos_hr_payment_2" model="pos.payment">
+            <field name="payment_method_id" ref="point_of_sale.cash_payment_method_furniture"/>
+            <field name="pos_order_id" ref="pos_hr_order_1_2"/>
+            <field name="amount">7.28</field>
+        </record>
+
+        <function model="pos.session" name="post_closing_cash_details"
+            eval="[[ref('pos_hr_session_1')], 2100.00]"/>
+        <function model="pos.session" name="update_closing_control_state_session"
+            eval="[[ref('pos_hr_session_1')], '']"/>
+        <function model="pos.session" name="action_pos_session_closing_control"
+            eval="[[ref('pos_hr_session_1')]]"/>
+
+        <!-- Previous to Last Month Closed Session 1 -->
+
+        <record id="pos_hr_session_2" model="pos.session">
+            <field name="name">FurnitureShopPastMonthsSession/0002</field>
+            <field name="config_id" ref="point_of_sale.pos_config_main"/>
+            <field name="user_id" ref="base.user_admin"/>
+            <field name="start_at" eval="(DateTime.today() + relativedelta(months=-2, days=-3, hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="stop_at" eval="(DateTime.today() + relativedelta(months=-2, days=-3, hours=12)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <!-- Order 1 -->
+        <record id="pos_hr_order_2_1" model="pos.order">
+            <field name="session_id" ref="pos_hr_session_2"/>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="state">paid</field>
+            <field name="amount_total">8.70</field>
+            <field name="amount_paid">8.70</field>
+            <field name="amount_return">0.0</field>
+            <field name="amount_tax">0.0</field>
+            <field name="date_order" eval="(DateTime.today() + relativedelta(months=-2, days=-3, hours=10)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        </record>
+
+        <record id="pos_hr_orderline_2_1_1" model="pos.order.line">
+            <field name="product_id" ref="point_of_sale.whiteboard"/>
+            <field name="price_unit">1.70</field>
+            <field name="price_subtotal">1.70</field>
+            <field name="price_subtotal_incl">1.70</field>
+            <field name="order_id" ref="pos_hr_order_2_1"/>
+            <field name="full_product_name">Whiteboard</field>
+        </record>
+
+        <record id="pos_hr_orderline_2_1_2" model="pos.order.line">
+            <field name="product_id" ref="point_of_sale.small_shelf"/>
+            <field name="price_unit">7.00</field>
+            <field name="price_subtotal">7.00</field>
+            <field name="price_subtotal_incl">7.00</field>
+            <field name="order_id" ref="pos_hr_order_2_1"/>
+            <field name="full_product_name">Small Shelf</field>
+        </record>
+
+        <record id="pos_hr_payment_1" model="pos.payment">
+            <field name="payment_method_id" ref="point_of_sale.cash_payment_method_furniture"/>
+            <field name="pos_order_id" ref="pos_hr_order_2_1"/>
+            <field name="amount">8.70</field>
+        </record>
+
+        <function model="pos.session" name="post_closing_cash_details"
+            eval="[[ref('pos_hr_session_2')], 2100.00]"/>
+        <function model="pos.session" name="update_closing_control_state_session"
+            eval="[[ref('pos_hr_session_2')], '']"/>
+        <function model="pos.session" name="action_pos_session_closing_control"
+            eval="[[ref('pos_hr_session_2')]]"/>
+
+    </data>
+</odoo>

@@ -22,6 +22,9 @@ The actual till still requires one user but an unlimited number of employees can
         'views/res_config_settings_views.xml',
         'wizard/pos_daily_sales_reports.xml',
     ],
+    'demo': [
+        'data/orders_demo.xml'
+    ],
     'installable': True,
     'auto_install': True,
     'assets': {
