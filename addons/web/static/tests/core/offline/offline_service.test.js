@@ -4,7 +4,6 @@ import { rpc } from "@web/core/network/rpc";
 import { advanceTime, animationFrame, expect, test } from "@odoo/hoot";
 import {
     makeMockEnv,
-    mockService,
     mountWithCleanup,
     onRpc,
     patchWithCleanup,
@@ -99,14 +98,6 @@ test("Repeatedly check connection when going offline", async () => {
     patchWithCleanup(Math, {
         random: () => 1, // no jitter
     });
-    mockService("notification", {
-        add(message) {
-            expect.step(`notification add (${message})`);
-            return () => {
-                expect.step(`notification close`);
-            };
-        },
-    });
 
     const values = [false, true]; // simulate the 'back online status' after 2 'version_info' calls
     const mockVersionInfoRpc = () => {
@@ -131,11 +122,5 @@ test("Repeatedly check connection when going offline", async () => {
     expect(env.services.offline.status.offline).toBe(true);
     await advanceTime(3500); // second version_info check
     expect(env.services.offline.status.offline).toBe(false);
-    expect.verifySteps([
-        "notification add (Connection lost)",
-        "version_info",
-        "version_info",
-        "notification close",
-        "notification add (Connection restored)",
-    ]);
+    expect.verifySteps(["version_info", "version_info"]);
 });

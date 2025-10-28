@@ -1,6 +1,5 @@
 import { reactive, useState } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
-import { _t } from "@web/core/l10n/translation";
 import { ConnectionLostError, rpc, rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useService } from "../utils/hooks";
@@ -25,10 +24,7 @@ function onlineUI() {
 }
 
 export const offlineService = {
-    dependencies: ["notification"],
-
-    async start(env, { notification }) {
-        let closeNotification = () => {};
+    async start() {
         let timeout;
         let observer;
 
@@ -48,8 +44,6 @@ export const offlineService = {
             },
             () => {
                 if (status.offline) {
-                    closeNotification = notification.add(_t("Connection lost"), { type: "danger" });
-
                     // Disable everything in the UI that isn't marked as available offline
                     offlineUI();
                     // Create an observer instance linked to the callback function to keep disabling
@@ -76,10 +70,6 @@ export const offlineService = {
                     };
                     timeout = browser.setTimeout(_checkConnection, delay);
                 } else {
-                    closeNotification();
-                    env.services.notification.add(_t("Connection restored"), {
-                        type: "success",
-                    });
                     onlineUI();
                     observer?.disconnect();
                     browser.clearTimeout(timeout);
