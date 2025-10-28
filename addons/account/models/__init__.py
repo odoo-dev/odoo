@@ -15,6 +15,7 @@ from . import account_move
 from . import account_move_line
 from . import account_move_line_tax_details
 from . import account_move_send
+from . import account_move_document_type
 from . import account_partial_reconcile
 from . import account_full_reconcile
 from . import account_payment

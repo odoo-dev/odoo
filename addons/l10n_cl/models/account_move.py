@@ -11,14 +11,14 @@ SII_VAT = '60805000-0'
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    l10n_cl_document_type_id = fields.Many2one('l10n_cl.document.type')  # TODO JOV: add _get_l10n_latam_documents_domain
+
     partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')
-    l10n_latam_internal_type = fields.Selection(
-        related='l10n_latam_document_type_id.internal_type', string='L10n Latam Internal Type')
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
         if self.journal_id.company_id.account_fiscal_country_id != self.env.ref('base.cl') or not \
-                self.l10n_latam_use_documents:
+                self.l10n_cl_document_type_id.use_documents:
             return super()._get_l10n_latam_documents_domain()
         if self.journal_id.type == 'sale':
             domain = [('country_id.code', '=', 'CL')]
@@ -58,84 +58,92 @@ class AccountMove(models.Model):
             tax_payer_type = rec.partner_id.l10n_cl_sii_taxpayer_type
             vat = rec.partner_id.vat
             country_id = rec.partner_id.country_id
-            latam_document_type_code = rec.l10n_latam_document_type_id.code
+            cl_document_type_code = rec.l10n_cl_document_type_id.code
             if (rec.journal_id.type == 'purchase' and tax_payer_type == '4' and country_id.code != 'CL' and
-                latam_document_type_code == '61' and
-               '46' in rec.l10n_cl_reference_ids.mapped('l10n_cl_reference_doc_type_selection')):
+                cl_document_type_code == '61' and
+               '46' in rec.l10n_cl_reference_ids.mapped('l10n_cl_reference_doc_type_selection')): # TODO JOV: l10n_cl_reference_ids is defined in l10n_cl_edi?
                 continue
-            if (not tax_payer_type or not vat) and (country_id.code == "CL" and latam_document_type_code
-                                                  and latam_document_type_code not in ['35', '38', '39', '41']):
+            if (not tax_payer_type or not vat) and (country_id.code == "CL" and cl_document_type_code
+                                                  and cl_document_type_code not in ['35', '38', '39', '41']):
                 raise ValidationError(_('Tax payer type and vat number are mandatory for this type of '
                                         'document. Please set the current tax payer type of this customer'))
             if rec.journal_id.type == 'sale' and rec.l10n_latam_use_documents:
                 if country_id.code != "CL":
-                    if not ((tax_payer_type == '4' and latam_document_type_code in ['110', '111', '112']) or (
-                            tax_payer_type == '3' and latam_document_type_code in ['39', '41', '61', '56'])):
+                    if not ((tax_payer_type == '4' and cl_document_type_code in ['110', '111', '112']) or (
+                            tax_payer_type == '3' and cl_document_type_code in ['39', '41', '61', '56'])):
                         raise ValidationError(_(
                             'Document types for foreign customers must be export type (codes 110, 111 or 112) or you should define the customer as an end consumer and use receipts (codes 39 or 41)'))
             if rec.journal_id.type == 'purchase' and rec.l10n_latam_use_documents:
-                if vat != SII_VAT and latam_document_type_code == '914':
+                if vat != SII_VAT and cl_document_type_code == '914':
                     raise ValidationError(_('The DIN document is intended to be used only with RUT 60805000-0'
                                             ' (Tesorería General de La República)'))
                 if not tax_payer_type or not vat:
-                    if country_id.code == "CL" and latam_document_type_code not in [
+                    if country_id.code == "CL" and cl_document_type_code not in [
                             '35', '38', '39', '41']:
                         raise ValidationError(_('Tax payer type and vat number are mandatory for this type of '
                                                 'document. Please set the current tax payer type of this supplier'))
-                if tax_payer_type == '2' and latam_document_type_code not in ['70', '71', '56', '61']:
+                if tax_payer_type == '2' and cl_document_type_code not in ['70', '71', '56', '61']:
                     raise ValidationError(_('The tax payer type of this supplier is incorrect for the selected type'
                                             ' of document.'))
                 if tax_payer_type in ['1', '3']:
-                    if latam_document_type_code in ['70', '71']:
+                    if cl_document_type_code in ['70', '71']:
                         raise ValidationError(_('The tax payer type of this supplier is not entitled to deliver '
                                                 'fees documents'))
-                    if latam_document_type_code in ['110', '111', '112']:
+                    if cl_document_type_code in ['110', '111', '112']:
                         raise ValidationError(_('The tax payer type of this supplier is not entitled to deliver '
                                                 'imports documents'))
-                if (tax_payer_type == '4' or country_id.code != "CL") and latam_document_type_code != '46':
+                if (tax_payer_type == '4' or country_id.code != "CL") and cl_document_type_code != '46':
                     raise ValidationError(_('You need a journal without the use of documents for foreign '
                                             'suppliers'))
 
     @api.onchange('journal_id')
     def _l10n_cl_onchange_journal(self):
         if self.company_id.country_id.code == 'CL':
-            self.l10n_latam_document_type_id = False
+            self.l10n_cl_document_type_id = False
 
     def _post(self, soft=True):
         self._check_document_types_post()
         return super()._post(soft)
 
     def _l10n_cl_get_formatted_sequence(self, number=0):
-        return '%s %06d' % (self.l10n_latam_document_type_id.doc_code_prefix, number)
+        return '%s %06d' % (self.l10n_cl_document_type_id.doc_code_prefix, number)
 
+    # TODO JOV: even with all the document type stuff this still overrides _get_starting_sequence and _get_last_sequence_domain
     def _get_starting_sequence(self):
         """ If use documents then will create a new starting sequence using the document type code prefix and the
         journal document number with a 6 padding number """
-        if self.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == "CL":
-            if self.l10n_latam_document_type_id:
-                return self._l10n_cl_get_formatted_sequence()
+        if self.l10n_cl_document_type_id.use_documents and self.company_id.account_fiscal_country_id.code == "CL":
+            return self._l10n_cl_get_formatted_sequence()
         return super()._get_starting_sequence()
 
     def _get_last_sequence_domain(self, relaxed=False):
         where_string, param = super(AccountMove, self)._get_last_sequence_domain(relaxed)
-        if self.company_id.account_fiscal_country_id.code == "CL" and self.l10n_latam_use_documents:
-            where_string = where_string.replace('journal_id = %(journal_id)s AND', '')
-            where_string += ' AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s AND ' \
-                            'company_id = %(company_id)s AND move_type IN %(move_type)s'
+        if self.l10n_cl_document_type_id.use_documents and self.company_id.account_fiscal_country_id.code == "CL":
+            where_string = where_string.replace('journal_id = %(journal_id)s AND', '')  # TODO JOV: no cleaner way? The same number spans journals? Why not use journals then instead of document types?
+            where_string += ' AND l10n_cl_document_type_id = %(l10n_cl_document_type_id)s AND ' \
+                            'company_id = %(company_id)s AND move_type IN %(move_type)s'  # TODO JOV: i'm sure company_id isn't needed
 
             param['company_id'] = self.company_id.id or False
-            param['l10n_latam_document_type_id'] = self.l10n_latam_document_type_id.id or 0
+            param['l10n_cl_document_type_id'] = self.l10n_cl_document_type_id.id or 0
             param['move_type'] = (('in_invoice', 'in_refund') if
-                  self.l10n_latam_document_type_id._is_doc_type_vendor() else ('out_invoice', 'out_refund'))
+                  self.l10n_cl_document_type_id._is_doc_type_vendor() else ('out_invoice', 'out_refund'))
         return where_string, param
+
+    def _is_manual_document_number(self):
+        if self.journal_id.company_id.country_id.code == 'CL':
+            return self.journal_id.type == 'purchase' and not self.l10n_cl_document_type_id._is_doc_type_vendor()
+        return super()._is_manual_document_number()
+
+    # TODO JOV: up to here
 
     def _get_name_invoice_report(self):
         self.ensure_one()
         if (
-            self.l10n_latam_use_documents and self.company_id.account_fiscal_country_id.code == "CL"
+            # TODO JOV: do we need to keep checking company? Probably constrain to not set l10n_cl_document_type_id to not be set on other invoices.
+            self.l10n_cl_document_type_id.use_documents and self.company_id.account_fiscal_country_id.code == "CL"
             and (
                 self.move_type in {"out_invoice", "out_refund"}
-                or self.l10n_latam_document_type_id.code == "46"
+                or self.l10n_cl_document_type_id.code == "46"
             )
         ):
             return 'l10n_cl.report_invoice_document'
@@ -163,12 +171,7 @@ class AccountMove(models.Model):
 
     def _l10n_cl_include_sii(self):
         self.ensure_one()
-        return self.l10n_latam_document_type_id.code in ['39', '41', '110', '111', '112', '34']
-
-    def _is_manual_document_number(self):
-        if self.journal_id.company_id.country_id.code == 'CL':
-            return self.journal_id.type == 'purchase' and not self.l10n_latam_document_type_id._is_doc_type_vendor()
-        return super()._is_manual_document_number()
+        return self.l10n_cl_document_type_id.code in ['39', '41', '110', '111', '112', '34']
 
     def _l10n_cl_get_amounts(self):
         """
@@ -176,7 +179,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         global_discounts = self.invoice_line_ids.filtered(lambda x: x.price_subtotal < 0)
-        export = self.l10n_latam_document_type_id._is_doc_type_export()
+        export = self.l10n_cl_document_type_id._is_doc_type_export()
         main_currency = self.company_id.currency_id if not export else self.currency_id
         key_main_currency = 'amount_currency' if export else 'balance'
         sign_main_currency = -1 if self.move_type == 'out_invoice' else 1

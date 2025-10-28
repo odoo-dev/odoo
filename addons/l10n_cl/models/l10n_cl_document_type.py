@@ -3,9 +3,11 @@
 from odoo import models, fields
 
 
-class L10n_LatamDocumentType(models.Model):
-    _inherit = 'l10n_latam.document.type'
+class L10nClDocumentType(models.Model):
+    _name = 'l10n_cl.document.type'
 
+    code = fields.Char()
+    doc_code_prefix = fields.Char('Document Code Prefix')
     internal_type = fields.Selection(
         selection_add=[
             ('invoice', 'Invoices'),
@@ -16,8 +18,11 @@ class L10n_LatamDocumentType(models.Model):
             ('stock_picking', 'Stock Delivery'),
         ],
     )
-    l10n_cl_active = fields.Boolean(
+    use_documents = fields.Boolean('Use Documents')
+    l10n_cl_active = fields.Boolean(  # TODO JOV: why
         'Active in localization', help='This boolean enables document to be included on invoicing')
+
+    # move_type_ids = fields.Many2many() # TODO JOV: an idea
 
     def _format_document_number(self, document_number):
         """ Make validation of Import Dispatch Number
@@ -25,8 +30,6 @@ class L10n_LatamDocumentType(models.Model):
           * format the document_number against a pattern and return it
         """
         self.ensure_one()
-        if self.country_id.code != "CL":
-            return super()._format_document_number(document_number)
 
         if not document_number:
             return False
@@ -37,7 +40,7 @@ class L10n_LatamDocumentType(models.Model):
         return self.code == '46'
 
     def _is_doc_type_export(self):
-        return self.code in ['110', '111', '112'] and self.country_id.code == 'CL'
+        return self.code in ['110', '111', '112']
 
     def _is_doc_type_electronic_ticket(self):
-        return self.code in ['39', '41'] and self.country_id.code == 'CL'
+        return self.code in ['39', '41']
