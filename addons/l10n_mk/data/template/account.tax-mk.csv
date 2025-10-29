@@ -1,0 +1,1 @@
+"id","sequence","description","invoice_label","name","amount","amount_type","type_tax_use","tax_group_id","active","repartition_line_ids/repartition_type","repartition_line_ids/document_type","repartition_line_ids/tag_ids","repartition_line_ids/factor_percent","repartition_line_ids/account_id","fiscal_position_ids","original_tax_ids"

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="partner_demo_company_mk" model="res.partner">
+        <field name="name">MK Company</field>
+        <field name="vat">MK4032013544513</field>
+        <field name="street">Street Number 271</field>
+        <field name="country_id" ref="base.mk"/>
+        <field name="zip">1000</field>
+        <field name="phone">+389 76 234 5678</field>
+        <field name="email">info@company.mkexample.com</field>
+        <field name="website">www.mkexample.com</field>
+    </record>
+    <record id="demo_company_mk" model="res.company">
+        <field name="name">MK Company</field>
+        <field name="partner_id" ref="partner_demo_company_mk"/>
+    </record>
+    <function model="res.company" name="_onchange_country_id">
+        <value eval="[ref('l10n_mk.demo_company_mk')]"/>
+    </function>
+    <function model="res.users" name="write">
+        <value eval="[ref('base.user_root'), ref('base.user_admin'), ref('base.user_demo')]"/>
+        <value eval="{'company_ids': [(Command.link(ref('l10n_mk.demo_company_mk')))]}"/>
+    </function>
+    <function model="account.chart.template" name="try_loading">
+        <value eval="[]"/>
+        <value>kh</value>
+        <value model="res.company" eval="obj().env.ref('l10n_mk.demo_company_mk')"/>
+        <value name="install_demo" eval="True"/>
+    </function>
+</odoo>

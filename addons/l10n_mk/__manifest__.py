@@ -1,0 +1,22 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+{
+    'name': 'North Macedonia - Accounting',
+    'icon': '/account/static/description/l10n.png',
+    'countries': ['mk'],
+    'version': '1.0',
+    'category': 'Accounting/Localizations/Account Charts',
+    'description': """
+    Chart Of Account and Taxes for North Macedonia.
+    """,
+    'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations.html',
+    'depends': [
+        'account',
+    ],
+    'data': [
+    ],
+    'demo': [
+        'demo/demo_company.xml',
+    ],
+    'author': 'Odoo S.A.',
+    'license': 'LGPL-3',
+}
