@@ -95,7 +95,7 @@ class AccountMoveLine(models.Model):
             'eco_9_5': get_tag_ids('l10n_in.tax_tag_eco_9_5'),
         }
 
-    def _set_l10n_in_gstr_section(self):
+    def _get_l10n_in_gstr_section(self):
 
         def tags_have_categ(line_tax_tags, categories):
             return any(tag in line_tax_tags for category in categories for tag in tax_tags_dict.get(category, []))
@@ -308,8 +308,15 @@ class AccountMoveLine(models.Model):
             return
         tax_tags_dict = self._get_l10n_in_tax_tag_ids()
 
+        move_line_dict = {}
         for move_line in indian_sale_moves_lines:
-            move_line.l10n_in_gstr_section = get_sales_section(move_line, tax_tags_dict)
+            move_line_dict[move_line] = get_sales_section(move_line, tax_tags_dict)
 
         for move_line in indian_moves_purchase_lines:
-            move_line.l10n_in_gstr_section = get_purchase_section(move_line, tax_tags_dict)
+            move_line_dict[move_line] = get_purchase_section(move_line, tax_tags_dict)
+        return move_line_dict
+
+    def _set_l10n_in_gstr_section(self):
+        move_line_dict = self._get_l10n_in_gstr_section()
+        for move_line in move_line_dict:
+            move_line.l10n_in_gstr_section = move_line_dict[move_line]
