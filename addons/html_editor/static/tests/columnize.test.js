@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { describe, expect, manuallyDispatchProgrammaticEvent, test } from "@odoo/hoot";
 import { press, queryAllTexts, tick } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { setupEditor, testEditor } from "./_helpers/editor";
@@ -6,6 +6,8 @@ import { getContent, setSelection } from "./_helpers/selection";
 import { insertText, redo, undo } from "./_helpers/user_actions";
 import { execCommand } from "./_helpers/userCommands";
 import { nodeSize } from "@html_editor/utils/position";
+import { unformat } from "./_helpers/format";
+import { MIN_WIDTH_PX } from "@html_editor/main/column/column_resize_plugin";
 
 function columnsContainer(contents) {
     return `<div class="container o_text_columns o-contenteditable-false"><div class="row">${contents}</div></div>`;
@@ -556,5 +558,418 @@ describe("helper hint", () => {
                 ),
             /* eslint-enable */
         });
+    });
+});
+
+describe("column resize", () => {
+    test("shrink first column by dragging left & row width unchanged", async () => {
+        const { el } = await setupEditor(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1200px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+
+        const row = el.querySelector(".o_text_columns .row");
+        const firstColumn = row.firstChild;
+        const firstColumnRect = firstColumn.getBoundingClientRect();
+        const initialColumnWidth = firstColumnRect.width;
+        const initialRowWidth = row.offsetWidth;
+
+        // Hover over the first column to display the resize handle
+        manuallyDispatchProgrammaticEvent(firstColumn, "pointermove", {
+            clientX: firstColumnRect.right,
+        });
+
+        const columnResizeHandle = document.querySelector(".o_we_column_resize_handle");
+        expect(columnResizeHandle).not.toHaveClass("d-none");
+
+        // Start resizing (pointer down on the handle)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerdown", {
+            clientX: firstColumnRect.right,
+        });
+
+        // Drag left to shrink the first column
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointermove", {
+            clientX: firstColumnRect.right - initialColumnWidth / 3,
+        });
+        await animationFrame();
+
+        // Finish resizing (pointer up)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerup", {
+            clientX: firstColumnRect.right - initialColumnWidth / 3,
+        });
+
+        const finalFirstColumnWidth = firstColumn.getBoundingClientRect().width;
+        const finalRowWidth = row.offsetWidth;
+
+        // Column width should decrease
+        expect(finalFirstColumnWidth).toBeLessThan(initialColumnWidth);
+        // Row width should remain unchanged
+        expect(finalRowWidth).toEqual(initialRowWidth);
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1200px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 200px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 400px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+    });
+
+    test("expand first column by dragging right and row width unchanged", async () => {
+        const { el } = await setupEditor(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1200px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+
+        const row = el.querySelector(".o_text_columns .row");
+        const firstColumn = row.firstChild;
+        const firstColumnRect = firstColumn.getBoundingClientRect();
+        const initialColumnWidth = firstColumnRect.width;
+        const initialRowWidth = row.offsetWidth;
+
+        // Hover over the first column to display the resize handle
+        manuallyDispatchProgrammaticEvent(firstColumn, "pointermove", {
+            clientX: firstColumnRect.right,
+        });
+
+        const columnResizeHandle = document.querySelector(".o_we_column_resize_handle");
+        expect(columnResizeHandle).not.toHaveClass("d-none");
+
+        // Start resizing (pointer down on the handle)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerdown", {
+            clientX: firstColumnRect.right,
+        });
+
+        // Drag right to expand the first column
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointermove", {
+            clientX: firstColumnRect.right + initialColumnWidth / 3,
+        });
+        await animationFrame();
+
+        // Finish resizing (pointer up)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerup", {
+            clientX: firstColumnRect.right + initialColumnWidth / 3,
+        });
+
+        const finalFirstColumnWidth = firstColumn.getBoundingClientRect().width;
+        const finalRowWidth = row.offsetWidth;
+
+        // Column width should increase
+        expect(finalFirstColumnWidth).toBeGreaterThan(initialColumnWidth);
+        // Row width should remain unchanged
+        expect(finalRowWidth).toEqual(initialRowWidth);
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1200px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 400px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 200px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+    });
+
+    test("shrink last column by dragging left and row width decreases", async () => {
+        const { el } = await setupEditor(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1200px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+
+        const row = el.querySelector(".o_text_columns .row");
+        const lastColumn = row.lastChild;
+        const lastColumnRect = lastColumn.getBoundingClientRect();
+        const initialColumnWidth = lastColumnRect.width;
+        const initialRowWidth = row.offsetWidth;
+
+        // Hover over last column to display the resize handle
+        manuallyDispatchProgrammaticEvent(lastColumn, "pointermove", {
+            clientX: lastColumnRect.right,
+        });
+
+        const columnResizeHandle = document.querySelector(".o_we_column_resize_handle");
+        expect(columnResizeHandle).not.toHaveClass("d-none");
+
+        // Start resizing (pointer down)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerdown", {
+            clientX: lastColumnRect.right,
+        });
+
+        // Drag left to shrink last column width
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointermove", {
+            clientX: lastColumnRect.right - initialColumnWidth / 3,
+        });
+        await animationFrame();
+
+        // Finish resizing (pointer up)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerup", {
+            clientX: lastColumnRect.right - initialColumnWidth / 3,
+        });
+
+        const finalColumnWidth = lastColumn.getBoundingClientRect().width;
+        const finalRowWidth = row.offsetWidth;
+
+        // Column width should decrease
+        expect(finalColumnWidth).toBeLessThan(initialColumnWidth);
+        // Row width should also decrease
+        expect(finalRowWidth).toBeLessThan(initialRowWidth);
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1100px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 200px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+    });
+
+    test("expand last column by dragging right and row width increases", async () => {
+        const { el } = await setupEditor(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1200px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+
+        const row = el.querySelector(".o_text_columns .row");
+        const lastColumn = row.lastChild;
+        const lastColumnRect = lastColumn.getBoundingClientRect();
+        const initialColumnWidth = lastColumnRect.width;
+        const initialRowWidth = row.offsetWidth;
+
+        // Hover over last column to show the resize handle
+        manuallyDispatchProgrammaticEvent(lastColumn, "pointermove", {
+            clientX: lastColumnRect.right,
+        });
+
+        const columnResizeHandle = document.querySelector(".o_we_column_resize_handle");
+        expect(columnResizeHandle).not.toHaveClass("d-none");
+
+        // Start resizing (pointer down)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerdown", {
+            clientX: lastColumnRect.right,
+        });
+
+        // Drag right to expand last column width
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointermove", {
+            clientX: lastColumnRect.right + initialColumnWidth / 3,
+        });
+        await animationFrame();
+
+        // Finish resizing (pointer up)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerup", {
+            clientX: lastColumnRect.right + initialColumnWidth / 3,
+        });
+
+        const finalColumnWidth = lastColumn.getBoundingClientRect().width;
+        const finalRowWidth = row.offsetWidth;
+
+        // Column width should increase
+        expect(finalColumnWidth).toBeGreaterThan(initialColumnWidth);
+        // Row width should also increase
+        expect(finalRowWidth).toBeGreaterThan(initialRowWidth);
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 1300px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 400px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+
+            `)
+        );
+    });
+
+    test("undo/redo should work when resizing columns", async () => {
+        const { el, editor } = await setupEditor(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 600px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+
+        const row = el.querySelector(".o_text_columns .row");
+        const firstColumn = row.firstChild;
+        const firstColumnRect = firstColumn.getBoundingClientRect();
+        const initialColumnWidth = firstColumnRect.width;
+
+        // Hover over the first column to display the resize handle
+        manuallyDispatchProgrammaticEvent(firstColumn, "pointermove", {
+            clientX: firstColumnRect.right,
+        });
+
+        const columnResizeHandle = document.querySelector(".o_we_column_resize_handle");
+        expect(columnResizeHandle).not.toHaveClass("d-none");
+
+        // Start resizing (pointer down)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerdown", {
+            clientX: firstColumnRect.right,
+        });
+
+        // Drag far left, trying to shrink column beyond allowed minimum
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointermove", {
+            clientX: firstColumnRect.right - initialColumnWidth,
+        });
+        await animationFrame();
+
+        // Finish resizing (pointer up)
+        manuallyDispatchProgrammaticEvent(columnResizeHandle, "pointerup", {
+            clientX: firstColumnRect.right - initialColumnWidth,
+        });
+
+        const finalWidth = firstColumn.getBoundingClientRect().width;
+        // Column width should not go below MIN_WIDTH_PX
+        expect(finalWidth).toEqual(MIN_WIDTH_PX);
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 600px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 200px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 400px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+
+        // Undo the resize
+        undo(editor);
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 600px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 300px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
+
+        // Redo the resize
+        redo(editor);
+        expect(getContent(el)).toBe(
+            unformat(`
+                <div class="container o_text_columns o-contenteditable-false" contenteditable="false">
+                    <div class="row" style="width: 600px;">
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 200px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint">[]</p>
+                        </div>
+                        <div class="col-4 o-contenteditable-true" contenteditable="true" style="width: 400px;">
+                            <p o-we-hint-text="Empty column" class="o-we-hint"><br></p>
+                        </div>
+                    </div>
+                </div>
+                <p><br></p>
+            `)
+        );
     });
 });

@@ -20,7 +20,7 @@ import { UserCommandPlugin } from "./core/user_command_plugin";
 import { AlignPlugin } from "./main/align/align_plugin";
 import { BannerPlugin } from "./main/banner_plugin";
 import { ChatGPTTranslatePlugin } from "./main/chatgpt/chatgpt_translate_plugin";
-import { ColumnPlugin } from "./main/column_plugin";
+import { ColumnPlugin } from "./main/column/column_plugin";
 import { EmojiPlugin } from "./main/emoji_plugin";
 import { ColorPlugin } from "./main/font/color_plugin";
 import { ColorUIPlugin } from "./main/font/color_ui_plugin";
@@ -78,6 +78,7 @@ import { DoubleClickImagePreviewPlugin } from "./main/media/dblclick_image_previ
 import { StylePlugin } from "./core/style_plugin";
 import { ContentEditablePlugin } from "./core/content_editable_plugin";
 import { SelectionPlaceholderPlugin } from "./main/selection_placeholder_plugin";
+import { ColumnResizePlugin } from "./main/column/column_resize_plugin";
 
 /**
  * @typedef { Object } SharedMethods
@@ -155,6 +156,7 @@ export const MAIN_PLUGINS = [
     ColorUIPlugin,
     SeparatorPlugin,
     ColumnPlugin,
+    ColumnResizePlugin,
     EmojiPlugin,
     HintPlugin,
     AlignPlugin,
