@@ -106,6 +106,7 @@ class RamCache {
     }
 }
 
+let _id = 1;
 export class RPCCache {
     constructor(name, version, secret) {
         this.crypto = new Crypto(secret);
@@ -122,6 +123,8 @@ export class RPCCache {
      */
     read(table, key, fallback, { callback = () => {}, type = "ram", update = "once" } = {}) {
         validateSettings({ type, update });
+
+        this.ramCache.invalidate();
 
         let ramValue = this.ramCache.read(table, key);
 
@@ -183,9 +186,12 @@ export class RPCCache {
                         fromCache.resolve();
                     });
                 } else if (type === "disk") {
+                    let id = ++_id;
+                    console.time(`indexedRB read ${id}`);
                     this.indexedDB
                         .read(table, key)
                         .then(async (result) => {
+                            console.timeEnd(`indexedRB read ${id}`);
                             if (result) {
                                 let decrypted;
                                 try {
