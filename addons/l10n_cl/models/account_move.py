@@ -11,45 +11,42 @@ SII_VAT = '60805000-0'
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    l10n_cl_document_type_id = fields.Many2one('l10n_cl.document.type')  # TODO JOV: add _get_l10n_latam_documents_domain
+    l10n_cl_document_type_id = fields.Many2one('l10n_cl.document.type', domain="[('id', 'in', l10n_cl_available_document_type_ids)]")
+    l10n_cl_available_document_type_ids = fields.Many2many(compute='_compute_l10n_cl_available_document_type_ids')
 
-    partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')
+    partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')  # TODO why?
 
-    def _get_l10n_latam_documents_domain(self):
-        self.ensure_one()
-        if self.journal_id.company_id.account_fiscal_country_id != self.env.ref('base.cl') or not \
-                self.l10n_cl_document_type_id.use_documents:
-            return super()._get_l10n_latam_documents_domain()
-        if self.journal_id.type == 'sale':
-            domain = [('country_id.code', '=', 'CL')]
-            if self.move_type in ['in_invoice', 'out_invoice']:
-                domain += [('internal_type', 'in', ['invoice', 'debit_note', 'invoice_in'])]
-            elif self.move_type in ['in_refund', 'out_refund']:
-                domain += [('internal_type', '=', 'credit_note')]
-            if self.company_id.partner_id.l10n_cl_sii_taxpayer_type == '1':
-                domain += [('code', '!=', '71')]  # Companies with VAT Affected doesn't have "Boleta de honorarios Electrónica"
-            return domain
-        if self.move_type == 'in_refund':
-            internal_types_domain = ('internal_type', '=', 'credit_note')
-        else:
-            internal_types_domain = ('internal_type', 'in', ['invoice', 'debit_note', 'invoice_in'])
-        domain = [
-            ('country_id.code', '=', 'CL'),
-            internal_types_domain,
-        ]
-        if self.partner_id.l10n_cl_sii_taxpayer_type == '1' and self.partner_id_vat != '60805000-0':
-            domain += [('code', 'not in', ['39', '70', '71', '914', '911'])]
-        elif self.partner_id.l10n_cl_sii_taxpayer_type == '1' and self.partner_id_vat == '60805000-0':
-            domain += [('code', 'not in', ['39', '70', '71'])]
-        elif self.partner_id.l10n_cl_sii_taxpayer_type == '2':
-            domain += [('code', '=', '71')]
-        elif self.partner_id.l10n_cl_sii_taxpayer_type == '3':
-            domain += [('code', 'in', ['35', '38', '39', '41', '56', '61'])]
-        elif self.partner_id.country_id.code != 'CL' or self.partner_id.l10n_cl_sii_taxpayer_type == '4':
-            domain += [('code', '=', '46')]
-        else:
-            domain += [('code', 'in', [])]
-        return domain
+    @api.depends('journal_id', 'move_type', 'company_id', 'partner_id', 'partner_id_vat')
+    def _compute_l10n_cl_available_document_type_ids(self):
+        for move in self:
+            domain = []
+            if self.journal_id.type == 'sale':
+                if self.move_type in ['in_invoice', 'out_invoice']:
+                    domain += [('internal_type', 'in', ['invoice', 'debit_note', 'invoice_in'])]
+                elif self.move_type in ['in_refund', 'out_refund']:
+                    domain += [('internal_type', '=', 'credit_note')]
+                if self.company_id.partner_id.l10n_cl_sii_taxpayer_type == '1':
+                    domain += [('code', '!=', '71')]  # Companies with VAT Affected doesn't have "Boleta de honorarios Electrónica"
+            else:
+                if self.move_type == 'in_refund':
+                    domain += [('internal_type', '=', 'credit_note')]
+                else:
+                    domain += [('internal_type', 'in', ['invoice', 'debit_note', 'invoice_in'])]
+
+                if self.partner_id.l10n_cl_sii_taxpayer_type == '1' and self.partner_id_vat != '60805000-0':
+                    domain += [('code', 'not in', ['39', '70', '71', '914', '911'])]
+                elif self.partner_id.l10n_cl_sii_taxpayer_type == '1' and self.partner_id_vat == '60805000-0':
+                    domain += [('code', 'not in', ['39', '70', '71'])]
+                elif self.partner_id.l10n_cl_sii_taxpayer_type == '2':
+                    domain += [('code', '=', '71')]
+                elif self.partner_id.l10n_cl_sii_taxpayer_type == '3':
+                    domain += [('code', 'in', ['35', '38', '39', '41', '56', '61'])]
+                elif self.partner_id.country_id.code != 'CL' or self.partner_id.l10n_cl_sii_taxpayer_type == '4':
+                    domain += [('code', '=', '46')]
+                else:
+                    domain += [('code', 'in', [])]
+
+            move.l10n_cl_available_document_type_ids = self.env['l10n_cl.document.type'].search(domain)
 
     def _check_document_types_post(self):
         for rec in self.filtered(

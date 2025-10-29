@@ -7,15 +7,19 @@ class L10nClDocumentType(models.Model):
     _name = 'l10n_cl.document.type'
 
     code = fields.Char()
+    active = fields.Boolean(default=True)
+    name = fields.Char(required=True, help='The document name', translate=True)
+    sequence = fields.Integer(default=10, required=True, help='To set in which order show the documents type taking into account the most commonly used first')
+    report_name = fields.Char('Name on Reports', help='Name that will be printed in reports, for example "CREDIT NOTE"', translate=True)
     doc_code_prefix = fields.Char('Document Code Prefix')
     internal_type = fields.Selection(
-        selection_add=[
+        [
             ('invoice', 'Invoices'),
-            ('invoice_in', 'Purchase Invoices'),
+            ('invoice_in', 'Purchase Invoices'),  # TODO JOV: new
             ('debit_note', 'Debit Notes'),
             ('credit_note', 'Credit Notes'),
-            ('receipt_invoice', 'Receipt Invoice'),
-            ('stock_picking', 'Stock Delivery'),
+            ('receipt_invoice', 'Receipt Invoice'),  # TODO JOV: new
+            ('stock_picking', 'Stock Delivery'),  # TODO JOV: new
         ],
     )
     use_documents = fields.Boolean('Use Documents')
