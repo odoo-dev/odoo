@@ -226,14 +226,6 @@ export const many2ManyTagsField = {
             help: _t("Write a domain to allow the creation of records conditionnally."),
         },
         {
-            label: _t("Color field"),
-            name: "color_field",
-            type: "field",
-            isRelationalField: true,
-            availableTypes: ["integer"],
-            help: _t("Set an integer field to use colors with the tags."),
-        },
-        {
             label: _t("Typeahead search"),
             name: "search_threshold",
             type: "number",
@@ -362,27 +354,48 @@ export class Many2ManyTagsFieldColorEditable extends Many2ManyTagsField {
 export const many2ManyTagsFieldColorEditable = {
     ...many2ManyTagsField,
     component: Many2ManyTagsFieldColorEditable,
-    supportedOptions: [
-        ...many2ManyTagsField.supportedOptions,
-        {
-            label: _t("Prevent color edition"),
-            name: "no_edit_color",
-            type: "boolean",
-        },
-        {
-            label: _t("Edit Tags"),
-            name: "edit_tags",
-            type: "boolean",
-            help: _t(
-                "If checked, clicking on the tag will open the form that allows to directly edit it. Note that if a color field is also set, the tag edition will prevail. So, the color picker will not be displayed on click on the tag."
-            ),
-        },
-    ],
+    getSupportedOptions(options) {
+        this.supportedOptions = [
+            ...many2ManyTagsField.supportedOptions,
+            {
+                label: _t("Color field"),
+                name: "color_field",
+                type: "field",
+                isRelationalField: true,
+                availableTypes: ["integer"],
+                help: _t("Set an integer field to use colors with the tags."),
+            },
+            {
+                label: _t("Click behavior"),
+                name: "on_click",
+                type: "selection",
+                get choices() {
+                    const choices = [
+                        { label: _t("Do nothing"), value: "do_nothing" },
+                        { label: _t("Open the form"), value: "open_form" },
+                    ];
+                    if (options.color_field) {
+                        choices.push({ label: _t("Edit the color"), value: "edit_color" });
+                    }
+                    return choices;
+                },
+                help: _t(
+                    "Clicking on the tag will [Open the form] or [Edit the color] that allows to directly edit it."
+                ),
+            },
+        ];
+    },
     extractProps({ options, attrs }) {
+        this.getSupportedOptions(options);
         const props = many2ManyTagsField.extractProps(...arguments);
         const hasEditPermission = attrs.can_write ? evaluateBooleanExpr(attrs.can_write) : true;
-        props.canEditTags = options.edit_tags ? hasEditPermission : false;
-        props.canEditColor = !props.canEditTags && !options.no_edit_color && !!options.color_field;
+        props.canEditTags = false;
+        props.canEditColor = false;
+        if (options.on_click === "open_form") {
+            props.canEditTags = hasEditPermission;
+        } else if (options.on_click === "edit_color") {
+            props.canEditColor = !!options.color_field;
+        }
         return props;
     },
 };
