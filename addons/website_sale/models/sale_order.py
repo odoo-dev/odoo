@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 
@@ -46,6 +46,7 @@ class SaleOrder(models.Model):
     is_abandoned_cart = fields.Boolean(
         string="Abandoned Cart", compute='_compute_abandoned_cart', search='_search_abandoned_cart',
     )
+    rating_email_sent = fields.Boolean(string="Rating email already sent")
 
     #=== COMPUTE METHODS ===#
 
@@ -845,6 +846,41 @@ class SaleOrder(models.Model):
             ('website_published', '=', True),
             *self.env['delivery.carrier']._check_company_domain(self.company_id),
         ]).filtered(lambda carrier: carrier._is_available_for_order(self))
+
+    @api.model
+    def _cron_send_order_rating_emails(self):
+        """Send rating request emails to customers a few days after order."""
+        send_order_rating_emails = self.env['ir.config_parameter'].sudo().get_bool('website_sale.send_order_rating_emails')
+        if not send_order_rating_emails:
+            return
+
+        days = max(0, self.env['ir.config_parameter'].sudo().get_int('website_sale.rating_email_days'))
+        date_limit = fields.Datetime.now() - timedelta(days=days)
+        rating_orders = self.search([
+            ('state', '=', 'sale'),
+            ('date_order', '>=', date_limit.replace(hour=0, minute=0, second=0)),
+            ('date_order', '<=', date_limit.replace(hour=23, minute=59, second=59)),
+            ('website_id', '!=', False),
+            ('rating_email_sent', '=', False),
+        ])
+
+        for order in rating_orders:
+            mail_template = order._get_rating_request_template()
+            if mail_template:
+                mail_template.send_mail(order.id)
+                order.rating_email_sent = True
+
+    def _get_rating_request_template(self):
+        self.ensure_one()
+
+        rating_email_template_id = self.env['ir.config_parameter'].sudo().get_int(
+            'website_sale.rating_email_template_id'
+        )
+        rating_email_template = self.env['mail.template'].browse(rating_email_template_id).exists()
+        if rating_email_template:
+            return rating_email_template
+
+        return self.env.ref('website_sale.mail_template_sale_order_rating', raise_if_not_found=False)
 
     #=== TOOLING ===#
 

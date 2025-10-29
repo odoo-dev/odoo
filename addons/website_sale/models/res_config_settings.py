@@ -67,6 +67,21 @@ class ResConfigSettings(models.TransientModel):
     confirmation_email_template_id = fields.Many2one(
         related='website_id.confirmation_email_template_id', readonly=False
     )
+    send_order_rating_emails = fields.Boolean(
+        string="Request ratings",
+        config_parameter='website_sale.send_order_rating_emails',
+    )
+    rating_email_days = fields.Integer(
+        string="Days After Order to Send Rating Email",
+        default=5,
+        config_parameter='website_sale.rating_email_days',
+    )
+    rating_email_template_id = fields.Many2one(
+        string="Email",
+        comodel_name='mail.template',
+        default=lambda self: self.env.ref('website_sale.mail_template_sale_order_rating', raise_if_not_found=False),
+        config_parameter='website_sale.rating_email_template_id',
+    )
 
     # Additional settings
     account_on_checkout = fields.Selection(
@@ -120,6 +135,9 @@ class ResConfigSettings(models.TransientModel):
                 )
             ):
                 website._populate_product_feeds()
+        view = self.env['ir.ui.view'].search([('key', '=', 'website_sale.product_comment')], limit=1)
+        if view and self.send_order_rating_emails:
+            view.active = True
 
     # === ACTION METHODS === #
 

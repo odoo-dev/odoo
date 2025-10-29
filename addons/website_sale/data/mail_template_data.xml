@@ -210,5 +210,60 @@
             </field>
             <field name="auto_delete" eval="False"/>
         </record>
+        <record id="mail_template_sale_order_rating" model="mail.template">
+            <field name="name">Ecommerce: Order Rating Request</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="subject">Review your recent order!</field>
+            <field name="email_from">{{ (object.user_id.email_formatted or object.company_id.email_formatted or user.email_formatted) }}</field>
+            <field name="partner_to" eval="False"/>
+            <field name="use_default_to" eval="True"/>
+            <field name="description">Sent to customers to request feedback on their order</field>
+            <field name="email_layout_xmlid">mail.mail_notification_light</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 12px;">
+                        Hello <t t-out="object.partner_id.name"/>,
+                        <br/>
+                        Take a minute to rate your order!
+                        <br/>
+                        <t t-if="not is_html_empty(object.user_id.signature)">
+                            <div>--<br/><t t-out="object.user_id.signature"/></div>
+                        </t>
+                        <br/>
+                        <t t-foreach="object.order_line.filtered(lambda l: l._is_sellable())" t-as="line">
+                            <t t-set="product" t-value="line.product_id"/>
+                            <table width="35%" style="color: #454748; font-size: 12px; border-collapse: collapse; margin-bottom: 15px;">
+                                <tr>
+                                    <td style="width: 100px; vertical-align: top;">
+                                        <img
+                                            t-attf-src="/web/image/product.product/{{ product.id }}/image_128"
+                                            t-attf-style="width: 64px; height: {{object.website_id and object.website_id._get_product_image_ratio_height() or '64px'}}; object-fit: cover; object-position: center;"
+                                            alt="Product image"
+                                        />
+                                    </td>
+                                    <td style="padding-left: 10px; vertical-align: top; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                                        <div style="font-weight: bold; margin-bottom: 5px;">
+                                            <t t-out="product.name"/>
+                                        </div>
+                                        <div style="font-size: 11px; color: #666;">
+                                            <t t-out="product.description_sale or ''"/>
+                                        </div>
+                                    </td>
+                                    <td style="width: 120px; padding-left: 10px; vertical-align: middle; text-align: center;">
+                                        <a t-att-href="product.website_absolute_url + '#o_product_page_reviews'"
+                                        style="background-color:#875A7B;color:white;padding:10px 15px;text-decoration:none;border-radius:4px;display:inline-block;font-weight:bold;"
+                                        target="_blank">
+                                            Review Now
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                    </p>
+                </div>
+            </field>
+            <field name="report_template_ids" eval="[]"/>
+            <field name="auto_delete" eval="True"/>
+        </record>
     </data>
 </odoo>
