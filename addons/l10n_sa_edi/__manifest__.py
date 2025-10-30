@@ -5,7 +5,7 @@
     'name': 'Saudi Arabia - E-invoicing',
     'author': 'Odoo S.A.',
     'countries': ['sa'],
-    'version': '0.3',
+    'version': '0.4',
     'depends': [
         'account_edi',
         'account_edi_ubl_cii',

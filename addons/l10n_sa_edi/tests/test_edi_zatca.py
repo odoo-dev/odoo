@@ -328,6 +328,45 @@ class TestEdiZatca(TestSaEdiCommon):
             freeze_time_at=datetime(2022, 9, 5, 8, 20, 2, tzinfo=timezone('Etc/GMT-3'))
         )
 
+    def testInvoiceWithGlobalRetention(self):
+        """Test standard invoice generation with a global retention line."""
+
+        retention_tax = self.env.ref(f"account.{self.env.company.id}_sa_sales_retention_0", raise_if_not_found=False)
+        if not retention_tax:
+            retention_tax = self.env['account.tax'].create({
+                'l10n_sa_is_retention': True,
+                'name': 'Retention Tax',
+                'amount_type': 'percent',
+                'amount': 0,
+            })
+
+        move_data = {
+            'name': 'INV/2022/00014',
+            'invoice_date': '2022-09-05',
+            'invoice_date_due': '2022-09-22',
+            'partner_id': self.partner_sa,
+            'invoice_line_ids': [
+                {
+                    'product_id': self.product_a.id,
+                    'price_unit': 1000,
+                    'tax_ids': self.tax_15.ids,
+                },
+                {
+                    'product_id': self.product_a.id,  # this could be any product
+                    'price_unit': -100,
+                    'tax_ids': retention_tax.ids,
+                },
+            ],
+        }
+
+        self._test_document_generation(
+            document_type='invoice',
+            test_file_path='l10n_sa_edi/tests/test_files/invoice_global_retention.xml',
+            expected_xpath=self.invoice_applied_xpath,
+            move_data=move_data,
+            freeze_time_at=datetime(2022, 9, 5, 8, 20, 2, tzinfo=timezone('Etc/GMT-3')),
+        )
+
     def testCompanyOnSimplifiedInvoiceQR(self):
         move_data = {
             'name': 'INV/2025/00012',

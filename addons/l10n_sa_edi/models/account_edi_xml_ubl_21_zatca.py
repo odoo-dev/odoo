@@ -83,8 +83,9 @@ class AccountEdiXmlUbl_21Zatca(models.AbstractModel):
         def tax_grouping_function(base_line, tax_data):
             tax = tax_data and tax_data['tax']
 
-            # Ignore withholding taxes
-            if tax and tax.l10n_sa_is_retention:
+            # Ignore withholding taxes if there are multiple line taxes
+            # We only consider retention taxes if it is a document level (i.e. only tax on the line)
+            if tax and tax.l10n_sa_is_retention and tax != tax_data["batch"]:
                 return None
             return {
                 'tax_category_code': self._get_tax_category_code(vals['customer'].commercial_partner_id, vals['supplier'], tax),
@@ -371,11 +372,10 @@ class AccountEdiXmlUbl_21Zatca(models.AbstractModel):
         base_amount_currency = base_line['tax_details']['total_excluded_currency']
         if base_line['special_type'] == 'early_payment':
             return super()._get_document_allowance_charge_node(vals)
-        elif base_amount_currency < 0:
-            return {
+        if base_amount_currency < 0:
+            # discount Charge
+            base_vals = {
                 'cbc:ChargeIndicator': {'_text': 'false'},
-                'cbc:AllowanceChargeReasonCode': {'_text': '95'},
-                'cbc:AllowanceChargeReason': {'_text': 'Discount'},
                 'cbc:Amount': {
                     '_text': self.format_float(abs(base_amount_currency), 2),
                     'currencyID': vals['currency_id'].name,
@@ -384,8 +384,20 @@ class AccountEdiXmlUbl_21Zatca(models.AbstractModel):
                     self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
                     for grouping_key in aggregated_tax_details
                     if grouping_key
-                ]
+                ],
             }
+            tax_ids = base_line.get("tax_ids")
+            if len(tax_ids) != 1 or not tax_ids.l10n_sa_is_retention or tax_ids.amount != 0:
+                # If there are multiple taxes on line, or tax is not a retention
+                # or tax percentage is not 0%, then 'Discount' code is used for
+                # AllowanceChargeReason and AllowanceChargeReasonCode, otherwise
+                # left empty as they are optional tags
+                base_vals.update({
+                    'cbc:AllowanceChargeReasonCode': {'_text': '95'},
+                    'cbc:AllowanceChargeReason': {'_text': 'Discount'},
+                })
+            return base_vals
+        return {}
 
     # -------------------------------------------------------------------------
     # EXPORT: Templates for document line nodes
