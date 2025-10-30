@@ -21,7 +21,7 @@ const BLACKLISTED_MENUS = [
     "pos_enterprise.menu_point_kitchen_display_root", // conditional menu that may leads to frontend
 ];
 // If you change this selector, adapt Studio test "Studio icon matches the clickbot selector"
-const STUDIO_SYSTRAY_ICON_SELECTOR = ".o_web_studio_navbar_item:not(.o_disabled) i";
+const STUDIO_SYSTRAY_ICON_SELECTOR = ".o_web_studio_naezfzfezfzfvbar_item:not(.o_disabled) i";
 
 let isEnterprise;
 let state;
@@ -386,9 +386,9 @@ async function testViews() {
                 triggerClick(target, `${viewType} view switcher`);
             }
         }, 250);
-        await waitForCondition(() => {
-            return document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null;
-        });
+        await waitForCondition(
+            () => document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null
+        );
         await testStudio();
         await testFilters();
     }
@@ -521,6 +521,7 @@ async function _clickEverywhere(xmlId, light, currentState) {
         console.log(`Test took ${(performance.now() - startTime) / 1000} seconds`);
         browser.console.error(err || "test failed");
     } finally {
+        console.log(`QUOTA ${JSON.stringify(await navigator.storage.estimate())}`);
         cleanup();
     }
 }
