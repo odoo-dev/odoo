@@ -14,7 +14,6 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 
 
 # these tests create accounting entries, and therefore need a chart of accounts
-@skip('Temporary to fast merge new valuation')
 class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon, TestSaleCommon):
 
     @classmethod
@@ -142,6 +141,11 @@ class TestSaleMrpFlowCommon(ValuationReconciliationTestCommon, TestSaleCommon):
             'product_id': cls.kit_3.id,
             'product_qty': 2.0,
             'bom_id': bom_kit_parent.id})
+
+    def _set_move_value(self, moves):
+        """Update the manual value of each move based on its current quantity and unit price."""
+        for move in moves:
+            move.value_manual = move.price_unit * move.quantity
 
     @classmethod
     def _cls_create_product(cls, name, uom_id, routes=()):
@@ -282,7 +286,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         order.action_confirm()
 
         # Verify buttons are working as expected
-        self.assertEqual(order.mrp_production_count, 2, "Mo for product A + child mo for product B")
+        self.assertEqual(order.mrp_production_count, 1, "Mo for product A")
+        self.assertEqual(order.mrp_production_ids.mrp_production_child_count, 1, "Child Mo for product D")
 
         # ===============================================================================
         #  Sales order of 10 Dozen product A should create production order
@@ -567,14 +572,12 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
         })
-        self.account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00', 'account_type': 'asset_receivable', 'reconcile': True})
         account_expense = self.env['account.account'].create({'name': 'Expense', 'code': 'EXP00', 'account_type': 'liability_current', 'reconcile': True})
         account_income = self.env['account.account'].create({'name': 'Income', 'code': 'INC00', 'account_type': 'asset_current', 'reconcile': True})
-        account_valuation = self.env['account.account'].create({'name': 'Valuation', 'code': 'STV00', 'account_type': 'asset_receivable', 'reconcile': True})
-        self.partner.property_account_receivable_id = self.account_receiv
+        self.partner.property_account_receivable_id = self.company_data['default_account_receivable']
         self.category.property_account_income_categ_id = account_income
         self.category.property_account_expense_categ_id = account_expense
-        self.category.property_stock_valuation_account_id = account_valuation
+        self.category.property_stock_valuation_account_id = self.company_data['default_account_stock_valuation']
         self.category.property_stock_journal = self.env['account.journal'].create({'name': 'Stock journal', 'type': 'sale', 'code': 'STK00'})
 
         Product = self.env['product.product']
@@ -1759,16 +1762,13 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
         })
-        account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00', 'account_type': 'asset_receivable', 'reconcile': True})
         account_expense = self.env['account.account'].create({'name': 'Expense', 'code': 'EXP00', 'account_type': 'liability_current', 'reconcile': True})
         account_income = self.env['account.account'].create({'name': 'Income', 'code': 'INC00', 'account_type': 'asset_current', 'reconcile': True})
-        account_valuation = self.env['account.account'].create({'name': 'Valuation', 'code': 'STV00', 'account_type': 'asset_receivable', 'reconcile': True})
         self.stock_location = self.company_data['default_warehouse'].lot_stock_id
-        self.partner.property_account_receivable_id = account_receiv
+        self.partner.property_account_receivable_id = self.company_data['default_account_receivable']
         self.category.property_account_income_categ_id = account_income
         self.category.property_account_expense_categ_id = account_expense
-        self.category.property_stock_account_input_categ_id = account_receiv
-        self.category.property_stock_valuation_account_id = account_valuation
+        self.category.property_stock_valuation_account_id = self.company_data['default_account_stock_valuation']
 
         # Create variant attributes
         self.prod_att_test = self.env['product.attribute'].create({'name': 'test'})
@@ -1901,16 +1901,13 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
         })
-        account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00', 'account_type': 'asset_receivable', 'reconcile': True})
         account_income = self.env['account.account'].create({'name': 'Income', 'code': 'INC00', 'account_type': 'asset_current', 'reconcile': True})
         account_expense = self.env['account.account'].create({'name': 'Expense', 'code': 'EXP00', 'account_type': 'liability_current', 'reconcile': True})
-        account_valuation = self.env['account.account'].create({'name': 'Valuation', 'code': 'STV00', 'account_type': 'asset_receivable', 'reconcile': True})
         self.stock_location = self.company_data['default_warehouse'].lot_stock_id
-        self.partner.property_account_receivable_id = account_receiv
+        self.partner.property_account_receivable_id = self.company_data['default_account_receivable']
         self.category.property_account_income_categ_id = account_income
         self.category.property_account_expense_categ_id = account_expense
-        self.category.property_stock_account_input_categ_id = account_income
-        self.category.property_stock_valuation_account_id = account_valuation
+        self.category.property_stock_valuation_account_id = self.company_data['default_account_stock_valuation']
 
         # Create variant attributes
         self.prod_att_test = self.env['product.attribute'].create({'name': 'test'})
@@ -2047,51 +2044,6 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         so.action_draft()
         so.action_confirm()
         self.assertEqual(len(so.picking_ids), 1, "The product was already delivered, no need to re-create a delivery order")
-
-    def test_kit_margin_and_return_picking(self):
-        """ This test ensure that, when returning the components of a sold kit, the
-        sale order line cost does not change"""
-        kit = self._cls_create_product('Super Kit', self.uom_unit)
-        (kit + self.component_a).categ_id.property_cost_method = 'fifo'
-
-        self.env['mrp.bom'].create({
-            'product_tmpl_id': kit.product_tmpl_id.id,
-            'product_qty': 1.0,
-            'type': 'phantom',
-            'bom_line_ids': [(0, 0, {
-                'product_id': self.component_a.id,
-                'product_qty': 1.0,
-            })]
-        })
-
-        self.component_a.standard_price = 10
-        kit.button_bom_cost()
-
-        stock_location = self.company_data['default_warehouse'].lot_stock_id
-        self.env['stock.quant']._update_available_quantity(self.component_a, stock_location, 1)
-
-        so_form = Form(self.env['sale.order'])
-        so_form.partner_id = self.partner_a
-        with so_form.order_line.new() as line:
-            line.product_id = kit
-        so = so_form.save()
-        so.action_confirm()
-
-        line = so.order_line
-        price = line.product_id.with_company(line.company_id)._compute_average_price(0, line.product_uom_qty, line.move_ids)
-        self.assertEqual(price, 10)
-
-        picking = so.picking_ids
-        picking.button_validate()
-
-        ctx = {'active_ids':picking.ids, 'active_id': picking.ids[0], 'active_model': 'stock.picking'}
-        return_picking_wizard_form = Form(self.env['stock.return.picking'].with_context(ctx))
-        return_picking_wizard = return_picking_wizard_form.save()
-        return_picking_wizard.product_return_moves.quantity = 1
-        return_picking_wizard.action_create_returns()
-
-        price = line.product_id.with_company(line.company_id)._compute_average_price(0, line.product_uom_qty, line.move_ids)
-        self.assertEqual(price, 10)
 
     def test_kit_decrease_sol_qty(self):
         """
@@ -2289,6 +2241,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         in_moves._action_confirm()
         in_moves.write({'quantity': 1, 'picked': True})
         in_moves._action_done()
+        self._set_move_value(in_moves)
 
         so = self.env['sale.order'].create({
             'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
@@ -2318,7 +2271,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         invoice02.action_post()
 
         amls = invoice02.line_ids
-        stock_out_aml = amls.filtered(lambda aml: aml.account_id == categ.property_stock_account_output_categ_id)
+        stock_out_aml = amls.filtered(lambda aml: aml.account_id == categ.property_stock_valuation_account_id)
         self.assertEqual(stock_out_aml.debit, 0)
         self.assertEqual(stock_out_aml.credit, 10)
         cogs_aml = amls.filtered(lambda aml: aml.account_id == categ.property_account_expense_categ_id)
@@ -2371,10 +2324,17 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         so.picking_ids.move_ids.picked = True
         so.picking_ids.button_validate()
 
+        move = so.picking_ids.move_ids
         invoice = so._create_invoices()
         invoice.action_post()
-
-        self.assertEqual(len(invoice.line_ids.filtered('reconciled')), 1)
+        closing_move = self.env['account.move'].browse(move.company_id.action_close_stock_valuation()['res_id'])
+        self.assertRecordValues(
+            closing_move.line_ids,
+            [
+                {'account_id': self.env.company.expense_account_id.id, 'debit': 0, 'credit': 30},
+                {'account_id': self.company_data['default_account_stock_valuation'].id, 'debit': 30, 'credit': 0},
+            ]
+        )
 
     def test_avoid_removing_kit_bom_in_use(self):
         so = self.env['sale.order'].create({
