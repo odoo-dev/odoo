@@ -8,7 +8,7 @@ class TestSnippets(HttpCaseWithUserPortal):
     def test_01_donation(self):
         payment_demo = self.env['ir.module.module']._get('payment_demo')
         if payment_demo.state != 'installed':
-            self.skipTest("payment_demo module is not installed")
+            self.skipTest("module payment_demo is not installed")
 
         demo_provider = self.env['payment.provider'].search([('code', '=', "demo")])
         demo_provider.write({'state': 'test'})
