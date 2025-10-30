@@ -165,6 +165,9 @@ class Monetary(Field[float]):
     :param str currency_field: name of the :class:`Many2one` field
         holding the :class:`res_currency <odoo.addons.base.models.res_currency.Currency>`
         this monetary field is expressed in (default: `\'currency_id\'`)
+    :param digits: a pair (total, decimal) or a string referencing a
+        :class:`~odoo.addons.base.models.decimal_precision.DecimalPrecision` record name.
+        If not specified or None, the precision of the currency is used.
     """
     type = 'monetary'
     write_sequence = 10
@@ -172,10 +175,11 @@ class Monetary(Field[float]):
     falsy_value = 0.0
 
     currency_field: Field | None = None
+    _digits: str | tuple[int, int] | None = None  # None uses the precision of the currency
     aggregator = 'sum'
 
-    def __init__(self, string: str | Sentinel = SENTINEL, currency_field: str | Sentinel = SENTINEL, **kwargs):
-        super().__init__(string=string, currency_field=currency_field, **kwargs)
+    def __init__(self, string: str | Sentinel = SENTINEL, currency_field: str | Sentinel = SENTINEL, digits: str | tuple[int, int] | Sentinel | None = SENTINEL, **kwargs):
+        super().__init__(string=string, currency_field=currency_field, _digits=digits, **kwargs)
 
     def _description_currency_field(self, env: Environment) -> str | None:
         return self.get_currency_field(env[self.model_name])
@@ -215,6 +219,9 @@ class Monetary(Field[float]):
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
 
     def convert_to_column_insert(self, value, record, values=None, validate=True):
+        if self._digits:
+            # bypass currency check for simplicity
+            return super().convert_to_column_insert(value, record, values, validate)
         # retrieve currency from values or record
         currency_field_name = self.get_currency_field(record)
         currency_field = record._fields[currency_field_name]
@@ -239,6 +246,9 @@ class Monetary(Field[float]):
         return value
 
     def convert_to_cache(self, value, record, validate=True):
+        if self._digits:
+            # bypass currency check for simplicity
+            return super().convert_to_cache(value, record, validate)
         # cache format: float
         value = float(value or 0.0)
         if value and validate:
