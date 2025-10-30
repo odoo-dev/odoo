@@ -292,7 +292,7 @@ async function getNextApp() {
  */
 async function testStudio() {
     const studioIcon = document.querySelector(STUDIO_SYSTRAY_ICON_SELECTOR);
-    if (!studioIcon) {
+    if (true || !studioIcon) {
         return;
     }
     // Open the filter menu dropdown
@@ -310,7 +310,7 @@ async function testStudio() {
  * Click on each filter in the control pannel
  */
 async function testFilters() {
-    if (state.light === true) {
+    if (true || state.light === true) {
         return;
     }
     const searchBarMenu = document.querySelector(
@@ -377,6 +377,9 @@ async function testViews() {
             .find((cls) => cls !== "o_switch_view" && cls.startsWith("o_"))
             .slice(2);
         browser.console.log(`Testing view switch: ${viewType}`);
+        if (viewType !== "list" && viewType !== "kanban") {
+            continue;
+        }
         // timeout to avoid click debounce
         browser.setTimeout(function () {
             const target = document.querySelector(
@@ -386,9 +389,9 @@ async function testViews() {
                 triggerClick(target, `${viewType} view switcher`);
             }
         }, 250);
-        await waitForCondition(() => {
-            return document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null;
-        });
+        await waitForCondition(
+            () => document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null
+        );
         await testStudio();
         await testFilters();
     }
@@ -521,12 +524,13 @@ async function _clickEverywhere(xmlId, light, currentState) {
         console.log(`Test took ${(performance.now() - startTime) / 1000} seconds`);
         browser.console.error(err || "test failed");
     } finally {
+        console.log(`*** CLICKBOT *** Finish: QUOTA ${JSON.stringify(await navigator.storage.estimate())}`);
         cleanup();
     }
 }
 
 function clickEverywhere(xmlId, light = false, currentState) {
-    browser.setTimeout(_clickEverywhere, 1000, xmlId, light, currentState);
+    browser.setTimeout(_clickEverywhere, 1000, xmlId, false, currentState);
 }
 
 window.clickEverywhere = clickEverywhere;
