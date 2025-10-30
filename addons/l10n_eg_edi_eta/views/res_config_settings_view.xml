@@ -27,6 +27,10 @@
                                 <label for="l10n_eg_invoicing_threshold" class="col-lg-4 o_light_label"/>
                                 <field name="l10n_eg_invoicing_threshold" help="Set the threshold amount for invoices that won't require the VAT ID of individuals when invoicing"/>
                             </div>
+                            <div class="row">
+                                <label for="l10n_eg_demo_mode" class="col-lg-4 o_light_label"/>
+                                <field name="l10n_eg_demo_mode" help="If enabled, Odoo will not sign the invoices prior to sending them to the ETA" groups="base.group_no_one"/>
+                            </div>
                         </div>
                     </setting>
                 </block>

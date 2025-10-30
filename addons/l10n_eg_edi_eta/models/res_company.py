@@ -14,3 +14,7 @@ class ResCompany(models.Model):
     l10n_eg_invoicing_threshold = fields.Float('Invoicing Threshold', default=0.0,
                                                help="Threshold at which you are required to give the VAT number "
                                                     "of the customer. ")
+    l10n_eg_demo_mode = fields.Boolean(
+        "ETA Demo Mode",
+        help="if enabled, Odoo will not sign the invoices prior to sending them to the ETA",
+    )

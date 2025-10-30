@@ -66,8 +66,26 @@ class AccountMove(models.Model):
         self.l10n_eg_is_signed = False
         return super().button_draft()
 
-    def action_post_sign_invoices(self):
-        # only sign invoices that are confirmed and not yet sent to the ETA.
+    def _demo_mode_skip_sign_invoices(self):
+        invoices = self.filtered(lambda r: r.country_code == 'EG' and r.state == 'posted' and not r.l10n_eg_submission_number and r.edi_document_ids.filtered(lambda e: e.edi_format_id.code == 'eg_eta'))
+        invoices.write({'l10n_eg_signing_time': datetime.utcnow()})
+        for invoice in invoices:
+            eta_invoice = self.env['account.edi.format']._l10n_eg_eta_prepare_eta_invoice(invoice)
+            eta_invoice['signatures'] = [{'signatureType': 'I', 'value': "signature"}]
+            invoice.l10n_eg_is_signed = True
+            attachment = self.env['ir.attachment'].create({
+                    'name': _('ETA_INVOICE_DOC_%s', invoice.name),
+                    'res_id': invoice.id,
+                    'res_model': invoice._name,
+                    'type': 'binary',
+                    'raw': json.dumps(dict(request=eta_invoice)),
+                    'mimetype': 'application/json',
+                    'description': _('Egyptian Tax authority JSON invoice generated for %s.', invoice.name),
+                })
+            invoice.l10n_eg_eta_json_doc_id = attachment.id
+        return True
+
+    def _sign_invoices(self):
         invoices = self.filtered(lambda r: r.country_code == 'EG' and r.state == 'posted' and not r.l10n_eg_submission_number and r.edi_document_ids.filtered(lambda e: e.edi_format_id.code == 'eg_eta'))
         if not invoices:
             return
@@ -102,6 +120,11 @@ class AccountMove(models.Model):
                 })
             invoice.l10n_eg_eta_json_doc_id = attachment.id
         return drive_id.action_sign_invoices(invoices)
+
+    def action_post_sign_invoices(self):
+        if self.company_id.l10n_eg_demo_mode:
+            return self._demo_mode_skip_sign_invoices()
+        return self._sign_invoices()
 
     def action_get_eta_invoice_pdf(self):
         """ This is a pdf with the structure from the government.  While we can use our own format,

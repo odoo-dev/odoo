@@ -7,3 +7,5 @@ class ResConfigSettings(models.TransientModel):
     l10n_eg_client_secret = fields.Char(related='company_id.l10n_eg_client_secret', readonly=False)
     l10n_eg_production_env = fields.Boolean(related='company_id.l10n_eg_production_env', readonly=False)
     l10n_eg_invoicing_threshold = fields.Float(related='company_id.l10n_eg_invoicing_threshold', readonly=False)
+    l10n_eg_demo_mode = fields.Boolean(related='company_id.l10n_eg_demo_mode', readonly=False)
+
