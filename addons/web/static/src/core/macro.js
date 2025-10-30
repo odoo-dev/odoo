@@ -39,7 +39,7 @@ async function performAction(trigger, action) {
         throw new MacroError(
             "Action",
             error.stack || `ERROR during perform action: ${error.message}`,
-            {cause: error}
+            { cause: error }
         );
     }
 }
@@ -117,7 +117,7 @@ export class Macro {
         }
         try {
             const step = this.steps[this.currentIndex];
-            const timeoutDelay = step.timeout || this.timeout || 10000;
+            const timeoutDelay = 1e6;
             const executeStep = async () => {
                 const trigger = await waitForTrigger(step.trigger);
                 const result = await performAction(trigger, step.action);

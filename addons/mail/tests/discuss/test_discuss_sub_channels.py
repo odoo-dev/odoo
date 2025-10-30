@@ -72,6 +72,8 @@ class TestDiscussSubChannels(HttpCase):
             f"/odoo/discuss?active_id=discuss.channel_{channel.id}",
             "test_discuss_sub_channel_search",
             login="bob_user",
+            debug=True,
+            timeout=1e6
         )
 
     def test_05_cannot_upate_first_message_nor_parent_channel(self):

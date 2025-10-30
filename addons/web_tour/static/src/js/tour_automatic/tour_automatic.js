@@ -37,7 +37,7 @@ export class TourAutomatic {
                 {
                     action: async () => {
                         if (this.debugMode) {
-                            console.groupCollapsed(step.describeMe);
+                            // console.groupCollapsed(step.describeMe);
                             console.log(step.stringify);
                             if (stepDelay > 0) {
                                 await hootDom.delay(stepDelay);
@@ -80,7 +80,7 @@ export class TourAutomatic {
                             } else {
                                 console.log("This step has run successfully");
                             }
-                            console.groupEnd();
+                            // console.groupEnd();
                             if (step.pause) {
                                 await this.pause();
                             }
@@ -187,7 +187,7 @@ export class TourAutomatic {
      * @param {string} [error]
      */
     throwError(...args) {
-        console.groupEnd();
+        // console.groupEnd();
         tourState.setCurrentTourOnError();
         // console.error notifies the test runner that the tour failed.
         browser.console.error([`FAILED: ${this.currentStep.describeMe}.`, ...args].join("\n"));

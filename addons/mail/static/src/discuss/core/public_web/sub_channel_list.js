@@ -32,11 +32,14 @@ export class SubChannelList extends Component {
         this.searchRef = useRef("search");
         this.sequential = useSequential();
         useAutofocus({ refName: "search" });
-        useVisible("load-more", (isVisible) => {
+        useVisible("load-more-foo", (isVisible) => {
             if (isVisible) {
-                this.props.thread.loadMoreSubChannels({
-                    searchTerm: this.state.searching ? this.state.searchTerm : undefined,
-                });
+                console.warn("==== loadMoreSubChannels");
+                this.props.thread
+                    .loadMoreSubChannels({
+                        searchTerm: this.state.searching ? this.state.searchTerm : undefined,
+                    })
+                    .then(() => console.warn("==== loadMoreSubChannels done"));
             }
         });
         useEffect(

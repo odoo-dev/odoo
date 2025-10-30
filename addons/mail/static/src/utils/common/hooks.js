@@ -297,25 +297,43 @@ export function useVisible(refName, cb, { ready = true } = {}) {
         isVisible: undefined,
         ready,
     });
+
+    function debugLog(...label) {
+        if (refName !== "load-more-foo") {
+            return;
+        }
+        console.warn("[USEVISIBLE DEBUG]", ...label);
+    }
+
     function setValue(value) {
+        if (value === state.isVisible) {
+            return;
+        }
         state.isVisible = value;
+        debugLog("setValue", value);
         cb?.(state.isVisible);
     }
+
     const observer = new IntersectionObserver((entries) => {
         setValue(entries.at(-1).isIntersecting);
     });
-    useEffect(
-        (el, ready) => {
-            if (el && ready) {
-                observer.observe(el);
-                return () => {
-                    setValue(undefined);
-                    observer.unobserve(el);
-                };
-            }
-        },
-        () => [ref.el, state.ready]
-    );
+
+    useEffect(() => {
+        debugLog("useEffect, visible?", state.isVisible);
+        const el = ref.el;
+        if (el && state.ready) {
+            // debugLog("observer.observe");
+            observer.observe(el);
+            return () => {
+                // debugLog("effect cleanup");
+                // setValue(undefined);
+                observer.unobserve(el);
+            };
+        } else {
+            // debugLog("effect skipped (el missing or not ready)");
+        }
+    });
+
     return state;
 }
 

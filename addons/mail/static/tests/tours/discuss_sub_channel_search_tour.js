@@ -1,8 +1,87 @@
 import { contains, dragenterFiles, dropFiles, scroll } from "@web/../tests/utils";
 import { registry } from "@web/core/registry";
+// import { SubChannelList } from "@mail/discuss/core/public_web/sub_channel_list";
 
+function isInViewPort() {
+    const parent = document.querySelector(".o-mail-ActionPanel");
+    const child = document.querySelector(".o-mail-SubChannelList-loadMore");
+    let inViewPort = false;
+    if (parent && child) {
+        const childRect = child.getBoundingClientRect();
+        const parentRect = parent.getBoundingClientRect();
+        inViewPort =
+            childRect.top <= parentRect.top
+                ? parentRect.top - childRect.top <= childRect.height
+                : childRect.bottom - parentRect.bottom <= childRect.height;
+    }
+    return inViewPort;
+}
+function debugScroll(label) {
+    const container = document.querySelector(".o-mail-ActionPanel:has(.o-mail-SubChannelList)");
+    if (!container) {
+        console.warn(`[${label}] Panel not found`);
+        return;
+    }
+    console.warn(
+        `[${label}]`,
+        JSON.stringify(
+            {
+                scrollTop: container.scrollTop,
+                scrollHeight: container.scrollHeight,
+                clientHeight: container.clientHeight,
+                isInViewPort: isInViewPort(),
+                atBottom:
+                    Math.abs(
+                        container.scrollHeight - container.clientHeight - container.scrollTop
+                    ) < 2,
+                count: document.querySelectorAll(".o-mail-SubChannelPreview").length,
+            },
+            null,
+            2
+        )
+    );
+}
+
+async function debugScrollBottom(sel, label) {
+    debugScroll(label);
+    await scroll(sel, "bottom");
+    debugScroll(label);
+}
+
+/********************************************************/
+/******************** FIRST TOUR ************************/
+/********************************************************/
+
+// import { status } from "@odoo/owl";
+
+// import { Deferred } from "@web/core/utils/concurrency";
+// import { patch } from "@web/core/utils/patch";
+// import { effect } from "@web/core/utils/reactive";
+
+// let waitForLoadMoreToDisappearDef;
 registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
     steps: () => [
+        {
+            trigger: "body",
+            run() {
+                // patch(SubChannelList.prototype, {
+                //     setup() {
+                //         super.setup(...arguments);
+                //         effect(
+                //             (state) => {
+                //                 if (status(this) === "destroyed") {
+                //                     return;
+                //                 }
+                //                 if (!state.isVisible) {
+                //                     waitForLoadMoreToDisappearDef?.resolve();
+                //                 }
+                //             },
+                //             [this.loadMoreState]
+                //         );
+                //     },
+                // });
+            },
+        },
         {
             trigger: "button[title='Threads']",
             run: "click",
@@ -12,9 +91,7 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
             async run() {
                 // 30 newest sub channels are loaded initially.
                 for (let i = 99; i > 69; i--) {
-                    await contains(".o-mail-SubChannelPreview", {
-                        text: `Sub Channel ${i}`,
-                    });
+                    await contains(".o-mail-SubChannelPreview", { text: `Sub Channel ${i}` });
                     await contains(".o-mail-SubChannelPreview", { count: 30 });
                 }
             },
@@ -32,6 +109,7 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
             trigger: ".o-mail-SubChannelPreview:contains(Sub Channel 10)",
             async run() {
                 await contains(".o-mail-SubChannelPreview", { count: 1 });
+                // waitForLoadMoreToDisappearDef = new Deferred();
             },
         },
         {
@@ -50,7 +128,6 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
                     });
                 }
                 await contains(".o-mail-SubChannelPreview", { text: `Sub Channel 10` });
-                // Ensure lazy loading is still working after a search.
                 await scroll(".o-mail-ActionPanel:has(.o-mail-SubChannelList)", "bottom");
             },
         },
@@ -63,7 +140,10 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
                         text: `Sub Channel ${i}`,
                     });
                 }
-                await scroll(".o-mail-ActionPanel:has(.o-mail-SubChannelList)", "bottom");
+                await debugScrollBottom(
+                    ".o-mail-ActionPanel:has(.o-mail-SubChannelList)",
+                    "Scroll #2 lazy-load"
+                );
             },
         },
         {
@@ -75,7 +155,10 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
                         text: `Sub Channel ${i}`,
                     });
                 }
-                await scroll(".o-mail-ActionPanel:has(.o-mail-SubChannelList)", "bottom");
+                await debugScrollBottom(
+                    ".o-mail-ActionPanel:has(.o-mail-SubChannelList)",
+                    "Scroll #3 lazy-load"
+                );
             },
         },
         {
@@ -87,6 +170,8 @@ registry.category("web_tour.tours").add("test_discuss_sub_channel_search", {
                         text: `Sub Channel ${i}`,
                     });
                 }
+                // Final state debug
+                debugScroll(".o-mail-ActionPanel:has(.o-mail-SubChannelList)", "Final state");
             },
         },
     ],
