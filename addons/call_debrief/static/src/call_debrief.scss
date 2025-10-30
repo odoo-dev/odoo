@@ -1,0 +1,78 @@
+/*
+    Odoo's form renderer wraps field widgets in a container that uses
+    `display: inline-block`, which causes the container to shrink to the width
+    of its content. This is problematic when the video is absent.
+    This is allowing our component to expand correctly.
+*/
+.o_field_widget:has(> .o-CallDebrief) {
+    width: 100%;
+    display: block;
+}
+
+.o-CallDebrief {
+    display: flex;
+    flex-direction: column;
+    max-height: 65vh;
+}
+
+.o-CallDebrief-artifacts-container {
+    display: flex;
+    gap: 1rem;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.o-CallDebrief-artifacts-container--no-video .o-CallDebrief-transcript {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 4em;
+}
+
+.o-CallDebrief-transcript {
+    overflow-y: auto;
+    flex: 1 1 40%;
+    min-width: 300px;
+    padding-right: 1rem;
+}
+
+.o-CallDebrief-video{
+    flex: 1 1 60%;
+    min-width: 0;
+    margin: 0.1em
+}
+
+.o-CallDebrief-transcript p {
+    display: flex;
+    align-items: baseline;
+    margin: 0;
+    cursor: pointer;
+}
+
+.o-CallDebrief-transcript-gap {
+    text-align: center;
+    margin: 0.5rem 0;
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+.o-CallDebrief-transcript-timestamp {
+    font-size: 0.8em;
+    min-width: 50px;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.o-CallDebrief-transcript-text {
+    font-size: 1.1em;
+    flex-grow: 1;
+}
+
+.o-CallDebrief-transcript-highlight {
+    border-radius: 4px;
+    box-shadow: inset 0 -20px 3px rgba(0, 253, 255, 0.1);
+    transition: box-shadow 0.15s ease;
+    font-weight: bold;
+}
