@@ -6,6 +6,15 @@ const VERSION_KEY = "__version__";
 let _readId = 1;
 let _writeId = 1;
 
+function formatStorageSize(size) {
+    const units = ["b", "Kb", "Mb", "Gb"];
+    while (size >= 1000 && units.length > 1) {
+        size /= 1000;
+        units.splice(0, 1);
+    }
+    return `${size.toFixed(2)}${units[0]}`;
+}
+
 export class IndexedDB {
     constructor(name, version) {
         this.name = name;
@@ -177,7 +186,18 @@ export class IndexedDB {
             const objectStore = transaction.objectStore(table);
             const request = objectStore.put(record, key); // put to allow updates
             request.onsuccess = resolve;
-            transaction.onerror = () => reject(transaction.error);
+            transaction.onerror = async (ev) => {
+                if (ev.target.error.name === "QuotaExceededError") {
+                    navigator.storage.estimate().then(({ quota, usage }) => {
+                        console.error(
+                            `IndexedDB error: Quota Exceeded (${formatStorageSize(
+                                usage
+                            )} out of ${formatStorageSize(quota)} used)`
+                        );
+                    });
+                }
+                reject(transaction.error);
+            };
 
             // Force the changes to be committed to the database asap
             // https://developer.mozilla.org/en-US/docs/Web/API/IDBTransaction/commit
