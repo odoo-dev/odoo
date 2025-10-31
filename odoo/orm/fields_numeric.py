@@ -285,6 +285,6 @@ class Monetary(Field[float]):
             if not (
                 (value := field_cache.get(record_id))
                 and (currency := currency_field.__get__(record_sudo))
-                and currency.with_env(env).round(value) == cache_value
+                and currency.with_env(env).round(cache_value) == value
             )
         )
