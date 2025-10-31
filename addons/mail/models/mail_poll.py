@@ -42,7 +42,7 @@ class MailPoll(models.Model):
         return [
             "allow_multiple_options",
             "create_date",
-            "create_uid",
+            Store.One("create_uid", ["partner_id"]),
             "end_message_id",
             Store.Many("option_ids"),
             "poll_end_dt",
@@ -58,9 +58,7 @@ class MailPoll(models.Model):
             poll.end_message_id = thread.message_post(
                 body="", message_type="mail_poll", subtype_xmlid="mail.mt_comment"
             )
-            Store(**thread._get_store_target()).add(
-                poll, extra_fields=[Store.One("start_message_id", ["author_id"])]
-            ).bus_send()
+            Store(**thread._get_store_target()).add(poll).bus_send()
 
     @api.model
     def _end_expired_polls(self):
