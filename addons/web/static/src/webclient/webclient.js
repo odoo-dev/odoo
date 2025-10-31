@@ -7,7 +7,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { ActionContainer } from "./actions/action_container";
 import { NavBar } from "./navbar/navbar";
 
-import { Component, onMounted, onWillStart, useExternalListener, useState } from "@odoo/owl";
+import { Component, onMounted, onWillStart, useExternalListener, useState, xml } from "@odoo/owl";
 import { router, routerBus } from "@web/core/browser/router";
 import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
@@ -183,3 +183,53 @@ export class WebClient extends Component {
         }
     }
 }
+
+import { RPCCache } from "@web/core/network/rpc_cache";
+import { session } from "@web/session";
+
+class IDBSystray extends Component {
+    static template = xml`<button class="btn btn-primary" t-on-click="onClick">Populate IDB</button>`;
+    static props = {};
+    setup() {
+        this.cache = new RPCCache("my_cache", session.registry_hash, session.browser_cache_secret);
+        this.keyId = 0;
+        this.running = false;
+    }
+
+    async populateIDB() {
+        const uniq = luxon.DateTime.now().ts;
+        for (let i = 1; i <= 2000; i++) {
+            if (!this.running) {
+                return;
+            }
+            if (i % 100 === 0) {
+                await new Promise((r) => setTimeout(r, 5000));
+            }
+            console.log("write " + i);
+            await this.cache.read(
+                "my_table",
+                `my_key_${uniq}_${this.keyId++}`,
+                async () => {
+                    await new Promise((r) => setTimeout(r, 100));
+                    return new Promise((resolve) => {
+                        resolve(new Array(1_000_000).map(() => new Array(1_000_000)));
+                    });
+                },
+                { type: "disk" }
+            );
+        }
+    }
+
+    async onClick() {
+        this.running = !this.running;
+        if (this.running) {
+            this.populateIDB();
+        }
+    }
+}
+
+export const idbSystrayItem = {
+    Component: IDBSystray,
+};
+
+registry.category("systray").add("idbSystrayItem", idbSystrayItem, { sequence: 10000 });

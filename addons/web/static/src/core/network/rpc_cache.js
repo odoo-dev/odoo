@@ -134,6 +134,10 @@ export class RPCCache {
             return ramValue.then((result) => deepCopy(result));
         }
 
+        if (!Object.keys(this.pendingRequests).length) {
+            this.ramCache.invalidate();
+        }
+
         if (!ramValue || update === "always") {
             this.pendingRequests[requestKey] = [callback];
 

@@ -3,6 +3,9 @@ import { Mutex } from "./concurrency";
 const VERSION_TABLE = "__DBVersion__";
 const VERSION_KEY = "__version__";
 
+let _readId = 1;
+let _writeId = 1;
+
 export class IndexedDB {
     constructor(name, version) {
         this.name = name;
@@ -24,9 +27,14 @@ export class IndexedDB {
      */
     async read(table, key) {
         this._tables.add(table);
+        const id = _readId++;
+        console.time(`indexedRB read ${id}`);
         return this.execute((db) => {
             if (db) {
-                return this._read(db, table, key);
+                return this._read(db, table, key).then((r) => {
+                    console.timeEnd(`indexedRB read ${id}`);
+                    return r;
+                });
             }
         });
     }
@@ -41,9 +49,13 @@ export class IndexedDB {
      */
     async write(table, key, value) {
         this._tables.add(table);
+        const id = _writeId++;
+        console.time(`indexedRB write ${id}`);
         return this.execute((db) => {
             if (db) {
-                this._write(db, table, key, value);
+                this._write(db, table, key, value).then(() => {
+                    console.timeEnd(`indexedRB write ${id}`);
+                });
             }
         });
     }
