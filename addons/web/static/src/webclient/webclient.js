@@ -222,6 +222,7 @@ class IDBSystray extends Component {
 
     async onClick() {
         this.running = !this.running;
+        window.isPopulatingIDB = this.running;
         if (this.running) {
             this.populateIDB();
         }

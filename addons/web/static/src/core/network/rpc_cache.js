@@ -134,7 +134,7 @@ export class RPCCache {
             return ramValue.then((result) => deepCopy(result));
         }
 
-        if (!Object.keys(this.pendingRequests).length) {
+        if (window.isPopulatingIDB) {
             this.ramCache.invalidate();
         }
 
