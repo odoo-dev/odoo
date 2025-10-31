@@ -203,6 +203,9 @@ export class DateTimeField extends Component {
         this.endDate = useRef("end-date");
 
         useEffect(() => {
+            if (this.props.record.isInEdition) {
+                return;
+            }
             [this.startDate, this.endDate].forEach((ref, index) => {
                 if (ref.el?.getAttribute("data-field") === this.picker.activeInput) {
                     ref.el.focus();
