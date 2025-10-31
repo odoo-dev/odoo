@@ -3483,15 +3483,17 @@ class BaseModel(metaclass=MetaModel):
 
         return None
 
-    @api.model
-    def _access_domain(self, operation: str) -> Domain:
+    def _access_domain(self, operation: str, user_domain: Domain | None = None) -> Domain:
         """Get the security domain for the given operation.
 
         If the user has no model access, return the false domain otherwise, the
         default implementation returns the access rule domain.
+        The domain may be specific to the some records, if provided
+        `user_domain` describes records that we are searching, otherwise you can
+        use `self.ids`.
         """
         Access = self.env['ir.model.access']
-        if not Access.check(self._name, operation, raise_exception=False):
+        if not Access.check(self._name, operation, raise_exception=False) or (user_domain is not None and user_domain.is_false()):
             return Domain.FALSE
 
         return self.env['ir.rule']._compute_domain(self._name, operation)
@@ -4690,15 +4692,15 @@ class BaseModel(metaclass=MetaModel):
         The `bypass_access` controls whether or not permissions should be
         checked on the model and record rules should be applied.
         """
+        domain = Domain(domain).optimize(self)
         if self.env.su or bypass_access:
             sec_domain = Domain.TRUE
         else:
-            sec_domain = self._access_domain('read')
+            sec_domain = self._access_domain('read', domain)
             if sec_domain.is_false():
                 # raise here if we don't have any access
                 self.browse().check_access('read')
 
-        domain = Domain(domain)
         # inactive records unless they were explicitly asked for
         if (
             self._active_name
