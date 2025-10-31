@@ -18,6 +18,9 @@ _logger = logging.getLogger(__name__)
 drivers = []
 interfaces = {}
 iot_devices = {}
+
+bluetooth_devices = {}
+print_lock = Lock()
 unsupported_devices = {}
 
 
@@ -121,6 +124,8 @@ class Manager(Thread):
         """Thread that will load interfaces and drivers and contact the odoo server
         with the updates. It will also reconnect to the Wi-Fi if the connection is lost.
         """
+        _logger.info("==== Starting Odoo IoT Box Service ====")
+
         if system.IS_RPI:
             # ensure that the root filesystem is writable retro compatibility (TODO: remove this in 19.0)
             subprocess.run(["sudo", "mount", "-o", "remount,rw", "/"], check=False)
@@ -141,7 +146,6 @@ class Manager(Thread):
         # the identifier of the Box is not found in the DB. So add the Box to the DB.
         self._send_all_devices()
         helpers.download_iot_handlers()
-        helpers.load_iot_handlers()
 
         for interface in interfaces.values():
             interface().start()
