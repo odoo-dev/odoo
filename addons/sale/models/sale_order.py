@@ -1927,7 +1927,10 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
 
-        file_data = attachment._unwrap_edi_attachments()[0]
+        file_data = attachment._unwrap_edi_attachments()
+        if not file_data:
+            return False
+        file_data = file_data[0]
         decoder = self._get_order_edi_decoder(file_data)
         if decoder:
             try:
