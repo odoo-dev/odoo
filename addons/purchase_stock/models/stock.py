@@ -171,9 +171,12 @@ class StockWarehouseOrderpoint(models.Model):
         """ Extend to add more depends values
         TODO: Probably performance costly due to x2many in depends
         """
-        res = super()._compute_qty_to_order_computed()
+        return super()._compute_qty_to_order_computed()
+
+    def _compute_qty_to_order(self):
+        res = super()._compute_qty_to_order()
         for orderpoint in self:
-            if not orderpoint.env.context.get('skip_compute_supplier') and orderpoint.qty_to_order_computed != orderpoint.qty_to_order:
+            if not orderpoint.env.context.get('skip_compute_supplier') and (orderpoint.qty_to_order and orderpoint.qty_to_order == (orderpoint.qty_to_order_computed)):
                 self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['supplier_id'], orderpoint)
         return res
 
@@ -207,13 +210,17 @@ class StockWarehouseOrderpoint(models.Model):
             if orderpoint.env.context.get('skip_compute_supplier'):
                 continue
             default_supplier = orderpoint._get_default_supplier() if orderpoint.partner_id else False
-            if orderpoint.supplier_id != default_supplier:
+            print("3_compute_supplier_id called ========> ")
+            print("3default_supplier: ", default_supplier and default_supplier.display_name)
+            print("3orderpoint.supplier_id: ", orderpoint.supplier_id.display_name)
+            if orderpoint.supplier_id and orderpoint.supplier_id != default_supplier:
                 orderpoint.supplier_id = default_supplier
                 self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['qty_to_order_computed'], orderpoint)
 
-    @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay', 'product_id.seller_ids.partner_id')
+    @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay', 'product_id.seller_ids.partner_id', 'show_partner', 'partner_id')
     def _compute_partner_id_placeholder(self):
         for orderpoint in self:
+            print("_compute_partner_id_placeholder called ========> ")
             if orderpoint.show_partner and not orderpoint.partner_id:
                 default_supplier = orderpoint._get_default_supplier()
                 orderpoint.partner_id_placeholder = default_supplier.partner_id.name if default_supplier else ''

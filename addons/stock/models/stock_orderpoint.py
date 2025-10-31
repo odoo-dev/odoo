@@ -393,6 +393,7 @@ class StockWarehouseOrderpoint(models.Model):
     def _compute_qty_to_order(self):
         for orderpoint in self:
             orderpoint.qty_to_order = orderpoint.qty_to_order_manual if orderpoint.qty_to_order_manual else orderpoint.qty_to_order_computed
+            print("1_compute_qty_to_order called ========> ")
 
     def _inverse_qty_to_order(self):
         for orderpoint in self:
@@ -427,6 +428,7 @@ class StockWarehouseOrderpoint(models.Model):
         qty_in_progress_by_orderpoint = orderpoints._quantity_in_progress()
         for orderpoint in orderpoints:
             orderpoint.qty_to_order_computed = orderpoint._get_qty_to_order(qty_in_progress_by_orderpoint=qty_in_progress_by_orderpoint)
+            print("2_compute_qty_to_order_computed called ========> ")
         (self - orderpoints).qty_to_order_computed = False
 
     def _get_default_rule(self):
