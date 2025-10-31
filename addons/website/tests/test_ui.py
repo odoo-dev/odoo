@@ -499,7 +499,7 @@ class TestUi(HttpCaseWithWebsiteUser):
         self.env['website'].create({
             'name': 'Test Website',
         })
-        self.start_tour("/odoo/action-website.action_website_menu", "parent_child_menu", login="admin")
+        self.start_tour("/odoo/action-website.action_website_menu", "parent_child_menu", login="admin", debug=True)
 
     def test_website_media_dialog_image_shape(self):
         self.start_tour("/", 'website_media_dialog_image_shape', login='admin')

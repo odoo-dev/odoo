@@ -829,6 +829,7 @@ export class StaticList extends DataPoint {
     }
 
     _createRecordDatapoint(data, params = {}) {
+        // debugger
         const resId = data.id || false;
         if (!resId && !params.virtualId) {
             throw new Error("You must provide a virtualId if the record has no id");
@@ -1148,6 +1149,7 @@ export class StaticList extends DataPoint {
         const sortedRecords = allRecords.sort((r1, r2) =>
             compareRecords(r1, r2, orderBy, this.fields)
         );
+        // debugger
         await this._load({
             orderBy,
             nextCurrentIds: sortedRecords.map((r) => r.resId || r._virtualId),
