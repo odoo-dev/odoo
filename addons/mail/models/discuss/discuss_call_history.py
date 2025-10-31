@@ -4,6 +4,7 @@ from odoo import api, models, fields
 
 
 class DiscussCallHistory(models.Model):
+    _inherit = ['mail.call.artifact.mixin']
     _name = "discuss.call.history"
     _order = "start_dt DESC, id DESC"
     _description = "Keep the call history"

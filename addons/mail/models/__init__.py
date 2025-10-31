@@ -17,6 +17,7 @@ from . import mail_thread_cc
 from . import mail_thread_main_attachment
 from . import mail_tracking_duration_mixin
 from . import template_reset_mixin
+from . import mail_call_artifact_mixin
 
 # mail models
 from . import fetchmail
