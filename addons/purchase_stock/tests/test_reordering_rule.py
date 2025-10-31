@@ -386,6 +386,51 @@ class TestReorderingRule(TransactionCase):
         self.assertEqual(pol.price_unit, 5.0, "Vendor V2's $5.00 price rule should be applied for qty = 5.")
         self.assertEqual(pol.product_qty, 5.0, "The ordered quantity should be 5 Units.")
 
+    def test_reordering_rule_prefer_replenishment_uom(self):
+        """ Check that the replenishment_uom_id defined on a reordering rule
+        is preferred over the supplier's default UoM on the generated
+        purchase order line, allowing users to purchase products in the exact
+        units they want.
+
+        - Create a storable product with a vendor using UoM = Unit
+        - Add Pack of 6 to the product's available UoMs
+        - Create a reordering rule with replenishment_uom_id = Pack of 6
+        - Trigger the reordering rule manually
+        - Verify that the generated purchase order line uses Pack of 6
+          instead of the supplier's Unit
+        """
+        self.env.user.group_ids |= self.env.ref('stock.group_stock_multi_locations')
+        partner = self.env['res.partner'].create({'name': 'Vendor UoM'})
+        warehouse_1 = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_pack_6 = self.env.ref('uom.product_uom_pack_6')
+
+        product_form = Form(self.env['product.product'])
+        product_form.name = 'Product UoM Preference'
+        product_form.is_storable = True
+        with product_form.seller_ids.new() as s:
+            s.partner_id = partner
+            s.product_uom_id = uom_unit
+        product = product_form.save()
+        product.uom_ids |= uom_pack_6
+
+        orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
+        orderpoint_form.warehouse_id = warehouse_1
+        orderpoint_form.location_id = warehouse_1.lot_stock_id
+        orderpoint_form.product_id = product
+        orderpoint_form.product_min_qty = 1.000
+        orderpoint_form.product_max_qty = 12.000
+        orderpoint_form.replenishment_uom_id = uom_pack_6
+        order_point = orderpoint_form.save()
+
+        order_point.action_replenish()
+
+        pol = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
+        self.assertEqual(pol.partner_id, partner, "The vendor on the POL should match with the orderpoint's default supplier.")
+        self.assertEqual(pol.product_uom_id, uom_pack_6, "POL should use replenishment_uom_id (Pack of 6) instead of supplier's product_uom_id (Unit).")
+        self.assertEqual(pol.product_qty, 2.0)
+        self.assertEqual(pol.product_uom_qty, 12.0)
+
     def test_reordering_rule_triggered_two_times(self):
         """
         A product P wth RR 0-0-1.
