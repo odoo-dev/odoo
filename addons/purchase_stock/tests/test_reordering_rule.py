@@ -297,6 +297,95 @@ class TestReorderingRule(TransactionCase):
                 'product_max_qty': 1,
             })
 
+    def test_reordering_rule_best_vendor_price_selection(self):
+        """ Check that when multiple vendor price rules exist for multiple vendors,
+        the reordering rule always applies the correct vendor and vendor price rule
+        depending on the ordered quantity and selected Vendor.
+
+        - Create a product with two vendors:
+            Vendor 1 → (1.0 Units - $1.00)
+            Vendor 2 → (1.0 Units - $10.00), (5.0 Units - $5.00)
+        - Create a reordering rule for the product (without setting vendor)
+        - Trigger replenishment with qty = 2 → should pick Vendor 1's $1.00 price rule
+        - Cancel the generated PO
+        - Create a reordering rule for the product (using Vendor V2)
+        - Trigger replenishment with qty = 4 → should pick Vendor V2's $10.00 price rule
+        - Cancel the generated PO
+        - Trigger replenishment again with qty = 5 → should pick Vendor V2's $5.00 price rule
+        """
+        self.env.user.group_ids |= self.env.ref('stock.group_stock_multi_locations')
+
+        partner1 = self.env['res.partner'].create({'name': 'Vendor V1'})
+        partner2 = self.env['res.partner'].create({'name': 'Vendor V2'})
+
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        stock_loc = warehouse.lot_stock_id
+        uom_unit = self.env.ref('uom.product_uom_unit')
+
+        product_form = Form(self.env['product.product'])
+        product_form.name = 'Product A'
+        product_form.is_storable = True
+
+        with product_form.seller_ids.new() as s:
+            s.partner_id = partner1
+            s.min_qty = 1.0
+            s.price = 1.0
+            s.product_uom_id = uom_unit
+        with product_form.seller_ids.new() as s:
+            s.partner_id = partner2
+            s.min_qty = 1.0
+            s.price = 10.0
+            s.product_uom_id = uom_unit
+        with product_form.seller_ids.new() as s:
+            s.partner_id = partner2
+            s.min_qty = 5.0
+            s.price = 5.0
+            s.product_uom_id = uom_unit
+
+        product = product_form.save()
+
+        # Reordering rule without vendor → should pick Vendor V1 → 2 @ $1
+        orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
+        orderpoint_form.warehouse_id = warehouse
+        orderpoint_form.location_id = stock_loc
+        orderpoint_form.product_id = product
+        order_point = orderpoint_form.save()
+
+        order_point.product_min_qty = 2.0
+        order_point.product_max_qty = 2.0
+        order_point.action_replenish()
+
+        po = self.env['purchase.order'].search([('product_id', '=', product.id)])
+        pol = po.order_line
+        self.assertEqual(pol.partner_id, partner1, "The vendor on the POL should match with the orderpoint's default supplier.")
+        self.assertEqual(pol.price_unit, 1.0, "Vendor V1's $1.00 price rule should be applied for qty = 2.")
+        self.assertEqual(pol.product_qty, 2.0, "The ordered quantity should be 2 Units.")
+        po.button_cancel()
+
+        # Reordering rule with Vendor V2 → 4 @ $10
+        order_point.partner_id = partner2
+
+        order_point.product_min_qty = 4.0
+        order_point.product_max_qty = 4.0
+        order_point.action_replenish()
+
+        po = self.env['purchase.order'].search([('product_id', '=', product.id), ('state', '=', 'draft')])
+        pol = po.order_line
+        self.assertEqual(pol.partner_id, partner2, "The generated Purchase Order should use Vendor V2 (explicitly selected vendor).")
+        self.assertEqual(pol.price_unit, 10.0, "Vendor V2's $10.00 price rule should be applied for qty = 4.")
+        self.assertEqual(pol.product_qty, 4.0, "The ordered quantity should be 4 Units")
+        po.button_cancel()
+
+        # Reordering rule with Vendor V2 → 5 @ $5
+        order_point.product_min_qty = 5.0
+        order_point.product_max_qty = 5.0
+        order_point.action_replenish()
+
+        pol = self.env['purchase.order'].search([('product_id', '=', product.id), ('state', '=', 'draft')], limit=1).order_line
+        self.assertEqual(pol.partner_id, partner2, "The generated Purchase Order should use Vendor V2 (explicitly selected vendor).")
+        self.assertEqual(pol.price_unit, 5.0, "Vendor V2's $5.00 price rule should be applied for qty = 5.")
+        self.assertEqual(pol.product_qty, 5.0, "The ordered quantity should be 5 Units.")
+
     def test_reordering_rule_triggered_two_times(self):
         """
         A product P wth RR 0-0-1.
@@ -868,7 +957,7 @@ class TestReorderingRule(TransactionCase):
             'product_min_qty': 1,
             'product_max_qty': 5,
             'route_id': route_buy_id,
-            'supplier_id': self.product_01.seller_ids.id,
+            'partner_id': self.partner.id,
         })
         orderpoint.action_replenish()
 
