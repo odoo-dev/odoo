@@ -4,9 +4,9 @@ import { EventBus, markRaw, toRaw } from "@odoo/owl";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import { WarningDialog } from "@web/core/errors/error_dialogs";
-import { rpcBus } from "@web/core/network/rpc";
+import { ConnectionLostError, rpcBus } from "@web/core/network/rpc";
 import { shallowEqual } from "@web/core/utils/arrays";
-import { deepCopy, pick } from "@web/core/utils/objects";
+import { deepCopy, omit, pick } from "@web/core/utils/objects";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { orderByToString } from "@web/search/utils/order_by";
 import { Model } from "../model";
@@ -209,7 +209,13 @@ export class RelationalModel extends Model {
         this.hooks.onWillLoadRoot(config);
         const { promise, resolve } = Promise.withResolvers();
         const cache = this._getCacheParams(config, promise);
-        const data = await this.keepLast.add(this._loadData(config, cache));
+        const loadProm = this._loadData(config, cache).catch((e) => {
+            if (e instanceof ConnectionLostError) {
+                this.notification.add("Data not in cache");
+            }
+            throw e;
+        });
+        const data = await this.keepLast.add(loadProm);
         this.root = this._createRoot(config, data);
         resolve({ root: this.root, loadId: config.loadId });
         this.config = config;
@@ -289,10 +295,18 @@ export class RelationalModel extends Model {
             return;
         }
         if (
+            true ||
             !this.isReady || // first load of the model
             this.offline.offline || // use the cache if we are offline
             // monorecord, loading a different id, or creating a new record (onchange)
-            (config.isMonoRecord && (this.root.config.resId !== config.resId || !config.resId))
+            (config.isMonoRecord && (this.root.config.resId !== config.resId || !config.resId)) ||
+            // multirecord, only offset changed (case: pager next/previous)
+            // FIXME: doesn't detect that we could have already alter the search beforehand
+            (!config.isMonoRecord &&
+                this.root.config.offset !== config.offset &&
+                Object.keys(omit(this.root.config, "offset")).every(
+                    (key) => this.root.config[key] === config[key]
+                ))
         ) {
             return {
                 type: "disk",
@@ -330,7 +344,7 @@ export class RelationalModel extends Model {
                         }
                         return;
                     }
-                    if (loadId !== this.root.config.loadId) {
+                    if (loadId !== root.config.loadId) {
                         // Avoid updating if another load was already done (e.g. a sort in a list)
                         return;
                     }
@@ -758,15 +772,20 @@ export class RelationalModel extends Model {
         markRaw(tmpConfig.fields);
 
         let data;
+        let rootLoadProm;
+        let rootLoadResolve;
         if (reload) {
+            let cache;
             if (tmpConfig.isRoot) {
                 this.hooks.onWillLoadRoot(tmpConfig);
+                ({ promise: rootLoadProm, resolve: rootLoadResolve } = Promise.withResolvers());
+                cache = this._getCacheParams(tmpConfig, rootLoadProm);
             }
             if (tmpConfig.groupBy?.length && "groups" in patch) {
                 // usecase: @_toggleAllGroups
                 tmpConfig.sendOpeningInfo = true;
             }
-            data = await this._loadData(tmpConfig);
+            data = await this._loadData(tmpConfig, cache);
         }
         Object.assign(config, tmpConfig);
         if (data && commit) {
@@ -777,6 +796,7 @@ export class RelationalModel extends Model {
             this.root.config.sendOpeningInfo = true;
         }
         if (reload && config.isRoot) {
+            rootLoadResolve({ root: this.root, loadId: config.loadId });
             await this.hooks.onRootLoaded(this.root);
         }
     }
