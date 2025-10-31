@@ -1743,7 +1743,7 @@ export class PosStore extends WithLazyGetterTrap {
                     const wasDirty = order.isDirty();
                     await this.data.write("pos.order", [order.id], { nb_print: count });
                     if (!wasDirty) {
-                        order._dirty = false;
+                        order.unmarkDirty();
                     }
                 } else {
                     order.nb_print = count;

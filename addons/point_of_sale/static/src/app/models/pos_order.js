@@ -258,7 +258,7 @@ export class PosOrder extends PosOrderAccounting {
         this.last_order_preparation_change.metadata = {
             serverDate: serializeDateTime(DateTime.now()),
         };
-        this._markDirty();
+        this.markDirty();
     }
 
     isEmpty() {
