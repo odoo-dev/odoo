@@ -60,6 +60,13 @@ export class FileUploader extends Component {
                     data: data.split(",")[1],
                     objectUrl: file.type === "application/pdf" ? URL.createObjectURL(file) : null,
                 });
+            } catch (error) {
+                if (error.data.name === "odoo.exceptions.UserError")
+                    this.notification.add(_t(error.data.message), {
+                        type: "danger",
+                    });
+                this.state.isUploading = false;
+                continue;
             } finally {
                 this.state.isUploading = false;
             }

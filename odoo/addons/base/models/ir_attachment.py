@@ -640,6 +640,8 @@ class IrAttachment(models.Model):
         } for vals in vals_list]
 
         for values in vals_list:
+            if values.get('datas') == '':
+                raise UserError(_("The attachment '%s' is empty. Please provide a valid file.") % values.get('name'))
             values = self._check_contents(values)
             raw, datas = values.pop('raw', None), values.pop('datas', None)
             if raw or datas:

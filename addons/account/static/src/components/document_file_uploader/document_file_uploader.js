@@ -50,6 +50,8 @@ export class DocumentFileUploader extends Component {
         const resModal = this.getResModel();
         let action;
         try {
+            if (!this.attachmentIdsToProcess.length)
+                return;
             action = await this.orm.call(
                 resModal,
                 "create_document_from_attachment",
