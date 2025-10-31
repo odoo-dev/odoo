@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="call_debrief.CallDebrief" owl="1">
+        <div class="o-CallDebrief">
+            <CallDebriefTimeline
+                totalDuration="state.totalDuration"
+                parsedTranscript="state.parsedTranscript"
+                artifacts="state.artifacts"
+                onSeek="seek"
+                currentTime="state.currentTime"
+                activeArtifact="state.playableArtifact"
+            />
+            <div class="o-CallDebrief-artifacts-container">
+                <div t-if="state.hasTranscript" class="o-CallDebrief-transcript" t-ref="transcriptContainer">
+                    <t t-foreach="state.parsedTranscript" t-as="line" t-key="line.startTime + '-' + line_index">
+                        <p t-att-data-timestamp="line.startTime" t-on-click="() => this.onTranscriptLineClick(line)">
+                            <span class="o-CallDebrief-transcript-timestamp text-muted" t-esc="this.formatTimestamp(line.startTime)"/>
+                            <span class="o-CallDebrief-transcript-text" t-esc="line.text"/>
+                        </p>
+                    </t>
+                </div>
+                <div t-if="state.playableArtifact and state.playableArtifact.artifact_type === 'video'" class="o-CallDebrief-video">
+                    <video t-ref="mediaPlayer" controls="1" t-att-src="state.playableArtifact.mediaUrl" style="width: 100%; height: 100%; object-fit: contain;"/>
+                </div>
+                <div t-if="state.playableArtifact and state.playableArtifact.artifact_type === 'audio'" class="o-CallDebrief-audio">
+                    <audio t-ref="mediaPlayer" controls="1" t-att-src="state.playableArtifact.mediaUrl" style="width: 100%;"/>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

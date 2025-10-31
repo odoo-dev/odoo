@@ -1,0 +1,307 @@
+1
+00:00:00,000 --> 00:00:01,360
+>> Thank you. Yes. So let's go to the next
+
+2
+00:00:01,360 --> 00:00:04,080
+question. Will the transcription work
+
+3
+00:00:04,080 --> 00:00:07,120
+with multiple languages? Switch within
+
+4
+00:00:07,120 --> 00:00:08,559
+the text.
+
+5
+00:00:08,559 --> 00:00:10,480
+>> Like if you want to switch like if you
+
+6
+00:00:10,480 --> 00:00:13,039
+want to switch while recording, you
+
+7
+00:00:13,039 --> 00:00:15,200
+cannot because the session has been has
+
+8
+00:00:15,200 --> 00:00:18,960
+to have has to be created with a
+
+9
+00:00:18,960 --> 00:00:21,600
+specific language. Uh so you would have
+
+10
+00:00:21,600 --> 00:00:23,279
+to stop the recording, start again,
+
+11
+00:00:23,279 --> 00:00:24,640
+record in another language. So it might
+
+12
+00:00:24,640 --> 00:00:27,840
+be a limitation here. However, even if
+
+13
+00:00:27,840 --> 00:00:29,840
+your language uh you selected another
+
+14
+00:00:29,840 --> 00:00:31,039
+language, but you start to speak, for
+
+15
+00:00:31,039 --> 00:00:33,279
+example, if you if you selected English
+
+16
+00:00:33,279 --> 00:00:34,720
+and you start speaking in French, for
+
+17
+00:00:34,720 --> 00:00:36,799
+example, the model will still pick up
+
+18
+00:00:36,799 --> 00:00:38,720
+what you're saying and most of the time
+
+19
+00:00:38,720 --> 00:00:41,200
+it will either do a proper transcription
+
+20
+00:00:41,200 --> 00:00:43,120
+or it will translate the transcription
+
+21
+00:00:43,120 --> 00:00:45,360
+in the in the language that is set up.
+
+22
+00:00:45,360 --> 00:00:46,559
+So, it could work.
+
+23
+00:00:46,559 --> 00:00:49,360
+>> We did a couple of tests also in VIP for
+
+24
+00:00:49,360 --> 00:00:52,000
+example whereas you have whole context
+
+25
+00:00:52,000 --> 00:00:54,960
+of the whole conversation at once. There
+
+26
+00:00:54,960 --> 00:00:57,679
+is no uh language setup. The model will
+
+27
+00:00:57,679 --> 00:01:01,360
+figure out the language and uh yeah
+
+28
+00:01:01,360 --> 00:01:03,440
+according to the tests we perform it
+
+29
+00:01:03,440 --> 00:01:06,240
+handles all the languages that we are
+
+30
+00:01:06,240 --> 00:01:08,079
+speaking in our team.
+
+31
+00:01:08,079 --> 00:01:08,560
+>> Yeah.
+
+32
+00:01:08,560 --> 00:01:10,399
+>> Okay. Thank you very much. So the next
+
+33
+00:01:10,399 --> 00:01:12,800
+question is how long will the audio
+
+34
+00:01:12,800 --> 00:01:15,599
+recordings be stored?
+
+35
+00:01:15,599 --> 00:01:17,599
+That is something also that we really
+
+36
+00:01:17,599 --> 00:01:19,679
+want to get your feedback on because
+
+37
+00:01:19,679 --> 00:01:21,520
+retention policy I know that's something
+
+38
+00:01:21,520 --> 00:01:24,560
+that you would like to probably uh have
+
+39
+00:01:24,560 --> 00:01:27,200
+options to set and we plan to just add
+
+40
+00:01:27,200 --> 00:01:29,839
+it in settings uh just a simple select
+
+41
+00:01:29,839 --> 00:01:32,720
+selector so you can um you can you can
+
+42
+00:01:32,720 --> 00:01:35,200
+select that time yourself
+
+43
+00:01:35,200 --> 00:01:36,639
+and yeah that's that's it that's
+
+44
+00:01:36,639 --> 00:01:37,679
+something also we need to get your
+
+45
+00:01:37,679 --> 00:01:39,760
+feedback on currently currently they are
+
+46
+00:01:39,760 --> 00:01:42,159
+stored indefinitely.
+
+47
+00:01:42,159 --> 00:01:44,720
+Okay. So the next question is does it
+
+48
+00:01:44,720 --> 00:01:47,679
+work with air?
+
+49
+00:01:47,679 --> 00:01:49,200
+>> Does it work with with what?
+
+50
+00:01:49,200 --> 00:01:51,440
+>> Does it work with air call? So I guess
+
+51
+00:01:51,440 --> 00:01:53,359
+it's a a very
+
+52
+00:01:53,359 --> 00:01:55,280
+>> I guess they are talking about one of
+
+53
+00:01:55,280 --> 00:01:57,280
+the providers
+
+54
+00:01:57,280 --> 00:01:59,200
+and
+
+55
+00:01:59,200 --> 00:02:03,280
+it's huh that's a nice thing about
+
+56
+00:02:03,280 --> 00:02:05,599
+current architecture of uh
+
+57
+00:02:05,599 --> 00:02:09,440
+transcriptions. It is provider agnostic.
+
+58
+00:02:09,440 --> 00:02:12,640
+Why? because we are not using provider
+
+59
+00:02:12,640 --> 00:02:15,200
+to record. We are the whole recording
+
+60
+00:02:15,200 --> 00:02:18,480
+happens on your site in browser.
+
+61
+00:02:18,480 --> 00:02:21,440
+However, that might not be long-term
+
+62
+00:02:21,440 --> 00:02:23,680
+solution because we would like to have
+
+63
+00:02:23,680 --> 00:02:26,800
+perhaps some kind of robustness. So, we
+
+64
+00:02:26,800 --> 00:02:30,800
+might uh switch to our own uh provider
+
+65
+00:02:30,800 --> 00:02:33,280
+within UDU. Uh that's uh yeah, that's
+
+66
+00:02:33,280 --> 00:02:35,680
+probably for the next year. At the
+
+67
+00:02:35,680 --> 00:02:37,119
+moment, it's agnostic provider.
+
+68
+00:02:37,119 --> 00:02:38,320
+>> Yeah.
+
+69
+00:02:38,320 --> 00:02:41,040
+>> Okay. So the next question is, is it
+
+70
+00:02:41,040 --> 00:02:42,880
+possible to remove the recordings
+
+71
+00:02:42,880 --> 00:02:45,680
+directly after the call
+
+72
+00:02:45,680 --> 00:02:47,040
+manually?
+
+73
+00:02:47,040 --> 00:02:50,320
+>> Uh, a little bit hackish solution, but
+
+74
+00:02:50,320 --> 00:02:53,280
+it exists. You can just open your
+
+75
+00:02:53,280 --> 00:02:56,000
+attachments because recording is just an
+
+76
+00:02:56,000 --> 00:02:58,400
+attachment. So you just open your
+
+77
+00:02:58,400 --> 00:03:00,000
+attachments and settings. I believe you

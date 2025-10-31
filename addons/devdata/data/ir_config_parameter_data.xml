@@ -1,0 +1,16 @@
+<odoo>
+    <data noupdate="1">
+        <record id="mail_use_sfu_server" model="ir.config_parameter">
+            <field name="key">mail.use_sfu_server</field>
+            <field name="value">True</field>
+        </record>
+        <record id="mail_sfu_server_url" model="ir.config_parameter">
+            <field name="key">mail.sfu_server_url</field>
+            <field name="value">http://127.0.0.1:8070</field>
+        </record>
+        <record id="mail_sfu_server_key" model="ir.config_parameter">
+            <field name="key">mail.sfu_server_key</field>
+            <field name="value">u6bsUQEWrHdKIuYplirRnbBmLbrKV5PxKG7DtA71mng=</field>
+        </record>
+    </data>
+</odoo>

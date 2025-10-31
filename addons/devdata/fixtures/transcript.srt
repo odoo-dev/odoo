@@ -1,0 +1,279 @@
+1
+00:00:00,560 --> 00:00:02,960
+do you know what odoo crm is in this
+
+2
+00:00:02,960 --> 00:00:05,040
+video we are going to explain how odoo
+
+3
+00:00:05,040 --> 00:00:06,879
+crm is helping businesses to manage
+
+4
+00:00:06,879 --> 00:00:09,360
+their customers leads and opportunities
+
+5
+00:00:09,360 --> 00:00:11,440
+crm is a strategy technique and
+
+6
+00:00:11,440 --> 00:00:13,200
+technology tool for managing all your
+
+7
+00:00:13,200 --> 00:00:14,799
+company relationship and interaction
+
+8
+00:00:14,799 --> 00:00:17,039
+with customer major problems that an
+
+9
+00:00:17,039 --> 00:00:18,720
+organization faces while managing their
+
+10
+00:00:18,720 --> 00:00:21,279
+customers cluttered customer data low
+
+11
+00:00:21,279 --> 00:00:23,359
+customer retention rate inefficient
+
+12
+00:00:23,359 --> 00:00:25,760
+tracking and reporting slow growth rate
+
+13
+00:00:25,760 --> 00:00:28,560
+odoo can solve all of them odoo crm is a
+
+14
+00:00:28,560 --> 00:00:30,240
+tool that is focused on building better
+
+15
+00:00:30,240 --> 00:00:32,800
+relationships with customers odoo crm is
+
+16
+00:00:32,800 --> 00:00:34,640
+a robust solution that helps you enhance
+
+17
+00:00:34,640 --> 00:00:36,079
+customer experience and nurture
+
+18
+00:00:36,079 --> 00:00:37,440
+relationships with your potential
+
+19
+00:00:37,440 --> 00:00:39,680
+customers as well as existing customers
+
+20
+00:00:39,680 --> 00:00:42,000
+furthermore odoo crm is closely
+
+21
+00:00:42,000 --> 00:00:43,760
+integrated with other odoo modules like
+
+22
+00:00:43,760 --> 00:00:46,960
+sales purchase e-commerce website
+
+23
+00:00:46,960 --> 00:00:49,520
+marketing and inventory this crm
+
+24
+00:00:49,520 --> 00:00:51,199
+software is built for tackling modern
+
+25
+00:00:51,199 --> 00:00:53,600
+challenges that businesses face such as
+
+26
+00:00:53,600 --> 00:00:57,039
+marketing customer service communication
+
+27
+00:00:57,039 --> 00:00:58,800
+let's dive into the powerful features of
+
+28
+00:00:58,800 --> 00:01:01,280
+odoo crm we will discuss the features
+
+29
+00:01:01,280 --> 00:01:04,720
+one by one sell faster with modern user
+
+30
+00:01:04,720 --> 00:01:06,960
+interface mobile friendly solution
+
+31
+00:01:06,960 --> 00:01:09,280
+reducing redundant data entry large
+
+32
+00:01:09,280 --> 00:01:11,439
+screen view bleeds is a major feature of
+
+33
+00:01:11,439 --> 00:01:13,920
+odoo crm which helps you with the lead
+
+34
+00:01:13,920 --> 00:01:16,240
+nurturing bleed scoring online
+
+35
+00:01:16,240 --> 00:01:18,799
+acquisition url tracker
+
+36
+00:01:18,799 --> 00:01:20,720
+next feature of the crm in the row is
+
+37
+00:01:20,720 --> 00:01:22,320
+opportunities helps you with the
+
+38
+00:01:22,320 --> 00:01:24,960
+activity management pipeline management
+
+39
+00:01:24,960 --> 00:01:27,840
+customize stage schedule meetings add
+
+40
+00:01:27,840 --> 00:01:29,520
+your customers in just a few clicks in
+
+41
+00:01:29,520 --> 00:01:31,280
+your address book add customer
+
+42
+00:01:31,280 --> 00:01:33,280
+preference manage multiple address of
+
+43
+00:01:33,280 --> 00:01:36,159
+them track customer history communicate
+
+44
+00:01:36,159 --> 00:01:38,000
+efficiently with the help of email
+
+45
+00:01:38,000 --> 00:01:41,200
+templates email automation email gateway
+
+46
+00:01:41,200 --> 00:01:44,240
+custom alert fetch reports with an easy
+
+47
+00:01:44,240 --> 00:01:46,560
+to understand dashboard opportunities
+
+48
+00:01:46,560 --> 00:01:49,920
+analysis cohort analysis bleed analysis
+
+49
+00:01:49,920 --> 00:01:51,920
+and integration the integration will
+
+50
+00:01:51,920 --> 00:01:53,920
+help you improve customer relationships
+
+51
+00:01:53,920 --> 00:01:56,159
+maintain customer data increase sales
+
+52
+00:01:56,159 --> 00:01:57,920
+with quote to order capabilities and
+
+53
+00:01:57,920 --> 00:02:00,960
+deliver better customer service odoocrm
+
+54
+00:02:00,960 --> 00:02:02,240
+helps you to manage your business at
+
+55
+00:02:02,240 --> 00:02:04,960
+your fingertips with mobile application
+
+56
+00:02:04,960 --> 00:02:07,200
+and tablets
+
+57
+00:02:07,200 --> 00:02:09,759
+how odoo crm is different from other crm
+
+58
+00:02:09,759 --> 00:02:11,440
+providing companies
+
+59
+00:02:11,440 --> 00:02:13,680
+odoo crm provides certain advantages
+
+60
+00:02:13,680 --> 00:02:16,319
+such as less expensive third-party
+
+61
+00:02:16,319 --> 00:02:19,680
+ecosystem ease of use modular suited for
+
+62
+00:02:19,680 --> 00:02:22,319
+small and medium-sized enterprises odoo
+
+63
+00:02:22,319 --> 00:02:25,440
+crm that salespeople loves try it today
+
+64
+00:02:25,440 --> 00:02:27,520
+for more info visit our website
+
+65
+00:02:27,520 --> 00:02:30,520
+www.o2btechnologies.com
+
+66
+00:02:31,200 --> 00:02:33,280
+or contact us at info at o2b
+
+67
+00:02:33,280 --> 00:02:36,000
+technologies dot com o2 o2ba silver
+
+68
+00:02:36,000 --> 00:02:37,519
+partner to odoo
+
+69
+00:02:37,519 --> 00:02:39,599
+thanks for watching don't forget to like
+
+70
+00:02:39,599 --> 00:02:42,720
+share and subscribe

@@ -1,0 +1,15 @@
+1
+00:00:05,000 --> 00:00:08,000
+Hello, this is a short demo call.
+
+2
+00:00:15,000 --> 00:00:18,000
+We are testing the Call Debrief widget.
+
+3
+00:01:30,000 --> 00:01:33,000
+This is a line in the middle of the call.
+
+4
+00:02:50,000 --> 00:02:55,000
+And this is the final line. Goodbye.

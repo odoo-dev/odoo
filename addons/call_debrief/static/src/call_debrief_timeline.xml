@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.CallDebriefTimeline">
+        <div class="o-CallDebriefTimeline-container">
+            <div class="o-CallDebriefTimeline-labels">
+                <span>00:00</span>
+                <span t-esc="formattedTotalDuration"/>
+            </div>
+            <div class="o-CallDebriefTimeline" t-ref="timeline" t-on-mousedown="onDragStart" t-att-style="'height: ' + state.timelineHeight + 'px;'">
+                <div class="o-CallDebriefTimeline-track">
+                    <!-- Transcript segments will be clipped by this container -->
+                    <t t-foreach="props.parsedTranscript" t-as="line" t-key="line.startTime + '-' + line_index">
+                        <div class="o-CallDebriefTimeline-transcript-marker"
+                             t-att-style="'left: ' + (line.startTime / props.totalDuration * 100) + '%;'"/>
+                    </t>
+                </div>
+
+                <!-- Recording bars (rendered on top of the track) -->
+                <t t-foreach="state.layoutedSegments" t-as="segment" t-key="segment.id">
+                    <div
+                        t-att-class="{
+                            'o-CallDebriefTimeline-line-segment': true,
+                            'o-CallDebriefTimeline-line-segment--video': segment.artifact_type === 'video',
+                            'o-CallDebriefTimeline-line-segment--audio': segment.artifact_type === 'audio',
+                            'o-active-segment': props.activeArtifact and props.activeArtifact.id === segment.id,
+                        }"
+                        t-on-click="(ev) => this.onSegmentClick(ev, segment)"
+                        t-on-mousedown.stop=""
+                        t-att-style="
+                            'top: ' + (segment.lane * 14) + 'px;' +
+                            'left: ' + ((segment.timestamp / props.totalDuration) * 100) + '%;' +
+                            'width: ' + ((segment.duration / props.totalDuration) * 100) + '%;'
+                        "
+                    />
+                </t>
+
+                <!-- Playhead (rendered on top of everything) -->
+                <div t-if="props.currentTime !== undefined" class="o-CallDebriefTimeline-playhead" t-ref="playhead"
+                     t-att-style="'left: ' + (props.currentTime / props.totalDuration * 100) + '%;'">
+                    <span class="o-CallDebriefTimeline-playhead-timestamp" t-esc="this.formatTimestamp(props.currentTime)"/>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

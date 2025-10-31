@@ -1,0 +1,20 @@
+any HTML field and all of that is done in real time. As you can see on screen
+right now is the new transcription
+component which can be used in any HTML
+field and you can see a snippet of how
+it looks like like with the timestamps and all the transcription features uh of the
+component. And this is the transcription Then you can with this component you can
+take a bunch of notes that will be used
+directly as a context for the transcription. This is mainly useful for
+the transcript to be able to grasp if you have specific concepts for let's say
+a meeting a very technical meeting so
+Then you when you're finished speaking
+that the transcription understands what
+uh your context is about and can do
+proper transcript.
+the the app automatically takes the
+whole transcripts of the recording and
+uh makes a summary that you can see here. This summary can be modified uh with the editor itself or you can also click one of the quick action buttons that will be used to replace the current summary and uh update it accordingly. And lastly, you also have the possibility to directly share the summary of your meeting through the mail composer within Odu. And this will be
+sent to the email address that you have configured in the settings of the app.
+So this is the summary of the meeting
+and this is the transcript of the meeting

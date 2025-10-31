@@ -1,0 +1,276 @@
+1
+00:00:00,400 --> 00:00:02,560
+Hello everyone.
+
+2
+00:00:02,560 --> 00:00:04,080
+Everyone can hear me. Can you raise your
+
+3
+00:00:04,080 --> 00:00:06,240
+hand if you can hear me properly? Thank
+
+4
+00:00:06,240 --> 00:00:10,000
+you very much. Right now
+
+5
+00:00:10,000 --> 00:00:11,840
+I'll welcome you with an interesting
+
+6
+00:00:11,840 --> 00:00:17,600
+fact. Did you know that you can speak at
+
+7
+00:00:17,600 --> 00:00:21,279
+around 170 words per minute while your
+
+8
+00:00:21,279 --> 00:00:23,519
+typing abilities
+
+9
+00:00:23,519 --> 00:00:24,560
+>> Hello.
+
+10
+00:00:24,560 --> 00:00:26,240
+>> Hi Dylan. How's it going?
+
+11
+00:00:26,240 --> 00:00:27,680
+>> Uh it's doing fine. How about you?
+
+12
+00:00:27,680 --> 00:00:29,760
+>> How about you? Hey, I just uh could use
+
+13
+00:00:29,760 --> 00:00:31,760
+some help for this whole transcription
+
+14
+00:00:31,760 --> 00:00:34,320
+thing because yeah, you did dictation
+
+15
+00:00:34,320 --> 00:00:36,239
+feature. So, could you please come on
+
+16
+00:00:36,239 --> 00:00:38,160
+stage and help me present it?
+
+17
+00:00:38,160 --> 00:00:39,600
+>> Yeah, sure. Coming right up.
+
+18
+00:00:39,600 --> 00:00:40,559
+>> Right off,
+
+19
+00:00:40,559 --> 00:00:44,760
+>> ladies and gentlemen, Dylan.
+
+20
+00:00:46,640 --> 00:00:49,840
+>> Quick uh quick demo before we jump into
+
+21
+00:00:49,840 --> 00:00:51,039
+actual dictation.
+
+22
+00:00:51,039 --> 00:00:55,280
+>> Yep. Uh we just took a phone call and
+
+23
+00:00:55,280 --> 00:00:58,800
+with new sets of feature new new set of
+
+24
+00:00:58,800 --> 00:01:01,039
+transcription features you can now open
+
+25
+00:01:01,039 --> 00:01:03,520
+your phone app
+
+26
+00:01:03,520 --> 00:01:05,920
+open your phone call and you can see
+
+27
+00:01:05,920 --> 00:01:08,960
+both full transcript as well as the
+
+28
+00:01:08,960 --> 00:01:12,000
+summary. So you can quickly skim on the
+
+29
+00:01:12,000 --> 00:01:15,280
+on the phone uh phone list view for
+
+30
+00:01:15,280 --> 00:01:17,280
+where's your actual call and you can
+
+31
+00:01:17,280 --> 00:01:19,200
+click on it to see the details. Now
+
+32
+00:01:19,200 --> 00:01:21,280
+let's go back to our presentation as we
+
+33
+00:01:21,280 --> 00:01:24,400
+are finally uh complete.
+
+34
+00:01:24,400 --> 00:01:28,159
+>> Yeah. So transcribe your meetings in no
+
+35
+00:01:28,159 --> 00:01:31,520
+time. Now within version this 19 of UDO
+
+36
+00:01:31,520 --> 00:01:34,479
+you can transcribe whatever uh you need.
+
+37
+00:01:34,479 --> 00:01:38,880
+So meetings um voice calls or even
+
+38
+00:01:38,880 --> 00:01:42,320
+videos directly within ODO and within
+
+39
+00:01:42,320 --> 00:01:45,520
+any HTML field and all of that is done
+
+40
+00:01:45,520 --> 00:01:47,680
+in real time. As you can see on screen
+
+41
+00:01:47,680 --> 00:01:49,920
+right now is the new transcription
+
+42
+00:01:49,920 --> 00:01:52,479
+component which can be used in any HTML
+
+43
+00:01:52,479 --> 00:01:55,759
+field and you can see a snippet of how
+
+44
+00:01:55,759 --> 00:01:57,680
+it looks like like with the timestamps
+
+45
+00:01:57,680 --> 00:02:00,320
+and all the transcription features uh of
+
+46
+00:02:00,320 --> 00:02:02,640
+the agent.
+
+47
+00:02:02,640 --> 00:02:04,640
+Then you can with this component you can
+
+48
+00:02:04,640 --> 00:02:07,200
+take a bunch of notes that will be used
+
+49
+00:02:07,200 --> 00:02:09,119
+directly as a context for the
+
+50
+00:02:09,119 --> 00:02:11,840
+transcription. This is mainly useful for
+
+51
+00:02:11,840 --> 00:02:13,840
+the transcript to be able to grasp if
+
+52
+00:02:13,840 --> 00:02:16,160
+you have specific concepts for let's say
+
+53
+00:02:16,160 --> 00:02:18,080
+a meeting a very technical meeting so
+
+54
+00:02:18,080 --> 00:02:21,520
+that the transcription understands what
+
+55
+00:02:21,520 --> 00:02:23,760
+uh your context is about and can do
+
+56
+00:02:23,760 --> 00:02:26,239
+proper transcript.
+
+57
+00:02:26,239 --> 00:02:29,599
+Then you when you're finished speaking
+
+58
+00:02:29,599 --> 00:02:31,599
+the the app automatically takes the
+
+59
+00:02:31,599 --> 00:02:34,160
+whole transcripts of the recording and
+
+60
+00:02:34,160 --> 00:02:36,800
+uh makes a summary that you can see
+
+61
+00:02:36,800 --> 00:02:40,400
+here. This summary can be modified uh
+
+62
+00:02:40,400 --> 00:02:42,480
+with the editor itself or you can also
+
+63
+00:02:42,480 --> 00:02:44,400
+click one of the quick action buttons
+
+64
+00:02:44,400 --> 00:02:47,440
+that will be used to replace the current
+
+65
+00:02:47,440 --> 00:02:50,720
+summary and uh update it accordingly.
+
+66
+00:02:50,720 --> 00:02:52,319
+And lastly, you also have the
+
+67
+00:02:52,319 --> 00:02:54,400
+possibility to directly share the
+
+68
+00:02:54,400 --> 00:02:57,760
+summary of your meeting through the mail
+
+69
+00:02:57,760 --> 00:03:00,000
+composer within Odu. And this will be
+

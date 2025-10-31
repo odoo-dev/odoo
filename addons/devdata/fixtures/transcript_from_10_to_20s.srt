@@ -1,0 +1,19 @@
+1
+00:00:01,440 --> 00:00:03,200
+technology tool for managing all your
+
+2
+00:00:03,200 --> 00:00:04,799
+company relationship and interaction
+
+3
+00:00:04,799 --> 00:00:07,039
+with customer major problems that an
+
+4
+00:00:07,039 --> 00:00:08,720
+organization faces while managing their
+
+5
+00:00:08,720 --> 00:00:11,279
+customers cluttered customer data low

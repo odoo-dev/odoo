@@ -1,0 +1,1152 @@
+1
+00:00:00,000 --> 00:00:01,600
+When you upload your audio, we switch
+
+2
+00:00:01,600 --> 00:00:03,919
+from no audio because we got some audio
+
+3
+00:00:03,919 --> 00:00:06,159
+into a pending state. And from this
+
+4
+00:00:06,159 --> 00:00:08,159
+pending state,
+
+5
+00:00:08,159 --> 00:00:10,720
+Chrome is able to figure out that this
+
+6
+00:00:10,720 --> 00:00:13,360
+is something that he should focus on and
+
+7
+00:00:13,360 --> 00:00:16,079
+he should uh process those. We can also
+
+8
+00:00:16,079 --> 00:00:19,039
+get some errors. Uh we can have no
+
+9
+00:00:19,039 --> 00:00:20,880
+audio. Somehow audio wasn't uploaded.
+
+10
+00:00:20,880 --> 00:00:23,600
+Then well, we can't transcribe call when
+
+11
+00:00:23,600 --> 00:00:25,840
+we don't have any any voice available.
+
+12
+00:00:25,840 --> 00:00:28,640
+Also you see this too long to process
+
+13
+00:00:28,640 --> 00:00:31,760
+and you might ask okay so if I go over
+
+14
+00:00:31,760 --> 00:00:33,440
+those 4 minutes I will have no
+
+15
+00:00:33,440 --> 00:00:36,640
+transcription. No it's just um well
+
+16
+00:00:36,640 --> 00:00:40,240
+there is a certain limit. Uh we made
+
+17
+00:00:40,240 --> 00:00:42,240
+sure that you can transcribe our long
+
+18
+00:00:42,240 --> 00:00:45,679
+conversations with current um with with
+
+19
+00:00:45,679 --> 00:00:48,400
+current limits. However if you well if
+
+20
+00:00:48,400 --> 00:00:50,320
+you open your
+
+21
+00:00:50,320 --> 00:00:53,360
+uh if you call somebody all day long you
+
+22
+00:00:53,360 --> 00:00:55,200
+probably reach those limits. And for
+
+23
+00:00:55,200 --> 00:00:57,679
+that we have an extra state.
+
+24
+00:00:57,679 --> 00:01:01,760
+Then background worker picks up uh call
+
+25
+00:01:01,760 --> 00:01:05,039
+in the pending state switches the state
+
+26
+00:01:05,039 --> 00:01:09,679
+to cued and this way it will notify
+
+27
+00:01:09,679 --> 00:01:11,760
+other background workers that right now
+
+28
+00:01:11,760 --> 00:01:15,520
+are not there but user can possibly
+
+29
+00:01:15,520 --> 00:01:17,520
+create an extra chrome that is also
+
+30
+00:01:17,520 --> 00:01:19,679
+tasked with processing.
+
+31
+00:01:19,679 --> 00:01:24,000
+This way when first chrome is picking up
+
+32
+00:01:24,000 --> 00:01:27,039
+some job it switches its state and locks
+
+33
+00:01:27,039 --> 00:01:30,559
+all the other crrons from uh trying to
+
+34
+00:01:30,559 --> 00:01:32,480
+process the same call. So we are
+
+35
+00:01:32,480 --> 00:01:34,960
+preventing some race conditions which we
+
+36
+00:01:34,960 --> 00:01:37,039
+do not expect at the moment is just some
+
+37
+00:01:37,039 --> 00:01:39,200
+defensive programming
+
+38
+00:01:39,200 --> 00:01:42,159
+and finally all the background worker is
+
+39
+00:01:42,159 --> 00:01:45,200
+doing all the calls is asking open AI to
+
+40
+00:01:45,200 --> 00:01:46,880
+transcribe the audio. it's getting the
+
+41
+00:01:46,880 --> 00:01:48,159
+transcription. If it gets the
+
+42
+00:01:48,159 --> 00:01:52,240
+transcription, it ask for summary and it
+
+43
+00:01:52,240 --> 00:01:54,640
+can also run into some errors. Open AI
+
+44
+00:01:54,640 --> 00:01:57,279
+cannot can become unavailable and then
+
+45
+00:01:57,279 --> 00:02:00,080
+yeah unfortunately we cannot do anything
+
+46
+00:02:00,080 --> 00:02:03,200
+about it uh unless we start running our
+
+47
+00:02:03,200 --> 00:02:06,320
+own models.
+
+48
+00:02:06,320 --> 00:02:09,600
+>> And that brings us to the topic of uh
+
+49
+00:02:09,600 --> 00:02:11,440
+yeah our features are very young. We
+
+50
+00:02:11,440 --> 00:02:14,960
+started our team like four months ago.
+
+51
+00:02:14,960 --> 00:02:16,320
+>> Yeah. in January.
+
+52
+00:02:16,320 --> 00:02:18,159
+>> Yes. So
+
+53
+00:02:18,159 --> 00:02:20,159
+>> all the features are very young and we
+
+54
+00:02:20,159 --> 00:02:22,480
+are expecting from you some kind of
+
+55
+00:02:22,480 --> 00:02:25,600
+feedback, preferably a lot of feedback
+
+56
+00:02:25,600 --> 00:02:28,640
+so we know where to focus. One of the
+
+57
+00:02:28,640 --> 00:02:31,440
+concerns that is appearing constantly is
+
+58
+00:02:31,440 --> 00:02:35,200
+privacy. So tell us if you would like us
+
+59
+00:02:35,200 --> 00:02:38,960
+to run our models on premise. Do not
+
+60
+00:02:38,960 --> 00:02:42,960
+send any uh code data to OpenAI. do not
+
+61
+00:02:42,960 --> 00:02:47,520
+send any call data to uh to to Google or
+
+62
+00:02:47,520 --> 00:02:50,559
+maybe you would like some options to
+
+63
+00:02:50,559 --> 00:02:54,919
+have your own voice models.
+
+64
+00:02:55,360 --> 00:02:58,320
+uh maybe a little bit about the UI and
+
+65
+00:02:58,320 --> 00:02:59,200
+then I'll
+
+66
+00:02:59,200 --> 00:03:02,640
+>> yeah uh about the voice transcription as
+
+67
+00:03:02,640 --> 00:03:05,440
+as I said with the current version of
+
+68
+00:03:05,440 --> 00:03:07,120
+the transcription
+
+69
+00:03:07,120 --> 00:03:09,200
+you have a less reactive feedback of the
+
+70
+00:03:09,200 --> 00:03:11,679
+UI and so it would be mainly be like
+
+71
+00:03:11,679 --> 00:03:13,760
+some UI improvement to make the thing
+
+72
+00:03:13,760 --> 00:03:16,480
+more snappy more reactive and also
+
+73
+00:03:16,480 --> 00:03:18,080
+improve the quality of the transcription
+
+74
+00:03:18,080 --> 00:03:20,480
+because it all can also happen since AI
+
+75
+00:03:20,480 --> 00:03:22,640
+models are not perfect that you would
+
+76
+00:03:22,640 --> 00:03:24,559
+have some snippets of transcription that
+
+77
+00:03:24,559 --> 00:03:26,720
+are really accurate with what you you
+
+78
+00:03:26,720 --> 00:03:28,640
+have said and so we also would like to
+
+79
+00:03:28,640 --> 00:03:31,120
+improve in the quality of these and
+
+80
+00:03:31,120 --> 00:03:32,960
+maybe in the future which is maybe not
+
+81
+00:03:32,960 --> 00:03:35,120
+related to transcription directly but
+
+82
+00:03:35,120 --> 00:03:36,480
+may the introduction of voice command
+
+83
+00:03:36,480 --> 00:03:38,240
+would be something that uh we thought of
+
+84
+00:03:38,240 --> 00:03:39,919
+as well for these uh these kind of
+
+85
+00:03:39,919 --> 00:03:42,640
+features but uh it's still yeah we still
+
+86
+00:03:42,640 --> 00:03:44,640
+have to to know what people would be
+
+87
+00:03:44,640 --> 00:03:46,080
+interested in and so it's important for
+
+88
+00:03:46,080 --> 00:03:48,080
+us to have feedbacks about those if you
+
+89
+00:03:48,080 --> 00:03:50,720
+if you have features you would like so
+
+90
+00:03:50,720 --> 00:03:51,039
+yeah
+
+91
+00:03:51,039 --> 00:03:52,320
+>> voice commands can be especially
+
+92
+00:03:52,320 --> 00:03:54,400
+interesting when if you attended the
+
+93
+00:03:54,400 --> 00:03:58,400
+previous talk about NLP about uh aski
+
+94
+00:03:58,400 --> 00:04:00,960
+imagine that instead of typing the whole
+
+95
+00:04:00,960 --> 00:04:03,919
+command, hey, show me uh my top
+
+96
+00:04:03,919 --> 00:04:07,039
+employees, you just press and hold some
+
+97
+00:04:07,039 --> 00:04:09,440
+button responsible for uh for voice
+
+98
+00:04:09,440 --> 00:04:12,000
+typing and there you go in 3 seconds.
+
+99
+00:04:12,000 --> 00:04:14,960
+Very lazy uh type of operation, huh?
+
+100
+00:04:14,960 --> 00:04:20,798
+>> Yeah. uh some more quirks um some more
+
+101
+00:04:20,798 --> 00:04:25,520
+improvements related to VIP and uh also
+
+102
+00:04:25,520 --> 00:04:29,120
+discuss we can als that's let me let me
+
+103
+00:04:29,120 --> 00:04:30,720
+quickly
+
+104
+00:04:30,720 --> 00:04:33,440
+tease you what's on the table we could
+
+105
+00:04:33,440 --> 00:04:38,080
+do something called semantic search
+
+106
+00:04:38,080 --> 00:04:39,840
+imaged
+
+107
+00:04:39,840 --> 00:04:43,760
+that you have a lot of calls with
+
+108
+00:04:43,760 --> 00:04:46,080
+current implementation of UDO It's very
+
+109
+00:04:46,080 --> 00:04:49,520
+difficult to search through million of
+
+110
+00:04:49,520 --> 00:04:51,679
+rows of text
+
+111
+00:04:51,679 --> 00:04:54,720
+and above that it's difficult to find
+
+112
+00:04:54,720 --> 00:04:57,760
+something because you need to type
+
+113
+00:04:57,760 --> 00:05:00,559
+exactly the phrase that you put in
+
+114
+00:05:00,559 --> 00:05:03,200
+there. Then uh what I'm proposing in
+
+115
+00:05:03,200 --> 00:05:05,919
+here what we could do is we could
+
+116
+00:05:05,919 --> 00:05:07,600
+introduce semantic search. We already
+
+117
+00:05:07,600 --> 00:05:10,399
+have tools for that with uh well with
+
+118
+00:05:10,399 --> 00:05:12,640
+birth of AI module. We already have
+
+119
+00:05:12,640 --> 00:05:14,480
+tools to introduce semantic search where
+
+120
+00:05:14,480 --> 00:05:17,279
+you would roughly describe what you want
+
+121
+00:05:17,279 --> 00:05:21,360
+to find like here latest sales
+
+122
+00:05:21,360 --> 00:05:24,880
+functionality should find viewing new
+
+123
+00:05:24,880 --> 00:05:27,679
+sales feature in the sales funnel. It's
+
+124
+00:05:27,679 --> 00:05:29,840
+not a direct march. It's not a keyword
+
+125
+00:05:29,840 --> 00:05:32,720
+search. It's roughly grabs the concept
+
+126
+00:05:32,720 --> 00:05:34,960
+the idea the semantic meaning of your
+
+127
+00:05:34,960 --> 00:05:38,799
+query and finds all all the codes that
+
+128
+00:05:38,799 --> 00:05:41,200
+uh that are similar. That's something on
+
+129
+00:05:41,200 --> 00:05:43,360
+the table.
+
+130
+00:05:43,360 --> 00:05:46,240
+Another thing that we could introduce is
+
+131
+00:05:46,240 --> 00:05:48,399
+co analysis that is already present in
+
+132
+00:05:48,399 --> 00:05:51,600
+the industry. And what is specifically
+
+133
+00:05:51,600 --> 00:05:53,679
+interesting to me is something called
+
+134
+00:05:53,679 --> 00:05:57,679
+moments. So you all probably heard of u
+
+135
+00:05:57,679 --> 00:06:01,520
+of sentiment analysis, right? So we can
+
+136
+00:06:01,520 --> 00:06:03,840
+tell you okay you have five calls that
+
+137
+00:06:03,840 --> 00:06:06,320
+are positive, five that are me and two
+
+138
+00:06:06,320 --> 00:06:09,760
+that are negative. That is in my opinion
+
+139
+00:06:09,760 --> 00:06:12,760
+uh
+
+140
+00:06:13,840 --> 00:06:15,919
+not very
+
+141
+00:06:15,919 --> 00:06:19,600
+uh interesting information. Much rather
+
+142
+00:06:19,600 --> 00:06:22,480
+would you probably like to know which
+
+143
+00:06:22,480 --> 00:06:24,640
+parts of the conversation answer certain
+
+144
+00:06:24,640 --> 00:06:26,640
+question. And this is where moments come
+
+145
+00:06:26,640 --> 00:06:29,360
+into play because we can have AI scan
+
+146
+00:06:29,360 --> 00:06:33,120
+the whole transcript and then highlight
+
+147
+00:06:33,120 --> 00:06:36,240
+all the all the parts that answer your
+
+148
+00:06:36,240 --> 00:06:38,559
+question negatively and answer your
+
+149
+00:06:38,559 --> 00:06:41,039
+question in a positive way. Then you can
+
+150
+00:06:41,039 --> 00:06:44,880
+count those and you can have more
+
+151
+00:06:44,880 --> 00:06:49,520
+more snappy feeling of if uh more more
+
+152
+00:06:49,520 --> 00:06:53,039
+realistic feeling of what the call
+
+153
+00:06:53,039 --> 00:06:55,360
+represents. Was was it something that
+
+154
+00:06:55,360 --> 00:06:57,200
+you have to focus about? That's
+
+155
+00:06:57,200 --> 00:06:59,600
+something that we can introduce very
+
+156
+00:06:59,600 --> 00:07:01,520
+quickly. Let us know if that's something
+
+157
+00:07:01,520 --> 00:07:04,480
+interesting to you. And yeah, last thing
+
+158
+00:07:04,480 --> 00:07:08,320
+is uh the discuss integration. I don't
+
+159
+00:07:08,320 --> 00:07:12,880
+know how many people here use discus.
+
+160
+00:07:12,880 --> 00:07:14,559
+There are some discus user. That's good
+
+161
+00:07:14,559 --> 00:07:16,640
+to know. Yeah. Let me know if you would
+
+162
+00:07:16,640 --> 00:07:18,559
+also like to see transcriptions in
+
+163
+00:07:18,559 --> 00:07:21,520
+there. uh depending on the feedback that
+
+164
+00:07:21,520 --> 00:07:26,159
+we get from you we will um we will put
+
+165
+00:07:26,159 --> 00:07:30,480
+our focus accordingly and I guess it's a
+
+166
+00:07:30,480 --> 00:07:32,080
+time for question we have a lot of time
+
+167
+00:07:32,080 --> 00:07:35,679
+for questions so we are all yours
+
+168
+00:07:35,679 --> 00:07:38,080
+>> you can uh open that up you have our
+
+169
+00:07:38,080 --> 00:07:40,240
+slides in there
+
+170
+00:07:40,240 --> 00:07:43,520
+do we have somebody All right
+
+171
+00:07:43,520 --> 00:07:45,679
+>> so thank you Dylan thank you Andre for
+
+172
+00:07:45,679 --> 00:07:48,320
+this great talk so let's go to the Q&A
+
+173
+00:07:48,320 --> 00:07:49,279
+session
+
+174
+00:07:49,279 --> 00:07:51,679
+So you can ask your question by the
+
+175
+00:07:51,679 --> 00:07:53,760
+through the QR code and I will ask the
+
+176
+00:07:53,760 --> 00:07:56,640
+first question then. So the first one is
+
+177
+00:07:56,640 --> 00:07:59,600
+is a Swiss German supported by the real
+
+178
+00:07:59,600 --> 00:08:02,559
+time like any language that you can
+
+179
+00:08:02,559 --> 00:08:04,880
+enable on your audio database is
+
+180
+00:08:04,880 --> 00:08:07,679
+supported by the transcription uh by
+
+181
+00:08:07,679 --> 00:08:09,440
+transcription snip. Yes. So if it's
+
+182
+00:08:09,440 --> 00:08:10,720
+available yes it is uh
+
+183
+00:08:10,720 --> 00:08:12,159
+>> I don't know specific yeah Swiss German
+
+184
+00:08:12,159 --> 00:08:13,919
+is a little bit specific language maybe
+
+185
+00:08:13,919 --> 00:08:16,960
+>> but if if whisper if open AI supports it
+
+186
+00:08:16,960 --> 00:08:18,880
+we support it. Yeah,
+
+187
+00:08:18,880 --> 00:08:20,720
+>> we don't have specific models to to
+
+188
+00:08:20,720 --> 00:08:22,240
+handle them.
+
+189
+00:08:22,240 --> 00:08:24,159
+>> Okay, thank you very much. So the second
+
+190
+00:08:24,159 --> 00:08:27,360
+question is in case of offline meetings,
+
+191
+00:08:27,360 --> 00:08:30,000
+is it possible to upload MP3 file
+
+192
+00:08:30,000 --> 00:08:32,558
+instead of realtime transcription
+
+193
+00:08:32,558 --> 00:08:34,000
+>> currently? No, not with the
+
+194
+00:08:34,000 --> 00:08:35,440
+transcription snippet. You cannot upload
+
+195
+00:08:35,440 --> 00:08:37,519
+the MP3 file.
+
+196
+00:08:37,519 --> 00:08:38,000
+>> Okay,
+
+197
+00:08:38,000 --> 00:08:40,240
+>> thank you very much. The third question
+
+198
+00:08:40,240 --> 00:08:43,039
+is will odo get all functionalities
+
+199
+00:08:43,039 --> 00:08:44,960
+funded in ringover?
+
+200
+00:08:44,960 --> 00:08:47,039
+>> I couldn't hear you. Sorry. So the third
+
+201
+00:08:47,039 --> 00:08:49,279
+question is will odo get all the
+
+202
+00:08:49,279 --> 00:08:52,960
+functionalities founded in ringover?
+
+203
+00:08:52,960 --> 00:08:55,519
+>> I'm not familiar with that feature. What
+
+204
+00:08:55,519 --> 00:08:57,360
+what features can can they move the
+
+205
+00:08:57,360 --> 00:08:58,720
+question to the to the bottom and
+
+206
+00:08:58,720 --> 00:09:00,240
+specify exact features?
+
+207
+00:09:00,240 --> 00:09:02,640
+>> Okay. Okay. I'll I'll go to the next
+
+208
+00:09:02,640 --> 00:09:05,120
+question. So is it possible in
+
+209
+00:09:05,120 --> 00:09:08,159
+collaboration modes to identify person
+
+210
+00:09:08,159 --> 00:09:10,720
+that speak and add name beside the
+
+211
+00:09:10,720 --> 00:09:11,840
+transcription text?
+
+212
+00:09:11,840 --> 00:09:13,919
+>> Uh currently no. And it's also the
+
+213
+00:09:13,919 --> 00:09:15,600
+limitation of like maybe the VIP calls
+
+214
+00:09:15,600 --> 00:09:17,760
+is that the models that are used for the
+
+215
+00:09:17,760 --> 00:09:20,720
+transcription are not meant to identify
+
+216
+00:09:20,720 --> 00:09:22,960
+people that are speaking uh as we are
+
+217
+00:09:22,960 --> 00:09:25,279
+using them and so no it's not uh really
+
+218
+00:09:25,279 --> 00:09:27,360
+some something right now here.
+
+219
+00:09:27,360 --> 00:09:28,799
+>> However, it's something that we can
+
+220
+00:09:28,799 --> 00:09:31,519
+bring to VIP calls a little bit faster
+
+221
+00:09:31,519 --> 00:09:34,320
+if you want that because we have two
+
+222
+00:09:34,320 --> 00:09:37,519
+streams of audio. So it's easy in VIP
+
+223
+00:09:37,519 --> 00:09:40,960
+calls. It's easier in VIP calls than uh
+
+224
+00:09:40,960 --> 00:09:42,399
+in the live dictation
+
+225
+00:09:42,399 --> 00:09:43,919
+>> because here Yeah. in the live dictation
+
+226
+00:09:43,919 --> 00:09:45,840
+basically how it works is that you have
+
+227
+00:09:45,840 --> 00:09:47,840
+it's meant to have like one microphone
+
+228
+00:09:47,840 --> 00:09:50,000
+recording in every and it's picking up
+
+229
+00:09:50,000 --> 00:09:52,000
+every sound and so in your meeting you
+
+230
+00:09:52,000 --> 00:09:53,679
+you won't really be able to identify
+
+231
+00:09:53,679 --> 00:09:56,320
+people with that at least not easily.
+
+232
+00:09:56,320 --> 00:09:57,279
+>> But that's a good question. Thank you
+
+233
+00:09:57,279 --> 00:09:58,640
+for that question.
+
+234
+00:09:58,640 --> 00:10:01,360
+>> Thank you. Yes. So let's go to the next
+
+235
+00:10:01,360 --> 00:10:04,080
+question. Will the transcription work
+
+236
+00:10:04,080 --> 00:10:07,120
+with multiple languages? Switch within
+
+237
+00:10:07,120 --> 00:10:08,559
+the text.
+
+238
+00:10:08,559 --> 00:10:10,480
+>> Like if you want to switch like if you
+
+239
+00:10:10,480 --> 00:10:13,039
+want to switch while recording, you
+
+240
+00:10:13,039 --> 00:10:15,200
+cannot because the session has been has
+
+241
+00:10:15,200 --> 00:10:18,960
+to have has to be created with a
+
+242
+00:10:18,960 --> 00:10:21,600
+specific language. Uh so you would have
+
+243
+00:10:21,600 --> 00:10:23,279
+to stop the recording, start again,
+
+244
+00:10:23,279 --> 00:10:24,640
+record in another language. So it might
+
+245
+00:10:24,640 --> 00:10:27,840
+be a limitation here. However, even if
+
+246
+00:10:27,840 --> 00:10:29,840
+your language uh you selected another
+
+247
+00:10:29,840 --> 00:10:31,039
+language, but you start to speak, for
+
+248
+00:10:31,039 --> 00:10:33,279
+example, if you if you selected English
+
+249
+00:10:33,279 --> 00:10:34,720
+and you start speaking in French, for
+
+250
+00:10:34,720 --> 00:10:36,799
+example, the model will still pick up
+
+251
+00:10:36,799 --> 00:10:38,720
+what you're saying and most of the time
+
+252
+00:10:38,720 --> 00:10:41,200
+it will either do a proper transcription
+
+253
+00:10:41,200 --> 00:10:43,120
+or it will translate the transcription
+
+254
+00:10:43,120 --> 00:10:45,360
+in the in the language that is set up.
+
+255
+00:10:45,360 --> 00:10:46,559
+So, it could work.
+
+256
+00:10:46,559 --> 00:10:49,360
+>> We did a couple of tests also in VIP for
+
+257
+00:10:49,360 --> 00:10:52,000
+example whereas you have whole context
+
+258
+00:10:52,000 --> 00:10:54,960
+of the whole conversation at once. There
+
+259
+00:10:54,960 --> 00:10:57,679
+is no uh language setup. The model will
+
+260
+00:10:57,679 --> 00:11:01,360
+figure out the language and uh yeah
+
+261
+00:11:01,360 --> 00:11:03,440
+according to the tests we perform it
+
+262
+00:11:03,440 --> 00:11:06,240
+handles all the languages that we are
+
+263
+00:11:06,240 --> 00:11:08,079
+speaking in our team.
+
+264
+00:11:08,079 --> 00:11:08,560
+>> Yeah.
+
+265
+00:11:08,560 --> 00:11:10,399
+>> Okay. Thank you very much. So the next
+
+266
+00:11:10,399 --> 00:11:12,800
+question is how long will the audio
+
+267
+00:11:12,800 --> 00:11:15,599
+recordings be stored?
+
+268
+00:11:15,599 --> 00:11:17,599
+That is something also that we really
+
+269
+00:11:17,599 --> 00:11:19,679
+want to get your feedback on because
+
+270
+00:11:19,679 --> 00:11:21,520
+retention policy I know that's something
+
+271
+00:11:21,520 --> 00:11:24,560
+that you would like to probably uh have
+
+272
+00:11:24,560 --> 00:11:27,200
+options to set and we plan to just add
+
+273
+00:11:27,200 --> 00:11:29,839
+it in settings uh just a simple select
+
+274
+00:11:29,839 --> 00:11:32,720
+selector so you can um you can you can
+
+275
+00:11:32,720 --> 00:11:35,200
+select that time yourself
+
+276
+00:11:35,200 --> 00:11:36,639
+and yeah that's that's it that's
+
+277
+00:11:36,639 --> 00:11:37,679
+something also we need to get your
+
+278
+00:11:37,679 --> 00:11:39,760
+feedback on currently currently they are
+
+279
+00:11:39,760 --> 00:11:42,159
+stored indefinitely.
+
+280
+00:11:42,159 --> 00:11:44,720
+Okay. So the next question is does it
+
+281
+00:11:44,720 --> 00:11:47,679
+work with air?
+
+282
+00:11:47,679 --> 00:11:49,200
+>> Does it work with with what?
+
+283
+00:11:49,200 --> 00:11:51,440
+>> Does it work with air call? So I guess
+
+284
+00:11:51,440 --> 00:11:53,359
+it's a a very
+
+285
+00:11:53,359 --> 00:11:55,280
+>> I guess they are talking about one of
+
+286
+00:11:55,280 --> 00:11:57,280
+the providers
+
+287
+00:11:57,280 --> 00:11:59,200
+and
+
+288
+00:11:59,200 --> 00:12:00,000
+it's huh that's a nice thing about
+
