@@ -104,7 +104,7 @@ export class PivotRenderer extends Component {
         if (formatter.extractOptions) {
             Object.assign(formatOptions, formatter.extractOptions(fieldInfo));
         }
-        if (formatType === "monetary") {
+        if (formatType === "monetary" && cell.currencyIds) {
             if (cell.currencyIds.length > 1) {
                 formatOptions.currencyId = user.activeCompany.currency_id;
                 return {
