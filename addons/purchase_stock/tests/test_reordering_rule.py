@@ -1315,7 +1315,7 @@ class TestReorderingRule(TransactionCase):
             'product_max_qty': 500,
         })
         product.seller_ids.with_context(orderpoint_id=orderpoint.id).action_set_supplier()
-        self.assertEqual(orderpoint.supplier_id, product.seller_ids, 'The supplier should be set in the orderpoint')
+        self.assertEqual(orderpoint.partner_id, product.seller_ids.partner_id, 'The supplier should be set in the orderpoint')
         self.assertEqual(orderpoint.product_uom, product.uom_id, 'The orderpoint uom should be the same as the product uom')
         self.assertEqual(orderpoint.qty_to_order, 6000)
 
