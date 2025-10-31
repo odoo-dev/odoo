@@ -56,6 +56,7 @@ import {
     mailDataHelpers,
 } from "./mock_server/mail_mock_server";
 import { Base } from "./mock_server/mock_models/base";
+import { DiscussCallHistory } from "./mock_server/mock_models/discuss_call_history";
 import { DiscussCategory } from "./mock_server/mock_models/discuss_category";
 import { DiscussChannel } from "./mock_server/mock_models/discuss_channel";
 import { DiscussChannelMember } from "./mock_server/mock_models/discuss_channel_member";
@@ -65,6 +66,7 @@ import { DiscussVoiceMetadata } from "./mock_server/mock_models/discuss_voice_me
 import { IrAttachment } from "./mock_server/mock_models/ir_attachment";
 import { IrWebSocket } from "./mock_server/mock_models/ir_websocket";
 import { M2xAvatarUser } from "./mock_server/mock_models/m2x_avatar_user";
+import { MailCallArtifact } from "./mock_server/mock_models/mail_call_artifact";
 import { MailActivity } from "./mock_server/mock_models/mail_activity";
 import { MailActivitySchedule } from "./mock_server/mock_models/mail_activity_schedule";
 import { MailActivityType } from "./mock_server/mock_models/mail_activity_type";
@@ -129,6 +131,7 @@ export const mailModels = {
     ...webModels,
     ...busModels,
     Base,
+    DiscussCallHistory,
     DiscussChannel,
     DiscussCategory,
     DiscussChannelMember,
@@ -138,6 +141,7 @@ export const mailModels = {
     IrAttachment,
     IrWebSocket,
     M2xAvatarUser,
+    MailCallArtifact,
     MailActivity,
     MailActivitySchedule,
     MailActivityType,
