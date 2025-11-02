@@ -1,0 +1,179 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.PosSalesDetailsReport" owl="1">
+        <div class="o_pos_sales_report overflow-hidden d-flex flex-row h-100">
+            <div class="o_content d-flex flex-column w-100">
+                <div class="mx-auto fit-content w-print-100">
+                    <div class="d-flex align-items-start">
+                        <table class="table table-borderless table-hover w-print-100">
+                            <thead id="table_header" class="sticky">
+                                <tr class="column_headers_row">
+                                    <th colspan="3" class="text-center">
+                                        <h4 class="m-0 fw-bold">Sales Details</h4>
+                                    </th>
+                                    <th colspan="2" class="column_header">
+                                        As of <span t-out="store.currentDate.toLocaleString()"/>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- SALES SECTION -->
+                                <tr>
+                                    <td class="line_name text" colspan="4">
+                                        <div class="wrapper">
+                                            <div class="content">
+                                                <div class="name">Sales</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <t t-foreach="store.data.products" t-as="cat" t-key="cat.name">
+                                    <tr class="fw-bold">
+                                        <td t-esc="cat.name" />
+                                        <td>Category Total</td>
+                                        <td class="text-end" t-esc="cat.qty" />
+                                        <td class="text-end">
+                                            <t t-if="store.data.currency.position === 'after'">
+                                                <span t-esc="cat.total" />
+                                                <span t-esc="store.data.currency.symbol" />
+                                            </t>
+                                            <t t-else="">
+                                                <span t-esc="store.data.currency.symbol" />
+                                                <span t-esc="cat.total" />
+                                            </t>
+                                        </td>
+                                    </tr>
+                                    <t t-foreach="cat.products" t-as="line" t-key="line.product_id">
+                                        <tr>
+                                            <td />
+                                            <td t-esc="line.product_name" />
+                                            <td class="text-end" t-esc="line.quantity" />
+                                            <td class="text-end">
+                                                <t t-if="store.data.currency.position === 'after'">
+                                                    <span t-esc="line.base_amount" />
+                                                    <span t-esc="store.data.currency.symbol" />
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-esc="store.data.currency.symbol" />
+                                                    <span t-esc="line.base_amount" />
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+
+                                <!-- TAXES SECTION -->
+                                <tr class="section-header">
+                                    <td colspan="4">
+                                        <div class="wrapper">
+                                            <div class="content">
+                                                <div class="name fs-5">Taxes</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <t t-foreach="store.data.taxes" t-as="tax" t-key="tax.name">
+                                    <tr>
+                                        <td />
+                                        <td t-esc="tax.name" />
+                                        <td class="text-end" t-esc="tax.base_amount" />
+                                        <td class="text-end" t-esc="tax.tax_amount" />
+                                    </tr>
+                                </t>
+
+                                <!-- PAYMENTS SECTION -->
+                                <tr class="section-header">
+                                    <td colspan="4">
+                                        <div class="wrapper">
+                                            <div class="content">
+                                                <div class="name fs-5">Payments</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <t t-foreach="store.data.payments" t-as="p" t-key="p.session + '_' + p.id">
+                                    <tr>
+                                        <td />
+                                        <td t-esc="p.name" />
+                                        <td />
+                                        <td class="text-end">
+                                            <t t-if="store.data.currency.position === 'after'">
+                                                <span t-esc="p.total" />
+                                                <span t-esc="store.data.currency.symbol" />
+                                            </t>
+                                            <t t-else="">
+                                                <span t-esc="store.data.currency.symbol" />
+                                                <span t-esc="p.total" />
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </t>
+
+                                <!-- REFUNDS SECTION -->
+                                <tr class="section-header">
+                                    <td colspan="4">
+                                        <div class="wrapper">
+                                            <div class="content">
+                                                <div class="name fs-5">Refunds</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <t t-foreach="store.data.refund_products" t-as="r" t-key="r">
+                                    <tr>
+                                        <td />
+                                        <td t-esc="r.name" />
+                                        <td class="text-end" t-esc="r.qty" />
+                                        <td class="text-end" t-esc="r.total" />
+                                    </tr>
+                                </t>
+
+                                <!-- INVOICES SECTION -->
+                                <tr class="section-header">
+                                    <td colspan="4">
+                                        <div class="wrapper">
+                                            <div class="content">
+                                                <div class="name fs-5">Invoices</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <t t-foreach="store.data.invoiceList" t-as="session" t-key="session.id">
+                                    <t t-foreach="session.invoices" t-as="inv" t-key="inv.id">
+                                        <tr>
+                                            <td />
+                                            <td>
+                                                <span t-esc="inv.name" /> — <small t-esc="inv.order_ref" />
+                                            </td>
+                                            <td />
+                                            <td class="text-end" t-esc="inv.total" />
+                                        </tr>
+                                    </t>
+                                </t>
+                                <tr class="fw-bold">
+                                    <td colspan="3" class="text-end">Invoice Total</td>
+                                    <td class="text-end" t-esc="store.data.invoiceTotal" />
+                                </tr>
+                            </tbody>
+
+                            <div class="mt-4">
+                                <strong>Transactions:</strong> <span t-esc="store.data.nbr_orders" />
+                                    <br />
+                                    <strong>
+                                Discounts:</strong>
+                                    <span t-esc="store.data.discount_number" /> (Total: <t
+                                    t-if="store.data.currency.position === 'after'">
+                                    <span t-esc="store.data.discount_amount" />
+                                    <span t-esc="store.data.currency.symbol" />
+                                </t>
+                                    <t
+                                    t-else="">
+                                    <span t-esc="store.data.currency.symbol" />
+                                    <span t-esc="store.data.discount_amount" />
+                                </t>) </div>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -105,4 +105,19 @@
 
         <menuitem id="menu_report_pos_order_all" name="Orders" action="action_report_pos_order_all" parent="menu_point_rep" sequence="3"/>
         <menuitem id="menu_report_order_details" name="Sales Details" action="action_report_pos_details" parent="menu_point_rep" sequence="4"/>
+
+        <record id="action_report_pos_details_new_client" model="ir.actions.client">
+            <field name="name">Sales Details (New)</field>
+            <field name="tag">pos_report</field>
+            <field name="path">sales-details</field>
+            <field name="context">{'report_name': 'pos_sales_details'}</field>
+        </record>
+
+        <menuitem
+            id="menu_report_order_details_new"
+            name="Sales Details New"
+            action="action_report_pos_details_new_client"
+            parent="menu_point_rep"
+            sequence="4"
+        />
 </odoo>

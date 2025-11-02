@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="point_of_sale.PosReportMultiSelectorFilter">
+        <Dropdown menuClass="'pos_report_filter multiselect'">
+            <button class="btn btn-secondary">
+                <i class="fa fa-store me-1" />Point of Sale</button>
+
+            <t t-set-slot="content">
+                <div class="dropdown-item gap-4 align-items-center">
+                    <label>Point of Sale</label>
+                    <MultiRecordSelector t-props="getMultiRecordSelectorProps('pos.config', 'config_ids')" />
+                </div>
+            </t>
+        </Dropdown>
+    </t>
+</templates>

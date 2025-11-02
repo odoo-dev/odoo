@@ -284,6 +284,7 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
         refund_products, refund_info = self.with_context(config_id=configs[0].id if len(configs) > 0 else False)._get_total_and_qty_per_category(refund_products)
 
         currency = {
+            'id': user_currency.id,
             'symbol': user_currency.symbol,
             'position': True if user_currency.position == 'after' else False,
             'total_paid': user_currency.round(total),

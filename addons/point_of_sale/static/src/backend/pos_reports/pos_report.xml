@@ -1,0 +1,23 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.PosReport">
+        <div class="o_action pos_report" t-att-class="cssCustomClass">
+            <ControlPanel>
+                <t t-set-slot="control-panel-buttons">
+                    <button class="btn btn-primary" t-on-click="() => store.export_pdf()">
+                        PDF
+                    </button>
+                </t>
+
+                <t t-set-slot="control-panel-actions">
+                   <div class="d-flex gap-1 flex-wrap">
+                       <PosReportFilters />
+                   </div>
+                </t>
+            </ControlPanel>
+
+            <t t-if="getComponentName">
+                <t t-component="getComponentName"/>
+            </t>
+        </div>
+    </t>
+</templates>

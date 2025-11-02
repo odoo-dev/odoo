@@ -1,0 +1,10 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.PosReportFilters">
+        <div id="filter_date">
+            <t t-call="point_of_sale.PosReportDateFilter"/>
+        </div>
+        <div id="filter_multi_selector">
+            <t t-call="point_of_sale.PosReportMultiSelectorFilter"/>
+        </div>
+    </t>
+</templates>
