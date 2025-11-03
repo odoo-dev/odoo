@@ -8,7 +8,8 @@
     </template>
 
     <template id="exception_on_picking">
-        <div> Exception(s) occurred on the picking
+        <div>
+            Exception(s) occurred on the picking
             <a href="#" data-oe-model="stock.picking" t-att-data-oe-id="origin_picking.id"><t t-out="origin_picking.name"/></a>.
             Manual actions may be needed.
             <div class="mt16">
