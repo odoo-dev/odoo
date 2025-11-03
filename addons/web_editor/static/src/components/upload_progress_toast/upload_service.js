@@ -182,7 +182,190 @@ export const uploadService = {
                         throw error;
                     }
                 }
-            }
+            },
+            /**
+             * TODO: merge with uploadFiles in master
+             *
+             * Uploads files with the ability to abort the entire upload process.
+             * @param {Array<File>} files
+             * @param {Object} options
+             * @param {Function} onUploaded
+             * @return {Object} { promise, abort }
+             * Technical Diff from uploadFiles:
+             *  - Wraps upload logic inside a returned promise instead of implicit async flow.
+             *  - Keeps local state (currentXHR, addAttachmentRpc) instead of service-level globals.
+             *  - Returns "invalid_size" instead of null for oversized files.
+             *  - Uses AbortController and checks signal.aborted before/after each upload and inside error handling.
+             *  - Checks ev.lengthComputable before computing progress.
+             *  - Explicitly calls currentXHR.abort() and addAttachmentRpc.abort?.() on cancellation.
+             *  - Explicitly nullifies large variables (dataURL = null) for memory release.
+             *  - Removes XHR event listeners (progress, load) in finally.
+             *  - Returns a control object { promise, abort } instead of nothing.
+             *  - Uses structured try/catch/finally around each upload to handle abortion cleanly.
+             */
+            uploadFilesWithAbort(
+                files,
+                { resModel, resId, isImage },
+                onUploaded
+            ) {
+                const sortedFiles = Array.from(files).sort(
+                    (a, b) => a.size - b.size
+                );
+                const controller = new AbortController();
+                const { signal } = controller;
+                let addAttachmentRpc = null;
+                let currentXHR = null;
+
+                const promise = (async () => {
+                    try {
+                        // Step 1: prepare UI entries
+                        for (const file of sortedFiles) {
+                            if (!checkFileSize(file.size, notification)) {
+                                return "invalid_size";
+                            }
+                            const id = ++fileId;
+                            file.progressToastId = id;
+                            addFile({
+                                id,
+                                name: file.name,
+                                size: file.size
+                                    ? humanNumber(file.size) + "B"
+                                    : "",
+                            });
+                        }
+
+                        // Step 2: upload sequentially
+                        for (const sortedFile of sortedFiles) {
+                            if (signal.aborted) {
+                                throw new Error("Upload Aborted Manually");
+                            }
+
+                            const file =
+                                progressToast.files[sortedFile.progressToastId];
+                            let dataURL;
+                            try {
+                                dataURL = await getDataURLFromFile(sortedFile);
+                            } catch {
+                                deleteFile(file.id);
+                                env.services.notification.add(
+                                    sprintf(
+                                        _t('Could not load the file "%s".'),
+                                        sortedFile.name
+                                    ),
+                                    { type: "danger" }
+                                );
+                                continue;
+                            }
+
+                            currentXHR = new XMLHttpRequest();
+                            addAttachmentRpc = null;
+
+                            const onProgress = (ev) => {
+                                if (ev.lengthComputable) {
+                                    file.progress =
+                                        (ev.loaded / ev.total) * 100;
+                                }
+                            };
+                            const onLoad = () => (file.progress = 100);
+                            currentXHR.upload.addEventListener(
+                                "progress",
+                                onProgress
+                            );
+                            currentXHR.upload.addEventListener("load", onLoad);
+
+                            try {
+                                addAttachmentRpc = rpc(
+                                    "/web_editor/attachment/add_data",
+                                    {
+                                        name: file.name,
+                                        data: dataURL.split(",")[1],
+                                        res_id: resId,
+                                        res_model: resModel,
+                                        is_image: !!isImage,
+                                        width: 0,
+                                        quality: 0,
+                                    },
+                                    { xhr: currentXHR }
+                                );
+
+                                const attachment = await addAttachmentRpc;
+                                if (signal.aborted) {
+                                    throw new Error("Upload Aborted Manually");
+                                }
+
+                                if (attachment.error) {
+                                    file.hasError = true;
+                                    file.errorMessage = attachment.error;
+                                } else {
+                                    if (attachment.mimetype === "image/webp") {
+                                        try {
+                                            // Generate alternate format for reports.
+                                            await convertWebpToJpeg(
+                                                dataURL,
+                                                file.name,
+                                                attachment.id
+                                            );
+                                        } catch (convErr) {
+                                            console.warn(
+                                                "[uploadService] webp conversion failed:",
+                                                convErr
+                                            );
+                                        }
+                                    }
+                                    file.uploaded = true;
+                                    await onUploaded(attachment);
+                                }
+                            } catch (error) {
+                                if (signal.aborted) {
+                                    throw new Error("Upload Aborted Manually");
+                                }
+                                file.hasError = true;
+                                console.error("Upload error:", error);
+                            } finally {
+                                currentXHR?.upload.removeEventListener(
+                                    "progress",
+                                    onProgress
+                                );
+                                currentXHR?.upload.removeEventListener(
+                                    "load",
+                                    onLoad
+                                );
+                                setTimeout(
+                                    () => deleteFile(file.id),
+                                    AUTOCLOSE_DELAY
+                                );
+                                dataURL = null; // explicitly free memory
+                            }
+                        }
+                        return "done";
+                    } catch (err) {
+                        console.error("[uploadService] unexpected error:", err);
+                        return "error";
+                    } finally {
+                        currentXHR = null;
+                        addAttachmentRpc = null;
+                    }
+                })();
+
+                const abort = () => {
+                    controller.abort();
+                    try {
+                        addAttachmentRpc?.abort?.();
+                        // Abort the current XMLHttpRequest if it’s running
+                        // In general, rpc abort should be enough, but just in case.
+                        currentXHR?.abort?.();
+                    } catch (err) {
+                        console.warn("[uploadService] abort failed:", err);
+                    }
+                    Object.keys(progressToast.files).forEach((fid) =>
+                        deleteFile(fid)
+                    );
+                    addAttachmentRpc = null; // release last reference
+                    currentXHR = null;
+                };
+
+                return { promise, abort };
+            },
         };
     },
 };
