@@ -462,7 +462,7 @@ class MrpWorkorder(models.Model):
         if 'qty_produced' in values:
             if any(w.state in ['done', 'cancel'] for w in self):
                 raise UserError(_('You cannot change the quantity produced of a work order that is in done or cancel state.'))
-            elif self.product_uom_id.compare(values['qty_produced'], 0) < 0:
+            elif float_compare(values['qty_produced'], 0.0, precision_rounding=self.product_uom_id.rounding) < 0:
                 raise UserError(_('The quantity produced must be positive.'))
 
         if 'production_id' in values and any(values['production_id'] != w.production_id.id for w in self):
