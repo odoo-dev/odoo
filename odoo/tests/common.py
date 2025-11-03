@@ -329,7 +329,7 @@ class BaseCase(case.TestCase, metaclass=MetaCase):
         testMethod = getattr(self, self._testMethodName)
 
         if getattr(testMethod, '_retry', True) and getattr(self, '_retry', True):
-            tests_run_count = self._tests_run_count
+            tests_run_count = 2
         else:
             tests_run_count = 1
             _logger.info('Auto retry disabled for %s', self)
