@@ -4,7 +4,7 @@ import { CalendarCommonRenderer } from "./calendar_common/calendar_common_render
 import { CalendarYearRenderer } from "./calendar_year/calendar_year_renderer";
 
 
-import { Component } from "@odoo/owl";
+import { Component, useEffect } from "@odoo/owl";
 
 export class CalendarRenderer extends Component {
     static template = "web.CalendarRenderer";
@@ -26,6 +26,15 @@ export class CalendarRenderer extends Component {
         onSquareSelection: Function,
         cleanSquareSelection: Function,
     };
+    setup() {
+        this.surroundingCalendarData;
+        this.fetchedSurroundingsPromise = this.fetchSurroundingData();
+        useEffect((date) => {
+            console.log("differente dATE")
+            this.surroundingCalendarData = null;
+            this.fetchedSurroundingsPromise = this.fetchSurroundingData(date);
+        }, () => [this.props.model.date]);
+    }
     get concreteRenderer() {
         return this.constructor.components[this.props.model.scale];
     }
@@ -58,20 +67,33 @@ export class CalendarRenderer extends Component {
             enabledDuration: TOUCH_SELECTION_THRESHOLD
         };
     }
+    async fetchSurroundingData() {
+        let data = this.props.model.data;
+        const _data = { ...data };
+        
+        console.log(data.range.start.toISO())
+        await this.props.model.updateData(_data, {
+            start: this.getSurroundingDate(data.range.start, "previous"),
+            end: this.getSurroundingDate(data.range.end, "next"),
+        });
+        console.log("records around: ", _data.records)
+        this.surroundingCalendarData = _data;
+    }
     getSurroundingDate(date, direction) {
         return date[direction === "next" ? "plus" : "minus"]({[`${this.props.model.scale}s`]: 1});
     }
     async getCalendarData(direction) {
-        let data = this.props.model.data;
         if (direction) {
-            const _data = { ...this.props.model.data };
-            await this.props.model.updateData(_data, {
-                start: this.getSurroundingDate(data.range.start, direction),
-                end: this.getSurroundingDate(data.range.end, direction),
-            });
-            data = _data;
+            if (this.surroundingCalendarData) {
+                console.log("send befoire promise")
+                return this.surroundingCalendarData;
+            }
+            await this.fetchedSurroundingsPromise;
+            console.log("send after promise")
+            return this.surroundingCalendarData;
+        } else {
+            return this.props.model.data;
         }
-        return data;
     }
     getSwiperProps(direction) {
         return {

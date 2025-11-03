@@ -89,7 +89,7 @@ beforeEach(() => {
     mockDate("2016-12-12 08:00:00");
 });
 
-test(`component is destroyed while sync microsoft calendar`, async () => {
+test.debug(`component is destroyed while sync microsoft calendar`, async () => {
     defineActions([
         {
             id: 1,
@@ -112,6 +112,8 @@ test(`component is destroyed while sync microsoft calendar`, async () => {
     await mountWebClient();
     await getService("action").doAction(1);
     expect.verifySteps([]);
+        debugger
+
 
     await switchView("calendar");
     expect.verifySteps(["sync_data"]);
@@ -121,5 +123,5 @@ test(`component is destroyed while sync microsoft calendar`, async () => {
 
     deferred.resolve();
     await animationFrame();
-    expect.verifySteps(["search_read"]);
+    await expect.waitForSteps(["search_read"]);
 });

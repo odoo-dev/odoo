@@ -228,6 +228,7 @@ export class CalendarCommonRenderer extends Component {
     }
     async mapRecordsToEvents() {
         const { records } = await this.props.getCalendarData();
+        console.log(records)
         return Object.values(records).map((r) => this.convertRecordToEvent(r))
     }
     convertRecordToEvent(record) {
