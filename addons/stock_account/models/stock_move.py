@@ -423,6 +423,13 @@ class StockMove(models.Model):
             if return_data.get('description'):
                 descriptions.append(return_data['description'])
 
+        if remaining_qty:
+            previous_moves_data = self._get_value_from_previous_moves(remaining_qty, at_date)
+            value += previous_moves_data['value']
+            remaining_qty -= previous_moves_data['quantity']
+            if previous_moves_data.get('description'):
+                descriptions.append(previous_moves_data['description'])
+
         # 4. standard_price
         if remaining_qty:
             std_price_data = self._get_value_from_std_price(remaining_qty, forced_std_price, at_date)
@@ -491,6 +498,16 @@ class StockMove(models.Model):
             }
         return dict(VALUATION_DICT)
 
+    def _get_value_from_previous_moves(self, quantity, at_date=None):
+        if not self.move_orig_ids or self.move_orig_ids.company_id == self.company_id or len(self.move_orig_ids) > 1:
+            return dict(VALUATION_DICT)
+        origin_move = self.move_orig_ids
+        return {
+            'value': origin_move.value * quantity / origin_move.quantity,
+            'quantity': quantity,
+            'description': _('Value from previous move %s', origin_move.reference),
+        }
+
     def _get_value_from_std_price(self, quantity, std_price=False, at_date=None):
         if at_date and self.product_id.cost_method == 'standard':
             std_price = std_price or self.product_id.standard_price or self.product_id._get_standard_price_at_date(at_date)
@@ -532,7 +549,7 @@ class StockMove(models.Model):
                 continue
             if move_line._should_exclude_for_valuation():
                 continue
-            if not move_line.location_id._should_be_valued() and move_line.location_dest_id._should_be_valued():
+            if not move_line.with_company(move_line.company_id).location_id._should_be_valued() and move_line.with_company(move_line.company_id).location_dest_id._should_be_valued():
                 res.add(move_line.id)
         return self.env['stock.move.line'].browse(res)
 
@@ -562,7 +579,7 @@ class StockMove(models.Model):
                 continue
             if move_line._should_exclude_for_valuation():
                 continue
-            if move_line.location_id._should_be_valued() and not move_line.location_dest_id._should_be_valued():
+            if move_line.with_company(move_line.company_id).location_id._should_be_valued() and not move_line.with_company(move_line.company_id).location_dest_id._should_be_valued():
                 res |= move_line
         return res
 
