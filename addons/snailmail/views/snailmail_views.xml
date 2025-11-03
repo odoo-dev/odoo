@@ -5,7 +5,7 @@
         <field name="model">snailmail.letter</field>
         <field name="arch" type="xml">
             <list decoration-danger="state=='error'" decoration-muted="state=='sent'" string="Letters">
-                <field name="attachment_id" string="Document"/>
+                <field name="name" string="Document"/>
                 <field name="partner_id"/>
                 <field name="user_id"/>
                 <field name="state" column_invisible="True"/>
@@ -31,8 +31,8 @@
                     </div>
                     <group>
                         <field name="reference" widget="reference"/>
-                        <field name="attachment_datas" filename="attachment_fname"/>
-                        <field name="attachment_fname" invisible="1"/>
+                        <field name="name" invisible="1"/>
+                        <field name="datas" widget="binary" filename="name" readonly="1" />
                         <field name="partner_id"/>
                         <field name="user_id"/>
                         <field name="info_msg" widget="html"/>

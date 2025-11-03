@@ -43,9 +43,8 @@ class SnailmailLetter(models.Model):
         default=lambda self: self.env.company.id)
     report_template = fields.Many2one('ir.actions.report', 'Optional report to print and attach')
 
-    attachment_id = fields.Many2one('ir.attachment', string='Attachment', ondelete='cascade', index='btree_not_null')
-    attachment_datas = fields.Binary('Document', related='attachment_id.datas')
-    attachment_fname = fields.Char('Attachment Filename', related='attachment_id.name')
+    datas = fields.Binary('Document')
+    name = fields.Char('Name')
     color = fields.Boolean(string='Color', default=lambda self: self.env.company.snailmail_color)
     cover = fields.Boolean(string='Cover Page', default=lambda self: self.env.company.snailmail_cover)
     duplex = fields.Boolean(string='Both side', default=lambda self: self.env.company.snailmail_duplex)
@@ -73,11 +72,11 @@ class SnailmailLetter(models.Model):
     state_id = fields.Many2one("res.country.state", string='State')
     country_id = fields.Many2one('res.country', string='Country')
 
-    @api.depends('attachment_id', 'partner_id')
+    @api.depends('name', 'partner_id')
     def _compute_display_name(self):
         for letter in self:
-            if letter.attachment_id:
-                letter.display_name = f"{letter.attachment_id.name} - {letter.partner_id.name}"
+            if letter.name:
+                letter.display_name = f"{letter.name} - {letter.partner_id.name}"
             else:
                 letter.display_name = letter.partner_id.name
 
@@ -119,24 +118,16 @@ class SnailmailLetter(models.Model):
             })
 
         self.env['mail.notification'].sudo().create(notification_vals)
-
-        letters.attachment_id.check_access('read')
         return letters
 
-    def write(self, vals):
-        res = super().write(vals)
-        if 'attachment_id' in vals:
-            self.attachment_id.check_access('read')
-        return res
-
-    def _fetch_attachment(self):
+    def _fetch_datas(self):
         """
-        This method will check if we have any existent attachement matching the model
+        This method will check if we have any existent datas matching the model
         and res_ids and create them if not found.
         """
         self.ensure_one()
         obj = self.env[self.model].browse(self.res_id)
-        if not self.attachment_id:
+        if not self.datas:
             report = self.report_template
             if not report:
                 report_name = self.env.context.get('report_name')
@@ -167,16 +158,12 @@ class SnailmailLetter(models.Model):
             pdf_bin = self._overwrite_margins(pdf_bin)
             if self.cover:
                 pdf_bin = self._append_cover_page(pdf_bin)
-            attachment = self.env['ir.attachment'].create({
+            self.write({
                 'name': filename,
                 'datas': base64.b64encode(pdf_bin),
-                'res_model': 'snailmail.letter',
-                'res_id': self.id,
-                'type': 'binary',  # override default_type from context, possibly meant for another model!
             })
-            self.write({'attachment_id': attachment.id})
 
-        return self.attachment_id
+        return self.datas
 
     def _count_pages_pdf(self, bin_pdf):
         """ Count the number of pages of the given pdf file.
@@ -273,11 +260,11 @@ class SnailmailLetter(models.Model):
                 document.update({
                     'company_logo': letter.company_id.logo_web and letter.company_id.logo_web.decode('utf-8') or False,
                 })
-                attachment = letter._fetch_attachment()
-                if attachment:
+                datas = letter._fetch_datas()
+                if datas:
                     document.update({
-                        'pdf_bin': route == 'print' and attachment.datas.decode('utf-8'),
-                        'pages': route == 'estimate' and self._count_pages_pdf(base64.b64decode(attachment.datas)),
+                        'pdf_bin': route == 'print' and datas.decode('utf-8'),
+                        'pages': route == 'estimate' and self._count_pages_pdf(base64.b64decode(datas)),
                     })
                 else:
                     letter.write({
