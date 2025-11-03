@@ -4,11 +4,9 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 from odoo.tests import tagged
 
 import time
-from unittest import skip
 
 
 @tagged('-at_install', 'post_install')
-@skip('Temporary to fast merge new valuation')
 class TestFifoPrice(ValuationReconciliationTestCommon):
 
     def test_00_test_fifo(self):
@@ -56,7 +54,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         # Check the standard price of the product (fifo icecream), that should have changed
         # because the unit cost of the purchase order is 50
         self.assertAlmostEqual(product_cable_management_box.standard_price, 50.0)
-        self.assertEqual(product_cable_management_box.value_svl, 500.0, 'Wrong stock value')
+        self.assertEqual(product_cable_management_box.total_value, 500.0, 'Wrong stock value')
 
         # I create a draft Purchase Order for second shipment for 30 kg at 80 euro
         purchase_order_2 = self.env['purchase.order'].create({
@@ -80,7 +78,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         # Check the standard price of the product, that should have not changed because we
         # still have icecream in stock
         self.assertEqual(product_cable_management_box.standard_price, 72.5, 'Standard price as fifo price of second reception incorrect!')
-        self.assertEqual(product_cable_management_box.value_svl, 2900.0, 'Stock valuation should be 2900')
+        self.assertEqual(product_cable_management_box.total_value, 2900.0, 'Stock valuation should be 2900')
 
         # Let us send some goods
         outgoing_shipment = self.env['stock.picking'].create({
@@ -103,7 +101,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         outgoing_shipment.button_validate()
 
         # Check stock value became 1600 .
-        self.assertEqual(product_cable_management_box.value_svl, 1600.0, 'Stock valuation should be 1600')
+        self.assertEqual(product_cable_management_box.total_value, 1600.0, 'Stock valuation should be 1600')
 
         # Do a delivery of an extra 500 g (delivery order)
         outgoing_shipment_uom = self.env['stock.picking'].create({
@@ -126,7 +124,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         outgoing_shipment_uom.button_validate()
 
         # Check stock valuation and qty in stock
-        self.assertEqual(product_cable_management_box.value_svl, 1560.0, 'Stock valuation should be 1560')
+        self.assertEqual(product_cable_management_box.total_value, 1560.0, 'Stock valuation should be 1560')
         self.assertEqual(product_cable_management_box.qty_available, 19.5, 'Should still have 19.5 in stock')
 
         # We will temporarily change the currency rate on the sixth of June to have the same results all year
@@ -304,7 +302,7 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         picking.button_validate()
 
         original_out_move = outgoing_shipment_neg.move_ids[0]
-        self.assertEqual(original_out_move.product_id.value_svl,  12000.0, 'Value of the move should be 12000')
+        self.assertEqual(original_out_move.product_id.total_value, 12000.0, 'Value of the move should be 12000')
         self.assertEqual(original_out_move.product_id.qty_available, 150.0, 'Qty available should be 150')
 
     def test_01_test_fifo(self):
@@ -348,5 +346,5 @@ class TestFifoPrice(ValuationReconciliationTestCommon):
         picking.button_validate()
 
         self.assertEqual(super_product.standard_price, 0.035)
-        self.assertEqual(super_product.value_svl, 35.0)
+        self.assertEqual(super_product.total_value, 35.0)
         self.assertEqual(picking.move_ids.price_unit, 0.035)
