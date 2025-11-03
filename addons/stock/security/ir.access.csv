@@ -14,7 +14,7 @@ access_stock_lot_user,stock.lot user,stock.lot,stock.group_stock_user,crud,
 stock_production_lot_rule,Stock Production Lot multi-company,stock.lot,,crud,"[('company_id', 'in', company_ids + [False])]"
 access_stock_move_manager,stock.move manager,stock.move,stock.group_stock_manager,crud,
 access_stock_move_user,stock.move user,stock.move,stock.group_stock_user,cru,
-stock_move_rule,stock_move multi-company,stock.move,,crud,"[('company_id', 'in', company_ids)]"
+stock_move_rule,stock_move multi-company,stock.move,,crud,"['|', '|', ('company_id', 'in', company_ids), ('move_orig_ids.company_id', 'in', company_ids), ('move_dest_ids.company_id', 'in', company_ids)]"
 access_product_product_stock_user,product_product_stock_user,product.product,stock.group_stock_user,r,
 access_product_template_stock_user,product.template stock user,product.template,stock.group_stock_user,r,
 access_product_pricelist_stock_manager,product.pricelist stock_manager,product.pricelist,stock.group_stock_manager,crud,
@@ -37,7 +37,7 @@ access_stock_location_route_stock_manager,stock.route,stock.route,stock.group_st
 access_stock_location_route,stock.route,stock.route,base.group_user,r,
 stock_location_route_comp_rule,stock_route multi-company,stock.route,,crud,"[('company_id', 'in', company_ids + [False])]"
 access_stock_move_line_all,stock.move.line all users,stock.move.line,base.group_user,crud,
-stock_move_line_rule,stock_move_line multi-company,stock.move.line,,crud,"[('company_id', 'in', company_ids + [False])]"
+stock_move_line_rule,stock_move_line multi-company,stock.move.line,,crud,"['|', '|', ('company_id', 'in', company_ids + [False]), ('move_id.move_orig_ids.company_id', 'in', company_ids), ('move_id.move_dest_ids.company_id', 'in', company_ids)]"
 access_stock_putaway_all,stock.putaway.rule all users,stock.putaway.rule,base.group_user,r,
 access_stock_putaway_manager,stock.putaway.rule all managers,stock.putaway.rule,stock.group_stock_manager,crud,
 stock_putaway_rule_rule,Stock Operation Type multi-company,stock.putaway.rule,,crud,"[('company_id','in', company_ids)]"
