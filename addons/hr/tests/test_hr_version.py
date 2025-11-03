@@ -676,3 +676,20 @@ class TestHrVersion(TransactionCase):
             fields_without_tracking,
             f"The following hr.version fields should have tracking=True: {fields_without_tracking}",
         )
+
+    def test_delete_hr_version(self):
+        employee = self.env['hr.employee'].create(
+            {
+                'name': 'John Doe',
+                'date_version': '2024-01-01',
+            }
+        )
+
+        version1 = employee.version_id
+        version2 = employee.create_version({
+            'date_version': '2025-01-01',
+        })
+
+        version1.unlink()
+        with self.assertRaises(ValidationError):
+            version2.unlink()
