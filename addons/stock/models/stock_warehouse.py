@@ -3,7 +3,7 @@
 
 from collections import namedtuple
 
-from odoo import api, fields, models
+from odoo import api, fields, models, Command
 from odoo.exceptions import UserError, RedirectWarning
 from odoo.tools.translate import _, LazyTranslate
 
@@ -26,7 +26,7 @@ class StockWarehouse(models.Model):
     _order = 'sequence,id'
     _check_company_auto = True
     # namedtuple used in helper methods generating values for routes
-    Routing = namedtuple('Routing', ['from_loc', 'dest_loc', 'picking_type', 'action'])
+    Routing = namedtuple('Routing', ['from_loc', 'dest_loc', 'picking_type', 'action', 'procure_method'])
 
     def _default_name(self):
         count = self.env['stock.warehouse'].with_context(active_test=False).search_count([('company_id', '=', self.env.company.id)])
@@ -154,6 +154,8 @@ class StockWarehouse(models.Model):
             # manually update locations' warehouse since it didn't exist at their creation time
             view_location_id = self.env['stock.location'].browse(vals.get('view_location_id'))
             (view_location_id | view_location_id.with_context(active_test=False).child_ids).write({'warehouse_id': warehouse.id})
+        # setup inter-warehouse/company transit locations
+        warehouses._update_inter_warehouse_location_properties()
 
         self._check_multiwarehouse_group()
 
@@ -201,8 +203,13 @@ class StockWarehouse(models.Model):
 
         if vals.get('code') or vals.get('name'):
             warehouses._update_name_and_code(vals.get('name'), vals.get('code'))
+        if vals.get('partner_id'):
+            self._update_inter_warehouse_resupply_routes_values(vals.get('partner_id'))
 
         res = super().write(vals)
+
+        if vals.get('partner_id'):
+            self._update_inter_warehouse_location_properties()
 
         for warehouse in warehouses:
             # check if we need to delete and recreate route
@@ -315,15 +322,15 @@ class StockWarehouse(models.Model):
             group_stock_multi_warehouses = self.env.ref('stock.group_stock_multi_warehouses')
             group_stock_multi_locations = self.env.ref('stock.group_stock_multi_locations')
             if max_count <= 1 and group_stock_multi_warehouses in group_user.implied_ids:
-                group_user.write({'implied_ids': [(3, group_stock_multi_warehouses.id)]})
-                group_stock_multi_warehouses.write({'user_ids': [(3, user.id) for user in group_user.all_user_ids]})
+                group_user.write({'implied_ids': [Command.unlink(group_stock_multi_warehouses.id)]})
+                group_stock_multi_warehouses.write({'user_ids': [Command.unlink(user.id) for user in group_user.all_user_ids]})
                 self.env.user._bus_send("stock_group_sync", {})
             if max_count > 1 and group_stock_multi_warehouses not in group_user.implied_ids:
                 if group_stock_multi_locations not in group_user.implied_ids:
                     self.env['res.config.settings'].create({
                         'group_stock_multi_locations': True,
                     }).execute()
-                group_user.write({'implied_ids': [(4, group_stock_multi_warehouses.id), (4, group_stock_multi_locations.id)]})
+                group_user.write({'implied_ids': [Command.link(group_stock_multi_warehouses.id), Command.link(group_stock_multi_locations.id)]})
                 self.env.user._bus_send("stock_group_sync", {})
 
     def _create_or_update_sequences_and_picking_types(self):
@@ -703,17 +710,36 @@ class StockWarehouse(models.Model):
 
             pull_rules_list = supplier_wh._get_supply_pull_rules_values(
                 [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')],
-                values={'route_id': inter_wh_route.id, 'location_dest_from_rule': True})
+                values={'route_id': inter_wh_route.id, 'location_dest_from_rule': True, 'partner_address_id': self.partner_id.id})
             if supplier_wh.delivery_steps != 'ship_only':
                 # Replenish from Output location
                 pull_rules_list += supplier_wh._get_supply_pull_rules_values(
                     [self.Routing(supplier_wh.lot_stock_id, output_location, supplier_wh.pick_type_id, 'pull')],
                     values={'route_id': inter_wh_route.id})
             pull_rules_list += self._get_supply_pull_rules_values(
-                [self.Routing(transit_location, self.lot_stock_id, self.in_type_id, 'pull')],
-                values={'route_id': inter_wh_route.id})
+                [self.Routing(transit_location, self.lot_stock_id, self.in_type_id, 'pull_push', 'make_to_stock')],
+                values={'route_id': inter_wh_route.id, 'partner_address_id': supplier_wh.partner_id.id, 'push_domain': f"[('partner_id', '=', {self.partner_id.id}), ('location_id.warehouse_id', '=', {supplier_wh.id})]"})
             for pull_rule_vals in pull_rules_list:
                 Rule.create(pull_rule_vals)
+
+    def _update_inter_warehouse_resupply_routes_values(self, partner_id):
+        """Update push_domain in resupply routes when warehouse partner_id changes to given partner_id argument.
+        We expect that only the old partner_id needs to be replaced with the new one if it's still in the push_domain
+        to avoid overwriting customizations to the push domain or touching custom push_pull rules"""
+        grouped_routes = self.env['stock.route'].sudo()._read_group([('supplier_wh_id', 'in', self.ids)], ['supplier_wh_id'], ['id:recordset'])
+        routes_by_supplier_wh = {supplier_wh.id: routes for supplier_wh, routes in grouped_routes}
+        for warehouse in self:
+            for route in warehouse.resupply_route_ids:
+                rules_to_update = route.rule_ids.filtered(
+                    lambda r: r.action == 'pull_push' and r.push_domain
+                )
+                for rule in rules_to_update:
+                    if f'("partner_id", "=", {warehouse.partner_id.id})' in rule.push_domain:
+                        rule.push_domain = rule.push_domain.replace(f'("partner_id", "=", {warehouse.partner_id.id})', f'("partner_id", "=", {partner_id})')
+            for route in routes_by_supplier_wh.get(warehouse.id, self.env['stock.route']):
+                rules_to_update = route.rule_ids.filtered(lambda r: r.action == 'pull_push')
+                for rule in rules_to_update:
+                    rule.partner_address_id = partner_id
 
     # Routing tools
     # ------------------------------------------------------------
@@ -793,7 +819,7 @@ class StockWarehouse(models.Model):
             'product_categ_selectable': True,
             'supplied_wh_id': self.id,
             'supplier_wh_id': supplier_warehouse.id,
-            'company_id': (self.company_id & supplier_warehouse.company_id).id,
+            'company_id': self.company_id.id,
         }
 
     # Pull / Push tools
@@ -928,6 +954,26 @@ class StockWarehouse(models.Model):
     def _update_location_delivery(self, new_delivery_step):
         self.mapped('wh_pack_stock_loc_id').write({'active': new_delivery_step == 'pick_pack_ship'})
         self.mapped('wh_output_stock_loc_id').write({'active': new_delivery_step != 'ship_only'})
+
+    def _update_inter_warehouse_location_properties(self):
+        """ Updates per company inter-company/warehouse locations.
+        Expected to be called after a warehouse's partner_id (i.e. address) has been changed
+        to ensure consistent delivery addresses during inter-warehouse transfers.
+        """
+        all_companies = self.env['res.company'].search([])
+        for warehouse in self:
+            warehouse_internal_transit_location, inter_company_transit_location = warehouse._get_transit_locations()
+            for company in all_companies:
+                if company == warehouse.company_id:
+                    warehouse.partner_id.with_company(company).sudo().write({
+                        'property_stock_customer': warehouse_internal_transit_location.id,
+                        'property_stock_supplier': warehouse_internal_transit_location.id,
+                    })
+                else:
+                    warehouse.partner_id.with_company(company).sudo().write({
+                        'property_stock_customer': inter_company_transit_location.id,
+                        'property_stock_supplier': inter_company_transit_location.id,
+                })
 
     # Misc
     # ------------------------------------------------------------

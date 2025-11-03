@@ -453,7 +453,7 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _get_default_route(self, force_action=False):
         self.ensure_one()
-        applicable_routes = self.product_id.route_ids | self.product_id.categ_id.total_route_ids
+        applicable_routes = self.product_id.route_ids | self.product_id.categ_id.total_route_ids | self.warehouse_id.route_ids
         matching_route = applicable_routes.filtered(lambda r: r.rule_ids.filtered(
             lambda rule: rule.location_dest_id == self.location_id
             and rule.action in ['pull_push', 'pull']

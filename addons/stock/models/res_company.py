@@ -213,6 +213,7 @@ class ResCompany(models.Model):
         self.ensure_one()
         if not self.env.user.has_group('base.group_multi_company'):
             return
+        inter_company_location = self.env.ref('stock.stock_location_inter_company')
         other_companies = self.env['res.company'].search([('id', '!=', self.id)])
         other_companies.partner_id.with_company(self).write({
             'property_stock_customer': inter_company_location.id,

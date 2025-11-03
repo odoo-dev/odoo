@@ -2273,8 +2273,9 @@ Please change the quantity done or the rounding precision in your settings.""",
                         move.move_orig_ids.sudo().filtered(lambda m: m.state != 'done')._action_cancel()
             else:
                 if all(state in ('done', 'cancel') for state in siblings_states):
+                    # Need sudo() as removing the `move_orig_ids` link will revoke the extra access, but would still trigger a recompute_state on the move.
                     move_dest_ids = move.move_dest_ids
-                    move_dest_ids.write({
+                    move_dest_ids.sudo().write({
                         'procure_method': 'make_to_stock',
                         'move_orig_ids': [Command.unlink(move.id)]
                     })
