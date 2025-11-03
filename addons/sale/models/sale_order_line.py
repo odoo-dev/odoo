@@ -669,8 +669,9 @@ class SaleOrderLine(models.Model):
         )
 
     def _get_pricelist_kwargs(self):
+        qty = sum(self._get_same_product_lines().mapped('product_uom_qty')) or 1
         return {
-            'quantity': self.product_uom_qty or 1.0,
+            'quantity': qty,
             'uom': self.product_uom_id,
             'date': self._get_order_date(),
             'currency': self.currency_id,
@@ -687,13 +688,22 @@ class SaleOrderLine(models.Model):
             self.product_no_variant_attribute_value_ids,
         )
 
+    def _get_same_product_lines(self):
+        """ Returns all the sale order lines in the same order having the same product template as
+        self.
+        """
+        return self.order_id.order_line.filtered(
+            lambda l: l.product_template_id in self.product_template_id
+        )
+
     def _get_pricelist_price_context(self):
         """DO NOT USE in new code, this contextual logic should be dropped or heavily refactored soon"""
         self.ensure_one()
+        qty = sum(self._get_same_product_lines().mapped('product_uom_qty')) or 1
         return {
             'pricelist': self.order_id.pricelist_id.id,
             'uom': self.product_uom_id.id,
-            'quantity': self.product_uom_qty,
+            'quantity': qty,
             'date': self._get_order_date(),
         }
 
@@ -1250,6 +1260,10 @@ class SaleOrderLine(models.Model):
                 msg = _("Extra line with %s", line.product_id.display_name)
                 line.order_id.message_post(body=msg)
 
+        to_recompute = lines._get_same_product_lines()
+        for line in to_recompute:
+            line.with_context(do_not_loop=True)._reset_price_unit()
+
         return lines
 
     def _add_precomputed_values(self, vals_list):
@@ -1301,8 +1315,20 @@ class SaleOrderLine(models.Model):
                     _('It is forbidden to modify the following fields in a locked order:\n%s',
                       '\n'.join(fields.mapped('field_description')))
                 )
+        res = super().write(values)
+        if not self.env.context.get('do_not_loop'):
+            to_recompute = self._get_same_product_lines()
+            for line in to_recompute:
+                line.with_context(do_not_loop=True)._reset_price_unit()
 
-        return super().write(values)
+        return res
+
+    def unlink(self):
+        to_recompute = self._get_same_product_lines() - self
+        res = super().unlink()
+        for line in to_recompute:
+            line.with_context(do_not_loop=True)._reset_price_unit()
+        return res
 
     def _get_protected_fields(self):
         """ Give the fields that should not be modified on a locked SO.
