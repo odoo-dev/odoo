@@ -1,12 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
 import datetime
+import itertools
 import re
 import time
 from collections import defaultdict
 
 import dateutil
 import werkzeug
+from dateutil.relativedelta import relativedelta
 from lxml import etree
 
 from odoo import SUPERUSER_ID, api, fields, models, modules
@@ -143,7 +145,6 @@ class MyInvoisDocument(models.Model):
         copy=False,
         readonly=True,
     )
-    # Note: the field is present but unused for now.
     invoice_ids = fields.Many2many(
         name="Invoices",
         comodel_name="account.move",
@@ -151,6 +152,9 @@ class MyInvoisDocument(models.Model):
         column1="document_id",
         column2="invoice_id",
         check_company=True,
+    )
+    linked_invoice_count = fields.Integer(
+        compute='_compute_linked_invoice_count',
     )
 
     # --------------------------------
@@ -160,7 +164,13 @@ class MyInvoisDocument(models.Model):
     @api.depends('myinvois_issuance_date')
     def _compute_name(self):
         """ Compute the name by using the sequence mixin. """
-        for document in self.sorted(key=lambda d: (d.myinvois_issuance_date, d._origin.id)):
+
+        """
+        If there is only one document, we should skip this computation entirely.
+        """
+
+        dated_documents = self.filtered('myinvois_issuance_date')
+        for document in dated_documents.sorted(key=lambda d: (d.myinvois_issuance_date, d._origin.id)):
             document_has_name = document.name and document.name != '/'
             if document_has_name:
                 if not document._sequence_matches_date():
@@ -191,6 +201,11 @@ class MyInvoisDocument(models.Model):
         for document in self:
             document.display_name = document.name if document.name != '/' else document.env._('Draft')
 
+    @api.depends('invoice_ids')
+    def _compute_linked_invoice_count(self):
+        for consolidated_invoice in self:
+            consolidated_invoice.linked_invoice_count = len(consolidated_invoice.invoice_ids)
+
     # -----------------------
     # CRUD, inherited methods
     # -----------------------
@@ -198,6 +213,17 @@ class MyInvoisDocument(models.Model):
     def _get_starting_sequence(self):
         """ Defines the default sequence to use by MyInvois Documents. """
         self.ensure_one()
+        if self.invoice_ids:
+            journal = self.invoice_ids[0].journal_id  # One MyInvois document only contain invoices for the same journal
+            move_type = self.invoice_ids[0].move_type
+            is_debit_notes = 'debit_origin_id' in self.env['account.move']._fields and self.invoice_ids[0].debit_origin_id
+            if move_type in ('out_refund', 'in_refund'):
+                if not is_debit_notes and journal.refund_sequence:
+                    return "CR%s/%s/00000" % (journal.code, self.myinvois_issuance_date.year)
+            if is_debit_notes and journal.debit_sequence and move_type in ("in_invoice", "out_invoice"):
+                return "CD%s/%s/00000" % (journal.code, self.myinvois_issuance_date.year)
+
+            return "C%s/%s/00000" % (journal.code, self.myinvois_issuance_date.year)
         return "MYINV/%04d/00000" % self.myinvois_issuance_date.year
 
     def _get_last_sequence_domain(self, relaxed=False):
@@ -210,6 +236,9 @@ class MyInvoisDocument(models.Model):
 
         if not relaxed:
             domain = [('id', '!=', self.id or self._origin.id), ('name', 'not in', ('/', '', False))]
+            if self.invoice_ids and self.invoice_ids[0].journal_id.refund_sequence:
+                refund_types = ('out_refund', 'in_refund')
+                domain += [('invoice_ids.move_type', 'in' if self.invoice_ids[0].move_type in refund_types else 'not in', refund_types)]
             reference_name = self.sudo().search(domain + [('myinvois_issuance_date', '<=', self.myinvois_issuance_date)], limit=1).name
             if not reference_name:
                 reference_name = self.sudo().search(domain, order='myinvois_issuance_date asc', limit=1).name
@@ -225,6 +254,17 @@ class MyInvoisDocument(models.Model):
 
             if param.get('anti_regex'):
                 where_string += " AND sequence_prefix !~ %(anti_regex)s "
+
+        if self.invoice_ids and self.invoice_ids[0].journal_id.refund_sequence:
+            param["journal_id"] = self.invoice_ids[0].journal_id.id
+            if self.invoice_ids[0].move_type in ("out_refund", "in_refund"):
+                where_string += " AND EXISTS(SELECT id FROM account_move WHERE id IN (SELECT invoice_id FROM myinvois_document_invoice_rel WHERE document_id = myinvois_document.id) AND move_type IN ('out_refund', 'in_refund') AND journal_id = %(journal_id)s) "
+            else:
+                where_string += " AND EXISTS(SELECT id FROM account_move WHERE id IN (SELECT invoice_id FROM myinvois_document_invoice_rel WHERE document_id = myinvois_document.id) AND move_type NOT IN ('out_refund', 'in_refund') AND journal_id = %(journal_id)s) "
+
+        if self.invoice_ids and 'debit_sequence' in self.env['account.journal']._fields and self.invoice_ids[0].journal_id.debit_sequence:
+            param["journal_id"] = self.invoice_ids[0].journal_id.id
+            where_string += " AND EXISTS(SELECT id FROM account_move WHERE id IN (SELECT invoice_id FROM myinvois_document_invoice_rel WHERE document_id = myinvois_document.id) AND journal_id = %(journal_id)s AND debit_origin_id IS " + ("NOT NULL)" if self.invoice_ids[0].debit_origin_id else "NULL)")
 
         return where_string, param
 
@@ -260,7 +300,7 @@ class MyInvoisDocument(models.Model):
             raise UserError(self.env._('You cannot send this document to MyInvois because the related invoice(s) %s are in draft or canceled state.', ','.join(invalid_documents.mapped('name'))))
 
         # Required for the file, this is the exact date at which the consolidated invoice was sent to MyInvois.
-        documents.myinvois_issuance_date = fields.Date.context_today(documents)
+        documents.filtered(lambda d: not d.myinvois_issuance_date).myinvois_issuance_date = fields.Date.context_today(documents)
         documents._submit_to_myinvois()
 
     def action_update_submission_status(self):
@@ -307,6 +347,43 @@ class MyInvoisDocument(models.Model):
         self.ensure_one()
         return self._action_myinvois_update_document(new_status='cancelled')
 
+    def action_open_consolidate_invoice_wizard(self):
+        """
+        Open the wizard, and set a default date_from/date_to based on the current date as well as already existing
+        consolidated invoices.
+        """
+        default_consolidation_type = self.env.context.get('default_consolidation_type', 'pos')
+
+        domain = Domain([
+            ('company_id', '=', self.env.company.id),
+            ('myinvois_state', 'in', ['in_progress', 'valid']),
+        ])
+        if default_consolidation_type == 'pos':
+            domain &= Domain('pos_order_ids', '!=', False)
+        else:
+            domain &= Domain('invoice_ids', '!=', False)
+
+        latest_consolidated_invoice = self.env['myinvois.document'].search(domain, limit=1)
+        if latest_consolidated_invoice:
+            default_date_from = latest_consolidated_invoice.myinvois_issuance_date + relativedelta(days=1)
+        else:
+            default_date_from = date_utils.start_of(fields.Date.context_today(self) - relativedelta(months=1), 'month')
+        default_date_to = date_utils.end_of(default_date_from, 'month')
+
+        return {
+            'name': self.env._('Create Consolidated Invoice'),
+            'res_model': 'myinvois.consolidate.invoice.wizard',
+            'view_mode': 'form',
+            'views': [[False, 'form']],
+            'target': 'new',
+            'context': {
+                'default_date_from': default_date_from,
+                'default_date_to': default_date_to,
+                'default_consolidation_type': default_consolidation_type,
+            },
+            'type': 'ir.actions.act_window',
+        }
+
     def action_show_myinvois_documents(self):
         """ Open the documents in self in the correct view based on the amount of records. """
         if len(self) == 1:
@@ -326,6 +403,29 @@ class MyInvoisDocument(models.Model):
                 'views': [(self.env.ref('l10n_my_edi.myinvois_document_list_view').id, 'list'), (self.env.ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
                 'domain': [('id', 'in', self.ids)],
             }
+        return action_vals
+
+    def action_view_linked_invoices(self):
+        """ Return the action used to open the order(s) linked to the selected consolidated invoice. """
+        self.ensure_one()
+        if self.linked_invoice_count == 1:
+            action_vals = {
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'view_mode': 'form',
+                'res_id': self.invoice_ids.id,
+                'views': [(False, 'form')],
+            }
+        else:
+            action_vals = {
+                'name': self.env._("Invoices"),
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'view_mode': 'list,form',
+                'views': [(False, 'list'), (False, 'form')],
+                'domain': [('id', 'in', self.invoice_ids.ids)],
+            }
+
         return action_vals
 
     # ----------------
@@ -375,11 +475,11 @@ class MyInvoisDocument(models.Model):
         error_map = {
             # These errors should be returned when we send malformed request to the EDI, ... tldr; this should never happen unless we have bugs.
             "internal_server_error": self.env._(
-                "Server error; If the problem persists, please contact the Odoo support."
+                "Server error; If the problem persists, please contact the Odoo support.",
             ),
             # The proxy user credentials are either incorrect, or Odoo does not have the permission to invoice on their behalf.
             "invalid_tin": self.env._(
-                "Please make sure that your company TIN is correct, and that you gave Odoo sufficient permissions on the MyInvois platform."
+                "Please make sure that your company TIN is correct, and that you gave Odoo sufficient permissions on the MyInvois platform.",
             ),
             # The api rate limit has been reached. If this happens, we need to ask the user to wait. This is also handled proxy side to be safe
             "rate_limit_exceeded": self.env._(
@@ -388,11 +488,11 @@ class MyInvoisDocument(models.Model):
             ),  # Note, should be UTC. The TZ name is present in the formatted date.
             "hash_resubmitted": self.env._(
                 "This document has already been submitted and was deemed invalid.\n"
-                "Please correct the document based on the previous error, or wait before retrying."
+                "Please correct the document based on the previous error, or wait before retrying.",
             ),
             # This happens when the MyInvois TIN validator cannot validate the TIN of the user using the provided identification type and number.
             "document_tin_not_found": self.env._(
-                "MyInvois could not match your TIN with the identification information you provided on the company."
+                "MyInvois could not match your TIN with the identification information you provided on the company.",
             ),
             # This happens when the TIN of the supplier doesn't match with the TIN registered on the Proxy. Data contains the TIN.
             "document_tin_mismatch": self.env._(
@@ -404,24 +504,24 @@ class MyInvoisDocument(models.Model):
             # This happens when a batch of invoices contains multiple different identifier for the supplier. Data contains the invoice.
             "multiple_documents_id": self.env._(
                 "Multiple different supplier identification information were found in the invoices.\n"
-                "If the company identification information changed, you may need to delete your invoice attachments and regenerate them."
+                "If the company identification information changed, you may need to delete your invoice attachments and regenerate them.",
             ),
             # Same as the previous error, but with the supplier TIN
             "multiple_documents_tin": self.env._(
                 "Multiple different supplier TIN were found in the invoices.\n"
-                "If the company TIN changed, you may need to delete your invoice attachments and regenerate them."
+                "If the company TIN changed, you may need to delete your invoice attachments and regenerate them.",
             ),
             # You cannot cancel an invoice that has been rejected or that is invalid
             "update_incorrect_state": self.env._(
-                "You can only update the status of invoices in the valid state."
+                "You can only update the status of invoices in the valid state.",
             ),
             "update_period_over": self.env._(
                 "It has been more than 72h since the invoice validation, you can no longer update it.\n"
-                "Instead, you should issue or request a debit or credit note."
+                "Instead, you should issue or request a debit or credit note.",
             ),
             "update_active_documents": self.env._(
                 "You cannot update this invoice, has it has been referenced by a debit or credit note.\n"
-                "If you still want to update it, you must first update the debit/credit note."
+                "If you still want to update it, you must first update the debit/credit note.",
             ),
             "update_forbidden": self.env._("You do not have the permission to update this invoice."),
             "search_date_invalid": self.env._("The search params are invalid."),  # Should never happen
@@ -545,7 +645,7 @@ class MyInvoisDocument(models.Model):
                 taxes = self.env["account.tax"]
                 for base_line in base_lines:
                     tax_details = base_line["tax_details"]
-                    sign = -1 if base_line["is_refund"] else 1
+                    sign = -1 if self._base_line_should_be_negated(base_line) else 1
                     for key in new_tax_details:
                         new_tax_details[key] += sign * tax_details[key]
                     for tax_data in tax_details["taxes_data"]:
@@ -563,7 +663,7 @@ class MyInvoisDocument(models.Model):
                 total_amount_discounted_currency = new_tax_details["total_excluded_currency"] + new_tax_details["delta_total_excluded_currency"]
                 total_amount = total_amount_currency = 0.0
                 for base_line in base_lines:
-                    sign = -1 if base_line["is_refund"] else 1
+                    sign = -1 if self._base_line_should_be_negated(base_line) else 1
                     total_amount += sign * (
                         (base_line["price_unit"] / base_line["rate"])
                         * base_line["quantity"]
@@ -592,7 +692,7 @@ class MyInvoisDocument(models.Model):
 
             base_lines = consolidated_base_lines
         else:
-            invoice = self.invoice_ids[0]  # Otherwise it would be a consolidated invoice.
+            invoice = self.invoice_ids[0]
             base_lines, _tax_lines = invoice._get_rounded_base_and_tax_lines()
         # In any cases, we'll provide a reference to the document in the base lines.
         # This will help later on when it is time to handle tax grouping as we may need to get the
@@ -615,7 +715,22 @@ class MyInvoisDocument(models.Model):
         :return: True if this invoice is a consolidated invoice or the refund of one.
         """
         self.ensure_one()
-        return len(self.invoice_ids) > 1
+
+        if len(self.invoice_ids) > 1:
+            return True
+
+        if len(self.invoice_ids) == 1:
+            if self.name == self.invoice_ids.name:
+                # When creating the document from the invoice itself, we never want it to be considered as consolidated invoice.
+                # In this case, it won't use the consolidated invoice sequence but copy the invoice one instead.
+                return False
+
+            commercial_partner = self.invoice_ids.commercial_partner_id
+            domain = self._myinvois_get_consolidated_invoice_partner_domain()
+            if commercial_partner.filtered_domain(domain):
+                return True
+
+        return False
 
     def _is_consolidated_invoice_refund(self):
         """
@@ -641,8 +756,48 @@ class MyInvoisDocument(models.Model):
         if not self._is_consolidated_invoice() or not self.invoice_ids:
             return []
 
-        # We will be working on that soon, but for now we do not support it.
-        raise NotImplementedError("Support for consolidated invoices in the invoicing app is not yet implemented.")
+        lines_per_journals = self._split_invoices_in_lines(self.invoice_ids)
+        # We create separate documents per config, so at this point _split_pos_orders_in_lines will always return a single config
+        return next(iter(lines_per_journals.values()))
+
+    @api.model
+    def _split_invoices_in_lines(self, invoice_ids):
+        """
+        Separate the given invoices into lines as represented in a consolidated invoice, taking care of splitting when
+        needed.
+
+        :param invoice_ids: The invoices to separate.
+        :return: A dict of invoices per journal, for each journal having a list of recordset each representing a single line in the xml.
+        """
+        lines_per_journal = {}
+        # We need to know if we 'skip' invoices when consolidating (sent separately, ...) to do so we will fetch all invoices
+        # whose sequence are between the lowest and highest in the invoices we send.
+        invoices_sorted_by_name = invoice_ids.sorted('name')
+        all_invoices = self.env["account.move"].search([
+            ('name', '>=', invoices_sorted_by_name[0].name),
+            ('name', '<=', invoices_sorted_by_name[-1].name),
+            ('journal_id', 'in', invoice_ids.journal_id.ids),
+        ]).sorted('name')
+
+        # During the loop, we want to gather "lines".
+        # One line can be comprised of any number of invoices as long as they are continuous.
+        continuous_invoices = []
+        for journal, invoices in itertools.groupby(all_invoices, key=lambda o: o["journal_id"]):
+            journal_lines = []
+            for invoice in invoices:
+                if continuous_invoices and invoice not in invoice_ids:
+                    journal_lines.append(self.env["account.move"].browse(continuous_invoices))
+                    continuous_invoices = []
+                elif invoice in invoice_ids:
+                    continuous_invoices.append(invoice.id)
+
+            # We don't mix orders from different journals in a single line as they have different sequences.
+            if continuous_invoices:
+                journal_lines.append(self.env["account.move"].browse(continuous_invoices))
+                continuous_invoices = []
+            lines_per_journal[journal] = journal_lines
+
+        return lines_per_journal
 
     def _get_record_rounded_base_lines(self, record):
         """
@@ -657,6 +812,17 @@ class MyInvoisDocument(models.Model):
         if record and record._name == 'account.move':
             base_lines, _tax_lines = record._get_rounded_base_and_tax_lines()
         return base_lines
+
+    def _base_line_should_be_negated(self, base_line):
+        """
+        Helpers that returns True if the base line amount should be negated when preparing the lines for generating
+        the xml of a consolidated invoice.
+        In some business models, we will merge refunds and their original documents in a single line, in which case the
+        refund should reduce the amounts.
+        In other business models where we issue refunds separately as a consolidated refund document, we want them to
+        be positive.
+        """
+        return False
 
     # Submission
 
@@ -924,8 +1090,6 @@ class MyInvoisDocument(models.Model):
             if self._can_commit():  # avoid the sleep in tests.
                 time.sleep(1)
 
-    # Status Update
-
     def _myinvois_check_can_update_status(self):
         """ The document status can only be updated (for rejection, or cancellation) up to 72h after the validation time.
         After that, any update will be rejected by the platform, as you are expected to issue a debit/credit note.
@@ -1114,3 +1278,21 @@ class MyInvoisDocument(models.Model):
                     time.sleep(0.3)  # There is a limit of how many calls we can do, so we spread them out a bit.
         if self._can_commit():
             self.env['ir.cron']._commit_progress(processed=processed_documents, remaining=document_count - processed_documents)
+
+    @api.model
+    def _myinvois_get_consolidated_invoice_partner_domain(self):
+        """
+        Returns a Domain object that can be used to filter res.partner to the ones that are eligible for consolidation.
+        Used both when finding invoices that can be consolidated and to determine if a MyInvois Document with a single
+        invoice is a consolidated invoice or not.
+        """
+        partner_domain = (
+                Domain('commercial_partner_id.vat', '=', 'EI00000000010')
+                | Domain('commercial_partner_id.l10n_my_edi_malaysian_tin', '=', 'EI00000000010')
+        )
+        partner_domain |= (
+                Domain('commercial_partner_id.l10n_my_identification_number', '=', False)
+                & Domain('commercial_partner_id.vat', '=', False)
+                & Domain('commercial_partner_id.l10n_my_edi_malaysian_tin', '=', False)
+        )
+        return partner_domain

@@ -27,7 +27,7 @@
             <field name="mode">primary</field>
             <field name="arch" type="xml">
                 <header position="inside">
-                    <button name="action_open_consolidate_invoice_wizard" string="Consolidate Orders" type="object" display="always" class="btn-primary"/>
+                    <button name="action_open_consolidate_invoice_wizard" string="Consolidate Orders" type="object" display="always" class="btn-primary" context="{'default_consolidation_type': 'pos'}"/>
                 </header>
                 <field name="myinvois_state" position="after">
                     <field name="pos_config_id"/>

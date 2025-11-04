@@ -180,7 +180,7 @@ class AccountMove(models.Model):
         myinvois_documents |= invoice_needing_new_document._create_myinvois_document()
 
         if myinvois_documents:
-            myinvois_documents._submit_to_myinvois()
+            myinvois_documents.action_submit_to_myinvois()
 
     def action_show_myinvois_documents(self):
         return self.l10n_my_edi_document_ids.action_show_myinvois_documents()
