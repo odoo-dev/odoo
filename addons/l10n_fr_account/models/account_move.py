@@ -6,6 +6,14 @@ class AccountMove(models.Model):
 
     l10n_fr_is_company_french = fields.Boolean(compute='_compute_l10n_fr_is_company_french')
 
+    @api.depends('l10n_fr_is_company_french')
+    def _compute_show_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_show_delivery_date()
+        for move in self:
+            if move.l10n_fr_is_company_french:
+                move.show_delivery_date = move.is_sale_document()
+
     @api.model
     def _get_view(self, view_id=None, view_type='form', **options):
         arch, view = super()._get_view(view_id, view_type, **options)
@@ -20,3 +28,11 @@ class AccountMove(models.Model):
     def _compute_l10n_fr_is_company_french(self):
         for record in self:
             record.l10n_fr_is_company_french = record.country_code in record.company_id._get_france_country_codes()
+
+    def _post(self, soft=True):
+        # EXTENDS 'account'
+        res = super()._post(soft)
+        for move in self:
+            if move.show_delivery_date and not move.delivery_date:
+                move.delivery_date = move.invoice_date
+        return res
