@@ -204,7 +204,7 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon, PaymentCommon):
         })._create_payments()
 
         self.assertRecordValues(payments, [{
-            'memo': Like(f'BATCH/{self.current_year}/...'),
+            'memo': Like(f'PAY/{self.current_year}/...'),
             'payment_method_line_id': self.inbound_payment_method_line.id,
         }])
         self.assertRecordValues(payments.move_id.line_ids.sorted('balance'), [
@@ -237,7 +237,7 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon, PaymentCommon):
         })._create_payments()
 
         self.assertRecordValues(payments, [{
-            'memo': Like(f'BATCH/{self.current_year}/...'),
+            'memo': Like(f'PAY/{self.current_year}/...'),
             'payment_method_line_id': self.inbound_payment_method_line.id,
         }])
         self.assertRecordValues(payments.move_id.line_ids.sorted('balance'), [
@@ -272,7 +272,7 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon, PaymentCommon):
         })._create_payments()
 
         self.assertRecordValues(payments, [{
-            'memo': Like(f'BATCH/{self.current_year}/...'),
+            'memo': Like(f'PAY/{self.current_year}/...'),
             'payment_method_line_id': self.inbound_payment_method_line.id,
         }])
         self.assertRecordValues(payments.move_id.line_ids.sorted('balance'), [
@@ -315,7 +315,7 @@ class TestAccountPaymentRegister(AccountTestInvoicingCommon, PaymentCommon):
         })._create_payments()
 
         self.assertRecordValues(payments, [{
-            'memo': Like(f'BATCH/{self.current_year}/...'),
+            'memo': Like(f'PAY/{self.current_year}/...'),
             'payment_method_line_id': self.inbound_payment_method_line.id,
         }])
         self.assertRecordValues(payments.move_id.line_ids.sorted('balance'), [
