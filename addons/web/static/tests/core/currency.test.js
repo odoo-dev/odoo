@@ -23,8 +23,8 @@ test("formatCurrency", async () => {
     expect(formatCurrency(8.0, 1, { humanReadable: true })).toBe("8.00\u00a0€");
     expect(formatCurrency(1234567.654, 1, { humanReadable: true })).toBe("1.23M\u00a0€");
     expect(formatCurrency(1990000.001, 1, { humanReadable: true })).toBe("1.99M\u00a0€");
-    expect(formatCurrency(1234567.654, 44, { digits: [69, 1] })).toBe("1,234,567.7");
-    expect(formatCurrency(1234567.654, 2, { digits: [69, 1] })).toBe("$\u00a01,234,567.7", {
+    expect(formatCurrency(1234567.654, 44, { digits: 1 })).toBe("1,234,567.7");
+    expect(formatCurrency(1234567.654, 2, { digits: 1 })).toBe("$\u00a01,234,567.7", {
         message: "options digits should take over currency digits when both are defined",
     });
 });
