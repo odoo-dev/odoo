@@ -276,8 +276,8 @@ class StockMove(models.Model):
                 move.value = move.product_id.standard_price * qty
 
         # Recompute the standard price
-        self.env['product.product'].browse(products_to_recompute)._update_standard_price()
-        self.env['stock.lot'].browse(lots_to_recompute)._update_standard_price()
+        self.env['product.product'].browse(products_to_recompute).sudo()._update_standard_price()
+        self.env['stock.lot'].browse(lots_to_recompute).sudo()._update_standard_price()
 
     def _get_value(self, forced_std_price=False, at_date=False, ignore_manual_update=False):
         return self._get_value_data(forced_std_price, at_date, ignore_manual_update)['value']
