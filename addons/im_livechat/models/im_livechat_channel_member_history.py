@@ -1,5 +1,8 @@
 from odoo import api, models, fields
 from odoo.exceptions import ValidationError
+from odoo.fields import Domain
+
+from collections import defaultdict
 
 
 class ImLivechatChannelMemberHistory(models.Model):
@@ -65,7 +68,7 @@ class ImLivechatChannelMemberHistory(models.Model):
     call_duration_hour = fields.Float(
         "Call Duration", compute="_compute_call_duration_hour", aggregator="sum", store=True
     )
-    message_count = fields.Integer("# of Messages per Session", aggregator="avg")
+    message_count = fields.Integer("# of Messages per Session", compute="_compute_message_count", aggregator="avg", store=True)
     help_status = fields.Selection(
         selection=[
             ("requested", "Help Requested"),
@@ -118,6 +121,24 @@ class ImLivechatChannelMemberHistory(models.Model):
             history.chatbot_script_id = history.chatbot_script_id or history.member_id.chatbot_script_id
             history.agent_expertise_ids = (
                 history.agent_expertise_ids or history.member_id.agent_expertise_ids
+            )
+
+    @api.depends("channel_id.message_ids.author_id", "channel_id.message_ids.author_guest_id")
+    def _compute_message_count(self):
+        domain = Domain("res_id", "in", self.channel_id.ids) & Domain(
+            "model", "=", "discuss.channel"
+        )
+        domain &= Domain("author_id", "in", self.partner_id.ids) | Domain(
+            "author_guest_id", "in", self.guest_id.ids
+        )
+        channel_id_to_persona_to_count = defaultdict(dict)
+        for channel_id, partner, guest, count in self.env["mail.message"]._read_group(
+            domain, ["res_id", "author_id", "author_guest_id"], ["__count"]
+        ):
+            channel_id_to_persona_to_count[channel_id][partner or guest] = count
+        for history in self:
+            history.message_count = channel_id_to_persona_to_count[channel_id].get(
+                history.partner_id or history.guest_id, 0
             )
 
     @api.depends("livechat_member_type", "partner_id.name", "partner_id.display_name", "guest_id.name")
