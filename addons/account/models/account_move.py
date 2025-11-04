@@ -614,6 +614,13 @@ class AccountMove(models.Model):
         tracking=True,
         help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+    move_sent_selection = fields.Selection(
+        selection=[
+            ('sent', 'Sent'),
+            ('not_sent', 'Not Sent'),
+        ],
+        compute='compute_move_sent_selection',
+    )
     is_being_sent = fields.Boolean(
         help="Is the move being sent asynchronously",
         compute='_compute_is_being_sent'
@@ -848,6 +855,11 @@ class AccountMove(models.Model):
         elif self.origin_payment_id or self.statement_line_id or self.env.context.get('is_payment') or self.env.context.get('is_statement_line'):
             return ['bank', 'cash', 'credit']
         return ['general']
+    
+    @api.depends('is_move_sent')
+    def compute_move_sent_selection(self):
+        for move in self:
+            move.move_sent_selection = 'sent' if move.is_move_sent else 'not_sent'
 
     def _search_default_journal(self):
         if self.statement_line_ids.statement_id.journal_id:
