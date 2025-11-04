@@ -818,8 +818,8 @@ class ProductTemplate(models.Model):
         'Routes can be selected on this product', compute='_compute_has_available_route_ids',
         default=lambda self: self.env['stock.route'].search_count([('product_selectable', '=', True)]))
     route_ids = fields.Many2many(
-        'stock.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
-        domain=[('product_selectable', '=', True)], depends_context=['company', 'allowed_companies'],
+        'product.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
+        domain=[('product_selectable', '=', True)], check_company=True, depends_context=['company', 'allowed_companies'],
         help="Depending on the modules installed, this will allow you to define the route of the product: whether it will be bought, manufactured, replenished on order, etc.")
     nbr_moves_in = fields.Integer(compute='_compute_nbr_moves', compute_sudo=False, help="Number of incoming stock moves in the past 12 months")
     nbr_moves_out = fields.Integer(compute='_compute_nbr_moves', compute_sudo=False, help="Number of outgoing stock moves in the past 12 months")
@@ -1298,3 +1298,13 @@ class UomUom(models.Model):
         else:
             computed_qty = self._compute_quantity(qty, procurement_uom, rounding_method='HALF-UP')
         return (computed_qty, procurement_uom)
+
+
+class ProductRoute(models.Model):
+    _name = 'product.route'
+    _description = 'An intermediate model to support different routes per company on product.template'
+    _rec_name = 'route_id'
+
+    product_id = fields.Many2one('product.template', 'Product Template', required=True, ondelete='cascade')
+    route_id = fields.Many2one('stock.route', 'Route', required=True, ondelete='cascade')
+    company_id = fields.Many2one('res.company', 'Company', required=True, ondelete='cascade', default=lambda self: self.env.company)
