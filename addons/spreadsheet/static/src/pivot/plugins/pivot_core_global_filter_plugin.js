@@ -9,7 +9,7 @@
  */
 
 import { CommandResult } from "../../o_spreadsheet/cancelled_reason";
-import { checkFilterFieldMatching } from "@spreadsheet/global_filters/helpers";
+// import { checkFilterFieldMatching } from "@spreadsheet/global_filters/helpers";
 import { deepCopy } from "@web/core/utils/objects";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
 
@@ -28,13 +28,13 @@ export class PivotCoreGlobalFilterPlugin extends OdooCorePlugin {
      * @returns {string | string[]}
      */
     allowDispatch(cmd) {
-        switch (cmd.type) {
-            case "ADD_GLOBAL_FILTER":
-            case "EDIT_GLOBAL_FILTER":
-                if (cmd.pivot) {
-                    return checkFilterFieldMatching(cmd.pivot);
-                }
-        }
+        // switch (cmd.type) {
+        //     case "ADD_GLOBAL_FILTER":
+        //     case "EDIT_GLOBAL_FILTER":
+        //         if (cmd.pivot) {
+        //             return checkFilterFieldMatching(cmd.pivot);
+        //         }
+        // }
         return CommandResult.Success;
     }
 

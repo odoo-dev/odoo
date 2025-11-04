@@ -2,12 +2,48 @@
 import { _t } from "@web/core/l10n/translation";
 import { Domain } from "@web/core/domain";
 import { cartesian, sections } from "@web/core/utils/arrays";
-import { addPropertyFieldDefs } from "@web/model/model";
 import { helpers, EvaluationError } from "@odoo/o-spreadsheet";
 
 const { deepEquals } = helpers;
 
 export const NO_RECORD_AT_THIS_POSITION = "__NO_RECORD_AT_THIS_POSITION__";
+
+
+export function _makeFieldFromPropertyDefinition(name, definition, relatedPropertyField) {
+    return {
+        ...definition,
+        name,
+        propertyName: definition.name,
+        relation: definition.comodel,
+        relatedPropertyField,
+    };
+}
+
+export async function addPropertyFieldDefs(orm, resModel, context, fields, groupBy) {
+    const proms = [];
+    for (const gb of groupBy) {
+        if (gb in fields) {
+            continue;
+        }
+        const [fieldName] = gb.split(".");
+        const field = fields[fieldName];
+        if (field?.type === "properties") {
+            proms.push(
+                orm
+                    .call(resModel, "get_property_definition", [gb], {
+                        context,
+                    })
+                    .then((definition) => {
+                        fields[gb] = _makeFieldFromPropertyDefinition(gb, definition, field);
+                    })
+                    .catch(() => {
+                        fields[gb] = _makeFieldFromPropertyDefinition(gb, {}, field);
+                    })
+            );
+        }
+    }
+    return Promise.all(proms);
+}
 
 /**
  * @typedef {import("@web/core/orm_service").ORM} ORM
@@ -376,6 +412,7 @@ export class PivotDataProvider {
             measureSpecs,
             kwargs
         );
+        debugger;
         return groupInfo.map((info) => ({ ...info, subGroups: result[info.subGroupIndex] }));
     }
 

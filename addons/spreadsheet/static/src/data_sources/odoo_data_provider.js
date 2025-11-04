@@ -1,6 +1,7 @@
 import { EventBus } from "@odoo/o-spreadsheet";
 import { ServerData } from "./server_data";
 
+debugger;
 export class OdooDataProvider extends EventBus {
     constructor(env) {
         super();

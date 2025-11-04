@@ -635,4 +635,4 @@ pivotRegistry.add("ODOO", {
         ["many2one", "char", "one2many", "many2many", "selection"].includes(field.type),
 });
 
-supportedPivotPositionalFormulaRegistry.add("ODOO", true);
+// supportedPivotPositionalFormulaRegistry.add("ODOO", true);
