@@ -4,11 +4,9 @@ from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_c
 from odoo.tests import tagged
 
 import time
-from unittest import skip
 
 
 @tagged('-at_install', 'post_install')
-@skip('Temporary to fast merge new valuation')
 class TestAveragePrice(ValuationReconciliationTestCommon):
 
     def test_00_average_price(self):
@@ -240,8 +238,8 @@ class TestAveragePrice(ValuationReconciliationTestCommon):
         picking = purchase_order.picking_ids[0]
         picking.button_validate()
 
-        self.assertEqual(avco_product.avg_cost, 9)
-        self.assertEqual(avco_product.value_svl, 90)
+        self.assertEqual(avco_product.avg_cost, 0)
+        self.assertEqual(avco_product.total_value, 90)
 
     def test_no_compensatory_svl_from_asymmetrical_rounding(self):
         """ Ensure that a purchase order for a high quantity of some product using avg costing does
@@ -289,4 +287,5 @@ class TestAveragePrice(ValuationReconciliationTestCommon):
         po.invoice_ids[0].invoice_date = time.strftime('%Y-%m-%d')
         po.invoice_ids[0].action_post()
 
-        self.assertFalse(po.picking_ids.move_ids.stock_valuation_layer_ids.stock_valuation_layer_ids)
+        self.assertEqual(avco_product.total_value, 1816.36)
+        self.assertEqual(po.picking_ids.move_ids.value, 1816.36)
