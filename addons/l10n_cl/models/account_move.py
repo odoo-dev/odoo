@@ -12,7 +12,8 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     l10n_cl_document_type_id = fields.Many2one('l10n_cl.document.type', domain="[('id', 'in', l10n_cl_available_document_type_ids)]")
-    l10n_cl_available_document_type_ids = fields.Many2many(compute='_compute_l10n_cl_available_document_type_ids')
+    l10n_cl_document_type_code = fields.Char(related='l10n_cl_document_type_id.code')
+    l10n_cl_available_document_type_ids = fields.Many2many('l10n_cl.document.type', compute='_compute_l10n_cl_available_document_type_ids')
 
     partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')  # TODO why?
 

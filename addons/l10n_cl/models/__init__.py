@@ -2,6 +2,7 @@
 from . import template_cl
 from . import account_move
 from . import account_move_line
+from . import account_journal
 from . import account_tax
 from . import l10n_cl_document_type
 from . import res_company
