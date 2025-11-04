@@ -86,7 +86,7 @@ export function formatCurrency(amount, currencyId, options = {}) {
     let formattedAmount;
     if (options.humanReadable) {
         formattedAmount = humanNumber(amount, {
-            decimals: digits ? digits[1] : 2,
+            decimals: digits ?? 2,
             minDigits: options.minDigits,
         });
     } else {

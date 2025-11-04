@@ -204,7 +204,7 @@ export function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
  *
  * @param {number} value the value that should be formatted
  * @param {Object} [options]
- * @param {number[]} [options.digits] the number of digits that should be used,
+ * @param {number} [options.digits] the number of digits that should be used,
  *   instead of the default digits precision in the field.
  * @param {boolean} [options.humanReadable] if true, large numbers are formatted
  *   to a human readable format.
@@ -219,8 +219,8 @@ export function humanNumber(number, options = { decimals: 0, minDigits: 1 }) {
  */
 export function formatFloat(value, options = {}) {
     let precision;
-    if (options.digits && options.digits[1] !== undefined) {
-        precision = options.digits[1];
+    if (options.digits && options.digits !== undefined) {
+        precision = options.digits;
     } else {
         precision = 2;
     }

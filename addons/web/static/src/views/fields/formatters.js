@@ -117,7 +117,7 @@ formatDateTime.extractOptions = ({ attrs, options }) => ({
  *
  * @param {number | false} value the value that should be formatted
  * @param {Object} [options]
- * @param {number[]} [options.digits] the number of digits that should be used,
+ * @param {number} [options.digits] the number of digits that should be used,
  *   instead of the default digits precision in the field.
  * @param {boolean} [options.humanReadable] if true, large numbers are formatted
  *   to a human readable format.
@@ -321,9 +321,8 @@ export function formatX2many(value) {
  * @param {boolean} [options.noSymbol] this currency has not a sympbol
  * @param {boolean} [options.humanReadable] if true, large numbers are formatted
  *   to a human readable format.
- * @param {[number, number]} [options.digits] the number of digits that should
- *   be used, instead of the default digits precision in the field.  The first
- *   number is always ignored (legacy constraint)
+ * @param {number} [options.digits] the number of digits that should
+ *   be used, instead of the default digits precision in the field.
  * @returns {string}
  */
 export function formatMonetary(value, options = {}) {

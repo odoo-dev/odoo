@@ -750,8 +750,8 @@ class BaseCase(case.TestCase):
                         record_value = record_value.id
                     case odoo.fields.One2many() | odoo.fields.Many2many():
                         record_value = sorted(record_value.ids)
-                    case odoo.fields.Float() as field if digits := field.get_digits(record.env):
-                        record_value = Approx(record_value, digits[1], decorate=False)
+                    case odoo.fields.Float() as field if (digits := field.get_digits(record.env) is not None):
+                        record_value = Approx(record_value, digits, decorate=False)
                     case odoo.fields.Monetary() as field if currency_field_name := field.get_currency_field(record):
                         # don't round if there's no currency set
                         if c := record[currency_field_name]:

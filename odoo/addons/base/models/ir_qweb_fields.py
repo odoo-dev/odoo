@@ -242,7 +242,7 @@ class IrQwebFieldFloat(models.AbstractModel):
     @api.model
     def record_to_html(self, record, field_name, options):
         if 'precision' not in options and 'decimal_precision' not in options:
-            _, precision = record._fields[field_name].get_digits(record.env) or (None, None)
+            precision = record._fields[field_name].get_digits(record.env)
             options = dict(options, precision=precision)
         return super().record_to_html(record, field_name, options)
 

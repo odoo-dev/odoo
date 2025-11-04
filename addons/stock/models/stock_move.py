@@ -1194,7 +1194,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         if not float_fields:
             return base_getter
 
-        float_precision = {f_name: (self.env['stock.move']._fields[f_name].get_digits(self.env) or (False, 2))[1] for f_name in float_fields}
+        float_precision = {f_name: (self.env['stock.move']._fields[f_name].get_digits(self.env) or 2) for f_name in float_fields}
         if 'price_unit' in float_fields:
             price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
             currency_precision = self.company_id.currency_id.decimal_places

@@ -62,8 +62,9 @@ class Float(Field[float]):
 
     The precision digits are given by the (optional) ``digits`` attribute.
 
-    :param digits: a pair (total, decimal) or a string referencing a
-        :class:`~odoo.addons.base.models.decimal_precision.DecimalPrecision` record name.
+    :param digits: the number of dicimals for rounding (0 means no rounding) or a string referencing a
+        :class:`~odoo.addons.base.models.decimal_precision.DecimalPrecision` record name
+        if defined, the ORM will use numeric column instead of float8 in the database to provide better precision
     :type digits: tuple(int,int) or str
 
     When a float is a quantity associated with an unit of measure, it is important
@@ -98,16 +99,16 @@ class Float(Field[float]):
     """
 
     type = 'float'
-    _digits: str | tuple[int, int] | None = None  # digits argument passed to class initializer
+    _digits: str | int | None = None
     falsy_value = 0.0
     aggregator = 'sum'
 
-    def __init__(self, string: str | Sentinel = SENTINEL, digits: str | tuple[int, int] | Sentinel | None = SENTINEL, **kwargs):
+    def __init__(self, string: str | Sentinel = SENTINEL, digits: str | int | Sentinel | None = SENTINEL, **kwargs):
         super().__init__(string=string, _digits=digits, **kwargs)
 
     @property
     def _column_type(self):
-        # Explicit support for "falsy" digits (0, False) to indicate a NUMERIC
+        # Explicit support for ``0`` digits to indicate a NUMERIC
         # field with no fixed precision. The values are saved in the database
         # with all significant digits.
         # FLOAT8 type is still the default when there is no precision because it
@@ -115,12 +116,14 @@ class Float(Field[float]):
         return ('numeric', 'numeric') if self._digits is not None else \
                ('float8', 'double precision')
 
-    def get_digits(self, env: Environment) -> tuple[int, int] | None:
+    def get_digits(self, env: Environment) -> int | None:
         if isinstance(self._digits, str):
             precision = env['decimal.precision'].precision_get(self._digits)
-            return 16, precision
+            # can be 0
+            return precision
         else:
-            return self._digits
+            # ``0`` and ``None`` both means ``None`` for the business code
+            return self._digits or None
 
     _related__digits = property(attrgetter('_digits'))
 
@@ -129,10 +132,9 @@ class Float(Field[float]):
 
     def convert_to_column(self, value, record, values=None, validate=True):
         value_float = value = float(value or 0.0)
-        if digits := self.get_digits(record.env):
-            _precision, scale = digits
-            value_float = float_round(value, precision_digits=scale)
-            value = float_repr(value_float, precision_digits=scale)
+        if digits := self.get_digits(record.env):  # type: ignore
+            value_float = float_round(value, precision_digits=digits)
+            value = float_repr(value_float, precision_digits=digits)
         if self.company_dependent:
             return value_float
         return value
@@ -141,7 +143,7 @@ class Float(Field[float]):
         # apply rounding here, otherwise value in cache may be wrong!
         value = float(value or 0.0)
         digits = self.get_digits(record.env)
-        return float_round(value, precision_digits=digits[1]) if digits else value
+        return float_round(value, precision_digits=digits) if digits is not None else value
 
     def convert_to_record(self, value, record):
         return value or 0.0

@@ -103,7 +103,7 @@ class TestProductCatalog(HttpCase, SaleCommon):
         )
         self.assertEqual(
             catalog_context['product_catalog_digits'],
-            (16, self.env['decimal.precision'].precision_get('Product Price')),
+            self.env['decimal.precision'].precision_get('Product Price'),
         )
 
     def test_empty_order_data(self):
