@@ -1270,3 +1270,25 @@ class TestInvoicePurchaseMatch(TestPurchaseToInvoiceCommon):
             'quantity': 1,
             'product_id': pol.product_id.id,
         }])
+
+    def test_zero_division_in_standard_price(self):
+        category = self.env['product.category'].create({
+            'name': 'FIFO Category',
+            'property_cost_method': 'fifo',
+        })
+        product = self.env['product.product'].create({
+            'name': 'Test FIFO Product',
+            'categ_id': category.id,
+        })
+        vendor = self.env['res.partner'].create({'name': 'Test Vendor'})
+        po = self.env['purchase.order'].create({
+            'partner_id': vendor.id,
+            'order_line': [Command.create({
+                'product_id': product.id,
+            })],
+        })
+        po.button_confirm()
+        picking = po.picking_ids
+        picking.button_validate()
+        move = picking.move_ids[0]
+        move.quantity = 0
