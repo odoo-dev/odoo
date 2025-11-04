@@ -74,9 +74,8 @@ export async function getCurrencyRates() {
  * @param {number} [options.minDigits] see @humanNumber
  * @param {boolean} [options.trailingZeros] if false, numbers will have zeros
  *  to the right of the last non-zero digit hidden
- * @param {[number, number]} [options.digits] the number of digits that should
- *   be used, instead of the default digits precision in the field.  The first
- *   number is always ignored (legacy constraint)
+ * @param {number} [options.digits] the number of digits after the decimal point that should
+ *   be used, instead of the default digits precision in the field.
  * @returns {string}
  */
 export function formatCurrency(amount, currencyId, options = {}) {

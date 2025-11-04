@@ -104,6 +104,8 @@ class Float(Field[float]):
     aggregator = 'sum'
 
     def __init__(self, string: str | Sentinel = SENTINEL, digits: str | int | Sentinel | None = SENTINEL, **kwargs):
+        if isinstance(digits, tuple):
+            digits = digits[1]
         super().__init__(string=string, _digits=digits, **kwargs)
 
     @property
