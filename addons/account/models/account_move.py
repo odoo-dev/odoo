@@ -614,6 +614,14 @@ class AccountMove(models.Model):
         tracking=True,
         help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+    is_move_sent_value = fields.Selection(
+        selection=[
+            ('sent', "Sent"),
+            ('not_sent', "Not Sent")
+        ],
+        copy=False,
+        compute='_compute_is_move_sent_value'
+    )
     is_being_sent = fields.Boolean(
         help="Is the move being sent asynchronously",
         compute='_compute_is_being_sent'
@@ -839,6 +847,11 @@ class AccountMove(models.Model):
     def _compute_journal_id(self):
         for move in self.filtered(lambda r: r.journal_id.type not in r._get_valid_journal_types()):
             move.journal_id = move._search_default_journal()
+
+    @api.depends('is_move_sent')
+    def _compute_is_move_sent_value(self):
+        for move in self:
+            move.is_move_sent_value = 'sent' if move.is_move_sent else 'not_sent'
 
     def _get_valid_journal_types(self):
         if self.is_sale_document(include_receipts=True):
