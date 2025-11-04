@@ -124,6 +124,26 @@ const data = {
     "listNextId": 1,
     "chartOdooMenusReferences": {}
 }
+
+// async function readStdin() {
+//     return new Promise((resolve, reject) => {
+//         let data = '';
+//         process.stdin.setEncoding('utf8');
+//         process.stdin.on('data', chunk => data += chunk);
+//         process.stdin.on('end', () => resolve(data));
+//         process.stdin.on('error', reject);
+//     });
+// }
+
+// const inputData = await readStdin();
+// let data;
+// try {
+//     data = JSON.parse(inputData);
+// } catch (e) {
+//     console.error('Invalid JSON input:', e);
+//     process.exit(1);
+// }
+
 const { ORM } = odoo.loader.modules.get("@web/core/orm_service");
 const { fieldService } = odoo.loader.modules.get("@web/core/field_service");
 const { OdooDataProvider } = odoo.loader.modules.get("@spreadsheet/data_sources/odoo_data_provider");

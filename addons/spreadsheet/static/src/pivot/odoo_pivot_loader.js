@@ -133,6 +133,7 @@ export class OdooPivotLoader {
             if (throwOnError) {
                 throw this.loadError;
             }
+            console.log(this.loadError);
             return { value: CellErrorType.GenericError, message: this.loadError.message };
         }
     }
