@@ -1,5 +1,5 @@
 import { CommandResult } from "../../o_spreadsheet/cancelled_reason";
-import { checkFilterFieldMatching } from "@spreadsheet/global_filters/helpers";
+// import { checkFilterFieldMatching } from "@spreadsheet/global_filters/helpers";
 import { deepCopy } from "@web/core/utils/objects";
 import { OdooCorePlugin } from "@spreadsheet/plugins";
 
@@ -25,13 +25,13 @@ export class ListCoreGlobalFilterPlugin extends OdooCorePlugin {
      * @returns {string | string[]}
      */
     allowDispatch(cmd) {
-        switch (cmd.type) {
-            case "ADD_GLOBAL_FILTER":
-            case "EDIT_GLOBAL_FILTER":
-                if (cmd.list) {
-                    return checkFilterFieldMatching(cmd.list);
-                }
-        }
+        // switch (cmd.type) {
+        //     case "ADD_GLOBAL_FILTER":
+        //     case "EDIT_GLOBAL_FILTER":
+        //         if (cmd.list) {
+        //             return checkFilterFieldMatching(cmd.list);
+        //         }
+        // }
         return CommandResult.Success;
     }
 

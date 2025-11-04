@@ -91,6 +91,7 @@ export class ListDataSource extends OdooViewsDataSource {
         this.fieldPathsToFieldMap = {};
         const { domain, orderBy, context } = this._searchParams;
         const specification = await this._getReadSpec();
+        debugger;
         const { records } = await this._orm.webSearchRead(this._metaData.resModel, domain, {
             specification,
             order: orderByToString(orderBy),

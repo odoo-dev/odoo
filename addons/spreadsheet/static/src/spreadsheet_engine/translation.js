@@ -6,6 +6,10 @@ odoo.define("@web/core/l10n/translation", [], function (require) {
     function _t(term, ...args) {
         return term;
     }
+    function appTranslateFn(term, module, ...args) {
+        return term;
+    }
     __exports._t = _t;
+    __exports.appTranslateFn = appTranslateFn;
     return __exports;
 });

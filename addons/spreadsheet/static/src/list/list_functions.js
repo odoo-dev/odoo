@@ -26,6 +26,7 @@ const ODOO_LIST = {
         const id = toString(listId);
         const position = toNumber(index, this.locale) - 1;
         const _fieldName = toString(fieldName);
+        debugger;
         if (!_fieldName) {
             return new EvaluationError(_t("The field name should not be empty."));
         }
