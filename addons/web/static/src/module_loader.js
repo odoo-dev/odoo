@@ -33,8 +33,9 @@
         constructor(root) {
             this.root = root;
 
-            const strDebug = new URLSearchParams(location.search).get("debug");
-            this.debug = Boolean(strDebug && strDebug !== "0");
+            // const strDebug = new URLSearchParams(location.search).get("debug");
+            // this.debug = Boolean(strDebug && strDebug !== "0");
+            this.debug = true;
         }
 
         /** @type {OdooModuleLoader["addJob"]} */
@@ -181,28 +182,28 @@
             }
 
             const document = this.root?.ownerDocument || globalThis.document;
-            if (document.readyState === "loading") {
-                await new Promise((resolve) =>
-                    document.addEventListener("DOMContentLoaded", resolve)
-                );
-            }
+            // if (document.readyState === "loading") {
+            //     await new Promise((resolve) =>
+            //         document.addEventListener("DOMContentLoaded", resolve)
+            //     );
+            // }
 
             if (this.debug) {
-                const style = document.createElement("style");
-                style.className = "o_module_error_banner";
-                style.textContent = `
-                    body::before {
-                        font-weight: bold;
-                        content: "An error occurred while loading javascript modules, you may find more information in the devtools console";
-                        position: fixed;
-                        left: 0;
-                        bottom: 0;
-                        z-index: 100000000000;
-                        background-color: #C00;
-                        color: #DDD;
-                    }
-                `;
-                document.head.appendChild(style);
+                // const style = document.createElement("style");
+                // style.className = "o_module_error_banner";
+                // style.textContent = `
+                //     body::before {
+                //         font-weight: bold;
+                //         content: "An error occurred while loading javascript modules, you may find more information in the devtools console";
+                //         position: fixed;
+                //         left: 0;
+                //         bottom: 0;
+                //         z-index: 100000000000;
+                //         background-color: #C00;
+                //         color: #DDD;
+                //     }
+                // `;
+                // document.head.appendChild(style);
             }
         }
 

@@ -17,6 +17,7 @@ export function addSpreadsheetActionLazyLoader(actionName, path, displayName) {
     const actionLazyLoader = async (env, action) => {
         // load the bundle which should redefine the action in the registry
         await loadBundle("spreadsheet.o_spreadsheet");
+        await loadBundle("spreadsheet.o_spreadsheet_engine");
 
         if (actionRegistry.get(actionName) === actionLazyLoader) {
             // At this point, the real spreadsheet client action should be loaded and have
