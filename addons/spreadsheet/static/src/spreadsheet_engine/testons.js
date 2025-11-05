@@ -125,6 +125,7 @@ const { Model } = odoo.loader.modules.get("@spreadsheet/spreadsheet_engine/o-spr
 //     "chartOdooMenusReferences": {}
 // }
 
+const { setApiKey } = odoo.loader.modules.get("@web/core/network/rpc");
 const { ORM } = odoo.loader.modules.get("@web/core/orm_service");
 const { fieldService } = odoo.loader.modules.get("@web/core/field_service");
 const { OdooDataProvider } = odoo.loader.modules.get("@spreadsheet/data_sources/odoo_data_provider");
@@ -158,8 +159,8 @@ const input = inputChunks.length === 1 ? inputChunks[0] : new Uint8Array(inputCh
 const decoder = new TextDecoder("utf-8");
 const jsonString = decoder.decode(input, {});
 console.log("read stdin", inputChunks.length, "chunks,", input.length, "bytes");
-const data = JSON.parse(jsonString);
-console.log(data);
+const { data, user_api_key } = JSON.parse(jsonString);
+setApiKey(user_api_key);
 delete data.version; // TODO include migration steps in the bundle
 const model = new Model(data, config);
 config.custom.odooDataProvider.on("data-source-updated", model, () =>

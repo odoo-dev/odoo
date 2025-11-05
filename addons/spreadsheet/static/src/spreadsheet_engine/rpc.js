@@ -66,58 +66,72 @@ odoo.define("@web/core/network/rpc", [], function (require) {
         error.code = code;
         return error;
     }
-
+    let sessionId = null;
+    let apiKey = null;
+    // async function authenticate() {
+    //     // This is so 2024
+    //     const response = await fetch('http://localhost:8069/web/session/authenticate', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({
+    //             params: {
+    //                 db: 'odoo-db',
+    //                 login: 'admin',
+    //                 password: apiKey,
+    //             }
+    //         }),
+    //     })
+    //     const data = await response.json();
+    //     console.log("authenticate response", data);
+    //     sessionId = data.result.session_id;
+    // }
     // -----------------------------------------------------------------------------
     // Main RPC
     // -----------------------------------------------------------------------------
     let rpcId = 0;
-    function rpc(url, params, settings) {
+    async function rpc(url, params, settings) {
         validateRPCSettings(settings);
-        const data = {
-            id: rpcId++,
-            jsonrpc: "2.0",
-            method: "call",
-            params: params,
-        };
+        const kwargs = params.kwargs || {};
+        const context = kwargs.context || {};
+        delete kwargs.context;
+        const body = {
+            ids: params.args[0] ?? [],
+            context: context,
+            ...kwargs,
+        }
+        // if (args.length > 1) { // ids, or nothing
+        //     throw new Error("RPC with positional arguments is not supported by /json/2.");
+        // }
         const headers = settings.headers || {};
-        headers["Content-Type"] = "application/json";
-        headers["cookie"] = "session_id=_l3zbLYXJ1ZYDimu8_muN37IV-W4ThfTLqrnTSTYvzFLYSNt12I1Sec0iiXDzlSWm8wkPm7YwJ1vIxshWl0xiA";
+        const [model, method] = url.split("/").slice(-2);
+        headers["Content-Type"] = "application/json; charset=utf-8";
+        headers["Authorization"] = "Bearer " + apiKey;
+        headers["Host"] = "localhost:8069";
+        console.log(model, method, body)
+        console.log("headers", headers);
         let abortController = new AbortController();
         let rejectFn;
         const promise = new Promise((resolve, reject) => {
             rejectFn = reject;
-            fetch("http://localhost:8069" + url, {
+            fetch(`http://localhost:8069/json/2/${model}/${method}`, {
                 method: "POST",
                 headers,
-                body: JSON.stringify(data),
+                body: JSON.stringify(body),
                 signal: abortController.signal,
             })
                 .then(async (response) => {
-                    if (response.status === 502) {
-                        const error = new ConnectionLostError(url);
-                        reject(error);
-                        return;
-                    }
-                    let params;
-                    try {
-                        params = await response.json();
-                    } catch {
-                        const error = new ConnectionLostError(url);
-                        return reject(error);
-                    }
-                    const { error: responseError, result: responseResult } = params;
-                    if (!params.error) {
-                        return resolve(responseResult);
-                    }
-                    const error = makeErrorFromResponse(responseError);
-                    error.model = data.params.model;
-                    reject(error);
+                    const result = await response.json();
+                    return resolve(result);
                 })
                 .catch((err) => {
                     // fetch throws on network errors and aborts
                     const error = err.name === "AbortError"
                         ? new ConnectionAbortedError("Fetch abort")
                         : new ConnectionLostError(url);
+                    console.log("fetch error", err);
+                    console.log(err);
                     reject(error);
                 });
         });
@@ -136,5 +150,8 @@ odoo.define("@web/core/network/rpc", [], function (require) {
     };
 
     __exports.rpc = rpc;
+    __exports.setApiKey = (key) => {
+        apiKey = key;
+    };
     return __exports;
 });
