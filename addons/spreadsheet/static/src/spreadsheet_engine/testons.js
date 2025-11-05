@@ -158,13 +158,15 @@ const decoder = new TextDecoder("utf-8");
 const jsonString = decoder.decode(input, {});
 console.log("read stdin", inputChunks.length, "chunks,", input.length, "bytes");
 const data = JSON.parse(jsonString);
-console.log(data.version);
-// console.log(typeof data);
-
+console.log(data);
+delete data.version; // TODO include migration steps in the bundle
 const model = new Model(data, config);
 config.custom.odooDataProvider.on("data-source-updated", model, () =>
     model.dispatch("EVALUATE_CELLS")
 );
 debugger;
 await new Promise(resolve => setTimeout(resolve, 3000)); // wait for async loads
-console.log(model.getters.getEvaluatedCell({ sheetId: "sheet1", col: 0, row: 0 }));
+const sheetId = model.getters.getSheetIds()[0];
+const A1 = { sheetId, col: 0, row: 0 };
+console.log(model.getters.getCell(A1).content);
+console.log(model.getters.getEvaluatedCell(A1));
