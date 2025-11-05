@@ -109,6 +109,7 @@ odoo.define("@web/core/network/rpc", [], function (require) {
         headers["Content-Type"] = "application/json; charset=utf-8";
         headers["Authorization"] = "Bearer " + apiKey;
         headers["Host"] = "localhost:8069";
+        // headers["X-Odoo-Database"] = ...
         console.log(model, method, body)
         console.log("headers", headers);
         let abortController = new AbortController();
