@@ -81,7 +81,7 @@ odoo.define("@web/core/network/rpc", [], function (require) {
         };
         const headers = settings.headers || {};
         headers["Content-Type"] = "application/json";
-        headers["cookie"] = "session_id=_l3zbLYXJ1ZYDimu8_muN37IV-W4ThfTLqrnTSTYvzhFVVfznqE3t6Se2t0SQtsgxm_fLalPu7ok2sKve8AVlg";
+        headers["cookie"] = "session_id=_l3zbLYXJ1ZYDimu8_muN37IV-W4ThfTLqrnTSTYvzFLYSNt12I1Sec0iiXDzlSWm8wkPm7YwJ1vIxshWl0xiA";
         let abortController = new AbortController();
         let rejectFn;
         const promise = new Promise((resolve, reject) => {
