@@ -1197,6 +1197,7 @@ export class LinkPlugin extends Plugin {
                     link_popover.PopoverClass,
                     {
                         closeOnPointerdown: true,
+                        positionOptions: { updatePositionOnResize: false }
                     },
                     {
                         sequence: 50,
