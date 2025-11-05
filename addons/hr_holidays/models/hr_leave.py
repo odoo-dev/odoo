@@ -23,6 +23,14 @@ from odoo.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 
+LEAVE_STATE = [
+    ('confirm', 'To Approve'),
+    ('refuse', 'Refused'),
+    ('validate1', 'Second Approval'),
+    ('validate', 'Approved'),
+    ('cancel', 'Cancelled'),
+]
+
 
 def get_employee_from_context(values, context, user_employee_id):
     employee_ids_list = [value[2] for value in values.get('employee_ids', []) if len(value) == 3 and value[0] == Command.SET]
@@ -126,13 +134,7 @@ class HrLeave(models.Model):
     # description
     name = fields.Char('Description', compute='_compute_description', inverse='_inverse_description', search='_search_description', compute_sudo=False, copy=False)
     private_name = fields.Char('Time Off Description', groups='hr_holidays.group_hr_holidays_user')
-    state = fields.Selection([
-        ('confirm', 'To Approve'),
-        ('refuse', 'Refused'),
-        ('validate1', 'Second Approval'),
-        ('validate', 'Approved'),
-        ('cancel', 'Cancelled'),
-        ], string='Status', store=True, tracking=True, copy=False, readonly=False, default='confirm')
+    state = fields.Selection(LEAVE_STATE, string='Status', store=True, tracking=True, copy=False, readonly=False, default='confirm')
     user_id = fields.Many2one('res.users', string='User', related='employee_id.user_id', related_sudo=True, compute_sudo=True, store=True, readonly=True, index=True)
     # leave type configuration
     holiday_status_id = fields.Many2one(

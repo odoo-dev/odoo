@@ -568,20 +568,46 @@ class HrVersion(models.Model):
             vals.pop('date_stop', False)
 
         # Now merge similar work entries on the same day
-        merged_vals = {}
+        # Fields to determine if work entries should be merged
+        key_fields = {
+            'date': False,
+            'work_entry_type_id': 'id',
+            'employee_id': 'id',
+            'version_id': 'id',
+            'company_id': 'id',
+        }
+
+        domains = [
+            [(field, '=', vals.get(field)) for field in key_fields]
+            for vals in vals_list
+        ]
+        work_entries_to_update = {
+            tuple(
+                entry[field][subfield] if subfield else entry[field] for field, subfield in key_fields.items()
+            ): entry
+            for entry in self.env['hr.work.entry'].search(Domain.OR(domains))
+        }
+        work_entries_to_create = {}
+        source_fields = self.env['hr.work.entry'].get_work_entry_sources_fields_names()
         for vals in vals_list:
-            key = (
-                vals['date'],
-                vals.get('work_entry_type_id', False),
-                vals['employee_id'],
-                vals['version_id'],
-                vals.get('company_id', False),
-            )
-            if key in merged_vals:
-                merged_vals[key]['duration'] += vals.get('duration', 0.0)
+            key = tuple(vals.get(field, False) for field in key_fields)
+            work_entry_to_update = work_entries_to_update.get(key, False)
+            if work_entry_to_update:
+                for field in source_fields:
+                    if field in vals:
+                        work_entry_to_update.write({field: vals[field]})
+                        work_entry_to_update.recompute_duration_from_sources()
+            elif key in work_entries_to_create:
+                work_entries_to_create[key]['duration'] += vals.get('duration', 0.0)
+                for field in source_fields:
+                    if field in vals:
+                        work_entries_to_create[key][field] = (
+                            work_entries_to_create[key].get(field, []) + vals[field]
+                        )
             else:
-                merged_vals[key] = vals.copy()
-        return list(merged_vals.values())
+                work_entries_to_create[key] = vals.copy()
+
+        return list(work_entries_to_create.values())
 
     def _remove_work_entries(self):
         ''' Remove all work_entries that are outside contract period (function used after writing new start or/and end date) '''

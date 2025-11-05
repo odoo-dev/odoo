@@ -311,3 +311,12 @@ class HrWorkEntry(models.Model):
         if len(self.env.companies.country_id.ids) > 1:
             return [('country_id', '=', False)]
         return ['|', ('country_id', '=', False), ('country_id', 'in', self.env.companies.country_id.ids)]
+
+    @api.model
+    def get_work_entry_sources_fields_names(self):
+        return ['resource_calendar_id']
+
+    def recompute_duration_from_sources(self):
+        for entry in self:
+            if entry.category != 'absence' and entry.work_entry_source == 'calendar':
+                entry.duration = entry.resource_calendar_id.get_work_hours_count(entry.date, entry.date)

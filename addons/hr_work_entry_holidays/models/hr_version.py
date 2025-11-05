@@ -2,7 +2,7 @@
 
 import pytz
 
-from odoo import api, models
+from odoo import api, Command, models
 from odoo.fields import Domain
 
 
@@ -21,7 +21,7 @@ class HrVersion(models.Model):
         result = super()._get_more_vals_leave_interval(interval, leaves)
         for leave in leaves:
             if interval[0] >= leave[0] and interval[1] <= leave[1]:
-                result.append(('leave_id', leave[2].holiday_id.id))
+                result.append(('leave_ids', [Command.link(leave[2].holiday_id.id)]))
         return result
 
     def _get_interval_leave_work_entry_type(self, interval, leaves, bypassing_codes):
@@ -65,4 +65,4 @@ class HrVersion(models.Model):
     @api.model
     def _generate_work_entries_postprocess_adapt_to_calendar(self, vals):
         res = super()._generate_work_entries_postprocess_adapt_to_calendar(vals)
-        return res or (not 'work_entry_type_id' not in vals and vals.get('leave_id'))
+        return res or (not 'work_entry_type_id' not in vals and vals.get('leave_ids'))
