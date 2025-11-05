@@ -81,6 +81,7 @@
             'spreadsheet/static/src/**/*.xml',
             ('remove', 'spreadsheet/static/src/assets_backend/**/*'),
             ('remove', 'spreadsheet/static/src/public_readonly_app/**/*'),
+            ('remove', 'spreadsheet/static/src/spreadsheet_engine/testons.js'),
         ],
         'spreadsheet.assets_print': [
             'spreadsheet/static/src/print_assets/**/*',
