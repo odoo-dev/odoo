@@ -614,6 +614,16 @@ class AccountMove(models.Model):
         tracking=True,
         help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+
+    is_move_sent_label = fields.Selection(
+        selection=[
+            ("sent", "Sent"),
+            ("not_sent","Not sent")
+        ],
+        string='Invoice Sent',
+        compute='_compute_is_move_sent_label'
+    )
+    
     is_being_sent = fields.Boolean(
         help="Is the move being sent asynchronously",
         compute='_compute_is_being_sent'
@@ -764,6 +774,11 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('is_move_sent')
+    def _compute_is_move_sent_label(self):
+        for move in self:
+            move.is_move_sent_label = "sent" if move.is_move_sent else "not_sent"
 
     @api.depends('move_type', 'partner_id')
     def _compute_invoice_default_sale_person(self):
