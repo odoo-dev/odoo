@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import enum
+import inspect
 import json
 import logging
 import re
@@ -33,6 +34,11 @@ __all__ = [
 _schema = logging.getLogger('odoo.schema')
 
 IDENT_RE = re.compile(r'^[a-z0-9_][a-z0-9_$\-]*$', re.I)
+MAGIC_RE = re.compile(r"""
+    ( [^{}]+ )              # text without braces
+    | ( {{ | }} )           # escaped brace "{{" or "}}"
+    | { (\w+ (?:\.\w+)*) }  # code inside braces "{a.b.c}"
+""", re.VERBOSE)
 
 _CONFDELTYPES = {
     'RESTRICT': 'r',
@@ -51,6 +57,27 @@ class MetaSQL(type):
             return SQL(f'"{name}"', to_flush=to_flush)
         assert subname.isidentifier() or IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
         return SQL(f'"{name}"."{subname}"', to_flush=to_flush)
+
+    def magic(self, code: str, to_flush=None) -> SQL:
+        f_locals = inspect.currentframe().f_back.f_locals
+        result = []
+        params = []
+        for text, esc, expr in MAGIC_RE.findall(code):
+            if esc:
+                text = esc[0]
+            if text:
+                result.append(text)
+                continue
+            # evaluate the expression, and add it to params
+            result.append("%s")
+            name, *names = expr.split('.')
+            val = f_locals[name]
+            for name in names:
+                assert '__' not in name
+                val = getattr(val, name)
+            params.append(val)
+        code = "".join(result)
+        return SQL(code, *params, to_flush=to_flush)
 
 
 class SQL(metaclass=MetaSQL):

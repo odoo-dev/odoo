@@ -184,3 +184,18 @@ class TestQuery(TransactionCase):
                 ON ("res_partner"."company_id" = "res_partner__company_id"."id")
         ''']):
             self.env.execute_query(query.select(company_name))
+
+    def test_magic(self):
+        model = self.env['res.partner']
+        query = Query(model)
+        partner = query.table  # noqa: F841
+
+        id_ = 42
+        year = 2025
+        sql_condition = SQL.magic(
+            "{partner.id} = {id_} AND {partner.create_date.month_number} < {year}",  # noqa: RUF027
+        )
+        self.assertEqual(sql_condition, SQL(
+            '"res_partner"."id" = %s AND date_part(%s, "res_partner"."create_date") < %s',
+            id_, 'month', year,
+        ))
