@@ -409,7 +409,7 @@ export class CalendarController extends Component {
         return this.model.unlinkRecords(ids);
     }
 
-    async setDate(move) {
+    setDate(move) {
         let date = null;
         switch (move) {
             case "next":
@@ -425,7 +425,7 @@ export class CalendarController extends Component {
                 }
                 break;
         }
-        await this.model.load({ date });
+        this.model.load({ date });
     }
 
     get scales() {
