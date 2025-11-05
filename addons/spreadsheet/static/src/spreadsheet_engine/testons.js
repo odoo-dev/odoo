@@ -128,6 +128,7 @@ const { Model } = odoo.loader.modules.get("@spreadsheet/spreadsheet_engine/o-spr
 const { ORM } = odoo.loader.modules.get("@web/core/orm_service");
 const { fieldService } = odoo.loader.modules.get("@web/core/field_service");
 const { OdooDataProvider } = odoo.loader.modules.get("@spreadsheet/data_sources/odoo_data_provider");
+const { waitForDataLoaded } = odoo.loader.modules.get("@spreadsheet/spreadsheet_engine/model");
 const orm = new ORM();
 const field = fieldService.start({}, { orm });
 
@@ -165,7 +166,7 @@ config.custom.odooDataProvider.on("data-source-updated", model, () =>
     model.dispatch("EVALUATE_CELLS")
 );
 debugger;
-await new Promise(resolve => setTimeout(resolve, 3000)); // wait for async loads
+await waitForDataLoaded(model);
 const sheetId = model.getters.getSheetIds()[0];
 const A1 = { sheetId, col: 0, row: 0 };
 console.log(model.getters.getCell(A1).content);

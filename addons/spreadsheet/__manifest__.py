@@ -25,6 +25,7 @@
             'spreadsheet/static/src/spreadsheet_engine/rpc.js',
             'spreadsheet/static/src/spreadsheet_engine/user.js',
             'spreadsheet/static/src/spreadsheet_engine/registry.js',
+            'spreadsheet/static/src/spreadsheet_engine/model.js',
             'spreadsheet/static/src/o_spreadsheet/errors.js',
             'spreadsheet/static/src/o_spreadsheet/odoo_module_engine.js',
             'spreadsheet/static/src/o_spreadsheet/odoo_module.js',
