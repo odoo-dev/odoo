@@ -29,21 +29,21 @@ class PosSelfKiosk(http.Controller):
 
     def _render_self_order_page(self, pos_config, config_access_token):
         return request.render(
-            'pos_self_order.index',
-            {
-                'access_token': config_access_token,
-                'session_info': {
-                    **request.env['ir.http'].get_frontend_session_info(),
-                    'currencies': request.env['res.currency'].get_all_currencies(),
-                    'data': {
-                        'config_id': pos_config.id,
-                        'self_ordering_mode': pos_config.self_ordering_mode,
-                    },
-                    'base_url': request.env['pos.session'].get_base_url(),
-                    'db': request.env.cr.dbname,
+                'pos_self_order.index',
+                {
+                    'access_token': config_access_token,
+                    'session_info': {
+                        **request.env["ir.http"].get_frontend_session_info(),
+                        'currencies': request.env["res.currency"].get_all_currencies(),
+                        'data': {
+                            'config_id': pos_config.id,
+                            'self_ordering_mode': pos_config.self_ordering_mode,
+                        },
+                        "base_url": request.env['pos.session'].get_base_url(),
+                        "db": request.env.cr.dbname,
+                    }
                 }
-            }
-        )
+            )
 
     @http.route("/pos-self/data/<config_id>", type='jsonrpc', auth='public', website=True)
     def get_self_ordering_data(self, config_id=None, access_token=None, table_identifier=None):

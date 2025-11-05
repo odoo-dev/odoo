@@ -95,6 +95,12 @@ class PosConfig(models.Model):
         help="Name of the image to display on the self order screen",
     )
     has_paper = fields.Boolean("Has paper", default=True)
+    self_order_route_preference = fields.Selection([
+            ('legacy', 'old (Query Params)'),
+            ('friendly', 'new (Token/Identifier)'),
+        ], string="Self Order Route Style",
+            help="Choose which routing style to use for self-order URLs.")
+
 
     def _update_access_token(self):
         self.access_token = uuid.uuid4().hex[:16]
@@ -235,19 +241,59 @@ class PosConfig(models.Model):
 
         return table_qr_code
 
-    def _get_self_order_route(self, table_id: Optional[int] = None) -> str:
+    # def _get_self_order_route(self, table_id: Optional[int] = None) -> str:
+    #     self.ensure_one()
+    #     token = self.access_token
+    #     base_route = f"/pos-self/{token}"
+
+    #     if self.self_ordering_mode == 'consultation':
+    #         return base_route
+
+    #     if self.self_ordering_mode == 'mobile' and table_id:
+    #         table = self.env["restaurant.table"].browse(table_id)
+    #         if table and table.active:
+    #             return f"{base_route}/{table.identifier}"
+
+    #     return base_route
+
+    def _get_self_order_route_old(self, table_id=None):
         self.ensure_one()
         base_route = f"/pos-self/{self.access_token}"
 
         if self.self_ordering_mode == 'consultation':
             return base_route
 
+        if self.self_ordering_mode == 'mobile':
+            table = self.env["restaurant.table"].search(
+                [("active", "=", True), ("id", "=", table_id)], limit=1
+            )
+            if table:
+                table_route = f"&table_identifier={table.identifier}"
+
+        return f"{base_route}?access_token={self.access_token}{table_route}"
+
+
+    def _get_self_order_route_new(self, table_id=None):
+        self.ensure_one()
+        token = self.access_token
+        base = f"/pos-self/{token}"
+
+        if self.self_ordering_mode == 'consultation':
+            return base
+
         if self.self_ordering_mode == 'mobile' and table_id:
             table = self.env['restaurant.table'].browse(table_id)
             if table.exists() and table.active:
-                return f"{base_route}/{table.identifier}"
+                return f"{base}/{table.identifier}"
 
-        return base_route
+        return base
+
+    def _get_self_order_route(self, table_id: Optional[int] = None) -> str:
+        self.ensure_one()
+        if self.self_order_route_preference == 'legacy':
+            return self._get_self_order_route_old(table_id)
+        else:
+            return self._get_self_order_route_new(table_id)
 
     def _get_self_order_url(self, table_id: Optional[int] = None) -> str:
         self.ensure_one()
