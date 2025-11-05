@@ -34,18 +34,15 @@ patch(SelfOrder.prototype, {
         let exitRouteUrl = baseUrl;
 
         if (exitRoute) {
-            let table = "";
-            exitRouteUrl += `/pos-self/${order_pos_config_id.id}`;
+            exitRouteUrl += `/pos-self/${order_pos_config_id.access_token}`;
+
+            if (this.currentTable) {
+                exitRouteUrl += `/${this.currentTable.identifier}`;
+            }
 
             if (this.config.self_ordering_pay_after === "each") {
                 exitRouteUrl += `/confirmation/${order.access_token}/order`;
             }
-
-            if (this.currentTable) {
-                table = `&table_identifier=${this.currentTable.identifier}`;
-            }
-
-            exitRouteUrl += `?access_token=${this.access_token}${table}`;
         }
 
         const exit = encodeURIComponent(exitRouteUrl);

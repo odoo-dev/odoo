@@ -33,16 +33,19 @@ class IrHttp(models.AbstractModel):
             path_with_config = None
 
         if path_with_config:
-            config_id_match = re.search(r'/pos-self(?:/data)?/(\d+)', path_with_config)
-            if config_id_match:
+            config_id_match = re.search(r'/pos-self(?:/data)?/([a-zA-Z0-9]+)', path_with_config)
+            if config_id_match[1].isnumeric():
                 pos_config = request.env['pos.config'].sudo().browse(int(config_id_match[1]))
-                if pos_config.self_ordering_available_language_ids:
-                    self_order_langs = pos_config.self_ordering_available_language_ids.mapped('code')
-                    if lang_code in self_order_langs:
-                        return lang_code
-                    short_code = lang_code.partition('_')[0]
-                    matched_code = next((code for code in self_order_langs if code.startswith(short_code)), None)
-                    if matched_code:
-                        return matched_code
+            else:
+                pos_config = request.env['pos.config'].sudo().search([('access_token', '=', config_id_match[1])], limit=1)
+
+            if pos_config and pos_config.self_ordering_available_language_ids:
+                self_order_langs = pos_config.self_ordering_available_language_ids.mapped('code')
+                if lang_code in self_order_langs:
+                    return lang_code
+                short_code = lang_code.partition('_')[0]
+                matched_code = next((code for code in self_order_langs if code.startswith(short_code)), None)
+                if matched_code:
+                    return matched_code
 
         return super().get_nearest_lang(lang_code)

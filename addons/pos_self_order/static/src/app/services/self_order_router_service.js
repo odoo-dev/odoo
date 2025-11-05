@@ -21,14 +21,17 @@ export class SelfOrderRouter extends Reactive {
     }
 
     addTableIdentifier(table) {
-        const url = new URL(browser.location.href);
-        url.searchParams.set("table_identifier", table.identifier);
-        history.replaceState({}, "", url);
+        if (!table.identifier) {
+            return;
+        }
+        const newPath = this.path.replace(/(\/pos-self\/[^/]+)/, `$1/${table.identifier}`);
+        history.replaceState({}, "", newPath);
+        this.path = newPath;
     }
 
     getTableIdentifier() {
-        const url = new URL(browser.location.href);
-        return url.searchParams.get("table_identifier");
+        const parts = this.path.split("/").filter(Boolean);
+        return parts.find((part) => /^[a-f0-9]{8}$/.test(part)) || null;
     }
 
     deleteTableIdentifier() {
@@ -57,9 +60,12 @@ export class SelfOrderRouter extends Reactive {
      * @param {string} route
      */
     navigate(routeName, routeParams = {}) {
-        const { route } = this.registeredRoutes[routeName];
+        let { route } = this.registeredRoutes[routeName];
         const url = new URL(browser.location.href);
-
+        const tableIdentifier = this.getTableIdentifier();
+        if (tableIdentifier) {
+            route = route.replace(/(\/pos-self\/[^/]+)/, `$1/${tableIdentifier}`);
+        }
         url.pathname = route.replace(
             /\{\w+:(\w+)\}/g,
             (match, paramName) => routeParams[paramName]

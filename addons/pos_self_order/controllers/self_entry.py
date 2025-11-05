@@ -6,25 +6,44 @@ from odoo.http import request
 
 
 class PosSelfKiosk(http.Controller):
-    @http.route(["/pos-self/<config_id>", "/pos-self/<config_id>/<path:subpath>"], auth="public", website=True, sitemap=True)
+    # NEW controller (access_token based)
+    # eg: /pos-self/<access_token> and /pos-self/<access_token>/<table_identifier>
+    # Old query-param style is removed.
+    @http.route(['/pos-self/<string:access_token>', '/pos-self/<string:access_token>/<string:table_identifier>', '/pos-self/<string:access_token>/<path:subpath>'], auth='public', website=True, sitemap=True)
+    def start_self_ordering_token(self, access_token=None, table_identifier=None, subpath=None):
+        pos_config, _, config_access_token = self._verify_entry_access(False, access_token, table_identifier)
+        return self._render_self_order_page(pos_config, config_access_token)
+
+    # OLD controller (config_id based)
+    # Previously accessed using query params: /pos-self/4?access_token=<token>&table_identifier=<table>
+    # It now redirects permanently to the NEW URL format: /pos-self/<access_token>/<table_identifier>
+    @http.route(['/pos-self/<int:config_id>', '/pos-self/<int:config_id>/<path:subpath>'], auth='public', website=True, sitemap=True)
     def start_self_ordering(self, config_id=None, access_token=None, table_identifier=None, subpath=None):
-        pos_config, _, config_access_token = self._verify_entry_access(config_id, access_token, table_identifier)
+        _, _, config_access_token = self._verify_entry_access(str(config_id), access_token, table_identifier)
+
+        new_url = f"/pos-self/{config_access_token}"
+        if table_identifier:
+            new_url += f"/{table_identifier}"
+
+        return request.redirect(new_url)
+
+    def _render_self_order_page(self, pos_config, config_access_token):
         return request.render(
-                'pos_self_order.index',
-                {
-                    'access_token': config_access_token,
-                    'session_info': {
-                        **request.env["ir.http"].get_frontend_session_info(),
-                        'currencies': request.env["res.currency"].get_all_currencies(),
-                        'data': {
-                            'config_id': pos_config.id,
-                            'self_ordering_mode': pos_config.self_ordering_mode,
-                        },
-                        "base_url": request.env['pos.session'].get_base_url(),
-                        "db": request.env.cr.dbname,
-                    }
+            'pos_self_order.index',
+            {
+                'access_token': config_access_token,
+                'session_info': {
+                    **request.env['ir.http'].get_frontend_session_info(),
+                    'currencies': request.env['res.currency'].get_all_currencies(),
+                    'data': {
+                        'config_id': pos_config.id,
+                        'self_ordering_mode': pos_config.self_ordering_mode,
+                    },
+                    'base_url': request.env['pos.session'].get_base_url(),
+                    'db': request.env.cr.dbname,
                 }
-            )
+            }
+        )
 
     @http.route("/pos-self/data/<config_id>", type='jsonrpc', auth='public', website=True)
     def get_self_ordering_data(self, config_id=None, access_token=None, table_identifier=None):
@@ -42,13 +61,12 @@ class PosSelfKiosk(http.Controller):
     def _verify_entry_access(self, config_id=None, access_token=None, table_identifier=None):
         table_sudo = False
 
-        if not config_id or not config_id.isnumeric():
+        if not (config_id or access_token) or (config_id and not config_id.isnumeric()):
             raise werkzeug.exceptions.NotFound()
 
         if access_token:
             config_access_token = True
-            pos_config_sudo = request.env["pos.config"].sudo().search([
-                ("id", "=", config_id), ('access_token', '=', access_token)], limit=1)
+            pos_config_sudo = request.env['pos.config'].sudo().search([('access_token', '=', access_token)], limit=1)
         else:
             config_access_token = False
             pos_config_sudo = request.env["pos.config"].sudo().search([

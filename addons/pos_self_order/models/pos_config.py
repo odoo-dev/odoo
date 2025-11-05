@@ -237,21 +237,17 @@ class PosConfig(models.Model):
 
     def _get_self_order_route(self, table_id: Optional[int] = None) -> str:
         self.ensure_one()
-        base_route = f"/pos-self/{self.id}"
-        table_route = ""
+        base_route = f"/pos-self/{self.access_token}"
 
         if self.self_ordering_mode == 'consultation':
             return base_route
 
-        if self.self_ordering_mode == 'mobile':
-            table = self.env["restaurant.table"].search(
-                [("active", "=", True), ("id", "=", table_id)], limit=1
-            )
+        if self.self_ordering_mode == 'mobile' and table_id:
+            table = self.env['restaurant.table'].browse(table_id)
+            if table.exists() and table.active:
+                return f"{base_route}/{table.identifier}"
 
-            if table:
-                table_route = f"&table_identifier={table.identifier}"
-
-        return f"{base_route}?access_token={self.access_token}{table_route}"
+        return base_route
 
     def _get_self_order_url(self, table_id: Optional[int] = None) -> str:
         self.ensure_one()

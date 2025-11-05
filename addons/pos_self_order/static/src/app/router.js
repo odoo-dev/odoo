@@ -32,30 +32,43 @@ export class Router extends Component {
 
         for (const [routeName, slot] of Object.entries(this.props.slots)) {
             const route = slot.route;
-            const paramStrings = route.match(/\{\w+:\w+\}/g);
 
-            if (!paramStrings) {
-                this.routes[routeName] = {
-                    route,
-                    paramSpecs: [],
-                    regex: new RegExp(`${lgPrefixRegex}${route}$`),
-                };
-                continue;
-            }
-
-            const paramSpecs = paramStrings.map((paramString) => {
-                const [, type, name] = paramString.match(/(\w+):(\w+)/);
+            const paramSpecs = (route.match(/\{\w+:\w+\}/g) || []).map((m) => {
+                const [, type, name] = m.match(/(\w+):(\w+)/);
                 return { type, name };
             });
 
-            const regex = new RegExp(
-                `${lgPrefixRegex}${route
-                    .split(/\{\w+:\w+\}/)
-                    .map((part) => escapeRegExp(part))
-                    .join("([^/]+)")}$`
-            );
+            /* Build a regex to match self-ordering routes with table identifiers avaialble or not.
+                Examples:
+                    /pos-self/<token>
+                    /pos-self/<token>/<tableIdentifiers>
+                    /pos-self/<token>/products
+                    /pos-self/<token>/<tableIdentifiers>/products
+                Dynamic parts like `{string:id}` become `([^/]+)` capture groups.
+            */
+            const tokenMatch = route.match(/^\/pos-self\/([^/]+)/);
 
-            this.routes[routeName] = { route, paramSpecs, regex };
+            const pattern =
+                lgPrefixRegex +
+                (tokenMatch
+                    ? escapeRegExp(tokenMatch[0]) +
+                      "(?:/[^/]+)?" +
+                      route
+                          .slice(tokenMatch[0].length)
+                          .split(/\{\w+:\w+\}/)
+                          .map(escapeRegExp)
+                          .join("([^/]+)")
+                    : route
+                          .split(/\{\w+:\w+\}/)
+                          .map(escapeRegExp)
+                          .join("([^/]+)")) +
+                "/?$";
+
+            this.routes[routeName] = {
+                route,
+                paramSpecs,
+                regex: new RegExp(pattern),
+            };
         }
 
         this.router.registerRoutes(this.routes);
@@ -68,7 +81,10 @@ export class Router extends Component {
     matchURL() {
         const path = this.router.path;
 
-        for (const [routeName, { paramSpecs, regex }] of Object.entries(this.routes)) {
+        const routes = Object.entries(this.routes).sort(
+            (a, b) => b[1].regex.source.length - a[1].regex.source.length
+        );
+        for (const [routeName, { paramSpecs, regex }] of routes) {
             const match = path.match(regex);
             if (match) {
                 const parsedParams = parseParams(match.slice(2), paramSpecs);
