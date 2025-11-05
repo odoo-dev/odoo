@@ -5,7 +5,7 @@ import logging
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
 from odoo.fields import Domain
-from odoo.tools.translate import _
+from odoo.tools import frozendict
 
 _logger = logging.getLogger(__name__)
 
@@ -102,10 +102,46 @@ class ResCountry(models.Model):
         result.extend(super().name_search(name, domain, operator, limit))
         return result
 
+    @property
+    def CACHED_FIELDS(self) -> tuple[str, ...]:
+        """ Return fields to cache for all countries.
+        Please promise all these fields don't depend on other models and context
+        and are not translated.
+        """
+        return (
+            'code',
+            'currency_id',
+            'phone_code',
+        )
+
+    def _fetch_field(self, field):
+        if any(self._ids) and field.name in self.CACHED_FIELDS:
+            self._check_field_access(field, 'read')
+            data = self._cached_data()[field.name]
+            field._insert_cache(self.browse(data), data.values())
+            if all(record_id in data for record_id in self.ids):
+                self.check_access('read')
+                return
+        super()._fetch_field(field)
+
+    @tools.ormcache(cache='stable')
+    def _cached_data(self) -> frozendict:
+        """ Cached values for active currencies. """
+        fnames = self.CACHED_FIELDS
+        records = self.sudo().with_context({}).search_fetch([], fnames, order='code')
+        return frozendict({
+            fname: frozendict(zip(records.ids, map(self._fields[fname]._get_cache(records.env).__getitem__, records.ids)))
+            for fname in fnames
+        })
+
     @api.model
     @tools.ormcache('code', cache='stable')
     def _phone_code_for(self, code):
-        return self.search([('code', '=', code)]).phone_code
+        data = self._cached_data()
+        for country_code, phone_code in zip(data['code'].values(), data['phone_code'].values()):
+            if country_code == code:
+                return phone_code
+        return False
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -119,7 +155,7 @@ class ResCountry(models.Model):
         if vals.get('code'):
             vals['code'] = vals['code'].upper()
         res = super().write(vals)
-        if ('code' in vals or 'phone_code' in vals):
+        if not vals.keys().isdisjoint(self.CACHED_FIELDS):
             # Intentionally simplified by not clearing the cache in create and unlink.
             self.env.registry.clear_cache('stable')
         if 'address_view_id' in vals:
@@ -153,7 +189,7 @@ class ResCountry(models.Model):
                 try:
                     record.address_format % {i: 1 for i in address_fields}
                 except (ValueError, KeyError):
-                    raise UserError(_('The layout contains an invalid format key'))
+                    raise UserError(self.env._('The layout contains an invalid format key'))
 
     @api.depends('country_group_ids')
     def _compute_country_group_codes(self):

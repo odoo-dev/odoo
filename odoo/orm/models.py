@@ -3895,7 +3895,7 @@ class BaseModel(metaclass=MetaModel):
             # invalidate the cache
             if real_recs and (cache_name := self._clear_cache_name) and (
                 not hasattr(self, '_clear_cache_on_fields')
-                or not self._clear_cache_on_fields.isdisjoint(vals)
+                or not vals.keys().isdisjoint(self._clear_cache_on_fields)
             ):
                 self.env.registry.clear_cache(cache_name)
 

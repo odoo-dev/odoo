@@ -7,8 +7,9 @@ from odoo import api, fields, models, modules, tools
 from odoo.api import SUPERUSER_ID
 from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Command, Domain
-from odoo.tools import html2plaintext, file_open, ormcache
+from odoo.tools import html2plaintext, file_open, frozendict, ormcache
 from odoo.tools.image import image_process
+from odoo.tools.sql import table_columns
 
 _logger = logging.getLogger(__name__)
 
@@ -19,13 +20,12 @@ class ResCompany(models.Model):
     _order = 'sequence, name'
     _inherit = ['format.address.mixin', 'format.vat.label.mixin']
     _parent_store = True
-    _clear_cache_name = 'default'
-    _clear_cache_on_fields = {
-        # This list is not well defined and tests should be improved
-        'active',  # user._get_company_ids and other potential cached search
-        'sequence',  # user._get_company_ids and other potential cached search
-    }
+    _clear_cache_name = 'stable'
     _clear_asset_cache_on_fields = {'font', 'primary_color', 'secondary_color', 'external_report_layout_id'}
+
+    @property
+    def _clear_cache_on_fields(self):
+        return self.CACHED_FIELDS
 
     def copy(self, default=None):
         raise UserError(self.env._('Duplicating a company is not allowed. Please create a new company instead.'))
@@ -35,6 +35,10 @@ class ResCompany(models.Model):
             return base64.b64encode(file.read())
 
     def _default_currency_id(self):
+        if self.env.registry._init and not (set(self.CACHED_FIELDS) <= table_columns(self.env.cr, self._table).keys()):
+            # The database is being initialized, _init_column calls and tries to
+            # access the cache.
+            return None
         return self.env.user.company_id.currency_id
 
     name = fields.Char(related='partner_id.name', string='Company Name', required=True, store=True, readonly=False)
@@ -327,6 +331,42 @@ class ResCompany(models.Model):
             companies_needs_l10n.install_l10n_modules()
 
         return companies
+
+    @property
+    def CACHED_FIELDS(self) -> tuple[str, ...]:
+        """ Return fields to cache for all companies.
+        Please promise all these fields don't depend on other models and context
+        and are not translated.
+        """
+        # active and sequence used in user._get_company_ids and other potential cached search
+        return (
+            'name',
+            'active',
+            'sequence',
+            'currency_id',
+            'parent_id',
+            'partner_id',
+        )
+
+    def _fetch_field(self, field):
+        if any(self._ids) and field.name in self.CACHED_FIELDS:
+            self._check_field_access(field, 'read')
+            data = self._cached_data()[field.name]
+            field._insert_cache(self.browse(data), data.values())
+            if all(record_id in data for record_id in self.ids):
+                self.check_access('read')
+                return
+        super()._fetch_field(field)
+
+    @tools.ormcache(cache='stable')
+    def _cached_data(self) -> frozendict:
+        """ Cached values for all companies. """
+        fnames = self.CACHED_FIELDS
+        records = self.sudo().with_context({'active_test': False}).search_fetch([], fnames, order='sequence, name')
+        return frozendict({
+            fname: frozendict(zip(records.ids, map(self._fields[fname]._get_cache(records.env).__getitem__, records.ids)))
+            for fname in fnames
+        })
 
     def write(self, vals):
         if 'parent_id' in vals:

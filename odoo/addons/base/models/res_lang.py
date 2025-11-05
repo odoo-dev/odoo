@@ -9,7 +9,7 @@ from typing import Any, Literal
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import OrderedSet
+from odoo.tools import frozendict
 
 _logger = logging.getLogger(__name__)
 
@@ -288,16 +288,46 @@ class ResLang(models.Model):
     # ------------------------------------------------------------
     # cached methods for **active** languages
     # ------------------------------------------------------------
+
     @property
-    def CACHED_FIELDS(self) -> OrderedSet:
+    def CACHED_FIELDS(self) -> tuple[str, ...]:
         """ Return fields to cache for the active languages
         Please promise all these fields don't depend on other models and context
         and are not translated.
         Warning: Don't add method names of ``dict`` to CACHED_FIELDS for sake of the
         implementation of LangData
         """
-        return OrderedSet(['id', 'name', 'code', 'iso_code', 'url_code', 'active', 'direction', 'date_format',
-                           'time_format', 'week_start', 'grouping', 'decimal_point', 'thousands_sep', 'flag_image_url'])
+        return (
+            'name', 'code', 'iso_code', 'url_code', 'active', 'direction', 'date_format',
+            'time_format', 'week_start', 'grouping', 'decimal_point', 'thousands_sep', 'flag_image_url',
+        )
+
+    def _fetch_field(self, field):
+        if any(self._ids) and field.name in self.CACHED_FIELDS:
+            self._check_field_access(field, 'read')
+            data = self._cached_data()[field.name]
+            field._insert_cache(self.browse(data), data.values())
+            if all(record_id in data for record_id in self.ids):
+                self.check_access('read')
+                return
+        super()._fetch_field(field)
+
+    @tools.ormcache(cache='stable')
+    def _cached_data(self) -> frozendict:
+        """ Cached values for active langs. """
+        fnames = self.CACHED_FIELDS
+        records = self.sudo().with_context({}).search_fetch([('active', '=', True)], fnames, order='name')
+        records.mapped('flag_image_url')  # fill the cache for computed field
+        return frozendict({
+            fname: frozendict(zip(records.ids, map(self._fields[fname]._get_cache(records.env).__getitem__, records.ids)))
+            for fname in fnames
+        })
+
+    @api.model
+    def _get_active_langs(self):
+        """ Return active languages. """
+        # any field will do, only active languages are cached
+        return self.browse(self._cached_data()['active'])
 
     def _get_data(self, **kwargs) -> LangData:
         """ Get the language data for the given field value in kwargs
@@ -312,22 +342,27 @@ class ResLang(models.Model):
                 ``False`` for all ``self.CACHED_FIELDS``
         :raise: UserError if field_name is not in ``self.CACHED_FIELDS``
         """
+        # TODO use _lang_get
         [[field_name, field_value]] = kwargs.items()
         return self._get_active_by(field_name)[field_value]
 
+    @api.model
     def _lang_get(self, code: str):
         """ Return the language using this code if it is active """
-        return self.browse(self._get_data(code=code).id)
+        data = self._cached_data()
+        lang_id = next((id_ for id_, value in data['code'].items() if value == code), None)
+        return self.browse(lang_id)
 
+    @api.model
     def _get_code(self, code: str) -> str | Literal[False]:
         """ Return the given language code if active, else return ``False`` """
-        return self._get_data(code=code).code
+        return self.sudo()._lang_get(code).code
 
     @api.model
     @api.readonly
     def get_installed(self) -> list[tuple[str, str]]:
         """ Return installed languages' (code, name) pairs sorted by name. """
-        return [(code, data.name) for code, data in self._get_active_by('code').items()]
+        return [(lang.code, lang.name) for lang in self.sudo()._get_active_langs()]
 
     @tools.ormcache('field', cache='stable')
     def _get_active_by(self, field: str) -> LangDataDict:
@@ -336,15 +371,17 @@ class ResLang(models.Model):
         Its items are ordered by languages' names
         Try to reuse the used ``field``: 'id', 'code', 'url_code'
         """
-        if field not in self.CACHED_FIELDS:
+        # TODO use directly _get_active_langs().grouped()
+        fnames = ('id', *self.CACHED_FIELDS)
+        if field not in fnames:
             raise UserError(_('Field "%s" is not cached', field))
         if field == 'code':
-            langs = self.sudo().with_context(active_test=True).search_fetch([], self.CACHED_FIELDS, order='name')
+            langs = self.sudo()._get_active_langs()
             return LangDataDict({
-                lang.code: LangData({f: lang[f] for f in self.CACHED_FIELDS})
+                lang.code: LangData({f: lang[f] for f in fnames})
                 for lang in langs
             })
-        return LangDataDict({data[field]: data for data in self._get_active_by('code').values()})
+        return LangDataDict({data[field]: data for data in self.sudo()._get_active_by('code').values()})
 
     # ------------------------------------------------------------
 
@@ -434,13 +471,12 @@ class ResLang(models.Model):
 
         formatted = percent % value
 
-        data = self._get_data(id=self.id)
-        if not data:
+        if self not in self._get_active_langs():
             raise UserError(_("The language %s is not installed.", self.name))
-        decimal_point = data.decimal_point
+        decimal_point = self.decimal_point
         # floats and decimal ints need special action!
         if grouping:
-            lang_grouping, thousands_sep = data.grouping, data.thousands_sep or ''
+            lang_grouping, thousands_sep = self.grouping, self.thousands_sep or ''
             eval_lang_grouping = ast.literal_eval(lang_grouping)
 
             if percent[-1] in 'eEfFgG':

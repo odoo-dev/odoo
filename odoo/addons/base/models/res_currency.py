@@ -7,7 +7,7 @@ from datetime import date
 
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import ormcache, parse_date, SQL
+from odoo.tools import frozendict, ormcache, parse_date, SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -25,7 +25,10 @@ class ResCurrency(models.Model):
     _order = 'active desc, name'
     # invalidate cache for get_all_currencies
     _clear_cache_name = 'stable'
-    _clear_cache_on_fields = {'active', 'digits', 'name', 'position', 'symbol'}
+
+    @property
+    def _clear_cache_on_fields(self):
+        return self.CACHED_FIELDS
 
     # Note: 'code' column was removed as of v6.0, the 'name' should now hold the ISO code.
     name = fields.Char(string='Currency', size=3, required=True, help="Currency Code (ISO 4217)")
@@ -284,10 +287,40 @@ class ResCurrency(models.Model):
         self.ensure_one()
         return tools.float_is_zero(amount, precision_rounding=self.rounding)
 
+    @property
+    def CACHED_FIELDS(self) -> tuple[str, ...]:
+        """ Return fields to cache for the active currencies.
+        Please promise all these fields don't depend on other models and context
+        and are not translated.
+        """
+        return (
+            'name', 'symbol', 'position', 'decimal_places', 'active',
+        )
+
+    def _fetch_field(self, field):
+        if any(self._ids) and field.name in self.CACHED_FIELDS:
+            self._check_field_access(field, 'read')
+            data = self._cached_data()[field.name]
+            field._insert_cache(self.browse(data), data.values())
+            if all(record_id in data for record_id in self.ids):
+                self.check_access('read')
+                return
+        super()._fetch_field(field)
+
+    @tools.ormcache(cache='stable')
+    def _cached_data(self) -> frozendict:
+        """ Cached values for active currencies. """
+        fnames = self.CACHED_FIELDS
+        records = self.sudo().with_context({}).search_fetch([('active', '=', True)], fnames, order='name')
+        return frozendict({
+            fname: frozendict(zip(records.ids, map(self._fields[fname]._get_cache(records.env).__getitem__, records.ids)))
+            for fname in fnames
+        })
+
     @ormcache(cache='stable')
     @api.model
     def get_all_currencies(self):
-        currencies = self.sudo().search_fetch([('active', '=', True)], ['name', 'symbol', 'position', 'decimal_places'])
+        currencies = self.sudo().browse(self._cached_data()['active'])
         return {
             c.id: {'name': c.name, 'symbol': c.symbol, 'position': c.position, 'digits': [69, c.decimal_places]}
             for c in currencies
