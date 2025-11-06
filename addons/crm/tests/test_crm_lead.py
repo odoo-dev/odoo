@@ -631,6 +631,17 @@ class TestCRMLead(TestCrmCommon):
         self.assertEqual(lead.stage_id, self.stage_team2_1)
 
     @users('user_sales_manager')
+    def test_crm_lead_creation_won_stage(self):
+        """ Test that creating a lead directly in a won stage works should have date_closed value"""
+        lead = self.env['crm.lead'].create({
+            'name': 'TestLead',
+            'stage_id': self.stage_team1_won.id,
+            'team_id': self.sales_team_1.id,
+        })
+        self.assertEqual(lead.stage_id, self.stage_team1_won)
+        self.assertTrue(lead.date_closed, "Creating a lead in a won stage should have date_closed")
+
+    @users('user_sales_manager')
     def test_crm_lead_unlink_calendar_event(self):
         """ Test res_id / res_model is reset (and hide document button in calendar
         event form view) when lead is unlinked """
