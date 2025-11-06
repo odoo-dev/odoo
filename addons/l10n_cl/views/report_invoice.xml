@@ -7,7 +7,7 @@
         <t t-set="report_date" t-value="o.invoice_date"/>
         <t t-set="report_number" t-value="int(o.l10n_latam_document_number)"/>
         <t t-set="pre_printed_report" t-value="report_type == 'pdf'"/>
-        <t t-set="report_name" t-value="o.l10n_latam_document_type_id.name"/>
+        <t t-set="report_name" t-value="o.l10n_cl_document_type_id.name"/>
         <t t-set="header_address" t-value="o.company_id.partner_id"/>
         <t t-set="custom_footer">
             <t t-call="l10n_cl.custom_footer"/>
@@ -202,7 +202,7 @@
 
         <xpath expr="//div[@id='right-elements']" position="inside">
             <div class="row">
-                <div class="col-12 text-center" t-if="o.l10n_latam_document_type_id.code == '39'" name="vat_boleta">
+                <div class="col-12 text-center" t-if="o.l10n_cl_document_type_id.code == '39'" name="vat_boleta">
                     The VAT tax of this boleta is: <span t-out="o._l10n_cl_get_amounts()['vat_amount']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>.
                 </div>
                 <div name="transferable-table" class="col-6"/>

@@ -36,7 +36,7 @@ class TestClLatamDocumentType(AccountTestInvoicingCommon):
             'code': 'VBE',
             'company_id': cls.company_data['company'].id,
             'type': 'purchase',
-            'l10n_latam_use_documents': True,
+            'l10n_cl_use_documents': True,
             'default_account_id': cls.company_data['default_journal_purchase'].default_account_id.id,
         }])
 
@@ -50,34 +50,34 @@ class TestClLatamDocumentType(AccountTestInvoicingCommon):
         # 1. Do the test with a new invoice
         with Form(self.env['account.move'].with_context({'default_move_type': 'in_invoice'})) as invoice_form:
             # Change the journal to the one that uses documents, set the partner and check that the
-            # l10n_latam_document_type_id is computed and set to 33 (Factura Electronica, the default).
+            # l10n_cl_document_type_id is computed and set to 33 (Factura Electronica, the default).
             invoice_form.journal_id = self.purchase_journal
             invoice_form.partner_id = self.cl_partner_a
-            self.assertEqual(invoice_form.l10n_latam_document_type_id.id, document_type_33.id)
+            self.assertEqual(invoice_form.l10n_cl_document_type_id.id, document_type_33.id)
 
             # Change the document type to 45 (Factura de Compra)
-            invoice_form.l10n_latam_document_type_id = document_type_46
+            invoice_form.l10n_cl_document_type_id = document_type_46
 
             # Change the partner and check that the document type hasn't changed
             invoice_form.partner_id = self.cl_partner_b
-            self.assertEqual(invoice_form.l10n_latam_document_type_id.id, document_type_46.id)
+            self.assertEqual(invoice_form.l10n_cl_document_type_id.id, document_type_46.id)
 
             invoice_form.l10n_latam_document_number = '000001'
 
         invoice = invoice_form.save()
         self.assertRecordValues(invoice, [{
             'partner_id': self.cl_partner_b.id,
-            'l10n_latam_document_type_id': document_type_46.id,
+            'l10n_cl_document_type_id': document_type_46.id,
         }])
 
         # 2. Do the test again with the existing invoice
         with Form(invoice) as invoice_form:
             # Change the partner and check that the document type hasn't changed
             invoice_form.partner_id = self.cl_partner_a
-            self.assertEqual(invoice_form.l10n_latam_document_type_id.id, document_type_46.id)
+            self.assertEqual(invoice_form.l10n_cl_document_type_id.id, document_type_46.id)
 
         invoice_form.save()
         self.assertRecordValues(invoice, [{
             'partner_id': self.cl_partner_a.id,
-            'l10n_latam_document_type_id': document_type_46.id,
+            'l10n_cl_document_type_id': document_type_46.id,
         }])

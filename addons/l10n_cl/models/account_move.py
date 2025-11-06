@@ -65,13 +65,13 @@ class AccountMove(models.Model):
                                                   and cl_document_type_code not in ['35', '38', '39', '41']):
                 raise ValidationError(_('Tax payer type and vat number are mandatory for this type of '
                                         'document. Please set the current tax payer type of this customer'))
-            if rec.journal_id.type == 'sale' and rec.l10n_latam_use_documents:
+            if rec.journal_id.type == 'sale' and rec.l10n_cl_use_documents:
                 if country_id.code != "CL":
                     if not ((tax_payer_type == '4' and cl_document_type_code in ['110', '111', '112']) or (
                             tax_payer_type == '3' and cl_document_type_code in ['39', '41', '61', '56'])):
                         raise ValidationError(_(
                             'Document types for foreign customers must be export type (codes 110, 111 or 112) or you should define the customer as an end consumer and use receipts (codes 39 or 41)'))
-            if rec.journal_id.type == 'purchase' and rec.l10n_latam_use_documents:
+            if rec.journal_id.type == 'purchase' and rec.l10n_cl_use_documents:
                 if vat != SII_VAT and cl_document_type_code == '914':
                     raise ValidationError(_('The DIN document is intended to be used only with RUT 60805000-0'
                                             ' (Tesorería General de La República)'))
