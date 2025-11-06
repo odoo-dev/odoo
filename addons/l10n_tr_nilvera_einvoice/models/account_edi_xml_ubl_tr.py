@@ -332,9 +332,9 @@ class AccountEdiXmlUblTr(models.AbstractModel):
         })
         return partner_vals
 
-    def _import_fill_invoice_form(self, invoice, tree, qty_factor):
+    def _import_fill_invoice_form(self, invoice, tree, qty_factor, collect_values=None):
         # EXTENDS account.edi.xml.ubl_20
-        logs = super()._import_fill_invoice_form(invoice, tree, qty_factor)
+        logs = super()._import_fill_invoice_form(invoice, tree, qty_factor, collect_values=collect_values)
 
         # ==== Nilvera UUID ====
         if uuid_node := tree.findtext('./{*}UUID'):

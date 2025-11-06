@@ -244,68 +244,7 @@ class TestAccountEdiUblCii(AccountTestInvoicingCommon, HttpCase):
             'peppol_endpoint': '0477472701',
         }])
 
-    def test_import_partner_peppol_fields(self):
-        """ Check that the peppol fields are used to retrieve the partner when importing a Bis 3 xml. """
-        partner = self.env['res.partner'].create({
-            'name': "My Belgian Partner",
-            'vat': "BE0477472701",
-            'peppol_eas': "0208",
-            'peppol_endpoint': "0477472701",
-            'email': "mypartner@email.com",
-        })
-        invoice = self.env['account.move'].create({
-            'partner_id': partner.id,
-            'move_type': 'out_invoice',
-            'invoice_line_ids': [Command.create({'product_id': self.product_a.id})]
-        })
-        invoice.action_post()
-        xml_attachment = self.env['ir.attachment'].create({
-            'raw': self.env['account.edi.xml.ubl_bis3']._export_invoice(invoice)[0],
-            'name': 'test_invoice.xml',
-        })
-
-        # There is a duplicated partner (with the same name and email)
-        self.env['res.partner'].create({
-            'name': "My Belgian Partner",
-            'email': "mypartner@email.com",
-        })
-        # Change the fields of the partner, keep the peppol fields
-        partner.update({
-            'name': "Turlututu",
-            'email': False,
-            'vat': False,
-        })
-        # The partner should be retrieved based on the peppol fields
-        imported_invoice = self.import_attachment(xml_attachment, self.company_data["default_journal_sale"])
-        self.assertEqual(imported_invoice.partner_id, partner)
-
-    def test_import_partner_postal_address(self):
-        " Test importing postal address when creating new partner from UBL xml."
-        file_path = "bis3_bill_example.xml"
-        file_path = f"{self.test_module}/tests/test_files/{file_path}"
-        with file_open(file_path, 'rb') as file:
-            xml_attachment = self.env['ir.attachment'].create({
-                'mimetype': 'application/xml',
-                'name': 'test_invoice.xml',
-                'raw': file.read(),
-            })
-
-        partner_vals = {
-            'name': "ALD Automotive LU",
-            'email': "adl@test.com",
-            'vat': "LU12977109",
-        }
-        # assert there is no matching partner
-        partner_match = self.env['res.partner']._retrieve_partner(**partner_vals)
-        self.assertFalse(partner_match)
-
-        bill = self.import_attachment(xml_attachment)
-
-        self.assertRecordValues(bill.partner_id, [partner_vals])
-        self.assertEqual(bill.partner_id.contact_address, "270 rte d'Arlon\n\n8010 Strassen \nLuxembourg")
-
     def test_actual_delivery_date_in_cii_xml(self):
-
         invoice = self.env['account.move'].create({
             'partner_id': self.partner_a.id,
             'move_type': 'out_invoice',

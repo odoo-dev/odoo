@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, _
-from odoo.tools.misc import str2bool
+from odoo import _, fields, models, Command
+from odoo.tools import frozendict
+from odoo.tools.misc import formatLang, str2bool
 from odoo.addons.account.tools import dict_to_xml
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import UOM_TO_UNECE_CODE
 from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import FloatFmt, UBL_NAMESPACES
 
+from datetime import datetime
 from stdnum.no import mva
 
 
@@ -905,3 +908,759 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
                 ) if not mva.is_valid(vat) or len(vat) != 14 or vat[:2] != 'NO' or vat[-3:] != 'MVA' else "",
             })
         return constraints
+
+    # -------------------------------------------------------------------------
+    # IMPORT
+    # -------------------------------------------------------------------------
+
+    def _import_bis3_add_file_type_code_and_file_document_sign(self, tree, collected_values):
+        suffix_invoice_type, document_sign = self._get_import_document_amount_sign(tree)
+        collected_values['is_refund'] = True if suffix_invoice_type == 'refund' else False
+        collected_values['file_document_sign'] = document_sign
+
+    def _import_bis3_invoice_update_move_type(self, collected_values):
+        invoice = collected_values['invoice']
+        odoo_document_type = collected_values['odoo_document_type']
+        is_refund = collected_values['is_refund']
+        logs = collected_values['logs']
+
+        prefix = 'out' if odoo_document_type == 'sale' else 'in'
+        suffix = 'refund' if is_refund else 'invoice'
+        move_type = f'{prefix}_{suffix}'
+        if invoice.move_type != move_type:
+            invoice.move_type = move_type
+
+            if move_type in ('out_refund', 'in_refund'):
+                logs.append(_("The invoice has been converted into a credit note and the quantities have been reverted."))
+
+    def _import_bis3_add_customer(self, tree, collected_values):
+        odoo_document_type = collected_values['odoo_document_type']
+        role = "AccountingCustomer" if odoo_document_type == 'sale' else "AccountingSupplier"
+        import_partner_params = self._import_retrieve_partner_vals(tree, role)
+        customer_values = collected_values['customer_values'] = dict(import_partner_params)
+        partner, logs = self._import_partner(collected_values['company'], **import_partner_params)
+        customer_values['partner'] = partner
+        collected_values['logs'] += logs
+
+    def _import_bis3_add_currency(self, tree, collected_values):
+        currency_id, logs = self._import_currency(tree, './/{*}DocumentCurrencyCode')
+        collected_values['currency_values'] = {
+            'currency': self.env['res.currency'].browse(currency_id),
+        }
+        collected_values['logs'] += logs
+
+    def _import_bis3_add_issue_date(self, tree, collected_values):
+        issue_date_str = tree.findtext('./{*}IssueDate')
+        if issue_date_str:
+            collected_values['issue_date'] = fields.Date.from_string(issue_date_str)
+        else:
+            collected_values['issue_date'] = None
+
+    def _import_bis3_add_due_date(self, tree, collected_values):
+        collected_values['due_date'] = self._find_value(('./cbc:DueDate', './/cbc:PaymentDueDate'), tree)
+
+    def _import_bis3_invoice_add_partner_bank(self, tree, collected_values):
+        partner_bank_values = collected_values['partner_bank_values'] = {
+            'partner_bank': None,
+        }
+        invoice = collected_values['invoice']
+        bank_detail_nodes = tree.findall('.//{*}PaymentMeans')
+        bank_details = [bank_detail_node.findtext('{*}PayeeFinancialAccount/{*}ID') for bank_detail_node in bank_detail_nodes]
+        if bank_details:
+            partner_bank = self._import_partner_bank(invoice, bank_details, link_to_invoice=False)
+            partner_bank_values['partner_bank'] = partner_bank
+
+    def _import_bis3_add_reference(self, tree, collected_values):
+        collected_values['reference'] = tree.findtext('./{*}ID')
+
+    def _import_bis3_add_order_reference(self, tree, collected_values):
+        collected_values['order_reference'] = tree.findtext('./{*}OrderReference/{*}ID')
+
+    def _import_bis3_add_payment_terms(self, tree, collected_values):
+        payment_terms_values = collected_values['payment_terms_values'] = {}
+        payment_terms_values['aggregated_notes'] = self._import_description(tree, xpaths=['./{*}Note', './{*}PaymentTerms/{*}Note'])
+
+    def _import_bis3_add_payment_means(self, tree, collected_values):
+        collected_values['payment_means_values'] = {
+            'reference': tree.findtext('./{*}PaymentMeans/{*}PaymentID'),
+        }
+
+    def _import_bis3_add_delivery(self, tree, collected_values):
+        collected_values['delivery_values'] = {
+            'date': tree.findtext('.//{*}Delivery/{*}ActualDeliveryDate'),
+        }
+
+    def _import_bis3_add_incoterm(self, tree, collected_values):
+        incoterm_values = collected_values['incoterm_values'] = {}
+        code = incoterm_values['code'] = tree.findtext('./{*}TransportExecutionTerms/{*}DeliveryTerms/{*}ID')
+        if code:
+            incoterm_values['incoterm'] = self.env['account.incoterms'].search([('code', '=', code)], limit=1)
+
+    def _import_bis3_add_legal_monetary_total(self, tree, collected_values):
+        file_document_sign = collected_values['file_document_sign']
+        currency = collected_values['currency_values']['currency']
+        legal_monetary_total = collected_values['legal_monetary_total_values'] = {}
+
+        prepaid_amount_str = tree.findtext('./{*}LegalMonetaryTotal/{*}PrepaidAmount')
+        if prepaid_amount_str:
+            prepaid_amount = file_document_sign * float(prepaid_amount_str)
+            if not currency.is_zero(prepaid_amount):
+                legal_monetary_total['prepaid_amount'] = prepaid_amount
+                formatted_prepaid_amount = formatLang(self.env, prepaid_amount, currency_obj=currency)
+                collected_values['logs'].append(_("A payment of %s was detected.", formatted_prepaid_amount))
+
+        payable_rounding_amount_str = tree.findtext('./{*}LegalMonetaryTotal/{*}PayableRoundingAmount')
+        if payable_rounding_amount_str:
+            payable_rounding_amount = file_document_sign * float(payable_rounding_amount_str)
+            if not currency.is_zero(payable_rounding_amount):
+                legal_monetary_total['payable_rounding_amount'] = payable_rounding_amount
+                formatted_amount = formatLang(self.env, payable_rounding_amount, currency_obj=currency)
+                collected_values['logs'].append(_("A rounding amount of %s was detected.", formatted_amount))
+
+    def _import_bis3_add_tax_total(self, tree, collected_values):
+        file_document_sign = collected_values['file_document_sign']
+        odoo_document_type = collected_values['odoo_document_type']
+
+        taxes_values = collected_values['tax_total_values'] = {
+            'is_complete': True,
+            'tax_mapping': {},
+        }
+
+        tax_mapping = taxes_values['tax_mapping']
+        for subtotal_elem in tree.findall('./{*}TaxTotal/{*}TaxSubtotal'):
+            amount = subtotal_elem.findtext('.//{*}TaxAmount')
+            category_code = subtotal_elem.findtext('.//{*}TaxCategory/{*}ID')
+            if amount is None or category_code is None:
+                taxes_values['is_complete'] = False
+                continue
+
+            percentage = subtotal_elem.findtext('.//{*}TaxCategory/{*}Percent')
+            if percentage is None:
+                percentage = subtotal_elem.find('.//{*}Percent')
+            if percentage is None:
+                taxes_values['is_complete'] = False
+                continue
+
+            percentage = float(percentage)
+            tax_key = frozendict({
+                'category_code': category_code,
+                'percentage': percentage,
+            })
+            default_tax_values = {
+                'amount_type': 'percent',
+                'type_tax_use': odoo_document_type,
+                'amount': percentage,
+                'category_code': category_code,
+            }
+            tax_values = tax_mapping.setdefault(tax_key, {
+                **default_tax_values,
+                'tax_amount_currency': 0.0,
+                'taxes': self.env['account.tax'],
+            })
+            tax_values['tax_amount_currency'] += file_document_sign * float(amount)
+
+    def _import_bis3_invoice_line_name(self, line_tree, collected_values, line_collected_values):
+        line_collected_values['name'] = (
+            line_tree.findtext('.//{*}Item/{*}Description')
+            or line_tree.findtext('.//{*}Item/{*}Name')
+        )
+
+    def _import_bis3_invoice_line_extension_amount(self, line_tree, collected_values, line_collected_values):
+        line_extension_amount_str = line_tree.findtext('.//{*}LineExtensionAmount')
+
+        if line_extension_amount_str:
+            line_extension_amount = float(line_extension_amount_str)
+        else:
+            line_extension_amount = 0.0
+            collected_values['tax_total_values']['is_complete'] = False
+
+        line_collected_values['line_extension_amount'] = line_extension_amount
+
+    def _import_bis3_invoice_line_allowance_charges(self, line_tree, collected_values, line_collected_values):
+        allowances = line_collected_values['allowances'] = []
+        charges = line_collected_values['charges'] = []
+        for allowance_charge_elem in line_tree.iterfind('./{*}AllowanceCharge'):
+            charge_indicator = allowance_charge_elem.findtext('.//{*}ChargeIndicator')
+            amount_str = allowance_charge_elem.findtext('.//{*}Amount')
+            base_amount_str = allowance_charge_elem.findtext('.//{*}BaseAmount')
+            reason = allowance_charge_elem.findtext('.//{*}AllowanceChargeReason')
+            reason_code = allowance_charge_elem.findtext('.//{*}AllowanceChargeReasonCode')
+
+            if amount_str:
+                amount = float(amount_str)
+            else:
+                amount = 0.0
+                collected_values['tax_total_values']['is_complete'] = False
+
+            allowance_charge_values = {
+                'amount': amount,
+                'base_amount': float(base_amount_str) if base_amount_str else None,
+                'reason': reason,
+                'reason_code': reason_code,
+            }
+            if charge_indicator.lower() == 'true':
+                charges.append(allowance_charge_values)
+            else:
+                allowances.append(allowance_charge_values)
+
+        allowance_elem = line_tree.find('./{*}Price/{*}AllowanceCharge')
+        if allowance_elem is not None:
+            amount_str = allowance_elem.findtext('./{*}Amount')
+            base_amount_str = allowance_elem.findtext('./{*}BaseAmount')
+            reason = allowance_elem.findtext('./{*}AllowanceChargeReason')
+            reason_code = allowance_elem.findtext('./{*}AllowanceChargeReasonCode')
+
+            if amount_str:
+                amount = float(amount_str)
+            else:
+                amount = None
+                collected_values['tax_total_values']['is_complete'] = False
+
+            line_collected_values['price_allowance_values'] = {
+                'amount': amount,
+                'base_amount': float(base_amount_str) if base_amount_str else None,
+                'reason': reason,
+                'reason_code': reason_code,
+            }
+        else:
+            line_collected_values['price_allowance_values'] = {}
+
+    def _import_bis3_invoice_line_price_unit_quantity_discount(self, line_tree, collected_values, line_collected_values):
+        file_document_sign = collected_values['file_document_sign']
+
+        quantity_str = (
+            line_tree.findtext('.//{*}InvoicedQuantity')
+            or line_tree.findtext('.//{*}CreditedQuantity')
+        )
+        price_amount_str = line_tree.findtext('.//{*}Price/{*}PriceAmount')
+        base_quantity_str = line_tree.findtext('./{*}Price/{*}BaseQuantity')
+        line_extension_amount = line_collected_values['line_extension_amount']
+        total_allowance = sum(allowance['amount'] for allowance in line_collected_values['allowances'])
+        total_charges = sum(charge['amount'] for charge in line_collected_values['charges'])
+        price_allowance_values = line_collected_values['price_allowance_values']
+
+        if line_extension_amount:
+
+            if quantity_str:
+                quantity = float(quantity_str) * file_document_sign
+            else:
+                quantity = 1.0
+
+            if base_amount := price_allowance_values.get('base_amount'):
+                # The allowance on the price gives the original price of the product and the applied discount on it.
+                price_unit = base_amount
+            else:
+                # We do not have the original price of the product.
+                price_unit = (line_extension_amount + total_allowance - total_charges) / quantity
+
+            # The charge will be moved to an extra line or a fixed tax.
+            # If you have line_extension_amount=950, total_allowance=100, total_charges=50
+            # at the very end, you expect 2 lines: 900 + 50 for a total of 950.
+            # So, we compute the discount from 950 + 100 = 1050 to 900 on the first line.
+            # That's why we need to add back the charges here.
+            discount_amount = (price_unit * quantity) - line_extension_amount + total_charges
+        elif price_amount_str:
+            price_unit = float(price_amount_str)
+            discount_amount = 0.0
+            if base_quantity_str:
+                quantity = float(base_quantity_str) * file_document_sign
+                price_unit /= quantity
+            else:
+                quantity = 1.0
+        elif base_amount := price_allowance_values.get('base_amount'):
+            price_unit = base_amount
+            discount_amount = price_allowance_values['amount'] or 0.0
+            if base_quantity_str:
+                quantity = float(base_quantity_str) * file_document_sign
+                price_unit /= quantity
+            else:
+                quantity = 1.0
+        else:
+            collected_values['tax_total_values']['is_complete'] = False
+            discount_amount = 0.0
+            price_unit = 0.0
+            if quantity_str:
+                quantity = float(quantity_str) * file_document_sign
+            elif base_quantity_str:
+                quantity = float(base_quantity_str) * file_document_sign
+            else:
+                quantity = 1.0
+
+        line_collected_values['quantity'] = quantity
+        line_collected_values['price_unit'] = price_unit
+        gross_subtotal = (line_collected_values['price_unit'] * line_collected_values['quantity'])
+        line_collected_values['discount'] = (discount_amount * 100 / gross_subtotal) if gross_subtotal else 0.0
+
+    def _import_bis3_invoice_line_product(self, line_tree, collected_values, line_collected_values):
+        product_values = line_collected_values['product_values'] = {
+            'default_code': line_tree.findtext('./{*}Item/{*}SellersItemIdentification/{*}ID'),
+            'name': line_tree.findtext('./{*}Item/{*}name'),
+            'barcode': line_tree.findtext('./{*}Item/{*}StandardItemIdentification/{*}ID[@schemeID="0160"]'),
+        }
+        product_values['product'] = self.env['product.product']._retrieve_product(**product_values)
+
+    def _import_bis3_invoice_line_product_uom(self, line_tree, collected_values, line_collected_values):
+        product_uom_values = line_collected_values['product_uom_values'] = {
+            'uom': None,
+        }
+
+        quantity_node = line_tree.find('.//{*}InvoicedQuantity')
+        if quantity_node is None:
+            quantity_node = line_tree.findtext('.//{*}CreditedQuantity')
+        if quantity_node is not None:
+            uom_code = quantity_node.attrib.get('unitCode')
+            if uom_code:
+                matched_uom_xmlid = None
+                for odoo_xmlid, uom_unece in UOM_TO_UNECE_CODE.items():
+                    if uom_unece == uom_code:
+                        matched_uom_xmlid = odoo_xmlid
+                        break
+                if matched_uom_xmlid:
+                    product_uom_values['uom'] = self.env.ref(matched_uom_xmlid, raise_if_not_found=False)
+
+    def _import_bis3_invoice_line_invoice_period(self, line_tree, collected_values, line_collected_values):
+        invoice_period_values = line_collected_values['invoice_period_values'] = {}
+
+        start_date = line_tree.findtext('./{*}InvoicePeriod/{*}StartDate')
+        end_date = line_tree.findtext('./{*}InvoicePeriod/{*}EndDate')
+
+        if start_date and end_date:
+            invoice_period_values.update({
+                'start_date': datetime.strptime(start_date.strip(), '%Y-%m-%d'),
+                'end_date': datetime.strptime(end_date.strip(), '%Y-%m-%d'),
+            })
+
+    def _import_bis3_invoice_line_taxes(self, line_tree, collected_values, line_collected_values):
+        AccountTax = self.env['account.tax']
+        taxes_values = line_collected_values['taxes_values'] = {
+            'taxes': self.env['account.tax'],
+        }
+        company = collected_values['company']
+        tax_total_values = collected_values['tax_total_values']
+        invoice = collected_values.get('invoice')
+        partner = collected_values.get('customer_values', {}).get('partner')
+
+        for tax_elem in line_tree.findall('.//{*}Item/{*}ClassifiedTaxCategory'):
+            percentage = tax_elem.findtext('./{*}Percent')
+            category_code = tax_elem.findtext('./{*}ID')
+
+            if not percentage or not category_code:
+                tax_total_values['is_complete'] = False
+                continue
+
+            percentage = float(percentage)
+            tax_key = frozendict({
+                'category_code': category_code,
+                'percentage': percentage,
+            })
+            tax_values = tax_total_values['tax_mapping'].get(tax_key)
+            if not tax_values:
+                tax_total_values['is_complete'] = False
+                continue
+
+            extra_domain = []
+            if 'ubl_cii_tax_category_code' in AccountTax._fields:
+                extra_domain.append(('ubl_cii_tax_category_code', 'in', (False, tax_key['category_code'])))
+
+            extra_values = dict(tax_values)
+            if invoice and partner:
+                extra_values['invoice_predictive'] = {
+                    'invoice': invoice,
+                    'name': line_collected_values['name'],
+                    'partner': partner,
+                    'amount_type': tax_values['amount_type'],
+                    'amount': tax_values['amount'],
+                    'tax_type': tax_values['type_tax_use'],
+                }
+
+            tax = AccountTax._retrieve_tax(
+                company=company,
+                extra_values=extra_values,
+                criteria=[
+                    AccountTax._retrieve_tax_with_invoice_predictive,
+                    AccountTax._retrieve_tax_with_price_include,
+                ],
+                extra_domain=extra_domain,
+            )
+            if not tax:
+                tax_total_values['is_complete'] = False
+                continue
+
+            taxes_values['taxes'] |= tax
+            tax_values['taxes'] |= tax
+
+    def _import_bis3_invoice_line_account(self, line_tree, collected_values, line_collected_values):
+        invoice = collected_values.get('invoice')
+        name = line_collected_values['name']
+        if (
+            not invoice
+            or not name
+            # Check if 'account_accountant' is installed.
+            or 'payment_state_before_switch' not in self.env['account.move']._fields
+        ):
+            return
+
+        line_collected_values['account'] = self.env['account.move.line']._predict_specific_account(
+            move=invoice,
+            name=name,
+            partner=collected_values['customer_values']['partner'] or self.env['res.partner'],
+        )
+
+    def _import_bis3_invoice_line_extra_charges_lines(self, line_tree, collected_values, line_collected_values):
+        AccountTax = self.env['account.tax']
+        company = collected_values['company']
+        odoo_document_type = collected_values['odoo_document_type']
+        original_taxes = line_collected_values['taxes_values']['taxes']
+
+        extra_charges_lines = line_collected_values['extra_charges_lines'] = []
+        for charge in line_collected_values['charges']:
+            if charge['reason_code'] == 'AEO':
+                fixed_tax_amount = charge['amount'] / line_collected_values['quantity']
+                charge_copy = charge.copy()
+                charge_copy['amount'] /= charge_copy['line_quantity']
+
+                extra_values = {
+                    'amount_type': 'fixed',
+                    'type_tax_use': odoo_document_type,
+                    'amount': fixed_tax_amount,
+                }
+                tax = AccountTax._retrieve_tax(
+                    company=company,
+                    extra_values=extra_values,
+                    criteria=[
+                        AccountTax._retrieve_tax_with_price_include,
+                    ],
+                )
+                if tax:
+                    line_collected_values['taxes_values']['taxes'] |= tax
+                    continue
+
+            extra_charges_lines.append({
+                'name': f"{charge['reason_code']} {charge['reason']}",
+                'quantity': 1.0,
+                'price_unit': charge['amount'],
+                'tax_ids': original_taxes,
+            })
+
+    def _import_bis3_add_invoice_lines(self, tree, collected_values):
+        invoice_lines_values = collected_values['invoice_lines_values'] = []
+        for xpath in ('./{*}InvoiceLine', './{*}CreditNoteLine'):
+            for line_tree in tree.iterfind(xpath):
+                line_collected_values = {}
+
+                self._import_bis3_invoice_line_name(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_extension_amount(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_allowance_charges(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_price_unit_quantity_discount(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_product(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_product_uom(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_invoice_period(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_taxes(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_account(line_tree, collected_values, line_collected_values)
+                self._import_bis3_invoice_line_extra_charges_lines(line_tree, collected_values, line_collected_values)
+
+                invoice_lines_values.append(line_collected_values)
+
+    def _import_bis3_add_allowance_charges(self, tree, collected_values):
+        allowances = collected_values['allowances'] = []
+        charges = collected_values['charges'] = []
+
+        for element in tree.iterfind('./{*}AllowanceCharge'):
+            reason = element.findtext('./{*}AllowanceChargeReason')
+            reason_code = element.findtext('./{*}AllowanceChargeReasonCode')
+            charge_indicator = element.findtext('./{*}ChargeIndicator')
+            amount_str = element.findtext('./{*}Amount')
+            base_amount_str = element.findtext('./{*}BaseAmount')
+            multiplier_factor_numeric_str = element.findtext('./{*}MultiplierFactorNumeric')
+            percentage = element.findtext('./{*}TaxCategory/{*}Percent')
+            category_code = element.findtext('./{*}TaxCategory/{*}ID')
+
+            if amount_str:
+                amount = float(amount_str)
+            else:
+                amount = 0.0
+                collected_values['tax_total_values']['is_complete'] = False
+
+            allowance_charge_values = {
+                'amount': amount,
+                'base_amount': float(base_amount_str) if base_amount_str else None,
+                'reason': reason,
+                'reason_code': reason_code,
+                'percentage': float(multiplier_factor_numeric_str) if multiplier_factor_numeric_str else None,
+                'tax_percentage': percentage,
+                'tax_category_code': category_code,
+            }
+            if charge_indicator.lower() == 'true':
+                charges.append(allowance_charge_values)
+            else:
+                allowances.append(allowance_charge_values)
+
+    def _import_bis3_invoice_extra_allowance_charges_lines(self, tree, collected_values):
+        AccountTax = self.env['account.tax']
+        company = collected_values['company']
+        odoo_document_type = collected_values['odoo_document_type']
+        file_document_sign = collected_values['file_document_sign']
+        logs = collected_values['logs']
+
+        extra_allowance_charges_lines = collected_values['extra_allowance_charges_lines'] = []
+        for sign, allowance_charges in ((1, collected_values['charges']), (-1, collected_values['allowances'])):
+            for allowance_charge in allowance_charges:
+                extra_values = {
+                    'amount_type': 'percent',
+                    'type_tax_use': odoo_document_type,
+                    'amount': allowance_charge['tax_percentage'],
+                }
+
+                extra_domain = []
+                if 'ubl_cii_tax_category_code' in AccountTax._fields:
+                    extra_domain.append(('ubl_cii_tax_category_code', 'in', (False, allowance_charge['tax_category_code'])))
+
+                tax = AccountTax._retrieve_tax(
+                    company=company,
+                    extra_values=extra_values,
+                    criteria=[
+                        AccountTax._retrieve_tax_with_price_include,
+                    ],
+                    extra_domain=extra_domain,
+                )
+
+                reason = allowance_charge['reason']
+                if not tax:
+                    collected_values['tax_total_values']['is_complete'] = False
+
+                    if reason:
+                        logs.append(_(
+                            "Could not retrieve the tax: %(tax_percentage)s %% for line '%(line)s'.",
+                            tax_percentage=extra_values['amount'],
+                            line=reason,
+                        ))
+                    else:
+                        logs.append(_("Could not retrieve the tax: %s for the document level allowance/charge.", extra_values['amount']))
+
+                amount = allowance_charge['amount']
+                base_amount = allowance_charge['base_amount']
+                quantity = 1
+                if base_amount:
+                    price_unit = base_amount * sign * file_document_sign
+                    percentage = allowance_charge['percentage']
+                    if percentage:
+                        quantity = percentage / 100
+                else:
+                    price_unit = (amount or 0.0) * sign * file_document_sign
+
+                extra_allowance_charges_lines.append({
+                    'name': reason,
+                    'quantity': quantity,
+                    'price_unit': price_unit,
+                    'tax_ids': tax or self.env['account.tax'],
+                })
+
+    def _import_invoice_ubl_cii(self, invoice, file_data, new=False):
+        AccountTax = self.env['account.tax']
+        tree = file_data['xml_tree']
+        company = invoice.company_id
+        collected_values = {
+            'invoice': invoice,
+            'company': company,
+            'odoo_document_type': 'sale' if invoice.journal_id.type == 'sale' else 'purchase',
+            'logs': [],
+        }
+
+        # Update 'move_type' first.
+        self._import_bis3_add_file_type_code_and_file_document_sign(tree, collected_values)
+        self._import_bis3_invoice_update_move_type(collected_values)
+
+        self._import_bis3_add_customer(tree, collected_values)
+        self._import_bis3_add_currency(tree, collected_values)
+        self._import_bis3_add_issue_date(tree, collected_values)
+        self._import_bis3_add_due_date(tree, collected_values)
+        self._import_bis3_invoice_add_partner_bank(tree, collected_values)
+        self._import_bis3_add_reference(tree, collected_values)
+        self._import_bis3_add_order_reference(tree, collected_values)
+        self._import_bis3_add_payment_terms(tree, collected_values)
+        self._import_bis3_add_payment_means(tree, collected_values)
+        self._import_bis3_add_delivery(tree, collected_values)
+        self._import_bis3_add_incoterm(tree, collected_values)
+        self._import_bis3_add_legal_monetary_total(tree, collected_values)
+        self._import_bis3_add_tax_total(tree, collected_values)
+        self._import_bis3_add_invoice_lines(tree, collected_values)
+        self._import_bis3_add_allowance_charges(tree, collected_values)
+        self._import_bis3_invoice_extra_allowance_charges_lines(tree, collected_values)
+
+        # Update the invoice.
+        to_write = {}
+        default_base_line_kwargs = {}
+        if partner := collected_values['customer_values']['partner']:
+            to_write['partner_id'] = partner.id
+            default_base_line_kwargs['partner_id'] = partner
+        if issue_date := collected_values['issue_date']:
+            to_write['invoice_date'] = issue_date
+        else:
+            to_write['invoice_date'] = fields.Date.context_today(self)
+        if currency := collected_values['currency_values']['currency']:
+            to_write['currency_id'] = currency.id
+            default_base_line_kwargs['currency_id'] = currency
+            default_base_line_kwargs['rate'] = currency._get_conversion_rate(
+                from_currency=invoice.company_currency_id,
+                to_currency=currency,
+                company=company,
+                date=to_write['invoice_date'],
+            )
+        if due_date := collected_values['due_date']:
+            to_write['invoice_date_due'] = due_date
+        if partner_bank := collected_values['partner_bank_values']['partner_bank']:
+            to_write['partner_bank_id'] = partner_bank.id
+        if reference := collected_values['reference']:
+            to_write['ref'] = reference
+            if collected_values['odoo_document_type'] and invoice.quick_edit_mode:
+                to_write['name'] = reference
+        if order_reference := collected_values['order_reference']:
+            to_write['invoice_origin'] = order_reference
+        if aggregated_notes := collected_values['payment_terms_values']['aggregated_notes']:
+            to_write['narration'] = aggregated_notes
+        if reference := collected_values['payment_means_values']['reference']:
+            to_write['payment_reference'] = reference
+        if delivery_date := collected_values['delivery_values']['date']:
+            to_write['delivery_date'] = delivery_date
+        if incoterm := collected_values['incoterm_values'].get('incoterm'):
+            to_write['invoice_incoterm_id'] = incoterm.id
+
+        base_lines = []
+        for line_collected_values in collected_values['invoice_lines_values']:
+            base_line_kwargs = {
+                **default_base_line_kwargs,
+                'quantity': line_collected_values['quantity'],
+                'price_unit': line_collected_values['price_unit'],
+                'discount': line_collected_values['discount'],
+                'tax_ids': line_collected_values['taxes_values']['taxes'],
+                'special_mode': 'total_excluded',
+            }
+            if product := line_collected_values['product_values']['product']:
+                base_line_kwargs['product_id'] = product
+            if uom := line_collected_values['product_uom_values']['uom']:
+                base_line_kwargs['product_uom_id'] = uom
+
+            invoice_line_values = base_line_kwargs['_extra_values'] = {}
+            if name := line_collected_values['name']:
+                invoice_line_values['name'] = name
+            if (
+                invoice_period_values := line_collected_values['invoice_period_values']
+                and 'deferred_start_date' in self.env['account.move.line']._fields
+            ):
+                invoice_line_values['deferred_start_date'] = invoice_period_values['start_date']
+                invoice_line_values['deferred_end_date'] = invoice_period_values['end_date']
+            if account := line_collected_values.get('account'):
+                invoice_line_values['account_id'] = account.id
+
+            base_lines.append(AccountTax._prepare_base_line_for_taxes_computation(
+                record=None,
+                **base_line_kwargs,
+            ))
+
+            for extra_charge_values in line_collected_values['extra_charges_lines']:
+                base_line_kwargs = {
+                    **default_base_line_kwargs,
+                    **extra_charge_values,
+                    'special_mode': 'total_excluded',
+                    '_extra_values': {'name': extra_charge_values['name']},
+                }
+
+                base_lines.append(AccountTax._prepare_base_line_for_taxes_computation(
+                    record=None,
+                    **base_line_kwargs,
+                ))
+
+        legal_monetary_total = collected_values['legal_monetary_total_values']
+        if legal_monetary_total.get('payable_rounding_amount'):
+            base_line_kwargs = {
+                **default_base_line_kwargs,
+                'quantity': 1.0,
+                'price_unit': legal_monetary_total['payable_rounding_amount'],
+                'tax_ids': [],
+                '_extra_values': {'name': _("Rounding")},
+            }
+
+            base_lines.append(AccountTax._prepare_base_line_for_taxes_computation(
+                record=None,
+                **base_line_kwargs,
+            ))
+
+        for extra_allowance_charges_line in collected_values['extra_allowance_charges_lines']:
+            base_line_kwargs = {
+                **default_base_line_kwargs,
+                **extra_allowance_charges_line,
+                'special_mode': 'total_excluded',
+                '_extra_values': {'name': extra_allowance_charges_line['name']},
+            }
+
+            base_lines.append(AccountTax._prepare_base_line_for_taxes_computation(
+                record=None,
+                **base_line_kwargs,
+            ))
+
+        AccountTax._add_tax_details_in_base_lines(base_lines, company)
+        AccountTax._round_base_lines_tax_details(base_lines, company)
+
+        # Fix 'price_unit' if some price-included taxes are involved.
+        for base_line in base_lines:
+            for tax_data in base_line['tax_details']['taxes_data']:
+                if tax_data['tax'].price_include:
+                    base_line['price_unit'] += tax_data['raw_tax_amount_currency']
+
+        # Fix the tax amounts according the xml.
+        tax_total_values = collected_values['tax_total_values']
+        if tax_total_values['is_complete']:
+            reverse_tax_mapping = {
+                tax: tax_key
+                for tax_key, tax_values in tax_total_values['tax_mapping'].items()
+                for tax in tax_values['taxes']
+            }
+
+            def grouping_function(base_line, tax_data):
+                return tax_data and reverse_tax_mapping[tax_data['tax']]
+
+            base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+            values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+            for grouping_key, values in values_per_grouping_key.items():
+                if not grouping_key:
+                    continue
+
+                target_tax_amount_currency = tax_total_values['tax_mapping'][grouping_key]['tax_amount_currency']
+                target_factors = [
+                    {
+                        'factor': tax_data['raw_tax_amount_currency'],
+                        'tax_data': tax_data,
+                    }
+                    for _base_line, taxes_data in values['base_line_x_taxes_data']
+                    for tax_data in taxes_data
+                ]
+                amounts_to_distribute = AccountTax._distribute_delta_amount_smoothly(
+                    precision_digits=currency.decimal_places,
+                    delta_amount=target_tax_amount_currency,
+                    target_factors=target_factors,
+                )
+                for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
+                    tax_data = target_factor['tax_data']
+                    tax_data['tax_amount_currency'] = amount_to_distribute
+
+            # Set 'extra_tax_data' to ensure the totals won't change anymore.
+            AccountTax._fix_base_lines_tax_details_on_manual_tax_amounts(base_lines, company)
+
+        # Final invoice lines.
+        invoice_line_ids_commands = to_write['invoice_line_ids'] = []
+        for base_line in base_lines:
+            invoice_line_values = {
+                **base_line['_extra_values'],
+                'quantity': base_line['quantity'],
+                'price_unit': base_line['price_unit'],
+                'discount': base_line['discount'],
+                'tax_ids': [Command.set(base_line['tax_ids'].ids)],
+                'extra_tax_data': AccountTax._export_base_line_extra_tax_data(base_line),
+            }
+            invoice_line_ids_commands.append(Command.create(invoice_line_values))
+
+        invoice.write(to_write)
+
+        # However, it's quite impossible to predict taxes correctly so most of the time, the user has to edit them after manually.
+        # For this reason, let's remove 'extra_tax_data'.
+        invoice.invoice_line_ids.extra_tax_data = False

@@ -27,7 +27,9 @@ class TestUblBis3(AccountTestInvoicingCommon):
     def _create_company(cls, **create_values):
         # EXTENDS 'account'
         create_values['currency_id'] = cls.env.ref('base.EUR').id
-        return super()._create_company(**create_values)
+        company = super()._create_company(**create_values)
+        company.tax_calculation_rounding_method = 'round_globally'
+        return company
 
     def setup_partner_as_be1(self, partner):
         partner.write({

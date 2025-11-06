@@ -1037,7 +1037,10 @@ class AccountTax(models.Model):
         """
         self.ensure_one()
         if self.amount_type == 'percent':
-            total_percentage = sum(tax.amount for tax in batch) / 100.0
+            if self.amount in (100.0, -100.0):
+                return raw_base
+
+            total_percentage = sum(tax.amount for tax in batch if tax.amount not in (100.0, -100.0)) / 100.0
             to_price_excluded_factor = 1 / (1 + total_percentage) if total_percentage != -1 else 0.0
             return raw_base * to_price_excluded_factor * self.amount / 100.0
 
@@ -1989,43 +1992,37 @@ class AccountTax(models.Model):
                     base_line['tax_details'][f'delta_total_excluded{delta_currency_indicator}'] += amount_to_distribute
 
     @api.model
-    def _round_tax_details_tax_amounts_from_tax_lines(self, base_lines, company, tax_lines):
-        """ If tax lines are provided, the totals will be aggregated according them.
+    def _round_tax_details_from_manual_tax_amounts(self, base_lines, company, taxes_amounts, extra_partition_key=None):
+        """ If tax_amounts are provided, the totals will be aggregated according them.
         At this point, everything is rounded and won't change anymore.
 
         [!] Only added python-side.
 
         :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
         :param company:             The company owning the base lines.
-        :param tax_lines:           A optional list of base lines generated using the '_prepare_tax_line_for_taxes_computation'
-                                    method. If specified, the tax amounts will be computed based on those existing tax lines.
-                                    It's used to keep the manual tax amounts set by the user.
+        :param taxes_amounts:       A mapping tax => tax_amounts to force the total result per tax to be exactly the provided one.
+        :param extra_partition_key: An optional additional dictionary to restrict the tax amounts to a subset of 'base_lines'.
+                                    Currently, the 'base_lines' are partitioned by currency and if they are refund or not.
         """
-        if not tax_lines:
+        if not taxes_amounts:
             return
 
-        total_per_tax_line_key = defaultdict(lambda: {
-            'currency': None,
-            'tax_amount_currency': 0.0,
-            'tax_amount': 0.0,
-        })
-        for tax_line in tax_lines:
-            tax_rep = tax_line['tax_repartition_line_id']
-            sign = tax_line['sign']
-            tax = tax_rep.tax_id
-            currency = tax_line['currency_id']
-            tax_line_key = (tax.id, currency.id, tax_rep.document_type == 'refund')
-            total_per_tax_line_key[tax_line_key]['currency'] = currency
-            total_per_tax_line_key[tax_line_key]['tax_amount_currency'] += sign * tax_line['amount_currency']
-            total_per_tax_line_key[tax_line_key]['tax_amount'] += sign * tax_line['balance']
-
         def grouping_function(base_line, tax_data):
-            if not tax_data:
+            if not tax_data or tax_data['tax'] not in taxes_amounts:
                 return
-            return {
-                'tax': tax_data['tax'],
+
+            grouping_key = {
                 'currency': base_line['currency_id'],
                 'is_refund': base_line['is_refund'],
+            }
+            if extra_partition_key:
+                for k, v in grouping_key.items():
+                    if k in extra_partition_key and extra_partition_key[k] != grouping_key[k]:
+                        return
+
+            return {
+                'tax': tax_data['tax'],
+                **grouping_key,
             }
 
         base_lines_aggregated_values = self._aggregate_base_lines_tax_details(base_lines, grouping_function)
@@ -2035,10 +2032,6 @@ class AccountTax(models.Model):
                 continue
 
             currency = grouping_key['currency']
-            tax_line_key = (grouping_key['tax'].id, currency.id, grouping_key['is_refund'])
-            if tax_line_key not in total_per_tax_line_key:
-                continue
-
             for delta_currency_indicator, delta_currency in (
                 ('_currency', currency),
                 ('', company.currency_id),
@@ -2047,7 +2040,12 @@ class AccountTax(models.Model):
                 if not current_total_tax_amount:
                     continue
 
-                target_total_tax_amount = total_per_tax_line_key[tax_line_key][f'tax_amount{delta_currency_indicator}']
+                tax_amounts = taxes_amounts[grouping_key['tax']]
+                tax_amount_field = f'tax_amount{delta_currency_indicator}'
+                if tax_amount_field not in tax_amounts:
+                    continue
+
+                target_total_tax_amount = tax_amounts[tax_amount_field]
                 delta_total_tax_amount = target_total_tax_amount - current_total_tax_amount
 
                 target_factors = [
@@ -2066,6 +2064,46 @@ class AccountTax(models.Model):
                 for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
                     tax_data = target_factor['tax_data']
                     tax_data[f'tax_amount{delta_currency_indicator}'] += amount_to_distribute
+
+    @api.model
+    def _round_tax_details_tax_amounts_from_tax_lines(self, base_lines, company, tax_lines):
+        """ If tax lines are provided, the totals will be aggregated according them.
+        At this point, everything is rounded and won't change anymore.
+
+        [!] Only added python-side.
+
+        :param base_lines:          A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
+        :param company:             The company owning the base lines.
+        :param tax_lines:           A list of tax lines generated using the '_prepare_tax_line_for_taxes_computation'
+                                    method. The tax amounts will be computed based on those existing tax lines.
+                                    It's used to keep the manual tax amounts set by the user.
+        """
+        if not tax_lines:
+            return
+
+        total_per_tax_line_key = defaultdict(lambda: defaultdict(lambda: {
+            'tax_amount_currency': 0.0,
+            'tax_amount': 0.0,
+        }))
+        for tax_line in tax_lines:
+            tax_rep = tax_line['tax_repartition_line_id']
+            sign = tax_line['sign']
+            tax = tax_rep.tax_id
+            currency = tax_line['currency_id']
+            tax_line_key = frozendict({
+                'currency': currency,
+                'is_refund': tax_rep.document_type == 'refund',
+            })
+            total_per_tax_line_key[tax_line_key][tax]['tax_amount_currency'] += sign * tax_line['amount_currency']
+            total_per_tax_line_key[tax_line_key][tax]['tax_amount'] += sign * tax_line['balance']
+
+        for extra_partition_key, taxes_amounts in total_per_tax_line_key.items():
+            self._round_tax_details_from_manual_tax_amounts(
+                base_lines=base_lines,
+                company=company,
+                taxes_amounts=taxes_amounts,
+                extra_partition_key=extra_partition_key,
+            )
 
     @api.model
     def _round_base_lines_tax_details(self, base_lines, company, tax_lines=None):
@@ -3102,8 +3140,6 @@ class AccountTax(models.Model):
         for base_line in base_lines:
             tax_details = base_line['tax_details']
             taxes_data = tax_details['taxes_data']
-            if not taxes_data:
-                continue
 
             base_line['manual_total_excluded_currency'] = (
                 tax_details['total_excluded_currency']
@@ -3113,6 +3149,10 @@ class AccountTax(models.Model):
                 tax_details['total_excluded']
                 + tax_details['delta_total_excluded']
             )
+
+            if not taxes_data:
+                continue
+
             base_line['manual_tax_amounts'] = {}
             for tax_data in taxes_data:
                 tax = tax_data['tax']
@@ -4534,6 +4574,66 @@ class AccountTax(models.Model):
             return ''
         return html2plaintext(self.description)
 
+    @api.model
+    def _retrieve_tax_with_price_include(self, basic_domain, extra_values):
+        price_include = extra_values.get('price_include')
+        extra_domains = []
+        if not price_include:
+            extra_domains.append([('price_include', '=', False)])
+        elif price_include is None or price_include:
+            extra_domains.append([('price_include', '=', True)])
+        for extra_domain in extra_domains:
+            tax = self.env['account.tax'].search(basic_domain + extra_domain, limit=1)
+            if tax:
+                return tax
+
+    @api.model
+    def _retrieve_tax_with_invoice_predictive(self, basic_domain, extra_values):
+        # Check if 'account_accountant' is installed.
+        if 'payment_state_before_switch' not in self.env['account.move']._fields:
+            return
+
+        invoice_predictive = extra_values.get('invoice_predictive')
+        if not invoice_predictive:
+            return
+
+        predicted_tax_ids = self.env['account.move.line']._predict_specific_tax(
+            move=invoice_predictive['invoice'],
+            name=invoice_predictive['name'],
+            partner=invoice_predictive['partner'],
+            amount_type=extra_values['amount_type'],
+            amount=extra_values['amount'],
+            type_tax_use=extra_values['type_tax_use'],
+        )
+        return self.env['account.tax'].browse(predicted_tax_ids).filtered_domain(basic_domain)
+
+    @api.model
+    def _retrieve_tax(self, company, extra_values, criteria, extra_domain=None):
+        amount_type = extra_values.get('amount_type', 'percent')
+        type_tax_use = extra_values.get('type_tax_use', 'purchase')
+        amount = extra_values.get('amount')
+        if amount is None:
+            return self.env['account.tax']
+
+        extra_values = {
+            **extra_values,
+            'amount_type': amount_type,
+            'type_tax_use': type_tax_use,
+            'amount': amount,
+        }
+
+        basic_domain = [
+            *self._check_company_domain(company),
+            ('amount_type', '=', amount_type),
+            ('type_tax_use', '=', type_tax_use),
+            ('amount', '=', amount),
+        ] + (extra_domain or [])
+        for criterion in criteria:
+            tax = criterion(basic_domain, extra_values)
+            if tax:
+                return tax
+
+        return self.env['account.tax']
 
 class AccountTaxRepartitionLine(models.Model):
     _name = 'account.tax.repartition.line'

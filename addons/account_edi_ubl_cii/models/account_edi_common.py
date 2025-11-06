@@ -437,7 +437,7 @@ class AccountEdiCommon(models.AbstractModel):
             })
         return partner, logs
 
-    def _import_partner_bank(self, invoice, bank_details):
+    def _import_partner_bank(self, invoice, bank_details, link_to_invoice=True):
         """ Retrieve the bank account, if no matching bank account is found, create it """
         # clear the context, because creation of partner when importing should not depend on the context default values
         ResPartnerBank = self.env['res.partner.bank'].with_env(self.env(context=clean_context(self.env.context)))
@@ -463,7 +463,10 @@ class AccountEdiCommon(models.AbstractModel):
                     'partner_id': partner.id,
                 })
         if banks_to_create:
-            invoice.partner_bank_id = ResPartnerBank.create(banks_to_create)[0]
+            partner_bank = ResPartnerBank.create(banks_to_create)[0]
+            if link_to_invoice:
+                invoice.partner_bank_id = partner_bank
+            return partner_bank
 
     def _import_document_allowance_charges(self, tree, record, tax_type, qty_factor=1):
         logs = []
@@ -868,6 +871,9 @@ class AccountEdiCommon(models.AbstractModel):
     def _get_invoice_line_xpaths(self, invoice_line, qty_factor):
         # OVERRIDE
         pass
+
+    def _retrieve_invoice_tax_amounts(self, tree, invoice):
+        pass  # To be implemented by the format if needed
 
     def _correct_invoice_tax_amount(self, tree, invoice):
         pass  # To be implemented by the format if needed

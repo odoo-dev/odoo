@@ -1672,14 +1672,16 @@ export const accountTaxHelpers = {
         for (const base_line of base_lines) {
             const tax_details = base_line.tax_details;
             const taxes_data = tax_details.taxes_data;
-            if (!taxes_data.length) {
-                continue;
-            }
 
             base_line.manual_total_excluded_currency =
                 tax_details.total_excluded_currency + tax_details.delta_total_excluded_currency;
             base_line.manual_total_excluded =
                 tax_details.total_excluded + tax_details.delta_total_excluded;
+
+            if (!taxes_data.length) {
+                continue;
+            }
+
             base_line.manual_tax_amounts = {};
             for (const tax_data of taxes_data) {
                 const tax = tax_data.tax;
