@@ -89,7 +89,7 @@ class AccountDocumentDownloadController(http.Controller):
                 if attachment := move.message_main_attachment_id:
                     docs_data.append({'filename': attachment.name, 'filetype': attachment.mimetype, 'content': attachment.raw})
             else:
-                docs_data += move._get_invoice_legal_documents_all() or []
+                docs_data += move._get_invoice_legal_documents_all(allow_fallback=True) or []
         if docs_data:
             docs_data = rename_duplicates(docs_data)
             zip_content = _build_zip_from_data(docs_data)
