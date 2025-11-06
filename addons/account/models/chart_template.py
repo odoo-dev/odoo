@@ -121,8 +121,6 @@ class AccountChartTemplate(models.AbstractModel):
         country = country if country is not None else self.env.company.country_id
         chart_template_mapping = self._get_chart_template_mapping()
         print("select coa:", country, states)
-        if not country:
-            import pdb; pdb.set_trace()
         print([
             (template_code, template['name'])
             for template_code, template in sorted(chart_template_mapping.items(), key=(lambda t: (
