@@ -116,21 +116,33 @@ class AccountChartTemplate(models.AbstractModel):
             if get_all or template['visible']
         }
 
-    def _select_chart_template(self, country=None):
+    def _select_chart_template(self, country=None, states=None):
         """Get the available templates in a format suited for Selection fields."""
         country = country if country is not None else self.env.company.country_id
         chart_template_mapping = self._get_chart_template_mapping()
+        print("select coa:", country, states)
+        if not country:
+            import pdb; pdb.set_trace()
+        print([
+            (template_code, template['name'])
+            for template_code, template in sorted(chart_template_mapping.items(), key=(lambda t: (
+                t[1]['name'] != 'generic_coa' if not country
+                else t[1]['country_id'] != country.id
+                + 0 if not states else states not in t[1].get('state_ids', self.env['res.country.state'])
+            )))
+        ])
         return [
             (template_code, template['name'])
             for template_code, template in sorted(chart_template_mapping.items(), key=(lambda t: (
                 t[1]['name'] != 'generic_coa' if not country
                 else t[1]['country_id'] != country.id
+                + 0 if not states else states not in t[1].get('state_ids', self.env['res.country.state'])
             )))
         ]
 
-    def _guess_chart_template(self, country):
+    def _guess_chart_template(self, country, states=None):
         """Guess the most appropriate template based on the country."""
-        return self._select_chart_template(country)[0][0]
+        return self._select_chart_template(country, states)[0][0]
 
     # --------------------------------------------------------------------------------
     # Loading
@@ -159,7 +171,7 @@ class AccountChartTemplate(models.AbstractModel):
         if isinstance(company, int):
             company = self.env['res.company'].browse([company])
 
-        template_code = template_code or company and self._guess_chart_template(company.country_id)
+        template_code = template_code or company and self._guess_chart_template(company.country_id, states=company.state_id)
 
         if template_code in {'syscohada', 'syscebnl'} and template_code != company.chart_template:
             raise UserError(_("The %s chart template shouldn't be selected directly. Instead, you should directly select the chart template related to your country.", template_code))
@@ -955,7 +967,7 @@ class AccountChartTemplate(models.AbstractModel):
 
         existing_accounts = {'': None, None: None}  # keeps tracks of the created account by foreign xml_id
         default_company_taxes = company.account_sale_tax_id + company.account_purchase_tax_id
-        chart_template_code = self._guess_chart_template(country=country)
+        chart_template_code = self._guess_chart_template(country=country, states=company.state_id)
         tax_group_data = self._get_chart_template_data(chart_template_code)['account.tax.group']
         tax_data = self._get_chart_template_data(chart_template_code)['account.tax']
 

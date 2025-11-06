@@ -225,7 +225,8 @@ class ResCompany(models.Model):
     def _get_oss_tags(self):
         oss_tag = self.env.ref('l10n_eu_oss.tag_oss')
         country = self._get_country_from_vat()
-        chart_template = self.env['account.chart.template']._guess_chart_template(country)
+        states = self.state_id if self.state_id.country_id == country else None
+        chart_template = self.env['account.chart.template']._guess_chart_template(country, states=states)
 
         # If that l10n module isn't installed, it means the company doesn't use any tax report for that country
         # and thus hasn't nor need those tax report tag
