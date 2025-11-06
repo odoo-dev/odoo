@@ -314,6 +314,10 @@ class TestUBLBE(TestUBLCommon, TestAccountMoveSendCommon):
                 self.assertTrue(bill)
                 self.assert_same_invoice(invoice, bill, partner_id=self.partner_1.id)
 
+    def test_export_import_refund_new(self):
+        self.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', True)
+        self.test_export_import_refund()
+
     def test_encoding_in_attachment_ubl(self):
         invoice = self._generate_move(
             seller=self.partner_1,

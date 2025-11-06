@@ -314,7 +314,6 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
                          "ALD Automotive LU\n270 rte d'Arlon\n\n8010 Strassen \nLuxembourg")
 
     def test_actual_delivery_date_in_cii_xml(self):
-
         invoice = self.env['account.move'].create({
             'partner_id': self.partner_a.id,
             'move_type': 'out_invoice',

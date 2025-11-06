@@ -1,5 +1,6 @@
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.tools import file_open
 
 
 class TestUblCiiCommon(AccountTestInvoicingCommon):
@@ -29,6 +30,7 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
             'vat': 'BE0477472701',
             'company_registry': '0477472701',
             'invoice_sending_method': 'manual',
+            'invoice_edi_format': 'ubl_bis3',
             'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
             'property_account_payable_id': cls.company_data['default_account_payable'].id,
             'company_id': cls.company_data['company'].id,
@@ -140,6 +142,7 @@ class TestUblCiiBECommon(TestUblCiiCommon):
 
     @classmethod
     def _create_company(cls, **create_values):
+        # EXTENDS 'TestUblBis3Common'
         company = super()._create_company(**create_values)
 
         company.partner_id.write({
@@ -151,6 +154,7 @@ class TestUblCiiBECommon(TestUblCiiCommon):
             'country_id': cls.env.ref('base.be').id,
             'bank_ids': [Command.create({'acc_number': 'BE15001559627230'})],
         })
+
         return company
 
     def subfolder(self):

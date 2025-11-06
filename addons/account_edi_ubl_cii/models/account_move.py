@@ -143,12 +143,16 @@ class AccountMove(models.Model):
 
     def _get_edi_decoder(self, file_data, new=False):
         # EXTENDS 'account'
+        def decode(*args, **kwargs):
+            with self._disable_discount_precision():
+                return ubl_cii_xml_builder._import_invoice_ubl_cii(*args, **kwargs)
+
         if file_data['type'] == 'xml':
             if etree.QName(file_data['xml_tree']).localname == 'AttachedDocument':
                 file_data['xml_tree'] = self._ubl_parse_attached_document(file_data['xml_tree'])
             ubl_cii_xml_builder = self._get_ubl_cii_builder_from_xml_tree(file_data['xml_tree'])
             if ubl_cii_xml_builder is not None:
-                return ubl_cii_xml_builder._import_invoice_ubl_cii
+                return decode
 
         return super()._get_edi_decoder(file_data, new=new)
 
