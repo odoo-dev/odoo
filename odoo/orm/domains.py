@@ -808,7 +808,7 @@ class DomainCustom(Domain):
         query = records._filtered_access('read')._as_query(ordered=False)
         if query.is_empty():
             return Domain.FALSE._as_predicate(records)
-        query.add_where(self.optimize_full(records)._to_sql(query.table))
+        query.add_where(self._to_sql(query.table))
         return DomainCondition('id', 'any!', query)._as_predicate(records)
 
     def __eq__(self, other):
@@ -1126,8 +1126,9 @@ class DomainCondition(Domain):
             positive_operator = 'any!'
             field_expr = 'id'
             # similar to a search with [('id', 'in', records.ids), *condition]
-            value = records._filtered_access('read')._as_query(ordered=False)
-            value.add_where(condition.optimize_full(records)._to_sql(value.table))
+            value = query = records._filtered_access('read')._as_query(ordered=False)
+            condition = condition.optimize_full(records)
+            query.add_where(condition._to_sql(query.table))
             assert isinstance(value, Query)
 
         if isinstance(value, Query):
@@ -1852,7 +1853,7 @@ def _operator_child_of_domain(comodel: BaseModel, parent):
             child_ids.update(comodel._ids)
             # same as searching with the condition and bypassing all rules and overrides
             query = Query(comodel)
-            query.add_where(DomainCondition(parent, 'in', comodel._ids).optimize_full(comodel)._to_sql(query.table))
+            query.add_where(SQL("%s IN %s", query.table[parent], tuple(comodel.ids)))
             comodel = comodel.browse(OrderedSet(query.get_result_ids()) - child_ids)
     return child_ids
 

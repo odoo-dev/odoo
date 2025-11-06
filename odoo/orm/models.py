@@ -3048,7 +3048,7 @@ class BaseModel(metaclass=MetaModel):
 
         # first determine a query that satisfies the domain and access rules
         if any(field.column_type for field in fields_to_fetch):
-            query = self._search([('id', 'in', self.ids)], active_test=False)
+            query = BaseModel._search(self, Domain('id', 'in', self.ids), active_test=False)
         else:
             try:
                 self.check_access('read')

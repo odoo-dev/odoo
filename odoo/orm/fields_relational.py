@@ -528,7 +528,7 @@ class Many2one(_Relational):
             return sql
 
         if isinstance(value, Domain):
-            value = comodel._search(value, active_test=False, bypass_access=bypass_access)
+            value = BaseModel._search(comodel, value, bypass_access=bypass_access, active_test=False)
         if isinstance(value, Query):
             subselect = value.subselect()
         elif isinstance(value, SQL):
@@ -557,9 +557,12 @@ class Many2one(_Relational):
         if self.compute_sudo or self.delegate or model.env.su:
             coquery = None
         else:
-            coquery = comodel.with_context(_generating_sql_for_fields=True)._search(Domain.TRUE, active_test=False)
-            if not coquery.where_clause:
+            sec_domain = comodel.with_context(_generating_sql_for_fields=True)._access_domain('read').optimize_full(comodel.sudo())
+            if sec_domain.is_true():
                 coquery = None
+            else:
+                coquery = Query(comodel)
+                coquery.add_where(sec_domain._to_sql(coquery.table))
         if coquery is None:
             coalias = table._make_alias(self.name, comodel)
             cotable = None
@@ -853,7 +856,7 @@ class _RelationalMulti(_Relational):
                     )
                 #  in (False) => not any (Domain.TRUE)
                 #  not in (False) => any (Domain.TRUE)
-                value = comodel._search(Domain.TRUE)
+                value = Query(comodel)
                 exists = not exists
             else:
                 value = comodel.browse(value)._as_query(ordered=False)
@@ -875,7 +878,7 @@ class _RelationalMulti(_Relational):
                 query = domain.value
             else:
                 comodel = comodel.with_context(**self.context)
-                query = comodel._search(domain, bypass_access=bypass_access)
+                query = BaseModel._search(comodel, domain, bypass_access=bypass_access, active_test=False)
             assert isinstance(query, Query)
             return query
         if isinstance(value, Query):
@@ -992,7 +995,7 @@ class One2many(_RelationalMulti):
         # retrieve the lines in the comodel
         context = {'active_test': False}
         context.update(self.context)
-        comodel = records.env[self.comodel_name].with_context(**context)
+        comodel = records.env[self.comodel_name].with_context(**context).sudo()
         inverse = self.inverse_name
         inverse_field = comodel._fields[inverse]
 
@@ -1006,7 +1009,10 @@ class One2many(_RelationalMulti):
             # add fields for security rules
             sec_domain = comodel._access_domain('read')
             field_names.update(c.field_expr for c in sec_domain.optimize(comodel.sudo()).iter_conditions())
-        lines = comodel.sudo().search_fetch(domain, field_names)
+        # XXX like search_fetch
+        fields_to_fetch = comodel._determine_fields_to_fetch(field_names)
+        query = BaseModel._search(comodel, domain, bypass_access=self.bypass_search_access, order=comodel._order, active_test=False)
+        lines = comodel._fetch_query(query, fields_to_fetch)
 
         # group lines by inverse field (without prefetching other fields)
         get_id = (lambda rec: rec.id) if inverse_field.type == 'many2one' else int
