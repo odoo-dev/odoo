@@ -14,7 +14,7 @@
                 <!-- Filters -->
                 <t t-set-slot="layout-actions">
                    <div class="d-flex gap-1 flex-wrap">
-                       <StockValuationReportFilters/>
+                       <StockValuationReportFilters minDate="data.min_closing_date"/>
                    </div>
                 </t>
             </ControlPanel>

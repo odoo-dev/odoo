@@ -1,13 +1,16 @@
 import { Component, useRef } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDateTimePicker } from "@web/core/datetime/datetime_picker_hook";
+import { parseDate } from "@web/core/l10n/dates";
 
 export class StockValuationReportFilters extends Component {
     static template = "stock_account.StockValuationReport.Filters";
     static components = {
         Dropdown,
     };
-    static props = {};
+    static props = {
+        minDate: { type: String, optional: true },
+    };
 
     setup() {
         this.dateFilterRef = useRef("filterDate");
@@ -16,6 +19,9 @@ export class StockValuationReportFilters extends Component {
                 value: this.env.controller.state.date,
                 type: "date",
             };
+            if (this.props.minDate) {
+                pickerProps.minDate = parseDate(this.props.minDate);
+            }
             return pickerProps;
         };
         this.dateTimePicker = useDateTimePicker({

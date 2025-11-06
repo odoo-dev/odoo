@@ -84,6 +84,7 @@ class StockValuationReport(models.AbstractModel):
             'currency_id': company.currency_id.id,
             'ending_stock': ending_stock,
             'initial_balance': initial_balance,
+            'min_closing_date': company._get_last_closing_date(),
         }
 
         if self._must_include_inventory_loss():
