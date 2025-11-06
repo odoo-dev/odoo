@@ -2,7 +2,7 @@ from io import BytesIO
 import logging
 import re
 
-from odoo import _, api, models
+from odoo import api, models
 
 _logger = logging.getLogger(__name__)
 
@@ -16,6 +16,7 @@ class AccountMoveSend(models.AbstractModel):
 
     def _get_all_extra_edis(self) -> dict:
         # EXTENDS 'account'
+        _ = self.env._
         res = super()._get_all_extra_edis()
         label = _("by Nilvera (Demo)") if self.env.company.l10n_tr_nilvera_use_test_env else _("by Nilvera")
         res.update({'tr_nilvera': {'label': label, 'is_applicable': self._is_tr_nilvera_applicable}})
@@ -36,6 +37,7 @@ class AccountMoveSend(models.AbstractModel):
                 and re.match(r'^[A-Za-z0-9]{3}[^A-Za-z0-9]?$', parts['prefix1'])
             )
 
+        _ = self.env._
         alerts = super()._get_alerts(moves, moves_data)
 
         # Filter for moves that have 'tr_nilvera' in their EDI data
@@ -138,17 +140,36 @@ class AccountMoveSend(models.AbstractModel):
                 'action': moves_with_invalid_name._get_records_action(name=_("Check name on Invoice(s)")),
             }
 
+        # Warning alert if product is missing CTSP Number
+        if non_eligible_tr_products := tr_nilvera_moves.invoice_line_ids.product_id.filtered(
+            lambda p: not p.l10n_tr_ctsp_number and "TR" in p.fiscal_country_codes,
+        ):
+            alerts["l10n_tr_non_eligible_products"] = {
+                "message": _(
+                    "The following products are missing a CTSP Number:\n%(products)s\n",
+                    products="\n".join(f"- {product.display_name}" for product in non_eligible_tr_products),
+                ),
+                "level": "warning",
+                "action_text": _("View Product(s)"),
+                "action": non_eligible_tr_products._get_records_action(
+                    name=_("Check Products"),
+                ),
+            }
+
         return alerts
 
     def _get_l10n_tr_tax_partner_address_alert(self, moves):
-        # Extended in l10n_tr_nilvera_einvoice_extended to remove error based on l10n_tr_is_export_invoice
+        _ = self.env._
         if tr_partners_missing_required_fields := moves.filtered(
             lambda m: (
-                not m.partner_id.vat
-                or not m.partner_id.street
-                or not m.partner_id.city
-                or not m.partner_id.state_id
-                or not m.partner_id.country_id
+                not m.l10n_tr_is_export_invoice
+                and (
+                    not m.partner_id.vat
+                    or not m.partner_id.street
+                    or not m.partner_id.city
+                    or not m.partner_id.state_id
+                    or not m.partner_id.country_id
+                )
             ),
         ).partner_id:
             return {
@@ -160,24 +181,31 @@ class AccountMoveSend(models.AbstractModel):
         return {}
 
     def _get_l10n_tr_tax_partner_tax_office_alert(self, moves):
-        # Overriden in l10n_tr_nilvera_einvoice_extended to give error based on l10n_tax_office field
-        if tr_einvoice_partners_missing_ref := moves.partner_id.filtered(lambda p: p.l10n_tr_nilvera_customer_status == "einvoice" and not p.ref and p.country_code == "TR"):
+        _ = self.env._
+        if tr_einvoice_partners_missing_ref := moves.partner_id.filtered(
+            lambda p: p.l10n_tr_nilvera_customer_status == "einvoice" and not p.l10n_tr_tax_office_id,
+        ):
             return {
-                "message": _("The following E-Invoice partner(s) must have the reference field set to the tax office name."),
+                "message": _("The Tax Office is not set on the following TR Partner(s)."),
                 "action_text": _("View Partner(s)"),
-                "action": tr_einvoice_partners_missing_ref._get_records_action(name=_("Check reference on Partner(s)")),
+                "action": tr_einvoice_partners_missing_ref._get_records_action(
+                    name=_("Check reference on Partner(s)"),
+                ),
                 "level": "danger",
             }
-
         return {}
 
     def _get_l10n_tr_tax_company_tax_office_alert(self, moves):
-        # Overriden in l10n_tr_nilvera_einvoice_extended to give error based on l10n_tax_office field
-        if tr_companies_missing_tax_office := moves.company_id.partner_id.filtered(lambda p: not p.reference and p.country_code == "TR"):
+        _ = self.env._
+        if tr_companies_missing_tax_office := moves.company_id.filtered(
+            lambda c: (not c.l10n_tr_tax_office_id and c.country_code == "TR"),
+        ):
             return {
-                "message": _("The following TR Company(s) must have the reference field set to the tax office name."),
+                "message": _("The Tax Office is not set on the following TR Company(s)."),
                 "action_text": _("View Company(s)"),
-                "action": tr_companies_missing_tax_office._get_records_action(name=_("TR Company(s)")),
+                "action": tr_companies_missing_tax_office._get_records_action(
+                    name=_(" TR Company(s)"),
+                ),
                 "level": "danger",
             }
         return {}
