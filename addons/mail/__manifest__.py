@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Discuss',
+    'name': 'Chatter App',
     'version': '1.19',
     'category': 'Productivity/Discuss',
     'sequence': 145,
