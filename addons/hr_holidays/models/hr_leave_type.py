@@ -280,7 +280,7 @@ class HrLeaveType(models.Model):
         leave_types = self.env['hr.leave.type'].search([])
 
         def is_valid(leave_type):
-            return not leave_type.requires_allocation or op(leave_type.virtual_remaining_leaves)
+            return not leave_type.requires_allocation or op(leave_type.virtual_remaining_leaves, value)
         return [('id', 'in', leave_types.filtered(is_valid).ids)]
 
     @api.depends_context('employee_id', 'default_employee_id', 'leave_date_from', 'default_date_from')
