@@ -523,7 +523,7 @@ class Many2one(_Relational):
             return sql
 
         if isinstance(value, Domain):
-            value = comodel._search(value, active_test=False, bypass_access=bypass_access)
+            value = BaseModel._search(comodel, value, bypass_access=bypass_access, active_test=False)
         if isinstance(value, Query):
             subselect = value.subselect()
         elif isinstance(value, SQL):
@@ -552,9 +552,12 @@ class Many2one(_Relational):
         if self.compute_sudo or self.delegate or model.env.su:
             coquery = None
         else:
-            coquery = comodel._search(Domain.TRUE, active_test=False)
-            if not coquery.where_clause:
+            sec_domain = comodel._access_domain('read').optimize_full(comodel.sudo())
+            if sec_domain.is_true():
                 coquery = None
+            else:
+                coquery = Query(comodel)
+                coquery.add_where(sec_domain._to_sql(coquery.table))
         if coquery is None:
             coalias = table._make_alias(self.name, comodel)
             cotable = None
@@ -835,7 +838,7 @@ class _RelationalMulti(_Relational):
                     )
                 #  in (False) => not any (Domain.TRUE)
                 #  not in (False) => any (Domain.TRUE)
-                value = comodel._search(Domain.TRUE)
+                value = Query(comodel)
                 exists = not exists
             else:
                 value = comodel.browse(value)._as_query(ordered=False)
@@ -853,9 +856,7 @@ class _RelationalMulti(_Relational):
             domain = value & field_domain
             comodel = comodel.with_context(**self.context)
             bypass_access = self.bypass_search_access or operator in ('any!', 'not any!')
-            query = comodel._search(domain, bypass_access=bypass_access)
-            assert isinstance(query, Query)
-            return query
+            return BaseModel._search(comodel, domain, bypass_access=bypass_access, active_test=False)
         if isinstance(value, Query):
             # add the field_domain to the query
             domain = field_domain.optimize_full(comodel)
@@ -980,7 +981,12 @@ class One2many(_RelationalMulti):
         if comodel._active_name:
             field_names.append(comodel._active_name)
         try:
-            lines = comodel.search_fetch(domain, field_names)
+            # XXX like search_fetch
+            fields_to_fetch = comodel._determine_fields_to_fetch(field_names)
+            query = BaseModel._search(comodel, domain, bypass_access=self.bypass_search_access, order=comodel._order, active_test=False)
+            lines = comodel._fetch_query(query, fields_to_fetch)
+            if not comodel.env.su:
+                comodel.env._add_to_access_cache(lines)
         except AccessError as e:
             raise AccessError(records.env._("Failed to read field %s", self) + '\n' + str(e)) from e
 
@@ -1423,12 +1429,12 @@ class Many2many(_RelationalMulti):
 
         # bypass the access during search if method is overwriten to avoid
         # possibly filtering all records of the comodel before joining
-        bypass_access = self.bypass_search_access and type(comodel)._search is not BaseModel._search
+        bypass_access = self.bypass_search_access and type(comodel)._access_domain is not BaseModel._access_domain
 
         # make the query for the lines
         domain = self.get_comodel_domain(records)
         try:
-            query = comodel._search(domain, order=comodel._order, bypass_access=bypass_access)
+            query = BaseModel._search(comodel, domain, bypass_access=bypass_access, order=comodel._order, active_test=False)
         except AccessError as e:
             raise AccessError(records.env._("Failed to read field %s", self) + '\n' + str(e)) from e
 
@@ -1448,16 +1454,17 @@ class Many2many(_RelationalMulti):
             corecord_ids.add(id2)
 
         # filter using record rules
-        if bypass_access and corecord_ids:
-            accessible_corecords = comodel.browse(corecord_ids)._filtered_access('read')
+        corecord_ids = OrderedSet(id_ for ids in group.values() for id_ in ids)
+        accessible_corecords = comodel.browse(corecord_ids)
+        if bypass_access and accessible_corecords:
+            accessible_corecords = accessible_corecords._filtered_access('read')
             if len(accessible_corecords) < len(corecord_ids):
                 # some records are inaccessible, remove them from groups
                 corecord_ids = set(accessible_corecords._ids)
                 for id1, ids in group.items():
                     group[id1] = [id_ for id_ in ids if id_ in corecord_ids]
-        elif corecord_ids and not comodel.env.su:
+        elif accessible_corecords and not comodel.env.su:
             # query is already filtered, corecords are accessible
-            accessible_corecords = comodel.browse(corecord_ids)
             comodel.env._add_to_access_cache(accessible_corecords)
 
         # store result in cache
