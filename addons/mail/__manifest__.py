@@ -78,6 +78,7 @@ For more specific needs, you may also assign custom-defined actions
         'views/mail_message_views.xml',
         'views/mail_message_schedule_views.xml',
         'views/mail_mail_views.xml',
+        'views/mail_mail_gateway_views.xml',
         'views/mail_followers_views.xml',
         'views/mail_ice_server_views.xml',
         'views/discuss_category_views.xml',

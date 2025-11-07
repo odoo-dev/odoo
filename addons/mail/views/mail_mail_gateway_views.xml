@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <record id="mail_mail_gateway_view_form" model="ir.ui.view">
+            <field name="name">mail_mail_gateway_view_form</field>
+            <field name="model">mail.mail.gateway</field>
+            <field name="arch" type="xml">
+                <form string="Email Message" duplicate="0">
+                    <header>
+                        <button name="action_send_and_close" string="Send &amp; Close" type="object" class="oe_highlight" invisible="state != 'outgoing' or message_type == 'user_notification'"/>
+                        <button name="mark_outgoing" string="Retry" type="object" invisible="state not in ('exception', 'cancel')"/>
+                        <button name="cancel" string="Cancel" type="object" invisible="state != 'outgoing'"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <label for="subject" class="oe_edit_only"/>
+                            <h2><field name="subject"/></h2>
+                        </div>
+                        <div style="vertical-align: top;">
+                            by <field name="author_id" class="oe_inline" string="User"/> on <field name="date" readonly="1" class="oe_inline"/>
+                        </div>
+                        <group>
+                            <field name="email_from"/>
+                            <field name="email_to"/>
+                            <field name="partner_ids" widget="many2many_tags"/>
+                            <field name="email_cc"/>
+                        </group>
+                        <notebook>
+                            <page string="Body" name="page_body">
+                                <field name="body"/>
+                            </page>
+                            <page string="Advanced" name="page_advanced" groups="base.group_no_one">
+                                <group>
+                                    <group string="Headers">
+                                        <field name="message_id"/>
+                                        <field name="references"/>
+                                        <field name="fetchmail_server_id"/>
+                                        <field name="headers"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Attachments" name="page_attachments">
+                                <field name="attachment_ids" domain="[('res_field','=', False)]"/>
+                            </page>
+                            <page string="Failure Reason" name="page_failure_reason">
+                                <field name="failure_reason"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="mail_mail_gateway_view_list" model="ir.ui.view">
+            <field name="name">mail_mail_gateway_view_list</field>
+            <field name="model">mail.mail.gateway</field>
+            <field name="arch" type="xml">
+                <list string="Emails">
+                    <header>
+                        <button name="action_retry" string="Retry" type="object"/>
+                    </header>
+                    <field name="date"/>
+                    <field name="subject"/>
+                    <field name="author_id" string="User"/>
+                    <field name="message_id" optional="hide"/>
+                    <field name="email_from"/>
+                    <!-- <button name="send" string="Send Now" type="object" icon="fa-paper-plane" invisible="state != 'outgoing' or message_type == 'user_notification'"/>
+                    <button name="mark_outgoing" string="Retry" type="object" icon="fa-repeat" invisible="state not in ('exception', 'cancel')"/>
+                    <button name="cancel" string="Cancel Email" type="object" icon="fa-times-circle" invisible="state != 'outgoing'"/> -->
+                </list>
+            </field>
+        </record>
+
+        <record id="mail_mail_gateway_view_search" model="ir.ui.view">
+            <field name="name">mail_mail_gateway_view_search</field>
+            <field name="model">mail.mail.gateway</field>
+            <field name="arch" type="xml">
+                <search string="Email Search">
+                    <field name="email_from" string="Email"/>
+                    <field name="date"/>
+                    <group>
+                        <field name="author_id"/>
+                        <field name="partner_ids"/>
+                    </group>
+                    <group>
+                        <filter string="Author" name="author" context="{'group_by':'author_id'}"/>
+                        <filter string="Date" name="month" help="Creation Date" domain="[]" context="{'group_by':'date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="mail_mail_gateway_action" model="ir.actions.act_window">
+            <field name="name">Unrouted Emails</field>
+            <field name="res_model">mail.mail.gateway</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="mail_mail_gateway_view_search"/>
+        </record>
+
+        <record id="mail_mail_gateway_action_from_fetchmail_server" model="ir.actions.act_window">
+            <field name="name">Messages</field>
+            <field name="res_model">mail.mail.gateway</field>
+            <field name="domain">[('fetchmail_server_id', '=', active_id)]</field>
+            <field name="context">{'search_default_server_id': active_id, 'default_fetchmail_server_id': active_id}</field>
+            <field name="binding_model_id" ref="model_fetchmail_server"/>
+            <field name="binding_view_types">form</field>
+        </record>
+    </data>
+</odoo>
