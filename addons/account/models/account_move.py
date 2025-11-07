@@ -772,6 +772,35 @@ class AccountMove(models.Model):
     display_send_button = fields.Boolean(compute='_compute_display_send_button')
     highlight_send_button = fields.Boolean(compute='_compute_highlight_send_button')
 
+    # TODO JOV: --------
+    #  new fields from invoice_latam_document, probably move elsewhere, maybe
+    #  common module or maybe hacky optional account.move.document.number mixin
+    document_number = fields.Char(
+        compute='_compute_document_number',
+        inverse='_inverse_document_number',
+    )
+
+    @api.depends('name')
+    def _compute_document_number(self):
+        recs_with_name = self.filtered(lambda x: x.name and x.name != "/")
+        for rec in recs_with_name:
+            # TODO JOV: this depended on whether document_type_id had a doc_code_prefix, is it important?
+            rec.document_number = rec.name.split(" ", 1)[-1]
+        (self - recs_with_name).document_number = False
+
+    # TODO JOV: why onchange
+    # @api.onchange('document_type_id', 'document_number', 'partner_id')
+    def _inverse_document_number(self):
+        for rec in self:
+            if not rec.document_number:
+                rec.name = False
+            else:
+                # TODO JOV: CL skips this
+                document_number = rec.document_type_id._format_document_number(rec.document_number)
+                rec.name = "%s %s" % (rec.document_type_id.doc_code_prefix, document_number)
+    # TODO JOV: --------
+    #  end of new fields
+
     _checked_idx = models.Index("(journal_id) WHERE (checked IS NOT TRUE)")
     _payment_idx = models.Index("(journal_id, state, payment_state, move_type, date)")
     _unique_name = models.UniqueIndex(
