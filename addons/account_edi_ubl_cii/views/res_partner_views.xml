@@ -38,4 +38,16 @@
             </xpath>
         </field>
     </record>
+
+    <!--    TODO: DELETE THIS LATER!!!-->
+    <record id="account_move_form_inherit_testwipwip" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.testwipwip</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="mytestwipwip" string="mytestwipwip" type="object"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

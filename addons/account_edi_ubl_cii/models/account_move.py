@@ -59,3 +59,16 @@ class AccountMove(models.Model):
             and not self.ubl_cii_xml_id \
             and self.is_sale_document() \
             and bool(self.partner_id.commercial_partner_id.ubl_cii_format)
+
+    def mytestwipwip(self):
+        print("mytestwipwip")
+        self.invoice_pdf_report_id.unlink()
+        self.ubl_cii_xml_id.unlink()
+        wizard = self.env['account.move.send']\
+            .with_context(active_model='account.move', active_ids=self.ids)\
+            .create({
+                'checkbox_ubl_cii_xml': True,
+            })
+        wizard.action_send_and_print()
+        with open('/home/yosuanicolaus/Downloads/pdfa/natural_pdfa.pdf', 'wb+') as f:
+            f.write(self.invoice_pdf_report_id.raw)

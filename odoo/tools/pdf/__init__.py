@@ -27,7 +27,13 @@ except ImportError:
 # might be a good case for exception groups
 error = None
 # keep pypdf2 2.x first so noble uses that rather than pypdf 4.0
-for SUBMOD in ['._pypdf2_2', '._pypdf', '._pypdf2_1']:
+import os
+submods = ['._pypdf'] if os.getenv('PDFA_MODERN') else ['._pypdf2_2'] if os.getenv('PDFA_NOBLE') else ['._pypdf2_1'] if os.getenv('PDFA_OLD') else []
+# for SUBMOD in ['._pypdf2_2', '._pypdf', '._pypdf2_1']:
+# for SUBMOD in ['._pypdf']:  # modern
+# for SUBMOD in ['._pypdf2_2']:  # noble
+# for SUBMOD in ['._pypdf2_1']:  # old
+for SUBMOD in submods:
     try:
         pypdf = importlib.import_module(SUBMOD, __spec__.name)
         break
@@ -551,6 +557,37 @@ class OdooPdfFileWriter(PdfFileWriter):
         # Add the new metadata to the pdf, then redirect the reference to refer to this new object.
         metadata_object = self._addObject(file_entry)
         self._root_object.update({NameObject("/Metadata"): metadata_object})
+
+        from rich.pretty import pprint
+
+        seen_indirect_object = set()
+
+        def deep_print(obj, level):
+            if level == 8:
+                return
+
+            def process_iobj(iobj):
+                if obj.__str__() not in seen_indirect_object:
+                    pprint(iobj)
+                    pprint(iobj.getObject())
+                    seen_indirect_object.add(obj.__str__())
+                    deep_print(obj.getObject(), level+1)
+
+            if isinstance(obj, IndirectObject):
+                process_iobj(obj)
+            elif isinstance(obj, list):
+                for item in obj:
+                    deep_print(item, level+1)
+            elif isinstance(obj, dict):
+                for value in obj.values():
+                    deep_print(value, level+1)
+
+        print('_objects')
+        pprint(self._objects)
+        deep_print(self._objects, 0)
+        print('_root_object')
+        pprint(self._root_object)
+        deep_print(self._root_object, 0)
 
     def _create_attachment_object(self, attachment):
         ''' Create a PyPdf2.generic object representing an embedded file.
