@@ -160,56 +160,7 @@ class ResCompany(models.Model):
         return extra_balance
 
     def _get_location_valuation_vals(self, at_date=None, location_domain=False):
-        location_domain = (location_domain or []) + [('valuation_account_id', '!=', False)]
-        amls_vals_list = []
-        valued_location = self.env['stock.location'].search(location_domain)
-        last_closing_date = self._get_last_closing_date()
-        moves_base_domain = Domain([
-            ('product_id.is_storable', '=', True),
-            ('product_id.valuation', '=', 'periodic')
-        ])
-        if last_closing_date:
-            moves_base_domain &= Domain([('date', '>', last_closing_date)])
-        if at_date:
-            moves_base_domain &= Domain([('date', '<=', at_date)])
-        moves_in_domain = Domain([
-            ('is_out', '=', True),
-            ('location_dest_id', 'in', valued_location.ids),
-        ]) & moves_base_domain
-        moves_in_by_location = self.env['stock.move']._read_group(
-            moves_in_domain,
-            ['location_dest_id'],
-            ['value:sum'],
-        )
-        moves_out_domain = Domain([
-            ('is_in', '=', True),
-            ('location_id', 'in', valued_location.ids),
-        ]) & moves_base_domain
-        moves_out_by_location = self.env['stock.move']._read_group(
-            moves_out_domain,
-            ['location_id'],
-            ['value:sum'],
-        )
-        account_balance = defaultdict(float)
-        incoming_value_by_location = dict(moves_in_by_location)
-        outgoing_value_by_location = dict(moves_out_by_location)
-        locations = incoming_value_by_location.keys() | outgoing_value_by_location.keys()
-        for location in locations:
-            # TODO: It would be better to replay the period to get the exact correct value.
-            inventory_value = incoming_value_by_location.get(location, 0.0) - outgoing_value_by_location.get(location, 0.0)
-            account_balance[location.valuation_account_id] += inventory_value
-
-        for account, balance in account_balance.items():
-            if balance == 0:
-                continue
-            amls_vals = self._prepare_inventory_aml_vals(
-                account,
-                self.account_stock_valuation_id,
-                balance,
-                _('Closing: Location Reclassification - [%(account)s]', account=account.display_name),
-            )
-            amls_vals_list += amls_vals
-        return amls_vals_list
+        return []
 
     def _get_stock_valuation_account_vals(self, accounts_by_product, at_date=None, extra_aml_vals_list=None):
         amls_vals_list = []

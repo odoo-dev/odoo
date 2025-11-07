@@ -592,8 +592,7 @@ class StockMove(models.Model):
         """
         self.ensure_one()
         return self.product_id.is_storable and self.is_valued\
-        and (self.location_dest_id.valuation_account_id or self.location_id.valuation_account_id)\
-        and self.product_id.valuation == 'real_time'
+        and (self.location_dest_id.valuation_account_id or self.location_id.valuation_account_id)
 
     def _should_exclude_for_valuation(self):
         """Determines if this move should be excluded from valuation based on its partner.
