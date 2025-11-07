@@ -737,7 +737,14 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.amount = wizard.amount
             else:
                 total_amount_values = wizard._get_total_amounts_to_pay(wizard.batches)
-                wizard.amount = total_amount_values['amount_by_default']
+                amount_to_deduct = sum(
+                    payment.amount
+                    for move in wizard.line_ids.mapped('move_id')
+                    if move.status_in_payment == 'in_payment'
+                    for payment in move.reconciled_payment_ids
+                    if payment.state == 'paid'
+                )
+                wizard.amount = max(0.0, total_amount_values['amount_by_default'] - amount_to_deduct)
 
     @api.depends('amount')
     def _compute_installments_mode(self):
