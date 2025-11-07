@@ -732,6 +732,20 @@ class Registry(Mapping[str, type["BaseModel"]]):
         from .environments import Environment  # noqa: PLC0415
         env = Environment(cr, SUPERUSER_ID, context)
         models = [env[model_name] for model_name in model_names]
+        auto_model_names = OrderedSet(
+            model_name
+            for model_name, model in zip(model_names, models)
+            if model._auto and not model._abstract
+        )
+        m2o_reference_fields = [
+            field
+            for model in models
+            for field in model._fields.values()
+            if field.type == 'many2one_reference'
+            and model._auto
+            and field.model_field in model._fields
+            and model._fields[field.model_field].store
+        ]
 
         try:
             self._post_init_queue: deque[Callable] = deque()
@@ -750,6 +764,10 @@ class Registry(Mapping[str, type["BaseModel"]]):
             env['ir.model.inherit']._reflect_inherits(model_names)
 
             self._ordinary_tables = None
+
+            for field in m2o_reference_fields:
+                field._create_polymorphic_function(env)
+                field._apply_polymorphic_trigger(env, auto_model_names)
 
             while self._post_init_queue:
                 func = self._post_init_queue.popleft()

@@ -37,20 +37,6 @@ class Base(models.AbstractModel):
         return super().with_user(user).with_context(guest=None)
 
     # ------------------------------------------------------------
-    # CRUD
-    # ------------------------------------------------------------
-
-    def unlink(self):
-        # Override unlink to delete records activities through (res_model, res_id)
-        record_ids = self.ids if (not self._abstract and not self._transient) else []
-        result = super().unlink()
-        if record_ids:
-            self.env['mail.activity'].with_context(active_test=False).sudo().search(
-                [('res_model', '=', self._name), ('res_id', 'in', record_ids)]
-            ).unlink()
-        return result
-
-    # ------------------------------------------------------------
     # CHECK ACCESS
     # ------------------------------------------------------------
 

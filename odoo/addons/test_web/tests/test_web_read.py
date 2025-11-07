@@ -818,8 +818,8 @@ class TestUnityRead(TransactionCase):
             {
                 'id': self.course.id,
                 'reference': f"{self.lesson_day1._name},{self.lesson_day1.id}",
-                'm2o_reference_id': self.lesson_day1.id,
-                'm2o_reference_model': self.lesson_day1._name,
+                'm2o_reference_id': False,
+                'm2o_reference_model': False,
             },
         ])
 

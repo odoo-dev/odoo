@@ -1,14 +1,19 @@
+from __future__ import annotations
 
+import typing
 from collections import defaultdict
 from operator import attrgetter
 
-from odoo.tools import OrderedSet, unique
+from odoo.tools import OrderedSet, unique, SQL
 from odoo.tools.sql import pg_varchar
 
 from .fields import Field
 from .fields_numeric import Integer
 from .fields_selection import Selection
 from .models import BaseModel
+
+if typing.TYPE_CHECKING:
+    OnDelete = typing.Literal['cascade', 'restrict', 'set null']
 
 
 class Reference(Selection):
@@ -71,10 +76,16 @@ class Many2oneReference(Integer):
 
     model_field = None
     aggregator = None
+    ondelete: OnDelete | None = None    # what to do when value is deleted
 
     _related_model_field = property(attrgetter('model_field'))
 
     _description_model_field = property(attrgetter('model_field'))
+
+    def setup_nonrelated(self, model):
+        super().setup_nonrelated(model)
+        if not self.ondelete:
+            self.ondelete = 'cascade'
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
@@ -116,3 +127,111 @@ class Many2oneReference(Integer):
                     continue
             model_ids[model].add(record.id)
         return model_ids
+
+    def _delete_polymorphic_function_name(self, model: BaseModel) -> SQL:
+        return SQL(f"fn_delete_polymorphic_{model._table}")
+
+    def _create_polymorphic_function(self, env):
+        model = env[self.model_name]
+        if self.ondelete == 'cascade':
+            model.env.cr.execute(SQL(
+                """
+                CREATE OR REPLACE FUNCTION %(func_name)s() RETURNS TRIGGER AS $$
+                BEGIN
+                    DELETE FROM %(table)s
+                          WHERE TG_TABLE_NAME ~ ('^' || %(model_field)s || '$')
+                            AND OLD.id = %(id_field)s;
+                    RETURN OLD;
+                END;
+                $$ LANGUAGE plpgsql
+                """,
+                func_name=self._delete_polymorphic_function_name(model),
+                model_field=SQL.identifier(self.model_field),
+                id_field=SQL.identifier(self.name),
+                table=SQL.identifier(model._table),
+            ))
+        elif self.ondelete == 'prevent':
+            model.env.cr.execute(SQL(
+                """
+                CREATE OR REPLACE FUNCTION %(func_name)s() RETURNS TRIGGER AS $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1
+                          FROM %(table)s
+                         WHERE TG_TABLE_NAME ~ ('^' || %(model_field)s || '$')
+                           AND OLD.id = %(id_field)s
+                    ) THEN
+                        RAISE EXCEPTION 'Cannot delete row from %% (id=%%) because it is still referenced in %(table)s',
+                                        TG_TABLE_NAME,
+                                        OLD.id;
+                    END IF;
+                    RETURN OLD;
+                END;
+                $$ LANGUAGE plpgsql
+                """,
+                func_name=self._delete_polymorphic_function_name(model),
+                model_field=SQL.identifier(self.model_field),
+                id_field=SQL.identifier(self.name),
+                table=SQL.identifier(model._table),
+            ))
+        elif self.ondelete == 'set null':
+            model.env.cr.execute(SQL(
+                """
+                CREATE OR REPLACE FUNCTION %(func_name)s() RETURNS TRIGGER AS $$
+                BEGIN
+                         UPDATE %(table)s
+                            SET %(model_field)s = NULL,
+                                %(id_field)s = NULL
+                          WHERE TG_TABLE_NAME ~ ('^' || %(model_field)s || '$')
+                            AND OLD.id = %(id_field)s;
+                    RETURN OLD;
+                END;
+                $$ LANGUAGE plpgsql
+                """,
+                func_name=self._delete_polymorphic_function_name(model),
+                model_field=SQL.identifier(self.model_field),
+                id_field=SQL.identifier(self.name),
+                table=SQL.identifier(model._table),
+            ))
+
+    def _apply_polymorphic_trigger(self, env, model_names):
+        if self.ondelete == 'cascade':
+            for model_name in model_names:
+                env.cr.execute(SQL(
+                    """
+         CREATE OR REPLACE TRIGGER trg_cascade_delete_%(source)s__%(table)s
+                     AFTER DELETE ON %(table)s
+                       FOR EACH ROW
+                   EXECUTE FUNCTION %(func_name)s()
+                    """,
+                    source=SQL(env[self.model_name]._table),
+                    table=SQL(env[model_name]._table),
+                    func_name=self._delete_polymorphic_function_name(env[self.model_name]),
+                ))
+        elif self.ondelete == 'prevent':
+            for model_name in model_names:
+                env.cr.execute(SQL(
+                    """
+         CREATE OR REPLACE TRIGGER trg_prevent_delete_%(source)s__%(table)s
+                    BEFORE DELETE ON %(table)s
+                       FOR EACH ROW
+                   EXECUTE FUNCTION %(func_name)s()
+                    """,
+                    source=SQL(env[self.model_name]._table),
+                    table=SQL(env[model_name]._table),
+                    func_name=self._delete_polymorphic_function_name(env[self.model_name]),
+                ))
+
+        elif self.ondelete == 'set null':
+            for model_name in model_names:
+                env.cr.execute(SQL(
+                    """
+         CREATE OR REPLACE TRIGGER trg_set_null_delete_%(source)s__%(table)s
+                     AFTER DELETE ON %(table)s
+                       FOR EACH ROW
+                   EXECUTE FUNCTION %(func_name)s()
+                    """,
+                    source=SQL(env[self.model_name]._table),
+                    table=SQL(env[model_name]._table),
+                    func_name=self._delete_polymorphic_function_name(env[self.model_name]),
+                ))

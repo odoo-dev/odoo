@@ -3596,11 +3596,7 @@ class BaseModel(metaclass=MetaModel):
         self.env.flush_all()
 
         cr = self.env.cr
-        Data = self.env['ir.model.data'].sudo().with_context({})
         Defaults = self.env['ir.default'].sudo()
-        Attachment = self.env['ir.attachment'].sudo()
-        ir_model_data_unlink = Data
-        ir_attachment_unlink = Attachment
 
         # mark fields that depend on 'self' to recompute them after 'self' has
         # been deleted (like updating a sum of lines after deleting one line)
@@ -3614,26 +3610,6 @@ class BaseModel(metaclass=MetaModel):
                 "DELETE FROM %s WHERE id IN %s",
                 SQL.identifier(self._table), sub_ids,
             ))
-
-            # Removing the ir_model_data reference if the record being deleted
-            # is a record created by xml/csv file, as these are not connected
-            # with real database foreign keys, and would be dangling references.
-            #
-            # Note: the following steps are performed as superuser to avoid
-            # access rights restrictions, and with no context to avoid possible
-            # side-effects during admin calls.
-            data = Data.search([('model', '=', self._name), ('res_id', 'in', sub_ids)])
-            ir_model_data_unlink |= data
-
-            # For the same reason, remove the relevant records in ir_attachment
-            # (the search is performed with sql as the search method of
-            # ir_attachment is overridden to hide attachments of deleted
-            # records)
-            cr.execute(SQL(
-                "SELECT id FROM ir_attachment WHERE res_model=%s AND res_id IN %s",
-                self._name, sub_ids,
-            ))
-            ir_attachment_unlink |= Attachment.browse(row[0] for row in cr.fetchall())
 
             # don't allow fallback value in ir.default for many2one company dependent fields to be deleted
             # Exception: when MODULE_UNINSTALL_FLAG, these fallbacks can be deleted by Defaults.discard_records(records)
@@ -3699,10 +3675,6 @@ class BaseModel(metaclass=MetaModel):
         # invalidate the *whole* cache, since the orm does not handle all
         # changes made in the database, like cascading delete!
         self.env.invalidate_all(flush=False)
-        if ir_model_data_unlink:
-            ir_model_data_unlink.unlink()
-        if ir_attachment_unlink:
-            ir_attachment_unlink.unlink()
 
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', self.env.uid, self._name, self.ids)
