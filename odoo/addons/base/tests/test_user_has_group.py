@@ -319,6 +319,7 @@ class TestHasGroup(TransactionCase):
         self.assertFalse(self.registry._Registry__caches['default'], "Ensure ormcache is empty")
 
         def populate_cache():
+            self.test_user.invalidate_recordset(['group_ids', 'all_group_ids'])
             self.test_user.has_group('test_user_has_group.group0')
             self.assertTrue(self.registry._Registry__caches['default'], "user._has_group cache must be populated")
 

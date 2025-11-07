@@ -23,12 +23,13 @@ from passlib.context import CryptContext as _CryptContext
 from odoo import api, fields, models, tools, _
 from odoo.api import SUPERUSER_ID
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
-from odoo.fields import Command, Domain
+from odoo.fields import Command, Domain, Field
 from odoo.http import request, DEFAULT_LANG
 from odoo.tools import email_domain_extract, is_html_empty, frozendict, reset_cached_properties, SQL
 
 
 _logger = logging.getLogger(__name__)
+
 
 class CryptContext:
     def __init__(self, *args, **kwargs):
@@ -693,6 +694,51 @@ class ResUsers(models.Model):
                 vals['login'] = _("%s (copy)", user.login)
         return vals_list
 
+    @property
+    def CACHED_FIELDS(self) -> tuple[str, ...]:
+        """ Return fields to cache for users.
+        Please promise all these fields don't depend on other models and context
+        and are not translated.
+        """
+        return (
+            'group_ids',
+            'company_ids',
+            'company_id',
+            'partner_id',
+        )
+
+    def _fetch_field(self, field: Field) -> None:
+        if (
+            len(self) == 1 and self.id
+            # skipping cache?
+            and not self.env.context.get('user_skip_cache')
+            # not prefetching all fields
+            and self.env.context.get('prefetch_fields', True)
+            and field.name in self.CACHED_FIELDS
+        ):
+            self._check_field_access(field, 'read')
+            for user in self:
+                value = user._cached_user_data(field.name)
+                field._insert_cache(user, (value,))
+            self.check_access('read')
+            return
+        super()._fetch_field(field)
+
+    @tools.ormcache('self.id', 'fname', cache='default')
+    def _cached_user_data(self, fname) -> frozendict:
+        """ Cached values for users. """
+        users = self.ensure_one().with_context({'user_skip_cache': True})
+        fnames = self.CACHED_FIELDS
+        assert fname in fnames
+        # fetch normal fields as a user, needed x2m relations in sudo
+        cache = self._fields[fname]._get_cache(self.env)
+        if self.id not in cache:
+            if self._fields[fname].type in ('one2many', 'many2many'):
+                users.sudo()[fname]
+            else:
+                users.fetch()
+        return cache[self.id]
+
     @api.model
     @tools.ormcache('self.env.uid')
     def context_get(self):
@@ -1095,7 +1141,7 @@ class ResUsers(models.Model):
         """
         group_id = self.env['res.groups']._get_group_definitions().get_id(group_ext_id)
         # for new record don't fill the ormcache
-        return group_id in (self._get_group_ids() if self.id else self.all_group_ids._origin._ids)
+        return group_id in self.all_group_ids._origin._ids
 
     @tools.ormcache('self.id')
     def _get_group_ids(self):

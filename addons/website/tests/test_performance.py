@@ -132,7 +132,7 @@ class TestStandardPerformance(UtilPerf):
         # not published user, get the not found image placeholder
         self.assertEqual(self.env['res.users'].sudo().browse(2).website_published, False)
         url = '/web/image/res.users/2/image_256'
-        self.assertEqual(self._get_url_hot_query(url), 7)
+        self.assertEqual(self._get_url_hot_query(url), 6)
 
     @mute_logger('odoo.http')
     def test_11_perf_sql_img_controller(self):

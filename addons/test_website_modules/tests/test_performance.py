@@ -306,7 +306,6 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'product_public_category': 6,
             'product_product': 1,
             'product_template_attribute_line': 3,
-            'res_users': 1,
             'res_partner': 2,
             'product_category': 1,
             'product_pricelist_item': 2,
