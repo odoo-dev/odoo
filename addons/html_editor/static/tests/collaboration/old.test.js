@@ -27,12 +27,18 @@ import {
     testMultiEditor,
     validateContent,
     validateSameHistory,
-} from "./_helpers/collaboration";
-import { cleanHints } from "./_helpers/dispatch";
-import { unformat } from "./_helpers/format";
-import { getContent } from "./_helpers/selection";
-import { addStep, deleteBackward, deleteForward, redo, undo } from "./_helpers/user_actions";
-import { execCommand } from "./_helpers/userCommands";
+} from "@html_editor/../tests/_helpers/collaboration";
+import { cleanHints } from "@html_editor/../tests/_helpers/dispatch";
+import { unformat } from "@html_editor/../tests/_helpers/format";
+import { getContent } from "@html_editor/../tests/_helpers/selection";
+import {
+    addStep,
+    deleteBackward,
+    deleteForward,
+    redo,
+    undo,
+} from "@html_editor/../tests/_helpers/user_actions";
+import { execCommand } from "@html_editor/../tests/_helpers/userCommands";
 import { wrapInlinesInBlocks } from "@html_editor/utils/dom";
 
 /**
