@@ -359,7 +359,7 @@ test("See records is not visible if the pivot is not loaded, even if the cell ha
             }
         },
     });
-    setCellContent(model, "A1", '=IFERROR(PIVOT.VALUE("1","probability"), 42)');
+    setCellContent(model, "A1", '=IFERROR(PIVOT.VALUE("1","probability:avg"), 42)');
     deferred = new Deferred();
     model.dispatch("REFRESH_ALL_DATA_SOURCES");
     const action = cellMenuRegistry.getAll().find((item) => item.id === "pivot_see_records");
