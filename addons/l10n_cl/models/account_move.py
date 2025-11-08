@@ -17,6 +17,13 @@ class AccountMove(models.Model):
 
     partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')  # TODO why?
 
+    def _inverse_document_number(self):
+        # Override.
+        super()._inverse_document_number()
+        for move in self:
+            if doc_type := move.l10n_cl_document_type_id:
+                move.name = f"{doc_type.doc_code_prefix} {(move.document_number or '').zfill(6)}"
+
     @api.depends('journal_id', 'move_type', 'company_id', 'partner_id', 'partner_id_vat')
     def _compute_l10n_cl_available_document_type_ids(self):
         for move in self:

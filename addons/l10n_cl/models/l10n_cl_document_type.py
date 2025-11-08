@@ -28,18 +28,6 @@ class L10nClDocumentType(models.Model):
 
     # move_type_ids = fields.Many2many() # TODO JOV: an idea
 
-    def _format_document_number(self, document_number):
-        """ Make validation of Import Dispatch Number
-          * making validations on the document_number. If it is wrong it should raise an exception
-          * format the document_number against a pattern and return it
-        """
-        self.ensure_one()
-
-        if not document_number:
-            return False
-
-        return document_number.zfill(6)
-
     def _is_doc_type_vendor(self):
         return self.code == '46'
 

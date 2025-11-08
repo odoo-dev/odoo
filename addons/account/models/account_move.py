@@ -777,7 +777,6 @@ class AccountMove(models.Model):
     #  common module or maybe hacky optional account.move.document.number mixin
     document_number = fields.Char(
         compute='_compute_document_number',
-        inverse='_inverse_document_number',
     )
 
     @api.depends('name')
@@ -792,12 +791,16 @@ class AccountMove(models.Model):
     # @api.onchange('document_type_id', 'document_number', 'partner_id')
     def _inverse_document_number(self):
         for rec in self:
-            if not rec.document_number:
-                rec.name = False
-            else:
-                # TODO JOV: CL skips this
-                document_number = rec.document_type_id._format_document_number(rec.document_number)
-                rec.name = "%s %s" % (rec.document_type_id.doc_code_prefix, document_number)
+            rec.name = rec.name
+    #
+    #     for rec in self:
+    #         if not rec.document_number:
+    #             rec.name = False
+    #         else:
+    #             # TODO JOV: CL skips this
+    #             # TODO JOV: somehow stop depending on document type id, modules should override a method
+    #             document_number = rec.document_type_id._format_document_number(rec.document_number)
+    #             rec.name = "%s %s" % (rec.document_type_id.doc_code_prefix, document_number)
     # TODO JOV: --------
     #  end of new fields
 
