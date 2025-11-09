@@ -1,6 +1,34 @@
 .s_quotes_carousel_wrapper[data-vcss='002'] {
     .s_quotes_carousel {
         @extend %s_carousel_variants;
+        .carousel-control-prev, .carousel-control-next {
+            width: 10%;
+        }
+        @include media-breakpoint-up(md) {
+            &[data-number-of-elements="2"] {
+                .carousel-item {
+                    padding: 0px 13%;
+                }
+            }
+            &[data-number-of-elements="3"] {
+                .carousel-control-prev,
+                .carousel-control-next {
+                    width: 5%;
+                }
+                .carousel-item {
+                    padding: 0px 5%;
+                }
+            }
+            &[data-number-of-elements="4"] {
+                .carousel-control-prev,
+                .carousel-control-next {
+                    width: 4%;
+                }
+                .carousel-item {
+                    padding: 0px 4%;
+                }
+            }
+        }
     }
 
     .s_blockquote {

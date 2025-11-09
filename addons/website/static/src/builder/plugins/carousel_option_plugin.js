@@ -47,6 +47,12 @@ export class CarouselCardsOption extends BaseOptionComponent {
     static applyTo = ".s_carousel_cards";
 }
 
+export class CarouselQuotesOption extends BaseOptionComponent {
+    static template = "website.CarouselQuotesOption";
+    static selector = "section";
+    static applyTo = 'section[data-name="Quotes"] div, section[data-name="Quotes Minimal"] div';
+}
+
 export class CarouselOptionPlugin extends Plugin {
     static id = "carouselOption";
     static dependencies = ["clone", "builderOptions", "builderActions"];
@@ -58,6 +64,7 @@ export class CarouselOptionPlugin extends Plugin {
             CarouselOption,
             CarouselBottomControllersOption,
             withSequence(CAROUSEL_CARDS_SEQUENCE, CarouselCardsOption),
+            CarouselQuotesOption,
         ],
         builder_header_middle_buttons: {
             Component: CarouselItemHeaderMiddleButtons,
@@ -83,6 +90,7 @@ export class CarouselOptionPlugin extends Plugin {
             SlideCarouselAction,
             ToggleControllersAction,
             ToggleCardImgAction,
+            UpdateQuotesCarouselOptionAction,
         },
         on_cloned_handlers: this.onCloned.bind(this),
         on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
@@ -141,11 +149,12 @@ export class CarouselOptionPlugin extends Plugin {
 
         // Add the new indicator.
         const indicatorsEl = editingElement.querySelector(".carousel-indicators");
-        const newIndicatorEl = this.document.createElement("button");
-        newIndicatorEl.setAttribute("data-bs-target", "#" + editingElement.id);
-        newIndicatorEl.setAttribute("aria-label", _t("Carousel indicator"));
-        indicatorsEl.appendChild(newIndicatorEl);
-
+        if (indicatorsEl) {
+            const newIndicatorEl = this.document.createElement("button");
+            newIndicatorEl.setAttribute("data-bs-target", "#" + editingElement.id);
+            newIndicatorEl.setAttribute("aria-label", _t("Carousel indicator"));
+            indicatorsEl.appendChild(newIndicatorEl);
+        }
         // Slide to the new item.
         await this.slide(editingElement, "next");
     }
@@ -168,13 +177,15 @@ export class CarouselOptionPlugin extends Plugin {
 
             // Remove the carousel item and the indicator.
             activeItemEl.remove();
-            activeIndicatorEl.remove();
+            if (!editingElement.classList.contains("o_carousel_multi_items")) {
+                activeIndicatorEl.remove();
 
-            // Hide the controllers if there is only one slide left.
-            const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
-            controlEls.forEach((controlEl) =>
-                controlEl.classList.toggle("d-none", newLength === 1)
-            );
+                // Hide the controllers if there is only one slide left.
+                const controlEls = editingElement.querySelectorAll(carouselControlsSelector);
+                controlEls.forEach((controlEl) =>
+                    controlEl.classList.toggle("d-none", newLength === 1)
+                );
+            }
         }
     }
 
@@ -223,9 +234,10 @@ export class CarouselOptionPlugin extends Plugin {
                             ".carousel-indicators > *"
                         );
                         const activeIndicatorEl = [...indicatorEls][activeIndex];
-                        activeIndicatorEl.classList.add("active");
-                        activeIndicatorEl.setAttribute("aria-current", "true");
-
+                        if (activeIndicatorEl) {
+                            activeIndicatorEl.classList.add("active");
+                            activeIndicatorEl.setAttribute("aria-current", "true");
+                        }
                         // Activate the active item.
                         this.dependencies["builderOptions"].setNextTarget(activeItemEl);
 
@@ -393,6 +405,171 @@ export class ToggleCardImgAction extends BuilderAction {
         const carouselEl = editingElement.closest(".carousel");
         const cardImgEl = carouselEl.querySelector(".o_card_img_wrapper");
         return !!cardImgEl;
+    }
+}
+
+export class UpdateQuotesCarouselOptionAction extends BuilderAction {
+    static id = "updateQuotesCarouselOption";
+    static dependencies = ["builderActions", "carouselOption"];
+
+    isApplied({ editingElement, params: { scrollMode, numberOfElements } }) {
+        if (!scrollMode) {
+            const currentMode = editingElement.dataset.numberOfElements || "1";
+            return currentMode === numberOfElements;
+        }
+        const currentMode = editingElement.dataset.scrollMode || "all";
+        return currentMode === scrollMode;
+    }
+
+    apply({ editingElement, params: { scrollMode, numberOfElements } }) {
+        numberOfElements ||= editingElement.dataset.numberOfElements;
+        scrollMode =
+            numberOfElements === "1" ? "" : scrollMode ?? editingElement.dataset.scrollMode;
+
+        const carouselInner = editingElement.querySelector(".carousel-inner");
+        const indicatorContainer = editingElement.querySelector(".indicators-container");
+        const prevBtn = editingElement.querySelector(".carousel-control-prev");
+        const nextBtn = editingElement.querySelector(".carousel-control-next");
+        if (!carouselInner) {
+            return;
+        }
+        indicatorContainer.classList.toggle("carousel-indicators", scrollMode !== "single");
+        const quoteDivs = Array.from(editingElement.querySelectorAll(".carousel-div"));
+        const totalQuotes = quoteDivs.length;
+        const groupSize = parseInt(numberOfElements, 10) || 1;
+        const colClass = `col-lg-${12 / groupSize}`;
+        carouselInner.innerHTML = "";
+        if (indicatorContainer) {
+            indicatorContainer.innerHTML = "";
+        }
+        if (scrollMode === "single") {
+            quoteDivs.forEach((quoteDiv) => {
+                const childEl = quoteDiv.querySelector(".s_blockquote");
+                if (childEl) {
+                    childEl.classList.forEach((cls) => {
+                        if (cls.startsWith("w-")) {
+                            childEl.classList.replace(cls, "w-100");
+                        }
+                    });
+                }
+            });
+        } else if (numberOfElements === "1" || numberOfElements === "2") {
+            quoteDivs.forEach((quoteDiv) => {
+                const childEl = quoteDiv.querySelector(".s_blockquote");
+                if (childEl) {
+                    childEl.classList.forEach((cls) => {
+                        if (cls.startsWith("w-")) {
+                            childEl.classList.replace(cls, "w-50");
+                        }
+                    });
+                }
+            });
+        } else {
+            quoteDivs.forEach((quoteDiv) => {
+                const childEl = quoteDiv.querySelector(".s_blockquote");
+                if (childEl) {
+                    childEl.classList.forEach((cls) => {
+                        if (cls.startsWith("w-")) {
+                            childEl.classList.replace(cls, "w-75");
+                        }
+                    });
+                }
+            });
+        }
+        if (scrollMode === "all" && numberOfElements > 1) {
+            editingElement.style.removeProperty("--o-carousel-item-width-percentage");
+            editingElement.classList.remove("o_carousel_multi_items");
+            const groupedQuotes = [];
+            for (let i = 0; i < quoteDivs.length; i += groupSize) {
+                groupedQuotes.push(quoteDivs.slice(i, i + groupSize));
+            }
+            for (let i = 0; i < quoteDivs.length; i++) {
+                quoteDivs[i].classList.remove("carousel-item");
+                quoteDivs[i].classList.remove("active");
+            }
+            groupedQuotes.forEach((group, index) => {
+                const carouselItem = document.createElement("div");
+                carouselItem.classList.add("carousel-item");
+                if (index === 0) {
+                    carouselItem.classList.add("active");
+                }
+                carouselItem.style.padding = "0px 1%";
+
+                const row = document.createElement("div");
+                row.classList.add("row");
+
+                group.forEach((quoteDiv) => {
+                    quoteDiv.classList.forEach((cls) => {
+                        if (cls.startsWith("col-lg-")) {
+                            quoteDiv.classList.remove(cls);
+                        }
+                    });
+                    quoteDiv.classList.add(colClass);
+                    row.appendChild(quoteDiv);
+                });
+                carouselItem.appendChild(row);
+                carouselInner.appendChild(carouselItem);
+                if (indicatorContainer) {
+                    indicatorContainer.classList.remove("d-none");
+                    const indicator = document.createElement("button");
+                    indicator.type = "button";
+                    indicator.dataset.bsTarget = `#${editingElement.id}`;
+                    indicator.dataset.bsSlideTo = index.toString();
+                    indicator.setAttribute("aria-label", "Carousel indicator");
+                    if (index === 0) {
+                        indicator.classList.add("active");
+                    }
+                    indicatorContainer.appendChild(indicator);
+                }
+            });
+        } else {
+            quoteDivs.forEach((quoteDiv, index) => {
+                quoteDiv.classList.add("carousel-item");
+                quoteDiv.classList.forEach((cls) => {
+                    if (cls.startsWith("col-lg-")) {
+                        quoteDiv.classList.remove(cls);
+                    }
+                });
+                quoteDiv.classList.add(colClass);
+                if (index === 0) {
+                    quoteDiv.classList.add("active");
+                }
+                carouselInner.appendChild(quoteDiv);
+                if (indicatorContainer) {
+                    scrollMode === "single" && indicatorContainer.classList.add("d-none");
+                    numberOfElements === "1" && indicatorContainer.classList.remove("d-none");
+                    const indicator = document.createElement("button");
+                    indicator.type = "button";
+                    indicator.dataset.bsTarget = `#${editingElement.id}`;
+                    indicator.dataset.bsSlideTo = index.toString();
+                    indicator.setAttribute("aria-label", "Carousel indicator");
+                    if (index === 0) {
+                        indicator.classList.add("active");
+                    }
+                    indicatorContainer.appendChild(indicator);
+                }
+            });
+            editingElement.classList.add("o_carousel_multi_items");
+            const widthPercentage = 100 / parseInt(numberOfElements, 10);
+            editingElement.style.setProperty(
+                "--o-carousel-item-width-percentage",
+                `${widthPercentage}%`
+            );
+        }
+        if (numberOfElements === "1") {
+            editingElement.classList.remove("o_carousel_multi_items");
+            editingElement.style.removeProperty("--o-carousel-item-width-percentage");
+        }
+        const hideArrows = totalQuotes <= groupSize;
+        [prevBtn, nextBtn].forEach((btn) => {
+            if (btn) {
+                btn.classList.toggle("d-none", hideArrows);
+            }
+        });
+        editingElement.dataset.numberOfElements = numberOfElements;
+        if (scrollMode) {
+            editingElement.dataset.scrollMode = scrollMode;
+        }
     }
 }
 

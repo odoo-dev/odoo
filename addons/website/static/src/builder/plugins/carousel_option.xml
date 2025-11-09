@@ -62,7 +62,6 @@
                 applyWithUnit="false"/>
         </BuilderRow>
     </t>
-
 </t>
 
 <t t-name="website.CarouselItemHeaderMiddleButtons">
