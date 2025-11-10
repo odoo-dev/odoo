@@ -2264,6 +2264,44 @@ class TestFormattedReadGroupMonetary(common.TransactionCase):
                 }],
             )
 
+    def test_sum_monetary_rated_company(self):
+        self.env.company.currency_id = self.eur
+        self.env['res.currency.rate'].create([
+            {
+                'currency_id': self.eur.id,
+                'name': fields.Date.context_today(self),
+                'rate': 0.5,
+            },
+            {
+                'currency_id': self.usd.id,
+                'name': fields.Date.context_today(self),
+                'rate': 1.25,  # 1 $ = 0.8 eur, eur rate 0.5.
+            },
+        ])
+
+        aggregates = [
+            # The webclient should ask these 3 aggregates
+            'total_in_currency_id:sum',
+            'currency_id:array_agg_distinct',
+            'total_in_currency_id:sum_currency',
+        ]
+        self.MonetaryAgg.formatted_read_group([], [], aggregates)
+        Currency = self.env['res.currency']
+
+        self.assertEqual(
+            self.MonetaryAgg.formatted_read_group([], [], aggregates),
+            [{
+                'total_in_currency_id:sum': 8.0,
+                'currency_id:array_agg_distinct': (self.usd + self.eur + self.stn).ids + [None],
+                'total_in_currency_id:sum_currency':
+                    self.usd._convert(from_amount=3, to_currency=self.eur) +  # 3 $
+                    self.eur._convert(from_amount=3, to_currency=self.eur) +  # 3 eur
+                    self.stn._convert(from_amount=1, to_currency=self.eur) +  # 1 Db
+                    Currency._convert(from_amount=1, to_currency=self.eur),  # No currency
+                '__extra_domain': [(1, '=', 1)],
+            }],
+        )
+
     def test_multi_currency_related(self):
         self.env['res.currency.rate'].create([
             {

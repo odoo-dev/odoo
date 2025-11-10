@@ -1973,6 +1973,8 @@ class BaseModel(metaclass=MetaModel):
             if field.type != 'monetary':
                 raise ValueError(f'Aggregator "sum_currency" only works on currency field for {fname!r}')
 
+            company = self.env.company.root_id
+            today = Date.context_today(self)
             CurrencyRate = self.env['res.currency.rate']
             rate_subquery_table = SQL(
                 """(SELECT DISTINCT ON (%(currency_field_sql)s) %(currency_field_sql)s, %(rate_field_sql)s
@@ -1987,20 +1989,21 @@ class BaseModel(metaclass=MetaModel):
                 currency_field_sql=CurrencyRate._field_to_sql(CurrencyRate._table, 'currency_id'),
                 rate_field_sql=CurrencyRate._field_to_sql(CurrencyRate._table, 'rate'),
                 company_field_sql=CurrencyRate._field_to_sql(CurrencyRate._table, 'company_id'),
-                company_id=self.env.company.root_id.id,
+                company_id=company.id,
                 name_field_sql=CurrencyRate._field_to_sql(CurrencyRate._table, 'name'),
-                today=Date.context_today(self),
+                today=today,
             )
             currency_field_name = field.get_currency_field(self)
             alias_rate = query.make_alias(self._table, f'{currency_field_name}__rates')
             currency_field_sql = self._field_to_sql(self._table, currency_field_name, query)
             condition = SQL("%s = %s", currency_field_sql, SQL.identifier(alias_rate, "currency_id"))
             query.add_join('LEFT JOIN', alias_rate, rate_subquery_table, condition)
-
+            company_rate = company.currency_id._get_rates(company, today)[company.currency_id.id]
             return SQL(
-                "SUM(%s / COALESCE(%s, 1.0))",
+                "SUM((%s / COALESCE(%s, 1.0)) * %s)",
                 self._field_to_sql(self._table, fname, query),
                 SQL.identifier(alias_rate, "rate"),
+                company_rate,
             )
 
         if func not in READ_GROUP_AGGREGATE:
