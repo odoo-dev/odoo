@@ -27,7 +27,7 @@ from odoo.fields import Domain
 from odoo.http import request
 from odoo.models import Query
 from odoo.modules.module import get_manifest
-from odoo.tools import SQL
+from odoo.tools import SQL, frozendict
 from odoo.tools.image import image_process
 from odoo.tools.sql import escape_psql
 from odoo.tools.translate import _
@@ -328,6 +328,8 @@ class Website(models.Model):
             groups = self.env['res.groups'].concat(*(self.env.ref(it) for it in all_user_groups.split(',')))
             groups.write({'implied_ids': [(4, self.env.ref('website.group_multi_website').id)]})
 
+        self.env.registry.clear_cache()
+
         return websites
 
     def write(self, vals):
@@ -443,6 +445,7 @@ class Website(models.Model):
 
         companies = self.company_id
         res = super().unlink()
+        self.env.registry.clear_cache()
         companies._compute_website_id()
         return res
 
@@ -1497,7 +1500,7 @@ class Website(models.Model):
 
     @api.model
     def is_public_user(self):
-        return request.env.user.id == request.website._get_cached('user_id')
+        return request.env.user == request.website.user_id
 
     @api.model
     def viewref(self, view_id, raise_if_not_found=True):
@@ -1815,9 +1818,12 @@ class Website(models.Model):
         # if the current URL is indeed canonical or not.
         return current_url == canonical_url
 
-    @tools.ormcache('self.id')
-    def _get_cached_values(self):
-        self.ensure_one()
+    @property
+    def CACHED_FIELDS(self) -> tuple[str, ...]:
+        """ Return fields to cache for all websites.
+        Please promise all these fields don't depend on other models and context
+        and are not translated.
+        """
         # ir.http:_match is called by ir.http:_serve_db at a time when the
         # environment hasn't been completely initialized (i.e. before the method
         # ir.http:_authenticate is called by ir.http:_serve_ir_http), and its
@@ -1825,22 +1831,36 @@ class Website(models.Model):
 
         # Inside ir.http:_match, the http_routing module is trying to retrieve
         # the default language via _get_default_lang, which is overridden by the
-        # website module and calls website._get_cached('default_lang_id'), which
-        # eventually calls this method.
+        # website module and calls website.default_lang_id, which eventually
+        # calls this method.
 
         # Here, we manually prefetch the needed fields only to avoid prefetching
         # any translatable field, such as contact_us_button_url by website_sale,
         # as translating to an invalid language would result in an error.
-        self.fetch(['user_id', 'company_id', 'default_lang_id', 'homepage_url'])
-        return {
-            'user_id': self.user_id.id,
-            'company_id': self.company_id.id,
-            'default_lang_id': self.default_lang_id.id,
-            'homepage_url': self.homepage_url,
-        }
+        return (
+            'user_id', 'company_id', 'default_lang_id', 'homepage_url',
+            'domain', 'cookies_bar',
+        )
 
-    def _get_cached(self, field):
-        return self._get_cached_values()[field]
+    def _fetch_field(self, field) -> None:
+        if any(self._ids) and field.name in self.CACHED_FIELDS:
+            self._check_field_access(field, 'read')
+            data = self._cached_data()[field.name]
+            field._insert_cache(self.browse(data), data.values())
+            if all(record_id in data for record_id in self.ids):
+                self.check_access('read')
+                return
+        super()._fetch_field(field)
+
+    @tools.ormcache(cache='default')
+    def _cached_data(self):
+        """ Cached values for websites. """
+        fnames = self.CACHED_FIELDS
+        records = self.sudo().search_fetch([], fnames)
+        return frozendict({
+            fname: frozendict(zip(records.ids, map(self._fields[fname]._get_cache(records.env).__getitem__, records.ids)))
+            for fname in fnames
+        })
 
     def _get_html_fields_blacklist(self):
         return (

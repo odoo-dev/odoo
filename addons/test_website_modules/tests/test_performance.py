@@ -295,10 +295,10 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         self.assertIn(f'<img src="/web/image/product.template/{self.productA.product_tmpl_id.id}/', html)
         self.assertIn(f'<img src="/web/image/product.image/{self.product_images.ids[1]}/', html)
 
-        query_count = 52  # To increase this number you must ask the permission to al
+        # To increase this number you must ask the permission to al
         queries = {
             'orm_signaling_registry': 1,
-            'website': 2,
+            'website': 1,
             'res_company': 2,
             'product_pricelist': 4,
             'product_template': 6,
@@ -326,29 +326,24 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
 
         addons = tuple(self.env.registry._init_modules) + (self.env.context.get('install_module'),)
         if 'website_helpdesk' in addons:
-            query_count += 1
             queries['helpdesk_team'] = 1
         if 'website_sale_subscription' in addons:
-            query_count += 1
             queries['product_product'] += 1
 
         tax = self.env.ref('account.1_sale_tax_template', raise_if_not_found=False)
         if tax and tax.name == '15%':
-            query_count += 2
             queries['account_tax_repartition_line'] = 2
 
         if self._has_demo_data():
-            query_count += 5
             queries['product_template'] += 1
             queries['product_product'] += 2
             queries['ir_attachment'] += 1
             queries['product_ribbon'] += 1
         else:
-            query_count += 3
             queries['product_template_attribute_value'] += 3
 
         # To increase the query count you must ask the permission to al
-        return query_count, queries
+        return sum(queries.values()), queries
 
     def _has_demo_data(self):
         return bool(self.env['ir.module.module'].search_count([('demo', '=', True)]))
