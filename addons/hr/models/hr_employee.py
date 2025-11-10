@@ -913,6 +913,26 @@ class HrEmployee(models.Model):
                 state = 'archive'
             employee.hr_presence_state = state
 
+    def _read_group_groupby(self, alias, groupby_spec: str, query: Query) -> SQL:
+        if groupby_spec != 'hr_presence_state':
+            return super()._read_group_groupby(alias, groupby_spec, query)
+
+        # Ugly hack to be able to groupby presence_state: that's not efficient since we will compute
+        # the presence_state on every record in the DB to generate this new groupby specification.
+        all_records = self.sudo().with_context(active_test=False).search_fetch([])
+        states_map = all_records.grouped('hr_presence_state')
+        if not states_map:  # No record, no result
+            return SQL('FALSE')
+
+        id_field = SQL.identifier(alias, 'id')
+        when_cases = SQL('\n').join(
+            [
+                SQL('WHEN %s IN %s THEN %s', id_field, records._ids, state)
+                for state, records in states_map.items()
+            ],
+        )
+        return SQL("CASE %s END", when_cases)
+
     @api.depends('user_id')
     def _compute_last_activity(self):
         for employee in self:
