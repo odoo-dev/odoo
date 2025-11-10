@@ -133,7 +133,7 @@ function mockSpreadsheetDataController(_request, { res_model, res_id }) {
         data: JSON.parse(record.spreadsheet_data),
         name: record.name,
         revisions: [],
-        isReadonly: false,
+        hasWriteAccess: true,
         writable_rec_name_field: "name",
     };
 }
