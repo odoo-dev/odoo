@@ -8,7 +8,7 @@ from odoo.exceptions import RedirectWarning
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    l10n_in_upi_id = fields.Char(string="UPI Id")
+    l10n_in_upi_id = fields.Char(string="UPI Id", inverse="_inverse_l10n_in_upi_id")
     l10n_in_hsn_code_digit = fields.Selection(
         selection=[
             ("4", "4 Digits (turnover < 5 CR.)"),
@@ -75,6 +75,10 @@ class ResCompany(models.Model):
         store=True,
     )
     l10n_in_gstin_status_feature = fields.Boolean(string="Check GST Number Status")
+
+    def _inverse_l10n_in_upi_id(self):
+        for company in self:
+            company.qr_code = bool(company.l10n_in_upi_id)
 
     def _inverse_l10n_in_tds_feature(self):
         for company in self:
