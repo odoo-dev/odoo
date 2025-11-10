@@ -81,7 +81,7 @@ class DeliveryCarrier(models.Model):
                                         help="The method is NOT available if at least one product of the order has one of these tags.")
 
     carrier_description = fields.Text(
-        'Carrier Description', translate=True,
+        'Description', translate=True,
         help="A description of the delivery method that you want to communicate to your customers on the Sales Order and sales confirmation email."
              "E.g. instructions for customers to follow.")
 
@@ -122,7 +122,7 @@ class DeliveryCarrier(models.Model):
     def _check_tags(self):
         for carrier in self:
             if carrier.must_have_tag_ids & carrier.excluded_tag_ids:
-                raise UserError(_("Carrier %s cannot have the same tag in both Must Have Tags and Excluded Tags.") % carrier.name)
+                raise UserError(_("Delivery method %(name)s cannot have the same tag in both Must Have Tags and Excluded Tags."), name=carrier.name)
 
     def _compute_weight_uom_name(self):
         self.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
@@ -286,7 +286,7 @@ class DeliveryCarrier(models.Model):
     def _get_delivery_type(self):
         """Return the delivery type.
 
-        This method needs to be overridden by a delivery carrier module if the delivery type is not
+        This method needs to be overridden by a delivery provider module if the delivery type is not
         stored on the field `delivery_type`.
         """
         self.ensure_one()
