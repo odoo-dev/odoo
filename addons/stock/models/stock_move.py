@@ -1848,6 +1848,13 @@ Please change the quantity done or the rounding precision of your unit of measur
         rounding = self.product_id.uom_id.rounding
         return dict((k, v) for k, v in available_move_lines.items() if float_compare(v, 0, precision_rounding=rounding) > 0)
 
+    def _prepare_sn_product_move_line_vals(self, quantity):
+        res = self._prepare_move_line_vals(quantity=1)
+        move_line_vals_list = []
+        for i in range(0, int(quantity)):
+            move_line_vals_list.append(res)
+        return move_line_vals_list
+
     def _action_assign(self, force_qty=False):
         """ Reserve stock moves by creating their stock move lines. A stock move is
         considered reserved once the sum of `reserved_qty` for all its move lines is
@@ -1904,8 +1911,7 @@ Please change the quantity done or the rounding precision of your unit of measur
                             break
 
                 if missing_reserved_quantity and move.product_id.tracking == 'serial' and (move.picking_type_id.use_create_lots or move.picking_type_id.use_existing_lots):
-                    for i in range(0, int(missing_reserved_quantity)):
-                        move_line_vals_list.append(move._prepare_move_line_vals(quantity=1))
+                    move_line_vals_list += move._prepare_sn_product_move_line_vals(missing_reserved_quantity)
                 elif missing_reserved_quantity:
                     to_update = move.move_line_ids.filtered(lambda ml: ml.product_uom_id == move.product_uom and
                                                             ml.location_id == move.location_id and

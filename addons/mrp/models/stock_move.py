@@ -515,6 +515,11 @@ class StockMove(models.Model):
         if procurements:
             self.env['procurement.group'].run(procurements)
 
+    def _prepare_sn_product_move_line_vals(self, quantity):
+        if self.production_id and not self.raw_material_production_id and not self.byproduct_id:
+            quantity = 1
+        return super()._prepare_sn_product_move_line_vals(quantity)
+
     def _action_assign(self, force_qty=False):
         res = super(StockMove, self)._action_assign(force_qty=force_qty)
         for move in self.filtered(lambda x: x.production_id or x.raw_material_production_id):
