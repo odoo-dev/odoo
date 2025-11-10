@@ -117,10 +117,9 @@ class BaseDate(Field[T | typing.Literal[False]], typing.Generic[T]):
             sql_expr = SQL("%s::date", sql_expr)
         return sql_expr
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None):
         # we can write date/datetime directly using psycopg
         # except for company_dependent fields where we expect a string value
-        value = self.convert_to_cache(value, record, validate=validate)
         if value and self.company_dependent:
             value = self.to_string(value)
         return value

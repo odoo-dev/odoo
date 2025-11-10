@@ -205,11 +205,14 @@ class IrDefault(models.Model):
         company_ids = self.env.execute_query(SQL('SELECT ARRAY_AGG(id) FROM res_company'))[0][0]
         field = self.env[model_name]._fields[field_name]
         self_super = self.with_user(SUPERUSER_ID)
+
+        def get_value(company_id):
+            record = self_super.with_company(company_id)
+            value = record._get_model_defaults(model_name).get(field_name)
+            value = field.convert_to_cache(value, record)
+            return field.convert_to_column(value, record)
         return json.dumps({
-            id_: field.convert_to_column(
-                self_super.with_company(id_)._get_model_defaults(model_name).get(field_name),
-                self_super.with_company(id_)
-            )
+            id_: get_value(id_)
             for id_ in company_ids
         })
 

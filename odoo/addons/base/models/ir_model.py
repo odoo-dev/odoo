@@ -1741,6 +1741,7 @@ class IrModelFieldsSelection(models.Model):
                 )
                 # if this fails then we're shit out of luck and there's nothing
                 # we can do except fix on a case-by-case basis
+                value = field.convert_to_cache(value, records)
                 self.env.execute_query(SQL(
                     "UPDATE %s SET %s=%s WHERE id IN %s",
                     SQL.identifier(records._table),

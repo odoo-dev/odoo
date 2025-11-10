@@ -123,11 +123,9 @@ class Properties(Field):
     #           'aa34746a6851ee4e': 1337,
     #       }
     #
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None):
         if not value:
             return None
-
-        value = self.convert_to_cache(value, record, validate=validate)
         return json.dumps(value)
 
     def convert_to_cache(self, value, record, validate=True):
@@ -1036,8 +1034,8 @@ class PropertiesDefinition(Field):
         flush_group()
         return new_def
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        """Convert the value before inserting it in database.
+    def convert_to_cache(self, value, record, validate=True):
+        """Convert the value to store in cache.
 
         This method accepts a list properties definition.
 
@@ -1058,23 +1056,6 @@ class PropertiesDefinition(Field):
             'default': [1337, 'Bob'],
         }]
         """
-        if not value:
-            return None
-
-        if isinstance(value, str):
-            value = json.loads(value)
-
-        if not isinstance(value, list):
-            raise TypeError(f'Wrong properties definition type {type(value)!r}')
-
-        if validate:
-            Properties._remove_display_name(value, value_key='default')
-
-            self._validate_properties_definition(value, record.env)
-
-        return json.dumps(record._convert_to_cache_properties_definition(value))
-
-    def convert_to_cache(self, value, record, validate=True):
         # any format -> cache format (list of dicts or None)
         if not value:
             return None

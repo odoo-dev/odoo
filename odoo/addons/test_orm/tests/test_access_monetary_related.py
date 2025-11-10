@@ -21,14 +21,11 @@ class TestMonetaryAccess(TransactionCaseWithUserDemo):
         new_user.partner_id.company_id = new_user.company_id
 
         # The following is here to document how the ORM behaves, not really part of the test;
-        # in particular these specific points highlight the discrepancy between what is sent
-        # to the database and what we get on the ORM side.
-        # (to be fair, these are pre-existing ORM limitations that should have been avoided
-        # by using more careful field definitions and testing)
-        self.assertEqual(new_user.currency_id.id, False,
-                         "The cache contains the wrong value for currency.")
-        self.assertEqual(new_user.monetary, 1 / 3,
-                         "Because of previous point, no rounding was done.")
+        # The ORM has correct values in cache event before invalidation.
+        self.assertEqual(new_user.currency_id.rounding, 0.01,
+                         "The cache contains the right value for currency.")
+        self.assertEqual(new_user.monetary, 0.33,
+                         "Rounding was done in cache.")
 
         self.env.invalidate_all()
 

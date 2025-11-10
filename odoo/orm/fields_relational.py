@@ -323,9 +323,6 @@ class Many2one(_Relational):
         for record in records:
             self._update_cache(record, self.convert_to_cache(value, record, validate=False))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return value or None
-
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
         if type(value) is int or type(value) is NewId:
@@ -344,6 +341,9 @@ class Many2one(_Relational):
             id_ = comodel.new(value, origin=origin).id
         else:
             id_ = None
+
+        if validate and type(id_) is int and not id_:
+            raise ValueError("Cannot set a falsy id")
 
         if self.delegate and record and not any(record._ids):
             # if all records are new, then so is the parent
@@ -395,7 +395,7 @@ class Many2one(_Relational):
         return value.display_name if value else ''
 
     def convert_to_display_name(self, value, record):
-        return value.display_name
+        return value.display_name if value else False
 
     def write(self, records, value):
         # discard recomputation of self on records

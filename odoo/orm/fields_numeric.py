@@ -29,13 +29,15 @@ class Integer(Field[int]):
             res['aggregator'] = None
         return res
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None):
         return int(value or 0)
 
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, dict):
             # special case, when an integer field is used as inverse for a one2many
             return value.get('id', None)
+        if value is None:
+            return None
         return int(value or 0)
 
     def convert_to_record(self, value, record):
@@ -127,7 +129,7 @@ class Float(Field[float]):
     def _description_digits(self, env: Environment) -> tuple[int, int] | None:
         return self.get_digits(env)
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None):
         value_float = value = float(value or 0.0)
         if digits := self.get_digits(record.env):
             _precision, scale = digits
@@ -138,6 +140,8 @@ class Float(Field[float]):
         return value
 
     def convert_to_cache(self, value, record, validate=True):
+        if value is None:
+            return None
         # apply rounding here, otherwise value in cache may be wrong!
         value = float(value or 0.0)
         digits = self.get_digits(record.env)
@@ -214,7 +218,7 @@ class Monetary(Field[float]):
         assert self.get_currency_field(model) in model._fields, \
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
 
-    def convert_to_column_insert(self, value, record, values=None, validate=True):
+    def convert_to_column_insert(self, value, record, values=None):
         # retrieve currency from values or record
         currency_field_name = self.get_currency_field(record)
         currency_field = record._fields[currency_field_name]
@@ -239,7 +243,9 @@ class Monetary(Field[float]):
         return value
 
     def convert_to_cache(self, value, record, validate=True):
-        # cache format: float
+        # cache format: float or None
+        if value is None:
+            return None
         value = float(value or 0.0)
         if value and validate:
             # FIXME @rco-odoo: currency may not be already initialized if it is

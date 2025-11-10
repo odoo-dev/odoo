@@ -2386,6 +2386,7 @@ class BaseModel(metaclass=MetaModel):
         if field.default:
             value = field.default(self)
             value = field.convert_to_write(value, self)
+            value = field.convert_to_cache(value, self)
             value = field.convert_to_column_insert(value, self)
         else:
             value = None
@@ -3939,6 +3940,7 @@ class BaseModel(metaclass=MetaModel):
             data = {}
             data['stored'] = stored = {}
             data['inversed'] = inversed = {}
+            data['cache'] = {}
             data['inherited'] = inherited = defaultdict(dict)
             data['protected'] = protected = set()
             for key, val in vals.items():
@@ -3968,6 +3970,9 @@ class BaseModel(metaclass=MetaModel):
                 elif data['inherited'][model_name]:
                     parent = self.env[model_name].browse(data['stored'][parent_name])
                     parent.write(data['inherited'][model_name])
+                    for fname in data['inherited'][model_name]:
+                        if fname in data['stored']:
+                            data['cache'][fname] = parent._cache[fname]
 
             if parent_data_list:
                 parents = self.env[model_name].create([
@@ -3976,6 +3981,10 @@ class BaseModel(metaclass=MetaModel):
                 ])
                 for parent, data in zip(parents, parent_data_list):
                     data['stored'][parent_name] = parent.id
+                    data['cache'][parent_name] = parent.id
+                    for fname in data['inherited'][model_name]:
+                        if fname in data['stored']:
+                            data['cache'][fname] = parent._cache[fname]
 
         # create records with stored fields
         records = self._create(data_list)
@@ -4119,8 +4128,10 @@ class BaseModel(metaclass=MetaModel):
                     vals[fname] = field.convert_to_write(record[fname], self)
                     precomputed.add(field)
 
+        records.invalidate_recordset()
+
     @api.model
-    def _create(self, data_list: list[ValuesType]) -> Self:
+    def _create(self, data_list: list[dict]) -> Self:
         """ Create records from the stored field values in ``data_list``. """
         assert data_list
         cr = self.env.cr
@@ -4132,6 +4143,8 @@ class BaseModel(metaclass=MetaModel):
         for data_sublist in split_every(INSERT_BATCH_SIZE, data_list):
             stored_list = [data['stored'] for data in data_sublist]
             fnames = sorted({name for stored in stored_list for name in stored})
+            # XXX rewrite this
+            records = [self.new(data['stored'], validate=True) for data in data_sublist]
 
             columns: list[str] = []
             rows: list[list[typing.Any]] = [[] for _ in stored_list]
@@ -4139,12 +4152,17 @@ class BaseModel(metaclass=MetaModel):
                 field = self._fields[fname]
                 if field.column_type:
                     columns.append(fname)
-                    for stored, row in zip(stored_list, rows):
+                    for stored, row, record, data in zip(stored_list, rows, records, data_sublist):
                         if fname in stored:
-                            row.append(field.convert_to_column_insert(stored[fname], self, stored))
+                            cache_value = record._cache[fname]
+                            # cache_value = field.convert_to_cache(stored[fname], record)
+                            data['cache'][fname] = cache_value
+                            row.append(field.convert_to_column_insert(cache_value, self, stored))
                         else:
                             row.append(SQL_DEFAULT)
                 else:
+                    for record, data in zip(records, data_sublist):
+                        data['cache'][fname] = record._cache[fname]
                     other_fields.add(field)
 
                 if field.type == 'properties':
@@ -4174,7 +4192,7 @@ class BaseModel(metaclass=MetaModel):
         for data, record in zip(data_list, records.with_context(bin_size=False)):
             data['record'] = record
             # DLE P104: test_inherit.py, test_50_search_one2many
-            vals = dict({k: v for d in data['inherited'].values() for k, v in d.items()}, **data['stored'])
+            vals = data['cache']
             set_vals = common_set_vals.union(vals)
 
             # put None in cache for all fields that are not part of the INSERT
@@ -4186,10 +4204,9 @@ class BaseModel(metaclass=MetaModel):
                 elif field.name not in set_vals:
                     field._update_cache(record, None)
 
-            for fname, value in vals.items():
+            for fname, cache_value in vals.items():
                 field = self._fields[fname]
-                if field.type not in ('one2many', 'many2many', 'html'):
-                    cache_value = field.convert_to_cache(value, record)
+                if field.type not in ('one2many', 'many2many'):
                     field._update_cache(record, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)
@@ -5705,7 +5722,7 @@ class BaseModel(metaclass=MetaModel):
 
     @api.model
     @api.private
-    def new(self, values: ValuesType | None = None, origin: Self | None = None, ref: str | None = None) -> Self:
+    def new(self, values: ValuesType | None = None, origin: Self | None = None, ref: str | None = None, validate=False) -> Self:
         """ Return a new record instance attached to the current environment and
         initialized with the provided ``value``. The record is *not* created
         in database, it only exists in memory.
@@ -5722,7 +5739,7 @@ class BaseModel(metaclass=MetaModel):
         if origin is not None:
             origin = origin.id
         record = self.browse((NewId(origin, ref),))
-        record._update_cache(values, validate=False)
+        record._update_cache(values, validate=validate)
 
         return record
 

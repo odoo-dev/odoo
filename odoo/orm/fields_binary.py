@@ -56,7 +56,7 @@ class Binary(Field):
     def _description_sortable(self, env):
         return False
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None):
         # Binary values may be byte strings (python 2.6 byte array), but
         # the legacy OpenERP convention is to transfer and store binaries
         # as base64-encoded strings. The base64 string may be provided as a
@@ -73,7 +73,7 @@ class Binary(Field):
         }
         if isinstance(value, str):
             value = value.encode()
-        if validate and value[:1] in magic_bytes:
+        if value[:1] in magic_bytes:  # XXX validate?
             try:
                 decoded_value = base64.b64decode(value.translate(None, delete=b'\r\n'), validate=True)
             except binascii.Error:
@@ -111,7 +111,9 @@ class Binary(Field):
             value = human_size(value)
             # human_size can return False (-> None) or a string (-> encoded)
             return value.encode() if value else None
-        return None if value is False else value
+        if value is False or value is None:
+            return None
+        return value
 
     def convert_to_record(self, value, record):
         if isinstance(value, _BINARY):

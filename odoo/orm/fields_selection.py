@@ -223,11 +223,6 @@ class Selection(Field[str | typing.Literal[False]]):
             selection = determine(selection, env[self.model_name].with_context(lang=None))
         return [value for value, _ in selection]
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        if validate and self.validate:
-            value = self.convert_to_cache(value, record)
-        return super().convert_to_column(value, record, values, validate)
-
     def convert_to_cache(self, value, record, validate=True):
         if not validate or self._selection is None:
             return value or None

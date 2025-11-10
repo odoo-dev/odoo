@@ -78,16 +78,13 @@ class BaseString(Field[str | typing.Literal[False]]):
         func = getattr(self.translate, 'get_text_content', lambda term: term)
         return func(term)
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return self.convert_to_cache(value, record, validate)
-
-    def convert_to_column_insert(self, value, record, values=None, validate=True):
+    def convert_to_column_insert(self, value, record, values=None):
         if self.translate:
-            value = self.convert_to_column(value, record, values, validate)
+            value = self.convert_to_column(value, record, values)
             if value is None:
                 return None
             return PsycopgJson({'en_US': value, record.env.lang or 'en_US': value})
-        return super().convert_to_column_insert(value, record, values, validate)
+        return super().convert_to_column_insert(value, record, values)
 
     def get_column_update(self, record):
         if self.translate:
@@ -445,7 +442,8 @@ class BaseString(Field[str | typing.Literal[False]]):
             raw_sql_field = self.to_sql(table._with_model(model.with_context(prefetch_langs=True)))
             sql_left = SQL("jsonb_path_query_array(%s, '$.*')::text", raw_sql_field)
             sql_operator = SQL_OPERATORS['like' if operator == 'in' else operator]
-            sql_right = SQL("%s", self.convert_to_column(value, model, validate=False))
+            cache_value = self.convert_to_cache(value, model, validate=False)
+            sql_right = SQL("%s", self.convert_to_column(cache_value, model))
             unaccent = model.env.registry.unaccent
             return SQL(
                 "(%s%s%s AND %s)",
@@ -606,15 +604,11 @@ class Html(BaseString):
     _description_strip_style = property(attrgetter('strip_style'))
     _description_strip_classes = property(attrgetter('strip_classes'))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        value = self._convert(value, record, validate=validate)
-        return super().convert_to_column(value, record, values, validate=False)
-
     def convert_to_cache(self, value, record, validate=True):
         return self._convert(value, record, validate)
 
-    def _convert(self, value, record, validate):
-        if value is None or value is False:
+    def _convert(self, value, record, validate) -> str | None:
+        if not value:
             return None
 
         if not validate or not self.sanitize:
@@ -675,18 +669,6 @@ class Html(BaseString):
                     ))
 
         return html_sanitize(value, **sanitize_vals)
-
-    def convert_to_record(self, value, record):
-        r = super().convert_to_record(value, record)
-        if isinstance(r, bytes):
-            r = r.decode()
-        return r and Markup(r)
-
-    def convert_to_read(self, value, record, use_display_name=True):
-        r = super().convert_to_read(value, record, use_display_name)
-        if isinstance(r, bytes):
-            r = r.decode()
-        return r and Markup(r)
 
     def get_trans_terms(self, value):
         # ensure the translation terms are stringified, otherwise we can break the PO file

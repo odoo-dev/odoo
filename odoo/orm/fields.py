@@ -998,27 +998,25 @@ class Field(typing.Generic[T]):
     #
     # Conversion of values
     #
+    # - record format: what you read on a recordset
+    # - cache format: what we store internally
+    # - SQL format: what is seen in psycopg (should be same as cache format)
+    # - write format: when you write on a recordset
+    #
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        """ Convert ``value`` from the ``write`` format to the SQL parameter
+    def convert_to_column(self, value, record, values=None):
+        """ Convert ``value`` from the cache format to the SQL parameter
         format for SQL conditions. This is used to compare a field's value when
         the field actually stores multiple values (translated or company-dependent).
         """
-        if value is None or value is False:
-            return None
-        if isinstance(value, str):
-            return value
-        elif isinstance(value, bytes):
-            return value.decode()
-        else:
-            return str(value)
+        return value
 
-    def convert_to_column_insert(self, value, record, values=None, validate=True):
-        """ Convert ``value`` from the ``write`` format to the SQL parameter
+    def convert_to_column_insert(self, value, record, values=None):
+        """ Convert ``value`` from the cache format to the SQL parameter
         format for INSERT queries. This method handles the case of fields that
         store multiple values (translated or company-dependent).
         """
-        value = self.convert_to_column(value, record, values, validate)
+        value = self.convert_to_column(value, record, values)
         if not self.company_dependent:
             return value
         fallback = record.env['ir.default']._get_model_defaults(record._name).get(self.name)
@@ -1051,7 +1049,7 @@ class Field(typing.Generic[T]):
                 raise AssertionError(f"Value not in cache for field {self} and id={record_id}")
         else:
             value = field_cache[record_id]
-        return self.convert_to_column_insert(value, record, validate=False)
+        return self.convert_to_column_insert(value, record)
 
     def convert_to_cache(self, value, record, validate=True):
         """ Convert ``value`` to the cache format; ``value`` may come from an
@@ -1064,7 +1062,7 @@ class Field(typing.Generic[T]):
         :param bool validate: when True, field-specific validation of ``value``
             will be performed
         """
-        return value
+        raise NotImplementedError(f"{self.__class__.__name__}.convert_to_cache()")
 
     def convert_to_record(self, value, record):
         """ Convert ``value`` from the cache format to the record format.
@@ -1249,7 +1247,8 @@ class Field(typing.Generic[T]):
         sql_field = SQL.identifier(table._alias, self.name, to_flush=self)
         if self.company_dependent:
             fallback = self.get_company_dependent_fallback(model)
-            fallback = self.convert_to_column(self.convert_to_write(fallback, model), model)
+            fallback = self.convert_to_cache(fallback, model)
+            fallback = self.convert_to_column(fallback, model)
             # in _read_group_orderby the result of field to sql will be mogrified and split to
             # e.g SQL('COALESCE(%s->%s') and SQL('to_jsonb(%s))::boolean') as 2 orderby values
             # and concatenated by SQL(',') in the final result, which works in an unexpected way
@@ -1298,7 +1297,8 @@ class Field(typing.Generic[T]):
 
         if not property_name:
             def _value_to_column(v):
-                return self.convert_to_column(v, model, validate=False)
+                cache_value = self.convert_to_cache(v, model, validate=False)
+                return self.convert_to_column(cache_value, model)
         else:
             # reading a property, keep value as-is
             def _value_to_column(v):

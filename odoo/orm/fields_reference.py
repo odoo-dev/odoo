@@ -5,7 +5,6 @@ from operator import attrgetter
 from odoo.tools import OrderedSet, unique
 from odoo.tools.sql import pg_varchar
 
-from .fields import Field
 from .fields_numeric import Integer
 from .fields_selection import Selection
 from .models import BaseModel
@@ -20,9 +19,6 @@ class Reference(Selection):
     type = 'reference'
 
     _column_type = ('varchar', pg_varchar())
-
-    def convert_to_column(self, value, record, values=None, validate=True):
-        return Field.convert_to_column(self, value, record, values, validate)
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: str ("model,id") or None
@@ -80,6 +76,8 @@ class Many2oneReference(Integer):
         # cache format: id or None
         if isinstance(value, BaseModel):
             value = value._ids[0] if value._ids else None
+        if not value:
+            return None
         return super().convert_to_cache(value, record, validate)
 
     def _update_inverses(self, records: BaseModel, value):

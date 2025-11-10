@@ -1834,12 +1834,12 @@ class TestHTMLTranslation(TransactionCase):
                 self.assertEqual(
                     company0.with_context(lang=lang).report_footer,
                     html,
-                    f'report_footer for {lang} should be {html}'
+                    f'report_footer for {lang} should be {html!r}'
                 )
                 self.assertEqual(
                     company0.with_context(lang=lang, check_translations=True).report_footer,
                     html,
-                    f'report_footer for {lang} should be {html} when check_translations'
+                    f'report_footer for {lang} should be {html!r} when check_translations'
                 )
 
 

@@ -5155,7 +5155,6 @@ class TestPrecompute(TransactionCase):
         QUERIES = [
             select(currency, *fnames),
             insert(model, 'amount', 'currency_id'),
-            select(model, 'currency_id'),
         ]
         with self.assertQueries(QUERIES):
             model.create({})

@@ -24,13 +24,16 @@ class Boolean(Field[bool]):
     _column_type = ('bool', 'bool')
     falsy_value = False
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_column(self, value, record, values=None):
         return bool(value)
 
     def convert_to_cache(self, value, record, validate=True):
         return bool(value)
 
     def convert_to_export(self, value, record):
+        return bool(value)
+
+    def convert_to_write(self, value, record):
         return bool(value)
 
     def _condition_to_sql(self, table: TableSQL, field_expr: str, operator: str, value) -> SQL:
@@ -79,8 +82,12 @@ class Json(Field):
             return None
         return PsycopgJson(value)
 
+    def convert_to_write(self, value, record):
+        return value
+
     def convert_to_export(self, value, record):
-        if not value:
+        # cache or record format empty value
+        if value is None or value is False:
             return ''
         return json.dumps(value)
 
@@ -117,7 +124,7 @@ class Id(Field[IdType | typing.Literal[False]]):
     def __set__(self, record, value):
         raise TypeError("field 'id' cannot be assigned")
 
-    def convert_to_column(self, value, record, values=None, validate=True):
+    def convert_to_cache(self, value, record, validate=True):
         return value
 
     def to_sql(self, table: TableSQL) -> SQL:
