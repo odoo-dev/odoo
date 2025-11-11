@@ -1,5 +1,3 @@
-from unittest import skip
-
 from odoo.exceptions import ValidationError
 from odoo.tests import Form, tagged
 
@@ -7,7 +5,6 @@ from odoo.addons.mrp_subcontracting.tests.common import TestMrpSubcontractingCom
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
 
     def test_subcontracting_landed_cost_receipts_flow(self):
@@ -71,8 +68,9 @@ class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
         stock_landed_cost.button_validate()
         self.assertEqual(stock_landed_cost.state, "done")
 
-        self.assertEqual(len(in_picking.move_ids.stock_valuation_layer_ids), 1)
-        self.assertEqual(in_picking.move_ids.stock_valuation_layer_ids.value, 99)
+        self.assertRecordValues(in_picking.move_ids, [
+            {'product_id': self.finished.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 199.0, 'remaining_value': 199.0},
+        ])
 
         new_po = self.env['purchase.order'].create({
             'partner_id': self.subcontractor_partner1.id,
@@ -134,3 +132,7 @@ class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
         # confirm the landed cost
         stock_landed_cost.button_validate()
         self.assertEqual(stock_landed_cost.state, "done")
+        self.assertRecordValues(in_picking.move_ids, [
+            {'product_id': self.finished.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 149.5, 'remaining_value': 149.5},
+            {'product_id': product.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 249.5, 'remaining_value': 249.5},
+        ])
