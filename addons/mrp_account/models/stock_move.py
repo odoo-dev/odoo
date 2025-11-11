@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models
+from odoo import api, models
 
 
 class StockMove(models.Model):
@@ -27,3 +27,12 @@ class StockMove(models.Model):
             m.bom_line_id.bom_id.type == 'phantom' and
             m.bom_line_id.bom_id == moves.bom_line_id.bom_id
         )
+
+
+class StockMoveLine(models.Model):
+    _inherit = "stock.move.line"
+
+    @api.model
+    def _should_exclude_for_valuation(self):
+        self.ensure_one()
+        return self.move_id.production_id.unbuild_ids or super()._should_exclude_for_valuation()

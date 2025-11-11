@@ -140,6 +140,13 @@ class TestMrpAccount(TestMrpCommon):
         cls.env['stock.move'].search([('product_id', 'in', [cls.product_bolt.id, cls.product_screw.id])])._do_unreserve()
         (cls.product_bolt + cls.product_screw).write({'is_storable': True})
         cls.dining_table.tracking = 'none'
+        cls.production_account = cls.env['account.account'].create({
+            'name': 'Cost of Production',
+            'code': 'ProductionCost',
+            'account_type': 'liability_current',
+            'reconcile': True,
+        })
+        cls.env['stock.location'].search([('usage', '=', 'production'), ('company_id', '=', cls.env.company.id)]).valuation_account_id = cls.production_account
 
     def test_00_production_order_with_accounting(self):
         self.product_table_sheet.standard_price = 20.0
@@ -186,7 +193,7 @@ class TestMrpAccount(TestMrpCommon):
         mo_form.qty_producing = 1
         production_table = mo_form.save()
         production_table._post_inventory()
-        move_value = production_table.move_finished_ids.filtered(lambda x: x.state == "done").stock_valuation_layer_ids.value
+        move_value = production_table.move_finished_ids.filtered(lambda x: x.state == "done").value
 
         # 1 table head at 20 + 4 table leg at 15 + 4 bolt at 10 + 10 screw at 10 + 1*20 (extra cost)
         self.assertEqual(move_value, 141, 'Thing should have the correct price')
@@ -238,11 +245,9 @@ class TestMrpAccount(TestMrpCommon):
         mo_1.action_confirm()
         mo_1.action_assign()
         mo_1.button_mark_done()
-        self.assertRecordValues(
-            self.env['stock.valuation.layer'].search([('product_id', '=', final_product.id)]),
-            # MO_1
-            [{'remaining_qty': 1.0, 'value': 1.0}]
-        )
+        self.assertRecordValues(mo_1.move_finished_ids, [
+            {'quantity': 1.0, 'remaining_qty': 1.0, 'value': 1.0, 'remaining_value': 1.0},
+        ])
 
         with Form(component) as comp_form:
             comp_form.standard_price = 2
@@ -250,14 +255,10 @@ class TestMrpAccount(TestMrpCommon):
         mo_2.action_confirm()
         mo_2.action_assign()
         mo_2.button_mark_done()
-        self.assertRecordValues(
-            self.env['stock.valuation.layer'].search([('product_id', '=', final_product.id)]),
-            [
-                {'remaining_qty': 1.0, 'value': 1.0},
-                # MO_2 new value to reflect change of component's `standard_price`
-                {'remaining_qty': 1.0, 'value': 2.0},
-            ]
-        )
+        self.assertRecordValues(mo_1.move_finished_ids | mo_2.move_finished_ids, [
+            {'quantity': 1.0, 'remaining_qty': 1.0, 'value': 1.0, 'remaining_value': 1.0},
+            {'quantity': 1.0, 'remaining_qty': 1.0, 'value': 2.0, 'remaining_value': 2.0},
+        ])
         unbuild_form = Form(self.env['mrp.unbuild'])
         unbuild_form.product_id = final_product
         unbuild_form.bom_id = final_bom
@@ -265,15 +266,14 @@ class TestMrpAccount(TestMrpCommon):
         unbuild_form.mo_id = mo_2
         unbuild_order = unbuild_form.save()
         unbuild_order.action_unbuild()
-        self.assertRecordValues(
-            self.env['stock.valuation.layer'].search([('product_id', '=', final_product.id)]),
-            [
-                {'remaining_qty': 1.0, 'value': 1.0, 'quantity': 1.0},
-                {'remaining_qty': 0.0, 'value': 2.0, 'quantity': 1.0},
-                # Unbuild SVL value is derived from MO_2, as precised on the unbuild form
-                {'remaining_qty': 0.0, 'value': -2.0, 'quantity': -1.0},
-            ]
-        )
+        self.assertRecordValues(mo_1.move_finished_ids | mo_2.move_finished_ids, [
+            {'quantity': 1.0, 'remaining_qty': 1.0, 'value': 1.0, 'remaining_value': 1.0},
+            {'quantity': 1.0, 'remaining_qty': 0.0, 'value': 2.0, 'remaining_value': 0.0},
+        ])
+        self.assertRecordValues(unbuild_order.produce_line_ids, [
+            {'product_id': final_product.id, 'quantity': 1.0, 'remaining_qty': 0.0, 'value': 1.0, 'remaining_value': 0.0},
+            {'product_id': component.id, 'quantity': 1.0, 'remaining_qty': 1.0, 'value': 2.0, 'remaining_value': 2.0},
+        ])
         out_move = self.env['stock.move'].create({
             'product_id': final_product.id,
             'product_uom_qty': 1.0,
@@ -285,16 +285,11 @@ class TestMrpAccount(TestMrpCommon):
         out_move.quantity = 1
         out_move.picked = True
         out_move._action_done()
-        self.assertRecordValues(
-            self.env['stock.valuation.layer'].search([('product_id', '=', final_product.id)]),
-            [
-                {'remaining_qty': 0.0, 'value': 1.0, 'quantity': 1.0},
-                {'remaining_qty': 0.0, 'value': 2.0, 'quantity': 1.0},
-                {'remaining_qty': 0.0, 'value': -2.0, 'quantity': -1.0},
-                # Out move SVL value is derived from MO_1, the only candidate origin with some `remaining_qty`
-                {'remaining_qty': 0.0, 'value': -1.0, 'quantity': -1.0},
-            ]
-        )
+        self.assertRecordValues(mo_1.move_finished_ids | mo_2.move_finished_ids | out_move, [
+            {'quantity': 1.0, 'remaining_qty': 0.0, 'value': 1.0, 'remaining_value': 0.0},
+            {'quantity': 1.0, 'remaining_qty': 0.0, 'value': 2.0, 'remaining_value': 0.0},
+            {'quantity': 1.0, 'remaining_qty': 0.0, 'value': 1.0, 'remaining_value': 0.0},
+        ])
 
     def test_labor_cost_posting_is_not_rounded_incorrectly(self):
         """ Test to ensure that labor costs are posted accurately without rounding errors."""

@@ -217,7 +217,7 @@ class ProductProduct(models.Model):
             return self.standard_price
         if (product_value and last_in and product_value.date > last_in.date) or not last_in:
             return product_value.value
-        return last_in._get_value(at_date=date) / last_in._get_valued_qty()
+        return last_in._get_value(at_date=date) / last_in._get_valued_qty() if last_in._get_valued_qty() else 0
 
     def _get_value_from_lots(self):
         lots = self.env['stock.lot'].search([
@@ -416,10 +416,10 @@ class ProductProduct(models.Model):
         while fifo_stack_size > 0 and moves_in:
             move = moves_in[0]
             moves_in = moves_in[1:]
-            in_qty = move._get_valued_qty()
-            fifo_stack.append(move)
-            remaining_qty_on_first_stack_move = min(in_qty, fifo_stack_size)
-            fifo_stack_size -= in_qty
+            if in_qty := move._get_valued_qty():
+                fifo_stack.append(move)
+                remaining_qty_on_first_stack_move = min(in_qty, fifo_stack_size)
+                fifo_stack_size -= in_qty
             if fifo_stack_size > 0 and not moves_in:
                 # We need to fetch more moves
                 current_offset += 1
