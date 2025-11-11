@@ -2,7 +2,7 @@ import { getEmbeddedProps } from "@html_editor/others/embedded_component_utils";
 import { Plugin } from "@html_editor/plugin";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
-import { closestBlock } from "@html_editor/utils/blocks";
+import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { isEmptyBlock, isParagraphRelatedElement } from "@html_editor/utils/dom_info";
 import {
     childNodes,
@@ -53,7 +53,7 @@ export class ToggleBlockPlugin extends Plugin {
         move_node_blacklist_selectors: `${toggleSelector} ${titleSelector} *`,
         selection_blocker_predicates: (blocker) => {
             // Prevent the insertion of selection placeholders around toggle blocks.
-            if (blocker.dataset.embedded === "toggleBlock") {
+            if (isBlock(blocker) && blocker.dataset.embedded === "toggleBlock") {
                 return false;
             }
         },

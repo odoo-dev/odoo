@@ -5,6 +5,7 @@ import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
 import { LayoutColumnOption } from "@html_builder/plugins/layout_column_option";
 import { LAYOUT_COLUMN } from "@html_builder/utils/option_sequence";
+import { isBlock } from "@html_editor/utils/blocks";
 
 class LayoutColumnOptionPlugin extends Plugin {
     static id = "LayoutColumnOption";
@@ -21,7 +22,7 @@ class LayoutColumnOptionPlugin extends Plugin {
             }
         },
         selection_blocker_predicates: (blocker) => {
-            if (blocker.classList.contains("row")) {
+            if ((isBlock(blocker)) && blocker.classList.contains("row")) {
                 return false;
             }
         },
