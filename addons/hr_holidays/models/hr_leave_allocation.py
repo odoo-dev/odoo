@@ -498,11 +498,28 @@ class HolidaysAllocation(models.Model):
                         # the leaves_taken are included in allocation.number_of_days.
                         # Also, allocation.expiring_carryover_days includes the leaves_taken before the carryover date
                         # and allocation.leaves_taken includes all the leaves_taken before the carryover date + all the leaves_taken
-                        # between the carryover date and the expiration_date. So, the number of expiring days will be
-                        # allocation.expiring_carryover_days - allocation.leaves_taken or 0 if all the expiring days were used
-                        # to take time off.
-                        # This ensures that only the days that weren't used to take time off will expire.
-                        expiring_days = max(0, allocation.expiring_carryover_days - allocation.leaves_taken)
+                        # between the carryover date and the expiration_date. In addition to validated leaves, we also
+                        # consider pending leaves (in 'confirm' or 'validate1' state) that end on or before the
+                        # expiration_date, so that those leaves are taken from the expiring carryover bucket first.
+                        pending_taken = 0
+                        pending_leaves_domain = [
+                            ('employee_id', '=', allocation.employee_id.id),
+                            ('holiday_status_id', '=', allocation.holiday_status_id.id),
+                            ('state', 'in', ['confirm', 'validate1']),
+                            ('date_to', '<=', datetime.combine(expiration_date, time.max)),
+                        ]
+                        pending_leaves = self.env['hr.leave'].sudo().search(pending_leaves_domain)
+                        for leave in pending_leaves:
+                            if allocation.holiday_status_id.request_unit in ['day', 'half_day']:
+                                pending_taken += leave.number_of_days
+                            else:
+                                pending_taken += leave.number_of_hours / allocation.employee_id._get_hours_per_day(allocation.date_from)
+
+                        effective_leaves_taken = allocation.leaves_taken + pending_taken
+                        # The number of expiring days will be expiring_carryover_days minus all leaves taken
+                        # (validated + relevant pending) before expiration, or 0 if all the expiring days were used
+                        # to take time off. This ensures that only the unused portion of the carried-over bucket expires.
+                        expiring_days = max(0, allocation.expiring_carryover_days - effective_leaves_taken)
                         allocation.number_of_days = max(0, allocation.number_of_days - expiring_days)
                         allocation.expiring_carryover_days = 0
 
