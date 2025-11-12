@@ -1342,12 +1342,25 @@ class AccountMoveLine(models.Model):
             if not account.active and not self.env.context.get('skip_account_deprecation_check'):
                 raise UserError(_('The account %(name)s (%(code)s) is archived.', name=account.name, code=account.code))
 
+            line._check_manual_equity_unaffected_account(account)
+
             account_currency = account.currency_id
             if account_currency and account_currency != line.company_currency_id and account_currency != line.currency_id:
                 raise UserError(_('The account selected on your journal entry forces to provide a secondary currency. You should remove the secondary currency on the account.'))
 
             if account in (journal.default_account_id, journal.suspense_account_id):
                 continue
+
+    def _check_manual_equity_unaffected_account(self, account):
+        """ Can be overwritten to allow the equity_unaffected_line usage for closing entries in some localizations """
+        self.ensure_one()
+        if (
+                account.account_type == 'equity_unaffected' and
+                not self.env.context.get('create_opening_move')
+                and self.move_id != self.company_id.account_opening_move_id
+        ):
+            raise UserError(_('It is not possible to manually add entries to the account %s. '
+                              'It is used for computing unallocated earnings.', account.name))
 
     @api.constrains('account_id', 'tax_ids', 'tax_line_id', 'reconciled')
     def _check_off_balance(self):

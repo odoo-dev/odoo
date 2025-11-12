@@ -936,7 +936,7 @@ class ResCompany(models.Model):
         if opening_move:
             opening_move.write(move_values)
         else:
-            self.account_opening_move_id = self.env['account.move'].create(move_values)
+            self.account_opening_move_id = self.env['account.move'].with_context(create_opening_move=True).create(move_values)
 
     def action_save_onboarding_sale_tax(self):
         """ Set the onboarding step as done """
