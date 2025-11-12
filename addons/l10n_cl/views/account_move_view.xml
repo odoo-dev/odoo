@@ -24,13 +24,33 @@
 <!--        </field>-->
 <!--    </record>-->
 
+    <record id="view_account_move_form" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.l10n.cl</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='journal_div']" position="after">
+                <!-- TODO JOV: move to account -->
+                <field name="l10n_cl_document_type_id"
+                    invisible="not l10n_cl_use_documents"
+                    readonly="posted_before"
+                    required="partner_id and l10n_cl_use_documents"
+                    options="{'no_open': True, 'no_create': True}"/>
+<!--                <field name="document_number"-->
+<!--                    invisible="(not use_documents or not manual_document_number) and (not l10n_latam_use_documents or highest_name or state != 'draft')"-->
+<!--                    readonly="posted_before and state != 'draft'"-->
+<!--                    required="partner_id and l10n_latam_use_documents and l10n_latam_manual_document_number"/>-->
+            </xpath>
+        </field>
+        </record>
+
     <record id="view_complete_invoice_refund_tree" model="ir.ui.view">
         <field name="name">account.move.list2</field>
         <field name="model">account.move</field>
         <field name="arch" type="xml">
             <list decoration-info="state == 'draft'" default_order="create_date" string="Invoices and Refunds" decoration-muted="state == 'cancel'" js_class="account_tree">
                 <field name="l10n_cl_document_type_code"/>
-<!--                <field name="l10n_latam_document_number" string="Folio" readonly="state != 'draft'"/>-->
+                <field name="document_number" string="Folio" readonly="state != 'draft'"/>
                 <field name="partner_id_vat"/>
                 <field name="partner_id" readonly="state != 'draft'"/>
                 <field name="invoice_date" optional="show" readonly="state != 'draft'"/>

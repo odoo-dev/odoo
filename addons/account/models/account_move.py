@@ -54,6 +54,16 @@ PAYMENT_STATE_SELECTION = [
         ('invoicing_legacy', 'Invoicing App Legacy'),
 ]
 
+MOVE_TYPE_SELECTION = [
+    ('entry', 'Journal Entry'),
+    ('out_invoice', 'Customer Invoice'),
+    ('out_refund', 'Customer Credit Note'),
+    ('in_invoice', 'Vendor Bill'),
+    ('in_refund', 'Vendor Credit Note'),
+    ('out_receipt', 'Sales Receipt'),
+    ('in_receipt', 'Purchase Receipt'),
+]
+
 TYPE_REVERSE_MAP = {
     'entry': 'entry',
     'out_invoice': 'out_refund',
@@ -139,15 +149,7 @@ class AccountMove(models.Model):
         default='draft',
     )
     move_type = fields.Selection(
-        selection=[
-            ('entry', 'Journal Entry'),
-            ('out_invoice', 'Customer Invoice'),
-            ('out_refund', 'Customer Credit Note'),
-            ('in_invoice', 'Vendor Bill'),
-            ('in_refund', 'Vendor Credit Note'),
-            ('out_receipt', 'Sales Receipt'),
-            ('in_receipt', 'Purchase Receipt'),
-        ],
+        selection=MOVE_TYPE_SELECTION,
         string='Type',
         required=True,
         readonly=True,

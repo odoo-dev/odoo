@@ -29,6 +29,7 @@ Plan contable chileno e impuestos de acuerdo a disposiciones vigentes.
         'views/report_invoice.xml',
         'views/res_partner.xml',
         'views/res_config_settings_view.xml',
+        'views/l10n_cl_document_type_view.xml',
         'data/l10n_cl_chart_data.xml',
         'data/account_tax_report_data.xml',
         'data/account_tax_tags_data.xml',
@@ -41,6 +42,7 @@ Plan contable chileno e impuestos de acuerdo a disposiciones vigentes.
         'data/res.bank.csv',
         'data/res.country.csv',
         'data/res_partner.xml',
+        # 'data/account.document.internal.type.csv',
     ],
     'demo': [
         'demo/partner_demo.xml',

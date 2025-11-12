@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from ast import literal_eval
+
 from odoo.exceptions import ValidationError
 from odoo import models, fields, api, _
+from odoo.orm.domains import Domain
 from odoo.tools.misc import formatLang
 from odoo.tools.float_utils import float_repr, float_round
 
@@ -14,8 +17,13 @@ class AccountMove(models.Model):
     l10n_cl_document_type_id = fields.Many2one('l10n_cl.document.type', domain="[('id', 'in', l10n_cl_available_document_type_ids)]")
     l10n_cl_document_type_code = fields.Char(related='l10n_cl_document_type_id.code')
     l10n_cl_available_document_type_ids = fields.Many2many('l10n_cl.document.type', compute='_compute_l10n_cl_available_document_type_ids')
+    l10n_cl_use_documents = fields.Boolean(compute='_compute_l10n_cl_use_documents')
 
     partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')  # TODO why?
+
+    def _compute_l10n_cl_use_documents(self):
+        for move in self:
+            move.l10n_cl_use_documents = move.journal_id.l10n_cl_use_documents and move.move_type != 'in_receipt'
 
     def _inverse_document_number(self):
         # Override.
@@ -24,8 +32,60 @@ class AccountMove(models.Model):
             if doc_type := move.l10n_cl_document_type_id:
                 move.name = f"{doc_type.doc_code_prefix} {(move.document_number or '').zfill(6)}"
 
-    @api.depends('journal_id', 'move_type', 'company_id', 'partner_id', 'partner_id_vat')
+    @api.depends('journal_id', 'move_type', 'company_id', 'partner_id', 'partner_id_vat')  # TODO JOV: must be dynamic based on domains now
     def _compute_l10n_cl_available_document_type_ids(self):
+        for doc_type in self.env['l10n_cl.document.type'].search([]):
+            matching_moves = self.search(
+                Domain.AND([
+                    [('id', 'in', self.ids)],
+                    literal_eval(doc_type.move_domain or '[]'),
+                ])
+            )
+
+            for move in self:
+                if move in matching_moves:
+                    move.l10n_cl_available_document_type_ids |= doc_type
+
+        return
+
+        # domain that matches a set of document types
+        # ->
+        # each document type has an account.move domain that matches
+        #
+        # 4 parameters: journal_id.type, move_type, l10n_cl_sii_taxpayer_type, partner_id.country_id.code, partner_id_vat
+
+        # for dc_m_d_dtn (code 71, internal_type invoice)
+        # [ '|',
+        #     '&', '&',
+        #     ('journal_id.type', '=', 'sale'),
+        #     ('move_type', '=like', '%_invoice'),
+        #     ('company_id.partner_id.l10n_cl_sii_taxpayer_type', '!=', '1'),
+        #
+        #     '&', '&',
+        #     ('journal_id.type', '!=', 'sale'),
+        #     ('move_type', '!=', 'in_refund'),
+        #     ('partner_id.l10n_cl_sii_taxpayer_type', '=', '2'),
+        # ]
+        #
+        # for dc_a_f_dte (code 33, internal_type invoice)
+        # [
+        #     '&',
+        #     ('journal_id.type', '=', 'sale'),
+        #     ('move_type', '=like', '%_invoice'),
+        # ]
+        #
+        # for dc_b_f_dtn (code 35, internal_type invoice)
+        # [
+        #   '|',
+        #     '&',
+        #     ('journal_id.type', '=', 'sale'),
+        #     ('move_type', '=like', '%_invoice'),
+        #
+        #     '&',
+        #     ('journal_id.type', '!=', 'sale'),
+        #     ('partner_id.l10n_cl_sii_taxpayer_type', '=', '3'),
+        # ]
+
         for move in self:
             domain = []
             if self.journal_id.type == 'sale':
@@ -52,7 +112,7 @@ class AccountMove(models.Model):
                 elif self.partner_id.country_id.code != 'CL' or self.partner_id.l10n_cl_sii_taxpayer_type == '4':
                     domain += [('code', '=', '46')]
                 else:
-                    domain += [('code', 'in', [])]
+                    domain += [('code', 'in', [])]  # TODO JOV: what
 
             move.l10n_cl_available_document_type_ids = self.env['l10n_cl.document.type'].search(domain)
 

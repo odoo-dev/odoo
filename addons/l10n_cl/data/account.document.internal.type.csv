@@ -1,0 +1,4 @@
+id,name,code
+internal_type_receipt_invoice,Receipt Invoice,receipt_invoice
+internal_type_stock_picking,Stock Delivery,stock_picking
+2

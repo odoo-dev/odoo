@@ -52,3 +52,4 @@ from . import account_report
 from . import onboarding_onboarding_step
 from . import template_generic_coa
 from . import uom_uom
+from . import document_internal_type
