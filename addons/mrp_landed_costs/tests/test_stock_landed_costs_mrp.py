@@ -1,13 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from unittest import skip
-
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
 from odoo.tests import tagged, Form
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
 
     @classmethod
@@ -117,12 +114,10 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         man_order = mo_form.save()
         man_order.button_mark_done()
 
+        self.assertEqual(self.product_refrigerator.total_value, 10.0)
+
         landed_cost = Form(self.env['stock.landed.cost'].with_user(self.allow_user)).save()
         landed_cost.target_model = 'manufacturing'
-
-        # Check domain of the views
-        self.assertTrue(man_order in self.env['mrp.production'].search([
-            ('move_finished_ids.stock_valuation_layer_ids', '!=', False), ('company_id', '=', landed_cost.company_id.id)]))
 
         landed_cost.mrp_production_ids = [(6, 0, [man_order.id])]
         landed_cost.cost_lines = [(0, 0, {'product_id': self.landed_cost.id, 'price_unit': 5.0, 'split_method': 'equal'})]
@@ -131,9 +126,7 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         self.assertEqual(landed_cost.state, 'done')
         self.assertTrue(landed_cost.account_move_id)
         # Link to one layer of product_refrigerator
-        self.assertEqual(len(landed_cost.stock_valuation_layer_ids), 1)
-        self.assertEqual(landed_cost.stock_valuation_layer_ids.product_id, self.product_refrigerator)
-        self.assertEqual(landed_cost.stock_valuation_layer_ids.value, 5.0)
+        self.assertEqual(self.product_refrigerator.total_value, 15.0)
 
     def test_landed_cost_on_mrp_02(self):
         """
@@ -171,8 +164,6 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         landed_cost.target_model = 'manufacturing'
 
         # Check that the MO can be selected by the stock_manger user
-        self.assertTrue(man_order in self.env['mrp.production'].search([
-            ('move_finished_ids.stock_valuation_layer_ids', '!=', False), ('company_id', '=', landed_cost.company_id.id)]))
         landed_cost.mrp_production_ids = [(6, 0, [man_order.id])]
 
         # Check that he can validate the landed cost without an access error
@@ -212,11 +203,18 @@ class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
         man_order = mo_form.save()
         man_order.button_mark_done()
 
+        self.assertEqual(self.product_refrigerator.total_value, 0.0)
+        self.assertEqual(byproduct1.total_value, 10.0)
+        self.assertEqual(byproduct2.total_value, 0.0)
+
         landed_cost = Form(self.env['stock.landed.cost'].with_user(self.allow_user)).save()
         landed_cost.target_model = 'manufacturing'
         landed_cost.mrp_production_ids = [(6, 0, [man_order.id])]
         landed_cost.cost_lines = [(0, 0, {'product_id': self.landed_cost.id, 'price_unit': 5.0, 'split_method': 'equal'})]
         landed_cost.compute_landed_cost()
+        landed_cost.button_validate()
 
         # check the valuation adjustment lines
-        self.assertFalse(byproduct2 in landed_cost.valuation_adjustment_lines.product_id)
+        self.assertEqual(self.product_refrigerator.total_value, 2.5)
+        self.assertEqual(byproduct1.total_value, 12.5)
+        self.assertEqual(byproduct2.total_value, 0.0)
