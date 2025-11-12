@@ -1,10 +1,12 @@
 import { patch } from "@web/core/utils/patch";
 import { CONSOLE_COLOR, PosStore } from "@point_of_sale/app/services/pos_store";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
+import { rpc } from "@web/core/network/rpc";
 
 patch(PosStore.prototype, {
     async setup() {
         await super.setup(...arguments);
+        this.pollingTimeout = null;
         this.data.connectWebSocket("ONLINE_PAYMENTS_NOTIFICATION", async ({ id }) => {
             // The bus communication is only protected by the name of the channel.
             // Therefore, no sensitive information is sent through it, only a
@@ -19,6 +21,27 @@ patch(PosStore.prototype, {
             if (this.getOrder()?.id === id) {
                 this.updateOnlinePaymentsDataWithServer(this.getOrder(), false);
             }
+        });
+        this.data.connectWebSocket(
+            "POLL_ONLINE_PAYMENT",
+            async (transaction_id) => await this._pollForOnlinePaymentResult(transaction_id)
+        );
+    },
+    async _pollForOnlinePaymentResult(transaction_id) {
+        clearTimeout(this.pollingTimeout);
+        return new Promise((resolve) => {
+            this.pollingTimeout = setTimeout(async () => {
+                const opStatus = await rpc("/pos-online-payment/status/poll", {
+                    transaction_id: transaction_id,
+                }).catch((error) => Promise.reject(error));
+                if (opStatus.state === "done") {
+                    return resolve(true);
+                } else if (["cancel", "error"].includes(opStatus.state)) {
+                    return resolve(false);
+                } else {
+                    return await this._pollForOnlinePaymentResult(transaction_id);
+                }
+            }, 5000);
         });
     },
     async updateOnlinePaymentsDataWithServer(order, next_online_payment_amount) {

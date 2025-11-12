@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import psycopg2
+
 from werkzeug.urls import url_encode
 
 from odoo import _, http, tools
@@ -240,6 +242,7 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
         tx_sudo = self._create_transaction(**kwargs)
         tx_sudo.landing_route = PaymentPortal._get_landing_route(pos_order_sudo.id, access_token, exit_route=exit_route, tx_id=tx_sudo.id)
+        pos_order_sudo.config_id._notify('POLL_ONLINE_PAYMENT', tx_sudo.id)
 
         return tx_sudo._get_processing_values()
 
@@ -299,3 +302,34 @@ class PaymentPortal(payment_portal.PaymentPortal):
 
     def _on_payment_successful(self, pos_order):
         return
+
+    @http.route('/pos-online-payment/status/poll', type='jsonrpc', auth='user')
+    def poll_online_payment_status(self, **_kwargs):
+        """
+        Polling from PoS terminal: Fetch the transaction and trigger its post-processing.
+
+        :return: The post-processing values of the transaction.
+        :rtype: dict
+        """
+        transaction_id = _kwargs.get('transaction_id')
+        requested_tx = request.env['payment.transaction'].sudo().browse(transaction_id)
+        if not requested_tx.exists() or not requested_tx.pos_order_id:
+            return {}
+        if not requested_tx.is_post_processed:
+            try:
+                requested_tx._post_process()
+            except (
+                psycopg2.OperationalError, psycopg2.IntegrityError
+            ):  # The database cursor could not be committed.
+                request.env.cr.rollback()  # Rollback and try later.
+                raise Exception('retry')
+            except Exception:
+                request.env.cr.rollback()
+                raise
+        if requested_tx.state == 'done':
+            requested_tx._process_pos_online_payment()
+        return {
+            'provider_code': requested_tx.provider_code,
+            'state': requested_tx.state,
+            'landing_route': requested_tx.landing_route,
+        }
