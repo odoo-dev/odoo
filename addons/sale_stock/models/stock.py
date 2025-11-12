@@ -128,27 +128,6 @@ class StockMove(models.Model):
             res['sale_line_id'] = self.sale_line_id.id
         return res
 
-    def _reassign_sale_lines(self, sale_order):
-        current_order = self.sale_line_id.order_id
-        if len(current_order) <= 1 and current_order != sale_order:
-            ids_to_reset = set()
-            if not sale_order:
-                ids_to_reset.update(self.ids)
-            else:
-                line_ids_by_product = dict(self.env['sale.order.line']._read_group(
-                    domain=[('order_id', '=', sale_order.id), ('product_id', 'in', self.product_id.ids)],
-                    aggregates=['id:array_agg'],
-                    groupby=['product_id']
-                ))
-                for move in self:
-                    if line_id := line_ids_by_product.get(move.product_id, [])[:1]:
-                        move.sale_line_id = line_id[0]
-                    else:
-                        ids_to_reset.add(move.id)
-
-            if ids_to_reset:
-                self.env['stock.move'].browse(ids_to_reset).sale_line_id = False
-
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
@@ -190,21 +169,57 @@ class StockPicking(models.Model):
                     picking.move_type = "one"
 
     def _set_sale_id(self):
-        if self.reference_ids:
-            if self.sale_id:
-                self.reference_ids.sale_ids = [Command.link(self.sale_id.id)]
+        for picking in self:
+            old_sale = picking.move_ids.sale_line_id.order_id
+            new_sale = picking.sale_id
+            if not new_sale:
+                continue
+            if new_sale and new_sale != old_sale:
+                picking._sync_moves_with_new_sale(new_sale)
+            if picking.reference_ids:
+                picking.reference_ids.sale_ids = [Command.link(new_sale.id)]
             else:
-                sale_order = self.move_ids.sale_line_id.order_id
-                if len(sale_order) == 1:
-                    self.reference_ids.sale_ids = [Command.unlink(sale_order.id)]
-        else:
-            if self.sale_id:
                 reference = self.env['stock.reference'].create({
-                    'sale_ids': [Command.link(self.sale_id.id)],
-                    'name': self.sale_id.name,
+                    'sale_ids': [Command.link(new_sale.id)],
+                    'name': new_sale.name,
                 })
-                self._add_reference(reference)
-        self.move_ids._reassign_sale_lines(self.sale_id)
+                picking._add_reference(reference)
+
+    def _sync_moves_with_new_sale(self, new_sale):
+        """Update picking moves to match products & qtys of the new sale order."""
+        sale_lines = new_sale.order_line.filtered(lambda l: not l.display_type)
+        sale_lines_by_product = {l.product_id.id: l for l in sale_lines}
+        picking_moves = {m.product_id.id: m for m in self.move_ids}
+        for product_id, move in picking_moves.items():
+            if product_id in sale_lines_by_product:
+                line = sale_lines_by_product[product_id]
+                move.write({
+                    'sale_line_id': line.id,
+                    'product_uom_qty': line.product_uom_qty,
+                    'product_uom': line.product_uom_id.id,
+                })
+            else:
+                move.write({'product_uom_qty': 0, 'sale_line_id': False})
+        missing_products = set(sale_lines_by_product.keys()) - set(picking_moves.keys())
+        new_moves = []
+        for product_id in missing_products:
+            line = sale_lines_by_product[product_id]
+            move_vals = self._prepare_move_from_sale_line(line)
+            new_moves.append((0, 0, move_vals))
+        if new_moves:
+            self.write({'move_ids': new_moves})
+        self.action_assign()
+
+    def _prepare_move_from_sale_line(self, line):
+        return {
+            'product_id': line.product_id.id,
+            'product_uom': line.product_uom_id.id,
+            'product_uom_qty': line.product_uom_qty,
+            'location_id': line.order_id.warehouse_id.lot_stock_id.id,
+            'location_dest_id': line.order_id.partner_shipping_id.property_stock_customer.id,
+            'sale_line_id': line.id,
+            'picking_id': self.id,
+        }
 
     def _auto_init(self):
         """
