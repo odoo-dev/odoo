@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_iot_config_view_form" model="ir.ui.view">
+        <field name="name">pos.iot.config.form.view</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='other_devices']" position="after">
+                <setting id="pos_network_printer" string="USB Printer" help="Connect device to your PoS without an IoT Box">
+                    <field name="network_printer" />
+                    <div class="content-group" invisible="not network_printer">
+                        <div class="row">
+                            <field name="device_ip" placeholder="Device IP Address" />
+                        </div>
+                        <div class="row">
+                            <field name="vendor_id" placeholder="Device Vendor Id" />
+                        </div>
+                        <div class="row">
+                            <field name="product_id" placeholder="Device Product Id" />
+                        </div>
+                        <button name="action_open_printer_wizard" string="Select Printer" type="object"/>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

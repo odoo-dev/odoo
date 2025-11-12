@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_printer.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//Dropdown//span[i[contains(@class, 'fa-desktop')]]" position="after">
+            <button class="d-flex flex-column align-items-center justify-content-center text-center w-100 gap-1 btn btn-light lh-sm" t-if="pos.config.network_printer" t-on-click="() => this.checkLongpolling()">
+                <i t-att-class="'fa fa-fw fa-solid fa-' + (state.printerStatus === 'connected' ? 'print' : 'sitemap') + (state.printerStatus === 'connected' ? ' text-success' : ' text-danger')"
+                   role="img"
+                   title="Printer Connected">
+                </i>
+                Printer <t t-esc="state.printerStatus" t-if="state.printerStatus" />
+            </button>
+        </xpath>
+    </t>
+</templates>

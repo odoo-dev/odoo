@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+pos_printer.access_usb_printer_device_line,access_usb_printer_device_line,pos_printer.model_usb_printer_device_line,base.group_user,1,1,1,1
+pos_printer.access_usb_printer_selection_wizard,access_usb_printer_selection_wizard,pos_printer.model_usb_printer_selection_wizard,base.group_user,1,1,1,1

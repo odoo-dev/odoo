@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_printer_form" model="ir.ui.view">
+        <field name="name">pos.iot.config.form.view</field>
+        <field name="model">pos.printer</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_printer_form"/>
+        <field name="arch" type="xml">
+            <field name="printer_type" position="after">
+                <field name="device_ip" invisible="printer_type != 'esc_pos_printer'"/>
+                <field name="vendor_id" invisible="printer_type != 'esc_pos_printer'"/>
+                <field name="product_id" invisible="printer_type != 'esc_pos_printer'"/>
+            </field>
+        </field>
+    </record>
+</odoo>

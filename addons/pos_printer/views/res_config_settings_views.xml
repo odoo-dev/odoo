@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pos.printer</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='pos_other_devices']" position="after">
+                <setting id="pos_network_printer" string="USB Printer" help="Connect device to your PoS without an IoT Box">
+                    <field name="pos_network_printer" />
+                    <div class="content-group" invisible="not pos_network_printer">
+                        <div class="row">
+                            <field name="pos_device_ip" placeholder="Device IP Address" />
+                        </div>
+                        <div class="row">
+                            <field name="pos_vendor_id" placeholder="Device Vendor Id" />
+                        </div>
+                        <div class="row">
+                            <field name="pos_product_id" placeholder="Device Product Id" />
+                        </div>
+                        <div>
+                            <field name="pos_printer_selection" options="{'no_quick_create': True, 'no_create': True, 'no_open': True}" placeholder="Select Printer Device to fill VID and PID"/>
+                            <button name="action_refresh" string="Refresh" type="object"/>
+                        </div>
+                    </div>
+                    <div role="alert" class="alert alert-warning" invisible="not pos_iface_print_via_proxy or not pos_network_printer or pos_product_id in [False, '']">
+                        The receipt printer will be used instead of the receipt printer connected to the IoT Box.
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

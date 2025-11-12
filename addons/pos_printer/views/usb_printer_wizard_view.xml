@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_usb_printer_selection_wizard_form" model="ir.ui.view">
+        <field name="name">usb.printer.selection.wizard.form</field>
+        <field name="model">usb.printer.selection.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select USB Printer">
+                <sheet>
+                    <field name="selected_printer_id" options="{'no_quick_create': True, 'no_create': True, 'no_open': True}" placeholder="Select Printer Device to fill VID and PID" widget="many2one"/>
+                    <button name="action_refresh" type="object" string="Refresh Printers" class="oe_highlight"/>
+                </sheet>
+                <footer>
+                    <button string="Confirm" type="object" name="action_confirm" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_usb_printer_selection_wizard" model="ir.actions.act_window">
+        <field name="name">USB Printer Selection</field>
+        <field name="res_model">usb.printer.selection.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
