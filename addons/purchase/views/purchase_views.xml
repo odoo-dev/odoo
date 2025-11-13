@@ -145,7 +145,8 @@
                     <button name="button_cancel" invisible="state not in ('draft', 'to approve', 'sent', 'purchase') or locked" string="Cancel" type="object" data-hotkey="x"/>
                     <button name="button_lock" type="object" string="Lock" invisible="locked or state != 'purchase' or not lock_confirmed_po == 'lock'" data-hotkey="l"/>
                     <button name="button_unlock" type="object" string="Unlock" invisible="not locked" groups="purchase.group_purchase_manager" data-hotkey="l"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,purchase" readonly="1"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,purchase" invisible="state != 'sent'" readonly="1"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,purchase" invisible="state == 'sent'" readonly="1"/>
                 </header>
                 <div class="alert alert-warning" role="alert" invisible="not purchase_warning_text">
                     <field name="purchase_warning_text" class="fw-bold"/>

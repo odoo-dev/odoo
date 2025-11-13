@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="purchase_stock.PurchaseOnTimeRateProgressBar" t-inherit="web.ProgressBarField" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_progress')]" position="attributes">
+            <attribute name="class" add="position-relative rounded" separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_progress')]" position="inside">
+            <span class="position-absolute top-50 translate-middle text-nowrap fs-6">
+                <t t-esc="formatCurrentValue(true)"/>% on time
+            </span>
+        </xpath>
+        <xpath expr="//div[hasclass('o_progressbar_value')]" position="attributes">
+            <attribute name="t-if">false</attribute>
+        </xpath>
+    </t>
+</templates>
