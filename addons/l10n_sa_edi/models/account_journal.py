@@ -91,12 +91,12 @@ class AccountJournal(models.Model):
         """
             Reset the chain head error from the journal's stuck invoices
         """
-        stuck_invoices = self.env['account.move'].search([
+        self.env['l10n_sa_edi.document'].search([
             ('l10n_sa_edi_chain_head_id', '!=', False),
             ('journal_id', 'in', self.ids),
-        ])
+        ]).state = 'to_send'
         # We only need to remove blocking errors, so webservices do not need to be triggered
-        stuck_invoices._retry_edi_documents_error()
+        # stuck_invoices._retry_edi_documents_error()
 
     # ====== Utility Functions =======
 
@@ -115,13 +115,13 @@ class AccountJournal(models.Model):
 
         # If the invoice wasn't sent to ZATCA because of a timeout, it will retain its existing chain index
         # Make sure there are no opened invoices with the journal's existing sequence
-        move_ids = self.env['account.move'].search(
+        doc_ids = self.env['l10n_sa_edi.document'].search(
             [
                 ('journal_id', '=', self.id),
-                ('l10n_sa_chain_index', '!=', 0)
-            ]
+                ('l10n_sa_chain_index', '!=', 0),
+            ],
         )
-        stuck_moves = [move for move in move_ids if not move._l10n_sa_is_in_chain()]
+        stuck_moves = [doc for doc in doc_ids if not doc._l10n_sa_is_in_chain()]
         if stuck_moves:
             raise UserError(_("Oops! The journal is stuck. Please submit the pending invoices to ZATCA and try again."))
 
@@ -231,12 +231,10 @@ class AccountJournal(models.Model):
             raise UserError(str(ERROR_MESSAGE))
 
         renew = False
-        zatca_format = self.env.ref('l10n_sa_edi.edi_sa_zatca')
-
         if self_sudo.l10n_sa_production_csid_json:
-            time_now = zatca_format._l10n_sa_get_zatca_datetime(datetime.now())
+            time_now = self.env['l10n_sa_edi.document']._l10n_sa_get_zatca_datetime(datetime.now())
             validity_time = self_sudo.l10n_sa_production_csid_validity
-            if zatca_format._l10n_sa_get_zatca_datetime(validity_time) < time_now:
+            if self.env['l10n_sa_edi.document']._l10n_sa_get_zatca_datetime(validity_time) < time_now:
                 renew = True
             else:
                 raise UserError(_("The Journal is valid until (%s) and can only be renewed upon expiry.", validity_time))
@@ -292,7 +290,7 @@ class AccountJournal(models.Model):
         for fname, fval in compliance_files.items():
             invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
                 fval).decode()
-            digital_signature = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_get_digital_signature(self.company_id, invoice_hash_hex).decode()
+            digital_signature = self.env['l10n_sa_edi.document']._l10n_sa_get_digital_signature(self.company_id, invoice_hash_hex).decode()
             prepared_xml = self._l10n_sa_prepare_compliance_xml(fname, fval, self_sudo.l10n_sa_compliance_csid_certificate_id, digital_signature)
             result = self._l10n_sa_api_compliance_checks(prepared_xml.decode(), CCSID_data)
             if result.get('error'):
@@ -309,7 +307,7 @@ class AccountJournal(models.Model):
             Prepare XML content to be used for Compliance checks
         """
         xml_content = self._l10n_sa_prepare_invoice_xml(xml_raw)
-        signed_xml = self.env.ref('l10n_sa_edi.edi_sa_zatca')._l10n_sa_sign_xml(xml_content, certificate, signature)
+        signed_xml = self.env['l10n_sa_edi.document']._l10n_sa_sign_xml(xml_content, certificate, signature)
         if xml_name.startswith('simplified'):
             qr_code_str = self.env['account.move']._l10n_sa_get_qr_code(self.company_id, signed_xml, certificate, signature, True)
             root = etree.fromstring(signed_xml)
@@ -371,19 +369,19 @@ class AccountJournal(models.Model):
             self.l10n_sa_chain_sequence_id = self._l10n_sa_edi_create_new_chain()
         return self.l10n_sa_chain_sequence_id.next_by_id()
 
-    def _l10n_sa_get_last_posted_invoice(self):
+    def _l10n_sa_get_last_posted_doc(self):
         """
         Returns the last invoice posted to this journal's chain.
         That invoice may have been received by the govt or not (eg. in case of a timeout).
         Only upon confirmed reception/refusal of that invoice can another one be posted.
         """
         self.ensure_one()
-        return self.env['account.move'].search(
+        return self.env['l10n_sa_edi.document'].search(
             [
                 ('journal_id', '=', self.id),
                 ('l10n_sa_chain_index', '!=', 0)
             ],
-            limit=1, order='l10n_sa_chain_index desc'
+            limit=1, order='l10n_sa_chain_index desc',
         )
 
     # ====== API Calls to ZATCA =======

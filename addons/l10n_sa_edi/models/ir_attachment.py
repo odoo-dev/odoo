@@ -26,8 +26,9 @@ class IrAttachment(models.Model):
             lambda attachment: attachment.res_model == "account.move"
             and attachment.res_field == "invoice_pdf_report_file"
         )
-        res = self.env["account.edi.document"]._read_group(
-            domain=[("move_id", "in", attachments_to_check.mapped("res_id")), ("state", "=", "sent"), ("edi_format_id.code", "=", "sa_zatca")],
+        res = self.env["l10n_sa_edi.document"]._read_group(
+            domain=[("res_id", "in", attachments_to_check.mapped("res_id")),
+                    ("state", "=", "sent"), ("res_model", "=", "account.move")],
             aggregates=["write_date:min"],
             groupby=["move_id"],
         )
@@ -43,4 +44,4 @@ class IrAttachment(models.Model):
 
     def _get_posted_pdf_moves_to_check(self):
         # Extends l10n_sa: to bypass the unlink check in l10n_sa for posted moves
-        return super()._get_posted_pdf_moves_to_check().filtered(lambda rec: not rec.edi_state)
+        return super()._get_posted_pdf_moves_to_check().filtered(lambda rec: not rec.l10n_sa_edi_state)

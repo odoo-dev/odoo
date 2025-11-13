@@ -6,7 +6,7 @@
     'countries': ['sa'],
     'version': '0.2',
     'depends': [
-        'account_edi',
+        # 'account_edi',
         'account_edi_ubl_cii',
         'l10n_sa',
         'base_vat',
@@ -20,7 +20,6 @@ E-invoice implementation for Saudi Arabia; Integration with ZATCA
     'license': 'LGPL-3',
     'data': [
         'security/ir.model.access.csv',
-        'data/account_edi_format.xml',
         'data/ubl_21_zatca.xml',
         'data/res_country_data.xml',
         'wizard/l10n_sa_edi_otp_wizard.xml',
@@ -30,6 +29,7 @@ E-invoice implementation for Saudi Arabia; Integration with ZATCA
         'views/res_company_views.xml',
         'views/res_config_settings_view.xml',
         'views/report_invoice.xml',
+        'views/account_move_views.xml',
     ],
     'demo': [
         'demo/demo_company.xml',
