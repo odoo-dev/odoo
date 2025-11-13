@@ -1,5 +1,3 @@
-from unittest import skip
-
 from odoo.exceptions import ValidationError
 from odoo.tests import Form, tagged
 
@@ -7,7 +5,6 @@ from odoo.addons.mrp_subcontracting.tests.common import TestMrpSubcontractingCom
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
 
     def test_subcontracting_landed_cost_receipts_flow(self):
@@ -29,11 +26,10 @@ class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
         })
         po.button_confirm()
 
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = po.picking_ids.move_ids._get_subcontract_production()
         self.assertTrue(mo)
 
-        action = po.action_view_picking()
-        in_picking = self.env[action['res_model']].browse(action['res_id'])
+        in_picking = po.picking_ids
         in_picking.move_ids.quantity = 10
         in_picking.move_ids.picked = True
         in_picking.button_validate()
@@ -71,8 +67,17 @@ class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
         stock_landed_cost.button_validate()
         self.assertEqual(stock_landed_cost.state, "done")
 
-        self.assertEqual(len(in_picking.move_ids.stock_valuation_layer_ids), 1)
-        self.assertEqual(in_picking.move_ids.stock_valuation_layer_ids.value, 99)
+        # Value Distribution — finished
+        #   ┌────────────────────────────────────────────┬────────┬────────────────────┐
+        #   │ Move                                       │ Source │ Value Added        │
+        #   ├────────────────────────────────────────────┼────────┼────────────────────┤
+        #   │ Subcontracting → Stock (Receipt)           │ LC     │ +99.0   (landed)   │
+        #   │ Production → Subcontracting (SBC)          │ MO     │ +100.0  (prod)     │
+        #   └────────────────────────────────────────────┴────────┴────────────────────┘
+        self.assertRecordValues(in_picking.move_ids | mo.move_finished_ids, [
+            {'product_id': self.finished.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 99.0, 'remaining_value': 99.0},
+            {'product_id': self.finished.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 100.0, 'remaining_value': 100.0},
+        ])
 
         new_po = self.env['purchase.order'].create({
             'partner_id': self.subcontractor_partner1.id,
@@ -98,11 +103,10 @@ class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
                 new_line.price_unit = 20
         new_po.button_confirm()
 
-        new_mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        new_mo = new_po.picking_ids.move_ids._get_subcontract_production()
         self.assertTrue(new_mo)
 
-        action = new_po.action_view_picking()
-        in_picking = self.env[action['res_model']].browse(action['res_id'])
+        in_picking = new_po.picking_ids
         in_picking.move_ids.quantity = 10
         in_picking.move_ids.picked = True
         in_picking.button_validate()
@@ -134,3 +138,25 @@ class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
         # confirm the landed cost
         stock_landed_cost.button_validate()
         self.assertEqual(stock_landed_cost.state, "done")
+
+        # Value Distribution — finished
+        #   ┌────────────────────────────────────────────────────────────┬────────┬────────────────────────┐
+        #   │ Move                                                       │ Source │ Value Added            │
+        #   ├────────────────────────────────────────────────────────────┼────────┼────────────────────────┤
+        #   │ finished : Subcontracting → Stock (Receipt)                │ LC     │ +49.5       (landed)   │
+        #   │ finished : Production → Subcontracting (SBC)               │ MO     │ +100.0      (prod)     │
+        #   └────────────────────────────────────────────────────────────┴────────┴────────────────────────┘
+        self.assertRecordValues(in_picking.move_ids.filtered(lambda m: m.product_id == self.finished) | new_mo.move_finished_ids, [
+            {'product_id': self.finished.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 49.5, 'remaining_value': 49.5},
+            {'product_id': self.finished.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 100.0, 'remaining_value': 100.0},
+        ])
+
+        # Value Distribution — product
+        #   ┌────────────────────────────────────────────────────────────┬────────┬──────────────────────────────┐
+        #   │ Move                                                       │ Source │ Value Added                  │
+        #   ├────────────────────────────────────────────────────────────┼────────┼──────────────────────────────┤
+        #   │ product : Vendor → Stock (Receipt)                         │ LC     │ +249.5  (PO + LC = 200+49.5) │
+        #   └────────────────────────────────────────────────────────────┴────────┴──────────────────────────────┘
+        self.assertRecordValues(in_picking.move_ids.filtered(lambda m: m.product_id == product), [
+            {'product_id': product.id, 'quantity': 10.0, 'remaining_qty': 10.0, 'value': 249.5, 'remaining_value': 249.5},
+        ])

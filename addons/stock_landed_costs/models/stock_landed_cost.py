@@ -162,11 +162,12 @@ class StockLandedCost(models.Model):
                 continue
             qty = move.product_uom._compute_quantity(move.quantity, move.product_id.uom_id)
 
+            former_cost = sum(m._get_value() for m in move._get_move_ids())
             vals = {
                 'product_id': move.product_id.id,
                 'move_id': move.id,
                 'quantity': qty,
-                'former_cost': move._get_value(),
+                'former_cost': former_cost,
                 'weight': move.product_id.weight * qty,
                 'volume': move.product_id.volume * qty
             }

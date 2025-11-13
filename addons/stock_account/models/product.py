@@ -217,7 +217,7 @@ class ProductProduct(models.Model):
             return self.standard_price
         if (product_value and last_in and product_value.date > last_in.date) or not last_in:
             return product_value.value
-        return last_in._get_value(at_date=date) / last_in._get_valued_qty()
+        return last_in._get_value(at_date=date) / last_in._get_valued_qty() if last_in._get_valued_qty() else 0
 
     def _get_value_from_lots(self):
         lots = self.env['stock.lot'].search([

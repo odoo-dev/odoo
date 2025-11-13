@@ -38,3 +38,7 @@ class StockMove(models.Model):
         else:
             accounting_data['description'] += '\n' + description
         return accounting_data
+
+    def _get_move_ids(self):
+        self.ensure_one()
+        return self
