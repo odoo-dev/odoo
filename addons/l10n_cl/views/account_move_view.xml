@@ -73,6 +73,19 @@
         <field name="view_mode">list,form</field>
     </record>
 
+    <record id="account_invoices_cl" model="ir.actions.report">
+        <field name="name">Invoices with copy</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_cl.report_invoice_document_with_box</field>
+        <field name="report_file">l10n_cl.report_invoice_document_with_box</field>
+        <field name="print_report_name">(object._get_report_base_filename())</field>
+        <field name="attachment"/>
+        <field name="binding_model_id" ref="model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="domain" eval="[('move_type', '!=', 'entry')]"/>
+    </record>
+
     <menuitem id="menu_sale_invoices_credit_notes" parent="account.menu_finance_receivables" sequence="3" action="sale_invoices_credit_notes" name="Sale Invoices and Credit Notes (CL)"/>
     <menuitem id="menu_vendor_bills_and_refunds" parent="account.menu_finance_payables" sequence="3" action="vendor_bills_and_refunds" name="Vendor Bills and Refunds (CL)"/>
 

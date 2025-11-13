@@ -216,6 +216,22 @@
             <span t-out="line_amounts['line_description']" t-options="{'widget': 'text'}"/>
         </xpath>
 
+        <xpath expr="//div[contains(@class, 'invoice_main')]" position="inside">
+            <t t-if="show_details_box">
+                <div style="position: fixed; width: 45%; right: 3%;">
+                    <div style="border: 3px solid black; padding: 1rem;" >
+                        <div style="font-size: 1.5rem"> Nombre : ___________________________________ </div>
+                        <div style="font-size: 1.5rem"> RUT : ______________ FECHA : _______________ </div>
+                        <div style="font-size: 1.5rem"> Recinto : __________  FIRMA : _______________ </div>
+                        <div style="font-size: 1rem"> El acuse de recibo que se declara en este acto, de acuredo a lo dispuesto en la letra b) del art.
+                                                    4 y la letra c) del Art. 5 de la ley 19.983, acredita que la entrega de mercaderia(s) o servicios
+                        </div>
+                    </div>
+                    <div style="font-size: 1.2rem; text-align: right; margin-right: 2rem; margin-top: 1rem; font-weight: bold;"> CEDIBLE </div>
+                </div>
+            </t>
+        </xpath>
+
         <t t-call="account.document_tax_totals" position="attributes">
             <attribute name="t-call">l10n_cl.tax_totals_widget</attribute>
         </t>
@@ -228,8 +244,29 @@
             <t t-if="o._get_name_invoice_report() == 'l10n_cl.report_invoice_document'"
                 t-call="l10n_cl.report_invoice_document" t-lang="lang"/>
         </xpath>
-
     </template>
+
+    <template id="report_invoice_document_with_box">
+        <t t-call="account.report_invoice_document">
+            <t t-set="show_details_box" t-value="True"/>
+        </t>
+    </template>
+
+<!--    <template id="report_invoice_details_box" inherit_id="l10n_cl.report_invoice_document" primary="True">-->
+<!--        <xpath expr="//div[contains(@class, 'invoice_main')]" position="inside">-->
+<!--            <div style="position: fixed; width: 45%; right: 3%;">-->
+<!--                <div style="border: 3px solid black; padding: 1rem;" >-->
+<!--                    <div style="font-size: 1.5rem"> Nombre : ___________________________________ </div>-->
+<!--                    <div style="font-size: 1.5rem"> RUT : ______________ FECHA : _______________ </div>-->
+<!--                    <div style="font-size: 1.5rem"> Recinto : __________  FIRMA : _______________ </div>-->
+<!--                    <div style="font-size: 1rem"> El acuse de recibo que se declara en este acto, de acuredo a lo dispuesto en la letra b) del art. -->
+<!--                                                4 y la letra c) del Art. 5 de la ley 19.983, acredita que la entrega de mercaderia(s) o servicios -->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div style="font-size: 1.2rem; text-align: right; margin-right: 2rem; margin-top: 1rem; font-weight: bold;"> CEDIBLE </div>-->
+<!--            </div>-->
+<!--        </xpath>-->
+<!--    </template>-->
 
     <template id="tax_totals_widget" inherit_id="account.document_tax_totals" primary="True">
         <t t-foreach="tax_totals['subtotals']" t-as="subtotal" position="replace">
