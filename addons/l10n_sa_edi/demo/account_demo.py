@@ -5,33 +5,33 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = "account.chart.template"
 
-    @template(model='account.move', demo=True)
-    def _l10n_sa_edi_onboard_sa_sale_demo(self, template_code):
-        if template_code == "sa":
-            self._l10n_sa_edi_update_res_partner_demo()
-            sa_sale_journal = self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', self.env.company.id)], limit=1)
-            sa_sale_journal._l10n_sa_api_onboard_journal('123345')
+    # @template(model='account.move', demo=True)
+    # def _l10n_sa_edi_onboard_sa_sale_demo(self, template_code):
+    #     if template_code == "sa":
+    #         self._l10n_sa_edi_update_res_partner_demo()
+    #         sa_sale_journal = self.env['account.journal'].search([('type', '=', 'sale'), ('company_id', '=', self.env.company.id)], limit=1)
+    #         sa_sale_journal._l10n_sa_api_onboard_journal('123345')
 
-            demo_invoices = (
-                self.ref('demo_sa_invoice_1', raise_if_not_found=False)
-                + self.ref('demo_sa_invoice_2', raise_if_not_found=False)
-                + self.ref('demo_sa_invoice_3', raise_if_not_found=False)
-                + self.ref('demo_sa_invoice_4', raise_if_not_found=False)
-            )
-            for invoice in demo_invoices:
-                invoice.update({
-                    "edi_document_ids": [
-                        Command.clear(),
-                        *[
-                            Command.create({
-                                "edi_format_id": edi_format.id,
-                                "state": "to_send",
-                            })
-                            for edi_format in invoice.journal_id.edi_format_ids
-                        ],
-                    ],
-                })
-                invoice.button_process_edi_web_services()
+    #         demo_invoices = (
+    #             self.ref('demo_sa_invoice_1', raise_if_not_found=False)
+    #             + self.ref('demo_sa_invoice_2', raise_if_not_found=False)
+    #             + self.ref('demo_sa_invoice_3', raise_if_not_found=False)
+    #             + self.ref('demo_sa_invoice_4', raise_if_not_found=False)
+    #         )
+    #         for invoice in demo_invoices:
+    #             invoice.update({
+    #                 "edi_document_ids": [
+    #                     Command.clear(),
+    #                     *[
+    #                         Command.create({
+    #                             "edi_format_id": edi_format.id,
+    #                             "state": "to_send",
+    #                         })
+    #                         for edi_format in invoice.journal_id.edi_format_ids
+    #                     ],
+    #                 ],
+    #             })
+    #             invoice.button_process_edi_web_services()
 
     def _l10n_sa_edi_update_res_partner_demo(self):
         demo_partner_updates = {

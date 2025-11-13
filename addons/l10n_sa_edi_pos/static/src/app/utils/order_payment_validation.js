@@ -15,8 +15,9 @@ patch(OrderPaymentValidation.prototype, {
         // note: isSACompany guarantees order.is_to_invoice()
         if (
             this.order.isSACompany() &&
+            this.order.isToInvoice() &&
             this.order.finalized &&
-            this.order.l10n_sa_invoice_edi_state !== "sent"
+            this.order.l10n_sa_invoice_edi_state !== "sent" // to remove
         ) {
             const orderError = _t(
                 "%s by going to Backend > Orders > Invoice",
@@ -27,6 +28,7 @@ patch(OrderPaymentValidation.prototype, {
                 "Invoice"
             )}</a>`;
             const errorInfo = this.order.raw.account_move ? link : orderError;
+            debugger;
             const message = _t(
                 `The Receipt and Invoice generated here are not valid documents as there is ` +
                     `an error in their processing. You need to resolve the errors first in %s` +
