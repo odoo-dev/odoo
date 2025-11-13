@@ -268,4 +268,42 @@
         </tr>
     </template>
 
+    <template id="report_invoice_document_copy" inherit_id="l10n_cl.report_invoice_document">
+        <xpath expr="//div[@id='right-elements']" position="inside">
+            <div t-if="show_information_box" name="custom_info_box" class="col-12 mt-3 p-3 border border-primary rounded">
+                <div class="row mb-2">
+                    <div class="col-12 d-flex align-items-baseline">
+                        <span class="small me-2 text-nowrap">Nombre: </span>
+                        <div class="border-bottom pb-1 flex-grow-1" stylr="min-height: 1.2rem;"/>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6 d-flex align-items-baseline">
+                        <span class="small me-2 text-nowrap">RUT: </span>
+                        <div class="border-bottom pb-1 flex-grow-1" stylr="min-height: 1.2rem;"/>
+                    </div>
+                    <div class="col-6 d-flex align-items-baseline">
+                        <span class="small me-2 text-nowrap">FETCHA: </span>
+                        <div class="border-bottom pb-1 flex-grow-1" stylr="min-height: 1.2rem;"/>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6 d-flex align-items-baseline">
+                        <span class="small me-2 text-nowrap">Recinto: </span>
+                        <div class="border-bottom pb-1 flex-grow-1" stylr="min-height: 1.2rem;"/>
+                    </div>
+                    <div class="col-6 d-flex align-items-baseline">
+                        <span class="small me-2 text-nowrap">FIRMA: </span>
+                        <div class="border-bottom pb-1 flex-grow-1" stylr="min-height: 1.2rem;"/>
+                    </div>
+                </div>
+                <p class="mt-3 small text-justify">
+                    El acuse de recibo que se declara en este acto, de acuerdo a lo dispuesto en 
+                    la letra b) del Art. 4° y la letra c) del Art. 5° de la Ley 19.983, acredita que 
+                    la entrega de mercaderia(s) o servicio(s)
+                </p>
+            </div>
+        </xpath>
+    </template>
+    
 </odoo>
