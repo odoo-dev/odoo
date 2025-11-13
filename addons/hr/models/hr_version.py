@@ -195,6 +195,11 @@ class HrVersion(models.Model):
         'An employee cannot have multiple active versions sharing the same effective date.',
     )
 
+    _check_positive_wage = models.Constraint(
+        'CHECK(wage >= 0)',
+        'Wage has to be positive',
+    )
+
     @api.depends('employee_id.company_id')
     def _compute_company_id(self):
         for version in self:
