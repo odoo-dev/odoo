@@ -64,7 +64,7 @@ export class PosPrinter extends BasePrinter {
             cash_drawer,
         };
 
-        const response = await fetch(`https://${this.device_ip}/pos/print/`, {
+        const response = await fetch(`http://${this.device_ip}/pos/print/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

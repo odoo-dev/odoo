@@ -13,7 +13,7 @@ patch(Navbar.prototype, {
         const deviceIp = this.pos.config.device_ip;
 
         if (deviceIp) {
-            const url = `https://${deviceIp}`;
+            const url = `http://${deviceIp}`;
             window.open(url, "_blank");
         } else {
             console.warn("No device IP configured in pos.config");
@@ -28,7 +28,7 @@ patch(Navbar.prototype, {
             product_id,
         };
         try {
-            const response = await fetch(`https://${device_ip}/printer/status-usb`, {
+            const response = await fetch(`http://${device_ip}/printer/status-usb`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
