@@ -55,10 +55,6 @@ $o-discuss-talkingColor: lighten($success, 10%);
 .o-discuss-dropdownMenu {
     --Dropdown_menu-margin-y: 0;
 
-    .btn {
-        border-color: transparent !important;
-    }
-
     &.o-simulateDarkTheme {
         background-color: $gray-800;
         border-color: $gray-700 !important;
