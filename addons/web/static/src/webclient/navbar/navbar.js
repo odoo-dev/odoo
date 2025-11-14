@@ -222,7 +222,12 @@ export class NavBar extends Component {
     }
 
     getMenuItemHref(payload) {
-        return `/odoo/${payload.actionPath || "action-" + payload.actionID}`;
+        let path = `${payload.actionPath || "action-" + payload.actionID}`;
+        if (payload.appID) {
+            const itemRelatedApp = this.menuService.getApps().find(a=>a.appID === payload.appID);
+            path = `${itemRelatedApp.actionPath}/${path}`;
+        }
+        return `${this.pwa.isScopedApp ? "/scoped_app" : "/odoo"}/${path}`;
     }
 
     _closeAppMenuSidebar() {
