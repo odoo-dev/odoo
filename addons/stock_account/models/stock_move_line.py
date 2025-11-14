@@ -1,4 +1,5 @@
 from odoo import api, models
+from odoo.exceptions import UserError
 
 
 class StockMoveLine(models.Model):
@@ -51,3 +52,9 @@ class StockMoveLine(models.Model):
                     move._set_value(correction_quantity=delta)
         if move_to_update:
             self.env['stock.move'].browse(move_to_update)._set_value()
+
+    def _action_done(self):
+        for line in self:
+            if not line.lot_id and not line.lot_name and line.product_id.lot_valuated:
+                raise UserError(self.env._("Lot/Serial number is mandatory for product valuated by lot"))
+        return super()._action_done()
