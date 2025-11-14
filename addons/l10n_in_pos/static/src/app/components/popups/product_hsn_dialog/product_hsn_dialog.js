@@ -1,6 +1,7 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { Component } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
+import { useService } from "@web/core/utils/hooks";
 
 export class productHsnDialog extends Component {
     static components = { Dialog };
@@ -11,19 +12,26 @@ export class productHsnDialog extends Component {
 
     setup() {
         this.pos = usePos();
+        this.action = useService("action");
     }
 
     redirect() {
-        return this.actionService.doAction({
+        this.props.close();
+
+        const domain = [
+            ["available_in_pos", "=", true],
+            ["l10n_in_hsn_code", "=", false],
+            ["taxes_id", "!=", false],
+        ];
+
+        this.action.doAction({
             type: "ir.actions.act_window",
-            res_model: this.data.link_model,
-            res_id: this.data.link_id,
-            views: [[false, "form"]],
+            res_model: "product.template",
+            domain: domain,
+            views: [[false, "list"]],
             target: "current",
-            context: {
-                active_id: this.data.link_id,
-            },
         });
+        return;
     }
 
     onClose() {
