@@ -24,7 +24,7 @@ port_code_inclx6,base.state_in_ap,INCLX6,Chirala
 port_code_insnf6,base.state_in_ap,INSNF6,Hyderabad
 port_code_incoi6,base.state_in_ap,INCOI6,Kakinada
 port_code_inmap1,base.state_in_ap,INMAP1,Masulipatnam
-port_code_inkri6,base.state_in_ap,INKRI1,Krishnapatnam
+port_code_inkri1,base.state_in_ap,INKRI1,Krishnapatnam
 port_code_inakp6,base.state_in_ap,INAKP6,APIICL SEZ/Visakhapatnam
 port_code_intni6,base.state_in_ap,INTNI6,HIPL SEZ/Visakhapatnam
 port_code_inakr6,base.state_in_ap,INAKR6,RPCIPL SEZ/Visakhapatnam
@@ -115,7 +115,7 @@ port_code_inpav1,base.state_in_gj,INPAV1,Pipavav(Victor) Port
 port_code_inbed1,base.state_in_gj,INBED1,Bedi(Including Rozi-Jamnagar)
 port_code_inbgw1,base.state_in_gj,INBGW1,Bhagwa
 port_code_inkdn1,base.state_in_gj,INKDN1,Kodinar(Muldwarka)
-port_code_inakvi1,base.state_in_gj,INKVI1,Kavi
+port_code_inkvi1,base.state_in_gj,INKVI1,Kavi
 port_code_ingha1,base.state_in_gj,INGHA1,Ghogha
 port_code_ingin6,base.state_in_gj,INGIN6,Gandhidham
 port_code_indrk1,base.state_in_gj,INDRK1,Dwarka (Rupen)
@@ -451,7 +451,7 @@ port_code_inatt2,base.state_in_pb,INATT2,Attari Railway Station
 port_code_inatrb,base.state_in_pb,INATRB,Attari Road
 port_code_indpr6,base.state_in_pb,INDPR6,DAPPER
 port_code_inatq4,base.state_in_pb,INATQ4,Rajasansi(Amritsar)
-port_code_injuuc6,base.state_in_pb,INJUC6,Jalandhar
+port_code_injuc6,base.state_in_pb,INJUC6,Jalandhar
 port_code_inldh6,base.state_in_pb,INLDH6,Ludhiana
 port_code_inasr6,base.state_in_pb,INASR6,Amritsar
 port_code_inbti6,base.state_in_pb,INBTI6,Bhatinda
