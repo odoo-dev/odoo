@@ -6,7 +6,6 @@ import logging
 from datetime import datetime, timedelta
 from freezegun import freeze_time
 from json import loads
-from unittest import skip
 
 from odoo import Command
 from odoo.exceptions import UserError
@@ -19,7 +18,6 @@ _logger = logging.getLogger(__name__)
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
 
     def setUp(self):
@@ -308,7 +306,7 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
             'reconcile': True,
             'account_type': 'asset_current',
         })
-        product_category_all.property_account_creditor_price_difference_categ = stock_price_diff_acc_id
+        product_category_all.property_price_difference_account_id = stock_price_diff_acc_id
 
         self.comp1.standard_price = 10.0
         self.comp2.standard_price = 20.0
@@ -355,16 +353,6 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         product_category_all = self.product_category
         product_category_all.property_cost_method = 'fifo'
         product_category_all.property_valuation = 'real_time'
-        in_account = self.env['account.account'].create({
-            'name': 'IN Account',
-            'code': '000001',
-            'account_type': 'asset_current',
-        })
-        out_account = self.env['account.account'].create({
-            'name': 'OUT Account',
-            'code': '000002',
-            'account_type': 'asset_current',
-        })
         valu_account = self.env['account.account'].create({
             'name': 'VALU Account',
             'code': '000003',
@@ -375,11 +363,8 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
             'code': '000004',
             'account_type': 'asset_current',
         })
-        product_category_all.property_stock_account_input_categ_id = in_account
-        product_category_all.property_stock_account_output_categ_id = out_account
         product_category_all.property_stock_account_production_cost_id = production_cost_account
         product_category_all.property_stock_valuation_account_id = valu_account
-        stock_in_acc_id = product_category_all.property_stock_account_input_categ_id.id
 
         resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
         (self.comp1 + self.comp2).write({'route_ids': [Command.link(resupply_sub_on_order_route.id)]})
@@ -433,13 +418,9 @@ class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
         aml.price_unit = 150
         aml.move_id.invoice_date = Date.today()
         aml.move_id.action_post()
-        svl = aml.stock_valuation_layer_ids
-        self.assertEqual(len(svl), 1)
-        self.assertEqual(svl.value, 50)
-        # check for the automated inventory valuation
-        account_move_credit_line = svl.account_move_id.line_ids.filtered(lambda l: l.credit > 0)
-        self.assertEqual(account_move_credit_line.account_id.id, stock_in_acc_id)
-        self.assertEqual(account_move_credit_line.credit, 50)
+        # # check for the automated inventory valuation
+        account_move_valuation_line = aml.move_id.line_ids.filtered(lambda l: l.account_id ==  valu_account)
+        self.assertEqual(account_move_valuation_line.debit, 150)
         # Total value of subcontracted product = 150 new price + components (10 + 10)
         self.assertEqual(self.finished.total_value, 170)
         self.assertEqual(self.finished.standard_price, 170)
