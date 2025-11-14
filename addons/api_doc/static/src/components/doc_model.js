@@ -38,7 +38,7 @@ function getTypeData(fieldData) {
     }
 
     return data;
-};
+}
 
 export class DocModel extends Component {
     static template = "web.DocModel";
@@ -55,7 +55,7 @@ export class DocModel extends Component {
             modelData: { items: [] },
             crudMethods: [],
             methods: [],
-            fields: { data: { items: [] }},
+            fields: { data: { items: [] } },
             modules: [],
             activeModules: {
                 core: true,
@@ -76,25 +76,23 @@ export class DocModel extends Component {
                 this.modelStore.activeModel,
                 this.modelStore.activeMethod,
                 this.modelStore.activeField,
-            ],
+            ]
         );
 
-        let lastFocusedElement = null
-        onPatched(
-            () => {
-                let el = null;
-                if (this.modelStore.activeMethod) {
-                    el = document.getElementById(this.modelStore.activeMethod);
-                }
-                if (this.modelStore.activeField) {
-                    el = document.getElementById(this.modelStore.activeField);
-                }
-                if (el && el != lastFocusedElement) {
-                    lastFocusedElement = el;
-                    el.scrollIntoView({ behavior: "smooth" });
-                }
+        let lastFocusedElement = null;
+        onPatched(() => {
+            let el = null;
+            if (this.modelStore.activeMethod) {
+                el = document.getElementById(this.modelStore.activeMethod);
             }
-        );
+            if (this.modelStore.activeField) {
+                el = document.getElementById(this.modelStore.activeField);
+            }
+            if (el && el != lastFocusedElement) {
+                lastFocusedElement = el;
+                el.scrollIntoView({ behavior: "smooth" });
+            }
+        });
     }
 
     get modelName() {
@@ -123,7 +121,8 @@ export class DocModel extends Component {
         this.state.methods = [];
         this.state.modules = [];
 
-        this.modelStore.loadModel(modelId)
+        this.modelStore
+            .loadModel(modelId)
             .then((model) => {
                 if (this.state.model.model !== model.model) {
                     return;
@@ -134,7 +133,7 @@ export class DocModel extends Component {
                     items: [
                         ["Model Name", { type: "code", value: model.model }],
                         ...(model.doc ? [["Description", model.doc]] : []),
-                    ]
+                    ],
                 };
 
                 this.updateModules();
@@ -209,7 +208,7 @@ export class DocModel extends Component {
             } else if (bIndex >= 0) {
                 return 1;
             }
-            return a.name.localeCompare(b.name)
+            return a.name.localeCompare(b.name);
         });
         this.state.methods = methods;
     }
@@ -227,7 +226,7 @@ export class DocModel extends Component {
             .filter((fieldData) => this.isModuleActive(fieldData.module))
             .map((fieldData, index) => {
                 if (fieldData.name === this.modelStore.activeField) {
-                    activeIndex = index
+                    activeIndex = index;
                 }
                 return [
                     { type: TABLE_TYPES.Code, value: fieldData.name },
@@ -246,7 +245,7 @@ export class DocModel extends Component {
                         type: TABLE_TYPES.Code,
                         value: fieldData.module || "",
                     },
-                ]
+                ];
             });
 
         fields.sort((a, b) => a[0].value.localeCompare(b[0].value));

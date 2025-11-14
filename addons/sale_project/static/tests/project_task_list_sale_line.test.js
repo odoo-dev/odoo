@@ -42,19 +42,28 @@ test("cannot edit sale_line_id when partners are different", async () => {
 
     await check(".o_list_record_selector input", { root: firstRow });
     await animationFrame();
-    expect(queryOne("[name=sale_line_id]", { root: firstRow })).not.toHaveClass("o_readonly_modifier", {
-        message: "None of the fields should be readonly",
-    });
-    expect(queryOne("[name=sale_line_id]", { root: secondRow })).not.toHaveClass("o_readonly_modifier", {
-        message: "None of the fields should be readonly",
-    });
+    expect(queryOne("[name=sale_line_id]", { root: firstRow })).not.toHaveClass(
+        "o_readonly_modifier",
+        {
+            message: "None of the fields should be readonly",
+        }
+    );
+    expect(queryOne("[name=sale_line_id]", { root: secondRow })).not.toHaveClass(
+        "o_readonly_modifier",
+        {
+            message: "None of the fields should be readonly",
+        }
+    );
 
     await check(".o_list_record_selector input", { root: secondRow });
     await animationFrame();
     expect(queryOne("[name=sale_line_id]", { root: firstRow })).toHaveClass("o_readonly_modifier", {
         message: "The sale_ine_id should be readonly",
     });
-    expect(queryOne("[name=sale_line_id]", { root: secondRow })).toHaveClass("o_readonly_modifier", {
-        message: "The sale_ine_id should be readonly",
-    });
+    expect(queryOne("[name=sale_line_id]", { root: secondRow })).toHaveClass(
+        "o_readonly_modifier",
+        {
+            message: "The sale_ine_id should be readonly",
+        }
+    );
 });

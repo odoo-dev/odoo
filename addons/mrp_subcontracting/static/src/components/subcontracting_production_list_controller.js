@@ -4,8 +4,8 @@ import { listView } from "@web/views/list/list_view";
 
 class SubcontractingProductionListController extends ListController {
     get actionMenuItems() {
-        let items = super.actionMenuItems;
-        items.action = []
+        const items = super.actionMenuItems;
+        items.action = [];
         return items;
     }
 }

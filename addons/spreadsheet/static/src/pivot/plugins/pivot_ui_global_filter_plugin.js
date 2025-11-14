@@ -1,8 +1,6 @@
 import { OdooUIPlugin } from "@spreadsheet/plugins";
 
-
 export class PivotUIGlobalFilterPlugin extends OdooUIPlugin {
-
     constructor(config) {
         super(config);
         /** @type {string} */

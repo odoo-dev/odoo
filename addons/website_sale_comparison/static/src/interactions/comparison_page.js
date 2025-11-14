@@ -1,16 +1,16 @@
-import { Interaction } from '@web/public/interaction';
-import { registry } from '@web/core/registry';
-import comparisonUtils from '@website_sale_comparison/js/website_sale_comparison_utils';
-import { redirect } from '@web/core/utils/urls';
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+import comparisonUtils from "@website_sale_comparison/js/website_sale_comparison_utils";
+import { redirect } from "@web/core/utils/urls";
 
 export class ComparisonPage extends Interaction {
-    static selector = '#o_comparelist_table';
+    static selector = "#o_comparelist_table";
 
     dynamicSelectors = {
         ...this.dynamicSelectors,
-        _miniSticky: () => document.querySelector('#miniStickyComparison'),
-        _mainScroll: () => document.querySelector('.table-comparator')?.closest('.overflow-x-auto'),
-        _miniScroll: () => document.querySelector('#miniStickyComparison .overflow-x-auto'),
+        _miniSticky: () => document.querySelector("#miniStickyComparison"),
+        _mainScroll: () => document.querySelector(".table-comparator")?.closest(".overflow-x-auto"),
+        _miniScroll: () => document.querySelector("#miniStickyComparison .overflow-x-auto"),
         _backButton: () => document.querySelector('button[name="comparison_back_button"]'),
         _clearAllButton: () => document.querySelector('button[name="comparison_clear_all_button"]'),
     };
@@ -19,9 +19,9 @@ export class ComparisonPage extends Interaction {
         "button[name='comparison_add_to_cart']": {
             "t-on-click": this.locked(this.addToCart, true),
         },
-        '.o_comparelist_remove': { 't-on-click': this.removeProduct },
-        _backButton: { 't-on-click': () => redirect('/shop') },
-        _clearAllButton: { 't-on-click': this.clearAllProducts },
+        ".o_comparelist_remove": { "t-on-click": this.removeProduct },
+        _backButton: { "t-on-click": () => redirect("/shop") },
+        _clearAllButton: { "t-on-click": this.clearAllProducts },
     };
 
     // TODO the sticky logic could probably make use of the WebsiteSaleStickyObject
@@ -34,7 +34,9 @@ export class ComparisonPage extends Interaction {
 
     start() {
         this._adaptToHeaderChange();
-        this.registerCleanup(this.services.website_menus.registerCallback(this._adaptToHeaderChange.bind(this)));
+        this.registerCleanup(
+            this.services.website_menus.registerCallback(this._adaptToHeaderChange.bind(this))
+        );
         this._initMiniStickyComparison();
     }
 
@@ -68,7 +70,7 @@ export class ComparisonPage extends Interaction {
      */
     clearAllProducts() {
         comparisonUtils.clearComparisonProducts(this.bus);
-        redirect('/shop');
+        redirect("/shop");
     }
 
     /**
@@ -78,9 +80,11 @@ export class ComparisonPage extends Interaction {
      */
     _initMiniStickyComparison() {
         const miniStickyEl = this.dynamicSelectors._miniSticky();
-        const productImagesEl = this.el.querySelector('ul:first-of-type');
+        const productImagesEl = this.el.querySelector("ul:first-of-type");
 
-        if (!miniStickyEl || !productImagesEl) return;
+        if (!miniStickyEl || !productImagesEl) {
+            return;
+        }
 
         // Set initial position
         miniStickyEl.style.top = `${this.position}px`;
@@ -94,8 +98,8 @@ export class ComparisonPage extends Interaction {
             const rect = productImagesEl.getBoundingClientRect();
             const shouldShow = rect.bottom < this.position + 20;
 
-            miniStickyEl.classList.toggle('show', shouldShow);
-            miniStickyEl.classList.toggle('d-none', !shouldShow);
+            miniStickyEl.classList.toggle("show", shouldShow);
+            miniStickyEl.classList.toggle("d-none", !shouldShow);
 
             // Sync horizontal position when showing
             if (shouldShow && mainScrollEl && miniScrollEl) {
@@ -108,26 +112,26 @@ export class ComparisonPage extends Interaction {
             if (!source._syncing) {
                 target._syncing = true;
                 target.scrollLeft = source.scrollLeft;
-                requestAnimationFrame(() => target._syncing = false);
+                requestAnimationFrame(() => (target._syncing = false));
             }
         };
 
         // Bind events
-        window.addEventListener('scroll', handleVerticalScroll, { passive: true });
-        this.registerCleanup(
-            () => window.removeEventListener('scroll', handleVerticalScroll, { passive: true })
+        window.addEventListener("scroll", handleVerticalScroll, { passive: true });
+        this.registerCleanup(() =>
+            window.removeEventListener("scroll", handleVerticalScroll, { passive: true })
         );
         if (mainScrollEl && miniScrollEl) {
             const syncMainToMiniScroll = (_) => syncScroll(mainScrollEl, miniScrollEl);
             const syncMiniToMainScroll = (_) => syncScroll(miniScrollEl, mainScrollEl);
-            mainScrollEl.addEventListener('scroll', syncMainToMiniScroll, { passive: true });
-            miniScrollEl.addEventListener('scroll', syncMiniToMainScroll, { passive: true });
-            this.registerCleanup(() => mainScrollEl.removeEventListener(
-                'scroll', syncMainToMiniScroll, { passive: true }
-            ));
-            this.registerCleanup(() => miniScrollEl.removeEventListener(
-                'scroll', syncMiniToMainScroll, { passive: true }
-            ));
+            mainScrollEl.addEventListener("scroll", syncMainToMiniScroll, { passive: true });
+            miniScrollEl.addEventListener("scroll", syncMiniToMainScroll, { passive: true });
+            this.registerCleanup(() =>
+                mainScrollEl.removeEventListener("scroll", syncMainToMiniScroll, { passive: true })
+            );
+            this.registerCleanup(() =>
+                miniScrollEl.removeEventListener("scroll", syncMiniToMainScroll, { passive: true })
+            );
         }
 
         // Initial check
@@ -145,12 +149,15 @@ export class ComparisonPage extends Interaction {
         const productTemplateId = parseInt(button.dataset.productTemplateId);
         const showQuantity = Boolean(button.dataset.showQuantity);
 
-        await this.services["cart"].add({
-            productTemplateId: productTemplateId,
-            productId: productId,
-        }, {
-            showQuantity: showQuantity,
-        });
+        await this.services["cart"].add(
+            {
+                productTemplateId: productTemplateId,
+                productId: productId,
+            },
+            {
+                showQuantity: showQuantity,
+            }
+        );
     }
 
     /**
@@ -164,14 +171,16 @@ export class ComparisonPage extends Interaction {
 
         const productIds = comparisonUtils.getComparisonProductIds();
         if (productIds.length === 0) {
-            redirect('/shop');
+            redirect("/shop");
         } else {
-            const comparisonUrl = `/shop/compare?products=${encodeURIComponent(productIds.join(','))}`;
+            const comparisonUrl = `/shop/compare?products=${encodeURIComponent(
+                productIds.join(",")
+            )}`;
             redirect(comparisonUrl);
         }
     }
 }
 
 registry
-    .category('public.interactions')
-    .add('website_sale_comparison.comparison_page', ComparisonPage);
+    .category("public.interactions")
+    .add("website_sale_comparison.comparison_page", ComparisonPage);

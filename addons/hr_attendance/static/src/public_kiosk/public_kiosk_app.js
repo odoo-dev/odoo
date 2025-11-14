@@ -17,7 +17,7 @@ import { DocumentationLink } from "@web/views/widgets/documentation_link/documen
 import { NewEmployeeDialog } from "@hr_attendance/components/new_employee_dialog/new_employee_dialog";
 import { session } from "@web/session";
 
-class kioskAttendanceApp extends Component{
+class kioskAttendanceApp extends Component {
     static template = "hr_attendance.public_kiosk_app";
     static props = {
         token: { type: String },
@@ -49,15 +49,19 @@ class kioskAttendanceApp extends Component{
         });
         this.state = useState({
             active_display: "settings",
-            displayDemoMessage: browser.localStorage.getItem("hr_attendance.ShowDemoMessage") !== "false",
+            displayDemoMessage:
+                browser.localStorage.getItem("hr_attendance.ShowDemoMessage") !== "false",
         });
         this.lockScanner = false;
-        if (this.props.kioskMode === 'settings' || this.props.fromTrialMode){
+        if (this.props.kioskMode === "settings" || this.props.fromTrialMode) {
             this.manualKioskMode = false;
-            useBus(this.barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.barcode));
-        }
-        else if (this.props.kioskMode !== 'manual') {
-            useBus(this.barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.barcode));
+            useBus(this.barcode.bus, "barcode_scanned", (ev) =>
+                this.onBarcodeScanned(ev.detail.barcode)
+            );
+        } else if (this.props.kioskMode !== "manual") {
+            useBus(this.barcode.bus, "barcode_scanned", (ev) =>
+                this.onBarcodeScanned(ev.detail.barcode)
+            );
             this.state.active_display = "main";
             this.manualKioskMode = false;
         } else {
@@ -76,7 +80,7 @@ class kioskAttendanceApp extends Component{
     }
 
     newSetUp() {
-        this.dialogService.add(NewEmployeeDialog, { 'token': this.props.token });
+        this.dialogService.add(NewEmployeeDialog, { token: this.props.token });
     }
 
     async setSetting(mode) {
@@ -96,24 +100,23 @@ class kioskAttendanceApp extends Component{
         }
     }
 
-    async kioskConfirm(employeeId){
-        const employee = await rpc('attendance_employee_data',
-            {
-                'token': this.props.token,
-                'employee_id': employeeId
-            })
-        if (employee && employee.employee_name){
-            if (employee.use_pin){
-                this.employeeData = employee
-                this.switchDisplay('pin')
-            }else{
-                await this.onManualSelection(employeeId, false)
+    async kioskConfirm(employeeId) {
+        const employee = await rpc("attendance_employee_data", {
+            token: this.props.token,
+            employee_id: employeeId,
+        });
+        if (employee && employee.employee_name) {
+            if (employee.use_pin) {
+                this.employeeData = employee;
+                this.switchDisplay("pin");
+            } else {
+                await this.onManualSelection(employeeId, false);
             }
         }
     }
 
     kioskReturn() {
-        if (this.state.active_display === "settings"){
+        if (this.state.active_display === "settings") {
             history.back();
         } else if (
             (["manual", "barcode"].includes(this.props.kioskMode) ||
@@ -122,14 +125,14 @@ class kioskAttendanceApp extends Component{
             this.props.fromTrialMode
         ) {
             this.switchDisplay("settings");
-        } else if (this.props.kioskMode === 'manual') {
+        } else if (this.props.kioskMode === "manual") {
             this.switchDisplay("manual");
         } else {
             this.switchDisplay("main");
         }
     }
 
-    displayNotification(text){
+    displayNotification(text) {
         this.notification.add(text, { type: "danger" });
     }
 
@@ -151,7 +154,7 @@ class kioskAttendanceApp extends Component{
                 },
                 async (err) => {
                     const result = await rpc(route, {
-                        ...params
+                        ...params,
                     });
                     resolve(result);
                 },
@@ -161,24 +164,23 @@ class kioskAttendanceApp extends Component{
     }
 
     async onManualSelection(employeeId, enteredPin) {
-        const result = await this.makeRpcWithGeolocation('manual_selection',
-            {
-                'token': this.props.token,
-                'employee_id': employeeId,
-                'pin_code': enteredPin
-            })
+        const result = await this.makeRpcWithGeolocation("manual_selection", {
+            token: this.props.token,
+            employee_id: employeeId,
+            pin_code: enteredPin,
+        });
         if (result && result.attendance) {
-            this.employeeData = result
-            this.switchDisplay('greet')
-        }else{
-            if (enteredPin){
-                this.displayNotification(_t("Wrong Pin"))
+            this.employeeData = result;
+            this.switchDisplay("greet");
+        } else {
+            if (enteredPin) {
+                this.displayNotification(_t("Wrong Pin"));
             }
         }
     }
 
-    async onBarcodeScanned(barcode){
-        if (this.lockScanner || this.state.active_display !== 'main') {
+    async onBarcodeScanned(barcode) {
+        if (this.lockScanner || this.state.active_display !== "main") {
             return;
         }
         this.lockScanner = true;
@@ -222,17 +224,16 @@ export async function createPublicKioskAttendance(document, kiosk_backend_info) 
     const app = new App(kioskAttendanceApp, {
         getTemplate,
         env: env,
-        props:
-            {
-                token : kiosk_backend_info.token,
-                companyId: kiosk_backend_info.company_id,
-                companyName: kiosk_backend_info.company_name,
-                departments: kiosk_backend_info.departments,
-                kioskMode: kiosk_backend_info.kiosk_mode,
-                barcodeSource: kiosk_backend_info.barcode_source,
-                fromTrialMode: kiosk_backend_info.from_trial_mode,
-                deviceTrackingEnabled: kiosk_backend_info.device_tracking_enabled,
-            },
+        props: {
+            token: kiosk_backend_info.token,
+            companyId: kiosk_backend_info.company_id,
+            companyName: kiosk_backend_info.company_name,
+            departments: kiosk_backend_info.departments,
+            kioskMode: kiosk_backend_info.kiosk_mode,
+            barcodeSource: kiosk_backend_info.barcode_source,
+            fromTrialMode: kiosk_backend_info.from_trial_mode,
+            deviceTrackingEnabled: kiosk_backend_info.device_tracking_enabled,
+        },
         dev: env.debug,
         translateFn: appTranslateFn,
         translatableAttributes: ["data-tooltip"],

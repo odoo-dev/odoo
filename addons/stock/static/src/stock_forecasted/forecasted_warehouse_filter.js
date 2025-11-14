@@ -12,23 +12,25 @@ export class ForecastedWarehouseFilter extends Component {
         this.orm = useService("orm");
         this.context = this.props.action.context;
         this.warehouses = this.props.warehouses;
-        onWillStart(this.onWillStart)
+        onWillStart(this.onWillStart);
     }
 
     async onWillStart() {
-        this.displayWarehouseFilter = (this.warehouses.length > 1);
+        this.displayWarehouseFilter = this.warehouses.length > 1;
     }
 
-    _onSelected(id){
+    _onSelected(id) {
         this.props.setWarehouseInContext(Number(id));
     }
 
-    get activeWarehouse(){
-        return this.context.warehouse_id ? this.warehouses.find((w) => w.id == this.context.warehouse_id) : this.warehouses[0];
+    get activeWarehouse() {
+        return this.context.warehouse_id
+            ? this.warehouses.find((w) => w.id == this.context.warehouse_id)
+            : this.warehouses[0];
     }
 
     get warehousesItems() {
-        return this.warehouses.map(warehouse => ({
+        return this.warehouses.map((warehouse) => ({
             id: warehouse.id,
             label: warehouse.name,
             onSelected: () => this._onSelected(warehouse.id),

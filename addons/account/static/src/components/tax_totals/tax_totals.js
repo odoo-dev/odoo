@@ -34,7 +34,9 @@ class TaxGroupComponent extends Component {
         onPatched(() => {
             if (this.state.value === "edit") {
                 const { taxGroup } = this.props;
-                const newVal = formatFloat(taxGroup.tax_amount_currency, { digits: this.props.totals.currency_pd });
+                const newVal = formatFloat(taxGroup.tax_amount_currency, {
+                    digits: this.props.totals.currency_pd,
+                });
                 this.inputTax.el.value = newVal;
                 this.inputTax.el.focus(); // Focus the input
             }
@@ -46,7 +48,7 @@ class TaxGroupComponent extends Component {
     }
 
     formatMonetary(value) {
-        return formatMonetary(value, {currencyId: this.props.totals.currency_id});
+        return formatMonetary(value, { currencyId: this.props.totals.currency_id });
     }
 
     //--------------------------------------------------------------------------
@@ -68,8 +70,7 @@ class TaxGroupComponent extends Component {
     setState(value) {
         if (["readonly", "edit", "disable"].includes(value)) {
             this.state.value = value;
-        }
-        else {
+        } else {
             this.state.value = "readonly";
         }
     }
@@ -142,7 +143,7 @@ export class TaxTotalsComponent extends Component {
     }
 
     formatMonetary(value) {
-        return formatMonetary(value, {currencyId: this.totals.currency_id});
+        return formatMonetary(value, { currencyId: this.totals.currency_id });
     }
 
     /**
@@ -152,13 +153,15 @@ export class TaxTotalsComponent extends Component {
      * It is responsible for triggering an event to notify the ORM of a change.
      */
     _onChangeTaxValueByTaxGroup({ oldValue, newValue }) {
-        if (oldValue === newValue) return;
+        if (oldValue === newValue) {
+            return;
+        }
         this.props.record.update({ [this.props.name]: this.totals });
         delete this.totals.cash_rounding_base_amount_currency;
     }
 
     formatData(props) {
-        let totals = JSON.parse(JSON.stringify(toRaw(props.record.data[this.props.name])));
+        const totals = JSON.parse(JSON.stringify(toRaw(props.record.data[this.props.name])));
         if (!totals) {
             return;
         }

@@ -8,7 +8,10 @@ import {
     m2oSupportedOptions,
     Many2OneField,
 } from "@web/views/fields/many2one/many2one_field";
-import { getProductRelatedModel, Many2XUomTagsAutocomplete } from "../many2x_uom_tags/many2x_uom_tags";
+import {
+    getProductRelatedModel,
+    Many2XUomTagsAutocomplete,
+} from "../many2x_uom_tags/many2x_uom_tags";
 
 // @todo: this extension will be removed in the future
 // when the autocomplete source generation come from a hook.

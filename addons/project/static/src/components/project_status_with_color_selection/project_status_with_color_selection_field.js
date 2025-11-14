@@ -1,7 +1,7 @@
-import { SelectionField, selectionField } from '@web/views/fields/selection/selection_field';
-import { registry } from '@web/core/registry';
+import { SelectionField, selectionField } from "@web/views/fields/selection/selection_field";
+import { registry } from "@web/core/registry";
 
-import { STATUS_COLORS, STATUS_COLOR_PREFIX } from '../../utils/project_utils';
+import { STATUS_COLORS, STATUS_COLOR_PREFIX } from "../../utils/project_utils";
 
 export class ProjectStatusWithColorSelectionField extends SelectionField {
     static props = {

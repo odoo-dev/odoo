@@ -41,13 +41,10 @@ export class SearchJobApplicant extends Component {
 export const searchJobApplicant = {
     Component: SearchJobApplicant,
     groupNumber: STATIC_ACTIONS_GROUP_NUMBER,
-    isDisplayed: ({ config, searchModel }) => {
-        return (
-            searchModel.resModel === "hr.applicant" &&
-            searchModel.globalContext.allow_search_matching_applicants &&
-            config.viewArch.classList.contains('o_search_matching_applicant')
-        );
-    },
+    isDisplayed: ({ config, searchModel }) =>
+        searchModel.resModel === "hr.applicant" &&
+        searchModel.globalContext.allow_search_matching_applicants &&
+        config.viewArch.classList.contains("o_search_matching_applicant"),
 };
 
 cogMenuRegistry.add("search-job-applicants-menu", searchJobApplicant, { sequence: 11 });

@@ -7,9 +7,9 @@ export class WebsiteSaleStickyObject extends Interaction {
     dynamicContent = {
         _root: {
             "t-att-style": () => ({
-                "top": `${this.position || 16}px`,
+                top: `${this.position || 16}px`,
             }),
-        }
+        },
     };
 
     setup() {
@@ -18,7 +18,9 @@ export class WebsiteSaleStickyObject extends Interaction {
 
     start() {
         this._adaptToHeaderChange();
-        this.registerCleanup(this.services.website_menus.registerCallback(this._adaptToHeaderChange.bind(this)));
+        this.registerCleanup(
+            this.services.website_menus.registerCallback(this._adaptToHeaderChange.bind(this))
+        );
     }
 
     //--------------------------------------------------------------------------
@@ -48,4 +50,4 @@ registry
 
 registry
     .category("public.interactions.edit")
-    .add("website.website_sale_product_sticky_col", { Interaction: WebsiteSaleStickyObject});
+    .add("website.website_sale_product_sticky_col", { Interaction: WebsiteSaleStickyObject });

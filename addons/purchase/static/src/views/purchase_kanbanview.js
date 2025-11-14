@@ -5,7 +5,9 @@ import { PurchaseDashBoard } from "@purchase/views/purchase_dashboard";
 
 export class PurchaseDashBoardKanbanRenderer extends FileUploadKanbanRenderer {
     static template = "purchase.PurchaseKanbanView";
-    static components = Object.assign({}, FileUploadKanbanRenderer.components, { PurchaseDashBoard });
+    static components = Object.assign({}, FileUploadKanbanRenderer.components, {
+        PurchaseDashBoard,
+    });
 }
 
 export const PurchaseDashBoardKanbanView = {

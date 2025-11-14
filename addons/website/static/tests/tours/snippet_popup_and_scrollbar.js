@@ -93,7 +93,8 @@ registerWebsitePreviewTour(
         },
         {
             content: "Remove the s_media_list snippet",
-            trigger: ".o_customize_tab [data-container-title='Media List'] button.oe_snippet_remove",
+            trigger:
+                ".o_customize_tab [data-container-title='Media List'] button.oe_snippet_remove",
             run: "click",
         },
         checkScrollbar(true),
@@ -184,13 +185,15 @@ registerWebsitePreviewTour(
         scrollIntoView("#website_cookies_bar .s_media_list_item:last-child"),
         {
             content: "Remove the first Media List snippet in the Cookies Bar.",
-            trigger: ".o_customize_tab [data-container-title='Media List'] button.oe_snippet_remove",
+            trigger:
+                ".o_customize_tab [data-container-title='Media List'] button.oe_snippet_remove",
             run: "click",
         },
         scrollIntoView("#website_cookies_bar .s_media_list_item:last-child"),
         {
             content: "Remove the second Media List snippet in the Cookies Bar.",
-            trigger: ".o_customize_tab [data-container-title='Media List'] button.oe_snippet_remove",
+            trigger:
+                ".o_customize_tab [data-container-title='Media List'] button.oe_snippet_remove",
             run: "click",
         },
         checkScrollbar(true),

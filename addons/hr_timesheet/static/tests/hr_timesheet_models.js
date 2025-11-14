@@ -1,6 +1,12 @@
 import { mockDate } from "@odoo/hoot-mock";
 import { session } from "@web/session";
-import { defineModels, fields, models, patchWithCleanup, serverState } from "@web/../tests/web_test_helpers";
+import {
+    defineModels,
+    fields,
+    models,
+    patchWithCleanup,
+    serverState,
+} from "@web/../tests/web_test_helpers";
 
 import { defineProjectModels, projectModels } from "@project/../tests/project_models";
 

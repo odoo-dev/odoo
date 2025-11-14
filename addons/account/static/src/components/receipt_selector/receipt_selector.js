@@ -5,17 +5,15 @@ import { onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { deepCopy } from "@web/core/utils/objects";
 
-
 const labels = {
-    'in_invoice': _t("Bill"),
-    'out_invoice': _t("Invoice"),
-    'in_receipt': _t("Receipt"),
-    'out_receipt': _t("Receipt"),
+    in_invoice: _t("Bill"),
+    out_invoice: _t("Invoice"),
+    in_receipt: _t("Receipt"),
+    out_receipt: _t("Receipt"),
 };
 
-const in_move_types = ['in_invoice', 'in_receipt']
-const out_move_types = ['out_invoice', 'out_receipt']
-
+const in_move_types = ["in_invoice", "in_receipt"];
+const out_move_types = ["out_invoice", "out_receipt"];
 
 export class ReceiptSelector extends RadioField {
     static template = "account.ReceiptSelector";
@@ -27,10 +25,10 @@ export class ReceiptSelector extends RadioField {
         super.setup();
         this.lazySession = useService("lazy_session");
         this.show_sale_receipts = useState({ value: false });
-        onWillStart(()=> {
+        onWillStart(() => {
             this.lazySession.getValue("show_sale_receipts", (show_sale_receipts) => {
                 this.show_sale_receipts.value = show_sale_receipts;
-            })
+            });
         });
     }
 
@@ -40,25 +38,23 @@ export class ReceiptSelector extends RadioField {
      */
     get items() {
         const original_items = super.items;
-        if ( this.type !== 'selection' ) {
+        if (this.type !== "selection") {
             return original_items;
         }
 
         // Use a copy to avoid updating the original selection labels
-        let items = deepCopy(original_items)
+        let items = deepCopy(original_items);
 
         let allowedValues = [];
-        if ( in_move_types.includes(this.value) ) {
-            allowedValues = in_move_types
-        } else if (out_move_types.includes(this.value) && this.show_sale_receipts.value ) {
-            allowedValues = out_move_types
+        if (in_move_types.includes(this.value)) {
+            allowedValues = in_move_types;
+        } else if (out_move_types.includes(this.value) && this.show_sale_receipts.value) {
+            allowedValues = out_move_types;
         }
 
-        if ( allowedValues.length > 1 ) {
+        if (allowedValues.length > 1) {
             // Filter only the wanted items
-            items = items.filter((item) => {
-                return (allowedValues.includes(item[0]));
-            });
+            items = items.filter((item) => allowedValues.includes(item[0]));
 
             // Update the label of the wanted items
             items.forEach((item) => {
@@ -71,10 +67,12 @@ export class ReceiptSelector extends RadioField {
     }
 
     get string() {
-        if ( this.type === 'selection' ) {
+        if (this.type === "selection") {
             // Use the original labels and not the modified ones
             return this.value !== false
-                ? this.props.record.fields[this.props.name].selection.find((i) => i[0] === this.value)[1]
+                ? this.props.record.fields[this.props.name].selection.find(
+                      (i) => i[0] === this.value
+                  )[1]
                 : "";
         }
         return "";
@@ -83,7 +81,7 @@ export class ReceiptSelector extends RadioField {
 
 export const receiptSelector = {
     ...radioField,
-    additionalClasses: ['o_field_radio'],
+    additionalClasses: ["o_field_radio"],
     component: ReceiptSelector,
     extractProps() {
         return radioField.extractProps(...arguments);

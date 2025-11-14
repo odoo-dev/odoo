@@ -1,5 +1,5 @@
-import { _t } from '@web/core/l10n/translation';
-import { FileUploadListRenderer } from '@account/views/file_upload_list/file_upload_list_renderer';
+import { _t } from "@web/core/l10n/translation";
+import { FileUploadListRenderer } from "@account/views/file_upload_list/file_upload_list_renderer";
 
 export class SaleFileUploadListRenderer extends FileUploadListRenderer {
     setup() {

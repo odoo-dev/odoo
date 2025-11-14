@@ -6,7 +6,7 @@ import { useService } from "@web/core/utils/hooks";
 const WARNING_TYPE_ORDER = ["danger", "warning", "info"];
 
 export class ActionableErrors extends Component {
-    static props = { errorData: {type: Object} };
+    static props = { errorData: { type: Object } };
     static template = "account.ActionableErrors";
 
     setup() {
@@ -19,11 +19,13 @@ export class ActionableErrors extends Component {
         return this.props.errorData;
     }
 
-    async handleOnClick(errorData){
+    async handleOnClick(errorData) {
         if (errorData.action?.view_mode) {
             // view_mode is not handled JS side
-            errorData.action['views'] = errorData.action.view_mode.split(',').map(mode => [false, mode]);
-            delete errorData.action['view_mode'];
+            errorData.action["views"] = errorData.action.view_mode
+                .split(",")
+                .map((mode) => [false, mode]);
+            delete errorData.action["view_mode"];
         }
         if (errorData.action_call) {
             const [model, method, args] = errorData.action_call;
@@ -35,12 +37,15 @@ export class ActionableErrors extends Component {
     }
 
     get sortedActionableErrors() {
-        return this.errorData && Object.fromEntries(
-            Object.entries(this.errorData).sort(
-                (a, b) =>
-                    WARNING_TYPE_ORDER.indexOf(a[1]["level"] || "warning") -
-                    WARNING_TYPE_ORDER.indexOf(b[1]["level"] || "warning"),
-            ),
+        return (
+            this.errorData &&
+            Object.fromEntries(
+                Object.entries(this.errorData).sort(
+                    (a, b) =>
+                        WARNING_TYPE_ORDER.indexOf(a[1]["level"] || "warning") -
+                        WARNING_TYPE_ORDER.indexOf(b[1]["level"] || "warning")
+                )
+            )
         );
     }
 }
@@ -53,5 +58,5 @@ export class ActionableErrorsField extends ActionableErrors {
     }
 }
 
-export const actionableErrorsField = {component: ActionableErrorsField};
+export const actionableErrorsField = { component: ActionableErrorsField };
 registry.category("fields").add("actionable_errors", actionableErrorsField);

@@ -47,14 +47,13 @@ export class ForecastWidgetField extends FloatField {
     }
 
     get decoration() {
-        if (!this.forecastExpectedDate && this.willBeFulfilled){
-            return "text-bg-success"
-        } else if (this.forecastExpectedDate && this.willBeFulfilled){
-            return this.forecastIsLate ? 'text-bg-danger' : 'text-bg-warning'
+        if (!this.forecastExpectedDate && this.willBeFulfilled) {
+            return "text-bg-success";
+        } else if (this.forecastExpectedDate && this.willBeFulfilled) {
+            return this.forecastIsLate ? "text-bg-danger" : "text-bg-warning";
         } else {
-            return 'text-bg-danger'
+            return "text-bg-danger";
         }
-
     }
 }
 

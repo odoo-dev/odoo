@@ -1,16 +1,16 @@
-import { Interaction } from '@web/public/interaction';
-import { registry } from '@web/core/registry';
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 export class ProductVariantPreview extends Interaction {
-    static selector = '.o_wsale_attribute_previewer';
+    static selector = ".o_wsale_attribute_previewer";
     dynamicContent = {
         _window: {
-            't-on-resize': this.debounced(this._updateVariantPreview, 250),
+            "t-on-resize": this.debounced(this._updateVariantPreview, 250),
         },
     };
 
     setup() {
-        this.ptavs = this.el.querySelectorAll('.o_product_variant_preview');
+        this.ptavs = this.el.querySelectorAll(".o_product_variant_preview");
         this.hiddenCountSpan = this.el.querySelector('span[name="hidden_ptavs_count"]');
         this.ptavCount = this.ptavs.length + Number(this.el.dataset.hiddenPtavCount ?? 0);
         this.displayedPTAVCount = 0;
@@ -29,7 +29,7 @@ export class ProductVariantPreview extends Interaction {
      */
     _resetDisplay() {
         for (const child of this.el.children) {
-            child.classList.add('d-none');
+            child.classList.add("d-none");
         }
     }
 
@@ -42,7 +42,7 @@ export class ProductVariantPreview extends Interaction {
     _updateAndGetHiddenPTAVsWidth() {
         const hiddenPTAVCount = this.ptavCount - this.displayedPTAVCount;
         this.hiddenCountSpan.firstElementChild.textContent = `+${hiddenPTAVCount}`;
-        this.hiddenCountSpan.classList.remove('d-none');
+        this.hiddenCountSpan.classList.remove("d-none");
         return this.hiddenCountSpan.offsetWidth + this.margin * 2;
     }
 
@@ -82,7 +82,7 @@ export class ProductVariantPreview extends Interaction {
         this.displayedPTAVCount = 0;
         for (const ptav of this.ptavs) {
             // Remove d-none to be able to get width.
-            ptav.classList.remove('d-none');
+            ptav.classList.remove("d-none");
             usedWidth += ptav.offsetWidth + this.margin;
             this.displayedPTAVCount++;
             const remainingSpace = containerWidth - usedWidth;
@@ -97,8 +97,8 @@ export class ProductVariantPreview extends Interaction {
 }
 
 registry
-    .category('public.interactions')
-    .add('website_sale.product_variant_preview', ProductVariantPreview);
+    .category("public.interactions")
+    .add("website_sale.product_variant_preview", ProductVariantPreview);
 
 registry
     .category("public.interactions.edit")

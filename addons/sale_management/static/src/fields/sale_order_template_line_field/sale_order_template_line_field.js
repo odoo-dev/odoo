@@ -4,16 +4,16 @@ import {
     SectionAndNoteListRenderer,
     getSectionRecords,
     getParentSectionRecord,
-} from '@account/components/section_and_note_fields_backend/section_and_note_fields_backend';
-import { x2ManyCommands } from '@web/core/orm_service';
-import { registry } from '@web/core/registry';
+} from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
+import { x2ManyCommands } from "@web/core/orm_service";
+import { registry } from "@web/core/registry";
 
 export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRenderer {
-    static recordRowTemplate = 'sale_management.ListRenderer.RecordRow';
+    static recordRowTemplate = "sale_management.ListRenderer.RecordRow";
 
     setup() {
         super.setup();
-        this.copyFields.push('is_optional');
+        this.copyFields.push("is_optional");
     }
 
     get showOptionalButton() {
@@ -26,16 +26,18 @@ export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRendere
 
     getRowClass(record) {
         let rowClasses = super.getRowClass(record);
-        if (record.data.is_optional || this.shouldCollapse(record, 'is_optional')) {
-            rowClasses += ' text-primary';
+        if (record.data.is_optional || this.shouldCollapse(record, "is_optional")) {
+            rowClasses += " text-primary";
         }
         return rowClasses;
     }
 
     async toggleIsOptional(record) {
-        const commands = [(x2ManyCommands.update(record.resId || record._virtualId, {
-            is_optional: !record.data.is_optional,
-        }))];
+        const commands = [
+            x2ManyCommands.update(record.resId || record._virtualId, {
+                is_optional: !record.data.is_optional,
+            }),
+        ];
 
         for (const sectionRecord of getSectionRecords(this.props.list, record)) {
             commands.push(
@@ -47,7 +49,6 @@ export class SaleOrderTemplateLineListRenderer extends SectionAndNoteListRendere
 
         await this.props.list.applyCommands(commands, { sort: true });
     }
-
 }
 export class SaleOrderTemplateLineOne2Many extends SectionAndNoteFieldOne2Many {
     static components = {
@@ -61,4 +62,4 @@ export const saleOrderTemplateLineOne2Many = {
     component: SaleOrderTemplateLineOne2Many,
 };
 
-registry.category('fields').add('so_template_line_o2m', saleOrderTemplateLineOne2Many);
+registry.category("fields").add("so_template_line_o2m", saleOrderTemplateLineOne2Many);

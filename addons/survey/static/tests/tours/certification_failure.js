@@ -182,11 +182,14 @@ const retrySteps = [
     },
 ];
 
-var lastSteps = [{
-    trigger: 'h1:contains("You scored")',
-}, {
-    trigger: 'body:not(:has(a:contains("Retry")))',
-}];
+var lastSteps = [
+    {
+        trigger: 'h1:contains("You scored")',
+    },
+    {
+        trigger: 'body:not(:has(a:contains("Retry")))',
+    },
+];
 
 registry.category("web_tour.tours").add("test_certification_failure", {
     url: "/survey/start/4ead4bc8-b8f2-4760-a682-1fde8daaaaac",

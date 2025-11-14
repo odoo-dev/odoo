@@ -7,12 +7,11 @@ import { standardActionServiceProps } from "@web/webclient/actions/action_servic
 
 import { Component, onWillStart, useChildSubEnv, useState } from "@odoo/owl";
 
-import { StockValuationReportButtonsBar } from "../stock_valuation/buttons_bar/buttons_bar"
-import { StockValuationReportController } from "../stock_valuation/controller"
-import { StockValuationReportFilters } from "../stock_valuation/filters/filters"
-import { StockValuationReportLine } from "../stock_valuation/line/line"
-import { StockValuationReportToggleLine } from "../stock_valuation/line/toggle_line"
-
+import { StockValuationReportButtonsBar } from "../stock_valuation/buttons_bar/buttons_bar";
+import { StockValuationReportController } from "../stock_valuation/controller";
+import { StockValuationReportFilters } from "../stock_valuation/filters/filters";
+import { StockValuationReportLine } from "../stock_valuation/line/line";
+import { StockValuationReportToggleLine } from "../stock_valuation/line/toggle_line";
 
 export class StockValuationReport extends Component {
     static template = "stock_account.StockValuationReport";
@@ -29,14 +28,14 @@ export class StockValuationReport extends Component {
         this.controller = useState(new StockValuationReportController(this.props.action));
         this.state = useState({
             displayInventoryValuationLine: false,
-        })
+        });
         this.orm = useService("orm");
         this.actionService = useService("action");
         this._t = _t;
 
         onWillStart(async () => {
             await this.controller.load(this.data);
-        })
+        });
 
         useChildSubEnv({
             _t,
@@ -79,7 +78,7 @@ export class StockValuationReport extends Component {
     }
 
     // On Click Methods --------------------------------------------------------
-    openAccountMoves(accountMoves=false) {
+    openAccountMoves(accountMoves = false) {
         const additionalContext = {};
         const domain = [];
         if (accountMoves) {
@@ -87,12 +86,12 @@ export class StockValuationReport extends Component {
             const names = accountMoves.map((am) => am.name);
             additionalContext.search_default_name = names;
             additionalContext.search_default_ids = ids;
-            domain.push(["id", "in", ids])
+            domain.push(["id", "in", ids]);
         }
-        return this.actionService.doAction(
-            "account.action_move_journal_line",
-            { additionalContext, domain }
-        );
+        return this.actionService.doAction("account.action_move_journal_line", {
+            additionalContext,
+            domain,
+        });
     }
 
     openStockMoveView(title, usage) {
@@ -110,8 +109,11 @@ export class StockValuationReport extends Component {
             type: "ir.actions.act_window",
             res_model: "stock.move",
             domain,
-            views: [[false, 'list'], [false, 'form']],
-            target: 'current',
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
+            target: "current",
         });
     }
 
@@ -124,10 +126,9 @@ export class StockValuationReport extends Component {
         if (this.controller.dateAsString) {
             additionalContext.to_date = this.controller.dateAsString;
         }
-        return this.actionService.doAction(
-            "stock.action_product_stock_view",
-            { additionalContext }
-        );
+        return this.actionService.doAction("stock.action_product_stock_view", {
+            additionalContext,
+        });
     }
 
     toggleInventoryValuationFold() {

@@ -9,14 +9,12 @@ import { dataUrlToBlob } from "@mail/core/common/attachment_uploader_hook";
 export class MailAttachments extends Component {
     static template = "mail.MailComposerAttachmentSelector";
     static components = { FileUploader };
-    static props = {...standardFieldProps};
+    static props = { ...standardFieldProps };
 
     setup() {
         this.mailStore = useService("mail.store");
         this.attachmentUploadService = useService("mail.attachment_upload");
-        this.operations = useX2ManyCrud(() => {
-            return this.props.record.data["attachment_ids"];
-        }, true);
+        this.operations = useX2ManyCrud(() => this.props.record.data["attachment_ids"], true);
     }
 
     get attachments() {
@@ -33,7 +31,7 @@ export class MailAttachments extends Component {
         const file = new File([dataUrlToBlob(data, type)], name, { type });
         const attachment = await this.attachmentUploadService.upload(thread, thread.composer, file);
 
-        let fileDict = {
+        const fileDict = {
             id: attachment.id,
             name: attachment.name,
             mimetype: attachment.mimetype,

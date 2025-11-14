@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { RemainingDaysField } from "@web/views/fields/remaining_days/remaining_days_field";
 
 export class MrpRemainingDaysUnformattedField extends RemainingDaysField {
-    static template = "mrp.MrpRemainingDaysUnformattedField"
+    static template = "mrp.MrpRemainingDaysUnformattedField";
 }
 
 export const mrpRemainingDaysUnformattedField = {

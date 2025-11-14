@@ -10,7 +10,7 @@ export class ProductCatalogKanbanController extends KanbanController {
         this.orm = useService("orm");
         this.orderId = this.props.context.order_id;
         this.orderResModel = this.props.context.product_catalog_order_model;
-        this.backToQuotationDebounced = useDebounced(this.backToQuotation, 500)
+        this.backToQuotationDebounced = useDebounced(this.backToQuotation, 500);
 
         onWillStart(() => this.onWillStart());
     }
@@ -31,7 +31,9 @@ export class ProductCatalogKanbanController extends KanbanController {
 
     async setOrderStateInfo() {
         const orderData = await this.orm.searchRead(
-            this.orderResModel, [["id", "=", this.orderId]], this.stateFiels
+            this.orderResModel,
+            [["id", "=", this.orderId]],
+            this.stateFiels
         );
         this.orderStateInfo = orderData[0] || {};
     }

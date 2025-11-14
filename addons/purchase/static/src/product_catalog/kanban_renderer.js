@@ -11,7 +11,7 @@ export class PurchaseProductCatalogKanbanRenderer extends ProductCatalogKanbanRe
     }
 
     get createProductContext() {
-        return {default_seller_ids: [{partner_id:this.props.list._config.context.partner_id}],};
+        return { default_seller_ids: [{ partner_id: this.props.list._config.context.partner_id }] };
     }
 
     async createProduct() {
@@ -33,7 +33,7 @@ export class PurchaseProductCatalogKanbanRenderer extends ProductCatalogKanbanRe
                             type: "ir.actions.act_window_close",
                         });
                     },
-                }
+                },
             }
         );
     }

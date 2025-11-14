@@ -15,9 +15,7 @@ export class ShowEmptyOption extends BaseOptionComponent {
 class WebsiteSaleShowEmptyOptionPlugin extends Plugin {
     static id = "showEmptyOption";
     resources = {
-        builder_options: [
-            withSequence(after(HEADER_ELEMENTS), ShowEmptyOption),
-        ],
+        builder_options: [withSequence(after(HEADER_ELEMENTS), ShowEmptyOption)],
     };
 }
 

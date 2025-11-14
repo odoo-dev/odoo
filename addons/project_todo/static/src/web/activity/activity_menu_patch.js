@@ -25,9 +25,11 @@ patch(ActivityMenu.prototype, {
     },
 
     async createActivityTodo() {
-        const wizard = await this.orm.call("mail.activity.todo.create", "create", [{
-            "user_id": this.userId,
-        }]);
+        const wizard = await this.orm.call("mail.activity.todo.create", "create", [
+            {
+                user_id: this.userId,
+            },
+        ]);
         this.dialogService.add(FormViewDialog, {
             title: _t("Add a To-Do"),
             resModel: "mail.activity.todo.create",
@@ -45,11 +47,7 @@ patch(ActivityMenu.prototype, {
     },
 
     async loadTodoViews() {
-        this.todoViews = await this.orm.call(
-            "project.task",
-            "get_todo_views_id",
-            [],
-        );
+        this.todoViews = await this.orm.call("project.task", "get_todo_views_id", []);
     },
 
     async onClickAction(action, group) {

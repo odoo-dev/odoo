@@ -1,6 +1,5 @@
 import { Component, useState } from "@odoo/owl";
 
-
 export class StockValuationReportLine extends Component {
     static template = "stock_account.StockValuationReport.InventoryValuationLine";
     static props = {

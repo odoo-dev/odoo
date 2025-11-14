@@ -9,7 +9,7 @@ export class CarouselProduct extends Interaction {
         _root: {
             "t-on-slide.bs.carousel.noUpdate": this.onSlideCarouselProduct,
             "t-att-style": () => ({
-                "top": this.top,
+                top: this.top,
             }),
         },
         _window: {
@@ -32,7 +32,9 @@ export class CarouselProduct extends Interaction {
 
     start() {
         this.updateCarouselPosition();
-        this.registerCleanup(this.services.website_menus.registerCallback(this.updateCarouselPosition.bind(this)));
+        this.registerCleanup(
+            this.services.website_menus.registerCallback(this.updateCarouselPosition.bind(this))
+        );
         if (this.el.querySelector(".carousel-indicators")) {
             this.updateJustifyContent();
         }
@@ -42,7 +44,10 @@ export class CarouselProduct extends Interaction {
         let size = 5;
         for (const el of document.querySelectorAll(".o_top_fixed_element")) {
             const style = window.getComputedStyle(el);
-            size += el.getBoundingClientRect().height + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+            size +=
+                el.getBoundingClientRect().height +
+                parseFloat(style.marginTop) +
+                parseFloat(style.marginBottom);
         }
         this.top = size;
     }
@@ -56,28 +61,45 @@ export class CarouselProduct extends Interaction {
     onSlideCarouselProduct(ev) {
         const isReversed = this.el.style["flex-direction"] === "column-reverse";
         const isLeftIndicators = this.el.classList.contains("o_carousel_product_left_indicators");
-        const indicatorsDivEl = this.el.querySelector(isLeftIndicators ? ".o_carousel_product_indicators" : ".carousel-indicators");
+        const indicatorsDivEl = this.el.querySelector(
+            isLeftIndicators ? ".o_carousel_product_indicators" : ".carousel-indicators"
+        );
         if (!indicatorsDivEl) {
             return;
         }
         const isVertical = isLeftIndicators && !isReversed;
         const currentIndicatorEl = ev?.relatedTarget || this.el.querySelector("li.active");
-        let indicatorIndex = currentIndicatorEl ? [...currentIndicatorEl.parentElement.children].findIndex(el => el === currentIndicatorEl) : -1;
+        const indicatorIndex = currentIndicatorEl
+            ? [...currentIndicatorEl.parentElement.children].findIndex(
+                  (el) => el === currentIndicatorEl
+              )
+            : -1;
         const indicatorEl = indicatorsDivEl.querySelector(`[data-bs-slide-to="${indicatorIndex}"]`);
         const indicatorsDivRect = indicatorsDivEl.getBoundingClientRect();
         const indicatorsDivStyle = window.getComputedStyle(indicatorsDivEl);
-        const indicatorsDivSize = isVertical ? indicatorsDivRect.height + parseFloat(indicatorsDivStyle.marginTop) + parseFloat(indicatorsDivStyle.marginBottom) : indicatorsDivRect.width + parseFloat(indicatorsDivStyle.marginLeft) + parseFloat(indicatorsDivStyle.marginRight);
+        const indicatorsDivSize = isVertical
+            ? indicatorsDivRect.height +
+              parseFloat(indicatorsDivStyle.marginTop) +
+              parseFloat(indicatorsDivStyle.marginBottom)
+            : indicatorsDivRect.width +
+              parseFloat(indicatorsDivStyle.marginLeft) +
+              parseFloat(indicatorsDivStyle.marginRight);
         const indicatorRect = indicatorEl.getBoundingClientRect();
         const indicatorStyle = window.getComputedStyle(indicatorEl);
         const indicatorSize = isVertical ? indicatorRect.height : indicatorRect.width;
-        const indicatorPosition = isVertical ? indicatorRect.top - indicatorsDivRect.top - parseFloat(indicatorStyle.marginTop) : indicatorRect.left - indicatorsDivRect.left - parseFloat(indicatorStyle.marginLeft);
+        const indicatorPosition = isVertical
+            ? indicatorRect.top - indicatorsDivRect.top - parseFloat(indicatorStyle.marginTop)
+            : indicatorRect.left - indicatorsDivRect.left - parseFloat(indicatorStyle.marginLeft);
         const scrollSize = isVertical ? indicatorsDivEl.scrollHeight : indicatorsDivEl.scrollWidth;
-        let indicatorsPositionDiff = (indicatorPosition + (indicatorSize / 2)) - (indicatorsDivSize / 2);
+        let indicatorsPositionDiff = indicatorPosition + indicatorSize / 2 - indicatorsDivSize / 2;
         indicatorsPositionDiff = Math.min(indicatorsPositionDiff, scrollSize - indicatorsDivSize);
         this.updateJustifyContent();
         const indicatorsPositionX = isVertical ? "0" : "-" + indicatorsPositionDiff;
         const indicatorsPositionY = isVertical ? "-" + indicatorsPositionDiff : "0";
-        const translate3D = indicatorsPositionDiff > 0 ? "translate3d(" + indicatorsPositionX + "px," + indicatorsPositionY + "px,0)" : "";
+        const translate3D =
+            indicatorsPositionDiff > 0
+                ? "translate3d(" + indicatorsPositionX + "px," + indicatorsPositionY + "px,0)"
+                : "";
         indicatorsDivEl.style.setProperty("transform", translate3D);
     }
 
@@ -108,12 +130,8 @@ export class CarouselProduct extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_sale.carousel_product", CarouselProduct);
+registry.category("public.interactions").add("website_sale.carousel_product", CarouselProduct);
 
-registry
-    .category("public.interactions.edit")
-    .add("website_sale.carousel_product", {
-        Interaction: CarouselProduct,
-    });
+registry.category("public.interactions.edit").add("website_sale.carousel_product", {
+    Interaction: CarouselProduct,
+});

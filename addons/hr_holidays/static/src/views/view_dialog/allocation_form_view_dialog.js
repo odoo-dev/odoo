@@ -7,4 +7,4 @@ export class AllocationFormViewDialog extends FormViewDialog {
             buttonDialogTemplate: "hr_holidays.AllocationFormViewDialog.buttons",
         });
     }
-};
+}

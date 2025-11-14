@@ -12,9 +12,7 @@ export class BarcodeParser {
             [["barcode_nomenclature_id", "=", id]],
             this.barcodeRuleFields
         );
-        rules = rules.sort((a, b) => {
-            return a.sequence - b.sequence;
-        });
+        rules = rules.sort((a, b) => a.sequence - b.sequence);
         nomenclature.rules = rules;
         return nomenclature;
     }
@@ -37,10 +35,12 @@ export class BarcodeParser {
      * @returns {number} Check Digit
      */
     get_barcode_check_digit(numericBarcode) {
-        let oddsum = 0, evensum = 0, total = 0;
+        let oddsum = 0,
+            evensum = 0,
+            total = 0;
         // Reverses the barcode to be sure each digit will be in the right place
         // regardless the barcode length.
-        const code = numericBarcode.split('').reverse();
+        const code = numericBarcode.split("").reverse();
         // Removes the last barcode digit (should not be took in account for its own computing).
         code.shift();
 
@@ -55,7 +55,7 @@ export class BarcodeParser {
             }
         }
         total = evensum * 3 + oddsum;
-        return (10 - total % 10) % 10;
+        return (10 - (total % 10)) % 10;
     }
 
     /**
@@ -66,7 +66,7 @@ export class BarcodeParser {
      * @returns {boolean}
      */
     check_encoding(barcode, encoding) {
-        if (encoding === 'any') {
+        if (encoding === "any") {
             return true;
         }
         const barcodeSizes = {
@@ -74,8 +74,11 @@ export class BarcodeParser {
             ean13: 13,
             upca: 12,
         };
-        return barcode.length === barcodeSizes[encoding] && /^\d+$/.test(barcode) &&
-            this.get_barcode_check_digit(barcode) === parseInt(barcode[barcode.length - 1]);
+        return (
+            barcode.length === barcodeSizes[encoding] &&
+            /^\d+$/.test(barcode) &&
+            this.get_barcode_check_digit(barcode) === parseInt(barcode[barcode.length - 1])
+        );
     }
 
     /**
@@ -112,27 +115,37 @@ export class BarcodeParser {
             base_code: barcode,
             match: false,
         };
-        barcode = barcode.replace("\\", "\\\\").replace("{", '\{').replace("}", "\}").replace(".", "\.");
+        barcode = barcode
+            .replace("\\", "\\\\")
+            .replace("{", "{")
+            .replace("}", "}")
+            .replace(".", ".");
 
         var numerical_content = pattern.match(/[{][N]*[D]*[}]/); // look for numerical content in pattern
         var base_pattern = pattern;
-        if(numerical_content){ // the pattern encodes a numerical content
+        if (numerical_content) {
+            // the pattern encodes a numerical content
             var num_start = numerical_content.index; // start index of numerical content
             var num_length = numerical_content[0].length; // length of numerical content
-            var value_string = barcode.substr(num_start, num_length-2); // numerical content in barcode
+            var value_string = barcode.substr(num_start, num_length - 2); // numerical content in barcode
             var whole_part_match = numerical_content[0].match("[{][N]*[D}]"); // looks for whole part of numerical content
             var decimal_part_match = numerical_content[0].match("[{N][D]*[}]"); // looks for decimal part
-            var whole_part = value_string.substr(0, whole_part_match.index+whole_part_match[0].length-2); // retrieve whole part of numerical content in barcode
-            var decimal_part = "0." + value_string.substr(decimal_part_match.index, decimal_part_match[0].length-1); // retrieve decimal part
-            if (whole_part === ''){
-                whole_part = '0';
+            var whole_part = value_string.substr(
+                0,
+                whole_part_match.index + whole_part_match[0].length - 2
+            ); // retrieve whole part of numerical content in barcode
+            var decimal_part =
+                "0." +
+                value_string.substr(decimal_part_match.index, decimal_part_match[0].length - 1); // retrieve decimal part
+            if (whole_part === "") {
+                whole_part = "0";
             }
             match.value = parseInt(whole_part) + parseFloat(decimal_part);
 
             // replace numerical content by 0's in barcode and pattern
             match.base_code = barcode.substr(0, num_start);
             base_pattern = pattern.substr(0, num_start);
-            for(var i=0;i<(num_length-2);i++) {
+            for (var i = 0; i < num_length - 2; i++) {
                 match.base_code += "0";
                 base_pattern += "0";
             }
@@ -141,24 +154,25 @@ export class BarcodeParser {
 
             match.base_code = match.base_code
                 .replace("\\\\", "\\")
-                .replace("\{", "{")
-                .replace("\}","}")
-                .replace("\.",".");
+                .replace("{", "{")
+                .replace("}", "}")
+                .replace(".", ".");
 
-            var base_code = match.base_code.split('');
-            if (encoding === 'ean13') {
-                base_code[12] = '' + this.get_barcode_check_digit(match.base_code);
-            } else if (encoding === 'ean8') {
-                base_code[7]  = '' + this.get_barcode_check_digit(match.base_code);
-            } else if (encoding === 'upca') {
-                base_code[11] = '' + this.get_barcode_check_digit(match.base_code);
+            var base_code = match.base_code.split("");
+            if (encoding === "ean13") {
+                base_code[12] = "" + this.get_barcode_check_digit(match.base_code);
+            } else if (encoding === "ean8") {
+                base_code[7] = "" + this.get_barcode_check_digit(match.base_code);
+            } else if (encoding === "upca") {
+                base_code[11] = "" + this.get_barcode_check_digit(match.base_code);
             }
-            match.base_code = base_code.join('');
+            match.base_code = base_code.join("");
         }
 
-        base_pattern = base_pattern.split('|')
-            .map(part => part.startsWith('^') ? part : '^' + part)
-            .join('|');
+        base_pattern = base_pattern
+            .split("|")
+            .map((part) => (part.startsWith("^") ? part : "^" + part))
+            .join("|");
         match.match = match.base_code.match(base_pattern);
 
         return match;
@@ -183,9 +197,9 @@ export class BarcodeParser {
 
     parseBarcodeNomenclature(barcode) {
         const parsed_result = {
-            encoding: '',
-            type:'error',
-            code:barcode,
+            encoding: "",
+            type: "error",
+            code: barcode,
             base_code: barcode,
             value: 0,
         };
@@ -199,37 +213,39 @@ export class BarcodeParser {
             var rule = rules[i];
             var cur_barcode = barcode;
 
-            if (    rule.encoding === 'ean13' &&
-                    this.check_encoding(barcode,'upca') &&
-                    this.nomenclature.upc_ean_conv in {'upc2ean':'','always':''} ){
-                cur_barcode = '0' + cur_barcode;
-            } else if (rule.encoding === 'upca' &&
-                    this.check_encoding(barcode,'ean13') &&
-                    barcode[0] === '0' &&
-                    this.nomenclature.upc_ean_conv in {'ean2upc':'','always':''} ){
-                cur_barcode = cur_barcode.substr(1,12);
+            if (
+                rule.encoding === "ean13" &&
+                this.check_encoding(barcode, "upca") &&
+                this.nomenclature.upc_ean_conv in { upc2ean: "", always: "" }
+            ) {
+                cur_barcode = "0" + cur_barcode;
+            } else if (
+                rule.encoding === "upca" &&
+                this.check_encoding(barcode, "ean13") &&
+                barcode[0] === "0" &&
+                this.nomenclature.upc_ean_conv in { ean2upc: "", always: "" }
+            ) {
+                cur_barcode = cur_barcode.substr(1, 12);
             }
 
-            if (!this.check_encoding(cur_barcode,rule.encoding)) {
+            if (!this.check_encoding(cur_barcode, rule.encoding)) {
                 continue;
             }
 
             var match = this.match_pattern(cur_barcode, rules[i].pattern, rule.encoding);
             if (match.match) {
-                if(rules[i].type === 'alias') {
+                if (rules[i].type === "alias") {
                     barcode = rules[i].alias;
                     parsed_result.code = barcode;
-                    parsed_result.type = 'alias';
-                }
-                else {
-                    parsed_result.encoding  = rules[i].encoding;
-                    parsed_result.type      = rules[i].type;
-                    parsed_result.value     = match.value;
-                    parsed_result.code      = cur_barcode;
-                    if (rules[i].encoding === "ean13"){
+                    parsed_result.type = "alias";
+                } else {
+                    parsed_result.encoding = rules[i].encoding;
+                    parsed_result.type = rules[i].type;
+                    parsed_result.value = match.value;
+                    parsed_result.code = cur_barcode;
+                    if (rules[i].encoding === "ean13") {
                         parsed_result.base_code = this.sanitize_ean(match.base_code);
-                    }
-                    else{
+                    } else {
                         parsed_result.base_code = match.base_code;
                     }
                     return parsed_result;
@@ -247,7 +263,7 @@ export class BarcodeParser {
      * @returns {Object}
      */
     parseURI(barcode) {
-        const uriParts = barcode.split(":").map(v => v.trim());
+        const uriParts = barcode.split(":").map((v) => v.trim());
         // URI should be formatted like that (number is the index once split):
         // 0: urn, 1: epc, 2: id/tag, 3: identifier, 4: data
         const identifier = uriParts[3];
@@ -279,13 +295,14 @@ export class BarcodeParser {
                 string_value: productBarcode,
                 type: "product",
                 value: productBarcode,
-            }, {
+            },
+            {
                 base_code,
                 code: trackingNumber,
                 string_value: trackingNumber,
                 type: "lot",
                 value: trackingNumber,
-            }
+            },
         ];
     }
 
@@ -295,12 +312,14 @@ export class BarcodeParser {
         const serialRef = serialReference.slice(1);
         let sscc = extension + gs1CompanyPrefix + serialRef;
         sscc += this.get_barcode_check_digit(sscc + "0");
-        return [{
-            base_code,
-            code: sscc,
-            string_value: sscc,
-            type: "package",
-            value: sscc,
-        }];
+        return [
+            {
+                base_code,
+                code: sscc,
+                string_value: sscc,
+                type: "package",
+                value: sscc,
+            },
+        ];
     }
 }

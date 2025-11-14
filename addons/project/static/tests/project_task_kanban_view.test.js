@@ -70,16 +70,16 @@ test("project.task (kanban): toggle sub-tasks", async () => {
             id: 1,
             project_id: 1,
             name: "Task 1",
-            stage_id:  1,
+            stage_id: 1,
             display_in_project: true,
         },
         {
             id: 2,
             project_id: 1,
             name: "Task 2",
-            stage_id:  1,
+            stage_id: 1,
             display_in_project: false,
-        }
+        },
     ];
     await mountView(viewParams);
     expect(".o_kanban_record").toHaveCount(1);

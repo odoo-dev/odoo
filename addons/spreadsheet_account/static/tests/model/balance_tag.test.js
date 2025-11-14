@@ -39,7 +39,7 @@ test("with wrong date format", async () => {
     setCellContent(model, "A1", `=ODOO.BALANCE.TAG("10, 14", "This is not a valid date")`);
     await waitForDataLoaded(model);
     expect(getEvaluatedCell(model, "A1").message).toBe(
-        "'This is not a valid date' is not a valid period. Supported formats are \"21/12/2022\", \"Q1/2022\", \"12/2022\", and \"2022\"."
+        '\'This is not a valid date\' is not a valid period. Supported formats are "21/12/2022", "Q1/2022", "12/2022", and "2022".'
     );
 });
 

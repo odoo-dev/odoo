@@ -1,8 +1,5 @@
 import { registry } from "@web/core/registry";
-import {
-    serializeDate,
-    serializeDateTime,
-} from "@web/core/l10n/dates";
+import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
 /**
  * Configuration depending on the granularity, using Luxon DateTime objects:
@@ -135,8 +132,9 @@ export class FillTemporalPeriod {
         //     {(2 * cycle - (minGroups - 1) % cycle - cyclePos) % cycle}
         //
         // (5) add minGroups!
-        const fillTemporalPeriod = ((2 * cycle - ((this.minGroups - 1) % cycle) - cyclePos) % cycle) + this.minGroups;
-        this.end = this.start.plus({[`${this.granularity}s`]: fillTemporalPeriod});
+        const fillTemporalPeriod =
+            ((2 * cycle - ((this.minGroups - 1) % cycle) - cyclePos) % cycle) + this.minGroups;
+        this.end = this.start.plus({ [`${this.granularity}s`]: fillTemporalPeriod });
         this.computedEnd = true;
     }
     /**
@@ -168,8 +166,12 @@ export class FillTemporalPeriod {
         const originalDomain = domain.length ? ["&", ...domain] : [];
         const defaultDomain = ["|", [this.field.name, "=", false]];
         const linkDomain = forceStartBound && forceEndBound ? ["&"] : [];
-        const startDomain = !forceStartBound ? [] : [[this.field.name, ">=", this._getFormattedServerDate(this.start)]];
-        const endDomain = !forceEndBound ? [] : [[this.field.name, "<", this._getFormattedServerDate(this.end)]];
+        const startDomain = !forceStartBound
+            ? []
+            : [[this.field.name, ">=", this._getFormattedServerDate(this.start)]];
+        const endDomain = !forceEndBound
+            ? []
+            : [[this.field.name, "<", this._getFormattedServerDate(this.end)]];
         return [...originalDomain, ...defaultDomain, ...linkDomain, ...startDomain, ...endDomain];
     }
     /**
@@ -200,7 +202,9 @@ export class FillTemporalPeriod {
         if (forceFillingTo) {
             // smallest time interval used in Odoo for the current date type
             const minGranularity = this.field.type === "date" ? "days" : "seconds";
-            fillTemporal.fill_to = this._getFormattedServerDate(this.end.minus({[minGranularity]: 1}));
+            fillTemporal.fill_to = this._getFormattedServerDate(
+                this.end.minus({ [minGranularity]: 1 })
+            );
         }
         context = { ...context, fill_temporal: fillTemporal };
         return context;
@@ -235,7 +239,7 @@ export class FillTemporalPeriod {
      * Adds one "granularity" period to [this.end], to expand the current fill_temporal period
      */
     expand() {
-        this.setEnd(this.end.plus({[`${this.granularity}s`]: 1}));
+        this.setEnd(this.end.plus({ [`${this.granularity}s`]: 1 }));
     }
 }
 
@@ -278,7 +282,13 @@ export const fillTemporalService = {
          *                                         reinstancied
          * @returns {FillTemporalPeriod}
          */
-        const getFillTemporalPeriod = ({ modelName, field, granularity, minGroups = 4, forceRecompute = false }) => {
+        const getFillTemporalPeriod = ({
+            modelName,
+            field,
+            granularity,
+            minGroups = 4,
+            forceRecompute = false,
+        }) => {
             if (!(modelName in _fillTemporalPeriods)) {
                 _fillTemporalPeriods[modelName] = {};
             }
@@ -292,7 +302,9 @@ export const fillTemporalService = {
                     granularity,
                     minGroups
                 );
-            } else if (_fillTemporalPeriods[modelName][field.name][granularity].minGroups != minGroups) {
+            } else if (
+                _fillTemporalPeriods[modelName][field.name][granularity].minGroups != minGroups
+            ) {
                 _fillTemporalPeriods[modelName][field.name][granularity].setMinGroups(minGroups);
             }
             return _fillTemporalPeriods[modelName][field.name][granularity];

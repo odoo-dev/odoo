@@ -30,7 +30,7 @@ export class ProjectTaskCalendarController extends CalendarController {
                 },
                 onDrop: (params) => {
                     this.dropTaskToPlan(params);
-                }
+                },
             });
         }
     }
@@ -39,7 +39,7 @@ export class ProjectTaskCalendarController extends CalendarController {
         return {
             ...super.modelParams,
             showTasksToPlan: this.canDragAndDropRecord,
-        }
+        };
     }
 
     get editRecordDefaultDisplayText() {
@@ -63,14 +63,14 @@ export class ProjectTaskCalendarController extends CalendarController {
 
     deleteConfirmationDialogProps(record) {
         const deleteConfirmationDialogProps = super.deleteConfirmationDialogProps(record);
-        if  (!record.rawRecord.subtask_count) {
+        if (!record.rawRecord.subtask_count) {
             return deleteConfirmationDialogProps;
         }
 
         return {
             ...deleteConfirmationDialogProps,
             body: subTaskDeleteConfirmationMessage,
-        }
+        };
     }
 
     async dropTaskToPlan(params) {

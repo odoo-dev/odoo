@@ -40,25 +40,22 @@ patch(SaleOrderLineProductField.prototype, {
         if (this.props.record.data.event_ticket_id) {
             actionContext.default_event_ticket_id = this.props.record.data.event_ticket_id.id;
         }
-        this.action.doAction(
-            'event_sale.event_configurator_action',
-            {
-                additionalContext: actionContext,
-                onClose: async (closeInfo) => {
-                    if (!closeInfo || closeInfo.special) {
-                        // wizard popup closed or 'Cancel' button triggered
-                        if (!this.props.record.data.event_ticket_id) {
-                            // remove product if event configuration was cancelled.
-                            this.props.record.update({
-                                [this.props.name]: undefined,
-                            });
-                        }
-                    } else {
-                        const eventConfiguration = closeInfo.eventConfiguration;
-                        this.props.record.update(eventConfiguration);
+        this.action.doAction("event_sale.event_configurator_action", {
+            additionalContext: actionContext,
+            onClose: async (closeInfo) => {
+                if (!closeInfo || closeInfo.special) {
+                    // wizard popup closed or 'Cancel' button triggered
+                    if (!this.props.record.data.event_ticket_id) {
+                        // remove product if event configuration was cancelled.
+                        this.props.record.update({
+                            [this.props.name]: undefined,
+                        });
                     }
+                } else {
+                    const eventConfiguration = closeInfo.eventConfiguration;
+                    this.props.record.update(eventConfiguration);
                 }
-            }
-        );
+            },
+        });
     },
 });

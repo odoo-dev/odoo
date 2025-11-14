@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { SelectionField } from "@web/views/fields/selection/selection_field";
 import { Many2One, computeM2OProps } from "@web/views/fields/many2one/many2one";
-import { user } from "@web/core/user"
+import { user } from "@web/core/user";
 
 class TemplateSelectionPopover extends Component {
     static template = "hr.TemplateSelectionPopover";
@@ -15,14 +15,14 @@ class TemplateSelectionPopover extends Component {
     };
 
     setup() {
-        this.state = useState({ 
+        this.state = useState({
             selectedTemplate: null,
         });
     }
 
     get many2oneProps() {
         const companyId = user.activeCompany.id;
-        
+
         const fieldProps = computeM2OProps({
             ...this.props.fieldProps,
             name: "contract_template_id",
@@ -31,7 +31,10 @@ class TemplateSelectionPopover extends Component {
             canCreateEdit: false,
             canQuickCreate: false,
             canOpen: false,
-            domain: () => [["employee_id", "=", false], ["company_id", "=", companyId]],
+            domain: () => [
+                ["employee_id", "=", false],
+                ["company_id", "=", companyId],
+            ],
             context: {},
             readonly: false,
         });
@@ -42,7 +45,7 @@ class TemplateSelectionPopover extends Component {
             value: this.state.selectedTemplate,
             update: (value) => {
                 this.state.selectedTemplate = value;
-            }
+            },
         };
     }
 
@@ -56,7 +59,7 @@ class TemplateSelectionPopover extends Component {
 
 export class ContractTemplateField extends SelectionField {
     static template = "hr.ContractTemplateField";
-    
+
     setup() {
         super.setup();
         this.templateButtonRef = useRef("templateButton");
@@ -67,7 +70,6 @@ export class ContractTemplateField extends SelectionField {
     }
 
     async onSelectTemplate() {
-        
         this.templatePopover.open(this.templateButtonRef.el, {
             fieldProps: this.props,
             record: this.props.record,

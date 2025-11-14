@@ -25,7 +25,7 @@ export class BomOverviewComponent extends Component {
 
         this.state = useState({
             showOptions: {
-                mode: this.props.action.context.mode || 'overview',
+                mode: this.props.action.context.mode || "overview",
                 uom: false,
                 attachments: false,
             },
@@ -60,7 +60,7 @@ export class BomOverviewComponent extends Component {
         const variantId = this.props.action.context.active_product_id;
         const resModel = this.props.action.context.active_model;
         this.state.currentVariantId = false;
-        if (resModel === 'product.product' && variantId !== undefined) {
+        if (resModel === "product.product" && variantId !== undefined) {
             this.state.currentVariantId = variantId;
         }
 
@@ -78,31 +78,21 @@ export class BomOverviewComponent extends Component {
     }
 
     async getBomData() {
-        const args = [
-            this.activeId,
-            this.state.bomQuantity,
-            this.state.currentVariantId,
-        ];
-        const context = { ...this.context};
+        const args = [this.activeId, this.state.bomQuantity, this.state.currentVariantId];
+        const context = { ...this.context };
         if (this.state.currentWarehouse) {
             context.warehouse_id = this.state.currentWarehouse.id;
         }
-        const bomData = await this.orm.call(
-            "report.mrp.report_bom_structure",
-            "get_html",
-            args,
-            { context }
-        );
+        const bomData = await this.orm.call("report.mrp.report_bom_structure", "get_html", args, {
+            context,
+        });
         this.state.bomData = bomData["lines"];
         this.state.showOptions.attachments = bomData["has_attachments"];
         return bomData;
     }
 
     async getWarehouses() {
-        const warehouses = await this.orm.call(
-            "report.mrp.report_bom_structure",
-            "get_warehouses",
-        );
+        const warehouses = await this.orm.call("report.mrp.report_bom_structure", "get_warehouses");
         this.warehouses = warehouses;
         this.state.currentWarehouse = warehouses[0];
     }
@@ -112,7 +102,7 @@ export class BomOverviewComponent extends Component {
     onChangeFolded(foldInfo) {
         const { ids, isFolded } = foldInfo;
         const operation = isFolded ? "delete" : "add";
-        ids.forEach(id => this.unfoldedIds[operation](id));
+        ids.forEach((id) => this.unfoldedIds[operation](id));
     }
 
     onChangeMode(mode) {
@@ -135,7 +125,7 @@ export class BomOverviewComponent extends Component {
 
     async onChangeWarehouse(warehouseId) {
         if (this.state.currentWarehouse.id != warehouseId) {
-            this.state.currentWarehouse = this.warehouses.find(wh => wh.id == warehouseId);
+            this.state.currentWarehouse = this.warehouses.find((wh) => wh.id == warehouseId);
             await this.getBomData();
         }
     }
@@ -158,11 +148,17 @@ export class BomOverviewComponent extends Component {
     // ---- Helpers ----
 
     getReportName(printAll) {
-        let reportName = "mrp.report_bom_structure?docids=" + this.activeId +
-                         "&mode=" + this.state.showOptions.mode +
-                         "&quantity=" + (this.state.bomQuantity || 1) +
-                         "&unfolded_ids=" + JSON.stringify(Array.from(this.unfoldedIds)) +
-                         "&warehouse_id=" + (this.state.currentWarehouse ? this.state.currentWarehouse.id : false);
+        let reportName =
+            "mrp.report_bom_structure?docids=" +
+            this.activeId +
+            "&mode=" +
+            this.state.showOptions.mode +
+            "&quantity=" +
+            (this.state.bomQuantity || 1) +
+            "&unfolded_ids=" +
+            JSON.stringify(Array.from(this.unfoldedIds)) +
+            "&warehouse_id=" +
+            (this.state.currentWarehouse ? this.state.currentWarehouse.id : false);
         if (printAll) {
             reportName += "&all_variants=1";
         } else if (this.showVariants && this.state.currentVariantId) {

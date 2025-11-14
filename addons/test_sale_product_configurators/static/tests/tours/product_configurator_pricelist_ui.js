@@ -3,8 +3,8 @@ import { stepUtils } from "@web_tour/tour_utils";
 import configuratorTourUtils from "@sale/js/tours/product_configurator_tour_utils";
 import tourUtils from "@sale/js/tours/tour_utils";
 
-registry.category("web_tour.tours").add('sale_product_configurator_pricelist_tour', {
-    url: '/odoo',
+registry.category("web_tour.tours").add("sale_product_configurator_pricelist_tour", {
+    url: "/odoo",
     steps: () => [
         ...stepUtils.goToAppSteps("sale.sale_menu_root", "Go to the Sales App"),
         ...tourUtils.createNewSalesOrder(),
@@ -15,7 +15,7 @@ registry.category("web_tour.tours").add('sale_product_configurator_pricelist_tou
         },
         {
             content: "select the partner",
-            trigger: 'ul.ui-autocomplete > li > a:contains(Azure)',
+            trigger: "ul.ui-autocomplete > li > a:contains(Azure)",
             run: "click",
         },
         {
@@ -34,22 +34,25 @@ registry.category("web_tour.tours").add('sale_product_configurator_pricelist_tou
         },
         {
             content: "select the pricelist",
-            trigger: 'ul.ui-autocomplete > li > a:contains(Custom pricelist (TEST))',
+            trigger: "ul.ui-autocomplete > li > a:contains(Custom pricelist (TEST))",
             run: "click",
         },
         ...tourUtils.addProduct("Customizable Desk (TEST)"),
         {
             content: "check price is correct (USD)",
-            trigger: '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) span[name="sale_product_configurator_formatted_price"]:contains("750.00")',
+            trigger:
+                '.o_sale_product_configurator_table tr:has(td>div[name="o_sale_product_configurator_name"] span:contains("Customizable Desk")) span[name="sale_product_configurator_formatted_price"]:contains("750.00")',
         },
         {
             content: "add one more",
-            trigger: '.o_sale_product_configurator_table tr:has(span:contains("Customizable Desk")) td.o_sale_product_configurator_qty button:has(i.oi-plus)',
+            trigger:
+                '.o_sale_product_configurator_table tr:has(span:contains("Customizable Desk")) td.o_sale_product_configurator_qty button:has(i.oi-plus)',
             run: "click",
         },
         {
             content: "check price for 2",
-            trigger: '.o_sale_product_configurator_table tr:has(span:contains("Customizable Desk")) td span[name="sale_product_configurator_formatted_price"]:contains("600.00")',
+            trigger:
+                '.o_sale_product_configurator_table tr:has(span:contains("Customizable Desk")) td span[name="sale_product_configurator_formatted_price"]:contains("600.00")',
         },
         configuratorTourUtils.addOptionalProduct("Conference Chair (TEST)"),
         configuratorTourUtils.increaseProductQuantity("Conference Chair (TEST)"),
@@ -67,6 +70,6 @@ registry.category("web_tour.tours").add('sale_product_configurator_pricelist_tou
             trigger: 'span[name="amount_total"]:contains("1,437.00")',
             run: "click",
         },
-        ...stepUtils.saveForm()
-    ]
+        ...stepUtils.saveForm(),
+    ],
 });

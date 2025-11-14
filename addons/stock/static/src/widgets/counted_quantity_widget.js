@@ -34,16 +34,16 @@ export class CountedQuantityWidgetField extends FloatField {
         return this.props.record.update({ inventory_quantity_set: true });
     }
 
-    updateValue(ev){
+    updateValue(ev) {
         try {
-           const val = this.parse(ev.target.value);
+            const val = this.parse(ev.target.value);
             this.props.record.update({ [this.props.name]: val });
         } catch {} // ignore since it will be handled later
     }
 
     onBlur(ev) {
-         if (!this.props.record.data.inventory_quantity_set) {
-           return;
+        if (!this.props.record.data.inventory_quantity_set) {
+            return;
         }
         this.updateValue(ev);
     }
@@ -59,7 +59,8 @@ export class CountedQuantityWidgetField extends FloatField {
     get formattedValue() {
         if (
             this.props.readonly &&
-            !this.props.record.data[this.props.name] & !this.props.record.data.inventory_quantity_set
+            !this.props.record.data[this.props.name] &
+                !this.props.record.data.inventory_quantity_set
         ) {
             return "";
         }

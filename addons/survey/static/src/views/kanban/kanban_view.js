@@ -7,4 +7,4 @@ export const SurveyKanbanView = {
     Renderer: SurveyKanbanRenderer,
 };
 
-registry.category('views').add('survey_view_kanban', SurveyKanbanView);
+registry.category("views").add("survey_view_kanban", SurveyKanbanView);

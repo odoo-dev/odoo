@@ -20,6 +20,4 @@ export class TagAdd extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_slides.tag_add", TagAdd);
+registry.category("public.interactions").add("website_slides.tag_add", TagAdd);

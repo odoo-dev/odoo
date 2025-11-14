@@ -3,7 +3,7 @@ import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { _t } from "@web/core/l10n/translation";
-import {  NewsletterSubscribeCommonOptionBase } from "./newsletter_subscribe_common_option";
+import { NewsletterSubscribeCommonOptionBase } from "./newsletter_subscribe_common_option";
 import { getElementsWithOption, filterExtends } from "@html_builder/utils/utils";
 import { BuilderAction } from "@html_builder/core/builder_action";
 
@@ -22,7 +22,7 @@ class MailingListSubscribeOptionPlugin extends Plugin {
     setup() {
         this.newsletterOptions = filterExtends(
             this.getResource("builder_options"),
-            NewsletterSubscribeCommonOptionBase,
+            NewsletterSubscribeCommonOptionBase
         );
     }
 
@@ -39,19 +39,23 @@ class MailingListSubscribeOptionPlugin extends Plugin {
         if (!this.mailingLists.length) {
             let cancelDrop = false;
             await new Promise((resolve) => {
-                this.services.dialog.add(ConfirmationDialog, {
-                    body: _t(
-                        "No mailing list found, do you want to create a new one? This will save all your changes, are you sure you want to proceed?"
-                    ),
-                    confirm: async () => {
-                        // TODO properly save and redirect.
-                        await this.dependencies.savePlugin.save();
-                        window.location.href =
-                            "/odoo/action-mass_mailing.action_view_mass_mailing_lists";
+                this.services.dialog.add(
+                    ConfirmationDialog,
+                    {
+                        body: _t(
+                            "No mailing list found, do you want to create a new one? This will save all your changes, are you sure you want to proceed?"
+                        ),
+                        confirm: async () => {
+                            // TODO properly save and redirect.
+                            await this.dependencies.savePlugin.save();
+                            window.location.href =
+                                "/odoo/action-mass_mailing.action_view_mass_mailing_lists";
+                        },
+                        cancel: () => (cancelDrop = true),
                     },
-                    cancel: () => cancelDrop = true,
-                }, { onClose: resolve });
-            })
+                    { onClose: resolve }
+                );
+            });
             // Cancel the drop if the dialog was cancelled.
             if (cancelDrop) {
                 return true;
@@ -70,12 +74,9 @@ class MailingListSubscribeOptionPlugin extends Plugin {
                 lang: this.services.website.currentWebsite.metadata.lang,
                 user_lang: user.context.lang,
             });
-            const response = await this.services.orm.call(
-                "mailing.list",
-                "name_search",
-                [],
-                { context }
-            );
+            const response = await this.services.orm.call("mailing.list", "name_search", [], {
+                context,
+            });
             this.mailingLists = [];
             for (const entry of response) {
                 this.mailingLists.push({ id: entry[0], name: entry[1] });
@@ -113,7 +114,9 @@ export class ToggleThanksMessageAction extends BuilderAction {
         this.setThanksMessageVisibility(editingElement, false);
     }
     isApplied({ editingElement }) {
-        return editingElement.querySelector(".js_subscribed_wrap")?.classList.contains("o_enable_preview");
+        return editingElement
+            .querySelector(".js_subscribed_wrap")
+            ?.classList.contains("o_enable_preview");
     }
     setThanksMessageVisibility(editingElement, isVisible) {
         const toSubscribeEl = editingElement.querySelector(".js_subscribe_wrap");

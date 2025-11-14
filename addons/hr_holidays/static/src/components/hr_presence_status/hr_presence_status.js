@@ -1,8 +1,14 @@
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 
-import { HrPresenceStatus, hrPresenceStatus } from "@hr/components/hr_presence_status/hr_presence_status";
-import { HrPresenceStatusPrivate, hrPresenceStatusPrivate } from "@hr/components/hr_presence_status_private/hr_presence_status_private";
+import {
+    HrPresenceStatus,
+    hrPresenceStatus,
+} from "@hr/components/hr_presence_status/hr_presence_status";
+import {
+    HrPresenceStatusPrivate,
+    hrPresenceStatusPrivate,
+} from "@hr/components/hr_presence_status_private/hr_presence_status_private";
 import {
     HrPresenceStatusPill,
     hrPresenceStatusPill,
@@ -13,23 +19,18 @@ import {
 } from "@hr/components/hr_presence_status_private_pill/hr_presence_status_private_pill";
 
 const patchHrPresenceStatus = () => ({
-
     get label() {
         if (this.value.includes("holiday")) {
-            return _t("%(label)s, back on %(date)s",
-                {
-                    label: super.label,
-                    date: this.props.record.data['leave_date_to'].toLocaleString(
-                        {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                        }
-                    )
-                }
-            )
+            return _t("%(label)s, back on %(date)s", {
+                label: super.label,
+                date: this.props.record.data["leave_date_to"].toLocaleString({
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                }),
+            });
         }
-        return super.label
+        return super.label;
     },
 
     get icon() {
@@ -41,7 +42,11 @@ const patchHrPresenceStatus = () => ({
 
     get color() {
         if (this.value.startsWith("presence_holiday")) {
-            return `${this.value === "presence_holiday_present" ? "text-success" : "o_icon_employee_absent"}`;
+            return `${
+                this.value === "presence_holiday_present"
+                    ? "text-success"
+                    : "o_icon_employee_absent"
+            }`;
         }
         return super.color;
     },
@@ -67,21 +72,21 @@ patch(HrPresenceStatusPill.prototype, patchHrPresenceStatusPill());
 
 const patchHrPresenceStatusPrivate = () => ({
     get label() {
-        if (this.props.record.data.current_leave_id){
+        if (this.props.record.data.current_leave_id) {
             let label = this.props.record.data.current_leave_id.display_name;
             if (this.props.record.data.leave_date_to) {
-                label += _t(", back on ") + this.props.record.data['leave_date_to'].toLocaleString(
-                    {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                    }
-                )
+                label +=
+                    _t(", back on ") +
+                    this.props.record.data["leave_date_to"].toLocaleString({
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                    });
             }
             return label;
         }
         return super.label;
-    }
+    },
 });
 // Applies patch to hr_presence_status_private to display the time off type instead of default label
 patch(HrPresenceStatusPrivate.prototype, patchHrPresenceStatusPrivate());
@@ -98,7 +103,7 @@ Object.assign(hrPresenceStatusPrivate, {
     fieldDependencies: [
         ...hrPresenceStatusPrivate.fieldDependencies,
         ...hrPresenceStatus.fieldDependencies,
-        { name: "current_leave_id", type:"many2one"},
+        { name: "current_leave_id", type: "many2one" },
     ],
 });
 

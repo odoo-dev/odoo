@@ -1,7 +1,17 @@
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { beforeEach, expect, test } from "@odoo/hoot";
 import { animationFrame, mockDate } from "@odoo/hoot-mock";
-import { defineActions, defineModels, fields, getService, models, mountWebClient, onRpc, serverState, switchView } from "@web/../tests/web_test_helpers";
+import {
+    defineActions,
+    defineModels,
+    fields,
+    getService,
+    models,
+    mountWebClient,
+    onRpc,
+    serverState,
+    switchView,
+} from "@web/../tests/web_test_helpers";
 
 class CalendarEvent extends models.Model {
     _name = "calendar.event";
@@ -34,7 +44,7 @@ class CalendarEvent extends models.Model {
                 <field name="partner_ids" write_model="calendar.filter" write_field="partner_id"/>
             </calendar>
         `,
-        list: `<list sample="1"/>`
+        list: `<list sample="1"/>`,
     };
 
     user_id = fields.Many2one({ relation: "users" });
@@ -47,9 +57,7 @@ class CalendarEvent extends models.Model {
 }
 
 class CalendarFilter extends models.Model {
-    _records = [
-        { id: 3, user_id: serverState.userId, partner_id: 4, partner_checked: true },
-    ];
+    _records = [{ id: 3, user_id: serverState.userId, partner_id: 4, partner_checked: true }];
 
     user_id = fields.Many2one({ relation: "users" });
     partner_id = fields.Many2one({ relation: "partner" });
@@ -67,9 +75,7 @@ class Partner extends models.Model {
 }
 
 class Users extends models.Model {
-    _records = [
-        { id: serverState.userId, name: "User 4", partner_id: 4 },
-    ];
+    _records = [{ id: serverState.userId, name: "User 4", partner_id: 4 }];
 
     name = fields.Char();
     partner_id = fields.Many2one({ relation: "partner" });
@@ -96,7 +102,10 @@ test(`component is destroyed while sync microsoft calendar`, async () => {
             name: "Partners",
             res_model: "calendar.event",
             type: "ir.actions.act_window",
-            views: [[false, "list"], [false, "calendar"]],
+            views: [
+                [false, "list"],
+                [false, "calendar"],
+            ],
         },
     ]);
 

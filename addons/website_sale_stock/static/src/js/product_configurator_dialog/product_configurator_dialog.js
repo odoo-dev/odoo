@@ -1,8 +1,6 @@
-import { patch } from '@web/core/utils/patch';
-import { useSubEnv } from '@odoo/owl';
-import {
-    ProductConfiguratorDialog
-} from '@sale/js/product_configurator_dialog/product_configurator_dialog';
+import { patch } from "@web/core/utils/patch";
+import { useSubEnv } from "@odoo/owl";
+import { ProductConfiguratorDialog } from "@sale/js/product_configurator_dialog/product_configurator_dialog";
 
 patch(ProductConfiguratorDialog.prototype, {
     setup() {
@@ -29,7 +27,7 @@ patch(ProductConfiguratorDialog.prototype, {
      * @return {Boolean} - Whether the provided product quantity can be added to the cart.
      */
     _isQuantityAllowed(product, quantity) {
-        return !('free_qty' in product) || product.free_qty >= quantity;
+        return !("free_qty" in product) || product.free_qty >= quantity;
     },
 
     /**
@@ -38,6 +36,6 @@ patch(ProductConfiguratorDialog.prototype, {
      * @return {Boolean} - Whether all selected product quantities can be added to the cart.
      */
     areQuantitiesAllowed() {
-        return this.state.products.every(p => this._isQuantityAllowed(p, p.quantity));
+        return this.state.products.every((p) => this._isQuantityAllowed(p, p.quantity));
     },
 });

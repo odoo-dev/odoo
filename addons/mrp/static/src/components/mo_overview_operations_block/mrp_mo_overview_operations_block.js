@@ -42,7 +42,10 @@ export class MoOverviewOperationsBlock extends Component {
             isFolded: this.level > 0 && !this.props.unfoldAll,
         });
         if (this.props.unfoldAll) {
-            this.env.overviewBus.trigger("update-folded", { indexes: [this.index], isFolded: false });
+            this.env.overviewBus.trigger("update-folded", {
+                indexes: [this.index],
+                isFolded: false,
+            });
         }
 
         useBus(this.env.overviewBus, "unfold-all", () => this.unfold());
@@ -52,7 +55,10 @@ export class MoOverviewOperationsBlock extends Component {
 
     toggleFolded() {
         this.state.isFolded = !this.state.isFolded;
-        this.env.overviewBus.trigger("update-folded", { indexes: [this.index], isFolded: this.state.isFolded });
+        this.env.overviewBus.trigger("update-folded", {
+            indexes: [this.index],
+            isFolded: this.state.isFolded,
+        });
     }
 
     unfold() {
@@ -86,8 +92,10 @@ export class MoOverviewOperationsBlock extends Component {
 
     get totalQuantity() {
         // Float for Hours when displaying done productions, FloatTime for Minutes otherwise.
-        return this.props.summary?.done ?
-            formatFloat(this.props.summary.quantity, { digits: [false, this.props.operations[0].uom_precision || undefined] }) :
-            formatFloatTime(this.props.summary.quantity)
+        return this.props.summary?.done
+            ? formatFloat(this.props.summary.quantity, {
+                  digits: [false, this.props.operations[0].uom_precision || undefined],
+              })
+            : formatFloatTime(this.props.summary.quantity);
     }
 }

@@ -1,19 +1,19 @@
-import { registry } from '@web/core/registry';
+import { registry } from "@web/core/registry";
 
-import { kanbanView } from '@web/views/kanban/kanban_view';
-import { KanbanRecord } from '@web/views/kanban/kanban_record';
-import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
-import { KanbanController } from '@web/views/kanban/kanban_controller';
+import { kanbanView } from "@web/views/kanban/kanban_view";
+import { KanbanRecord } from "@web/views/kanban/kanban_record";
+import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
+import { KanbanController } from "@web/views/kanban/kanban_controller";
 
-import { LunchDashboard } from '../components/lunch_dashboard';
-import { LunchRendererMixin } from '../mixins/lunch_renderer_mixin';
+import { LunchDashboard } from "../components/lunch_dashboard";
+import { LunchRendererMixin } from "../mixins/lunch_renderer_mixin";
 
-import { LunchSearchModel } from './search_model';
-import { LunchSearchPanel } from './search_panel';
+import { LunchSearchModel } from "./search_model";
+import { LunchSearchPanel } from "./search_panel";
 
 export class LunchKanbanRecord extends KanbanRecord {
     onGlobalClick(ev) {
-        this.env.bus.trigger('lunch_open_order', {productId: this.props.record.resId});
+        this.env.bus.trigger("lunch_open_order", { productId: this.props.record.resId });
     }
 }
 
@@ -44,7 +44,7 @@ class LunchKanbanController extends KanbanController {
     }
 }
 
-registry.category('views').add('lunch_kanban', {
+registry.category("views").add("lunch_kanban", {
     ...kanbanView,
     Controller: LunchKanbanController,
     Renderer: LunchKanbanRenderer,

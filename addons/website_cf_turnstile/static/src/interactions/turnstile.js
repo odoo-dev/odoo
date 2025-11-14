@@ -68,7 +68,7 @@ export class TurnStile {
      */
     static clean(el) {
         const submitButtons = el.querySelectorAll(".cf_form_disabled");
-        submitButtons.forEach(button => {
+        submitButtons.forEach((button) => {
             button.classList.remove("disabled", "cf_form_disabled");
         });
         const turnstileEls = el.querySelectorAll(".s_turnstile");

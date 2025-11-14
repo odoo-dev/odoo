@@ -22,7 +22,7 @@ export class Follower extends Component {
     onClickDetails() {
         this.store.openDocument({
             id: this.props.follower.partner_id.id,
-            model: "res.partner"
+            model: "res.partner",
         });
         this.props.close?.();
     }

@@ -1,8 +1,8 @@
 import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_utils";
 
-registry.category("web_tour.tours").add('mass_mailing_dynamic_placeholder_tour', {
-    url: '/odoo',
+registry.category("web_tour.tours").add("mass_mailing_dynamic_placeholder_tour", {
+    url: "/odoo",
     steps: () => [
         stepUtils.showAppsMenuItem(),
         {
@@ -12,12 +12,12 @@ registry.category("web_tour.tours").add('mass_mailing_dynamic_placeholder_tour',
         },
         {
             content: "Click on the create button to create a new mailing.",
-            trigger: 'button.o_list_button_add',
+            trigger: "button.o_list_button_add",
             run: "click",
         },
         {
             content: "Fill in Subject",
-            trigger: '#subject_0',
+            trigger: "#subject_0",
             run: "edit Test Dynamic Placeholder",
         },
         {
@@ -28,9 +28,9 @@ registry.category("web_tour.tours").add('mass_mailing_dynamic_placeholder_tour',
             trigger: '.o_mailing_template_preview_wrapper [data-name="basic"]',
             run: "click",
         },
-         {
+        {
             content: "Insert text inside editable",
-            trigger: ':iframe .odoo-editor-editable',
+            trigger: ":iframe .odoo-editor-editable",
             async run(actions) {
                 await actions.editor(`/`);
                 const iframe = document.querySelector("iframe");

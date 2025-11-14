@@ -107,7 +107,13 @@ test("report.project.task.user: fix the domain, in case field is not present in 
     mockService("action", {
         doAction({ domain, res_model }) {
             if (res_model === "project.task") {
-                expect(domain).toEqual(["&", ["display_in_project", "=", true], "&", [1, "=", 1], ["id", "=", 1]]);
+                expect(domain).toEqual([
+                    "&",
+                    ["display_in_project", "=", true],
+                    "&",
+                    [1, "=", 1],
+                    ["id", "=", 1],
+                ]);
             }
             return super.doAction(...arguments);
         },
@@ -123,7 +129,7 @@ test("report.project.task.user: fix the domain, in case field is not present in 
                 <field name="task_id"/>
                 <field name="nbr"/>
             </graph>
-        `
+        `,
     };
 
     const view = await mountView("graph", { group_by: ["task_id", "nbr"] });

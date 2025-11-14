@@ -9,7 +9,7 @@ export class NotebookTaskListRenderer extends TaskListRenderer {
     setup() {
         super.setup();
         this.hideState = useState({
-            hide: localStorage.getItem(this._getStorageKey) === 'true',
+            hide: localStorage.getItem(this._getStorageKey) === "true",
         });
     }
 
@@ -30,7 +30,9 @@ export class NotebookTaskListRenderer extends TaskListRenderer {
     }
 
     get openLabel() {
-        return typeof this.closedX2MCount === "undefined" ? _t("Show closed tasks") : _t("%s closed tasks", this.closedX2MCount);
+        return typeof this.closedX2MCount === "undefined"
+            ? _t("Show closed tasks")
+            : _t("%s closed tasks", this.closedX2MCount);
     }
 
     get closeLabel() {

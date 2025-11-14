@@ -7,7 +7,6 @@ import { serializeDate } from "@web/core/l10n/dates";
  * Mobile: Using the calendar quick create dialog.
  */
 export class EventSlotCalendarModel extends CalendarModel {
-
     /**
      * @override
      * Set slot date and hours from selected datetimes.
@@ -46,12 +45,15 @@ export class EventSlotCalendarModel extends CalendarModel {
      */
     normalizeRecord(rawRecord) {
         const normalizedRecord = super.normalizeRecord(rawRecord);
-        const tz = rawRecord.date_tz || 'utc';
-        normalizedRecord.start = normalizedRecord.start.setZone(tz).setZone('local', {keepLocalTime: true});
-        normalizedRecord.end = normalizedRecord.end.setZone(tz).setZone('local', {keepLocalTime: true});
+        const tz = rawRecord.date_tz || "utc";
+        normalizedRecord.start = normalizedRecord.start
+            .setZone(tz)
+            .setZone("local", { keepLocalTime: true });
+        normalizedRecord.end = normalizedRecord.end
+            .setZone(tz)
+            .setZone("local", { keepLocalTime: true });
         // Always display the slot time
         normalizedRecord.isTimeHidden = false;
         return normalizedRecord;
     }
-
 }

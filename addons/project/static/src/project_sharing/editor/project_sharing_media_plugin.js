@@ -6,10 +6,8 @@ import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 export class ProjectSharingMediaPlugin extends MediaPlugin {
     resources = {
         ...this.resources,
-        toolbar_items: this.resources.toolbar_items.filter(
-            item => item.id !== "replace_image"
-        ),
-    }
+        toolbar_items: this.resources.toolbar_items.filter((item) => item.id !== "replace_image"),
+    };
 }
 
 export class ProjectSharingImageSavePlugin extends ImageSavePlugin {

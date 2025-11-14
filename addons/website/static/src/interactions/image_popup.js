@@ -31,6 +31,4 @@ export class ImagePopUp extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website.image_popup", ImagePopUp);
+registry.category("public.interactions").add("website.image_popup", ImagePopUp);

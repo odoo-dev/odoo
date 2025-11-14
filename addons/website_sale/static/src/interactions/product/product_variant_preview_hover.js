@@ -1,19 +1,19 @@
-import { Interaction } from '@web/public/interaction';
-import { registry } from '@web/core/registry';
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
 
 export class ProductVariantPreviewImageHover extends Interaction {
-    static selector = '.oe_product_cart.o_has_variations';
+    static selector = ".oe_product_cart.o_has_variations";
     dynamicContent = {
-        '.o_product_variant_preview': {
-            't-on-mouseenter': this._mouseEnter,
-            't-on-mouseleave': this._mouseLeave,
-            't-on-click': this._onClick,
+        ".o_product_variant_preview": {
+            "t-on-mouseenter": this._mouseEnter,
+            "t-on-mouseleave": this._mouseLeave,
+            "t-on-click": this._onClick,
         },
     };
 
     setup() {
-        this.productImg = this.el.querySelector('.oe_product_image_img_wrapper_primary img');
-        this.originalImgSrc = this.productImg.getAttribute('src');
+        this.productImg = this.el.querySelector(".oe_product_image_img_wrapper_primary img");
+        this.originalImgSrc = this.productImg.getAttribute("src");
     }
 
     /**
@@ -67,9 +67,9 @@ export class ProductVariantPreviewImageHover extends Interaction {
     _onClick(ev) {
         if (this.env.isSmall) {
             ev.preventDefault();
-            const targetElement = ev.target.closest('.o_product_variant_preview');
-            const productCard = ev.target.closest('.oe_product_cart');
-            productCard.querySelector('.oe_product_image_link').href = targetElement.href;
+            const targetElement = ev.target.closest(".o_product_variant_preview");
+            const productCard = ev.target.closest(".oe_product_cart");
+            productCard.querySelector(".oe_product_image_link").href = targetElement.href;
             const variantImageSrc = targetElement.dataset.variantImage;
             if (!variantImageSrc) {
                 return;
@@ -80,5 +80,5 @@ export class ProductVariantPreviewImageHover extends Interaction {
 }
 
 registry
-    .category('public.interactions')
-    .add('website_sale.product_variant_preview_image_hover', ProductVariantPreviewImageHover);
+    .category("public.interactions")
+    .add("website_sale.product_variant_preview_image_hover", ProductVariantPreviewImageHover);

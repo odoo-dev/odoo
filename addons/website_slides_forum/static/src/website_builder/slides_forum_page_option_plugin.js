@@ -17,9 +17,7 @@ export class SlidesForumOption extends BaseOptionComponent {
 class SlidesForumOptionPlugin extends Plugin {
     static id = "slidesForumOption";
     resources = {
-        builder_options: [
-            withSequence(after(FORUMS_INDEX), SlidesForumOption),
-        ],
+        builder_options: [withSequence(after(FORUMS_INDEX), SlidesForumOption)],
     };
 }
 

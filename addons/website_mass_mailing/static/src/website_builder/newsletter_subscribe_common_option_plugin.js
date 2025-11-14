@@ -3,7 +3,10 @@ import { POPUP } from "@website/builder/plugins/options/popup_option_plugin";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { registry } from "@web/core/registry";
-import { NewsletterSubscribeCommonOption, NewsletterSubscribeCommonPopupOption } from "./newsletter_subscribe_common_option";
+import {
+    NewsletterSubscribeCommonOption,
+    NewsletterSubscribeCommonPopupOption,
+} from "./newsletter_subscribe_common_option";
 import { BaseOptionComponent } from "@html_builder/core/utils";
 import { renderToFragment } from "@web/core/utils/render";
 
@@ -39,13 +42,14 @@ class NewsletterSubscribeCommonOptionPlugin extends Plugin {
                 const mailingLists = await this.services.orm.searchRead(
                     "mailing.list",
                     [["is_public", "=", true]],
-                    ["id", "name"],
+                    ["id", "name"]
                 );
                 if (mailingLists.length) {
                     const parentEl = sampleEl.parentElement;
                     sampleEl.remove();
                     const checkboxesFragment = renderToFragment(
-                        "website_mass_mailing.NewsletterMailingListsCheckboxes", { mailingLists }
+                        "website_mass_mailing.NewsletterMailingListsCheckboxes",
+                        { mailingLists }
                     );
                     parentEl.append(...checkboxesFragment.children);
                 } else {

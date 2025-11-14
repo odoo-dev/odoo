@@ -22,7 +22,7 @@ export class AddToCartNotification extends Component {
             },
         },
         currency_id: Number,
-    }
+    };
 
     /**
      * Return the lines which aren't linked to other lines.
@@ -30,7 +30,7 @@ export class AddToCartNotification extends Component {
      * @return {Object[]} The lines which aren't linked to other lines.
      */
     get mainLines() {
-        return this.props.lines.filter(line => !line.linked_line_id);
+        return this.props.lines.filter((line) => !line.linked_line_id);
     }
 
     /**
@@ -40,7 +40,7 @@ export class AddToCartNotification extends Component {
      * @return {Object[]} The lines which aren't linked to other lines.
      */
     getLinkedLines(lineId) {
-        return this.props.lines.filter(line => line.linked_line_id === lineId);
+        return this.props.lines.filter((line) => line.linked_line_id === lineId);
     }
 
     /**
@@ -56,5 +56,4 @@ export class AddToCartNotification extends Component {
             : line.price_total;
         return formatCurrency(price, this.props.currency_id);
     }
-
 }

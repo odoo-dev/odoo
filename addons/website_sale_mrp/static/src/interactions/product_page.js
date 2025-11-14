@@ -1,8 +1,8 @@
 /** @odoo-module **/
 
 import { rpc } from "@web/core/network/rpc";
-import { patch } from '@web/core/utils/patch';
-import { ProductPage } from '@website_sale/interactions/product_page';
+import { patch } from "@web/core/utils/patch";
+import { ProductPage } from "@website_sale/interactions/product_page";
 
 patch(ProductPage.prototype, {
     /**

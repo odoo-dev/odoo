@@ -26,13 +26,11 @@ export class EnrollEmail extends Interaction {
             confirmLabel: _t("Yes"),
             confirm: async () => {
                 const { error, done } = await this.waitFor(
-                    this.services.orm.call(
-                        "slide.channel",
-                        "action_request_access",
-                        [channelId],
-                    )
+                    this.services.orm.call("slide.channel", "action_request_access", [channelId])
                 );
-                const message = done ? _t("Request sent!") : error || _t("Unknown error, try again.");
+                const message = done
+                    ? _t("Request sent!")
+                    : error || _t("Unknown error, try again.");
 
                 const newAlertEl = document.createElement("div");
                 newAlertEl.classList.add("alert", done ? "alert-success" : "alert-danger");
@@ -42,11 +40,9 @@ export class EnrollEmail extends Interaction {
                 alertEl.remove();
             },
             cancelLabel: _t("Cancel"),
-            cancel: () => { },
+            cancel: () => {},
         });
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_slides.enroll_email", EnrollEmail);
+registry.category("public.interactions").add("website_slides.enroll_email", EnrollEmail);

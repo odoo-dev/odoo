@@ -1,18 +1,20 @@
 import { registry } from "@web/core/registry";
 
-registry.category("web_tour.tours").add('mailing_activities_split', {
-    url: '/odoo',
+registry.category("web_tour.tours").add("mailing_activities_split", {
+    url: "/odoo",
     steps: () => [
         {
-            content: 'Open Activity Systray',
-            trigger: '.o-mail-ActivityMenu-counter',
+            content: "Open Activity Systray",
+            trigger: ".o-mail-ActivityMenu-counter",
             run: "click",
-        }, {
-            content: 'Open Email Activities',
+        },
+        {
+            content: "Open Email Activities",
             trigger: '.o-mail-ActivityGroup:contains("Email Marketing")',
             run: "click",
-        }, {
-            content: 'Open Email Marketing record in the kanban view',
+        },
+        {
+            content: "Open Email Marketing record in the kanban view",
             trigger: '.o_list_renderer .o_data_cell:contains("New Email!")',
         },
         {
@@ -20,15 +22,17 @@ registry.category("web_tour.tours").add('mailing_activities_split', {
             trigger: "body:not(:has(.o_list_renderer .o_data_cell:contains(New SMS!)))",
         },
         {
-            content: 'Open Activity Systray',
-            trigger: '.o-mail-ActivityMenu-counter',
+            content: "Open Activity Systray",
+            trigger: ".o-mail-ActivityMenu-counter",
             run: "click",
-        }, {
-            content: 'Open SMS Activities',
+        },
+        {
+            content: "Open SMS Activities",
             trigger: '.o-mail-ActivityGroup:contains("SMS Marketing")',
             run: "click",
-        }, {
-            content: 'Open SMS Marketing record in the kanban view',
+        },
+        {
+            content: "Open SMS Marketing record in the kanban view",
             trigger: '.o_list_renderer .o_data_cell:contains("New SMS!")',
         },
         {

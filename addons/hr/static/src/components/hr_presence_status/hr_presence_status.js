@@ -22,8 +22,8 @@ export class HrPresenceStatus extends Component {
             "o_button_icon",
             "hr_presence",
             "align-middle",
-            this.color,
-        )
+            this.color
+        );
         return classNames.join(" ");
     }
 
@@ -73,4 +73,4 @@ export const hrPresenceStatus = {
     },
 };
 
-registry.category("fields").add("hr_presence_status", hrPresenceStatus)
+registry.category("fields").add("hr_presence_status", hrPresenceStatus);

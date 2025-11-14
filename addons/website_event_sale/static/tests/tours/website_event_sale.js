@@ -30,7 +30,7 @@ registry.category("web_tour.tours").add("event_buy_tickets", {
         {
             content: "Reset to 0",
             trigger: ".modal input:eq(1)",
-            run: "edit 0"
+            run: "edit 0",
         },
         {
             content: "Add 1 unit of `Standard` ticket type thanks to the spinner",
@@ -44,7 +44,8 @@ registry.category("web_tour.tours").add("event_buy_tickets", {
         },
         {
             // The input number should be changed to min(limit per order, seats available) (11 < 12 < 2002)
-            trigger: "div.o_wevent_ticket_selector:contains('VIP'):contains('11') input.form-control",
+            trigger:
+                "div.o_wevent_ticket_selector:contains('VIP'):contains('11') input.form-control",
         },
         {
             content: "Edit 2 units of `VIP` ticket type",

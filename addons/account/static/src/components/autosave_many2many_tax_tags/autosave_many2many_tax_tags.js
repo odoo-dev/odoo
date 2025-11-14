@@ -2,7 +2,7 @@ import { registry } from "@web/core/registry";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import {
     Many2ManyTaxTagsField,
-    many2ManyTaxTagsField
+    many2ManyTaxTagsField,
 } from "@account/components/many2x_tax_tags/many2x_tax_tags";
 
 export class AutosaveMany2ManyTaxTagsField extends Many2ManyTaxTagsField {
@@ -29,9 +29,11 @@ export class AutosaveMany2ManyTaxTagsField extends Many2ManyTaxTagsField {
     onRecordChange(record) {
         const line = record.data;
         if (line.tax_ids.records.length > 0) {
-            if (line.balance !== this.lastBalance
-                || line.account_id.id !== this.lastAccount.id
-                || line.partner_id.id !== this.lastPartner.id) {
+            if (
+                line.balance !== this.lastBalance ||
+                line.account_id.id !== this.lastAccount.id ||
+                line.partner_id.id !== this.lastPartner.id
+            ) {
                 this.lastBalance = line.balance;
                 this.lastAccount = line.account_id;
                 this.lastPartner = line.partner_id;

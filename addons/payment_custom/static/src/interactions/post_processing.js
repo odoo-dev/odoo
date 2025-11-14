@@ -1,8 +1,7 @@
-import { PaymentPostProcessing } from '@payment/interactions/post_processing';
-import { patch } from '@web/core/utils/patch';
+import { PaymentPostProcessing } from "@payment/interactions/post_processing";
+import { patch } from "@web/core/utils/patch";
 
 patch(PaymentPostProcessing, {
-
     /**
      * Don't wait for the transaction to be confirmed before redirecting customers to the landing
      * route, because custom transactions remain in the state 'pending' forever.
@@ -12,10 +11,9 @@ patch(PaymentPostProcessing, {
      */
     getFinalStates(providerCode) {
         const finalStates = super.getFinalStates(...arguments);
-        if (providerCode === 'custom') {
-            finalStates.add('pending');
+        if (providerCode === "custom") {
+            finalStates.add("pending");
         }
         return finalStates;
     },
-
 });

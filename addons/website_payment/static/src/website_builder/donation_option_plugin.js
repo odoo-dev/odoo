@@ -20,9 +20,7 @@ export class DonationOptionPlugin extends Plugin {
     static id = "donationOption";
 
     resources = {
-        builder_options: [
-            withSequence(SNIPPET_SPECIFIC, DonationOption),
-        ],
+        builder_options: [withSequence(SNIPPET_SPECIFIC, DonationOption)],
         builder_actions: {
             ToggleDisplayOptionsAction,
             TogglePrefilledOptionsAction,

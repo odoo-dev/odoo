@@ -32,7 +32,8 @@ registry.category("web_tour.tours").add("test_tickets_questions", {
         },
         {
             // The input number should automatically be changed to the limit per order (22 < 28)
-            trigger: 'div.o_wevent_ticket_selector:contains("Free"):contains("22") input.form-control',
+            trigger:
+                'div.o_wevent_ticket_selector:contains("Free"):contains("22") input.form-control',
         },
         {
             content: "Edit 2 'Free' tickets to buy",
@@ -46,7 +47,8 @@ registry.category("web_tour.tours").add("test_tickets_questions", {
         },
         {
             // The input number should automatically be changed to the event limit (28 < 150)
-            trigger: 'div.o_wevent_ticket_selector:contains("Other"):contains("28") input.form-control',
+            trigger:
+                'div.o_wevent_ticket_selector:contains("Other"):contains("28") input.form-control',
         },
         {
             content: "Remove 'Other' tickets",
@@ -55,7 +57,8 @@ registry.category("web_tour.tours").add("test_tickets_questions", {
         },
         {
             content: "Check '-' spinner button is disabled when no ticket selected",
-            trigger: 'div.o_wevent_ticket_selector:contains("Other") button[data-increment-type="minus"]:disabled',
+            trigger:
+                'div.o_wevent_ticket_selector:contains("Other") button[data-increment-type="minus"]:disabled',
         },
         {
             content: "Click on Register (to fill tickets data) button",

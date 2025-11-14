@@ -9,17 +9,27 @@ export class WebsiteEventTrackProposalForm extends Interaction {
     static selector = ".o_website_event_track_proposal_form";
 
     dynamicContent = {
-        ".o_wetrack_add_contact_information_checkbox" : { "t-on-click" : this.onAdvancedContactToggle },
-        "input[name='partner_name']" : { "t-on-input" : this.onPartnerNameInput },
-        ".o_wetrack_proposal_submit_button" : { "t-on-click.prevent.stop" : this.onProposalFormSubmit },
-        ".o_wetrack_contact_information" : { "t-att-class": () => ({
-            "d-none": !this.useAdvancedContact,
-            "o_wetrack_no_contact_mean_error": !this.hasContactMean,
-        }) },
-        ".o_wetrack_contact_mean": { "t-att-class": () => ({ "is-invalid": !this.hasContactMean }) },
-        ".o_wetrack_contact_name_input" : { "t-att-required": () => this.useAdvancedContact },
-        ".o_wetrack_proposal_error_section": { "t-att-class": () => ({ "d-none": !this.formErrors.length }) },
-    }
+        ".o_wetrack_add_contact_information_checkbox": {
+            "t-on-click": this.onAdvancedContactToggle,
+        },
+        "input[name='partner_name']": { "t-on-input": this.onPartnerNameInput },
+        ".o_wetrack_proposal_submit_button": {
+            "t-on-click.prevent.stop": this.onProposalFormSubmit,
+        },
+        ".o_wetrack_contact_information": {
+            "t-att-class": () => ({
+                "d-none": !this.useAdvancedContact,
+                o_wetrack_no_contact_mean_error: !this.hasContactMean,
+            }),
+        },
+        ".o_wetrack_contact_mean": {
+            "t-att-class": () => ({ "is-invalid": !this.hasContactMean }),
+        },
+        ".o_wetrack_contact_name_input": { "t-att-required": () => this.useAdvancedContact },
+        ".o_wetrack_proposal_error_section": {
+            "t-att-class": () => ({ "d-none": !this.formErrors.length }),
+        },
+    };
 
     setup() {
         this.useAdvancedContact = false;
@@ -39,22 +49,24 @@ export class WebsiteEventTrackProposalForm extends Interaction {
         this.formErrors = [];
 
         // 1) Valid Form Inputs
-        this.el.querySelectorAll(".form-control:not(.o_wetrack_select_tags)").forEach((formControl) => {
-            // Validate current input
-            const isValid = formControl.checkValidity();
-            formControl.classList.toggle("o_wetrack_input_error", !isValid);
-            formControl.classList.toggle("is-invalid", !isValid);
-            if (!isValid) {
-                this.formErrors.push("invalidFormInputs");
-            }
-        });
+        this.el
+            .querySelectorAll(".form-control:not(.o_wetrack_select_tags)")
+            .forEach((formControl) => {
+                // Validate current input
+                const isValid = formControl.checkValidity();
+                formControl.classList.toggle("o_wetrack_input_error", !isValid);
+                formControl.classList.toggle("is-invalid", !isValid);
+                if (!isValid) {
+                    this.formErrors.push("invalidFormInputs");
+                }
+            });
 
         // 2) Advanced Contact Must Have a Contact Mean
         if (this.useAdvancedContact) {
             const phoneInput = this.el.querySelector(".o_wetrack_contact_phone_input");
             const emailInput = this.el.querySelector(".o_wetrack_contact_email_input");
-    
-            this.hasContactMean = (phoneInput.value || emailInput.value);
+
+            this.hasContactMean = phoneInput.value || emailInput.value;
 
             if (!this.hasContactMean) {
                 this.formErrors.push("noContactMean");
@@ -72,13 +84,15 @@ export class WebsiteEventTrackProposalForm extends Interaction {
      */
     updateErrorDisplay() {
         const errorMessages = [];
-        
+
         if (this.formErrors.includes("invalidFormInputs")) {
             errorMessages.push(_t("Please fill out the form correctly."));
         }
 
         if (this.formErrors.includes("noContactMean")) {
-            errorMessages.push(_t("Please enter either a contact email address or a contact phone number."));
+            errorMessages.push(
+                _t("Please enter either a contact email address or a contact phone number.")
+            );
         }
 
         if (this.formErrors.includes("forbidden")) {
@@ -142,7 +156,9 @@ export class WebsiteEventTrackProposalForm extends Interaction {
             const formData = new FormData(this.el);
             const eventId = encodeURIComponent(this.el.dataset.eventId);
 
-            const jsonResponse = await this.waitFor(post(`/event/${eventId}/track_proposal/post`, formData));
+            const jsonResponse = await this.waitFor(
+                post(`/event/${eventId}/track_proposal/post`, formData)
+            );
             this.protectSyncAfterAsync(() => {
                 if (jsonResponse.success) {
                     // TODO we really should not remove the whole widget element

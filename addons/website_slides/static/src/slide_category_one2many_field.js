@@ -20,5 +20,5 @@ class SlideCategoryOneToManyField extends X2ManyField {
 registry.category("fields").add("slide_category_one2many", {
     ...x2ManyField,
     component: SlideCategoryOneToManyField,
-    additionalClasses: [...x2ManyField.additionalClasses || [], "o_field_one2many"],
+    additionalClasses: [...(x2ManyField.additionalClasses || []), "o_field_one2many"],
 });

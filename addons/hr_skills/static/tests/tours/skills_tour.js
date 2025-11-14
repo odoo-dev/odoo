@@ -71,7 +71,8 @@ registry.category("web_tour.tours").add("hr_skills_tour", {
         },
         {
             content: "Change type",
-            trigger: ".modal:contains(new resume line) .o_field_widget[name='line_type_id'] .o_selection_badge:contains(Other Experience)",
+            trigger:
+                ".modal:contains(new resume line) .o_field_widget[name='line_type_id'] .o_selection_badge:contains(Other Experience)",
             run: "click",
         },
         {

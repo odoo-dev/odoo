@@ -27,10 +27,9 @@ export class ExhibitorConnectClosedDialog extends Component {
         sponsorData.website_description = sponsorData.website_description || "";
         sponsorData.website_description = markup(sponsorData.website_description);
         this.formatEventStartRemaining = formatDuration(sponsorData.event_start_remaining, true);
-        this.formatEventDateBegin = deserializeDateTime(
-            sponsorData.event_date_begin,
-            { tz: sponsorData.event_date_tz }
-        ).toLocaleString(DateTime.DATETIME_MED);
+        this.formatEventDateBegin = deserializeDateTime(sponsorData.event_date_begin, {
+            tz: sponsorData.event_date_tz,
+        }).toLocaleString(DateTime.DATETIME_MED);
         this.sponsorData = sponsorData;
     }
 }

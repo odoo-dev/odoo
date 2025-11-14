@@ -2,7 +2,7 @@ import { registry } from "@web/core/registry";
 import { redirect } from "@web/core/utils/urls";
 import * as tourUtils from "@website_sale/js/tours/tour_utils";
 
-registry.category("web_tour.tours").add('website_sale.so_mail', {
+registry.category("web_tour.tours").add("website_sale.so_mail", {
     steps: () => [
         ...tourUtils.addToCartFromProductPage(),
         tourUtils.goToCart(),
@@ -38,7 +38,7 @@ registry.category("web_tour.tours").add('website_sale.so_mail', {
         {
             content: "Open recipients dropdown",
             trigger: ".modal .o_field_many2many_tags_email[name=partner_ids] input",
-            run: 'edit Interior24',
+            run: "edit Interior24",
         },
         {
             content: "Select azure interior",
@@ -50,7 +50,7 @@ registry.category("web_tour.tours").add('website_sale.so_mail', {
         },
         {
             content: "click Send email",
-            trigger: '.modal .btn.o_mail_send',
+            trigger: ".modal .btn.o_mail_send",
             run: "click",
         },
         {
@@ -60,5 +60,5 @@ registry.category("web_tour.tours").add('website_sale.so_mail', {
             content: "wait mail to be sent, and go see it",
             trigger: '.o-mail-Message-body:contains("Your"):contains("order")',
         },
-    ]
+    ],
 });

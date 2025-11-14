@@ -17,7 +17,8 @@ export class PurchaseDashBoard extends Component {
     }
     async updateDashboardState() {
         this.purchaseData = await this.orm.call("purchase.order", "retrieve_dashboard");
-        this.multiuser = JSON.stringify(this.purchaseData.global) !== JSON.stringify(this.purchaseData.my);
+        this.multiuser =
+            JSON.stringify(this.purchaseData.global) !== JSON.stringify(this.purchaseData.my);
     }
 
     /**

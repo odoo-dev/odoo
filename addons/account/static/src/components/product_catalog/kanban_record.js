@@ -44,9 +44,9 @@ patch(ProductCatalogKanbanRecord.prototype, {
     },
 
     notifyLineCountChange(lineCountChange) {
-        this.env.searchModel.trigger('section-line-count-change', {
+        this.env.searchModel.trigger("section-line-count-change", {
             sectionId: this.env.selectedSectionId,
             lineCountChange: lineCountChange,
         });
     },
-})
+});

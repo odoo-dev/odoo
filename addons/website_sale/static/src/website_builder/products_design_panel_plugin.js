@@ -19,7 +19,7 @@ export class ProductsDesignPanelPlugin extends Plugin {
         },
         save_handlers: this.onSave.bind(this),
         change_current_options_containers_listeners: () => {
-            this.panels.forEach(panel => {
+            this.panels.forEach((panel) => {
                 if (panel.state.overlayVisible) {
                     panel.closeDesignOverlay();
                 }
@@ -40,7 +40,9 @@ export class ProductsDesignPanelPlugin extends Plugin {
     }
 
     async onSave() {
-        const persistentPanels = Array.from(this.panels).filter(panel => panel.needsDbPersistence);
+        const persistentPanels = Array.from(this.panels).filter(
+            (panel) => panel.needsDbPersistence
+        );
 
         for (const panel of persistentPanels) {
             const pageEl = panel.env.getEditingElement();
@@ -53,12 +55,12 @@ export class ProductsDesignPanelPlugin extends Plugin {
 
             // Scan DOM for all classes with o_wsale_products_opt_ prefix
             const currentClasses = Array.from(pageEl.classList);
-            const productOptClasses = currentClasses.filter(className =>
-                className.startsWith('o_wsale_products_opt_')
+            const productOptClasses = currentClasses.filter((className) =>
+                className.startsWith("o_wsale_products_opt_")
             );
 
             // Always save the classes field (empty string if no classes found)
-            updateData[panel.props.recordName] = productOptClasses.join(' ');
+            updateData[panel.props.recordName] = productOptClasses.join(" ");
 
             // Early return only if no classes and no gap to save
             if (productOptClasses.length === 0 && pageEl.dataset.gapToSave === undefined) {
@@ -81,13 +83,14 @@ class ClassActionWithSuggestedAction extends BuilderAction {
     static dependencies = ["builderActions"];
 
     setup() {
-        this.classAction = this.dependencies.builderActions.getAction('classAction');
-        this.setClassRangeAction = this.dependencies.builderActions.getAction('setClassRange');
+        this.classAction = this.dependencies.builderActions.getAction("classAction");
+        this.setClassRangeAction = this.dependencies.builderActions.getAction("setClassRange");
     }
 
     getPriority(context) {
-        const targetAction = Array.isArray(context.params.className) ?
-            this.setClassRangeAction : this.classAction;
+        const targetAction = Array.isArray(context.params.className)
+            ? this.setClassRangeAction
+            : this.classAction;
         return targetAction.getPriority?.(context) || 0;
     }
 
@@ -95,13 +98,12 @@ class ClassActionWithSuggestedAction extends BuilderAction {
         // Transform parameters to match expected format
         const { className } = context.params;
 
-        const targetAction = Array.isArray(className) ?
-            this.setClassRangeAction : this.classAction;
+        const targetAction = Array.isArray(className) ? this.setClassRangeAction : this.classAction;
 
         // Transform context to match what the target action expects
         const delegatedContext = {
             ...context,
-            params: { mainParam: className }
+            params: { mainParam: className },
         };
 
         return targetAction.isApplied(delegatedContext);
@@ -109,19 +111,21 @@ class ClassActionWithSuggestedAction extends BuilderAction {
 
     getValue(context) {
         const { className } = context.params;
-        const targetAction = Array.isArray(className) ?
-            this.setClassRangeAction : this.classAction;
+        const targetAction = Array.isArray(className) ? this.setClassRangeAction : this.classAction;
 
         const delegatedContext = {
             ...context,
-            params: { mainParam: className }
+            params: { mainParam: className },
         };
 
         return targetAction.getValue?.(delegatedContext);
     }
 
     apply(context) {
-        const { editingElement, params: { className, suggestedClasses } } = context;
+        const {
+            editingElement,
+            params: { className, suggestedClasses },
+        } = context;
 
         if (suggestedClasses) {
             this.applySuggestedClasses(editingElement, suggestedClasses);
@@ -132,14 +136,17 @@ class ClassActionWithSuggestedAction extends BuilderAction {
 
         const delegatedContext = {
             ...context,
-            params: { mainParam: className }
+            params: { mainParam: className },
         };
 
         return targetAction.apply(delegatedContext);
     }
 
     clean(context) {
-        const { editingElement, params: { className, suggestedClasses } } = context;
+        const {
+            editingElement,
+            params: { className, suggestedClasses },
+        } = context;
 
         if (suggestedClasses) {
             this.cleanSuggestedClasses(editingElement, suggestedClasses);
@@ -150,7 +157,7 @@ class ClassActionWithSuggestedAction extends BuilderAction {
 
         return targetAction.clean({
             ...context,
-            params: { mainParam: className }
+            params: { mainParam: className },
         });
     }
 
@@ -158,31 +165,39 @@ class ClassActionWithSuggestedAction extends BuilderAction {
      * Clean slate approach: Remove ALL o_wsale_products_opt_* classes, then add positive ones from suggestedClasses
      */
     applySuggestedClasses(editingElement, suggestedClasses) {
-        if (!suggestedClasses || typeof suggestedClasses !== 'string') {
+        if (!suggestedClasses || typeof suggestedClasses !== "string") {
             return;
         }
 
         // 1. Clean slate: Remove ALL existing design classes
         const currentClasses = Array.from(editingElement.classList);
-        const designClasses = currentClasses.filter(cls => cls.startsWith('o_wsale_products_opt_'));
-        designClasses.forEach(cls => editingElement.classList.remove(cls));
+        const designClasses = currentClasses.filter((cls) =>
+            cls.startsWith("o_wsale_products_opt_")
+        );
+        designClasses.forEach((cls) => editingElement.classList.remove(cls));
 
         // 2. Apply new classes
-        const newClasses = suggestedClasses.trim().split(/\s+/).filter(cls => cls && !cls.startsWith('!'));
-        newClasses.forEach(cls => editingElement.classList.add(cls));
+        const newClasses = suggestedClasses
+            .trim()
+            .split(/\s+/)
+            .filter((cls) => cls && !cls.startsWith("!"));
+        newClasses.forEach((cls) => editingElement.classList.add(cls));
     }
 
     /**
      * Reverse of applySuggestedClasses for clean operations
      */
     cleanSuggestedClasses(editingElement, suggestedClasses) {
-        if (!suggestedClasses || typeof suggestedClasses !== 'string') {
+        if (!suggestedClasses || typeof suggestedClasses !== "string") {
             return;
         }
 
         // Remove the positive classes that were added
-        const classesToRemove = suggestedClasses.trim().split(/\s+/).filter(cls => cls && !cls.startsWith('!'));
-        classesToRemove.forEach(cls => editingElement.classList.remove(cls));
+        const classesToRemove = suggestedClasses
+            .trim()
+            .split(/\s+/)
+            .filter((cls) => cls && !cls.startsWith("!"));
+        classesToRemove.forEach((cls) => editingElement.classList.remove(cls));
     }
 }
 

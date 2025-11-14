@@ -87,7 +87,9 @@ registry.category("web_tour.tours").add("sale_tour", {
         },
         ...stepUtils.statusbarButtonsSteps(
             "Send",
-            markup(_t("<b>Send the quote</b> to yourself and check what the customer will receive.")),
+            markup(
+                _t("<b>Send the quote</b> to yourself and check what the customer will receive.")
+            )
         ),
         {
             isActive: ["body:not(:has(.modal-footer button.o_mail_send))"],

@@ -28,22 +28,30 @@ export class HierarchyArchParser {
                 if (node.hasAttribute("parent_field")) {
                     const parentFieldName = node.getAttribute("parent_field");
                     if (!(parentFieldName in fields)) {
-                        throw new Error(`The parent field set (${parentFieldName}) is not defined in the model (${modelName}).`);
+                        throw new Error(
+                            `The parent field set (${parentFieldName}) is not defined in the model (${modelName}).`
+                        );
                     } else if (fields[parentFieldName].type !== "many2one") {
                         throw new Error(`Invalid parent field, it should be a Many2One field.`);
                     } else if (fields[parentFieldName].relation !== modelName) {
-                        throw new Error(`Invalid parent field, the co-model should be same model than the current one (expected: ${modelName}).`);
+                        throw new Error(
+                            `Invalid parent field, the co-model should be same model than the current one (expected: ${modelName}).`
+                        );
                     }
                     archInfo.parentFieldName = parentFieldName;
                 }
                 if (node.hasAttribute("child_field")) {
                     const childFieldName = node.getAttribute("child_field");
                     if (!(childFieldName in fields)) {
-                        throw new Error(`The child field set (${childFieldName}) is not defined in the model (${modelName}).`);
+                        throw new Error(
+                            `The child field set (${childFieldName}) is not defined in the model (${modelName}).`
+                        );
                     } else if (fields[childFieldName].type !== "one2many") {
                         throw new Error(`Invalid child field, it should be a One2Many field.`);
                     } else if (fields[childFieldName].relation !== modelName) {
-                        throw new Error(`Invalid child field, the co-model should be same model than the current one (expected: ${modelName}).`);
+                        throw new Error(
+                            `Invalid child field, the co-model should be same model than the current one (expected: ${modelName}).`
+                        );
                     }
                     archInfo.childFieldName = childFieldName;
                 }

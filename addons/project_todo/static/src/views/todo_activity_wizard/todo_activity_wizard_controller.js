@@ -5,7 +5,7 @@ export class TodoActivityWizardController extends FormController {
     setup() {
         super.setup();
         onMounted(() => {
-            const firstInput = document.querySelector('div.o_field_widget input');
+            const firstInput = document.querySelector("div.o_field_widget input");
             firstInput.focus();
         });
     }

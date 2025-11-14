@@ -10,12 +10,10 @@ export class RegisterToaster extends Interaction {
         if (message && message.length) {
             this.services.notification.add(message, {
                 title: _t("Register"),
-                type: 'info',
+                type: "info",
             });
         }
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_event.register_toaster", RegisterToaster);
+registry.category("public.interactions").add("website_event.register_toaster", RegisterToaster);

@@ -24,7 +24,7 @@ export class Many2ManyBarcodeTagsField extends Many2ManyTagsField {
 export const many2ManyBarcodeTagsField = {
     ...many2ManyTagsField,
     component: Many2ManyBarcodeTagsField,
-    additionalClasses: ['o_field_many2many_tags'],
-}
+    additionalClasses: ["o_field_many2many_tags"],
+};
 
 registry.category("fields").add("many2many_barcode_tags", many2ManyBarcodeTagsField);

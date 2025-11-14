@@ -30,10 +30,12 @@ export function useAssignUserCommand() {
 
     const add = async (record) => {
         if (type === "many2one") {
-            component.props.record.update({ [component.props.name]: {
-                id: record[0],
-                display_name: record[1],
-            } });
+            component.props.record.update({
+                [component.props.name]: {
+                    id: record[0],
+                    display_name: record[1],
+                },
+            });
         } else if (type === "many2many") {
             component.props.record.data[component.props.name].linkTo(record[0], {
                 display_name: record[1],

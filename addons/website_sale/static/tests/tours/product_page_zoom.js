@@ -1,12 +1,12 @@
 import { registry } from "@web/core/registry";
 
-var imageSelector = '#o-carousel-product .carousel-item.active img';
+var imageSelector = "#o-carousel-product .carousel-item.active img";
 var imageName = "A Colorful Image";
 var nameGreen = "Forest Green";
 
 // This tour relies on a data created from the python test.
-registry.category("web_tour.tours").add('website_sale.product_page_zoom', {
-    url: '/shop?debug=1&search=' + imageName,
+registry.category("web_tour.tours").add("website_sale.product_page_zoom", {
+    url: "/shop?debug=1&search=" + imageName,
     steps: () => [
         {
             content: "select " + imageName,
@@ -21,17 +21,17 @@ registry.category("web_tour.tours").add('website_sale.product_page_zoom', {
         },
         {
             content: "check that the image viewer opened",
-            trigger: '.o_wsale_image_viewer',
+            trigger: ".o_wsale_image_viewer",
         },
         {
             content: "close the image viewer",
-            trigger: '.o_wsale_image_viewer_header span.fa-times',
+            trigger: ".o_wsale_image_viewer_header span.fa-times",
             run: "click",
         },
         {
             content: "change variant",
             trigger: `input[data-attribute-name='Beautiful Color'][data-value-name='${nameGreen}']:not(:visible)`,
-            run: 'click',
+            run: "click",
         },
         {
             content: "wait for variant to be loaded",
@@ -45,7 +45,7 @@ registry.category("web_tour.tours").add('website_sale.product_page_zoom', {
         },
         {
             content: "check there is a zoom on that big image",
-            trigger: '.o_wsale_image_viewer',
+            trigger: ".o_wsale_image_viewer",
         },
-    ]
+    ],
 });

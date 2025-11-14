@@ -66,7 +66,7 @@ class MailGroupOptionPlugin extends Plugin {
 }
 
 export class MailGroupAction extends BuilderAction {
-    static id = "mailGroupAction"
+    static id = "mailGroupAction";
     static dependencies = ["builderActions"];
     apply({ editingElement, value }) {
         const { id } = JSON.parse(value);

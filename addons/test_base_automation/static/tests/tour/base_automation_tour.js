@@ -72,8 +72,7 @@ registry.category("web_tour.tours").add("test_base_automation", {
         },
         {
             content: "Open update select",
-            trigger:
-                '.modal .modal-content .o_form_renderer div[name="value"] textarea',
+            trigger: '.modal .modal-content .o_form_renderer div[name="value"] textarea',
             run: "edit Test",
         },
         {
@@ -117,8 +116,8 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             trigger: ".o_select_menu_menu",
             run() {
                 const options = [...this.anchor.querySelectorAll(".o_select_menu_item")].map(
-                        (el) => el.textContent
-                    );
+                    (el) => el.textContent
+                );
 
                 assertEqual(
                     JSON.stringify(options),
@@ -134,7 +133,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
                         "On create and edit",
                         "On deletion",
                         "On UI change",
-                        "On webhook"
+                        "On webhook",
                     ])
                 );
             },
@@ -179,8 +178,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             run: "click",
         },
         {
-            trigger:
-                '.modal .modal-content .o_form_renderer div[name="value"] textarea',
+            trigger: '.modal .modal-content .o_form_renderer div[name="value"] textarea',
             run: "edit Test",
         },
         {
@@ -218,8 +216,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             run: "click",
         },
         {
-            trigger:
-                '.modal .modal-content .o_form_renderer div[name="selection_value"] input',
+            trigger: '.modal .modal-content .o_form_renderer div[name="selection_value"] input',
             run: "edit High",
         },
         {
@@ -464,7 +461,7 @@ registry.category("web_tour.tours").add("test_form_view_model_id", {
                         .join(", "),
                     "User is set, Based on date field, After creation, After last update, On create, On create and edit, On deletion, On UI change, On webhook"
                 );
-            }
+            },
         },
         {
             trigger: ".o_field_widget[name='model_id'] input",
@@ -493,7 +490,7 @@ registry.category("web_tour.tours").add("test_form_view_model_id", {
                         .join(", "),
                     "Stage is set to, User is set, Tag is added, Priority is set to, Based on date field, After creation, After last update, On create, On create and edit, On deletion, On UI change, On webhook"
                 );
-            }
+            },
         },
         {
             trigger: ".o_form_button_cancel",
@@ -618,7 +615,7 @@ registry.category("web_tour.tours").add("test_form_view_mail_triggers", {
                         .join(", "),
                     "Values Updated, Email Events, Timing Conditions, Custom, External"
                 );
-            }
+            },
         },
         {
             trigger: "button.o_form_button_cancel",

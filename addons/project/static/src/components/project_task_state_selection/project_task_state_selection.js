@@ -46,28 +46,26 @@ export class ProjectTaskStateSelection extends StateSelectionField {
             "1_canceled": "btn-outline-danger",
             "04_waiting_normal": "btn-outline-info",
         };
-        if (this.props.viewType != 'form') {
+        if (this.props.viewType != "form") {
             super.setup();
         } else {
             const commandName = _t("Set state as...");
             useCommand(
                 commandName,
-                () => {
-                    return {
-                        placeholder: commandName,
-                        providers: [
-                            {
-                                provide: () =>
-                                    this.options.map(subarr => ({
-                                        name: subarr[1],
-                                        action: () => {
-                                            this.updateRecord(subarr[0]);
-                                        },
-                                    })),
-                            },
-                        ],
-                    };
-                },
+                () => ({
+                    placeholder: commandName,
+                    providers: [
+                        {
+                            provide: () =>
+                                this.options.map((subarr) => ({
+                                    name: subarr[1],
+                                    action: () => {
+                                        this.updateRecord(subarr[0]);
+                                    },
+                                })),
+                        },
+                    ],
+                }),
                 {
                     category: "smart_action",
                     hotkey: "alt+f",
@@ -130,17 +128,17 @@ export class ProjectTaskStateSelection extends StateSelectionField {
     }
 
     getDropdownPosition() {
-        if (this.isView(['activity', 'kanban', 'list', 'calendar']) || this.env.isSmall) {
-            return '';
+        if (this.isView(["activity", "kanban", "list", "calendar"]) || this.env.isSmall) {
+            return "";
         }
-        return 'bottom-end';
+        return "bottom-end";
     }
 
     getTogglerClass(currentValue) {
-        if (this.isView(['activity', 'kanban', 'list', 'calendar']) || this.env.isSmall) {
-            return 'btn btn-link d-flex p-0';
+        if (this.isView(["activity", "kanban", "list", "calendar"]) || this.env.isSmall) {
+            return "btn btn-link d-flex p-0";
         }
-        return 'o_state_button btn rounded-pill ' + this.colorButton[currentValue];
+        return "o_state_button btn rounded-pill " + this.colorButton[currentValue];
     }
 
     async updateRecord(value) {
@@ -173,11 +171,12 @@ export const projectTaskStateSelection = {
     component: ProjectTaskStateSelection,
     fieldDependencies: [{ name: "project_id", type: "many2one" }],
     supportedOptions: [
-        ...stateSelectionField.supportedOptions, {
+        ...stateSelectionField.supportedOptions,
+        {
             label: _t("Is toggle mode"),
             name: "is_toggle_mode",
-            type: "boolean"
-        }
+            type: "boolean",
+        },
     ],
     extractProps({ options, viewType }) {
         const props = stateSelectionField.extractProps(...arguments);
@@ -185,6 +184,6 @@ export const projectTaskStateSelection = {
         props.viewType = viewType;
         return props;
     },
-}
+};
 
 registry.category("fields").add("project_task_state_selection", projectTaskStateSelection);

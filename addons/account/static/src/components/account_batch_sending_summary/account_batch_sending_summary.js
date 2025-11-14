@@ -1,5 +1,5 @@
-import {Component} from "@odoo/owl";
-import {registry} from "@web/core/registry";
+import { Component } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 export class AccountBatchSendingSummary extends Component {
@@ -16,6 +16,6 @@ export class AccountBatchSendingSummary extends Component {
 
 export const accountBatchSendingSummary = {
     component: AccountBatchSendingSummary,
-}
+};
 
 registry.category("fields").add("account_batch_sending_summary", accountBatchSendingSummary);

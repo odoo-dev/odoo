@@ -1,14 +1,14 @@
-import { patch } from '@web/core/utils/patch';
-import { patchDynamicContent } from '@web/public/utils';
-import { ProductComparison } from '@website_sale_comparison/interactions/product_comparison';
-import comparisonUtils from '@website_sale_comparison/js/website_sale_comparison_utils';
+import { patch } from "@web/core/utils/patch";
+import { patchDynamicContent } from "@web/public/utils";
+import { ProductComparison } from "@website_sale_comparison/interactions/product_comparison";
+import comparisonUtils from "@website_sale_comparison/js/website_sale_comparison_utils";
 
 patch(ProductComparison.prototype, {
     setup() {
         super.setup();
         patchDynamicContent(this.dynamicContent, {
-            '.wishlist-section .o_add_to_compare': {
-                't-on-click': this.addProductFromWishlist.bind(this),
+            ".wishlist-section .o_add_to_compare": {
+                "t-on-click": this.addProductFromWishlist.bind(this),
             },
         });
     },
@@ -19,7 +19,9 @@ patch(ProductComparison.prototype, {
      * @param {Event} ev
      */
     addProductFromWishlist(ev) {
-        if (this._checkMaxComparisonProducts()) return;
+        if (this._checkMaxComparisonProducts()) {
+            return;
+        }
 
         const el = ev.currentTarget;
         const productId = parseInt(el.dataset.productId);

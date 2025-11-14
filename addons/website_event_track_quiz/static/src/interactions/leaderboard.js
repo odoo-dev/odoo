@@ -9,6 +9,4 @@ export class Leaderboard extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_event_track_quiz.leaderboard", Leaderboard);
+registry.category("public.interactions").add("website_event_track_quiz.leaderboard", Leaderboard);

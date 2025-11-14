@@ -10,7 +10,7 @@ import { useState, onWillStart } from "@odoo/owl";
 export class DashboardKanbanDropdownMenuWrapper extends KanbanDropdownMenuWrapper {
     onClick(ev) {
         // Keep the dropdown open as we need the fileupload to remain in the dom
-        if (!ev.target.tagName === "INPUT" && !ev.target.closest('.file_upload_kanban_action_a')) {
+        if (!ev.target.tagName === "INPUT" && !ev.target.closest(".file_upload_kanban_action_a")) {
             super.onClick(ev);
         }
     }
@@ -28,7 +28,9 @@ export class DashboardKanbanRecord extends KanbanRecord {
     setup() {
         super.setup();
         onWillStart(async () => {
-            this.allowDrop = this.recordDropSettings.group ? await user.hasGroup(this.recordDropSettings.group) : true;
+            this.allowDrop = this.recordDropSettings.group
+                ? await user.hasGroup(this.recordDropSettings.group)
+                : true;
         });
         this.dropzoneState = useState({
             visible: false,
@@ -41,7 +43,7 @@ export class DashboardKanbanRecord extends KanbanRecord {
             image: kanbanDashboard.drag_drop_settings.image,
             text: kanbanDashboard.drag_drop_settings.text,
             company_name: kanbanDashboard.company_name,
-            show_company: kanbanDashboard.show_company
+            show_company: kanbanDashboard.show_company,
         };
     }
 
@@ -54,7 +56,9 @@ export class DashboardKanbanRecord extends KanbanRecord {
             dragCompany: recordDropSettings.company_name,
             dragShowCompany: recordDropSettings.show_company,
             dragTitle: this.props.record.data.name,
-            hideZone: () => { this.dropzoneState.visible = false; },
-        }
+            hideZone: () => {
+                this.dropzoneState.visible = false;
+            },
+        };
     }
 }

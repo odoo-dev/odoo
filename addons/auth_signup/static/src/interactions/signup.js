@@ -18,6 +18,4 @@ export class Signup extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("auth_signup.signup", Signup);
+registry.category("public.interactions").add("auth_signup.signup", Signup);

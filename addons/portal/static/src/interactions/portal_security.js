@@ -74,10 +74,12 @@ export class PortalSecurity extends Interaction {
             confirmLabel: _t("Confirm"),
             confirm: async ({ inputEl }) => {
                 const formData = Object.fromEntries(new FormData(inputEl.closest("form")));
-                const wizardId = await this.services.orm.create("res.users.apikeys.description", [{
-                    name: formData['description'],
-                    duration: formData['duration']
-                }]);
+                const wizardId = await this.services.orm.create("res.users.apikeys.description", [
+                    {
+                        name: formData["description"],
+                        duration: formData["duration"],
+                    },
+                ]);
                 const res = await this.waitFor(
                     handleCheckIdentity(
                         this.waitFor(
@@ -163,7 +165,7 @@ export async function handleCheckIdentity(wrapped, ormService, dialogService) {
         }
         const checkId = r.res_id;
         return new Promise((resolve) => {
-            ormService.write("res.users.identitycheck", [checkId], {auth_method: 'password'});
+            ormService.write("res.users.identitycheck", [checkId], { auth_method: "password" });
             dialogService.add(InputConfirmationDialog, {
                 title: _t("Security Control"),
                 body: renderToMarkup("portal.identitycheck"),
@@ -175,9 +177,11 @@ export async function handleCheckIdentity(wrapped, ormService, dialogService) {
                     }
                     let result;
                     try {
-                        result = await ormService.call("res.users.identitycheck", "run_check",
-                            [ checkId ],
-                            { 'context': {'password': inputEl.value} },
+                        result = await ormService.call(
+                            "res.users.identitycheck",
+                            "run_check",
+                            [checkId],
+                            { context: { password: inputEl.value } }
                         );
                     } catch {
                         inputEl.classList.add("is-invalid");

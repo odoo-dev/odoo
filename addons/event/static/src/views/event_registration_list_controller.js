@@ -5,7 +5,6 @@ import { listView } from "@web/views/list/list_view";
 import { ListController } from "@web/views/list/list_controller";
 
 export class EventRegistrationListController extends ListController {
-
     setup() {
         super.setup();
         this.dialog = useService("dialog");
@@ -22,13 +21,10 @@ export class EventRegistrationListController extends ListController {
                 event_id: eventId,
             });
 
-            this.dialog.add(
-                EventRegistrationSummaryDialog,
-                {
-                    model: this.model,
-                    registration: result
-                }
-            );
+            this.dialog.add(EventRegistrationSummaryDialog, {
+                model: this.model,
+                registration: result,
+            });
         } else {
             return super.openRecord(record);
         }
@@ -37,7 +33,7 @@ export class EventRegistrationListController extends ListController {
 
 export const EventRegistrationListView = {
     ...listView,
-   Controller: EventRegistrationListController,
-}
+    Controller: EventRegistrationListController,
+};
 
 registry.category("views").add("registration_summary_dialog_list", EventRegistrationListView);

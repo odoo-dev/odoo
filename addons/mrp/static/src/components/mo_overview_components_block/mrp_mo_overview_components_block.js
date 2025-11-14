@@ -46,12 +46,15 @@ export class MoOverviewComponentsBlock extends Component {
         });
 
         if (this.props.unfoldAll) {
-            this.env.overviewBus.trigger("update-folded", { indexes: Object.keys(this.state.fold), isFolded: false });
+            this.env.overviewBus.trigger("update-folded", {
+                indexes: Object.keys(this.state.fold),
+                isFolded: false,
+            });
         }
 
         useBus(this.env.overviewBus, "unfold-all", () => this.unfoldAll());
 
-        onWillUpdateProps(newProps => {
+        onWillUpdateProps((newProps) => {
             // Update the fold indexes so it matches the newly added lines.
             this.state.fold = { ...this.getIndexStates(newProps), ...this.state.fold };
         });
@@ -64,9 +67,11 @@ export class MoOverviewComponentsBlock extends Component {
         const newState = !this.state.fold[foldIndex];
         if (newState) {
             // If a line is folded, its children lines must be folded as well
-            Object.keys(this.state.fold).filter(key => key.startsWith(foldIndex)).forEach(index => {
-                this.state.fold[index] = newState;
-            });
+            Object.keys(this.state.fold)
+                .filter((key) => key.startsWith(foldIndex))
+                .forEach((index) => {
+                    this.state.fold[index] = newState;
+                });
         }
         this.state.fold[foldIndex] = newState;
         this.env.overviewBus.trigger("update-folded", { indexes: [foldIndex], isFolded: newState });
@@ -75,7 +80,7 @@ export class MoOverviewComponentsBlock extends Component {
     unfoldAll() {
         this.state.unfoldAll = true;
         const foldIndexes = Object.keys(this.state.fold);
-        foldIndexes.forEach(index => this.state.fold[index] = false);
+        foldIndexes.forEach((index) => (this.state.fold[index] = false));
         this.env.overviewBus.trigger("update-folded", { indexes: foldIndexes, isFolded: false });
     }
 
@@ -83,9 +88,9 @@ export class MoOverviewComponentsBlock extends Component {
 
     getIndexStates(props) {
         const indexStates = {};
-        (props?.components ?? []).forEach(component => {
+        (props?.components ?? []).forEach((component) => {
             indexStates[component?.summary.index] = !props.unfoldAll;
-            (component?.replenishments ?? []).forEach(replenishment => {
+            (component?.replenishments ?? []).forEach((replenishment) => {
                 indexStates[replenishment?.summary.index] = !props.unfoldAll;
             });
         });
@@ -101,7 +106,9 @@ export class MoOverviewComponentsBlock extends Component {
     }
 
     hasComponents(replenishment) {
-        return replenishment?.components?.length > 0 || replenishment?.operations?.details?.length > 0;
+        return (
+            replenishment?.components?.length > 0 || replenishment?.operations?.details?.length > 0
+        );
     }
 
     hasComponentsBlock(replenishment) {

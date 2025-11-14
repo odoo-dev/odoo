@@ -7,16 +7,18 @@ import { defineStyle } from "@web/../tests/web_test_helpers";
 setupInteractionWhiteList(["website_forum.website_forum_share", "website.share"]);
 describe.current.tags("interaction_dev");
 
-
-beforeEach(() => defineStyle(/* css */`* { transition: none !important; }`));
+beforeEach(() => defineStyle(/* css */ `* { transition: none !important; }`));
 afterEach(() => {
     document.body.querySelector("#oe_social_share_modal")?.remove();
 });
 
 test("sessionStorage social_share is cleared after start", async () => {
-    sessionStorage.setItem("social_share", JSON.stringify({
-        targetType: "answer",
-    }));
+    sessionStorage.setItem(
+        "social_share",
+        JSON.stringify({
+            targetType: "answer",
+        })
+    );
     expect(sessionStorage.getItem("social_share")).toEqual('{"targetType":"answer"}');
     await startInteractions(`
          <div id="wrapwrap" class="website_forum">
@@ -26,12 +28,14 @@ test("sessionStorage social_share is cleared after start", async () => {
     expect(sessionStorage.getItem("social_share")).toBe(null);
 });
 
-
 describe("target types", () => {
     test("target type answer shows modal with website_forum.social_message_answer", async () => {
-        sessionStorage.setItem("social_share", JSON.stringify({
-            targetType: "answer",
-        }));
+        sessionStorage.setItem(
+            "social_share",
+            JSON.stringify({
+                targetType: "answer",
+            })
+        );
         const { core } = await startInteractions(`
              <div id="wrapwrap" class="website_forum">
                 <div class="o_wforum_question" data-state="active"></div>
@@ -42,13 +46,18 @@ describe("target types", () => {
         await animationFrame();
         await advanceTime(100);
         expect(document.querySelector(".modal")).toBeVisible();
-        expect(document.querySelector(".modal p")).toHaveText(/^By sharing you answer, you will get additional/);
+        expect(document.querySelector(".modal p")).toHaveText(
+            /^By sharing you answer, you will get additional/
+        );
     });
 
     test("target type question shows modal with website_forum.social_message_question", async () => {
-        sessionStorage.setItem("social_share", JSON.stringify({
-            targetType: "question",
-        }));
+        sessionStorage.setItem(
+            "social_share",
+            JSON.stringify({
+                targetType: "question",
+            })
+        );
         const { core } = await startInteractions(`
              <div id="wrapwrap" class="website_forum">
                 <div class="o_wforum_question" data-state="active"></div>
@@ -63,9 +72,12 @@ describe("target types", () => {
     });
 
     test("target type default shows modal with website_forum.social_message_default", async () => {
-        sessionStorage.setItem("social_share", JSON.stringify({
-            targetType: "default",
-        }));
+        sessionStorage.setItem(
+            "social_share",
+            JSON.stringify({
+                targetType: "default",
+            })
+        );
         const { core } = await startInteractions(`
              <div id="wrapwrap" class="website_forum">
                 <div class="o_wforum_question" data-state="active"></div>
@@ -76,15 +88,20 @@ describe("target types", () => {
         await animationFrame();
         await advanceTime(100);
         expect(document.querySelector(".modal")).toBeVisible();
-        expect(document.querySelector(".modal p")).toHaveText(/^Share this content to increase your chances/);
+        expect(document.querySelector(".modal p")).toHaveText(
+            /^Share this content to increase your chances/
+        );
     });
 });
 
 describe("forum share state", () => {
     test("pending state doesn't show .s_share", async () => {
-        sessionStorage.setItem("social_share", JSON.stringify({
-            targetType: "answer",
-        }));
+        sessionStorage.setItem(
+            "social_share",
+            JSON.stringify({
+                targetType: "answer",
+            })
+        );
         const { core } = await startInteractions(`
              <div id="wrapwrap" class="website_forum">
                 <div class="o_wforum_question" data-state="pending"></div>
@@ -99,9 +116,12 @@ describe("forum share state", () => {
     });
 
     test("active state shows .s_share", async () => {
-        sessionStorage.setItem("social_share", JSON.stringify({
-            targetType: "answer",
-        }));
+        sessionStorage.setItem(
+            "social_share",
+            JSON.stringify({
+                targetType: "answer",
+            })
+        );
         const { core } = await startInteractions(`
              <div id="wrapwrap" class="website_forum">
                 <div class="o_wforum_question" data-state="active"></div>

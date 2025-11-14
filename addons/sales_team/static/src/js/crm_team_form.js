@@ -7,7 +7,6 @@ import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 
-
 /**
  * Controller used to directly activate the multi-team option
  * via a button present in the crm team member alert.
@@ -16,7 +15,6 @@ import { useService } from "@web/core/utils/hooks";
  * multiple teams but the multi-team option is deactivated.
  */
 class CrmTeamFormController extends FormController {
-
     setup() {
         super.setup();
         this.orm = useService("orm");
@@ -33,11 +31,13 @@ class CrmTeamFormController extends FormController {
                     "sales_team.membership_multi",
                     true,
                 ]);
-                alert?.classList.add('d-none');
+                alert?.classList.add("d-none");
             } catch {
                 if (alert) {
                     alert.classList.replace("alert-info", "alert-danger");
-                    alert.textContent = _t("An error occurred while activating the Multi-Team option.");
+                    alert.textContent = _t(
+                        "An error occurred while activating the Multi-Team option."
+                    );
                 }
             }
             return false;

@@ -1,11 +1,11 @@
-import { Component, onWillStart, useState, useSubEnv } from '@odoo/owl';
-import { rpc } from '@web/core/network/rpc';
-import { useBus } from '@web/core/utils/hooks';
-import comparisonUtils from '@website_sale_comparison/js/website_sale_comparison_utils';
-import { ProductRow } from '../product_row/product_row';
+import { Component, onWillStart, useState, useSubEnv } from "@odoo/owl";
+import { rpc } from "@web/core/network/rpc";
+import { useBus } from "@web/core/utils/hooks";
+import comparisonUtils from "@website_sale_comparison/js/website_sale_comparison_utils";
+import { ProductRow } from "../product_row/product_row";
 
 export class ProductComparisonBottomBar extends Component {
-    static template = 'website_sale_comparison.ProductComparisonBottomBar';
+    static template = "website_sale_comparison.ProductComparisonBottomBar";
     static components = { ProductRow };
     static props = {
         bus: Object,
@@ -15,7 +15,7 @@ export class ProductComparisonBottomBar extends Component {
         super.setup();
         this.state = useState({ products: new Map() });
         useBus(this.props.bus, comparisonUtils.COMPARISON_EVENT, (_) => this._loadProducts());
-        useSubEnv({bus: this.props.bus});
+        useSubEnv({ bus: this.props.bus });
         onWillStart(this._loadProducts);
     }
 
@@ -30,7 +30,7 @@ export class ProductComparisonBottomBar extends Component {
             this.state.products.clear();
             return;
         }
-        const productData = await rpc('/shop/compare/get_product_data', {
+        const productData = await rpc("/shop/compare/get_product_data", {
             product_ids: productIds,
         });
 
@@ -45,7 +45,7 @@ export class ProductComparisonBottomBar extends Component {
      */
     get comparisonUrl() {
         const productIds = Array.from(this.state.products.keys());
-        return `/shop/compare?products=${encodeURIComponent(productIds.join(','))}`;
+        return `/shop/compare?products=${encodeURIComponent(productIds.join(","))}`;
     }
 
     /**
@@ -55,8 +55,6 @@ export class ProductComparisonBottomBar extends Component {
     get productCount() {
         return this.state.products.size;
     }
-
-
 
     /**
      * Clear all products from comparison.

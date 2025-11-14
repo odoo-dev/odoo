@@ -6,4 +6,4 @@ const MoveListView = {
     searchMenuTypes: [],
 };
 
-registry.category("views").add('subcontracting_portal_move_list_view', MoveListView);
+registry.category("views").add("subcontracting_portal_move_list_view", MoveListView);

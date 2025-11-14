@@ -5,7 +5,6 @@ import { ProductTemplate } from "./mock_server/mock_models/product_template";
 import { SaleOrder } from "./mock_server/mock_models/sale_order";
 import { SaleOrderLine } from "./mock_server/mock_models/sale_order_line";
 
-
 export const saleModels = {
     ...mailModels,
     ProductProduct,

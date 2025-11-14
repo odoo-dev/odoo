@@ -72,7 +72,4 @@ export class WebsiteEventTrackTimer extends Interaction {
 
 registry
     .category("public.interactions")
-    .add(
-        "website_event_track.website_event_track_timer",
-        WebsiteEventTrackTimer
-    );
+    .add("website_event_track.website_event_track_timer", WebsiteEventTrackTimer);

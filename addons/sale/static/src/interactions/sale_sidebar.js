@@ -21,6 +21,4 @@ export class SaleSidebar extends Sidebar {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("sale.sale_sidebar", SaleSidebar);
+registry.category("public.interactions").add("sale.sale_sidebar", SaleSidebar);

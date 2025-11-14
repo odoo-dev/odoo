@@ -15,7 +15,8 @@ export class AccountMoveListController extends FileUploadListController {
         super.setup();
         this.orm = useService("orm");
         this.account_move_service = useService("account_move");
-        this.showUploadButton = this.props.context.default_move_type !== 'entry' || 'active_id' in this.props.context;
+        this.showUploadButton =
+            this.props.context.default_move_type !== "entry" || "active_id" in this.props.context;
     }
 
     get actionMenuProps() {
@@ -27,7 +28,9 @@ export class AccountMoveListController extends FileUploadListController {
     }
 
     async loadExtraPrintItems() {
-        return this.orm.call("account.move", "get_extra_print_items", [this.actionMenuProps.getActiveIds()]);
+        return this.orm.call("account.move", "get_extra_print_items", [
+            this.actionMenuProps.getActiveIds(),
+        ]);
     }
 
     async onDeleteSelectedRecords() {
@@ -38,10 +41,9 @@ export class AccountMoveListController extends FileUploadListController {
             if (this.model.root.isDomainSelected || this.model.root.selection.length > 1) {
                 body = _t("Are you sure you want to delete these records?");
             }
-            deleteConfirmationDialogProps.body = await this.account_move_service.getDeletionDialogBody(body, selectedResIds);
+            deleteConfirmationDialogProps.body =
+                await this.account_move_service.getDeletionDialogBody(body, selectedResIds);
         }
-        this.deleteRecordsWithConfirmation(
-            deleteConfirmationDialogProps
-        );
+        this.deleteRecordsWithConfirmation(deleteConfirmationDialogProps);
     }
 }

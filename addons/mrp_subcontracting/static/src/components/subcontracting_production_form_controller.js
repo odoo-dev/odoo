@@ -11,7 +11,9 @@ class SubcontractingProductionFormController extends FormController {
                     key: "assign",
                     description: _t("Check Availability"),
                     callback: () => {
-                        this.model.orm.call('mrp.production', 'action_assign', [this.model.root.resId]);
+                        this.model.orm.call("mrp.production", "action_assign", [
+                            this.model.root.resId,
+                        ]);
                         this.model.load();
                     },
                 },
@@ -19,11 +21,15 @@ class SubcontractingProductionFormController extends FormController {
                     key: "split",
                     description: _t("Create New Production"),
                     callback: async () => {
-                        const res = await this.model.orm.call('mrp.production', 'action_split_subcontracting', [this.model.root.resId]);
+                        const res = await this.model.orm.call(
+                            "mrp.production",
+                            "action_split_subcontracting",
+                            [this.model.root.resId]
+                        );
                         this.model.action.doAction(res);
-                    }
-                }
-            ]
+                    },
+                },
+            ],
         };
     }
 }

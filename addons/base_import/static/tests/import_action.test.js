@@ -709,7 +709,7 @@ describe("Import view", () => {
             },
         });
 
-        redirect("/odoo/action-2")
+        redirect("/odoo/action-2");
         await mountWebClient();
         onRpc("base_import.import", "parse_preview", ({ route }) => {
             expect.step(route);
@@ -1448,7 +1448,7 @@ describe("Import view", () => {
 
     test("date format should be converted to strftime", async () => {
         let parseCount = 0;
-        redirect("/odoo/action-2")
+        redirect("/odoo/action-2");
         await mountWebClient();
         onRpc("base_import.import", "parse_preview", async ({ args }) => {
             parseCount++;

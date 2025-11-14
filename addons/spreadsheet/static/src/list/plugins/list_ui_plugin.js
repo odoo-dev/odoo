@@ -9,7 +9,6 @@ const { PIVOT_TABLE_CONFIG } = constants;
  */
 
 export class ListUIPlugin extends OdooUIPlugin {
-
     /**
      * Handle a spreadsheet command
      * @param {Object} cmd Command
@@ -32,7 +31,6 @@ export class ListUIPlugin extends OdooUIPlugin {
     // -------------------------------------------------------------------------
     // Handlers
     // -------------------------------------------------------------------------
-
 
     _addTable({ sheetId, col, row, linesNumber, columns }) {
         const zone = {

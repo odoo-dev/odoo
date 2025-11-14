@@ -1,5 +1,5 @@
-import { registry } from '@web/core/registry';
-import { Interaction } from '@web/public/interaction';
+import { registry } from "@web/core/registry";
+import { Interaction } from "@web/public/interaction";
 
 export class PaymentButton extends Interaction {
     static selector = '[name="o_payment_submit_button"]';
@@ -8,10 +8,10 @@ export class PaymentButton extends Interaction {
         this.paymentButton = this.el;
         this.iconClass = this.paymentButton.dataset.iconClass;
         this._enable();
-        this.env.bus.addEventListener('enablePaymentButton', this._enable.bind(this));
-        this.env.bus.addEventListener('disablePaymentButton', this._disable.bind(this));
-        this.env.bus.addEventListener('hidePaymentButton', this._hide.bind(this));
-        this.env.bus.addEventListener('showPaymentButton', this._show.bind(this));
+        this.env.bus.addEventListener("enablePaymentButton", this._enable.bind(this));
+        this.env.bus.addEventListener("disablePaymentButton", this._disable.bind(this));
+        this.env.bus.addEventListener("hidePaymentButton", this._hide.bind(this));
+        this.env.bus.addEventListener("showPaymentButton", this._show.bind(this));
     }
 
     /**
@@ -37,8 +37,9 @@ export class PaymentButton extends Interaction {
      * @return {boolean} Whether the form can be submitted.
      */
     _canSubmit() {
-        const paymentForm = document.querySelector('#o_payment_form');
-        if (!paymentForm) {  // Payment form is not present.
+        const paymentForm = document.querySelector("#o_payment_form");
+        if (!paymentForm) {
+            // Payment form is not present.
             return true; // Ignore the check.
         }
         return document.querySelectorAll('input[name="o_payment_radio"]:checked').length === 1;
@@ -71,7 +72,7 @@ export class PaymentButton extends Interaction {
      * @return {void}
      */
     _hide() {
-        this.paymentButton.classList.add('d-none');
+        this.paymentButton.classList.add("d-none");
     }
 
     /**
@@ -81,8 +82,8 @@ export class PaymentButton extends Interaction {
      * @return {void}
      */
     _show() {
-        this.paymentButton.classList.remove('d-none');
+        this.paymentButton.classList.remove("d-none");
     }
 }
 
-registry.category('public.interactions').add('payment.payment_button', PaymentButton);
+registry.category("public.interactions").add("payment.payment_button", PaymentButton);

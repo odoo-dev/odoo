@@ -12,75 +12,75 @@ describe.current.tags("desktop");
 beforeEach(() => {
     ProjectProject._records = [
         {
-            id:5,
-            name: "Project One"
+            id: 5,
+            name: "Project One",
         },
     ];
 
     ProjectTask._records = [
         {
             id: 1,
-            name: 'task one',
+            name: "task one",
             project_id: 5,
             closed_subtask_count: 1,
             closed_depend_on_count: 1,
             subtask_count: 4,
             child_ids: [2, 3, 4, 7],
-            depend_on_ids: [5,6],
-            state: '04_waiting_normal',
+            depend_on_ids: [5, 6],
+            state: "04_waiting_normal",
         },
         {
-            name: 'task two',
+            name: "task two",
             parent_id: 1,
             closed_subtask_count: 0,
             subtask_count: 0,
             child_ids: [],
             depend_on_ids: [],
-            state: '03_approved'
+            state: "03_approved",
         },
         {
-            name: 'task three',
+            name: "task three",
             parent_id: 1,
             closed_subtask_count: 0,
             subtask_count: 0,
             child_ids: [],
             depend_on_ids: [],
-            state: '02_changes_requested'
+            state: "02_changes_requested",
         },
         {
-            name: 'task four',
+            name: "task four",
             parent_id: 1,
             closed_subtask_count: 0,
             subtask_count: 0,
             child_ids: [],
             depend_on_ids: [],
-            state: '1_done'
+            state: "1_done",
         },
         {
-            name: 'task five',
+            name: "task five",
             closed_subtask_count: 0,
             subtask_count: 1,
             child_ids: [6],
             depend_on_ids: [],
-            state: '03_approved'
+            state: "03_approved",
         },
         {
-            name: 'task six',
+            name: "task six",
             parent_id: 5,
             closed_subtask_count: 0,
             subtask_count: 0,
             child_ids: [],
             depend_on_ids: [],
-            state: '1_canceled'
+            state: "1_canceled",
         },
         {
-            name: 'task seven',
+            name: "task seven",
             parent_id: 1,
             closed_subtask_count: 0,
             subtask_count: 0,
             child_ids: [],
             depend_on_ids: [],
-            state: '01_in_progress',
+            state: "01_in_progress",
         },
     ];
 
@@ -117,38 +117,56 @@ test("test Project Task Calendar Popover with task_stage_with_state_selection wi
     });
 
     expect('div[name="child_ids"] .o_data_row').toHaveCount(4, {
-        message: "The subtasks list should display all subtasks by default, thus we are looking for 4 in total"
+        message:
+            "The subtasks list should display all subtasks by default, thus we are looking for 4 in total",
     });
     expect('div[name="depend_on_ids"] .o_data_row').toHaveCount(2, {
-        message: "The depend on tasks list should display all blocking tasks by default, thus we are looking for 2 in total"
+        message:
+            "The depend on tasks list should display all blocking tasks by default, thus we are looking for 2 in total",
     });
 
-    expect("div[name='child_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button").toHaveText("Hide closed tasks");
-    expect("div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button").toHaveText("Hide closed tasks");
+    expect(
+        "div[name='child_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button"
+    ).toHaveText("Hide closed tasks");
+    expect(
+        "div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button"
+    ).toHaveText("Hide closed tasks");
 
     await click("div[name='child_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button");
     await animationFrame();
 
-    expect("div[name='child_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button").toHaveText("Show closed tasks");
-    expect("div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button").toHaveText("Hide closed tasks");
+    expect(
+        "div[name='child_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button"
+    ).toHaveText("Show closed tasks");
+    expect(
+        "div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button"
+    ).toHaveText("Hide closed tasks");
 
     expect('div[name="child_ids"] .o_data_row').toHaveCount(3, {
-        message: "The subtasks list should only display the open subtasks of the task, in this case 3"
+        message:
+            "The subtasks list should only display the open subtasks of the task, in this case 3",
     });
     expect('div[name="depend_on_ids"] .o_data_row').toHaveCount(2, {
-        message: "The depend on tasks list should still display all blocking tasks, in this case 2"
+        message: "The depend on tasks list should still display all blocking tasks, in this case 2",
     });
 
-    await click("div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button");
+    await click(
+        "div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button"
+    );
     await animationFrame();
 
-    expect("div[name='child_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button").toHaveText("Show closed tasks");
-    expect("div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button").toHaveText("1 closed tasks");
+    expect(
+        "div[name='child_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button"
+    ).toHaveText("Show closed tasks");
+    expect(
+        "div[name='depend_on_ids'] .o_field_x2many_list_row_add a.o_toggle_closed_task_button"
+    ).toHaveText("1 closed tasks");
 
     expect('div[name="child_ids"] .o_data_row').toHaveCount(3, {
-        message: "The subtasks list should only display the open subtasks of the task, in this case 3"
+        message:
+            "The subtasks list should only display the open subtasks of the task, in this case 3",
     });
     expect('div[name="depend_on_ids"] .o_data_row').toHaveCount(1, {
-        message: "The depend on tasks list should only display open tasks, in this case 1"
+        message: "The depend on tasks list should only display open tasks, in this case 1",
     });
 });

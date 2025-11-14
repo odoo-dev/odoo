@@ -1,5 +1,9 @@
 import { _t } from "@web/core/l10n/translation";
-import { buildM2OFieldDescription, extractM2OFieldProps, m2oSupportedOptions } from "@web/views/fields/many2one/many2one_field";
+import {
+    buildM2OFieldDescription,
+    extractM2OFieldProps,
+    m2oSupportedOptions,
+} from "@web/views/fields/many2one/many2one_field";
 import { registry } from "@web/core/registry";
 import { ProductNameAndDescriptionField } from "@product/product_name_and_description/product_name_and_description";
 
@@ -23,11 +27,11 @@ export class ProductLabelSectionAndNoteField extends ProductNameAndDescriptionFi
 
     get sectionAndNoteIsReadonly() {
         return (
-            this.props.readonly
-            && this.isProductClickable
-            && (["cancel", "posted"].includes(this.props.record.evalContext.parent.state)
-            || this.props.record.evalContext.parent.locked)
-        )
+            this.props.readonly &&
+            this.isProductClickable &&
+            (["cancel", "posted"].includes(this.props.record.evalContext.parent.state) ||
+                this.props.record.evalContext.parent.locked)
+        );
     }
 
     get isSection() {
@@ -48,9 +52,12 @@ export class ProductLabelSectionAndNoteField extends ProductNameAndDescriptionFi
     }
 
     parseLabel(value) {
-        return (this.productName && value && this.productName.concat("\n", value))
-            || (this.productName && !value && this.productName)
-            || (value || "");
+        return (
+            (this.productName && value && this.productName.concat("\n", value)) ||
+            (this.productName && !value && this.productName) ||
+            value ||
+            ""
+        );
     }
 
     shouldShowWarning() {
@@ -72,7 +79,7 @@ export const productLabelSectionAndNoteField = {
             label: _t("Show Label Warning"),
             name: "show_label_warning",
             type: "boolean",
-            default: false
+            default: false,
         },
     ],
     extractProps({ options }) {

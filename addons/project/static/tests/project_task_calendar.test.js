@@ -200,7 +200,7 @@ test("tasks to plan should be visible in the sidebar when `default_project_id` i
     });
     expect(".o_calendar_view").toHaveCount(1);
     expect(".o_task_to_plan_draggable").toHaveCount(2);
-    expect(queryAllTexts(".o_task_to_plan_draggable")).toEqual(['Task-10', 'Task-11']);
+    expect(queryAllTexts(".o_task_to_plan_draggable")).toEqual(["Task-10", "Task-11"]);
     expect(".o_calendar_view .o_calendar_sidebar h5").toHaveText("Drag Tasks to Schedule");
     expect.verifySteps(["search_read", "fetch tasks to schedule"]);
 });
@@ -216,11 +216,11 @@ test("search domain should be taken into account in Tasks to Schedule", async ()
     await mountView({
         ...calendarMountParams,
         context: { default_project_id: 1 },
-        domain: [['is_closed', '=', false]],
+        domain: [["is_closed", "=", false]],
     });
     expect(".o_calendar_view").toHaveCount(1);
     expect(".o_task_to_plan_draggable").toHaveCount(1);
-    expect(".o_task_to_plan_draggable").toHaveText('Task-10');
+    expect(".o_task_to_plan_draggable").toHaveText("Task-10");
     expect(".o_calendar_view .o_calendar_sidebar h5").toHaveText("Drag Tasks to Schedule");
     expect.verifySteps(["search_read", "fetch tasks to schedule"]);
 });
@@ -236,11 +236,15 @@ test("planned dates used in search domain should not be taken into account in Ta
     await mountView({
         ...calendarMountParams,
         context: { default_project_id: 1 },
-        domain: [['is_closed', '=', false], ['date_deadline', '!=', false], ['planned_date_begin', '!=', false]],
+        domain: [
+            ["is_closed", "=", false],
+            ["date_deadline", "!=", false],
+            ["planned_date_begin", "!=", false],
+        ],
     });
     expect(".o_calendar_view").toHaveCount(1);
     expect(".o_task_to_plan_draggable").toHaveCount(1);
-    expect(".o_task_to_plan_draggable").toHaveText('Task-10');
+    expect(".o_task_to_plan_draggable").toHaveText("Task-10");
     expect(".o_calendar_view .o_calendar_sidebar h5").toHaveText("Drag Tasks to Schedule");
     expect.verifySteps(["search_read", "fetch tasks to schedule"]);
 });
@@ -286,7 +290,7 @@ test("project.task (calendar): toggle sub-tasks", async () => {
             id: 1,
             project_id: 1,
             name: "Task 1",
-            stage_id:  1,
+            stage_id: 1,
             display_in_project: true,
             date_deadline: "2024-01-09 07:00:00",
             create_date: "2024-01-03 12:00:00",
@@ -295,11 +299,11 @@ test("project.task (calendar): toggle sub-tasks", async () => {
             id: 2,
             project_id: 1,
             name: "Task 2",
-            stage_id:  1,
+            stage_id: 1,
             display_in_project: false,
             date_deadline: "2024-01-09 07:00:00",
             create_date: "2024-01-03 12:00:00",
-        }
+        },
     ];
     await mountView(calendarMountParams);
     expect(".o_event").toHaveCount(1);

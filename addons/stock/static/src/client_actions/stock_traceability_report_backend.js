@@ -104,11 +104,11 @@ export class TraceabilityReport extends Component {
 
     onClickOpenLot(line) {
         this.actionService.doAction({
-            type: 'ir.actions.act_window',
-            res_model: 'stock.lot',
+            type: "ir.actions.act_window",
+            res_model: "stock.lot",
             res_id: line.lot_id,
-            views: [[false, 'form']],
-            target: 'current',
+            views: [[false, "form"]],
+            target: "current",
         });
     }
 

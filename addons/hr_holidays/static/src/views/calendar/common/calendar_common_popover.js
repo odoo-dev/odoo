@@ -15,7 +15,7 @@ export class TimeOffCalendarCommonPopover extends CalendarCommonPopover {
     }
 
     onEditEvent() {
-        this.props.close()
+        this.props.close();
         this.actionService.doAction({
             name: this.record.display_name,
             type: "ir.actions.act_window",

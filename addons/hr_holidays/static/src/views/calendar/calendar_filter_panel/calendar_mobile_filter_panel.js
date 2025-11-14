@@ -5,5 +5,4 @@ export class TimeOffCalendarMobileFilterPanel extends CalendarMobileFilterPanel 
         ...CalendarMobileFilterPanel.components,
     };
     static template = "hr_holidays.TimeOffCalendarMobileFilterPanel";
-
 }

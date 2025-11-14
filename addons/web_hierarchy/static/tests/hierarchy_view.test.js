@@ -1573,4 +1573,3 @@ test("Open record on new window", async () => {
         'set current_state-{"actionStack":[{"displayName":"","model":"hr.employee","view_type":"hierarchy"}],"model":"hr.employee"}',
     ]);
 });
-

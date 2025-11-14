@@ -9,45 +9,46 @@ import { useInputField } from "@web/views/fields/input_field_hook";
 const standardAddressFields = {
     street: {
         label: _t("Street field"),
-        type: ["char"]
+        type: ["char"],
     },
     street2: {
         label: _t("Additional street field"),
-        type: ["char"]
+        type: ["char"],
     },
     city: {
         label: _t("City field"),
-        type: ["char"]
+        type: ["char"],
     },
     state_id: {
         label: _t("State field"),
-        type: ["char", "many2one"]
+        type: ["char", "many2one"],
     },
     zip: {
         label: _t("Zip field"),
-        type: ["char"]
+        type: ["char"],
     },
     country_id: {
         label: _t("Country field"),
-        type: ["char", "many2one"]
-    }
-}
+        type: ["char", "many2one"],
+    },
+};
 
 export class AddressAutoComplete extends CharField {
     static template = "google_address_autocomplete.AddressAutoCompleteTemplate";
     static components = { AutoComplete, ...CharField.components };
 
-    static props = {...CharField.props,
+    static props = {
+        ...CharField.props,
         addressFieldMap: {
             type: Object,
             optional: true,
-        }
-    }
+        },
+    };
 
     static defaultProps = {
         ...CharField.defaultProps,
         addressFieldMap: {},
-    }
+    };
 
     setup() {
         super.setup();
@@ -140,15 +141,13 @@ export const addressAutoComplete = {
     supportedTypes: ["char"],
     supportedOptions: [
         ...charField.supportedOptions,
-        ...Object.entries(standardAddressFields).map(([fname, data]) => {
-            return {
-                label: data.label,
-                placeholder: fname,
-                type : "field",
-                name: fname,
-                availableTypes: data.type,
-            }
-        })
+        ...Object.entries(standardAddressFields).map(([fname, data]) => ({
+            label: data.label,
+            placeholder: fname,
+            type: "field",
+            name: fname,
+            availableTypes: data.type,
+        })),
     ],
     extractProps: (fieldInfo, dynamicInfo) => {
         const { options } = fieldInfo;
@@ -162,6 +161,6 @@ export const addressAutoComplete = {
         });
         props.addressFieldMap = addressFieldMap;
         return props;
-    }
+    },
 };
 registry.category("fields").add("google_address_autocomplete", addressAutoComplete);

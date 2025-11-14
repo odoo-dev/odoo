@@ -6,10 +6,6 @@ export class RatingRating extends models.ServerModel {
     res_model = fields.Char({ string: "Related Document Model", related: false }); // FIXME: related removed otherwise it cannot be set properly
 
     get _to_store_defaults() {
-        return [
-            "rating",
-            "rating_image_url",
-            "rating_text",
-        ]
+        return ["rating", "rating_image_url", "rating_text"];
     }
 }

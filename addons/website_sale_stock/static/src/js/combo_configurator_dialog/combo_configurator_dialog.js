@@ -1,7 +1,5 @@
-import { patch } from '@web/core/utils/patch';
-import {
-    ComboConfiguratorDialog
-} from '@sale/js/combo_configurator_dialog/combo_configurator_dialog';
+import { patch } from "@web/core/utils/patch";
+import { ComboConfiguratorDialog } from "@sale/js/combo_configurator_dialog/combo_configurator_dialog";
 
 patch(ComboConfiguratorDialog.prototype, {
     async selectComboItem(comboId, comboItem) {
@@ -15,8 +13,8 @@ patch(ComboConfiguratorDialog.prototype, {
         if (!this.isComboQuantityAllowed(quantity)) {
             quantity = Math.min(
                 ...this._selectedComboItems
-                    .map(comboItem => comboItem.product.free_qty)
-                    .filter(freeQty => freeQty !== undefined)
+                    .map((comboItem) => comboItem.product.free_qty)
+                    .filter((freeQty) => freeQty !== undefined)
             );
         }
         return super.setQuantity(quantity);
@@ -29,8 +27,8 @@ patch(ComboConfiguratorDialog.prototype, {
      * @return {Boolean} Whether the combo quantity can be added to the cart.
      */
     isComboQuantityAllowed(quantity) {
-        return this._selectedComboItems.every(
-            comboItem => comboItem.product.isQuantityAllowed(quantity)
+        return this._selectedComboItems.every((comboItem) =>
+            comboItem.product.isQuantityAllowed(quantity)
         );
     },
 });

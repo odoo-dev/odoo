@@ -16,6 +16,4 @@ export class PurchaseSidebar extends Sidebar {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("purchase.purchase_sidebar", PurchaseSidebar);
+registry.category("public.interactions").add("purchase.purchase_sidebar", PurchaseSidebar);

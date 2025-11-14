@@ -16,7 +16,7 @@ class ListGroup extends Component {
 class ShowGroupedList extends Component {
     static template = "account.GroupedListTemplate";
     static components = { ListGroup };
-    static props = {...standardFieldProps};
+    static props = { ...standardFieldProps };
     getValue() {
         const value = this.props.record.data[this.props.name];
         return value

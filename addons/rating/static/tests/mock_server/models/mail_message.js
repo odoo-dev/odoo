@@ -15,7 +15,10 @@ export class MailMessage extends mailModels.MailMessage {
         store = kwargs.store;
         fields = kwargs.fields;
 
-        super._to_store(...arguments, makeKwArgs({ fields: fields.filter((field) => field !== "rating_id") }));
+        super._to_store(
+            ...arguments,
+            makeKwArgs({ fields: fields.filter((field) => field !== "rating_id") })
+        );
         if (!fields.includes("rating_id")) {
             return;
         }

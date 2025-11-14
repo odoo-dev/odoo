@@ -10,18 +10,18 @@ export class PortalPrepayment extends Interaction {
     };
     dynamicContent = {
         _amountPrepaymentButton: {
-            't-on-click': () => this.reloadAmount(true),
-            't-att-class': () => ({ 'active': this.isDownPayment }),
+            "t-on-click": () => this.reloadAmount(true),
+            "t-att-class": () => ({ active: this.isDownPayment }),
         },
         _amountTotalButton: {
-            't-on-click': () => this.reloadAmount(false),
-            't-att-class': () => ({ 'active': !this.isDownPayment }),
+            "t-on-click": () => this.reloadAmount(false),
+            "t-att-class": () => ({ active: !this.isDownPayment }),
         },
         'span[id="o_sale_portal_use_amount_prepayment"]': {
-            't-att-class': () => ({ 'd-none': !this.isDownPayment }),
+            "t-att-class": () => ({ "d-none": !this.isDownPayment }),
         },
         'span[id="o_sale_portal_use_amount_total"]': {
-            't-att-class': () => ({ 'd-none': this.isDownPayment }),
+            "t-att-class": () => ({ "d-none": this.isDownPayment }),
         },
     };
 
@@ -33,15 +33,15 @@ export class PortalPrepayment extends Interaction {
             'button[name="o_sale_portal_amount_total_button"]'
         );
         const params = new URLSearchParams(window.location.search);
-        if (params.has('amount_selection')) {
-           this.isDownPayment = params.get('amount_selection') === 'down_payment'
-        } else if (params.has('payment_amount')) {
-            const paymentAmount = params.get('payment_amount');
+        if (params.has("amount_selection")) {
+            this.isDownPayment = params.get("amount_selection") === "down_payment";
+        } else if (params.has("payment_amount")) {
+            const paymentAmount = params.get("payment_amount");
             this.isDownPayment = Number(paymentAmount) < Number(this.el.dataset.orderAmountTotal);
         } else {
             this.isDownPayment = true;
         }
-        this.showPaymentModal = params.has('payment_amount') || params.has('amount_selection');
+        this.showPaymentModal = params.has("payment_amount") || params.has("amount_selection");
     }
 
     start() {
@@ -53,11 +53,9 @@ export class PortalPrepayment extends Interaction {
 
     reloadAmount(isDownPayment) {
         const searchParams = new URLSearchParams(window.location.search);
-        searchParams.set('amount_selection', isDownPayment ? 'down_payment' : 'full_amount');
+        searchParams.set("amount_selection", isDownPayment ? "down_payment" : "full_amount");
         window.location.search = searchParams.toString();
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("sale.portal_prepayment", PortalPrepayment);
+registry.category("public.interactions").add("sale.portal_prepayment", PortalPrepayment);

@@ -6,7 +6,7 @@ export class SaleActionHelper extends Component {
     static template = "sale.SaleActionHelper";
     static props = {
         noContentHelp: String,
-    }
+    };
 
     setup() {
         this.dialogService = useService("dialog");
@@ -15,6 +15,6 @@ export class SaleActionHelper extends Component {
     openVideoPreview() {
         this.dialogService.add(SaleActionHelperDialog, {
             url: "https://www.youtube.com/embed/N4zw-2t6spk?autoplay=1",
-        })
+        });
     }
-};
+}

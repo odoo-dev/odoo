@@ -1,14 +1,13 @@
 /* global paypal */
 
-import { loadJS } from '@web/core/assets';
-import { _t } from '@web/core/l10n/translation';
-import { rpc, RPCError } from '@web/core/network/rpc';
-import { patch } from '@web/core/utils/patch';
+import { loadJS } from "@web/core/assets";
+import { _t } from "@web/core/l10n/translation";
+import { rpc, RPCError } from "@web/core/network/rpc";
+import { patch } from "@web/core/utils/patch";
 
-import { PaymentForm } from '@payment/interactions/payment_form';
+import { PaymentForm } from "@payment/interactions/payment_form";
 
 patch(PaymentForm.prototype, {
-
     setup() {
         super.setup();
         this.paypalData = {}; // Store the component of each instantiated payment method.
@@ -22,10 +21,10 @@ patch(PaymentForm.prototype, {
      */
     async willStart() {
         // Suffix the button IDs to prevent collisions when multiple button containers are present.
-        const paypalEnabledButtons = [...document.querySelectorAll('#o_paypal_enabled_button')];
-        const paypalDisabledButtons = [...document.querySelectorAll('#o_paypal_disabled_button')];
-        paypalEnabledButtons.forEach((button, index) => button.id += `_${index}`);
-        paypalDisabledButtons.forEach((button, index) => button.id += `_${index}`);
+        const paypalEnabledButtons = [...document.querySelectorAll("#o_paypal_enabled_button")];
+        const paypalDisabledButtons = [...document.querySelectorAll("#o_paypal_disabled_button")];
+        paypalEnabledButtons.forEach((button, index) => (button.id += `_${index}`));
+        paypalDisabledButtons.forEach((button, index) => (button.id += `_${index}`));
 
         await super.willStart(...arguments);
     },
@@ -39,9 +38,9 @@ patch(PaymentForm.prototype, {
      */
     async _expandInlineForm(radio) {
         const providerCode = this._getProviderCode(radio);
-        if (providerCode !== 'paypal') {
-            for (const buttonContainer of document.querySelectorAll('#o_paypal_button_container')) {
-                buttonContainer.classList.add('d-none');
+        if (providerCode !== "paypal") {
+            for (const buttonContainer of document.querySelectorAll("#o_paypal_button_container")) {
+                buttonContainer.classList.add("d-none");
             }
         }
         await super._expandInlineForm(...arguments);
@@ -70,58 +69,57 @@ patch(PaymentForm.prototype, {
      * @return {void}
      */
     async _prepareInlineForm(providerId, providerCode, paymentOptionId, paymentMethodCode, flow) {
-        if (providerCode !== 'paypal') {
+        if (providerCode !== "paypal") {
             await super._prepareInlineForm(...arguments);
             return;
         }
 
         this._hideInputs();
-        this._setPaymentFlow('direct');
-        const paypalLoadingList = document.querySelectorAll('#o_paypal_loading');
+        this._setPaymentFlow("direct");
+        const paypalLoadingList = document.querySelectorAll("#o_paypal_loading");
         for (const paypalLoading of paypalLoadingList) {
-            paypalLoading.classList.remove('d-none');
+            paypalLoading.classList.remove("d-none");
         }
 
         // Check if instantiation of the component is needed.
         if (this.selectedOptionId && this.selectedOptionId !== paymentOptionId) {
             Object.entries(this.paypalData).forEach(([_key, value]) => {
-                value.enabledButtons.forEach(btn => btn.hide());
-                value.disabledButtons.forEach(btn => btn.hide());
+                value.enabledButtons.forEach((btn) => btn.hide());
+                value.disabledButtons.forEach((btn) => btn.hide());
             });
         }
         const currentPayPalData = this.paypalData[paymentOptionId];
         if (currentPayPalData && this.selectedOptionId !== paymentOptionId) {
-            const paypalSDKURL = this.paypalData[paymentOptionId]['sdkURL']
+            const paypalSDKURL = this.paypalData[paymentOptionId]["sdkURL"];
             await this.waitFor(loadJS(paypalSDKURL));
-            this.paypalData[this.selectedOptionId]['enabledButtons'].forEach(btn => btn.show());
-            this.paypalData[this.selectedOptionId]['disabledButtons'].forEach(btn => btn.show());
-        }
-        else if (!currentPayPalData) {
+            this.paypalData[this.selectedOptionId]["enabledButtons"].forEach((btn) => btn.show());
+            this.paypalData[this.selectedOptionId]["disabledButtons"].forEach((btn) => btn.show());
+        } else if (!currentPayPalData) {
             this.paypalData[paymentOptionId] = {};
             const radio = document.querySelector('input[name="o_payment_radio"]:checked');
             let inlineFormValues;
-            let paypalColor = 'blue';
+            let paypalColor = "blue";
             if (radio) {
-                inlineFormValues = JSON.parse(radio.dataset['paypalInlineFormValues']);
-                paypalColor = radio.dataset['paypalColor'];
+                inlineFormValues = JSON.parse(radio.dataset["paypalInlineFormValues"]);
+                paypalColor = radio.dataset["paypalColor"];
             }
 
             // https://developer.paypal.com/sdk/js/configuration/#link-queryparameters
             const { client_id, currency_code } = inlineFormValues;
-            const paypalSDKURL = `https://www.paypal.com/sdk/js?client-id=${
-                client_id}&components=buttons&currency=${currency_code}&intent=capture`;
-            this.paypalData[paymentOptionId]['sdkURL'] = paypalSDKURL;
+            const paypalSDKURL = `https://www.paypal.com/sdk/js?client-id=${client_id}&components=buttons&currency=${currency_code}&intent=capture`;
+            this.paypalData[paymentOptionId]["sdkURL"] = paypalSDKURL;
             await this.waitFor(loadJS(paypalSDKURL));
 
             // Create the two sets of PayPal buttons.
             // See https://developer.paypal.com/sdk/js/reference.
-            this.paypalData[paymentOptionId]['enabledButtons'] = [];
-            document.querySelectorAll('[id^="o_paypal_enabled_button"]').forEach(domButton => {
+            this.paypalData[paymentOptionId]["enabledButtons"] = [];
+            document.querySelectorAll('[id^="o_paypal_enabled_button"]').forEach((domButton) => {
                 const enabledButton = paypal.Buttons({
                     fundingSource: paypal.FUNDING.PAYPAL,
-                    style: { // https://developer.paypal.com/sdk/js/reference/#link-style
+                    style: {
+                        // https://developer.paypal.com/sdk/js/reference/#link-style
                         color: paypalColor,
-                        label: 'paypal',
+                        label: "paypal",
                         disableMaxWidth: true,
                         borderRadius: 6,
                     },
@@ -131,31 +129,32 @@ patch(PaymentForm.prototype, {
                     onError: this._paypalOnError.bind(this),
                 });
                 enabledButton.render(`#${domButton.id}`);
-                this.paypalData[paymentOptionId]['enabledButtons'].push(enabledButton);
+                this.paypalData[paymentOptionId]["enabledButtons"].push(enabledButton);
             });
 
-            this.paypalData[paymentOptionId]['disabledButtons'] = [];
-            document.querySelectorAll('[id^="o_paypal_disabled_button"]').forEach(domButton => {
+            this.paypalData[paymentOptionId]["disabledButtons"] = [];
+            document.querySelectorAll('[id^="o_paypal_disabled_button"]').forEach((domButton) => {
                 const disabledButton = paypal.Buttons({
                     fundingSource: paypal.FUNDING.PAYPAL,
-                    style: { // https://developer.paypal.com/sdk/js/reference/#link-style
-                        color: 'silver',
-                        label: 'paypal',
+                    style: {
+                        // https://developer.paypal.com/sdk/js/reference/#link-style
+                        color: "silver",
+                        label: "paypal",
                         disableMaxWidth: true,
                         borderRadius: 6,
                     },
-                    onInit: (data, actions) => actions.disable(),  // Permanently disable the button.
+                    onInit: (data, actions) => actions.disable(), // Permanently disable the button.
                 });
                 disabledButton.render(`#${domButton.id}`);
-                this.paypalData[paymentOptionId]['disabledButtons'].push(disabledButton);
+                this.paypalData[paymentOptionId]["disabledButtons"].push(disabledButton);
             });
         }
 
         for (const paypalLoading of paypalLoadingList) {
-            paypalLoading.classList.add('d-none');
+            paypalLoading.classList.add("d-none");
         }
-        for (const buttonContainer of document.querySelectorAll('#o_paypal_button_container')) {
-            buttonContainer.classList.remove('d-none');
+        for (const buttonContainer of document.querySelectorAll("#o_paypal_button_container")) {
+            buttonContainer.classList.remove("d-none");
         }
         this.selectedOptionId = paymentOptionId;
     },
@@ -174,12 +173,12 @@ patch(PaymentForm.prototype, {
     },
 
     _processDirectFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
-        if (providerCode !== 'paypal') {
+        if (providerCode !== "paypal") {
             super._processDirectFlow(...arguments);
             return;
         }
-        this.paypalData[paymentOptionId].paypalOrderId = processingValues['order_id'];
-        this.paypalData[paymentOptionId].paypalTxRef = processingValues['reference'];
+        this.paypalData[paymentOptionId].paypalOrderId = processingValues["order_id"];
+        this.paypalData[paymentOptionId].paypalTxRef = processingValues["reference"];
     },
 
     /**
@@ -192,15 +191,17 @@ patch(PaymentForm.prototype, {
     async _paypalOnApprove(data) {
         const orderID = data.orderID;
         try {
-            await this.waitFor(rpc('/payment/paypal/complete_order', {
-                'order_id': orderID,
-                'reference': this.paypalData[this.selectedOptionId].paypalTxRef,
-            }));
+            await this.waitFor(
+                rpc("/payment/paypal/complete_order", {
+                    order_id: orderID,
+                    reference: this.paypalData[this.selectedOptionId].paypalTxRef,
+                })
+            );
             // Close the PayPal buttons that were rendered
-            for (const enabledButton of this.paypalData[this.selectedOptionId]['enabledButtons']) {
+            for (const enabledButton of this.paypalData[this.selectedOptionId]["enabledButtons"]) {
                 enabledButton.close();
             }
-            window.location = '/payment/status';
+            window.location = "/payment/status";
         } catch (error) {
             if (error instanceof RPCError) {
                 this._displayErrorDialog(_t("Payment processing failed"), error.data.message);

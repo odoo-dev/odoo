@@ -3,8 +3,8 @@ import { stepUtils } from "@web_tour/tour_utils";
 import { boundariesIn } from "@html_editor/utils/position";
 import { setSelection } from "@html_editor/../tests/tours/helpers/editor";
 
-registry.category("web_tour.tours").add('mailing_editor_theme', {
-    url: '/odoo',
+registry.category("web_tour.tours").add("mailing_editor_theme", {
+    url: "/odoo",
     steps: () => [
         stepUtils.showAppsMenuItem(),
         {
@@ -14,22 +14,22 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         },
         {
             content: "Click on the create button to create a new mailing.",
-            trigger: 'button.o_list_button_add',
+            trigger: "button.o_list_button_add",
             run: "click",
         },
         {
             content: "Fill in Subject",
-            trigger: '#subject_0',
+            trigger: "#subject_0",
             run: "edit Test Basic Theme",
         },
         {
             content: "Fill in Mailing list",
-            trigger: '#contact_list_ids_0',
+            trigger: "#contact_list_ids_0",
             run: "edit Newsletter",
         },
         {
             content: "Pick 'Newsletter' option",
-            trigger: '.o_input_dropdown a:contains(Newsletter)',
+            trigger: ".o_input_dropdown a:contains(Newsletter)",
             run: "click",
         },
         {
@@ -50,7 +50,7 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         ...stepUtils.saveForm(),
         {
             content: "Click on the New button to create another mailing",
-            trigger: 'button.o_form_button_create',
+            trigger: "button.o_form_button_create",
             run: "click",
         },
         {
@@ -58,17 +58,17 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         },
         {
             content: "Fill in Subject",
-            trigger: '#subject_0',
+            trigger: "#subject_0",
             run: "edit Test Newsletter Theme",
         },
         {
             content: "Fill in Mailing list",
-            trigger: '#contact_list_ids_0',
+            trigger: "#contact_list_ids_0",
             run: "edit Newsletter",
         },
         {
             content: "Pick 'Newsletter' option",
-            trigger: '.o_input_dropdown a:contains(Newsletter)',
+            trigger: ".o_input_dropdown a:contains(Newsletter)",
             run: "click",
         },
         {
@@ -82,7 +82,7 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         },
         ...stepUtils.discardForm(),
         {
-            content: 'Go back to previous mailing',
+            content: "Go back to previous mailing",
             trigger: 'td[name="subject"]:contains(Test Basic Theme)',
             run: "click",
         },
@@ -92,18 +92,18 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         },
         {
             content: "Add some content to be selected afterwards",
-            trigger: ':iframe p',
+            trigger: ":iframe p",
             run: "editor content",
         },
         {
             content: "Select text",
-            trigger: ':iframe p:contains(content)',
+            trigger: ":iframe p:contains(content)",
             run() {
                 const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesIn(
                     this.anchor
                 );
                 setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
-            }
+            },
         },
         {
             content: "Make sure the floating toolbar is visible",
@@ -131,12 +131,12 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         },
         {
             content: "Check that color was applied",
-            trigger: ':iframe p font.text-o-color-1',
+            trigger: ":iframe p font.text-o-color-1",
         },
         ...stepUtils.saveForm(),
         {
             content: "Go to 'Mailings' list view",
-            trigger: '.breadcrumb a:contains(Mailings)',
+            trigger: ".breadcrumb a:contains(Mailings)",
             run: "click",
         },
         {
@@ -150,13 +150,13 @@ registry.category("web_tour.tours").add('mailing_editor_theme', {
         },
         {
             content: "Select content",
-            trigger: ':iframe p:contains(content)',
+            trigger: ":iframe p:contains(content)",
             run() {
                 const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesIn(
                     this.anchor
                 );
                 setSelection({ anchorNode, anchorOffset, focusNode, focusOffset });
-            }
+            },
         },
         {
             content: "Make sure the floating toolbar is visible",

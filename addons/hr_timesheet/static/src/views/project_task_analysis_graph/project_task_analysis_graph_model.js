@@ -2,4 +2,3 @@ import { ProjectTaskAnalysisGraphModel } from "@project/views/project_task_analy
 import { patchGraphModel } from "../graph_model_patch";
 
 patchGraphModel(ProjectTaskAnalysisGraphModel);
-

@@ -606,7 +606,9 @@ export class SurveyForm extends Interaction {
         const selectorsToFadeout = [".o_survey_form_content"];
         if (options.isFinish && !this.nextScreenResult?.has_post_submit_questions) {
             // Fade out the top title
-            document.querySelector('.o_survey_main_title_fade')?.classList.replace("opacity-100", "opacity-0");
+            document
+                .querySelector(".o_survey_main_title_fade")
+                ?.classList.replace("opacity-100", "opacity-0");
             selectorsToFadeout.push(".breadcrumb", ".o_survey_timer");
             cookie.delete(`survey_${this.options.surveyToken}`);
         }
@@ -681,8 +683,10 @@ export class SurveyForm extends Interaction {
         }
 
         // Force recompute the title's display condition and fade it in
-        if (this.options.isStartScreen && this.options.questionsLayout !== 'page_per_question') {
-            document.querySelector('.o_survey_main_title_fade')?.classList.replace("opacity-0", "opacity-100");
+        if (this.options.isStartScreen && this.options.questionsLayout !== "page_per_question") {
+            document
+                .querySelector(".o_survey_main_title_fade")
+                ?.classList.replace("opacity-0", "opacity-100");
         }
 
         if (this.options.isStartScreen || (options && options.initTimer)) {
@@ -843,9 +847,7 @@ export class SurveyForm extends Interaction {
                     break;
                 case "matrix":
                     if (questionRequired) {
-                        const subQuestionsIds = JSON.parse(
-                            inputEl.dataset.subQuestions
-                        );
+                        const subQuestionsIds = JSON.parse(inputEl.dataset.subQuestions);
                         // Highlight unanswered rows' header
                         const questionBodySelector = `div[id="${questionId}"] > .o_survey_question_matrix > tbody`;
                         for (const subQuestionId of subQuestionsIds) {
@@ -1184,9 +1186,9 @@ export class SurveyForm extends Interaction {
             const checkAgain = () => this.waitForTimeout(() => check(true), 1000);
             this.dialog.add(ConfirmationDialog, {
                 title: _t("A problem has occurred"),
-                body: _t("To take this survey, please close all other tabs on %(hostname)s",
-                    { hostname: window.location.hostname }
-                ),
+                body: _t("To take this survey, please close all other tabs on %(hostname)s", {
+                    hostname: window.location.hostname,
+                }),
                 confirmLabel: _t("Continue here"),
                 confirm: checkAgain,
                 dismiss: checkAgain,
@@ -1223,9 +1225,7 @@ export class SurveyForm extends Interaction {
                     );
                     const completedQuestions = [];
                     for (const id of subQuestionsIds) {
-                        if (
-                            this.el.querySelector(`tr[id="${id}"] input:checked`)
-                        ) {
+                        if (this.el.querySelector(`tr[id="${id}"] input:checked`)) {
                             completedQuestions.push(id);
                         }
                     }

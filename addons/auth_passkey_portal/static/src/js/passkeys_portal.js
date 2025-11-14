@@ -30,7 +30,7 @@ export class PortalPasskey extends Interaction {
             confirm: async ({ inputEl }) => {
                 const name = inputEl.value;
                 if (name.length > 0) {
-                    await this.services.orm.write("auth.passkey.key", [this.id], { name })
+                    await this.services.orm.write("auth.passkey.key", [this.id], { name });
                     location.reload();
                 }
             },

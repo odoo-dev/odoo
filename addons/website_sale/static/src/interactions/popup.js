@@ -7,8 +7,8 @@ patch(Popup.prototype, {
      */
     canBtnPrimaryClosePopup(primaryBtnEl) {
         return (
-            super.canBtnPrimaryClosePopup(...arguments)
-            && !primaryBtnEl.classList.contains("js_add_cart")
+            super.canBtnPrimaryClosePopup(...arguments) &&
+            !primaryBtnEl.classList.contains("js_add_cart")
         );
     },
 });

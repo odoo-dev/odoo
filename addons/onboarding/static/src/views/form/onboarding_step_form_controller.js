@@ -8,8 +8,8 @@ import { useService } from "@web/core/utils/hooks";
 export default class OnboardingStepFormController extends FormController {
     setup() {
         super.setup();
-        this.action = useService('action');
-        this.orm = useService('orm');
+        this.action = useService("action");
+        this.orm = useService("orm");
     }
     /**
      * If necessary, mark the step as done and reload the main view.
@@ -20,9 +20,9 @@ export default class OnboardingStepFormController extends FormController {
         if (saved) {
             const { reloadOnFirstValidation, reloadAlways } = this.stepConfig;
             const validationResponse = await this.orm.call(
-                'onboarding.onboarding.step',
-                'action_validate_step',
-                [this.stepName],
+                "onboarding.onboarding.step",
+                "action_validate_step",
+                [this.stepName]
             );
             if (reloadAlways || (reloadOnFirstValidation && validationResponse === "JUST_DONE")) {
                 this.action.restore(this.action.currentController.jsId);
@@ -39,7 +39,7 @@ export default class OnboardingStepFormController extends FormController {
      * @return {string}
      */
     get stepName() {
-        return ''
+        return "";
     }
     /**
      *  Returns whether to reload the page (useful if the current

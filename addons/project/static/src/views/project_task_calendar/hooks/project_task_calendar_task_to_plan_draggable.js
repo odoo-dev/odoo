@@ -6,7 +6,16 @@ import { useThrottleForAnimation } from "@web/core/utils/timing";
 const hookParams = {
     name: "useCalendarTaskToPlanDraggable",
     onDragStart(params) {
-        const { ctx, addClass, addListener, addStyle, callHandler, getRect, removeClass, removeStyle } = params;
+        const {
+            ctx,
+            addClass,
+            addListener,
+            addStyle,
+            callHandler,
+            getRect,
+            removeClass,
+            removeStyle,
+        } = params;
 
         const onElementPointerEnter = (ev) => {
             const element = ev.currentTarget;
@@ -27,20 +36,22 @@ const hookParams = {
             const element = ev.currentTarget;
             current.timeSlotElement = element;
             callHandler("onElementEnter", { element });
-        }
+        };
 
         const onTimeSlotElementPointerLeave = (ev) => {
             const element = ev.currentTarget;
             current.timeSlotElement = null;
-            callHandler("onElementLeave", { element })
-        }
+            callHandler("onElementLeave", { element });
+        };
 
         const { ref, current } = ctx;
         const containerSelector = ".o_calendar_renderer .o_calendar_widget";
         let selector = `${containerSelector} .fc-timegrid-slot.fc-timegrid-slot-lane`;
         const slotElements = ref.el.querySelectorAll(selector);
         if (slotElements.length) {
-            const eventContainer = ref.el.querySelector(".o_calendar_renderer .o_task_event_to_plan_container");
+            const eventContainer = ref.el.querySelector(
+                ".o_calendar_renderer .o_task_event_to_plan_container"
+            );
 
             const onTimeGridPointerMove = (ev) => {
                 current.calendarCell = null;
@@ -58,7 +69,7 @@ const hookParams = {
                     const { left, width } = getRect(current.calendarCell, { adjust: true });
                     addStyle(eventContainer, {
                         bottom: `${document.documentElement.clientHeight - bottom - height}px`,
-                        width:`${width}px`,
+                        width: `${width}px`,
                         left: `${left}px`,
                         height: `${height * 2}px`,
                     });
@@ -67,7 +78,7 @@ const hookParams = {
                     removeStyle(eventContainer, "bottom", "width", "left", "height");
                     addClass(eventContainer, "d-none");
                 }
-            }
+            };
 
             const onTimeGridPointerCancel = (ev) => {
                 current.calendarCell = null;
@@ -75,13 +86,15 @@ const hookParams = {
                     removeStyle(eventContainer, "bottom", "width", "left", "height");
                     addClass(eventContainer, "d-none");
                 }
-            }
+            };
 
             for (const timeSlotCalendarCell of slotElements) {
                 addListener(timeSlotCalendarCell, "pointerenter", onTimeSlotElementPointerEnter);
                 addListener(timeSlotCalendarCell, "pointerleave", onTimeSlotElementPointerLeave);
             }
-            const timeSlotContainerEl = ref.el.querySelector(`${containerSelector} .fc-timegrid-body`);
+            const timeSlotContainerEl = ref.el.querySelector(
+                `${containerSelector} .fc-timegrid-body`
+            );
             addListener(timeSlotContainerEl, "pointermove", onTimeGridPointerMove);
             addListener(timeSlotContainerEl, "pointercancel", onTimeGridPointerCancel);
         }
@@ -95,14 +108,14 @@ const hookParams = {
     onDragEnd({ ctx }) {
         return pick(ctx.current, "element", "calendarCell");
     },
-    onDrop({ ctx}) {
+    onDrop({ ctx }) {
         const { element, calendarCell, timeSlotElement } = ctx.current;
         if (element && calendarCell) {
             return {
                 element,
                 calendarCell,
                 timeSlotElement,
-            }
+            };
         }
     },
 };

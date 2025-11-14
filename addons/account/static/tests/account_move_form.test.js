@@ -7,7 +7,7 @@ import {
     triggerHotkey,
 } from "@mail/../tests/mail_test_helpers";
 import { expect, test } from "@odoo/hoot";
-import { contains, defineModels, fields, onRpc, models} from "@web/../tests/web_test_helpers";
+import { contains, defineModels, fields, onRpc, models } from "@web/../tests/web_test_helpers";
 import { defineAccountModels } from "./account_test_helpers";
 
 defineAccountModels();
@@ -65,20 +65,20 @@ class AccountMove extends models.Model {
     line_ids = fields.One2many({
         string: "Invoice Lines",
         relation: "account.move.line",
-    })
+    });
 
-    _records = [{ id: 1, name: "account.move" }]
+    _records = [{ id: 1, name: "account.move" }];
 }
 class AccountMoveLine extends models.Model {
     name = fields.Char();
     product_id = fields.Many2one({
-        string:"Product",
-        relation:"product",
+        string: "Product",
+        relation: "product",
     });
     move_id = fields.Many2one({
         string: "Account Move",
         relation: "account.move",
-    })
+    });
 }
 class Product extends models.Model {
     name = fields.Char();
@@ -87,13 +87,19 @@ class Product extends models.Model {
 
 defineModels({ Product, AccountMoveLine, AccountMove });
 
-test("Update description on product line", async() => {
+test("Update description on product line", async () => {
     const pyEnv = await startServer();
     const productId = pyEnv["product"].browse([1]);
     const accountMove = pyEnv["account.move"].browse([1]);
-    pyEnv["account.move.line"].create({ name: productId[0].name, product_id: productId[0].id, move_id: accountMove[0].id });
+    pyEnv["account.move.line"].create({
+        name: productId[0].name,
+        product_id: productId[0].id,
+        move_id: accountMove[0].id,
+    });
     await start();
-    onRpc("account.move", "web_save", () => { expect.step("save")});
+    onRpc("account.move", "web_save", () => {
+        expect.step("save");
+    });
     await openFormView("account.move", accountMove[0].id, {
         arch: `<form js_class="account_move_form">
             <sheet>
@@ -112,12 +118,11 @@ test("Update description on product line", async() => {
     });
 
     await click(".o_many2one");
-    await contains("#labelVisibilityButtonId").click()
+    await contains("#labelVisibilityButtonId").click();
     await insertText("textarea[placeholder='Enter a description']", "testDescription");
     await click(".o_form_button_save");
     await expect.waitForSteps(["save"]);
 
     const line = pyEnv["account.move.line"].browse([1])[0];
     expect(line.name).toBe("testProduct\ntestDescription");
-
 });

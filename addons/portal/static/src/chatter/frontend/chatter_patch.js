@@ -8,7 +8,7 @@ patch(Chatter.prototype, {
         super.setup(...arguments);
         this.topRef = useRef("top");
         onWillPatch(() => {
-            // Keep the composer position under the page header on scrolling 
+            // Keep the composer position under the page header on scrolling
             // unless the header is on the side.
             const headerEl = document.querySelector("#wrapwrap header");
             if (!this.props.twoColumns && headerEl && !headerEl.matches(".o_header_sidebar")) {

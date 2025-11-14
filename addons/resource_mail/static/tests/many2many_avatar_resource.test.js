@@ -65,24 +65,25 @@ beforeEach(async () => {
     ]);
 
     // Tasks linked to those resources
-    [ data.task1Id, data.task2Id ] = pyEnv["resource.task"].create([{
-        display_name: "Task with three resources",
-        resource_ids: [data.resourceComputerId, data.resourceMarieId, data.resourcePierreId],
-    }, {
-        display_name: "Task with one resources",
-        resource_ids: [
-            data.resourcePierreId,
-        ],
-    }]);
+    [data.task1Id, data.task2Id] = pyEnv["resource.task"].create([
+        {
+            display_name: "Task with three resources",
+            resource_ids: [data.resourceComputerId, data.resourceMarieId, data.resourcePierreId],
+        },
+        {
+            display_name: "Task with one resources",
+            resource_ids: [data.resourcePierreId],
+        },
+    ]);
 
     onRpc("resource.resource", "get_avatar_card_data", (params) => {
         const resourceIdArray = params.args[0];
         const resourceId = resourceIdArray[0];
-        const resources = pyEnv['resource.resource'].read([resourceId]);
-        const result = resources.map(resource => ({
+        const resources = pyEnv["resource.resource"].read([resourceId]);
+        const result = resources.map((resource) => ({
             name: resource.name,
             role_ids: resource.role_ids,
-            email:resource.email,
+            email: resource.email,
             phone: resource.phone,
             user_id: resource.user_id,
         }));
@@ -148,38 +149,46 @@ test("many2many_avatar_resource widget in list view", async () => {
         arch: '<list><field name="display_name"/><field name="resource_ids" widget="many2many_avatar_resource"/></list>',
     });
 
-    const [ row1, row2 ] = queryAll(".o_data_row");
+    const [row1, row2] = queryAll(".o_data_row");
     await contains(
         "img.o_m2m_avatar",
         { count: 2, target: row1 },
-        "Two human resources with avatar should be displayed",
+        "Two human resources with avatar should be displayed"
     );
     await contains(
         "i.fa-wrench.o_m2m_avatar",
         { count: 1, target: row1 },
-        "One material resource with fa-wrench icon should be displayed",
+        "One material resource with fa-wrench icon should be displayed"
     );
     await contains(
         "div.o_tag_badge_text",
         { count: 0, target: row1 },
-        "No text should be displayed on any avatar",
+        "No text should be displayed on any avatar"
     );
 
     await contains(
         "img.o_m2m_avatar",
         { count: 1, target: row2 },
-        "One human resource with avatar should be displayed",
+        "One human resource with avatar should be displayed"
     );
     await contains(
         "div.o_tag_badge_text",
         { count: 1, target: row2 },
-        "The text should be displayed on the avatar",
+        "The text should be displayed on the avatar"
     );
 
     // Second and third records in widget should display employee avatars
-    const [ tagMarie, tagPierre ] = document.querySelectorAll(".many2many_tags_avatar_field_container .o_tag img");
-    expect(tagMarie).toHaveAttribute("data-src", `/web/image/resource.resource/${data.resourceMarieId}/avatar_128`);
-    expect(tagPierre).toHaveAttribute("data-src", `/web/image/resource.resource/${data.resourcePierreId}/avatar_128`);
+    const [tagMarie, tagPierre] = document.querySelectorAll(
+        ".many2many_tags_avatar_field_container .o_tag img"
+    );
+    expect(tagMarie).toHaveAttribute(
+        "data-src",
+        `/web/image/resource.resource/${data.resourceMarieId}/avatar_128`
+    );
+    expect(tagPierre).toHaveAttribute(
+        "data-src",
+        `/web/image/resource.resource/${data.resourcePierreId}/avatar_128`
+    );
     // 1. Clicking on material resource's icon
     await click(".many2many_tags_avatar_field_container .o_tag i.fa-wrench");
     await contains(".o_avatar_card", { count: 0 });
@@ -214,7 +223,6 @@ test("many2many_avatar_resource widget in list view", async () => {
     );
 });
 
-
 test("many2many_avatar_resource widget in kanban view", async () => {
     await start();
     await openKanbanView("resource.task", {
@@ -235,38 +243,46 @@ test("many2many_avatar_resource widget in kanban view", async () => {
             </kanban>`,
     });
 
-    const [ card1, card2 ] = queryAll(".oe_kanban_content");
+    const [card1, card2] = queryAll(".oe_kanban_content");
     await contains(
         "img.o_m2m_avatar",
         { count: 2, target: card1 },
-        "Two human resources with avatar should be displayed",
+        "Two human resources with avatar should be displayed"
     );
     await contains(
         "i.fa-wrench.o_m2m_avatar",
         { count: 1, target: card1 },
-        "One material resource with fa-wrench icon should be displayed",
+        "One material resource with fa-wrench icon should be displayed"
     );
     await contains(
         "div.o_tag_badge_text",
         { count: 0, target: card1 },
-        "No text should be displayed on any avatar",
+        "No text should be displayed on any avatar"
     );
 
     await contains(
         "img.o_m2m_avatar",
         { count: 1, target: card2 },
-        "One human resource with avatar should be displayed",
+        "One human resource with avatar should be displayed"
     );
     await contains(
         "div.o_tag_badge_text",
         { count: 0, target: card2 },
-        "No text should be displayed on the avatar",
+        "No text should be displayed on the avatar"
     );
 
     // Second and third records in widget should display employee avatars
-    const [ tagMarie, tagPierre ] = document.querySelectorAll(".many2many_tags_avatar_field_container .o_tag img");
-    expect(tagMarie).toHaveAttribute("data-src", `/web/image/resource.resource/${data.resourceMarieId}/avatar_128`);
-    expect(tagPierre).toHaveAttribute("data-src", `/web/image/resource.resource/${data.resourcePierreId}/avatar_128`);
+    const [tagMarie, tagPierre] = document.querySelectorAll(
+        ".many2many_tags_avatar_field_container .o_tag img"
+    );
+    expect(tagMarie).toHaveAttribute(
+        "data-src",
+        `/web/image/resource.resource/${data.resourceMarieId}/avatar_128`
+    );
+    expect(tagPierre).toHaveAttribute(
+        "data-src",
+        `/web/image/resource.resource/${data.resourcePierreId}/avatar_128`
+    );
     // 1. Clicking on material resource's icon
     await click(".many2many_tags_avatar_field_container .o_tag i.fa-wrench");
     await contains(".o_avatar_card", { count: 0 });

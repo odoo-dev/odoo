@@ -112,9 +112,9 @@ test("display the avatar of the parent when there is more than one node in the s
 });
 
 test("hierarchy with a self manager employee", async () => {
-    Employee._records = [{ id: 1, name: "Albert", parent_id: 1, child_ids: [1] }]
+    Employee._records = [{ id: 1, name: "Albert", parent_id: 1, child_ids: [1] }];
     await mountView({
-        context:{
+        context: {
             hierarchy_res_id: 1,
         },
         type: "hierarchy",
@@ -129,15 +129,15 @@ test("hierarchy with a self manager employee", async () => {
     expect(".o_hierarchy_node").toHaveCount(1);
 });
 
-test("hierarchy with a cycle", async () =>{
+test("hierarchy with a cycle", async () => {
     Employee._records = [
-                { id: 1, name: "Albert", parent_id: 4, child_ids: [2, 3] },
-                { id: 2, name: "Georges", parent_id: 1, child_ids: [] },
-                { id: 3, name: "Josephine", parent_id: 1, child_ids: [4] },
-                { id: 4, name: "Louis", parent_id: 3, child_ids: [1] },
-            ]
+        { id: 1, name: "Albert", parent_id: 4, child_ids: [2, 3] },
+        { id: 2, name: "Georges", parent_id: 1, child_ids: [] },
+        { id: 3, name: "Josephine", parent_id: 1, child_ids: [4] },
+        { id: 4, name: "Louis", parent_id: 3, child_ids: [1] },
+    ];
     await mountView({
-        context:{
+        context: {
             hierarchy_res_id: 1,
         },
         type: "hierarchy",

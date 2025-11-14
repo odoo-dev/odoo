@@ -22,7 +22,9 @@ function getTemplate(disabled = false) {
                                     data-vxml="001" data-list-id="3" data-name="Newsletter Form" data-snippet="s_newsletter_subscribe_form">
                                     <div class="js_subscribe_wrap">
                                         <div class="input-group">
-                                            <input type="email" name="email" class="js_subscribe_value form-control" ${disabled ? "disabled='true'" : ""}>
+                                            <input type="email" name="email" class="js_subscribe_value form-control" ${
+                                                disabled ? "disabled='true'" : ""
+                                            }>
                                             <a role="button" href="#" class="btn btn-primary js_subscribe_btn o_submit">Subscribe</a>
                                         </div>
                                     </div>
@@ -37,7 +39,7 @@ function getTemplate(disabled = false) {
 }
 
 describe("mail popup", () => {
-    beforeEach(() => defineStyle(/* css */`* { transition: none !important; }`));
+    beforeEach(() => defineStyle(/* css */ `* { transition: none !important; }`));
     test("popup is shown if user is not subscribed (mail input not disabled)", async () => {
         const { core } = await startInteractions(getTemplate());
         expect(core.interactions).toHaveLength(1);

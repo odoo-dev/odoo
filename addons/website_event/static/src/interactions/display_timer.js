@@ -33,7 +33,9 @@ export class DisplayTimer extends Interaction {
         }
 
         this.checkTimer();
-        this.interval = setInterval(() => { this.checkTimer(); }, 1000);
+        this.interval = setInterval(() => {
+            this.checkTimer();
+        }, 1000);
         this.registerCleanup(() => clearInterval(this.interval));
     }
 
@@ -45,7 +47,7 @@ export class DisplayTimer extends Interaction {
     checkTimer() {
         const now = new Date();
 
-        const remainingPreSeconds = this.preCountdownTime - (now.getTime() / 1000);
+        const remainingPreSeconds = this.preCountdownTime - now.getTime() / 1000;
         if (remainingPreSeconds <= 1) {
             const countdownTextEl = this.el.querySelector(".o_countdown_text");
             if (countdownTextEl) {
@@ -54,7 +56,7 @@ export class DisplayTimer extends Interaction {
             if (this.hasMainTimeDisplay) {
                 this.el.parentElement.classList.remove("d-none");
             }
-            const remainingMainSeconds = this.mainCountdownTime - (now.getTime() / 1000);
+            const remainingMainSeconds = this.mainCountdownTime - now.getTime() / 1000;
             if (remainingMainSeconds <= 1) {
                 clearInterval(this.interval);
                 document.querySelector(this.displayClass).classList.remove("d-none");
@@ -65,7 +67,7 @@ export class DisplayTimer extends Interaction {
         } else {
             this.updateCountdown(remainingPreSeconds);
         }
-    };
+    }
 
     /**
      * This method update the DOM to display the remaining time.
@@ -89,7 +91,7 @@ export class DisplayTimer extends Interaction {
 
     /**
      * Format the number to a 2 char strings
-     * 
+     *
      * @param {number} num
      */
     formatTime(num) {
@@ -97,6 +99,4 @@ export class DisplayTimer extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_event.display_timer", DisplayTimer);
+registry.category("public.interactions").add("website_event.display_timer", DisplayTimer);

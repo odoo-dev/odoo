@@ -9,6 +9,7 @@ export class AccountMoveKanbanController extends FileUploadKanbanController {
 
     setup() {
         super.setup();
-        this.showUploadButton = this.props.context.default_move_type !== 'entry' || 'active_id' in this.props.context;
+        this.showUploadButton =
+            this.props.context.default_move_type !== "entry" || "active_id" in this.props.context;
     }
 }

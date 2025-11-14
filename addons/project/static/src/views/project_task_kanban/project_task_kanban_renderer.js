@@ -1,7 +1,7 @@
-import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
-import { ProjectTaskKanbanRecord } from './project_task_kanban_record';
-import { ProjectTaskKanbanHeader } from './project_task_kanban_header';
-import { useService } from '@web/core/utils/hooks';
+import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
+import { ProjectTaskKanbanRecord } from "./project_task_kanban_record";
+import { ProjectTaskKanbanHeader } from "./project_task_kanban_header";
+import { useService } from "@web/core/utils/hooks";
 import { onWillStart } from "@odoo/owl";
 import { user } from "@web/core/user";
 
@@ -17,10 +17,10 @@ export class ProjectTaskKanbanRenderer extends KanbanRenderer {
 
     setup() {
         super.setup();
-        this.action = useService('action');
+        this.action = useService("action");
 
         onWillStart(async () => {
-            this.isProjectManager = await user.hasGroup('project.group_project_manager');
+            this.isProjectManager = await user.hasGroup("project.group_project_manager");
         });
     }
 

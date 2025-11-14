@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
-import { useSelectCreate, useOpenMany2XRecord} from "@web/views/fields/relational_utils";
+import { useSelectCreate, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 import { useService } from "@web/core/utils/hooks";
 import { Domain } from "@web/core/domain";
 
@@ -17,9 +17,7 @@ export class SMLX2ManyField extends X2ManyField {
             onCreateEdit: () => this.createOpenRecord(),
         });
 
-        this.selectCreate = (params) => {
-            return selectCreate(params);
-        };
+        this.selectCreate = (params) => selectCreate(params);
         this.openQuantRecord = useOpenMany2XRecord({
             resModel: "stock.quant",
             activeActions: this.activeActions,
@@ -29,7 +27,7 @@ export class SMLX2ManyField extends X2ManyField {
         });
     }
 
-    get quantListViewShowOnHandOnly(){
+    get quantListViewShowOnHandOnly() {
         return true; // To override in mrp_subcontracting
     }
 
@@ -82,9 +80,7 @@ export class SMLX2ManyField extends X2ManyField {
         const dirtyQuantityMoveLines = this._move_line_ids.filter(
             (ml) => !ml.data.quant_id && ml._values.quantity - ml._changes.quantity
         );
-        const dirtyQuantMoveLines = this._move_line_ids.filter(
-            (ml) => ml.data.quant_id.id
-        );
+        const dirtyQuantMoveLines = this._move_line_ids.filter((ml) => ml.data.quant_id.id);
         const dirtyMoveLines = [...dirtyQuantityMoveLines, ...dirtyQuantMoveLines];
         if (!dirtyMoveLines.length) {
             return;
@@ -93,9 +89,7 @@ export class SMLX2ManyField extends X2ManyField {
             "stock.move.line",
             "get_move_line_quant_match",
             [
-                this._move_line_ids
-                    .filter((rec) => rec.resId)
-                    .map((rec) => rec.resId),
+                this._move_line_ids.filter((rec) => rec.resId).map((rec) => rec.resId),
                 this.props.record.resId,
                 dirtyMoveLines.filter((rec) => rec.resId).map((rec) => rec.resId),
                 dirtyQuantMoveLines.map((ml) => ml.data.quant_id.id),
@@ -140,9 +134,7 @@ export class SMLX2ManyField extends X2ManyField {
     async selectRecord(res_ids) {
         const demand =
             this.props.record.data.product_uom_qty -
-            this._move_line_ids
-                .map((ml) => ml.data.quantity)
-                .reduce((val, sum) => val + sum, 0);
+            this._move_line_ids.map((ml) => ml.data.quantity).reduce((val, sum) => val + sum, 0);
         const params = {
             context: { default_quant_id: res_ids[0] },
         };

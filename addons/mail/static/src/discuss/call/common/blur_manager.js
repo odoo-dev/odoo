@@ -26,9 +26,8 @@ export class BlurManager {
     rejectStreamPromise;
     resolveStreamPromise;
     selfieSegmentation = new window.SelfieSegmentation({
-        locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1/${file}`;
-        },
+        locateFile: (file) =>
+            `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1/${file}`,
     });
     /**
      * Promise or undefined, based on the input stream, resolved when selfieSegmentation has started painting on the canvas,

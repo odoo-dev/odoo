@@ -1,6 +1,6 @@
-import { Product } from '@sale/js/product/product';
-import { formatCurrency } from '@web/core/currency';
-import { patch } from '@web/core/utils/patch';
+import { Product } from "@sale/js/product/product";
+import { formatCurrency } from "@web/core/currency";
+import { patch } from "@web/core/utils/patch";
 
 patch(Product, {
     props: {

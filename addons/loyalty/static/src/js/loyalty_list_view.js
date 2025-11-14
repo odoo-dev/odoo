@@ -18,7 +18,7 @@ export class LoyaltyActionHelper extends Component {
                 [],
                 {
                     context: this.env.model.root.context,
-                },
+                }
             );
         });
     }
@@ -28,14 +28,14 @@ export class LoyaltyActionHelper extends Component {
             "loyalty.program",
             "create_from_template",
             [templateId],
-            {context: this.env.model.root.context},
+            { context: this.env.model.root.context }
         );
         if (!action) {
             return;
         }
         this.action.doAction(action);
     }
-};
+}
 
 export class LoyaltyListRenderer extends ListRenderer {
     static template = "loyalty.LoyaltyListRenderer";
@@ -43,7 +43,7 @@ export class LoyaltyListRenderer extends ListRenderer {
         ...LoyaltyListRenderer.components,
         LoyaltyActionHelper,
     };
-};
+}
 
 export const LoyaltyListView = {
     ...listView,

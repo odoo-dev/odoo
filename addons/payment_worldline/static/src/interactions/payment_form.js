@@ -1,6 +1,6 @@
-import { patch } from '@web/core/utils/patch';
+import { patch } from "@web/core/utils/patch";
 
-import { PaymentForm } from '@payment/interactions/payment_form';
+import { PaymentForm } from "@payment/interactions/payment_form";
 
 patch(PaymentForm.prototype, {
     /**
@@ -15,7 +15,7 @@ patch(PaymentForm.prototype, {
      * @return {void}
      */
     _processTokenFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
-        if (providerCode === 'worldline' && processingValues.force_flow === 'redirect') {
+        if (providerCode === "worldline" && processingValues.force_flow === "redirect") {
             delete processingValues.force_flow;
             this._processRedirectFlow(...arguments);
         } else {

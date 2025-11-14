@@ -1,4 +1,4 @@
-import { SaleFileUploadListRenderer } from '../sale_file_upload_list/sale_file_upload_list_renderer';
+import { SaleFileUploadListRenderer } from "../sale_file_upload_list/sale_file_upload_list_renderer";
 import { SaleActionHelper } from "../../js/sale_action_helper/sale_action_helper";
 
 export class SaleListRenderer extends SaleFileUploadListRenderer {
@@ -7,4 +7,4 @@ export class SaleListRenderer extends SaleFileUploadListRenderer {
         ...SaleFileUploadListRenderer.components,
         SaleActionHelper,
     };
-};
+}

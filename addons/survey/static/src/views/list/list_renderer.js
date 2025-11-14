@@ -6,5 +6,5 @@ export class SurveyListRenderer extends ListRenderer {
     static components = {
         ...ListRenderer.components,
         SurveySurveyActionHelper,
-    }
-};
+    };
+}

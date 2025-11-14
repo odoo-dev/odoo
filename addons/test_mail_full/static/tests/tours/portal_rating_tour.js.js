@@ -17,8 +17,8 @@ registry.category("web_tour.tours").add("portal_rating_tour", {
             trigger: "#chatterRoot:shadow .o_website_rating_card_container",
         },
         {
-            trigger: "#chatterRoot:shadow .o_website_rating_table_row[data-star='4']:contains(100%)",
+            trigger:
+                "#chatterRoot:shadow .o_website_rating_table_row[data-star='4']:contains(100%)",
         },
-        
     ],
 });

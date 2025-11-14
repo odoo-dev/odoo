@@ -7,7 +7,7 @@ import { standardFieldProps } from "@web/views/fields/standard_field_props";
 export class MailAttachments extends Component {
     static template = "account.mail_attachments";
     static components = { FileInput };
-    static props = {...standardFieldProps};
+    static props = { ...standardFieldProps };
 
     setup() {
         this.orm = useService("orm");
@@ -24,7 +24,7 @@ export class MailAttachments extends Component {
     onFileRemove(deleteId) {
         const newValue = [];
 
-        for (let item of this.attachments) {
+        for (const item of this.attachments) {
             if (item.id === deleteId) {
                 if (item.placeholder || item.protect_from_deletion) {
                     const copyItem = Object.assign({ skip: true }, item);

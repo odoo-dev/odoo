@@ -4,7 +4,6 @@ import { EventSlotCalendarModel } from "@event/views/event_slot_calendar/event_s
 import { EventSlotCalendarRenderer } from "@event/views/event_slot_calendar/event_slot_calendar_renderer";
 import { registry } from "@web/core/registry";
 
-
 export const EventSlotCalendarView = {
     ...calendarView,
     Controller: EventSlotCalendarController,

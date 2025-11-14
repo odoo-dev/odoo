@@ -17,9 +17,12 @@ export class ReCaptcha {
      */
     loadLibs() {
         if (this._publicKey) {
-            this._recaptchaReady = loadJS(`https://www.recaptcha.net/recaptcha/api.js?render=${encodeURIComponent(this._publicKey)}`)
-                .then(() => new Promise(resolve => window.grecaptcha.ready(() => resolve())));
-            return this._recaptchaReady.then(() => !!document.querySelector('.grecaptcha-badge'));
+            this._recaptchaReady = loadJS(
+                `https://www.recaptcha.net/recaptcha/api.js?render=${encodeURIComponent(
+                    this._publicKey
+                )}`
+            ).then(() => new Promise((resolve) => window.grecaptcha.ready(() => resolve())));
+            return this._recaptchaReady.then(() => !!document.querySelector(".grecaptcha-badge"));
         }
         return false;
     }
@@ -34,13 +37,15 @@ export class ReCaptcha {
     async getToken(action) {
         if (!this._publicKey) {
             return {
-                message: _t("reCAPTCHA disabled or no site key has been configured. Please check your settings."),
+                message: _t(
+                    "reCAPTCHA disabled or no site key has been configured. Please check your settings."
+                ),
             };
         }
         await this._recaptchaReady;
         try {
             return {
-                token: await window.grecaptcha.execute(this._publicKey, {action: action})
+                token: await window.grecaptcha.execute(this._publicKey, { action: action }),
             };
         } catch {
             return {

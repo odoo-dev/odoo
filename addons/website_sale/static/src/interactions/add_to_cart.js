@@ -1,9 +1,9 @@
-import { Interaction } from '@web/public/interaction';
-import { registry } from '@web/core/registry';
-import wSaleUtils from '@website_sale/js/website_sale_utils';
+import { Interaction } from "@web/public/interaction";
+import { registry } from "@web/core/registry";
+import wSaleUtils from "@website_sale/js/website_sale_utils";
 
 export class AddToCart extends Interaction {
-    static selector = '#add_to_cart, .o_we_buy_now, #products_grid .o_wsale_product_btn .a-submit';
+    static selector = "#add_to_cart, .o_we_buy_now, #products_grid .o_wsale_product_btn .a-submit";
     dynamicContent = {
         _root: { "t-on-click.prevent": this.locked(this.addToCart, true) },
     };
@@ -17,10 +17,10 @@ export class AddToCart extends Interaction {
         const el = ev.currentTarget;
         const form = wSaleUtils.getClosestProductForm(el);
         this._updateRootProduct(form);
-        const isBuyNow = el.classList.contains('o_we_buy_now');
-        const isConfigured = el.parentElement.id === 'add_to_cart_wrap';
+        const isBuyNow = el.classList.contains("o_we_buy_now");
+        const isConfigured = el.parentElement.id === "add_to_cart_wrap";
         const showQuantity = Boolean(el.dataset.showQuantity);
-        return this.services['cart'].add(this.rootProduct, {
+        return this.services["cart"].add(this.rootProduct, {
             isBuyNow: isBuyNow,
             isConfigured: isConfigured,
             showQuantity: showQuantity,
@@ -36,17 +36,16 @@ export class AddToCart extends Interaction {
         const productId = parseInt(
             form.querySelector('input[type="hidden"][name="product_id"]')?.value
         );
-        const productEl = form.closest('.js_product') ?? form;
+        const productEl = form.closest(".js_product") ?? form;
         const quantity = parseFloat(productEl.querySelector('input[name="add_qty"]')?.value);
         const uomId = this._getUoMId(form);
-        const isCombo = form.querySelector(
-            'input[type="hidden"][name="product_type"]'
-        )?.value === 'combo';
+        const isCombo =
+            form.querySelector('input[type="hidden"][name="product_type"]')?.value === "combo";
         this.rootProduct = {
             ...(productId ? { productId: productId } : {}),
-            productTemplateId: parseInt(form.querySelector(
-                'input[type="hidden"][name="product_template_id"]',
-            ).value),
+            productTemplateId: parseInt(
+                form.querySelector('input[type="hidden"][name="product_template_id"]').value
+            ),
             ...(quantity ? { quantity: quantity } : {}),
             ...(uomId ? { uomId: uomId } : {}),
             ptavs: this._getSelectedPtavs(form),
@@ -66,9 +65,9 @@ export class AddToCart extends Interaction {
      */
     _getSelectedPtavs(form) {
         const selectedPtavElements = form.querySelectorAll(
-            'input.js_variant_change:not(.no_variant):checked, select.js_variant_change:not(.no_variant)'
+            "input.js_variant_change:not(.no_variant):checked, select.js_variant_change:not(.no_variant)"
         );
-        return Array.from(selectedPtavElements).map(el => parseInt(el.value));
+        return Array.from(selectedPtavElements).map((el) => parseInt(el.value));
     }
 
     /**
@@ -81,12 +80,12 @@ export class AddToCart extends Interaction {
      *     - `custom_value`: The value assigned to the custom PTAV.
      */
     _getCustomPtavValues(form) {
-        const customPtavValueElements = form.querySelectorAll('.variant_custom_value');
-        return Array.from(customPtavValueElements).map(el => ({
-            'custom_product_template_attribute_value_id': parseInt(
+        const customPtavValueElements = form.querySelectorAll(".variant_custom_value");
+        return Array.from(customPtavValueElements).map((el) => ({
+            custom_product_template_attribute_value_id: parseInt(
                 el.dataset.customProductTemplateAttributeValueId
             ),
-            'custom_value': el.value,
+            custom_value: el.value,
         }));
     }
 
@@ -100,14 +99,14 @@ export class AddToCart extends Interaction {
      */
     _getSelectedNoVariantPtavs(form) {
         const selectedNoVariantPtavElements = form.querySelectorAll(
-            'input.no_variant.js_variant_change:checked, select.no_variant.js_variant_change'
+            "input.no_variant.js_variant_change:checked, select.no_variant.js_variant_change"
         );
-        return Array.from(selectedNoVariantPtavElements).map(el => parseInt(el.value));
+        return Array.from(selectedNoVariantPtavElements).map((el) => parseInt(el.value));
     }
 
     _getUoMId(element) {
-        return parseInt(element.querySelector('input[name="uom_id"]:checked')?.value)
+        return parseInt(element.querySelector('input[name="uom_id"]:checked')?.value);
     }
 }
 
-registry.category('public.interactions').add('website_sale.add_to_cart', AddToCart);
+registry.category("public.interactions").add("website_sale.add_to_cart", AddToCart);

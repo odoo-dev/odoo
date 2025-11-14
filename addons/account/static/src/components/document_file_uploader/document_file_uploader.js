@@ -36,8 +36,14 @@ export class DocumentFileUploader extends Component {
             datas: file.data,
         };
         // clean the context to ensure the `create` call doesn't fail from unknown `default_*` context
-        const cleanContext = Object.fromEntries(Object.entries(this.env.searchModel.context).filter(([key]) => !key.startsWith('default_')));
-        const [att_id] = await this.orm.create("ir.attachment", [att_data], {context: cleanContext});
+        const cleanContext = Object.fromEntries(
+            Object.entries(this.env.searchModel.context).filter(
+                ([key]) => !key.startsWith("default_")
+            )
+        );
+        const [att_id] = await this.orm.create("ir.attachment", [att_data], {
+            context: cleanContext,
+        });
         this.attachmentIdsToProcess.push(att_id);
     }
 

@@ -9,7 +9,9 @@ describe.current.tags("interaction_dev");
 
 const template = (options = {}) => `
  <div id="wrap" class="o_wforum_wrapper o_wforum_moderation_queue">
-    <div class="modal fade show modal_shown" id="markAllAsSpam" data-spam-ids="${options.spamIds ? "[1,2]" : ""}" style="display: block;">
+    <div class="modal fade show modal_shown" id="markAllAsSpam" data-spam-ids="${
+        options.spamIds ? "[1,2]" : ""
+    }" style="display: block;">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body bg-100">
@@ -47,7 +49,7 @@ test("keep last spam input search", async () => {
     await edit("hello");
     await advanceTime(201); // debounced
     expect.verifySteps([]);
-    def.resolve([{ content: "<div>hello</div>"}]);
+    def.resolve([{ content: "<div>hello</div>" }]);
     await tick();
     expect.verifySteps(["rpc"]);
     expect(".post_spam").toHaveText("hello");

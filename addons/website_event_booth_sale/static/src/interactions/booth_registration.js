@@ -7,7 +7,9 @@ import { patch } from "@web/core/utils/patch";
 patch(BoothRegistration.prototype, {
     start() {
         super.start();
-        this.categoryPrice = this.selectedBoothCategory ? this.selectedBoothCategory.dataset.price : undefined;
+        this.categoryPrice = this.selectedBoothCategory
+            ? this.selectedBoothCategory.dataset.price
+            : undefined;
     },
     onBoothTypeChange(ev, currentTargetEl) {
         super.onBoothTypeChange(ev, currentTargetEl);
@@ -21,7 +23,9 @@ patch(BoothRegistration.prototype, {
         this.updatePrice(boothCount);
     },
     updatePrice(boothCount) {
-        const boothCurrencyEl = this.el.querySelector(".o_wbooth_booth_total_price .oe_currency_value");
+        const boothCurrencyEl = this.el.querySelector(
+            ".o_wbooth_booth_total_price .oe_currency_value"
+        );
         if (boothCurrencyEl) {
             boothCurrencyEl.textContent = `${boothCount * this.categoryPrice}`;
         }

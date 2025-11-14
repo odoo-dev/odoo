@@ -5,23 +5,23 @@ import { _t } from "@web/core/l10n/translation";
 patch(QtyAtDatePopover.prototype, {
     get forecastedLabel() {
         if (this.props.record.data.use_expiration_date) {
-            return _t('Fresh Forecasted Stock')
+            return _t("Fresh Forecasted Stock");
         }
         return super.forecastedLabel;
     },
     get availableLabel() {
         if (this.props.record.data.use_expiration_date) {
-            return _t('Fresh Available')
+            return _t("Fresh Available");
         }
         return super.availableLabel;
-    }
+    },
 });
 
 export const expiryQtyAtDateWidget = {
     ...qtyAtDateWidget,
     fieldDependencies: [
         ...qtyAtDateWidget.fieldDependencies,
-        { name: 'use_expiration_date', type: 'boolean' },
+        { name: "use_expiration_date", type: "boolean" },
     ],
 };
 patch(qtyAtDateWidget, expiryQtyAtDateWidget);

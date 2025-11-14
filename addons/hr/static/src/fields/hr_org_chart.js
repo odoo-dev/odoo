@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { user } from "@web/core/user";
-import { onEmployeeSubRedirect } from './hooks';
+import { onEmployeeSubRedirect } from "./hooks";
 import { Component, useState } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useRecordObserver } from "@web/model/relational_model/utils";
@@ -17,7 +17,7 @@ class HrOrgChartPopover extends Component {
     async setup() {
         super.setup();
 
-        this.orm = useService('orm');
+        this.orm = useService("orm");
         this.actionService = useService("action");
         this._onEmployeeSubRedirect = onEmployeeSubRedirect();
     }
@@ -30,22 +30,22 @@ class HrOrgChartPopover extends Component {
      * @returns {Promise} action loaded
      */
     async _onEmployeeRedirect(employeeId) {
-        const action = await this.orm.call('hr.employee', 'get_formview_action', [employeeId]);
+        const action = await this.orm.call("hr.employee", "get_formview_action", [employeeId]);
         this.actionService.doAction(action);
     }
 }
 
 export class HrOrgChart extends Component {
     static template = "hr.hr_org_chart";
-    static props = {...standardFieldProps};
+    static props = { ...standardFieldProps };
     async setup() {
         super.setup();
 
-        this.orm = useService('orm');
+        this.orm = useService("orm");
         this.actionService = useService("action");
         this.popover = usePopover(HrOrgChartPopover);
 
-        this.state = useState({'employee_id': null});
+        this.state = useState({ employee_id: null });
         this.max_level = null;
         this.lastEmployeeId = null;
         this._onEmployeeSubRedirect = onEmployeeSubRedirect();
@@ -72,13 +72,11 @@ export class HrOrgChart extends Component {
             this.view_employee_id = null;
         } else if (employeeId !== this.view_employee_id || force) {
             this.view_employee_id = employeeId;
-            let orgData = await rpc(
-                '/hr/get_org_chart',
-                {
-                    employee_id: employeeId,
-                    new_parent_id: newParentId,
-                    context: {
-                        ...user.context,
+            let orgData = await rpc("/hr/get_org_chart", {
+                employee_id: employeeId,
+                new_parent_id: newParentId,
+                context: {
+                    ...user.context,
                     max_level: this.max_level,
                 },
             });
@@ -86,7 +84,7 @@ export class HrOrgChart extends Component {
                 orgData = {
                     managers: [],
                     children: [],
-                }
+                };
             }
             this.managers = orgData.managers;
             this.children = orgData.children;
@@ -108,7 +106,7 @@ export class HrOrgChart extends Component {
      * @returns {Promise} action loaded
      */
     async _onEmployeeRedirect(employeeId) {
-        const action = await this.orm.call('hr.employee', 'get_formview_action', [employeeId]);
+        const action = await this.orm.call("hr.employee", "get_formview_action", [employeeId]);
         this.actionService.doAction(action);
     }
 

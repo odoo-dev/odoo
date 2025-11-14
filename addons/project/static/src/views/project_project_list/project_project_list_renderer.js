@@ -13,9 +13,7 @@ export class ProjectProjectListRenderer extends ListRenderer {
         const { selection } = this.props.list;
         if (column.name === "stage_id" && selection.length) {
             const companyId = getRawValue(selection[0], "company_id");
-            readonly = selection.some(
-                (task) => getRawValue(task, "company_id") !== companyId
-            );
+            readonly = selection.some((task) => getRawValue(task, "company_id") !== companyId);
         }
         return readonly;
     }

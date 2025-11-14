@@ -21,11 +21,9 @@ export class ReceptionReportLine extends Component {
     //---- Handlers ----
 
     async onClickForecast() {
-        const action = await this.ormService.call(
-            "stock.move",
-            "action_product_forecast_report",
-            [[this.data.move_out_id]],
-        );
+        const action = await this.ormService.call("stock.move", "action_product_forecast_report", [
+            [this.data.move_out_id],
+        ]);
 
         return this.actionService.doAction(action);
     }
@@ -35,7 +33,7 @@ export class ReceptionReportLine extends Component {
             return;
         }
         const modelIds = [this.data.move_out_id];
-        const productQtys = [Math.ceil(this.data.quantity) || '1'];
+        const productQtys = [Math.ceil(this.data.quantity) || "1"];
 
         return this.actionService.doAction({
             ...this.props.labelReport,
@@ -45,12 +43,17 @@ export class ReceptionReportLine extends Component {
     }
 
     async onClickAssign() {
-        await this.ormService.call(
-            "report.stock.report_reception",
-            "action_assign",
-            [false, [this.data.move_out_id], [this.data.quantity], [this.data.move_ins]],
-        );
-        this.env.bus.trigger("update-assign-state", { isAssigned: true, tableIndex: this.props.parentIndex, lineIndex: this.data.index });
+        await this.ormService.call("report.stock.report_reception", "action_assign", [
+            false,
+            [this.data.move_out_id],
+            [this.data.quantity],
+            [this.data.move_ins],
+        ]);
+        this.env.bus.trigger("update-assign-state", {
+            isAssigned: true,
+            tableIndex: this.props.parentIndex,
+            lineIndex: this.data.index,
+        });
     }
 
     async onClickUnassign() {
@@ -58,9 +61,13 @@ export class ReceptionReportLine extends Component {
             "report.stock.report_reception",
             "action_unassign",
             [false, this.data.move_out_id, this.data.quantity, this.data.move_ins]
-        )
+        );
         if (done) {
-            this.env.bus.trigger("update-assign-state", { isAssigned: false, tableIndex: this.props.parentIndex, lineIndex: this.data.index });
+            this.env.bus.trigger("update-assign-state", {
+                isAssigned: false,
+                tableIndex: this.props.parentIndex,
+                lineIndex: this.data.index,
+            });
         }
     }
 

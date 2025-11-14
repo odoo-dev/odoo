@@ -8,7 +8,9 @@ export class AddressForm extends Interaction {
     static selector = ".oe_cart .address_autoformat";
     static selectorHas = "input[name='street'][data-autocomplete-enabled='1']";
     dynamicContent = {
-        "input[name='street']": { "t-on-input.withTarget": this.debounced(this.onStreetInput, 200) },
+        "input[name='street']": {
+            "t-on-input.withTarget": this.debounced(this.onStreetInput, 200),
+        },
         ".js_autocomplete_result": { "t-on-click.withTarget": this.onClickAutocompleteResult },
     };
 
@@ -29,14 +31,20 @@ export class AddressForm extends Interaction {
         const inputContainerEl = inputEl.parentNode;
         if (inputEl.value.length >= 5) {
             this.keepLast.add(
-                googlePlacesSession.getAddressPropositions({
-                    partial_address: inputEl.value,
-                }).then((response) => {
-                    inputContainerEl.querySelector(".dropdown-menu")?.remove();
-                    this.renderAt("website_sale_autocomplete.AutocompleteDropDown", {
-                        results: response.results,
-                    }, inputContainerEl);
-                })
+                googlePlacesSession
+                    .getAddressPropositions({
+                        partial_address: inputEl.value,
+                    })
+                    .then((response) => {
+                        inputContainerEl.querySelector(".dropdown-menu")?.remove();
+                        this.renderAt(
+                            "website_sale_autocomplete.AutocompleteDropDown",
+                            {
+                                results: response.results,
+                            },
+                            inputContainerEl
+                        );
+                    })
             );
         } else {
             inputContainerEl.querySelector(".dropdown-menu")?.remove();
@@ -56,10 +64,12 @@ export class AddressForm extends Interaction {
         spinnerEl.classList.add("spinner-border", "text-warning", "text-center", "m-auto");
         dropdownEl.appendChild(spinnerEl);
 
-        const address = await this.waitFor(googlePlacesSession.getAddressDetails({
-            address: currentTargetEl.innerText,
-            google_place_id: currentTargetEl.dataset.googlePlaceId,
-        }));
+        const address = await this.waitFor(
+            googlePlacesSession.getAddressDetails({
+                address: currentTargetEl.innerText,
+                google_place_id: currentTargetEl.dataset.googlePlaceId,
+            })
+        );
 
         if (address.formatted_street_number) {
             this.streetAndNumberInput.value = address.formatted_street_number;
@@ -87,6 +97,4 @@ export class AddressForm extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_sale_autocomplete.address_form", AddressForm);
+registry.category("public.interactions").add("website_sale_autocomplete.address_form", AddressForm);

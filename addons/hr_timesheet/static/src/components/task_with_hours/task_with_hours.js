@@ -13,7 +13,7 @@ export class TaskWithHours extends Component {
         onWillStart(this.onWillStart);
     }
 
-    async onWillStart() { }
+    async onWillStart() {}
 
     canCreate() {
         return Boolean(this.props.context.default_project_id);

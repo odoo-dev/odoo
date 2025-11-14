@@ -46,8 +46,9 @@ export class SubtaskKanbanList extends Component {
         if (this.state.isLoad || currentCount !== this.state.prevSubtaskCount) {
             this.state.prevSubtaskCount = currentCount;
             this.state.isLoad = false;
-            this.state.subtasks = this.list.records
-                .filter((subtask) => !["1_done", "1_canceled"].includes(subtask.data.state));
+            this.state.subtasks = this.list.records.filter(
+                (subtask) => !["1_done", "1_canceled"].includes(subtask.data.state)
+            );
         }
         return this.state.subtasks;
     }
@@ -92,16 +93,18 @@ export class SubtaskKanbanList extends Component {
                 type: "danger",
             });
         } else {
-            const sequences = this.list.records.map(r => r.data.sequence);
+            const sequences = this.list.records.map((r) => r.data.sequence);
             const nextSequence = (sequences.length ? Math.max(...sequences) : 0) + 1;
 
-            await this.orm.create("project.task", [{
-                display_name: name,
-                parent_id: this.props.record.resId,
-                project_id: this.props.record.data.project_id.id,
-                user_ids: this.props.record.data.user_ids.resIds,
-                sequence: nextSequence,
-            }]);
+            await this.orm.create("project.task", [
+                {
+                    display_name: name,
+                    parent_id: this.props.record.resId,
+                    project_id: this.props.record.data.project_id.id,
+                    user_ids: this.props.record.data.user_ids.resIds,
+                    sequence: nextSequence,
+                },
+            ]);
             this.subtaskCreate.open = false;
             this.subtaskCreate.name = "";
             this.props.record.load();

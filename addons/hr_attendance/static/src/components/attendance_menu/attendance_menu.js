@@ -10,7 +10,7 @@ import { isIosApp } from "@web/core/browser/feature_detection";
 const { DateTime } = luxon;
 
 export class ActivityMenu extends Component {
-    static components = {Dropdown, DropdownItem};
+    static components = { Dropdown, DropdownItem };
     static props = [];
     static template = "hr_attendance.attendance_menu";
 
@@ -20,11 +20,11 @@ export class ActivityMenu extends Component {
         this.employee = false;
         this.state = useState({
             checkedIn: false,
-            isDisplayed: false
+            isDisplayed: false,
         });
-        this.date_formatter = registry.category("formatters").get("float_time")
+        this.date_formatter = registry.category("formatters").get("float_time");
         this.dropdown = useDropdownState();
-        onWillStart(()=> {
+        onWillStart(() => {
             // access lazy session but do no wait for it, to prevent from delaying the whole webclient
             this.lazySession.getValue("attendance_user_data", (employee) => {
                 if (employee) {
@@ -35,28 +35,26 @@ export class ActivityMenu extends Component {
         });
     }
 
-    async searchReadEmployee(){
+    async searchReadEmployee() {
         this.employee = await rpc("/hr_attendance/attendance_user_data");
         this._searchReadEmployeeFill();
     }
 
     _searchReadEmployeeFill() {
         if (this.employee.id) {
-            this.hoursToday = this.date_formatter(
-                this.employee.hours_today
-            );
-            this.hoursPreviouslyToday = this.date_formatter(
-                this.employee.hours_previously_today
-            );
+            this.hoursToday = this.date_formatter(this.employee.hours_today);
+            this.hoursPreviouslyToday = this.date_formatter(this.employee.hours_previously_today);
             this.lastAttendanceWorkedHours = this.date_formatter(
                 this.employee.last_attendance_worked_hours
             );
-            this.lastCheckIn = deserializeDateTime(this.employee.last_check_in).toLocaleString(DateTime.TIME_SIMPLE);
+            this.lastCheckIn = deserializeDateTime(this.employee.last_check_in).toLocaleString(
+                DateTime.TIME_SIMPLE
+            );
             this.state.checkedIn = this.employee.attendance_state === "checked_in";
             this.isFirstAttendance = this.employee.hours_previously_today === 0;
-            this.state.isDisplayed = this.employee.display_systray
+            this.state.isDisplayed = this.employee.display_systray;
         } else {
-            this.state.isDisplayed = false
+            this.state.isDisplayed = false;
         }
     }
 
@@ -66,23 +64,23 @@ export class ActivityMenu extends Component {
         if (trackingEnabled && !isIosApp() && navigator.geolocation) {
             // iOS app lacks permissions to call `getCurrentPosition`
             navigator.geolocation.getCurrentPosition(
-                async ({coords: {latitude, longitude}}) => {
+                async ({ coords: { latitude, longitude } }) => {
                     this.employee = await rpc("/hr_attendance/systray_check_in_out", {
                         latitude,
-                        longitude
-                    })
+                        longitude,
+                    });
                     this._searchReadEmployeeFill();
                 },
-                async err => {
-                    this.employee = await rpc("/hr_attendance/systray_check_in_out")
+                async (err) => {
+                    this.employee = await rpc("/hr_attendance/systray_check_in_out");
                     this._searchReadEmployeeFill();
                 },
                 {
                     enableHighAccuracy: true,
                 }
-            )
+            );
         } else {
-            this.employee = await rpc("/hr_attendance/systray_check_in_out")
+            this.employee = await rpc("/hr_attendance/systray_check_in_out");
             this._searchReadEmployeeFill();
         }
     }

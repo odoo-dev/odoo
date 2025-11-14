@@ -122,10 +122,13 @@ registry.category("web_tour.tours").add("mail/static/tests/tours/mail_composer_t
             content: "Verify admin template is NOT listed",
             trigger: ".mail-composer-template-dropdown.popover",
             run() {
-                const hasAdminTemplate = [...document.querySelectorAll('.o-dropdown-item')]
-                    .some(item => item.textContent.includes("Test template for admin"));
+                const hasAdminTemplate = [...document.querySelectorAll(".o-dropdown-item")].some(
+                    (item) => item.textContent.includes("Test template for admin")
+                );
                 if (hasAdminTemplate) {
-                    console.error("Template assigned to the admin is visible to a non-assigned user! This should not happen.");
+                    console.error(
+                        "Template assigned to the admin is visible to a non-assigned user! This should not happen."
+                    );
                 }
             },
         },

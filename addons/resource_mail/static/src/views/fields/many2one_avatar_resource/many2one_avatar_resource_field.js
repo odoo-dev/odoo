@@ -2,7 +2,11 @@ import { Component } from "@odoo/owl";
 import { AvatarResource } from "@resource_mail/components/avatar_resource/avatar_resource";
 import { registry } from "@web/core/registry";
 import { computeM2OProps, Many2One } from "@web/views/fields/many2one/many2one";
-import { buildM2OFieldDescription, extractM2OFieldProps, Many2OneField } from "@web/views/fields/many2one/many2one_field";
+import {
+    buildM2OFieldDescription,
+    extractM2OFieldProps,
+    Many2OneField,
+} from "@web/views/fields/many2one/many2one_field";
 
 export class Many2OneAvatarResourceField extends Component {
     static template = "resource_mail.Many2OneAvatarResourceField";
@@ -26,9 +30,10 @@ export const many2OneAvatarResourceField = {
     extractProps(staticInfo, dynamicInfo) {
         return {
             ...extractM2OFieldProps(staticInfo, dynamicInfo),
-            canOpen: "no_open" in staticInfo.options
-                ? !staticInfo.options.no_open
-                : staticInfo.viewType === "form",
+            canOpen:
+                "no_open" in staticInfo.options
+                    ? !staticInfo.options.no_open
+                    : staticInfo.viewType === "form",
         };
     },
     fieldDependencies: [

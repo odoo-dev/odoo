@@ -1,4 +1,4 @@
-import { _t } from '@web/core/l10n/translation';
+import { _t } from "@web/core/l10n/translation";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { UploadDropZone } from "@account/components/upload_drop_zone/upload_drop_zone";
 import { useState } from "@odoo/owl";

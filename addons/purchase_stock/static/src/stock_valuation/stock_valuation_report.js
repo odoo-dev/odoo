@@ -3,7 +3,6 @@ import { patch } from "@web/core/utils/patch";
 
 import { StockValuationReport } from "@stock_account/stock_valuation/stock_valuation_report";
 
-
 patch(StockValuationReport.prototype, {
     get accrual() {
         const accrual = super.accrual;
@@ -23,17 +22,19 @@ patch(StockValuationReport.prototype, {
     },
 
     // On Click Methods --------------------------------------------------------
-    openPurchaseOrder(line=false) {
+    openPurchaseOrder(line = false) {
         const action = {
             type: "ir.actions.act_window",
             name: _t("Purchase Orders"),
             res_model: "purchase.order",
-            views: [[false, "list"], [false, "form"]],
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
             target: "current",
-        }
+        };
         if (line?.id) {
-            action.views = [[false, "form"]],
-            action.res_id = line.id;
+            (action.views = [[false, "form"]]), (action.res_id = line.id);
         } else {
             action.domain = [["id", "in", this.purchaseOrderIds]];
         }

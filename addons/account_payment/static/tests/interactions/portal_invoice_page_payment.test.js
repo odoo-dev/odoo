@@ -1,7 +1,4 @@
-import {
-    startInteractions,
-    setupInteractionWhiteList,
-} from "@web/../tests/public/helpers";
+import { startInteractions, setupInteractionWhiteList } from "@web/../tests/public/helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
 import { advanceTime, queryOne } from "@odoo/hoot-dom";
@@ -177,5 +174,5 @@ test("portal_invoice_page_payment is started with #portal_pay", async () => {
     expect(core.interactions).toHaveLength(1);
     expect(queryOne("#pay_with")).toBeInstanceOf(HTMLElement);
     await advanceTime(400);
-    expect("#pay_with").not.toHaveStyle({ "display": "none" });
+    expect("#pay_with").not.toHaveStyle({ display: "none" });
 });

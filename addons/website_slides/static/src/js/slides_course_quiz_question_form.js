@@ -1,4 +1,4 @@
-import publicWidget from '@web/legacy/js/public/public_widget';
+import publicWidget from "@web/legacy/js/public/public_widget";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
 import { rpc } from "@web/core/network/rpc";
@@ -9,15 +9,15 @@ import { rpc } from "@web/core/network/rpc";
  * displaying the question by the Quiz widget.
  */
 var QuestionFormWidget = publicWidget.Widget.extend({
-    template: 'slide.quiz.question.input',
+    template: "slide.quiz.question.input",
     events: {
-        'click .o_wslides_js_quiz_validate_question': '_validateQuestion',
-        'click .o_wslides_js_quiz_cancel_question': '_cancelValidation',
-        'click .o_wslides_js_quiz_comment_answer': '_toggleAnswerLineComment',
-        'click .o_wslides_js_quiz_add_answer': '_addAnswerLine',
-        'click .o_wslides_js_quiz_remove_answer': '_removeAnswerLine',
-        'click .o_wslides_js_quiz_remove_answer_comment': '_removeAnswerLineComment',
-        'change .o_wslides_js_quiz_answer_comment > input[type=text]': '_onCommentChanged'
+        "click .o_wslides_js_quiz_validate_question": "_validateQuestion",
+        "click .o_wslides_js_quiz_cancel_question": "_cancelValidation",
+        "click .o_wslides_js_quiz_comment_answer": "_toggleAnswerLineComment",
+        "click .o_wslides_js_quiz_add_answer": "_addAnswerLine",
+        "click .o_wslides_js_quiz_remove_answer": "_removeAnswerLine",
+        "click .o_wslides_js_quiz_remove_answer_comment": "_removeAnswerLineComment",
+        "change .o_wslides_js_quiz_answer_comment > input[type=text]": "_onCommentChanged",
     },
 
     /**
@@ -41,7 +41,7 @@ var QuestionFormWidget = publicWidget.Widget.extend({
     start: function () {
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            self.$('.o_wslides_quiz_question input').focus();
+            self.$(".o_wslides_quiz_question input").focus();
         });
     },
 
@@ -56,13 +56,15 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      */
     _onCommentChanged: function (event) {
         var input = event.currentTarget;
-        var commentIcon = $(input).closest('.o_wslides_js_quiz_answer').find('.o_wslides_js_quiz_comment_answer');
-        if (input.value.trim() !== '') {
-            commentIcon.addClass('text-primary');
-            commentIcon.removeClass('text-muted');
+        var commentIcon = $(input)
+            .closest(".o_wslides_js_quiz_answer")
+            .find(".o_wslides_js_quiz_comment_answer");
+        if (input.value.trim() !== "") {
+            commentIcon.addClass("text-primary");
+            commentIcon.removeClass("text-muted");
         } else {
-            commentIcon.addClass('text-muted');
-            commentIcon.removeClass('text-primary');
+            commentIcon.addClass("text-muted");
+            commentIcon.removeClass("text-primary");
         }
     },
 
@@ -73,8 +75,11 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      * @private
      */
     _toggleAnswerLineComment: function (ev) {
-        var commentLine = $(ev.currentTarget).closest('.o_wslides_js_quiz_answer').find('.o_wslides_js_quiz_answer_comment').toggleClass('d-none');
-        commentLine.find('input[type=text]').focus();
+        var commentLine = $(ev.currentTarget)
+            .closest(".o_wslides_js_quiz_answer")
+            .find(".o_wslides_js_quiz_answer_comment")
+            .toggleClass("d-none");
+        commentLine.find("input[type=text]").focus();
     },
 
     /**
@@ -86,7 +91,9 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      * @private
      */
     _addAnswerLine: function (ev) {
-        $(ev.currentTarget).closest('.o_wslides_js_quiz_answer').after(renderToElement('slide.quiz.answer.line'));
+        $(ev.currentTarget)
+            .closest(".o_wslides_js_quiz_answer")
+            .after(renderToElement("slide.quiz.answer.line"));
     },
 
     /**
@@ -95,8 +102,8 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      * @private
      */
     _removeAnswerLine: function (ev) {
-        if (this.$('.o_wslides_js_quiz_answer').length > 1) {
-            $(ev.currentTarget).closest('.o_wslides_js_quiz_answer').remove();
+        if (this.$(".o_wslides_js_quiz_answer").length > 1) {
+            $(ev.currentTarget).closest(".o_wslides_js_quiz_answer").remove();
         }
     },
 
@@ -106,8 +113,10 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      * @private
      */
     _removeAnswerLineComment: function (ev) {
-        var commentLine = $(ev.currentTarget).closest('.o_wslides_js_quiz_answer_comment').addClass('d-none');
-        commentLine.find('input[type=text]').val('').change();
+        var commentLine = $(ev.currentTarget)
+            .closest(".o_wslides_js_quiz_answer_comment")
+            .addClass("d-none");
+        commentLine.find("input[type=text]").val("").change();
     },
 
     /**
@@ -117,7 +126,7 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      */
     _validateQuestion: function (ev) {
         this._createOrUpdateQuestion({
-            update: $(ev.currentTarget).hasClass('o_wslides_js_quiz_update'),
+            update: $(ev.currentTarget).hasClass("o_wslides_js_quiz_update"),
         });
     },
 
@@ -128,7 +137,7 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      * @private
      */
     _cancelValidation: function () {
-        this.trigger_up('reset_display', {
+        this.trigger_up("reset_display", {
             questionFormWidget: this,
         });
     },
@@ -145,37 +154,37 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      * @private
      */
     _createOrUpdateQuestion: async function (options) {
-        var $form = this.$('form');
+        var $form = this.$("form");
 
         if (this._isValidForm($form)) {
             var values = this._serializeForm($form);
-            var renderedQuestion = await rpc('/slides/slide/quiz/question_add_or_update', values);
+            var renderedQuestion = await rpc("/slides/slide/quiz/question_add_or_update", values);
 
-            if (typeof renderedQuestion === 'object' && renderedQuestion.error) {
-                this.$('.o_wslides_js_quiz_validation_error')
-                    .removeClass('d-none')
-                    .find('.o_wslides_js_quiz_validation_error_text')
+            if (typeof renderedQuestion === "object" && renderedQuestion.error) {
+                this.$(".o_wslides_js_quiz_validation_error")
+                    .removeClass("d-none")
+                    .find(".o_wslides_js_quiz_validation_error_text")
                     .text(renderedQuestion.error);
             } else if (options.update) {
-                this.$('.o_wslides_js_quiz_validation_error').addClass('d-none');
-                this.trigger_up('display_updated_question', {
+                this.$(".o_wslides_js_quiz_validation_error").addClass("d-none");
+                this.trigger_up("display_updated_question", {
                     newQuestionRenderedTemplate: renderedQuestion,
                     $editedQuestion: this.$editedQuestion,
                     questionFormWidget: this,
                 });
             } else {
-                this.$('.o_wslides_js_quiz_validation_error').addClass('d-none');
-                this.trigger_up('display_created_question', {
+                this.$(".o_wslides_js_quiz_validation_error").addClass("d-none");
+                this.trigger_up("display_created_question", {
                     newQuestionRenderedTemplate: renderedQuestion,
-                    questionFormWidget: this
+                    questionFormWidget: this,
                 });
             }
         } else {
-            this.$('.o_wslides_js_quiz_validation_error')
-                .removeClass('d-none')
-                .find('.o_wslides_js_quiz_validation_error_text')
-                .text(_t('Please fill in the question'));
-            this.$('.o_wslides_quiz_question input').focus();
+            this.$(".o_wslides_js_quiz_validation_error")
+                .removeClass("d-none")
+                .find(".o_wslides_js_quiz_validation_error_text")
+                .text(_t("Please fill in the question"));
+            this.$(".o_wslides_quiz_question input").focus();
         }
     },
 
@@ -185,8 +194,8 @@ var QuestionFormWidget = publicWidget.Widget.extend({
      * @returns {boolean}
      * @private
      */
-    _isValidForm: function($form) {
-        return $form.find('.o_wslides_quiz_question input[type=text]').val().trim() !== "";
+    _isValidForm: function ($form) {
+        return $form.find(".o_wslides_quiz_question input[type=text]").val().trim() !== "";
     },
 
     /**
@@ -199,27 +208,29 @@ var QuestionFormWidget = publicWidget.Widget.extend({
     _serializeForm: function ($form) {
         var answers = [];
         var sequence = 1;
-        $form.find('.o_wslides_js_quiz_answer').each(function () {
-            var value = $(this).find('.o_wslides_js_quiz_answer_value').val();
+        $form.find(".o_wslides_js_quiz_answer").each(function () {
+            var value = $(this).find(".o_wslides_js_quiz_answer_value").val();
             if (value.trim() !== "") {
                 var answer = {
-                    'sequence': sequence++,
-                    'text_value': value,
-                    'is_correct': $(this).find('input[type=radio]').prop('checked') === true,
-                    'comment': $(this).find('.o_wslides_js_quiz_answer_comment input[type=text]').val().trim()
+                    sequence: sequence++,
+                    text_value: value,
+                    is_correct: $(this).find("input[type=radio]").prop("checked") === true,
+                    comment: $(this)
+                        .find(".o_wslides_js_quiz_answer_comment input[type=text]")
+                        .val()
+                        .trim(),
                 };
                 answers.push(answer);
             }
         });
         return {
-            'existing_question_id': this.$el.data('id'),
-            'sequence': this.sequence,
-            'question': $form.find('.o_wslides_quiz_question input[type=text]').val(),
-            'slide_id': this.slideId,
-            'answer_ids': answers
+            existing_question_id: this.$el.data("id"),
+            sequence: this.sequence,
+            question: $form.find(".o_wslides_quiz_question input[type=text]").val(),
+            slide_id: this.slideId,
+            answer_ids: answers,
         };
     },
-
 });
 
 export default QuestionFormWidget;

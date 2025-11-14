@@ -1,9 +1,8 @@
 import { onWillStart } from "@odoo/owl";
 import { user } from "@web/core/user";
-import { CalendarCommonRenderer } from '@web/views/calendar/calendar_common/calendar_common_renderer';
-import { useMandatoryDays } from '../../hooks';
-import { TimeOffCalendarCommonPopover } from './calendar_common_popover';
-
+import { CalendarCommonRenderer } from "@web/views/calendar/calendar_common/calendar_common_renderer";
+import { useMandatoryDays } from "../../hooks";
+import { TimeOffCalendarCommonPopover } from "./calendar_common_popover";
 
 export class TimeOffCalendarCommonRenderer extends CalendarCommonRenderer {
     static components = {
@@ -14,7 +13,7 @@ export class TimeOffCalendarCommonRenderer extends CalendarCommonRenderer {
         super.setup();
         this.mandatoryDays = useMandatoryDays(this.props);
         onWillStart(async () => {
-            this.isManager = (await user.hasGroup("hr_holidays.group_hr_holidays_user"));
+            this.isManager = await user.hasGroup("hr_holidays.group_hr_holidays_user");
         });
     }
 
@@ -24,6 +23,6 @@ export class TimeOffCalendarCommonRenderer extends CalendarCommonRenderer {
 
     onClick(info) {
         // To open record view
-        return this.onDblClick(info)
+        return this.onDblClick(info);
     }
 }

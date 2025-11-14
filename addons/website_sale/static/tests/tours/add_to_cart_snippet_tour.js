@@ -7,14 +7,10 @@ import {
     registerWebsitePreviewTour,
     changeOptionInPopover,
 } from "@website/js/tours/tour_utils";
-import { assertCartContains } from '@website_sale/js/tours/tour_utils';
-
+import { assertCartContains } from "@website_sale/js/tours/tour_utils";
 
 function editAddToCartSnippet() {
-    return [
-        ...clickOnEditAndWaitEditMode(),
-        ...clickOnSnippet({ id: 's_add_to_cart' })
-    ]
+    return [...clickOnEditAndWaitEditMode(), ...clickOnSnippet({ id: "s_add_to_cart" })];
 }
 
 function checkQuanityInCart(quantity) {
@@ -32,16 +28,16 @@ function checkButtonIsDisabled() {
 }
 
 registerWebsitePreviewTour(
-    'website_sale.add_to_cart_snippet',
+    "website_sale.add_to_cart_snippet",
     {
-        url: '/',
+        url: "/",
         edition: true,
     },
     () => [
-        ...insertSnippet({ name: 'Add to Cart Button' }),
+        ...insertSnippet({ name: "Add to Cart Button" }),
 
         // Basic product with no variants
-        ...clickOnSnippet({ id: 's_add_to_cart' }),
+        ...clickOnSnippet({ id: "s_add_to_cart" }),
         ...changeOptionInPopover("Add to Cart Button", "Product", "Product No Variant", true),
         ...clickOnSave(),
         clickOnElement("add to cart button", ":iframe .s_add_to_cart_btn"),
@@ -62,7 +58,7 @@ registerWebsitePreviewTour(
         ...changeOptionInPopover("Add to Cart Button", "Product", "Product Yes Variant 2"),
         {
             content: "Check if variant option is visible",
-            trigger: "[data-container-title='Add to Cart Button'] [data-label='Variant']"
+            trigger: "[data-container-title='Add to Cart Button'] [data-label='Variant']",
         },
         ...changeOptionInPopover("Add to Cart Button", "Variant", "Product Yes Variant 2 (Pink)"),
         ...clickOnSave(),
@@ -70,7 +66,7 @@ registerWebsitePreviewTour(
         checkButtonIsDisabled(),
         // Since 18.2, even if a specific variant is selected, the product configuration modal is displayed
         // The variant set on the modal used the default variants attributes (so will not correspond to the selected variant)
-        // TODO: fix this misbahvior by setting the variant attributes based on the chosen variant 
+        // TODO: fix this misbahvior by setting the variant attributes based on the chosen variant
         // https://github.com/odoo/odoo/pull/201217#issuecomment-2721871718
         {
             content: "Check if the red variant is selected",
@@ -85,7 +81,7 @@ registerWebsitePreviewTour(
             content: "Check if the pink variant is selected",
             trigger: ":iframe .modal li:contains(Pink) input:checked",
         },
-        clickOnElement('add to cart', ':iframe .modal button:contains(Add to Cart)'),
+        clickOnElement("add to cart", ":iframe .modal button:contains(Add to Cart)"),
         checkQuanityInCart("3"),
 
         // Basic product with no variants and action=buy now
@@ -93,12 +89,12 @@ registerWebsitePreviewTour(
         ...changeOptionInPopover("Add to Cart Button", "Product", "Product No Variant"),
         {
             content: "Check if action option is visible",
-            trigger: "[data-container-title='Add to Cart Button'] [data-label='Action']"
+            trigger: "[data-container-title='Add to Cart Button'] [data-label='Action']",
         },
         ...changeOptionInPopover("Add to Cart Button", "Action", "Buy Now", false),
         // At this point the "Add to cart" button was changed to a "Buy Now" button
         ...clickOnSave(),
-        clickOnElement('"Buy Now" button', ':iframe .s_add_to_cart_btn'),
+        clickOnElement('"Buy Now" button', ":iframe .s_add_to_cart_btn"),
         checkButtonIsDisabled(),
         checkQuanityInCart("4"),
         {
@@ -106,8 +102,16 @@ registerWebsitePreviewTour(
             content: "Wait for the redirection to the cart page",
             trigger: ":iframe h4:contains(order summary)",
         },
-        ...assertCartContains({ productName: 'Product No Variant', backend: true }),
-        ...assertCartContains({ productName: 'Product Yes Variant 1', combinationName: 'Red', backend: true }),
-        ...assertCartContains({ productName: 'Product Yes Variant 2', combinationName: 'Pink', backend: true }),
-    ],
+        ...assertCartContains({ productName: "Product No Variant", backend: true }),
+        ...assertCartContains({
+            productName: "Product Yes Variant 1",
+            combinationName: "Red",
+            backend: true,
+        }),
+        ...assertCartContains({
+            productName: "Product Yes Variant 2",
+            combinationName: "Pink",
+            backend: true,
+        }),
+    ]
 );

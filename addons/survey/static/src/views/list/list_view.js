@@ -7,4 +7,4 @@ export const SurveyListView = {
     Renderer: SurveyListRenderer,
 };
 
-registry.category('views').add('survey_view_tree', SurveyListView);
+registry.category("views").add("survey_view_tree", SurveyListView);

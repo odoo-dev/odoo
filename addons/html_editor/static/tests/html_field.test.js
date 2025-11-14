@@ -1180,13 +1180,11 @@ test("add Vimeo video link in 'Videos' tab of MediaDialog", async () => {
     });
     setSelectionInHtmlField();
 
-    await onRpc("/html_editor/video_url/data", async () => {
-        return {
-            video_id: "1128489814",
-            platform: "vimeo",
-            embed_url: vimeoVideoLink,
-        };
-    });
+    await onRpc("/html_editor/video_url/data", async () => ({
+        video_id: "1128489814",
+        platform: "vimeo",
+        embed_url: vimeoVideoLink,
+    }));
 
     // Insert Vimeo video link
     await insertText(htmlEditor, "/video");

@@ -1,7 +1,15 @@
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { expect, test } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
-import { contains, defineModels, fields, getService, models, mountWebClient, onRpc } from "@web/../tests/web_test_helpers";
+import {
+    contains,
+    defineModels,
+    fields,
+    getService,
+    models,
+    mountWebClient,
+    onRpc,
+} from "@web/../tests/web_test_helpers";
 
 class ProductProduct extends models.Model {
     _records = [{ id: 42, name: "Customizable Desk" }];
@@ -56,10 +64,9 @@ test(`Pricelist Client Action`, async () => {
     await contains(`.o_add_qty`).click();
     expect(queryAllTexts(`.o_badges_list .badge`)).toEqual(["1", "5", "10"]);
     expect(`.o_notification`).toHaveCount(1);
-    expect(`.o_notification .o_notification_content`).toHaveText(
-        "Quantity already present (1).",
-        { message: "Existing Quantity can not be added" }
-    );
+    expect(`.o_notification .o_notification_content`).toHaveText("Quantity already present (1).", {
+        message: "Existing Quantity can not be added",
+    });
     expect(`.o_notification .o_notification_bar`).toHaveClass("bg-info");
     await contains(`.o_notification_close`).click();
     expect(`.o_notification`).toHaveCount(0);

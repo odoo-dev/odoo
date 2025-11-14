@@ -25,5 +25,5 @@ registry.category("web_tour.tours").add("hr_employee_tour", {
             trigger: "[data-menu=preferences]",
             run: "click",
         },
-    ]
+    ],
 });

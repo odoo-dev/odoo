@@ -17,9 +17,9 @@ export class NewsletterLayoutOptionPlugin extends Plugin {
     static dependencies = ["builderActions"];
 
     resources = {
-        builder_options: [withSequence(before(NEWSLETTER_SELECT),NewsletterLayoutOption)],
+        builder_options: [withSequence(before(NEWSLETTER_SELECT), NewsletterLayoutOption)],
         builder_actions: {
-            SelectNewsletterTemplateAction
+            SelectNewsletterTemplateAction,
         },
     };
 }
@@ -45,7 +45,7 @@ export class SelectNewsletterTemplateAction extends BuilderAction {
         parentEl.dataset.newsletterTemplate = action.params.attribute;
     }
     clean(action) {
-        return this.getAction("selectTemplate").clean(action)
+        return this.getAction("selectTemplate").clean(action);
     }
 }
 registry

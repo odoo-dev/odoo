@@ -1,15 +1,15 @@
 import { Domain } from "@web/core/domain";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
-import { CalendarModel } from '@web/views/calendar/calendar_model';
+import { CalendarModel } from "@web/views/calendar/calendar_model";
 import { ProjectTaskModelMixin } from "../project_task_model_mixin";
 
 export class ProjectTaskCalendarModel extends ProjectTaskModelMixin(CalendarModel) {
     get tasksToPlanDomain() {
         const projectId = this.meta.context.default_project_id;
-        const domain = [['date_deadline', '=', false]];
+        const domain = [["date_deadline", "=", false]];
         if (projectId) {
-            domain.push(['project_id', '=', projectId]);
+            domain.push(["project_id", "=", projectId]);
         }
         return domain;
     }
@@ -18,7 +18,7 @@ export class ProjectTaskCalendarModel extends ProjectTaskModelMixin(CalendarMode
      * @override
      */
     get defaultFilterLabel() {
-        this.isCheckProject = 'project_id' in this.meta.filtersInfo;
+        this.isCheckProject = "project_id" in this.meta.filtersInfo;
         if (this.isCheckProject) {
             return _t("Private");
         }
@@ -72,18 +72,14 @@ export class ProjectTaskCalendarModel extends ProjectTaskModelMixin(CalendarMode
             return [];
         }
         const { date_start, date_stop } = this.meta.fieldMapping;
-        const fieldsToRemove = [...new Set([date_start, date_stop, 'planned_date_begin', 'date_deadline'])]
+        const fieldsToRemove = [
+            ...new Set([date_start, date_stop, "planned_date_begin", "date_deadline"]),
+        ];
         let domain = Domain.removeDomainLeaves(
-            Domain.and([
-                this.meta.domain,
-                this.computeFiltersDomain(data || this.data),
-            ]),
+            Domain.and([this.meta.domain, this.computeFiltersDomain(data || this.data)]),
             fieldsToRemove
         );
-        domain = Domain.and([
-            domain,
-            this.tasksToPlanDomain,
-        ]);
+        domain = Domain.and([domain, this.tasksToPlanDomain]);
         return await this.orm.webSearchRead(this.resModel, domain.toList(this.meta.context), {
             specification: this.tasksToPlanSpecification,
             limit: limit || 20,
@@ -99,7 +95,8 @@ export class ProjectTaskCalendarModel extends ProjectTaskModelMixin(CalendarMode
     _getPlanTaskContext(taskToPlan, timeSlotSelected) {
         return {
             ...this.meta.context,
-            task_calendar_plan_full_day: ["day", "week"].includes(this.meta.scale) && !timeSlotSelected,
+            task_calendar_plan_full_day:
+                ["day", "week"].includes(this.meta.scale) && !timeSlotSelected,
         };
     }
 
@@ -111,9 +108,14 @@ export class ProjectTaskCalendarModel extends ProjectTaskModelMixin(CalendarMode
         }
         const [taskToPlan] = this.tasksToPlan.records.splice(taskToPlanIndex, 1);
         const context = this._getPlanTaskContext(taskToPlan, timeSlotSelected);
-        await this.orm.call(this.meta.resModel, "plan_task_in_calendar", [[taskId], this._getPlanTaskVals(taskToPlan, date, timeSlotSelected)], {
-            context,
-        });
+        await this.orm.call(
+            this.meta.resModel,
+            "plan_task_in_calendar",
+            [[taskId], this._getPlanTaskVals(taskToPlan, date, timeSlotSelected)],
+            {
+                context,
+            }
+        );
         await this.load({ planTask: true });
     }
 }

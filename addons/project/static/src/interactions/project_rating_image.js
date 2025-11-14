@@ -21,6 +21,4 @@ export class ProjectRatingImage extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("project.project_rating_image", ProjectRatingImage);
+registry.category("public.interactions").add("project.project_rating_image", ProjectRatingImage);

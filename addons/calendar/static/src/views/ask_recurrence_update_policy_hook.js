@@ -3,11 +3,15 @@ import { AskRecurrenceUpdatePolicyDialog } from "@calendar/views/ask_recurrence_
 
 export function askRecurrenceUpdatePolicy(dialogService) {
     return new Promise((resolve) => {
-        dialogService.add(AskRecurrenceUpdatePolicyDialog, {
-            confirm: resolve,
-        }, {
-            onClose: resolve.bind(null, false),
-        });
+        dialogService.add(
+            AskRecurrenceUpdatePolicyDialog,
+            {
+                confirm: resolve,
+            },
+            {
+                onClose: resolve.bind(null, false),
+            }
+        );
     });
 }
 

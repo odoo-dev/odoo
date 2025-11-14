@@ -5,7 +5,7 @@ export class CouponToaster extends Interaction {
     static selector = ".coupon-message";
 
     start() {
-        let options = {};
+        const options = {};
         const titleEl = this.el.querySelector(".coupon-message-title");
         const contentEl = this.el.querySelector(".coupon-message-content");
         let message = null;
@@ -29,6 +29,4 @@ export class CouponToaster extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_sale_loyalty.coupon_toaster", CouponToaster);
+registry.category("public.interactions").add("website_sale_loyalty.coupon_toaster", CouponToaster);

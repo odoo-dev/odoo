@@ -14,9 +14,7 @@ export class EventsListPageOption extends BaseOptionComponent {
 class EventsListPageOptionPlugin extends Plugin {
     static id = "eventsListPageOption";
     resources = {
-        builder_options: [
-            withSequence(DEFAULT, EventsListPageOption),
-        ],
+        builder_options: [withSequence(DEFAULT, EventsListPageOption)],
     };
 }
 

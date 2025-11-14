@@ -7,5 +7,5 @@ patch(AttendeeCalendarYearRenderer, {
     props: {
         ...AttendeeCalendarYearRenderer.props,
         openWorkLocationWizard: { type: Function, optional: true },
-    }
+    },
 });

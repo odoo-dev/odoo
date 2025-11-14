@@ -1,7 +1,6 @@
 import { Component } from "@odoo/owl";
 
 export class ProjectProfitability extends Component {
-
     static props = {
         data: Object,
         labels: Object,

@@ -17,12 +17,12 @@ export class StockPickFrom extends Component {
     }
 
     _quant_display_name() {
-        let name_parts = [];
+        const name_parts = [];
         // if location group is activated
         const data = this.props.record.data;
-        name_parts.push(data.location_id?.display_name)
+        name_parts.push(data.location_id?.display_name);
         if (data.lot_id) {
-            name_parts.push(data.lot_id?.display_name || data.lot_name)
+            name_parts.push(data.lot_id?.display_name || data.lot_name);
         }
         if (data.package_id) {
             let packageName = data.package_id?.display_name;
@@ -32,10 +32,12 @@ export class StockPickFrom extends Component {
             name_parts.push(packageName);
         }
         if (data.owner) {
-            name_parts.push(data.owner?.display_name)
+            name_parts.push(data.owner?.display_name);
         }
         const result = name_parts.join(" - ");
-        if (result) return result;
+        if (result) {
+            return result;
+        }
         return "";
     }
 }

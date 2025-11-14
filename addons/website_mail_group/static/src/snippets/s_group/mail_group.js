@@ -35,11 +35,11 @@ patch(MailGroup.prototype, {
         // Can not be done in the template of the snippets
         // Because it's rendered only once when the admin add the snippets
         // for the first time, we make a RPC call to setup the widget properly
-        const email = (new URL(document.location.href)).searchParams.get('email');
-        const response = await rpc('/group/is_member', {
-            'group_id': this.mailGroupId,
-            'email': email,
-            'token': this.token,
+        const email = new URL(document.location.href).searchParams.get("email");
+        const response = await rpc("/group/is_member", {
+            group_id: this.mailGroupId,
+            email: email,
+            token: this.token,
         });
 
         if (!response) {
@@ -53,7 +53,8 @@ patch(MailGroup.prototype, {
 
         if (userEmail && userEmail.length) {
             this.hasMemberEmail = true;
-            this.el.querySelector(".o_mg_email_input_group .o_mg_subscribe_email").value = userEmail;
+            this.el.querySelector(".o_mg_email_input_group .o_mg_subscribe_email").value =
+                userEmail;
         }
     },
 });

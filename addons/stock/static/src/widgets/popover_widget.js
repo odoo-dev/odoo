@@ -28,24 +28,24 @@ export class PopoverComponent extends Component {
 export class PopoverWidgetField extends Component {
     static template = "stock.popoverButton";
     static components = { Popover: PopoverComponent };
-    static props = {...standardFieldProps};
-    setup(){
-        let fieldValue = this.props.record.data[this.props.name];
+    static props = { ...standardFieldProps };
+    setup() {
+        const fieldValue = this.props.record.data[this.props.name];
         this.jsonValue = JSON.parse(fieldValue || "{}");
         const position = this.jsonValue.position || "top";
         this.popover = usePopover(this.constructor.components.Popover, { position });
-        this.color = this.jsonValue.color || 'text-primary';
-        this.icon = this.jsonValue.icon || 'fa-info-circle';
+        this.color = this.jsonValue.color || "text-primary";
+        this.icon = this.jsonValue.icon || "fa-info-circle";
     }
 
-    showPopup(ev){
+    showPopup(ev) {
         this.popover.open(ev.currentTarget, { ...this.jsonValue, record: this.props.record });
     }
 }
 
 export const popoverWidgetField = {
     component: PopoverWidgetField,
-    supportedTypes: ['char'],
+    supportedTypes: ["char"],
 };
 
 registry.category("fields").add("popover_widget", popoverWidgetField);

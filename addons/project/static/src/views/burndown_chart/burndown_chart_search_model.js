@@ -2,9 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { SearchModel } from "@web/search/search_model";
 
-
 export class BurndownChartSearchModel extends SearchModel {
-
     /**
      * @override
      */
@@ -20,18 +18,22 @@ export class BurndownChartSearchModel extends SearchModel {
         await super.load(...arguments);
         // Store date and stage_id searchItemId in the SearchModel for reuse in other functions.
         for (const searchItem of Object.values(this.searchItems)) {
-            if (['dateGroupBy', 'groupBy'].includes(searchItem.type)) {
-                if (this.stageIdSearchItemId && this.dateSearchItemId && this.isClosedSearchItemId) {
+            if (["dateGroupBy", "groupBy"].includes(searchItem.type)) {
+                if (
+                    this.stageIdSearchItemId &&
+                    this.dateSearchItemId &&
+                    this.isClosedSearchItemId
+                ) {
                     return;
                 }
                 switch (searchItem.fieldName) {
-                    case 'date':
+                    case "date":
                         this.dateSearchItemId = searchItem.id;
                         break;
-                    case 'stage_id':
+                    case "stage_id":
                         this.stageIdSearchItemId = searchItem.id;
                         break;
-                    case 'is_closed':
+                    case "is_closed":
                         this.isClosedSearchItemId = searchItem.id;
                         break;
                 }
@@ -45,8 +47,18 @@ export class BurndownChartSearchModel extends SearchModel {
     deactivateGroup(groupId) {
         // Prevent removing 'Date & Stage' and 'Date & is closed' group by from the search
         if (this.searchItems[this.dateSearchItemId].groupId == groupId) {
-            if (this.query.some(queryElem => [this.stageIdSearchItemId, this.isClosedSearchItemId].includes(queryElem.searchItemId))){
-                this._addGroupByNotification(_t("The report should be grouped either by \"Stage\" to represent a Burndown Chart or by \"Is Closed\" to represent a Burn-up chart. Without one of these groupings applied, the report will not provide relevant information."));
+            if (
+                this.query.some((queryElem) =>
+                    [this.stageIdSearchItemId, this.isClosedSearchItemId].includes(
+                        queryElem.searchItemId
+                    )
+                )
+            ) {
+                this._addGroupByNotification(
+                    _t(
+                        'The report should be grouped either by "Stage" to represent a Burndown Chart or by "Is Closed" to represent a Burn-up chart. Without one of these groupings applied, the report will not provide relevant information.'
+                    )
+                );
             }
             return;
         }
@@ -59,7 +71,7 @@ export class BurndownChartSearchModel extends SearchModel {
     toggleDateGroupBy(searchItemId, intervalId) {
         // Ensure that there is always one and only one date group by selected.
         if (searchItemId === this.dateSearchItemId) {
-            let filtered_query = [];
+            const filtered_query = [];
             let triggerNotification = false;
             for (const queryElem of this.query) {
                 if (queryElem.searchItemId !== searchItemId) {
@@ -84,9 +96,9 @@ export class BurndownChartSearchModel extends SearchModel {
      */
     toggleSearchItem(searchItemId) {
         // if the current searchItem stage/is_closed, the counterpart is added before removing the current searchItem
-        if (searchItemId === this.isClosedSearchItemId){
+        if (searchItemId === this.isClosedSearchItemId) {
             super.toggleSearchItem(this.stageIdSearchItemId);
-        } else if (searchItemId === this.stageIdSearchItemId){
+        } else if (searchItemId === this.stageIdSearchItemId) {
             super.toggleSearchItem(this.isClosedSearchItemId);
         }
         super.toggleSearchItem(...arguments);
@@ -98,10 +110,7 @@ export class BurndownChartSearchModel extends SearchModel {
      * @private
      */
     _addGroupByNotification(body) {
-        this.notificationService.add(
-            body,
-            { type: "danger" }
-        );
+        this.notificationService.add(body, { type: "danger" });
     }
 
     /**
@@ -144,5 +153,4 @@ export class BurndownChartSearchModel extends SearchModel {
         }
         await super._notify(...arguments);
     }
-
 }

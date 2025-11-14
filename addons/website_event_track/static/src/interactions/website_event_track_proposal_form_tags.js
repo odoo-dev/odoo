@@ -32,12 +32,10 @@ export class WebsiteEventTrackProposalFormTags extends Interaction {
             fields: ["id", "name", "category_id"],
             domain: [["color", "!=", 0]],
         });
-        const choicesMap = choices.map(({ id, category_id, name }) => {
-            return {
-                value: id,
-                label: category_id ? `${category_id[1]} : ${name}` : name,
-            };
-        });
+        const choicesMap = choices.map(({ id, category_id, name }) => ({
+            value: id,
+            label: category_id ? `${category_id[1]} : ${name}` : name,
+        }));
         this.mountComponent(this.el, WebsiteEventTrackProposalFormTagsWrapper, {
             defaultChoices: choicesMap || [],
             placeholder: _t("Select Categories"),
@@ -47,4 +45,7 @@ export class WebsiteEventTrackProposalFormTags extends Interaction {
 
 registry
     .category("public.interactions")
-    .add("website_event_track.website_event_track_proposal_form_tags", WebsiteEventTrackProposalFormTags);
+    .add(
+        "website_event_track.website_event_track_proposal_form_tags",
+        WebsiteEventTrackProposalFormTags
+    );

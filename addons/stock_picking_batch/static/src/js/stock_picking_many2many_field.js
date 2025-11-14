@@ -3,7 +3,6 @@ import { useService } from "@web/core/utils/hooks";
 import { useSelectCreate } from "@web/views/fields/relational_utils";
 import { registry } from "@web/core/registry";
 
-
 class BatchToPickingMany2ManyField extends X2ManyField {
     setup() {
         super.setup();
@@ -12,11 +11,18 @@ class BatchToPickingMany2ManyField extends X2ManyField {
             resModel: "stock.picking",
             activeActions: this.activeActions,
             onSelected: async (resIds) => {
-                const addToWaveWizard = await this.orm.create("stock.add.to.wave", [{
-                    wave_id: this.props.record.resId,
-                    picking_ids: resIds,
-                }]);
-                const action = await this.orm.call("stock.add.to.wave", "attach_pickings", [addToWaveWizard[0]], {context: {from_wave_form: true}});
+                const addToWaveWizard = await this.orm.create("stock.add.to.wave", [
+                    {
+                        wave_id: this.props.record.resId,
+                        picking_ids: resIds,
+                    },
+                ]);
+                const action = await this.orm.call(
+                    "stock.add.to.wave",
+                    "attach_pickings",
+                    [addToWaveWizard[0]],
+                    { context: { from_wave_form: true } }
+                );
                 this.action.doAction(action);
             },
             onCreateEdit: () => this.createOpenRecord(),

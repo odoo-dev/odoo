@@ -14,16 +14,16 @@ export class AccountFileUploader extends DocumentFileUploader {
     getExtraContext() {
         const extraContext = super.getExtraContext();
         const record_data = this.props.record ? this.props.record.data : false;
-        return record_data ? {
-            ...extraContext,
-            default_journal_id: record_data.id,
-            default_move_type: (
-                (record_data.type === 'sale' && 'out_invoice')
-                || (record_data.type === 'purchase' && 'in_invoice')
-                || 'entry'
-            ),
-        } : extraContext;
-
+        return record_data
+            ? {
+                  ...extraContext,
+                  default_journal_id: record_data.id,
+                  default_move_type:
+                      (record_data.type === "sale" && "out_invoice") ||
+                      (record_data.type === "purchase" && "in_invoice") ||
+                      "entry",
+              }
+            : extraContext;
     }
 
     getResModel() {

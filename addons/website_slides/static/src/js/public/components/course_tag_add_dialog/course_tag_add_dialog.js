@@ -186,9 +186,7 @@ export class CourseTagAddDialog extends Component {
             domain,
         });
 
-        const choices = read_results.map((choice) => {
-            return { value: choice.id, label: choice.name };
-        });
+        const choices = read_results.map((choice) => ({ value: choice.id, label: choice.name }));
         return { choices, can_create };
     }
 

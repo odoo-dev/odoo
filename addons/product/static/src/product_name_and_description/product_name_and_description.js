@@ -2,7 +2,15 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import { Component, onMounted, onPatched, onWillUnmount, useEffect, useRef, useState } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onPatched,
+    onWillUnmount,
+    useEffect,
+    useRef,
+    useState,
+} from "@odoo/owl";
 import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
 import { useProductAndLabelAutoresize } from "./product_and_label_autoresize";
 import { computeM2OProps, Many2One } from "@web/views/fields/many2one/many2one";
@@ -24,9 +32,13 @@ export const ProductNameAndDescriptionListRendererMixin = {
 
         if (productCol) {
             if (labelCol) {
-                this.props.list.records.forEach((record) => (record.columnIsProductAndLabel = true));
+                this.props.list.records.forEach(
+                    (record) => (record.columnIsProductAndLabel = true)
+                );
             } else {
-                this.props.list.records.forEach((record) => (record.columnIsProductAndLabel = false));
+                this.props.list.records.forEach(
+                    (record) => (record.columnIsProductAndLabel = false)
+                );
             }
             activeColumns = activeColumns.filter((col) => col.name !== this.descriptionColumn);
             this.titleField = productCol.name;
@@ -35,7 +47,7 @@ export const ProductNameAndDescriptionListRendererMixin = {
         }
 
         return activeColumns;
-    }
+    },
 };
 
 export class ProductNameAndDescriptionField extends Component {
@@ -49,7 +61,9 @@ export class ProductNameAndDescriptionField extends Component {
         this.isPrintMode = useState({ value: false });
         this.labelVisibility = useState({ value: false });
         this.switchToLabel = false;
-        this.columnIsProductAndLabel = useState({ value: this.props.record.columnIsProductAndLabel });
+        this.columnIsProductAndLabel = useState({
+            value: this.props.record.columnIsProductAndLabel,
+        });
         this.labelNode = useRef("labelNodeRef");
         useProductAndLabelAutoresize(this.labelNode, { targetParentName: this.props.name });
         this.productNode = useRef("productNodeRef");

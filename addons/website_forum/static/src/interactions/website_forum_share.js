@@ -11,13 +11,21 @@ export class WebsiteForumShare extends Interaction {
 
             if (socialData.targetType) {
                 const questionEl = document.querySelector(".o_wforum_question");
-                this.renderAt("website.social_modal", {
-                    target_type: socialData.targetType,
-                    state: questionEl.dataset.state,
-                }, document.body, "beforeend", (els) => {
-                    this.addListener(els[0], "hidden.bs.modal", () => els[0].remove());
-                });
-                const bsModal = window.Modal.getOrCreateInstance(document.querySelector("#oe_social_share_modal"));
+                this.renderAt(
+                    "website.social_modal",
+                    {
+                        target_type: socialData.targetType,
+                        state: questionEl.dataset.state,
+                    },
+                    document.body,
+                    "beforeend",
+                    (els) => {
+                        this.addListener(els[0], "hidden.bs.modal", () => els[0].remove());
+                    }
+                );
+                const bsModal = window.Modal.getOrCreateInstance(
+                    document.querySelector("#oe_social_share_modal")
+                );
                 bsModal.show();
                 this.registerCleanup(() => bsModal.dispose());
             }

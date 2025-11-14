@@ -1,4 +1,4 @@
-import { registry } from '@web/core/registry';
+import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_utils";
 
 registry.category("web_tour.tours").add("time_off_allocation_warning_tour", {
@@ -17,7 +17,8 @@ registry.category("web_tour.tours").add("time_off_allocation_warning_tour", {
         },
         {
             content: "Go to Allocations",
-            trigger: ".o-dropdown-item[data-menu-xmlid='hr_holidays.hr_holidays_menu_manager_approve_allocations']",
+            trigger:
+                ".o-dropdown-item[data-menu-xmlid='hr_holidays.hr_holidays_menu_manager_approve_allocations']",
             run: "click",
         },
         {

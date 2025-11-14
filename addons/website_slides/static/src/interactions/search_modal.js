@@ -5,6 +5,4 @@ export class SearchModal extends WebsiteSearchModal {
     static selector = "#o_wslides_search_modal";
 }
 
-registry
-    .category("public.interactions")
-    .add("website_slides.search_modal", SearchModal);
+registry.category("public.interactions").add("website_slides.search_modal", SearchModal);

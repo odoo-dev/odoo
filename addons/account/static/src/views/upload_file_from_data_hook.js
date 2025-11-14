@@ -8,7 +8,6 @@ const supportedFileTypes = ["text/xml", "application/pdf"];
  */
 export function uploadFileFromData(dataTransfer) {
     return async (dataTransfer) => {
-
         function uploadFiles(dataTransfer) {
             const invalidFiles = [...dataTransfer.items].filter(
                 (item) => item.kind !== "file" || !supportedFileTypes.includes(item.type)
@@ -18,7 +17,7 @@ export function uploadFileFromData(dataTransfer) {
                 console.warn("Invalid files to extract details.");
                 return;
             }
-            let uploadInput = document.querySelector('.document_file_uploader.o_input_file');
+            const uploadInput = document.querySelector(".document_file_uploader.o_input_file");
             uploadInput.files = dataTransfer.files;
             uploadInput.dispatchEvent(new Event("change"));
         }
@@ -28,5 +27,5 @@ export function uploadFileFromData(dataTransfer) {
         } else {
             console.warn("Invalid data to extract details.");
         }
-    }
+    };
 }

@@ -1,10 +1,7 @@
 import { Domain } from "@web/core/domain";
 import { makeContext } from "@web/core/context";
 import { SearchModel } from "@web/search/search_model";
-import {
-    serializeDate,
-    serializeDateTime,
-} from "@web/core/l10n/dates";
+import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 
 /**
  * This is the conversion of ForecastModelExtension. See there for more
@@ -61,7 +58,10 @@ export class ForecastSearchModel extends SearchModel {
                 granularity = "day";
             }
             const startDateTime = luxon.DateTime.now().startOf(granularity);
-            this.forecastStart = type === "datetime" ? serializeDateTime(startDateTime) : serializeDate(startDateTime);
+            this.forecastStart =
+                type === "datetime"
+                    ? serializeDateTime(startDateTime)
+                    : serializeDate(startDateTime);
         }
         return this.forecastStart;
     }

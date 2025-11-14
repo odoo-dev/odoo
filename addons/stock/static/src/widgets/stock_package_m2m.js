@@ -5,7 +5,6 @@ import {
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
-
 export class Many2ManyPackageTagsField extends Many2ManyTagsField {
     setup() {
         this.hasNoneTag = this.props.record.data?.has_lines_without_result_package || false;
@@ -34,10 +33,8 @@ export class Many2ManyPackageTagsField extends Many2ManyTagsField {
 export const many2ManyPackageTagsField = {
     ...many2ManyTagsField,
     component: Many2ManyPackageTagsField,
-    additionalClasses: ['o_field_many2many_tags'],
-    relatedFields: () => [
-        { name: "name", type: "char" },
-    ],
-}
+    additionalClasses: ["o_field_many2many_tags"],
+    relatedFields: () => [{ name: "name", type: "char" }],
+};
 
 registry.category("fields").add("package_m2m", many2ManyPackageTagsField);

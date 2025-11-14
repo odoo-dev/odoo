@@ -2,7 +2,6 @@ import { registry } from "@web/core/registry";
 import { GraphRenderer } from "@web/views/graph/graph_renderer";
 import { graphView } from "@web/views/graph/graph_view";
 
-
 export class SubscriptionGraphRenderer extends GraphRenderer {
     /**
      * Open the pivot view instead of the list view on graph click.
@@ -17,7 +16,10 @@ export class SubscriptionGraphRenderer extends GraphRenderer {
                 res_model: this.model.metaData.resModel,
                 target: "current",
                 type: "ir.actions.act_window",
-                views: [[false, "pivot"], [false, "form"]],
+                views: [
+                    [false, "pivot"],
+                    [false, "form"],
+                ],
             },
             {
                 viewType: "pivot",

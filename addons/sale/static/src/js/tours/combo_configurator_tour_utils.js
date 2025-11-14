@@ -5,8 +5,8 @@ function comboSelector(comboName) {
     `;
 }
 
-function comboItemSelector(comboItemName, extraClasses=[]) {
-    const extraClassesSelector = extraClasses.map(extraClass => `.${extraClass}`).join('');
+function comboItemSelector(comboItemName, extraClasses = []) {
+    const extraClassesSelector = extraClasses.map((extraClass) => `.${extraClass}`).join("");
     return `
         .sale-combo-configurator-dialog
         .product-card${extraClassesSelector}:has(h6:contains("${comboItemName}"))
@@ -16,7 +16,7 @@ function comboItemSelector(comboItemName, extraClasses=[]) {
 function assertComboCount(count) {
     return {
         content: `Assert that there are ${count} combos`,
-        trigger: '.sale-combo-configurator-dialog',
+        trigger: ".sale-combo-configurator-dialog",
         run() {
             const selector = `.sale-combo-configurator-dialog [name="sale_combo_configurator_title"]`;
             if (document.querySelectorAll(selector).length !== count) {
@@ -42,7 +42,7 @@ function assertComboItemCount(comboName, count) {
 function assertSelectedComboItemCount(count) {
     return {
         content: `Assert that there are ${count} selected combo items`,
-        trigger: '.sale-combo-configurator-dialog',
+        trigger: ".sale-combo-configurator-dialog",
         run() {
             const selector = `.sale-combo-configurator-dialog .row .product-card.selected`;
             if (document.querySelectorAll(selector).length !== count) {
@@ -55,7 +55,7 @@ function assertSelectedComboItemCount(count) {
 function assertPreselectedComboItemCount(count) {
     return {
         content: `Assert that there are ${count} preselected combo items`,
-        trigger: '.sale-combo-configurator-dialog',
+        trigger: ".sale-combo-configurator-dialog",
         run() {
             const selector = '.sale-combo-configurator-dialog div[name="preselected_product_name"]';
             if (document.querySelectorAll(selector).length !== count) {
@@ -69,14 +69,14 @@ function selectComboItem(comboItemName) {
     return {
         content: `Select combo item ${comboItemName}`,
         trigger: comboItemSelector(comboItemName),
-        run: 'click',
+        run: "click",
     };
 }
 
 function assertComboItemSelected(comboItemName) {
     return {
         content: `Assert that combo item ${comboItemName} is selected`,
-        trigger: comboItemSelector(comboItemName, ['selected']),
+        trigger: comboItemSelector(comboItemName, ["selected"]),
     };
 }
 
@@ -91,7 +91,7 @@ function increaseQuantity() {
     return {
         content: "Increase the combo quantity",
         trigger: '.sale-combo-configurator-dialog button[name="sale_quantity_button_plus"]',
-        run: 'click',
+        run: "click",
     };
 }
 
@@ -99,7 +99,7 @@ function decreaseQuantity() {
     return {
         content: "Decrease the combo quantity",
         trigger: '.sale-combo-configurator-dialog button[name="sale_quantity_button_minus"]',
-        run: 'click',
+        run: "click",
     };
 }
 
@@ -138,14 +138,14 @@ function assertPriceInfo(priceInfo) {
 function assertFooterButtonsDisabled() {
     return {
         content: "Assert that the footer buttons are disabled",
-        trigger: '.sale-combo-configurator-dialog footer.modal-footer button:disabled',
+        trigger: ".sale-combo-configurator-dialog footer.modal-footer button:disabled",
     };
 }
 
 function assertFooterButtonsEnabled() {
     return {
         content: "Assert that the footer buttons are enabled",
-        trigger: '.sale-combo-configurator-dialog footer.modal-footer button:enabled',
+        trigger: ".sale-combo-configurator-dialog footer.modal-footer button:enabled",
     };
 }
 
@@ -177,10 +177,11 @@ function saveConfigurator() {
                 .sale-combo-configurator-dialog
                 button[name="sale_combo_configurator_confirm_button"]
             `,
-            run: 'click',
-        }, {
+            run: "click",
+        },
+        {
             content: "Wait until the modal is closed",
-            trigger: 'body:not(:has(.sale-combo-configurator-dialog))',
+            trigger: "body:not(:has(.sale-combo-configurator-dialog))",
         },
     ];
 }

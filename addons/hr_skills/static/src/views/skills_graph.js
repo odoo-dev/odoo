@@ -6,7 +6,7 @@ export class SkillsGraphRenderer extends GraphRenderer {
     getScaleOptions() {
         const scaleOptions = super.getScaleOptions();
 
-        if ('y' in scaleOptions) {
+        if ("y" in scaleOptions) {
             scaleOptions.y.suggestedMax = 100;
         }
 

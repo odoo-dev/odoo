@@ -42,7 +42,9 @@ export class PurchaseFileUploader extends Component {
         if (this.env.config.viewType !== "list") {
             return;
         }
-        const vendorSet = new Set(this.props.list.selection.map((record) => record.data.partner_id.id));
+        const vendorSet = new Set(
+            this.props.list.selection.map((record) => record.data.partner_id.id)
+        );
         if (vendorSet.size > 1) {
             this.dialog.add(WarningDialog, {
                 title: _t("Validation Error"),

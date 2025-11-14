@@ -1,9 +1,21 @@
 import { patch } from "@web/core/utils/patch";
 
-import { HrPresenceStatus, hrPresenceStatus } from "@hr/components/hr_presence_status/hr_presence_status";
-import { HrPresenceStatusPrivate, hrPresenceStatusPrivate } from "@hr/components/hr_presence_status_private/hr_presence_status_private";
-import { HrPresenceStatusPill, hrPresenceStatusPill } from "@hr/components/hr_presence_status_pill/hr_presence_status_pill";
-import { HrPresenceStatusPrivatePill, hrPresenceStatusPrivatePill } from "@hr/components/hr_presence_status_private_pill/hr_presence_status_private_pill";
+import {
+    HrPresenceStatus,
+    hrPresenceStatus,
+} from "@hr/components/hr_presence_status/hr_presence_status";
+import {
+    HrPresenceStatusPrivate,
+    hrPresenceStatusPrivate,
+} from "@hr/components/hr_presence_status_private/hr_presence_status_private";
+import {
+    HrPresenceStatusPill,
+    hrPresenceStatusPill,
+} from "@hr/components/hr_presence_status_pill/hr_presence_status_pill";
+import {
+    HrPresenceStatusPrivatePill,
+    hrPresenceStatusPrivatePill,
+} from "@hr/components/hr_presence_status_private_pill/hr_presence_status_private_pill";
 import { _t } from "@web/core/l10n/translation";
 
 const patchHrPresenceStatus = () => ({
@@ -11,7 +23,10 @@ const patchHrPresenceStatus = () => ({
         if (this.location) {
             let color = "text-muted";
             if (this.props.record.data.hr_presence_state !== "out_of_working_hour") {
-                color = this.props.record.data.hr_presence_state === "present" ?  "text-success" : "o_icon_employee_absent";
+                color =
+                    this.props.record.data.hr_presence_state === "present"
+                        ? "text-success"
+                        : "o_icon_employee_absent";
             }
             return color;
         }
@@ -85,7 +100,7 @@ if (typeof hrPresenceStatus.fieldDependencies === "function") {
         const fieldDependencies = oldFieldDependencies(widgetInfo);
         fieldDependencies.push(...additionalFieldDependencies);
         return fieldDependencies;
-    }
+    };
 } else {
     hrPresenceStatus.fieldDependencies = [
         ...(hrPresenceStatus.fieldDependencies || []),

@@ -21,7 +21,9 @@ class IAPActionButtonsWidget extends Component {
     }
 
     async onManageServiceLinkClicked() {
-        const account_id = await this.orm.silent.call("iap.account", "get_account_id", [this.props.serviceName]);
+        const account_id = await this.orm.silent.call("iap.account", "get_account_id", [
+            this.props.serviceName,
+        ]);
         this.action.doAction({
             type: "ir.actions.act_window",
             res_model: "iap.account",
@@ -33,11 +35,9 @@ class IAPActionButtonsWidget extends Component {
 
 export const iapActionButtonsWidget = {
     component: IAPActionButtonsWidget,
-    extractProps: ({ attrs }) => {
-        return {
-            serviceName: attrs.service_name,
-            showServiceButtons: !Boolean(attrs.hide_service),
-        };
-    },
+    extractProps: ({ attrs }) => ({
+        serviceName: attrs.service_name,
+        showServiceButtons: !attrs.hide_service,
+    }),
 };
 registry.category("view_widgets").add("iap_buy_more_credits", iapActionButtonsWidget);

@@ -1,11 +1,11 @@
 /* global Stripe */
 
-import { patch } from '@web/core/utils/patch';
-import { _t } from '@web/core/l10n/translation';
-import { rpc } from '@web/core/network/rpc';
-import { redirect } from '@web/core/utils/urls';
-import { ExpressCheckout } from '@payment/interactions/express_checkout';
-import { StripeOptions } from '@payment_stripe/interactions/stripe_options';
+import { patch } from "@web/core/utils/patch";
+import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
+import { redirect } from "@web/core/utils/urls";
+import { ExpressCheckout } from "@payment/interactions/express_checkout";
+import { StripeOptions } from "@payment_stripe/interactions/stripe_options";
 
 patch(ExpressCheckout.prototype, {
     /**
@@ -17,13 +17,15 @@ patch(ExpressCheckout.prototype, {
      * @returns {Object} The information to be displayed on the payment form.
      */
     _getOrderDetails(deliveryAmount, amountFreeShipping) {
-        const pending = this.paymentContext['shippingInfoRequired'] && deliveryAmount === undefined;
-        const minorAmount = parseInt(this.paymentContext['minorAmount']);
-        const displayItems = [{
-            label: _t("Your order"),
-            amount: minorAmount,
-        }];
-        if (this.paymentContext['shippingInfoRequired'] && deliveryAmount !== undefined) {
+        const pending = this.paymentContext["shippingInfoRequired"] && deliveryAmount === undefined;
+        const minorAmount = parseInt(this.paymentContext["minorAmount"]);
+        const displayItems = [
+            {
+                label: _t("Your order"),
+                amount: minorAmount,
+            },
+        ];
+        if (this.paymentContext["shippingInfoRequired"] && deliveryAmount !== undefined) {
             displayItems.push({
                 label: _t("Delivery"),
                 amount: deliveryAmount,
@@ -37,7 +39,7 @@ patch(ExpressCheckout.prototype, {
         }
         return {
             total: {
-                label: this.paymentContext['merchantName'],
+                label: this.paymentContext["merchantName"],
                 amount: minorAmount + (deliveryAmount ?? 0) + (amountFreeShipping ?? 0),
                 // Delay the display of the amount until the shipping price is retrieved.
                 pending: pending,
@@ -60,31 +62,31 @@ patch(ExpressCheckout.prototype, {
          * that case, the check is whether the variable is defined because the server doesn't send
          * the value when it equals '0'.
          */
-        if (providerData.providerCode !== 'stripe' || !this.paymentContext['amount']) {
+        if (providerData.providerCode !== "stripe" || !this.paymentContext["amount"]) {
             super._prepareExpressCheckoutForm(...arguments);
             return;
         }
 
         const stripeJS = Stripe(
             providerData.stripePublishableKey,
-            new StripeOptions()._prepareStripeOptions(providerData),
+            new StripeOptions()._prepareStripeOptions(providerData)
         );
         const paymentRequest = stripeJS.paymentRequest({
             country: providerData.countryCode,
-            currency: this.paymentContext['currencyName'],
+            currency: this.paymentContext["currencyName"],
             requestPayerName: true, // Force fetching the billing address for Apple Pay.
             requestPayerEmail: true,
             requestPayerPhone: true,
-            requestShipping: this.paymentContext['shippingInfoRequired'],
+            requestShipping: this.paymentContext["shippingInfoRequired"],
             ...this._getOrderDetails(),
         });
         if (this.stripePaymentRequests === undefined) {
             this.stripePaymentRequests = [];
         }
         this.stripePaymentRequests.push(paymentRequest);
-        const paymentRequestButton = stripeJS.elements().create('paymentRequestButton', {
+        const paymentRequestButton = stripeJS.elements().create("paymentRequestButton", {
             paymentRequest: paymentRequest,
-            style: {paymentRequestButton: {type: 'buy'}},
+            style: { paymentRequestButton: { type: "buy" } },
         });
 
         // Check the availability of the Payment Request API first.
@@ -96,12 +98,12 @@ patch(ExpressCheckout.prototype, {
         } else {
             document.querySelector(
                 `#o_stripe_express_checkout_container_${providerData.providerId}`
-            ).style.display = 'none';
+            ).style.display = "none";
         }
 
-        paymentRequest.on('paymentmethod', async (ev) => {
+        paymentRequest.on("paymentmethod", async (ev) => {
             const addresses = {
-                'billing_address': {
+                billing_address: {
                     name: ev.payerName,
                     email: ev.payerEmail,
                     phone: ev.payerPhone,
@@ -111,9 +113,9 @@ patch(ExpressCheckout.prototype, {
                     city: ev.paymentMethod.billing_details.address.city,
                     country: ev.paymentMethod.billing_details.address.country,
                     state: ev.paymentMethod.billing_details.address.state,
-                }
+                },
             };
-            if (this.paymentContext['shippingInfoRequired']) {
+            if (this.paymentContext["shippingInfoRequired"]) {
                 addresses.shipping_address = {
                     name: ev.shippingAddress.recipient,
                     email: ev.payerEmail,
@@ -128,85 +130,90 @@ patch(ExpressCheckout.prototype, {
                 addresses.shipping_option = ev.shippingOption;
             }
             // Update the customer addresses on the related document.
-            this.paymentContext.partnerId = parseInt(await this.waitFor(rpc(
-                this.paymentContext['expressCheckoutRoute'],
-                addresses,
-            )));
+            this.paymentContext.partnerId = parseInt(
+                await this.waitFor(rpc(this.paymentContext["expressCheckoutRoute"], addresses))
+            );
             // Call the transaction route to create the transaction and retrieve the client secret.
-            const { client_secret } = await this.waitFor(rpc(
-                this.paymentContext['transactionRoute'],
-                this._prepareTransactionRouteParams(providerData.providerId),
-            ));
+            const { client_secret } = await this.waitFor(
+                rpc(
+                    this.paymentContext["transactionRoute"],
+                    this._prepareTransactionRouteParams(providerData.providerId)
+                )
+            );
             // Confirm the PaymentIntent without handling eventual next actions (e.g. 3DS).
             const { paymentIntent, error: confirmError } = await this.waitFor(
                 stripeJS.confirmCardPayment(
-                    client_secret, {payment_method: ev.paymentMethod.id}, {handleActions: false}
+                    client_secret,
+                    { payment_method: ev.paymentMethod.id },
+                    { handleActions: false }
                 )
             );
             if (confirmError) {
                 // Report to the browser that the payment failed, prompting it to re-show the
                 // payment interface, or show an error message and close the payment interface.
-                ev.complete('fail');
+                ev.complete("fail");
             } else {
                 // Report to the browser that the confirmation was successful, prompting it to close
                 // the browser payment method collection interface.
-                ev.complete('success');
-                if (paymentIntent.status === 'requires_action') { // A next step is required.
+                ev.complete("success");
+                if (paymentIntent.status === "requires_action") {
+                    // A next step is required.
                     // Trigger the step.
                     await this.waitFor(stripeJS.confirmCardPayment(client_secret));
                 }
-                redirect('/payment/status');
+                redirect("/payment/status");
             }
         });
 
-        if (this.paymentContext['shippingInfoRequired']) {
+        if (this.paymentContext["shippingInfoRequired"]) {
             // Wait until the express checkout form is loaded for Apple Pay and Google Pay to select
             // a default shipping address and trigger the `shippingaddresschange` event, so we can
             // fetch the available shipping options. When the customer manually selects a different
             // shipping address, the shipping options need to be fetched again.
-            paymentRequest.on('shippingaddresschange', async (ev) => {
+            paymentRequest.on("shippingaddresschange", async (ev) => {
                 // Call the shipping address update route to fetch the shipping options.
-                const availableCarriersData = await this.waitFor(rpc(
-                    this.paymentContext['shippingAddressUpdateRoute'],
-                    {
+                const availableCarriersData = await this.waitFor(
+                    rpc(this.paymentContext["shippingAddressUpdateRoute"], {
                         partial_delivery_address: {
                             zip: ev.shippingAddress.postalCode,
                             city: ev.shippingAddress.city,
                             country: ev.shippingAddress.country,
                             state: ev.shippingAddress.region,
                         },
-                    },
-                ));
+                    })
+                );
                 const { delivery_methods, delivery_discount_minor_amount } = availableCarriersData;
                 if (delivery_methods.length === 0) {
-                    ev.updateWith({status: 'invalid_shipping_address'});
+                    ev.updateWith({ status: "invalid_shipping_address" });
                 } else {
                     ev.updateWith({
-                        status: 'success',
-                        shippingOptions: delivery_methods.map(carrier => ({
+                        status: "success",
+                        shippingOptions: delivery_methods.map((carrier) => ({
                             id: String(carrier.id),
                             label: carrier.name,
-                            detail: carrier.description ? carrier.description:'',
+                            detail: carrier.description ? carrier.description : "",
                             amount: carrier.minorAmount,
                         })),
                         ...this._getOrderDetails(
                             delivery_methods[0].minorAmount,
-                            delivery_discount_minor_amount,
+                            delivery_discount_minor_amount
                         ),
                     });
                 }
             });
 
             // When the customer selects a different shipping option, update the displayed total.
-            paymentRequest.on('shippingoptionchange', async (ev) => {
-                const result = await this.waitFor(rpc('/shop/set_delivery_method', {
-                    dm_id: parseInt(ev.shippingOption.id),
-                }));
+            paymentRequest.on("shippingoptionchange", async (ev) => {
+                const result = await this.waitFor(
+                    rpc("/shop/set_delivery_method", {
+                        dm_id: parseInt(ev.shippingOption.id),
+                    })
+                );
                 ev.updateWith({
-                    status: 'success',
+                    status: "success",
                     ...this._getOrderDetails(
                         ev.shippingOption.amount,
-                        parseInt(result.delivery_discount_minor_amount) || 0,
+                        parseInt(result.delivery_discount_minor_amount) || 0
                     ),
                 });
             });
@@ -224,8 +231,9 @@ patch(ExpressCheckout.prototype, {
      */
     _updateAmount(newAmount, newMinorAmount) {
         super._updateAmount(...arguments);
-        this.stripePaymentRequests && this.stripePaymentRequests.map(
-            paymentRequest => paymentRequest.update(this._getOrderDetails())
-        );
+        this.stripePaymentRequests &&
+            this.stripePaymentRequests.map((paymentRequest) =>
+                paymentRequest.update(this._getOrderDetails())
+            );
     },
 });

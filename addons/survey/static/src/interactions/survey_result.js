@@ -143,11 +143,15 @@ export class SurveyResult extends Interaction {
      */
     prepareAnswersFilters(filters, operation, ev) {
         const cellDataset = ev.currentTarget.dataset;
-        const filter = `${cellDataset.modelShortKey},${cellDataset.rowId || 0},${cellDataset.recordId}`;
+        const filter = `${cellDataset.modelShortKey},${cellDataset.rowId || 0},${
+            cellDataset.recordId
+        }`;
 
         if (operation === "add") {
             if (filters) {
-                filters = !filters.split("|").includes(filter) ? (filters += `|${filter}`) : filters;
+                filters = !filters.split("|").includes(filter)
+                    ? (filters += `|${filter}`)
+                    : filters;
             } else {
                 filters = filter;
             }
@@ -157,7 +161,9 @@ export class SurveyResult extends Interaction {
                 .filter((filterItem) => filterItem !== filter)
                 .join("|");
         } else {
-            throw new Error('`operation` parameter for `prepareAnswersFilters` must be either "add" or "remove".');
+            throw new Error(
+                '`operation` parameter for `prepareAnswersFilters` must be either "add" or "remove".'
+            );
         }
         return filters;
     }

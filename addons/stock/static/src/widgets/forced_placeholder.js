@@ -19,7 +19,7 @@ export class ForcedPlaceholderField extends Component {
         return {
             ...props,
             canOpen: !props.readonly && props.canOpen, // to remove the wrong link and the hand cursor on hover
-        }
+        };
     }
 }
 

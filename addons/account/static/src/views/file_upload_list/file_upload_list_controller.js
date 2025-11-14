@@ -6,4 +6,4 @@ export class FileUploadListController extends ListController {
         ...ListController.components,
         DocumentFileUploader,
     };
-};
+}

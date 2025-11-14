@@ -13,7 +13,7 @@ export class GenerateContentAndCopyButton extends CopyButton {
     }
 
     async onClick() {
-        if(this.props.contentGenerationFunction){
+        if (this.props.contentGenerationFunction) {
             this.props.content = await this.props.contentGenerationFunction();
         }
         await super.onClick();

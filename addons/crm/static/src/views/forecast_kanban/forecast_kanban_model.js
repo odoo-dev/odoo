@@ -58,7 +58,8 @@ export class ForecastKanbanModel extends CrmKanbanModel {
     fillTemporalPeriod(config) {
         const [groupByFieldName, granularity] = config.groupBy[0].split(":");
         const groupByField = config.fields[groupByFieldName];
-        const minGroups = (config.context.fill_temporal && config.context.fill_temporal.min_groups) || undefined;
+        const minGroups =
+            (config.context.fill_temporal && config.context.fill_temporal.min_groups) || undefined;
         const { name, type } = groupByField;
         const forceRecompute = this.forceNextRecompute;
         this.forceNextRecompute = false;

@@ -51,7 +51,7 @@ export class LivechatChannel extends models.ServerModel {
         const MailGuest = this.env["mail.guest"];
         /** @type {import("mock_models").ResUsers} */
         const ResUsers = this.env["res.users"];
-        const agent = operator_info['agent']
+        const agent = operator_info["agent"];
 
         const membersToAdd = [
             Command.create({

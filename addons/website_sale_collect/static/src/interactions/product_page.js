@@ -1,5 +1,5 @@
-import { patch } from '@web/core/utils/patch';
-import { ProductPage } from '@website_sale/interactions/product_page';
+import { patch } from "@web/core/utils/patch";
+import { ProductPage } from "@website_sale/interactions/product_page";
 
 patch(ProductPage.prototype, {
     /**
@@ -12,6 +12,6 @@ patch(ProductPage.prototype, {
      */
     async _onChangeCombination(ev, parent, combination) {
         await super._onChangeCombination(...arguments);
-        this.env.bus.trigger('updateCombinationInfo', combination);
+        this.env.bus.trigger("updateCombinationInfo", combination);
     },
 });

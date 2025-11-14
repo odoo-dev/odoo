@@ -9,7 +9,8 @@ export function patchCommonRenderer(CommonRenderer) {
             const record = this.props.model.records[event.id];
             if (record) {
                 const { state, is_closed } = record.rawRecord;
-                const isTaskClosed = is_closed !== undefined ? is_closed : ['1_done', '1_canceled'].includes(state);
+                const isTaskClosed =
+                    is_closed !== undefined ? is_closed : ["1_done", "1_canceled"].includes(state);
                 if (isTaskClosed) {
                     classesToAdd.push("o_past_event");
                 }

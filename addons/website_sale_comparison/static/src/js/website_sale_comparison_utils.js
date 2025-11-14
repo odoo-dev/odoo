@@ -1,8 +1,8 @@
-import { cookie } from '@web/core/browser/cookie';
+import { cookie } from "@web/core/browser/cookie";
 
-const COMPARISON_PRODUCT_IDS_COOKIE_NAME = 'comparison_product_ids';
+const COMPARISON_PRODUCT_IDS_COOKIE_NAME = "comparison_product_ids";
 const MAX_COMPARISON_PRODUCTS = 4;
-const COMPARISON_EVENT = 'comparison_products_changed'
+const COMPARISON_EVENT = "comparison_products_changed";
 
 /**
  * Get the IDs of the products to compare from the cookie.
@@ -10,7 +10,7 @@ const COMPARISON_EVENT = 'comparison_products_changed'
  * @return {Array<number>} The IDs of the products to compare.
  */
 function getComparisonProductIds() {
-    return JSON.parse(cookie.get(COMPARISON_PRODUCT_IDS_COOKIE_NAME) || '[]');
+    return JSON.parse(cookie.get(COMPARISON_PRODUCT_IDS_COOKIE_NAME) || "[]");
 }
 
 /**
@@ -79,7 +79,7 @@ function notifyComparisonListeners(bus) {
  */
 function updateDisabled(el, isDisabled) {
     el.disabled = isDisabled;
-    el.classList.toggle('disabled', isDisabled);
+    el.classList.toggle("disabled", isDisabled);
 }
 
 /**

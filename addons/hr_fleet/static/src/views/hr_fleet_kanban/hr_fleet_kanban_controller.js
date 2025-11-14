@@ -7,13 +7,9 @@ export class HrFleetKanbanController extends KanbanController {
         super.setup(...arguments);
         this.uploadFileInput = useRef("uploadFileInput");
         this.uploadService = useService("file_upload");
-        useBus(
-            this.uploadService.bus,
-            "FILE_UPLOAD_LOADED",
-            () => {
-                this.model.load();
-            },
-        );
+        useBus(this.uploadService.bus, "FILE_UPLOAD_LOADED", () => {
+            this.model.load();
+        });
     }
 
     get canCreate() {
@@ -24,16 +20,12 @@ export class HrFleetKanbanController extends KanbanController {
         if (!ev.target.files) {
             return;
         }
-        this.uploadService.upload(
-            "/web/binary/upload_attachment",
-            ev.target.files,
-            {
-                buildFormData: (formData) => {
-                    formData.append("model", "fleet.vehicle.assignation.log");
-                    formData.append("id", this.props.context.active_id);
-                },
+        this.uploadService.upload("/web/binary/upload_attachment", ev.target.files, {
+            buildFormData: (formData) => {
+                formData.append("model", "fleet.vehicle.assignation.log");
+                formData.append("id", this.props.context.active_id);
             },
-        );
+        });
         ev.target.value = "";
     }
 }

@@ -9,7 +9,10 @@ function fillSelectMenu(inputID, search) {
             trigger: `.o_website_links_utm_forms div#${inputID} .o_select_menu_toggler`,
             run: "click",
         },
-        ...stepUtils.editSelectMenuInput(`.o_website_links_utm_forms div#${inputID} .o_select_menu_input`, search),
+        ...stepUtils.editSelectMenuInput(
+            `.o_website_links_utm_forms div#${inputID} .o_select_menu_input`,
+            search
+        ),
         {
             content: "Select found selectMenu item",
             trigger: `.o_popover .o_select_menu_item:contains("${search}")`,
@@ -22,23 +25,23 @@ function fillSelectMenu(inputID, search) {
     ];
 }
 
-const campaignValue = 'Super Specific Campaign';
-const mediumValue = 'Super Specific Medium';
-const sourceValue = 'Super Specific Source';
+const campaignValue = "Super Specific Campaign";
+const mediumValue = "Super Specific Medium";
+const sourceValue = "Super Specific Source";
 
-registry.category("web_tour.tours").add('website_links_tour', {
-    url: '/r',
+registry.category("web_tour.tours").add("website_links_tour", {
+    url: "/r",
     steps: () => [
         // 1. Create a tracked URL
         {
             content: "check that existing links are shown",
-            trigger: '#o_website_links_recent_links .btn_shorten_url_clipboard',
+            trigger: "#o_website_links_recent_links .btn_shorten_url_clipboard",
         },
         {
             content: "fill the URL form input",
-            trigger: '#o_website_links_link_tracker_form input#url',
+            trigger: "#o_website_links_link_tracker_form input#url",
             run: function () {
-                var url = window.location.host + '/contactus';
+                var url = window.location.host + "/contactus";
                 document.querySelector("#o_website_links_link_tracker_form input#url").value = url;
             },
         },
@@ -50,7 +53,7 @@ registry.category("web_tour.tours").add('website_links_tour', {
         ...fillSelectMenu("source-select-wrapper", sourceValue),
         {
             content: "Copy tracker link",
-            trigger: '#btn_shorten_url',
+            trigger: "#btn_shorten_url",
             run: function () {
                 // Patch and ignore write on clipboard in tour as we don't have permissions
                 const oldWriteText = browser.navigator.clipboard.writeText;
@@ -67,13 +70,17 @@ registry.category("web_tour.tours").add('website_links_tour', {
         },
         // 2. Visit it
         {
-            trigger: '#o_website_links_recent_links .o_website_links_title:first():contains("Contact Us")',
+            trigger:
+                '#o_website_links_recent_links .o_website_links_title:first():contains("Contact Us")',
         },
         {
             content: "check that link was created and visit it",
-            trigger: '.o_website_links_create_tracked_url #generated_tracked_link .o_website_links_short_url:contains("/r/")',
+            trigger:
+                '.o_website_links_create_tracked_url #generated_tracked_link .o_website_links_short_url:contains("/r/")',
             run: function () {
-                window.location.href = $('#generated_tracked_link .o_website_links_short_url').text();
+                window.location.href = $(
+                    "#generated_tracked_link .o_website_links_short_url"
+                ).text();
             },
             expectUnloadPage: true,
         },
@@ -81,12 +88,14 @@ registry.category("web_tour.tours").add('website_links_tour', {
             content: "check that we landed on correct page with correct query strings",
             trigger: ".s_form_aside h1:contains(/^Contact us$/)",
             run: function () {
-                const enc = c => encodeURIComponent(c).replace(/%20/g, '+');
-                const expectedUrl = `/contactus?utm_campaign=${enc(campaignValue)}&utm_source=${enc(sourceValue)}&utm_medium=${enc(mediumValue)}`;
+                const enc = (c) => encodeURIComponent(c).replace(/%20/g, "+");
+                const expectedUrl = `/contactus?utm_campaign=${enc(campaignValue)}&utm_source=${enc(
+                    sourceValue
+                )}&utm_medium=${enc(mediumValue)}`;
                 if (window.location.pathname + window.location.search !== expectedUrl) {
                     console.error("The link was not correctly created. " + window.location.search);
                 }
-                window.location.href = '/r';
+                window.location.href = "/r";
             },
             expectUnloadPage: true,
         },
@@ -112,7 +121,7 @@ registry.category("web_tour.tours").add('website_links_tour', {
         },
         {
             content: "check click number and ensure graphs are initialized",
-            trigger: 'canvas',
+            trigger: "canvas",
         },
         {
             content: "click on Last Month tab",
@@ -121,7 +130,7 @@ registry.category("web_tour.tours").add('website_links_tour', {
         },
         {
             content: "ensure tab is correctly resized",
-            trigger: '#last_month_charts #last_month_clicks_chart',
+            trigger: "#last_month_charts #last_month_clicks_chart",
             run: function () {
                 var width = document
                     .querySelector("#last_month_charts #last_month_clicks_chart")
@@ -131,5 +140,5 @@ registry.category("web_tour.tours").add('website_links_tour', {
                 }
             },
         },
-    ]
+    ],
 });

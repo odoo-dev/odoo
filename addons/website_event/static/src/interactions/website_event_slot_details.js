@@ -16,7 +16,7 @@ export class SlotDetails extends Interaction {
     };
     dynamicContent = {
         _envBus: {
-            "t-on-websiteEvent.enableSubmit": () => this.buttonDisabled = false,
+            "t-on-websiteEvent.enableSubmit": () => (this.buttonDisabled = false),
         },
         ".a-submit": {
             "t-on-click.prevent.stop": this._onSubmitClick,
@@ -30,16 +30,16 @@ export class SlotDetails extends Interaction {
             "t-att-class": (el) => ({
                 "btn-light": el.dataset.slotId !== this.selectedSlotId,
                 "btn-primary": el.dataset.slotId === this.selectedSlotId,
-            })
+            }),
         },
         ".o_wevent_slot_btn_cancel, .btn-close": {
             "t-on-click": this._onClose,
         },
-        ".o_wevent_selected_slot" : {
+        ".o_wevent_selected_slot": {
             "t-out": () => this.selectedSlotDatetime,
         },
         ".o_wevent_selected_slot_title": {
-            "t-out": () => this.selectedSlotId ? _t("Selected Date:") : _t("Select a Date:"),
+            "t-out": () => (this.selectedSlotId ? _t("Selected Date:") : _t("Select a Date:")),
         },
     };
 
@@ -66,8 +66,12 @@ export class SlotDetails extends Interaction {
      * @param {MouseEvent} ev
      */
     _onChangePageClick(ev) {
-        const numPage = ev.currentTarget.classList.contains("o_wevent_slot_next") ? this.currentSlotPage + 1 : this.currentSlotPage - 1;
-        const maxNumPage = Math.ceil(this.el.querySelectorAll(".o_wevent_slot_date").length / MAX_DATES_PER_PAGE) - 1;
+        const numPage = ev.currentTarget.classList.contains("o_wevent_slot_next")
+            ? this.currentSlotPage + 1
+            : this.currentSlotPage - 1;
+        const maxNumPage =
+            Math.ceil(this.el.querySelectorAll(".o_wevent_slot_date").length / MAX_DATES_PER_PAGE) -
+            1;
         if (numPage < 0 || numPage > maxNumPage) {
             return;
         }
@@ -91,8 +95,13 @@ export class SlotDetails extends Interaction {
     _onSlotSelected(ev) {
         const dataset = ev.currentTarget.dataset;
         this.selectedSlotDatetime =
-            deserializeDateTime(dataset.slotStart, {tz: dataset.eventTz}).toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY) +
-            " - " + deserializeDateTime(dataset.slotEnd, {tz: dataset.eventTz}).toLocaleString(DateTime.TIME_SIMPLE);
+            deserializeDateTime(dataset.slotStart, { tz: dataset.eventTz }).toLocaleString(
+                DateTime.DATETIME_MED_WITH_WEEKDAY
+            ) +
+            " - " +
+            deserializeDateTime(dataset.slotEnd, { tz: dataset.eventTz }).toLocaleString(
+                DateTime.TIME_SIMPLE
+            );
         this.form.setAttribute("data-selected-slot-id", parseInt(ev.currentTarget.dataset.slotId));
     }
 
@@ -102,9 +111,9 @@ export class SlotDetails extends Interaction {
     async _onSubmitClick(ev) {
         const formEl = ev.currentTarget.closest("form");
         this.buttonDisabled = true;
-        const modal = await this.waitFor(rpc(
-            formEl.action.replace("slot_id", this.selectedSlotId),
-        ));
+        const modal = await this.waitFor(
+            rpc(formEl.action.replace("slot_id", this.selectedSlotId))
+        );
         const modalEl = new DOMParser().parseFromString(modal, "text/html").body.firstChild;
         this.insert(modalEl, document.body);
     }
@@ -123,9 +132,9 @@ export class SlotDetails extends Interaction {
         dates.forEach((date) => date.classList.add("d-none"));
         const min = MAX_DATES_PER_PAGE * this.currentSlotPage;
         const max = MAX_DATES_PER_PAGE * (this.currentSlotPage + 1);
-        Array.from(dates).slice(min, max).forEach(
-            date => date.classList.remove("d-none")
-        );
+        Array.from(dates)
+            .slice(min, max)
+            .forEach((date) => date.classList.remove("d-none"));
         // Handle previous/next buttons display
         const previousBtn = this.el.querySelector(".o_wevent_slot_previous button");
         const nextBtn = this.el.querySelector(".o_wevent_slot_next button");
@@ -137,13 +146,11 @@ export class SlotDetails extends Interaction {
             });
             if (this.currentSlotPage === 0) {
                 previousBtn.classList.add("disabled");
-            } else if(max >= dates.length) {
+            } else if (max >= dates.length) {
                 nextBtn.classList.add("disabled");
             }
         }
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_event.slot_details", SlotDetails);
+registry.category("public.interactions").add("website_event.slot_details", SlotDetails);

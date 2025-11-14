@@ -6,7 +6,7 @@ export class PortalInvoicePagePayment extends Interaction {
 
     setup() {
         if (this.el.dataset.payment) {
-            (new Modal("#pay_with")).show();
+            new Modal("#pay_with").show();
         }
     }
 }

@@ -6,48 +6,46 @@ export class AccountTypeSelection extends SelectionField {
     static template = "account.AccountTypeSelection";
     setup() {
         super.setup();
-        const getChoicesForGroup = (group) => {
-            return this.choices.filter(x => x.value.startsWith(group));
-        }
+        const getChoicesForGroup = (group) => this.choices.filter((x) => x.value.startsWith(group));
         this.sections = [
             {
-                label: _t('Balance Sheet'),
-                name: "balance_sheet"
+                label: _t("Balance Sheet"),
+                name: "balance_sheet",
             },
             {
-                label: _t('Profit & Loss'),
-                name: "profit_and_loss"
+                label: _t("Profit & Loss"),
+                name: "profit_and_loss",
             },
-        ]
+        ];
         this.groups = [
             {
-                label: _t('Assets'),
-                choices: getChoicesForGroup('asset'),
+                label: _t("Assets"),
+                choices: getChoicesForGroup("asset"),
                 section: "balance_sheet",
             },
             {
-                label: _t('Liabilities'),
-                choices: getChoicesForGroup('liability'),
+                label: _t("Liabilities"),
+                choices: getChoicesForGroup("liability"),
                 section: "balance_sheet",
             },
             {
-                label: _t('Equity'),
-                choices: getChoicesForGroup('equity'),
+                label: _t("Equity"),
+                choices: getChoicesForGroup("equity"),
                 section: "balance_sheet",
             },
             {
-                label: _t('Income'),
-                choices: getChoicesForGroup('income'),
+                label: _t("Income"),
+                choices: getChoicesForGroup("income"),
                 section: "profit_and_loss",
             },
             {
-                label: _t('Expense'),
-                choices: getChoicesForGroup('expense'),
+                label: _t("Expense"),
+                choices: getChoicesForGroup("expense"),
                 section: "profit_and_loss",
             },
             {
-                label: _t('Other'),
-                choices: getChoicesForGroup('off_balance'),
+                label: _t("Other"),
+                choices: getChoicesForGroup("off_balance"),
                 section: "profit_and_loss",
             },
         ];

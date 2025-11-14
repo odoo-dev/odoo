@@ -1,8 +1,7 @@
-import { listView } from '@web/views/list/list_view';
+import { listView } from "@web/views/list/list_view";
 import { registry } from "@web/core/registry";
 import { StockReportSearchModel } from "../search/stock_report_search_model";
-import { StockReportSearchPanel } from '../search/stock_report_search_panel';
-
+import { StockReportSearchPanel } from "../search/stock_report_search_panel";
 
 export const StockReportListView = {
     ...listView,

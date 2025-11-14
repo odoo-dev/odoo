@@ -53,9 +53,10 @@ export const many2OneAvatarUserField = {
         return {
             ...extractM2OFieldProps(staticInfo, dynamicInfo),
             withCommand: ["form", "list"].includes(staticInfo.viewType),
-            canOpen: "no_open" in staticInfo.options
-                ? !staticInfo.options.no_open
-                : staticInfo.viewType === "form",
+            canOpen:
+                "no_open" in staticInfo.options
+                    ? !staticInfo.options.no_open
+                    : staticInfo.viewType === "form",
         };
     },
     listViewWidth: [110],

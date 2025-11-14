@@ -70,7 +70,7 @@ export class TodoFormController extends FormControllerWithHTMLExpander {
 
     async openHistoryDialog() {
         const record = this.model.root;
-        const versionedFieldName = 'description';
+        const versionedFieldName = "description";
         const historyMetadata = record.data["html_field_history_metadata"]?.[versionedFieldName];
         if (!historyMetadata) {
             this.notifications.add(
@@ -81,32 +81,31 @@ export class TodoFormController extends FormControllerWithHTMLExpander {
             return;
         }
 
-        this.dialogService.add(
-            HistoryDialog,
-            {
-                title: _t("To-do History"),
-                noContentHelper: markup`
+        this.dialogService.add(HistoryDialog, {
+            title: _t("To-do History"),
+            noContentHelper: markup`
                     <span class='text-muted fst-italic'>${_t(
                         "The To-do description was empty at the time."
                     )}</span>`,
-                recordId: record.resId,
-                recordModel: this.props.resModel,
-                versionedFieldName,
-                historyMetadata,
-                restoreRequested: (html, close) => {
-                    this.dialogService.add(ConfirmationDialog, {
-                        title: _t("Are you sure you want to restore this version?"),
-                        body: _t("Restoring will replace the current content with the selected version. Any unsaved changes will be lost."),
-                        confirm: () => {
-                            const restoredData = {};
-                            restoredData[versionedFieldName] = html;
-                            record.update(restoredData);
-                            close();
-                        },
-                        confirmLabel: _t("Restore"),
-                    });
-                },
+            recordId: record.resId,
+            recordModel: this.props.resModel,
+            versionedFieldName,
+            historyMetadata,
+            restoreRequested: (html, close) => {
+                this.dialogService.add(ConfirmationDialog, {
+                    title: _t("Are you sure you want to restore this version?"),
+                    body: _t(
+                        "Restoring will replace the current content with the selected version. Any unsaved changes will be lost."
+                    ),
+                    confirm: () => {
+                        const restoredData = {};
+                        restoredData[versionedFieldName] = html;
+                        record.update(restoredData);
+                        close();
+                    },
+                    confirmLabel: _t("Restore"),
+                });
             },
-        );
+        });
     }
 }

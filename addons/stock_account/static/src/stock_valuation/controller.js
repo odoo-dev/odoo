@@ -3,7 +3,6 @@ import { useService } from "@web/core/utils/hooks";
 import { serializeDate } from "@web/core/l10n/dates";
 const { DateTime } = luxon;
 
-
 export class StockValuationReportController {
     constructor(action) {
         this.action = action;
@@ -45,7 +44,9 @@ export class StockValuationReportController {
         // Prepare the "Initial Balance" lines.
         this.data.initial_balance.lines = [];
         this.data.initial_balance.accounts = [];
-        for (let [accountId, data] of Object.entries(this.data.initial_balance.lines_by_account_id)) {
+        for (const [accountId, data] of Object.entries(
+            this.data.initial_balance.lines_by_account_id
+        )) {
             const account = this.data.accounts_by_id[accountId];
             this.data.initial_balance.lines.push({
                 label: account.display_name,
@@ -57,7 +58,9 @@ export class StockValuationReportController {
         // Prepare the "Ending Stock" lines.
         this.data.ending_stock.lines = [];
         this.data.ending_stock.accounts = [];
-        for (let [accountId, data] of Object.entries(this.data.ending_stock.lines_by_account_id)) {
+        for (const [accountId, data] of Object.entries(
+            this.data.ending_stock.lines_by_account_id
+        )) {
             const account = this.data.accounts_by_id[accountId];
             this.data.ending_stock.lines.push({
                 label: account?.display_name,
@@ -70,7 +73,7 @@ export class StockValuationReportController {
 
     async setDate(date) {
         this.state.date = date;
-        this.dateAsString = date.toFormat('y-LL-dd HH:mm:ss');
+        this.dateAsString = date.toFormat("y-LL-dd HH:mm:ss");
         await this.loadReportData();
     }
 
@@ -83,7 +86,7 @@ export class StockValuationReportController {
         }
     }
 
-    actionPrintReport(format="pdf") {
+    actionPrintReport(format = "pdf") {
         if (format === "pdf") {
             return this.orm.call("stock_account.stock.valuation.report", "action_print_as_pdf");
         } else if (format === "xlsx") {

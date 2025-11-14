@@ -1,7 +1,6 @@
 import { fields, models } from "@web/../tests/web_test_helpers";
 import { projectModels } from "@project/../tests/project_models";
 
-
 export class ProjectTask extends projectModels.ProjectTask {
     _name = "project.task";
 

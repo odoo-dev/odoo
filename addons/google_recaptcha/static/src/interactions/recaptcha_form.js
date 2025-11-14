@@ -49,6 +49,4 @@ export class RecaptchaForm extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("google_recaptcha.recaptcha_form", RecaptchaForm);
+registry.category("public.interactions").add("google_recaptcha.recaptcha_form", RecaptchaForm);

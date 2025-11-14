@@ -17,7 +17,6 @@ export class LoyaltyDataField extends Component {
         const LoyaltyCardData = this.props.record.data[this.props.name];
         this.LoyaltyCardData = Object.keys(LoyaltyCardData).length && toRaw(LoyaltyCardData);
     }
-
 }
 
 export const loyaltyDataField = {

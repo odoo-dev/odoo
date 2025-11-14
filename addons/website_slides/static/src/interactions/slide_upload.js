@@ -36,6 +36,4 @@ export class SlideUpload extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_slides.slide_upload", SlideUpload);
+registry.category("public.interactions").add("website_slides.slide_upload", SlideUpload);

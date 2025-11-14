@@ -684,7 +684,9 @@ export class HierarchyModel extends Model {
             const nodesToUpdate = [];
             if (!(children[0] instanceof Object)) {
                 const allNodeResIds = this.root.resIds;
-                let existingChildResIds = children.filter((childResId) => allNodeResIds.includes(childResId));
+                let existingChildResIds = children.filter((childResId) =>
+                    allNodeResIds.includes(childResId)
+                );
                 if (existingChildResIds.length) {
                     // special case with result found with the search view
                     for (const tree of this.root.trees) {
@@ -795,12 +797,9 @@ export class HierarchyModel extends Model {
         if (!this.env.searchModel) {
             return true;
         }
-        const isDisabledOptionalSearchMenuType = (type) => {
-            return (
-                ["filter", "groupBy", "favorite"].includes(type) &&
-                !this.env.searchModel.searchMenuTypes.has(type)
-            );
-        };
+        const isDisabledOptionalSearchMenuType = (type) =>
+            ["filter", "groupBy", "favorite"].includes(type) &&
+            !this.env.searchModel.searchMenuTypes.has(type);
         const activeSearchItems = this.env.searchModel.getSearchItems(
             (item) => item.isActive && !isDisabledOptionalSearchMenuType(item.type)
         );
@@ -841,8 +840,8 @@ export class HierarchyModel extends Model {
                 : Domain.and([this.defaultDomain, domain]).toList({});
         }
         const fieldsSpec = this._getFieldsSpec(config.context);
-        const hierarchyRead = async () => {
-            return await this.orm.call(
+        const hierarchyRead = async () =>
+            await this.orm.call(
                 this.resModel,
                 "hierarchy_read",
                 [
@@ -854,7 +853,6 @@ export class HierarchyModel extends Model {
                 ],
                 { context: this.context }
             );
-        };
         let result = await hierarchyRead();
         if (!result.length && onlyRoots) {
             domain = config.domain;
@@ -998,7 +996,7 @@ export class HierarchyModel extends Model {
                 {
                     context: this.context || {},
                     order: orderByToString(this.config.orderBy),
-                },
+                }
             );
             const childIdsPerId = Object.fromEntries(
                 fetchChildren.map((g) => [g[this.parentFieldName][0], g["id:array_agg"]])
@@ -1144,9 +1142,9 @@ export class HierarchyModel extends Model {
             parentNode.data[this.childFieldName || this.defaultChildFieldName] = formattedData;
             parentNode.populateChildNodes();
         }
-        const newNodeId = Object.keys(this.root.nodePerNodeId).find((key) => {
-            return this.root.nodePerNodeId[key].resId === resId;
-        });
+        const newNodeId = Object.keys(this.root.nodePerNodeId).find(
+            (key) => this.root.nodePerNodeId[key].resId === resId
+        );
         this.notify({ scrollTarget: newNodeId });
     }
 

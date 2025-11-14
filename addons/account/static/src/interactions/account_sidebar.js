@@ -17,9 +17,10 @@ export class AccountSidebar extends Sidebar {
 
     start() {
         super.start();
-        this.invoiceHTMLEl = document.getElementById('invoice_html');
-        const iframeDoc = this.invoiceHTMLEl.contentDocument || this.invoiceHTMLEl.contentWindow.document;
-        if (iframeDoc.readyState === 'complete') {
+        this.invoiceHTMLEl = document.getElementById("invoice_html");
+        const iframeDoc =
+            this.invoiceHTMLEl.contentDocument || this.invoiceHTMLEl.contentWindow.document;
+        if (iframeDoc.readyState === "complete") {
             this.updateIframeSize();
         } else {
             this.addListener(this.invoiceHTMLEl, "load", this.updateIframeSize);
@@ -36,7 +37,7 @@ export class AccountSidebar extends Sidebar {
         this.invoiceHTMLEl.height = 0;
         this.invoiceHTMLEl.height = wrapwrapEl.scrollHeight;
         // scroll to the right place after iframe resize
-        const isAnchor = /^#[\w-]+$/.test(window.location.hash)
+        const isAnchor = /^#[\w-]+$/.test(window.location.hash);
         if (!isAnchor) {
             return;
         }
@@ -56,6 +57,4 @@ export class AccountSidebar extends Sidebar {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("account.account_sidebar", AccountSidebar);
+registry.category("public.interactions").add("account.account_sidebar", AccountSidebar);

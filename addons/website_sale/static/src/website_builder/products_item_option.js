@@ -23,20 +23,23 @@ export class ProductsItemOption extends BaseOptionComponent {
             count: getCount(),
         });
 
-        this.productsGridTableEl = this.env.getEditingElement().closest(".o_wsale_products_grid_table");
+        this.productsGridTableEl = this.env
+            .getEditingElement()
+            .closest(".o_wsale_products_grid_table");
 
         this.domState = useDomState(() => {
-
             // If /shop page layout is list, do not display Size option
-            const displaySizeOption = !this.productsGridTableEl?.classList.contains("o_wsale_products_opt_layout_list");
+            const displaySizeOption = !this.productsGridTableEl?.classList.contains(
+                "o_wsale_products_opt_layout_list"
+            );
 
-            if(displaySizeOption && this.state.itemSize) {
+            if (displaySizeOption && this.state.itemSize) {
                 this.addClassToTableCells(this.state.itemSize.x, this.state.itemSize.y, "selected");
             }
 
             return {
                 displaySizeOption,
-            }
+            };
         });
 
         onWillStart(async () => {
@@ -44,7 +47,9 @@ export class ProductsItemOption extends BaseOptionComponent {
 
             // need to display "re-order" option only if shop_default_sort is 'website_sequence asc'
             this.displayReOrder = this.defaultSort[0].shop_default_sort === "website_sequence asc";
-            const pprValue = this.productsGridTableEl.style.getPropertyValue('--o-wsale-ppr').trim();
+            const pprValue = this.productsGridTableEl.style
+                .getPropertyValue("--o-wsale-ppr")
+                .trim();
             this.maxWidth = parseInt(pprValue) || 5;
         });
 
@@ -60,7 +65,9 @@ export class ProductsItemOption extends BaseOptionComponent {
 
         // By default, this.domState.displaySizeOption is undefined, so the table is not displayed
         // We need to check if the table is visible before adding classes to the cells
-        if(!table) { return; }
+        if (!table) {
+            return;
+        }
 
         const rows = table.rows;
 

@@ -49,7 +49,7 @@ export class InventoryReportListModel extends RelationalModel {
                 }
             }
         } else {
-            super._updateSimilarRecords(...arguments)
+            super._updateSimilarRecords(...arguments);
         }
     }
 }

@@ -17,10 +17,11 @@ export class PortalMyInvoicesPaymentList extends Interaction {
             const diff = dateTime.diff(today).as("days");
 
             const dueDateLabel =
-                (diff === 0) ? _t("due today") :
-                    (diff > 0)
-                        ? _t("due in %s day(s)", Math.abs(diff).toFixed())
-                        : _t("%s day(s) overdue", Math.abs(diff).toFixed());
+                diff === 0
+                    ? _t("due today")
+                    : diff > 0
+                    ? _t("due in %s day(s)", Math.abs(diff).toFixed())
+                    : _t("%s day(s) overdue", Math.abs(diff).toFixed());
 
             // We use `.createTextNode()` to escape possible HTML in translations (XSS)
             dueDateEl.replaceChildren(document.createTextNode(dueDateLabel));

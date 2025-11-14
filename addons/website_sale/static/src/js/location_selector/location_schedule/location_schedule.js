@@ -1,8 +1,6 @@
-import {
-    LocationSchedule
-} from '@delivery/js/location_selector/location_schedule/location_schedule';
-import { patch } from '@web/core/utils/patch';
-import { _t } from '@web/core/l10n/translation';
+import { LocationSchedule } from "@delivery/js/location_selector/location_schedule/location_schedule";
+import { patch } from "@web/core/utils/patch";
+import { _t } from "@web/core/l10n/translation";
 
 patch(LocationSchedule.prototype, {
     get closedLabel() {

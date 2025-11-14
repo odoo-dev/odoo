@@ -1,17 +1,17 @@
 import { registry } from "@web/core/registry";
 
-registry.category("web_tour.tours").add('test_mrp_bom_product_catalog', {
+registry.category("web_tour.tours").add("test_mrp_bom_product_catalog", {
     steps: () => [
         {
-            trigger: 'button[name=action_add_from_catalog]',
+            trigger: "button[name=action_add_from_catalog]",
             run: "click",
         },
         {
-            trigger: '.o_kanban_record:nth-child(1)',
+            trigger: ".o_kanban_record:nth-child(1)",
             run: "click",
         },
         {
-            trigger: '.o_product_added',
+            trigger: ".o_product_added",
             run: "click",
         },
         {
@@ -21,20 +21,21 @@ registry.category("web_tour.tours").add('test_mrp_bom_product_catalog', {
         {
             trigger: 'div.o_field_one2many:contains("Component")',
         },
-]});
+    ],
+});
 
-registry.category("web_tour.tours").add('test_mrp_production_product_catalog', {
+registry.category("web_tour.tours").add("test_mrp_production_product_catalog", {
     steps: () => [
         {
-            trigger: 'button[name=action_add_from_catalog_raw]',
+            trigger: "button[name=action_add_from_catalog_raw]",
             run: "click",
         },
         {
-            trigger: '.o_kanban_record:nth-child(1)',
+            trigger: ".o_kanban_record:nth-child(1)",
             run: "click",
         },
         {
-            trigger: '.o_product_added',
+            trigger: ".o_product_added",
             run: "click",
         },
         {
@@ -44,4 +45,5 @@ registry.category("web_tour.tours").add('test_mrp_production_product_catalog', {
         {
             trigger: 'div.o_field_widget:contains("WH/MO/")',
         },
-]});
+    ],
+});

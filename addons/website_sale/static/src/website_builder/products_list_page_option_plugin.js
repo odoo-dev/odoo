@@ -25,7 +25,7 @@ export class SetShopContainerAction extends PreviewableWebsiteConfigAction {
         await super.apply({ editingElement: productDetailMainEl, isPreviewing, params, value });
 
         if (!isPreviewing) {
-            await rpc("/shop/config/website", { 'shop_page_container': value });
+            await rpc("/shop/config/website", { shop_page_container: value });
         }
     }
 }

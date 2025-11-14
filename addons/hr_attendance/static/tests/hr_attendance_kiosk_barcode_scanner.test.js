@@ -10,7 +10,6 @@ defineMailModels();
 
 test.tags("desktop");
 test("KioskBarcodeScanner can be opened and closed", async () => {
-
     mockGetMedia();
     const isBarcodeScannerOpened = new Deferred();
     patchWithCleanup(KioskBarcodeScanner.prototype, {

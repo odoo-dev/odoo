@@ -4,12 +4,11 @@ import { notificationService } from "@web/core/notifications/notification_servic
 import { registry } from "@web/core/registry";
 import { CartNotification } from "@website_sale/js/notification/cart_notification/cart_notification";
 
-
 export class CartNotificationContainer extends NotificationContainer {
     static components = {
         ...NotificationContainer.components,
         Notification: CartNotification,
-    }
+    };
     static template = xml`
     <div class="position-fixed w-100 h-100 top-0 pe-none">
         <div class="d-flex flex-column container align-items-end">
@@ -25,6 +24,6 @@ export class CartNotificationContainer extends NotificationContainer {
 export const cartNotificationService = {
     ...notificationService,
     notificationContainer: CartNotificationContainer,
-}
+};
 
 registry.category("services").add("cartNotificationService", cartNotificationService);

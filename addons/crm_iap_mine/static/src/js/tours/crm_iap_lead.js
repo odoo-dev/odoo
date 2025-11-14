@@ -23,7 +23,9 @@ patch(registry.category("web_tour.tours").get("crm_tour"), {
                  *
                  */
                 trigger: ".o_button_generate_leads",
-                content: markup(_t("Looking for more opportunities?<br>Try the <b>Lead Generation</b> tool.")),
+                content: markup(
+                    _t("Looking for more opportunities?<br>Try the <b>Lead Generation</b> tool.")
+                ),
                 tooltipPosition: "bottom",
                 run: "click .o_button_generate_leads",
             },

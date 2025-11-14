@@ -6,7 +6,7 @@ export class ForecastedHeader extends Component {
     static template = "stock.ForecastedHeader";
     static props = { docs: Object, openView: Function };
 
-    setup(){
+    setup() {
         this.orm = useService("orm");
         this.action = useService("action");
         this.tooltip = useService("tooltip");
@@ -14,9 +14,9 @@ export class ForecastedHeader extends Component {
         this._formatFloat = (num) => formatFloat(num, { digits: this.props.docs.precision });
     }
 
-    async _onClickInventory(){
+    async _onClickInventory() {
         const productIds = this.props.docs.product_variants_ids;
-        const action = await this.orm.call('product.product', 'action_open_quants', [productIds]);
+        const action = await this.orm.call("product.product", "action_open_quants", [productIds]);
         if (action.help) {
             action.help = markup(action.help);
         }
@@ -34,21 +34,25 @@ export class ForecastedHeader extends Component {
         const productsArray = Object.values(this.products || {});
         const product = productsArray.reduce((minProduct, p) => {
             if (
-            !minProduct ||
-            (p.leadtime && p.leadtime.total_delay < (minProduct.leadtime?.total_delay ?? Infinity))
+                !minProduct ||
+                (p.leadtime &&
+                    p.leadtime.total_delay < (minProduct.leadtime?.total_delay ?? Infinity))
             ) {
-            return p;
+                return p;
             }
             return minProduct;
         }, null);
         const today = new Date(Date.now());
         product.leadtime["today"] = today.toLocaleDateString();
-        product.leadtime["earliestPossibleArrival"] = this.addDays(today, product.leadtime.total_delay);
+        product.leadtime["earliestPossibleArrival"] = this.addDays(
+            today,
+            product.leadtime.total_delay
+        );
         return product.leadtime;
     }
 
     get leadTimeShort() {
-        let short = " " + (this.leadTime.total_delay) + " day(s)";
+        let short = " " + this.leadTime.total_delay + " day(s)";
         if (this.leadTime.total_delay != 0) {
             short += " (" + this.leadTime.earliestPossibleArrival + ")";
         }
@@ -56,7 +60,10 @@ export class ForecastedHeader extends Component {
     }
 
     get quantityOnHand() {
-        return Object.values(this.products).reduce((sum, product) => sum + product.quantity_on_hand, 0);
+        return Object.values(this.products).reduce(
+            (sum, product) => sum + product.quantity_on_hand,
+            0
+        );
     }
 
     get incomingQty() {
@@ -68,7 +75,10 @@ export class ForecastedHeader extends Component {
     }
 
     get virtualAvailable() {
-        return Object.values(this.products).reduce((sum, product) => sum + product.virtual_available, 0);
+        return Object.values(this.products).reduce(
+            (sum, product) => sum + product.virtual_available,
+            0
+        );
     }
 
     get uom() {

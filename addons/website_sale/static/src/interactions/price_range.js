@@ -1,11 +1,11 @@
-import { Interaction } from '@web/public/interaction';
-import { redirect } from '@web/core/utils/urls';
-import { registry } from '@web/core/registry';
+import { Interaction } from "@web/public/interaction";
+import { redirect } from "@web/core/utils/urls";
+import { registry } from "@web/core/registry";
 
 export class PriceRange extends Interaction {
-    static selector = '#o_wsale_price_range_option';
+    static selector = "#o_wsale_price_range_option";
     dynamicContent = {
-        'input[type="range"]': { 't-on-newRangeValue': this.onPriceRangeSelected },
+        'input[type="range"]': { "t-on-newRangeValue": this.onPriceRangeSelected },
     };
 
     /**
@@ -21,14 +21,12 @@ export class PriceRange extends Interaction {
         if (parseFloat(range.max) !== range.valueHigh) {
             searchParams.set("max_price", range.valueHigh);
         }
-        const product_list_div = document.querySelector('.o_wsale_products_grid_table_wrapper');
+        const product_list_div = document.querySelector(".o_wsale_products_grid_table_wrapper");
         if (product_list_div) {
-            product_list_div.classList.add('opacity-50');
+            product_list_div.classList.add("opacity-50");
         }
         redirect(`${url.pathname}?${searchParams.toString()}`);
     }
 }
 
-registry
-    .category('public.interactions')
-    .add('website_sale.price_range', PriceRange);
+registry.category("public.interactions").add("website_sale.price_range", PriceRange);

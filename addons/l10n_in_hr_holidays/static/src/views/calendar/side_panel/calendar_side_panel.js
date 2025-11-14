@@ -20,5 +20,5 @@ patch(TimeOffCalendarSidePanel.prototype, {
             optionalHoliday.end = luxon.DateTime.fromISO(optionalHoliday.end);
         });
         this.leaveState.optionalHolidays = specialDays["optionalHolidays"];
-    }
-})
+    },
+});

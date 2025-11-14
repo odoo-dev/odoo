@@ -32,7 +32,9 @@ export class ReceptionReportMain extends Component {
                 const parsedIds = JSON.parse(rids);
                 defaultDocIds = [rfield, parsedIds instanceof Array ? parsedIds : [parsedIds]];
             } else {
-                defaultDocIds = Object.entries(this.context).find(([k,v]) => k.startsWith("default_"));
+                defaultDocIds = Object.entries(this.context).find(([k, v]) =>
+                    k.startsWith("default_")
+                );
                 if (!defaultDocIds) {
                     // If nothing could be found, just ask for empty data.
                     defaultDocIds = [false, [0]];
@@ -42,7 +44,10 @@ export class ReceptionReportMain extends Component {
 
             if (this.contextDefaultDoc.field) {
                 // Add the fields/ids to the URL, so we can properly reload them after a page refresh.
-                this.props.updateActionState({ rfield: this.contextDefaultDoc.field, rids: JSON.stringify(this.contextDefaultDoc.ids) });
+                this.props.updateActionState({
+                    rfield: this.contextDefaultDoc.field,
+                    rids: JSON.stringify(this.contextDefaultDoc.ids),
+                });
             }
             this.data = await this.getReportData();
             this.state.sourcesToLines = this.data.sources_to_lines;
@@ -60,17 +65,14 @@ export class ReceptionReportMain extends Component {
     }
 
     async getReportData() {
-        const context = { ...this.context, [this.contextDefaultDoc.field]: this.contextDefaultDoc.ids };
-        const args = [
-            this.contextDefaultDoc.ids,
-            { context, report_type: "html" },
-        ];
-        return this.ormService.call(
-            "report.stock.report_reception",
-            "get_report_data",
-            args,
-            { context },
-        );
+        const context = {
+            ...this.context,
+            [this.contextDefaultDoc.field]: this.contextDefaultDoc.ids,
+        };
+        const args = [this.contextDefaultDoc.ids, { context, report_type: "html" }];
+        return this.ormService.call("report.stock.report_reception", "get_report_data", args, {
+            context,
+        });
     }
 
     //---- Handlers ----
@@ -82,18 +84,21 @@ export class ReceptionReportMain extends Component {
 
         for (const lines of Object.values(this.state.sourcesToLines)) {
             for (const line of lines) {
-                if (line.is_assigned) continue;
+                if (line.is_assigned) {
+                    continue;
+                }
                 moveIds.push(line.move_out_id);
                 quantities.push(line.quantity);
                 inIds.push(line.move_ins);
             }
         }
 
-        await this.ormService.call(
-            "report.stock.report_reception",
-            "action_assign",
-            [false, moveIds, quantities, inIds],
-        );
+        await this.ormService.call("report.stock.report_reception", "action_assign", [
+            false,
+            moveIds,
+            quantities,
+            inIds,
+        ]);
         this._changeAssignedState({ isAssigned: true });
     }
 
@@ -120,7 +125,9 @@ export class ReceptionReportMain extends Component {
 
         for (const lines of Object.values(this.state.sourcesToLines)) {
             for (const line of lines) {
-                if (!line.is_assigned) continue;
+                if (!line.is_assigned) {
+                    continue;
+                }
                 modelIds.push(line.move_out_id);
                 quantities.push(Math.ceil(line.quantity) || 1);
             }
@@ -142,8 +149,10 @@ export class ReceptionReportMain extends Component {
         const { isAssigned, tableIndex, lineIndex } = options;
 
         for (const [tabIndex, lines] of Object.entries(this.state.sourcesToLines)) {
-            if (tableIndex && tableIndex != tabIndex) continue;
-            lines.forEach(line => {
+            if (tableIndex && tableIndex != tabIndex) {
+                continue;
+            }
+            lines.forEach((line) => {
                 if (isNaN(lineIndex) || lineIndex == line.index) {
                     line.is_assigned = isAssigned;
                 }
@@ -162,11 +171,15 @@ export class ReceptionReportMain extends Component {
     }
 
     get isAssignAllDisabled() {
-        return Object.values(this.state.sourcesToLines).every(lines => lines.every(line => line.is_assigned || !line.is_qty_assignable));
+        return Object.values(this.state.sourcesToLines).every((lines) =>
+            lines.every((line) => line.is_assigned || !line.is_qty_assignable)
+        );
     }
 
     get isPrintLabelDisabled() {
-        return Object.values(this.state.sourcesToLines).every(lines => lines.every(line => !line.is_assigned));
+        return Object.values(this.state.sourcesToLines).every((lines) =>
+            lines.every((line) => !line.is_assigned)
+        );
     }
 }
 

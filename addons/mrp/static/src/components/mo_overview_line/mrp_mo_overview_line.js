@@ -61,7 +61,8 @@ export class MoOverviewLine extends Component {
     setup() {
         this.actionService = useService("action");
         this.ormService = useService("orm");
-        this.formatFloat = (val) => formatFloat(val, { digits: [false, this.data.uom_precision || undefined] });
+        this.formatFloat = (val) =>
+            formatFloat(val, { digits: [false, this.data.uom_precision || undefined] });
         this.formatFloatTime = formatFloatTime;
         this.formatMonetary = (val) => formatMonetary(val, { currencyId: this.data.currency_id });
     }
@@ -84,11 +85,9 @@ export class MoOverviewLine extends Component {
     }
 
     async openForecast() {
-        const action = await this.ormService.call(
-            this.data.product_model,
-            this.forecastAction,
-            [[this.data.product_id]],
-        );
+        const action = await this.ormService.call(this.data.product_model, this.forecastAction, [
+            [this.data.product_id],
+        ]);
         action.context = {
             active_model: this.data.product_model,
             active_id: this.data.product_id,
@@ -98,7 +97,10 @@ export class MoOverviewLine extends Component {
 
     async openReplenish() {
         return this.actionService.doAction("stock.action_product_replenish", {
-            additionalContext: { default_product_id: this.data.product_id, default_quantity: this.data.replenish_quantity || this.data.quantity },
+            additionalContext: {
+                default_product_id: this.data.product_id,
+                default_quantity: this.data.replenish_quantity || this.data.quantity,
+            },
             onClose: (closeInfo) => {
                 if (closeInfo?.done) {
                     // Trigger the reload only if a replenishment was done.

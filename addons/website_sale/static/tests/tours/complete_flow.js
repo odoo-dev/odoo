@@ -4,8 +4,8 @@ import { redirect } from "@web/core/utils/urls";
 import { post } from "@web/core/network/http_service";
 import * as tourUtils from "@website_sale/js/tours/tour_utils";
 
-registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
-    url: '/shop?search=Storage Box Test',
+registry.category("web_tour.tours").add("website_sale.complete_flow_1", {
+    url: "/shop?search=Storage Box Test",
     steps: () => [
         // Testing b2c with Tax-Excluded Prices
         {
@@ -16,7 +16,7 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
         },
         {
             content: "Add one more storage box",
-            trigger: '.js_add_cart_json:eq(1)',
+            trigger: ".js_add_cart_json:eq(1)",
             run: "click",
         },
         {
@@ -31,9 +31,9 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
                 '#cart_products div:has(a>h6:contains("Storage Box Test")) input.js_quantity:value(2)',
         },
         ...tourUtils.assertCartAmounts({
-            taxes: '23.70',
-            untaxed: '158.00',
-            total: '181.70',
+            taxes: "23.70",
+            untaxed: "158.00",
+            total: "181.70",
         }),
         tourUtils.goToCheckout(),
         {
@@ -74,12 +74,13 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
         tourUtils.waitForInteractionToLoad(),
         {
             content: "Billing address is not same as delivery address",
-            trigger: '#use_delivery_as_billing',
+            trigger: "#use_delivery_as_billing",
             run: "click",
         },
         {
             content: "Add a billing address",
-            trigger: '#billing_address_list a[href^="/shop/address?address_type=billing"]:contains("Add address")',
+            trigger:
+                '#billing_address_list a[href^="/shop/address?address_type=billing"]:contains("Add address")',
             run: "click",
             expectUnloadPage: true,
         },
@@ -123,15 +124,18 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
         },
         {
             content: "Check selected delivery address is same as typed in previous step",
-            trigger: '#delivery_address_list:contains(SO1 Delivery Street, 33):contains(SO1DeliveryCity):contains(Afghanistan)',
+            trigger:
+                "#delivery_address_list:contains(SO1 Delivery Street, 33):contains(SO1DeliveryCity):contains(Afghanistan)",
         },
         {
             content: "Check selected billing address is same as typed in previous step",
-            trigger: '#billing_address_list:contains(17, SO1 Billing Road):contains(SO1BillingCity):contains(Afghanistan)',
+            trigger:
+                "#billing_address_list:contains(17, SO1 Billing Road):contains(SO1BillingCity):contains(Afghanistan)",
         },
         {
             content: "Click for edit billing address",
-            trigger: '#billing_address_list a[href^="/shop/address?address_type=billing"].js_edit_address:first',
+            trigger:
+                '#billing_address_list a[href^="/shop/address?address_type=billing"].js_edit_address:first',
             run: "click",
             expectUnloadPage: true,
         },
@@ -167,7 +171,8 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
         tourUtils.confirmOrder(),
         {
             content: "Check selected billing address is same as typed in previous step",
-            trigger: '#delivery_and_billing :contains(Billing):contains(SO1 Billing Street Edited, 33):contains(SO1BillingCityEdited):contains(Afghanistan)',
+            trigger:
+                "#delivery_and_billing :contains(Billing):contains(SO1 Billing Street Edited, 33):contains(SO1BillingCityEdited):contains(Afghanistan)",
         },
         ...tourUtils.payWithTransfer({
             redirect: false,
@@ -246,15 +251,17 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
         },
         {
             content: "Configuration Settings for 'Tax Included' and sign up 'On Invitation'",
-            trigger: '#wrapwrap',
+            trigger: "#wrapwrap",
             run: function () {
                 var def1 = rpc(`/web/dataset/call_kw/res.config.settings/create`, {
                     model: "res.config.settings",
                     method: "create",
-                    args: [{
-                        'auth_signup_uninvited': 'b2b',
-                        'show_line_subtotals_tax_selection': 'tax_included',
-                    }],
+                    args: [
+                        {
+                            auth_signup_uninvited: "b2b",
+                            show_line_subtotals_tax_selection: "tax_included",
+                        },
+                    ],
                     kwargs: {},
                 });
                 var def2 = def1.then(function (resId) {
@@ -266,7 +273,11 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
                     });
                 });
                 def2.then(async function () {
-                    const url = await post('/web/session/logout?redirect=/shop?search=Storage Box Test', { csrf_token: odoo.csrf_token }, "url");
+                    const url = await post(
+                        "/web/session/logout?redirect=/shop?search=Storage Box Test",
+                        { csrf_token: odoo.csrf_token },
+                        "url"
+                    );
                     redirect(url);
                 });
             },
@@ -281,7 +292,7 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
         },
         {
             content: "Add one more Storage Box Test",
-            trigger: '.js_add_cart_json:eq(1)',
+            trigger: ".js_add_cart_json:eq(1)",
             run: "click",
         },
         {
@@ -374,7 +385,8 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
             run: "click",
         },
         {
-            trigger: 'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
+            trigger:
+                'input[name="o_payment_radio"][data-payment-method-code="wire_transfer"]:checked',
         },
         ...tourUtils.pay({ expectUnloadPage: true, waitFinalizeYourPayment: true }),
         {
@@ -435,11 +447,12 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_1', {
             trigger: `.oe_login_form button[type="submit"]`,
             run: "click",
             expectUnloadPage: true,
-        }]
+        },
+    ],
 });
 
-registry.category("web_tour.tours").add('website_sale.complete_flow_2', {
-    url: '/shop/cart',
+registry.category("web_tour.tours").add("website_sale.complete_flow_2", {
+    url: "/shop/cart",
     steps: () => [
         {
             trigger: '.o_wizard:contains("Extra Info")',
@@ -507,5 +520,5 @@ registry.category("web_tour.tours").add('website_sale.complete_flow_2', {
             content: "Check payment status confirmation window",
             trigger: '[name="order_confirmation"][data-order-tracking-info]',
         },
-    ]
+    ],
 });

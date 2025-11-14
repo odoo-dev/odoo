@@ -12,7 +12,7 @@ registry.category("web_tour.tours").add("event_sale_with_product_configurator_to
         ...tourUtils.addProduct("Registration Event (TEST variants)"),
         {
             trigger:
-            'tr:has(div[name="o_sale_product_configurator_name"]:contains("Memorabilia")) button:has(i.oi-plus)',
+                'tr:has(div[name="o_sale_product_configurator_name"]:contains("Memorabilia")) button:has(i.oi-plus)',
             run: "click",
         },
         {
@@ -49,12 +49,12 @@ registry.category("web_tour.tours").add("event_sale_with_product_configurator_to
         ...tourUtils.addProduct("Registration Event (TEST variants)"),
         {
             trigger:
-            'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("Adult")',
+                'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("Adult")',
             run: "click",
         },
         {
             trigger:
-            'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) .o_sale_product_configurator_qty input',
+                'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) .o_sale_product_configurator_qty input',
             run: "edit 5 && click body",
         },
         configuratorTourUtils.assertPriceTotal("150.00"),
@@ -92,7 +92,7 @@ registry.category("web_tour.tours").add("event_sale_with_product_configurator_to
         ...tourUtils.addProduct("Registration Event (TEST variants)"),
         {
             trigger:
-            'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("VIP")',
+                'tr:has(div[name="o_sale_product_configurator_name"]:contains("Registration Event (TEST variants)")) label:contains("VIP")',
             run: "click",
         },
         configuratorTourUtils.assertPriceTotal(60.0),

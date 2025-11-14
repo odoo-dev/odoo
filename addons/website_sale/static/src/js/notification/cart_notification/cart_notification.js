@@ -9,7 +9,7 @@ export class CartNotification extends Component {
     static template = "website_sale.cartNotification";
     static props = {
         message: [String, { toString: Function }],
-        warning: {type : [String, { toString: Function }], optional: true},
+        warning: { type: [String, { toString: Function }], optional: true },
         lines: {
             type: Array,
             optional: true,
@@ -28,12 +28,12 @@ export class CartNotification extends Component {
                 },
             },
         },
-        currency_id: {type: Number, optional: true},
+        currency_id: { type: Number, optional: true },
         className: String,
         close: Function,
         refresh: Function,
         freeze: Function,
-    }
+    };
 
     setup() {
         onMounted(() => setTimeout(this.props.close, AUTOCLOSE_DELAY));
@@ -45,6 +45,6 @@ export class CartNotification extends Component {
      * This prevents the notification from being shown in front of the navbar.
      */
     get positionOffset() {
-        return (document.querySelector('header.o_top_fixed_element')?.offsetHeight || 0) + 'px';
+        return (document.querySelector("header.o_top_fixed_element")?.offsetHeight || 0) + "px";
     }
 }

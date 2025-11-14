@@ -14,26 +14,20 @@ export class ForecastedDetails extends Component {
         this._prepareData();
         this._mergeLines();
 
-        this._formatFloat = (num) => {
-            return formatFloat(num, { digits: this.props.docs.precision });
-        };
+        this._formatFloat = (num) => formatFloat(num, { digits: this.props.docs.precision });
     }
 
-    async _reserve(move_id){
-        await this.orm.call(
-            'stock.forecasted_product_product',
-            'action_reserve_linked_picks',
-            [move_id],
-        );
+    async _reserve(move_id) {
+        await this.orm.call("stock.forecasted_product_product", "action_reserve_linked_picks", [
+            move_id,
+        ]);
         this.props.reloadReport();
     }
 
-    async _unreserve(move_id){
-        await this.orm.call(
-            'stock.forecasted_product_product',
-            'action_unreserve_linked_picks',
-            [move_id],
-        );
+    async _unreserve(move_id) {
+        await this.orm.call("stock.forecasted_product_product", "action_unreserve_linked_picks", [
+            move_id,
+        ]);
         this.props.reloadReport();
     }
 
@@ -44,24 +38,32 @@ export class ForecastedDetails extends Component {
         this.props.reloadReport();
     }
 
-    _onHandCondition(line){
-        return !line.document_in && !line.in_transit && line.replenishment_filled && line.document_out;
+    _onHandCondition(line) {
+        return (
+            !line.document_in && !line.in_transit && line.replenishment_filled && line.document_out
+        );
     }
 
-    _reconciledCondition(line){
-        return line.document_in && !line.in_transit && line.replenishment_filled && line.document_out;
+    _reconciledCondition(line) {
+        return (
+            line.document_in && !line.in_transit && line.replenishment_filled && line.document_out
+        );
     }
 
-    _freeStockCondition(line){
-        return !line.document_in && !line.in_transit && line.replenishment_filled && !line.document_out;
+    _freeStockCondition(line) {
+        return (
+            !line.document_in && !line.in_transit && line.replenishment_filled && !line.document_out
+        );
     }
 
-    _notAvailableCondition(line){
-        return !line.document_in && !line.in_transit && !line.replenishment_filled && line.document_out;
+    _notAvailableCondition(line) {
+        return (
+            !line.document_in && !line.in_transit && !line.replenishment_filled && line.document_out
+        );
     }
 
     //Extend this to add new lines grouping
-    _groupLines(){
+    _groupLines() {
         this._groupLinesByProduct();
         this._groupOnHandLinesByProduct();
         this._groupReconciledLinesByProduct();
@@ -117,13 +119,13 @@ export class ForecastedDetails extends Component {
         }
     }
 
-    _prepareLines(){
+    _prepareLines() {
         if (this.multipleProducts) {
             this.props.docs.lines.sort((a, b) => (a.product.id || 0) - (b.product.id || 0));
         }
     }
 
-    _prepareData(){
+    _prepareData() {
         this.OnHandTotalQty = Object.fromEntries(
             Object.entries(this.OnHandLinesPerProduct).map(([id, lines]) => [
                 id,
@@ -136,30 +138,37 @@ export class ForecastedDetails extends Component {
                 lines.reduce((sum, line) => sum + (line.reservation ? 0 : line.quantity), 0),
             ])
         );
-        for (const productId of this.productIds){
-            if (!(productId in this.FreeStockLinesPerProduct) || !(productId in this.LinesPerProduct)){
+        for (const productId of this.productIds) {
+            if (
+                !(productId in this.FreeStockLinesPerProduct) ||
+                !(productId in this.LinesPerProduct)
+            ) {
                 continue;
             }
-            const lines = this.FreeStockLinesPerProduct[productId]
-            if (this.LinesPerProduct[productId].length > 1 && lines.length == 1 && lines[0]?.quantity === 0 ){
+            const lines = this.FreeStockLinesPerProduct[productId];
+            if (
+                this.LinesPerProduct[productId].length > 1 &&
+                lines.length == 1 &&
+                lines[0]?.quantity === 0
+            ) {
                 const removeIndex = this.lines.indexOf(lines[0]);
-                this.lines.splice(removeIndex,1);
+                this.lines.splice(removeIndex, 1);
             }
         }
     }
 
-    _mergeLines(){
-        let lines = this.lines;
+    _mergeLines() {
+        const lines = this.lines;
         this.mergesLinesData = {};
         let lastIndex = 0;
-        for(let i = 0; i < lines.length-1; i++){
+        for (let i = 0; i < lines.length - 1; i++) {
             const line = lines[i];
             const nextLine = lines[i + 1];
             if (line.product.id != nextLine.product.id || !this._sameLineRule(line, nextLine)) {
-                lastIndex = i+1;
+                lastIndex = i + 1;
                 continue;
             }
-            if (!this.mergesLinesData[lastIndex]){
+            if (!this.mergesLinesData[lastIndex]) {
                 this.mergesLinesData[lastIndex] = {
                     rowcount: 1,
                     tot_qty: line.quantity,
@@ -170,62 +179,90 @@ export class ForecastedDetails extends Component {
         }
     }
 
-    _sameLineRule(line, nextLine){
+    _sameLineRule(line, nextLine) {
         const OnHand = this.OnHandLinesPerProduct[line.product.id] || [];
         const NotAvailable = this.NotAvailableLinesPerProduct[line.product.id] || [];
-        return  this.sameDocumentIn(line, nextLine) || (OnHand.includes(line) && OnHand.includes(nextLine)) || (NotAvailable.includes(line) && NotAvailable.includes(nextLine));
+        return (
+            this.sameDocumentIn(line, nextLine) ||
+            (OnHand.includes(line) && OnHand.includes(nextLine)) ||
+            (NotAvailable.includes(line) && NotAvailable.includes(nextLine))
+        );
     }
 
-    displayReserve(line){
+    displayReserve(line) {
         let splittedLine = true;
-        if(this.line_index - 1 >= 0){
+        if (this.line_index - 1 >= 0) {
             const previousLine = this.lines[this.line_index - 1];
             const sameProduct = this.line.product.id == previousLine.product.id;
-            const isOnHandSplittedLine = this.OnHandLinesPerProduct[line.product.id] && this.OnHandLinesPerProduct[line.product.id].some(l => this.sameDocumentOut(l, line))
-            const isReconciledSplittedLine = this.ReconciledLinesPerProduct[line.product.id] && !this.isReconciled(line) && this.ReconciledLinesPerProduct[line.product.id].some(l => this.sameDocumentOut(l, line))
-            splittedLine = sameProduct && (this.sameDocumentOut(line, previousLine) || isOnHandSplittedLine || isReconciledSplittedLine);
+            const isOnHandSplittedLine =
+                this.OnHandLinesPerProduct[line.product.id] &&
+                this.OnHandLinesPerProduct[line.product.id].some((l) =>
+                    this.sameDocumentOut(l, line)
+                );
+            const isReconciledSplittedLine =
+                this.ReconciledLinesPerProduct[line.product.id] &&
+                !this.isReconciled(line) &&
+                this.ReconciledLinesPerProduct[line.product.id].some((l) =>
+                    this.sameDocumentOut(l, line)
+                );
+            splittedLine =
+                sameProduct &&
+                (this.sameDocumentOut(line, previousLine) ||
+                    isOnHandSplittedLine ||
+                    isReconciledSplittedLine);
         }
         const hasFreeStock = this.props.docs.product[line.product.id].free_qty > 0;
-        return this.props.docs.user_can_edit_pickings && !line.in_transit && this.canReserveOperation(line) &&
-            (this.isOnHand(line) || (hasFreeStock && !splittedLine));
+        return (
+            this.props.docs.user_can_edit_pickings &&
+            !line.in_transit &&
+            this.canReserveOperation(line) &&
+            (this.isOnHand(line) || (hasFreeStock && !splittedLine))
+        );
     }
 
-    canReserveOperation(line){
+    canReserveOperation(line) {
         return line.move_out?.picking_id;
     }
 
     futureVirtualAvailable(line) {
-        const product = this.props.docs.product[line.product.id]
+        const product = this.props.docs.product[line.product.id];
         return product.virtual_available + product.qty.in - product.qty.out;
     }
 
-    sameDocumentIn(line1, line2){
-        return this._sameDocument(line1, line2, 'document_in');
+    sameDocumentIn(line1, line2) {
+        return this._sameDocument(line1, line2, "document_in");
     }
 
-    sameDocumentOut(line1, line2){
-        return this._sameDocument(line1, line2, 'document_out');
+    sameDocumentOut(line1, line2) {
+        return this._sameDocument(line1, line2, "document_out");
     }
 
     _sameDocument(line1, line2, docField) {
         return (
-            line1[docField] && line2[docField] &&
+            line1[docField] &&
+            line2[docField] &&
             line1[docField].id === line2[docField].id &&
             line1[docField]._name === line2[docField]._name &&
             line1[docField].name === line2[docField].name
         );
     }
 
-    isOnHand(line){
-        return this.OnHandLinesPerProduct[line.product.id] && this.OnHandLinesPerProduct[line.product.id].includes(this.lines[this.line_index]);
+    isOnHand(line) {
+        return (
+            this.OnHandLinesPerProduct[line.product.id] &&
+            this.OnHandLinesPerProduct[line.product.id].includes(this.lines[this.line_index])
+        );
     }
 
-    isReconciled(line){
-        return this.ReconciledLinesPerProduct[line.product.id] && this.ReconciledLinesPerProduct[line.product.id].includes(this.lines[this.line_index]);
+    isReconciled(line) {
+        return (
+            this.ReconciledLinesPerProduct[line.product.id] &&
+            this.ReconciledLinesPerProduct[line.product.id].includes(this.lines[this.line_index])
+        );
     }
 
     get freeStockLabel() {
-        return _t('Free Stock');
+        return _t("Free Stock");
     }
 
     get lines() {
@@ -236,7 +273,7 @@ export class ForecastedDetails extends Component {
         return this.props.docs.multiple_product;
     }
 
-    get productIds(){
+    get productIds() {
         return Object.keys(this.props.docs.product).map(Number);
     }
 }

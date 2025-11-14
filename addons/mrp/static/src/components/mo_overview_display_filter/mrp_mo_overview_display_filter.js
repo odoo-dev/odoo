@@ -20,7 +20,7 @@ export class MoOverviewDisplayFilter extends BomOverviewDisplayFilter {
         showOptions: SHOW_OPTIONS,
         changeDisplay: Function,
         limited: { type: Boolean, optional: true },
-        isProductionDraft: { type: Boolean, optional: true},
+        isProductionDraft: { type: Boolean, optional: true },
     };
     static defaultProps = {
         limited: false,

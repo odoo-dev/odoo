@@ -6,7 +6,7 @@ import * as tourUtils from "@website_sale/js/tours/tour_utils";
  * Patch tracking to avoid third party calls during tests.
  */
 function patchTracking() {
-    const { Tracking } = odoo.loader.modules.get('@website_sale/interactions/tracking');
+    const { Tracking } = odoo.loader.modules.get("@website_sale/interactions/tracking");
     patch(Tracking.prototype, {
         // Don't call super to avoid third party calls (GA).
         onViewItem(event) {
@@ -20,19 +20,20 @@ function patchTracking() {
     });
 }
 
-if (odoo.loader.modules.has('@website_sale/interactions/tracking')) {
+if (odoo.loader.modules.has("@website_sale/interactions/tracking")) {
     patchTracking();
 } else {
-    odoo.loader.bus.addEventListener('module-started', (e) => {
-        if (e.detail.moduleName === '@website_sale/interactions/tracking') patchTracking();
+    odoo.loader.bus.addEventListener("module-started", (e) => {
+        if (e.detail.moduleName === "@website_sale/interactions/tracking") {
+            patchTracking();
+        }
     });
 }
 
 let itemId;
 
-
-registry.category("web_tour.tours").add('website_sale.google_analytics_view_item', {
-    url: '/shop?search=Colored T-Shirt',
+registry.category("web_tour.tours").add("website_sale.google_analytics_view_item", {
+    url: "/shop?search=Colored T-Shirt",
     steps: () => [
         {
             content: "select Colored T-Shirt",
@@ -42,38 +43,42 @@ registry.category("web_tour.tours").add('website_sale.google_analytics_view_item
         },
         {
             content: "wait until `_getCombinationInfo()` rpc is done",
-            trigger: 'body[view-event-id]',
+            trigger: "body[view-event-id]",
             timeout: 25000,
             run: () => {
                 itemId = document.body.getAttribute("view-event-id");
-            }
+            },
         },
         {
-            content: 'select another variant',
+            content: "select another variant",
             trigger:
                 "ul.js_add_cart_variants ul.d-flex li:has(label.active) + li:has(label) input:not(:visible)",
             run: "click",
         },
         {
-            content: 'wait until `_getCombinationInfo()` rpc is done (2)',
+            content: "wait until `_getCombinationInfo()` rpc is done (2)",
             // a new view event should have been generated, for another variant
             trigger: `body[view-event-id]:not([view-event-id="${itemId}"])`,
             timeout: 25000,
         },
-    ]
+    ],
 });
 
-registry.category("web_tour.tours").add('website_sale.google_analytics_add_to_cart', {
-    url: '/shop?search=Basic Shirt',
+registry.category("web_tour.tours").add("website_sale.google_analytics_add_to_cart", {
+    url: "/shop?search=Basic Shirt",
     steps: () => [
-        ...tourUtils.addToCart({ productName: 'Basic Shirt', search: false, expectUnloadPage: true }),
+        ...tourUtils.addToCart({
+            productName: "Basic Shirt",
+            search: false,
+            expectUnloadPage: true,
+        }),
         {
             trigger: "body[cart-event-id]",
         },
         {
-            content: 'check add to cart event',
+            content: "check add to cart event",
             trigger: "a:has(.my_cart_quantity:contains(/^1$/))",
             timeout: 25000,
         },
-    ]
+    ],
 });

@@ -46,10 +46,10 @@ export class TimeOffDashboard extends Component {
             "get_time_off_dashboard_data",
             [this.state.date],
             { context }
-        )
-        this.state.holidays = dashboardData['allocation_data'];
-        this.state.allocationRequests = dashboardData['allocation_request_amount'];
-        this.hasAccrualAllocation = dashboardData['has_accrual_allocation'];
+        );
+        this.state.holidays = dashboardData["allocation_data"];
+        this.state.allocationRequests = dashboardData["allocation_request_amount"];
+        this.hasAccrualAllocation = dashboardData["has_accrual_allocation"];
     }
 
     async newAllocationRequest() {

@@ -7,6 +7,6 @@ export const projectTaskGraphView = {
     ...graphView,
     ControlPanel: ProjectTaskControlPanel,
     Model: ProjectTaskGraphModel,
-}
+};
 
 registry.category("views").add("project_task_graph", projectTaskGraphView);

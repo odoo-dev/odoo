@@ -26,12 +26,10 @@ export class CategoryAdd extends Interaction {
                 return true;
             },
             cancelLabel: _t("Cancel"),
-            cancel: () => { },
+            cancel: () => {},
             channelId,
         });
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_slides.category_add", CategoryAdd);
+registry.category("public.interactions").add("website_slides.category_add", CategoryAdd);

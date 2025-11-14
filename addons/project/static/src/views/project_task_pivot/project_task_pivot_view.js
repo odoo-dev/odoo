@@ -7,6 +7,6 @@ export const projectTaskPivotView = {
     ...pivotView,
     ControlPanel: ProjectTaskControlPanel,
     Model: ProjectTaskPivotModel,
-}
+};
 
 registry.category("views").add("project_task_pivot", projectTaskPivotView);

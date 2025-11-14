@@ -18,6 +18,4 @@ export class GiftCardCopy extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_sale_loyalty.gift_card_copy", GiftCardCopy);
+registry.category("public.interactions").add("website_sale_loyalty.gift_card_copy", GiftCardCopy);

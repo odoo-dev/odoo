@@ -26,7 +26,7 @@ registry.category("web_tour.tours").add("website_sale.cart_notification", {
         },
         {
             content: "change quantity",
-            trigger: '#product_detail form input[name=add_qty]',
+            trigger: "#product_detail form input[name=add_qty]",
             run: "edit 3",
         },
         ...tourUtils.addToCartFromProductPage(),
@@ -63,7 +63,6 @@ registry.category("web_tour.tours").add("website_sale.cart_notification", {
     ],
 });
 
-
 registry.category("web_tour.tours").add("website_sale.cart_notification_qty_and_total", {
     url: "/shop",
     steps: () => [
@@ -86,12 +85,12 @@ registry.category("web_tour.tours").add("website_sale.cart_notification_qty_and_
         // Again add same product
         {
             content: "change quantity",
-            trigger: '#product_detail form input[name=add_qty]',
+            trigger: "#product_detail form input[name=add_qty]",
             run: "edit 3",
         },
         {
             content: "click on add to cart",
-            trigger: '#product_detail form #add_to_cart',
+            trigger: "#product_detail form #add_to_cart",
             run: "click",
         },
         {

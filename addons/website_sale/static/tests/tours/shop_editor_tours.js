@@ -1,4 +1,4 @@
-import { clickOnSave, registerWebsitePreviewTour } from '@website/js/tours/tour_utils';
+import { clickOnSave, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
 
 registerWebsitePreviewTour(
     "website_sale.shop_editor",
@@ -13,7 +13,8 @@ registerWebsitePreviewTour(
             run: "click",
         },
         {
-            trigger: ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown][aria-expanded=true]",
+            trigger:
+                ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown][aria-expanded=true]",
         },
         {
             trigger: ":iframe input[name=search]",
@@ -21,16 +22,19 @@ registerWebsitePreviewTour(
             run: "click",
         },
         {
-            trigger: ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown][aria-expanded=false]",
+            trigger:
+                ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown][aria-expanded=false]",
         },
         {
             trigger: ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown]",
             content: "Click on the pricelist again.",
             run: "click",
-        }, {
-            trigger: ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown][aria-expanded=true]",
+        },
+        {
+            trigger:
+                ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown][aria-expanded=true]",
             content: "Check pricelist dropdown opened",
-        }
+        },
     ]
 );
 
@@ -45,11 +49,13 @@ registerWebsitePreviewTour(
             content: "Click on first product",
             trigger: ":iframe .oe_product:first",
             run: "click",
-        }, {
+        },
+        {
             content: "Open the ribbon selector",
             trigger: ".o_wsale_ribbon_select + button:contains('None')",
             run: "click",
-        }, {
+        },
+        {
             content: "Select a ribbon",
             trigger: ".o_popover div.o-dropdown-item:contains('Sale')",
             run: "click",
@@ -58,6 +64,6 @@ registerWebsitePreviewTour(
         {
             content: "Check that the ribbon was properly saved",
             trigger: ':iframe .oe_product:first .o_ribbons:contains("Sale")',
-        }
+        },
     ]
 );

@@ -11,8 +11,11 @@ export class ProductHeaderCategoryOption extends BaseOptionComponent {
     static editableOnly = false;
     static reloadTarget = true;
     static getSnippetTitle() {
-        return _t((this.editable.querySelector("#o_wsale_products_header")?.dataset.categoryName || "Category") + ' Header');
-    };
+        return _t(
+            (this.editable.querySelector("#o_wsale_products_header")?.dataset.categoryName ||
+                "Category") + " Header"
+        );
+    }
     static groups = ["website.group_website_restricted_editor"];
 }
 
@@ -32,12 +35,20 @@ class ProductHeaderCategoryOptionPlugin extends Plugin {
 
     async onSave() {
         const headerEl = this.editable.querySelector("#o_wsale_products_header");
-        if (!headerEl) return;
+        if (!headerEl) {
+            return;
+        }
         const categoryId = headerEl.dataset.categoryId;
 
-        const showTitle = headerEl.classList.contains("o_wsale_products_header_show_category_title");
-        const showDescription = headerEl.classList.contains("o_wsale_products_header_show_category_description");
-        const alignCategoryContent = headerEl.classList.contains("o_wsale_products_header_category_center_content");
+        const showTitle = headerEl.classList.contains(
+            "o_wsale_products_header_show_category_title"
+        );
+        const showDescription = headerEl.classList.contains(
+            "o_wsale_products_header_show_category_description"
+        );
+        const alignCategoryContent = headerEl.classList.contains(
+            "o_wsale_products_header_category_center_content"
+        );
 
         if (categoryId) {
             return rpc("/shop/config/category", {
@@ -76,4 +87,6 @@ export class ToggleCategoryAlignContentAction extends BaseCategoryToggleAction {
     static id = "toggleCategoryAlignContent";
 }
 
-registry.category("website-plugins").add(ProductHeaderCategoryOptionPlugin.id, ProductHeaderCategoryOptionPlugin);
+registry
+    .category("website-plugins")
+    .add(ProductHeaderCategoryOptionPlugin.id, ProductHeaderCategoryOptionPlugin);

@@ -33,7 +33,7 @@ export class ProjectTaskListRenderer extends ListRenderer {
     isCellReadonly(column, record) {
         let readonly = false;
         if (column.name === "stage_id") {
-            readonly = !this.haveAllSelectedTasksSameField('project_id');
+            readonly = !this.haveAllSelectedTasksSameField("project_id");
         }
         return readonly || super.isCellReadonly(column, record);
     }

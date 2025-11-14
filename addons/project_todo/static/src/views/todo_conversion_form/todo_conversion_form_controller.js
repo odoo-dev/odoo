@@ -11,7 +11,9 @@ export class TodoConversionFormController extends FormController {
     setup() {
         super.setup();
         onMounted(() => {
-            const firstConversionInput = document.querySelector('div.o_todo_conversion_form_view input');
+            const firstConversionInput = document.querySelector(
+                "div.o_todo_conversion_form_view input"
+            );
             firstConversionInput.focus();
         });
     }

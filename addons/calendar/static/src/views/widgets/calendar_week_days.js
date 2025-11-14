@@ -6,7 +6,7 @@ export class CalendarWeekDays extends WeekDays {
     onChange(day) {
         this.props.record.update({ [day]: !this.data[day] });
     }
-};
+}
 
 export const calendarWeekDays = {
     component: CalendarWeekDays,

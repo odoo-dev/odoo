@@ -1,4 +1,4 @@
-import * as wsTourUtils from '@website_sale/js/tours/tour_utils';
+import * as wsTourUtils from "@website_sale/js/tours/tour_utils";
 
 const closeModal = {
     content: "Close the ticket picking modal",
@@ -16,17 +16,17 @@ export function changePricelist(pricelistName) {
         },
         {
             content: "Toggle Pricelist",
-            trigger: '.o_pricelist_dropdown > .dropdown-toggle',
-            run: 'click',
+            trigger: ".o_pricelist_dropdown > .dropdown-toggle",
+            run: "click",
         },
         {
             content: `Activate Pricelist ${pricelistName}`,
             trigger: `.dropdown-item:contains(${pricelistName})`,
-            run: 'click',
+            run: "click",
             expectUnloadPage: true,
         },
         {
-            content: 'Wait for pricelist to load',
+            content: "Wait for pricelist to load",
             trigger: `.dropdown-toggle:contains(${pricelistName})`,
         },
     ];
@@ -71,17 +71,17 @@ function checkPriceDiscountEvent(eventName, price, discount) {
     ];
 }
 export function checkPriceCart(price) {
-    return [
-        wsTourUtils.goToCart(),
-        ...wsTourUtils.assertCartAmounts({total: price}),
-    ]
+    return [wsTourUtils.goToCart(), ...wsTourUtils.assertCartAmounts({ total: price })];
 }
-export const getPriceListChecksSteps = function ({pricelistName, eventName, price, priceBeforeDiscount=false}) {
-    const checkPriceSteps = priceBeforeDiscount ? checkPriceDiscountEvent(eventName, price, priceBeforeDiscount) : checkPriceEvent(eventName, price);
-    return [
-        ...changePricelist(pricelistName),
-        ...checkPriceSteps,
-        ...checkPriceCart(price),
-    ]
-}
-export default { getPriceListChecksSteps, changePricelist, checkPriceCart }
+export const getPriceListChecksSteps = function ({
+    pricelistName,
+    eventName,
+    price,
+    priceBeforeDiscount = false,
+}) {
+    const checkPriceSteps = priceBeforeDiscount
+        ? checkPriceDiscountEvent(eventName, price, priceBeforeDiscount)
+        : checkPriceEvent(eventName, price);
+    return [...changePricelist(pricelistName), ...checkPriceSteps, ...checkPriceCart(price)];
+};
+export default { getPriceListChecksSteps, changePricelist, checkPriceCart };

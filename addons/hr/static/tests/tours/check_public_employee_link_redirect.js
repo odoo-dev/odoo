@@ -6,7 +6,8 @@ registry.category("web_tour.tours").add("check_public_employee_link_redirect", {
         /* ignoring inactive modals since the modal may appear multiple times
           thus hiding the inactive ones and playwright doesn't like doing
           actions on hidden elements */
-        const msgSelector = '.o_dialog:not(.o_inactive_modal) .modal-content .modal-body div[role="alert"] p';
+        const msgSelector =
+            '.o_dialog:not(.o_inactive_modal) .modal-content .modal-body div[role="alert"] p';
         const msg = `You are not allowed to access "Employee" (hr.employee) records.
 We can redirect you to the public employee list.`;
         return [
@@ -17,11 +18,12 @@ We can redirect you to the public employee list.`;
                 run: () => {
                     const errorTxt = document.querySelector(msgSelector).innerText;
                     if (errorTxt !== msg) {
-                        throw new Error("Could not find correct warning message when visiting private employee without required permissions")
+                        throw new Error(
+                            "Could not find correct warning message when visiting private employee without required permissions"
+                        );
                     }
-                }
+                },
             },
-        ]
+        ];
     },
 });
-

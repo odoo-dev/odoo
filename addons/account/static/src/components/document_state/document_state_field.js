@@ -58,7 +58,7 @@ export class DocumentState extends SelectionField {
             {
                 closeOnClickAway: true,
                 position: "top",
-            },
+            }
         );
     }
 }

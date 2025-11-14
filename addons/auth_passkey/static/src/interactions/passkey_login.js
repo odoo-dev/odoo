@@ -12,7 +12,9 @@ export class PasskeyLogin extends Interaction {
 
     async onClick() {
         const serverOptions = await this.waitFor(rpc("/auth/passkey/start-auth"));
-        const auth = await this.waitFor(passkeyLib.startAuthentication(serverOptions).catch(e => console.error(e)));
+        const auth = await this.waitFor(
+            passkeyLib.startAuthentication(serverOptions).catch((e) => console.error(e))
+        );
         if (!auth) {
             return false;
         }
@@ -23,6 +25,4 @@ export class PasskeyLogin extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("auth_passkey.passkey_login", PasskeyLogin);
+registry.category("public.interactions").add("auth_passkey.passkey_login", PasskeyLogin);

@@ -5,7 +5,6 @@ import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { useService } from "@web/core/utils/hooks";
 
-
 export class MOListViewDropdown extends Component {
     static template = "mrp.MOViewListDropdown";
     static components = {
@@ -21,15 +20,15 @@ export class MOListViewDropdown extends Component {
             state: this.props.record.data.state,
         });
         this.colorIcons = {
-            "blocked": "bg-warning",
-            "ready": "bg-muted",
-            "progress": "bg-info",
-            "cancel": "bg-danger",
-            "done": "bg-success",
+            blocked: "bg-warning",
+            ready: "bg-muted",
+            progress: "bg-info",
+            cancel: "bg-danger",
+            done: "bg-success",
         };
     }
 
-    async reload(){
+    async reload() {
         await this.env.model.root.load();
         this.env.model.notify();
     }
@@ -44,15 +43,19 @@ export class MOListViewDropdown extends Component {
         if (!selectedWorkorders || selectedWorkorders.length == 0) {
             selectedWorkorders = [this.props.record];
         }
-        let ids = selectedWorkorders.filter((wo) => !([state, 'done'].includes(wo.data.state) || wo.data.production_state == 'done')).map((wo) => wo.resId)  
+        const ids = selectedWorkorders
+            .filter(
+                (wo) =>
+                    !([state, "done"].includes(wo.data.state) || wo.data.production_state == "done")
+            )
+            .map((wo) => wo.resId);
         if (ids && ids.length > 0) {
             await this.callOrm("set_state", [state], ids);
         }
     }
 
-
     async callOrm(functionName, args, ids = undefined) {
-        if (!ids){
+        if (!ids) {
             ids = this.props.record.model.root.selection?.map((element) => element.evalContext.id);
         }
         // if no records selected, take the current clicked one

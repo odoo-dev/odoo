@@ -6,5 +6,5 @@ export class SurveyKanbanRenderer extends KanbanRenderer {
     static components = {
         ...KanbanRenderer.components,
         SurveySurveyActionHelper,
-    }
-};
+    };
+}

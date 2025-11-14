@@ -11,12 +11,15 @@ patch(Parent.prototype, {
     async _onClickValuation() {
         const context = this._getActionContext();
         return this.action.doAction({
-            name: _t('Stock Valuation'),
-            res_model: 'stock.move',
-            type: 'ir.actions.act_window',
-            view_mode: 'list,form',
-            views: [[false, 'list'], [false, 'form']],
-            target: 'current',
+            name: _t("Stock Valuation"),
+            res_model: "stock.move",
+            type: "ir.actions.act_window",
+            view_mode: "list,form",
+            views: [
+                [false, "list"],
+                [false, "form"],
+            ],
+            target: "current",
             context: context,
         });
     },
@@ -30,5 +33,5 @@ patch(Parent.prototype, {
             context.search_default_product_id = this.props.docs.product_variants_ids;
         }
         return context;
-    }
+    },
 });

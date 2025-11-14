@@ -4,11 +4,10 @@ import { Notebook } from "@web/core/notebook/notebook";
 import { formView } from "@web/views/form/form_view";
 import { FormCompiler } from "@web/views/form/form_compiler";
 import { FormRenderer } from "@web/views/form/form_renderer";
-import { FormController } from '@web/views/form/form_controller';
+import { FormController } from "@web/views/form/form_controller";
 import { useService } from "@web/core/utils/hooks";
 import { deleteConfirmationMessage } from "@web/core/confirmation_dialog/confirmation_dialog";
-import {_t} from "@web/core/l10n/translation";
-
+import { _t } from "@web/core/l10n/translation";
 
 export class AccountMoveFormController extends FormController {
     setup() {
@@ -28,10 +27,12 @@ export class AccountMoveFormController extends FormController {
         return this.orm.call("account.move", "get_extra_print_items", [this.model.root.resId]);
     }
 
-
     async deleteRecord() {
         const deleteConfirmationDialogProps = this.deleteConfirmationDialogProps;
-        deleteConfirmationDialogProps.body = await this.account_move_service.getDeletionDialogBody(deleteConfirmationMessage, this.model.root.resId);
+        deleteConfirmationDialogProps.body = await this.account_move_service.getDeletionDialogBody(
+            deleteConfirmationMessage,
+            this.model.root.resId
+        );
         this.deleteRecordsWithConfirmation(deleteConfirmationDialogProps, [this.model.root]);
     }
 }
@@ -58,8 +59,8 @@ export class AccountMoveFormRenderer extends FormRenderer {
     };
 
     async saveBeforeTabChange() {
-        if (this.props.record.isInEdition && await this.props.record.isDirty()) {
-            const contentEl = document.querySelector('.o_content');
+        if (this.props.record.isInEdition && (await this.props.record.isDirty())) {
+            const contentEl = document.querySelector(".o_content");
             const scrollPos = contentEl.scrollTop;
             await this.props.record.save();
             if (scrollPos) {

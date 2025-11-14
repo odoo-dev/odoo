@@ -32,7 +32,7 @@ export class AnalyticDistribution extends Component {
         BadgeTag,
         Record,
         Field,
-    }
+    };
 
     static props = {
         ...standardFieldProps,
@@ -45,9 +45,9 @@ export class AnalyticDistribution extends Component {
         allow_save: { type: Boolean, optional: true },
         multi_edit: { type: Boolean, optional: true },
         placeholder: { type: String, optional: true },
-    }
+    };
 
-    setup(){
+    setup() {
         this.orm = useService("orm");
         this.batchedOrm = useService("batchedOrm");
 
@@ -98,8 +98,10 @@ export class AnalyticDistribution extends Component {
         });
         this.allPlans = [];
         this.planIdToColumn = {};
-        this.lastAccount = this.props.account_field && this.props.record.data[this.props.account_field] || false;
-        this.lastProduct = this.props.product_field && this.props.record.data[this.props.product_field] || false;
+        this.lastAccount =
+            (this.props.account_field && this.props.record.data[this.props.account_field]) || false;
+        this.lastProduct =
+            (this.props.product_field && this.props.record.data[this.props.product_field]) || false;
     }
 
     // Lifecycle
@@ -121,18 +123,19 @@ export class AnalyticDistribution extends Component {
         // or a model applies that contains unavailable plans
         // This should only execute when these fields have changed, therefore we use the `_field` props.
         const valueChanged =
-            JSON.stringify(this.currentValue) !==
-            JSON.stringify(record.data[this.props.name]);
-        const currentAccount = this.props.account_field && record.data[this.props.account_field] || false;
-        const currentProduct = this.props.product_field && record.data[this.props.product_field] || false;
+            JSON.stringify(this.currentValue) !== JSON.stringify(record.data[this.props.name]);
+        const currentAccount =
+            (this.props.account_field && record.data[this.props.account_field]) || false;
+        const currentProduct =
+            (this.props.product_field && record.data[this.props.product_field]) || false;
         const accountChanged = !shallowEqual(this.lastAccount, currentAccount);
         const productChanged = !shallowEqual(this.lastProduct, currentProduct);
         if (valueChanged || accountChanged || productChanged) {
             if (!this.props.force_applicability) {
                 await this.fetchAllPlans({ record });
             }
-            this.lastAccount = accountChanged && currentAccount || this.lastAccount;
-            this.lastProduct = productChanged && currentProduct || this.lastProduct;
+            this.lastAccount = (accountChanged && currentAccount) || this.lastAccount;
+            this.lastProduct = (productChanged && currentProduct) || this.lastProduct;
             await this.jsonToData(record.data[this.props.name]);
             if (this.props.multi_edit) {
                 this.initialFormattedData = this.state.formattedData;
@@ -152,7 +155,9 @@ export class AnalyticDistribution extends Component {
      */
     accountTotalsByPlan() {
         const accountTotals = {};
-        const formattedData = this.props.multi_edit ? this.initialFormattedData : this.state.formattedData;
+        const formattedData = this.props.multi_edit
+            ? this.initialFormattedData
+            : this.state.formattedData;
         formattedData.map((line) => {
             line.analyticAccounts.map((column) => {
                 if (column.accountId) {
@@ -167,9 +172,9 @@ export class AnalyticDistribution extends Component {
                     total += roundDecimals(line.percentage, this.decimalPrecision.digits[1] + 2);
 
                     accountTotals[planId] = accountTotals[planId] || {};
-                    accountTotals[planId][accId] = { accId, accName, planId, total, planColor};
+                    accountTotals[planId][accId] = { accId, accName, planId, total, planColor };
                 }
-            })
+            });
         });
         return accountTotals;
     }
@@ -181,14 +186,22 @@ export class AnalyticDistribution extends Component {
     planTotals() {
         const summary = this.accountTotalsByPlan();
         this.allPlans.map((plan) => {
-            const planTotal = (summary[plan.id] && Object.values(summary[plan.id]) || []).reduce((prev, next) => prev + next.total, 0.0);
-            const className = plan.applicability === "mandatory" && !this.planIsComplete(planTotal) ? 'text-danger' : plan.applicability === "mandatory" ? 'text-success' : '';
+            const planTotal = ((summary[plan.id] && Object.values(summary[plan.id])) || []).reduce(
+                (prev, next) => prev + next.total,
+                0.0
+            );
+            const className =
+                plan.applicability === "mandatory" && !this.planIsComplete(planTotal)
+                    ? "text-danger"
+                    : plan.applicability === "mandatory"
+                    ? "text-success"
+                    : "";
             summary[plan.id] = {
                 value: planTotal,
                 formattedValue: formatPercentage(planTotal, this.decimalPrecision),
                 class: className,
                 applicability: plan.applicability,
-            }
+            };
         });
         return summary;
     }
@@ -216,7 +229,15 @@ export class AnalyticDistribution extends Component {
             const accs = Object.values(planSummary);
             return {
                 id: accs[0].planId,
-                text: accs.reduce((p, n) => p + (p.length ? " | " : "") + (this.planIsComplete(n.total) ? n.accName : `${formatPercentage(n.total)} ${n.accName}`) , ""),
+                text: accs.reduce(
+                    (p, n) =>
+                        p +
+                        (p.length ? " | " : "") +
+                        (this.planIsComplete(n.total)
+                            ? n.accName
+                            : `${formatPercentage(n.total)} ${n.accName}`),
+                    ""
+                ),
                 color: accs[0].planColor,
                 onClick: (ev) => this.tagClicked(ev),
             };
@@ -232,16 +253,26 @@ export class AnalyticDistribution extends Component {
     }
 
     async jsonToData(jsonFieldValue) {
-        const analyticAccountIds = jsonFieldValue ? Object.keys(jsonFieldValue).filter((key) => key != '__update__' ).map((key) => key.split(',')).flat().map((id) => parseInt(id)) : [];
-        const analyticAccountDict = analyticAccountIds.length ? await this.fetchAnalyticAccounts([["id", "in", analyticAccountIds]]) : [];
+        const analyticAccountIds = jsonFieldValue
+            ? Object.keys(jsonFieldValue)
+                  .filter((key) => key != "__update__")
+                  .map((key) => key.split(","))
+                  .flat()
+                  .map((id) => parseInt(id))
+            : [];
+        const analyticAccountDict = analyticAccountIds.length
+            ? await this.fetchAnalyticAccounts([["id", "in", analyticAccountIds]])
+            : [];
 
-        let distribution = [];
+        const distribution = [];
         let accountNotFound = false;
 
         for (const [accountIds, percentage] of Object.entries(jsonFieldValue)) {
-            if (accountIds == '__update__') continue;
+            if (accountIds == "__update__") {
+                continue;
+            }
             const defaultVals = this.plansToArray(); // empty if the popup was not opened
-            const ids = accountIds.split(',');
+            const ids = accountIds.split(",");
 
             for (const id of ids) {
                 const account = analyticAccountDict[parseInt(id)];
@@ -249,13 +280,16 @@ export class AnalyticDistribution extends Component {
                     // since tags are displayed even though plans might not be retrieved (ie defaultVals is empty)
                     // push the accounts anyway, as order doesn't matter
                     // once the popup is opened, plans are fetched and the analyticAccounts list will be ordered
-                    Object.assign(defaultVals.find((plan) => plan.planId == account.root_plan_id[0]) || defaultVals.push({}) && defaultVals[defaultVals.length-1],
-                    {
-                        accountId: parseInt(id),
-                        accountDisplayName: account.display_name,
-                        accountColor: account.color,
-                        accountRootPlanId: account.root_plan_id[0],
-                    });
+                    Object.assign(
+                        defaultVals.find((plan) => plan.planId == account.root_plan_id[0]) ||
+                            (defaultVals.push({}) && defaultVals[defaultVals.length - 1]),
+                        {
+                            accountId: parseInt(id),
+                            accountDisplayName: account.display_name,
+                            accountColor: account.color,
+                            accountRootPlanId: account.root_plan_id[0],
+                        }
+                    );
                 } else {
                     accountNotFound = true;
                 }
@@ -264,7 +298,7 @@ export class AnalyticDistribution extends Component {
                 analyticAccounts: defaultVals,
                 percentage: percentage / 100,
                 id: this.nextId++,
-            })
+            });
         }
         this.state.formattedData = distribution;
         if (accountNotFound) {
@@ -281,19 +315,20 @@ export class AnalyticDistribution extends Component {
             plan_id: { type: "many2one" },
             root_plan_id: { type: "many2one" },
         };
-        let recordFields = {};
+        const recordFields = {};
         const values = {};
         // Analytic Account fields
         line.analyticAccounts.map((account) => {
             const fieldName = this.planIdToColumn[account.planId];
-            const companyId = this.props.record.data.company_id && this.props.record.data.company_id[0];
+            const companyId =
+                this.props.record.data.company_id && this.props.record.data.company_id[0];
             const domain = companyId
                 ? [
-                    "&",
-                    ["root_plan_id", "=", account.planId],
-                    "|",
-                    ["company_id", "parent_of", companyId],
-                    ["company_id", "=", false],
+                      "&",
+                      ["root_plan_id", "=", account.planId],
+                      "|",
+                      ["company_id", "parent_of", companyId],
+                      ["company_id", "=", false],
                   ]
                 : [["root_plan_id", "=", account.planId]];
             recordFields[fieldName] = {
@@ -311,18 +346,25 @@ export class AnalyticDistribution extends Component {
                 : false;
         });
         // Percentage field
-        recordFields['percentage'] = {
+        recordFields["percentage"] = {
             string: _t("Percentage"),
             type: "percentage",
             cellClass: "numeric_column_width",
             ...this.decimalPrecision,
         };
-        values['percentage'] = line.percentage;
+        values["percentage"] = line.percentage;
         // Value field copied from original
         if (this.props.amount_field) {
-            const { string, name, type, currency_field } = this.props.record.fields[this.props.amount_field];
-            recordFields[name] = { string, name, type, currency_field, cellClass: "numeric_column_width" };
-            values[name] = this.props.record.data[name] * values['percentage'];
+            const { string, name, type, currency_field } =
+                this.props.record.fields[this.props.amount_field];
+            recordFields[name] = {
+                string,
+                name,
+                type,
+                currency_field,
+                cellClass: "numeric_column_width",
+            };
+            values[name] = this.props.record.data[name] * values["percentage"];
             // Currency field
             if (currency_field) {
                 const { string, name, type, relation } = this.props.record.fields[currency_field];
@@ -335,9 +377,10 @@ export class AnalyticDistribution extends Component {
             values: values,
             activeFields: recordFields,
             hooks: {
-                onRecordChanged: async (record, changes) => await this.lineChanged(record, changes, line),
-            }
-        }
+                onRecordChanged: async (record, changes) =>
+                    await this.lineChanged(record, changes, line),
+            },
+        };
     }
 
     accountCount(line) {
@@ -350,38 +393,51 @@ export class AnalyticDistribution extends Component {
 
     // ORM
     fetchPlansArgs({ record }) {
-        let args = {};
+        const args = {};
         if (this.props.business_domain_compute) {
-            args['business_domain'] = evaluateExpr(this.props.business_domain_compute, record.evalContext);
+            args["business_domain"] = evaluateExpr(
+                this.props.business_domain_compute,
+                record.evalContext
+            );
         }
         if (this.props.business_domain) {
-            args['business_domain'] = this.props.business_domain;
+            args["business_domain"] = this.props.business_domain;
         }
         if (this.props.product_field && record.data[this.props.product_field]) {
-            args['product'] = record.data[this.props.product_field].id;
+            args["product"] = record.data[this.props.product_field].id;
         }
         if (this.props.account_field && record.data[this.props.account_field]) {
-            args['account'] = record.data[this.props.account_field].id;
+            args["account"] = record.data[this.props.account_field].id;
         }
         if (this.props.force_applicability) {
-            args['applicability'] = this.props.force_applicability;
+            args["applicability"] = this.props.force_applicability;
         }
-        const existing_account_ids = Object.keys(record.data[this.props.name]).map((k) => k.split(",")).flat().map((i) => parseInt(i));
+        const existing_account_ids = Object.keys(record.data[this.props.name])
+            .map((k) => k.split(","))
+            .flat()
+            .map((i) => parseInt(i));
         if (existing_account_ids.length) {
-            args['existing_account_ids'] = existing_account_ids;
+            args["existing_account_ids"] = existing_account_ids;
         }
         if (record.data.company_id) {
-            args['company_id'] = record.data.company_id.id;
+            args["company_id"] = record.data.company_id.id;
         }
         return args;
     }
 
     async fetchAllPlans(props) {
         const argsPlan = this.fetchPlansArgs(props);
-        this.allPlans = await this.orm.call("account.analytic.plan", "get_relevant_plans", [], argsPlan);
-        this.planIdToColumn = Object.fromEntries(this.allPlans.map((plan) => [plan.id, plan.column_name]));
+        this.allPlans = await this.orm.call(
+            "account.analytic.plan",
+            "get_relevant_plans",
+            [],
+            argsPlan
+        );
+        this.planIdToColumn = Object.fromEntries(
+            this.allPlans.map((plan) => [plan.id, plan.column_name])
+        );
         if (!this.props.multi_edit) {
-            this.allPlans.forEach(plan => {
+            this.allPlans.forEach((plan) => {
                 this.state.update_plan[plan.column_name] = true;
             });
         }
@@ -392,13 +448,21 @@ export class AnalyticDistribution extends Component {
             domain: domain,
             fields: ["id", "display_name", "root_plan_id", "color"],
             context: [],
-        }
+        };
         // batched call
-        const records = await this.batchedOrm.read("account.analytic.account", domain[0][2], args.fields, {});
-        return Object.assign({}, ...records.map((r) => {
-            const {id, ...rest} = r;
-            return {[id]: rest};
-        }));
+        const records = await this.batchedOrm.read(
+            "account.analytic.account",
+            domain[0][2],
+            args.fields,
+            {}
+        );
+        return Object.assign(
+            {},
+            ...records.map((r) => {
+                const { id, ...rest } = r;
+                return { [id]: rest };
+            })
+        );
     }
 
     // Editing Distributions
@@ -413,14 +477,19 @@ export class AnalyticDistribution extends Component {
         }
         // record percentage or value changes
         if (changes.percentage != line.percentage) {
-            roundDecimals(line.percentage = record.data.percentage, this.decimalPrecision.digits[1] + 2);
+            roundDecimals(
+                (line.percentage = record.data.percentage),
+                this.decimalPrecision.digits[1] + 2
+            );
         } else if (
             this.valueColumnEnabled &&
             changes[this.props.amount_field] != line[this.props.amount_field]
         ) {
             line.percentage = roundDecimals(
-                record.data[this.props.amount_field] / this.props.record.data[this.props.amount_field],
-                this.decimalPrecision.digits[1] + 2);
+                record.data[this.props.amount_field] /
+                    this.props.record.data[this.props.amount_field],
+                this.decimalPrecision.digits[1] + 2
+            );
         }
     }
 
@@ -434,7 +503,9 @@ export class AnalyticDistribution extends Component {
     }
 
     get allowSave() {
-        return this.props.allow_save && this.state.formattedData.some((line) => this.lineIsValid(line));
+        return (
+            this.props.allow_save && this.state.formattedData.some((line) => this.lineIsValid(line))
+        );
     }
 
     get editingRecord() {
@@ -447,25 +518,36 @@ export class AnalyticDistribution extends Component {
 
     // actions
     addLine() {
-        let maxMandatory = 0, maxOptional = 0, hasMandatory = false;
+        let maxMandatory = 0,
+            maxOptional = 0,
+            hasMandatory = false;
 
-        Object.values(this.planTotals()).filter((plan) => plan.value < 1).map((plan) => {
-            if (plan.applicability == "mandatory"){
-                maxMandatory = Math.max(plan.value, maxMandatory);
-                hasMandatory = true;
-            } else {
-                maxOptional = Math.max(plan.value, maxOptional);
-            }
-        });
-        let noPlanTotal = this.state.formattedData.filter((line) => !this.accountCount(line)).reduce((p, n) => p + n.percentage, 0);
-        const remainder = roundDecimals(1 - (hasMandatory ? maxMandatory : (maxOptional || noPlanTotal)), this.decimalPrecision.digits[1] + 2);
+        Object.values(this.planTotals())
+            .filter((plan) => plan.value < 1)
+            .map((plan) => {
+                if (plan.applicability == "mandatory") {
+                    maxMandatory = Math.max(plan.value, maxMandatory);
+                    hasMandatory = true;
+                } else {
+                    maxOptional = Math.max(plan.value, maxOptional);
+                }
+            });
+        const noPlanTotal = this.state.formattedData
+            .filter((line) => !this.accountCount(line))
+            .reduce((p, n) => p + n.percentage, 0);
+        const remainder = roundDecimals(
+            1 - (hasMandatory ? maxMandatory : maxOptional || noPlanTotal),
+            this.decimalPrecision.digits[1] + 2
+        );
         const lineToAdd = {
             id: this.nextId++,
             analyticAccounts: this.plansToArray(),
             percentage: Math.max(remainder, 0) || 1,
-        }
+        };
         this.state.formattedData.push(lineToAdd);
-        this.setFocusSelector(`[name=line_${this.state.formattedData.length - 1}] td:first-of-type`);
+        this.setFocusSelector(
+            `[name=line_${this.state.formattedData.length - 1}] td:first-of-type`
+        );
     }
 
     deleteLine(index) {
@@ -478,11 +560,18 @@ export class AnalyticDistribution extends Component {
     dataToJson() {
         const result = {};
         if (this.props.multi_edit) {
-            result.__update__ = Object.entries(this.state.update_plan).filter((e) => e[1]).map((e) => e[0]);
+            result.__update__ = Object.entries(this.state.update_plan)
+                .filter((e) => e[1])
+                .map((e) => e[0]);
         }
-        this.state.formattedData = this.state.formattedData.filter((line) => this.accountCount(line));
+        this.state.formattedData = this.state.formattedData.filter((line) =>
+            this.accountCount(line)
+        );
         this.state.formattedData.map((line) => {
-            const key = line.analyticAccounts.reduce((p, n) => p.concat(n.accountId ? n.accountId : []), []);
+            const key = line.analyticAccounts.reduce(
+                (p, n) => p.concat(n.accountId ? n.accountId : []),
+                []
+            );
             result[key] = (result[key] || 0) + line.percentage * 100;
         });
         return result;
@@ -501,12 +590,19 @@ export class AnalyticDistribution extends Component {
     onSaveNew() {
         this.closeAnalyticEditor();
         const { record, product_field, account_field } = this.props;
-        this.openTemplate({ resId: false, context: {
-            'default_analytic_distribution': this.dataToJson(),
-            'default_partner_id': record.data['partner_id'] ? record.data['partner_id'].id : undefined,
-            'default_product_id': product_field ? record.data[product_field].id : undefined,
-            'default_account_prefix': account_field ? record.data[account_field].display_name.substr(0, 3) : undefined,
-        }});
+        this.openTemplate({
+            resId: false,
+            context: {
+                default_analytic_distribution: this.dataToJson(),
+                default_partner_id: record.data["partner_id"]
+                    ? record.data["partner_id"].id
+                    : undefined,
+                default_product_id: product_field ? record.data[product_field].id : undefined,
+                default_account_prefix: account_field
+                    ? record.data[account_field].display_name.substr(0, 3)
+                    : undefined,
+            },
+        });
     }
 
     forceCloseEditor() {
@@ -558,7 +654,12 @@ export class AnalyticDistribution extends Component {
 
     focusToSelector() {
         if (this.focusSelector && this.isDropdownOpen) {
-            this.focus(this.adjacentElementToFocus("next", this.dropdownRef.el.querySelector(this.focusSelector)));
+            this.focus(
+                this.adjacentElementToFocus(
+                    "next",
+                    this.dropdownRef.el.querySelector(this.focusSelector)
+                )
+            );
         }
         this.focusSelector = false;
     }
@@ -579,7 +680,7 @@ export class AnalyticDistribution extends Component {
 
     focusAdjacent(direction) {
         const elementToFocus = this.adjacentElementToFocus(direction);
-        if (elementToFocus){
+        if (elementToFocus) {
             this.focus(elementToFocus);
             return true;
         }
@@ -587,7 +688,9 @@ export class AnalyticDistribution extends Component {
     }
 
     focus(el) {
-        if (!el) return;
+        if (!el) {
+            return;
+        }
         el.focus();
         if (["INPUT", "TEXTAREA"].includes(el.tagName)) {
             if (el.selectionStart) {
@@ -611,20 +714,24 @@ export class AnalyticDistribution extends Component {
                     const closestCell = ev.target.closest("td, th");
                     const row = closestCell.parentElement;
                     const line = this.state.formattedData[parseInt(row.id)];
-                    if (this.adjacentElementToFocus("next") == this.addLineButton.el && line && this.lineIsValid(line)) {
+                    if (
+                        this.adjacentElementToFocus("next") == this.addLineButton.el &&
+                        line &&
+                        this.lineIsValid(line)
+                    ) {
                         this.addLine();
                         break;
                     }
                     this.focusAdjacent("next") || this.forceCloseEditor();
                     break;
-                };
+                }
                 return;
             }
             case "shift+tab": {
                 if (this.isDropdownOpen) {
                     this.focusAdjacent("previous") || this.forceCloseEditor();
                     break;
-                };
+                }
                 return;
             }
             case "escape": {
@@ -658,15 +765,13 @@ export class AnalyticDistribution extends Component {
             - click is not targeting document dom element (drag and drop search more modal)
         */
 
-        const selectors = [
-            ".o_popover",
-            ".modal:not(.o_inactive_modal):not(:has(.o_act_window))",
-        ];
-        if (this.isDropdownOpen
-            && !this.widgetRef.el.contains(ev.target)
-            && !ev.target.closest(selectors.join(","))
-            && !ev.target.isSameNode(document.documentElement)
-           ) {
+        const selectors = [".o_popover", ".modal:not(.o_inactive_modal):not(:has(.o_act_window))"];
+        if (
+            this.isDropdownOpen &&
+            !this.widgetRef.el.contains(ev.target) &&
+            !ev.target.closest(selectors.join(",")) &&
+            !ev.target.isSameNode(document.documentElement)
+        ) {
             this.forceCloseEditor();
         }
     }
@@ -682,9 +787,7 @@ export class AnalyticDistribution extends Component {
 export const analyticDistribution = {
     component: AnalyticDistribution,
     supportedTypes: ["json"],
-    fieldDependencies: [
-        { name: "analytic_precision", type: "integer" },
-    ],
+    fieldDependencies: [{ name: "analytic_precision", type: "integer" }],
     supportedOptions: [
         {
             label: _t("Disable save"),

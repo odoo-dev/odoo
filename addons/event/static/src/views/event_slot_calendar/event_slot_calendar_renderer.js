@@ -41,7 +41,7 @@ export class EventSlotCalendarCommonRenderer extends CalendarCommonRenderer {
     /**
      * @override
      * Prevent click on disabled dates in mobile.
-    */
+     */
     onDateClick(info) {
         if (info.dayEl.classList.contains("o_calendar_disabled")) {
             return;

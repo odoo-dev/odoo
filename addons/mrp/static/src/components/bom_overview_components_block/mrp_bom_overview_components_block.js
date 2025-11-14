@@ -23,7 +23,10 @@ export class BomOverviewComponentsBlock extends Component {
     };
 
     setup() {
-        const childFoldstate = this.childIds.reduce((prev, curr) => ({ ...prev, [curr]: !this.props.unfoldAll}), {});
+        const childFoldstate = this.childIds.reduce(
+            (prev, curr) => ({ ...prev, [curr]: !this.props.unfoldAll }),
+            {}
+        );
         this.state = useState({
             ...childFoldstate,
             unfoldAll: this.props.unfoldAll || false,
@@ -36,11 +39,13 @@ export class BomOverviewComponentsBlock extends Component {
             useBus(this.env.overviewBus, "toggle-fold-all", () => this._toggleFoldAll());
         }
 
-        onWillUpdateProps(newProps => {
+        onWillUpdateProps((newProps) => {
             if (this.data.product_id != newProps.data.product_id) {
-                this.childIds.forEach(id => delete this.state[id]);
-                const newChildIds = this.getHasComponents(newProps.data) ? newProps.data.components.map(c => this.getIdentifier(c)) : [];
-                newChildIds.forEach(id => this.state[id] = true);
+                this.childIds.forEach((id) => delete this.state[id]);
+                const newChildIds = this.getHasComponents(newProps.data)
+                    ? newProps.data.components.map((c) => this.getIdentifier(c))
+                    : [];
+                newChildIds.forEach((id) => (this.state[id] = true));
                 this.state.unfoldAll = false;
             }
         });
@@ -64,7 +69,7 @@ export class BomOverviewComponentsBlock extends Component {
         const allChildIds = this.childIds;
 
         this.state.unfoldAll = !this.state.unfoldAll;
-        allChildIds.forEach(id => this.state[id] = !this.state.unfoldAll);
+        allChildIds.forEach((id) => (this.state[id] = !this.state.unfoldAll));
         this.props.changeFolded({ ids: allChildIds, isFolded: !this.state.unfoldAll });
     }
 
@@ -79,7 +84,7 @@ export class BomOverviewComponentsBlock extends Component {
     }
 
     get childIds() {
-        return this.hasComponents ? this.data.components.map(c => this.getIdentifier(c)) : [];
+        return this.hasComponents ? this.data.components.map((c) => this.getIdentifier(c)) : [];
     }
 
     get identifier() {
@@ -92,7 +97,7 @@ export class BomOverviewComponentsBlock extends Component {
         return data.components && data.components.length > 0;
     }
 
-    getIdentifier(data, type=null) {
+    getIdentifier(data, type = null) {
         return `${type ? type : data.type}_${data.index}`;
     }
 }

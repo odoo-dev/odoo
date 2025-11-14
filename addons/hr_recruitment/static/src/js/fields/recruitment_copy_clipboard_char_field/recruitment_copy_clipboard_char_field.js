@@ -1,4 +1,7 @@
-import { CopyClipboardCharField, copyClipboardCharField } from "@web/views/fields/copy_clipboard/copy_clipboard_field";
+import {
+    CopyClipboardCharField,
+    copyClipboardCharField,
+} from "@web/views/fields/copy_clipboard/copy_clipboard_field";
 import { CharField } from "@web/views/fields/char/char_field";
 import { GenerateContentAndCopyButton } from "../../buttons/generate_content_and_copy_button";
 import { useService } from "@web/core/utils/hooks";
@@ -25,12 +28,13 @@ class RecruitmentCopyClipboardCharField extends CopyClipboardCharField {
     }
 
     get contentGenerationFunction() {
-        if(this.props.contentGenerationFunctionName) {
-            return () => this.orm.call(
-                this.props.record._config.resModel,
-                this.props.contentGenerationFunctionName,
-                [this.props.record.resId],
-            );
+        if (this.props.contentGenerationFunctionName) {
+            return () =>
+                this.orm.call(
+                    this.props.record._config.resModel,
+                    this.props.contentGenerationFunctionName,
+                    [this.props.record.resId]
+                );
         }
         return null;
     }

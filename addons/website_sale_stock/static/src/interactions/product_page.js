@@ -1,70 +1,74 @@
-import { rpc } from '@web/core/network/rpc';
-import { isEmail } from '@web/core/utils/strings';
-import { patch } from '@web/core/utils/patch';
-import { renderToFragment } from '@web/core/utils/render';
-import { formatFloat } from '@web/core/utils/numbers';
-import { setElementContent } from '@web/core/utils/html';
-import { patchDynamicContent } from '@web/public/utils';
-import { markup } from '@odoo/owl';
-import { ProductPage } from '@website_sale/interactions/product_page';
+import { rpc } from "@web/core/network/rpc";
+import { isEmail } from "@web/core/utils/strings";
+import { patch } from "@web/core/utils/patch";
+import { renderToFragment } from "@web/core/utils/render";
+import { formatFloat } from "@web/core/utils/numbers";
+import { setElementContent } from "@web/core/utils/html";
+import { patchDynamicContent } from "@web/public/utils";
+import { markup } from "@odoo/owl";
+import { ProductPage } from "@website_sale/interactions/product_page";
 
 patch(ProductPage.prototype, {
     setup() {
         super.setup();
         patchDynamicContent(this.dynamicContent, {
-            '#product_stock_notification_message': {
-                't-on-click': this.onClickProductStockNotificationMessage.bind(this),
+            "#product_stock_notification_message": {
+                "t-on-click": this.onClickProductStockNotificationMessage.bind(this),
             },
-            '#product_stock_notification_form_submit_button': {
-                't-on-click': this.onClickSubmitProductStockNotificationForm.bind(this),
+            "#product_stock_notification_form_submit_button": {
+                "t-on-click": this.onClickSubmitProductStockNotificationForm.bind(this),
             },
         });
     },
 
     onClickProductStockNotificationMessage(ev) {
-        const partnerEmail = document.querySelector('#wsale_user_email').value;
-        const emailInputEl = document.querySelector('#stock_notification_input');
+        const partnerEmail = document.querySelector("#wsale_user_email").value;
+        const emailInputEl = document.querySelector("#stock_notification_input");
 
         emailInputEl.value = partnerEmail;
         this._handleClickStockNotificationMessage(ev);
     },
 
     onClickSubmitProductStockNotificationForm(ev) {
-        const formEl = ev.currentTarget.closest('#stock_notification_form');
+        const formEl = ev.currentTarget.closest("#stock_notification_form");
         const productId = parseInt(formEl.querySelector('input[name="product_id"]').value);
         this._handleClickSubmitStockNotificationForm(ev, productId);
     },
 
     _handleClickStockNotificationMessage(ev) {
-        ev.currentTarget.classList.add('d-none');
-        ev.currentTarget.parentElement.querySelector('#stock_notification_form').classList.remove('d-none');
+        ev.currentTarget.classList.add("d-none");
+        ev.currentTarget.parentElement
+            .querySelector("#stock_notification_form")
+            .classList.remove("d-none");
     },
 
     async _handleClickSubmitStockNotificationForm(ev, productId) {
-        const stockNotificationEl = ev.currentTarget.closest('#stock_notification_div');
-        const formEl = stockNotificationEl.querySelector('#stock_notification_form');
-        const email = stockNotificationEl.querySelector('#stock_notification_input').value.trim();
+        const stockNotificationEl = ev.currentTarget.closest("#stock_notification_div");
+        const formEl = stockNotificationEl.querySelector("#stock_notification_form");
+        const email = stockNotificationEl.querySelector("#stock_notification_input").value.trim();
 
         if (!isEmail(email)) {
             return this._displayEmailIncorrectMessage(stockNotificationEl);
         }
 
         try {
-            await this.waitFor(rpc(
-                '/shop/add/stock_notification', { product_id: productId, email }
-            ));
+            await this.waitFor(
+                rpc("/shop/add/stock_notification", { product_id: productId, email })
+            );
         } catch {
             this._displayEmailIncorrectMessage(stockNotificationEl);
             return;
         }
-        const message = stockNotificationEl.querySelector('#stock_notification_success_message');
-        message.classList.remove('d-none');
-        formEl.classList.add('d-none');
+        const message = stockNotificationEl.querySelector("#stock_notification_success_message");
+        message.classList.remove("d-none");
+        formEl.classList.add("d-none");
     },
 
     _displayEmailIncorrectMessage(stockNotificationEl) {
-        const incorrectIconEl = stockNotificationEl.querySelector('#stock_notification_input_incorrect');
-        incorrectIconEl.classList.remove('d-none');
+        const incorrectIconEl = stockNotificationEl.querySelector(
+            "#stock_notification_input_incorrect"
+        );
+        incorrectIconEl.classList.remove("d-none");
     },
 
     /**
@@ -80,15 +84,19 @@ patch(ProductPage.prototype, {
      */
     async _onChangeCombination(ev, parent, combination) {
         await super._onChangeCombination(...arguments);
-        const has_max_combo_quantity = 'max_combo_quantity' in combination
-        if (!combination.is_storable && !has_max_combo_quantity) return;
-        if (!combination.product_id) return; // If the product is dynamic.
+        const has_max_combo_quantity = "max_combo_quantity" in combination;
+        if (!combination.is_storable && !has_max_combo_quantity) {
+            return;
+        }
+        if (!combination.product_id) {
+            return;
+        } // If the product is dynamic.
 
         const addQtyInput = parent.querySelector('input[name="add_qty"]');
         const qty = parseFloat(addQtyInput?.value) || 1;
-        const ctaWrapper = parent.querySelector('#o_wsale_cta_wrapper');
-        ctaWrapper.classList.replace('d-none', 'd-flex');
-        ctaWrapper.classList.remove('out_of_stock');
+        const ctaWrapper = parent.querySelector("#o_wsale_cta_wrapper");
+        ctaWrapper.classList.replace("d-none", "d-flex");
+        ctaWrapper.classList.remove("out_of_stock");
 
         if (!combination.allow_out_of_stock_order) {
             const unavailableQty = await this.waitFor(this._getUnavailableQty(combination));
@@ -103,8 +111,8 @@ patch(ProductPage.prototype, {
                 }
             }
             if (combination.free_qty < 1) {
-                ctaWrapper.classList.replace('d-flex', 'd-none');
-                ctaWrapper.classList.add('out_of_stock');
+                ctaWrapper.classList.replace("d-flex", "d-none");
+                ctaWrapper.classList.add("out_of_stock");
             }
         } else if (has_max_combo_quantity) {
             if (addQtyInput) {
@@ -114,33 +122,34 @@ patch(ProductPage.prototype, {
                 }
             }
             if (combination.max_combo_quantity < 1) {
-                ctaWrapper.classList.replace('d-flex', 'd-none');
-                ctaWrapper.classList.add('out_of_stock');
+                ctaWrapper.classList.replace("d-flex", "d-none");
+                ctaWrapper.classList.add("out_of_stock");
             }
         }
 
         // needed xml-side for formatting of remaining qty
-        combination.formatQuantity = qty => {
+        combination.formatQuantity = (qty) => {
             if (Number.isInteger(qty)) {
                 return qty;
             } else {
                 const decimals = Math.max(0, Math.ceil(-Math.log10(combination.uom_rounding)));
                 return formatFloat(qty, { digits: [false, decimals] });
             }
-        }
+        };
 
-        document.querySelector('.oe_website_sale')
-            .querySelectorAll('.availability_message_' + combination.product_template)
-            .forEach(el => el.remove());
+        document
+            .querySelector(".oe_website_sale")
+            .querySelectorAll(".availability_message_" + combination.product_template)
+            .forEach((el) => el.remove());
         if (combination.out_of_stock_message) {
             combination.out_of_stock_message = markup(combination.out_of_stock_message);
-            const outOfStockMessage = document.createElement('div');
+            const outOfStockMessage = document.createElement("div");
             setElementContent(outOfStockMessage, combination.out_of_stock_message);
             combination.has_out_of_stock_message = !!outOfStockMessage.textContent.trim();
         }
-        this.el.querySelector('div.availability_messages').append(renderToFragment(
-            'website_sale_stock.product_availability', combination
-        ));
+        this.el
+            .querySelector("div.availability_messages")
+            .append(renderToFragment("website_sale_stock.product_availability", combination));
     },
 
     async _getUnavailableQty(combination) {

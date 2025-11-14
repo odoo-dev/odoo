@@ -29,18 +29,24 @@ export class ReceptionReportTable extends Component {
         const quantities = [];
         const inIds = [];
         for (const line of this.props.lines) {
-            if (line.is_assigned) continue;
+            if (line.is_assigned) {
+                continue;
+            }
             moveIds.push(line.move_out_id);
             quantities.push(line.quantity);
             inIds.push(line.move_ins);
         }
 
-        await this.ormService.call(
-            "report.stock.report_reception",
-            "action_assign",
-            [false, moveIds, quantities, inIds],
-        );
-        this.env.bus.trigger("update-assign-state", { isAssigned: true, tableIndex: this.props.index });
+        await this.ormService.call("report.stock.report_reception", "action_assign", [
+            false,
+            moveIds,
+            quantities,
+            inIds,
+        ]);
+        this.env.bus.trigger("update-assign-state", {
+            isAssigned: true,
+            tableIndex: this.props.index,
+        });
     }
 
     async onClickLink(resModel, resId, viewType) {
@@ -57,7 +63,9 @@ export class ReceptionReportTable extends Component {
         const modelIds = [];
         const quantities = [];
         for (const line of this.props.lines) {
-            if (!line.is_assigned) continue;
+            if (!line.is_assigned) {
+                continue;
+            }
             modelIds.push(line.move_out_id);
             quantities.push(Math.ceil(line.quantity) || 1);
         }
@@ -75,18 +83,18 @@ export class ReceptionReportTable extends Component {
     //---- Getters ----
 
     get hasMovesIn() {
-        return this.props.lines.some(line => line.move_ins && line.move_ins.length > 0);
+        return this.props.lines.some((line) => line.move_ins && line.move_ins.length > 0);
     }
 
     get hasAssignAllButton() {
-        return this.props.lines.some(line => line.is_qty_assignable);
+        return this.props.lines.some((line) => line.is_qty_assignable);
     }
 
     get isAssignAllDisabled() {
-        return this.props.lines.every(line => line.is_assigned);
+        return this.props.lines.every((line) => line.is_assigned);
     }
 
     get isPrintLabelDisabled() {
-        return this.props.lines.every(line => !line.is_assigned);
+        return this.props.lines.every((line) => !line.is_assigned);
     }
 }

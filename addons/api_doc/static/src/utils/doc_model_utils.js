@@ -128,7 +128,7 @@ export function getParameterDefaultValue(name, parameter) {
     if ("default" in parameter) {
         return parameter.default;
     } else if (/\bdomaintype\b/i.test(parameter.type)) {
-        return [[ "display_name", "ilike", "a%"]];
+        return [["display_name", "ilike", "a%"]];
     } else if (/\bstr\b/i.test(parameter.type)) {
         return "";
     } else if (/\b(int|float|complex)\b/i.test(parameter.type)) {

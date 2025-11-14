@@ -69,12 +69,10 @@ export const fieldMany2ManyTagsBanks = {
         ...(many2ManyTagsFieldColorEditable.additionalClasses || []),
         "o_field_many2many_tags",
     ],
-    relatedFields: ({ options }) => {
-        return [
-            ...many2ManyTagsFieldColorEditable.relatedFields({ options }),
-            { name: options.allow_out_payment_field, type: "boolean", readonly: false },
-        ];
-    },
+    relatedFields: ({ options }) => [
+        ...many2ManyTagsFieldColorEditable.relatedFields({ options }),
+        { name: options.allow_out_payment_field, type: "boolean", readonly: false },
+    ],
 };
 
 registry.category("fields").add("many2many_tags_banks", fieldMany2ManyTagsBanks);

@@ -28,7 +28,9 @@ export class PickingTypeDashboardGraphField extends JournalDashboardGraphField {
             } else if (pt.type === "future") {
                 backgroundColor.push(colorFuture);
             } else {
-                backgroundColor.push(getCustomColor(cookie.get("color_scheme"), "#ebebeb", "#3C3E4B"));
+                backgroundColor.push(
+                    getCustomColor(cookie.get("color_scheme"), "#ebebeb", "#3C3E4B")
+                );
             }
         });
         return {
@@ -68,7 +70,7 @@ export class PickingTypeDashboardGraphField extends JournalDashboardGraphField {
                     // Add a filter for the given date category
                     additionalContext["search_default_".concat(dateCategory)] = true;
                     this.actionService.doAction("stock.click_dashboard_graph", {
-                        additionalContext: additionalContext
+                        additionalContext: additionalContext,
                     });
                 },
                 plugins: {

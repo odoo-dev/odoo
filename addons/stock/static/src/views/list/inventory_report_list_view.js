@@ -7,4 +7,4 @@ export const InventoryReportListView = {
     Model: InventoryReportListModel,
 };
 
-registry.category("views").add('inventory_report_list', InventoryReportListView);
+registry.category("views").add("inventory_report_list", InventoryReportListView);

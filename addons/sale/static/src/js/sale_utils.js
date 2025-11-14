@@ -24,8 +24,8 @@ export function areSaleOrderLinesLinked(linkingSaleOrderLine, linkedSaleOrderLin
 export function getLinkedSaleOrderLines(saleOrderLine) {
     const saleOrder = saleOrderLine.model.root;
     // TODO(loti): this leaves out any combo items that are on another page.
-    return saleOrder.data.order_line.records.filter(
-        record => areSaleOrderLinesLinked(record, saleOrderLine)
+    return saleOrder.data.order_line.records.filter((record) =>
+        areSaleOrderLinesLinked(record, saleOrderLine)
     );
 }
 
@@ -41,12 +41,12 @@ export function serializeComboItem(comboItem) {
         product_id: comboItem.product.id,
         no_variant_attribute_value_ids: comboItem.product.selectedNoVariantPtavIds,
         product_custom_attribute_values: comboItem.product.selectedCustomPtavs.map(
-            customPtav => ({
+            (customPtav) => ({
                 custom_product_template_attribute_value_id: customPtav.id,
                 custom_value: customPtav.value,
             })
         ),
-    }
+    };
 }
 
 /**
@@ -61,5 +61,5 @@ export function serializeComboItem(comboItem) {
  */
 export function getSelectedCustomPtav(ptal) {
     const selectedPtavIds = new Set(ptal.selected_attribute_value_ids);
-    return ptal.attribute_values.find(ptav => ptav.is_custom && selectedPtavIds.has(ptav.id));
+    return ptal.attribute_values.find((ptav) => ptav.is_custom && selectedPtavIds.has(ptav.id));
 }

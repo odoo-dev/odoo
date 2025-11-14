@@ -23,10 +23,12 @@ CourseJoinWidget.include({
     _onClickJoin: function (ev) {
         ev.preventDefault();
 
-        if (this.channel.channelEnroll === 'payment' && !this.publicUser) {
+        if (this.channel.channelEnroll === "payment" && !this.publicUser) {
             const self = this;
             this.beforeJoin().then(function () {
-                self.call('cart', 'add',
+                self.call(
+                    "cart",
+                    "add",
                     {
                         // TODO VCR Ensure productTemplateId is always provided to `addToCart`.
                         // Currently, this works because the product configurator check is bypassed
@@ -36,7 +38,7 @@ CourseJoinWidget.include({
                     },
                     {
                         isBuyNow: true,
-                    },
+                    }
                 );
             });
         } else {

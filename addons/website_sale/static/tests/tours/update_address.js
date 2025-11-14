@@ -1,8 +1,8 @@
 import { registry } from "@web/core/registry";
 import * as tourUtils from "@website_sale/js/tours/tour_utils";
 
-registry.category("web_tour.tours").add('website_sale.update_billing_shipping_address', {
-    url: '/shop',
+registry.category("web_tour.tours").add("website_sale.update_billing_shipping_address", {
+    url: "/shop",
     steps: () => [
         ...tourUtils.addToCart({ productName: "Office Chair Black TEST", expectUnloadPage: true }),
         tourUtils.goToCart({ quantity: 1 }),
@@ -16,7 +16,7 @@ registry.category("web_tour.tours").add('website_sale.update_billing_shipping_ad
         },
         {
             content: "Edit  billing address which is shipping address too",
-            trigger: 'a.js_edit_address',
+            trigger: "a.js_edit_address",
             run: "click",
             expectUnloadPage: true,
         },
@@ -32,7 +32,7 @@ registry.category("web_tour.tours").add('website_sale.update_billing_shipping_ad
         },
         {
             content: "Check there is a warning for required field.",
-            trigger: ':invalid',
+            trigger: ":invalid",
         },
     ],
 });

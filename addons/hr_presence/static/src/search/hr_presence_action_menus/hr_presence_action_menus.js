@@ -8,14 +8,12 @@ export class HrPresenceActionMenus extends ActionMenus {
     static template = "hr_presence.actionmenu";
 
     get PresenceActionItems() {
-        return (this.presenceActionItems || []).map((action) => {
-            return {
-                action,
-                description: action.name,
-                key: action.id,
-                groupNumber: action.groupNumber,
-            };
-        });
+        return (this.presenceActionItems || []).map((action) => ({
+            action,
+            description: action.name,
+            key: action.id,
+            groupNumber: action.groupNumber,
+        }));
     }
 
     /**

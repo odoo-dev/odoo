@@ -14,9 +14,10 @@ export class StockForecastedGraphRenderer extends GraphRenderer {
         });
         if (data.datasets.length) {
             const dataset_length = data.datasets[0].data.length;
-            for(let i = dataset_length-2; i > 0; i--) { // i=0 and i=last are always preserved
-                let skipData = data.datasets.every(d => d.data[i] == d.data[i-1]);
-                if (skipData){
+            for (let i = dataset_length - 2; i > 0; i--) {
+                // i=0 and i=last are always preserved
+                const skipData = data.datasets.every((d) => d.data[i] == d.data[i - 1]);
+                if (skipData) {
                     data.datasets.forEach((dataset) => {
                         dataset.data[i] = null; // Mark as null to indicate it can be skipped
                     });
@@ -25,7 +26,7 @@ export class StockForecastedGraphRenderer extends GraphRenderer {
         }
         return data;
     }
-};
+}
 
 export const StockForecastedGraphView = {
     ...graphView,

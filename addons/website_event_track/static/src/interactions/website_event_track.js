@@ -9,20 +9,34 @@ export class WebsiteEventTrack extends Interaction {
             "t-on-scroll": () => this.updateAgendaScroll(),
             "t-on-resize": () => this.updateAgendaScroll(),
         },
-        "#event_track_search": { "t-on-input.prevent.withTarget": (ev, currentTargetEl) => {
-            this.searchText = currentTargetEl.value.toLowerCase();
-        }},
+        "#event_track_search": {
+            "t-on-input.prevent.withTarget": (ev, currentTargetEl) => {
+                this.searchText = currentTargetEl.value.toLowerCase();
+            },
+        },
         ".o_we_online_agenda": { "t-on-scroll.withTarget": this.onAgendaScroll },
-        ".event_track": { "t-att-class": (el) => ({ "invisible": !el.textContent.toLowerCase().includes(this.searchText) }) },
-        "#search_summary": { "t-att-class": () => ({ "invisible": !this.searchText }) },
-        "#search_number": { "t-out": () => this.tracks.filter(element => !element.classList.contains('invisible')).length },
+        ".event_track": {
+            "t-att-class": (el) => ({
+                invisible: !el.textContent.toLowerCase().includes(this.searchText),
+            }),
+        },
+        "#search_summary": { "t-att-class": () => ({ invisible: !this.searchText }) },
+        "#search_number": {
+            "t-out": () =>
+                this.tracks.filter((element) => !element.classList.contains("invisible")).length,
+        },
         ".o_we_agenda_horizontal_scroller_container": {
             "t-on-scroll": this.alignAgendaScroll,
             "t-att-class": () => ({
-                "d-none": !(this.visibleAgenda && this.visibleAgenda.classList.contains("o_we_online_agenda_has_scroll")),
+                "d-none": !(
+                    this.visibleAgenda &&
+                    this.visibleAgenda.classList.contains("o_we_online_agenda_has_scroll")
+                ),
             }),
         },
-        ".o_we_agenda_horizontal_scroller": { "t-att-style": () => ({ "width": this.computeScrollerWidth() }) },
+        ".o_we_agenda_horizontal_scroller": {
+            "t-att-style": () => ({ width: this.computeScrollerWidth() }),
+        },
     };
 
     setup() {
@@ -33,7 +47,9 @@ export class WebsiteEventTrack extends Interaction {
 
         this.searchText = "";
         this.agendaScroller = this.el.querySelector(".o_we_agenda_horizontal_scroller_container");
-        this.agendaScrollerElement = this.agendaScroller?.querySelector(".o_we_agenda_horizontal_scroller");
+        this.agendaScrollerElement = this.agendaScroller?.querySelector(
+            ".o_we_agenda_horizontal_scroller"
+        );
         this.agendas = Array.from(this.el.querySelectorAll(".o_we_online_agenda"));
         this.tracks = Array.from(this.el.querySelectorAll(".event_track"));
 
@@ -64,24 +80,26 @@ export class WebsiteEventTrack extends Interaction {
      */
     updateAgendaScroll() {
         if (!this.agendaScroller) {
-            return ;
+            return;
         }
 
         // reverse the agendas, we always want the last agenda "on screen" to be the scrolled one
         this.visibleAgenda = this.agendas.toReversed().find((el) => {
             const rect = el.getBoundingClientRect();
             const containerOffset = {
-                top: rect.top + window.scrollY + 30,  // some offset for a better experience
-                bottom: rect.bottom + window.scrollY
+                top: rect.top + window.scrollY + 30, // some offset for a better experience
+                bottom: rect.bottom + window.scrollY,
             };
             const windowOffset = {
                 top: window.scrollY,
-                bottom: window.scrollY + window.innerHeight
+                bottom: window.scrollY + window.innerHeight,
             };
 
             // if the top of the container if visible but NOT the bottom
-            return (containerOffset.top < windowOffset.bottom) &&
-                !(containerOffset.bottom < windowOffset.bottom);
+            return (
+                containerOffset.top < windowOffset.bottom &&
+                !(containerOffset.bottom < windowOffset.bottom)
+            );
         });
         if (this.visibleAgenda) {
             requestAnimationFrame(() => {
@@ -94,7 +112,7 @@ export class WebsiteEventTrack extends Interaction {
      * @param {Object} agendas
      */
     checkAgendasOverflow(agendas) {
-        agendas.forEach(agendaEl => {
+        agendas.forEach((agendaEl) => {
             const hasScroll = agendaEl.querySelector("table").clientWidth > agendaEl.clientWidth;
 
             agendaEl.classList.toggle("o_we_online_agenda_has_scroll", hasScroll);
@@ -112,7 +130,10 @@ export class WebsiteEventTrack extends Interaction {
         const gap = tableEl.clientWidth - currentTargetEl.clientWidth - gutter;
 
         currentTargetEl.classList.add("o_we_online_agenda_is_scrolling");
-        currentTargetEl.classList.toggle("o_we_online_agenda_has_content_hidden", gap > Math.ceil(currentTargetEl.scrollLeft));
+        currentTargetEl.classList.toggle(
+            "o_we_online_agenda_has_content_hidden",
+            gap > Math.ceil(currentTargetEl.scrollLeft)
+        );
 
         requestAnimationFrame(() => {
             setTimeout(() => {
@@ -126,10 +147,13 @@ export class WebsiteEventTrack extends Interaction {
     }
 
     computeScrollerWidth() {
-        if (this.visibleAgenda && this.visibleAgenda.classList.contains("o_we_online_agenda_has_scroll")) {
+        if (
+            this.visibleAgenda &&
+            this.visibleAgenda.classList.contains("o_we_online_agenda_has_scroll")
+        ) {
             // need to account for vertical scrollbar width
             const verticalScrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-            return (this.visibleAgenda.scrollWidth + verticalScrollbarWidth) + "px";
+            return this.visibleAgenda.scrollWidth + verticalScrollbarWidth + "px";
         }
     }
 }

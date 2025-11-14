@@ -1,7 +1,5 @@
-import { patch } from '@web/core/utils/patch';
-import {
-    AddProductToWishlistButton
-} from '@website_sale_wishlist/interactions/add_product_to_wishlist_button';
+import { patch } from "@web/core/utils/patch";
+import { AddProductToWishlistButton } from "@website_sale_wishlist/interactions/add_product_to_wishlist_button";
 
 patch(AddProductToWishlistButton.prototype, {
     /**
@@ -9,11 +7,11 @@ patch(AddProductToWishlistButton.prototype, {
      */
     async addProduct(ev) {
         await this.waitFor(super.addProduct(...arguments));
-        const saveForLaterButton = document.querySelector('#wsale_save_for_later_button');
-        const addedToWishListAlert = document.querySelector('#wsale_added_to_your_wishlist_alert');
+        const saveForLaterButton = document.querySelector("#wsale_save_for_later_button");
+        const addedToWishListAlert = document.querySelector("#wsale_added_to_your_wishlist_alert");
         if (saveForLaterButton) {
-            saveForLaterButton.classList.add('d-none');
-            addedToWishListAlert.classList.remove('d-none');
+            saveForLaterButton.classList.add("d-none");
+            addedToWishListAlert.classList.remove("d-none");
         }
     },
 });

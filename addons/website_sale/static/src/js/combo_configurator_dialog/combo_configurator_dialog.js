@@ -1,8 +1,6 @@
-import {
-    ComboConfiguratorDialog
-} from '@sale/js/combo_configurator_dialog/combo_configurator_dialog';
-import { _t } from '@web/core/l10n/translation';
-import { patch } from '@web/core/utils/patch';
+import { ComboConfiguratorDialog } from "@sale/js/combo_configurator_dialog/combo_configurator_dialog";
+import { _t } from "@web/core/l10n/translation";
+import { patch } from "@web/core/utils/patch";
 
 patch(ComboConfiguratorDialog, {
     props: {
@@ -23,7 +21,7 @@ patch(ComboConfiguratorDialog.prototype, {
         super.setup(...arguments);
 
         if (this.props.isFrontend) {
-            this.getPriceUrl = '/website_sale/combo_configurator/get_price';
+            this.getPriceUrl = "/website_sale/combo_configurator/get_price";
         }
     },
 
@@ -37,7 +35,7 @@ patch(ComboConfiguratorDialog.prototype, {
     get _comboProductData() {
         const comboProductData = super._comboProductData;
         if (this.props.isFrontend) {
-            Object.assign(comboProductData, { 'price': this._comboPrice });
+            Object.assign(comboProductData, { price: this._comboPrice });
         }
         return comboProductData;
     },

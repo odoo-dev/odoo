@@ -36,7 +36,7 @@ export class DocSidebar extends Component {
 
     _toggleAllAddons(isCollapsed) {
         const allAddons = this.filteredAddons;
-        allAddons.forEach((a) => this.state.collapseAddons[a.name] = !isCollapsed);
+        allAddons.forEach((a) => (this.state.collapseAddons[a.name] = !isCollapsed));
     }
 
     toggleAddon(event, addonName) {

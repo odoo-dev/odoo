@@ -4,7 +4,10 @@ import { ProductPageOption } from "./product_page_option";
 import { rpc } from "@web/core/network/rpc";
 import { isImageCorsProtected } from "@html_editor/utils/image";
 import { TABS } from "@html_editor/main/media/media_dialog/media_dialog";
-import { WebsiteConfigAction, PreviewableWebsiteConfigAction } from "@website/builder/plugins/customize_website_plugin";
+import {
+    WebsiteConfigAction,
+    PreviewableWebsiteConfigAction,
+} from "@website/builder/plugins/customize_website_plugin";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import wSaleUtils from "@website_sale/js/website_sale_utils";
 
@@ -37,9 +40,9 @@ class ProductPageOptionPlugin extends Plugin {
             if (
                 // TODO the "placeholder" feature should be reviewed, this is
                 // not a valid HTML attribute.
-                el.getAttribute("placeholder")
-                && el.hasAttribute("data-oe-zws-empty-inline")
-                && /^[\s\u200b]*$/.test(el.textContent)
+                el.getAttribute("placeholder") &&
+                el.hasAttribute("data-oe-zws-empty-inline") &&
+                /^[\s\u200b]*$/.test(el.textContent)
             ) {
                 el.textContent = el.getAttribute("placeholder");
             }
@@ -70,9 +73,9 @@ class ProductPageOptionPlugin extends Plugin {
         },
         patch_builder_options: [
             {
-                target_name: 'ProductsRibbonOption',
-                target_element: 'selector',
-                method: 'add',
+                target_name: "ProductsRibbonOption",
+                target_element: "selector",
+                method: "add",
                 value: ProductPageOption.selector,
             },
         ],
@@ -102,7 +105,7 @@ class ProductPageOptionPlugin extends Plugin {
             return;
         }
         const targetWindow = this.productPageCarousel.ownerDocument.defaultView || window;
-        const resizeEvent = new Event('resize');
+        const resizeEvent = new Event("resize");
         targetWindow.dispatchEvent(resizeEvent);
     }
 }
@@ -351,8 +354,7 @@ export class ProductAddExtraImageAction extends BaseProductPageAction {
                 // Kinda hack-ish but the regular save does not get the information we need
                 save: async (imgEls, selectedMedia, activeTab) => {
                     if (selectedMedia.length) {
-                        const type =
-                            activeTab === TABS["IMAGES"].id ? "image" : "video";
+                        const type = activeTab === TABS["IMAGES"].id ? "image" : "video";
                         await this.extraMediaSave(el, type, selectedMedia, imgEls);
                     }
                 },
@@ -370,7 +372,7 @@ export class ProductRemoveAllExtraImagesAction extends BaseProductPageAction {
             product_product_id: this.productProductID,
             product_template_id: this.productTemplateID,
             combination_ids: this.getSelectedVariantValues(el),
-        })
+        });
     }
 }
 

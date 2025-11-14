@@ -27,11 +27,9 @@ export class CategoryDelete extends Interaction {
                 window.location.reload();
             },
             cancelLabel: _t("Cancel"),
-            cancel: () => { },
+            cancel: () => {},
         });
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_slides.category_delete", CategoryDelete);
+registry.category("public.interactions").add("website_slides.category_delete", CategoryDelete);

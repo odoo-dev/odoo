@@ -3,7 +3,7 @@ import {
     contains,
     openFormView,
     start,
-    startServer
+    startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { describe, test } from "@odoo/hoot";
 import { defineSMSModels } from "@sms/../tests/sms_test_helpers";

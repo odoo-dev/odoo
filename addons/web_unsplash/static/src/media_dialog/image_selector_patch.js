@@ -129,8 +129,8 @@ patch(ImageSelector.prototype, {
             // based on their ids. This will allow us to ignore duplicate
             // images from Unsplash. We can assume there are no duplicates at
             // this point as a precondition.
-            const existingIds = new Set(this.unsplashState.unsplashRecords.map(r => r.id));
-            const newImages = images.filter(record => {
+            const existingIds = new Set(this.unsplashState.unsplashRecords.map((r) => r.id));
+            const newImages = images.filter((record) => {
                 if (existingIds.has(record.id)) {
                     return false;
                 }

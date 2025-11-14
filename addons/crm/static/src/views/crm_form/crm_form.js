@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { formView } from "@web/views/form/form_view";
 
 class CrmFormRecord extends formView.Model.Record {
-     /**
+    /**
      * override of record _save mechanism intended to affect the main form record
      * We check if the stage_id field was altered and if we need to display a rainbowman
      * message.
@@ -35,7 +35,11 @@ class CrmFormRecord extends formView.Model.Record {
                 ? this._values.partner_phone_update // original value
                 : this._changes.partner_phone_update; // new value
 
-        if (needsSynchronizationEmail && this._changes.email_from === undefined && this._values.email_from) {
+        if (
+            needsSynchronizationEmail &&
+            this._changes.email_from === undefined &&
+            this._values.email_from
+        ) {
             this._changes.email_from = this._values.email_from;
         }
         if (needsSynchronizationPhone && this._changes.phone === undefined && this._values.phone) {

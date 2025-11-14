@@ -1,10 +1,7 @@
-
 import { Component } from "@odoo/owl";
 import { formatCurrency } from "@web/core/currency";
-import {
-    ProductTemplateAttributeLine as PTAL
-} from "../product_template_attribute_line/product_template_attribute_line";
-import { QuantityButtons } from '../quantity_buttons/quantity_buttons';
+import { ProductTemplateAttributeLine as PTAL } from "../product_template_attribute_line/product_template_attribute_line";
+import { QuantityButtons } from "../quantity_buttons/quantity_buttons";
 import { getSelectedCustomPtav } from "../sale_utils";
 import { _t } from "@web/core/l10n/translation";
 
@@ -12,7 +9,7 @@ export class Product extends Component {
     static components = { PTAL, QuantityButtons };
     static template = "sale.Product";
     static props = {
-        id: { type: [Number, {value: false}], optional: true },
+        id: { type: [Number, { value: false }], optional: true },
         product_tmpl_id: Number,
         display_name: String,
         description_sale: [Boolean, String], // backend sends 'false' when there is no description
@@ -66,9 +63,9 @@ export class Product extends Component {
      */
     get imageUrl() {
         const modelPath = this.props.id
-            ? `product.product/${ this.props.id }`
-            : `product.template/${ this.props.product_tmpl_id }`;
-        return `/web/image/${ modelPath }/image_256`;
+            ? `product.product/${this.props.id}`
+            : `product.template/${this.props.product_tmpl_id}`;
+        return `/web/image/${modelPath}/image_256`;
     }
 
     /**
@@ -77,11 +74,12 @@ export class Product extends Component {
      * @return {Boolean} Whether the PTAL should be shown.
      */
     shouldShowPtal(ptal) {
-        return this.env.canChangeVariant
-            || ptal.create_variant === 'no_variant'
-            || !!getSelectedCustomPtav(ptal);
+        return (
+            this.env.canChangeVariant ||
+            ptal.create_variant === "no_variant" ||
+            !!getSelectedCustomPtav(ptal)
+        );
     }
-
 
     get UoMTitle() {
         return _t("Packaging");
@@ -90,5 +88,4 @@ export class Product extends Component {
     async selectUoM(event) {
         this.env.setUoM(this.props.product_tmpl_id, parseInt(event.target.value));
     }
-
 }

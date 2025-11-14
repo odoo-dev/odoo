@@ -11,7 +11,7 @@ export class ProjectTaskListController extends ListController {
 
     get deleteConfirmationDialogProps() {
         const deleteConfirmationDialogProps = super.deleteConfirmationDialogProps;
-        const hasSubtasks = this.model.root.selection.some(task => task.data.subtask_count > 0)
+        const hasSubtasks = this.model.root.selection.some((task) => task.data.subtask_count > 0);
         if (!hasSubtasks) {
             return deleteConfirmationDialogProps;
         }
@@ -23,6 +23,6 @@ export class ProjectTaskListController extends ListController {
                 await this.model.load();
             },
             body: subTaskDeleteConfirmationMessage,
-        }
+        };
     }
 }

@@ -29,11 +29,7 @@ export function addToWishlistFromShopPage() {
     ];
 }
 
-export function goToWishlist({
-    quantity = 1,
-    position = "bottom",
-    backend = false,
-} = {}) {
+export function goToWishlist({ quantity = 1, position = "bottom", backend = false } = {}) {
     return {
         content: _t("Go to wishlist"),
         trigger: `${backend ? ":iframe" : ""} a sup.my_wish_quantity:contains(/^${quantity}$/)`,
@@ -60,8 +56,8 @@ export function submitCouponCode(code) {
         {
             content: "click on 'Apply'",
             trigger: 'form[name="coupon_code"] button[type="submit"]',
-            run: 'click',
+            run: "click",
             expectUnloadPage: true,
         },
-    ]
+    ];
 }

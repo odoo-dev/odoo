@@ -10,7 +10,10 @@ registry.category("services").add("stock_warehouse", {
             const { data, error } = ev.detail;
             const { model, method } = data.params;
             if (!error && model === "stock.warehouse") {
-                if (UPDATE_METHODS.includes(method) && !browser.localStorage.getItem("running_tour")) {
+                if (
+                    UPDATE_METHODS.includes(method) &&
+                    !browser.localStorage.getItem("running_tour")
+                ) {
                     action.doAction("reload_context");
                 }
             }

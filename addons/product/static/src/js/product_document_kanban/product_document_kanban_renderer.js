@@ -17,4 +17,3 @@ export class ProductDocumentKanbanRenderer extends KanbanRenderer {
         this.fileUploadService = useService("file_upload");
     }
 }
-

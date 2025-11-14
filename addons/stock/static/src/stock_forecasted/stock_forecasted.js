@@ -30,7 +30,7 @@ export class StockForecasted extends Component {
         this.productId = this.context.active_id;
         this.resModel = this.context.active_model;
         this.title = this.props.action.name || _t("Forecasted Report");
-        if(!this.context.active_id){
+        if (!this.context.active_id) {
             this.context.active_id = this.props.action.params.active_id;
             this.reloadReport();
         }
@@ -41,10 +41,12 @@ export class StockForecasted extends Component {
 
     async _getReportValues() {
         await this._getResModel();
-        const isTemplate = !this.resModel || this.resModel === 'product.template';
+        const isTemplate = !this.resModel || this.resModel === "product.template";
         this.reportModelName = `stock.forecasted_product_${isTemplate ? "template" : "product"}`;
         this.warehouses.splice(0, this.warehouses.length);
-        this.warehouses.push(...await this.orm.searchRead('stock.warehouse', [],['id', 'name', 'code']));
+        this.warehouses.push(
+            ...(await this.orm.searchRead("stock.warehouse", [], ["id", "name", "code"]))
+        );
         if (!this.context.warehouse_id) {
             this.updateWarehouse(this.warehouses[0].id);
         }
@@ -60,7 +62,7 @@ export class StockForecasted extends Component {
         };
     }
 
-    async _getResModel(){
+    async _getResModel() {
         this.resModel = this.context.active_model || this.context.params?.active_model;
         //Following is used as a fallback when the forecast is not called by an action but through browser's history
         if (!this.resModel) {
@@ -68,14 +70,20 @@ export class StockForecasted extends Component {
             if (resModel) {
                 if (/^\d+$/.test(resModel)) {
                     // legacy action definition where res_model is the model id instead of name
-                    const actionModel = await this.orm.read('ir.model', [Number(resModel)], ['model']);
+                    const actionModel = await this.orm.read(
+                        "ir.model",
+                        [Number(resModel)],
+                        ["model"]
+                    );
                     resModel = actionModel[0]?.model;
                 }
                 this.resModel = resModel;
             } else if (this.props.action._originalAction) {
                 const originalContextAction = JSON.parse(this.props.action._originalAction).context;
                 if (typeof originalContextAction === "string") {
-                    this.resModel = JSON.parse(originalContextAction.replace(/'/g, '"')).active_model;
+                    this.resModel = JSON.parse(
+                        originalContextAction.replace(/'/g, '"')
+                    ).active_model;
                 } else if (originalContextAction) {
                     this.resModel = originalContextAction.active_model;
                 }
@@ -121,13 +129,13 @@ export class StockForecasted extends Component {
         return { noContentHelp: _t("Try to add some incoming or outgoing transfers.") };
     }
 
-    async openView(resModel, view, resId=false, domain = false) {
+    async openView(resModel, view, resId = false, domain = false) {
         const action = {
             type: "ir.actions.act_window",
             res_model: resModel,
             views: [[false, view]],
             view_mode: view,
-            res_id:  resId,
+            res_id: resId,
             domain: domain,
         };
         return this.action.doAction(action);

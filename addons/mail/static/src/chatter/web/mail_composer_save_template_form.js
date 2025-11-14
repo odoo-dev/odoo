@@ -2,7 +2,6 @@ import { formView } from "@web/views/form/form_view";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-
 export class MailComposerSaveTemplateFormController extends formView.Controller {
     /** @override */
     setup() {

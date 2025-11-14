@@ -3,7 +3,7 @@ import {
     contains,
     openFormView,
     start,
-    startServer
+    startServer,
 } from "@mail/../tests/mail_test_helpers";
 import { describe, test } from "@odoo/hoot";
 import { defineWebsiteSlidesModels } from "@website_slides/../tests/website_slides_test_helpers";

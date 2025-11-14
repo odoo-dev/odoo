@@ -1,6 +1,6 @@
 import { onWillStart, useEffect } from "@odoo/owl";
 import { user } from "@web/core/user";
-import { FormControllerWithHTMLExpander } from '@resource/views/form_with_html_expander/form_controller_with_html_expander'
+import { FormControllerWithHTMLExpander } from "@resource/views/form_with_html_expander/form_controller_with_html_expander";
 import { ProjectTemplateDropdown } from "../components/project_template_dropdown";
 
 export class ProjectProjectFormController extends FormControllerWithHTMLExpander {
@@ -23,7 +23,7 @@ export class ProjectProjectFormController extends FormControllerWithHTMLExpander
     setup() {
         super.setup();
         onWillStart(async () => {
-            this.isProjectManager = await user.hasGroup('project.group_project_manager');
+            this.isProjectManager = await user.hasGroup("project.group_project_manager");
             this.featuresToObserve = await this.orm.call(
                 this.modelParams.config.resModel,
                 "check_features_enabled",

@@ -130,8 +130,8 @@ export class QuestionPageListRenderer extends ListRenderer {
      * @return {Promise<void>}
      */
     async onDeleteRecord(record) {
-        const triggeredRecords = this.props.list.records.filter(
-            (rec) => rec.data.triggering_question_ids.currentIds.includes(record.resId)
+        const triggeredRecords = this.props.list.records.filter((rec) =>
+            rec.data.triggering_question_ids.currentIds.includes(record.resId)
         );
         if (triggeredRecords.length) {
             const res = await super.onDeleteRecord(record);

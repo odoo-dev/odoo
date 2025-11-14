@@ -7,7 +7,7 @@ patch(Thread.prototype, {
         super.setup();
         this.selectedRating;
         this.rating_stats;
-    }, 
+    },
 
     getFetchParams() {
         const params = super.getFetchParams(...arguments);

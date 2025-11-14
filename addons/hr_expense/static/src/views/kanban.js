@@ -1,11 +1,11 @@
-import { registry } from '@web/core/registry';
+import { registry } from "@web/core/registry";
 
-import { ExpenseDashboard } from '../components/expense_dashboard';
-import { ExpenseDocumentUpload, ExpenseDocumentDropZone } from '../mixins/document_upload';
+import { ExpenseDashboard } from "../components/expense_dashboard";
+import { ExpenseDocumentUpload, ExpenseDocumentDropZone } from "../mixins/document_upload";
 
-import { kanbanView } from '@web/views/kanban/kanban_view';
-import { KanbanController } from '@web/views/kanban/kanban_controller';
-import { KanbanRenderer } from '@web/views/kanban/kanban_renderer';
+import { kanbanView } from "@web/views/kanban/kanban_view";
+import { KanbanController } from "@web/views/kanban/kanban_controller";
+import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 
 export class ExpenseKanbanController extends ExpenseDocumentUpload(KanbanController) {
     static template = "hr_expense.KanbanView";
@@ -20,16 +20,16 @@ export class ExpenseDashboardKanbanRenderer extends ExpenseKanbanRenderer {
     static template = "hr_expense.DashboardKanbanRenderer";
 }
 
-registry.category('views').add('hr_expense_kanban', {
+registry.category("views").add("hr_expense_kanban", {
     ...kanbanView,
     Controller: ExpenseKanbanController,
     Renderer: ExpenseKanbanRenderer,
-    buttonTemplate: "hr_expense.KanbanView.Buttons"
+    buttonTemplate: "hr_expense.KanbanView.Buttons",
 });
 
-registry.category('views').add('hr_expense_dashboard_kanban', {
+registry.category("views").add("hr_expense_dashboard_kanban", {
     ...kanbanView,
     Controller: ExpenseKanbanController,
     Renderer: ExpenseDashboardKanbanRenderer,
-    buttonTemplate: "hr_expense.KanbanView.Buttons"
+    buttonTemplate: "hr_expense.KanbanView.Buttons",
 });

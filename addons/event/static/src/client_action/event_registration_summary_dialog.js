@@ -20,14 +20,24 @@ export class EventRegistrationSummaryDialog extends Component {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.continueButtonRef = useRef("continueButton");
-        this.button = useState({enabled: true});
+        this.button = useState({ enabled: true });
 
-        this.registrationStatus = useState({value: this.registration.status});
+        this.registrationStatus = useState({ value: this.registration.status });
 
         onMounted(() => {
-            if (['already_registered', 'need_manual_confirmation'].includes(this.props.registration.status) && this.props.playSound) {
+            if (
+                ["already_registered", "need_manual_confirmation"].includes(
+                    this.props.registration.status
+                ) &&
+                this.props.playSound
+            ) {
                 this.props.playSound("notify");
-            } else if (['not_ongoing_event', 'canceled_registration'].includes(this.props.registration.status) && this.props.playSound) {
+            } else if (
+                ["not_ongoing_event", "canceled_registration"].includes(
+                    this.props.registration.status
+                ) &&
+                this.props.playSound
+            ) {
                 this.props.playSound("error");
             }
             // Without this, repeat barcode scans don't work as focus is lost
@@ -45,8 +55,10 @@ export class EventRegistrationSummaryDialog extends Component {
 
     async onRegistrationConfirm() {
         if (this.registrationStatus.value !== "confirmed_registration") {
-            this.button.enabled = false
-            await this.orm.call("event.registration", "action_set_done", [this.registration.id]).catch(() => this.button.enabled = true);
+            this.button.enabled = false;
+            await this.orm
+                .call("event.registration", "action_set_done", [this.registration.id])
+                .catch(() => (this.button.enabled = true));
             this.registrationStatus.value = "confirmed_registration";
         }
         this.props.close();
@@ -59,7 +71,9 @@ export class EventRegistrationSummaryDialog extends Component {
     }
 
     async undoRegistration() {
-        if (["confirmed_registration", "already_registered"].includes(this.registrationStatus.value)) {
+        if (
+            ["confirmed_registration", "already_registered"].includes(this.registrationStatus.value)
+        ) {
             await this.orm.call("event.registration", "action_confirm", [this.registration.id]);
         } else if (this.registrationStatus.value == "unconfirmed_registration") {
             await this.orm.call("event.registration", "action_set_draft", [this.registration.id]);

@@ -31,14 +31,14 @@ test("many2one_avatar_employee widget in kanban view with skills on avatar card"
     onRpc("hr.employee", "get_avatar_card_data", (params) => {
         const resourceIdArray = params.args[0];
         const resourceId = resourceIdArray[0];
-        const resources = pyEnv['hr.employee.public'].read([resourceId]);
-        const result = resources.map(resource => ({
+        const resources = pyEnv["hr.employee.public"].read([resourceId]);
+        const result = resources.map((resource) => ({
             name: resource.name,
             role_ids: resource.role_ids,
-            email:resource.email,
+            email: resource.email,
             phone: resource.phone,
             user_id: resource.user_id,
-            employee_skill_ids: resource.employee_skill_ids
+            employee_skill_ids: resource.employee_skill_ids,
         }));
         return result;
     });

@@ -10,11 +10,15 @@ export class RevokeTrustedDevice extends Interaction {
     };
 
     async onClick() {
-        await this.waitFor(handleCheckIdentity(
-            this.waitFor(this.services.orm.call("auth_totp.device", "remove", [parseInt(this.el.id)])),
-            this.services.orm,
-            this.services.dialog,
-        ));
+        await this.waitFor(
+            handleCheckIdentity(
+                this.waitFor(
+                    this.services.orm.call("auth_totp.device", "remove", [parseInt(this.el.id)])
+                ),
+                this.services.orm,
+                this.services.dialog
+            )
+        );
         location.reload();
     }
 }

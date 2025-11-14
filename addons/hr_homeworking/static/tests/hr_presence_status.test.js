@@ -1,9 +1,5 @@
 import { describe, test, expect } from "@odoo/hoot";
-import {
-    mountView,
-    models,
-    defineModels,
-} from "@web/../tests/web_test_helpers";
+import { mountView, models, defineModels } from "@web/../tests/web_test_helpers";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 describe.current.tags("desktop");
 

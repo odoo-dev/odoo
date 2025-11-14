@@ -86,10 +86,10 @@ test("Product page options", async () => {
             original: { id: 1, image_src: "/web/image/hoot.png", mimetype: "image/png" },
         };
     });
-    onRpc("/web/image/hoot.png", () => {
+    onRpc("/web/image/hoot.png", () =>
         // converted image won't be used if original is not larger
-        return dataURItoBlob(base64Image + "A".repeat(1000));
-    });
+        dataURItoBlob(base64Image + "A".repeat(1000))
+    );
     onRpc("/html_editor/modify_image/1", () => {
         expect.step("modify_image");
         return base64Image; // Simulate image compression/convertion

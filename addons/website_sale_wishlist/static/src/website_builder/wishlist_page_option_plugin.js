@@ -1,4 +1,3 @@
-
 import { Plugin } from "@html_editor/plugin";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { rpc } from "@web/core/network/rpc";
@@ -8,7 +7,7 @@ import { BaseOptionComponent } from "@html_builder/core/utils";
 
 export class WishlistPageOption extends BaseOptionComponent {
     static template = "website_sale_wishlist.WishlistPageOption";
-    static selector = ".o_wishlist_table"
+    static selector = ".o_wishlist_table";
     static editableOnly = false;
     static title = _t("Wishlist Page");
     static groups = ["website.group_website_designer"];
@@ -21,14 +20,16 @@ class WishlistPageOptionPlugin extends Plugin {
         builder_actions: {
             WishlistGridColumnsAction,
             WishlistMobileColumnsAction,
-            WishlistSetGapAction
+            WishlistSetGapAction,
         },
         save_handlers: this.onSave.bind(this),
     };
 
     async onSave() {
         const wishlistEl = this.editable.querySelector(".o_wishlist_table");
-        if (!wishlistEl) return;
+        if (!wishlistEl) {
+            return;
+        }
 
         const gridColumns = parseInt(wishlistEl.dataset.wishlistGridColumns) || 5;
         const mobileColumns = parseInt(wishlistEl.dataset.wishlistMobileColumns) || 2;
@@ -86,6 +87,4 @@ export class WishlistSetGapAction extends BuilderAction {
     }
 }
 
-registry
-    .category("website-plugins")
-    .add(WishlistPageOptionPlugin.id, WishlistPageOptionPlugin);
+registry.category("website-plugins").add(WishlistPageOptionPlugin.id, WishlistPageOptionPlugin);

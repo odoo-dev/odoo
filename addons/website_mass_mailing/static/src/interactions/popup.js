@@ -9,10 +9,10 @@ patch(Popup.prototype, {
      */
     canShowPopup() {
         if (
-            this.el.classList.contains("o_newsletter_popup")
+            this.el.classList.contains("o_newsletter_popup") &&
             // js_subscribe_email is kept by compatibility (it was the old name
             // of js_subscribe_value)
-            && this.el.querySelector("input.js_subscribe_value, input.js_subscribe_email")?.disabled
+            this.el.querySelector("input.js_subscribe_value, input.js_subscribe_email")?.disabled
         ) {
             return false;
         }

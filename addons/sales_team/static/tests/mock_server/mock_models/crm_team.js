@@ -1,6 +1,5 @@
 import { fields, models } from "@web/../tests/web_test_helpers";
 
-
 export class CrmTeam extends models.ServerModel {
     _name = "crm.team";
 
@@ -13,7 +12,7 @@ export class CrmTeam extends models.ServerModel {
         for (const team of this) {
             const other_memberships = this.env["crm.team"].search_count([
                 ["id", "!=", team.id],
-                ["member_ids", "in", team.member_ids]
+                ["member_ids", "in", team.member_ids],
             ]);
             team.member_warning = other_memberships ? "Users already in other teams." : false;
         }

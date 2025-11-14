@@ -1,4 +1,3 @@
-
 export function assertRewardAmounts(rewards) {
     const steps = [];
     const currencyValue = `.oe_currency_value:visible`;
@@ -21,8 +20,8 @@ export function submitCouponCode(code) {
         {
             content: "click on 'Apply'",
             trigger: 'form[name="coupon_code"] button[type="submit"]',
-            run: 'click',
+            run: "click",
             expectUnloadPage: true,
         },
-    ]
+    ];
 }

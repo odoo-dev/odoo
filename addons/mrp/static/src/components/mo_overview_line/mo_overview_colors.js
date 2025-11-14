@@ -10,7 +10,7 @@ const PRODUCTION_DECORATORS = {
 const PURCHASE_DECORATORS = {
     draft: "info",
     sent: "info",
-    ['to approve']: "info",
+    ["to approve"]: "info",
     purchase: "info",
     cancel: "secondary",
 };

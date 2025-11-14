@@ -4,7 +4,7 @@ import { patch } from "@web/core/utils/patch";
 
 patch(AttendeeCalendarModel.prototype, {
     setup() {
-        super.setup(...arguments)
+        super.setup(...arguments);
         this.data.workingHours = {};
     },
 
@@ -13,12 +13,12 @@ patch(AttendeeCalendarModel.prototype, {
     },
 
     async updateData(data) {
-        await super.updateData(...arguments)
+        await super.updateData(...arguments);
         data.workingHours = await this.fetchWorkingHours(data);
     },
 
-    async fetchWorkingHours(data){
-        if (this.meta.scale !== "day" && this.meta.scale !== "week"){
+    async fetchWorkingHours(data) {
+        if (this.meta.scale !== "day" && this.meta.scale !== "week") {
             return [];
         }
         const attendeeFilters = data.filterSections.partner_ids;
@@ -30,7 +30,7 @@ patch(AttendeeCalendarModel.prototype, {
             activeAttendeeIds,
             serializeDate(data.range.start),
             serializeDate(data.range.end),
-            allFilter?.active
+            allFilter?.active,
         ]);
     },
 });

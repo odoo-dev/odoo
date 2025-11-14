@@ -1,4 +1,4 @@
-import {websiteSlidesQuizNoFullscreen} from "@website_slides/js/slides_course_quiz";
+import { websiteSlidesQuizNoFullscreen } from "@website_slides/js/slides_course_quiz";
 
 websiteSlidesQuizNoFullscreen.include({
     _extractChannelData: function (slideData) {
@@ -8,7 +8,7 @@ websiteSlidesQuizNoFullscreen.include({
             currencyName: slideData.currencyName,
             currencySymbol: slideData.currencySymbol,
             price: slideData.price,
-            hasDiscountedPrice: slideData.hasDiscountedPrice
+            hasDiscountedPrice: slideData.hasDiscountedPrice,
         });
-    }
+    },
 });

@@ -25,7 +25,7 @@ class VerificationCodeWidget extends Component {
         }
         ev.preventDefault();
 
-        const pastedData = ev.clipboardData.getData('text').split('');
+        const pastedData = ev.clipboardData.getData("text").split("");
         const target = ev.target;
         for (let i = target.id; i < this.inputs.length; i++) {
             this.inputs[i].el.value = pastedData.shift() || null;
@@ -44,7 +44,7 @@ class VerificationCodeWidget extends Component {
     }
 
     _save() {
-        let verificationCode = [...this.inputs.map((i) => i.el.value)].join("");
+        const verificationCode = [...this.inputs.map((i) => i.el.value)].join("");
         if (verificationCode.length === 6) {
             this.props.record.update({ verification_code: verificationCode });
         }

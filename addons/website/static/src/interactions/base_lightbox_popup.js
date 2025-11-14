@@ -64,6 +64,4 @@ export class BaseLightbox extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website.base_lightbox", BaseLightbox);
+registry.category("public.interactions").add("website.base_lightbox", BaseLightbox);

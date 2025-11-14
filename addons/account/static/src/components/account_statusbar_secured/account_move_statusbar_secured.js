@@ -6,7 +6,7 @@ export class AccountMoveStatusBarSecuredField extends StatusBarField {
     static template = "account.MoveStatusBarSecuredField";
 
     get isSecured() {
-        return this.props.record.data['secured'];
+        return this.props.record.data["secured"];
     }
 
     get currentItem() {

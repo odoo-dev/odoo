@@ -15,7 +15,9 @@ export class Many2OneAvatarLeaderUserField extends Many2OneAvatarUserField {
             ...super.m2oProps,
             context: {
                 ...super.m2oProps.context,
-                crm_formatted_display_name_team: Number(this.props.record.data[this.props.teamField].id),
+                crm_formatted_display_name_team: Number(
+                    this.props.record.data[this.props.teamField].id
+                ),
             },
         };
     }

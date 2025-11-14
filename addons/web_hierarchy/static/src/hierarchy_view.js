@@ -23,7 +23,7 @@ export const hierarchyView = {
             Model,
             Renderer,
         };
-    }
-}
+    },
+};
 
 registry.category("views").add("hierarchy", hierarchyView);

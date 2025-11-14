@@ -2,7 +2,6 @@ import { useService } from "@web/core/utils/hooks";
 import { SearchModel } from "@web/search/search_model";
 import { debounce } from "@web/core/utils/timing";
 
-
 export class StockOrderpointSearchModel extends SearchModel {
     static DEBOUNCE_DELAY = 500;
 
@@ -26,7 +25,7 @@ export class StockOrderpointSearchModel extends SearchModel {
             context: {
                 ...this.context,
                 force_orderpoint_recompute: true,
-            }
+            },
         });
         await this._fetchSections(this.categories, this.filters);
         this._notify();

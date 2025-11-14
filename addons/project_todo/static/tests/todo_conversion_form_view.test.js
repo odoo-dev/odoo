@@ -46,16 +46,14 @@ beforeEach(() => {
 });
 
 test("Check that todo_conversion_form view focuses on the focus on the first element", async () => {
-    onRpc("/web/action/load", () => {
-        return {
-            type: "ir.actions.act_window",
-            name: "Convert to Task",
-            res_model: "project.task",
-            view_mode: "form",
-            target: "new",
-            views: [[2, "form"]],
-        };
-    });
+    onRpc("/web/action/load", () => ({
+        type: "ir.actions.act_window",
+        name: "Convert to Task",
+        res_model: "project.task",
+        view_mode: "form",
+        target: "new",
+        views: [[2, "form"]],
+    }));
 
     await mountView({
         resModel: "project.task",

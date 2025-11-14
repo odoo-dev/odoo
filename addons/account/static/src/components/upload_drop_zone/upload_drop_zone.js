@@ -26,19 +26,19 @@ export class UploadDropZone extends Component {
     }
 
     onDrop(ev) {
-        const selector = '.document_file_uploader.o_input_file';
+        const selector = ".document_file_uploader.o_input_file";
         // look for the closest uploader Input as it may have a context
-        let uploadInput = ev.target.closest('.o_drop_area').parentElement.querySelector(selector) || document.querySelector(selector);
-        let files = ev.dataTransfer ? ev.dataTransfer.files : false;
+        const uploadInput =
+            ev.target.closest(".o_drop_area").parentElement.querySelector(selector) ||
+            document.querySelector(selector);
+        const files = ev.dataTransfer ? ev.dataTransfer.files : false;
         if (uploadInput && !!files) {
             uploadInput.files = ev.dataTransfer.files;
             uploadInput.dispatchEvent(new Event("change"));
         } else {
-            this.notificationService.add(
-                _t("Could not upload files"),
-                {
-                    type: "danger",
-                });
+            this.notificationService.add(_t("Could not upload files"), {
+                type: "danger",
+            });
         }
         this.props.hideZone();
     }

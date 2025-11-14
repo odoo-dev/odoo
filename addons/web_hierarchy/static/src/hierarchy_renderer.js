@@ -131,7 +131,9 @@ export class HierarchyRenderer extends Component {
                         parentResId = nodes[0].parentResId;
                         if (!nodes.every((node) => node.parentResId === parentResId)) {
                             this.notification.add(
-                                _t("Impossible to update the parent node of the dragged node because no parent has been found."),
+                                _t(
+                                    "Impossible to update the parent node of the dragged node because no parent has been found."
+                                ),
                                 {
                                     type: "danger",
                                 }
@@ -142,6 +144,9 @@ export class HierarchyRenderer extends Component {
                 }
             }
         }
-        await this.props.model.updateParentNode(element.dataset.nodeId, { parentResId, parentNodeId });
+        await this.props.model.updateParentNode(element.dataset.nodeId, {
+            parentResId,
+            parentNodeId,
+        });
     }
 }

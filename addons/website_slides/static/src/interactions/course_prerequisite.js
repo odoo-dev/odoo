@@ -8,12 +8,12 @@ export class CoursePrerequisite extends Interaction {
 
     start() {
         const bsPopover = window.Popover.getOrCreateInstance(this.el, {
-            trigger: 'focus',
-            placement: 'bottom',
-            container: 'body',
+            trigger: "focus",
+            placement: "bottom",
+            container: "body",
             html: true,
-            content: renderToElement('slide.course.prerequisite', {
-                channels: JSON.parse(this.el.dataset.channels)
+            content: renderToElement("slide.course.prerequisite", {
+                channels: JSON.parse(this.el.dataset.channels),
             }),
         });
         this.registerCleanup(() => bsPopover.dispose());

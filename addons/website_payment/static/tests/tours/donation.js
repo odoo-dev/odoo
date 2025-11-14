@@ -128,7 +128,11 @@ registerWebsitePreviewTour(
             trigger: ":iframe .s_donation_donate_btn",
             run: "click",
         },
-        ...changeOptionInPopover("Donation Button", "Custom Amount", "[data-action-param='slider']"),
+        ...changeOptionInPopover(
+            "Donation Button",
+            "Custom Amount",
+            "[data-action-param='slider']"
+        ),
         ...clickOnSave(),
     ]
 );

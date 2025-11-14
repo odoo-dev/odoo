@@ -13,22 +13,22 @@ export class StockKanbanRenderer extends KanbanRenderer {
     // If all Inventory Overview graphs are empty, we use random sample data
     getGroupsOrRecords() {
         const { list } = this.props;
-        let records = [];
+        const records = [];
         if (list instanceof DynamicRecordList) {
             records.push(...list.records);
         } else if (list instanceof DynamicGroupList) {
-            list.groups.forEach(g => {
+            list.groups.forEach((g) => {
                 records.push(...g.list.records);
             });
         }
         // Data type "sample" is assigned in Python to empty graph data
-        let allEmpty = records.every(r => {
-            return r.data.kanban_dashboard_graph.includes('"type": "sample"');
-        });
+        const allEmpty = records.every((r) =>
+            r.data.kanban_dashboard_graph.includes('"type": "sample"')
+        );
         if (allEmpty) {
-            records.forEach(r => {
-                let parsedDashboardData = JSON.parse(r.data.kanban_dashboard_graph);
-                parsedDashboardData[0].values.forEach(d => {
+            records.forEach((r) => {
+                const parsedDashboardData = JSON.parse(r.data.kanban_dashboard_graph);
+                parsedDashboardData[0].values.forEach((d) => {
                     d.value = Math.floor(Math.random() * 9 + 1);
                 });
                 r.data.kanban_dashboard_graph = JSON.stringify(parsedDashboardData);

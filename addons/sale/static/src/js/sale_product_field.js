@@ -18,7 +18,7 @@ import { getLinkedSaleOrderLines, serializeComboItem, getSelectedCustomPtav } fr
 async function applyProduct(record, product) {
     // handle custom values & no variants
     const customAttributesCommands = [
-        x2ManyCommands.set([]),  // Command.clear isn't supported in static_list/_applyCommands
+        x2ManyCommands.set([]), // Command.clear isn't supported in static_list/_applyCommands
     ];
     for (const ptal of product.attribute_lines) {
         const selectedCustomPTAV = getSelectedCustomPtav(ptal);
@@ -46,7 +46,7 @@ async function applyProduct(record, product) {
         product_uom_qty: product.quantity,
         product_no_variant_attribute_value_ids: [x2ManyCommands.set(noVariantPTAVIds)],
         product_custom_attribute_value_ids: customAttributesCommands,
-    }
+    };
     if (product.uom) {
         // only update uom field if uom are enabled (uom_data provided), otherwise we don't have the display_name
         // and the value isn't expected to change anyway.
@@ -70,29 +70,32 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         this.isInternalUpdate = false;
         this.wasCombo = false;
         let isMounted = false;
-        useEffect(value => {
-            if (!isMounted) {
-                isMounted = true;
-            } else if (value && this.isInternalUpdate) {
-                // we don't want to trigger product update when update comes from an external sources,
-                // such as an onchange, or the product configuration dialog itself
-                if (this.wasCombo) {
-                    // If the previously selected product was a combo, delete its selected combo
-                    // items before changing the product.
-                    this.props.record.update({ selected_combo_items: JSON.stringify([]) });
+        useEffect(
+            (value) => {
+                if (!isMounted) {
+                    isMounted = true;
+                } else if (value && this.isInternalUpdate) {
+                    // we don't want to trigger product update when update comes from an external sources,
+                    // such as an onchange, or the product configuration dialog itself
+                    if (this.wasCombo) {
+                        // If the previously selected product was a combo, delete its selected combo
+                        // items before changing the product.
+                        this.props.record.update({ selected_combo_items: JSON.stringify([]) });
+                    }
+                    if (this.relation === "product.template" || this.isCombo) {
+                        this._onProductTemplateUpdate();
+                    } else {
+                        this._onProductUpdate();
+                    }
                 }
-                if (this.relation === "product.template" || this.isCombo) {
-                    this._onProductTemplateUpdate();
-                } else {
-                    this._onProductUpdate();
-                }
-            }
-            this.isInternalUpdate = false;
-        }, () => [this.value && this.value.id]);
+                this.isInternalUpdate = false;
+            },
+            () => [this.value && this.value.id]
+        );
     }
 
     get productName() {
-        if (this.props.name == 'product_template_id') {
+        if (this.props.name == "product_template_id") {
             const product_id_data = this.props.record.data.product_id;
             if (product_id_data && product_id_data.display_name) {
                 return product_id_data.display_name.split("\n")[0];
@@ -116,7 +119,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         return this.props.record.data.is_configurable_product;
     }
     get isCombo() {
-        return this.props.record.data.product_type === 'combo';
+        return this.props.record.data.product_type === "combo";
     }
     get isDownpayment() {
         return this.props.record.data.is_downpayment;
@@ -133,7 +136,10 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         return {
             ...super.sectionAndNoteClasses,
             "text-warning":
-                !this.isSectionOrSubSection && !this.isNote() && !this.productName && !this.isDownpayment,
+                !this.isSectionOrSubSection &&
+                !this.isNote() &&
+                !this.productName &&
+                !this.isDownpayment,
         };
     }
 
@@ -141,7 +147,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         let label = this.props.record.data.name;
         if (this.translatedProductName && label.startsWith(this.translatedProductName)) {
             // Remove the translated name as it is already shown to the salesman on the SOL.
-            label = label.slice(this.translatedProductName.length + 1);  // + "\n"
+            label = label.slice(this.translatedProductName.length + 1); // + "\n"
         } else {
             label = super.label;
         }
@@ -156,7 +162,9 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         if (!this.translatedProductName) {
             return super.parseLabel(value);
         }
-        return value && this.translatedProductName.concat("\n", value) || this.translatedProductName;
+        return (
+            (value && this.translatedProductName.concat("\n", value)) || this.translatedProductName
+        );
     }
 
     get m2oProps() {
@@ -188,8 +196,8 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
 
     async _onProductTemplateUpdate() {
         const result = await this.orm.call(
-            'product.template',
-            'get_single_product_variant',
+            "product.template",
+            "get_single_product_variant",
             [this.props.record.data.product_template_id.id],
             {
                 context: this.context,
@@ -211,7 +219,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
                     this._onProductUpdate();
                 }
             }
-        } else if (!result.mode || result.mode === 'configurator') {
+        } else if (!result.mode || result.mode === "configurator") {
             this._openProductConfigurator();
         } else {
             // only triggered when sale_product_matrix is installed.
@@ -262,13 +270,13 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
                 await Promise.all([
                     // Don't add main product if it's a combo product as it has already been added
                     // from combo configurator
-                    ...(
-                        !selectedComboItems.length ?
-                            [applyProduct(this.props.record, mainProduct)]: []
-                    ),
-                    ...optionalProducts.map(async product => {
+                    ...(!selectedComboItems.length
+                        ? [applyProduct(this.props.record, mainProduct)]
+                        : []),
+                    ...optionalProducts.map(async (product) => {
                         const line = await saleOrderRecord.data.order_line.addNewRecord({
-                            position: 'bottom', mode: 'readonly'
+                            position: "bottom",
+                            mode: "readonly",
                         });
                         await applyProduct(line, product);
                     }),
@@ -290,13 +298,17 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
     async _openComboConfigurator(edit = false, hasOptionalProducts = false) {
         const saleOrder = this.props.record.model.root.data;
         const comboLineRecord = this.props.record;
-        const comboItemLineRecords = getLinkedSaleOrderLines(comboLineRecord).filter(record => !!record.data.combo_item_id);
-        const selectedComboItems = await Promise.all(comboItemLineRecords.map(async record => ({
-            id: record.data.combo_item_id.id,
-            no_variant_ptav_ids: edit ? this._getNoVariantPtavIds(record.data) : [],
-            custom_ptavs: edit ? await this._getCustomPtavs(record.data) : [],
-        })));
-        const { combos, ...remainingData } = await rpc('/sale/combo_configurator/get_data', {
+        const comboItemLineRecords = getLinkedSaleOrderLines(comboLineRecord).filter(
+            (record) => !!record.data.combo_item_id
+        );
+        const selectedComboItems = await Promise.all(
+            comboItemLineRecords.map(async (record) => ({
+                id: record.data.combo_item_id.id,
+                no_variant_ptav_ids: edit ? this._getNoVariantPtavIds(record.data) : [],
+                custom_ptavs: edit ? await this._getCustomPtavs(record.data) : [],
+            }))
+        );
+        const { combos, ...remainingData } = await rpc("/sale/combo_configurator/get_data", {
             product_tmpl_id: comboLineRecord.data.product_template_id.id,
             currency_id: comboLineRecord.data.currency_id.id,
             quantity: comboLineRecord.data.product_uom_qty,
@@ -307,13 +319,13 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
             ...this._getAdditionalRpcParams(),
         });
 
-        const comboChoices = combos.map(combo => new ProductCombo(combo));
+        const comboChoices = combos.map((combo) => new ProductCombo(combo));
         const preselectedComboItems = comboChoices
-            .map(combo => combo.preselectedComboItem)
+            .map((combo) => combo.preselectedComboItem)
             .filter(Boolean);
         if (preselectedComboItems.length === comboChoices.length) {
             return this.handleComboSave(
-                { 'quantity' : remainingData.quantity },
+                { quantity: remainingData.quantity },
                 preselectedComboItems,
                 edit,
                 hasOptionalProducts
@@ -345,9 +357,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         saleOrder.order_line.leaveEditMode();
         const comboLineValues = {
             product_uom_qty: comboProductData.quantity,
-            selected_combo_items: JSON.stringify(
-                selectedComboItems.map(serializeComboItem)
-            ),
+            selected_combo_items: JSON.stringify(selectedComboItems.map(serializeComboItem)),
         };
         if (!edit) {
             comboLineValues.virtual_id = uuid();
@@ -357,9 +367,9 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         await saleOrder.order_line._sort();
 
         if (hasOptionalProducts && !edit) {
-            const selectedComboProducts = selectedComboItems.map(
-                item => ({ name: item.product.display_name })
-            );
+            const selectedComboProducts = selectedComboItems.map((item) => ({
+                name: item.product.display_name,
+            }));
             await this._openProductConfigurator(false, selectedComboProducts);
         }
     }
@@ -415,7 +425,7 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
         const customPtavIds = saleOrderLine.product_custom_attribute_value_ids;
         let customPtavs = [];
         if (customPtavIds.records[0]?.isNew) {
-            customPtavs = customPtavIds.records.map(record => record.data);
+            customPtavs = customPtavIds.records.map((record) => record.data);
         } else if (customPtavIds.currentIds.length) {
             const specification = {
                 custom_product_template_attribute_value_id: {
@@ -424,13 +434,14 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
                 custom_value: {},
             };
             customPtavs = await this.orm.webRead(
-                'product.attribute.custom.value',
+                "product.attribute.custom.value",
                 customPtavIds.currentIds,
-                { specification },
+                { specification }
             );
         }
-        return customPtavs.map(customPtav => ({
-            id: customPtav.custom_product_template_attribute_value_id &&
+        return customPtavs.map((customPtav) => ({
+            id:
+                customPtav.custom_product_template_attribute_value_id &&
                 customPtav.custom_product_template_attribute_value_id.id,
             value: customPtav.custom_value,
         }));
@@ -447,11 +458,11 @@ export const saleOrderLineProductField = {
         };
     },
     fieldDependencies: [
-        { name: 'is_configurable_product', type: 'boolean' },
-        { name: 'product_type', type: 'selection' },
-        { name: 'service_tracking', type: 'selection' },
-        { name: 'product_template_attribute_value_ids', type: 'many2many' },
-        { name: 'translated_product_name', type: 'char' },
+        { name: "is_configurable_product", type: "boolean" },
+        { name: "product_type", type: "selection" },
+        { name: "service_tracking", type: "selection" },
+        { name: "product_template_attribute_value_ids", type: "many2many" },
+        { name: "translated_product_name", type: "char" },
     ],
 };
 

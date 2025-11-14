@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 import { HrPresenceStatus, hrPresenceStatus } from "../hr_presence_status/hr_presence_status";
 
-export class HrPresenceStatusPrivate extends HrPresenceStatus { }
+export class HrPresenceStatusPrivate extends HrPresenceStatus {}
 
 export const hrPresenceStatusPrivate = {
     ...hrPresenceStatus,

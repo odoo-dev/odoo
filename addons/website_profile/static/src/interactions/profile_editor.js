@@ -24,6 +24,4 @@ export class ProfileEditor extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_profile.profile_editor", ProfileEditor);
+registry.category("public.interactions").add("website_profile.profile_editor", ProfileEditor);

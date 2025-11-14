@@ -82,12 +82,14 @@ class QuestionPageOneToManyField extends X2ManyField {
         });
         this._openRecord = async (params) => {
             const { record, name } = this.props;
-            if (!await record.save()) {
+            if (!(await record.save())) {
                 // do not open question form as it won't be savable either.
                 return;
             }
             if (params.record) {
-                params.record = record.data[name].records.find(r => r.resId === params.record.resId);
+                params.record = record.data[name].records.find(
+                    (r) => r.resId === params.record.resId
+                );
             }
             await openRecord(params);
         };
@@ -98,8 +100,7 @@ class QuestionPageOneToManyField extends X2ManyField {
 export const questionPageOneToManyField = {
     ...x2ManyField,
     component: QuestionPageOneToManyField,
-    additionalClasses: [...x2ManyField.additionalClasses || [], "o_field_one2many"],
-    
+    additionalClasses: [...(x2ManyField.additionalClasses || []), "o_field_one2many"],
 };
 
 registry.category("fields").add("question_page_one2many", questionPageOneToManyField);

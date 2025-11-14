@@ -19,7 +19,7 @@ class StockActionField extends Component {
     static components = {
         FloatField,
         MonetaryField,
-    }
+    };
     static template = "stock.actionField";
 
     setup() {
@@ -28,12 +28,12 @@ class StockActionField extends Component {
         this.orm = useService("orm");
         this.fieldType = this.props.record.fields[this.props.name].type;
     }
-    
-    extractProps () {
+
+    extractProps() {
         const keysToRemove = ["actionName", "actionContext"];
         return Object.fromEntries(
-         Object.entries(this.props).filter(([prop]) => !keysToRemove.includes(prop))
-       );
+            Object.entries(this.props).filter(([prop]) => !keysToRemove.includes(prop))
+        );
     }
 
     _onClick(ev) {
@@ -70,13 +70,13 @@ const stockActionField = {
         const action_props = {
             actionName: options.action_name,
             actionContext: context,
-        }
-        let props = {...action_props}
+        };
+        let props = { ...action_props };
         if (fieldType === "monetary") {
             props = { ...action_props, ...monetaryField.extractProps(...args) };
         } else if (fieldType === "float") {
             props = { ...action_props, ...floatField.extractProps(...args) };
-        };
+        }
         return props;
     },
 };

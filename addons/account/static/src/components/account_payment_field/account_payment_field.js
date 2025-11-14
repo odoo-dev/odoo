@@ -39,7 +39,7 @@ export class AccountPaymentField extends Component {
             });
             if (value.date) {
                 // value.date is a string, parse to date and format to the users date format
-                value.formattedDate = formatDate(deserializeDate(value.date))
+                value.formattedDate = formatDate(deserializeDate(value.date));
             }
         }
         return {
@@ -60,18 +60,33 @@ export class AccountPaymentField extends Component {
     }
 
     async assignOutstandingCredit(moveId, id) {
-        await this.orm.call(this.props.record.resModel, 'js_assign_outstanding_line', [moveId, id], {});
+        await this.orm.call(
+            this.props.record.resModel,
+            "js_assign_outstanding_line",
+            [moveId, id],
+            {}
+        );
         await this.props.record.model.root.load();
     }
 
     async removeMoveReconcile(moveId, partialId) {
         this.popover.close();
-        await this.orm.call(this.props.record.resModel, 'js_remove_outstanding_partial', [moveId, partialId], {});
+        await this.orm.call(
+            this.props.record.resModel,
+            "js_remove_outstanding_partial",
+            [moveId, partialId],
+            {}
+        );
         await this.props.record.model.root.load();
     }
 
     async openMove(moveId) {
-        const action = await this.orm.call(this.props.record.resModel, 'action_open_business_doc', [moveId], {});
+        const action = await this.orm.call(
+            this.props.record.resModel,
+            "action_open_business_doc",
+            [moveId],
+            {}
+        );
         this.action.doAction(action);
     }
 }

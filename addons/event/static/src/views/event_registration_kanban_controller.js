@@ -5,9 +5,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 export class EventRegistrationKanbanController extends KanbanController {
-
     setup() {
-        super.setup()
+        super.setup();
         this.dialog = useService("dialog");
         this.orm = useService("orm");
     }
@@ -22,13 +21,10 @@ export class EventRegistrationKanbanController extends KanbanController {
                 event_id: eventId,
             });
 
-            this.dialog.add(
-                EventRegistrationSummaryDialog,
-                {
-                    model: this.model,
-                    registration: result
-                }
-            );
+            this.dialog.add(EventRegistrationSummaryDialog, {
+                model: this.model,
+                registration: result,
+            });
         } else {
             return super.openRecord(record);
         }
@@ -37,7 +33,7 @@ export class EventRegistrationKanbanController extends KanbanController {
 
 export const EventRegistrationKanbanView = {
     ...kanbanView,
-   Controller: EventRegistrationKanbanController,
-}
+    Controller: EventRegistrationKanbanController,
+};
 
 registry.category("views").add("registration_summary_dialog_kanban", EventRegistrationKanbanView);

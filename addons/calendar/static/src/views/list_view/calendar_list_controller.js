@@ -27,7 +27,10 @@ export class CaledarListController extends ListController {
         if (selectedRecords.length == 1 && selectedRecords[0]?.data.recurrency) {
             recurrenceUpdate = await this.askRecurrenceUpdatePolicy();
             if (recurrenceUpdate) {
-                await this.orm.call(this.model.root.resModel, "action_mass_archive", [[selectedRecords[0]?.resId], recurrenceUpdate]);
+                await this.orm.call(this.model.root.resModel, "action_mass_archive", [
+                    [selectedRecords[0]?.resId],
+                    recurrenceUpdate,
+                ]);
                 this.model.load();
             }
         } else {

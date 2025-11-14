@@ -39,7 +39,7 @@ function updatePager(position) {
     } else {
         next = parseInt(pager.querySelector(".o_pager_limit").textContent, 10);
     }
-    let current = parseInt(pager.innerText.split('/')[0], 10);
+    const current = parseInt(pager.innerText.split("/")[0], 10);
     if (current === next) {
         return;
     }
@@ -64,19 +64,18 @@ function updatePager(position) {
 }
 
 export const COMMANDS = {
-    "OCDEDIT": () => clickOnButton(".o_form_button_edit"),
-    "OCDDISC": () => clickOnButton(".o_form_button_cancel"),
-    "OCDSAVE": () => clickOnButton(".o_form_button_save"),
-    "OCDPREV": () => clickOnButton(".o_pager_previous"),
-    "OCDNEXT": () => clickOnButton(".o_pager_next"),
-    "OCDPAGERFIRST": () => updatePager("first"),
-    "OCDPAGERLAST": () => updatePager("last"),
+    OCDEDIT: () => clickOnButton(".o_form_button_edit"),
+    OCDDISC: () => clickOnButton(".o_form_button_cancel"),
+    OCDSAVE: () => clickOnButton(".o_form_button_save"),
+    OCDPREV: () => clickOnButton(".o_pager_previous"),
+    OCDNEXT: () => clickOnButton(".o_pager_next"),
+    OCDPAGERFIRST: () => updatePager("first"),
+    OCDPAGERLAST: () => updatePager("last"),
 };
 
 export const barcodeGenericHandlers = {
     dependencies: ["ui", "barcode", "notification"],
     start(env, { ui, barcode, notification }) {
-
         barcode.bus.addEventListener("barcode_scanned", (ev) => {
             const barcode = ev.detail.barcode;
             if (barcode.startsWith("OBT")) {
@@ -84,11 +83,14 @@ export const barcodeGenericHandlers = {
                 try {
                     // the scanned barcode could be anything, and could crash the queryselectorall
                     // function
-                    targets = getVisibleElements(ui.activeElement, `[barcode_trigger=${barcode.slice(3)}]`);
+                    targets = getVisibleElements(
+                        ui.activeElement,
+                        `[barcode_trigger=${barcode.slice(3)}]`
+                    );
                 } catch {
                     console.warn(`Barcode '${barcode}' is not valid`);
                 }
-                for (let elem of targets) {
+                for (const elem of targets) {
                     elem.click();
                 }
             }
@@ -99,12 +101,12 @@ export const barcodeGenericHandlers = {
                 } else {
                     notification.add(_t("Barcode: %(barcode)s", { barcode }), {
                         title: _t("Unknown barcode command"),
-                        type: "danger"
+                        type: "danger",
                     });
                 }
             }
         });
-    }
+    },
 };
 
 registry.category("services").add("barcode_handlers", barcodeGenericHandlers);

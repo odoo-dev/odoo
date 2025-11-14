@@ -14,7 +14,7 @@ export class AttendanceActionHelper extends Component {
         });
         onWillStart(async () => {
             this.hasAttendanceRight = await user.hasGroup("hr_attendance.group_hr_attendance_user");
-            if (this.hasAttendanceRight){
+            if (this.hasAttendanceRight) {
                 this.state.hasDemoData = await this.orm.call("hr.attendance", "has_demo_data", []);
             }
         });
@@ -27,4 +27,4 @@ export class AttendanceActionHelper extends Component {
     LoadTryKiosk() {
         this.actionService.doAction("hr_attendance.action_try_kiosk");
     }
-};
+}

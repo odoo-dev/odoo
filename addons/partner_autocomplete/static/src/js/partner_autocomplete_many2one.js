@@ -39,12 +39,13 @@ export class PartnerAutoCompleteMany2one extends Component {
                 write: this.props.canWrite,
             },
             isToMany: false,
-            onRecordSaved: (record) => this.props.record.update({
-                [this.props.name]: {
-                    id: record.resId,
-                    display_name: record.data.display_name || record.data.name,
-                },
-            }),
+            onRecordSaved: (record) =>
+                this.props.record.update({
+                    [this.props.name]: {
+                        id: record.resId,
+                        display_name: record.data.display_name || record.data.name,
+                    },
+                }),
             onRecordDiscarded: () => this.props.record.update(false),
             fieldString: this.props.string || this.props.record.fields[this.props.name].string,
         });
@@ -70,18 +71,20 @@ export class PartnerAutoCompleteMany2one extends Component {
                 options: async (request, shouldSearchWorldWide) => {
                     if (this.validateSearchTerm(request)) {
                         let queryCountryId = false;
-                    	if (shouldSearchWorldWide){
-							queryCountryId = 0;
-						}
-                        const suggestions = await this.partnerAutocomplete.autocomplete(request, queryCountryId);
+                        if (shouldSearchWorldWide) {
+                            queryCountryId = 0;
+                        }
+                        const suggestions = await this.partnerAutocomplete.autocomplete(
+                            request,
+                            queryCountryId
+                        );
                         return suggestions.map((suggestion) => ({
                             cssClass: "partner_autocomplete_dropdown_many2one",
                             data: suggestion,
                             label: suggestion.name,
                             onSelect: () => this.onSelectPartnerAutocompleteOption(suggestion),
                         }));
-                    }
-                    else {
+                    } else {
                         return [];
                     }
                 },
@@ -93,15 +96,15 @@ export class PartnerAutoCompleteMany2one extends Component {
 
     async onSelectPartnerAutocompleteOption(option) {
         const data = await this.partnerAutocomplete.getCreateData(option);
-		if (!data?.company) {
-			return;
-		}
-        let context = {
-            'default_is_company': true
+        if (!data?.company) {
+            return;
+        }
+        const context = {
+            default_is_company: true,
         };
 
         for (const [key, val] of Object.entries(data.company)) {
-            context['default_' + key] = val && val.id ? val.id : val;
+            context["default_" + key] = val && val.id ? val.id : val;
         }
 
         if (data.logo) {
@@ -109,8 +112,12 @@ export class PartnerAutoCompleteMany2one extends Component {
         }
 
         const unspsc_codes = data.company.unspsc_codes;
-        if(unspsc_codes){
-            context.default_category_id = await this.orm.call("res.partner", "iap_partner_autocomplete_get_tag_ids", [[], unspsc_codes]);
+        if (unspsc_codes) {
+            context.default_category_id = await this.orm.call(
+                "res.partner",
+                "iap_partner_autocomplete_get_tag_ids",
+                [[], unspsc_codes]
+            );
         }
 
         return this.openRecord({ context });

@@ -17,12 +17,7 @@ patch(MegaMenuOptionPlugin.prototype, {
 
 class WebsiteSaleMegaMenuOptionPlugin extends Plugin {
     static id = "websiteSaleMegaMenuOptionPlugin";
-    static dependencies = [
-        "builderOptions",
-        "customizeWebsite",
-        "history",
-        "megaMenuOptionPlugin",
-    ];
+    static dependencies = ["builderOptions", "customizeWebsite", "history", "megaMenuOptionPlugin"];
     resources = {
         builder_actions: {
             ToggleFetchEcomCategoriesAction,

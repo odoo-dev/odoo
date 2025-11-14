@@ -22,7 +22,7 @@ class AccountOnboardingWidget extends Component {
         const action = await this.orm.call("onboarding.onboarding.step", step.action, [], {
             context: {
                 journal_id: this.props.record.resId,
-            }
+            },
         });
         this.action.doAction(action);
     }
@@ -30,6 +30,6 @@ class AccountOnboardingWidget extends Component {
 
 export const accountOnboarding = {
     component: AccountOnboardingWidget,
-}
+};
 
 registry.category("view_widgets").add("account_onboarding", accountOnboarding);

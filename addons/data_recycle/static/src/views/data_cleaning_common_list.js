@@ -1,9 +1,7 @@
 import { ListController } from "@web/views/list/list_controller";
 import { useService } from "@web/core/utils/hooks";
 
-
 export class DataCleaningCommonListController extends ListController {
-
     setup() {
         super.setup();
         this.orm = useService("orm");
@@ -17,14 +15,14 @@ export class DataCleaningCommonListController extends ListController {
      */
     openRecord(record) {
         this.actionService.doAction({
-            type: 'ir.actions.act_window',
-            views: [[false, 'form']],
+            type: "ir.actions.act_window",
+            views: [[false, "form"]],
             res_model: record.data.res_model_name,
             res_id: record.data.res_id,
             context: {
                 create: false,
-                edit: false
-            }
+                edit: false,
+            },
         });
     }
 
@@ -34,4 +32,4 @@ export class DataCleaningCommonListController extends ListController {
     onUnselectClick() {
         this.discardSelection();
     }
-};
+}

@@ -16,5 +16,5 @@ class SectionOneToManyField extends X2ManyField {
 registry.category("fields").add("section_one2many", {
     ...x2ManyField,
     component: SectionOneToManyField,
-    additionalClasses: [...x2ManyField.additionalClasses || [], "o_field_one2many"],
+    additionalClasses: [...(x2ManyField.additionalClasses || []), "o_field_one2many"],
 });

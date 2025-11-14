@@ -1,15 +1,14 @@
-import { registry } from '@web/core/registry';
+import { registry } from "@web/core/registry";
 
-import { listView } from '@web/views/list/list_view';
-import { ListRenderer } from '@web/views/list/list_renderer';
-import { ListController } from '@web/views/list/list_controller';
+import { listView } from "@web/views/list/list_view";
+import { ListRenderer } from "@web/views/list/list_renderer";
+import { ListController } from "@web/views/list/list_controller";
 
-import { LunchDashboard } from '../components/lunch_dashboard';
-import { LunchRendererMixin } from '../mixins/lunch_renderer_mixin';
+import { LunchDashboard } from "../components/lunch_dashboard";
+import { LunchRendererMixin } from "../mixins/lunch_renderer_mixin";
 
-import { LunchSearchModel } from './search_model';
-import { LunchSearchPanel } from './search_panel';
-
+import { LunchSearchModel } from "./search_model";
+import { LunchSearchPanel } from "./search_panel";
 
 export class LunchListRenderer extends LunchRendererMixin(ListRenderer) {
     static template = "lunch.ListRenderer";
@@ -40,7 +39,7 @@ class LunchListController extends ListController {
     }
 }
 
-registry.category('views').add('lunch_list', {
+registry.category("views").add("lunch_list", {
     ...listView,
     Controller: LunchListController,
     Renderer: LunchListRenderer,

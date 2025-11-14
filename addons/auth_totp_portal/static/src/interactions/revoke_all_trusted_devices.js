@@ -11,11 +11,15 @@ export class RevokeAllTrustedDevices extends Interaction {
     };
 
     async onClick() {
-        await this.waitFor(handleCheckIdentity(
-            this.waitFor(this.services.orm.call("res.users", "revoke_all_devices", [user.userId])),
-            this.services.orm,
-            this.services.dialog,
-        ));
+        await this.waitFor(
+            handleCheckIdentity(
+                this.waitFor(
+                    this.services.orm.call("res.users", "revoke_all_devices", [user.userId])
+                ),
+                this.services.orm,
+                this.services.dialog
+            )
+        );
         location.reload();
     }
 }

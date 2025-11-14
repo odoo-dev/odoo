@@ -107,9 +107,7 @@ test("Right side panel will be not rendered if settings are turned off but does 
 });
 
 test("Right side panel will be rendered if both setting is turned on and does have data", async () => {
-    onRpc(() => {
-        return { ...FAKE_DATA };
-    });
+    onRpc(() => ({ ...FAKE_DATA }));
 
     await mountWithCleanup(ProjectRightSidePanel, {
         props: {

@@ -55,11 +55,9 @@ export class BomOverviewLine extends Component {
     }
 
     async goToForecast() {
-        const action = await this.ormService.call(
-            this.data.link_model,
-            this.forecastAction,
-            [[this.data.link_id]],
-        );
+        const action = await this.ormService.call(this.data.link_model, this.forecastAction, [
+            [this.data.link_id],
+        ]);
         action.context = {
             active_model: this.data.link_model,
             active_id: this.data.link_id,
@@ -75,17 +73,29 @@ export class BomOverviewLine extends Component {
             name: _t("Attachments"),
             type: "ir.actions.act_window",
             res_model: "product.document",
-            domain: ['&', ["attached_on_mrp", "=", "bom"], '|',
-                '&',["res_model", "=", "product.product"],["res_id", "in", [this.data.product_id]],
-                '&',["res_model", "=", "product.template"],["res_id", "in", [this.data.product_template_id]]],
-            views: [[false, "kanban"], [false, "list"], [false, "form"]],
+            domain: [
+                "&",
+                ["attached_on_mrp", "=", "bom"],
+                "|",
+                "&",
+                ["res_model", "=", "product.product"],
+                ["res_id", "in", [this.data.product_id]],
+                "&",
+                ["res_model", "=", "product.template"],
+                ["res_id", "in", [this.data.product_template_id]],
+            ],
+            views: [
+                [false, "kanban"],
+                [false, "list"],
+                [false, "form"],
+            ],
             view_mode: "kanban,list,form",
             target: "current",
-            context:{
-                'bom_id': true,
-                'default_res_id': this.data.product_id,
-                'default_res_model': "product.product"
-            }
+            context: {
+                bom_id: true,
+                default_res_id: this.data.product_id,
+                default_res_model: "product.product",
+            },
         });
     }
 
@@ -112,11 +122,15 @@ export class BomOverviewLine extends Component {
     }
 
     get hasQuantity() {
-        return this.data.is_storable && this.data.hasOwnProperty('quantity_available') && this.data.quantity_available !== false;
+        return (
+            this.data.is_storable &&
+            this.data.hasOwnProperty("quantity_available") &&
+            this.data.quantity_available !== false
+        );
     }
 
     get hasLeadTime() {
-        return this.data.hasOwnProperty('lead_time') && this.data.lead_time !== false;
+        return this.data.hasOwnProperty("lead_time") && this.data.lead_time !== false;
     }
 
     get hasFoldButton() {
@@ -141,8 +155,8 @@ export class BomOverviewLine extends Component {
 
     get availabilityColorClass() {
         // For first line, another rule applies : green if doable now, red otherwise.
-        if (this.data.hasOwnProperty('components_available')) {
-            if (this.data.components_available && this.data.availability_state != 'unavailable') {
+        if (this.data.hasOwnProperty("components_available")) {
+            if (this.data.components_available && this.data.availability_state != "unavailable") {
                 return "text-success";
             } else {
                 return "text-danger";
@@ -170,7 +184,7 @@ export class BomOverviewLine extends Component {
     }
 
     get statusBackgroundClass() {
-        if(this.data.index == "0") {
+        if (this.data.index == "0") {
             return "text-bg-info";
         }
         return "text-bg-danger";

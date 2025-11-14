@@ -21,8 +21,12 @@ export class TimeOffCalendarSidePanel extends CalendarSidePanel {
             if (isSameDay) {
                 return start.toLocaleString({ month: s, day: n, year: n });
             }
-            return start.toLocaleString({ month: s, day: n, year: n }) + " - " + end.toLocaleString({ month: s, day: n, year: n });
-        };;
+            return (
+                start.toLocaleString({ month: s, day: n, year: n }) +
+                " - " +
+                end.toLocaleString({ month: s, day: n, year: n })
+            );
+        };
         this.leaveState = useState({
             mandatoryDays: [],
             bankHolidays: [],
@@ -44,7 +48,6 @@ export class TimeOffCalendarSidePanel extends CalendarSidePanel {
             await this.updateSpecialDays();
             await this.loadHolidayData();
         });
-        
     }
 
     fetchSpecialDays(start, end) {
@@ -66,18 +69,15 @@ export class TimeOffCalendarSidePanel extends CalendarSidePanel {
             return;
         }
         const promises = [];
-        for (const section of this.props.model.filterSections){
-
+        for (const section of this.props.model.filterSections) {
             if (section.fieldName !== "holiday_status_id") {
                 continue;
             }
-            promises.push(
-                this.orm.call("hr.leave.type", "get_allocation_data_request", [])
-            );
+            promises.push(this.orm.call("hr.leave.type", "get_allocation_data_request", []));
         }
         const filterData = {};
-        const [data,] = await Promise.all(promises);
-        if(!data){
+        const [data] = await Promise.all(promises);
+        if (!data) {
             return;
         }
         data.forEach((leave) => {

@@ -7,11 +7,11 @@ export class MailGroupMessage extends Interaction {
     static selector = ".o_mg_message";
     dynamicContent = {
         ".o_mg_link_hide": {
-            "t-on-click.prevent.stop": () => this.isShown = false,
+            "t-on-click.prevent.stop": () => (this.isShown = false),
             "t-att-class": () => ({ "d-none": !this.isShown }),
         },
         ".o_mg_link_show": {
-            "t-on-click.prevent.stop": () => this.isShown = true,
+            "t-on-click.prevent.stop": () => (this.isShown = true),
             "t-att-class": () => ({ "d-none": this.isShown }),
         },
         ".o_mg_link_content": { "t-att-class": () => ({ "d-none": this.isShown }) },
@@ -24,12 +24,14 @@ export class MailGroupMessage extends Interaction {
         // By default hide the mention of the previous email for which we reply
         // And add a button "Read more" to show the mention of the parent email
         const quoted = this.el.querySelectorAll(".card-body *[data-o-mail-quote]");
-        if (quoted.length > 0)  {
+        if (quoted.length > 0) {
             const readMore = document.createElement("button");
             readMore.classList.add("btn", "btn-light", "btn-sm", "ms-1");
             readMore.innerText = ". . .";
             quoted[0].before(readMore);
-            readMore.addEventListener("click", () => quoted.forEach((node) => node.classList.toggle("visible")));
+            readMore.addEventListener("click", () =>
+                quoted.forEach((node) => node.classList.toggle("visible"))
+            );
         }
     }
 
@@ -37,15 +39,21 @@ export class MailGroupMessage extends Interaction {
      * @param {MouseEvent} ev
      */
     async onReadMoreClick(ev) {
-        const data = await this.waitFor(rpc(ev.target.getAttribute("href"), {
-            last_displayed_id: ev.target.dataset.listDisplayedId,
-        }));
+        const data = await this.waitFor(
+            rpc(ev.target.getAttribute("href"), {
+                last_displayed_id: ev.target.dataset.listDisplayedId,
+            })
+        );
         if (data) {
-            const threadContainer = ev.target.closest(".o_mg_replies")?.querySelector("ul.list-unstyled");
+            const threadContainer = ev.target
+                .closest(".o_mg_replies")
+                ?.querySelector("ul.list-unstyled");
             if (threadContainer) {
                 const messages = threadContainer.querySelectorAll(":scope > li.media");
                 let lastMessage = messages[messages.length - 1];
-                const newMessages = data.querySelector("ul.list-unstyled").querySelectorAll(":scope > li.media");
+                const newMessages = data
+                    .querySelector("ul.list-unstyled")
+                    .querySelectorAll(":scope > li.media");
                 for (const newMessage in newMessages) {
                     this.insert(newMessage, lastMessage, "afterend");
                     lastMessage = newMessage;
@@ -57,6 +65,4 @@ export class MailGroupMessage extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("mail_group.mail_group_message", MailGroupMessage);
+registry.category("public.interactions").add("mail_group.mail_group_message", MailGroupMessage);

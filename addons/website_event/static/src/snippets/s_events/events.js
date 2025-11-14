@@ -15,22 +15,19 @@ export class Events extends DynamicSnippet {
         let searchDomain = super.getSearchDomain(...arguments);
         const filterByTagIds = this.el.dataset.filterByTagIds;
         if (filterByTagIds) {
-            let tagGroupedByCategory = groupBy(JSON.parse(filterByTagIds), "category_id");
+            const tagGroupedByCategory = groupBy(JSON.parse(filterByTagIds), "category_id");
             for (const category in tagGroupedByCategory) {
-                searchDomain = searchDomain.concat(
-                    [["tag_ids", "in", tagGroupedByCategory[category].map(e => e.id)]]);
+                searchDomain = searchDomain.concat([
+                    ["tag_ids", "in", tagGroupedByCategory[category].map((e) => e.id)],
+                ]);
             }
         }
         return searchDomain;
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_event.events", Events);
+registry.category("public.interactions").add("website_event.events", Events);
 
-registry
-    .category("public.interactions.edit")
-    .add("website_event.events", {
-        Interaction: Events,
-    });
+registry.category("public.interactions.edit").add("website_event.events", {
+    Interaction: Events,
+});

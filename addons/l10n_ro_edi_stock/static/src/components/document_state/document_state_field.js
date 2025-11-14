@@ -6,7 +6,7 @@ import { DocumentState } from "@account/components/document_state/document_state
 export class RoDocumentState extends DocumentState {
     // Override
     get message() {
-        let errors = this.props.record.data.message
+        const errors = this.props.record.data.message
             ?.split("\n")
             ?.filter((error) => error?.trim()?.length > 0);
 

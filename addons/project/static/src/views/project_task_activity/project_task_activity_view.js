@@ -8,6 +8,6 @@ export const projectTaskActivityView = {
     ...activityView,
     ControlPanel: ProjectTaskControlPanel,
     Model: ProjectTaskActivityModel,
-}
+};
 
 registry.category("views").add("project_task_activity", projectTaskActivityView);

@@ -6,11 +6,11 @@ import { BurndownChartSearchModel } from "./burndown_chart_search_model";
 const viewRegistry = registry.category("views");
 
 const burndownChartGraphView = {
-  ...graphView,
-  buttonTemplate: "project.BurndownChartView.Buttons",
-  hideCustomGroupBy: true,
-  Model: BurndownChartModel,
-  SearchModel: BurndownChartSearchModel,
+    ...graphView,
+    buttonTemplate: "project.BurndownChartView.Buttons",
+    hideCustomGroupBy: true,
+    Model: BurndownChartModel,
+    SearchModel: BurndownChartSearchModel,
 };
 
 viewRegistry.add("burndown_chart", burndownChartGraphView);

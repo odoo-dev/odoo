@@ -106,5 +106,4 @@ test("Check placeholder string when no so_line linked", async () => {
     expect(".o_field_so_line_field.o_field_empty").toHaveText("Non-billable", {
         message: "Should display 'Non-billable' as placeholder for empty so_line field.",
     });
-
 });

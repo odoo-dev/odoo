@@ -26,12 +26,17 @@ export class FormattedDate extends Component {
         const colors = Object.keys(this.props.color);
         if (colors) {
             for (const colorName of colors) {
-                if (evaluateBooleanExpr(`${this.props.color[colorName]}`, this.props.record.evalContextWithVirtualIds)) {
+                if (
+                    evaluateBooleanExpr(
+                        `${this.props.color[colorName]}`,
+                        this.props.record.evalContextWithVirtualIds
+                    )
+                ) {
                     return "text-" + colorName;
                 }
             }
         }
-        return ""
+        return "";
     }
 }
 
@@ -43,7 +48,6 @@ export const formattedDate = {
             name: "day_format",
             type: "string",
             default: "numeric",
-
         },
         {
             label: _t("Month Format"),

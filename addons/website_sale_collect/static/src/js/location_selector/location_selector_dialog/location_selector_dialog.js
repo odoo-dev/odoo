@@ -1,9 +1,7 @@
-import { rpc } from '@web/core/network/rpc';
-import { patch } from '@web/core/utils/patch';
+import { rpc } from "@web/core/network/rpc";
+import { patch } from "@web/core/utils/patch";
 
-import {
-    LocationSelectorDialog
-} from '@delivery/js/location_selector/location_selector_dialog/location_selector_dialog';
+import { LocationSelectorDialog } from "@delivery/js/location_selector/location_selector_dialog/location_selector_dialog";
 
 patch(LocationSelectorDialog, {
     props: {
@@ -15,13 +13,13 @@ patch(LocationSelectorDialog, {
 
 patch(LocationSelectorDialog.prototype, {
     async _getLocations(zip) {
-         if (this.props.isProductPage) {
-             return await rpc(
-                 this.getLocationUrl, {zip_code: zip, product_id: this.props.productId}
-             );
-         }
-        else {
+        if (this.props.isProductPage) {
+            return await rpc(this.getLocationUrl, {
+                zip_code: zip,
+                product_id: this.props.productId,
+            });
+        } else {
             return await super._getLocations(...arguments);
-         }
+        }
     },
 });

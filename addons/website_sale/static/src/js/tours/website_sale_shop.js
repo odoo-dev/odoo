@@ -3,14 +3,14 @@ import {
     goBackToBlocks,
     insertSnippet,
     registerWebsitePreviewTour,
-} from '@website/js/tours/tour_utils';
+} from "@website/js/tours/tour_utils";
 
 import { markup } from "@odoo/owl";
 
 registerWebsitePreviewTour(
     "website_sale.onboarding_tour",
     {
-        url: '/shop',
+        url: "/shop",
     },
     () => [
         {
@@ -24,7 +24,11 @@ registerWebsitePreviewTour(
         },
         {
             trigger: "button[data-module-xml-id='base.module_website_sale']",
-            content: markup(_t("Select <b>New Product</b> to create it and manage its properties to boost your sales.")),
+            content: markup(
+                _t(
+                    "Select <b>New Product</b> to create it and manage its properties to boost your sales."
+                )
+            ),
             tooltipPosition: "bottom",
             run: "click",
         },
@@ -102,10 +106,13 @@ registerWebsitePreviewTour(
             run: "click",
         },
         {
-            trigger: "a[data-menu-xmlid='website.menu_website_dashboard'], a[data-menu-xmlid='website.menu_website_analytics']",
-            content: _t("Let's now take a look at your eCommerce dashboard to get your eCommerce website ready in no time."),
+            trigger:
+                "a[data-menu-xmlid='website.menu_website_dashboard'], a[data-menu-xmlid='website.menu_website_analytics']",
+            content: _t(
+                "Let's now take a look at your eCommerce dashboard to get your eCommerce website ready in no time."
+            ),
             tooltipPosition: "bottom",
             // Just check during test mode. Otherwise, clicking it will result to random error on loading the Chart.js script.
-        }
+        },
     ]
 );

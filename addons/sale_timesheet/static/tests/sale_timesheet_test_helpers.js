@@ -1,5 +1,9 @@
 import { mailModels } from "@mail/../tests/mail_test_helpers";
-import { ProductProduct, SaleOrder, SaleOrderLine } from "@sale_project/../tests/project_task_model";
+import {
+    ProductProduct,
+    SaleOrder,
+    SaleOrderLine,
+} from "@sale_project/../tests/project_task_model";
 import { defineModels, fields, models } from "@web/../tests/web_test_helpers";
 
 export class HrEmployee extends models.Model {

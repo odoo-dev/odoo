@@ -15,7 +15,7 @@ patch(AttendeeCalendarModel.prototype, {
         this.state = useState({
             microsoftIsSync: true,
             microsoftIsPaused: false,
-        })
+        });
     },
 
     /**
@@ -27,8 +27,8 @@ patch(AttendeeCalendarModel.prototype, {
         }
         try {
             await Promise.race([
-                new Promise(resolve => setTimeout(resolve, 1000)),
-                this.syncMicrosoftCalendar(true)
+                new Promise((resolve) => setTimeout(resolve, 1000)),
+                this.syncMicrosoftCalendar(true),
             ]);
         } catch (error) {
             if (error.event) {
@@ -49,15 +49,22 @@ patch(AttendeeCalendarModel.prototype, {
             "/microsoft_calendar/sync_data",
             {
                 model: this.resModel,
-                fromurl: window.location.href
+                fromurl: window.location.href,
             },
             {
                 silent,
-            },
+            }
         );
-        if (["need_config_from_admin", "need_auth", "sync_stopped", "sync_paused"].includes(result.status)) {
+        if (
+            ["need_config_from_admin", "need_auth", "sync_stopped", "sync_paused"].includes(
+                result.status
+            )
+        ) {
             this.state.microsoftIsSync = false;
-        } else if (result.status === "no_new_event_from_microsoft" || result.status === "need_refresh") {
+        } else if (
+            result.status === "no_new_event_from_microsoft" ||
+            result.status === "need_refresh"
+        ) {
             this.state.microsoftIsSync = true;
         }
         this.state.microsoftIsPaused = result.status == "sync_paused";
@@ -66,6 +73,6 @@ patch(AttendeeCalendarModel.prototype, {
     },
 
     get microsoftCredentialsSet() {
-        return this.credentialStatus['microsoft_calendar'] ?? false;
-    }
+        return this.credentialStatus["microsoft_calendar"] ?? false;
+    },
 });

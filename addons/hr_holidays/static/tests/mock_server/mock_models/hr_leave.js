@@ -8,7 +8,7 @@ export class HrLeave extends models.Model {
         relation: "hr.employee",
     });
     user_id = fields.Many2one({
-        relation: "res.users"
+        relation: "res.users",
     });
     department_id = fields.Many2one({
         relation: "hr.department",

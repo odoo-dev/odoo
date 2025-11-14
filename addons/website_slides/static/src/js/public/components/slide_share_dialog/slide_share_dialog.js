@@ -35,7 +35,10 @@ export class SlideShareDialog extends Component {
 
     onPageChange(event) {
         const page = event.currentTarget.value;
-        const newEmbedCodeValue = this.codeInput.el.value.replace(/(page=).*?([^\d]+)/, "$1" + page + "$2");
+        const newEmbedCodeValue = this.codeInput.el.value.replace(
+            /(page=).*?([^\d]+)/,
+            "$1" + page + "$2"
+        );
         this.codeInput.el.value = newEmbedCodeValue;
     }
 }

@@ -34,21 +34,21 @@ export class TestsSharedJsPython extends Component {
                     params.taxes,
                     params.price_unit,
                     params.quantity,
-                    kwargs,
-                )
+                    kwargs
+                ),
             };
             if (params.rounding_method === "round_globally") {
                 results.total_excluded_results = accountTaxHelpers.get_tax_details(
                     params.taxes,
                     results.results.total_excluded / params.quantity,
                     params.quantity,
-                    {...kwargs, special_mode: "total_excluded"}
+                    { ...kwargs, special_mode: "total_excluded" }
                 );
                 results.total_included_results = accountTaxHelpers.get_tax_details(
                     params.taxes,
                     results.results.total_included / params.quantity,
                     params.quantity,
-                    {...kwargs, special_mode: "total_included"}
+                    { ...kwargs, special_mode: "total_included" }
                 );
             }
             return results;
@@ -60,8 +60,8 @@ export class TestsSharedJsPython extends Component {
                     params.product,
                     params.original_taxes,
                     params.new_taxes
-                )
-            }
+                ),
+            };
         }
         if (params.test === "tax_totals_summary") {
             const document = this.populateDocument(params.document);
@@ -69,9 +69,9 @@ export class TestsSharedJsPython extends Component {
                 document.lines,
                 document.currency,
                 document.company,
-                {cash_rounding: document.cash_rounding}
+                { cash_rounding: document.cash_rounding }
             );
-            return {tax_totals: taxTotals, soft_checking: params.soft_checking};
+            return { tax_totals: taxTotals, soft_checking: params.soft_checking };
         }
         if (params.test === "global_discount") {
             const document = this.populateDocument(params.document);
@@ -80,7 +80,7 @@ export class TestsSharedJsPython extends Component {
                 document.company,
                 params.amount_type,
                 params.amount,
-                "global_discount",
+                "global_discount"
             );
             document.lines.push(...baseLines);
             accountTaxHelpers.add_tax_details_in_base_lines(document.lines, document.company);
@@ -89,9 +89,9 @@ export class TestsSharedJsPython extends Component {
                 document.lines,
                 document.currency,
                 document.company,
-                {cash_rounding: document.cash_rounding}
+                { cash_rounding: document.cash_rounding }
             );
-            return {tax_totals: taxTotals, soft_checking: params.soft_checking};
+            return { tax_totals: taxTotals, soft_checking: params.soft_checking };
         }
         if (params.test === "down_payment") {
             const document = this.populateDocument(params.document);
@@ -100,7 +100,7 @@ export class TestsSharedJsPython extends Component {
                 document.company,
                 params.amount_type,
                 params.amount,
-                "down_payment",
+                "down_payment"
             );
             document.lines = baseLines;
             accountTaxHelpers.add_tax_details_in_base_lines(document.lines, document.company);
@@ -109,21 +109,21 @@ export class TestsSharedJsPython extends Component {
                 document.lines,
                 document.currency,
                 document.company,
-                {cash_rounding: document.cash_rounding}
+                { cash_rounding: document.cash_rounding }
             );
-            return {tax_totals: taxTotals, soft_checking: params.soft_checking};
+            return { tax_totals: taxTotals, soft_checking: params.soft_checking };
         }
         if (params.test === "base_lines_tax_details") {
             const document = this.populateDocument(params.document);
             return {
-                base_lines_tax_details: document.lines.map(line => ({
+                base_lines_tax_details: document.lines.map((line) => ({
                     total_excluded_currency: line.tax_details.total_excluded_currency,
                     total_excluded: line.tax_details.total_excluded,
                     total_included_currency: line.tax_details.total_included_currency,
                     total_included: line.tax_details.total_included,
                     delta_total_excluded_currency: line.tax_details.delta_total_excluded_currency,
                     delta_total_excluded: line.tax_details.delta_total_excluded,
-                    taxes_data: line.tax_details.taxes_data.map(tax_data => ({
+                    taxes_data: line.tax_details.taxes_data.map((tax_data) => ({
                         tax_id: tax_data.tax.id,
                         tax_amount_currency: tax_data.tax_amount_currency,
                         tax_amount: tax_data.tax_amount,
@@ -143,13 +143,15 @@ export class TestsSharedJsPython extends Component {
     }
 
     populateDocument(document) {
-        const base_lines = document.lines.map(line => accountTaxHelpers.prepare_base_line_for_taxes_computation(null, line));
+        const base_lines = document.lines.map((line) =>
+            accountTaxHelpers.prepare_base_line_for_taxes_computation(null, line)
+        );
         accountTaxHelpers.add_tax_details_in_base_lines(base_lines, document.company);
         accountTaxHelpers.round_base_lines_tax_details(base_lines, document.company);
         return {
             ...document,
             lines: base_lines,
-        }
+        };
     }
 }
 

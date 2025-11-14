@@ -25,4 +25,3 @@ test("LazyComponent loads the required bundle", async () => {
         "rgb(165, 94, 117)"
     );
 });
-

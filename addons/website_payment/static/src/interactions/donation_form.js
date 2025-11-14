@@ -25,8 +25,8 @@ export class DonationForm extends Interaction {
      */
     onDonationCommentChange(ev, currentTargetEl) {
         const checked = currentTargetEl.checked;
-        const donationCommentEl = this.el.querySelector('#donation_comment');
-        donationCommentEl.classList.toggle('d-none', !checked);
+        const donationCommentEl = this.el.querySelector("#donation_comment");
+        donationCommentEl.classList.toggle("d-none", !checked);
         if (!checked) {
             donationCommentEl.value = "";
         }
@@ -63,6 +63,4 @@ export class DonationForm extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_payment.donation_form", DonationForm);
+registry.category("public.interactions").add("website_payment.donation_form", DonationForm);

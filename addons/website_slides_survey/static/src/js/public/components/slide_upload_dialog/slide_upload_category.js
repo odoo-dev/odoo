@@ -15,9 +15,10 @@ patch(SlideUploadCategory.prototype, {
                 fields: ["title"],
             });
 
-            this.state.choices.certifications = results.read_results.map((certification) => {
-                return { value: certification.id, label: certification.title };
-            });
+            this.state.choices.certifications = results.read_results.map((certification) => ({
+                value: certification.id,
+                label: certification.title,
+            }));
         });
     },
 

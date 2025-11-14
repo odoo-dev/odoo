@@ -43,7 +43,7 @@ export class MoOverview extends Component {
         const reportValues = await this.ormService.call(
             "report.mrp.report_mo_overview",
             "get_report_values",
-            [this.activeId],
+            [this.activeId]
         );
         this.state.data = reportValues.data;
         if (this.isProductionStarted) {
@@ -79,7 +79,7 @@ export class MoOverview extends Component {
     onChangeFolded(foldInfo) {
         const { indexes, isFolded } = foldInfo;
         const operation = isFolded ? "delete" : "add";
-        indexes.forEach(index => this.unfoldedIds[operation](index));
+        indexes.forEach((index) => this.unfoldedIds[operation](index));
     }
 
     async onPrint() {
@@ -92,7 +92,7 @@ export class MoOverview extends Component {
     }
 
     onUnfold() {
-        this.env.overviewBus.trigger("unfold-all")
+        this.env.overviewBus.trigger("unfold-all");
     }
 
     //---- Helpers ----
@@ -181,25 +181,37 @@ export class MoOverview extends Component {
     }
 
     get totalColspan() {
-        let colspan = 2;  // Name & Quantity
-        if (this.showReplenishments) colspan++;
-        if (this.showAvailabilities) colspan += 2;  // Free to use / On Hand & Reserved
-        if (this.showUom) colspan++;
-        if (this.showReceipts) colspan++;
-        if (this.showUnitCosts) colspan++;
+        let colspan = 2; // Name & Quantity
+        if (this.showReplenishments) {
+            colspan++;
+        }
+        if (this.showAvailabilities) {
+            colspan += 2;
+        } // Free to use / On Hand & Reserved
+        if (this.showUom) {
+            colspan++;
+        }
+        if (this.showReceipts) {
+            colspan++;
+        }
+        if (this.showUnitCosts) {
+            colspan++;
+        }
         return colspan;
     }
 
     get reportName() {
-        return `mrp.report_mo_overview?docids=${this.activeId}`
-            + `&replenishments=${+this.state.showOptions.replenishments}`
-            + `&availabilities=${+this.state.showOptions.availabilities}`
-            + `&receipts=${+this.state.showOptions.receipts}`
-            + `&unitCosts=${+this.state.showOptions.unitCosts}`
-            + `&moCosts=${+this.state.showOptions.moCosts}`
-            + `&bomCosts=${+this.state.showOptions.bomCosts}`
-            + `&realCosts=${+this.state.showOptions.realCosts}`
-            + `&unfoldedIds=${JSON.stringify(Array.from(this.unfoldedIds))}`;
+        return (
+            `mrp.report_mo_overview?docids=${this.activeId}` +
+            `&replenishments=${+this.state.showOptions.replenishments}` +
+            `&availabilities=${+this.state.showOptions.availabilities}` +
+            `&receipts=${+this.state.showOptions.receipts}` +
+            `&unitCosts=${+this.state.showOptions.unitCosts}` +
+            `&moCosts=${+this.state.showOptions.moCosts}` +
+            `&bomCosts=${+this.state.showOptions.bomCosts}` +
+            `&realCosts=${+this.state.showOptions.realCosts}` +
+            `&unfoldedIds=${JSON.stringify(Array.from(this.unfoldedIds))}`
+        );
     }
 }
 

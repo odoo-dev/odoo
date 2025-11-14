@@ -1,5 +1,5 @@
 import { deserializeDateTime, serializeDateTime } from "@web/core/l10n/dates";
-import { CalendarModel } from '@web/views/calendar/calendar_model';
+import { CalendarModel } from "@web/views/calendar/calendar_model";
 
 export class CalendarWithRecurrenceModel extends CalendarModel {
     async loadRecords(data) {
@@ -14,11 +14,14 @@ export class CalendarWithRecurrenceModel extends CalendarModel {
             recordsCounter++;
             if (rawRecord.recurring_maintenance && !rawRecord.done && !rawRecord.archive) {
                 let { start, end } = data.range;
-                if (rawRecord.repeat_type == 'until') {
-                    end = luxon.DateTime.min(end, deserializeDateTime(rawRecord.repeat_until)).endOf('day');
+                if (rawRecord.repeat_type == "until") {
+                    end = luxon.DateTime.min(
+                        end,
+                        deserializeDateTime(rawRecord.repeat_until)
+                    ).endOf("day");
                 }
                 const duration = rawRecord.duration || 1;
-                const [unit, interval] = [rawRecord.repeat_unit + "s", rawRecord.repeat_interval]
+                const [unit, interval] = [rawRecord.repeat_unit + "s", rawRecord.repeat_interval];
                 let date = deserializeDateTime(rawRecord.schedule_date);
                 date = this._getNextDate(date, unit, interval);
                 let counter = 1;

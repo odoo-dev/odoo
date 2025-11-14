@@ -33,9 +33,12 @@ export class WebsiteForumTagsWrapper extends Component {
         const editKarma = document.querySelector("#karma_edit_retag").value;
         const hasEnoughKarma = parseInt(karma) >= parseInt(editKarma);
 
-        return hasEnoughKarma && searchValue?.length >= 2
-            && !this.state.choices.some(c => c.label === searchValue)
-            && !this.state.value.some(v => v === `_${searchValue.trim()}`);
+        return (
+            hasEnoughKarma &&
+            searchValue?.length >= 2 &&
+            !this.state.choices.some((c) => c.label === searchValue) &&
+            !this.state.value.some((v) => v === `_${searchValue.trim()}`)
+        );
     }
 
     onCreateOption(string) {

@@ -11,8 +11,8 @@ export class CrmLead extends Record {
     name;
     href = fields.Attr("", {
         compute() {
-            return router.stateToUrl({ model: 'crm.lead', resId: this.id });
-        }
+            return router.stateToUrl({ model: "crm.lead", resId: this.id });
+        },
     });
 }
 

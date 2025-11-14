@@ -15,7 +15,9 @@ export class AccountMoveService {
     }
 
     async getDeletionDialogBody(body, moveIds) {
-        const isMoveEndOfChain = await this.orm.call("account.move", "check_move_sequence_chain", [moveIds]);
+        const isMoveEndOfChain = await this.orm.call("account.move", "check_move_sequence_chain", [
+            moveIds,
+        ]);
         if (!isMoveEndOfChain) {
             const message = _t("This operation will create a gap in the sequence.");
             return markup`<div class="text-danger">${message}</div>${body}`;
@@ -24,11 +26,10 @@ export class AccountMoveService {
     }
 
     async downloadPdf(accountMoveId, target = "download") {
-        const downloadAction = await this.orm.call(
-            "account.move",
-            "action_invoice_download_pdf",
-            [accountMoveId, target]
-        );
+        const downloadAction = await this.orm.call("account.move", "action_invoice_download_pdf", [
+            accountMoveId,
+            target,
+        ]);
         await this.action.doAction(downloadAction);
     }
 }

@@ -18,9 +18,7 @@ export class ForumPageOption extends BaseOptionComponent {
 class ForumPageOptionPlugin extends Plugin {
     static id = "forumPageOption";
     resources = {
-        builder_options: [
-            withSequence(FORUMS_INDEX, ForumPageOption),
-        ],
+        builder_options: [withSequence(FORUMS_INDEX, ForumPageOption)],
     };
 }
 

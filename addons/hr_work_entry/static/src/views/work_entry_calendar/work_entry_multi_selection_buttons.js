@@ -14,7 +14,7 @@ export class WorkEntryCalendarMultiSelectionButtons extends MultiSelectionButton
                 onQuickReplace: Function,
                 onQuickReset: Function,
             },
-        }
+        },
     };
     static components = {
         ...MultiSelectionButtons.components,
@@ -37,11 +37,11 @@ export class WorkEntryCalendarMultiSelectionButtons extends MultiSelectionButton
         const props = super.getMultiCreatePopoverProps();
         props.onQuickReplace = (values) => {
             this.props.reactive.onQuickReplace(values);
-        }
+        };
         props.multiCreateRecordProps.context = {
             default_is_manual: true,
             default_employee_id: this.actionService.currentController.currentState.active_id,
-        }
+        };
         return props;
     }
 

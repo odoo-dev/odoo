@@ -5,7 +5,6 @@ import { useService } from "@web/core/utils/hooks";
 import { CalendarController } from "@web/views/calendar/calendar_controller";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 
-
 export class WorkEntryCalendarController extends CalendarController {
     static components = {
         ...CalendarController.components,
@@ -100,7 +99,8 @@ export class WorkEntryCalendarController extends CalendarController {
      */
     updateMultiSelection() {
         super.updateMultiSelection(...arguments);
-        this.multiSelectionButtonsReactive.userFavoritesWorkEntries = this.model.userFavoritesWorkEntries || [];
+        this.multiSelectionButtonsReactive.userFavoritesWorkEntries =
+            this.model.userFavoritesWorkEntries || [];
     }
 
     getDatesWithoutValidatedWorkEntry(selectedCells, records) {

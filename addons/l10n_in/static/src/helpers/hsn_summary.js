@@ -14,8 +14,10 @@ patch(accountTaxHelpers, {
         function get_base_line_grouping_key(base_line) {
             const unique_taxes_data = new Set(
                 base_line.tax_details.taxes_data
-                    .filter(tax_data => ['igst', 'cgst', 'sgst'].includes(tax_data.tax.l10n_in_gst_tax_type))
-                    .map(tax_data => tax_data.tax)
+                    .filter((tax_data) =>
+                        ["igst", "cgst", "sgst"].includes(tax_data.tax.l10n_in_gst_tax_type)
+                    )
+                    .map((tax_data) => tax_data.tax)
             );
             const rate = [...unique_taxes_data].reduce((sum, tax) => sum + tax.amount, 0);
 
@@ -43,30 +45,40 @@ patch(accountTaxHelpers, {
                     tax_amount_cgst: 0.0,
                     tax_amount_sgst: 0.0,
                     tax_amount_cess: 0.0,
-                }
+                };
             }
 
             const item = items_map[key];
             item.quantity += base_line.quantity;
-            item.amount_untaxed += (
+            item.amount_untaxed +=
                 base_line.tax_details.total_excluded_currency +
-                base_line.tax_details.delta_total_excluded_currency
-            );
+                base_line.tax_details.delta_total_excluded_currency;
         }
 
         // Tax amounts.
         function grouping_function(base_line, tax_data) {
-            return tax_data ? {
-                ...get_base_line_grouping_key(base_line),
-                l10n_in_gst_tax_type: tax_data.tax.l10n_in_gst_tax_type,
-            } : null;
+            return tax_data
+                ? {
+                      ...get_base_line_grouping_key(base_line),
+                      l10n_in_gst_tax_type: tax_data.tax.l10n_in_gst_tax_type,
+                  }
+                : null;
         }
 
-        const base_lines_aggregated_values = this.aggregate_base_lines_tax_details(base_lines, grouping_function);
-        const values_per_grouping_key = this.aggregate_base_lines_aggregated_values(base_lines_aggregated_values);
+        const base_lines_aggregated_values = this.aggregate_base_lines_tax_details(
+            base_lines,
+            grouping_function
+        );
+        const values_per_grouping_key = this.aggregate_base_lines_aggregated_values(
+            base_lines_aggregated_values
+        );
         for (const values of Object.values(values_per_grouping_key)) {
             const grouping_key = values.grouping_key;
-            if (!grouping_key || !grouping_key.l10n_in_hsn_code || !grouping_key.l10n_in_gst_tax_type) {
+            if (
+                !grouping_key ||
+                !grouping_key.l10n_in_hsn_code ||
+                !grouping_key.l10n_in_gst_tax_type
+            ) {
                 continue;
             }
 
@@ -83,7 +95,7 @@ patch(accountTaxHelpers, {
 
         const items = [];
         for (const values of Object.values(items_map)) {
-            const item = {...values.key, ...values};
+            const item = { ...values.key, ...values };
             delete item.key;
             items.push(item);
         }
@@ -95,5 +107,5 @@ patch(accountTaxHelpers, {
             display_uom: display_uom,
             items: items,
         };
-    }
+    },
 });

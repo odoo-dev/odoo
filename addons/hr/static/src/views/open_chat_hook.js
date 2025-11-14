@@ -12,5 +12,5 @@ patch(helpers, {
             return { employeeId: id };
         }
         return super.buildOpenChatParams(...arguments);
-    }
+    },
 });

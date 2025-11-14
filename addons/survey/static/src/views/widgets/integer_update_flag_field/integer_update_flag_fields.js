@@ -4,7 +4,6 @@ import { integerField, IntegerField } from "@web/views/fields/integer/integer_fi
 
 import { useEffect, useRef } from "@odoo/owl";
 
-
 /**
  * Update a second field when the widget's own field `value` changes.
  *
@@ -18,11 +17,11 @@ import { useEffect, useRef } from "@odoo/owl";
  * See also `BooleanUpdateFlagField`.
  */
 export class IntegerUpdateFlagField extends IntegerField {
-    static props= {
+    static props = {
         ...IntegerField.props,
         flagFieldName: { type: String },
         referenceValue: { type: Number },
-    }
+    };
     /**
      * @override
      */
@@ -31,9 +30,10 @@ export class IntegerUpdateFlagField extends IntegerField {
         const inputRef = useRef("numpadDecimal");
         const onChange = async () => {
             await this.props.record._update({
-                [this.props.flagFieldName]: parseInt(this.formattedValue) !== this.props.referenceValue}
-            );
-        }
+                [this.props.flagFieldName]:
+                    parseInt(this.formattedValue) !== this.props.referenceValue,
+            });
+        };
         useEffect(
             (inputEl) => {
                 if (inputEl) {
@@ -52,14 +52,13 @@ export const integerUpdateFlagField = {
     ...integerField,
     component: IntegerUpdateFlagField,
     displayName: _t("Integer updating comparison flag"),
-    extractProps ({ attrs, options }, { context: { referenceValue } }) {
+    extractProps({ attrs, options }, { context: { referenceValue } }) {
         return {
             ...integerField.extractProps(...arguments),
             flagFieldName: options.flagFieldName,
             referenceValue: referenceValue,
-        }
-    }
+        };
+    },
 };
 
-
-registry.category("fields").add("integer_update_flag", integerUpdateFlagField)
+registry.category("fields").add("integer_update_flag", integerUpdateFlagField);

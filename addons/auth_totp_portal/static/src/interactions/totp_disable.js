@@ -7,20 +7,21 @@ import { user } from "@web/core/user";
 export class TOTPDisable extends Interaction {
     static selector = "#auth_totp_portal_disable";
     dynamicContent = {
-        _root: { "t-on-click.prevent": this.onClick }
-    }
+        _root: { "t-on-click.prevent": this.onClick },
+    };
 
     async onClick() {
-        await this.waitFor(handleCheckIdentity(
-            this.waitFor(this.services.orm.call("res.users", "action_totp_disable", [user.userId])),
-            this.services.orm,
-            this.services.dialog,
-        ));
+        await this.waitFor(
+            handleCheckIdentity(
+                this.waitFor(
+                    this.services.orm.call("res.users", "action_totp_disable", [user.userId])
+                ),
+                this.services.orm,
+                this.services.dialog
+            )
+        );
         location.reload();
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("auth_totp_portal.totp_disable", TOTPDisable);
-
+registry.category("public.interactions").add("auth_totp_portal.totp_disable", TOTPDisable);

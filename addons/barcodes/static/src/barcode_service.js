@@ -8,12 +8,15 @@ function isEditable(element) {
 }
 
 function makeBarcodeInput() {
-    const inputEl = document.createElement('input');
-    inputEl.setAttribute("style", "position:fixed;top:50%;transform:translateY(-50%);z-index:-1;opacity:0");
+    const inputEl = document.createElement("input");
+    inputEl.setAttribute(
+        "style",
+        "position:fixed;top:50%;transform:translateY(-50%);z-index:-1;opacity:0"
+    );
     inputEl.setAttribute("autocomplete", "off");
     inputEl.setAttribute("inputmode", "none"); // magic! prevent native keyboard from popping
     inputEl.classList.add("o-barcode-input");
-    inputEl.setAttribute('name', 'barcode');
+    inputEl.setAttribute("name", "barcode");
     return inputEl;
 }
 
@@ -25,8 +28,8 @@ export const barcodeService = {
     // this is done here to make it easily mockable in mobile tests
     isMobileChrome: isMobileOS() && isBrowserChrome(),
 
-    cleanBarcode: function(barcode) {
-        return barcode.replace(/Alt|Shift|Control/g, '');
+    cleanBarcode: function (barcode) {
+        return barcode.replace(/Alt|Shift|Control/g, "");
     },
 
     start() {
@@ -38,9 +41,11 @@ export const barcodeService = {
         let barcodeInput = null;
 
         function handleBarcode(barcode, target) {
-            bus.trigger('barcode_scanned', {barcode,target});
-            if (target.getAttribute('barcode_events') === "true") {
-                const barcodeScannedEvent = new CustomEvent("barcode_scanned", { detail: { barcode, target } });
+            bus.trigger("barcode_scanned", { barcode, target });
+            if (target.getAttribute("barcode_events") === "true") {
+                const barcodeScannedEvent = new CustomEvent("barcode_scanned", {
+                    detail: { barcode, target },
+                });
                 target.dispatchEvent(barcodeScannedEvent);
             }
         }
@@ -76,7 +81,8 @@ export const barcodeService = {
             // Notes:
             // - shiftKey is not ignored because it can be used by some barcode scanner for digits.
             // - altKey/ctrlKey are not ignored because it can be used in some barcodes (e.g. GS1 separator)
-            const isSpecialKey = !['Control', 'Alt'].includes(ev.key) && (ev.key.length > 1 || ev.metaKey);
+            const isSpecialKey =
+                !["Control", "Alt"].includes(ev.key) && (ev.key.length > 1 || ev.metaKey);
             const isEndCharacter = ev.key.match(/(Enter|Tab)/);
 
             // Don't catch non-printable keys except 'enter' and 'tab'
@@ -89,9 +95,12 @@ export const barcodeService = {
             // have no way of redispatching 'genuine' key events. Resent events
             // don't trigger native event handlers of elements. So this means that
             // our fake events will not appear in eg. an <input> element.
-            if (currentTarget !== barcodeInput && isEditable(currentTarget) &&
+            if (
+                currentTarget !== barcodeInput &&
+                isEditable(currentTarget) &&
                 !currentTarget.dataset.enableBarcode &&
-                currentTarget.getAttribute("barcode_events") !== "true") {
+                currentTarget.getAttribute("barcode_events") !== "true"
+            ) {
                 return;
             }
 
@@ -108,8 +117,13 @@ export const barcodeService = {
             if (ev.key === "Unidentified") {
                 return;
             }
-            if (document.activeElement && !document.activeElement.matches('input:not([type]), input[type="text"], textarea, [contenteditable], ' +
-                '[type="email"], [type="number"], [type="password"], [type="tel"], [type="search"]')) {
+            if (
+                document.activeElement &&
+                !document.activeElement.matches(
+                    'input:not([type]), input[type="text"], textarea, [contenteditable], ' +
+                        '[type="email"], [type="number"], [type="password"], [type="tel"], [type="search"]'
+                )
+            ) {
                 barcodeInput.focus();
             }
             keydownHandler(ev);
@@ -122,7 +136,7 @@ export const barcodeService = {
                 document.body.appendChild(barcodeInput);
             }
             const handler = isMobileChrome ? mobileChromeHandler : keydownHandler;
-            document.body.addEventListener('keydown', handler);
+            document.body.addEventListener("keydown", handler);
         });
 
         return {

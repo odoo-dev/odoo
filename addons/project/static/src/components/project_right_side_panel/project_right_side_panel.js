@@ -1,12 +1,12 @@
 import { _t } from "@web/core/l10n/translation";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { formatFloat } from "@web/views/fields/formatters";
-import { ViewButton } from '@web/views/view_button/view_button';
+import { ViewButton } from "@web/views/view_button/view_button";
 
-import { ProjectRightSidePanelSection } from './components/project_right_side_panel_section';
-import { ProjectMilestone } from './components/project_milestone';
-import { ProjectProfitability } from './components/project_profitability';
-import { getCurrency } from '@web/core/currency';
+import { ProjectRightSidePanelSection } from "./components/project_right_side_panel_section";
+import { ProjectMilestone } from "./components/project_milestone";
+import { ProjectProfitability } from "./components/project_profitability";
+import { getCurrency } from "@web/core/currency";
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { SIZES } from "@web/core/ui/ui_service";
 
@@ -24,11 +24,11 @@ export class ProjectRightSidePanel extends Component {
     };
 
     setup() {
-        this.orm = useService('orm');
-        this.actionService = useService('action');
-        this.dialog = useService('dialog');
+        this.orm = useService("orm");
+        this.actionService = useService("action");
+        this.dialog = useService("dialog");
         this.uiService = useService("ui");
-        useBus(this.uiService.bus, "resize", this.updateGridTemplateColumns)
+        useBus(this.uiService.bus, "resize", this.updateGridTemplateColumns);
         this.state = useState({
             data: {
                 milestones: {
@@ -86,8 +86,8 @@ export class ProjectRightSidePanel extends Component {
 
     get sectionNames() {
         return {
-            'milestones': _t('Milestones'),
-            'profitability': _t('Profitability'),
+            milestones: _t("Milestones"),
+            profitability: _t("Profitability"),
         };
     }
 
@@ -103,8 +103,8 @@ export class ProjectRightSidePanel extends Component {
     formatMonetary(value, options = {}) {
         const valueFormatted = formatFloat(value, {
             ...options,
-            'digits': [false, 0],
-            'noSymbol': true,
+            digits: [false, 0],
+            noSymbol: true,
         });
         const currency = getCurrency(this.currencyId);
         if (!currency) {
@@ -118,15 +118,13 @@ export class ProjectRightSidePanel extends Component {
     }
 
     async loadData() {
-        if (!this.projectId) { // If this is called from notif, multiples updates but no specific project
+        if (!this.projectId) {
+            // If this is called from notif, multiples updates but no specific project
             return {};
         }
-        const data = await this.orm.call(
-            'project.project',
-            'get_panel_data',
-            [[this.projectId]],
-            { context: this.context },
-        );
+        const data = await this.orm.call("project.project", "get_panel_data", [[this.projectId]], {
+            context: this.context,
+        });
         this.state.data = data;
         return data;
     }
@@ -151,10 +149,10 @@ export class ProjectRightSidePanel extends Component {
 
     async onProjectActionClick(params) {
         this.actionService.doActionButton({
-            type: 'action',
+            type: "action",
             resId: this.projectId,
             context: this.context,
-            resModel: 'project.project',
+            resModel: "project.project",
             ...params,
         });
     }
@@ -163,7 +161,7 @@ export class ProjectRightSidePanel extends Component {
         return {
             type: statButton.action_type,
             name: statButton.action,
-            context: statButton.additional_context || '{}',
+            context: statButton.additional_context || "{}",
         };
     }
 
@@ -171,7 +169,7 @@ export class ProjectRightSidePanel extends Component {
         return {
             resId: this.projectId,
             context: this.context,
-            resModel: 'project.project',
+            resModel: "project.project",
         };
     }
 }

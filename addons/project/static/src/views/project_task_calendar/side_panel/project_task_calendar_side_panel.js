@@ -9,9 +9,6 @@ export class ProjectTaskCalendarSidePanel extends CalendarSidePanel {
         FilterSection: ProjectTaskCalendarFilterSection,
         ProjectTaskCalendarListToPlan,
     };
-    static props = [
-        ...CalendarSidePanel.props,
-        "editRecord",
-    ];
+    static props = [...CalendarSidePanel.props, "editRecord"];
     static template = "project.ProjectTaskCalendarSidePanel";
 }

@@ -18,9 +18,11 @@ export class ProfileValidation extends Interaction {
      * @param {HTMLElement} currentTargetEl
      */
     async onSendMailClick(ev, currentTargetEl) {
-        const data = await this.waitFor(rpc('/profile/send_validation_email', {
-            redirect_url: currentTargetEl.dataset["redirect_url"],
-        }));
+        const data = await this.waitFor(
+            rpc("/profile/send_validation_email", {
+                redirect_url: currentTargetEl.dataset["redirect_url"],
+            })
+        );
         if (data) {
             redirect(currentTargetEl.dataset["redirect_url"]);
             return new Promise(() => {});

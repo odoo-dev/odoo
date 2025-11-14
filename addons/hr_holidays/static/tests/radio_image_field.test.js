@@ -1,6 +1,13 @@
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
 import { expect, test } from "@odoo/hoot";
-import { clickSave, contains, defineModels, fields, models, mountView } from "@web/../tests/web_test_helpers";
+import {
+    clickSave,
+    contains,
+    defineModels,
+    fields,
+    models,
+    mountView,
+} from "@web/../tests/web_test_helpers";
 
 class Partner extends models.Model {
     _records = [{ id: 1, product_id: false }];

@@ -4,7 +4,7 @@ import { defineModels } from "@web/../tests/web_test_helpers";
 
 export const crmModels = {
     ...mailModels,
-    CrmLead
+    CrmLead,
 };
 
 export function defineCrmModels() {

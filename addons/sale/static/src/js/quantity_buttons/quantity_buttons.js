@@ -1,8 +1,7 @@
-
-import { Component } from '@odoo/owl';
+import { Component } from "@odoo/owl";
 
 export class QuantityButtons extends Component {
-    static template = 'sale.QuantityButtons';
+    static template = "sale.QuantityButtons";
     static props = {
         quantity: Number,
         setQuantity: Function,

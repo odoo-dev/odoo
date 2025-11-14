@@ -32,7 +32,7 @@ registry.category("web_tour.tours").add("website_sale_loyalty.ewallet", {
             expectUnloadPage: true,
         },
         {
-            trigger: 'div h3:contains("Thank you for your order.")'
+            trigger: 'div h3:contains("Thank you for your order.")',
         },
         {
             trigger: 'a[href="/shop/cart"]',

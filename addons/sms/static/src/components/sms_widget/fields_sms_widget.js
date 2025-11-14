@@ -15,12 +15,13 @@ export class SmsWidget extends EmojisTextField {
     static template = "sms.SmsWidget";
     setup() {
         super.setup();
-        this._emojiAdded = () => this.props.record.update({ [this.props.name]: this.targetEditElement.el.value });
-        this.notification = useService('notification');
+        this._emojiAdded = () =>
+            this.props.record.update({ [this.props.name]: this.targetEditElement.el.value });
+        this.notification = useService("notification");
     }
 
     get encoding() {
-        return this._extractEncoding(this.props.record.data[this.props.name] || '');
+        return this._extractEncoding(this.props.record.data[this.props.name] || "");
     }
     get nbrChar() {
         const content = this._getValueForSmsCounts(this.props.record.data[this.props.name] || "");
@@ -46,7 +47,7 @@ export class SmsWidget extends EmojisTextField {
         if (nbrChar === 0) {
             return 0;
         }
-        if (encoding === 'UNICODE') {
+        if (encoding === "UNICODE") {
             if (nbrChar <= 70) {
                 return 1;
             }
@@ -65,10 +66,16 @@ export class SmsWidget extends EmojisTextField {
      * @returns {String} Encoding of the content (GSM7 or UNICODE)
      */
     _extractEncoding(content) {
-        if (String(content).match(RegExp("^[@£$¥èéùìòÇ\\nØø\\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\\\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà]*$"))) {
-            return 'GSM7';
+        if (
+            String(content).match(
+                RegExp(
+                    "^[@£$¥èéùìòÇ\\nØø\\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\\\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà]*$"
+                )
+            )
+        ) {
+            return "GSM7";
         }
-        return 'UNICODE';
+        return "UNICODE";
     }
 
     /**
@@ -96,12 +103,12 @@ export class SmsWidget extends EmojisTextField {
      */
     async onBlur() {
         await super.onBlur();
-        var content = this.props.record.data[this.props.name] || '';
-        if( !content.trim().length && content.length > 0) {
+        var content = this.props.record.data[this.props.name] || "";
+        if (!content.trim().length && content.length > 0) {
             this.notification.add(
                 _t("Your SMS Text Message must include at least one non-whitespace character"),
-                { type: 'danger' },
-            )
+                { type: "danger" }
+            );
             await this.props.record.update({ [this.props.name]: content.trim() });
         }
     }

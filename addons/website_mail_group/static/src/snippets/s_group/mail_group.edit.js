@@ -18,8 +18,6 @@ export class MailGroupEdit extends Interaction {
     };
 }
 
-registry
-    .category("public.interactions.edit")
-    .add("website_mail_group.mail_group", {
-        Interaction: MailGroupEdit,
-    });
+registry.category("public.interactions.edit").add("website_mail_group.mail_group", {
+    Interaction: MailGroupEdit,
+});

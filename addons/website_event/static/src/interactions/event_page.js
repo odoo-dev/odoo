@@ -10,6 +10,4 @@ export class EventPage extends Interaction {
     };
 }
 
-registry
-    .category("public.interactions")
-    .add("website_event.event_page", EventPage);
+registry.category("public.interactions").add("website_event.event_page", EventPage);

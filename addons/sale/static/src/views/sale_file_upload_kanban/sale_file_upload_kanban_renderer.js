@@ -1,5 +1,5 @@
-import { _t } from '@web/core/l10n/translation';
-import { FileUploadKanbanRenderer } from '@account/views/file_upload_kanban/file_upload_kanban_renderer';
+import { _t } from "@web/core/l10n/translation";
+import { FileUploadKanbanRenderer } from "@account/views/file_upload_kanban/file_upload_kanban_renderer";
 
 export class SaleFileUploadKanbanRenderer extends FileUploadKanbanRenderer {
     setup() {

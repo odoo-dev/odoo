@@ -1,19 +1,12 @@
 import { expect, test } from "@odoo/hoot";
 import { click, waitFor } from "@odoo/hoot-dom";
-import {
-    defineModels,
-    fields,
-    models,
-    mountView,
-} from "@web/../tests/web_test_helpers";
+import { defineModels, fields, models, mountView } from "@web/../tests/web_test_helpers";
 import { defineWebsiteSlidesModels } from "@website_slides/../tests/website_slides_test_helpers";
 
 class Partner extends models.Model {
     lines = fields.One2many({ relation: "lines_sections" });
 
-    _records = [
-        { id: 1, lines: [1, 2] },
-    ];
+    _records = [{ id: 1, lines: [1, 2] }];
 }
 
 class LinesSections extends models.Model {
@@ -41,7 +34,7 @@ class LinesSections extends models.Model {
     ];
 
     _views = {
-        form: /*xml*/`
+        form: /*xml*/ `
             <form>
                 <field name="display_name"/>
             </form>

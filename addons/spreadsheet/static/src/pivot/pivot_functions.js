@@ -30,5 +30,4 @@ const ODOO_FILTER_VALUE = /** @satisfies {CustomFunctionDescription} */ ({
     returns: ["STRING"],
 });
 
-functionRegistry
-    .add("ODOO.FILTER.VALUE", ODOO_FILTER_VALUE);
+functionRegistry.add("ODOO.FILTER.VALUE", ODOO_FILTER_VALUE);

@@ -20,7 +20,11 @@ export class PartnerAutoCompleteCharField extends CharField {
         this.partnerAutocomplete = usePartnerAutocomplete();
 
         this.inputRef = useChildRef();
-        useInputField({ getValue: () => this.props.record.data[this.props.name] || "", parse: (v) => this.parse(v), ref: this.inputRef});
+        useInputField({
+            getValue: () => this.props.record.data[this.props.name] || "",
+            parse: (v) => this.parse(v),
+            ref: this.inputRef,
+        });
     }
 
     async validateSearchTerm(request) {
@@ -32,55 +36,70 @@ export class PartnerAutoCompleteCharField extends CharField {
             {
                 options: async (request, shouldSearchWorldWide) => {
                     if (await this.validateSearchTerm(request)) {
-                        let queryCountryId = this.props.record.data?.country_id ? this.props.record.data.country_id.id : false;
-                        if (shouldSearchWorldWide){
-                        	queryCountryId = 0;
+                        let queryCountryId = this.props.record.data?.country_id
+                            ? this.props.record.data.country_id.id
+                            : false;
+                        if (shouldSearchWorldWide) {
+                            queryCountryId = 0;
                         }
-                        const suggestions = await this.partnerAutocomplete.autocomplete(request, queryCountryId);
+                        const suggestions = await this.partnerAutocomplete.autocomplete(
+                            request,
+                            queryCountryId
+                        );
                         return suggestions.map((suggestion) => ({
                             cssClass: "partner_autocomplete_dropdown_char",
                             data: suggestion,
                             label: suggestion.name,
                             onSelect: () => this.onSelectPartnerAutocompleteOption(suggestion),
                         }));
-                    }
-                    else {
+                    } else {
                         return [];
                     }
                 },
                 optionSlot: "partnerOption",
-                placeholder: _t('Searching Autocomplete...'),
+                placeholder: _t("Searching Autocomplete..."),
             },
         ];
     }
 
     async onSelectPartnerAutocompleteOption(option) {
-        let data = await this.partnerAutocomplete.getCreateData(option);
+        const data = await this.partnerAutocomplete.getCreateData(option);
         if (!data?.company) {
             return;
         }
 
         if (data.logo) {
-            const logoField = this.props.record.resModel === 'res.partner' ? 'image_1920' : 'logo';
+            const logoField = this.props.record.resModel === "res.partner" ? "image_1920" : "logo";
             data.company[logoField] = data.logo;
         }
 
         // Save UNSPSC codes (tags)
-        const unspsc_codes = data.company.unspsc_codes
+        const unspsc_codes = data.company.unspsc_codes;
 
         // Delete useless fields before updating record
-        data.company = this.partnerAutocomplete.removeUselessFields(data.company, Object.keys(this.props.record.fields));
+        data.company = this.partnerAutocomplete.removeUselessFields(
+            data.company,
+            Object.keys(this.props.record.fields)
+        );
 
         // Update record with retrieved values
         if (data.company.name) {
-            await this.props.record.update({name: data.company.name});  // Needed otherwise name it is not saved
+            await this.props.record.update({ name: data.company.name }); // Needed otherwise name it is not saved
         }
 
         // Add UNSPSC codes (tags)
-        if (this.props.record.resModel === 'res.partner' && unspsc_codes && unspsc_codes.length !== 0) {
+        if (
+            this.props.record.resModel === "res.partner" &&
+            unspsc_codes &&
+            unspsc_codes.length !== 0
+        ) {
             // category id is fetched and then tags are created (many2many)
-            const category_id = await this.orm.call("res.partner", "iap_partner_autocomplete_get_tag_ids", [this.props.record.resId, unspsc_codes]);
-            data.company['category_id'] = [[6, 0, category_id]];
+            const category_id = await this.orm.call(
+                "res.partner",
+                "iap_partner_autocomplete_get_tag_ids",
+                [this.props.record.resId, unspsc_codes]
+            );
+            data.company["category_id"] = [[6, 0, category_id]];
         }
         await this.props.record.update(data.company);
 

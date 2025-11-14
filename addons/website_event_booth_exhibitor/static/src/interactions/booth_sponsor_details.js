@@ -5,7 +5,7 @@ export class BoothSponsorDetails extends Interaction {
     static selector = "#o_wbooth_contact_details_form";
     dynamicContent = {
         "input[id='contact_details']": { "t-on-click.withTarget": this.onClickContactDetails },
-    }
+    };
 
     /**
      * @param {MouseEvent} ev
@@ -17,12 +17,16 @@ export class BoothSponsorDetails extends Interaction {
         const contactDetailsEl = this.el.querySelector("#o_wbooth_contact_details");
         contactDetailsEl.classList.toggle("d-none", !this.useContactDetails);
 
-        const sponsorInfoEls = this.el.querySelectorAll("label[for='sponsor_name'] > .mandatory_mark, label[for='sponsor_email'] > .mandatory_mark");
+        const sponsorInfoEls = this.el.querySelectorAll(
+            "label[for='sponsor_name'] > .mandatory_mark, label[for='sponsor_email'] > .mandatory_mark"
+        );
         for (const sponsorInfoEl of sponsorInfoEls) {
             sponsorInfoEl.classList.toggle("d-none", this.useContactDetails);
         }
 
-        const contactInfoEls = this.el.querySelectorAll("input[name='contact_name'], input[name='contact_email']");
+        const contactInfoEls = this.el.querySelectorAll(
+            "input[name='contact_name'], input[name='contact_email']"
+        );
         for (const contactInfoEl of contactInfoEls) {
             contactInfoEl.required = this.useContactDetails;
         }

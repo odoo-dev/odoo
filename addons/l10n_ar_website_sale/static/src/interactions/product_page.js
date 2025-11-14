@@ -1,5 +1,5 @@
-import { patch } from '@web/core/utils/patch';
-import { ProductPage } from '@website_sale/interactions/product_page';
+import { patch } from "@web/core/utils/patch";
+import { ProductPage } from "@website_sale/interactions/product_page";
 
 patch(ProductPage.prototype, {
     /**
@@ -13,7 +13,7 @@ patch(ProductPage.prototype, {
     async _onChangeCombination(ev, parent, combination) {
         await super._onChangeCombination(...arguments);
         const currencyValue = parent.querySelector(
-            '.o_l10n_ar_price_tax_excluded .oe_currency_value'
+            ".o_l10n_ar_price_tax_excluded .oe_currency_value"
         );
         if (currencyValue) {
             currencyValue.textContent = this._priceToStr(

@@ -53,7 +53,6 @@ export class Many2OneBank extends Many2One {
     }
 }
 
-
 export class Many2OneBankField extends Many2OneField {
     static components = {
         ...Many2OneField.components,
@@ -62,16 +61,14 @@ export class Many2OneBankField extends Many2OneField {
 
     get m2oProps() {
         const props = super.m2oProps;
-        props.cssClass = `${props.cssClass ?? ''} d-flex`;
+        props.cssClass = `${props.cssClass ?? ""} d-flex`;
         return props;
     }
 }
 
 export const many2OneBankField = {
     ...buildM2OFieldDescription(Many2OneBankField),
-    relatedFields: [
-        { name: "allow_out_payment", type: "bool" },
-    ],
+    relatedFields: [{ name: "allow_out_payment", type: "bool" }],
 };
 
 registry.category("fields").add("many2one_bank", many2OneBankField);

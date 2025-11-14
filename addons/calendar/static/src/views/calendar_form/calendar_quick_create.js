@@ -13,7 +13,7 @@ export const QUICK_CREATE_CALENDAR_EVENT_FIELDS = {
     allday: { type: "boolean" },
     partner_ids: { type: "many2many" },
     videocall_location: { type: "string" },
-    description: { type: "string" }
+    description: { type: "string" },
 };
 
 function getDefaultValuesFromRecord(data) {
@@ -21,10 +21,10 @@ function getDefaultValuesFromRecord(data) {
     for (const fieldName in QUICK_CREATE_CALENDAR_EVENT_FIELDS) {
         if (fieldName in data) {
             let value = data[fieldName];
-            const { type } = QUICK_CREATE_CALENDAR_EVENT_FIELDS[fieldName]
-            if (type === 'many2many') {
+            const { type } = QUICK_CREATE_CALENDAR_EVENT_FIELDS[fieldName];
+            if (type === "many2many") {
                 value = value.records.map((record) => record.resId);
-            } else if (type === 'date') {
+            } else if (type === "date") {
                 value = value && serializeDate(value);
             } else if (type === "datetime") {
                 value = value && serializeDateTime(value);
@@ -36,7 +36,6 @@ function getDefaultValuesFromRecord(data) {
 }
 
 export class CalendarQuickCreateFormController extends CalendarFormController {
-
     goToFullEvent() {
         const context = getDefaultValuesFromRecord(this.model.root.data);
         return this.actionService.doAction(
@@ -77,7 +76,6 @@ registry.category("views").add("calendar_quick_create_form_view", {
 });
 
 export class CalendarQuickCreate extends FormViewDialog {
-
     setup() {
         super.setup();
         Object.assign(this.viewProps, {

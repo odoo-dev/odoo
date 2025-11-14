@@ -6,5 +6,4 @@ export class AccountMove extends models.ServerModel {
     get_extra_print_items() {
         return [];
     }
-
 }

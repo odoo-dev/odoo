@@ -9,7 +9,7 @@ registry.category("web_tour.tours").add("portal_copy_link_tour", {
             run: () => {
                 const copyLinkAction = messageActionsRegistry.get("copy-link");
                 patch(copyLinkAction, { sequence: 1 }); // make sure the action is visible without expanding
-            }
+            },
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message:contains(Test Message)",

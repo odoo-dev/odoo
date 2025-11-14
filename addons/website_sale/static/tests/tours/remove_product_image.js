@@ -3,7 +3,7 @@ import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     registerWebsitePreviewTour,
-} from '@website/js/tours/tour_utils';
+} from "@website/js/tours/tour_utils";
 
 const clickOnImgAndWaitForLoad = [
     {
@@ -33,7 +33,8 @@ const enterEditModeOfTestProduct = () => [
 const removeImg = [
     {
         content: "Click on Remove",
-        trigger: ".o_customize_tab [data-container-title='Image'] button[data-action-id='removeMedia']",
+        trigger:
+            ".o_customize_tab [data-container-title='Image'] button[data-action-id='removeMedia']",
         run: "click",
     },
     // If the snippet editor is not visible, the remove process is considered as

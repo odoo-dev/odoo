@@ -1,8 +1,8 @@
 import { registry } from "@web/core/registry";
-import { clickOnElement } from '@website/js/tours/tour_utils';
+import { clickOnElement } from "@website/js/tours/tour_utils";
 import * as tourUtils from "@website_sale/js/tours/tour_utils";
 
-registry.category("web_tour.tours").add('website_sale.product_comparison', {
+registry.category("web_tour.tours").add("website_sale.product_comparison", {
     url: "/shop",
     steps: () => [
         // test from shop page
@@ -13,7 +13,7 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         },
         {
             content: "check compare button contains one product",
-            trigger: '.o_wsale_comparison_bottom_bar .badge:contains(1)',
+            trigger: ".o_wsale_comparison_bottom_bar .badge:contains(1)",
         },
         {
             content: "add second product 'Color Pants' in a comparison list",
@@ -22,7 +22,7 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         },
         {
             content: "check that the compare button contains two products",
-            trigger: '.o_wsale_comparison_bottom_bar .badge:contains(2)',
+            trigger: ".o_wsale_comparison_bottom_bar .badge:contains(2)",
         },
         {
             content: "check products name are correct in the comparelist",
@@ -34,7 +34,8 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         },
         {
             content: "remove product",
-            trigger: '[name="product_comparison_bottom_bar_row"]:contains("Color T-Shirt") button:has(i.oi-close)',
+            trigger:
+                '[name="product_comparison_bottom_bar_row"]:contains("Color T-Shirt") button:has(i.oi-close)',
             run: "click",
         },
         {
@@ -55,22 +56,26 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         },
         {
             content: "check compare button is still there and contains 2 products",
-            trigger: '.o_wsale_comparison_bottom_bar .badge:contains(2)',
+            trigger: ".o_wsale_comparison_bottom_bar .badge:contains(2)",
         },
         {
             content: "add first variant to comparelist",
-            trigger: '.o_add_compare_dyn',
+            trigger: ".o_add_compare_dyn",
             run: "click",
         },
         {
-            content: "check the comparelist is now open and contains 3rd product with correct variant",
+            content:
+                "check the comparelist is now open and contains 3rd product with correct variant",
             trigger: '[name="product_comparison_bottom_bar_row"]:contains("Color Shoes (Red)")',
         },
         {
             content: "select 2nd variant(Pink Color)",
-            trigger: '.variant_attribute[data-attribute-name="Color"] input[data-value-name="Pink"]:not(:visible)',
+            trigger:
+                '.variant_attribute[data-attribute-name="Color"] input[data-value-name="Pink"]:not(:visible)',
             run: function (actions) {
-                document.querySelector('img[class*="product_detail_img"]').setAttribute('data-image-to-change', 1);
+                document
+                    .querySelector('img[class*="product_detail_img"]')
+                    .setAttribute("data-image-to-change", 1);
                 actions.click();
             },
         },
@@ -79,7 +84,7 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         },
         {
             content: "click on compare button to add in comparison list when variant changed",
-            trigger: '.o_add_compare_dyn',
+            trigger: ".o_add_compare_dyn",
             run: "click",
         },
         {
@@ -88,19 +93,21 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         },
         {
             content: "check limit is not reached",
-            trigger: ':not(.o_notification:contains("You can compare up to 4 products at a time."))',
+            trigger:
+                ':not(.o_notification:contains("You can compare up to 4 products at a time."))',
         },
         {
             content: "select 3nd variant(Custom)",
-            trigger: '.variant_attribute[data-attribute-name="Color"] input[data-value-name="Blue"]:not(:visible)',
+            trigger:
+                '.variant_attribute[data-attribute-name="Color"] input[data-value-name="Blue"]:not(:visible)',
             run: "click",
         },
         {
-            trigger: 'body:not(:has(.carousel-indicators))', // there is 1 image on the custom variant
+            trigger: "body:not(:has(.carousel-indicators))", // there is 1 image on the custom variant
         },
         {
             content: "click on compare button to add in comparison list when variant changed",
-            trigger: '.o_add_compare_dyn',
+            trigger: ".o_add_compare_dyn",
             run: "click",
         },
         {
@@ -132,7 +139,7 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
         },
         {
             content: "remove Color Shoes (Pink) from compare table",
-            trigger: '#o_comparelist_table .o_comparelist_remove:eq(2)',
+            trigger: "#o_comparelist_table .o_comparelist_remove:eq(2)",
             run: "click",
             expectUnloadPage: true,
         },
@@ -145,11 +152,14 @@ registry.category("web_tour.tours").add('website_sale.product_comparison', {
             trigger: '.product_summary:contains("Color Pants") button:contains("Add to Cart")',
             run: "click",
         },
-        clickOnElement('Add to cart', 'button[name="website_sale_product_configurator_continue_button"]'),
+        clickOnElement(
+            "Add to cart",
+            'button[name="website_sale_product_configurator_continue_button"]'
+        ),
         tourUtils.goToCart(),
         {
             content: "check product correctly added to cart",
             trigger: '#cart_products:contains("Color Pants") .js_quantity[value="1"]',
         },
-    ]
+    ],
 });

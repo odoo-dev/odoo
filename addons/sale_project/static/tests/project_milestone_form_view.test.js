@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { queryFirst } from "@odoo/hoot-dom";
 import { defineModels, mountView } from "@web/../tests/web_test_helpers";
 import { defineProjectModels } from "@project/../tests/project_models";
-import { ProductProduct, ProjectMilestone, SaleOrderLine } from "./project_task_model"
+import { ProductProduct, ProjectMilestone, SaleOrderLine } from "./project_task_model";
 
 describe.current.tags("desktop");
 defineModels([SaleOrderLine, ProductProduct]);
@@ -36,8 +36,8 @@ async function _testElementClass(resId, shouldHaveClass) {
     mountViewParams.resId = resId;
     await mountView(mountViewParams);
 
-    const quantityElement = queryFirst('#quantity_percentage_0').parentElement;
-    const productUomQtyElement = queryFirst('#product_uom_qty_0').parentElement;
+    const quantityElement = queryFirst("#quantity_percentage_0").parentElement;
+    const productUomQtyElement = queryFirst("#product_uom_qty_0").parentElement;
 
     if (shouldHaveClass) {
         expect(quantityElement).toHaveClass("text-danger");

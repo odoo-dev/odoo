@@ -130,7 +130,6 @@ for (const [viewType, newButtonClass] of [
         await animationFrame();
         await contains(".o_template_icon_group:first > i.fa-pencil").click();
         expect.verifySteps(["task template opened"]);
-
     });
 }
 

@@ -8,8 +8,12 @@ import { ListTextField, TextField } from "@web/views/fields/text/text_field";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { ListRenderer } from "@web/views/list/list_renderer";
 
-const SHOW_ALL_ITEMS_TOOLTIP = _t("Some lines can be on the next page, display them to unlock actions on section.");
-const DISABLED_MOVE_DOWN_ITEM_TOOLTIP = _t("Some lines of the next section can be on the next page, display them to unlock the action.");
+const SHOW_ALL_ITEMS_TOOLTIP = _t(
+    "Some lines can be on the next page, display them to unlock actions on section."
+);
+const DISABLED_MOVE_DOWN_ITEM_TOOLTIP = _t(
+    "Some lines of the next section can be on the next page, display them to unlock the action."
+);
 
 const DISPLAY_TYPES = {
     NOTE: "line_note",
@@ -18,7 +22,12 @@ const DISPLAY_TYPES = {
 };
 
 export function getParentSectionRecord(list, record) {
-    const { sectionIndex } = getRecordsUntilSection(list, record, false, record.data.display_type !== DISPLAY_TYPES.SUBSECTION);
+    const { sectionIndex } = getRecordsUntilSection(
+        list,
+        record,
+        false,
+        record.data.display_type !== DISPLAY_TYPES.SUBSECTION
+    );
     return list.records[sectionIndex];
 }
 
@@ -34,12 +43,18 @@ export function getSectionRecords(list, record, subSection) {
 
 function hasNextSection(list, record) {
     const { sectionIndex } = getRecordsUntilSection(list, record, true);
-    return sectionIndex < list.records.length && list.records[sectionIndex].data.display_type === record.data.display_type;
+    return (
+        sectionIndex < list.records.length &&
+        list.records[sectionIndex].data.display_type === record.data.display_type
+    );
 }
 
 function hasPreviousSection(list, record) {
     const { sectionIndex } = getRecordsUntilSection(list, record, false);
-    return sectionIndex >= 0 && list.records[sectionIndex].data.display_type === record.data.display_type;
+    return (
+        sectionIndex >= 0 &&
+        list.records[sectionIndex].data.display_type === record.data.display_type
+    );
 }
 
 function getRecordsUntilSection(list, record, asc, subSection) {
@@ -53,7 +68,10 @@ function getRecordsUntilSection(list, record, asc, subSection) {
     if (asc) {
         sectionRecords.push(list.records[index]);
         index++;
-        while (index < list.records.length && !stopAtTypes.includes(list.records[index].data.display_type)) {
+        while (
+            index < list.records.length &&
+            !stopAtTypes.includes(list.records[index].data.display_type)
+        ) {
             sectionRecords.push(list.records[index]);
             index++;
         }
@@ -120,7 +138,9 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     get showPricesButton() {
         if (this.isSubSection(this.record)) {
             const parentRecord = getParentSectionRecord(this.props.list, this.record);
-            return !parentRecord?.data?.collapse_prices && !parentRecord?.data?.collapse_composition;
+            return (
+                !parentRecord?.data?.collapse_prices && !parentRecord?.data?.collapse_composition
+            );
         }
         return true;
     }
@@ -135,7 +155,8 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 
     async toggleCollapse(record, fieldName) {
         // We don't want to have 'collapse_prices' & 'collapse_composition' set to True at the same time
-        const reverseFieldName = fieldName === 'collapse_prices' ? 'collapse_composition' : 'collapse_prices';
+        const reverseFieldName =
+            fieldName === "collapse_prices" ? "collapse_composition" : "collapse_prices";
         const changes = {
             [fieldName]: !record.data[fieldName],
             [reverseFieldName]: false,
@@ -193,10 +214,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     }
 
     canUseFormatter(column, record) {
-        if (
-            this.isSection(record) &&
-            this.props.aggregatedFields.includes(column.name)
-        ) {
+        if (this.isSection(record) && this.props.aggregatedFields.includes(column.name)) {
             return true;
         }
         return super.canUseFormatter(column, record);
@@ -228,10 +246,14 @@ export class SectionAndNoteListRenderer extends ListRenderer {
             return;
         }
 
-        const { sectionRecords, sectionIndex } = getRecordsUntilSection(this.props.list, record, true)
-        const recordsToDuplicate = sectionRecords.filter((record) => {
-            return this.shouldDuplicateSectionItem(record);
-        });
+        const { sectionRecords, sectionIndex } = getRecordsUntilSection(
+            this.props.list,
+            record,
+            true
+        );
+        const recordsToDuplicate = sectionRecords.filter((record) =>
+            this.shouldDuplicateSectionItem(record)
+        );
         await this.props.list.duplicateRecords(recordsToDuplicate, {
             targetIndex: sectionIndex,
             copyFields: this.copyFields,
@@ -282,7 +304,11 @@ export class SectionAndNoteListRenderer extends ListRenderer {
             return false;
         }
 
-        const { sectionIndex } = getRecordsUntilSection(this.props.list, this.props.list.records[index], true);
+        const { sectionIndex } = getRecordsUntilSection(
+            this.props.list,
+            this.props.list.records[index],
+            true
+        );
         return sectionIndex < this.props.list.limit;
     }
 
@@ -334,8 +360,8 @@ export class SectionAndNoteListRenderer extends ListRenderer {
             const parentSection = getParentSectionRecord(this.props.list, record);
             if (parentSection?.data.display_type === DISPLAY_TYPES.SUBSECTION) {
                 return (
-                    parentSection.data[fieldName]
-                    || getParentSectionRecord(this.props.list, parentSection)?.data[fieldName]
+                    parentSection.data[fieldName] ||
+                    getParentSectionRecord(this.props.list, parentSection)?.data[fieldName]
                 );
             }
             return parentSection?.data[fieldName];
@@ -345,7 +371,7 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     getRowClass(record) {
         const existingClasses = super.getRowClass(record);
         let newClasses = `${existingClasses} o_is_${record.data.display_type}`;
-        if (this.props.hideComposition && this.shouldCollapse(record, 'collapse_composition')) {
+        if (this.props.hideComposition && this.shouldCollapse(record, "collapse_composition")) {
             newClasses += " text-muted";
         }
         return newClasses;
@@ -355,17 +381,17 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         let classNames = super.getCellClass(column, record);
         // For hiding columnns of section and note
         if (
-            this.isSectionOrNote(record)
-            && column.widget !== "handle"
-            && ![column.name, ...this.props.aggregatedFields].includes(column.name)
+            this.isSectionOrNote(record) &&
+            column.widget !== "handle" &&
+            ![column.name, ...this.props.aggregatedFields].includes(column.name)
         ) {
             return `${classNames} o_hidden`;
         }
         // For muting the price columns
         if (
-            this.props.hidePrices
-            && this.shouldCollapse(record, 'collapse_prices')
-            && this.priceColumns.includes(column.name)
+            this.props.hidePrices &&
+            this.shouldCollapse(record, "collapse_prices") &&
+            this.priceColumns.includes(column.name)
         ) {
             classNames += " text-muted";
         }
@@ -399,9 +425,9 @@ export class SectionAndNoteListRenderer extends ListRenderer {
     getSectionColumns(columns, record) {
         const sectionCols = columns.filter(
             (col) =>
-                col.widget === "handle"
-                || col.name === this.titleField
-                || (this.isSection(record) && this.props.aggregatedFields.includes(col.name))
+                col.widget === "handle" ||
+                col.name === this.titleField ||
+                (this.isSection(record) && this.props.aggregatedFields.includes(col.name))
         );
         return sectionCols.map((col) => {
             if (col.name === this.titleField) {
@@ -420,7 +446,10 @@ export class SectionAndNoteListRenderer extends ListRenderer {
 
         const sectionRecords = getSectionRecords(this.props.list, record);
         const index = this.props.list.records.indexOf(record) + sectionRecords.length;
-        const nextSectionRecords = getSectionRecords(this.props.list, this.props.list.records[index]);
+        const nextSectionRecords = getSectionRecords(
+            this.props.list,
+            this.props.list.records[index]
+        );
         return this.swapSections(sectionRecords, nextSectionRecords);
     }
 
@@ -443,14 +472,18 @@ export class SectionAndNoteListRenderer extends ListRenderer {
         const commands = [];
         let sequence = sectionRecords1[0].data[this.props.list.handleField];
         for (const record of sectionRecords2) {
-            commands.push(x2ManyCommands.update(record.resId || record._virtualId, {
-                [this.props.list.handleField]: sequence++,
-            }));
+            commands.push(
+                x2ManyCommands.update(record.resId || record._virtualId, {
+                    [this.props.list.handleField]: sequence++,
+                })
+            );
         }
         for (const record of sectionRecords1) {
-            commands.push(x2ManyCommands.update(record.resId || record._virtualId, {
-                [this.props.list.handleField]: sequence++,
-            }));
+            commands.push(
+                x2ManyCommands.update(record.resId || record._virtualId, {
+                    [this.props.list.handleField]: sequence++,
+                })
+            );
         }
         await this.props.list.applyCommands(commands, { sort: true });
     }
@@ -502,17 +535,15 @@ export const sectionAndNoteFieldOne2Many = {
     ...x2ManyField,
     component: SectionAndNoteFieldOne2Many,
     additionalClasses: [...(x2ManyField.additionalClasses || []), "o_field_one2many"],
-    extractProps: (staticInfo, dynamicInfo) => {
-        return {
-            ...x2ManyField.extractProps(staticInfo, dynamicInfo),
-            aggregatedFields: staticInfo.attrs.aggregated_fields
-                ? staticInfo.attrs.aggregated_fields.split(/\s*,\s*/)
-                : [],
-            hideComposition: staticInfo.options?.hide_composition ?? false,
-            hidePrices: staticInfo.options?.hide_prices ?? false,
-            subsections: staticInfo.options?.subsections ?? false,
-        };
-    },
+    extractProps: (staticInfo, dynamicInfo) => ({
+        ...x2ManyField.extractProps(staticInfo, dynamicInfo),
+        aggregatedFields: staticInfo.attrs.aggregated_fields
+            ? staticInfo.attrs.aggregated_fields.split(/\s*,\s*/)
+            : [],
+        hideComposition: staticInfo.options?.hide_composition ?? false,
+        hidePrices: staticInfo.options?.hide_prices ?? false,
+        subsections: staticInfo.options?.subsections ?? false,
+    }),
 };
 
 export const sectionAndNoteText = {

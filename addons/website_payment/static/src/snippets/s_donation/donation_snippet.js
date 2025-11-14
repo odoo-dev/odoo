@@ -1,4 +1,3 @@
-
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
@@ -13,11 +12,11 @@ export class DonationSnippet extends Interaction {
     dynamicContent = {
         ".s_donation_btn": {
             "t-on-click.withTarget": this.onPrefilledClick,
-            "t-att-class": (el) => ({ "active": el === this.activeButtonEl }),
+            "t-att-class": (el) => ({ active: el === this.activeButtonEl }),
         },
         ".s_donation_donate_btn": {
             "t-on-click.withTarget": this.locked(this.onDonateClick, true),
-            "t-att-class": () => ({ "o_ready_to_donate": true }), // See TEST_01_DONATION_FIX
+            "t-att-class": () => ({ o_ready_to_donate: true }), // See TEST_01_DONATION_FIX
         },
         "#s_donation_range_slider": { "t-on-input": this.onRangeSliderInput },
         "#s_donation_amount_input": {
@@ -32,7 +31,7 @@ export class DonationSnippet extends Interaction {
         this.activeButtonEl = null;
         this.rangeSliderEl = this.el.querySelector("#s_donation_range_slider");
         this.defaultAmount = this.el.dataset.defaultAmount;
-        if (!!this.rangeSliderEl) {
+        if (this.rangeSliderEl) {
             this.rangeSliderEl.value = this.defaultAmount;
             this.setBubble();
         }
@@ -66,7 +65,9 @@ export class DonationSnippet extends Interaction {
 
         const customButtonEl = this.el.querySelector("#s_donation_amount_input");
         if (customButtonEl) {
-            this.registerCleanup(() => { customButtonEl.style.maxWidth = "" });
+            this.registerCleanup(() => {
+                customButtonEl.style.maxWidth = "";
+            });
             const canvasEl = document.createElement("canvas");
             const context = canvasEl.getContext("2d");
             context.font = window.getComputedStyle(customButtonEl).font;
@@ -81,7 +82,7 @@ export class DonationSnippet extends Interaction {
         const min = this.rangeSliderEl.min || 0;
         const max = this.rangeSliderEl.max || 100;
         const newVal = Number(((val - min) * 100) / (max - min));
-        const tipOffsetLow = 8 - (newVal * 0.16); // the range thumb size is 16px*16px. The '8' and the '0.16' are related to that 16px (50% and 1% of 16px)
+        const tipOffsetLow = 8 - newVal * 0.16; // the range thumb size is 16px*16px. The '8' and the '0.16' are related to that 16px (50% and 1% of 16px)
 
         for (const child of bubbleEl.childNodes) {
             if (child.nodeType === 3) {
@@ -116,7 +117,9 @@ export class DonationSnippet extends Interaction {
     onDonateClick(ev, currentTargetEl) {
         this.el.querySelector(".alert-danger")?.remove();
         const donationButtonEls = this.el.querySelectorAll(".s_donation_btn");
-        let amount = this.activeButtonEl ? parseFloat(this.activeButtonEl.dataset.donationValue) : 0;
+        let amount = this.activeButtonEl
+            ? parseFloat(this.activeButtonEl.dataset.donationValue)
+            : 0;
         if (this.el.dataset.displayOptions && !amount) {
             if (this.rangeSliderEl) {
                 amount = parseFloat(this.rangeSliderEl.value);
@@ -127,12 +130,9 @@ export class DonationSnippet extends Interaction {
                 if (!amount) {
                     errorMessage = _t("Please select or enter an amount");
                 } else if (amount < minAmount) {
-                    errorMessage = _t(
-                        "The minimum donation amount is %(amount)s",
-                        {
-                            amount: formatCurrency(minAmount, this.currency.id),
-                        }
-                    );
+                    errorMessage = _t("The minimum donation amount is %(amount)s", {
+                        amount: formatCurrency(minAmount, this.currency.id),
+                    });
                 }
                 if (errorMessage) {
                     const pEl = document.createElement("p");
@@ -175,6 +175,4 @@ export class DonationSnippet extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website_payment.donation_snippet", DonationSnippet);
+registry.category("public.interactions").add("website_payment.donation_snippet", DonationSnippet);
