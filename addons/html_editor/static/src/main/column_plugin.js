@@ -86,6 +86,16 @@ export class ColumnPlugin extends Plugin {
                 text: _t("Empty column"),
             },
         ],
+        /** Resize Configurations */
+        resize_configs: [
+            {
+                resizableElementsSelector: "div[class^='col-']",
+                parentContainerSelector: ".o_text_columns .row",
+                allowedEdges: ["left", "right"],
+                minSize: 200,
+                hoverClass: "o_resize_handle",
+            },
+        ],
         unremovable_node_predicates: isUnremovableColumn,
         power_buttons_visibility_predicates: ({ anchorNode }) =>
             !closestElement(anchorNode, ".o_text_columns"),

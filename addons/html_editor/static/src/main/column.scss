@@ -1,0 +1,14 @@
+.o_text_columns > .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.o_text_columns > .row > [class*="col-"] {
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+}
+
+.o_resize_handle {
+    border-left-color: $o-gray-300 !important;
+    border-right-color: $o-gray-300 !important;
+}
