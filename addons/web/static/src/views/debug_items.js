@@ -142,8 +142,12 @@ class GetMetadataDialog extends Component {
         this.state.xmlid = metadata.xmlid;
         this.state.xmlids = metadata.xmlids;
         this.state.noupdate = metadata.noupdate;
-        this.state.creator = formatMany2one(metadata.create_uid && { display_name: metadata.create_uid[1] });
-        this.state.lastModifiedBy = formatMany2one(metadata.write_uid && { display_name: metadata.write_uid[1] });
+        this.state.creator = formatMany2one(
+            metadata.create_uid && { display_name: metadata.create_uid[1] }
+        );
+        this.state.lastModifiedBy = formatMany2one(
+            metadata.write_uid && { display_name: metadata.write_uid[1] }
+        );
         this.state.createDate = formatDateTime(deserializeDateTime(metadata.create_date));
         this.state.writeDate = formatDateTime(deserializeDateTime(metadata.write_date));
     }
@@ -323,9 +327,7 @@ class SetDefaultDialog extends Component {
             displayed = value.display_name;
             value = value.id;
         } else if (value && fieldInfo.type === "selection") {
-            displayed = fieldInfo.selection.find((option) => {
-                return option[0] === value;
-            })[1];
+            displayed = fieldInfo.selection.find((option) => option[0] === value)[1];
         }
         if (
             (typeof displayed === "string" || displayed instanceof String) &&
@@ -340,9 +342,9 @@ class SetDefaultDialog extends Component {
         if (!this.state.fieldToSet) {
             return;
         }
-        let fieldToSet = this.defaultFields.find((field) => {
-            return field.name === this.state.fieldToSet;
-        }).value;
+        let fieldToSet = this.defaultFields.find(
+            (field) => field.name === this.state.fieldToSet
+        ).value;
 
         if (fieldToSet.constructor.name.toLowerCase() === "date") {
             fieldToSet = serializeDate(fieldToSet);

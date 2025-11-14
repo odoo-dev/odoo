@@ -20,26 +20,23 @@ export class FilterableSelectionField extends SelectionField {
     get options() {
         let options = super.options;
         if (this.props.whitelist_fname) {
-            options = options.filter((option) => {
-                return (
+            options = options.filter(
+                (option) =>
                     option[0] === this.props.record.data[this.props.name] ||
                     this.props.record.data[this.props.whitelist_fname].includes(option[0])
-                );
-            });
+            );
         } else if (this.props.whitelisted_values) {
-            options = options.filter((option) => {
-                return (
+            options = options.filter(
+                (option) =>
                     option[0] === this.props.record.data[this.props.name] ||
                     this.props.whitelisted_values.includes(option[0])
-                );
-            });
+            );
         } else if (this.props.blacklisted_values) {
-            options = options.filter((option) => {
-                return (
+            options = options.filter(
+                (option) =>
                     option[0] === this.props.record.data[this.props.name] ||
                     !this.props.blacklisted_values.includes(option[0])
-                );
-            });
+            );
         }
         return options;
     }

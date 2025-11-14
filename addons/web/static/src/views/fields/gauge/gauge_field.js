@@ -47,7 +47,9 @@ export class GaugeField extends Component {
 
     renderChart() {
         const gaugeValue = this.props.record.data[this.props.name];
-        let maxValue = this.props.maxValueField ? this.props.record.data[this.props.maxValueField] : this.props.maxValue;
+        let maxValue = this.props.maxValueField
+            ? this.props.record.data[this.props.maxValueField]
+            : this.props.maxValue;
         maxValue = Math.max(gaugeValue, maxValue);
         let maxLabel = maxValue;
         if (gaugeValue === 0 && maxValue === 0) {

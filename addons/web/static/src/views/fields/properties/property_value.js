@@ -176,13 +176,19 @@ export class PropertyValue extends Component {
             return value.map((many2manyValue) => {
                 const hasAccess = many2manyValue[1] !== null;
                 const props = {
-                    imageUrl: this.showAvatar && hasAccess ? imageUrl(this.props.comodel, many2manyValue[0], "avatar_128") : undefined,
-                    onClick: hasAccess && this.clickableRelational
-                        ? (async () => await this._openRecord(this.props.comodel, many2manyValue[0]))
-                        : undefined,
-                    onDelete: !this.props.readonly && hasAccess
-                        ? (() => this.onMany2manyDelete(many2manyValue[0]))
-                        : undefined,
+                    imageUrl:
+                        this.showAvatar && hasAccess
+                            ? imageUrl(this.props.comodel, many2manyValue[0], "avatar_128")
+                            : undefined,
+                    onClick:
+                        hasAccess && this.clickableRelational
+                            ? async () =>
+                                  await this._openRecord(this.props.comodel, many2manyValue[0])
+                            : undefined,
+                    onDelete:
+                        !this.props.readonly && hasAccess
+                            ? () => this.onMany2manyDelete(many2manyValue[0])
+                            : undefined,
                     text: hasAccess ? many2manyValue[1] : _t("No Access"),
                 };
                 return {
@@ -312,9 +318,14 @@ export class PropertyValue extends Component {
                 // Make a RPC call to resolve the display name of the record.
                 newValue = await this._nameGet(newValue.id);
             } else if (newValue && !newValue.id && newValue.display_name) {
-                const result = await this.orm.call(this.props.comodel, "name_create", [newValue.display_name], {
-                    context: this.props.context,
-                });
+                const result = await this.orm.call(
+                    this.props.comodel,
+                    "name_create",
+                    [newValue.display_name],
+                    {
+                        context: this.props.context,
+                    }
+                );
                 newValue.id = result[0];
                 newValue.display_name = result[1];
             }

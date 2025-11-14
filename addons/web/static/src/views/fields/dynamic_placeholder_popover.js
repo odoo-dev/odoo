@@ -68,7 +68,7 @@ export class DynamicPlaceholderPopover extends Component {
     setPath(path, fieldInfo) {
         this.state.path = path;
         this.state.fieldName = fieldInfo?.string;
-        this.fieldType = fieldInfo?.type
+        this.fieldType = fieldInfo?.type;
     }
     setDefaultValue(value) {
         this.state.defaultValue = value;

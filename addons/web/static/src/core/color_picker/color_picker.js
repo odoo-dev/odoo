@@ -1,11 +1,7 @@
 import { Component, useEffect, useRef, useState } from "@odoo/owl";
 import { CustomColorPicker } from "@web/core/color_picker/custom_color_picker/custom_color_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
-import {
-    isCSSColor,
-    isColorGradient,
-    normalizeCSSColor,
-} from "@web/core/utils/colors";
+import { isCSSColor, isColorGradient, normalizeCSSColor } from "@web/core/utils/colors";
 import { cookie } from "@web/core/browser/cookie";
 import { POSITION_BUS } from "../position/position_hook";
 import { registry } from "../registry";

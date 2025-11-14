@@ -61,9 +61,7 @@ export const BUILTINS = {
                 `set expected at most 1 argument, got (${arguments.length - 1}`
             );
         }
-        return execOnIterable(iterable, (iterable) => {
-            return new Set(iterable);
-        });
+        return execOnIterable(iterable, (iterable) => new Set(iterable));
     },
 
     max(...args) {

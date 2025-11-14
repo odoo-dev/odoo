@@ -29,22 +29,20 @@ export class PriorityField extends Component {
         return [
             [
                 commandName,
-                () => {
-                    return {
-                        placeholder: commandName,
-                        providers: [
-                            {
-                                provide: () =>
-                                    this.options.map((value) => ({
-                                        name: value[1],
-                                        action: () => {
-                                            this.updateRecord(value[0]);
-                                        },
-                                    })),
-                            },
-                        ],
-                    };
-                },
+                () => ({
+                    placeholder: commandName,
+                    providers: [
+                        {
+                            provide: () =>
+                                this.options.map((value) => ({
+                                    name: value[1],
+                                    action: () => {
+                                        this.updateRecord(value[0]);
+                                    },
+                                })),
+                        },
+                    ],
+                }),
                 { category: "smart_action", hotkey: "alt+r" },
             ],
         ];

@@ -469,10 +469,10 @@ test("should accept file with allowed MIME type and reject others", async () => 
 
 test("doesn't crash if value is not a string", async () => {
     class Dummy extends models.Model {
-        document = fields.Binary()
+        document = fields.Binary();
         _applyComputesAndValidate() {}
     }
-    defineModels([Dummy])
+    defineModels([Dummy]);
     Dummy._records.push({ id: 1, document: {} });
     await mountView({
         type: "form",

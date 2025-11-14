@@ -7,7 +7,7 @@ const mainComponents = registry.category("main_components");
 
 mainComponents.addValidation({
     Component: { validate: (c) => c.prototype instanceof Component },
-    props: { type: Object, optional: true }
+    props: { type: Object, optional: true },
 });
 
 export class MainComponentsContainer extends Component {

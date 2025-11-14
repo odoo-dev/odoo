@@ -78,7 +78,9 @@ export const PROPERTIES_INFO = {
     },
 };
 export const PROPERTY_TYPES = Object.keys(PROPERTIES_INFO);
-const PROPERTY_PARAMETERS = new Set(Object.values(PROPERTIES_INFO).flatMap((info) => info.parameters));
+const PROPERTY_PARAMETERS = new Set(
+    Object.values(PROPERTIES_INFO).flatMap((info) => info.parameters)
+);
 
 export class PropertyDefinition extends Component {
     static template = "web.PropertyDefinition";
@@ -174,9 +176,9 @@ export class PropertyDefinition extends Component {
     }
 
     get currencyFields() {
-        return Object
-            .values(this.props.record.fields)
-            .filter((fieldDef) => fieldDef.type === "many2one" && fieldDef.relation === "res.currency");
+        return Object.values(this.props.record.fields).filter(
+            (fieldDef) => fieldDef.type === "many2one" && fieldDef.relation === "res.currency"
+        );
     }
 
     get defaultCurrencyField() {

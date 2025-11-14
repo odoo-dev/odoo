@@ -386,9 +386,9 @@ async function testViews() {
                 triggerClick(target, `${viewType} view switcher`);
             }
         }, 250);
-        await waitForCondition(() => {
-            return document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null;
-        });
+        await waitForCondition(
+            () => document.querySelector(`.o_switch_view.o_${viewType}.active`) !== null
+        );
         await testStudio();
         await testFilters();
     }

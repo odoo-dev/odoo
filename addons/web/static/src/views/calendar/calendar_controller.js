@@ -106,7 +106,7 @@ export class CalendarController extends Component {
             domain: this.props.domain,
             fields: this.props.fields,
             date: this.props.state?.date,
-            loadSurroundings: hasTouch()
+            loadSurroundings: hasTouch(),
         };
     }
 
@@ -152,13 +152,9 @@ export class CalendarController extends Component {
     get weekHeader() {
         const { start, end } = this.model.visibleRange;
         if (start.year != end.year) {
-            return `${start.toFormat("MMMM")} ${start.year} - ${end.toFormat(
-                "MMMM"
-            )} ${end.year}`;
+            return `${start.toFormat("MMMM")} ${start.year} - ${end.toFormat("MMMM")} ${end.year}`;
         } else if (start.month != end.month) {
-            return `${start.toFormat("MMMM")} - ${end.toFormat("MMMM")} ${
-                start.year
-            }`;
+            return `${start.toFormat("MMMM")} - ${end.toFormat("MMMM")} ${start.year}`;
         }
         return `${start.toFormat("MMMM")} ${start.year}`;
     }

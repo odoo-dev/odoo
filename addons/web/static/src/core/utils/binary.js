@@ -14,7 +14,7 @@ export function isBinarySize(value) {
  * @returns {number} number of char
  */
 export function toBase64Length(maxBytes) {
-    return Math.ceil(maxBytes * 4 / 3);
+    return Math.ceil((maxBytes * 4) / 3);
 }
 
 /**

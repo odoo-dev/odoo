@@ -127,7 +127,6 @@ export function fuzzyLevenshteinLookup(pattern, list, errorRatio = 3) {
     return results.map((r) => r.elem);
 }
 
-
 /**
  * Computes the Levenshtein distance between two strings.
  *
@@ -136,10 +135,10 @@ export function fuzzyLevenshteinLookup(pattern, list, errorRatio = 3) {
  * @returns {number} The Levenshtein distance between `a` and `b`.
  */
 function getLevenshteinScore(a, b) {
-    let aLength = a.length;
-    let bLength = b.length;
+    const aLength = a.length;
+    const bLength = b.length;
 
-    let distanceMatrix = [];
+    const distanceMatrix = [];
     for (let i = 0; i <= aLength; i++) {
         distanceMatrix[i] = [];
         for (let j = 0; j <= bLength; j++) {

@@ -31,6 +31,4 @@ export class Login extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("public.login", Login);
+registry.category("public.interactions").add("public.login", Login);

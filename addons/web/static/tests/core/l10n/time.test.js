@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, test } from "@odoo/hoot";
-import {
-    patchWithCleanup,
-    defineParams,
-} from "@web/../tests/web_test_helpers";
+import { patchWithCleanup, defineParams } from "@web/../tests/web_test_helpers";
 import { localization } from "@web/core/l10n/localization";
 import { parseTime } from "@web/core/l10n/time";
 
@@ -22,7 +19,6 @@ beforeEach(() => {
 
 describe.current.tags("headless");
 test("parseTime (various entries)", async () => {
-
     const testSet = [
         // Default ":" separator
         ["8:15", "8:15:00"],
@@ -90,7 +86,6 @@ test("parseTime (various entries)", async () => {
 
 describe.current.tags("headless");
 test("parseTime (no seconds)", async () => {
-
     const testSet = [
         ["8:15", "8:15"],
         ["10:15", "10:15"],

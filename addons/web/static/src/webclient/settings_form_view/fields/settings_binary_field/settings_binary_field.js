@@ -12,9 +12,8 @@ export class SettingsBinaryField extends BinaryField {
             model: this.props.record.fields[fieldName].relation,
             field: relatedFieldName ?? fieldName,
             id: this.props.record.data[fieldName].id,
-        }
+        };
     }
-
 }
 
 const settingsBinaryField = {

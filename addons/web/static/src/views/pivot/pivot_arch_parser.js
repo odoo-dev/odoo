@@ -49,7 +49,11 @@ export class PivotArchParser {
                         break;
                     }
                     for (const { name, value } of node.attributes) {
-                        if (["name", "type", "operator", "interval", "string", "widget"].includes(name)) {
+                        if (
+                            ["name", "type", "operator", "interval", "string", "widget"].includes(
+                                name
+                            )
+                        ) {
                             continue;
                         }
                         if (name === "options") {

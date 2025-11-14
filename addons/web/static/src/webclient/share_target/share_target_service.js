@@ -9,8 +9,8 @@ import { browser } from "@web/core/browser/browser";
  *     externalMediaFiles:File[]
  * }>}
  */
-const getShareTargetDataFromServiceWorker = () => {
-    return new Promise((resolve) => {
+const getShareTargetDataFromServiceWorker = () =>
+    new Promise((resolve) => {
         const onmessage = (event) => {
             if (event.data.action === "odoo_share_target_ack") {
                 resolve(event.data.shared_files);
@@ -20,7 +20,6 @@ const getShareTargetDataFromServiceWorker = () => {
         browser.navigator.serviceWorker.addEventListener("message", onmessage);
         browser.navigator.serviceWorker.controller.postMessage("odoo_share_target");
     });
-};
 
 export const shareTargetService = {
     dependencies: ["menu"],

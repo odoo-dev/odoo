@@ -38,8 +38,8 @@ export class FileUploader extends Component {
      * @param {Event} ev
      */
     async onFileChange(ev) {
-        const files = [...ev.target.files].filter(file => this.validFileType(file));
-        if (!files. length) {
+        const files = [...ev.target.files].filter((file) => this.validFileType(file));
+        if (!files.length) {
             return;
         }
         const { target } = ev;
@@ -81,7 +81,7 @@ export class FileUploader extends Component {
      * @param {File} file
      * @returns Whether the upload file's type is in the whitelist (`allowedMIMETypes`).
      */
-     validFileType(file) {
+    validFileType(file) {
         if (this.props.allowedMIMETypes && !this.props.allowedMIMETypes.includes(file.type)) {
             this.notification.add(
                 _t(`Oops! '%(fileName)s' didn’t upload since its format isn’t allowed.`, {

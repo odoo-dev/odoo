@@ -138,12 +138,20 @@ describe("Basic Properties", () => {
         expect(new Domain([["a", "not ilike", "value"]]).contains({ a: "Something" })).toBe(true);
         expect(new Domain([["a", "not ilike", "value"]]).contains({ a: false })).toBe(true);
 
-        expect(new Domain([["a", "not =like", "%value"]]).contains({ a: "some value" })).toBe(false);
-        expect(new Domain([["a", "not =like", "%value"]]).contains({ a: "Some Value" })).not.toBe(false);
+        expect(new Domain([["a", "not =like", "%value"]]).contains({ a: "some value" })).toBe(
+            false
+        );
+        expect(new Domain([["a", "not =like", "%value"]]).contains({ a: "Some Value" })).not.toBe(
+            false
+        );
 
         expect(new Domain([["a", "not =ilike", "%value"]]).contains({ a: "value" })).toBe(false);
-        expect(new Domain([["a", "not =ilike", "%value"]]).contains({ a: "some value" })).toBe(false);
-        expect(new Domain([["a", "not =ilike", "%value"]]).contains({ a: "Some Value" })).toBe(false);
+        expect(new Domain([["a", "not =ilike", "%value"]]).contains({ a: "some value" })).toBe(
+            false
+        );
+        expect(new Domain([["a", "not =ilike", "%value"]]).contains({ a: "Some Value" })).toBe(
+            false
+        );
         expect(new Domain([["a", "not =ilike", "%value"]]).contains({ a: false })).toBe(true);
     });
 

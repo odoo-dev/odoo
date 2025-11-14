@@ -103,9 +103,7 @@ export class CalendarFilterSection extends Component {
                 id: result[0],
             },
             label: result[1],
-            onSelect: () => {
-                return this.props.model.createFilter(this.section.fieldName, result[0]);
-            },
+            onSelect: () => this.props.model.createFilter(this.section.fieldName, result[0]),
         }));
 
         if (records.length > 7) {

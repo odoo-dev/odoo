@@ -82,7 +82,10 @@ export function useInputField(params) {
                 if (val !== component.props.record.data[fieldName]) {
                     lastSetValue = inputRef.el.value;
                     pendingUpdate = true;
-                    await component.props.record.update({ [fieldName]: val }, { save: shouldSave() });
+                    await component.props.record.update(
+                        { [fieldName]: val },
+                        { save: shouldSave() }
+                    );
                     pendingUpdate = false;
                     component.props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
                 } else {
@@ -132,11 +135,7 @@ export function useInputField(params) {
         // the corresponding value in the record. Otherwise, in some cases,
         // if the value in the record change the useEffect isn't triggered.
         const value = params.getValue();
-        if (
-            inputRef.el &&
-            !isDirty &&
-            !component.props.record.isFieldInvalid(fieldName)
-        ) {
+        if (inputRef.el && !isDirty && !component.props.record.isFieldInvalid(fieldName)) {
             inputRef.el.value = value;
             lastSetValue = inputRef.el.value;
         }

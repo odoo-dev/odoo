@@ -3,13 +3,7 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { visitXML } from "@web/core/utils/xml";
 import { Field } from "@web/views/fields/field";
 
-const FIELD_ATTRIBUTE_NAMES = [
-    "date_start",
-    "date_stop",
-    "all_day",
-    "create_name_field",
-    "color",
-];
+const FIELD_ATTRIBUTE_NAMES = ["date_start", "date_stop", "all_day", "create_name_field", "color"];
 const SCALES = ["day", "week", "month", "year"];
 
 export class CalendarParseArchError extends Error {}

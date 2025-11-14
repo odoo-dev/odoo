@@ -480,8 +480,8 @@ export function download(options) {
     return download._download(options);
 }
 
-download._download = (options) => {
-    return new Promise((resolve, reject) => {
+download._download = (options) =>
+    new Promise((resolve, reject) => {
         const xhr = new browser.XMLHttpRequest();
         let data;
         if (Object.prototype.hasOwnProperty.call(options, "form")) {
@@ -506,7 +506,6 @@ download._download = (options) => {
         });
         xhr.send(data);
     });
-};
 
 /**
  * Setup a download xhr request response handling
@@ -542,8 +541,7 @@ export function configureBlobDownloadXHR(
             decoder.onload = () => {
                 const contents = decoder.result;
                 const doc = new DOMParser().parseFromString(contents, "text/html");
-                const nodes =
-                    doc.body.children.length === 0 ? [doc.body] : doc.body.children;
+                const nodes = doc.body.children.length === 0 ? [doc.body] : doc.body.children;
 
                 let error;
                 try {

@@ -103,13 +103,12 @@ export class Mutex {
                 };
             });
         }
-        const always = () => {
-            return Promise.resolve(action()).finally(() => {
+        const always = () =>
+            Promise.resolve(action()).finally(() => {
                 if (--this._queueSize === 0) {
                     this._unlock();
                 }
             });
-        };
         this._lock = this._lock.then(always, always);
         return this._lock;
     }

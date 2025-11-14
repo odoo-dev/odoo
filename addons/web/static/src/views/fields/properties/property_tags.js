@@ -99,7 +99,7 @@ export class PropertyTags extends Component {
                 text: tagLabel,
                 color: tagColorIndex || 0,
                 onClick: (event) => this.onTagClick(event, tagId, tagColorIndex),
-                onDelete: canDeleteTag ? (() => this.onTagDelete(tagId)) : undefined,
+                onDelete: canDeleteTag ? () => this.onTagDelete(tagId) : undefined,
             };
         });
     }

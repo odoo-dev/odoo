@@ -55,12 +55,10 @@ export const badgeField = {
             help: _t("Set an integer field to use colors with the badge."),
         },
     ],
-    extractProps: ({ decorations, options }) => {
-        return {
-            decorations,
-            colorField: options.color_field,
-        };
-    },
+    extractProps: ({ decorations, options }) => ({
+        decorations,
+        colorField: options.color_field,
+    }),
 };
 
 registry.category("fields").add("badge", badgeField);

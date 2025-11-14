@@ -3,13 +3,10 @@ import { queryAllTexts } from "@odoo/hoot-dom";
 import { contains, mountWithCleanup, onRpc } from "@web/../tests/web_test_helpers";
 import { NameAndSignature } from "@web/core/signature/name_and_signature";
 
-const getNameAndSignatureButtonNames = () => {
-    return queryAllTexts(".card-header .col-auto").filter((text) => text.length);
-};
+const getNameAndSignatureButtonNames = () =>
+    queryAllTexts(".card-header .col-auto").filter((text) => text.length);
 
-onRpc("/web/sign/get_fonts/", () => {
-    return {};
-});
+onRpc("/web/sign/get_fonts/", () => ({}));
 
 test("test name_and_signature widget", async () => {
     const props = {
@@ -114,19 +111,18 @@ test("test name_and_signature widget update signmode with onSignatureChange prop
 });
 
 test("test name_and_signature widget with non-breaking spaces", async function () {
-   const props = {
-       signature: { name: "Non Breaking Spaces" },
-   };
-   const res = await mountWithCleanup(NameAndSignature, { props });
-   expect(res.getCleanedName()).toBe("Non Breaking Spaces");
+    const props = {
+        signature: { name: "Non Breaking Spaces" },
+    };
+    const res = await mountWithCleanup(NameAndSignature, { props });
+    expect(res.getCleanedName()).toBe("Non Breaking Spaces");
 });
 
-
 test("test name_and_signature widget with non-breaking spaces and initials mode", async function () {
-   const props = {
-       signature: { name: "Non Breaking Spaces" },
-       signatureType: "initial",
-   };
-   const res = await mountWithCleanup(NameAndSignature, { props });
-   expect(res.getCleanedName()).toBe("N.B.S.");
+    const props = {
+        signature: { name: "Non Breaking Spaces" },
+        signatureType: "initial",
+    };
+    const res = await mountWithCleanup(NameAndSignature, { props });
+    expect(res.getCleanedName()).toBe("N.B.S.");
 });

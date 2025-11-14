@@ -47,9 +47,10 @@ export class StateSelectionField extends Component {
         }
     }
     get options() {
-        return this.props.record.fields[this.props.name].selection.map(([state, label]) => {
-            return [state, this.props.record.data[`legend_${state}`] || label];
-        });
+        return this.props.record.fields[this.props.name].selection.map(([state, label]) => [
+            state,
+            this.props.record.data[`legend_${state}`] || label,
+        ]);
     }
     get currentValue() {
         return this.props.record.data[this.props.name] || this.options[0][0];
@@ -95,7 +96,7 @@ export const stateSelectionField = {
     supportedTypes: ["selection"],
     extractProps({ options, viewType }, dynamicInfo) {
         return {
-            showLabel: 'hide_label' in options ? !options.hide_label : false,
+            showLabel: "hide_label" in options ? !options.hide_label : false,
             withCommand: viewType === "form",
             readonly: dynamicInfo.readonly,
             autosave: "autosave" in options ? !!options.autosave : true,

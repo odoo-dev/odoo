@@ -110,24 +110,22 @@ export function useVirtualGrid({ scrollableRef, initialScroll, onChange, bufferC
     onChange ||= () => comp.render();
 
     const current = { scroll: { left: 0, top: 0, ...initialScroll } };
-    const computeColumnsIndexes = () => {
-        return getIndexes({
+    const computeColumnsIndexes = () =>
+        getIndexes({
             sizes: current.summedColumnsWidths,
             start: Math.abs(current.scroll.left),
             span: window.innerWidth,
             prevStartIndex: current.columnsIndexes?.[0],
             bufferCoef,
         });
-    };
-    const computeRowsIndexes = () => {
-        return getIndexes({
+    const computeRowsIndexes = () =>
+        getIndexes({
             sizes: current.summedRowsHeights,
             start: current.scroll.top,
             span: window.innerHeight,
             prevStartIndex: current.rowsIndexes?.[0],
             bufferCoef,
         });
-    };
     const throttledCompute = useThrottleForAnimation(() => {
         const changed = [];
         const columnsVisibleIndexes = computeColumnsIndexes();

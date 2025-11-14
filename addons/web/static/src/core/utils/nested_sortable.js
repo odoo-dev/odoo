@@ -223,14 +223,12 @@ export const useNestedSortable = makeDraggableHook({
             return list;
         };
 
-        const getPosition = (el) => {
-            return {
-                previous: el.previousElementSibling,
-                next: el.nextElementSibling,
-                parent: el.parentElement?.closest(ctx.elementSelector) || null,
-                group: ctx.groupSelector ? el.closest(ctx.groupSelector) : false,
-            };
-        };
+        const getPosition = (el) => ({
+            previous: el.previousElementSibling,
+            next: el.nextElementSibling,
+            parent: el.parentElement?.closest(ctx.elementSelector) || null,
+            group: ctx.groupSelector ? el.closest(ctx.groupSelector) : false,
+        });
         const position = getPosition(ctx.current.placeHolder);
 
         /** If nesting elements is allowed, horizontal moves may change the

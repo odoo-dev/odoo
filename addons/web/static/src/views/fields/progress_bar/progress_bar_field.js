@@ -75,7 +75,9 @@ export class ProgressBarField extends Component {
     }
 
     formatMaxValue(humanReadable = !this.state.isEditing) {
-        const formatter = formatters.get(this.props.record.fields[this.maxValueField]?.type ?? "integer");
+        const formatter = formatters.get(
+            this.props.record.fields[this.maxValueField]?.type ?? "integer"
+        );
         return formatter(this.maxValue, { humanReadable });
     }
 

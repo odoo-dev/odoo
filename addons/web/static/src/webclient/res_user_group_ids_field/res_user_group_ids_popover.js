@@ -35,7 +35,9 @@ export class ResUserGroupIdsPopover extends Component {
         const implyGroupsByPrivilege = groupBy(implyGroups, (g) => g.privilege_id);
         const keysToOmit = this.privilege ? ["false", String(this.privilege.id)] : ["false"];
         const groupsFromOtherPrivileges = omit(implyGroupsByPrivilege, ...keysToOmit);
-        const higherLevelGroups = Object.values(groupsFromOtherPrivileges).map((groups) => groups[groups.length-1]);
+        const higherLevelGroups = Object.values(groupsFromOtherPrivileges).map(
+            (groups) => groups[groups.length - 1]
+        );
         const groupsWithoutPrivilege = implyGroupsByPrivilege[false] || [];
         const implyGroupsToDisplay = groupsWithoutPrivilege.concat(higherLevelGroups);
         const { exclusive, joint, extra } = groupBy(implyGroupsToDisplay, (g) => {

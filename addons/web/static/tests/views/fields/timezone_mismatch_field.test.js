@@ -72,12 +72,12 @@ test("in a form view", async () => {
 
 test("timezone_mismatch_field mismatch property", () => {
     const testCases = [
-        {userOffset: "-1030", browserOffset: 630, expectedMismatch: false},
-        {userOffset: "+0000", browserOffset: 0, expectedMismatch: false},
-        {userOffset: "+0345", browserOffset: -225, expectedMismatch: false},
-        {userOffset: "+0500", browserOffset: -300, expectedMismatch: false},
-        {userOffset: "+0200", browserOffset: 120, expectedMismatch: true},
-        {userOffset: "+1200", browserOffset: 0, expectedMismatch: true},
+        { userOffset: "-1030", browserOffset: 630, expectedMismatch: false },
+        { userOffset: "+0000", browserOffset: 0, expectedMismatch: false },
+        { userOffset: "+0345", browserOffset: -225, expectedMismatch: false },
+        { userOffset: "+0500", browserOffset: -300, expectedMismatch: false },
+        { userOffset: "+0200", browserOffset: 120, expectedMismatch: true },
+        { userOffset: "+1200", browserOffset: 0, expectedMismatch: true },
     ];
 
     for (const testCase of testCases) {

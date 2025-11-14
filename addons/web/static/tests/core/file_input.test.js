@@ -121,9 +121,7 @@ test("uploading the same file twice triggers the onChange twice", async () => {
                 expect.step(files[0].name);
             },
         },
-        mockPost: (_, params) => {
-            return JSON.stringify([{ name: params.ufile[0].name }]);
-        },
+        mockPost: (_, params) => JSON.stringify([{ name: params.ufile[0].name }]),
     });
 
     const file = new File(["test"], "fake_file.txt", { type: "text/plain" });
@@ -147,9 +145,7 @@ test("uploading a file that is too heavy will send a notification", async () => 
                 expect.step(files[0].name);
             },
         },
-        mockPost: (_, params) => {
-            return JSON.stringify([{ name: params.ufile[0].name }]);
-        },
+        mockPost: (_, params) => JSON.stringify([{ name: params.ufile[0].name }]),
         mockAdd: (message) => {
             expect.step("notification");
             // Message is a bit weird because values (2 and 4 bytes) are simplified to 2 decimals in regards to megabytes
@@ -202,9 +198,7 @@ test("support preprocessing of files via props", async () => {
                 return files;
             },
         },
-        mockPost: (route, params) => {
-            return JSON.stringify([{ name: params.ufile[0].name }]);
-        },
+        mockPost: (route, params) => JSON.stringify([{ name: params.ufile[0].name }]),
     });
 
     await contains(".o_file_input input", { visible: false }).click();

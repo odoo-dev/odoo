@@ -52,7 +52,7 @@ export class CalendarRenderer extends Component {
             onLeftSwipe: this.getSwiperProps("next"),
             onRightSwipe: this.getSwiperProps("previous"),
             animationType: "forwards",
-            enabledDuration: TOUCH_SELECTION_THRESHOLD
+            enabledDuration: TOUCH_SELECTION_THRESHOLD,
         };
     }
     getSwiperProps(direction) {
@@ -62,8 +62,10 @@ export class CalendarRenderer extends Component {
                 component: this.concreteRenderer,
                 props: {
                     ...this.concreteRendererProps,
-                    initialDate: this.props.model.date[direction === "next" ? "plus" : "minus"]({[`${this.props.model.scale}s`]: 1}),
-                    isDisabled: true
+                    initialDate: this.props.model.date[direction === "next" ? "plus" : "minus"]({
+                        [`${this.props.model.scale}s`]: 1,
+                    }),
+                    isDisabled: true,
                 },
             },
         };

@@ -46,7 +46,7 @@ export class ActionSwiper extends Component {
         },
         enabledDuration: {
             type: Number,
-            optional: true
+            optional: true,
         },
         slots: Object,
         animationType: { type: String, optional: true },
@@ -87,10 +87,12 @@ export class ActionSwiper extends Component {
         });
     }
     get localizedProps() {
-        const onLeftSwipe = localization.direction === "rtl" ? this.props.onRightSwipe : this.props.onLeftSwipe;
-        const onRightSwipe = localization.direction === "rtl" ? this.props.onLeftSwipe : this.props.onRightSwipe;
+        const onLeftSwipe =
+            localization.direction === "rtl" ? this.props.onRightSwipe : this.props.onLeftSwipe;
+        const onRightSwipe =
+            localization.direction === "rtl" ? this.props.onLeftSwipe : this.props.onRightSwipe;
         if (!hasTouch() || (!onRightSwipe && !onLeftSwipe)) {
-            return;
+            return null;
         }
         return { onLeftSwipe, onRightSwipe };
     }
@@ -105,7 +107,10 @@ export class ActionSwiper extends Component {
         if (this.isSwipeStarted) {
             ev.stopPropagation();
             ev.preventDefault();
-            if (this.localizedProps.onRightSwipe && this.swipedDistance > this.containerWidth / this.constructor.swipeDistanceRatio) {
+            if (
+                this.localizedProps.onRightSwipe &&
+                this.swipedDistance > this.containerWidth / this.constructor.swipeDistanceRatio
+            ) {
                 this.swipedDistance = this.containerWidth;
                 this.handleSwipe(this.localizedProps.onRightSwipe.action);
                 return;
@@ -119,7 +124,10 @@ export class ActionSwiper extends Component {
             }
         }
         this.targetContainer.el.style.transform = "translateX(0)";
-        this.resetTimeoutId = browser.setTimeout(() => this._reset(), this.constructor.animationLength);
+        this.resetTimeoutId = browser.setTimeout(
+            () => this._reset(),
+            this.constructor.animationLength
+        );
     }
     /**
      * @private
@@ -180,7 +188,10 @@ export class ActionSwiper extends Component {
         this.targetContainer.el.classList.remove("o_actionswiper_transition_enabled");
         this.startX = ev.touches[0].clientX;
         if (this.props.enabledDuration) {
-            this.enabledTimeoutId = browser.setTimeout(() => this._reset(), this.props.enabledDuration);
+            this.enabledTimeoutId = browser.setTimeout(
+                () => this._reset(),
+                this.props.enabledDuration
+            );
         }
     }
 
@@ -218,7 +229,11 @@ export class ActionSwiper extends Component {
         if (this.targetContainer.el) {
             this.targetContainer.el.style.transform = distance ? `translateX(${distance}px)` : "";
         }
-        if (this.leftPanel.el) { this.leftPanel.el.style.maxWidth = `${distance}px` };
-        if (this.rightPanel.el) { this.rightPanel.el.style.maxWidth = `${-distance}px` };
+        if (this.leftPanel.el) {
+            this.leftPanel.el.style.maxWidth = `${distance}px`;
+        }
+        if (this.rightPanel.el) {
+            this.rightPanel.el.style.maxWidth = `${-distance}px`;
+        }
     }
 }

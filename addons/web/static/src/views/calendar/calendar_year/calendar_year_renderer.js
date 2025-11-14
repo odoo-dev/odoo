@@ -49,7 +49,7 @@ export class CalendarYearRenderer extends Component {
             eventStartEditable: false,
             eventDurationEditable: false,
             droppable: false,
-        }
+        };
     }
 
     get interactiveOptions() {
@@ -71,7 +71,7 @@ export class CalendarYearRenderer extends Component {
             windowResize: this.onWindowResize,
             eventContent: this.onEventContent,
             weekends: this.props.isWeekendVisible,
-        }
+        };
     }
 
     get options() {
@@ -115,7 +115,7 @@ export class CalendarYearRenderer extends Component {
     }
     mapRecordsToEvents() {
         const { records } = this.props.model.data;
-        return Object.values(records).map((r) => this.convertRecordToEvent(r))
+        return Object.values(records).map((r) => this.convertRecordToEvent(r));
     }
     convertRecordToEvent(record) {
         return {
@@ -148,7 +148,7 @@ export class CalendarYearRenderer extends Component {
             // The event might be fired after a touch pointerup without any jsEvent
             return;
         }
-        this.onDateClick(info)
+        this.onDateClick(info);
     }
     openPopover(target, date, records) {
         this.popover.open(target, this.getPopoverProps(date, records), "o_cw_popover");

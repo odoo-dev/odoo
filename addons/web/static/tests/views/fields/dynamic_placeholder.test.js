@@ -64,7 +64,12 @@ class Product extends models.Model {
             name: "xphone",
             properties_definitions: [
                 { name: "f80b6fb58d0d4c72", type: "integer", string: "prop 1" },
-                { name: "f424643eee1f3655", type: "many2one", string: "prop 2", comodel: "product" },
+                {
+                    name: "f424643eee1f3655",
+                    type: "many2one",
+                    string: "prop 2",
+                    comodel: "product",
+                },
             ],
         },
         { id: 41, name: "xpad" },
@@ -122,19 +127,33 @@ test("dynamic placeholder properties", async () => {
 
     await contains(".o_field_char input").edit("#", { confirm: false });
     expect(".o_model_field_selector_popover").toHaveCount(1);
-    expect(".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Properties')").toHaveCount(1);
+    expect(
+        ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Properties')"
+    ).toHaveCount(1);
 
     // select the properties
-    await contains(".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Properties') + .o_model_field_selector_popover_item_relation").click();
-    expect(".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('prop 1 (xphone)')").toHaveCount(1);
-    expect(".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('prop 2 (xphone)')").toHaveCount(1);
+    await contains(
+        ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Properties') + .o_model_field_selector_popover_item_relation"
+    ).click();
+    expect(
+        ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('prop 1 (xphone)')"
+    ).toHaveCount(1);
+    expect(
+        ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('prop 2 (xphone)')"
+    ).toHaveCount(1);
 
     // select the many2one property
-    await contains(".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('prop 2 (xphone)') + .o_model_field_selector_popover_item_relation").click();
-    expect(".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Created on')").toHaveCount(1);
+    await contains(
+        ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('prop 2 (xphone)') + .o_model_field_selector_popover_item_relation"
+    ).click();
+    expect(
+        ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Created on')"
+    ).toHaveCount(1);
 
     // select the product name
-    await contains(".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Product Name')").click();
+    await contains(
+        ".o_model_field_selector_popover .o_model_field_selector_popover_item_name:contains('Product Name')"
+    ).click();
 
     // click on insert
     await contains(".o_model_field_selector_popover button:contains('Insert')").click();

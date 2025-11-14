@@ -37,7 +37,7 @@ export class SignatureViewer extends Component {
     }
 
     get src() {
-        return this.state.isValid && this.props.url || PLACEHOLDER;
+        return (this.state.isValid && this.props.url) || PLACEHOLDER;
     }
 
     get size() {

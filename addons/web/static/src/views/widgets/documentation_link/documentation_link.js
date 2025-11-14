@@ -32,7 +32,7 @@ export class DocumentationLink extends Component {
 
     get classes() {
         let classes = "o_doc_link me-2";
-        if (this.props.alertLink){
+        if (this.props.alertLink) {
             classes += " alert-link";
         }
         return classes;

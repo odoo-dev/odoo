@@ -266,7 +266,7 @@ beforeEach(() => {
             // avoid to change the range on the model between 'desktop' and 'mobile' tests
             params.loadSurroundings = false;
             return params;
-        }
+        },
     });
 });
 
@@ -279,7 +279,7 @@ function enableLoadSurroundingsInTest() {
                 params.loadSurroundings = true;
             }
             return params;
-        }
+        },
     });
 }
 
@@ -5646,7 +5646,9 @@ test("calendar (year): tap on date switch to day scale", async () => {
     // Should display day view
     expect(".o_calendar_current .fc-dayGridYear-view").toHaveCount(0);
     expect(".o_calendar_current .fc-timeGridDay-view").toHaveCount(1);
-    expect(queryFirst(".o_calendar_current .fc-col-header-cell[data-date]").dataset.date).toBe("2016-02-05");
+    expect(queryFirst(".o_calendar_current .fc-col-header-cell[data-date]").dataset.date).toBe(
+        "2016-02-05"
+    );
 
     // Change scale to month
     await changeScale("month");
@@ -5769,11 +5771,11 @@ test(`calendar renderer is rendered again after search refresh`, async () => {
         `,
     });
     expect.verifySteps(["before load", "after load", "rendered"], {
-        message: "model trigger two notify before the initial render"
+        message: "model trigger two notify before the initial render",
     });
     await validateSearch();
     expect.verifySteps(["before load", "rendered", "after load", "rendered"], {
-        message: "model trigger two rerender, one the load"
+        message: "model trigger two rerender, one the load",
     });
 });
 
@@ -5859,7 +5861,7 @@ test(`three calendars are rendered in the ActionSwiper on touch devices`, async 
     expect.verifySteps(["event.search_read"]);
     expect(".o_calendar_widget").toHaveCount(3);
     expect(".o_actionswiper_left_swipe_area .fc-event").toHaveCount(2, {
-        message: "events are displayed on the following month"
+        message: "events are displayed on the following month",
     });
     expect(".o_actionswiper_left_swipe_area .fc-daygrid-body .fc-event").toHaveText("event 5");
 });

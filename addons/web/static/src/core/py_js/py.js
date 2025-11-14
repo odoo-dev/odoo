@@ -40,7 +40,9 @@ export function evaluateExpr(expr, context = {}) {
     try {
         return evaluate(ast, context);
     } catch (error) {
-        throw new EvalError(`Can not evaluate python expression: (${expr})\nError: ${error.message}`);
+        throw new EvalError(
+            `Can not evaluate python expression: (${expr})\nError: ${error.message}`
+        );
     }
 }
 
@@ -52,10 +54,10 @@ export function evaluateExpr(expr, context = {}) {
  * @returns {any}
  */
 export function evaluateBooleanExpr(expr, context = {}) {
-    if (!expr || expr === 'False' || expr === '0') {
+    if (!expr || expr === "False" || expr === "0") {
         return false;
     }
-    if (expr === 'True' || expr === '1') {
+    if (expr === "True" || expr === "1") {
         return true;
     }
     return evaluateExpr(`bool(${expr})`, context);

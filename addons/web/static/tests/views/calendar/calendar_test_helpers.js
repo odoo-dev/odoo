@@ -241,7 +241,7 @@ async function waitForSelection() {
         await advanceTime(TOUCH_SELECTION_THRESHOLD);
     }
     await animationFrame();
-};
+}
 
 /**
  * @param {string} date
@@ -424,7 +424,9 @@ export async function selectDateRange(startDate, endDate) {
     await hover(startCell);
     await animationFrame();
 
-    const { moveTo, drop } = await drag(startCell, {pointerDownDuration: TOUCH_SELECTION_THRESHOLD});
+    const { moveTo, drop } = await drag(startCell, {
+        pointerDownDuration: TOUCH_SELECTION_THRESHOLD,
+    });
     await waitForSelection();
 
     await moveTo(endCell);
@@ -448,7 +450,7 @@ export async function selectAllDayRange(startDate, endDate) {
     await hover(start);
     await animationFrame();
 
-    const { drop } = await drag(start, {pointerDownDuration: TOUCH_SELECTION_THRESHOLD});
+    const { drop } = await drag(start, { pointerDownDuration: TOUCH_SELECTION_THRESHOLD });
     await waitForSelection();
 
     await drop(end);
@@ -476,7 +478,9 @@ export async function moveEventToDate(eventId, date, options) {
     await hover(eventEl);
     await animationFrame();
 
-    const { drop, moveTo } = await drag(eventEl, {pointerDownDuration: TOUCH_SELECTION_THRESHOLD});
+    const { drop, moveTo } = await drag(eventEl, {
+        pointerDownDuration: TOUCH_SELECTION_THRESHOLD,
+    });
     await waitForSelection();
 
     await moveTo(cell);
@@ -510,7 +514,7 @@ export async function moveEventToTime(eventId, dateTime) {
     const { drop, moveTo } = await drag(eventEl, {
         position: { y: 1 },
         relative: true,
-        pointerDownDuration: TOUCH_SELECTION_THRESHOLD
+        pointerDownDuration: TOUCH_SELECTION_THRESHOLD,
     });
     await waitForSelection();
 
@@ -550,7 +554,7 @@ export async function moveEventToAllDaySlot(eventId, date) {
     const { drop, moveTo } = await drag(eventEl, {
         position: { y: 1 },
         relative: true,
-        pointerDownDuration: TOUCH_SELECTION_THRESHOLD
+        pointerDownDuration: TOUCH_SELECTION_THRESHOLD,
     });
     await waitForSelection();
 
@@ -673,9 +677,9 @@ export async function hideCalendarPanel() {
 export async function navigate(direction) {
     if (hasTouch()) {
         if (direction === "next") {
-            await swipeLeft(".o_calendar_widget", {pointerDownDuration: 200});
+            await swipeLeft(".o_calendar_widget", { pointerDownDuration: 200 });
         } else {
-            await swipeRight(".o_calendar_widget", {pointerDownDuration: 200});
+            await swipeRight(".o_calendar_widget", { pointerDownDuration: 200 });
         }
         await advanceFrame(16);
     } else {

@@ -55,9 +55,7 @@ export class SettingsPage extends Component {
     }
 
     getCurrentIndex() {
-        return this.props.modules.findIndex((object) => {
-            return object.key === this.state.selectedTab;
-        });
+        return this.props.modules.findIndex((object) => object.key === this.state.selectedTab);
     }
 
     hasRightSwipe() {

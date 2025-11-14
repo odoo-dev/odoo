@@ -11,14 +11,13 @@ const scssErrorNotificationService = {
         if (browser.location.origin === "null") {
             return;
         }
-        const assets = [...document.styleSheets].filter((sheet) => {
-            return (
+        const assets = [...document.styleSheets].filter(
+            (sheet) =>
                 sheet.href?.includes("/web") &&
                 sheet.href?.includes("/assets/") &&
                 // CORS security rules don't allow reading content in JS
                 new URL(sheet.href, browser.location.origin).origin === origin
-            );
-        });
+        );
         translationIsReady.then(() => {
             for (const asset of assets) {
                 let cssRules;

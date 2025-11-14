@@ -21,9 +21,7 @@ class ResConfigSettings extends models.Model {
 defineModels([ResConfigSettings]);
 
 test("Simple render", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
+    onRpc("/base_setup/demo_active", () => true);
     redirect("/odoo");
     await mountView({
         type: "form",
@@ -46,9 +44,7 @@ test("Simple render", async () => {
 });
 
 test("Activate the developer mode", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
+    onRpc("/base_setup/demo_active", () => true);
     patchWithCleanup(browser.location, {
         reload() {
             expect.step("location reload");
@@ -73,9 +69,7 @@ test("Activate the developer mode", async () => {
 });
 
 test("Activate the developer mode (with assets)", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
+    onRpc("/base_setup/demo_active", () => true);
     patchWithCleanup(browser.location, {
         reload() {
             expect.step("location reload");
@@ -100,9 +94,7 @@ test("Activate the developer mode (with assets)", async () => {
 });
 
 test("Activate the developer mode (with tests assets)", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
+    onRpc("/base_setup/demo_active", () => true);
     patchWithCleanup(browser.location, {
         reload() {
             expect.step("location reload");
@@ -129,9 +121,7 @@ test("Activate the developer mode (with tests assets)", async () => {
 
 test("Activate the developer modeddd (with tests assets)", async () => {
     serverState.debug = "assets,tests";
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
+    onRpc("/base_setup/demo_active", () => true);
     patchWithCleanup(browser.location, {
         reload() {
             expect.step("location reload");

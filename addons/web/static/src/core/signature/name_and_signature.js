@@ -124,8 +124,8 @@ export class NameAndSignature extends Component {
     }
 
     /**
-    * Loads a signature image from a base64 dataURL and updates the empty state.
-    */
+     * Loads a signature image from a base64 dataURL and updates the empty state.
+     */
     async fromDataURL() {
         await this.signaturePad.fromDataURL(...arguments);
         this.props.signature.isSignatureEmpty = this.isSignatureEmpty;
@@ -141,7 +141,7 @@ export class NameAndSignature extends Component {
      */
     getCleanedName() {
         // This replaces non-breaking spaces with breaking spaces
-        const text = this.props.signature.name.replace(/ /g, " ");
+        const text = this.props.signature.name.replace(/\u00A0/g, " ");
         if (this.props.signatureType === "initial" && text) {
             return (
                 text
@@ -259,13 +259,16 @@ export class NameAndSignature extends Component {
         const img = new Image();
         img.onload = () => {
             const ctx = c.getContext("2d");
-            var ratio = ((img.width / img.height) > (c.width / c.height)) ? c.width / img.width : c.height / img.height;
-            ctx.drawImage( 
+            var ratio =
+                img.width / img.height > c.width / c.height
+                    ? c.width / img.width
+                    : c.height / img.height;
+            ctx.drawImage(
                 img,
-                (c.width / 2) - (img.width * ratio / 2),
-                (c.height / 2) - (img.height * ratio / 2)
-                , img.width * ratio
-                , img.height * ratio
+                c.width / 2 - (img.width * ratio) / 2,
+                c.height / 2 - (img.height * ratio) / 2,
+                img.width * ratio,
+                img.height * ratio
             );
             this.props.signature.isSignatureEmpty = this.isSignatureEmpty;
             this.props.onSignatureChange(this.state.signMode);

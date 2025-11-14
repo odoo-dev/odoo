@@ -77,11 +77,7 @@ describe("datetime.datetime", () => {
     test("datetime.datetime.combine", () => {
         const expr =
             "datetime.datetime.combine(context_today(), datetime.time(23,59,59)).strftime('%Y-%m-%d %H:%M:%S')";
-        expect(
-            check(expr, (d) => {
-                return formatDate(d) + " 23:59:59";
-            })
-        ).toBe(true);
+        expect(check(expr, (d) => formatDate(d) + " 23:59:59")).toBe(true);
     });
 
     test("datetime.datetime.toJSON", () => {
