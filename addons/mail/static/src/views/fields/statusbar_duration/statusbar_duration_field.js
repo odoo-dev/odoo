@@ -9,14 +9,20 @@ export class StatusBarDurationField extends StatusBarField {
     getAllItems() {
         const items = super.getAllItems();
         const durationTracking = this.props.record.data.duration_tracking || {};
-        if (Object.keys(durationTracking).length) {
+        if (Object.keys(durationTracking).length && durationTracking.d) {
+            const { s: activeStageValue, d: activeStageStartDate } = durationTracking;
+            const oldDateUTC = new Date(activeStageStartDate.replace(" ", "T") + "Z");
+            const nowUTC = new Date(new Date().toISOString());
+            const currentElapsedSeconds = Math.floor((nowUTC - oldDateUTC) / 1000);
+
             for (const item of items) {
-                const duration = durationTracking[item.value];
+                let duration = durationTracking[item.value] || 0;
+                if (activeStageValue === item.value) {
+                    duration += currentElapsedSeconds;
+                }
                 if (duration > 0) {
                     item.shortTimeInStage = formatDuration(duration, false);
                     item.fullTimeInStage = formatDuration(duration, true);
-                } else {
-                    item.shortTimeInStage = 0;
                 }
             }
         }

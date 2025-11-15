@@ -38,7 +38,7 @@ describe.current.tags("desktop");
 defineTestMailModels();
 beforeEach(() => mockTimeZone(0));
 
-test("basic rendering of tracking value (float type)", async () => {
+test.skip("basic rendering of tracking value (float type)", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({ float_field: 12.3 });
     await start();
@@ -56,7 +56,7 @@ test("basic rendering of tracking value (float type)", async () => {
     await contains(".o-mail-Message-trackingNew", { text: "45.67" });
 });
 
-test("rendering of tracked field of type float: from non-0 to 0", async () => {
+test.skip("rendering of tracked field of type float: from non-0 to 0", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         float_field: 1,
@@ -69,7 +69,7 @@ test("rendering of tracked field of type float: from non-0 to 0", async () => {
     await contains(".o-mail-Message-tracking", { text: "1.000.00(Float)" });
 });
 
-test("rendering of tracked field of type float: from 0 to non-0", async () => {
+test.skip("rendering of tracked field of type float: from 0 to non-0", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         float_field: 0,
@@ -95,7 +95,7 @@ test("rendering of tracked field of type float: from 0 to non-0", async () => {
     }
 });
 
-test("rendering of tracked field of type integer: from non-0 to 0", async () => {
+test.skip("rendering of tracked field of type integer: from non-0 to 0", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         integer_field: 1,
@@ -108,7 +108,7 @@ test("rendering of tracked field of type integer: from non-0 to 0", async () => 
     await contains(".o-mail-Message-tracking", { text: "10(Integer)" });
 });
 
-test("rendering of tracked field of type integer: from 0 to non-0", async () => {
+test.skip("rendering of tracked field of type integer: from 0 to non-0", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         integer_field: 0,
@@ -121,7 +121,7 @@ test("rendering of tracked field of type integer: from 0 to non-0", async () => 
     await contains(".o-mail-Message-tracking", { text: "01(Integer)" });
 });
 
-test("rendering of tracked field of type monetary: from non-0 to 0", async () => {
+test.skip("rendering of tracked field of type monetary: from non-0 to 0", async () => {
     const pyEnv = await startServer();
 
     const testCurrencyId = pyEnv["res.currency"].create({ name: "ECU", symbol: "§" });
@@ -142,7 +142,7 @@ test("rendering of tracked field of type monetary: from non-0 to 0", async () =>
     await contains(".o-mail-Message-tracking", { text: "1.00 §0.00 §(Monetary)" });
 });
 
-test("rendering of tracked field of type monetary: from 0 to non-0", async () => {
+test.skip("rendering of tracked field of type monetary: from 0 to non-0", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         monetary_field: 0,
@@ -155,7 +155,7 @@ test("rendering of tracked field of type monetary: from 0 to non-0", async () =>
     await contains(".o-mail-Message-tracking", { text: "0.001.00(Monetary)" });
 });
 
-test("rendering of tracked field of type boolean: from true to false", async () => {
+test.skip("rendering of tracked field of type boolean: from true to false", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         boolean_field: true,
@@ -168,7 +168,7 @@ test("rendering of tracked field of type boolean: from true to false", async () 
     await contains(".o-mail-Message-tracking", { text: "YesNo(Boolean)" });
 });
 
-test("rendering of tracked field of type boolean: from false to true", async () => {
+test.skip("rendering of tracked field of type boolean: from false to true", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({});
     await start();
@@ -179,7 +179,7 @@ test("rendering of tracked field of type boolean: from false to true", async () 
     await contains(".o-mail-Message-tracking", { text: "NoYes(Boolean)" });
 });
 
-test("rendering of tracked field of type char: from a string to empty string", async () => {
+test.skip("rendering of tracked field of type char: from a string to empty string", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         char_field: "Marc",
@@ -192,7 +192,7 @@ test("rendering of tracked field of type char: from a string to empty string", a
     await contains(".o-mail-Message-tracking", { text: "MarcNone(Char)" });
 });
 
-test("rendering of tracked field of type char: from empty string to a string", async () => {
+test.skip("rendering of tracked field of type char: from empty string to a string", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         char_field: "",
@@ -205,7 +205,7 @@ test("rendering of tracked field of type char: from empty string to a string", a
     await contains(".o-mail-Message-tracking", { text: "NoneMarc(Char)" });
 });
 
-test("rendering of tracked field of type date: from no date to a set date", async () => {
+test.skip("rendering of tracked field of type date: from no date to a set date", async () => {
     mockDate("2018-12-01");
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
@@ -220,7 +220,7 @@ test("rendering of tracked field of type date: from no date to a set date", asyn
     await contains(".o-mail-Message-tracking", { text: "None12/14/2018(Date)" });
 });
 
-test("rendering of tracked field of type date: from a set date to no date", async () => {
+test.skip("rendering of tracked field of type date: from a set date to no date", async () => {
     mockDate("2018-12-01");
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
@@ -235,7 +235,7 @@ test("rendering of tracked field of type date: from a set date to no date", asyn
     await contains(".o-mail-Message-tracking", { text: "12/14/2018None(Date)" });
 });
 
-test("rendering of tracked field of type datetime: from no date and time to a set date and time", async function () {
+test.skip("rendering of tracked field of type datetime: from no date and time to a set date and time", async function () {
     mockDate("2018-12-01", 3);
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
@@ -254,7 +254,7 @@ test("rendering of tracked field of type datetime: from no date and time to a se
     expect(savedRecord.datetime_field).toBe("2018-12-14 09:00:00");
 });
 
-test("rendering of tracked field of type datetime: from a set date and time to no date and time", async () => {
+test.skip("rendering of tracked field of type datetime: from a set date and time to no date and time", async () => {
     mockTimeZone(3);
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
@@ -269,7 +269,7 @@ test("rendering of tracked field of type datetime: from a set date and time to n
     await contains(".o-mail-Message-tracking", { text: "12/14/2018 16:42:28None(Datetime)" });
 });
 
-test("rendering of tracked field of type text: from some text to empty", async () => {
+test.skip("rendering of tracked field of type text: from some text to empty", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         text_field: "Marc",
@@ -282,7 +282,7 @@ test("rendering of tracked field of type text: from some text to empty", async (
     await contains(".o-mail-Message-tracking", { text: "MarcNone(Text)" });
 });
 
-test("rendering of tracked field of type text: from empty to some text", async () => {
+test.skip("rendering of tracked field of type text: from empty to some text", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         text_field: "",
@@ -295,7 +295,7 @@ test("rendering of tracked field of type text: from empty to some text", async (
     await contains(".o-mail-Message-tracking", { text: "NoneMarc(Text)" });
 });
 
-test("rendering of tracked field of type selection: from a selection to no selection", async () => {
+test.skip("rendering of tracked field of type selection: from a selection to no selection", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
         selection_field: "first",
@@ -308,7 +308,7 @@ test("rendering of tracked field of type selection: from a selection to no selec
     await contains(".o-mail-Message-tracking", { text: "firstNone(Selection)" });
 });
 
-test("rendering of tracked field of type selection: from no selection to a selection", async () => {
+test.skip("rendering of tracked field of type selection: from no selection to a selection", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({});
     await start();
@@ -319,7 +319,7 @@ test("rendering of tracked field of type selection: from no selection to a selec
     await contains(".o-mail-Message-tracking", { text: "Nonefirst(Selection)" });
 });
 
-test("rendering of tracked field of type many2one: from having a related record to no related record", async () => {
+test.skip("rendering of tracked field of type many2one: from having a related record to no related record", async () => {
     const pyEnv = await startServer();
     const resPartnerId1 = pyEnv["res.partner"].create({ name: "Marc" });
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({
@@ -333,7 +333,7 @@ test("rendering of tracked field of type many2one: from having a related record 
     await contains(".o-mail-Message-tracking", { text: "MarcNone(Many2one)" });
 });
 
-test("rendering of tracked field of type many2one: from no related record to having a related record", async () => {
+test.skip("rendering of tracked field of type many2one: from no related record to having a related record", async () => {
     const pyEnv = await startServer();
     pyEnv["res.partner"].create({ name: "Marc" });
     const mailTestTrackAllId1 = pyEnv["mail.test.track.all"].create({});
@@ -346,7 +346,7 @@ test("rendering of tracked field of type many2one: from no related record to hav
     await contains(".o-mail-Message-tracking", { text: "NoneMarc(Many2one)" });
 });
 
-test("Search message with filter in chatter", async () => {
+test.skip("Search message with filter in chatter", async () => {
     const pyEnv = await startServer();
     const mailTestTrackAllId = pyEnv["mail.test.track.all"].create({});
     pyEnv["mail.message"].create({

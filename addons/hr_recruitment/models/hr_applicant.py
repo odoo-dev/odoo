@@ -672,10 +672,22 @@ class HrApplicant(models.Model):
         old_interviewers = self.interviewer_ids
         # stage_id: track last stage before update
         if 'stage_id' in vals:
+            now = fields.Datetime.now()
             vals['date_last_stage_update'] = fields.Datetime.now()
             if 'kanban_state' not in vals:
                 vals['kanban_state'] = 'normal'
             for applicant in self:
+                tracking = applicant.duration_tracking and applicant.duration_tracking.get("stage_history_tracking") or []
+                new_entry = {
+                    'date_begin': tracking[-1].get('date_end') if tracking else fields.Datetime.to_string(applicant.create_date),
+                    'date_end': fields.Datetime.to_string(now),
+                    'old_stage_id': applicant.stage_id.id,
+                }
+                tracking.append(new_entry)
+                applicant.duration_tracking = {
+                    **(applicant.duration_tracking or {}),
+                    "stage_history_tracking": tracking,
+                }
                 vals['last_stage_id'] = applicant.stage_id.id
                 new_stage = self.env['hr.recruitment.stage'].browse(vals['stage_id'])
                 if new_stage.hired_stage and not applicant.stage_id.hired_stage:

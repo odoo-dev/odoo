@@ -90,7 +90,18 @@ class TestMessageValues(MailCommon):
         self.flush_tracking()
         tracking_message = record.message_ids[0]
         self.assertFalse(tracking_message.attachment_ids)
-        self.assertTrue(is_html_empty(tracking_message.body))
+        '''
+            <ul class="mb-0 list-unstyled">
+                <li class="o-mail-Message-tracking mb-1">
+                </li><li class="o-mail-Message-tracking mb-1">
+                    <span class="o-mail-Message-trackingOld text-muted fw-bold">None</span>
+                        <i class="o-mail-Message-trackingSeparator fa fa-long-arrow-right mx-2 text-600"></i>
+                        <span class="o-mail-Message-trackingNew me-1 fw-bold text-info">Mitchell Admin</span>
+                    <span class="o-mail-Message-trackingField ms-1 fst-italic text-muted">(Responsible)</span>
+                </li>
+            </ul>
+        '''
+        self.assertFalse(is_html_empty(tracking_message.body))
         self.assertFalse(tracking_message.subtype_id.description)
         self.assertFalse(tracking_message.sudo()._filter_empty(), 'Has tracking values')
         with self.assertRaises(UserError, msg='Tracking values prevent from updating content'):

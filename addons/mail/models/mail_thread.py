@@ -658,6 +658,84 @@ class MailThread(models.AbstractModel):
         self.ensure_one()
         return False
 
+    def _format_display_value(self, val, fieldinfo, author_id):
+        old = new = None
+        data = val[2]
+        field_type = fieldinfo['type']
+        options = {'widget': field_type}
+        if field_type in ['many2many', 'many2one', 'char', 'selection']:
+            old = data.get('old_value_char') or self.env._('None')
+            new = data.get('new_value_char') or self.env._('None')
+            options = {'widget': 'char'}
+        elif field_type in ['integer', 'boolean']:
+            default = 0 if field_type == 'integer' else 'False'
+            old = data.get('old_value_integer') or default
+            new = data.get('new_value_integer') or default
+        elif field_type in ['float', 'monetary']:
+            old = data.get('old_value_float') or 0.0
+            new = data.get('new_value_float') or 0.0
+            if field_type == 'monetary':
+                if data.get('currency_id'):
+                    currency_id = self.env['res.currency'].browse(data.get('currency_id'))
+                    options.update({'display_currency': currency_id})
+                else:
+                    # to do: check
+                    options = {'widget': 'Float', 'precision': fieldinfo.get('digits')}
+            else:
+                options.update({'precision': fieldinfo.get('digits')})
+        elif field_type == 'text':
+            old = data.get('old_value_text') or self.env._('None')
+            new = data.get('new_value_text') or self.env._('None')
+        elif field_type in ['date', 'datetime']:
+            old = data.get('old_value_datetime') or self.env._('None')
+            new = data.get('new_value_datetime') or self.env._('None')
+            tz = self.env.user.tz
+            if author_id:
+                tz = self.env['res.partner'].browse(author_id).tz
+            options.update({'tz_name': tz})
+
+        return {
+            "old_value": old,
+            "new_value": new,
+            'options': options,
+        }
+
+    def _skip_track_fields(self):
+        return []
+
+    def _log_tracking_values_in_body(self, body, tracking_value_ids, changes, tracked_fields, author_id, subtype=False):
+        tracking_value_list = [
+            {
+                **self._format_display_value(val, tracked_fields[field_name], author_id),
+                'fieldInfo': {
+                    'changedField': tracked_fields[field_name]['string'],
+                    'fieldType': tracked_fields[field_name]['type'],
+                    'isPropertyField': tracked_fields[field_name].get('type') == 'properties',
+                },
+            }
+            for val, field_name in zip(tracking_value_ids, changes)
+        ]
+
+        html_body = self.env['ir.qweb']._render(
+            "mail.mail_tracking_template",
+            {
+                'body': body,
+                'trackingValues': tracking_value_list,
+                'description': subtype and subtype.description,
+            }
+        )
+        if subtype:
+            self.message_post(
+                body=html_body,
+                author_id=author_id,
+                subtype_id=subtype.id
+            )
+        else:
+            self._message_log(
+                body=html_body,
+                author_id=author_id
+            )
+
     def _message_track(self, fields_iter, initial_values_dict):
         """ Track updated values. Comparing the initial and current values of
         the fields given in tracked_fields, it generates a message containing
@@ -701,20 +779,18 @@ class MailThread(models.AbstractModel):
                 if not subtype.exists():
                     _logger.debug('subtype "%s" not found' % subtype.name)
                     continue
-                record.message_post(
-                    body=body,
-                    author_id=author_id,
-                    subtype_id=subtype.id,
-                    tracking_value_ids=tracking_value_ids
-                )
-            elif tracking_value_ids:
-                record._message_log(
-                    body=body,
-                    author_id=author_id,
-                    tracking_value_ids=tracking_value_ids
-                )
+            tracked_fields, changes = record._filter_fields(tracked_fields, changes)
+            record._log_tracking_values_in_body(body, tracking_value_ids, changes, tracked_fields, author_id, subtype)
 
         return tracking
+
+    def _filter_fields(self, tracked_fields, changes):
+        self.ensure_one()
+        skip_fields = self._skip_track_fields()
+        return (
+            {k: v for k, v in tracked_fields.items() if k not in skip_fields},
+            [c for c in changes if c not in skip_fields],
+        )
 
     def _message_track_post_template(self, changes):
         """ Based on a tracking, post a message defined by ``_track_template``
@@ -3673,23 +3749,6 @@ class MailThread(models.AbstractModel):
             model_description = record_wlang._get_model_description(msg_vals['model'] if 'model' in msg_vals else message.model)
         record_name = force_record_name or message.with_context(lang=lang).record_name
 
-        # tracking: in case of missing value, perform search (skip only if sure we don't have any)
-        check_tracking = msg_vals.get('tracking_value_ids', True) if msg_vals else bool(self)
-        tracking = []
-        if check_tracking:
-            tracking_values = self.env['mail.tracking.value'].sudo().search(
-                [('mail_message_id', 'in', message.ids)]
-            )._filter_has_field_access(self.env)
-            if tracking_values and hasattr(record_wlang, '_track_filter_for_display'):
-                tracking_values = record_wlang._track_filter_for_display(tracking_values)
-            tracking = [
-                (
-                    fmt_vals['fieldInfo']['changedField'],
-                    fmt_vals['oldValue'],
-                    fmt_vals['newValue'],
-                ) for fmt_vals in tracking_values._tracking_value_format()
-            ]
-
         subtype_id = msg_vals['subtype_id'] if 'subtype_id' in msg_vals else message.subtype_id.id
         is_discussion = subtype_id == self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
 
@@ -3698,7 +3757,6 @@ class MailThread(models.AbstractModel):
             'is_discussion': is_discussion,
             'message': message,
             'subtype': message.subtype_id,
-            'tracking_values': tracking,
             # record
             'model_description': model_description,
             'record': record_wlang,

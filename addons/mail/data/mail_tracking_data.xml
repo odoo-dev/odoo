@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <template id="mail_tracking_template">
+            <p t-out="description" class="mb-0" t-if="description"/>
+            <ul class="mb-0 list-unstyled">
+                <t name="trackingValues" t-foreach="trackingValues" t-as="trackingValue">
+                    <li class="o-mail-Message-tracking mb-1">
+                        <span t-out="trackingValue.get('old_value')" t-if="trackingValue.get('old_value') != 'None'" t-options="trackingValue.get('options')"/>
+                        <span t-out="trackingValue.get('old_value')" t-else=""/>
+                        <!-- Not sure about the PropertyField flow, so I just added the condition. -->
+                        <t t-if="not trackingValue['fieldInfo']['isPropertyField']">
+                            -> <b class="text-info">
+                                <span t-out="trackingValue.get('new_value')" t-options="trackingValue.get('options')" t-if="trackingValue.get('new_value') != 'None'"/>
+                                <span t-out="trackingValue.get('new_value')" t-else=""/>
+                            </b>
+                            <i>(<t t-out="trackingValue['fieldInfo']['changedField']"/>)</i>
+                        </t>
+                    </li>
+                </t>
+            </ul>
+            <div t-out="body" t-if="body"/>
+        </template>
+    </data>
+</odoo>

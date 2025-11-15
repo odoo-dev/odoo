@@ -96,44 +96,70 @@ class ProjectTaskBurndownChartReport(models.AbstractModel):
                         stage_id,
                         is_closed
                    FROM (
-                            -- Gathers the stage_ids history per task_id. This query gets:
-                            -- * All changes except the last one for those for which we have at least a mail
-                            --   message and a mail tracking value on project.task stage_id.
-                            -- * The stage at creation for those for which we do not have any mail message and a
-                            --   mail tracking value on project.task stage_id.
                             SELECT DISTINCT task_id,
                                    allocated_hours,
                                    project_id,
                                    %(date_begin)s as date_begin,
                                    %(date_end)s as date_end,
-                                   first_value(stage_id) OVER task_date_begin_window AS stage_id,
+                                   stage_id,
                                    is_closed
                               FROM (
+                                     -- Gathers the stage_ids history per task_id from the stage history tracking field.
+                                     SELECT DISTINCT task_id,
+                                            allocated_hours,
+                                            project_id,
+                                            %(date_begin)s as date_begin,
+                                            %(date_end)s as date_end,
+                                            first_value(stage_id) OVER task_date_begin_window AS stage_id,
+                                            is_closed
+                                       FROM (
+                                            SELECT pt.id as task_id,
+                                                    pt.allocated_hours,
+                                                    pt.project_id,
+                                                    CASE WHEN sh ->> 'date_begin' IS NOT NULL THEN (sh ->> 'date_begin')::timestamp
+                                                        ELSE pt.create_date
+                                                    END as date_begin,
+                                                    CASE WHEN sh ->> 'date_end' IS NOT NULL THEN (sh ->> 'date_end')::timestamp
+                                                        ELSE (now() at time zone 'utc')::date + INTERVAL '%(interval)s'
+                                                    END as date_end,
+                                                    CASE WHEN sh ->> 'old_stage_id' IS NOT NULL THEN (sh ->> 'old_stage_id')::integer
+                                                    ELSE pt.stage_id
+                                                    END as stage_id,
+                                                    CASE
+                                                        WHEN sh ->> 'is_closed' = 'true' THEN 'closed'
+                                                        ELSE 'open'
+                                                    END as is_closed
+                                            FROM project_task pt
+                                            JOIN jsonb_array_elements(pt.duration_tracking -> 'stage_history_tracking') AS sh ON True
+                                            JOIN project_task_type ptt ON ptt.id = (sh ->> 'old_stage_id')::integer
+                                            WHERE pt.active=true AND pt.id IN (SELECT id from task_ids)
+                                        ) task_stage_id_history
+                                     GROUP BY task_id,
+                                              allocated_hours,
+                                              project_id,
+                                              %(date_begin)s,
+                                              %(date_end)s,
+                                              stage_id,
+                                              is_closed
+                                       WINDOW task_date_begin_window AS (PARTITION BY task_id, %(date_begin)s)
+
+                                     UNION ALL
+
+                                        -- Gathers the current stage_ids per task_id for those which do not have
+                                        -- stage history tracking.
                                      SELECT pt.id as task_id,
                                             pt.allocated_hours,
                                             pt.project_id,
-                                            COALESCE(LAG(mm.date) OVER (PARTITION BY mm.res_id ORDER BY mm.id), pt.create_date) as date_begin,
-                                            CASE WHEN mtv.id IS NOT NULL THEN mm.date
-                                                ELSE (now() at time zone 'utc')::date + INTERVAL '%(interval)s'
-                                            END as date_end,
-                                            CASE WHEN mtv.id IS NOT NULL THEN mtv.old_value_integer
-                                               ELSE pt.stage_id
-                                            END as stage_id,
+                                            CASE WHEN pt.duration_tracking -> 'stage_history_tracking' -> -1 IS NOT NULL THEN ((pt.duration_tracking -> 'stage_history_tracking' -> -1) ->> 'date_end')::timestamp
+                                                ELSE pt.create_date
+                                            END as date_begin,
+                                            (now() at time zone 'utc')::date + INTERVAL '%(interval)s' as date_end,
+                                            pt.stage_id as stage_id,
                                             CASE
-                                                WHEN mtv.id IS NOT NULL AND mtv.old_value_char IN ('1_done', '1_canceled') THEN 'closed'
-                                                WHEN mtv.id IS NOT NULL AND mtv.old_value_char NOT IN ('1_done', '1_canceled') THEN 'open'
-                                                WHEN mtv.id IS NULL AND pt.state IN ('1_done', '1_canceled') THEN 'closed'
+                                                WHEN pt.state IN ('1_done', '1_canceled') THEN 'closed'
                                                 ELSE 'open'
                                             END as is_closed
                                        FROM project_task pt
-                                                LEFT JOIN (
-                                                    mail_message mm
-                                                        JOIN mail_tracking_value mtv ON mm.id = mtv.mail_message_id
-                                                                                     AND mtv.field_id = %(field_id)s
-                                                                                     AND mm.model='project.task'
-                                                                                     AND mm.message_type = 'notification'
-                                                        JOIN project_task_type ptt ON ptt.id = mtv.old_value_integer
-                                                ) ON mm.res_id = pt.id
                                       WHERE pt.active=true AND pt.id IN (SELECT id from task_ids)
                                    ) task_stage_id_history
                           GROUP BY task_id,
@@ -143,33 +169,6 @@ class ProjectTaskBurndownChartReport(models.AbstractModel):
                                    %(date_end)s,
                                    stage_id,
                                    is_closed
-                            WINDOW task_date_begin_window AS (PARTITION BY task_id, %(date_begin)s)
-                          UNION ALL
-                            -- Gathers the current stage_ids per task_id for those which values changed at least
-                            -- once (=those for which we have at least a mail message and a mail tracking value
-                            -- on project.task stage_id).
-                            SELECT pt.id as task_id,
-                                   pt.allocated_hours,
-                                   pt.project_id,
-                                   last_stage_id_change_mail_message.date as date_begin,
-                                   (now() at time zone 'utc')::date + INTERVAL '%(interval)s' as date_end,
-                                   pt.stage_id as old_value_integer,
-                                   CASE WHEN pt.state IN ('1_done', '1_canceled') THEN 'closed'
-                                       ELSE 'open'
-                                   END as is_closed
-                              FROM project_task pt
-                                   JOIN LATERAL (
-                                       SELECT mm.date
-                                       FROM mail_message mm
-                                       JOIN mail_tracking_value mtv ON mm.id = mtv.mail_message_id
-                                       AND mtv.field_id = %(field_id)s
-                                       AND mm.model='project.task'
-                                       AND mm.message_type = 'notification'
-                                       AND mm.res_id = pt.id
-                                       ORDER BY mm.id DESC
-                                       FETCH FIRST ROW ONLY
-                                   ) AS last_stage_id_change_mail_message ON TRUE
-                             WHERE pt.active=true AND pt.id IN (SELECT id from task_ids)
                         ) AS project_task_burndown_chart
                GROUP BY allocated_hours,
                         project_id,
@@ -194,7 +193,6 @@ class ProjectTaskBurndownChartReport(models.AbstractModel):
             date_begin=SQL(simple_date_groupby_sql.replace('"date"', '"date_begin"')),
             date_end=SQL(simple_date_groupby_sql.replace('"date"', '"date_end"')),
             interval=SQL(sql_interval),
-            field_id=field_id,
         )
 
         # hardcode 'project_task_burndown_chart_report' as the query above

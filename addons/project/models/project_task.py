@@ -1180,6 +1180,22 @@ class ProjectTask(models.Model):
         return tasks
 
     def write(self, vals):
+        if 'stage_id' in vals:
+            now = fields.Datetime.now()
+            for task in self:
+                tracking = task.duration_tracking and task.duration_tracking.get("stage_history_tracking") or []
+                new_entry = {
+                    'date_begin': tracking[-1].get('date_end') if tracking else fields.Datetime.to_string(task.create_date),
+                    'date_end': fields.Datetime.to_string(now),
+                    'is_closed': task.state in CLOSED_STATES,
+                    'old_stage_id': task.stage_id.id,
+                }
+                tracking.append(new_entry)
+                task.duration_tracking = {
+                    **(task.duration_tracking or {}),
+                    "stage_history_tracking": tracking,
+                }
+
         self.check_access('write')
         if len(self) == 1:
             handle_history_divergence(self, 'description', vals)

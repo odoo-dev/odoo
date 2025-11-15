@@ -84,7 +84,7 @@ class MailTrackingValue(models.Model):
         if not field:
             raise ValueError(f'Unknown field {col_name} on model {record._name}')
 
-        values = {'field_id': field.id}
+        values = {'field_id': field.id, 'fieldinfo': col_info}
 
         if col_info['type'] in {'integer', 'float', 'char', 'text', 'datetime'}:
             values.update({

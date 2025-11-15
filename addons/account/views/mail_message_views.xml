@@ -11,7 +11,7 @@
                 <field name="date"/>
                 <field name="author_id" widget="many2one_avatar"/>
                 <field name="res_id" string="Name"/>
-                <field name="account_audit_log_preview"/>
+                <field name="body" string="Description"/>
             </list>
         </field>
     </record>
@@ -23,6 +23,7 @@
         <field name="mode">primary</field>
         <field name="arch" type="xml">
             <search string="Messages Search">
+                <field name="body" string="Description"/>
                 <field name="account_audit_log_move_id"/>
                 <field name="account_audit_log_account_id"/>
                 <field name="account_audit_log_tax_id"/>

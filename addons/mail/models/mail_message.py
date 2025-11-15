@@ -761,8 +761,24 @@ class MailMessage(models.Model):
             if tracking_values_cmd:
                 vals_lst = [dict(cmd[2], mail_message_id=message.id) for cmd in tracking_values_cmd if len(cmd) == 3 and cmd[0] == 0]
                 other_cmd = [cmd for cmd in tracking_values_cmd if len(cmd) != 3 or cmd[0] != 0]
-                if vals_lst:
-                    self.env['mail.tracking.value'].sudo().create(vals_lst)
+                if vals_lst and vals_lst[0].get('fieldinfo'):
+                    tracking_value_list = [{
+                        **self.env['mail.thread']._format_display_value(tracking_values_cmd[0], vals_lst[0].get('fieldinfo'), message.author_id.id),
+                        'fieldInfo': {
+                            'changedField': vals_lst[0].get('fieldinfo')['name'],
+                            'fieldType': vals_lst[0].get('fieldinfo')['type'],
+                            'isPropertyField': vals_lst[0].get('fieldinfo')['type'] == 'properties',
+                        }
+                    }]
+                    html_body = self.env['ir.qweb']._render(
+                        "mail.mail_tracking_template",
+                        {
+                            'body': message.body,
+                            'trackingValues': tracking_value_list,
+                        }
+                    )
+                    message.body = html_body
+
                 if other_cmd:
                     message.sudo().write({'tracking_value_ids': tracking_values_cmd})
 
@@ -1213,24 +1229,6 @@ class MailMessage(models.Model):
                 data["incoming_email_cc"] = tools.mail.email_split_tuples(message.incoming_email_cc)
             if message.incoming_email_to:
                 data["incoming_email_to"] = tools.mail.email_split_tuples(message.incoming_email_to)
-            if store.target.is_current_user(self.env):
-                # sudo: mail.message - filtering allowed tracking values
-                displayed_tracking_ids = message.sudo().tracking_value_ids._filter_has_field_access(
-                    self.env
-                )
-                if record and hasattr(record, "_track_filter_for_display"):
-                    displayed_tracking_ids = record._track_filter_for_display(
-                        displayed_tracking_ids
-                    )
-                # sudo: mail.message - checking whether there is a notification for the current user is acceptable
-                notifications_partners = message.sudo().notification_ids.filtered(
-                    lambda n: not n.is_read
-                ).res_partner_id
-                data["needaction"] = (
-                    not self.env.user._is_public()
-                    and self.env.user.partner_id in notifications_partners
-                )
-                data["trackingValues"] = displayed_tracking_ids._tracking_value_format()
             store.add(message, data)
         # Add extras at the end to guarantee order in result. In particular, the parent message
         # needs to be after the current message (client code assuming the first received message is

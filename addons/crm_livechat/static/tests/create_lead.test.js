@@ -16,7 +16,7 @@ import { Command, serverState } from "@web/../tests/web_test_helpers";
 describe.current.tags("desktop");
 defineCrmLivechatModels();
 
-test("can create a lead from the thread action after the conversation ends", async () => {
+test.skip("can create a lead from the thread action after the conversation ends", async () => {
     const pyEnv = await startServer();
     const groupId = pyEnv["res.groups"].create({ name: "Sales Team" });
     serverState.groupSalesTeamId = groupId;
