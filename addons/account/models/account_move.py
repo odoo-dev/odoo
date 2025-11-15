@@ -333,7 +333,7 @@ class AccountMove(models.Model):
         'res_id',
         domain=[
             ('model', '=', 'account.move'),
-            ('message_type', '=', 'notification'),
+            ('message_type', '=', 'tracking'),
         ],
         string='Audit Trail Messages',
     )

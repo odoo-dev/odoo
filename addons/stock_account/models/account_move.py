@@ -7,6 +7,7 @@ class AccountMove(models.Model):
 
     stock_move_ids = fields.One2many('stock.move', 'account_move_id', string='Stock Move')
     inventory_closing = fields.Boolean(string='Inventory Closing', default=False)
+    last_post_date = fields.Datetime(copy=False)
 
     # -------------------------------------------------------------------------
     # OVERRIDE METHODS
@@ -28,6 +29,10 @@ class AccountMove(models.Model):
         return vals_list
 
     def _post(self, soft=True):
+        for move in self:
+            if move.inventory_closing:
+                move.last_post_date = move.line_ids[-1].create_date
+
         # OVERRIDE
 
         # Don't change anything on moves used to cancel another ones.

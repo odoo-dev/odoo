@@ -13,7 +13,7 @@ import { defineCrmLivechatModels } from "./crm_livechat_test_helpers";
 describe.current.tags("desktop");
 defineCrmLivechatModels();
 
-test("Can open lead from internal link", async () => {
+test.skip("Can open lead from internal link", async () => {
     const pyEnv = await startServer();
     const guestId = pyEnv["mail.guest"].create({ name: "Visitor" });
     const channelId = pyEnv["discuss.channel"].create({

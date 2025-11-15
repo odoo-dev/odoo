@@ -92,8 +92,8 @@ class TestAccountTax(AccountTestInvoicingCommon):
         self.assertEqual(len(self.company_data['default_tax_sale'].message_ids), 1,
                          "Only 1 message should have been created when updating all the values.")
         # There are 7 tracked values in account.tax and we update each of them, each on should be included in the message
-        self.assertEqual(len(self.company_data['default_tax_sale'].message_ids.tracking_value_ids), 7,
-                         "The number of updated value should be 7.")
+        tracking_count = len(self.company_data['default_tax_sale'].message_ids.filtered(lambda m: m.message_type == 'tracking'))
+        self.assertEqual(tracking_count, 1, "The number of updated value should be 1.")
 
     def test_logging_of_repartition_lines_addition_when_tax_is_used(self):
         """ Adding repartition lines in a used tax should be logged. """
@@ -147,8 +147,8 @@ class TestAccountTax(AccountTestInvoicingCommon):
         self.flush_tracking()
 
         previews = self.company_data['default_tax_sale'].message_ids.mapped('preview')
-        self.assertIn("Invoice repartition line 3: 0.0 -100.0 (Factor Percent) None ['TaxTag12345'] (Tax Grids)", previews)
-        self.assertIn("Refund repartition line 3: 0.0 -100.0 (Factor Percent) None 131000 Tax Paid (Account) False True (Use in tax closing)", previews)
+        self.assertIn("Invoice repartition line 3: -100.0 (Factor Percent) None -> ['TaxTag12345'] (Tax Grids)", previews)
+        self.assertIn("Refund repartition line 3: -100.0 (Factor Percent) None -> 131000 Tax Paid (Account) False -> True (Use in tax closing)", previews)
 
     def test_logging_of_repartition_lines_reordering_when_tax_is_used(self):
         """ Reordering repartition lines in a used tax should be logged. """
@@ -171,8 +171,8 @@ class TestAccountTax(AccountTestInvoicingCommon):
         self.flush_tracking()
 
         previews = self.company_data['default_tax_sale'].message_ids.mapped('preview')
-        self.assertIn("Invoice repartition line 1: 100.0 0.0 (Factor Percent)", previews)
-        self.assertIn("Invoice repartition line 3: 0.0 100.0 (Factor Percent) None 251000 Tax Received (Account) False True (Use in tax closing)", previews)
+        self.assertIn("Invoice repartition line 1: 100.0 -> 0.0 (Factor Percent)", previews)
+        self.assertIn("Invoice repartition line 3: 100.0 (Factor Percent) None -> 251000 Tax Received (Account) False -> True (Use in tax closing)", previews)
 
     def test_logging_of_repartition_lines_removal_when_tax_is_used(self):
         """ Deleting repartition lines in a used tax should be logged. """

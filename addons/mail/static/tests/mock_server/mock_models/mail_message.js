@@ -81,8 +81,6 @@ export class MailMessage extends models.ServerModel {
         const MailNotification = this.env["mail.notification"];
         /** @type {import("mock_models").MailThread} */
         const MailThread = this.env["mail.thread"];
-        /** @type {import("mock_models").MailTrackingValue} */
-        const MailTrackingValue = this.env["mail.tracking.value"];
         /** @type {import("mock_models").ResFake} */
         const ResFake = this.env["res.fake"];
 
@@ -161,10 +159,6 @@ export class MailMessage extends models.ServerModel {
                         ]).length
                 );
                 data["starred"] = message.starred_partner_ids?.includes(this.env.user?.partner_id);
-                const trackingValues = MailTrackingValue.browse(message.tracking_value_ids);
-                const formattedTrackingValues =
-                    MailTrackingValue._tracking_value_format(trackingValues);
-                data["trackingValues"] = formattedTrackingValues;
             }
             store._add_record_fields(this.browse(message.id), data);
         }
@@ -493,8 +487,6 @@ export class MailMessage extends models.ServerModel {
         const IrAttachment = this.env["ir.attachment"];
         /** @type {import("mock_models").MailMessageSubtype} */
         const MailMessageSubtype = this.env["mail.message.subtype"];
-        /** @type {import("mock_models").MailTrackingValue} */
-        const MailTrackingValue = this.env["mail.tracking.value"];
         ({
             domain,
             thread,
@@ -544,17 +536,9 @@ export class MailMessage extends models.ServerModel {
                     ["res_id", "=", parseInt(thread[0].id)],
                     ["model", "=", thread._name],
                 ]);
-                const trackingValueDomain = Domain.and([
-                    [["mail_message_id", "in", messageIds]],
-                    this._get_tracking_values_domain(search_term),
-                ]).toList();
-                const trackingValueIds = MailTrackingValue.search(trackingValueDomain);
-                const trackingMessageIds = this.search([
-                    ["tracking_value_ids", "in", trackingValueIds],
-                ]);
                 message_domain = Domain.or([
                     message_domain,
-                    new Domain([["id", "in", trackingMessageIds]]),
+                    new Domain([["id", "in", messageIds]]),
                 ]);
             }
             domain = Domain.and([domain, message_domain]).toList();

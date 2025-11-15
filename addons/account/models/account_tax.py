@@ -422,61 +422,50 @@ class AccountTax(models.Model):
         for (document_type, sequence), old_value, new_value in modified_lines:
             diff_keys = [key for key in old_value if old_value[key] != new_value[key]]
             if diff_keys:
-                body = Markup("<b>{type}</b> {rep} {seq}:<ul class='mb-0 ps-4'>{changes}</ul>").format(
+                body = Markup("<strong>{type}</strong> {rep} {seq}:<br/>").format(
                     type=document_type.capitalize(),
-                    rep=_('repartition line'),
+                    rep=self.env._('repartition line'),
                     seq=sequence,
-                    changes=Markup().join(
-                        [Markup("""
-                            <li>
-                                <span class='o-mail-Message-trackingOld me-1 px-1 text-muted fw-bold'>{old}</span>
-                                <i class='o-mail-Message-trackingSeparator fa fa-long-arrow-right mx-1 text-600'/>
-                                <span class='o-mail-Message-trackingNew me-1 fw-bold text-info'>{new}</span>
-                                <span class='o-mail-Message-trackingField ms-1 fst-italic text-muted'>({diff})</span>
-                            </li>
-                        """).format(old=old_value[diff_key], new=new_value[diff_key], diff=diff_key)
-                        for diff_key in diff_keys]
-                    )
                 )
-                super()._message_log(body=body)
+                tracking_values = [{
+                    'old_value': old_value[diff_key],
+                    'new_value': new_value[diff_key],
+                    'field_name': diff_key,
+                } for diff_key in diff_keys]
+
+                tracking_body = self.env['ir.qweb']._render("mail.mail_tracking_template", {'trackingValues': tracking_values})
+                super()._message_log(body=body + tracking_body, message_type='tracking')
 
         for (document_type, sequence), operation, value in added_and_deleted_lines:
-            body = Markup("<b>{op} {type}</b> {rep} {seq}:<ul class='mb-0 ps-4'>{changes}</ul>").format(
+            body = Markup("<strong>{op} {type}</strong> {rep} {seq}:<br/>").format(
                 op=operation,
                 type=document_type.capitalize(),
-                rep=_('repartition line'),
+                rep=self.env._('repartition line'),
                 seq=sequence,
-                changes=Markup().join(
-                    [Markup("""
-                        <li>
-                            <span class='o-mail-Message-trackingNew me-1 fw-bold text-info'>{value}</span>
-                            <span class='o-mail-Message-trackingField ms-1 fst-italic text-muted'>({diff})</span>
-                        </li>
-                    """).format(value=value[key], diff=key)
-                    for key in value]
-                )
             )
-            super()._message_log(body=body)
+            tracking_values = [{
+                'old_value': '',
+                'new_value': old_value,
+                'field_name': key,
+            } for key, old_value in value.items()]
+            tracking_body = self.env['ir.qweb']._render("mail.mail_tracking_template", {'trackingValues': tracking_values})
+            super()._message_log(body=body + tracking_body, message_type='tracking')
         return
 
-    def _message_log(self, **kwargs):
-        # OVERRIDE _message_log
-        # We only log the modification of the tracked fields if the tax is
-        # currently used in transactions. We remove the `repartition_lines_str`
-        # from tracked value to avoid having it logged twice (once in the raw
-        # string format and one in the nice formatted way thanks to
-        # `_message_log_repartition_lines`)
-
-        self.ensure_one()
-
+    def _log_tracking_values_in_body(self, body, message_tracking_values, skip_fields, author_id, subtype=False):
         if self.is_used:
             repartition_line_str_field_id = self.env['ir.model.fields']._get('account.tax', 'repartition_lines_str').id
-            for tracked_value_id in kwargs['tracking_value_ids']:
-                if tracked_value_id[2]['field_id'] == repartition_line_str_field_id:
-                    kwargs['tracking_value_ids'].remove(tracked_value_id)
-                    self._message_log_repartition_lines(tracked_value_id[2]['old_value_char'], tracked_value_id[2]['new_value_char'])
+            remaining_values = []
+            for val_item in message_tracking_values:
+                if val_item.get('field_id') == repartition_line_str_field_id:
+                    self._message_log_repartition_lines(val_item['old_value_char'], val_item['new_value_char'])
+                else:
+                    remaining_values.append(val_item)
+            if remaining_values:
+                super()._log_tracking_values_in_body(body, remaining_values, skip_fields, author_id, subtype)
 
-            return super()._message_log(**kwargs)
+        else:
+            super()._log_tracking_values_in_body(body, message_tracking_values, skip_fields, author_id, subtype)
 
     @api.depends('company_id')
     def _compute_invoice_repartition_line_ids(self):

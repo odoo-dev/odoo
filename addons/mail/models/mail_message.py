@@ -9,6 +9,7 @@ from binascii import Error as binascii_error
 from collections import defaultdict
 from lxml import html
 from typing import Self
+from markupsafe import Markup
 
 from odoo import _, api, fields, models, modules, tools
 from odoo.exceptions import AccessError, MissingError
@@ -126,6 +127,7 @@ class MailMessage(models.Model):
         ('auto_comment', 'Automated Targeted Notification'),
         ('out_of_office', 'Out-of-office Message'),
         ('user_notification', 'User Specific Notification'),
+        ('tracking', 'Tracking'),
         ],
         'Type', required=True, default='comment',
         help="Used to categorize message generator"
@@ -177,13 +179,6 @@ class MailMessage(models.Model):
     starred = fields.Boolean(
         'Starred', compute='_compute_starred', search='_search_starred', compute_sudo=False,
         help='Current user has a starred notification linked to this message')
-    # tracking
-    tracking_value_ids = fields.One2many(
-        'mail.tracking.value', 'mail_message_id',
-        string='Tracking values',
-        groups="base.group_system",
-        help='Tracked values are stored in a separate model. This field allow to reconstruct '
-             'the tracking and to generate statistics on the model.')
     # polls
     ended_poll_ids = fields.One2many('mail.poll', 'end_message_id')
     started_poll_ids = fields.One2many('mail.poll', 'start_message_id')
@@ -676,7 +671,6 @@ class MailMessage(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        tracking_values_list = []
         for values in vals_list:
             if not (self.env.su or self.env.user.has_group('base.group_user')):
                 values.pop('author_id', None)
@@ -719,9 +713,26 @@ class MailMessage(models.Model):
                     return '%s%s alt="%s"' % (data_to_url[key][0], match.group(3), data_to_url[key][1])
                 values['body'] = _image_dataurl.sub(base64_to_boundary, values['body'] or '')
 
-            # delegate creation of tracking after the create as sudo to avoid access rights issues
-            tracking_values_list.append(values.pop('tracking_value_ids', False))
+            tracking_values_cmd = values.pop('message_tracking_values', False)
+            tracking_value_list = []
+            if tracking_values_cmd:
+                for vals in tracking_values_cmd:
+                    fieldinfo = vals.get('fieldinfo')
+                    if not fieldinfo:
+                        continue
 
+                    formatted_vals = self.env['mail.thread']._format_display_value(
+                        vals,
+                        fieldinfo,
+                        values.get('author_id'),
+                    )
+                    tracking_value_list.append({**formatted_vals, 'field_name': fieldinfo['string']})
+
+            if tracking_value_list:
+                tracking_template_message = self.env['ir.qweb']._render(
+                    "mail.mail_tracking_template", {'trackingValues': tracking_value_list}
+                )
+                values['body'] = tracking_template_message + Markup(values['body']) if values.get('body') else tracking_template_message
         messages = super().create(vals_list)
 
         # link back attachments to records, to filter out attachments linked to
@@ -762,15 +773,7 @@ class MailMessage(models.Model):
         if attachments_tocheck:
             attachments_tocheck.check_access('read')
 
-        for message, values, tracking_values_cmd in zip(messages, vals_list, tracking_values_list):
-            if tracking_values_cmd:
-                vals_lst = [dict(cmd[2], mail_message_id=message.id) for cmd in tracking_values_cmd if len(cmd) == 3 and cmd[0] == 0]
-                other_cmd = [cmd for cmd in tracking_values_cmd if len(cmd) != 3 or cmd[0] != 0]
-                if vals_lst:
-                    self.env['mail.tracking.value'].sudo().create(vals_lst)
-                if other_cmd:
-                    message.sudo().write({'tracking_value_ids': tracking_values_cmd})
-
+        for message, values in zip(messages, vals_list):
             if message._is_thread_message_visible(vals=values):
                 message._invalidate_documents(values.get('model'), values.get('res_id'))
 
@@ -967,16 +970,6 @@ class MailMessage(models.Model):
                 [("subject", "ilike", search_term)],
                 [("subtype_id.description", "ilike", search_term)],
             ])
-            if thread and is_notification is not False:
-                tracking_value_domain = (
-                    Domain("mail_message_id.res_id", "=", thread.id)
-                    & Domain("mail_message_id.model", "=", thread._name)
-                    & self._get_tracking_values_domain(search_term)
-                )
-                # sudo: mail.tracking.value - searching allowed tracking values for acessible records
-                tracking_values = self.env["mail.tracking.value"].sudo().search(tracking_value_domain)
-                accessible_tracking_value_ids = tracking_values._filter_has_field_access(self.env)
-                message_domain |= Domain("id", "in", accessible_tracking_value_ids.mail_message_id.ids)
             domain &= message_domain
         if search_term or is_notification is not None:
             res["count"] = self.search_count(domain)
@@ -992,39 +985,6 @@ class MailMessage(models.Model):
         if after:
             res["messages"] = res["messages"].sorted('id', reverse=True)
         return res
-
-    def _get_tracking_values_domain(self, search_term):
-        """Get the domain to search for tracking values."""
-        numeric_term = None
-        # try to convert the search term to a number
-        with contextlib.suppress(ValueError, TypeError):
-            numeric_term = float(search_term)
-        domain = Domain.OR(
-            Domain(field_name, "ilike", search_term)
-            for field_name in (
-                "old_value_char",
-                "new_value_char",
-                "old_value_text",
-                "new_value_text",
-                "old_value_datetime",
-                "new_value_datetime",
-                "field_id.name",
-                "field_id.field_description",
-            )
-        )
-        if numeric_term:
-            epsilon = 1e-9  # small epsilon to allow for floating point precision
-            domain |= Domain.OR(
-                Domain(field_name, ">=", numeric_term - epsilon)
-                & Domain(field_name, "<=", numeric_term + epsilon)
-                for field_name in ("old_value_float", "new_value_float")
-            )
-            if numeric_term.is_integer():
-                domain |= Domain.OR(
-                    Domain(field_name, "=", int(numeric_term))
-                    for field_name in ("old_value_integer", "new_value_integer")
-                )
-        return domain
 
     def _message_reaction(self, content, action, partner, guest, store: Store = None):
         self.ensure_one()
@@ -1252,16 +1212,6 @@ class MailMessage(models.Model):
                 )
 
             res.attr("needaction", needaction)
-
-            def tracking_values(message):
-                # sudo: mail.message - filtering allowed tracking values
-                trackings = message.sudo().tracking_value_ids._filter_has_field_access(message.env)
-                record = record_by_message.get(message)
-                if record and hasattr(record, "_track_filter_for_display"):
-                    trackings = record._track_filter_for_display(trackings)
-                return trackings._tracking_value_format()
-
-            res.attr("trackingValues", tracking_values)
         # Add extras at the end to guarantee order in result. In particular, the parent message
         # needs to be after the current message (client code assuming the first received message is
         # the one just posted for example, and not the message being replied to).
@@ -1376,10 +1326,6 @@ class MailMessage(models.Model):
             (not self.body or tools.is_html_empty(self.body))
             and (not self.subtype_id or not self.subtype_id.description)
             and not self.attachment_ids
-            and not (
-                self.has_field_access(self._fields["tracking_value_ids"], "read")
-                and self.tracking_value_ids
-            )
             and not self.has_poll
         )
 
