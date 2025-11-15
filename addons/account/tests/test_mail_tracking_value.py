@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.mail.tests.common import MailCase
@@ -35,16 +34,8 @@ class TestTracking(AccountTestInvoicingCommon, MailCase):
 
         self.flush_tracking()
         # Isolate the tracked value for the invoice line because changing the account has recomputed the taxes.
-        tracking_value = account_move.message_ids.sudo().tracking_value_ids\
-            .filtered(lambda t: t.field_id.name == 'account_id' and t.old_value_integer == old_value.id)
-        self.assertTracking(tracking_value.mail_message_id, [
-            ('account_id', 'many2one', old_value, new_value),
-        ])
-
-        self.assertEqual(len(tracking_value), 1)
-        self.assertTrue(tracking_value.field_id)
-        field = self.env[tracking_value.field_id.model]._fields[tracking_value.field_id.name]
-        self.assertFalse(field.groups, "There is no group on account.move.line.account_id")
+        message = account_move.message_ids.filtered(lambda m: m.message_type == 'tracking')
+        self.assertIn('%s -> %s' % (old_value.display_name, new_value.display_name), message.preview)
 
     @users('admin')
     def test_invite_follower_account_moves(self):

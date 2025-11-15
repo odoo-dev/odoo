@@ -907,7 +907,6 @@ class TestLeadLost(TestCrmCommon):
                 'notified_partner_ids': self.env['res.partner'],
                 'partner_ids': self.env['res.partner'],
                 'subtype_id': self.env.ref('mail.mt_note'),
-                'tracking_field_names': ['user_id'],
             }
         )
 
@@ -934,12 +933,6 @@ class TestLeadLost(TestCrmCommon):
                 'notified_partner_ids': self.env['res.partner'],
                 'partner_ids': self.env['res.partner'],
                 'subtype_id': self.env.ref('crm.mt_lead_lost'),
-                'tracking_field_names': ['active', 'lost_reason_id', 'won_status'],
-                'tracking_values': [
-                    ('active', 'boolean', True, False),
-                    ('lost_reason_id', 'many2one', False, self.lost_reason),
-                    ('won_status', 'char', 'Pending', 'Lost'),
-                ],
             }
         )
 

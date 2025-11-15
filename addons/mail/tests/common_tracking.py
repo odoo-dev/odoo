@@ -37,6 +37,7 @@ class MailTrackingDurationMixinCase(MailCommon):
         with patch.object(cls.env.cr, 'now', return_value=cls.mock_start_time):
             cls.rec_1, cls.rec_2, cls.rec_3, cls.rec_4 = cls.env[tested_model].create(
                 [record_values for i in range(4)])
+            (cls.rec_1 + cls.rec_2 + cls.rec_3 + cls.rec_4)._compute_duration_tracking()
         cls.flush_tracking(cls)
 
     def _update_duration_tracking(self, record_to_tracking_dic, minutes, new_stage=False):
@@ -66,7 +67,10 @@ class MailTrackingDurationMixinCase(MailCommon):
         """
         records._compute_duration_tracking()
         for record, tracking_dic in record_to_tracking_dic:
-            self.assertDictEqual(dict(tracking_dic), record.duration_tracking)
+            self.assertDictEqual(
+                {k: record.duration_tracking.get(k) for k in tracking_dic},  # skip 's' and 'd' keys
+                dict(tracking_dic),
+            )
 
     def _test_record_duration_tracking(self):
         """
