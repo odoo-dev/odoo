@@ -25,6 +25,19 @@ export class OrderCourse extends Component {
 
     clickCourse(evt, course) {
         const order = course.order_id;
-        order.selectCourse(course);
+        if (order) {
+            order.selectCourse(course);
+        }
+    }
+
+    async deleteCourse(evt, course) {
+        const order = course.order_id;
+        order.lines
+            .filter((l) => l.course_id?.id == course?.id)
+            .forEach((line) => {
+                line.delete();
+            });
+        course.delete();
+        order.ensureCourseSelection();
     }
 }

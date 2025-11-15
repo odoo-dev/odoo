@@ -10,6 +10,11 @@
                  t-on-click="(event) => this.clickCourse(event, course)">
                 <span class="fw-bolder" t-out="course.name"/>
                 <span t-if="course.fired" class="rounded text-bg-info fs-6 px-2 ms-auto">Fired</span>
+                <span t-if="course.isSelected()"
+                    t-attf-class="cursor-pointer opacity-75 opacity-100-hover {{course.fired ? '' : 'ms-auto'}}"
+                    t-on-click="(event) => this.deleteCourse(event, course)">
+                    <i class="me-1 fa fa-fw fa-trash"/>
+                </span>
             </div>
             <t t-foreach="comboSortedLines" t-as="line" t-key="line_index">
                 <t t-slot="default" line="line" />
