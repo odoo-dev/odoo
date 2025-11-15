@@ -15,18 +15,29 @@ class StockMove(models.Model):
             vals['purchase_line_id'] = self.purchase_line_id.id
         return vals
 
-    def _get_valuation_price_and_qty(self, related_aml, to_curr):
-        valuation_price_unit_total, valuation_total_qty = super()._get_valuation_price_and_qty(related_aml, to_curr)
-        boms = self.env['mrp.bom']._bom_find(related_aml.product_id, company_id=related_aml.company_id.id, bom_type='phantom')
-        if related_aml.product_id in boms:
-            kit_bom = boms[related_aml.product_id]
-            order_qty = related_aml.product_id.uom_id._compute_quantity(related_aml.quantity, kit_bom.product_uom_id)
-            filters = {
-                'incoming_moves': lambda m: m.location_id.usage == 'supplier' and (not m.origin_returned_move_id or (m.origin_returned_move_id and m.to_refund)),
-                'outgoing_moves': lambda m: m.location_id.usage != 'supplier' and m.to_refund
-            }
-            valuation_total_qty = self._compute_kit_quantities(related_aml.product_id, order_qty, kit_bom, filters)
-            valuation_total_qty = kit_bom.product_uom_id._compute_quantity(valuation_total_qty, related_aml.product_id.uom_id)
-            if related_aml.product_uom_id.rounding or related_aml.product_id.uom_id.is_zero(valuation_total_qty):
-                raise UserError(_('Odoo is not able to generate the anglo saxon entries. The total valuation of %s is zero.', related_aml.product_id.display_name))
-        return valuation_price_unit_total, valuation_total_qty
+    def _get_value_for_kit_product(self, value, quantity):
+        purchase_product = self.purchase_line_id.product_id
+        if purchase_product.is_kits and self.purchase_line_id.move_ids:
+            boms = self.env['mrp.bom']._bom_find(purchase_product, company_id=self.company_id.id, bom_type='phantom')
+            if purchase_product in boms:
+                kit_bom = boms[purchase_product]
+                bom_line = kit_bom.bom_line_ids.filtered(lambda bl: bl.product_id == self.product_id)
+                if bom_line:
+                    factor = self.purchase_line_id.product_uom_id.factor if self.purchase_line_id.product_uom_id != self.purchase_line_id.product_id.uom_id else 1
+                    if quantity:
+                        value = ((value * self.purchase_line_id.qty_received * factor) / quantity)
+                        if any(kit_bom.bom_line_ids.mapped('cost_share')):
+                            value = (value * bom_line.cost_share) / 100
+                        else:
+                            value = value/len(kit_bom.bom_line_ids)
+        return value
+
+    def _get_value_from_account_move(self, quantity, at_date=None):
+        valuation_data = super()._get_value_from_account_move(quantity, at_date=at_date)
+        valuation_data['value'] = self._get_value_for_kit_product(valuation_data['value'], valuation_data['quantity'])
+        return valuation_data
+
+    def _get_value_from_quotation(self, quantity, at_date=None):
+        valuation_data = super()._get_value_from_quotation(quantity, at_date)
+        valuation_data['value'] = self._get_value_for_kit_product(valuation_data['value'], valuation_data['quantity'])
+        return valuation_data
