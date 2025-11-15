@@ -2019,7 +2019,7 @@ export class PosStore extends WithLazyGetterTrap {
         });
     }
     editPartnerContext(partner) {
-        return {'target': 'new'};     // This context is used to open the parent company form view in the POS - method: open_commercial_entity.
+        return {};
     }
     /**
      * @param {import("@point_of_sale/app/models/res_partner").ResPartner?} partner leave undefined to create a new partner

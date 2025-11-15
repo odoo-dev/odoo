@@ -1,11 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
+from itertools import groupby
+
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_is_zero
-
-from itertools import groupby
-from collections import defaultdict
 
 
 class StockPicking(models.Model):
@@ -16,13 +16,10 @@ class StockPicking(models.Model):
 
     def _prepare_picking_vals(self, partner, picking_type, location_id, location_dest_id):
         return {
-            'partner_id': partner.id if partner else False,
-            'user_id': False,
+            'partner_id': partner.id,
             'picking_type_id': picking_type.id,
-            'move_type': 'direct',
             'location_id': location_id,
             'location_dest_id': location_dest_id,
-            'state': 'draft',
         }
 
     @api.model

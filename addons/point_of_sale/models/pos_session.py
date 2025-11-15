@@ -82,7 +82,7 @@ class PosSession(models.Model):
     payment_method_ids = fields.Many2many('pos.payment.method', related='config_id.payment_method_ids', string='Payment Methods')
     total_payments_amount = fields.Float(compute='_compute_total_payments_amount', string='Total Payments Amount')
     is_in_company_currency = fields.Boolean('Use Company Currency', compute='_compute_is_in_company_currency')
-    update_stock_at_closing = fields.Boolean('Is Stock updated at closing?')
+    update_stock_at_closing = fields.Boolean('Use Stock updated at closing')
     bank_payment_ids = fields.One2many('account.payment', 'pos_session_id', 'Bank Payments', help='Account payments representing aggregated and bank split payments.')
 
     def write(self, vals):
@@ -270,14 +270,12 @@ class PosSession(models.Model):
             ['pos_session_id', 'state'],
             ['__count']
         )
-
         picking_counts = {}
         failed_pickings = set()
         for session, state, count in pickings_data:
             picking_counts[session.id] = picking_counts.get(session.id, 0) + count
             if state != 'done':
                 failed_pickings.add(session.id)
-
         for session in self:
             session.picking_count = picking_counts.get(session.id, 0)
             session.failed_pickings = session.id in failed_pickings

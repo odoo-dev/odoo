@@ -1,24 +1,24 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
+import base64
 import json
-from datetime import datetime
-from markupsafe import Markup
-from itertools import groupby
-from collections import defaultdict
-from uuid import uuid4
-from random import randrange
-from pprint import pformat
-
+import logging
 import psycopg2
 import pytz
 
-from odoo import api, fields, models, tools, _
-from odoo.tools import float_is_zero, float_round, float_repr, float_compare, formatLang
-from odoo.exceptions import ValidationError, UserError
-from odoo.fields import Command, Domain
-import base64
+from collections import defaultdict
+from datetime import datetime
+from itertools import groupby
+from markupsafe import Markup
+from pprint import pformat
+from random import randrange
+from uuid import uuid4
 
+from odoo import api, fields, models, tools, _
+from odoo.fields import Command, Domain
+from odoo.exceptions import ValidationError, UserError
+from odoo.tools import float_is_zero, float_round, float_repr, float_compare, formatLang
+from tinyhtml5.constants import digits
 
 _logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class PosOrder(models.Model):
     _name = 'pos.order'
     _inherit = ["portal.mixin", "pos.bus.mixin", "pos.load.mixin", "mail.thread"]
     _description = "Point of Sale Order"
-    _order = "date_order desc, name desc, id desc"
+    _order = "date_order desc, id desc"
     _mailing_enabled = True
 
     # This function deals with orders that belong to a closed session. It attempts to find
@@ -84,7 +84,6 @@ class PosOrder(models.Model):
                     "to_invoice": False,
                 })
 
-        pos_order = False
         record_uuid_mapping = order.pop('relations_uuid_mapping', {})
 
         if not existing_order:
@@ -285,8 +284,8 @@ class PosOrder(models.Model):
     last_order_preparation_change = fields.Char(string='Last preparation change', help="Last printed state of the order")
     date_order = fields.Datetime(string='Date', readonly=True, index=True, default=fields.Datetime.now)
     user_id = fields.Many2one(
-        comodel_name='res.users', string='Employee',
-        help="Employee who uses the cash register.",
+        comodel_name='res.users', string='User',
+        help="User who uses the cash register.",
         default=lambda self: self.env.uid,
     )
     amount_difference = fields.Monetary(string='Difference', readonly=True)
@@ -310,12 +309,10 @@ class PosOrder(models.Model):
     currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency")
     currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, digits=0, readonly=True,
         help='The rate of the currency to the currency of rate applicable at the date of the order')
-
-    is_refund = fields.Boolean(string='Is Refund', readonly=True, default=False)
+    is_refund = fields.Boolean(string='Is Refund', readonly=True)
     state = fields.Selection(
         [('draft', 'New'), ('cancel', 'Cancelled'), ('paid', 'Paid'), ('done', 'Posted')],
         'Status', readonly=True, copy=False, default='draft', index=True)
-
     account_move = fields.Many2one('account.move', string='Invoice', readonly=True, copy=False, index="btree_not_null")
     picking_ids = fields.One2many('stock.picking', 'pos_order_id')
     picking_count = fields.Integer(compute='_compute_picking_count')
@@ -1458,21 +1455,17 @@ class PosOrderLine(models.Model):
     _rec_name = "product_id"
     _inherit = ['pos.load.mixin']
 
-    company_id = fields.Many2one('res.company', string='Company', related="order_id.company_id", store=True)
     name = fields.Char(string='Line No', required=True, copy=False)
-    notice = fields.Char(string='Discount Notice')
-    product_id = fields.Many2one('product.product', string='Product', domain=[('sale_ok', '=', True)], required=True, change_default=True)
+    order_id = fields.Many2one('pos.order', string='Order Ref', ondelete='cascade', required=True, index=True)
+    company_id = fields.Many2one('res.company', string='Company', related='order_id.company_id', store=True)
+    product_id = fields.Many2one('product.product', string='Product', domain=[('sale_ok', '=', True)], required=True)
     attribute_value_ids = fields.Many2many('product.template.attribute.value', string="Selected Attributes")
     custom_attribute_value_ids = fields.One2many(
-        comodel_name='product.attribute.custom.value', inverse_name='pos_order_line_id',
-        string="Custom Values",
-        store=True, readonly=False)
+        comodel_name='product.attribute.custom.value', inverse_name='pos_order_line_id', string="Custom Values")
     price_unit = fields.Float(string='Unit Price', digits=0)
     qty = fields.Float('Quantity', digits='Product Unit', default=1)
-    price_subtotal = fields.Monetary(string='Tax Excl.',
-        readonly=True, required=True)
-    price_subtotal_incl = fields.Monetary(string='Tax Incl.',
-        readonly=True, required=True)
+    price_subtotal = fields.Monetary(string='Tax Excl.', readonly=True, required=True)
+    price_subtotal_incl = fields.Monetary(string='Tax Incl.', readonly=True, required=True)
     price_extra = fields.Float(string="Price extra")
     price_type = fields.Selection([
         ('original', 'Original'),
@@ -1484,10 +1477,9 @@ class PosOrderLine(models.Model):
     total_cost = fields.Float(string='Total cost', digits='Product Price', readonly=True)
     is_total_cost_computed = fields.Boolean(help="Allows to know if the total cost has already been computed or not")
     discount = fields.Float(string='Discount (%)', digits=0, default=0.0)
-    order_id = fields.Many2one('pos.order', string='Order Ref', ondelete='cascade', required=True, index=True)
     tax_ids = fields.Many2many('account.tax', string='Taxes', readonly=True)
     tax_ids_after_fiscal_position = fields.Many2many('account.tax', compute='_get_tax_ids_after_fiscal_position', string='Taxes to Apply')
-    pack_lot_ids = fields.One2many('pos.pack.operation.lot', 'pos_order_line_id', string='Lot/serial Number')
+    pack_lot_ids = fields.One2many('pos.pack.operation.lot', 'pos_order_line_id', string='Lot/Serial Number')
     product_uom_id = fields.Many2one('uom.uom', string='Product Unit', related='product_id.uom_id')
     currency_id = fields.Many2one('res.currency', related='order_id.currency_id')
     full_product_name = fields.Char('Full Product Name')
@@ -1497,12 +1489,10 @@ class PosOrderLine(models.Model):
     refunded_qty = fields.Float('Refunded Quantity', compute='_compute_refund_qty', help='Number of items refunded in this orderline.')
     uuid = fields.Char(string='Uuid', readonly=True, default=lambda self: str(uuid4()), copy=False)
     note = fields.Char('Product Note')
-
     combo_parent_id = fields.Many2one('pos.order.line', string='Combo Parent', index='btree_not_null') # FIXME rename to parent_line_id
     combo_line_ids = fields.One2many('pos.order.line', 'combo_parent_id', string='Combo Lines') # FIXME rename to child_line_ids
-
     combo_item_id = fields.Many2one('product.combo.item', string='Combo Item')
-    is_edited = fields.Boolean('Edited', default=False)
+    is_edited = fields.Boolean('Edited')
     # Technical field holding custom data for the taxes computation engine.
     extra_tax_data = fields.Json()
 
@@ -1558,7 +1548,7 @@ class PosOrderLine(models.Model):
             order = self.env['pos.order'].browse(vals['order_id']) if vals.get('order_id') else False
             if order and order.exists() and not vals.get('name'):
                 # set name based on the sequence specified on the config
-                config = order.session_id.config_id
+                config = order.config_id
                 if config.order_line_seq_id:
                     vals['name'] = config.order_line_seq_id._next()
             if not vals.get('name'):
@@ -1587,9 +1577,9 @@ class PosOrderLine(models.Model):
         The lot is available if its quantity in the corresponding stock_quant and pos stock location is > 0.
         """
         self.check_access('read')
-        pos_config = self.env['pos.config'].browse(config_id)
+        pos_config = self.env['pos.config'].browse(config_id).exists()
         if not pos_config:
-            raise UserError(_('No PoS configuration found'))
+            raise UserError(_('Point of Sale not found!'))
 
         src_loc = pos_config.picking_type_id.default_location_src_id
 

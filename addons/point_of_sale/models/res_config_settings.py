@@ -2,7 +2,7 @@
 
 import logging
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.addons.point_of_sale.models.pos_config import format_epson_certified_domain
 
 _logger = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ class ResConfigSettings(models.TransientModel):
     pos_module_pos_restaurant = fields.Boolean(related='pos_config_id.module_pos_restaurant', readonly=False)
     pos_module_pos_appointment = fields.Boolean(related="pos_config_id.module_pos_appointment", readonly=False)
     pos_module_pos_avatax = fields.Boolean(related='pos_config_id.module_pos_avatax', readonly=False)
-    pos_use_order_printer = fields.Boolean(related='pos_config_id.is_order_printer', readonly=False)
+    pos_use_order_printer = fields.Boolean(related='pos_config_id.use_order_printer', readonly=False)
     pos_printer_ids = fields.Many2many(related='pos_config_id.printer_ids', readonly=False)
     pos_amount_authorized_diff = fields.Float(related='pos_config_id.amount_authorized_diff', readonly=False)
     pos_available_pricelist_ids = fields.Many2many('product.pricelist', string='Available Pricelists', compute='_compute_pos_pricelist_id', readonly=False, store=True)

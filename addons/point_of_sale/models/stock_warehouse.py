@@ -22,9 +22,7 @@ class StockWarehouse(models.Model):
 
     def _get_picking_type_update_values(self):
         picking_type_update_values = super()._get_picking_type_update_values()
-        picking_type_update_values.update({
-            'pos_type_id': {'default_location_src_id': self.lot_stock_id.id}
-        })
+        picking_type_update_values['pos_type_id'] = {'default_location_src_id': self.lot_stock_id.id}
         return picking_type_update_values
 
     def _get_picking_type_create_values(self, max_sequence):

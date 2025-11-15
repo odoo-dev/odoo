@@ -129,6 +129,7 @@ class PosConfig(models.Model):
     pos_session_duration = fields.Char(compute='_compute_current_session')
     current_user_id = fields.Many2one('res.users', string='Current Session Responsible', compute='_compute_current_session')
     has_active_session = fields.Boolean(compute='_compute_current_session')
+    manual_discount = fields.Boolean(string="Line Discounts", default=True)
     use_pricelist = fields.Boolean('Is Pricelist?')
     pricelist_id = fields.Many2one('product.pricelist', string='Default Pricelist',
         help="The pricelist used if no customer is selected or if the customer has no Sale Pricelist configured.")
@@ -651,7 +652,7 @@ class PosConfig(models.Model):
 
     def _update_menuitems_visibility(self):
         if prepa_printers_menuitem := self.env.ref('point_of_sale.menu_pos_preparation_printer', False):
-            prepa_printers_menuitem.active = self.env['pos.config'].search_count([('is_order_printer', '=', True)], limit=1) > 0
+            prepa_printers_menuitem.active = self.env['pos.config'].search_count([('use_order_printer', '=', True)], limit=1) > 0
         if preset_menu := self.env.ref('point_of_sale.menu_pos_preset', False):
             preset_menu.active = self.env['pos.config'].search_count([('use_presets', '=', True)], limit=1) > 0
 

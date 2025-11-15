@@ -114,7 +114,6 @@
                                     <field name="tax_ids_after_fiscal_position" widget="many2many_tax_tags" string="Taxes"/>
                                     <field name="tax_ids" widget="many2many_tax_tags" invisible="1"/>
                                     <field name="pack_lot_ids" widget="many2many_tags" groups="stock.group_production_lot"/>
-                                    <field name="notice"/>
                                     <field name="currency_id" invisible="1"/>
                                     <field name="full_product_name" readonly="1" />
                                 </group>
