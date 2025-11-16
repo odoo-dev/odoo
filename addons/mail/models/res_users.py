@@ -92,7 +92,7 @@ class ResUsers(models.Model):
         # Special case: internal users with inbox notifications converted to portal must be converted to email users
         new_portal_users = self.filtered_domain([('share', '=', True), ('notification_type', '=', 'inbox')])
         new_portal_users.notification_type = 'email'
-        new_portal_users.write({"group_ids": [Command.unlink(inbox_group_id)]})
+        new_portal_users.group_ids = [Command.unlink(inbox_group_id)]
 
     @api.depends('out_of_office_from', 'out_of_office_to')
     def _compute_is_out_of_office(self):
@@ -120,8 +120,8 @@ class ResUsers(models.Model):
     def _inverse_notification_type(self):
         inbox_group = self.env.ref('mail.group_mail_notification_type_inbox')
         inbox_users = self.filtered(lambda user: user.notification_type == 'inbox')
-        inbox_users.write({"group_ids": [Command.link(inbox_group.id)]})
-        (self - inbox_users).write({"group_ids": [Command.unlink(inbox_group.id)]})
+        inbox_users.group_ids = [Command.link(inbox_group.id)]
+        (self - inbox_users).group_ids = [Command.unlink(inbox_group.id)]
 
     @api.depends_context("uid")
     def _compute_can_edit_role(self):

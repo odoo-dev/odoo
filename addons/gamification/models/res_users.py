@@ -261,11 +261,11 @@ WHERE sub.user_id IN %s""",
         for user in self:
             old_rank = user.rank_id
             if user.karma == 0 and ranks:
-                user.write({'next_rank_id': ranks[-1]['rank'].id})
+                user.next_rank_id = ranks[-1]['rank'].id
             else:
                 for i in range(0, len(ranks)):
                     if user.karma >= ranks[i]['karma_min']:
-                        user.write({
+                        user.update({
                             'rank_id': ranks[i]['rank'].id,
                             'next_rank_id': ranks[i - 1]['rank'].id if 0 < i else False
                         })

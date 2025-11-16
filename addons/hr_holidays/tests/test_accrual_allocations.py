@@ -2052,6 +2052,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             })
             # As the duration is set to a onchange, we need to force that onchange to run
             accrual_allocation._onchange_date_from()
+            # XXX probably should test using Form
             accrual_allocation.action_approve()
             # The amount of days should be computed as if it was accrued since
             # the start date of the allocation.
@@ -2196,12 +2197,12 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             self.assertAlmostEqual(accrual_allocation.number_of_days, 0, places=0)
 
             # Yearly Report lost
-            accrual_allocation.write({'date_from': '2022-01-01'})
+            accrual_allocation.date_from = '2022-01-01'
             accrual_allocation._onchange_date_from()
             self.assertAlmostEqual(accrual_allocation.number_of_days, 2, places=0)
 
             # Update date_to
-            accrual_allocation.write({'date_to': '2022-12-31'})
+            accrual_allocation.date_to = '2022-12-31'
             accrual_allocation._onchange_date_from()
             self.assertAlmostEqual(accrual_allocation.number_of_days, 12, places=0)
 
@@ -2238,12 +2239,12 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             self.assertAlmostEqual(accrual_allocation.number_of_days, 0, places=0)
 
             # Yearly Report capped to 5 after 2022 and after 2023
-            accrual_allocation.write({'date_from': '2022-01-01'})
+            accrual_allocation.date_from = '2022-01-01'
             accrual_allocation._onchange_date_from()
             self.assertAlmostEqual(accrual_allocation.number_of_days, 7, places=0)
 
             # Update date_to
-            accrual_allocation.write({'date_to': '2022-12-31'})
+            accrual_allocation.date_to = '2022-12-31'
             accrual_allocation._onchange_date_from()
             self.assertAlmostEqual(accrual_allocation.number_of_days, 12, places=0)
 

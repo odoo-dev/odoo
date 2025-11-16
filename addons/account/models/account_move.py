@@ -5767,11 +5767,12 @@ class AccountMove(models.Model):
         if any(move.move_type == "entry" for move in self):
             raise ValidationError(_("This action isn't available for this document."))
 
+        # note: can be called on NewIds
         for move in self:
             in_out, old_move_type = move.move_type.split('_')
             new_move_type = f"{in_out}_{'invoice' if old_move_type == 'refund' else 'refund'}"
             move.name = False
-            move.write({
+            move.update({
                 'move_type': new_move_type,
                 'currency_id': move.currency_id.id,
                 'fiscal_position_id': move.fiscal_position_id.id,
@@ -5785,7 +5786,7 @@ class AccountMove(models.Model):
                         'quantity': -line.quantity,
                         'extra_tax_data': self.env['account.tax']._reverse_quantity_base_line_extra_tax_data(line.extra_tax_data),
                     }))
-                move.write({'line_ids': line_ids_commands})
+                move.line_ids = line_ids_commands
 
     def get_currency_rate(self, company_id, to_currency_id, date):
         company = self.env['res.company'].browse(company_id)

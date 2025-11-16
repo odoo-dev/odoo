@@ -304,7 +304,7 @@ class ProductProduct(models.Model):
             else:
                 value = product.lst_price
             value -= product.price_extra
-            product.write({'list_price': value})
+            product.list_price = value
 
     @api.depends("product_template_attribute_value_ids.price_extra")
     def _compute_product_price_extra(self):

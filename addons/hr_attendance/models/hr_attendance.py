@@ -125,7 +125,7 @@ class HrAttendance(models.Model):
     def _compute_overtime_hours(self):
         domain = self._get_overtimes_to_update_domain()
         all_attendances = self | self.env['hr.attendance'].search(domain)
-        all_attendances.write({'overtime_hours': 0.0})  # reset
+        all_attendances.overtime_hours = 0.0  # reset
 
         attendances_by_employee_and_date = defaultdict(lambda: self.env['hr.attendance'])
         for a in all_attendances:
@@ -151,7 +151,7 @@ class HrAttendance(models.Model):
     def _compute_validated_overtime_hours(self):
         domain = self._get_overtimes_to_update_domain()
         all_attendances = self | self.env['hr.attendance'].search(domain)
-        all_attendances.write({'validated_overtime_hours': 0.0})  # reset
+        all_attendances.validated_overtime_hours = 0.0  # reset
 
         attendances_by_employee_and_date = defaultdict(lambda: self.env['hr.attendance'])
         for a in all_attendances:

@@ -3581,6 +3581,7 @@ class BaseModel(metaclass=MetaModel):
             return True
 
         self.check_access('unlink')
+        assert all(self._ids), "cannot unlink() on new records"
 
         from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
         for func in self._ondelete_methods:
@@ -3758,6 +3759,7 @@ class BaseModel(metaclass=MetaModel):
             return True
 
         self.check_access('write')
+        assert all(self._ids), "cannot write() on new records"
         for field_name in vals:
             try:
                 self._check_field_access(self._fields[field_name], 'write')
