@@ -131,13 +131,12 @@ export class DomPlugin extends Plugin {
     /**
      * @param {string | DocumentFragment | Element | null} content
      */
-    insert(content) {
+    insert(content, selection = this.dependencies.selection.getEditableSelection()) {
         if (!content) {
             return;
         }
-        let selection = this.dependencies.selection.getEditableSelection();
         if (!selection.isCollapsed) {
-            this.dependencies.delete.deleteSelection();
+            this.dependencies.delete.deleteSelection(selection);
             selection = this.dependencies.selection.getEditableSelection();
         }
 

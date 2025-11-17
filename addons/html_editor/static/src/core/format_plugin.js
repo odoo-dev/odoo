@@ -64,6 +64,9 @@ export class FormatPlugin extends Plugin {
         "insertAndSelectZws",
         "mergeAdjacentInlines",
         "formatSelection",
+        "removeFormats",
+        "removeAllFormats",
+        "removeEmptyInlineElement",
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {

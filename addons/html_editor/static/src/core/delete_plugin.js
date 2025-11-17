@@ -430,6 +430,28 @@ export class DeletePlugin extends Plugin {
             range = this.joinFragments(range);
         }
 
+        // const { startContainer: sc, startOffset: so, endContainer: ec, endOffset: eo } = range;
+        // if (
+        //     sc == ec &&
+        //     so == eo &&
+        //     sc.nodeType === Node.ELEMENT_NODE &&
+        //     sc.hasAttribute("data-oe-zws-empty-inline") &&
+        //     !this.isUnremovable(sc)
+        // ) {
+        //     const parent = sc.parentNode;
+        //     if (parent) {
+        //         const index = childNodeIndex(sc);
+        //         sc.remove();
+        //         range = {
+        //             startContainer: parent,
+        //             startOffset: index,
+        //             endContainer: parent,
+        //             endOffset: index,
+        //             commonAncestorContainer: parent,
+        //         };
+        //     }
+        // }
+
         restoreFakeBRs();
         this.fillShrunkBlocks(originalCommonAncestor);
         restoreSpaces();
