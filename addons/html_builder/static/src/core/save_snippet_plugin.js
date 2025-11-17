@@ -79,7 +79,7 @@ export class SaveSnippetPlugin extends Plugin {
             this.wrapWithBeforeAfterSaveHandlers.bind(this)
         );
         if (savedName) {
-            if (this.delegateTo("custom_snippets_notification_handlers", savedName)) {
+            if (this.delegateTo("custom_snippets_notification_overrides", savedName)) {
                 return;
             }
             const message = _t(

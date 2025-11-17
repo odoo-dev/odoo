@@ -88,7 +88,7 @@ import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
  * @typedef {((el: HTMLElement) => boolean)[]} keep_overlay_options
  */
 /**
- * @typedef {((arg: { el: HTMLElement, reasons: [] }) => void)[]} clone_disabled_reason_providers
+ * @typedef {((arg: { el: HTMLElement, reasons: [] }) => void)[]} clone_disabled_reason_processors
  *
  * Appends new reasons to the `reasons` array given as a parameter.
  *
@@ -99,7 +99,7 @@ import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
  *     }
  */
 /**
- * @typedef {((arg: { el: HTMLElement, reasons: [] }) => void)[]} remove_disabled_reason_providers
+ * @typedef {((arg: { el: HTMLElement, reasons: [] }) => void)[]} remove_disabled_reason_processors
  *
  * Appends new reasons to the `reasons` array given as a parameter.
  *
@@ -493,13 +493,13 @@ export class BuilderOptionsPlugin extends Plugin {
 
     getRemoveDisabledReason(el) {
         const reasons = [];
-        this.dispatchTo("remove_disabled_reason_providers", { el, reasons });
+        this.dispatchTo("remove_disabled_reason_processors", { el, reasons });
         return reasons.length ? reasons.join(" ") : undefined;
     }
 
     getCloneDisabledReason(el) {
         const reasons = [];
-        this.dispatchTo("clone_disabled_reason_providers", { el, reasons });
+        this.dispatchTo("clone_disabled_reason_processors", { el, reasons });
         return reasons.length ? reasons.join(" ") : undefined;
     }
 

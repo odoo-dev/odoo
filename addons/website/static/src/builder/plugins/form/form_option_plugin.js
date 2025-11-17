@@ -114,7 +114,7 @@ export class FormOptionPlugin extends Plugin {
                 },
             },
         ],
-        clone_disabled_reason_providers: ({ el, reasons }) => {
+        clone_disabled_reason_processors: ({ el, reasons }) => {
             if (
                 el.classList.contains("s_website_form_field") &&
                 !el.classList.contains("s_website_form_custom")
@@ -125,7 +125,7 @@ export class FormOptionPlugin extends Plugin {
                 reasons.push(_t("You can't duplicate the submit button of the form."));
             }
         },
-        remove_disabled_reason_providers: ({ el, reasons }) => {
+        remove_disabled_reason_processors: ({ el, reasons }) => {
             if (el.classList.contains("s_website_form_model_required")) {
                 const models = this.modelsCache.get();
                 const modelName = el.closest("form")?.dataset.model_name;

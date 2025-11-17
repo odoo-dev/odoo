@@ -37,7 +37,7 @@ import { deepCopy, deepMerge } from "@web/core/utils/objects";
  *   }>,
  * }>} ImageShapeGroups
  * @typedef {((shapeGroups: ImageShapeGroups) => ImageShapeGroups | void)[]} image_shape_groups_providers
- * @typedef {((dataset: DOMStringMap) => string)[]} default_shape_handlers
+ * @typedef {((dataset: DOMStringMap) => string)[]} default_shape_providers
  * @typedef {((
  *     svg: SVGElement,
  *     params: {
@@ -86,8 +86,8 @@ export class ImageShapeOptionPlugin extends Plugin {
             SetImageShapeSpeedAction,
             ToggleImageShapeRatioAction,
         },
-        process_image_warmup_handlers: this.processImageWarmup.bind(this),
-        process_image_post_handlers: this.processImagePost.bind(this),
+        process_image_warmup_processors: this.processImageWarmup.bind(this),
+        process_image_post_processors: this.processImagePost.bind(this),
         hover_effect_allowed_predicates: (el) => this.canHaveHoverEffect(el),
         image_shape_groups_providers: withSequence(0, () => deepCopy(imageShapeDefinitions)),
     };
@@ -435,7 +435,7 @@ export class ImageShapeOptionPlugin extends Plugin {
         return Object.fromEntries(entries);
     }
     getDefaultShapeId(dataset) {
-        for (const fn of this.getResource("default_shape_handlers")) {
+        for (const fn of this.getResource("default_shape_providers")) {
             const shapeId = fn(dataset);
             if (shapeId) {
                 return shapeId;
