@@ -42,10 +42,12 @@ export class FieldMany2OneMailingFilter extends Component {
         ...Many2OneField.props,
         domain_field: { type: String, optional: true },
         model_field: { type: String, optional: true },
+        noLabel: { type: Boolean, optional: true },
     };
     static defaultProps = {
         domain_field: "mailing_domain",
         model_field: "mailing_model_id",
+        noLabel: false,
     };
 
     setup() {
@@ -208,6 +210,7 @@ registry.category("fields").add("mailing_filter", {
         const props = extractM2OFieldProps(...arguments);
         props.domain_field = options.domain_field;
         props.model_field = options.model_field;
+        props.noLabel = options.no_label;
         return props;
     },
 });
