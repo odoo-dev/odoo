@@ -39,9 +39,13 @@ export function createElementWithContent(elementName, content) {
  * @param {string | ReturnType<markup>} query
  * @param {string | ReturnType<markup>} text
  * @param {string | ReturnType<markup>} classes
+ * @param {boolean} [htmlEscaping=true]
+ *  When true, HTML characters (e.g., `&`, `<`, `>`, `"`, `'`, `` ` ``)
+ *  are automatically escaped (e.g., `&` → `&amp;`).
+ *  When false, the text is left as-is and no HTML escaping is applied.
  * @returns {string | ReturnType<markup>}
  */
-export function highlightText(query, text, classes) {
+export function highlightText(query, text, classes, htmlEscaping = true) {
     if (!query) {
         return text;
     }
@@ -55,7 +59,7 @@ export function highlightText(query, text, classes) {
     let result = text;
     for (const match of matches) {
         const regex = new RegExp(
-            `(${escapeRegExp(htmlEscape(match))})(?=(?:[^>]*<[^<]*>)*[^<>]*$)`,
+            `(${escapeRegExp(htmlEscaping ? htmlEscape(match): match)})(?=(?:[^>]*<[^<]*>)*[^<>]*$)`,
             "ig"
         );
         result = htmlReplace(result, regex, (_, match) => {
@@ -66,7 +70,7 @@ export function highlightText(query, text, classes) {
              */
             match = markup(match);
             return markup`<span class="${classes}">${match}</span>`;
-        });
+        }, htmlEscaping);
     }
     return result;
 }
@@ -96,13 +100,14 @@ export function htmlFormatList(list, ...args) {
  * @param {string|ReturnType<markup>} content
  * @param {string | RegExp} search
  * @param {string} replacement
+ * @param {boolean} [htmlEscaping=true]
  * @returns {ReturnType<markup>}
  */
-export function htmlReplace(content, search, replacement) {
+export function htmlReplace(content, search, replacement, htmlEscaping = true) {
     if (search instanceof RegExp && !(replacement instanceof Function)) {
         throw new Error("htmlReplace: replacement must be a function when search is a RegExp.");
     }
-    content = htmlEscape(content);
+    content = htmlEscaping ? htmlEscape(content): content;
     if (typeof search === "string" || search instanceof String) {
         search = htmlEscape(search);
     }
@@ -120,13 +125,14 @@ export function htmlReplace(content, search, replacement) {
  * @param {string|ReturnType<markup>} content
  * @param {string | RegExp} search
  * @param {string|(match: string) => string|ReturnType<markup>} replacement
+ * @param {boolean} [htmlEscaping=true]
  * @returns {ReturnType<markup>}
  */
-export function htmlReplaceAll(content, search, replacement) {
+export function htmlReplaceAll(content, search, replacement, htmlEscaping = true) {
     if (search instanceof RegExp && !(replacement instanceof Function)) {
         throw new Error("htmlReplaceAll: replacement must be a function when search is a RegExp.");
     }
-    content = htmlEscape(content);
+    content = htmlEscaping ? htmlEscape(content): content;
     if (typeof search === "string" || search instanceof String) {
         search = htmlEscape(search);
     }
@@ -222,9 +228,10 @@ export function isHtmlEmpty(content = "") {
  *      \t => Insert 4 spaces.
  *
  * @param {string|ReturnType<markup>} text
+ * @param {boolean} [htmlEscaping=true]
  * @returns {string|ReturnType<markup>} the formatted text
  */
-export function odoomark(text) {
+export function odoomark(text, htmlEscaping = true) {
     const replacements = [
         [/\n/g, () => markup`<br/>`],
         [/\t/g, () => markup`<span style="margin-left: 2em"></span>`],
@@ -253,7 +260,7 @@ export function odoomark(text) {
             },
         ],
         [
-            /&#x60;(.+?)&#x60;/g,
+            /(?:`|&#x60;)(.+?)(?:`|&#x60;)/g,
             (_, tag) => {
                 /**
                  * markup: text is a Markup object (either escaped inside htmlReplace or
@@ -266,7 +273,7 @@ export function odoomark(text) {
         ],
     ];
     for (const replacement of replacements) {
-        text = htmlReplaceAll(text, replacement[0], replacement[1]);
+        text = htmlReplaceAll(text, replacement[0], replacement[1], htmlEscaping);
     }
     return text;
 }

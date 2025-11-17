@@ -13,7 +13,8 @@ export class HighlightText extends Component {
             this.text = highlightText(
                 this.searchState.value,
                 this.props.originalText,
-                "highlighter"
+                "highlighter",
+                false,
             );
         });
     }

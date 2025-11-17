@@ -519,7 +519,7 @@ export class Many2XAutocomplete extends Component {
         return {
             data: { record, slotName: "autoCompleteItem" },
             label: label
-                ? highlightText(request, odoomark(label), "text-primary fw-bold")
+                ? highlightText(request, odoomark(label, false), "text-primary fw-bold", false)
                 : _t("Unnamed"),
             onSelect: () => this.props.update([record]),
         };
