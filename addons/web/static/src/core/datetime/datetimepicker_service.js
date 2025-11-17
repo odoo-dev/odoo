@@ -95,7 +95,7 @@ export const datetimePickerService = {
                     const { value } = pickerProps;
                     const stringValue = JSON.stringify(value);
                     if (
-                        stringValue === lastAppliedStringValue ||
+                        stringValue === lastAppliedStringValue &&
                         stringValue === stringProps.value
                     ) {
                         return;
