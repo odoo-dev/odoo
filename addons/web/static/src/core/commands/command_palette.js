@@ -227,7 +227,7 @@ export class CommandPalette extends Component {
             commands.slice(0, 100).map((command) => ({
                 ...command,
                 keyId: this.keyId++,
-                text: highlightText(options.searchValue, command.name, "fw-bolder text-primary"),
+                text: highlightText(options.searchValue, command.name, "fw-bolder text-primary", false),
             }))
         );
         this.selectCommand(this.state.commands.length ? 0 : -1);

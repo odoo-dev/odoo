@@ -1340,6 +1340,57 @@ test("bold the searchValue on the commands with accents", async () => {
     expect(queryAllTexts(".o_command .fw-bolder")).toEqual(["éd"]);
 });
 
+test("searching a value should not display escaped characters in commands", async () => {
+    await mountWithCleanup(MainComponentsContainer);
+    const action = () => {};
+    const providers = [
+        {
+            namespace: "/",
+            provide: () => [
+                {
+                    name: "Research & Development",
+                    action,
+                },
+                {
+                    name: "R&D",
+                    action,
+                },
+            ],
+        },
+    ];
+    const config = {
+        searchValue: "/",
+        providers,
+    };
+    getService("dialog").add(CommandPalette, {
+        config,
+    });
+    await animationFrame();
+    expect(".o_command_palette").toHaveCount(1);
+    expect(".o_command").toHaveCount(2);
+    expect(queryAllTexts(".o_command .fw-bolder")).toEqual([]);
+
+    await click(".o_command_palette_search input");
+    await edit("/a");
+    await runAllTimers();
+    expect(".o_command").toHaveCount(2);
+    expect(
+        queryAll(".o_command").map((command) =>
+            queryAllTexts(".o_command_name .fw-bolder", { root: command })
+        )
+    ).toEqual([["a"], []]);
+
+    await click(".o_command_palette_search input");
+    await edit("/&");
+    await runAllTimers();
+    expect(".o_command").toHaveCount(2);
+    expect(
+        queryAll(".o_command").map((command) =>
+            queryAllTexts(".o_command_name .fw-bolder", { root: command })
+        )
+    ).toEqual([["&"], ["&"]]);
+});
+
 test("remove namespace with backspace", async () => {
     await mountWithCleanup(MainComponentsContainer);
     const provide = () => [];
