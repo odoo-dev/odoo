@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, Command
+from odoo import api, models, Command
 from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
 from odoo.tools import mute_logger, unique, lazy
 from odoo.tools.constants import PREFETCH_MAX
@@ -140,6 +140,45 @@ class TestAPI(SavepointCaseWithUserDemo):
 
         self.assertFalse(partner.parent_id.user_id.group_ids)
         self.assertIsRecordset(partner.parent_id.user_id.group_ids, 'res.groups')
+
+    def test_real_new(self):
+        """ One cannot mix new and real records. """
+        model = self.env['res.partner']
+
+        real_records = model.search([], limit=5)
+        self.assertEqual(len(real_records), 5)
+        self.assertTrue(all(real_records._ids))
+
+        new_records = model.browse([api.NewId() for _ in range(5)])
+        self.assertEqual(len(new_records), 5)
+        self.assertTrue(not any(new_records._ids))
+
+        with self.assertRaises(AssertionError):
+            model.browse([False])
+
+        with self.assertRaises(AssertionError):
+            model.browse([0])
+
+        with self.assertRaises(AssertionError):
+            model.browse([*real_records._ids, False])
+
+        with self.assertRaises(AssertionError):
+            model.browse([*new_records._ids, False])
+
+        with self.assertRaises(AssertionError):
+            model.browse([*real_records._ids, *new_records._ids])
+
+        # with self.assertRaises(AssertionError):
+        #     real_records + new_records
+
+        # with self.assertRaises(AssertionError):
+        #     model.concat(*real_records, *new_records)
+
+        # with self.assertRaises(AssertionError):
+        #     real_records | new_records
+
+        # with self.assertRaises(AssertionError):
+        #     model.union(*real_records, *new_records)
 
     @mute_logger('odoo.models')
     def test_40_new_new(self):
