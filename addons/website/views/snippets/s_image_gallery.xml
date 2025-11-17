@@ -4,15 +4,15 @@
 <template id="s_image_gallery" name="Image Gallery">
     <section class="s_image_gallery o_slideshow pt24 pb24 s_image_gallery_controllers_outside s_image_gallery_controllers_outside_arrows_right s_image_gallery_indicators_dots s_image_gallery_arrows_default o_image_popup" data-vcss="002" data-columns="3">
         <div class="o_container_small overflow-hidden">
-            <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="carousel" data-bs-interval="0">
+            <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="carousel" data-bs-interval="0" data-number-of-elements="1" data-scroll-mode="all">
                 <div class="carousel-inner">
-                    <div class="carousel-item active">
+                    <div class="carousel-item active carousel-div" style="padding: 0%;">
                         <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_08" data-name="Image" data-index="0" alt=""/>
                     </div>
-                    <div class="carousel-item">
+                    <div class="carousel-item carousel-div" style="padding: 0%;">
                         <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_03" data-name="Image" data-index="1" alt=""/>
                     </div>
-                    <div class="carousel-item">
+                    <div class="carousel-item carousel-div" style="padding: 0%;">
                         <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_02" data-name="Image" data-index="2" alt=""/>
                     </div>
                 </div>
@@ -21,7 +21,7 @@
                         <span class="carousel-control-prev-icon" aria-hidden="true"/>
                         <span class="visually-hidden">Previous</span>
                     </button>
-                    <div class="carousel-indicators">
+                    <div class="carousel-indicators indicators-container">
                         <button type="button" data-bs-target="#slideshow_sample" data-bs-slide-to="0" style="background-image: url(/web/image/website.library_image_08)" class="active" aria-label="Carousel indicator"/>
                         <button type="button" style="background-image: url(/web/image/website.library_image_03)" data-bs-target="#slideshow_sample" data-bs-slide-to="1" aria-label="Carousel indicator"/>
                         <button type="button" style="background-image: url(/web/image/website.library_image_02)" data-bs-target="#slideshow_sample" data-bs-slide-to="2" aria-label="Carousel indicator"/>

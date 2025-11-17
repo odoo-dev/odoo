@@ -24,6 +24,11 @@ export class ImageGalleryImagesOption extends BaseOptionComponent {
     static template = "website.ImageGalleryImagesOption";
     static selector = ".s_image_gallery";
 }
+export class CarouselGalleryOption extends BaseOptionComponent {
+    static template = "website.CarouselQuotesOption";
+    static selector = "section";
+    static applyTo = 'section[data-snippet="s_image_gallery"] div div';
+}
 
 class ImageGalleryOption extends Plugin {
     static id = "imageGalleryOption";
@@ -42,6 +47,7 @@ class ImageGalleryOption extends Plugin {
         builder_options: [
             withSequence(SNIPPET_SPECIFIC, ImageGalleryImagesOption),
             withSequence(SNIPPET_SPECIFIC_END, ImageGalleryComponent),
+            CarouselGalleryOption,
         ],
         builder_actions: {
             AddImageAction,
