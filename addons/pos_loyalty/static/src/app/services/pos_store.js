@@ -105,11 +105,11 @@ patch(PosStore.prototype, {
         }
         // This type of coupons don't need to really exist up until validating the order, so no need to cache
         return this.models["loyalty.card"].create({
-            id: loyaltyIdsGenerator(),
-            code: null,
+            code: this._generateCode(),
             program_id: program,
             partner_id: order.partner_id,
             points: 0,
+            source_pos_order_id: this.getOrder()?.id,
         });
     },
     /**
@@ -203,6 +203,7 @@ patch(PosStore.prototype, {
                         coupon_id: coupon.id,
                         barcode: pa.barcode,
                         appliedRules: pointsForProgramsCountedRules[program.id],
+                        coupon: coupon,
                     };
                     if (program && program.program_type === "gift_card") {
                         couponPointChange.product_id = order.getSelectedOrderline()?.product_id.id;
@@ -211,9 +212,17 @@ patch(PosStore.prototype, {
                         );
                         couponPointChange.code = order.getSelectedOrderline()?.gift_code;
                         couponPointChange.partner_id = order.getPartner()?.id;
+
+                        coupon.expiration_date = couponPointChange.expiration_date;
+                        coupon.code = couponPointChange.code;
+                        coupon.points = pa.points;
                     }
 
                     order.uiState.couponPointChanges[coupon.id] = couponPointChange;
+                    order.sell_loyalty_card_ids = [
+                        ...order.sell_loyalty_card_ids.map((c) => c.id),
+                        coupon.id,
+                    ];
                 }
             }
         }
@@ -650,6 +659,7 @@ patch(PosStore.prototype, {
      * @param {int} partnerId
      */
     async fetchLoyaltyCard(programId, partnerId) {
+        console.log("fetchLoyaltyCard ==> ", programId, partnerId);
         const coupon = this.models["loyalty.card"].find(
             (c) => c.partner_id?.id === partnerId && c.program_id?.id === programId
         );
@@ -663,7 +673,7 @@ patch(PosStore.prototype, {
         let dbCoupon = fetchedCoupons.length > 0 ? fetchedCoupons[0] : null;
         if (!dbCoupon) {
             dbCoupon = await this.models["loyalty.card"].create({
-                id: loyaltyIdsGenerator(),
+                // id: loyaltyIdsGenerator(),
                 code: null,
                 program_id: this.models["loyalty.program"].get(programId),
                 partner_id: this.models["res.partner"].get(partnerId),

@@ -113,6 +113,13 @@ patch(PosOrder.prototype, {
         return state;
     },
 
+    get loyaltyCards() {
+        const lineCouponIds = this.lines
+            .filter((line) => line.coupon_id)
+            .map((line) => line.coupon_id);
+        return [...new Set([...this.sell_loyalty_card_ids, ...lineCouponIds])];
+    },
+
     /**
      * We need to update the rewards upon changing the partner as it may impact the points available
      *  for rewards.
@@ -332,7 +339,7 @@ patch(PosOrder.prototype, {
             const loyaltyCard =
                 this.models["loyalty.card"].get(coupon_id) ||
                 this.models["loyalty.card"].create({
-                    id: coupon_id,
+                    uuid: coupon_id,
                     points: 0,
                 });
             let [won, spent, total] = [0, 0, 0];
@@ -735,7 +742,11 @@ patch(PosOrder.prototype, {
             .map((id) => couponPointChanges[id].coupon_id);
 
         const allCouponPrograms = Object.values(this.uiState.couponPointChanges)
-            .filter((pe) => !excludedCouponIds.includes(pe.coupon_id))
+            .filter(
+                (pe) =>
+                    !excludedCouponIds.includes(pe.coupon_id) &&
+                    pe.source_pos_order_id?.state == "paid"
+            )
             .map((pe) => ({
                 program_id: pe.program_id,
                 coupon_id: pe.coupon_id,
@@ -934,6 +945,12 @@ patch(PosOrder.prototype, {
             couponData.code = newGiftCardCode;
             couponData.partner_id = partner_id;
             couponData.expiration_date = expirationDate;
+
+            const coupon = this.uiState.couponPointChanges[couponId].coupon;
+            couponData.coupon = coupon;
+            coupon.code = newGiftCardCode;
+            coupon.partner_id = partner_id;
+            coupon.expiration_date = expirationDate;
         }
 
         this.uiState.couponPointChanges[couponId] = couponData;

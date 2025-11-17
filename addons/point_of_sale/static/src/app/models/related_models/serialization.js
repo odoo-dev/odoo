@@ -135,6 +135,9 @@ const deepSerialization = (
         }
 
         if (field.type === "many2one") {
+            // if (record.model.name == "pos.order.line" && field.name == "coupon_id") {
+            //     debugger
+            // }
             const recordId = record[fieldName]?.id;
             if (DYNAMIC_MODELS.includes(relatedModel) && record[fieldName]) {
                 if (
@@ -155,6 +158,12 @@ const deepSerialization = (
             } else if (record[fieldName] === undefined) {
                 result[fieldName] = false;
             }
+            // } else if (serialized[relatedModel][record[fieldName].uuid]) {
+            //     stack.push([
+            //         result,
+            //         fieldName,
+            //         () => [0, 0, [recursiveSerialize(record[fieldName])]],
+            //     ]);
             continue;
         }
         if (DATE_TIME_TYPE.has(field.type) && typeof record[fieldName] === "object") {
@@ -201,6 +210,7 @@ export const ormSerialization = (record, opts) => {
     const result = deepSerialization(record, opts, {
         uuidMapping,
     });
+    // debugger;
     if (Object.keys(uuidMapping).length !== 0) {
         result.relations_uuid_mapping = uuidMapping;
     }

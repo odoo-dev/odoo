@@ -1550,6 +1550,7 @@ class PosOrderLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        print('\n\n\n === pos.order.line create - ', vals_list)
         for vals in vals_list:
             order = self.env['pos.order'].browse(vals['order_id']) if vals.get('order_id') else False
             if order and order.exists() and not vals.get('name'):

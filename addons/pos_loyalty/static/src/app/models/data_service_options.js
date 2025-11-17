@@ -6,13 +6,16 @@ patch(DataServiceOptions.prototype, {
         return {
             ...super.databaseTable,
             "loyalty.card": {
-                key: "id",
+                key: "uuid",
                 condition: (record) =>
                     record
                         .backLink("<-pos.order.line.coupon_id")
                         .find((l) => !(l.order_id?.finalized && l.order_id.isSynced)),
             },
         };
+    },
+    get dynamicModels() {
+        return [...super.dynamicModels, "loyalty.card"];
     },
     get pohibitedAutoLoadedModels() {
         return [

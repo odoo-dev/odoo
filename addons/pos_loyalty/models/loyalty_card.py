@@ -8,6 +8,7 @@ class LoyaltyCard(models.Model):
     _name = 'loyalty.card'
     _inherit = ['loyalty.card', 'pos.load.mixin']
 
+    uuid = fields.Char('Uniqe Card Identifier')
     source_pos_order_id = fields.Many2one('pos.order', "PoS Order Reference",
         help="PoS order where this coupon was generated.")
     source_pos_order_partner_id = fields.Many2one(
@@ -20,7 +21,12 @@ class LoyaltyCard(models.Model):
 
     @api.model
     def _load_pos_data_fields(self, config):
-        return ['partner_id', 'code', 'points', 'program_id', 'expiration_date', 'write_date']
+        return ['uuid', 'partner_id', 'code', 'points', 'program_id', 'expiration_date', 'write_date', 'source_pos_order_id']
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        print('\n\n\n === loyalty.card create - ', vals_list)
+        return super().create(vals_list)
 
     def _has_source_order(self):
         return super()._has_source_order() or bool(self.source_pos_order_id)

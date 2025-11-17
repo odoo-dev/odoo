@@ -4,13 +4,20 @@
 from collections import defaultdict
 from markupsafe import Markup
 
-from odoo import _, models
+from odoo import _, models, fields
 from odoo.tools import float_compare
 import base64
 
 
 class PosOrder(models.Model):
     _inherit = 'pos.order'
+
+    sell_loyalty_card_ids = fields.Many2many('loyalty.card', "Reward")
+
+    def read_pos_data(self, data, config):
+        result = super().read_pos_data(data, config)
+        result['loyalty.card'] = self.env['loyalty.card']._load_pos_data_read(self.sell_loyalty_card_ids + self.lines.coupon_id, config)
+        return result
 
     def validate_coupon_programs(self, point_changes, new_codes):
         """
