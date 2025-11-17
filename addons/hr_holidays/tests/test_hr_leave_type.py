@@ -114,3 +114,59 @@ class TestHrLeaveType(TestHrHolidaysCommon):
             ).search([('has_valid_allocation', '=', True)], limit=1)
 
         self.assertFalse(leave_types, "Got valid leaves outside vaild period")
+
+    def test_search_virtual_remaining_leaves(self):
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+        leave_type_1 = self.env['hr.leave.type'].create({
+            'name': 'Test Leave 1',
+            'requires_allocation': True,
+        })
+        leave_type_2 = self.env['hr.leave.type'].create({
+            'name': 'Test Leave 2',
+            'requires_allocation': False,
+        })
+
+        self.env['hr.leave.allocation'].sudo().create({
+            'state': 'confirm',
+            'holiday_status_id': leave_type_1.id,
+            'employee_id': employee.id,
+            'number_of_days': 4,
+            'date_from': '2025-01-01',
+            'date_to': '2025-12-31',
+        }).action_approve()
+
+        result = (
+            self.env["hr.leave.type"]
+            .with_context(employee_id=employee.id)
+            .search([("virtual_remaining_leaves", ">", 0)])
+        )
+        self.assertIn(
+            leave_type_1, result, "Leave Type 1 should be in the result as it has remaining leaves",
+        )
+        self.assertIn(
+            leave_type_2, result, "Leave Type 2 should be in the result since it does not require allocation",
+        )
+
+        result = (
+            self.env["hr.leave.type"]
+            .with_context(employee_id=employee.id)
+            .search([("virtual_remaining_leaves", "=", 0)])
+        )
+        self.assertNotIn(
+            leave_type_1, result, "Leave Type 1 should not be in the result as it has remaining leaves != 0",
+        )
+        self.assertIn(
+            leave_type_2, result, "Leave Type 2 should be in the result since it does not require allocation",
+        )
+
+        result = (
+            self.env["hr.leave.type"]
+            .with_context(employee_id=employee.id)
+            .search([("virtual_remaining_leaves", ">", 4)])
+        )
+        self.assertNotIn(
+            leave_type_1, result, "Leave Type 1 should not be in the result",
+        )
+        self.assertIn(
+            leave_type_2, result, "Leave Type 2 should be in the result since it does not require allocation",
+        )
