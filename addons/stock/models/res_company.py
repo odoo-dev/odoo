@@ -75,13 +75,27 @@ class ResCompany(models.Model):
            in case of resuply routes between warehouses belonging to the same company, because
            we don't want to create accounting entries at that time.
         '''
+        def get_parent_internal_transit_location(company):
+            """ Recursive call for parents transit location in case branch within a branch is created at
+            the same time since the lowest level branch will call this method first and its parent
+            won't have its `internal_transit_location_id` set yet.
+            """
+            if internal_transit_loc := company.parent_id and company.parent_id.internal_transit_location_id:
+                return internal_transit_loc
+            if company.parent_id.parent_id:
+                return get_parent_internal_transit_location(company.parent_id)
+            return False
+
         for company in self:
-            location = self.env['stock.location'].create({
-                'name': _('Inter-warehouse transit'),
-                'usage': 'transit',
-                'company_id': company.id,
-                'active': False
-            })
+            if company.parent_id:
+                location = get_parent_internal_transit_location(company)
+            else:
+                location = self.env['stock.location'].create({
+                    'name': _('Inter-warehouse transit'),
+                    'usage': 'transit',
+                    'company_id': company.id,
+                    'active': False
+                })
 
             company.write({'internal_transit_location_id': location.id})
 
