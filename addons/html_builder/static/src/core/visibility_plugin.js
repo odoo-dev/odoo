@@ -145,7 +145,7 @@ export class VisibilityPlugin extends Plugin {
     toggleTargetVisibility(editingEl, show, considerDeviceVisibility, isCleaning = false) {
         show = this.toggleVisibilityStatus(editingEl, show, considerDeviceVisibility);
         const resourceName = show ? "target_show" : "target_hide";
-        this.dispatchTo(resourceName, editingEl);
+        this.trigger(resourceName, editingEl);
         return show;
     }
 

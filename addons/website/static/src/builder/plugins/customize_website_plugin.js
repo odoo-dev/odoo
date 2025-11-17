@@ -76,7 +76,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 return `o_cc${getCSSVariableValue(combination, style)}`;
             }
         }),
-        save_handlers: this.onSave.bind(this),
+        on_save_handlers: this.onSave.bind(this),
     };
 
     async onSave() {
@@ -320,7 +320,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 this.services.ui.block({ delay: 2500 });
                 return applyFn({ ...arg, value: v })
                     .then(() => {
-                        this.dispatchTo("trigger_dom_updated");
+                        this.trigger("on_dom_updated_handlers");
                     })
                     .finally(() => this.services.ui.unblock());
             };
@@ -529,7 +529,7 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
                 getAction("customizeBodyBgType")
                     .load({ editingElement, params, value, historyImageSrc: imageSrc })
                     .then(() => {
-                        this.dispatchTo("trigger_dom_updated");
+                        this.trigger("on_dom_updated_handlers");
                     })
                     .finally(() => this.services.ui.unblock());
             },
@@ -543,7 +543,7 @@ export class CustomizeBodyBgTypeAction extends BuilderAction {
                         historyImageSrc: oldImageSrc,
                     })
                     .then(() => {
-                        this.dispatchTo("trigger_dom_updated");
+                        this.trigger("on_dom_updated_handlers");
                     })
                     .finally(() => this.services.ui.unblock());
             },

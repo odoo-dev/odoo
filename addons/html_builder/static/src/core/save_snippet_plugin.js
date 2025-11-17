@@ -39,9 +39,9 @@ export class SaveSnippetPlugin extends Plugin {
     }
 
     /**
-     * Execute the `before_save_handlers` on {@link snippetEl},
+     * Execute the `on_before_save_handlers` on {@link snippetEl},
      * then execute {@link callback}, and finally execute the
-     * `after_save_handlers` on {@link snippetEl}.
+     * `on_after_save_handlers` on {@link snippetEl}.
      * This is used, for example, to stop the interactions before cloning a
      * snippet, and restarting them after cloning it.
      *
@@ -49,14 +49,12 @@ export class SaveSnippetPlugin extends Plugin {
      * @param {Function} callback
      */
     async wrapWithBeforeAfterSaveHandlers(snippetEl, callback) {
-        await Promise.all(
-            this.getResource("before_save_handlers").map((handler) => handler(snippetEl))
-        );
+        await Promise.all(this.trigger("on_before_save_handlers", snippetEl));
         let node;
         try {
             node = callback();
         } finally {
-            this.getResource("after_save_handlers").forEach((handler) => handler(snippetEl));
+            this.trigger("on_after_save_handlers", snippetEl);
         }
         return node;
     }

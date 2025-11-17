@@ -3,7 +3,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { withSequence } from "@html_editor/utils/resource";
 
 /**
- * @typedef {((arg: { sourceEl: HTMLElement, targetEl: HTMLElement }) => void)[]} after_replication_handlers
+ * @typedef {((arg: { sourceEl: HTMLElement, targetEl: HTMLElement }) => void)[]} on_after_replication_handlers
  */
 
 export class FieldChangeReplicationPlugin extends Plugin {
@@ -12,8 +12,8 @@ export class FieldChangeReplicationPlugin extends Plugin {
 
     /** @type {import("plugins").BuilderResources} */
     resources = {
-        handleNewRecords: this.handleMutations.bind(this),
-        normalize_handlers: withSequence(9000, this.normalizeHandler.bind(this)),
+        on_handle_new_records_handlers: this.handleMutations.bind(this),
+        on_normalize_handlers: withSequence(9000, this.normalizeHandler.bind(this)),
     };
 
     setup() {
@@ -109,12 +109,12 @@ export class FieldChangeReplicationPlugin extends Plugin {
                             touchedEls.add(targetEl);
                         }
                     }
-                    this.dispatchTo("after_replication_handlers", { sourceEl, targetEl });
+                    this.trigger("on_after_replication_handlers", { sourceEl, targetEl });
                 }
             }
         }
         for (const touchedEl of touchedEls) {
-            this.dispatchTo("normalize_handlers", touchedEl);
+            this.trigger("on_normalize_handlers", touchedEl);
         }
     }
 }

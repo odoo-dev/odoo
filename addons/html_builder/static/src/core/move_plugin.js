@@ -37,7 +37,7 @@ export class MovePlugin extends Plugin {
         }),
         on_cloned_handlers: this.onCloned.bind(this),
         on_will_remove_handlers: this.onWillRemove.bind(this),
-        on_element_dropped_handlers: this.onElementDropped.bind(this),
+        on_element_dropped_sequential_async_handlers: this.onElementDropped.bind(this),
         is_movable_selector: [
             {
                 selector: "section, .s_showcase .row .row:not(.s_col_no_resize) > div",
@@ -289,7 +289,7 @@ export class MovePlugin extends Plugin {
                 this.overlayTarget
             );
         }
-        this.dispatchTo("on_element_arrow_moved_handlers", {
+        this.trigger("on_element_arrow_moved_handlers", {
             movedEl: this.overlayTarget,
             dragState,
         });

@@ -24,12 +24,12 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        collaboration_notification_handlers: this.handleCollaborationNotification.bind(this),
-        external_history_step_handlers: this.refreshSelection.bind(this),
-        layout_geometry_change_handlers: this.refreshSelection.bind(this),
-        set_movable_element_handlers: this.disableAvatarForElement.bind(this),
-        unset_movable_element_handlers: this.enableAvatars.bind(this),
-        collaborative_selection_update_handlers: this.updateSelection.bind(this),
+        on_collaboration_notification_handlers: this.handleCollaborationNotification.bind(this),
+        on_external_history_step_handlers: this.refreshSelection.bind(this),
+        on_layout_geometry_change_handlers: this.refreshSelection.bind(this),
+        on_set_movable_element_handlers: this.disableAvatarForElement.bind(this),
+        on_unset_movable_element_handlers: this.enableAvatars.bind(this),
+        on_collaborative_selection_update_handlers: this.updateSelection.bind(this),
 
         collaboration_peer_metadata_providers: () => ({ avatarUrl: this.avatarUrl }),
     };

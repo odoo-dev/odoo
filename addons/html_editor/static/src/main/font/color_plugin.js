@@ -65,7 +65,7 @@ export class ColorPlugin extends Plugin {
             },
         ],
         /** Handlers */
-        remove_all_formats_handlers: this.removeAllColor.bind(this),
+        on_remove_all_formats_handlers: this.removeAllColor.bind(this),
         color_combination_getters: getColorCombinationFromClass,
 
         /** Predicates */
@@ -80,7 +80,7 @@ export class ColorPlugin extends Plugin {
                 return true;
             }
         },
-        normalize_handlers: this.normalize.bind(this),
+        on_normalize_handlers: this.normalize.bind(this),
     };
 
     normalize(root) {

@@ -27,7 +27,7 @@ class ProductHeaderCategoryOptionPlugin extends Plugin {
             ToggleCategoryAlignContentAction,
         },
 
-        save_handlers: this.onSave.bind(this),
+        on_save_handlers: this.onSave.bind(this),
     };
 
     async onSave() {

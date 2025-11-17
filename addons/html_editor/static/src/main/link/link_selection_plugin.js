@@ -37,8 +37,8 @@ export class LinkSelectionPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        selectionchange_handlers: this.resetLinkInSelection.bind(this),
-        normalize_handlers: () => this.resetLinkInSelection(),
+        on_selectionchange_handlers: this.resetLinkInSelection.bind(this),
+        on_normalize_handlers: () => this.resetLinkInSelection(),
 
         /** Processors */
         clean_for_save_processors: ({ root }) => this.clearLinkInSelectionClass(root),

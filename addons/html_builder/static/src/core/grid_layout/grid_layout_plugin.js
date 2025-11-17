@@ -49,7 +49,7 @@ export class GridLayoutPlugin extends Plugin {
         on_element_out_dropzone_handlers: this.onDropzoneOut.bind(this),
         on_element_dropped_over_handlers: this.onElementDroppedOver.bind(this),
         on_element_dropped_near_handlers: this.onElementDroppedNear.bind(this),
-        on_element_dropped_handlers: this.onElementDropped.bind(this),
+        on_element_dropped_sequential_async_handlers: this.onElementDropped.bind(this),
         // Ignore background grid in history
         savable_mutation_record_predicates: this.ignoreBackgroundGrid.bind(this),
     };

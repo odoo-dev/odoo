@@ -9,7 +9,7 @@ export class TranslateAnnouncementScrollPlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        mark_translatable_nodes: this.listenToAnnouncementScrollClick.bind(this),
+        on_mark_translatable_nodes_handlers: this.listenToAnnouncementScrollClick.bind(this),
     };
 
     /**

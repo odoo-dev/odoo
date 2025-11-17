@@ -82,7 +82,7 @@ export class ClonePlugin extends Plugin {
         el,
         { position = "afterend", scrollToClone = false, activateClone = true } = {}
     ) {
-        this.dispatchTo("on_will_clone_handlers", { originalEl: el });
+        this.trigger("on_will_clone_handlers", { originalEl: el });
         const cloneEl = el.cloneNode(true);
         this.dependencies.dom.removeSystemProperties(cloneEl); // TODO check that
         el.insertAdjacentElement(position, cloneEl);
@@ -98,9 +98,7 @@ export class ClonePlugin extends Plugin {
             cloneEl.scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
-        for (const onCloned of this.getResource("on_cloned_handlers")) {
-            await onCloned({ cloneEl, originalEl: el });
-        }
+        await Promise.all(this.trigger("on_cloned_handlers", { cloneEl, originalEl: el }));
 
         return cloneEl;
     }

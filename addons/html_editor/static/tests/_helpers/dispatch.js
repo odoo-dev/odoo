@@ -1,6 +1,6 @@
 import { removeClass } from "@html_editor/utils/dom";
 
-function dispatchTo(editor, resourceId, ...args) {
+function trigger(editor, resourceId, ...args) {
     (editor.resources[resourceId] || []).forEach((fn) => fn(...args));
 }
 
@@ -11,8 +11,8 @@ function processThrough(editor, resourceId, item, ...args) {
     return item;
 }
 
-export function dispatchNormalize(editor) {
-    dispatchTo(editor, "normalize_handlers", editor.editable);
+export function triggerNormalize(editor) {
+    trigger(editor, "on_normalize_handlers", editor.editable);
 }
 
 export function cleanHints(editor) {

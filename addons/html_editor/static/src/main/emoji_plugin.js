@@ -15,7 +15,7 @@ export class EmojiPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         delete_backward_overrides: this.handleDeleteBackward.bind(this),
-        input_handlers: this.detect.bind(this),
+        on_input_handlers: this.detect.bind(this),
         user_commands: [
             {
                 id: "addEmoji",

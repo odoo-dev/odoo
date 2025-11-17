@@ -23,7 +23,7 @@ describe("reset", () => {
         const TestPlugin = class extends Plugin {
             static id = "test";
             resources = {
-                normalize_handlers: () => {
+                on_normalize_handlers: () => {
                     this.editable.firstChild.setAttribute("data-test-normalize", "1");
                 },
             };
@@ -647,18 +647,18 @@ describe("shortcut", () => {
         expect(getContent(el)).toBe("<p>b[]</p>");
     });
 
-    test("use handleNewRecords resource", async () => {
+    test("use on_handle_new_records_handlers resource", async () => {
         const onChange = () => {
             expect.step("onchange");
         };
         const resources = {
-            handleNewRecords: () => {
+            on_handle_new_records_handlers: () => {
                 expect.step("handleNewRecords");
             },
-            content_updated_handlers: () => {
+            on_content_updated_handlers: () => {
                 expect.step("contentUpdated");
             },
-            normalize_handlers: (root) => {
+            on_normalize_handlers: (root) => {
                 expect.step("normalize");
                 root.classList.add("test");
             },

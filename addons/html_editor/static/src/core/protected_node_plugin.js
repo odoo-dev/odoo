@@ -19,8 +19,8 @@ export class ProtectedNodePlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        normalize_handlers: withSequence(0, this.normalize.bind(this)),
-        before_filter_mutation_record_handlers: this.beforeFilteringMutationRecords.bind(this),
+        on_normalize_handlers: withSequence(0, this.normalize.bind(this)),
+        on_before_filter_mutation_record_handlers: this.beforeFilteringMutationRecords.bind(this),
 
         /** Processors */
         clean_for_save_processors: ({ root }) => this.cleanForSave(root),

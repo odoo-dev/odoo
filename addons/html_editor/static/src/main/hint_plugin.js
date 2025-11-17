@@ -25,13 +25,13 @@ export class HintPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        selectionchange_handlers: this.updateHints.bind(this),
-        external_history_step_handlers: () => {
+        on_selectionchange_handlers: this.updateHints.bind(this),
+        on_external_history_step_handlers: () => {
             this.clearHints();
             this.updateHints();
         },
-        normalize_handlers: this.normalize.bind(this),
-        content_updated_handlers: this.updateHints.bind(this),
+        on_normalize_handlers: this.normalize.bind(this),
+        on_content_updated_handlers: this.updateHints.bind(this),
 
         /** Processors */
         clean_for_save_processors: ({ root }) => this.clearHints(root),

@@ -152,7 +152,7 @@ async function fetchAttachmentMetaData(url, ormService) {
  *      isAvailable: (linkEl: HTMLLinkElement) => boolean;
  *      getProps: (props) => props;
  *  }[]} link_popovers
- * @typedef {((linkEl: HTMLAnchorElement) => void)[]} create_link_handlers
+ * @typedef {((linkEl: HTMLAnchorElement) => void)[]} on_create_link_handlers
  */
 
 export class LinkPlugin extends Plugin {
@@ -298,17 +298,17 @@ export class LinkPlugin extends Plugin {
         },
 
         /** Handlers */
-        beforeinput_handlers: withSequence(5, this.onBeforeInput.bind(this)),
-        input_handlers: this.onInputDeleteNormalizeLink.bind(this),
-        before_delete_handlers: this.updateCurrentLinkSyncState.bind(this),
-        delete_handlers: this.onInputDeleteNormalizeLink.bind(this),
-        before_paste_handlers: this.updateCurrentLinkSyncState.bind(this),
-        after_paste_handlers: this.onPasteNormalizeLink.bind(this),
-        selectionchange_handlers: this.handleSelectionChange.bind(this),
-        normalize_handlers: this.normalizeLink.bind(this),
-        after_insert_handlers: this.handleAfterInsert.bind(this),
+        on_beforeinput_handlers: withSequence(5, this.onBeforeInput.bind(this)),
+        on_input_handlers: this.onInputDeleteNormalizeLink.bind(this),
+        on_before_delete_handlers: this.updateCurrentLinkSyncState.bind(this),
+        on_delete_handlers: this.onInputDeleteNormalizeLink.bind(this),
+        on_before_paste_handlers: this.updateCurrentLinkSyncState.bind(this),
+        on_after_paste_handlers: this.onPasteNormalizeLink.bind(this),
+        on_selectionchange_handlers: this.handleSelectionChange.bind(this),
+        on_normalize_handlers: this.normalizeLink.bind(this),
+        on_after_insert_handlers: this.handleAfterInsert.bind(this),
         on_will_remove_handlers: () => this.closeLinkTools(),
-        to_inline_code_handlers: (node) => {
+        on_to_inline_code_handlers: (node) => {
             this.removeEmptyLinks(node);
             for (const btn of selectElements(node, "a.btn")) {
                 // Remove all attributes from the button link except "href"
@@ -414,7 +414,7 @@ export class LinkPlugin extends Plugin {
             link.setAttribute(param, `${value}`);
         }
         link.innerText = label;
-        this.dispatchTo("create_link_handlers", link);
+        this.trigger("on_create_link_handlers", link);
         return link;
     }
 
@@ -451,8 +451,8 @@ export class LinkPlugin extends Plugin {
             description: _t("Create an URL."),
             icon: "fa-link",
             run: () => {
-                this.dispatchTo(
-                    "before_paste_handlers",
+                this.trigger(
+                    "on_before_paste_handlers",
                     this.dependencies.selection.getEditableSelection()
                 );
                 this.dependencies.dom.insert(this.createLink(url, text));

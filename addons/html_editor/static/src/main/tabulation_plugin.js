@@ -71,7 +71,7 @@ export class TabulationPlugin extends Plugin {
         contenteditable_to_remove_selector: "span.oe-tabs",
 
         /** Handlers */
-        normalize_handlers: this.normalize.bind(this),
+        on_normalize_handlers: this.normalize.bind(this),
 
         /** Overrides */
         delete_forward_overrides: this.handleDeleteForward.bind(this),

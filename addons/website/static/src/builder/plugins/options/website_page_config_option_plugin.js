@@ -56,7 +56,7 @@ class WebsitePageConfigOptionPlugin extends Plugin {
         ],
         target_show: this.onTargetVisibilityToggle.bind(this, true),
         target_hide: this.onTargetVisibilityToggle.bind(this, false),
-        save_handlers: this.onSave.bind(this),
+        on_save_handlers: this.onSave.bind(this),
     };
 
     /**

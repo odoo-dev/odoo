@@ -53,7 +53,7 @@ export class HighlightPlugin extends Plugin {
                     closestElement(editableSelection.anchorNode, ".o_text_highlight") && "compact"
             ),
         ],
-        normalize_handlers: (root) => {
+        on_normalize_handlers: (root) => {
             for (const node of root.querySelectorAll(".o_text_highlight")) {
                 // Signal to the interaction that there is (maybe) a new element
                 node.dispatchEvent(new Event("text_highlight_added", { bubbles: true }));
@@ -64,15 +64,15 @@ export class HighlightPlugin extends Plugin {
                 return true;
             }
         },
-        selectionchange_handlers: this.updateSelectedHighlight.bind(this),
-        remove_all_formats_handlers: () => {
+        on_selectionchange_handlers: this.updateSelectedHighlight.bind(this),
+        on_remove_all_formats_handlers: () => {
             // we rely on the normalize handler to start it again
             this.dependencies.edit_interaction.stopInteraction("website.text_highlight");
         },
-        format_selection_handlers: () => {
+        on_format_selection_handlers: () => {
             this.dependencies.edit_interaction.stopInteraction("website.text_highlight");
         },
-        before_save_handlers: () => {
+        on_before_save_handlers: () => {
             this.dependencies.edit_interaction.stopInteraction("website.text_highlight");
         },
     };

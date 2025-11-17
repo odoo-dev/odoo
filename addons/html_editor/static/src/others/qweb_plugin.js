@@ -38,8 +38,8 @@ export class QWebPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        selectionchange_handlers: withSequence(8, this.onSelectionChange.bind(this)),
-        normalize_handlers: withSequence(0, this.normalize.bind(this)),
+        on_selectionchange_handlers: withSequence(8, this.onSelectionChange.bind(this)),
+        on_normalize_handlers: withSequence(0, this.normalize.bind(this)),
 
         /** Processors */
         clean_for_save_processors: ({ root }) => {

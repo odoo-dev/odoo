@@ -60,10 +60,10 @@ export class TableAlignPlugin extends Plugin {
         ],
 
         /** Handlers */
-        selectionchange_handlers: this.updateVerticalAlignParams.bind(this),
-        post_undo_handlers: this.updateVerticalAlignParams.bind(this),
-        post_redo_handlers: this.updateVerticalAlignParams.bind(this),
-        remove_all_formats_handlers: this.setVerticalAlignment.bind(this),
+        on_selectionchange_handlers: this.updateVerticalAlignParams.bind(this),
+        on_after_undo_handlers: this.updateVerticalAlignParams.bind(this),
+        on_after_redo_handlers: this.updateVerticalAlignParams.bind(this),
+        on_remove_all_formats_handlers: this.setVerticalAlignment.bind(this),
 
         /** Predicates */
         has_format_predicates: (node) => {

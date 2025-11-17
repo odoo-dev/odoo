@@ -174,7 +174,7 @@ export class BackgroundImageOptionPlugin extends Plugin {
         // remove background size to avoid repeating gradient
         editingElement.classList.remove("o_bg_img_opt_repeat");
         editingElement.style.removeProperty("background-size");
-        this.dispatchTo("on_bg_image_hide_handlers", editingElement);
+        this.trigger("on_bg_image_hide_handlers", editingElement);
     }
 }
 
