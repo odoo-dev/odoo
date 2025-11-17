@@ -164,6 +164,14 @@
         </div>
     </div>
 
+    <!-- document Popover for downloading -->
+    <div t-name="wysiwyg.widgets.document.download.tooltip" class="d-flex">
+        <span class="me-2 o_we_preview_favicon"><i class="fa fa-globe"/><img class="align-baseline d-none"/></span>
+        <div class="w-100 d-flex">
+            <a href="#" target="_blank" class="o_we_url_link fw-bold flex-grow-1 text-truncate" t-esc="widget.href" title="Download the file"/>
+        </div>
+    </div>
+
     <!-- Link Edition : Popover -->
     <div t-name="wysiwyg.widgets.link.edit.tooltip" class="d-flex">
         <span class="me-2 o_we_preview_favicon"><i class="fa fa-globe"/><img class="align-baseline d-none"/></span>

@@ -470,6 +470,28 @@ const Wysiwyg = Widget.extend({
                     });
                 }
             }
+
+            // open the popover for a document so it can be downlaoded by click the link
+            if ($target.is(this.customizableLinksSelector)
+                && $target.is('a')
+                && !$target[0].isContentEditable
+                && $target.attr("data-mimetype")) {
+                    this.linkPopover = $target.data('popover-widget-initialized');
+                    if (!this.linkPopover) {
+                        (async () => {
+                            let container;
+                            if (this.snippetsMenu) {
+                                // Await for the editor panel to be fully updated
+                                // as some buttons of the link popover we create
+                                // here relies on clicking in that editor panel...
+                                await this.snippetsMenu._mutex.exec(() => null);
+                                container = this.options.document.getElementById('oe_manipulators');
+                            }
+                            this.linkPopover = await weWidgets.DocumentPopoverWidget.createFor(this, $target[0], { wysiwyg: this, container });
+                            $target.data('popover-widget-initialized', this.linkPopover);
+                        })();
+                    }
+            }
         });
 
         this._onSelectionChange = this._onSelectionChange.bind(this);
@@ -2518,11 +2540,13 @@ const Wysiwyg = Widget.extend({
             if (
                 isVisible &&
                 (
-                    (this.options.autohideToolbar && !this.odooEditor.document.getSelection().isCollapsed) ||
+                    (this.options.autohideToolbar && !this.odooEditor.document.getSelection().isCollapsed && !this.linkPopover.$target.attr("data-mimetype")) ||
                     !selectionInLink
                 )
             ) {
                 this.linkPopover.hide();
+            } else if (isVisible && this.linkPopover.$target.attr("data-mimetype")){
+                this.odooEditor.toolbarHide();
             }
         }
     },
