@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { beforeEach, expect, getFixture, test } from "@odoo/hoot";
 import { queryAllAttributes, queryAllTexts, queryFirst } from "@odoo/hoot-dom";
 import {
     contains,
@@ -8,7 +8,9 @@ import {
     models,
     mountView,
     onRpc,
+    patchWithCleanup,
 } from "../../web_test_helpers";
+import { browser } from "@web/core/browser/browser";
 
 class Product extends models.Model {
     url = fields.Char();
@@ -17,6 +19,21 @@ class Product extends models.Model {
 defineModels([Product]);
 
 onRpc("has_group", () => true);
+
+async function assertUrl(target, url) {
+    await contains(target, {
+        visible: false,
+    }).click();
+    expect.verifySteps([url]);
+}
+
+beforeEach(() => {
+    patchWithCleanup(browser, {
+        open(url) {
+            expect.step(url);
+        },
+    });
+});
 
 test("UrlField in form view", async () => {
     Product._records = [{ id: 1, url: "https://www.example.com" }];
@@ -27,10 +44,9 @@ test("UrlField in form view", async () => {
         arch: `<form><field name="url" widget="url"/></form>`,
     });
     expect(`.o_field_widget input[type="text"]`).toHaveCount(1);
-    expect(`.o_field_widget input[type="text"]`).toHaveValue("https://www.example.com");
-    expect(`.o_field_url a`).toHaveAttribute("href", "https://www.example.com");
+    await assertUrl(`.o_field_widget button i.fa-globe`, "https://www.example.com");
     await fieldInput("url").edit("https://www.odoo.com");
-    expect(`.o_field_widget input[type="text"]`).toHaveValue("https://www.odoo.com");
+    await assertUrl(`.o_field_widget button i.fa-globe`, "https://www.odoo.com");
 });
 
 test("in form view (readonly)", async () => {
@@ -191,5 +207,5 @@ test("with non falsy, but non url value", async () => {
         resModel: "product",
         arch: `<form><field name="url" widget="url"/></form>`,
     });
-    expect(".o_field_widget[name=url] a").toHaveAttribute("href", "http://odoo://hello");
+    await assertUrl(`.o_field_widget button i.fa-globe`, "http://odoo://hello");
 });

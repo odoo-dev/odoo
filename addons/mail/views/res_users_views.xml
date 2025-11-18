@@ -41,7 +41,7 @@
                             <field name="out_of_office_from" widget="daterange" options="{'end_date_field': 'out_of_office_to', 'show_time': False}" placeholder="None planned"/>
                             <field name="out_of_office_to" invisible="1"/> <!-- otherwise it is visible, smort -->
                         </div>
-                        <field name="out_of_office_message" string="" options="{'height': 112}" class="border border-secondary w-100" placeholder="Your out-of-office message..."/>
+                        <field name="out_of_office_message" string="" options="{'height': 112}" class="o_field_border_visible w-100" placeholder="Your out-of-office message..."/>
                     </group>
                 </data>
             </field>
@@ -73,7 +73,7 @@
                             <field name="out_of_office_from" widget="daterange" options="{'end_date_field': 'out_of_office_to', 'show_time': False}" placeholder="None planned"/>
                             <field name="out_of_office_to" invisible="1"/> <!-- otherwise it is visible, smort -->
                         </div>
-                        <field name="out_of_office_message" string="" options="{'height': 112}" class="border border-secondary w-100" placeholder="Your out-of-office message..."/>
+                        <field name="out_of_office_message" string="" options="{'height': 112}" class="o_field_border_visible w-100" placeholder="Your out-of-office message..."/>
                     </group>
                 </data>
             </field>

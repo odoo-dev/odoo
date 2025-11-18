@@ -6,7 +6,7 @@
             <span t-esc="formattedValue"/>
         </t>
         <t t-else="">
-            <div class="d-flex">
+            <div class="o_input_box">
                 <input
                     t-ref="numpadDecimal"
                     t-attf-class="o_input"
@@ -14,7 +14,7 @@
                     inputmode="decimal"
                     autocomplete="off"
                 />
-                <span>%</span>
+                <span class="o_input_box_overlay suffix">%</span>
             </div>
         </t>
     </t>

@@ -3,6 +3,22 @@ import { useBus } from "@web/core/utils/hooks";
 
 import { useComponent, useEffect, useRef } from "@odoo/owl";
 
+export function positionInputBoxOverlay(inputEl) {
+    const closestInputBox = inputEl.closest(".o_input_box:has(.o_input_box_overlay.inline)");
+    if (!closestInputBox) {
+        return;
+    }
+    const length = inputEl.value.length;
+    const inlineEl = closestInputBox.querySelector(".o_input_box_overlay.inline");
+    const overlayLength = inlineEl.clientWidth;
+    if (inlineEl.classList.contains("prefix")) {
+        closestInputBox.style.setProperty("--inputbox-overlay-width-start", overlayLength + "px");
+    } else {
+        closestInputBox.style.setProperty("--inputbox-overlay-width-end", overlayLength + "px");
+        closestInputBox.style.setProperty("--inputbox-overlay-inline-position", `calc(100% - (${overlayLength}px + ${length * 0.5}rem) - var(--inputbox-overlay-width-start) - var(--inputbox-spacing-unit))`);
+    }
+}
+
 /**
  * This hook is meant to be used by field components that use an input or
  * textarea to edit their value. Its purpose is to prevent that value from being
@@ -90,6 +106,7 @@ export function useInputField(params) {
                 }
             }
         }
+        positionInputBoxOverlay(ev.target);
     }
     function onKeydown(ev) {
         const hotkey = getActiveHotkey(ev);
@@ -139,6 +156,9 @@ export function useInputField(params) {
         ) {
             inputRef.el.value = value;
             lastSetValue = inputRef.el.value;
+        }
+        if (inputRef.el) {
+            positionInputBoxOverlay(inputRef.el);
         }
     });
 

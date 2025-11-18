@@ -64,12 +64,12 @@ test("button is visible in the edited record and allows to open that record", as
         `,
     });
     expect("td.o_survey_description_page_cell").toHaveCount(2);
-    expect("button.o_icon_button").toHaveCount(0);
+    expect("button .o_button_icon").toHaveCount(0);
 
     await contains(".o_data_cell").click();
-    expect(".o_data_row button.o_icon_button").toHaveCount(1);
+    expect(".o_data_row button .o_button_icon").toHaveCount(1);
     expect(".modal .o_form_view").toHaveCount(0);
 
-    await contains("button.o_icon_button").click();
+    await contains("button .o_button_icon").click();
     expect(".modal .o_form_view").toHaveCount(1);
 });

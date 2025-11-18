@@ -182,28 +182,25 @@
             <field name="arch" type="xml">
                 <xpath expr="//div[@name='tracking_and_qty_no_stock']" position="replace">
                     <!-- Replace the single line tacking + qty without stock with 2 individual lines with stock (tracking + tracking method // qty) -->
-                    <div name="tracking_with_stock" class="o_row w-100" invisible="type != 'consu'">
-                        <field name="is_storable"/>
-                    </div>
+                    <field name="is_storable" widget="boolean_toggle" invisible="type != 'consu'"/>
                     <field name="tracking" invisible="not is_storable" groups="stock.group_production_lot"/>
                     <!-- Qty line if storable -->
-                    <label for="qty_available" class="oe_inline" invisible="not is_storable" groups="stock.group_stock_user"/>
-                    <div name="qty_available_with_stock" class="o_row" invisible="not is_storable" groups="stock.group_stock_user">
+                    <label for="qty_available" invisible="not is_storable" groups="stock.group_stock_user"/>
+                    <div name="qty_available_with_stock" class="o_input_box" invisible="not is_storable" groups="stock.group_stock_user">
                         <a type="object" name="action_open_quants"
                            invisible="not show_qty_update_button" groups="stock.group_stock_manager">
                             <field name="qty_available" readonly="True"/>
                         </a>
-                        <field name="qty_available" invisible="show_qty_update_button" groups="stock.group_stock_manager" style="max-width: fit-content;"/>
-                        <field name="qty_available" readonly="True" groups="!stock.group_stock_manager" style="max-width: fit-content;"/>
-                        <span name="uom_span" groups="uom.group_uom">
-                            <field name="uom_name" class="oe_inline"/>
-                        </span>
+                        <field name="qty_available" invisible="show_qty_update_button" groups="stock.group_stock_manager"/>
+                        <field name="qty_available" readonly="True" groups="!stock.group_stock_manager"/>
+                        <field groups="uom.group_uom" name="uom_name" class="o_input_box_overlay suffix"/>
                     </div>
                 </xpath>
                 <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
                     <label for="sale_delay" invisible="not sale_ok"/>
-                    <div invisible="not sale_ok">
-                        <field name="sale_delay" class="oe_inline" style="vertical-align:baseline"/> days
+                    <div class="o_input_box" invisible="not sale_ok">
+                        <field name="sale_delay"/>
+                        <span class="o_input_box_overlay suffix inline">days</span>
                     </div>
                 </xpath>
                 <xpath expr="//group[@name='group_lots_and_weight']" position="before">

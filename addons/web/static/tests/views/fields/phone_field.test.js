@@ -6,11 +6,13 @@ import {
     models,
     mountView,
     onRpc,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
-import { expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test } from "@odoo/hoot";
 import { click, edit, pointerDown, queryFirst, queryOne } from "@odoo/hoot-dom";
 import { getNextTabableElement } from "@web/core/utils/ui";
 import { animationFrame } from "@odoo/hoot-mock";
+import { browser } from "@web/core/browser/browser";
 
 class Partner extends models.Model {
     foo = fields.Char({ default: "My little Foo Value", trim: true });
@@ -20,6 +22,21 @@ class Partner extends models.Model {
 }
 
 defineModels([Partner]);
+
+async function assertUrl(target, url) {
+    await contains(target, {
+        visible: false,
+    }).click();
+    expect.verifySteps([url]);
+}
+
+beforeEach(() => {
+    patchWithCleanup(browser, {
+        open(url) {
+            expect.step(url);
+        },
+    });
+});
 
 test("PhoneField in form view on normal screens (readonly)", async () => {
     await mountView({
@@ -57,9 +74,8 @@ test("PhoneField in form view on normal screens (edit)", async () => {
     });
     expect(`input[type="tel"]`).toHaveCount(1);
     expect(`input[type="tel"]`).toHaveValue("yop");
-    expect(".o_field_phone a").toHaveCount(1);
-    expect(".o_field_phone a").toHaveText("Call");
-    expect(".o_field_phone a").toHaveAttribute("href", "tel:yop");
+    expect(".o_field_phone button i.fa-phone").toHaveCount(1);
+    await assertUrl(`.o_field_widget button i.fa-phone`, "tel:yop");
 
     // change value in edit mode
     await click(`input[type="tel"]`);

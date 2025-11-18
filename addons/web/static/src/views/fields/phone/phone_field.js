@@ -2,7 +2,8 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
-
+import { InputBox } from "@web/core/input_box/input_box";
+import { useChildRef } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
 
 export class PhoneField extends Component {
@@ -11,9 +12,14 @@ export class PhoneField extends Component {
         ...standardFieldProps,
         placeholder: { type: String, optional: true },
     };
+    static components = { InputBox };
 
     setup() {
-        useInputField({ getValue: () => this.props.record.data[this.props.name] || "" });
+        this.input = useChildRef();
+        useInputField({ ref: this.input, getValue: () => this.props.record.data[this.props.name] || "" });
+    }
+    get inlineButtons() {
+        return [];
     }
     get phoneHref() {
         return "tel:" + this.props.record.data[this.props.name].replace(/\s+/g, "");
@@ -39,8 +45,19 @@ export const phoneField = {
 
 registry.category("fields").add("phone", phoneField);
 
-class FormPhoneField extends PhoneField {
-    static template = "web.FormPhoneField";
+export class FormPhoneField extends PhoneField {
+    get overlayButtons() {
+        return [
+            {
+                icon: "fa-phone",
+                href: this.phoneHref,
+                name: _t("Call")
+            }
+        ]
+    }
+    get inlineButtons() {
+        return this.overlayButtons.filter(btn => btn.showInReadonly);
+    }
 }
 
 export const formPhoneField = {

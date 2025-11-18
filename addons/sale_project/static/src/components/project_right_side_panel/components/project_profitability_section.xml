@@ -4,7 +4,7 @@
         <tr class="opacity-trigger-hover" t-att-class="{ 'table-active': !state.isFolded }">
             <t t-set="revenue_label" t-value="props.labels[revenue.id] or revenue.id"/>
             <td>
-                <div class="position-relative d-flex gap-1">
+                <div class="o_input_box">
                     <t t-if="this.props.revenue.isSectionFoldable">
                         <button class="o_group_caret btn btn-link d-flex gap-1 flex-grow-1 p-0 text-reset text-start" t-on-click="() => this.toggleSaleItems()">
                             <i t-attf-class="fa fa-fw #{state.isFolded ? 'fa-caret-right' : 'fa-caret-down'} mt-1"/>
@@ -12,16 +12,7 @@
                         </button>
                     </t>
                     <t t-esc="revenue_label" t-else=""/>
-                    <a
-                        class="revenue_section btn btn-link my-n2 py-2 text-action"
-                        t-if="revenue.action" href="#"
-                        t-on-click="() => this.props.onClick(revenue.action)"
-                        t-att-class="{ 'ms-auto': env.isSmall, 'opacity-0': !env.isSmall and state.isFolded, 'opacity-100-hover': !env.isSmall }"
-                        aria-label="Internal link"
-                        data-tooltip="Internal link"
-                    >
-                        <i class="oi oi-arrow-right"/>
-                    </a>
+                    <InternalLinkButton onClick.bind="(_, isMiddleClick) => this.props.onClick(revenue.action, isMiddleClick)" />
                 </div>
             </td>
             <td t-attf-class="text-end {{ revenue.invoiced + revenue.to_invoice === 0 ? 'text-500' : ''}}"><t t-esc="props.formatMonetary(revenue.invoiced + revenue.to_invoice)"/></td>

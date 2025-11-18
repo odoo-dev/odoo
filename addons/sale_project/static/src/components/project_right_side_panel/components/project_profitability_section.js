@@ -1,9 +1,11 @@
 import { useService } from "@web/core/utils/hooks";
 import { Component, useState } from "@odoo/owl";
 import { formatFloat, formatFloatTime } from "@web/views/fields/formatters";
+import { InternalLinkButton } from "@web/views/view_components/internal_link_button";
 
 export class ProjectProfitabilitySection extends Component {
 
+    static components = { InternalLinkButton };
     static props = {
         revenue: Object,
         labels: Object,

@@ -1,0 +1,121 @@
+:root {
+    --inputbox-spacing-unit: 8px;
+}
+
+.o_input_box:not(.o_input_box .o_input_box) {
+    --inputbox-padding-around: 0px;
+    --inputbox-overlay-padding-toggler: 0px;
+    --inputbox-overlay-padding-suffix: 0px;
+}
+
+.o_input_box:has(.o_input_box_overlay) {
+    --inputbox-overlay-padding-x: 0px;
+    --inputbox-overlay-padding-y: 0px;
+    --inputbox-overlay-width-default: calc(3 * var(--inputbox-spacing-unit));
+    --inputbox-overlay-width-start: var(--inputbox-overlay-width-default);
+    --inputbox-overlay-width-end: var(--inputbox-overlay-width-default);
+    position: relative;
+}
+
+.o_input_box_overlay {
+    position: absolute;
+    top: var(--inputbox-overlay-padding-y);
+    height: var(--inputbox-overlay-width-default) !important;
+    padding: 0 !important;
+    z-index: 1;
+    color: $text-muted;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+    &.btn, .btn, button {
+        border-radius: var(--inputbox-spacing-unit);
+        line-height: 0;
+        pointer-events: auto;
+        padding: 0 !important;
+        color: $btn-link-color;
+    }
+    .btn {
+        display: block;
+        height: inherit;
+    }
+}
+
+.o_input_box:not(.o_input_box .o_input_box):has(.o_dropdown_button) {
+    --inputbox-overlay-padding-toggler: calc(var(--inputbox-overlay-padding-x) + (2 * var(--inputbox-spacing-unit)));
+}
+
+// SUFFIX OVERLAY RULES
+.o_input_box:not(.o_input_box .o_input_box):has(.suffix) {
+    --inputbox-overlay-padding-suffix: calc(var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit));
+    
+    &:has(.suffix + .suffix) {
+    --inputbox-overlay-padding-suffix: calc(2 * (var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit)));
+
+        .o_input_box_overlay.suffix:not(.suffix + .suffix) {
+            right: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler) + var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit));
+        }
+    }
+}
+
+.o_input_box {
+    .o_input {
+        padding-right: calc((var(--inputbox-spacing-unit)) + var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler) + var(--inputbox-overlay-padding-suffix)) !important;
+    }
+    .suffix {
+        width: var(--inputbox-overlay-width-end) !important;
+        right: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler));
+    }
+}
+
+// PREFIX OVERLAY RULES
+.o_input_box:has(.prefix) {
+    .o_input_box_overlay.prefix {
+        width: var(--inputbox-overlay-width-start) !important;
+        left: var(--inputbox-overlay-padding-x);
+    }
+    .o_input, .o_field_widget.o_readonly_modifier {
+        padding-left: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-width-start) + var(--inputbox-spacing-unit)) !important;
+    }
+}
+
+.o_input_box:has(.o_input_box_overlay.inline) {
+    // --inputbox-overlay-width-end: 20%;
+
+    .o_input_box_overlay.inline {
+        &.prefix, &.suffix {
+            width: auto !important;
+            transition: right .4s;
+        }
+        &.suffix:not(.o_touch_device .suffix):not(.o_input_box:focus-within .suffix) {
+            right: var(--inputbox-overlay-inline-position);
+        }
+    }
+}
+
+.o_touch_device {
+    :has(.o_input_box_overlay) {
+        --inputbox-overlay-padding-x: var(--inputbox-spacing-unit);
+        --inputbox-overlay-padding-y: calc(var(--border-width) + 2.25 * var(--inputbox-spacing-unit) - var(--inputbox-overlay-width-default) / 2);
+    }
+    .o_input_box_overlay {
+        &.btn, .btn, button {
+            color: var(--secondary-color);
+        }
+    }
+}
+
+// READONLY RULES
+.o_input_box:not(:has(input:not([type]), [type='text'], textarea, [contenteditable], [type='email'], [type='number'], [type='password'], [type='tel'], [type='search'], button.o_input)) {
+    display: flex;
+    flex-direction: row;
+    gap: var(--inputbox-spacing-unit);
+
+    .o_input_box_overlay {
+        &.prefix, &.suffix {
+            position: relative;
+            inset: unset;
+        }
+    }
+}

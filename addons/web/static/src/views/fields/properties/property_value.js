@@ -1,4 +1,4 @@
-import { Component } from "@odoo/owl";
+import { Component, useEffect, useRef } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { getCurrency } from "@web/core/currency";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
@@ -28,6 +28,7 @@ import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relat
 import { PropertyTags } from "./property_tags";
 import { PropertyText } from "./property_text";
 import { fileTypeMagicWordMap } from "@web/views/fields/image/image_field";
+import { positionInputBoxOverlay } from "@web/views/fields/input_field_hook";
 
 class PropertyValueTag extends Component {
     static template = "web.PropertyValueTag";
@@ -87,6 +88,7 @@ export class PropertyValue extends Component {
         currencyField: { type: String, optional: true },
         domain: { type: String, optional: true },
         string: { type: String, optional: true },
+        suffix: { type: String, optional: true },
         value: { optional: true },
         context: { type: Object },
         readonly: { type: Boolean, optional: true },
@@ -103,6 +105,7 @@ export class PropertyValue extends Component {
 
         this.orm = useService("orm");
         this.action = useService("action");
+        this.root = useRef("root");
 
         this.openMany2X = useOpenMany2XRecord({
             resModel: this.props.model,
@@ -130,6 +133,10 @@ export class PropertyValue extends Component {
             },
             fieldString: this.props.string,
         });
+
+        useEffect(() => {
+            this._positionSuffixOverlay();
+        }, () => [this.root.el, this.props.suffix]);
     }
 
     /* --------------------------------------------------------
@@ -345,6 +352,7 @@ export class PropertyValue extends Component {
         } else if (this.props.type === "signature") {
             newValue = newValue.signatureImage.split(",")[1] || false;
         }
+        this._positionSuffixOverlay();
 
         // trigger the onchange event to notify the parent component
         this.props.onChange(newValue);
@@ -388,6 +396,13 @@ export class PropertyValue extends Component {
     /* --------------------------------------------------------
      * Private methods
      * -------------------------------------------------------- */
+
+    _positionSuffixOverlay() {
+        const element = this.root.el?.querySelector("input, select");
+        if (element) {
+            positionInputBoxOverlay(element);
+        }
+    }
 
     /**
      * Open the form view of the given record id / model.

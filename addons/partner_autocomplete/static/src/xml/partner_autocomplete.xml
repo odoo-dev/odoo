@@ -25,7 +25,7 @@
     </t>
 
     <t t-name="partner_autocomplete.PartnerAutoCompleteCharField" t-inherit="web.CharField" t-inherit-mode="primary">
-        <xpath expr="//t[@t-else='']" position="before">
+        <xpath expr="//div[@t-else='']" position="before">
             <t t-elif="props.record.resModel !== 'res.partner' || !props.record.data.parent_id">
                 <PartnerAutoComplete
                     value="props.record.data[props.name] || ''"

@@ -78,8 +78,8 @@ class PeppolRegistration(models.TransientModel):
         required=True,
     )
     phone_number = fields.Char(related='selected_company_id.account_peppol_phone_number', readonly=False)
-    peppol_eas = fields.Selection(related='selected_company_id.peppol_eas', readonly=False, required=True)
-    peppol_endpoint = fields.Char(related='selected_company_id.peppol_endpoint', readonly=False, required=True)
+    peppol_eas = fields.Selection(string="Peppol ID", related='selected_company_id.peppol_eas', readonly=False, required=True)
+    peppol_endpoint = fields.Char(string="Peppol Endpoint", related='selected_company_id.peppol_endpoint', readonly=False, required=True)
     smp_registration = fields.Boolean(  # you're registering to SMP when you register as a sender+receiver
         string='Register as a receiver',
         compute='_compute_smp_registration_external_provider'

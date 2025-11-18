@@ -1,6 +1,7 @@
 import { localization } from "@web/core/l10n/localization";
 import { useOwnedDialogs } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
+import { hasTouch } from "@web/core/browser/feature_detection";
 import { TranslationDialog } from "./translation_dialog";
 
 import { Component } from "@odoo/owl";
@@ -47,6 +48,7 @@ export class TranslationButton extends Component {
 
     setup() {
         this.translationDialog = useTranslationDialog();
+        this.hasTouch = hasTouch();
     }
 
     get isMultiLang() {

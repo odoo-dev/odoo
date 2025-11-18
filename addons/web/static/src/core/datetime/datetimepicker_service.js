@@ -425,7 +425,7 @@ export const datetimePickerService = {
                     params.createPopover ||
                     function defaultCreatePopover(...args) {
                         let service = popoverService;
-                        if (ui.isSmall) {
+                        if (ui.isSmall && hasTouch()) {
                             service = bottomSheetService;
                         }
                         return makePopover(service.add, ...args);
