@@ -2,7 +2,7 @@
 
 import inspect
 import logging
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, Sequence, Iterable
 from typing import Any
 
 from werkzeug.exceptions import (
@@ -75,6 +75,11 @@ class WebJson2Controller(http.Controller):
         if hasattr(func, '_api_model') and ids:
             e = f"cannot call {__model__}.{__method__} with ids"
             raise UnprocessableEntity(e)
+
+        if isinstance(ids, str):
+            ids = int(ids)
+        elif isinstance(ids, Iterable):
+            ids = [int(x) for x in ids]
 
         records = Model.browse(ids)
         signature = inspect.signature(func)

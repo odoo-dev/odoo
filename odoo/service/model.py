@@ -3,7 +3,7 @@ import logging
 import random
 import threading
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, Sequence, Iterable
 from functools import partial
 
 from psycopg2 import IntegrityError, OperationalError, errorcodes, errors
@@ -80,6 +80,10 @@ def call_kw(model: BaseModel, name: str, args: list, kwargs: Mapping):
         recs = model
     else:
         ids, args = args[0], args[1:]
+        if isinstance(ids, str):
+            ids = int(ids)
+        elif isinstance(ids, Iterable):
+            ids = [int(x) for x in ids]
         recs = model.browse(ids)
 
     # altering kwargs is a cause of errors, for instance when retrying a request
