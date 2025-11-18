@@ -21,6 +21,7 @@ Plan contable chileno e impuestos de acuerdo a disposiciones vigentes.
     'auto_install': ['account'],
     'data': [
         'security/ir.model.access.csv',
+        'views/account_journal_view.xml',
         'views/account_move_view.xml',
         'views/account_tax_view.xml',
         'views/res_bank_view.xml',
