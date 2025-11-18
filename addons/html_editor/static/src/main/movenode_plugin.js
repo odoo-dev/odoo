@@ -261,7 +261,7 @@ export class MoveNodePlugin extends Plugin {
         }
 
         this.moveWidget = this.document.createElement("div");
-        this.moveWidget.className = "oe-sidewidget-move oi oi-draggable";
+        this.moveWidget.className = "oe-sidewidget-move oi oi-draggable border shadow";
         this.widgetContainer.append(this.moveWidget);
 
         let moveWidgetOffsetTop = 0;

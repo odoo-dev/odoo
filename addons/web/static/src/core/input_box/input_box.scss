@@ -1,0 +1,96 @@
+:root {
+    --inputbox-spacing-unit: 8px;
+}
+
+.o_input_box_overlay {
+    position: absolute;
+    top: var(--inputbox-overlay-padding-y);
+    height: var(--inputbox-overlay-size) !important;
+    min-width: var(--inputbox-overlay-size);
+    padding: 0 !important;
+    z-index: 1;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+    &:not(.btn-link) {
+        color: $text-muted;
+    }
+    &.btn, .btn, button {
+        border-radius: var(--inputbox-spacing-unit);
+        line-height: 0;
+        pointer-events: auto;
+        padding: 0 !important;
+    }
+    .btn {
+        display: block;
+        width: inherit;
+        height: inherit;
+    }
+    &.fa, &:has(i.fa) {
+        font-size: calc(2 * var(--inputbox-spacing-unit));
+    }
+}
+
+.o_input_box:not(.o_input_box .o_input_box) {
+    // OVERLAY VARIABLES
+    --inputbox-overlay-size: calc(3 * var(--inputbox-spacing-unit));
+    --inputbox-overlay-padding-x: 0px;
+    --inputbox-overlay-padding-y: 0px;
+    --inputbox-overlay-padding-toggler: 0px;
+    --inputbox-overlay-padding-prefix: 0px;
+    --inputbox-overlay-padding-suffix: 0px;
+    // STORE THE COMPUTED VALUE IN REUSABLE VARIABLES
+    --inputbox-inner-padding-start: calc((1.5 * var(--inputbox-overlay-padding-x)) + var(--inputbox-overlay-padding-prefix));
+    --inputbox-inner-padding-end: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler) + var(--inputbox-overlay-padding-suffix));
+
+    &:is(.o_touch_device .o_input_box) {
+        --inputbox-overlay-padding-x: var(--inputbox-spacing-unit);
+        --inputbox-overlay-padding-y: calc(var(--border-width) + 2.25 * var(--inputbox-spacing-unit) - var(--inputbox-overlay-size) / 2);
+    }
+
+    &:has(.o_dropdown_button) {
+        --inputbox-overlay-padding-toggler: calc(var(--inputbox-overlay-padding-x) + (2 * var(--inputbox-spacing-unit)));
+    }
+
+    .o_input:not(.o_input .o_input) {
+        padding-left: var(--inputbox-inner-padding-start) !important;
+        padding-right: var(--inputbox-inner-padding-end) !important;
+    }
+
+    &:has(.o_input_box_overlay) {
+        position: relative;
+    }
+
+    &:is(.o_touch_device *) .o_input_box_overlay {
+        opacity: 0;
+
+        &:not(.o_field_widget, :has(.o_field_widget)) {
+            &.btn-link, .btn-link {
+                color: var(--secondary-color);
+                background-color: var(--secondary);
+            }
+        }
+    }
+
+    &:has(.o_input, textarea, select, [contenteditable]) {
+        .o_input_box_overlay:not(.o_field_widget, :has(.o_field_widget)) {
+            &.btn-link, .btn-link {
+                &:not(.o_touch_device *):is(:not(:focus-within, :hover) *) {
+                    visibility: hidden;
+                }
+            }
+        }
+    }
+}
+
+.o_input_box:has(.o_input_box_overlay.inline) {
+    .o_input_box_overlay.inline.suffix {
+        width: auto !important;
+        transition: right .4s;
+        &:not(.o_touch_device .suffix):not(.o_input_box:focus-within .suffix) {
+            right: var(--inputbox-overlay-inline-position) !important;
+        }
+    }
+}

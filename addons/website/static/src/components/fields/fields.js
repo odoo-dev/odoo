@@ -4,7 +4,7 @@ import { UrlField, urlField } from "@web/views/fields/url/url_field";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { debounce } from "@web/core/utils/timing";
-import { Component, useEffect, useRef } from "@odoo/owl";
+import { Component, useEffect } from "@odoo/owl";
 import { charField, CharField } from "@web/views/fields/char/char_field";
 
 /**
@@ -12,7 +12,7 @@ import { charField, CharField } from "@web/views/fields/char/char_field";
  * is updated.
  */
 class PageUrlField extends UrlField {
-    static components = { PageDependencies };
+    static components = { ...UrlField.components, PageDependencies };
     static template = "website.PageUrlField";
     static defaultProps = {
         ...UrlField.defaultProps,
@@ -22,7 +22,6 @@ class PageUrlField extends UrlField {
     setup() {
         super.setup();
         this.serverUrl = `${window.location.origin}/`;
-        this.inputRef = useRef("input");
 
         // Trigger onchange api on input event to display redirection
         // parameters as soon as the user types.
@@ -52,7 +51,7 @@ class PageUrlField extends UrlField {
                     };
                 }
             },
-            () => [this.inputRef.el]
+            () => [this.input.el]
         );
     }
 
@@ -71,6 +70,7 @@ class PageUrlField extends UrlField {
 
 const pageUrlField = {
     ...urlField,
+    additionalClasses: ["o_input_box"],
     component: PageUrlField,
 };
 

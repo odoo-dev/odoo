@@ -2,20 +2,18 @@
 <templates xml:space="preserve">
 
     <t t-name="sale_timesheet.SoLineCreateButton">
-        <div class="d-flex align-items-center gap-1">
-            <Many2One t-props="m2oProps" cssClass="'w-100'"/>
-            <a
+        <div class="o_input_box">
+            <Many2One t-props="m2oProps"/>
+            <button
                 t-if="!props.readonly and !props.record.data.sale_line_id"
-                type="button"
-                class="ms-3 d-inline-flex align-items-center"
+                t-attf-class="btn btn-link o_input_box_overlay suffix"
                 tabindex="-1"
-                draggable="false"
                 aria-label="Create Sales Order"
                 data-tooltip="Create Sales Order"
                 t-on-click="openSalesOrderDialog"
             >
                 <i class="fa fa-plus"/>
-            </a>
+            </button>
         </div>
     </t>
 

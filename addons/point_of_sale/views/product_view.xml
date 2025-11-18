@@ -78,7 +78,7 @@
                     <group>
                         <group name="pos" string="Point of Sale">
                             <field name="color" invisible="True"/>
-                            <field name="to_weight" invisible="type=='service'"/>
+                            <field name="to_weight" invisible="type=='service'" widget="boolean_toggle"/>
                             <field name="pos_categ_ids"
                                    widget="many2many_tags"
                                    groups="point_of_sale.group_pos_user"

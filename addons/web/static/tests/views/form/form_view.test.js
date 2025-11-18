@@ -8857,9 +8857,9 @@ test(`form group with newline tag inside`, async () => {
     expect(`.main_inner_group .o_cell`).toHaveCount(6);
     expect(`.main_inner_group > .o_cell.o_wrap_label:first-child`).toHaveCount(1);
     expect(`.main_inner_group > .o_cell.o_wrap_input:nth-child(2)`).toHaveCount(1);
-    expect(`.main_inner_group > .o_wrap_field_boolean:nth-child(3)`).toHaveCount(1);
-    expect(`.main_inner_group > .o_wrap_field_boolean:nth-child(3) > .o_wrap_label`).toHaveCount(1);
-    expect(`.main_inner_group > .o_wrap_field_boolean:nth-child(3) > .o_wrap_input`).toHaveCount(1);
+    expect(`.main_inner_group > .o_wrap_field_inline:nth-child(3)`).toHaveCount(1);
+    expect(`.main_inner_group > .o_wrap_field_inline:nth-child(3) > .o_wrap_label`).toHaveCount(1);
+    expect(`.main_inner_group > .o_wrap_field_inline:nth-child(3) > .o_wrap_input`).toHaveCount(1);
     expect(`.main_inner_group > .o_cell.o_wrap_label:nth-child(4)`).toHaveCount(1);
     expect(`.main_inner_group > .o_cell.o_wrap_input:nth-child(5)`).toHaveCount(1);
 
@@ -8936,7 +8936,7 @@ test(`translation dialog with right context and domain`, async () => {
         resId: 1,
     });
     await contains(".o_field_translate").click();
-    await contains(`.o_field_translate.btn-link`).click();
+    await contains(`button.o_field_translate`).click();
     expect.verifySteps([
         `translate args [[1],"name"]`,
         `translate context {"lang":"en","tz":"taht","uid":7,"allowed_company_ids":[1]}`,
@@ -8969,7 +8969,7 @@ test(`save new record before opening translate dialog`, async () => {
     expect(`.o_form_editable`).toHaveCount(1);
 
     await contains(`.o_field_translate`).click();
-    await contains(`.o_field_translate.btn-link`).click();
+    await contains(`button.o_field_translate`).click();
     expect.verifySteps(["web_save", "get_field_translations"]);
     expect(`.modal`).toHaveCount(1);
     expect(`.modal-title`).toHaveText("Translate: name");

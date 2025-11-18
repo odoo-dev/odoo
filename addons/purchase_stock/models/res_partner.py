@@ -35,7 +35,7 @@ class ResPartner(models.Model):
         ('5', 'Friday'),
         ('6', 'Saturday'),
         ('7', 'Sunday'),
-    ], string='Week Day', required=True, default='default')
+    ], string='On', required=True, default='default')
 
     @api.depends('purchase_line_ids')
     def _compute_on_time_rate(self):

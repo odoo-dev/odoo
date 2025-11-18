@@ -352,6 +352,7 @@ export class StatusBarField extends Component {
 }
 
 export const statusBarField = {
+    additionalClasses: ["w-100"],
     component: StatusBarField,
     displayName: _t("Status"),
     supportedOptions: [

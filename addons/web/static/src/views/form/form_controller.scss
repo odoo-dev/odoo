@@ -14,10 +14,10 @@
 
 // Form view rules to break the default table layout
 @mixin form-break-table() {
-    --fieldWidget-margin-bottom: 0;
-
     grid-template-columns: minmax(0, 1fr);
-    margin-bottom: $o-form-spacing-unit * 4;
+    @include media-breakpoint-up(md) {
+        margin-bottom: $o-form-spacing-unit * 4;
+    }
 
     .o_cell {
         max-width: 100%;
@@ -26,14 +26,8 @@
             line-height: $o-label-font-size-factor;
         }
 
-        .o_field_widget {
-            &:not(.o_field_boolean){
-                width: 100%;
-            }
-
-            &.o_field_boolean {
-                margin-right: 0;
-            }
+        .o_field_widget .o_field_boolean {
+            margin-right: 0;
         }
 
         .o_input_dropdown {
@@ -47,7 +41,8 @@
 
 @mixin editable-form-break-table() {
     .o_address_type, .o_address_format {
-        --fieldWidget-margin-bottom: #{$o-form-spacing-unit * 2};
+        --fieldWidget-margin-bottom: #{$o-form-spacing-unit * 3}; 
+        // FIXME fix the spacing without changing this value, or make a consistant change
     }
 }
 
@@ -79,6 +74,14 @@
         &, &.o_field_widget { // Some field may want to use o_row as root and these rules must prevalue
             display: flex;
             width: auto!important;
+        }
+
+        &[colspan="2"] .o_col {
+            display: flex;
+            .o_form_label {
+                width: 50%;
+                font-weight: $font-weight-medium;
+            }
         }
 
         align-items: baseline;
@@ -155,7 +158,6 @@
         .o_row {
             > .o_field_widget, > div {
                 flex: 1 1 auto;
-                width: 0!important; // 3rd flex argument does not work with input (must be auto and real width 0)
 
                 &.o_field_boolean, &.o_field_boolean_toggle, &.o_priority {
                     flex: 0 0 auto;
@@ -184,7 +186,7 @@
         flex: 1 1 auto;
     }
 
-    &:not(.o_field_highlight) .o_field_widget:not(.o_field_invalid):not(.o_field_highlight) .o_input:not(:hover):not(:focus) {
+    .o_form_renderer:not(.o_field_highlight) .o_field_widget:not(.o_field_invalid):not(.o_field_highlight) .o_input:not(:hover):not(:focus) {
         --o-input-border-color: transparent;
     }
 
@@ -373,6 +375,7 @@
         @include media-breakpoint-down(sm) {
             + .oe_title {
                 max-width: calc(100% - #{$o-form-picture-size} - #{map-get($spacers, 2)});
+                height: $o-form-picture-size;
             }
         }
     }
@@ -389,13 +392,6 @@
 
         .o_form_label {
             font-weight: $font-weight-normal;
-        }
-
-        .o_field_widget {
-            > .btn {
-                flex: 0 0 auto;
-                padding: 0 10px;
-            }
         }
 
         @include media-breakpoint-up(sm) {
@@ -462,9 +458,18 @@
         }
     }
 
-    .o_group, .o_inner_group {
-        .o_field_widget {
-            width: 100%;
+    @include media-breakpoint-down(sm) {
+        .o_inner_group .o_wrap_field_inline {
+            flex-direction: row-reverse;
+            justify-content: space-between;
+            padding-left: calc(1.5 * var(--inputbox-spacing-unit));
+            margin: 0;
+            margin-top: calc(var(--fieldWidget-margin-bottom) / 2);
+
+            &:is(.o_wrap_field_inline + .o_wrap_field_inline) {
+                margin-top: 0;
+                margin-bottom: calc(var(--fieldWidget-margin-bottom) / 2);
+            }
         }
     }
 
@@ -497,6 +502,11 @@
         }
     }
 
+    .o_inner_group:not(:has(.o_cell)) .o_horizontal_separator {
+        // Hide groups that are empty
+        display: none;
+    }
+
     // Contextual adaptation
     .o_kanban_renderer {
         --Kanban-background: transparent;
@@ -517,8 +527,10 @@
             border-bottom: 1px solid $border-color;
 
             > .tab-pane {
-                padding: $o-horizontal-padding 0;
-
+                padding: $o-horizontal-padding 0 0 0;
+                @include media-breakpoint-up(md) {
+                    padding: $o-horizontal-padding 0;
+                }
                 > .o_field_html .note-editable {
                     min-height: 180px;
                     overflow-y: hidden;
@@ -593,13 +605,30 @@
         line-height: $line-height-base;
         font-weight: $font-weight-bold;
 
-        @include media-breakpoint-down(md) {
-            font-size: $o-font-size-base-touch;
+        &.o_form_label_empty, &.o_form_label_false, &.o_form_label_readonly {
+            color: $text-muted;
         }
 
-        &.o_form_label_empty, &.o_form_label_false, &.o_form_label_readonly {
-            opacity: 0.66;
-            font-weight: $font-weight-normal;
+        &.o_form_label_empty.o_form_label_readonly {
+            display: none;
+        }
+    }
+
+    .o_field_widget.o_field_empty.o_readonly_modifier {
+        display: none;
+    }
+
+    .o_form_renderer:not(.o_field_highlight):not(.o_touch_device .o_field_highlight) {
+        .o_field_widget {
+            .o_dropdown_button {
+                visibility: hidden;
+            }
+
+            &:hover, &:focus-within {
+                .o_dropdown_button {
+                    visibility: visible;
+                }
+            }
         }
     }
 
@@ -626,12 +655,7 @@
             }
         }
 
-        &.o_field_many2one_avatar {
-            --fieldWidget-display: inline;
-        }
-
         &.o_field_many2many_tags_avatar {
-            --fieldWidget-display: inline-flex;
             min-height: calc(var(--Avatar-size, #{$o-avatar-size}) + #{$o-input-padding-y} * 2 + #{$input-border-width});
         }
     }
@@ -678,10 +702,6 @@
         @include media-breakpoint-up(sm) {
             width: 45%!important;
         }
-    }
-
-    span.o_list_monetary {
-        display: block
     }
 
     .o_field_monetary {
@@ -936,19 +956,10 @@
         }
     }
     @include media-breakpoint-down(md) {
-        .o_form_label:not(.o_invisible_modifier) {
-            padding-bottom: 4px;
-        }
-
         .o_group {
             margin-top: 0;
 
             .o_inner_group {
-                margin-bottom: 0 !important;
-                &:last-child {
-                    margin-bottom: map-get($spacers, 3) !important;
-                }
-
                 div[name="carrier_selection"] {
                     > div:not(.alert) {
                         display: inline-flex;
@@ -1108,17 +1119,11 @@
 }
 
 .o_form_view.o_xxs_form_view {
-    .o_group {
-        .o_inner_group {
-            margin-bottom: $o-form-spacing-unit * 4;
-
-        }
-
-        .o_form_label {
-            font-size: $o-label-font-size-factor * $o-font-size-base-touch;
-            font-weight: $font-weight-normal;
-            color: $o-brand-secondary;
-        }
+    .o_inner_group {
+        margin-bottom: var(--fieldWidget-margin-bottom);
+    }
+    .tab-pane .o_group .o_inner_group {
+        margin-bottom: inherit;
     }
 }
 
@@ -1153,4 +1158,142 @@
 // This ensures correct alignment with the cog button when there is no breadcrumb displayed.
 .o_breadcrumb:not(:has(.breadcrumb)) + .o_form_status_indicator {
     align-self: center !important;
+}
+
+// General InputBox rules
+.o_form_view {
+    .o_field_widget:not(.o_list_view .o_field_widget):not(.o_field_one2many), .o_input_box:has(.o_field_widget) {
+        &:has(.o_input, textarea, select, [contenteditable]) {
+            width: 100%;
+            position: relative;
+
+            .o_input_dropdown {
+                position: static;
+            }
+        }
+    }
+    .o_input_box:has(.o_field_widget):not(.o_input_box .o_input_box):not(.o_field_widget .o_input_box) {
+        margin-bottom: var(--fieldWidget-margin-bottom);
+    }
+    .o_input_box .o_field_widget {
+        --fieldWidget-margin-bottom: 0;
+    }
+}
+
+// READONLY INPUTBOX RULES
+.o_field_widget.o_readonly_modifier:not(.o_form_label .o_field_widget) {
+    color: $text-muted;
+}
+
+
+// TOUCH ONLY INPUTBOX RULES
+.o_touch_device .o_form_view {
+    --fieldWidget-label-height: .7rem;
+    --fieldWidget-margin-bottom: calc(1.5 * var(--fieldWidget-label-height));
+    --fieldWidget-outline-width: #{$input-border-width};
+
+    .o_horizontal_separator {
+        box-shadow: none;
+    }
+    .o-wysiwyg div:has([contenteditable="true"]) {
+        padding: $input-border-width;
+    }
+
+    // Editable input specific rules
+    .o_field_widget:not(.o_field_widget .o_field_widget):not(.o_list_view .o_field_widget):not(.o_field_one2many):not(.o_field_domain), .o_input_box:has(.o_field_widget) {
+        &:has(.o_input, textarea, select, [contenteditable]):not(.o_input_box *) {
+            outline: var(--fieldWidget-outline-width) solid var(--o-input-border-color);
+            border: calc(1.5 * #{$input-border-width}) solid transparent;
+            border-radius: var(--border-radius);
+
+            &:focus-within {
+                border-color: var(--o-input-border-color);
+            }
+
+            &.o_required_modifier:not(:focus-within):has(:placeholder-shown)  {
+                --fieldWidget-outline-width: calc(1.5 * #{$input-border-width});
+            }
+        }
+
+        &:not(.o_input_box .o_field_widget):not(.o_field_widget .o_field_widget):not(.o_input_box_overlay) {
+            line-height: calc(2.5 * var(--inputbox-spacing-unit));
+
+            .o_input, textarea, select, [contenteditable] {
+                border: none;
+            }
+        }
+
+        .o_input, textarea, select, [contenteditable] {
+            border-color: transparent;
+            padding: 0;
+            font-size: var(--body-font-size);
+        }
+
+        .o_input:not(.o_input .o_input), textarea, select, [contenteditable] {
+            padding: var(--inputbox-spacing-unit) calc(1.5 * var(--inputbox-spacing-unit));
+        }
+
+        .o_input_dropdown .o_dropdown_button {
+            top: 0;
+            right: 0;
+            padding: var(--inputbox-spacing-unit) calc(1.5 * var(--inputbox-spacing-unit));
+        }
+    }
+
+    // READONLY FIELD STYLE
+    .o_cell .o_field_widget.o_readonly_modifier:not(.o_field_widget .o_field_widget):not(.o_form_label *):not(.o_input_box *):not(:has(.o_input_box)) {
+        padding: var(--inputbox-spacing-unit) calc(1.5 * var(--inputbox-spacing-unit));
+    }
+}
+
+// DESKTOP ONLY INPUTBOX RULES
+body:not(.o_touch_device) .o_form_view {
+    .oe_title:has(h1) {
+        .o_input_box:not(.o_input_box .o_input_box) {
+            --inputbox-spacing-unit: 1em;
+
+            .o_avatar img {
+                height: 80%;
+            }
+        }
+    }
+}
+
+// LABEL RULES
+.o_touch_device .o_form_view {
+    .o_wrap_cell:has(.o_input, textarea, select, [contenteditable]):not(:has(.o_setting_box)) .o_form_label:not(.o_field_widget .o_form_label):not(.form-check-label),
+    .oe_title:is(:has(.o_input, textarea, select, [contenteditable]), :not(:has(h1,h2,h3,h4,h5,h6))) .o_form_label,
+    .o_cell:not(.o_wrap_field_inline *):has(+ .o_cell .o_field_widget :is(.o_input, textarea, select, [contenteditable]), + .o_cell .o_field_widget.o_readonly_modifier):not(:has(table)) .o_form_label {
+        position: absolute;
+        transform: translate(var(--inputbox-spacing-unit), calc(-.5 * var(--fieldWidget-label-height) - #{$input-border-width}));
+        background: linear-gradient(transparent 0px, transparent .3rem, $o-view-background-color .3rem, $o-view-background-color 1rem, transparent 1rem);
+        padding: 0 calc(var(--inputbox-spacing-unit) / 2) !important;
+        font-weight: 500;
+        font-size: var(--fieldWidget-label-height);
+        line-height: var(--fieldWidget-label-height);
+        user-select: none;
+        z-index: 1;
+
+        .o_field_char.o_readonly_modifier {
+            margin-bottom: 0;
+        }
+    }
+    .o_form_label {
+        font-size: var(--fieldWidget-label-height);
+    }
+    .o_label_active {
+        color: $o-action;
+    }
+    .o_row[colspan="2"] .o_col .o_form_label {
+        width: initial;
+    }
+}
+
+@include media-breakpoint-up(sm) {
+    .o_touch_device .o_form_view .o_inner_group {
+        gap: 0;
+        .o_cell.o_wrap_input:has(.o_input) {
+            grid-column: 1/3;
+        }
+    }
 }

@@ -80,8 +80,8 @@ class ResCompany(models.Model):
         comodel_name='account_edi_proxy_client.user',
         compute='_compute_account_peppol_edi_user',
     )
-    peppol_eas = fields.Selection(related='partner_id.peppol_eas', readonly=False)
-    peppol_endpoint = fields.Char(related='partner_id.peppol_endpoint', readonly=False)
+    peppol_eas = fields.Selection(string="Peppol ID", related='partner_id.peppol_eas', readonly=False)
+    peppol_endpoint = fields.Char(string="Peppol Endpoint", related='partner_id.peppol_endpoint', readonly=False)
     peppol_purchase_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Peppol Purchase Journal',

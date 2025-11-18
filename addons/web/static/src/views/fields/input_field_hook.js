@@ -3,6 +3,65 @@ import { useBus } from "@web/core/utils/hooks";
 
 import { useComponent, useEffect, useRef } from "@odoo/owl";
 
+function _positionInputBoxOverlay(target) {
+    const closestInputBox =
+        target.closest(".o_input_box:not(.o_input_box .o_input_box)") ||
+        target.querySelector(".o_input_box:not(.o_input_box .o_input_box)");
+    if (!closestInputBox) {
+        return;
+    }
+    const overlays = closestInputBox.querySelectorAll(".o_input_box_overlay");
+    if (overlays.length === 0) {
+        return;
+    }
+    const width = {
+        end: 0,
+        start: 0,
+    };
+    const gap = parseInt(
+        getComputedStyle(closestInputBox).getPropertyValue("--inputbox-spacing-unit")
+    );
+    overlays.forEach((overlay) => {
+        const length = overlay.clientWidth;
+        const toAdd = length + gap;
+        if (overlay.classList.contains("suffix")) {
+            const offset = width.end > 0 ? ` + ${width.end}px` : "";
+            overlay.style.right = `calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler) ${offset})`;
+            width.end += toAdd;
+        } else {
+            const offset = width.start > 0 ? ` + ${width.start}px` : "";
+            overlay.style.left = `calc((1.5 * var(--inputbox-overlay-padding-x)) ${offset})`;
+            width.start += toAdd;
+        }
+        overlay.style.opacity = 1;
+    });
+    closestInputBox.style.setProperty("--inputbox-overlay-padding-prefix", width.start + "px");
+    closestInputBox.style.setProperty("--inputbox-overlay-padding-suffix", width.end + "px");
+    const inlineEl = closestInputBox.querySelector(".o_input_box_overlay.inline");
+    if (inlineEl) {
+        const inputEl = closestInputBox.querySelector(
+            ".o_input, textarea, select, [contenteditable]"
+        );
+        if (inputEl && inputEl.value) {
+            const length = inputEl.value.length;
+            closestInputBox.style.setProperty(
+                "--inputbox-overlay-inline-position",
+                `calc(100% - (${length}px + ${
+                    length * 0.5
+                }rem) - var(--inputbox-overlay-size) - var(--inputbox-spacing-unit))`
+            );
+        }
+    }
+}
+
+export function positionInputBoxOverlay(target) {
+        if (target) {
+            setTimeout(
+            () => requestAnimationFrame(() => _positionInputBoxOverlay(target))
+        );
+    }
+}
+
 /**
  * This hook is meant to be used by field components that use an input or
  * textarea to edit their value. Its purpose is to prevent that value from being
@@ -58,6 +117,7 @@ export function useInputField(params) {
         if (!component.props.record.isValid) {
             component.props.record.resetFieldValidity(fieldName);
         }
+        positionInputBoxOverlay(ev.target);
     }
 
     /**
@@ -82,7 +142,10 @@ export function useInputField(params) {
                 if (val !== component.props.record.data[fieldName]) {
                     lastSetValue = inputRef.el.value;
                     pendingUpdate = true;
-                    await component.props.record.update({ [fieldName]: val }, { save: shouldSave() });
+                    await component.props.record.update(
+                        { [fieldName]: val },
+                        { save: shouldSave() }
+                    );
                     pendingUpdate = false;
                     component.props.record.model.bus.trigger("FIELD_IS_DIRTY", isDirty);
                 } else {
@@ -90,6 +153,7 @@ export function useInputField(params) {
                 }
             }
         }
+        positionInputBoxOverlay(inputRef.el);
     }
     function onKeydown(ev) {
         const hotkey = getActiveHotkey(ev);
@@ -132,11 +196,7 @@ export function useInputField(params) {
         // the corresponding value in the record. Otherwise, in some cases,
         // if the value in the record change the useEffect isn't triggered.
         const value = params.getValue();
-        if (
-            inputRef.el &&
-            !isDirty &&
-            !component.props.record.isFieldInvalid(fieldName)
-        ) {
+        if (inputRef.el && !isDirty && !component.props.record.isFieldInvalid(fieldName)) {
             inputRef.el.value = value;
             lastSetValue = inputRef.el.value;
         }

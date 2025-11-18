@@ -1,4 +1,4 @@
-import { Component, toRaw, useRef, useState } from "@odoo/owl";
+import { Component, toRaw, useRef, useState, useEffect } from "@odoo/owl";
 import * as BarcodeScanner from "@web/core/barcode/barcode_dialog";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -8,7 +8,9 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { useService } from "@web/core/utils/hooks";
 import { getFieldDomain } from "@web/model/relational_model/utils";
-import { Many2XAutocomplete, useOpenMany2XRecord } from "../relational_utils";
+import { InternalLinkButton } from "@web/views/view_components/internal_link_button";
+import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
+import { positionInputBoxOverlay } from "@web/views/fields/input_field_hook";
 
 ///////////////////////////////////////////////////////////////////////////////
 // UTILS
@@ -71,7 +73,7 @@ export function computeM2OProps(fieldProps) {
 
 export class Many2One extends Component {
     static template = "web.Many2One";
-    static components = { Many2XAutocomplete };
+    static components = { InternalLinkButton, Many2XAutocomplete };
     static props = {
         canCreate: { type: Boolean, optional: true },
         canCreateEdit: { type: Boolean, optional: true },
@@ -148,6 +150,14 @@ export class Many2One extends Component {
                 resModel: this.props.relation,
             }),
         };
+        useEffect(() => {
+            if (!this.props.readonly) {
+                const input = this.input;
+                if (input) {
+                    positionInputBoxOverlay(input);
+                }
+            }
+        });
     }
 
     get activeActions() {
@@ -230,6 +240,12 @@ export class Many2One extends Component {
             ? this.props.relation
             : `m-${this.props.relation}`;
         return `/odoo/${relation}/${this.props.value.id}`;
+    }
+
+    onExtraLinesClick() {
+        if (!this.props.readonly) {
+            this.rootRef.el?.querySelector("input").click();
+        }
     }
 
     async openBarcodeScanner() {
