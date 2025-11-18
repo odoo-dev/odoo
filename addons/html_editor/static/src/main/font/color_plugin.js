@@ -93,10 +93,10 @@ export class ColorPlugin extends Plugin {
         const hasGradient = isColorGradient(gradient);
         const hasTextGradientClass = el.classList.contains("text-gradient");
 
-        let backgroundColor = elStyle.backgroundColor;
-        for (const processor of this.getResource("get_background_color_processors")) {
-            backgroundColor = processor(backgroundColor);
-        }
+        const backgroundColor = this.processThrough(
+            "get_background_color_processors",
+            elStyle.backgroundColor
+        );
 
         return {
             color: hasGradient && hasTextGradientClass ? gradient : rgbaToHex(elStyle.color),
@@ -146,9 +146,7 @@ export class ColorPlugin extends Plugin {
     applyColor(color, mode, previewMode = false) {
         this.dependencies.selection.selectAroundNonEditable();
         if (mode === "backgroundColor") {
-            for (const processor of this.getResource("apply_background_color_processors")) {
-                color = processor(color, mode);
-            }
+            color = this.processThrough("apply_background_color_processors", color, mode);
         }
         if (this.delegateTo("color_apply_overrides", color, mode, previewMode)) {
             return;
