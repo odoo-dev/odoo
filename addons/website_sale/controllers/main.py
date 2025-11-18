@@ -227,11 +227,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         **post,
     ):
         return {
-            'displayDescription': True,
-            'displayDetail': True,
-            'displayExtraDetail': True,
-            'displayExtraLink': True,
-            'displayImage': True,
             'allowFuzzy': not post.get('noFuzzy'),
             'category': str(category.id) if category else None,
             'tags': tags,

@@ -591,7 +591,7 @@ class Website(Home):
         return 'is_published desc, %s, id desc' % order
 
     @http.route('/website/snippet/autocomplete', type='jsonrpc', auth='public', website=True, readonly=True)
-    def autocomplete(self, search_type=None, term=None, order=None, limit=5, max_nb_chars=999, options=None):
+    def autocomplete(self, search_type=None, term=None, order=None, limit=6, max_nb_chars=999, options=None):
         """
         Returns list of results according to the term and options
 
@@ -616,54 +616,64 @@ class Website(Home):
         order = self._get_search_order(order)
         options = options or {}
         results_count, search_results, fuzzy_term = request.website._search_with_fuzzy(search_type, term, limit, order, options)
+        # Sort result based in sequence for ordered results.
+        search_results.sort(key=lambda d: d.get('sequence', float('inf')))
         if not results_count:
             return {
-                'results': [],
+                'results': {},
                 'results_count': 0,
                 'parts': {},
             }
         term = fuzzy_term or term
-        search_results = request.website._search_render_results(search_results, limit)
+        search_results = request.website.sudo()._search_render_results(search_results, limit)
 
         mappings = []
-        results_data = []
+        result = {}
         for search_result in search_results:
-            for result in search_result['results_data']:
-                result['model'] = search_result['model']
-                results_data.append(result)
+            if not len(search_result['results_data']):
+                continue
+            search_result['results_data'].sort(key=lambda r: r.get('name', ''), reverse='name desc' in order)
             mappings.append(search_result['mapping'])
-        if search_type == 'all':
-            # Only supported order for 'all' is on name
-            results_data.sort(key=lambda r: r.get('name', ''), reverse='name desc' in order)
-        results_data = results_data[:limit]
-        result = []
-        for record in results_data:
-            mapping = record['_mapping']
-            model = request.env[record['model']]
-            mapped = {
-                '_fa': record.get('_fa'),
-            }
-            for mapped_name, field_meta in mapping.items():
-                value = record.get(field_meta.get('name'))
-                if not value:
-                    mapped[mapped_name] = ''
-                    continue
-                field_type = field_meta.get('type')
-                if field_type == 'text' and field_meta.get('truncate', True):
-                    value = self._shorten_around_match(value, term, max_nb_chars)
-
-                if field_meta.get('match'):
-                    skip_field, value, field_type = model._search_highlight_field(field_meta, value, term)
-                    if skip_field:
+            group_name = search_result.get("group_name")
+            group_key = '_'.join(group_name.lower().split())
+            result_data = []
+            for record in search_result['results_data']:
+                model = request.env[search_result['model']]
+                mapping = record['_mapping']
+                mapped = {
+                    '_fa': record.get('_fa'),
+                }
+                model = request.env[search_result['model']]
+                for mapped_name, field_meta in mapping.items():
+                    value = record.get(field_meta.get('name'))
+                    if not value:
+                        mapped[mapped_name] = ''
                         continue
+                    field_type = field_meta.get('type')
+                    if field_type == 'text' and field_meta.get('truncate', True):
+                        value = self._shorten_around_match(value, term, max_nb_chars)
 
-                if field_type not in ('image', 'binary') and ('ir.qweb.field.%s' % field_type) in request.env:
-                    opt = {}
-                    if field_type == 'monetary':
-                        opt['display_currency'] = options['display_currency']
-                    value = request.env[('ir.qweb.field.%s' % field_type)].value_to_html(value, opt)
-                mapped[mapped_name] = escape(value)
-            result.append(mapped)
+                    if field_meta.get('match'):
+                        skip_field, value, field_type = model._search_highlight_field(field_meta, value, term)
+                        if skip_field:
+                            continue
+
+                    if field_type not in ('image', 'binary') and ('ir.qweb.field.%s' % field_type) in request.env:
+                        opt = {}
+                        if field_type == 'monetary':
+                            opt['display_currency'] = options['display_currency']
+                        elif field_type == 'float':
+                            opt['precision'] = field_meta.get('precision', 2)
+                        value = request.env[('ir.qweb.field.%s' % field_type)].value_to_html(value, opt)
+                    mapped[mapped_name] = escape(value)
+                result_data.append(mapped)
+
+            result[group_key] = {
+                "groupName": group_name,
+                "templateKey": search_result.get("template_key"),
+                "search_count": search_result.get('count'),
+                "data": result_data,
+            }
 
         return {
             'results': result,
@@ -674,11 +684,6 @@ class Website(Home):
 
     def _get_page_search_options(self, **post):
         return {
-            'displayDescription': False,
-            'displayDetail': False,
-            'displayExtraDetail': False,
-            'displayExtraLink': False,
-            'displayImage': False,
             'allowFuzzy': not post.get('noFuzzy'),
         }
 
@@ -712,44 +717,26 @@ class Website(Home):
 
     def _get_hybrid_search_options(self, **post):
         return {
-            'displayDescription': True,
-            'displayDetail': True,
-            'displayExtraDetail': True,
-            'displayExtraLink': True,
-            'displayImage': True,
             'allowFuzzy': not post.get('noFuzzy'),
         }
 
     @http.route([
         '/website/search',
-        '/website/search/page/<int:page>',
         '/website/search/<string:search_type>',
-        '/website/search/<string:search_type>/page/<int:page>',
     ], type='http', auth="public", website=True, sitemap=False, readonly=True)
-    def hybrid_list(self, page=1, search='', search_type='all', **kw):
+    def hybrid_list(self, search='', search_type='all', **kw):
         if not search:
             return request.render("website.list_hybrid")
 
         options = self._get_hybrid_search_options(**kw)
-        data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=500, max_nb_chars=200, options=options)
+        data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=100, max_nb_chars=200, options=options)
 
         results = data.get('results', [])
-        search_count = len(results)
+        search_count = data.get('results_count', 0)
         parts = data.get('parts', {})
 
-        step = 50
-        pager = portal_pager(
-            url="/website/search/%s" % search_type,
-            url_args={'search': search},
-            total=search_count,
-            page=page,
-            step=step
-        )
-
-        results = results[(page - 1) * step:page * step]
-
+        # TODO: Implement pagination or load more button for more records
         values = {
-            'pager': pager,
             'results': results,
             'parts': parts,
             'search': search,

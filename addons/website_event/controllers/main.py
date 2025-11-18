@@ -30,11 +30,6 @@ class WebsiteEventController(http.Controller):
 
     def _get_events_search_options(self, slug_tags, **post):
         return {
-            'displayDescription': True,
-            'displayDetail': False,
-            'displayExtraDetail': False,
-            'displayExtraLink': False,
-            'displayImage': False,
             'allowFuzzy': not post.get('noFuzzy'),
             'date': post.get('date'),
             'tags': slug_tags or post.get('tags'),

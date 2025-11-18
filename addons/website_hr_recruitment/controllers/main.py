@@ -134,7 +134,6 @@ class WebsiteHrRecruitment(WebsiteForm):
             limit=self._jobs_per_page * 50,
             order="is_published desc, sequence, no_of_recruitment desc",
             options={
-                'displayDescription': True,
                 'allowFuzzy': not noFuzzy,
             }
         )

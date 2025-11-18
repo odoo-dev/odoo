@@ -30,9 +30,7 @@ class TestAutoComplete(TransactionCase):
 
     def _autocomplete_page(self, term, expected_count, expected_fuzzy_term):
         self._autocomplete(term, expected_count, expected_fuzzy_term, search_type="pages", options={
-            'displayDescription': False, 'displayDetail': False,
-            'displayExtraDetail': False, 'displayExtraLink': False,
-            'displayImage': False, 'allowFuzzy': True
+            'allowFuzzy': True
         })
 
     def test_01_many_records(self):
@@ -98,9 +96,7 @@ class TestAutoComplete(TransactionCase):
             # ORM level, not in SQL, due to how `inherits` works.
             self.env['website'].browse(1)._search_with_fuzzy(
                 'pages', 'test', limit=5, order='name asc, website_id desc, id', options={
-                    'displayDescription': False, 'displayDetail': False,
-                    'displayExtraDetail': False, 'displayExtraLink': False,
-                    'displayImage': False, 'allowFuzzy': True
+                    'allowFuzzy': True
                 }
             )
 

@@ -44,30 +44,3 @@ class ForumTag(models.Model):
             if self.env.user.karma < forum.karma_tag_create and not self.env.is_admin():
                 raise AccessError(_('%d karma required to create a new Tag.', forum.karma_tag_create))
         return super(ForumTag, self.with_context(mail_create_nolog=True, mail_create_nosubscribe=True)).create(vals_list)
-
-    # ----------------------------------------------------------------------
-    # WEBSITE
-    # ----------------------------------------------------------------------
-
-    @api.model
-    def _search_get_detail(self, website, order, options):
-        search_fields = ['name']
-        fetch_fields = ['id', 'name', 'website_url']
-        mapping = {
-            'name': {'name': 'name', 'type': 'text', 'match': True},
-            'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
-        }
-        base_domain = []
-        if forum := options.get("forum"):
-            forum_ids = (self.env['ir.http']._unslug(forum)[1],) if isinstance(forum, str) else forum.ids
-            search_domain = options.get("domain")
-            base_domain = [search_domain if search_domain is not None else [('forum_id', 'in', forum_ids)]]
-        return {
-            'model': 'forum.tag',
-            'base_domain': base_domain,
-            'search_fields': search_fields,
-            'fetch_fields': fetch_fields,
-            'mapping': mapping,
-            'icon': 'fa-tag',
-            'order': ','.join(filter(lambda f: 'is_published' not in f, order.split(','))),
-        }

@@ -101,11 +101,6 @@ class WebsiteForum(WebsiteProfile):
         return {
             'allowFuzzy': not post.get('noFuzzy'),
             'create_uid': create_uid,
-            'displayDescription': False,
-            'displayDetail': False,
-            'displayExtraDetail': False,
-            'displayExtraLink': False,
-            'displayImage': False,
             'filters': filters,
             'forum': str(forum.id) if forum else None,
             'include_answers': include_answers,

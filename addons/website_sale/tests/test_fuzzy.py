@@ -23,9 +23,8 @@ class TestFuzzy(ProductVariantsCommon):
         self.cr.flush()
 
         options = {
-            'displayDescription': True, 'displayDetail': True, 'display_currency': True,
-            'displayExtraDetail': True, 'displayExtraLink': True,
-            'displayImage': True, 'allowFuzzy': True
+            'display_currency': True,
+            'allowFuzzy': True
         }
         results_count, _, fuzzy_term = website._search_with_fuzzy('products_only', 'RED234', 5, 'name asc', options)
         self.assertEqual(1, results_count, "Should have found red")

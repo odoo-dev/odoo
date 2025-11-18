@@ -83,7 +83,6 @@ class HrJob(models.Model):
     @api.model
     def _search_get_detail(self, website, order, options):
         requires_sudo = False
-        with_description = options['displayDescription']
         country_id = options.get('country_id')
         department_id = options.get('department_id')
         office_id = options.get('office_id')
@@ -113,17 +112,15 @@ class HrJob(models.Model):
             # Rule must be reinforced because of sudo.
             domain.append([('website_published', '=', True)])
 
-
-        search_fields = ['name']
-        fetch_fields = ['name', 'website_url']
+        search_fields = ['name', 'description']
+        fetch_fields = ['name', 'website_url', 'no_of_recruitment']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
-            'website_url': {'name': 'website_url', 'type': 'text', 'truncate':  False},
+            'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
+            'department_name': {'name': 'department_name', 'type': 'text'},
+            'no_of_recruitment': {'name': 'no_of_recruitment', 'type': 'integer'},
+            'address': {'name': 'address', 'type': 'text'},
         }
-        if with_description:
-            search_fields.append('description')
-            fetch_fields.append('description')
-            mapping['description'] = {'name': 'description', 'type': 'text', 'html': True, 'match': True}
         return {
             'model': 'hr.job',
             'requires_sudo': requires_sudo,
@@ -132,4 +129,15 @@ class HrJob(models.Model):
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-briefcase',
+            'template_key': 'website_hr_recruitment.search_items_jobs',
+            'group_name': self.env._("Jobs"),
+            'sequence': 100,
         }
+
+    def _search_render_results(self, fetch_fields, mapping, icon, limit):
+        results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
+        for data in results_data:
+            job = self.browse(data['id'])
+            data['department_name'] = job.department_id.name or ''
+            data['address'] = job.address_id.name or ''
+        return results_data

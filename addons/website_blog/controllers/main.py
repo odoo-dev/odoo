@@ -54,11 +54,6 @@ class WebsiteBlog(http.Controller):
 
     def _get_blog_post_search_options(self, blog=None, active_tags=None, date_begin=None, date_end=None, state=None, **post):
         return {
-            'displayDescription': True,
-            'displayDetail': False,
-            'displayExtraDetail': False,
-            'displayExtraLink': False,
-            'displayImage': False,
             'allowFuzzy': not post.get('noFuzzy'),
             'blog': str(blog.id) if blog else None,
             'tag': ','.join([str(id) for id in active_tags.ids]),

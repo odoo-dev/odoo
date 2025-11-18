@@ -385,11 +385,6 @@ class WebsiteSlides(WebsiteProfile):
 
     def _get_slide_channel_search_options(self, my=None, slug_tags=None, slide_category=None, **post):
         return {
-            'displayDescription': True,
-            'displayDetail': False,
-            'displayExtraDetail': False,
-            'displayExtraLink': False,
-            'displayImage': False,
             'allowFuzzy': not post.get('noFuzzy'),
             'my': my,
             'tag': slug_tags or post.get('tag'),
