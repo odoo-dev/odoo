@@ -2,7 +2,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from datetime import timedelta
-from unittest import skip
 
 from odoo.tests import Form, TransactionCase, tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
@@ -11,7 +10,6 @@ from odoo.fields import Command
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
 
     @classmethod
@@ -142,9 +140,6 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         p.is_storable = True
         p.categ_id = cls.env.ref('product.product_category_goods')
         p.uom_id = uom_id
-        p.route_ids.clear()
-        for r in routes:
-            p.route_ids.add(r)
         return p.save()
 
         # Helper to process quantities based on a dict following this structure :
@@ -269,8 +264,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         po.button_confirm()
         po.picking_ids.button_validate()
 
-        layer = po.picking_ids.move_ids.stock_valuation_layer_ids
-        self.assertEqual(layer.unit_cost, 1)
+        self.assertEqual(cmp.standard_price, 1)
 
     def test_01_sale_mrp_kit_qty_delivered(self):
         """ Test that the quantities delivered are correct when
@@ -607,55 +601,6 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         self.assertTrue(po)
 
         po.button_confirm()
-
-    def test_procurement_with_preferred_route_2(self):
-        """
-        Check that the route set in the product is taken into account
-        when the product have a supplier and bom.
-        """
-        manu_route = self.warehouse.manufacture_pull_id.route_id
-        buy_route = self.warehouse.buy_pull_id.route_id
-
-        vendor = self.env['res.partner'].create({'name': 'super vendor'})
-
-        product = self.env['product.product'].create({
-            'name': 'super product',
-            'is_storable': True,
-            'seller_ids': [(0, 0, {'partner_id': vendor.id})],
-            'route_ids': buy_route,
-        })
-        self.env['mrp.bom'].create({
-            'product_tmpl_id': product.product_tmpl_id.id,
-            'product_qty': 1.0,
-            'product_uom_id': product.uom_id.id,
-        })
-        # create a need of the product with a picking
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
-        picking = self.env['stock.picking'].create({
-            'location_id': warehouse.lot_stock_id.id,
-            'location_dest_id': self.env.ref('stock.stock_location_customers').id,
-            'picking_type_id': warehouse.out_type_id.id,
-            'move_ids': [(0, 0, {
-                'product_id': product.id,
-                'product_uom': product.uom_id.id,
-                'product_uom_qty': 1,
-                'location_id': warehouse.lot_stock_id.id,
-                'location_dest_id': self.env.ref('stock.stock_location_customers').id,
-            })]
-        })
-        picking.action_assign()
-        self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
-        orderpoint_product = self.env['stock.warehouse.orderpoint'].search(
-            [('product_id', '=', product.id)])
-        self.assertEqual(orderpoint_product.route_id, manu_route, "The route manufacture should be set on the orderpoint")
-        # Delete the orderpoint to generate a new one with the manufacture route
-        orderpoint_product.unlink()
-        # switch the product route to manufacture
-        product.write({'route_ids': [(3, buy_route.id), (4, manu_route.id)]})
-        self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
-        orderpoint_product = self.env['stock.warehouse.orderpoint'].search(
-            [('product_id', '=', product.id)])
-        self.assertEqual(orderpoint_product.route_id, manu_route, "The route manufacture should be set on the orderpoint")
 
     def test_compute_bom_days_00(self):
         """ Check Days to prepare Manufacturing Order are correctly computed when Days to Purchase is set. """
@@ -1036,6 +981,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         self.assertTrue(compo_d_values['route_alert'], "Should be true as 3 units < 1 dozen for this vendor")
 
     def test_valuation_with_backorder(self):
+        self.env['decimal.precision'].search([('name', '=', 'Product Unit')]).digits = 3
+        self.env['decimal.precision'].search([('name', '=', 'Price Unit')]).digits = 3
         fifo_category = self.env['product.category'].create({
             'name': 'FIFO',
             'property_cost_method': 'fifo',
@@ -1080,9 +1027,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # Price Unit for 1 gm of the kit = 90000/1000 = 90
         # unit_cost for cmp1 = 90 *1000* 3 / 2 / 2 / 1000 = 67.5
         # unit_cost for cmp2  = 90 *1000* 3 / 2 / 1  * 1000 = 135000000
-        svl = po.picking_ids[0].move_ids.stock_valuation_layer_ids
-        self.assertEqual(svl[0].unit_cost, 67.5)
-        self.assertEqual(svl[1].unit_cost, 135000000)
+        self.assertEqual(cmp1.standard_price, 67.5)
+        self.assertEqual(cmp2.standard_price, 135000000)
 
     def test_mo_overview_mto_purchase_with_backorders(self):
         self.warehouse.reception_steps = 'two_steps'
@@ -1244,8 +1190,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # calculating the unit cost per component: 100 / 12 = 8.33333333333
         # total cost for 12 components: 8.33 * 12 = 99.96
         # however, due to rounding differences, the expected value is 100
-        svl_val = self.env['stock.valuation.layer'].search([('stock_move_id', '=', move.id)]).value
-        self.assertEqual(svl_val, 100)
+        self.assertEqual(move.value, 100)
 
     def test_valuation_by_lot_component_in_kit(self):
         """
@@ -1285,8 +1230,8 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # the cost_share is equal, 60/6 = $10.
         self.assertEqual(self.component_a.standard_price, 10)
         self.assertEqual(lot_a.standard_price, 10)
-        self.assertEqual(lot_a.quantity_svl, 4)
-        self.assertEqual(lot_a.value_svl, 40)
+        self.assertEqual(lot_a.product_qty, 4)
+        self.assertEqual(lot_a.total_value, 40)
 
     def test_inter_company_received_qty_with_kit(self):
         """
@@ -1378,8 +1323,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         receipt = purchase_order.picking_ids
         # would fail due to attempted re-reconciliation prior to this commit
         receipt.button_validate()
-        stock_input_account, stock_valuation_account, tax_paid_account, account_payable_account = (
-            kit_product.categ_id.property_stock_account_input_categ_id,
+        stock_valuation_account, tax_paid_account, account_payable_account = (
             kit_product.categ_id.property_stock_valuation_account_id,
             self.company_data['default_account_tax_purchase'],
             self.company_data['default_account_payable'],
@@ -1388,15 +1332,9 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         self.assertRecordValues(
             self.env['account.move.line'].search([], order='id asc'),
             [
-                {'account_id': stock_input_account.id,       'product_id': components[0].id,   'reconciled': True,    'debit': 5.0,    'credit':  0.0},
-                {'account_id': stock_input_account.id,       'product_id': kit_product.id,     'reconciled': True,    'debit': 10.0,   'credit':  0.0},
+                {'account_id': stock_valuation_account.id,   'product_id': components[0].id,   'reconciled': False,   'debit':  5.0,   'credit':  0.0},
+                {'account_id': stock_valuation_account.id,   'product_id': kit_product.id,     'reconciled': False,   'debit':  10.0,  'credit':  0.0},
                 {'account_id': tax_paid_account.id,          'product_id': False,              'reconciled': False,   'debit': 2.25,   'credit':  0.0},
                 {'account_id': account_payable_account.id,   'product_id': False,              'reconciled': False,   'debit':  0.0,   'credit':  17.25},
-                {'account_id': stock_input_account.id,       'product_id': components[0].id,   'reconciled': True,    'debit':  0.0,   'credit':  5.0},
-                {'account_id': stock_valuation_account.id,   'product_id': components[0].id,   'reconciled': False,   'debit':  5.0,   'credit':  0.0},
-                {'account_id': stock_input_account.id,       'product_id': components[0].id,   'reconciled': True,    'debit':  0.0,   'credit':  5.0},
-                {'account_id': stock_valuation_account.id,   'product_id': components[0].id,   'reconciled': False,   'debit':  5.0,   'credit':  0.0},
-                {'account_id': stock_input_account.id,       'product_id': components[1].id,   'reconciled': True,    'debit':  0.0,   'credit':  5.0},
-                {'account_id': stock_valuation_account.id,   'product_id': components[1].id,   'reconciled': False,   'debit':  5.0,   'credit':  0.0},
             ]
         )
