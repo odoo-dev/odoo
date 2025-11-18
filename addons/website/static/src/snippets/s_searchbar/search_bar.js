@@ -5,6 +5,7 @@ import { markup } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { getTemplate } from "@web/core/templates";
 import { KeepLast } from "@web/core/utils/concurrency";
+import { SIZES, MEDIAS_BREAKPOINTS } from "@web/core/ui/ui_service";
 
 export class SearchBar extends Interaction {
     static selector = ".o_searchbar_form";
@@ -22,6 +23,9 @@ export class SearchBar extends Interaction {
             "t-on-keydown": this.onKeydown,
             "t-on-search": this.onSearch,
         },
+        ".o_search_result_item a": {
+            "t-on-keydown": this.onKeydown,
+        },
     };
     autocompleteMinWidth = 300;
 
@@ -33,7 +37,7 @@ export class SearchBar extends Interaction {
         const orderByEl = this.el.querySelector(".o_search_order_by");
         const form = orderByEl.closest("form");
         this.order = orderByEl.value;
-        this.limit = parseInt(this.inputEl.dataset.limit) || 5;
+        this.limit = parseInt(this.inputEl.dataset.limit) || 6;
         this.wasEmpty = !this.inputEl.value;
         this.linkHasFocus = false;
         if (this.limit) {
@@ -41,10 +45,7 @@ export class SearchBar extends Interaction {
         }
         const dataset = this.inputEl.dataset;
         this.options = {
-            displayImage: dataset.displayImage && JSON.parse(dataset.displayImage),
-            displayDescription: dataset.displayDescription && JSON.parse(dataset.displayDescription),
-            displayExtraLink: dataset.displayExtraLink && JSON.parse(dataset.displayExtraLink),
-            displayDetail: dataset.displayDetail && JSON.parse(dataset.displayDetail),
+            searchType: dataset.searchType,
             // Make it easy for customization to disable fuzzy matching on specific searchboxes
             allowFuzzy: !(dataset.noFuzzy && JSON.parse(dataset.noFuzzy)),
         };
@@ -89,6 +90,13 @@ export class SearchBar extends Interaction {
         this.render(null);
     }
 
+    getDisplayType() {
+        if (this.el.clientWidth > MEDIAS_BREAKPOINTS[SIZES.SM].maxWidth) {
+            return "columns";
+        }
+        return "list";
+    }
+
     async fetch() {
         const res = await rpc("/website/snippet/autocomplete", {
             search_type: this.searchType,
@@ -96,18 +104,25 @@ export class SearchBar extends Interaction {
             order: this.order,
             limit: this.limit,
             max_nb_chars: Math.round(
-                Math.max(this.autocompleteMinWidth, parseInt(this.el.clientWidth)) * 0.22
+                Math.max(
+                    this.autocompleteMinWidth,
+                    parseInt(this.el.clientWidth / (this.getDisplayType() === "columns" ? 3 : 1))
+                ) * 0.22
             ),
             options: this.options,
         });
-        const fieldNames = this.getFieldsNames();
-        res.results.forEach((record) => {
-            for (const fieldName of fieldNames) {
-                if (record[fieldName]) {
-                    record[fieldName] = markup(record[fieldName]);
+
+        const field_set = new Set(this.getFieldsNames());
+        for (const group in res.results) {
+            const data = res.results[group].data;
+            data.forEach((record) => {
+                for (const key in record) {
+                    if (field_set.has(key) && record[key]) {
+                        record[key] = markup(record[key]);
+                    }
                 }
-            }
-        });
+            });
+        }
         return res;
     }
 
@@ -119,8 +134,9 @@ export class SearchBar extends Interaction {
             this.services["public.interactions"].stopInteractions(this.menuEl);
         }
         const prevMenuEl = this.menuEl;
+        this.resultEls = null;
         if (res && this.limit) {
-            const results = res["results"];
+            const results = res.results;
             let template = "website.s_searchbar.autocomplete";
             const candidate = template + "." + this.searchType;
             if (getTemplate(candidate)) {
@@ -131,10 +147,11 @@ export class SearchBar extends Interaction {
                 {
                     results: results,
                     parts: res["parts"],
-                    hasMoreResults: results.length < res["results_count"],
+                    limit: this.limit,
                     search: this.inputEl.value,
                     fuzzySearch: res["fuzzy_search"],
                     widget: this.options,
+                    displayType: this.getDisplayType(),
                 },
                 this.el
             )[0];
@@ -186,20 +203,93 @@ export class SearchBar extends Interaction {
                 break;
             case "ArrowUp":
             case "ArrowDown":
-                ev.preventDefault();
-                if (this.menuEl) {
-                    const focusableEls = [this.inputEl, ...this.menuEl.children];
-                    const focusedEl = document.activeElement;
-                    const currentIndex = focusableEls.indexOf(focusedEl) || 0;
-                    const delta = ev.key === "ArrowUp" ? focusableEls.length - 1 : 1;
-                    const nextIndex = (currentIndex + delta) % focusableEls.length;
-                    const nextFocusedEl = focusableEls[nextIndex];
-                    nextFocusedEl.focus();
+            case "ArrowLeft":
+            case "ArrowRight":
+                // Cache resultEls to avoid repeated DOM queries on each keypress
+                if (!this.resultEls && this.menuEl) {
+                    this.resultEls = [...this.menuEl.querySelectorAll(".o_search_result_item a")];
+                }
+                if (this.resultEls?.length) {
+                    if (document.activeElement === this.inputEl) {
+                        if (ev.key === "ArrowDown") {
+                            this.resultEls[0]?.focus();
+                        }
+                        return;
+                    }
+                    ev.preventDefault();
+                    const currentIndex = this.resultEls.indexOf(document.activeElement);
+                    const direction = ev.key.replace("Arrow", "").toLowerCase();
+                    this.navigateByDirection(currentIndex, direction);
                 }
                 break;
             case "Enter":
                 this.limit = 0; // prevent autocomplete
                 break;
+        }
+    }
+
+    /**
+     * Move focus to the closest search result in the given direction based on
+     * visual (screen) position.
+     * @param {number} currentIndex
+     *  Index of the currently focused result in `this.resultEls`
+     * @param {"up"|"down"|"left"|"right"} direction"
+     *  Direction of navigation triggered by arrow keys.
+     */
+    navigateByDirection(currentIndex, direction) {
+        const resultEls = this.resultEls;
+        const currentRect = resultEls[currentIndex].getBoundingClientRect();
+        const currentCenterX = currentRect.left + currentRect.width / 2;
+        const currentCenterY = currentRect.top + currentRect.height / 2;
+        let nextIndex = -1;
+        let bestDistance = Infinity;
+
+        const scoreCandidate = (direction, dx, dy, height) => {
+            const AXIS_WEIGHT = 1000; // Prioritize row/column movement to avoid jumps
+            switch (direction) {
+                case "down":
+                    if (dy > 0) {
+                        return Math.abs(dy) * AXIS_WEIGHT + Math.abs(dx);
+                    }
+                    break;
+                case "up":
+                    if (dy < 0) {
+                        return Math.abs(dy) * AXIS_WEIGHT + Math.abs(dx);
+                    }
+                    break;
+                case "right":
+                    if (dx > 0 && Math.abs(dy) < height) {
+                        return Math.abs(dx) * AXIS_WEIGHT + Math.abs(dy);
+                    }
+                    break;
+                case "left":
+                    if (dx < 0 && Math.abs(dy) < height) {
+                        return Math.abs(dx) * AXIS_WEIGHT + Math.abs(dy);
+                    }
+                    break;
+            }
+            return Infinity;
+        };
+
+        resultEls.forEach((el, index) => {
+            if (index === currentIndex) {
+                return;
+            }
+            const rect = el.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const dx = centerX - currentCenterX;
+            const dy = centerY - currentCenterY;
+            const distance = scoreCandidate(direction, dx, dy, currentRect.height);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                nextIndex = index;
+            }
+        });
+        if (nextIndex >= 0) {
+            resultEls[nextIndex].focus();
+        } else if (direction === "up") {
+            this.inputEl.focus();
         }
     }
 
