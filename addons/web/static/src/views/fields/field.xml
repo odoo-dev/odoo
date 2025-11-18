@@ -2,8 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="web.Field">
-        <div t-att-name="props.name" t-att-class="classNames" t-att-style="props.style" t-att-data-tooltip-template="tooltip and 'web.FieldTooltip'" t-att-data-tooltip-info="tooltip">
+        <div t-att-name="props.name" t-att-class="classNames" t-att-style="props.style" t-att-data-tooltip-template="tooltip and 'web.FieldTooltip'" t-att-data-tooltip-info="tooltip" t-on-focusin="() => this.onFieldFocus(true)" t-on-focusout="() => this.onFieldFocus(false)">
             <t t-component="field.component" t-props="fieldComponentProps"/>
+            <div class="o_form_required_asterisk text-muted" t-if="this.displayRequired">*required</div>
         </div>
     </t>
 

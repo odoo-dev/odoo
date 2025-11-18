@@ -27,12 +27,12 @@
                 <field name="picking_policy" required="True" readonly="state not in ['draft', 'sent']"/>
             </label>
             <div name="commitment_date_div" position="replace">
-                <div class="o_row">
+                <div class="o_input_box">
                     <field name="expected_date" invisible="1"/>  <!-- Needed for the placeholder widget -->
                     <field name="commitment_date" options="{'placeholder_field': 'expected_date'}"/>
                     <field
                         name="delivery_status"
-                        class="oe_inline"
+                        class="o_input_box_overlay suffix"
                         invisible="state != 'sale'"
                         decoration-success="delivery_status == 'full'"
                         decoration-warning="delivery_status == 'partial'"

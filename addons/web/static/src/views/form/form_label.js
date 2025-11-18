@@ -1,4 +1,4 @@
-import { fieldVisualFeedback } from "@web/views/fields/field";
+import { fieldVisualFeedback, fieldDisplayRequired } from "@web/views/fields/field";
 import { getTooltipInfo } from "@web/views/fields/field_tooltip";
 import { _t } from "@web/core/l10n/translation";
 import { Component } from "@odoo/owl";
@@ -15,14 +15,18 @@ export class FormLabel extends Component {
         id: { type: String },
         notMuttedLabel: { type: Boolean, optional: true },
     };
-
-    get className() {
-        const { invalid, empty, readonly } = fieldVisualFeedback(
+    setup() {
+        this.fieldVisualFeedback = fieldVisualFeedback(
             this.props.fieldInfo.field,
             this.props.record,
             this.props.fieldName,
             this.props.fieldInfo
         );
+        this.displayRequired = fieldDisplayRequired(this.props.fieldInfo, this.props.record);
+    }
+
+    get className() {
+        const { invalid, empty, readonly } = this.fieldVisualFeedback;
         const classes = this.props.className ? [this.props.className] : [];
         if (invalid) {
             classes.push("o_field_invalid");

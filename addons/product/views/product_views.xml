@@ -57,11 +57,9 @@
                     />
                     <div class="oe_title">
                         <label for="name" string="Product"/>
-                        <h1>
-                            <div class="d-flex">
-                                <field name="is_favorite" widget="boolean_favorite" class="me-2" nolabel="1"/>
-                                <field class="text-break" name="name" options="{'line_breaks': False}" widget="text" placeholder="e.g. Cheese Burger"/>
-                            </div>
+                        <h1 class="o_input_box">
+                            <field name="is_favorite" widget="boolean_favorite" nolabel="1" class="o_input_box_overlay prefix"/>
+                            <field class="text-break" name="name" options="{'line_breaks': False}" widget="text" placeholder="e.g. Cheese Burger"/>
                         </h1>
                     </div>
                     <div name="options">
@@ -114,24 +112,16 @@
                                     </div>
                                 </group>
                                 <group name="group_standard_price">
-                                    <label for="list_price"/>
                                     <div name="list_price_uom">
+                                        <label for="list_price"/>
                                         <field name="list_price"
-                                            class="oe_inline"
                                             widget="monetary"
                                             options="{'currency_field': 'currency_id', 'field_digits': True}"/>
-                                        <span
-                                            name="uom_span"
-                                            groups="uom.group_uom"
-                                            invisible="type == 'combo'"
-                                        >
-                                            per
-                                            <field
-                                                name="uom_id" widget="many2one_uom"
-                                                class="oe_inline" style="max-width:136px"
-                                                options="{'no_quick_create': True}"
-                                            />
-                                        </span>
+                                        <label for="uom_id" string="per"/>
+                                        <field
+                                            name="uom_id" widget="many2one_uom"
+                                            options="{'no_quick_create': True}"
+                                        />
                                     </div>
                                     <label
                                         for="standard_price"

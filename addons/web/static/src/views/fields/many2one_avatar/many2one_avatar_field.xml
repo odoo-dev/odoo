@@ -4,8 +4,8 @@
     <t t-name="web.Many2OneAvatarField">
         <t t-set="relation" t-value="props.record.fields[props.name].relation"/>
         <t t-set="value" t-value="props.record.data[props.name]"/>
-        <div class="d-flex align-items-center gap-1">
-            <span class="o_avatar o_m2o_avatar">
+        <div class="d-flex align-items-center gap-1 o_input_box">
+            <span class="o_avatar o_m2o_avatar o_input_box_overlay prefix">
                 <t t-if="value">
                     <img class="rounded" t-attf-src="/web/image/{{relation}}/{{value.id}}/avatar_128"/>
                 </t>

@@ -14,8 +14,6 @@
 
 // Form view rules to break the default table layout
 @mixin form-break-table() {
-    --fieldWidget-margin-bottom: 0;
-
     grid-template-columns: minmax(0, 1fr);
     margin-bottom: $o-form-spacing-unit * 4;
 
@@ -47,7 +45,8 @@
 
 @mixin editable-form-break-table() {
     .o_address_type, .o_address_format {
-        --fieldWidget-margin-bottom: #{$o-form-spacing-unit * 2};
+        --fieldWidget-margin-bottom: #{$o-form-spacing-unit * 3}; 
+        // FIXME fix the spacing without changing this value, or make a consistant change
     }
 }
 
@@ -184,7 +183,7 @@
         flex: 1 1 auto;
     }
 
-    &:not(.o_field_highlight) .o_field_widget:not(.o_field_invalid):not(.o_field_highlight) .o_input:not(:hover):not(:focus) {
+    .o_form_renderer:not(.o_field_highlight) .o_field_widget:not(.o_field_invalid):not(.o_field_highlight) .o_input:not(:hover):not(:focus) {
         --o-input-border-color: transparent;
     }
 
@@ -391,13 +390,6 @@
             font-weight: $font-weight-normal;
         }
 
-        .o_field_widget {
-            > .btn {
-                flex: 0 0 auto;
-                padding: 0 10px;
-            }
-        }
-
         @include media-breakpoint-up(sm) {
             .o_field_widget {
                 &.o_text_overflow {
@@ -495,6 +487,11 @@
         &:empty {
             height: $o-form-spacing-unit * 2;
         }
+    }
+
+    .o_inner_group div:not(:has(+ .o_cell)) .o_horizontal_separator {
+        // Hide groups that are empty
+        display: none;
     }
 
     // Contextual adaptation
@@ -595,11 +592,28 @@
 
         @include media-breakpoint-down(md) {
             font-size: $o-font-size-base-touch;
+
+            &.o_form_label_empty, &.o_form_label_false {
+                display: none;
+            }
         }
 
         &.o_form_label_empty, &.o_form_label_false, &.o_form_label_readonly {
-            opacity: 0.66;
-            font-weight: $font-weight-normal;
+            color: $text-muted;
+        }
+    }
+
+    .o_form_renderer:not(.o_field_highlight):not(.o_touch_device .o_field_highlight) {
+        .o_field_widget {
+            .o_dropdown_button {
+                visibility: hidden;
+            }
+
+            &:hover, &:focus-within {
+                .o_dropdown_button {
+                    visibility: visible;
+                }
+            }
         }
     }
 
@@ -933,10 +947,6 @@
         }
     }
     @include media-breakpoint-down(md) {
-        .o_form_label:not(.o_invisible_modifier) {
-            padding-bottom: 4px;
-        }
-
         .o_group {
             margin-top: 0;
 
@@ -1113,8 +1123,6 @@
 
         .o_form_label {
             font-size: $o-label-font-size-factor * $o-font-size-base-touch;
-            font-weight: $font-weight-normal;
-            color: $o-brand-secondary;
         }
     }
 }
@@ -1150,4 +1158,10 @@
 // This ensures correct alignment with the cog button when there is no breadcrumb displayed.
 .o_breadcrumb:not(:has(.breadcrumb)) + .o_form_status_indicator {
     align-self: center !important;
+}
+
+.o_touch_device .o_form_view {
+    .o_horizontal_separator {
+        box-shadow: none;
+    }
 }

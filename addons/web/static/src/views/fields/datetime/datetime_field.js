@@ -10,6 +10,7 @@ import { FIELD_WIDTHS } from "@web/views/list/column_width_hook";
 import { formatDate, formatDateTime } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
 import { DateTimeOperation } from "@web/model/relational_model/operation";
+import { hasTouch } from "@web/core/browser/feature_detection";
 
 const { DateTime } = luxon;
 
@@ -163,6 +164,7 @@ export class DateTimeField extends Component {
 
         this.startDate = useRef("start-date");
         this.endDate = useRef("end-date");
+        this.hasTouch = hasTouch();
 
         useEffect(
             () => {

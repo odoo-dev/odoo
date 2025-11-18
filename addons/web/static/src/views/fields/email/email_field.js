@@ -3,6 +3,9 @@ import { _t } from "@web/core/l10n/translation";
 import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 
+import { InputBox } from "@web/core/input_box/input_box";
+
+import { useChildRef } from "@web/core/utils/hooks";
 import { Component } from "@odoo/owl";
 
 export class EmailField extends Component {
@@ -11,9 +14,11 @@ export class EmailField extends Component {
         ...standardFieldProps,
         placeholder: { type: String, optional: true },
     };
+    static components = { InputBox };
 
     setup() {
-        useInputField({ getValue: () => this.props.record.data[this.props.name] || "" });
+        this.input = useChildRef();
+        useInputField({ ref: this.input, getValue: () => this.props.record.data[this.props.name] || "" });
     }
 }
 
@@ -37,7 +42,15 @@ export const emailField = {
 registry.category("fields").add("email", emailField);
 
 class FormEmailField extends EmailField {
-    static template = "web.FormEmailField";
+    get inputLinks() {
+        return [
+            {
+                icon: "fa-envelope",
+                href: 'mailto:' + this.props.record.data[this.props.name],
+                name: _t("Send Email")
+            }
+        ]
+    }
 }
 
 export const formEmailField = {

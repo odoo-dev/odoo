@@ -3,6 +3,7 @@ import { useOfflineStatus } from "@web/core/offline/offline_service";
 import { evaluateBooleanExpr, evaluateExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { utils } from "@web/core/ui/ui_service";
+import { hasTouch } from "@web/core/browser/feature_detection";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { getFieldContext } from "@web/model/relational_model/utils";
 import { X2M_TYPES, getClassNameFromDecoration } from "@web/views/utils";
@@ -163,6 +164,23 @@ export function fieldVisualFeedback(field, record, fieldName, fieldInfo) {
             : record.isFieldInvalid(fieldName),
         empty,
     };
+}
+
+export function fieldDisplayRequired(fieldInfo, record) {
+    if (
+        !hasTouch() ||
+        fieldInfo.viewType !== "form" ||
+        fieldInfo.field.isEmpty instanceof Function
+    ) {
+        return false;
+    }
+    const { readonly, required } = fieldVisualFeedback(
+        fieldInfo.field,
+        record,
+        fieldInfo.name,
+        fieldInfo || {}
+    )
+    return required && !readonly;
 }
 
 export function getPropertyFieldInfo(propertyField) {
@@ -363,6 +381,7 @@ export class Field extends Component {
             const fieldType = this.props.record.fields[this.props.name].type;
             this.field = getFieldFromRegistry(fieldType, this.props.type);
         }
+        this.displayRequired = fieldDisplayRequired(this.props.fieldInfo, this.props.record);
     }
 
     get classNames() {
@@ -481,5 +500,9 @@ export class Field extends Component {
             }
         }
         return false;
+    }
+    onFieldFocus(isActive) {
+        const formLabelSelector = `.o_wrap_label:has(+ * .o_field_widget[name=${this.props.name}]) .o_form_label`
+        document.querySelector(`label[for=${this.fieldComponentProps.id}], ${formLabelSelector}`)?.classList.toggle("o_label_active", isActive);
     }
 }

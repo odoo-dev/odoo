@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.InputBox">
+        <div t-attf-class="o_input_box {{ this.displayOverlayButton ? '' : 'd-inline-flex w-100' }}">
+            <input
+                t-attf-class="o_input w-100"
+                t-att-id="this.props.id"
+                t-att-type="this.props.type"
+                autocomplete="off"
+                t-att-placeholder="this.props.placeholder"
+                t-att-required="this.props.required"
+                t-ref="input"
+            />
+            <t t-if="this.props.inputLinks.length">
+                <t t-if="!this.displayOverlayButton">
+                    <t t-foreach="this.props.inputLinks" t-as="link" t-key="link.name">
+                        <a t-att-class="this.buttonClass" t-att-href="link.href" t-att-data-tooltip="link.name" t-att-style="'--InputBox-spacing: calc(var(--icon-w-default) * ' + (this.props.inputLinks.length - link_index - 1) + ')'">
+                            <i t-attf-class="fa {{ link.icon }}" />
+                        </a>
+                    </t>
+                </t>
+                <t t-else="">
+                    <Dropdown t-if="this.props.inputLinks.length > 1">
+                        <button t-att-class="this.buttonClass">
+                            <i class="oi oi-ellipsis-v"/>
+                        </button>
+                            <t t-set-slot="content">
+                                <t t-foreach="this.props.inputLinks" t-as="link" t-key="link.name">
+                                    <DropdownItem onSelected="() => window.open(link.href)">
+                                        <i t-attf-class="fa {{ link.icon }}" class="me-2"/>
+                                        <t t-esc="link.name"/>
+                                    </DropdownItem>
+                                </t>
+                            </t>
+                    </Dropdown>
+                    <t t-else="">
+                        <t t-set="link" t-value="this.props.inputLinks[0]" />
+                        <button t-att-class="this.buttonClass" t-on-click="() => window.open(link.href)" t-att-data-tooltip="link.name">
+                            <i t-attf-class="fa {{ link.icon }}"/>
+                        </button>
+                    </t>
+                </t>
+            </t>
+        </div>
+    </t>
+
+</templates>

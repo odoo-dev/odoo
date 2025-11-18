@@ -149,14 +149,14 @@ export class ProjectRightSidePanel extends Component {
         });
     }
 
-    async onProjectActionClick(params) {
+    async onProjectActionClick(params, newWindow) {
         this.actionService.doActionButton({
             type: 'action',
             resId: this.projectId,
             context: this.context,
             resModel: 'project.project',
             ...params,
-        });
+        }, { newWindow });
     }
 
     _getStatButtonClickParams(statButton) {

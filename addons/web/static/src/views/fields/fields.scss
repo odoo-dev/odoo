@@ -9,6 +9,9 @@
 .o_field_highlight .o_field_widget .o_input, .o_field_highlight.o_field_widget .o_input {
     border-color: var(--o-input-border-color);
 }
+.o_form_renderer {
+    --spacing: 8px;
+}
 
 // field decoration classes (e.g. text-danger) are set on the field root node,
 // but bootstrap contextual classes do not work on input/textarea, so we have to
@@ -18,6 +21,98 @@
         color: inherit;
     }
 }
+
+.o_input_box .o_field_widget {
+    width: 100%;
+}
+
+.o_touch_device .o_form_view {
+    --fieldWidget-label-height: .7rem;
+    --fieldWidget-margin-bottom: calc(var(--fieldWidget-label-height) * 1.5);
+    .o_field_widget, .o_input_box:has(.o_field_widget) {
+        &:has(.o_form_required_asterisk) {
+            --fieldWidget-margin-bottom: calc(var(--fieldWidget-label-height) * 2.5);
+            position: relative;
+        }
+
+        .o_form_required_asterisk {
+            position: absolute;
+            top: 100%;
+            left: calc(2 * var(--spacing));
+            font-size: var(--fieldWidget-label-height);
+            font-weight: 400;
+            display: none;
+        }
+
+        &:has(input:not([type]), [type='text'], [type='email'], [type='number'], [type='password'], [type='tel'], [type='search'], button.o_input) .o_form_required_asterisk {
+            display: block;
+        }
+
+        .o_input, textarea, select, &.o_input_box .o_field_widget, div[contenteditable] {
+            border-color: transparent;
+            padding: 0;
+            width: 100%;
+
+            &:not(.o_input_box .o_field_widget *):not(.o_input .o_input):not(.o_input_box_overlay) {
+                outline: $input-border-width solid var(--o-input-border-color);
+                border-width: calc(1.5 * #{$input-border-width});
+                border-radius: var(--border-radius);
+                line-height: calc(2.5 * var(--spacing));
+
+                &:focus-within {
+                    border-color: var(--o-input-border-color);
+                }
+
+                &:has(.o_input) {
+                    position: relative;
+
+                    .o_input_dropdown {
+                        position: static;
+                    }
+                }
+            }   
+        }
+
+        .o_input:not(.o_input .o_input), textarea, select, div[contenteditable] {
+            padding: var(--spacing) calc(2 * var(--spacing));
+        }
+
+        .o_input_dropdown .o_dropdown_button {
+            top: 0;
+            padding: var(--spacing) calc(1.5 * var(--spacing));
+            transform: translateY(-2px);
+        }
+    }
+
+    .o_label_active {
+        color: $o-action;
+    }
+
+    .o_wrap_cell :is(input:not([type]), [type='text'], [type='email'], [type='number'], [type='password'], [type='tel'], [type='search'], button.o_input) + .o_form_label,
+    .o_wrap_label:not(.o_wrap_inline):has(+ .o_cell :is(input:not([type]), [type='text'], textarea, [contenteditable], [type='email'], [type='number'], [type='password'], [type='tel'], [type='search'], button.o_input)) .o_form_label,
+    .oe_title .o_form_label:not(.o_form_label:has(+ * .o_field_widget.o_readonly_modifier)),
+    .o_wrap_label .o_form_label.o_form_label_readonly {
+        position: absolute;
+        transform: translate(calc(1.5 * var(--spacing)), calc(-.5 * var(--fieldWidget-label-height) - #{$input-border-width}));
+        background: linear-gradient(transparent 0px, transparent .3rem, $o-view-background-color .3rem, $o-view-background-color 1rem, transparent 1rem);
+        padding: 0 calc(var(--spacing) / 2) !important;
+        font-weight: 500;
+        font-size: var(--fieldWidget-label-height);
+        line-height: var(--fieldWidget-label-height);
+        user-select: none;
+        z-index: 1;
+
+        .o_field_char.o_readonly_modifier {
+            margin-bottom: 0;
+        }
+    }
+
+    .o_cell .o_field_widget.o_readonly_modifier:not(.o_form_label .o_field_char) {
+        color: $text-muted;
+        padding: var(--spacing) calc(2 * var(--spacing));
+    }
+}
+
 
 //------------------------------------------------------------------------------
 // Field States
@@ -29,8 +124,8 @@
 }
 
 .o_required_modifier {
-    @include print-variable(o-input-border-color, $o-input-border-required);
-    @include print-variable(o-caret-color, $o-input-border-required);
+    // @include print-variable(o-input-border-color, $o-input-border-required);
+    // @include print-variable(o-caret-color, $o-input-border-required);
 }
 
 .o_field_widget:focus-within {
@@ -48,7 +143,7 @@
 //------------------------------------------------------------------------------
 
 .o_input {
-    border:$input-border-width solid var(--o-input-border-color);
+    border: $input-border-width solid var(--o-input-border-color);
     border-width: 0 0 $input-border-width 0;
     padding: $o-input-padding-y $o-input-padding-x;
     background-color: var(--o-input-background-color, #{$input-bg});
@@ -93,7 +188,10 @@
     // Default display and alignment of widget and internal <input/>
     text-align: inherit;
     display: var(--fieldWidget-display, inline-block);
-    margin-bottom: var(--fieldWidget-margin-bottom);
+
+    &:not(.o_form_label .o_field_widget.o_readonly_modifier) {
+        margin-bottom: var(--fieldWidget-margin-bottom);
+    }
 
     textarea.o_input,
     input.o_input {

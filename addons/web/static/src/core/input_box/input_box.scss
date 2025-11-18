@@ -1,0 +1,101 @@
+.o_input_box:has(.o_input_box_overlay) {
+    --inputbox-x-spacing: 0px;
+    --inputbox-y-spacing: 0px;
+    --dropdown-button-spacing: calc(3 * var(--spacing));
+    --icon-w-default: 24px;
+    --icon-w-start: var(--icon-w-default);
+    --icon-w-end: var(--icon-w-default);
+    position: relative;
+}
+
+.o_input_box_overlay {
+    position: absolute;
+    top: var(--inputbox-y-spacing);
+    height: var(--icon-w-default) !important;
+    padding: 0 !important;
+    z-index: 1;
+    color: $text-muted;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+    &.btn, .btn, button {
+        border-radius: var(--spacing);
+        line-height: 0;
+        pointer-events: auto;
+        padding: 0 !important;
+        color: $btn-link-color;
+    }
+    .btn {
+        display: block;
+        height: inherit;
+    }
+}
+
+
+// SUFFIX OVERLAY RULES
+.o_input_box:has(.suffix) {
+    .o_input_box_overlay.suffix {
+        width: var(--icon-w-end) !important;
+        right: var(--inputbox-x-spacing);
+    }
+
+    .o_dropdown_button {
+        right: calc(var(--icon-w-end) + var(--spacing)) !important;
+    }
+    .o_input {
+        padding-right: calc(var(--inputbox-x-spacing) + var(--icon-w-end) + var(--spacing)) !important;
+    }
+    &:has(.o_dropdown_button) {
+        .o_input {
+            padding-right: calc(var(--inputbox-x-spacing) + var(--icon-w-end) + var(--spacing) + var(--dropdown-button-spacing)) !important;
+        }
+    }
+    &:has(.suffix + .suffix) {
+        .o_dropdown_button {
+            right: calc(var(--icon-w-end) + var(--spacing) + var(--icon-w-default) + var(--spacing)) !important;
+        }
+        .o_input {
+            padding-right: calc(var(--inputbox-x-spacing) + var(--icon-w-end) + var(--spacing) + var(--icon-w-default) + var(--spacing)) !important;
+        }
+        .o_input_box_overlay.suffix:not(.suffix + .suffix) {
+            right: calc(var(--inputbox-x-spacing) + var(--icon-w-end) + var(--spacing));
+        }
+    }
+}
+
+// PREFIX OVERLAY RULES
+.o_input_box:has(.prefix) {
+    .o_input_box_overlay.prefix {
+        width: var(--icon-w-start) !important;
+        left: var(--inputbox-x-spacing);
+    }
+    .o_input, .o_field_widget.o_readonly_modifier {
+        padding-left: calc(var(--inputbox-x-spacing) + var(--icon-w-start) + var(--spacing)) !important;
+    }
+}
+
+.o_input_box:has(.o_input_box_overlay.inline) {
+    --icon-w-end: 20%;
+
+    .o_input_box_overlay.inline {
+        &.prefix, &.suffix {
+            width: auto !important;
+        }
+    }
+}
+
+.o_touch_device {
+    :has(.o_input_box_overlay) {
+        --inputbox-x-spacing: var(--spacing);
+        --inputbox-y-spacing: calc(var(--border-width) + 2.25 * var(--spacing) - var(--icon-w-default) / 2);
+    }
+    .o_input_box_overlay {
+        top: calc(var(--border-width) + 2.25 * var(--spacing) - var(--icon-w-default) / 2);
+
+        &.btn, .btn, button {
+            color: var(--secondary-color);
+        }
+    }
+}
