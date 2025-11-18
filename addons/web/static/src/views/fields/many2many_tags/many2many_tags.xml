@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.Many2ManyTags">
+        <div class="o_many2many_tags o_field_tags d-inline-flex flex-wrap gap-1 mw-100" t-att-class="{'o_tags_input o_input': !this.props.readonly}" t-ref="root">
+            <TagsList t-props="this.tagsListProps" t-slot-scope="tag">
+                <Tag t-props="tag.props"/>
+            </TagsList>
+            <t t-if="!this.props.readonly">
+                <div class="o_field_many2many_selection d-inline-flex w-100">
+                    <Many2XAutocomplete t-props="this.many2xAutocompleteProps">
+                        <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                            <span t-att-class="{ 'fw-bold': this.isSelected(autoCompleteItemScope.record) }">
+                                <span t-out="autoCompleteItemScope.label"/>
+                            </span>
+                        </t>
+                    </Many2XAutocomplete>
+                </div>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="web.KanbanMany2ManyTags">
+        <div class="o_kanban_many2many_tags d-flex flex-wrap gap-1">
+            <TagsList t-props="this.tagsListProps" t-slot-scope="tag">
+                <Tag t-props="tag.props"/>
+            </TagsList>
+        </div>
+    </t>
+
+</templates>

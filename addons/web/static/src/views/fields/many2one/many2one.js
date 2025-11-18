@@ -108,7 +108,7 @@ export class Many2One extends Component {
         canScanBarcode: false,
         canWrite: true,
         context: {},
-        domain: [],
+        domain: () => [],
         linkCssClass: "",
         nameCreateField: "name",
         openActionContext: () => ({}),

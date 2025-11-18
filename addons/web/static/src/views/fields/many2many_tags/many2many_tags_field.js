@@ -1,25 +1,117 @@
-import { _t } from "@web/core/l10n/translation";
+import { Component, useRef } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { Domain } from "@web/core/domain";
+import { _t } from "@web/core/l10n/translation";
+import { usePopover } from "@web/core/popover/popover_hook";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
+import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook";
+import { registry } from "@web/core/registry";
+import { BadgeTag } from "@web/core/tags_list/badge_tag";
+import { TagsList } from "@web/core/tags_list/tags_list";
+import { Mutex } from "@web/core/utils/concurrency";
+import { useService } from "@web/core/utils/hooks";
+import { getFieldDomain } from "@web/model/relational_model/utils";
 import {
     Many2XAutocomplete,
     useActiveActions,
-    useX2ManyCrud,
     useOpenMany2XRecord,
+    useX2ManyCrud,
 } from "@web/views/fields/relational_utils";
-import { registry } from "@web/core/registry";
-import { Mutex } from "@web/core/utils/concurrency";
 import { standardFieldProps } from "../standard_field_props";
-import { BadgeTag } from "@web/core/tags_list/badge_tag";
-import { TagsList } from "@web/core/tags_list/tags_list";
-import { usePopover } from "@web/core/popover/popover_hook";
-import { useService } from "@web/core/utils/hooks";
-import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook";
 
-import { Component, useRef } from "@odoo/owl";
-import { getFieldDomain } from "@web/model/relational_model/utils";
+/** @type {import("registries").FieldsRegistryItemShape["supportedOptions"]} */
+export const m2mTagsSupportedOptions = [
+    {
+        label: _t("Disable creation"),
+        name: "no_create",
+        type: "boolean",
+        help: _t(
+            "If checked, users won't be able to create records through the autocomplete dropdown at all."
+        ),
+    },
+    {
+        label: _t("Disable 'Create' option"),
+        name: "no_quick_create",
+        type: "boolean",
+        help: _t(
+            "If checked, users will not be able to create records based on the text input; they will still be able to create records via a popup form."
+        ),
+    },
+    {
+        label: _t("Disable 'Create and Edit' option"),
+        name: "no_create_edit",
+        type: "boolean",
+        help: _t(
+            "If checked, users will not be able to create records based through a popup form; they will still be able to create records based on the text input."
+        ),
+    },
+    {
+        label: _t("Can create"),
+        name: "create",
+        type: "string",
+        help: _t("Write a domain to allow the creation of records conditionnally."),
+    },
+    {
+        label: _t("Color field"),
+        name: "color_field",
+        type: "field",
+        isRelationalField: true,
+        availableTypes: ["integer"],
+        help: _t("Set an integer field to use colors with the tags."),
+    },
+    {
+        label: _t("Typeahead search"),
+        name: "search_threshold",
+        type: "number",
+        help: _t(
+            "Defines the minimum number of characters to perform the search. If not set, the search is performed on focus."
+        ),
+    },
+    {
+        label: _t("Dynamic Placeholder"),
+        name: "placeholder_field",
+        type: "field",
+        availableTypes: ["char"],
+    },
+];
+/** @type {import("registries").FieldsRegistryItemShape["supportedTypes"]} */
+export const m2mTagsSupportedTypes = ["many2many", "one2many"];
+
+/** @type {import("registries").FieldsRegistryItemShape["extractProps"]} */
+export function extractM2MTagsFieldProps(staticInfo, dynamicInfo) {
+    const { attrs, options, string, placeholder } = staticInfo;
+    const hasCreatePermission = attrs.can_create ? evaluateBooleanExpr(attrs.can_create) : true;
+    const noCreate = Boolean(options.no_create);
+    const canCreate = noCreate ? false : hasCreatePermission;
+    return {
+        colorField: options.color_field,
+        nameCreateField: options.create_name_field,
+        canCreate,
+        canQuickCreate: canCreate && !options.no_quick_create,
+        canCreateEdit: canCreate && !options.no_create_edit,
+        createExpression: attrs.create,
+        context: dynamicInfo.context,
+        domain: dynamicInfo.domain,
+        placeholder,
+        searchThreshold: options.search_threshold,
+        string,
+    };
+}
+
+/**
+ * @param {typeof Component} component
+ * @returns {import("registries").FieldsRegistryItemShape}
+ */
+export function buildM2MTagsFieldDescription(component) {
+    return {
+        component,
+        displayName: _t("Tags"),
+        extractProps: extractM2MTagsFieldProps,
+        supportedOptions: m2mTagsSupportedOptions,
+        supportedTypes: m2mTagsSupportedTypes,
+    };
+}
 
 class Many2ManyTagsFieldColorListPopover extends Component {
     static template = "web.Many2ManyTagsFieldColorListPopover";

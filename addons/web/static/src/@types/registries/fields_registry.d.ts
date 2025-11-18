@@ -23,6 +23,7 @@ declare module "registries" {
         name: string;
         onChange: boolean;
         options: Record<string, any>;
+        placeholder: string;
         string: TranslatableString;
         type: string;
         viewType: string;
@@ -44,6 +45,7 @@ declare module "registries" {
 
     interface FieldOption extends IOption<"field"> {
         availableTypes?: FieldType[];
+        isRelationalField?: boolean;
     }
 
     interface NumberOption extends IOption<"number"> {
