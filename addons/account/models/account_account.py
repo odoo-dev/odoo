@@ -79,6 +79,7 @@ class AccountAccount(models.Model):
         compute='_compute_account_type', store=True, readonly=False, precompute=True, index=True,
         help="Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries."
     )
+    is_allocation_account = fields.Boolean(string='Is Allocation Account', compute='_compute_is_allocation_account')
     include_initial_balance = fields.Boolean(string="Bring Accounts Balance Forward",
         help="Used in reports to know if we should consider journal items from the beginning of time instead of from the fiscal year only. Account types that should be reset to zero at each new fiscal year (like expenses, revenue..) should not have this option set.",
         compute="_compute_include_initial_balance",
@@ -192,6 +193,8 @@ class AccountAccount(models.Model):
                 "SUBSTRING(%(placeholder_code)s, 1, 2)",
                 placeholder_code=self._field_to_sql(alias, 'placeholder_code', query),
             )
+        if field_expr == 'is_allocation_account':
+            return SQL("FALSE")
 
         return super()._field_to_sql(alias, field_expr, query)
 
@@ -641,6 +644,10 @@ class AccountAccount(models.Model):
     def _compute_account_type(self):
         accounts_to_process = self.filtered(lambda account: account.code and not account.account_type)
         self._get_closest_parent_account(accounts_to_process, 'account_type', default_value='asset_current')
+
+    def _compute_is_allocation_account(self):
+        # To be extended in localizations
+        self.is_allocation_account = False
 
     @api.depends('code')
     def _compute_account_tags(self):
