@@ -227,11 +227,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         **post,
     ):
         return {
-            'displayDescription': True,
-            'displayDetail': True,
-            'displayExtraDetail': True,
-            'displayExtraLink': True,
-            'displayImage': True,
             'allowFuzzy': not post.get('noFuzzy'),
             'category': str(category.id) if category else None,
             'tags': tags,
@@ -245,6 +240,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         # No limit because attributes are obtained from complete product list
         product_count, details, fuzzy_search_term = website._search_with_fuzzy("products_only", search,
                                                                                limit=None,
+                                                                               offset=0,
                                                                                order=self._get_search_order(post),
                                                                                options=options)
         search_result = details[0].get('results', request.env['product.template']).with_context(bin_size=True)

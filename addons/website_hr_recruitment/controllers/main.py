@@ -132,9 +132,9 @@ class WebsiteHrRecruitment(WebsiteForm):
         _total_not_used, details, fuzzy_search_term = website._search_with_fuzzy(
             "jobs", search,
             limit=self._jobs_per_page * 50,
+            offset=0,
             order="is_published desc, sequence, no_of_recruitment desc",
             options={
-                'displayDescription': True,
                 'allowFuzzy': not noFuzzy,
             }
         )

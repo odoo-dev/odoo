@@ -118,6 +118,15 @@ class WebsiteCover_PropertiesMixin(models.AbstractModel):
                 img = img[:-1] + suffix + ')'
         return img
 
+    def _get_image_url(self):
+        self.ensure_one()
+        properties = json_safe.loads(self.cover_properties)
+        img = properties.get('background-image', None)
+        if not img:
+            return None
+        match = re.search(r"url\(\s*(['\"]?)(.*?)\1\s*\)", img)
+        return match.group(2) if match else img
+
     def write(self, vals):
         if 'cover_properties' not in vals:
             return super().write(vals)
@@ -680,7 +689,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
         raise NotImplementedError()
 
     @api.model
-    def _search_fetch(self, search_detail, search, limit, order):
+    def _search_fetch(self, search_detail, search, limit, offset, order):
         fields = search_detail['search_fields']
         base_domain = search_detail['base_domain']
         domain = self._search_build_domain(base_domain, search, fields, search_detail.get('search_extra'))
@@ -688,13 +697,16 @@ class WebsiteSearchableMixin(models.AbstractModel):
         results = model.search(
             domain,
             limit=limit,
+            offset=offset,
             order=search_detail.get('order', order)
         )
         count = model.search_count(domain) if limit and limit == len(results) else len(results)
         return results, count
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
-        results_data = self.read(fetch_fields)[:limit]
+        # Some fields are not available in public user group,
+        # require sudo to complete result
+        results_data = self.sudo().read(fetch_fields)[:limit]
         for result in results_data:
             result['_fa'] = icon
             result['_mapping'] = mapping
