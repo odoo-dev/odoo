@@ -136,7 +136,7 @@ class ProductProduct(models.Model):
              "to the totaled value of the product's valuation layers")
 
     @api.depends_context('to_date', 'company', 'warehouse_id')
-    @api.depends('cost_method', 'stock_move_ids.value', 'standard_price')
+    @api.depends('cost_method', 'stock_move_ids.value', 'standard_price', 'product_tmpl_id.lot_valuated')
     def _compute_value(self):
         """Compute totals of multiple svl related values"""
         company_id = self.env.company
