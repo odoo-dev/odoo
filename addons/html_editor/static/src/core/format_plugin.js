@@ -249,7 +249,9 @@ export class FormatPlugin extends Plugin {
      * @returns {boolean}
      */
     isSelectionFormat(format, targetedNodes = this.dependencies.selection.getTargetedNodes()) {
-        const targetedTextNodes = targetedNodes.filter(isTextNode);
+        const targetedTextNodes = targetedNodes
+            .filter(isTextNode)
+            .filter((node) => !isEmptyTextNode(node) && !isZWS(node));
         const isFormatted = formatsSpecs[format].isFormatted;
         return (
             targetedTextNodes.length &&
@@ -308,17 +310,16 @@ export class FormatPlugin extends Plugin {
         }
 
         const selectedTextNodes = /** @type { Text[] } **/ (
-            this.dependencies.selection
-                .getTargetedNodes()
-                .filter(
-                    (n) =>
-                        this.dependencies.selection.areNodeContentsFullySelected(n) &&
-                        ((isTextNode(n) && (isVisibleTextNode(n) || isZWS(n))) ||
-                            (n.nodeName === "BR" &&
-                                (isFakeLineBreak(n) ||
-                                    previousLeaf(n, closestBlock(n))?.nodeName === "BR"))) &&
-                        isContentEditable(n)
-                )
+            this.dependencies.selection.getTargetedNodes().filter(
+                (n) =>
+                    this.dependencies.selection.areNodeContentsFullySelected(n) &&
+                    ((isTextNode(n) && (isVisibleTextNode(n) || isZWS(n))) ||
+                        (n.nodeName === "BR" &&
+                            (isFakeLineBreak(n) ||
+                                previousLeaf(n, closestBlock(n))?.nodeName === "BR"))) &&
+                    isContentEditable(n) &&
+                    n.nodeName !== "BR" //TODO HTML EDITOR investigate
+            )
         );
         const unformattedTextNodes = selectedTextNodes.filter((n) => {
             const listItem = closestElement(n, "li");

@@ -2,10 +2,11 @@ import { Component, onWillUpdateProps, useState } from "@odoo/owl";
 import { OptionsContainer } from "./option_container";
 import { useVisibilityObserver } from "../core/utils";
 import { CustomizeComponent } from "@html_builder/sidebar/customize_component";
+import { FormatContainer } from "./format_container";
 
 export class CustomizeTab extends Component {
     static template = "html_builder.CustomizeTab";
-    static components = { CustomizeComponent, OptionsContainer };
+    static components = { CustomizeComponent, OptionsContainer, FormatContainer };
     static props = {
         currentOptionsContainers: { type: Array, optional: true },
         snippetModel: { type: Object },
@@ -42,5 +43,10 @@ export class CustomizeTab extends Component {
             return this.env.editor.shared.builderOptions.getPageContainers();
         }
         return currentOptionsContainers;
+    }
+
+    getLastOptionContainers() {
+        const containers = this.getCurrentOptionsContainers();
+        return containers[containers.length - 1];
     }
 }

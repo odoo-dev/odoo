@@ -10,6 +10,7 @@ import {
 import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import {
     isEmptyBlock,
+    isEmptyTextNode,
     isRedundantElement,
     isTextNode,
     isWhitespace,
@@ -208,6 +209,7 @@ export class ColorPlugin extends Plugin {
                 }
                 return true;
             })
+            .filter((node) => !isEmptyTextNode(node) && node.nodeName !== "BR") // TODO HTML EDITOR fix + test
             .map((node) => findTopMostDecoration(node));
 
         const targetedFieldNodes = new Set(
@@ -216,7 +218,6 @@ export class ColorPlugin extends Plugin {
                 .map((n) => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
                 .filter(Boolean)
         );
-
         const getFonts = (selectedNodes) =>
             selectedNodes.flatMap((node) => {
                 let font =
