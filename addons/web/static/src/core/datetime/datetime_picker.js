@@ -1,9 +1,10 @@
-import { onWillRender, useState } from "@web/owl2/utils";
+import { useLayoutEffect, useState } from "@web/owl2/utils";
 import { Component, onWillUpdateProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { MAX_VALID_DATE, MIN_VALID_DATE, clampDate, isInRange, today } from "../l10n/dates";
 import { localization } from "../l10n/localization";
 import { ensureArray } from "../utils/arrays";
+import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
 import { TimePicker } from "@web/core/time_picker/time_picker";
 import { Time } from "@web/core/l10n/time";
 import { range } from "@web/core/utils/numbers";
@@ -280,6 +281,68 @@ const NULLABLE_DATETIME_PROPERTY = [DateTime, { value: false }, { value: null }]
 const DAYS_PER_WEEK = 7;
 const WEEKS_PER_MONTH = 6;
 
+export class DateTimePickerCalendar extends Component {
+    static props = {
+        focusDate: true,
+        getCalendarData: true,
+        zoomOrSelect: true,
+        precision: true,
+        showWeekNumbers: { type: Boolean, optional: true },
+        daysOfWeekFormat: { type: String, optional: true },
+    }
+
+    static template = "web.DateTimePickerCalendar";
+
+    setup() {
+        this.state = useState({
+            /** @type {DateTime | null} */
+            hoveredDate: null,
+            items: []
+        });
+
+        useLayoutEffect(() => {
+            const {items, selectedRange} = this.props.getCalendarData(this.props.focusDate, this.state.hoveredDate);
+            this.selectedRange = selectedRange;
+            this.state.items = items;
+        }, () => [this.props.focusDate]);
+    }
+
+    /**
+     * Returns various flags indicating what ranges the current date item belongs
+     * to. Note that these ranges are computed differently according to the current
+     * value mode (range or single date). This is done to simplify CSS selectors.
+     * - Selected Range:
+     *      > range: current values with hovered date applied
+     *      > single date: just the hovered date
+     * - Highlighted Range:
+     *      > range: union of selection range and current values
+     *      > single date: just the current value
+     * - Current Range (range only):
+     *      > range: current start date or current end date.
+     * @param {DateItem} item
+     */
+    getActiveRangeInfo({ range }) {
+        const result = {
+            isSelected: isInRange(this.selectedRange, range),
+            isSelectStart: false,
+            isSelectEnd: false,
+            isHighlighted: isInRange(this.state.hoveredDate, range),
+        };
+
+        if (range) {
+            if (result.isSelected) {
+                const [selectStart, selectEnd] = this.selectedRange.sort();
+                result.isSelectStart = !selectStart || isInRange(selectStart, range);
+                result.isSelectEnd = !selectEnd || isInRange(selectEnd, range);
+            }
+        } else {
+            result.isSelectStart = result.isSelectEnd = result.isSelected;
+        }
+
+        return result;
+    }
+}
+
 /** @extends {Component<DateTimePickerProps>} */
 export class DateTimePicker extends Component {
     static props = {
@@ -331,7 +394,7 @@ export class DateTimePicker extends Component {
     };
 
     static template = "web.DateTimePicker";
-    static components = { TimePicker };
+    static components = { ActionSwiper, DateTimePickerCalendar, TimePicker };
 
     //-------------------------------------------------------------------------
     // Getters
@@ -348,10 +411,6 @@ export class DateTimePicker extends Component {
         );
     }
 
-    get titles() {
-        return ensureArray(this.title);
-    }
-
     //-------------------------------------------------------------------------
     // Lifecycle
     //-------------------------------------------------------------------------
@@ -360,25 +419,72 @@ export class DateTimePicker extends Component {
         /** @type {PrecisionLevel[]} */
         this.allowedPrecisionLevels = [];
         /** @type {Item[]} */
-        this.items = [];
-        this.title = "";
+        
         this.shouldAdjustFocusDate = false;
 
         this.state = useState({
             /** @type {DateTime | null} */
             focusDate: null,
-            /** @type {DateTime | null} */
-            hoveredDate: null,
             /** @type {Time[]} */
             timeValues: [],
             /** @type {PrecisionLevel} */
             precision: this.props.minPrecision,
+            /** @type {Array} */
+            titles: []
         });
 
         this.onPropsUpdated(this.props);
         onWillUpdateProps((nextProps) => this.onPropsUpdated(nextProps));
+    }
 
-        onWillRender(() => this.onWillRender());
+    get calendarProps() {
+        return {
+            daysOfWeekFormat: this.props.daysOfWeekFormat,
+            precision: this.state.precision,
+            showWeekNumbers: this.props.showWeekNumbers,
+            getCalendarData: this.getCalendarData.bind(this),
+            zoomOrSelect: this.zoomOrSelect.bind(this)
+        }
+    }
+
+    getCalendarData(focusedDate, hoveredDate) {
+        const { dayCellClass, focusedDateIndex, isDateValid, range, showWeekNumbers } = this.props;
+        const precision = this.activePrecisionLevel;
+        const getterParams = {
+            maxDate: this.maxDate,
+            minDate: this.minDate,
+            showWeekNumbers: showWeekNumbers ?? !range,
+            isDateValid,
+            dayCellClass,
+        };
+
+        this.state.titles = ensureArray(precision.getTitle(this.state.focusDate));
+
+        const selectedRange = [...this.values];
+        if (range && focusedDateIndex > 0 && (!this.values[1] || hoveredDate > this.values[0])) {
+            selectedRange[1] = hoveredDate;
+        }
+
+        return {
+            selectedRange: selectedRange,
+            items: precision.getItems(focusedDate, getterParams)
+        }
+    }
+
+    getSwiperProps(direction) {
+        const { step } = this.activePrecisionLevel;
+        const previousFocusDate = this.clamp(this.state.focusDate.minus(step));
+        const nextFocusDate = this.clamp(this.state.focusDate.plus(step));
+        return {
+            action: () => this[direction].call(this),
+            slot: {
+                component: DateTimePickerCalendar,
+                props: {
+                    ...this.calendarProps,
+                    focusDate: direction === "previous" ? previousFocusDate : nextFocusDate
+                },
+            },
+        };
     }
 
     /**
@@ -408,27 +514,6 @@ export class DateTimePicker extends Component {
         this.state.timeValues = this.getTimeValues(props);
         this.shouldAdjustFocusDate = !props.range;
         this.adjustFocus(this.values, props.focusedDateIndex);
-    }
-
-    onWillRender() {
-        const { dayCellClass, focusedDateIndex, isDateValid, range, showWeekNumbers } = this.props;
-        const { focusDate, hoveredDate } = this.state;
-        const precision = this.activePrecisionLevel;
-        const getterParams = {
-            maxDate: this.maxDate,
-            minDate: this.minDate,
-            showWeekNumbers: showWeekNumbers ?? !range,
-            isDateValid,
-            dayCellClass,
-        };
-
-        this.title = precision.getTitle(focusDate);
-        this.items = precision.getItems(focusDate, getterParams);
-
-        this.selectedRange = [...this.values];
-        if (range && focusedDateIndex > 0 && (!this.values[1] || hoveredDate > this.values[0])) {
-            this.selectedRange[1] = hoveredDate;
-        }
     }
 
     //-------------------------------------------------------------------------
@@ -468,41 +553,6 @@ export class DateTimePicker extends Component {
     }
 
     /**
-     * Returns various flags indicating what ranges the current date item belongs
-     * to. Note that these ranges are computed differently according to the current
-     * value mode (range or single date). This is done to simplify CSS selectors.
-     * - Selected Range:
-     *      > range: current values with hovered date applied
-     *      > single date: just the hovered date
-     * - Highlighted Range:
-     *      > range: union of selection range and current values
-     *      > single date: just the current value
-     * - Current Range (range only):
-     *      > range: current start date or current end date.
-     * @param {DateItem} item
-     */
-    getActiveRangeInfo({ range }) {
-        const result = {
-            isSelected: isInRange(this.selectedRange, range),
-            isSelectStart: false,
-            isSelectEnd: false,
-            isHighlighted: isInRange(this.state.hoveredDate, range),
-        };
-
-        if (this.props.range) {
-            if (result.isSelected) {
-                const [selectStart, selectEnd] = this.selectedRange.sort();
-                result.isSelectStart = !selectStart || isInRange(selectStart, range);
-                result.isSelectEnd = !selectEnd || isInRange(selectEnd, range);
-            }
-        } else {
-            result.isSelectStart = result.isSelectEnd = result.isSelected;
-        }
-
-        return result;
-    }
-
-    /**
      * @param {DateTimePickerProps} props
      */
     getTimeValues(props) {
@@ -536,22 +586,16 @@ export class DateTimePicker extends Component {
 
     /**
      * Goes to the next panel (e.g. next month if precision is "days").
-     * If an event is given it will be prevented.
-     * @param {PointerEvent} ev
      */
-    next(ev) {
-        ev.preventDefault();
+    next() {
         const { step } = this.activePrecisionLevel;
         this.state.focusDate = this.clamp(this.state.focusDate.plus(step));
     }
 
     /**
      * Goes to the previous panel (e.g. previous month if precision is "days").
-     * If an event is given it will be prevented.
-     * @param {PointerEvent} ev
      */
-    previous(ev) {
-        ev.preventDefault();
+    previous() {
         const { step } = this.activePrecisionLevel;
         this.state.focusDate = this.clamp(this.state.focusDate.minus(step));
     }
