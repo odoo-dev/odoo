@@ -32,7 +32,6 @@ class AccountMove(models.Model):
             if doc_type := move.l10n_cl_document_type_id:
                 move.name = f"{doc_type.doc_code_prefix} {(move.document_number or '').zfill(6)}"
 
-    @api.model
     def _compute_l10n_cl_available_document_type_ids_depends(self):
         depends = set()
         for doc_type in self.env['l10n_cl.document.type'].search([]):
@@ -41,17 +40,13 @@ class AccountMove(models.Model):
 
         return depends
 
-    # @api.depends('journal_id', 'move_type', 'company_id', 'partner_id', 'partner_id_vat')
     @api.depends(lambda self: self._compute_l10n_cl_available_document_type_ids_depends())
     def _compute_l10n_cl_available_document_type_ids(self):
-        for doc_type in self.env['l10n_cl.document.type'].search([]):
-            matching_moves = self.search(
-                Domain([('id', 'in', self.ids)]) & Domain(literal_eval(doc_type.move_domain or '[]'))
-            )
+        self.l10n_cl_available_document_type_ids = False
 
-            for move in self:
-                if move in matching_moves:
-                    move.l10n_cl_available_document_type_ids |= doc_type
+        for doc_type in self.env['l10n_cl.document.type'].search([]):
+            for move in self.filtered_domain(literal_eval(doc_type.move_domain or '[]')):
+                move.l10n_cl_available_document_type_ids |= doc_type
 
         return
 
@@ -184,18 +179,16 @@ class AccountMove(models.Model):
     def _get_starting_sequence(self):
         """ If use documents then will create a new starting sequence using the document type code prefix and the
         journal document number with a 6 padding number """
-        if self.l10n_cl_document_type_id.use_documents and self.company_id.account_fiscal_country_id.code == "CL":
+        if self.l10n_cl_use_documents and self.l10n_cl_document_type_id:
             return self._l10n_cl_get_formatted_sequence()
         return super()._get_starting_sequence()
 
     def _get_last_sequence_domain(self, relaxed=False):
         where_string, param = super(AccountMove, self)._get_last_sequence_domain(relaxed)
-        if self.l10n_cl_document_type_id.use_documents and self.company_id.account_fiscal_country_id.code == "CL":
+        if self.l10n_cl_use_documents and self.l10n_cl_document_type_id and self.company_id.account_fiscal_country_id.code == "CL":
             where_string = where_string.replace('journal_id = %(journal_id)s AND', '')  # TODO JOV: no cleaner way? The same number spans journals? Why not use journals then instead of document types?
-            where_string += ' AND l10n_cl_document_type_id = %(l10n_cl_document_type_id)s AND ' \
-                            'company_id = %(company_id)s AND move_type IN %(move_type)s'  # TODO JOV: i'm sure company_id isn't needed
+            where_string += ' AND l10n_cl_document_type_id = %(l10n_cl_document_type_id)s'
 
-            param['company_id'] = self.company_id.id or False
             param['l10n_cl_document_type_id'] = self.l10n_cl_document_type_id.id or 0
             param['move_type'] = (('in_invoice', 'in_refund') if
                   self.l10n_cl_document_type_id._is_doc_type_vendor() else ('out_invoice', 'out_refund'))
