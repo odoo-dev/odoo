@@ -156,7 +156,7 @@ const MIN_SIZE_FOR_COMPACT = 7;
 export class ToolbarPlugin extends Plugin {
     static id = "toolbar";
     static dependencies = ["overlay", "selection", "userCommand"];
-    static shared = ["getToolbarInfo", "getIsToolbarOpen"];
+    static shared = ["getToolbarInfo", "getIsToolbarOpen", "getButtons", "getButtonGroups"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         selectionchange_handlers: this.handleSelectionChange.bind(this),

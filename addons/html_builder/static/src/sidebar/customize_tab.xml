@@ -15,7 +15,8 @@
                     editingElements="this.customizeComponent.editingEls"
                     comp="this.customizeComponent.component"
                     compProps="this.customizeComponent.props"/>
-                <t t-else="" t-foreach="currentOptionsContainers" t-as="optionsContainer" t-key="optionsContainer.id">
+                <t t-else="" >
+                    <t t-foreach="currentOptionsContainers" t-as="optionsContainer" t-key="optionsContainer.id">
                     <OptionsContainer
                         snippetModel="props.snippetModel"
                         editingElement="optionsContainer.element"
@@ -28,6 +29,9 @@
                         isClonable="optionsContainer.isClonable"
                         cloneDisabledReason="optionsContainer.cloneDisabledReason"
                         containerTopButtons="optionsContainer.optionsContainerTopButtons"/>
+                    </t>
+                    <t t-set="container" t-value="this.getLastOptionContainers()"></t>
+                    <FormatContainer editingElement="container.element" container="container"></FormatContainer>
                 </t>
             </div>
         </t>

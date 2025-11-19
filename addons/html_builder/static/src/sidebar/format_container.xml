@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="html_builder.FormatContainer">
+    <div
+        class="options-container mb-1" t-ref="root" t-att-data-container-title="title"
+        t-on-pointerenter="onPointerEnter" t-on-pointerleave="onPointerLeave">
+        <div class="options-container-header d-flex align-items-center justify-content-between">
+            <span class="options-container-label ps-2 py-2">Format</span>
+        </div>
+            <div class="we-bg-options-container pb-3">
+                <div t-foreach="this.toolbarButtons" t-as="group" t-key="group.id" class="hb-row d-flex position-relative pe-2" >
+                    <div class="o-hb-button-group btn-group" style="height: 30px">
+                        <t t-foreach="group.buttons" t-as="button" t-key="button.id" >
+                            <t t-if="button.Component">
+                                <t t-component="button.Component"
+                                    t-props="button.props"
+                                    title="button.description"
+                                    getSelection.bind="this.getSelection"
+                                    isDisabled="'isDisabled' in button.props ? button.props.isDisabled : !!button.isDisabled"/>
+                                </t>
+                                <button t-else=""
+                                    class="o-hb-btn btn lh-1 btn-secondary"
+                                    t-att-class="{
+                                        active: button.isActive,
+                                        disabled: button.isDisabled,
+                                    }"
+                                    t-att-disabled="button.isDisabled"
+                                    t-att-title="button.description"
+                                    t-att-name="button.id"
+                                    t-on-click="() => this.onButtonClick(button)"
+                                >
+                                    <span t-if="button.icon" t-att-class="button.icon.includes('fa-') ? 'fa fa-fw ' + button.icon : 'oi oi-fw ' + button.icon"/>
+                                    <span t-if="button.text" t-esc="button.text"/>
+                                </button>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+</t>
+
+</templates>

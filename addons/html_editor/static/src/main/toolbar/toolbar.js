@@ -67,6 +67,7 @@ export const toolbarButtonProps = {
     title: [String, Function],
     getSelection: Function,
     isDisabled: Boolean,
+    isSecondary: { type: Boolean, optional: true },
 };
 
 /** @typedef {import("@html_editor/core/user_command_plugin").UserCommand} UserCommand */
