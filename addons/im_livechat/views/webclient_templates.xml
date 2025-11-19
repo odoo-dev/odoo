@@ -11,7 +11,10 @@
                     odoo.__session_info__ = <t t-out="json.dumps(session_info)"/>;
                 </script>
 
+                <t t-call-assets="web.assets_unit_tests_setup" />
                 <t t-call-assets="im_livechat.embed_assets_unit_tests_setup" />
+                <t t-call-assets="web.assets_backend" />
+                <t t-call-assets="im_livechat.assets_embed_external" />
                 <t t-call-assets="im_livechat.embed_assets_unit_tests" defer_load="True" />
             </t>
         </t>
