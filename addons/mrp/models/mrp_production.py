@@ -1023,10 +1023,7 @@ class MrpProduction(models.Model):
         if moves_to_reassign:
             moves_to_reassign._do_unreserve()
             moves_to_reassign = moves_to_reassign.filtered(
-                lambda move: move.state in ('confirmed', 'partially_available')
-                and (move._should_bypass_reservation()
-                    or move.picking_type_id.reservation_method == 'at_confirm'
-                    or (move.reservation_date and move.reservation_date <= fields.Date.today())))
+                lambda move: move.state in ('confirmed', 'partially_available') and move._should_assign_at_confirm())
             moves_to_reassign._action_assign()
         return res
 
@@ -2114,10 +2111,7 @@ class MrpProduction(models.Model):
         self.env['stock.move'].browse(partially_assigned_moves).write({'state': 'partially_available'})
         self.env['stock.move.line'].create(move_lines_vals)
         move_to_assign = move_to_assign.filtered(
-            lambda move: move.state in ('confirmed', 'partially_available')
-            and (move._should_bypass_reservation()
-                or move.picking_type_id.reservation_method == 'at_confirm'
-                or (move.reservation_date and move.reservation_date <= fields.Date.today())))
+            lambda move: move.state in ('confirmed', 'partially_available') and move._should_assign_at_confirm())
         move_to_assign._action_assign()
 
         # Avoid triggering a useless _recompute_state
