@@ -10,6 +10,22 @@
     <xpath expr="//BuilderRow[*[@id=&quot;'filter_opt'&quot;]]" position="after">
 
         <ProductsDesignPanel showLists="false" label.translate="Cards Design"/>
+        <!-- <BuilderRow label.translate="Desktop" level="1">
+            <BuilderSelect action="'GridColumns'" id="'o_wsale_grid_columns'">
+                <BuilderSelectItem actionValue="2">2 Columns</BuilderSelectItem>
+                <BuilderSelectItem actionValue="3">3 Columns</BuilderSelectItem>
+                <BuilderSelectItem actionValue="4">4 Columns</BuilderSelectItem>
+                <BuilderSelectItem actionValue="5">5 Columns</BuilderSelectItem>
+                <BuilderSelectItem actionValue="6">6 Columns</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+
+        <BuilderRow label.translate="Mobile" level="1">
+            <BuilderSelect action="'MobileColumns'" id="'o_wsale_mobile_columns'">
+                <BuilderSelectItem actionValue="1">1 Column</BuilderSelectItem>
+                <BuilderSelectItem actionValue="2">2 Columns</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow> -->
 
         <BuilderRow label.translate="Category" t-if="!this.domState.isAlternative and !isSingleMode">
             <BuilderSelect dataAttributeAction="'productCategoryId'" preview="false" id="'product_category_opt'">
@@ -29,10 +45,10 @@
                     data-allow-delete="true"
                     data-fakem2m="true"
 -->
-        <BuilderRow label.translate="Show variants" preview="false">
+        <BuilderRow label.translate="Split variants" preview="false">
             <BuilderCheckbox dataAttributeAction="'showVariants'" dataAttributeActionValue="'true'"/>
         </BuilderRow>
-        <BuilderRow label.translate="Product Names" preview="false" t-if="!this.domState.isAlternative and !isSingleMode">
+        <BuilderRow label.translate="Name" preview="false" t-if="!this.domState.isAlternative and !isSingleMode">
             <BuilderTextInput dataAttributeAction="'productNames'" id="'product_names_opt'"
                 placeholder.translate="e.g. lamp,bin"
                 title.translate="Comma-separated list of parts of product names, barcodes or internal reference"

@@ -311,6 +311,33 @@ class WebsiteSnippetFilter(models.Model):
                     display_default_code=False,
                 ).search(domain, limit=limit)
         return products
+    
+    def _get_products_with_ribbons(self, website, limit, domain, **kwargs):
+        """Return products that have a ribbon assigned on their template."""
+        ProductTmpl = self.env['product.template']
+        Product = self.env['product.product']
+
+        # Find templates that have a ribbon
+        tmpl_domain = Domain.AND([
+            [('website_ribbon_id', '!=', False)]
+        ])
+
+        templates = ProductTmpl.search(tmpl_domain, limit=limit)
+
+        if not templates:
+            return Product
+
+        # Get variants from those templates
+        if self.env.context.get('hide_variants'):
+            product_ids = templates.mapped('product_variant_id').ids
+        else:
+            product_ids = templates.mapped('product_variant_ids').ids
+
+        # Merge snippet domain + variant ids
+        domain = Domain(domain) & Domain('id', 'in', product_ids)
+
+        products = Product.with_context(display_default_code=False).search(domain, limit=limit)
+        return products
 
     @api.model
     def default_get(self, fields):
