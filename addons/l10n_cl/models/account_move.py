@@ -14,10 +14,10 @@ SII_VAT = '60805000-0'
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    l10n_cl_document_type_id = fields.Many2one('l10n_cl.document.type', domain="[('id', 'in', l10n_cl_available_document_type_ids)]")
+    l10n_cl_document_type_id = fields.Many2one('l10n_cl.document.type', string="Chilean Document Type", domain="[('id', 'in', l10n_cl_available_document_type_ids)]")
     l10n_cl_document_type_code = fields.Char(related='l10n_cl_document_type_id.code')
     l10n_cl_available_document_type_ids = fields.Many2many('l10n_cl.document.type', compute='_compute_l10n_cl_available_document_type_ids')
-    l10n_cl_use_documents = fields.Boolean(compute='_compute_l10n_cl_use_documents')
+    l10n_cl_use_documents = fields.Boolean('Use Chilean Documents', compute='_compute_l10n_cl_use_documents')
 
     partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')  # TODO why?
 
@@ -32,14 +32,21 @@ class AccountMove(models.Model):
             if doc_type := move.l10n_cl_document_type_id:
                 move.name = f"{doc_type.doc_code_prefix} {(move.document_number or '').zfill(6)}"
 
-    @api.depends('journal_id', 'move_type', 'company_id', 'partner_id', 'partner_id_vat')  # TODO JOV: must be dynamic based on domains now
+    @api.model
+    def _compute_l10n_cl_available_document_type_ids_depends(self):
+        depends = set()
+        for doc_type in self.env['l10n_cl.document.type'].search([]):
+            domain = Domain(literal_eval(doc_type.move_domain or '[]'))
+            depends |= {condition.field_expr for condition in domain.iter_conditions()}
+
+        return depends
+
+    # @api.depends('journal_id', 'move_type', 'company_id', 'partner_id', 'partner_id_vat')
+    @api.depends(lambda self: self._compute_l10n_cl_available_document_type_ids_depends())
     def _compute_l10n_cl_available_document_type_ids(self):
         for doc_type in self.env['l10n_cl.document.type'].search([]):
             matching_moves = self.search(
-                Domain.AND([
-                    [('id', 'in', self.ids)],
-                    literal_eval(doc_type.move_domain or '[]'),
-                ])
+                Domain([('id', 'in', self.ids)]) & Domain(literal_eval(doc_type.move_domain or '[]'))
             )
 
             for move in self:

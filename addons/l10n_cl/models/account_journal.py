@@ -5,4 +5,4 @@ from odoo import models, fields
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
-    l10n_cl_use_documents = fields.Boolean()
+    l10n_cl_use_documents = fields.Boolean('Use Chilean Documents')
