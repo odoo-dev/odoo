@@ -1,101 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="web.DateTimePicker.Days">
-        <div class="d-flex gap-3">
-            <t t-foreach="this.items" t-as="month" t-key="month.id">
-                <div
-                    class="o_date_picker d-grid flex-grow-1 rounded overflow-auto"
-                    t-on-pointerleave="() => (this.state.hoveredDate = null)"
-                >
-                    <t t-foreach="month.daysOfWeek" t-as="dayOfWeek" t-key="dayOfWeek[0]">
-                        <div
-                            class="o_day_of_week_cell fw-bolder d-flex align-items-center justify-content-center"
-                            t-att-title="dayOfWeek[1]"
-                        >
-                            <div class="text-nowrap overflow-hidden" t-out="this.props.daysOfWeekFormat === 'narrow' ? dayOfWeek[2] : dayOfWeek[0]"/>
-                        </div>
-                    </t>
-                    <t t-foreach="month.weeks" t-as="week" t-key="week.number">
-                        <t t-if="this.props.showWeekNumbers">
-                            <div
-                                class="o_week_number_cell d-flex justify-content-center align-items-center fw-bolder"
-                                t-out="week.number"
-                            />
-                        </t>
-                        <t t-foreach="week.days" t-as="itemInfo" t-key="itemInfo.id">
-                            <t t-set="arInfo" t-value="this.getActiveRangeInfo(itemInfo)" />
-                            <div
-                                class="o_date_item_cell o_datetime_button o_center"
-                                t-att-class="{
-                                    'o_out_of_range text-muted': itemInfo.isOutOfRange,
-                                    o_selected: arInfo.isSelected,
-                                    o_select_start: arInfo.isSelectStart,
-                                    o_select_end: arInfo.isSelectEnd,
-                                    o_highlighted: arInfo.isHighlighted,
-                                    'o_today fw-bolder': itemInfo.includesToday,
-                                    [itemInfo.extraClass]: true,
-                                    'opacity-50': !itemInfo.isValid,
-                                    'cursor-pointer': itemInfo.isValid,
-                                }"
-                                t-att-disabled="!itemInfo.isValid"
-                                t-on-pointerenter="() => (this.state.hoveredDate = itemInfo.range[0])"
-                                t-on-click="() => this.zoomOrSelect(itemInfo)"
-                            >
-                                <div t-att-class="{'w-75 align-content-center text-center rounded-circle': itemInfo.includesToday}">
-                                    <t t-out="itemInfo.label" />
-                                </div>
-                            </div>
-                        </t>
-                    </t>
-                </div>
-            </t>
-        </div>
-        <div t-if="this.props.type === 'datetime'" class="d-flex gap-3 justify-content-between">
-            <div class="d-flex gap-1 align-items-center">
-                <TimePicker
-                    t-if="this.state.timeValues[0]"
-                    value="this.state.timeValues[0]"
-                    onChange="(newTime) => this.onTimeChange(0, newTime)"
-                    minutesRounding="this.props.rounding"
-                    showSeconds="this.props.rounding === 0"
-                    inputCssClass="'o_input'"
-                />
-                <i t-if="this.state.timeValues[0] and this.state.timeValues[1]" class="fa fa-long-arrow-right"/>
-                <TimePicker
-                    t-if="this.state.timeValues[1]"
-                    value="this.state.timeValues[1]"
-                    onChange="(newTime) => this.onTimeChange(1, newTime)"
-                    minutesRounding="this.props.rounding"
-                    showSeconds="this.props.rounding === 0"
-                    inputCssClass="'o_input'"
-                />
-            </div>
-            <t t-call-slot="buttons" />
-        </div>
-    </t>
-
-    <t t-name="web.DateTimePicker.Grid">
-        <div class="o_date_item_picker d-grid">
-            <t t-foreach="this.items" t-as="itemInfo" t-key="itemInfo.id">
-                <t t-set="arInfo" t-value="this.getActiveRangeInfo(itemInfo)" />
-                <div
-                    class="o_date_item_cell o_datetime_button o_center cursor-pointer"
-                    t-att-class="{
-                        o_selected: arInfo.isSelected,
-                        o_select_start: arInfo.isSelectStart,
-                        o_select_end: arInfo.isSelectEnd,
-                        o_highlighted: arInfo.isHighlighted,
-                        o_today: itemInfo.includesToday,
-                        'opacity-50': !itemInfo.isValid,
-                    }"
-                    t-att-disabled="!itemInfo.isValid"
-                    t-on-click="() => this.zoomOrSelect(itemInfo)"
-                >
-                    <t t-out="itemInfo.label" />
-                </div>
-            </t>
-        </div>
-    </t>
 
     <t t-name="web.DateTimePicker">
         <div
@@ -128,7 +32,7 @@
                     t-on-click="this.zoomOut"
                     data-available-offline=""
                 >
-                    <t t-foreach="this.titles" t-as="title" t-key="title">
+                    <t t-foreach="this.state.titles" t-as="title" t-key="title">
                         <strong
                             class="o_header_part"
                             t-out="title"
@@ -157,12 +61,108 @@
                 </div>
 
             </nav>
-            <t t-if="this.state.precision === 'days'">
-                <t t-call="web.DateTimePicker.Days" />
-            </t>
-            <t t-else="">
-                <t t-call="web.DateTimePicker.Grid" />
-            </t>
+            
+            <ActionSwiper animationType="'forwards'" onLeftSwipe="this.getSwiperProps('next')" onRightSwipe="this.getSwiperProps('previous')">
+                <DateTimePickerCalendar t-props="this.calendarProps" focusDate="this.state.focusDate" />
+                <t t-if="this.props.precision === 'days' and this.props.type === 'datetime'">
+                    <div class="d-flex gap-3 justify-content-between">
+                        <div class="d-flex gap-1 align-items-center">
+                            <TimePicker
+                                t-if="this.state.timeValues[0]"
+                                value="this.state.timeValues[0]"
+                                onChange="(newTime) => this.onTimeChange(0, newTime)"
+                                minutesRounding="this.props.rounding"
+                                showSeconds="this.props.rounding === 0"
+                                inputCssClass="'o_input'"
+                            />
+                            <i t-if="this.state.timeValues[0] and this.state.timeValues[1]" class="fa fa-long-arrow-right"/>
+                            <TimePicker
+                                t-if="this.state.timeValues[1]"
+                                value="this.state.timeValues[1]"
+                                onChange="(newTime) => this.onTimeChange(1, newTime)"
+                                minutesRounding="this.props.rounding"
+                                showSeconds="this.props.rounding === 0"
+                                inputCssClass="'o_input'"
+                            />
+                        </div>
+                        <t t-call-slot="buttons" />
+                    </div>
+                </t>
+            </ActionSwiper>
         </div>
+    </t>
+
+    <t t-name="web.DateTimePickerCalendar">
+        <t t-if="this.props.precision === 'days'">
+            <div
+                t-if="this.state.items.length"
+                class="o_date_picker d-grid flex-grow-1 rounded overflow-auto"
+                t-on-pointerleave="() => (this.state.hoveredDate = null)"
+            >
+                <t t-set="month" t-value="this.state.items[0]" />
+                <t t-foreach="month.daysOfWeek" t-as="dayOfWeek" t-key="dayOfWeek[0]">
+                    <div
+                        class="o_day_of_week_cell fw-bolder d-flex align-items-center justify-content-center"
+                        t-att-title="dayOfWeek[1]"
+                    >
+                        <div class="text-nowrap overflow-hidden" t-out="this.props.daysOfWeekFormat === 'narrow' ? dayOfWeek[2] : dayOfWeek[0]"/>
+                    </div>
+                </t>
+                <t t-foreach="month.weeks" t-as="week" t-key="week.number">
+                    <t t-if="this.props.showWeekNumbers">
+                        <div
+                            class="o_week_number_cell d-flex justify-content-center align-items-center fw-bolder"
+                            t-out="week.number"
+                        />
+                    </t>
+                    <t t-foreach="week.days" t-as="itemInfo" t-key="itemInfo.id">
+                        <t t-set="arInfo" t-value="this.getActiveRangeInfo(itemInfo)" />
+                        <div
+                            class="o_date_item_cell o_datetime_button o_center"
+                            t-att-class="{
+                                'o_out_of_range text-muted': itemInfo.isOutOfRange,
+                                o_selected: arInfo.isSelected,
+                                o_select_start: arInfo.isSelectStart,
+                                o_select_end: arInfo.isSelectEnd,
+                                o_highlighted: arInfo.isHighlighted,
+                                'o_today fw-bolder': itemInfo.includesToday,
+                                [itemInfo.extraClass]: true,
+                                'opacity-50': !itemInfo.isValid,
+                                'cursor-pointer': itemInfo.isValid,
+                            }"
+                            t-att-disabled="!itemInfo.isValid"
+                            t-on-pointerenter="() => (this.state.hoveredDate = itemInfo.range[0])"
+                            t-on-click="() => this.props.zoomOrSelect(itemInfo)"
+                        >
+                            <div t-att-class="{'w-75 align-content-center text-center rounded-circle': itemInfo.includesToday}">
+                                <t t-out="itemInfo.label" />
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </div>
+        </t>
+        <t t-else="">
+            <div class="o_date_item_picker d-grid">
+                <t t-foreach="this.state.items" t-as="itemInfo" t-key="itemInfo.id">
+                    <t t-set="arInfo" t-value="this.getActiveRangeInfo(itemInfo)" />
+                    <div
+                        class="o_date_item_cell o_datetime_button o_center cursor-pointer"
+                        t-att-class="{
+                            o_selected: arInfo.isSelected,
+                            o_select_start: arInfo.isSelectStart,
+                            o_select_end: arInfo.isSelectEnd,
+                            o_highlighted: arInfo.isHighlighted,
+                            o_today: itemInfo.includesToday,
+                            'opacity-50': !itemInfo.isValid,
+                        }"
+                        t-att-disabled="!itemInfo.isValid"
+                        t-on-click="() => this.props.zoomOrSelect(itemInfo)"
+                    >
+                        <t t-out="itemInfo.label" />
+                    </div>
+                </t>
+            </div>
+        </t>
     </t>
 </templates>

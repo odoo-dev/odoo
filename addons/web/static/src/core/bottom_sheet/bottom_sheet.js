@@ -207,6 +207,7 @@ export class BottomSheet extends Component {
      * Configures initial scroll position and overflow behavior
      */
     positionSheet() {
+        console.log("positionSheet :", this.measurements);
         const scrollRail = this.scrollRailRef.el;
         const bodyContent = this.sheetBodyRef.el;
 

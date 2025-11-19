@@ -144,11 +144,7 @@ export class ActionSwiper extends Component {
                 onLeftSwipe ? -this.containerWidth : 0,
                 onRightSwipe ? this.containerWidth : 0
             );
-            ev.stopPropagation();
             if (this.isSwipeStarted) {
-                // Prevent the browser to navigate back/forward when using swipe
-                // gestures while still allowing to scroll vertically.
-                ev.preventDefault();
                 this.applyStyle(this.swipedDistance);
             } else {
                 // If there are scrollable elements under touch pressure,
@@ -163,6 +159,10 @@ export class ActionSwiper extends Component {
                     this.isSwipeStarted = true;
                 }
             }
+            // Prevent the browser to navigate back/forward when using swipe
+            // gestures while still allowing to scroll vertically.
+            //ev.stopPropagation();
+            ev.preventDefault();
         }
     }
     /**
@@ -231,10 +231,10 @@ export class ActionSwiper extends Component {
         if (this.targetContainer.el) {
             this.targetContainer.el.style.transform = distance ? `translateX(${distance}px)` : "";
         }
-        if (this.leftPanel.el) {
+        if (this.localizedProps.onLeftSwipe?.icon) {
             this.leftPanel.el.style.maxWidth = `${distance}px`;
         }
-        if (this.rightPanel.el) {
+        if (this.localizedProps.onRightSwipe?.icon) {
             this.rightPanel.el.style.maxWidth = `${-distance}px`;
         }
     }
