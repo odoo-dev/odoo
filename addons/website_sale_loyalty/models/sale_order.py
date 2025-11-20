@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.fields import Domain
+from odoo.fields import Command, Domain
 from odoo.http import request
 
 
@@ -121,11 +121,11 @@ class SaleOrder(models.Model):
             for line in order.order_line:
                 if line.reward_id and line.coupon_id:
                     grouped_order_lines[(line.reward_id, line.coupon_id, line.reward_identifier_code)] |= line
-            new_lines = self.env['sale.order.line']
+            new_lines = []
             for lines in grouped_order_lines.values():
                 if lines.reward_id.reward_type != 'discount':
                     continue
-                new_lines += self.env['sale.order.line'].new({
+                new_lines.append(Command.create({
                     'product_id': lines[0].product_id.id,
                     'tax_ids': False,
                     'price_unit': sum(lines.mapped('price_unit')),
@@ -139,9 +139,9 @@ class SaleOrder(models.Model):
                     'is_reward_line': True,
                     'coupon_id': lines.coupon_id,
                     'reward_id': lines.reward_id,
-                })
+                }))
             if new_lines:
-                order.website_order_line += new_lines
+                order.website_order_line = new_lines
 
     def _compute_cart_info(self):
         super(SaleOrder, self)._compute_cart_info()
