@@ -19,7 +19,7 @@ FIGURE_TYPE_SELECTION_VALUES = [
     ('string', 'String'),
 ]
 
-DOMAIN_REGEX = re.compile(r'(-?sum)\((.*)\)')
+DOMAIN_REGEX = re.compile(r'(-?sum)\(([\s\S]*)\)')
 CROSS_REPORT_REGEX = re.compile(r'^cross_report\((.+)\)$')
 
 ACCOUNT_CODES_ENGINE_SPLIT_REGEX = re.compile(r"(?=[+-])")
@@ -592,8 +592,8 @@ class AccountReportExpression(models.Model):
         ],
         required=True
     )
-    formula = fields.Char(string="Formula", required=True)
-    subformula = fields.Char(string="Subformula")
+    formula = fields.Text(string="Formula", required=True)
+    subformula = fields.Text(string="Subformula")
     date_scope = fields.Selection(
         string="Date Scope",
         selection=[
@@ -652,7 +652,8 @@ class AccountReportExpression(models.Model):
                 raise_formula_error(expression)
 
         for expression in expressions_by_engine.get('account_codes', []):
-            for token in ACCOUNT_CODES_ENGINE_SPLIT_REGEX.split(expression.formula.replace(' ', '')):
+            clean_formula = "".join(expression.formula.split())
+            for token in ACCOUNT_CODES_ENGINE_SPLIT_REGEX.split(clean_formula):
                 if token:  # e.g. if the first character of the formula is "-", the first token is ''
                     token_match = ACCOUNT_CODES_ENGINE_TERM_REGEX.match(token)
                     prefix = token_match['prefix']
@@ -698,8 +699,9 @@ class AccountReportExpression(models.Model):
     def create(self, vals_list):
         # Overridden so that we create the corresponding account.account.tag objects when instantiating an expression
         # with engine 'tax_tags'.
-        for vals in vals_list:
-            self._strip_formula(vals)
+        #Commented out as the _strip_formula replaces all whitespaces with '' which includes \n
+        #for vals in vals_list:
+        #    self._strip_formula(vals) 
 
         result = super().create(vals_list)
 
@@ -712,8 +714,8 @@ class AccountReportExpression(models.Model):
         return result
 
     def write(self, vals):
-
-        self._strip_formula(vals)
+        #Commented out as the _strip_formula replaces all whitespaces with '' which includes \n
+        #self._strip_formula(vals)
 
         tax_tags_expressions = self.filtered(lambda x: x.engine == 'tax_tags')
 
