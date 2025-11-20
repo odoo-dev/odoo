@@ -23,3 +23,15 @@ body.editor_enable.o_basic_theme.o_in_iframe {
 .oe_structure {
     width: 100%;
 }
+
+.o_favorite_template_preview {
+
+    .o_layout .container.o_mail_wrapper {
+        max-width: unset;
+        // override bootstrap row padding to avoid strips around the preview
+        > .row > * {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+}

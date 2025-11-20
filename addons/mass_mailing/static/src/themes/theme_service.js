@@ -26,6 +26,7 @@ export class ThemeModel extends Reactive {
         this.orm = services.orm;
         this.loadedAssets = new Set();
         this.loadedThemes = new Map();
+        this.simpleThemes = new Map();
         this.loadingPromise = new Deferred();
     }
 
@@ -61,7 +62,11 @@ export class ThemeModel extends Reactive {
             }
             // Wrap the Theme `html` with a technical layout.
             themeOptions.html = renderToMarkup("mass_mailing.ThemeLayout", themeOptions);
-            this.loadedThemes.set(themeOptions.name, themeOptions);
+            if (["basic", "empty"].includes(themeOptions.name)) {
+                this.simpleThemes.set(themeOptions.name, themeOptions);
+            } else {
+                this.loadedThemes.set(themeOptions.name, themeOptions);
+            }
         }
     }
 
@@ -81,6 +86,11 @@ export class ThemeModel extends Reactive {
 
     getThemes() {
         return this.loadedThemes;
+    }
+
+    // The simple themes (basic, empty) are separated as they are displayed separately
+    getSimpleThemes() {
+        return this.simpleThemes;
     }
 
     async load(asset = "mass_mailing.email_designer_themes") {
