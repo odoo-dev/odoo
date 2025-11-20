@@ -7,17 +7,18 @@ import { usePopover } from "@web/core/popover/popover_hook";
 registerThreadAction("show-threads", {
     actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: SubChannelList,
-    actionPanelComponentProps: ({ action, thread }) => ({
+    actionPanelComponentProps: ({ action, channel }) => ({
         close: () => action.actionPanelClose(),
-        thread,
+        channel,
     }),
-    actionPanelOpen({ channel, owner }) {
+    actionPanelOpen({ owner, channel }) {
+        const parentOrchannel = channel?.parent_channel_id || channel;
         this.popover?.open(owner.root.el.querySelector(`[name="${this.id}"]`), {
-            thread: (channel?.parent_channel_id || channel).thread,
+            channel: parentOrchannel,
         });
     },
     actionPanelOuterClass: "bg-100 border border-secondary",
-    condition: ({ channel, owner }) =>
+    condition: ({ channel, owner}) =>
         (channel?.hasSubChannelFeature || channel?.parent_channel_id?.hasSubChannelFeature) &&
         !owner.isDiscussSidebarChannelActions,
     icon: "fa fa-fw fa-comments-o",

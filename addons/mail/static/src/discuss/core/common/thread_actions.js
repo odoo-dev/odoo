@@ -286,7 +286,7 @@ registerThreadAction("leave", {
     tags: ACTION_TAGS.DANGER,
 });
 
-registerThreadAction("delete-thread", {
+registerThreadAction("delete-sub-channel", {
     actionPanelClose: ({ action }) => action.popover?.close(),
     actionPanelComponent: DeleteThreadDialog,
     actionPanelComponentProps({ action, channel }) {
