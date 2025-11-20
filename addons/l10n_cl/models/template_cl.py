@@ -6,6 +6,7 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+
     @template('cl')
     def _get_cl_template_data(self):
         return {
@@ -13,6 +14,14 @@ class AccountChartTemplate(models.AbstractModel):
             'property_account_receivable_id': 'account_110310',
             'property_account_payable_id': 'account_210210',
             'property_stock_valuation_account_id': 'account_110610',
+        }
+
+    # TODO JOV: will be copied to all l10n_ modules
+    @template('cl', 'account.journal')
+    def _get_cl_template_journal(self):
+        return {
+            'sale': {'l10n_cl_use_documents': True},
+            'purchase': {'l10n_cl_use_documents': True},
         }
 
     @template('cl', 'res.company')
@@ -32,5 +41,6 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'OTAX_19',
                 'expense_account_id': 'account_410235',
                 'income_account_id': 'account_310115',
+                'documents_enabled': True,
             },
         }

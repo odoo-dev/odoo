@@ -5,12 +5,18 @@ from odoo import models, fields, api
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    documents_enabled = fields.Boolean(
+        related='company_id.documents_enabled'
+    )
     document_number = fields.Char(
         compute='_compute_document_number',
         inverse='_inverse_document_number',
     )
     is_manual_document_number = fields.Boolean(
         compute='_compute_is_manual_document_number',
+    )
+    is_document_number_editable = fields.Boolean(
+        compute='_compute_is_document_number_editable',
     )
 
     @api.depends('name')
@@ -36,6 +42,12 @@ class AccountMove(models.Model):
     #             document_number = rec.document_type_id._format_document_number(rec.document_number)
     #             rec.name = "%s %s" % (rec.document_type_id.doc_code_prefix, document_number)
 
+    @api.depends('journal_id')
     def _compute_is_manual_document_number(self):
         for move in self:
             move.is_manual_document_number = move.journal_id.type == 'purchase'
+
+    @api.depends('journal_id', 'posted_before', 'state')
+    def _compute_is_document_number_editable(self):
+        for move in self:
+            move.is_document_number_editable = move.is_manual_document_number and not move.posted_before and move.state == 'draft'
