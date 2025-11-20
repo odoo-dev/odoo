@@ -32,6 +32,12 @@ class AccountMove(models.Model):
             if doc_type := move.l10n_cl_document_type_id:
                 move.name = f"{doc_type.doc_code_prefix} {(move.document_number or '').zfill(6)}"
 
+    @api.depends('company_id')
+    def _compute_documents_enabled(self):
+        # Override
+        for move in self:
+            move.documents_enabled &= move.l10n_cl_use_documents
+
     def _compute_l10n_cl_available_document_type_ids_depends(self):
         depends = set()
         for doc_type in self.env['l10n_cl.document.type'].search([]):

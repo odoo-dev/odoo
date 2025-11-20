@@ -6,7 +6,7 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     documents_enabled = fields.Boolean(
-        related='company_id.documents_enabled'
+        compute='_compute_documents_enabled',
     )
     document_number = fields.Char(
         compute='_compute_document_number',
@@ -18,6 +18,11 @@ class AccountMove(models.Model):
     is_document_number_editable = fields.Boolean(
         compute='_compute_is_document_number_editable',
     )
+
+    @api.depends('company_id')
+    def _compute_documents_enabled(self):
+        for move in self:
+            move.documents_enabled = move.company_id.documents_enabled
 
     @api.depends('name')
     def _compute_document_number(self):
