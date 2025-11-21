@@ -31,6 +31,7 @@ Spanish charts of accounts (PGCE 2008).
     'data': [
         'data/account.account.tag.csv',
         'data/res_partner_data.xml',
+        'data/res_country_data.xml',
         'data/res_country_group.xml',
         'views/account_move_views.xml',
         'views/account_tax_views.xml',

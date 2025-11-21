@@ -14,6 +14,8 @@ class ResCity(models.Model):
     country_id = fields.Many2one(comodel_name='res.country', string='Country', required=True)
     country_code = fields.Char(related='country_id.code')
     state_id = fields.Many2one(comodel_name='res.country.state', string='State', domain="[('country_id', '=', country_id)]")
+    # TODO VFE could be used to replace some additional codes added by locas ? (l10n_pe_code, ...)
+    # code = fields.Char("Code")
 
     @api.depends_context('formatted_display_name')
     @api.depends('zipcode', 'state_id')

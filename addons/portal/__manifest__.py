@@ -14,7 +14,14 @@ portal.
 This module contains most code coming from odoo v10 website_portal. Purpose
 of this module is to allow the display of a customer portal without having
 a dependency towards website editing and customization capabilities.""",
-    'depends': ['web', 'html_editor', 'http_routing', 'mail', 'auth_signup'],
+    'depends': [
+        'web',
+        'html_editor',
+        'http_routing',
+        'mail',
+        'auth_signup',
+        'base_address_extended',
+    ],
     'data': [
         'security/ir.model.access.csv',
         'data/mail_templates.xml',
@@ -27,15 +34,11 @@ a dependency towards website editing and customization capabilities.""",
         'wizard/portal_wizard_views.xml',
     ],
     'assets': {
-        'web._assets_primary_variables': [
-            'portal/static/src/scss/primary_variables.scss',
-        ],
+        'web._assets_primary_variables': ['portal/static/src/scss/primary_variables.scss'],
         'web._assets_frontend_helpers': [
-            ('prepend', 'portal/static/src/scss/bootstrap_overridden.scss'),
+            ('prepend', 'portal/static/src/scss/bootstrap_overridden.scss')
         ],
-        'web.assets_backend': [
-            'portal/static/src/views/**/*',
-        ],
+        'web.assets_backend': ['portal/static/src/views/**/*'],
         'web.assets_frontend': [
             'portal/static/src/interactions/**/*',
             'portal/static/src/scss/portal.scss',
@@ -49,9 +52,7 @@ a dependency towards website editing and customization capabilities.""",
             'portal/static/src/js/components/input_confirmation_dialog/*',
             'portal/static/src/xml/**/*',
         ],
-        'web.assets_tests': [
-            'portal/static/tests/**/*',
-        ],
+        'web.assets_tests': ['portal/static/tests/**/*'],
         "portal.assets_chatter_helpers": [
             "web/static/src/views/view_dialogs/form_view_dialog.js",
             "web/static/src/views/view_dialogs/export_data_dialog.js",
@@ -109,9 +110,7 @@ a dependency towards website editing and customization capabilities.""",
             ("remove", "mail/static/src/**/*.dark.scss"),
             "portal/static/src/chatter/portal/scss/shadow.scss",
         ],
-        'website.assets_inside_builder_iframe': [
-            'portal/static/src/scss/portal.edit.*'
-        ],
+        'website.assets_inside_builder_iframe': ['portal/static/src/scss/portal.edit.*'],
     },
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',

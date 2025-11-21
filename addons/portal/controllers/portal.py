@@ -355,12 +355,44 @@ class CustomerPortal(Controller):
         :return: The set of common mandatory address field names.
         :rtype: set
         """
-        field_names = {'street', 'city', 'country_id'}
+        field_names = {
+            'street',
+            country_sudo._get_partner_city_field(),
+            'country_id'
+        }
         if country_sudo.state_required:
             field_names.add('state_id')
         if country_sudo.zip_required:
             field_names.add('zip')
         return field_names
+
+    def _get_address_format_fields_mapping(self):
+        return {
+            'state_name': 'state_id',
+            'state_code': 'state_id',
+            'country_name': 'country_id',
+        }
+
+    def _get_address_fields(self, country):
+        address_format_fields = (country and country.get_address_fields()) or [
+            'street',
+            'zip',
+            'city',
+        ]
+
+        # Maps `res.country` 'address_format' fields to `res.partner` fields that have to be set on
+        # the address page.
+        mapping = self._get_address_format_fields_mapping()
+        if country.enforce_cities and country._has_cities():
+            mapping['city'] = 'city_id'
+
+        return [mapping.get(fname, fname) for fname in address_format_fields]
+
+    def _get_required_address_fields(self, address_type, country):
+        if address_type == 'billing':
+            # TODO delivery as billing consideration might be missing ?
+            return self._get_mandatory_billing_address_fields(country)
+        return self._get_mandatory_delivery_address_fields(country)
 
     @route(
         '/my/address',
@@ -427,19 +459,35 @@ class CustomerPortal(Controller):
 
         # TODO in the future: rename can_edit_vat
         # Means something like 'can edit commercial fields on current address'
+
         if partner_sudo:
-            # Existing address, use the values defined on the address
-            state_id = partner_sudo.state_id.id
+            # When editing an existing address, display this record values, even if empty
             country_sudo = partner_sudo.country_id
+            state_sudo = partner_sudo.state_id
+            city_sudo = partner_sudo.city_id
             can_edit_vat = partner_sudo.can_edit_vat()
+            email = partner_sudo.email
+            phone = partner_sudo.phone
         else:
+            # When creating a new address, use existing customer values as default values
             # New address, take default values from current partner
             country_sudo = current_partner.country_id or self._get_default_country(**kwargs)
-            state_id = current_partner.state_id.id
+            state_sudo = current_partner.state_id
+            city_sudo = current_partner.city_id
             can_edit_vat = not current_partner or (
                 partner_sudo == current_partner and current_partner.can_edit_vat()
             )
-        address_fields = (country_sudo and country_sudo.get_address_fields()) or ['city', 'zip']
+            email = current_partner.email
+            phone = current_partner.phone
+
+        address_fields = self._get_address_fields(country_sudo)
+        # TODO address fields matching done in country_info but still needed here.
+
+        cities = request.env['res.city']
+        if country_sudo.enforce_cities:
+            cities = state_sudo.city_ids
+            if not cities and not country_sudo.state_required:
+                cities = country_sudo.city_ids
 
         return {
             'partner_sudo': partner_sudo,  # If set, customer is editing an existing address
@@ -453,22 +501,36 @@ class CustomerPortal(Controller):
                 # partner.
                 current_partner == commercial_partner and "/my/account?redirect=/my/addresses"
             ),
+            'discard_url': callback or '/my/addresses',
             'address_type': address_type,
             'can_edit_vat': can_edit_vat,
             'can_edit_country': not partner_sudo.country_id or partner_sudo._can_edit_country(),
             'callback': callback,
-            'country': country_sudo,
-            'countries': request.env['res.country'].sudo().search([]),
             'is_used_as_billing': address_type == 'billing' or use_delivery_as_billing,
+            'required_fields': self._get_required_address_fields(address_type, country_sudo),
             'use_delivery_as_billing': use_delivery_as_billing,
-            'state_id': state_id,
-            'country_states': country_sudo.state_ids,
             'zip_before_city': (
                 'zip' in address_fields
-                and address_fields.index('zip') < address_fields.index('city')
+                and address_fields.index('zip') < address_fields.index(
+                    country_sudo._get_partner_city_field()
+                )
             ),
-            'vat_label': request.env._("VAT"),
-            'discard_url': callback or '/my/addresses',
+            'vat_label': (
+                country_sudo.vat_label
+                or (partner_sudo.company_id or request.env.company).country_id.vat_label
+                or _("VAT")
+            ),
+
+            # Form values
+            'email': email,
+            'phone': phone,
+            'country': country_sudo,
+            'countries': request.env['res.country'].sudo().search([]),
+            'state': state_sudo,
+            'states': country_sudo.state_ids,
+            'city': city_sudo,
+            'cities': cities,
+            # TODO ask BOJE if we want the name to be the same by default on new addresses ?
         }
 
     def _is_used_as_billing(self, address_type, **kwargs):
@@ -828,9 +890,9 @@ class CustomerPortal(Controller):
         :return: None
         """
         address_values['lang'] = request.lang.code
-        partner = request.env['res.partner']._get_current_partner(**kwargs)
-        address_values['company_id'] = partner.company_id.id
-        commercial_partner = partner.commercial_partner_id
+        partner_sudo = request.env['res.partner']._get_current_partner(**kwargs)
+        address_values['company_id'] = partner_sudo.company_id.id
+        commercial_partner = partner_sudo.commercial_partner_id
         if use_delivery_as_billing:
             address_values['type'] = 'other'
         elif address_type == 'billing':
@@ -868,20 +930,52 @@ class CustomerPortal(Controller):
         readonly=True,
     )
     def portal_address_country_info(self, country, address_type, **kw):
-        address_fields = country.get_address_fields()
-        if address_type == 'billing':
-            required_fields = self._get_mandatory_billing_address_fields(country)
-        else:
-            required_fields = self._get_mandatory_delivery_address_fields(country)
+        required_fields = self._get_required_address_fields(address_type, country)
+
+        cities_data = []
+        if 'city_id' in required_fields and not country.state_required:
+            # If country enforces states, cities will be fetched through the state_info route
+            # depending on the chosen state.
+            cities_data = request.env['res.city'].search_read(
+                [('country_id', '=', country.id)],
+                ['id', 'name'],
+            )
+
+        address_fields = self._get_address_fields(country)
         return {
-            'fields': address_fields,
+            'address_fields': address_fields,
+            'required_fields': list(required_fields),
             'zip_before_city': (
                 'zip' in address_fields
-                and address_fields.index('zip') < address_fields.index('city')
+                and address_fields.index('zip') < address_fields.index(
+                    country._get_partner_city_field()
+                )
             ),
-            'states': [(st.id, st.name, st.code) for st in country.sudo().state_ids],
+            'selection': {
+                'city_id': cities_data,
+                # TODO VFE perf check, maybe use search_read here
+                'state_id': country.sudo().state_ids.read(['id', 'name', 'code']),
+            },
             'phone_code': country.phone_code,
-            'required_fields': list(required_fields),
+            'vat_label': country.vat_label or request.env._("VAT"),
+        }
+
+    @route(
+        '/my/address/state_info/<model("res.country.state"):state>',
+        type='jsonrpc',
+        auth='public',
+        methods=['POST'],
+        website=True,
+        readonly=True,
+    )
+    def portal_address_state_info(self, state, **kw):
+        # l10n_pe_code was read before for peru but unused.
+        # l10n_co_edi_code was read before for columbia but unused.
+        return {
+            'cities': request.env['res.city'].sudo().search_read(
+                [('state_id', '=', state.id)],
+                ['id', 'name', 'zipcode'],
+            )
         }
 
     @route('/my/address/archive', type='jsonrpc', auth='user', website=True, methods=['POST'])

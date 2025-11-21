@@ -43,9 +43,12 @@ class ResPartner(models.Model):
 
     @api.model
     def _get_current_partner(self, **kwargs):
-        """ Get main partner of the current user base on logged in user and kwargs. """
+        """Get main partner of the current user base on logged in user and kwargs.
+
+        :returns: sudoed partner record, may be empty.
+        """
         if self.env.user._is_public():
-            return self.env['res.partner']
+            return self.env['res.partner'].sudo()
         return self.env.user.partner_id
 
     def _get_delivery_address_domain(self):

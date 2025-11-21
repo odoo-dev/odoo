@@ -1,7 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import re
 import logging
+import re
+
 from odoo import api, fields, models, tools
 from odoo.exceptions import UserError
 from odoo.fields import Domain
@@ -41,7 +42,8 @@ class ResCountry(models.CachedModel):
         string='Country Code', size=2,
         required=True,
         help='The ISO country code in two chars. \nYou can use this field for quick search.')
-    address_format = fields.Text(string="Layout in Reports",
+    address_format = fields.Text(
+        string="Layout in Reports",
         help="Display format to use for addresses belonging to this country.\n\n"
              "You can use python-style string pattern with all the fields of the address "
              "(for example, use '%(street)s' to display the field 'street') plus"
@@ -49,9 +51,11 @@ class ResCountry(models.CachedModel):
              "\n%(state_code)s: the code of the state"
              "\n%(country_name)s: the name of the country"
              "\n%(country_code)s: the code of the country",
-        default='%(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s')
+        default='%(street)s\n%(street2)s\n%(city)s %(state_code)s %(zip)s\n%(country_name)s',
+    )
     address_view_id = fields.Many2one(
-        comodel_name='ir.ui.view', string="Input View",
+        string="Input View",
+        comodel_name='ir.ui.view',
         domain=[('model', '=', 'res.partner'), ('type', '=', 'form')],
         help="Use this field if you want to replace the usual way to encode a complete address. "
              "Note that the address_format field is used to modify the way to display addresses "
@@ -59,23 +63,52 @@ class ResCountry(models.CachedModel):
              "addresses.")
     currency_id = fields.Many2one('res.currency', string='Currency')
     image_url = fields.Char(
-        compute="_compute_image_url", string="Flag",
+        string="Flag",
+        compute="_compute_image_url",
         help="Url of static flag image",
     )
-    phone_code = fields.Integer(string='Country Calling Code')
-    country_group_ids = fields.Many2many('res.country.group', 'res_country_res_country_group_rel',
-                         'res_country_id', 'res_country_group_id', string='Country Groups')
+    phone_code = fields.Integer(string="Phone Prefix")
+    country_group_ids = fields.Many2many(
+        string='Country Groups',
+        comodel_name='res.country.group',
+        relation='res_country_res_country_group_rel',
+        column1='res_country_id',
+        column2='res_country_group_id',
+    )
     country_group_codes = fields.Json(compute="_compute_country_group_codes")
-    state_ids = fields.One2many('res.country.state', 'country_id', string='States')
-    name_position = fields.Selection([
+    state_ids = fields.One2many(
+        string="States",
+        comodel_name='res.country.state',
+        inverse_name='country_id',
+    )
+    name_position = fields.Selection(
+        string="Customer Name Position",
+        selection=[
             ('before', 'Before Address'),
             ('after', 'After Address'),
-        ], string="Customer Name Position", default="before",
-        help="Determines where the customer/company name should be placed, i.e. after or before the address.")
-    vat_label = fields.Char(string='Vat Label', translate=True, prefetch=True, help="Use this field if you want to change vat label.")
+        ],
+        default="before",
+        help="Determines where the customer/company name should be placed, i.e. after or before the address.",
+    )
+    vat_label = fields.Char(
+        string='Vat Label',
+        translate=True,
+        help="Use this field if you want to change vat label."
+    )
 
     state_required = fields.Boolean(default=False)
     zip_required = fields.Boolean(default=True)
+    # zip_required = fields.Selection(
+    #     selection=[
+    #         ('optional', "Optional"),
+    #         ('required', "Required"),
+    #         ('not_applicable', "Not applicable"),
+    #     ],
+    #     default='required',
+    # )
+
+    # TODO challenge, maybe handle through address_format instead ?
+    split_street_and_number = fields.Boolean(default=False)
 
     _name_uniq = models.Constraint(
         'unique (name)',

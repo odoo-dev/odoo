@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
 
+    <!-- FIXME VFE unused? -->
     <record id="address_street_extended_form" model="ir.ui.view">
         <field name="name">partner.form.address.extended</field>
         <field name="model">res.partner</field>

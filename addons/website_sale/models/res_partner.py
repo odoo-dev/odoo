@@ -50,7 +50,7 @@ class ResPartner(models.Model):
         if order_sudo:
             return (
                 (not order_sudo._is_anonymous_cart() and order_sudo.partner_id)
-                or self.env["res.partner"]  # Avoid returning public user's partner
+                or self.env["res.partner"].sudo() # Avoid returning public user's partner
             )
         return super()._get_current_partner(order_sudo=order_sudo, **kwargs)
 
