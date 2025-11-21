@@ -153,9 +153,12 @@ class SaleOrderLine(models.Model):
     def _prepare_qty_invoiced(self):
         invoiced_qties = super()._prepare_qty_invoiced()
         for sale_line in self:
-            pos_lines = sale_line.sudo().pos_order_line_ids.filtered(lambda order_line: order_line.order_id.state not in ['cancel', 'draft'])
+            pos_lines = sale_line.sudo().pos_order_line_ids.filtered(
+                lambda l: l.order_id.state not in ['cancel', 'draft']
+            )
             invoiced_qties[sale_line] += sum((
-                self._convert_qty(self, pos_line.qty, 'p2s') for pos_line in pos_lines
+                self._convert_qty(sale_line, pos_line.qty, 'p2s')
+                for pos_line in pos_lines
             ), 0)
         return invoiced_qties
 
