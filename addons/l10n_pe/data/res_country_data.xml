@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- FIXME VFE is this view even useful, most of it is already in the base_address_extended partner view... -->
+    <!-- TODO VFE investigate this address_view_id broll -->
     <record id="pe_partner_address_form" model="ir.ui.view">
         <field name="name">pe.partner.form.address</field>
         <field name="model">res.partner</field>
@@ -40,7 +42,8 @@
         </field>
     </record>
     <record id="base.pe" model="res.country">
-        <field name="enforce_cities" eval="1" />
+        <field name="enforce_cities" eval="True"/>
+        <field name="state_required" eval="True"/>
         <field name="address_view_id" ref="pe_partner_address_form" />
         <field name="address_format" eval="'%(street)s\n%(l10n_pe_district_name)s\n%(zip)s%(city)s\n%(state_name)s\n%(country_name)s'"/>
     </record>

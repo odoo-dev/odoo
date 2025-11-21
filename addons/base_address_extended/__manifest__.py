@@ -19,7 +19,7 @@ It is primarily used for EDIs that might need a special city code.
         'views/res_city_view.xml',
         'views/res_country_view.xml',
     ],
-    'depends': ['base', 'contacts'],
+    'depends': ['base'],
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }

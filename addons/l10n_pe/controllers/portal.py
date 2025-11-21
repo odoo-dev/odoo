@@ -15,26 +15,20 @@ class L10nPEPortalAccount(L10nLatamBasePortalAccount):
         if not self._is_peru_company():
             return rendering_values
 
-        state = request.env['res.country.state'].browse(rendering_values['state_id'])
-        city = partner_sudo.city_id
-        ResCity = request.env['res.city'].sudo()
         District = request.env['l10n_pe.res.city.district'].sudo()
-        rendering_values.update({
-            'state': state,
-            'state_cities': ResCity.search([('state_id', '=', state.id)]) if state else ResCity,
-            'city': city,
-            'city_districts': District.search([('city_id', '=', city.id)]) if city else District,
-        })
+        districts = District
+        if (city := rendering_values['city']):
+            districts = District.search([('city_id', '=', city.id)])
+        rendering_values['city_districts'] = districts
+
         return rendering_values
 
     def _get_mandatory_address_fields(self, country_sudo):
         mandatory_fields = super()._get_mandatory_address_fields(country_sudo)
-        if not self._is_peru_company():
-            return mandatory_fields
 
-        if country_sudo.code == 'PE':
-            mandatory_fields.update({'state_id', 'city_id', 'l10n_pe_district'})
-            mandatory_fields.remove('city')
+        if self._is_peru_company() and country_sudo.code == 'PE':
+            mandatory_fields.add('l10n_pe_district')
+
         return mandatory_fields
 
     def _l10n_get_default_identification_type_id(self):
@@ -44,25 +38,21 @@ class L10nPEPortalAccount(L10nLatamBasePortalAccount):
         )
 
     @route(
-        '/portal/state_infos/<model("res.country.state"):state>',
+        '/my/address/city_info/<model("res.city"):city>',
         type='jsonrpc',
         auth='public',
         methods=['POST'],
         website=True,
+        readonly=True,
     )
-    def state_infos(self, state, **kw):
-        states = request.env['res.city'].sudo().search([('state_id', '=', state.id)])
-        return {'cities': [(c.id, c.name, c.l10n_pe_code) for c in states]}
+    def city_info(self, city, **kw):
+        """Provide district choices on city change."""
+        res = {}
 
-    @route(
-        '/portal/city_infos/<model("res.city"):city>',
-        type='jsonrpc',
-        auth='public',
-        methods=['POST'],
-        website=True,
-    )
-    def city_infos(self, city, **kw):
-        districts = request.env['l10n_pe.res.city.district'].sudo().search(
-            [('city_id', '=', city.id)],
-        )
-        return {'districts': [(d.id, d.name, d.code) for d in districts]}
+        if city.country_id.code == 'PE':
+            res['districts'] = request.env['l10n_pe.res.city.district'].sudo().search_read(
+                [('city_id', '=', city.id)],
+                ['id', 'name', 'code'],
+            )
+
+        return res

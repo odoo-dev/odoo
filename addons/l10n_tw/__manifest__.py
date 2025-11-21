@@ -10,11 +10,8 @@
 This is the base module to manage the accounting chart for Taiwan in Odoo.
 ==============================================================================
     """,
-    'depends': [
-        'account',
-        'base_address_extended',
-    ],
-    'auto_install': ['account'],
+    'depends': ['account'],
+    'auto_install': True,
     'data': [
         'data/res_currency_data.xml',
         'data/res_country_data.xml',

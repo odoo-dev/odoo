@@ -52,7 +52,6 @@ Create electronic sales invoices with Avatax.
     'depends': [
         'account',
         'account_qr_code_emv',
-        'base_address_extended',
         'l10n_latam_base',
         'l10n_latam_invoice_document',
     ],
