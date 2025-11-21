@@ -7,6 +7,7 @@ import { roundCurrency, formatCurrency } from "./utils/currency";
 import { _t } from "@web/core/l10n/translation";
 import { getTaxesAfterFiscalPosition } from "@point_of_sale/app/models/utils/tax_utils";
 import { accountTaxHelpers } from "@account/helpers/account_tax";
+import { markRaw } from "@odoo/owl";
 
 export class PosOrderline extends Base {
     static pythonModel = "pos.order.line";
@@ -24,6 +25,7 @@ export class PosOrderline extends Base {
         // Data that are not saved in the backend
         this.uiState = {
             hasChange: true,
+            displayData: markRaw({}),
         };
         this.saved_quantity = 0;
     }
@@ -376,7 +378,7 @@ export class PosOrderline extends Base {
 
     prepareBaseLineForTaxesComputationExtraValues(customValues = {}) {
         const order = this.order_id;
-        const currency = order.config.currency_id;
+        const currency = order.currency;
         const extraValues = { currency_id: currency };
         const product = this.get_product();
         const product_uom = this.get_unit();
@@ -394,6 +396,7 @@ export class PosOrderline extends Base {
             is_refund: this.qty * priceUnit < 0,
             ...customValues,
         };
+
         if (order.fiscal_position_id) {
             values.tax_ids = getTaxesAfterFiscalPosition(
                 values.tax_ids,
@@ -660,41 +663,49 @@ export class PosOrderline extends Base {
     }
 
     getDisplayData() {
-        return {
-            productName: this.get_full_product_name(),
-            price: this.getPriceString(),
-            qty: this.get_quantity_str(),
-            unit: this.product_id.uom_id ? this.product_id.uom_id.name : "",
-            unitPrice: formatCurrency(this.get_unit_display_price(), this.currency),
-            oldUnitPrice: this.get_old_unit_display_price()
-                ? formatCurrency(this.get_old_unit_display_price(), this.currency)
-                : "",
-            discount: this.get_discount_str(),
-            customerNote: this.get_customer_note() || "",
-            internalNote: this.getNote(),
-            comboParent: this.combo_parent_id?.get_full_product_name?.() || "",
-            packLotLines: this.pack_lot_ids.map(
-                (l) =>
-                    `${l.pos_order_line_id.product_id.tracking == "lot" ? "Lot Number" : "SN"} ${
-                        l.lot_name
-                    }`
-            ),
-            price_without_discount: formatCurrency(
-                this.getUnitDisplayPriceBeforeDiscount(),
-                this.currency
-            ),
-            taxGroupLabels: [
-                ...new Set(
-                    getTaxesAfterFiscalPosition(
-                        this.product_id.taxes_id,
-                        this.order_id.fiscal_position_id,
-                        this.models
-                    )
-                        ?.map((tax) => tax.tax_group_id.pos_receipt_label)
-                        .filter((label) => label)
+        const new_qty = this.get_quantity_str();
+        if (
+            !this.uiState?.displayData ||
+            Object.keys(this.uiState.displayData).length === 0 ||
+            this.uiState.displayData.qty !== new_qty
+        ) {
+            this.uiState.displayData = markRaw({
+                productName: this.get_full_product_name(),
+                price: this.getPriceString(),
+                qty: new_qty,
+                unit: this.product_id.uom_id ? this.product_id.uom_id.name : "",
+                unitPrice: formatCurrency(this.get_unit_display_price(), this.currency),
+                oldUnitPrice: this.get_old_unit_display_price()
+                    ? formatCurrency(this.get_old_unit_display_price(), this.currency)
+                    : "",
+                discount: this.get_discount_str(),
+                customerNote: this.get_customer_note() || "",
+                internalNote: this.getNote(),
+                comboParent: this.combo_parent_id?.get_full_product_name?.() || "",
+                packLotLines: this.pack_lot_ids.map(
+                    (l) =>
+                        `${
+                            l.pos_order_line_id.product_id.tracking == "lot" ? "Lot Number" : "SN"
+                        } ${l.lot_name}`
                 ),
-            ].join(" "),
-        };
+                price_without_discount: formatCurrency(
+                    this.getUnitDisplayPriceBeforeDiscount(),
+                    this.currency
+                ),
+                taxGroupLabels: [
+                    ...new Set(
+                        getTaxesAfterFiscalPosition(
+                            this.product_id.taxes_id,
+                            this.order_id.fiscal_position_id,
+                            this.models
+                        )
+                            ?.map((tax) => tax.tax_group_id.pos_receipt_label)
+                            .filter((label) => label)
+                    ),
+                ].join(" "),
+            });
+        }
+        return this.uiState.displayData;
     }
 
     get_discount() {

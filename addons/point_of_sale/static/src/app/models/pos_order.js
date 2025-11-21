@@ -34,6 +34,7 @@ export class PosOrder extends Base {
         this.shipping_date = vals.shipping_date || false;
         this.state = vals.state || "draft";
         this.uuid = vals.uuid ? vals.uuid : uuidv4();
+        this.currency_id = {};
         this.last_order_preparation_change = vals.last_order_preparation_change
             ? JSON.parse(vals.last_order_preparation_change)
             : {
@@ -86,7 +87,10 @@ export class PosOrder extends Base {
     }
 
     get currency() {
-        return this.config.currency_id;
+        if (!this.currency_id?.id) {
+            this.currency_id = this.config?.currency_id;
+        }
+        return this.currency_id;
     }
 
     get pickingType() {

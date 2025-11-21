@@ -51,6 +51,8 @@ export class ProductScreen extends Component {
         this.numberBuffer = useService("number_buffer");
         this.state = useState({
             previousSearchWord: "",
+            previousProductsDisplayed: [],
+            previousCategory: "",
             currentOffset: 0,
             quantityByProductTmplId: {},
         });
@@ -373,7 +375,13 @@ export class ProductScreen extends Component {
     get productsToDisplay() {
         let list = [];
 
-        if (this.searchWord !== "") {
+        const posCategory = this.pos.selectedCategory;
+        const hasDisplayChanged =
+            this.state.previousSearchWord != this.searchWord ||
+            this.state.previousCategory != posCategory?.id;
+        if (!hasDisplayChanged) {
+            list = this.state.previousProductsDisplayed;
+        } else if (this.searchWord !== "") {
             if (!this._searchTriggered) {
                 this.pos.setSelectedCategory(0);
                 this._searchTriggered = true;
@@ -381,11 +389,16 @@ export class ProductScreen extends Component {
             list = this.addMainProductsToDisplay(this.getProductsBySearchWord(this.searchWord));
         } else {
             this._searchTriggered = false;
-            if (this.pos.selectedCategory?.id) {
-                list = this.getProductsByCategory(this.pos.selectedCategory);
+            if (posCategory?.id) {
+                list = this.getProductsByCategory(posCategory);
             } else {
                 list = this.products;
             }
+        }
+
+        if (!this.state.previousProductsDisplayed || hasDisplayChanged) {
+            this.state.previousProductsDisplayed = list;
+            this.state.previousCategory = posCategory?.id;
         }
 
         if (!list || list.length === 0) {
