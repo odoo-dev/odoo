@@ -17,7 +17,11 @@ export function createFileViewer() {
         if (files.length > 0) {
             const viewableFiles = files.filter((file) => file.isViewable);
             const index = viewableFiles.indexOf(file);
-            registry.category("main_components").add(fileViewerId, {
+            const mainCategory = registry.category("main_components");
+            if (mainCategory.contains(fileViewerId)) {
+                mainCategory.remove(fileViewerId);
+            }
+            mainCategory.add(fileViewerId, {
                 Component: FileViewer,
                 props: { files: viewableFiles, startIndex: index, close },
             });
