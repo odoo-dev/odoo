@@ -346,6 +346,12 @@ export class KanbanController extends Component {
             classList.push("o_action_delegate_scroll");
             return classList.join(" ");
         }
+        debugger
+        if (this.model.root.showCachedData) {
+            const classList = (this.props.className || "").split(" ");
+            classList.push("o_show_cached_data");
+            return classList.join(" ");
+        }
         return this.props.className;
     }
 

@@ -80,6 +80,10 @@
     }
 }
 
+.o_show_cached_data {
+    filter: grayscale(0.8);   
+}
+
 // ------- Kanban renderer -------
 .o_kanban_renderer {
     // ----------------------------------------------------------------------------

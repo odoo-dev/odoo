@@ -141,14 +141,16 @@ export class RPCCache {
             const prom = new Promise((resolve, reject) => {
                 const fromCache = Promise.withResolvers();
                 let fromCacheValue;
-                const onFullfilled = (result) => {
+                const onFullfilled = async (result) => {
                     resolve(result);
                     // call the pending request callbacks with the result
-                    const hasChanged = !!fromCacheValue && !jsonEqual(fromCacheValue, result);
-                    request.callbacks.forEach((cb) => cb(deepCopy(result), hasChanged));
-                    if (request.invalidated) {
-                        return result;
-                    }
+                    Promise.resolve().then(() => {
+                        const hasChanged = !!fromCacheValue && !jsonEqual(fromCacheValue, result);
+                        request.callbacks.forEach((cb) => cb(deepCopy(result), hasChanged));
+                        if (request.invalidated) {
+                            return result;
+                        }
+                    });
                     delete this.pendingRequests[requestKey];
                     // update the ram and optionally the disk caches with the latest data
                     this.ramCache.write(table, key, Promise.resolve(result));

@@ -210,6 +210,8 @@ export class RelationalModel extends Model {
         const cache = this._getCacheParams(config, promise);
         const data = await this.keepLast.add(this._loadData(config, cache));
         this.root = this._createRoot(config, data);
+        debugger
+        this.root.showCachedData = true;
         resolve({ root: this.root, loadId: config.loadId });
         this.config = config;
         await this.hooks.onRootLoaded(this.root);
@@ -297,10 +299,11 @@ export class RelationalModel extends Model {
                 type: "disk",
                 update: "always",
                 callback: async (result, hasChanged) => {
+                    const { root, loadId } = await rootLoadProm;
+                    root.showCachedData = false;
                     if (!hasChanged) {
                         return;
                     }
-                    const { root, loadId } = await rootLoadProm;
                     if (root.id !== this.root.id) {
                         // The root id might have changed, either because:
                         //  1) the user already changed the domain and a second load has been done
