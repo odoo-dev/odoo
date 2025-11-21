@@ -17,14 +17,7 @@
                         </div>
 
                         <!-- business fields -->
-                        <field name="pdp_identifier"
-                               string="Identifier"/>
-                        <field name="contact_email"
-                               string="Email"/>
-                        <field name="phone_number"
-                               string="Phone"
-                               required="edi_mode != 'demo'"/>
-
+                        <field name="siren_number"/>
                     </group>
 
                     <!-- edi mode info -->
@@ -44,10 +37,19 @@
                 </sheet>
 
                 <footer>
+                    <button name="button_trigger_kyb_flow"
+                            type="object"
+                            class="btn-primary"
+                            data-hotkey="q"
+                            string="Next"
+                    />
+
                     <button name="button_register_pdp_participant"
                             type="object"
                             class="btn-primary"
-                            data-hotkey="q">
+                            data-hotkey="q"
+                            invisible="!kyb_done"
+                    >
                         <span invisible="edi_mode != 'prod'">
                             Validate Registration (Production)
                         </span>
@@ -62,7 +64,9 @@
                             string="Cancel Registration"
                             type="object"
                             class="btn-secondary"
-                            data-hotkey="x"/>
+                            data-hotkey="x"
+                            invisible="!kyb_done"
+                    />
                 </footer>
             </form>
         </field>

@@ -1,4 +1,8 @@
 import contextlib
+
+from addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
+from addons.iap.tools import iap_tools
+
 try:
     import phonenumbers
 except ImportError:
@@ -40,6 +44,8 @@ class PdpRegistration(models.TransientModel):
         string="Warnings",
         compute="_compute_warnings",
     )
+    siren_number = fields.Char(compute='_compute_siren_number', store=True, readonly=False)
+    kyb_done = fields.Boolean()
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -70,6 +76,10 @@ class PdpRegistration(models.TransientModel):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+    @api.depends('company_id.siret')
+    def _compute_siren_number(self):
+        for wizard in self:
+            wizard.siren_number = wizard.company_id.siret[:9] if wizard.company_id.siret else ''
 
     @api.depends('company_id.account_edi_proxy_client_ids')
     def _compute_edi_user_id(self):
@@ -133,6 +143,18 @@ class PdpRegistration(models.TransientModel):
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
+
+    def button_trigger_kyb_flow(self):
+        self.ensure_one()
+
+        endpoint = self.env['ir.config_parameter'].sudo().get_param('iap.l10n_fr_pdp', 'https://localhost:8469')
+        response = iap_tools.iap_jsonrpc(f'{endpoint}/api/pdp/1/kyb_flow', params={
+            'dbuuid': self.env['ir.config_parameter'].get_param('database.uuid'),
+        })
+        if error_message := response.get('error'):
+            raise UserError(error_message)
+        self.kyb_done = True
+        return self.env['pdp.registration'].create({'company_id': self.company_id.id})
 
     def button_register_pdp_participant(self):
         self.ensure_one()
