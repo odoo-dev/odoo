@@ -40,10 +40,9 @@ class MicrosoftOutlookMixin(models.AbstractModel):
         help='The URL to generate the authorization code from Outlook', groups='base.group_system')
 
     def _compute_outlook_uri(self):
-        Config = self.env['ir.config_parameter'].sudo()
         base_url = self.get_base_url()
-        microsoft_outlook_client_id = Config.get_str('microsoft_outlook_client_id')
-        microsoft_outlook_client_secret = Config.get_str('microsoft_outlook_client_secret')
+        microsoft_outlook_client_id = self.env.company.microsoft_outlook_client_identifier
+        microsoft_outlook_client_secret = self.env.company.microsoft_outlook_client_secret
         is_configured = microsoft_outlook_client_id and microsoft_outlook_client_secret
 
         for record in self:
@@ -82,9 +81,8 @@ class MicrosoftOutlookMixin(models.AbstractModel):
         if not email_normalized:
             raise UserError(_('Please enter a valid email address.'))
 
-        Config = self.env['ir.config_parameter'].sudo()
-        microsoft_outlook_client_id = Config.get_str('microsoft_outlook_client_id')
-        microsoft_outlook_client_secret = Config.get_str('microsoft_outlook_client_secret')
+        microsoft_outlook_client_id = self.env.company.microsoft_outlook_client_identifier
+        microsoft_outlook_client_secret = self.env.company.microsoft_outlook_client_secret
         is_configured = microsoft_outlook_client_id and microsoft_outlook_client_secret
 
         if not is_configured:  # use IAP (see '/microsoft_outlook/iap_confirm')
@@ -153,9 +151,8 @@ class MicrosoftOutlookMixin(models.AbstractModel):
         :return:
             access_token, access_token_expiration
         """
-        Config = self.env['ir.config_parameter'].sudo()
-        microsoft_outlook_client_id = Config.get_str('microsoft_outlook_client_id')
-        microsoft_outlook_client_secret = Config.get_str('microsoft_outlook_client_secret')
+        microsoft_outlook_client_id = self.env.company.microsoft_outlook_client_identifier
+        microsoft_outlook_client_secret = self.env.company.microsoft_outlook_client_secret
         if not microsoft_outlook_client_id or not microsoft_outlook_client_secret:
             return self._fetch_outlook_access_token_iap(refresh_token)
 
@@ -175,16 +172,13 @@ class MicrosoftOutlookMixin(models.AbstractModel):
         :param grant_type: Depends the action we want to do (refresh_token or authorization_code)
         :param values: Additional parameters that will be given to the Outlook endpoint
         """
-        Config = self.env['ir.config_parameter'].sudo()
         base_url = self.get_base_url()
-        microsoft_outlook_client_id = Config.get_str('microsoft_outlook_client_id')
-        microsoft_outlook_client_secret = Config.get_str('microsoft_outlook_client_secret')
 
         response = requests.post(
             url_join(self._get_microsoft_endpoint(), 'token'),
             data={
-                'client_id': microsoft_outlook_client_id,
-                'client_secret': microsoft_outlook_client_secret,
+                'client_id': self.env.company.microsoft_outlook_client_identifier,
+                'client_secret': self.env.company.microsoft_outlook_client_secret,
                 'scope': f'openid email offline_access https://outlook.office.com/User.read {self._OUTLOOK_SCOPE}',
                 'redirect_uri': url_join(base_url, '/microsoft_outlook/confirm'),
                 'grant_type': grant_type,

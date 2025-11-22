@@ -6,19 +6,24 @@
             <field name="model">res.config.settings</field>
             <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
             <field name="arch" type="xml">
+                <field name="module_microsoft_outlook" position="replace">
+                    <field name="company_uses_microsoft_outlook_server"/>
+                </field>
                 <div id="msg_module_microsoft_outlook" position="replace">
-                    <div class="row mt16" id="outlook_client_identifier">
-                        <label string="ID" for="microsoft_outlook_client_identifier"
-                            class="col-lg-3 o_light_label"/>
-                        <field name="microsoft_outlook_client_identifier" class="ms-2"
-                            placeholder="ID of your Outlook app"/>
-                    </div>
-                    <div class="row mt16" id="outlook_client_secret">
-                        <label string="Secret" for="microsoft_outlook_client_secret"
-                            class="col-lg-3 o_light_label"/>
-                        <field name="microsoft_outlook_client_secret" password="True" class="ms-2"
-                            placeholder="Secret of your Outlook app"/>
-                    </div>
+                    <t invisible="not company_uses_microsoft_outlook_server">
+                        <div class="row mt16" id="outlook_client_identifier">
+                            <label string="ID" for="microsoft_outlook_client_identifier"
+                                class="col-lg-3 o_light_label"/>
+                            <field name="microsoft_outlook_client_identifier" class="ms-2"
+                                placeholder="ID of your Outlook app"/>
+                        </div>
+                        <div class="row mt16" id="outlook_client_secret">
+                            <label string="Secret" for="microsoft_outlook_client_secret"
+                                class="col-lg-3 o_light_label"/>
+                            <field name="microsoft_outlook_client_secret" password="True" class="ms-2"
+                                placeholder="Secret of your Outlook app"/>
+                        </div>
+                    </t>
                 </div>
             </field>
         </record>

@@ -7,5 +7,6 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    microsoft_outlook_client_identifier = fields.Char('Outlook Client Id', config_parameter='microsoft_outlook_client_id')
-    microsoft_outlook_client_secret = fields.Char('Outlook Client Secret', config_parameter='microsoft_outlook_client_secret')
+    company_uses_microsoft_outlook_server = fields.Boolean(related='company_id.uses_microsoft_outlook_server', readonly=False)
+    microsoft_outlook_client_identifier = fields.Char('Outlook Client Id', related='company_id.microsoft_outlook_client_identifier', readonly=False)
+    microsoft_outlook_client_secret = fields.Char('Outlook Client Secret', related='company_id.microsoft_outlook_client_secret', readonly=False)

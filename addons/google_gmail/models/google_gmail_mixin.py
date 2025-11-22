@@ -40,9 +40,8 @@ class GoogleGmailMixin(models.AbstractModel):
     google_gmail_uri = fields.Char(compute='_compute_gmail_uri', string='URI', help='The URL to generate the authorization code from Google', groups='base.group_system')
 
     def _compute_gmail_uri(self):
-        Config = self.env['ir.config_parameter'].sudo()
-        google_gmail_client_id = Config.get_str('google_gmail_client_id')
-        google_gmail_client_secret = Config.get_str('google_gmail_client_secret')
+        google_gmail_client_id = self.env.company.google_gmail_client_identifier
+        google_gmail_client_secret = self.env.company.google_gmail_client_secret
         is_configured = google_gmail_client_id and google_gmail_client_secret
         base_url = self.get_base_url()
 
@@ -82,9 +81,8 @@ class GoogleGmailMixin(models.AbstractModel):
         if not email_normalized:
             raise UserError(_('Please enter a valid email address.'))
 
-        Config = self.env['ir.config_parameter'].sudo()
-        google_gmail_client_id = Config.get_str('google_gmail_client_id')
-        google_gmail_client_secret = Config.get_str('google_gmail_client_secret')
+        google_gmail_client_id = self.env.company.google_gmail_client_identifier
+        google_gmail_client_secret = self.env.company.google_gmail_client_secret
         is_configured = google_gmail_client_id and google_gmail_client_secret
 
         if not is_configured:  # use IAP (see '/google_gmail/iap_confirm')
@@ -155,10 +153,8 @@ class GoogleGmailMixin(models.AbstractModel):
         :return:
             access_token, access_token_expiration
         """
-        Config = self.env['ir.config_parameter'].sudo()
-
-        google_gmail_client_id = Config.get_str('google_gmail_client_id')
-        google_gmail_client_secret = Config.get_str('google_gmail_client_secret')
+        google_gmail_client_id = self.env.company.google_gmail_client_identifier
+        google_gmail_client_secret = self.env.company.google_gmail_client_secret
         if not google_gmail_client_id or not google_gmail_client_secret:
             return self._fetch_gmail_access_token_iap(refresh_token)
 
@@ -176,17 +172,14 @@ class GoogleGmailMixin(models.AbstractModel):
         :param grant_type: Depends the action we want to do (refresh_token or authorization_code)
         :param values: Additional parameters that will be given to the GMail endpoint
         """
-        Config = self.env['ir.config_parameter'].sudo()
-        google_gmail_client_id = Config.get_str('google_gmail_client_id')
-        google_gmail_client_secret = Config.get_str('google_gmail_client_secret')
         base_url = self.get_base_url()
         redirect_uri = url_join(base_url, '/google_gmail/confirm')
 
         response = requests.post(
             'https://oauth2.googleapis.com/token',
             data={
-                'client_id': google_gmail_client_id,
-                'client_secret': google_gmail_client_secret,
+                'client_id': self.env.company.google_gmail_client_identifier,
+                'client_secret': self.env.company.google_gmail_client_secret,
                 'grant_type': grant_type,
                 'redirect_uri': redirect_uri,
                 **values,
