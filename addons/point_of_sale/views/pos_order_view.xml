@@ -179,7 +179,6 @@
                             <group string="Other Information" name="other_information">
                                 <field name="pos_reference"/>
                                 <field name="tracking_number"/>
-                                <field name="country_code" invisible="1"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                                 <field name="pricelist_id" groups="product.group_product_pricelist" readonly="state != 'draft'"/>
                                 <field name="preset_id" readonly="True" />

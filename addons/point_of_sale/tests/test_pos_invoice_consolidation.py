@@ -22,7 +22,6 @@ class TestPosInvoiceConsolidation(TestPoSCommon, CommonPosTest):
             orders_user1 = self._create_orders([{
                 'pos_order_lines_ui_args': [(self.product1, 1)],
                 'customer': self.customer,
-                'is_invoiced': False,
                 'uuid': 'u1-order',
             }])
             # This flattens the dict into the recordset
@@ -33,11 +32,9 @@ class TestPosInvoiceConsolidation(TestPoSCommon, CommonPosTest):
                 {
                     'pos_order_lines_ui_args': [(self.product1, 2)],
                     'customer': self.customer,
-                    'is_invoiced': False,
                 }, {
                     'pos_order_lines_ui_args': [(self.product2, 1)],
                     'customer': self.customer,
-                    'is_invoiced': False,
                 }
             ])
             # This flattens the dict into the recordset

@@ -759,7 +759,7 @@ class PosSession(models.Model):
             session_destination_id = picking_type.default_location_dest_id.id
 
         for order in self._get_closed_orders():
-            if order.company_id.anglo_saxon_accounting and order.is_invoiced or order.shipping_date:
+            if order.company_id.anglo_saxon_accounting and order.account_move or order.shipping_date:
                 continue
             destination_id = order.partner_id.property_stock_customer.id or session_destination_id
             if destination_id in lines_grouped_by_dest_location:
@@ -859,7 +859,7 @@ class PosSession(models.Model):
         currency_rounding = self.currency_id.rounding
         closed_orders = self._get_closed_orders()
         for order in closed_orders:
-            order_is_invoiced = order.is_invoiced
+            order_is_invoiced = bool(order.account_move)
             for payment in order.payment_ids:
                 amount = payment.amount
                 if float_is_zero(amount, precision_rounding=currency_rounding):
@@ -953,7 +953,7 @@ class PosSession(models.Model):
                 partners._increase_rank('customer_rank')
 
         if self.company_id.anglo_saxon_accounting:
-            all_picking_ids = self.order_ids.filtered(lambda p: not p.is_invoiced and not p.shipping_date).picking_ids.ids + self.picking_ids.filtered(lambda p: not p.pos_order_id).ids
+            all_picking_ids = self.order_ids.filtered(lambda p: not p.account_move and not p.shipping_date).picking_ids.ids + self.picking_ids.filtered(lambda p: not p.pos_order_id).ids
             if all_picking_ids:
                 # Combine stock lines
                 stock_move_sudo = self.env['stock.move'].sudo()
@@ -1792,7 +1792,7 @@ class PosSession(models.Model):
 
     def _get_invoice_total_list(self):
         invoice_list = []
-        for order in self.order_ids.filtered(lambda o: o.is_invoiced):
+        for order in self.order_ids.filtered(lambda o: o.account_move):
             invoice = {
                 'total': order.account_move.amount_total_signed,
                 'name': order.account_move.name,
@@ -1804,7 +1804,7 @@ class PosSession(models.Model):
 
     def _get_total_invoice(self):
         amount = 0
-        for order in self.order_ids.filtered(lambda o: o.is_invoiced):
+        for order in self.order_ids.filtered(lambda o: o.account_move):
             amount += order.amount_paid
 
         return amount

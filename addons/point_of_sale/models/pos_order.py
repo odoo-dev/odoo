@@ -35,20 +35,17 @@ class PosOrder(models.Model):
     # an error is raised, asking the user to open a session.
     def _get_valid_session(self, order):
         PosSession = self.env['pos.session']
-        closed_session = PosSession.browse(order['session_id'])
-
+        closed_session = PosSession.browse(order['session_id']).exists()
         _logger.warning('Session %s (ID: %s) was closed but received order %s (total: %s) belonging to it',
                         closed_session.name,
                         closed_session.id,
                         order['uuid'],
                         order['amount_total'])
 
-        open_session = PosSession.search([
+        if open_session := PosSession.search([
             ('state', 'not in', ('closed', 'closing_control')),
             ('config_id', '=', closed_session.config_id.id)
-        ], limit=1)
-
-        if open_session:
+        ], limit=1):
             _logger.warning('Using open session %s for uuid number %s', open_session.name, order['uuid'])
             return open_session
 
@@ -155,11 +152,7 @@ class PosOrder(models.Model):
 
         return self.id
 
-    def _clean_payment_lines(self):
-        self.ensure_one()
-        self.payment_ids.unlink()
-
-    def _compute_amount_paid(self):
+    def _get_amount_paid(self):
         return sum(self.payment_ids.mapped('amount'))
 
     def _process_payment_lines(self, pos_order, order, pos_session, draft):
@@ -179,7 +172,7 @@ class PosOrder(models.Model):
         prec_acc = order.currency_id.decimal_places
 
         # Recompute amount paid because we don't trust the client
-        order.write({'amount_paid': order._compute_amount_paid()})
+        order.write({'amount_paid': order._get_amount_paid()})
 
         if not draft and not float_is_zero(pos_order['amount_return'], prec_acc):
             cash_payment_method = pos_session.payment_method_ids.filtered('is_cash_count')[:1]
@@ -297,17 +290,16 @@ class PosOrder(models.Model):
     margin_percent = fields.Float(string="Margin (%)", compute='_compute_margin', digits=(12, 4))
     is_total_cost_computed = fields.Boolean(compute='_compute_is_total_cost_computed',
         help="Allows to know if all the total cost of the order lines have already been computed")
-    lines = fields.One2many('pos.order.line', 'order_id', string='Order Lines', copy=True)
+    lines = fields.One2many('pos.order.line', 'order_id', string='Order Lines')
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, index=True)
-    country_code = fields.Char(related='company_id.account_fiscal_country_id.code')
     pricelist_id = fields.Many2one('product.pricelist', string='Pricelist')
-    partner_id = fields.Many2one('res.partner', string='Customer', change_default=True, index='btree_not_null')
+    partner_id = fields.Many2one('res.partner', string='Customer', index='btree_not_null')
     sequence_number = fields.Integer(string='Sequence Number', copy=False,
                                      help='A session-unique sequence number for the order. Negative if generated from the client')
     session_id = fields.Many2one('pos.session', string='Session', index=True, domain="[('state', '=', 'opened')]")
     config_id = fields.Many2one('pos.config', compute='_compute_order_config_id', string="Point of Sale", readonly=False, store=True)
     currency_id = fields.Many2one('res.currency', related='config_id.currency_id', string="Currency")
-    currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, digits=0, readonly=True,
+    currency_rate = fields.Float("Currency Rate", compute='_compute_currency_rate', compute_sudo=True, store=True, digits=0,
         help='The rate of the currency to the currency of rate applicable at the date of the order')
     is_refund = fields.Boolean(string='Is Refund', readonly=True)
     state = fields.Selection(
@@ -322,19 +314,18 @@ class PosOrder(models.Model):
     floating_order_name = fields.Char(string='Order Name')
     general_customer_note = fields.Text(string='General Customer Note')
     internal_note = fields.Text(string='Internal Note')
-    nb_print = fields.Integer(string='Number of Print', readonly=True, copy=False, default=0)
+    nb_print = fields.Integer(string='Number of Print', readonly=True, copy=False)
     pos_reference = fields.Char(string='Receipt Number', readonly=True, copy=False, index=True)
-    sale_journal = fields.Many2one('account.journal', related='session_id.config_id.journal_id', string='Sales Journal', store=True, readonly=True, ondelete='restrict')
+    sale_journal = fields.Many2one('account.journal', related='session_id.config_id.journal_id', string='Sales Journal', ondelete='restrict')
     fiscal_position_id = fields.Many2one(
-        comodel_name='account.fiscal.position', string='Fiscal Position',
-        readonly=False,
+        comodel_name='account.fiscal.position', string='Fiscal Position'
     )
     payment_ids = fields.One2many('pos.payment', 'pos_order_id', string='Payments')
-    session_move_id = fields.Many2one('account.move', string='Session Journal Entry', related='session_id.move_id', readonly=True, copy=False)
+    session_move_id = fields.Many2one('account.move', string='Session Journal Entry', related='session_id.move_id', copy=False)
     to_invoice = fields.Boolean('To invoice', copy=False)
     shipping_date = fields.Date('Shipping Date')
     preset_time = fields.Datetime(string='Hour', help="Hour of the day for the order")
-    is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
+    # is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
     is_tipped = fields.Boolean('Is this already tipped?', readonly=True)
     tip_amount = fields.Monetary(string='Tip Amount', readonly=True)
     refund_orders_count = fields.Integer('Number of Refund Orders', compute='_compute_refund_related_fields', help="Number of orders where items from this order were refunded")
@@ -414,11 +405,6 @@ class PosOrder(models.Model):
         for order in self:
             order.has_refundable_lines = any([float_compare(line.qty, line.refunded_qty, digits) > 0 for line in order.lines])
 
-    @api.depends('account_move')
-    def _compute_is_invoiced(self):
-        for order in self:
-            order.is_invoiced = bool(order.account_move)
-
     @api.depends('picking_ids', 'picking_ids.state')
     def _compute_picking_count(self):
         for order in self:
@@ -438,9 +424,11 @@ class PosOrder(models.Model):
     @api.depends('partner_id')
     def _compute_contact_details(self):
         for order in self:
-            order.email = order.partner_id.email or ""
-            order.mobile = order._phone_format(number=order.partner_id.phone or "",
-                        country=order.partner_id.country_id)
+            mobile = order._phone_format(number=order.partner_id.phone or "", country=order.partner_id.country_id)
+            order.write({
+                'email': order.partner_id.email or "",
+                'mobile': mobile
+            })
 
     def _compute_total_cost_in_real_time(self):
         """
@@ -485,7 +473,7 @@ class PosOrder(models.Model):
         for order in self:
             if not order.currency_id:
                 raise UserError(_("You can't: create a pos order from the backend interface, or unset the pricelist, or create a pos.order in a python test with Form tool, or edit the form view in studio if no PoS order exist"))
-            order.amount_paid = sum(payment.amount for payment in order.payment_ids)
+            order.amount_paid = sum(order.payment_ids.mapped('amount'))
             order.amount_return = -sum(payment.amount < 0 and payment.amount or 0 for payment in order.payment_ids)
 
             base_lines = order.lines._prepare_tax_base_line_values()
@@ -507,9 +495,11 @@ class PosOrder(models.Model):
                 cash_rounding=cash_rounding,
             )
             refund_factor = -1 if (order.amount_total < 0.0) else 1
-            order.amount_tax = refund_factor * tax_totals['tax_amount_currency']
-            order.amount_total = refund_factor * tax_totals['total_amount_currency']
-            order.amount_difference = order.amount_paid - order.amount_total
+            order.write({
+                'order.amount_tax': refund_factor * tax_totals['tax_amount_currency'],
+                'order.amount_total': refund_factor * tax_totals['total_amount_currency'],
+                'order.amount_difference': order.amount_paid - order.amount_total,
+            })
 
     @api.depends('lines.is_edited', 'has_deleted_line')
     def _compute_is_edited(self):
@@ -518,7 +508,8 @@ class PosOrder(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
-        if self.partner_id:
+        # TODO: need to check the flow at frontend side
+        if self.partner_id.property_product_pricelist:
             self.pricelist_id = self.partner_id.property_product_pricelist.id
 
     @api.ondelete(at_uninstall=False)
@@ -530,7 +521,7 @@ class PosOrder(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             session = self.env['pos.session'].browse(vals['session_id'])
-            vals = self._complete_values_from_session(session, vals)
+            self._complete_values_from_session(session, vals)
         return super().create(vals_list)
 
     def _update_sequence_number(self, session, values):
@@ -1258,7 +1249,7 @@ class PosOrder(models.Model):
         """Create a new payment for the order"""
         self.ensure_one()
         self.env['pos.payment'].create(data)
-        self.amount_paid = self._compute_amount_paid()
+        self.amount_paid = self._get_amount_paid()
 
     def _prepare_refund_values(self, current_session):
         self.ensure_one()
@@ -1277,14 +1268,14 @@ class PosOrder(models.Model):
 
     def _prepare_mail_values(self, email, ticket, basic_ticket):
         message = Markup(
-            _("<p>Dear %(client_name)s,<br/>Here is your Receipt %(is_invoiced)sfor \
+            _("<p>Dear %(client_name)s,<br/>Here is your Receipt %(invoiced)sfor \
             %(pos_name)s amounting in %(amount)s from %(company_name)s. </p>")
         ) % {
             'client_name': self.partner_id.name or _('Customer'),
             'pos_name': self.name,
             'amount': self.currency_id.format(self.amount_total),
             'company_name': self.company_id.name,
-            'is_invoiced': "and Invoice " if self.account_move else "",
+            'invoiced': "and Invoice " if self.account_move else "",
         }
 
         return {
@@ -1516,8 +1507,8 @@ class PosOrderLine(models.Model):
     @api.depends('refund_orderline_ids', 'refund_orderline_ids.order_id.state')
     def _compute_refund_qty(self):
         for orderline in self:
-            refund_order_line = orderline.refund_orderline_ids.filtered(lambda l: l.order_id.state != 'cancel')
-            orderline.refunded_qty = -sum(refund_order_line.mapped('qty'))
+            refund_order_lines = orderline.refund_orderline_ids.filtered(lambda l: l.order_id.state != 'cancel')
+            orderline.refunded_qty = -sum(refund_order_lines.mapped('qty'))
 
     def _prepare_refund_data(self, refund_order, PosPackOperationLot):
         """
@@ -1641,19 +1632,8 @@ class PosOrderLine(models.Model):
             self.tax_ids = self.product_id.taxes_id.filtered_domain(self.env['account.tax']._check_company_domain(self.company_id))
             tax_ids_after_fiscal_position = self.order_id.fiscal_position_id.map_tax(self.tax_ids)
             self.price_unit = self.env['account.tax']._fix_tax_included_price_company(price, self.tax_ids, tax_ids_after_fiscal_position, self.company_id)
-            self._onchange_qty()
 
-    @api.onchange('qty', 'discount', 'price_unit', 'tax_ids')
-    def _onchange_qty(self):
-        if self.product_id:
-            price = self.price_unit * (1 - (self.discount or 0.0) / 100.0)
-            self.price_subtotal = self.price_subtotal_incl = price * self.qty
-            if (self.tax_ids):
-                taxes = self.tax_ids.compute_all(price, self.order_id.currency_id, self.qty, product=self.product_id, partner=False)
-                self.price_subtotal = taxes['total_excluded']
-                self.price_subtotal_incl = taxes['total_included']
-
-    @api.depends('order_id', 'order_id.fiscal_position_id', 'tax_ids')
+    @api.depends('order_id.fiscal_position_id', 'tax_ids')
     def _get_tax_ids_after_fiscal_position(self):
         for line in self:
             line.tax_ids_after_fiscal_position = line.order_id.fiscal_position_id.map_tax(line.tax_ids)

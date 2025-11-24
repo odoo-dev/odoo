@@ -183,7 +183,6 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuPosCommon):
             with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.json'):
                 order = self._create_order({
                     # Note: The total is not above the simplified invoice limit
-                    'is_invoiced': True,
                     'customer': self.partner_b,  # Spanish customer
                     'pos_order_lines_ui_args': [
                         (self.product, 1.0),
@@ -219,7 +218,6 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuPosCommon):
             with self._mock_zeep_registration_operation('l10n_es_edi_verifactu/tests/responses/batch_single_accepted_registration.json'):
                 order = self._create_order({
                     # Note: The total is above the simplified invoice limit
-                    'is_invoiced': True,
                     'customer': self.partner_b,  # Spanish customer
                     'pos_order_lines_ui_args': [
                         (self.product, 10.0),

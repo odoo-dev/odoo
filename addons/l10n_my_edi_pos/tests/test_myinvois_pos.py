@@ -148,7 +148,7 @@ class TestMyInvoisPoS(TestPoSCommon):
             # Create the orders
             with self.with_pos_session(), patch(CONTACT_PROXY_METHOD, new=self._mock_successful_submission):
                 first_order = self._create_order({'pos_order_lines_ui_args': [(self.product_one, 1.0)]})
-                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer, 'is_invoiced': True})
+                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer})
                 third_order = self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)]})
             # Consolidate them
             wizard = self.env['myinvois.consolidate.invoice.wizard'].create({
@@ -193,7 +193,7 @@ class TestMyInvoisPoS(TestPoSCommon):
             # Create two orders split in the middle to create two lines.
             with self.with_pos_session(), patch(CONTACT_PROXY_METHOD, new=self._mock_successful_submission):
                 first_order = self._create_order({'pos_order_lines_ui_args': [(self.product_one, 1.0)]})
-                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer, 'is_invoiced': True})
+                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer})
                 third_order = self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)]})
 
             with patch('odoo.addons.l10n_my_edi_pos.wizard.myinvois_consolidate_invoice_wizard.MAX_LINE_COUNT_PER_INVOICE', 1):
@@ -262,7 +262,7 @@ class TestMyInvoisPoS(TestPoSCommon):
     def test_invoice_from_pos(self):
         with freeze_time("2025-01-01"):
             with self.with_pos_session(), patch(CONTACT_PROXY_METHOD, new=self._mock_successful_submission):
-                order = self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer, 'is_invoiced': True})
+                order = self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer})
             self.assertRecordValues(order.account_move._get_active_myinvois_document(), [{
                 'myinvois_submission_uid': '123456789',
                 'myinvois_external_uuid': '123458974513518',
@@ -492,7 +492,7 @@ class TestMyInvoisPoS(TestPoSCommon):
                             'quantity': -1.0,  # Refund 1 unit of product_b
                             'refunded_orderline_id': first_order.lines[0].id,
                         },
-                    ], 'customer': self.invoicing_customer, 'is_invoiced': True,
+                    ], 'customer': self.invoicing_customer,
                 })
 
     @mute_logger('odoo.addons.point_of_sale.models.pos_order', 'odoo.addons.point_of_sale.models.pos_session')
@@ -500,7 +500,7 @@ class TestMyInvoisPoS(TestPoSCommon):
         with freeze_time("2025-01-01"):
             # Create the orders
             with self.with_pos_session(), patch(CONTACT_PROXY_METHOD, new=self._mock_successful_submission):
-                first_order = self._create_order({'pos_order_lines_ui_args': [(self.product_one, 2.0)], 'customer': self.invoicing_customer, 'is_invoiced': True})
+                first_order = self._create_order({'pos_order_lines_ui_args': [(self.product_one, 2.0)], 'customer': self.invoicing_customer})
 
             with self.with_pos_session(), patch(CONTACT_PROXY_METHOD, new=self._mock_successful_submission):
                 # Fails, the order should be invoiced in such a case
@@ -528,7 +528,7 @@ class TestMyInvoisPoS(TestPoSCommon):
                             'quantity': -1.0,  # Refund 1 unit of product_b
                             'refunded_orderline_id': first_order.lines[0].id,
                         },
-                    ], 'customer': self.invoicing_customer, 'is_invoiced': True,
+                    ], 'customer': self.invoicing_customer,
                 })
 
     @mute_logger('odoo.addons.point_of_sale.models.pos_order', 'odoo.addons.point_of_sale.models.pos_session')
@@ -547,7 +547,7 @@ class TestMyInvoisPoS(TestPoSCommon):
                                 'quantity': -1.0,  # Refund 1 unit of product_b
                                 'refunded_orderline_id': first_order.lines[0].id,
                             },
-                        ], 'customer': self.invoicing_customer, 'is_invoiced': True,
+                        ], 'customer': self.invoicing_customer,
                     })
                 self._create_order({
                     'pos_order_lines_ui_args': [
@@ -592,7 +592,7 @@ class TestMyInvoisPoS(TestPoSCommon):
                             'quantity': -2.0,
                             'refunded_orderline_id': first_order.lines[0].id,
                         },
-                    ], 'customer': self.invoicing_customer, 'is_invoiced': True,
+                    ], 'customer': self.invoicing_customer,
                 })
 
             refund = self.env['account.move'].search([('move_type', '=', 'out_refund')], limit=1, order='id desc')
@@ -633,7 +633,7 @@ class TestMyInvoisPoS(TestPoSCommon):
                 third_order = self._create_order({'pos_order_lines_ui_args': [(product_1, 4.0, 25)]})
                 fourth_order = self._create_order({'pos_order_lines_ui_args': [(product_1, 1.0), (product_2, 2.0)]})
                 # This one is invoiced right away, so it will not be consolidated.
-                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer, 'is_invoiced': True})
+                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer})
                 fifth_order = self._create_order({'pos_order_lines_ui_args': [(product_1, 1.0), (product_2, 1.0)]})
 
             # Consolidate them
@@ -684,7 +684,7 @@ class TestMyInvoisPoS(TestPoSCommon):
                 third_order = self._create_order({'pos_order_lines_ui_args': [(product_1, 4.0, 25)]})
                 fourth_order = self._create_order({'pos_order_lines_ui_args': [(product_1, 1.0), (product_2, 2.0)]})
                 # This one is invoiced right away, so it will not be consolidated.
-                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer, 'is_invoiced': True})
+                self._create_order({'pos_order_lines_ui_args': [(self.product_two, 1.0)], 'customer': self.invoicing_customer})
                 fifth_order = self._create_order({'pos_order_lines_ui_args': [(product_1, 1.0), (product_2, 1.0)]})
 
             # Consolidate them
@@ -714,7 +714,7 @@ class TestMyInvoisPoS(TestPoSCommon):
                             'quantity': -2.0,
                             'refunded_orderline_id': first_order.lines[0].id,
                         },
-                    ], 'customer': self.invoicing_customer, 'is_invoiced': True,
+                    ], 'customer': self.invoicing_customer,
                 })
 
             refund = self.env['account.move'].search([('move_type', '=', 'out_refund')], limit=1, order='id desc')

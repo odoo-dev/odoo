@@ -62,7 +62,7 @@ class TestPoSController(TestPointOfSaleHttpCommon):
         }
         self.url_open(f'/pos/ticket/validate?access_token={self.pos_order.access_token}', data=get_invoice_data)
         self.assertEqual(self.env['res.partner'].sudo().search_count([('name', '=', 'AAA Partner')]), 1)
-        self.assertTrue(self.pos_order.is_invoiced, "The pos order should have an invoice")
+        self.assertTrue(self.pos_order.account_move, "The pos order should have an invoice")
         self.assertTrue(len(self.pos_order.pos_reference) >= 12, "The pos reference should not be less than 12 characters")
 
     def test_qr_code_receipt_user_connected(self):
@@ -108,7 +108,7 @@ class TestPoSController(TestPointOfSaleHttpCommon):
         })
         self.main_pos_config.current_session_id.close_session_from_ui()
         res = self.url_open(f'/pos/ticket/validate?access_token={self.pos_order.access_token}', timeout=30000)
-        self.assertTrue(self.pos_order.is_invoiced, "The pos order should have an invoice")
+        self.assertTrue(self.pos_order.account_move, "The pos order should have an invoice")
         self.assertTrue("my/invoices" in res.url)
 
     def test_qr_code_receipt_user_not_connected(self):

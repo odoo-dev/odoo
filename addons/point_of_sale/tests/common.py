@@ -898,7 +898,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
 
         for uid in orders_map:
             order = orders_map[uid]
-            if not order.is_invoiced:
+            if not order.account_move:
                 continue
             invoice = order.account_move
             # allow not checking the invoice since pos is not creating the invoices
