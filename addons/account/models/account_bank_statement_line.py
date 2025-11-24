@@ -359,8 +359,8 @@ class AccountBankStatementLine(models.Model):
         return defaults
 
     @api.model
-    def new(self, values=None, origin=None, ref=None):
-        return super(AccountBankStatementLine, self.with_context(is_statement_line=True)).new(values, origin, ref)
+    def new(self, values=None, origin=None, ref=None, validate=False):
+        return super(AccountBankStatementLine, self.with_context(is_statement_line=True)).new(values, origin, ref, validate)
 
     @api.model_create_multi
     def create(self, vals_list):

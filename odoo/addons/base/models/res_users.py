@@ -1321,10 +1321,10 @@ class UsersMultiCompany(models.Model):
         return res
 
     @api.model
-    def new(self, values=None, origin=None, ref=None):
+    def new(self, values=None, origin=None, ref=None, validate=False):
         if values is None:
             values = {}
-        user = super().new(values=values, origin=origin, ref=ref)
+        user = super().new(values=values, origin=origin, ref=ref, validate=validate)
         group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
             'base.group_multi_company', raise_if_not_found=False)
         if group_multi_company_id:

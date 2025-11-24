@@ -1503,19 +1503,19 @@ class HrEmployee(models.Model):
         return resource_vals
 
     @api.model
-    def new(self, values=None, origin=None, ref=None):
+    def new(self, values=None, origin=None, ref=None, validate=False):
         if not values:
             values = {}
         new_vals = values.copy()
         version_vals = {val: new_vals.pop(val) for val in values if val in self._fields and self._fields[val].inherited}
 
-        employee = super().new(new_vals, origin, ref)
+        employee = super().new(new_vals, origin, ref, validate)
         version_vals['employee_id'] = employee
         self.env['hr.version'].new({
             f_name: value
             for f_name, value in version_vals.items()
             if self.env['hr.version']._has_field_access(self.env['hr.version']._fields[f_name], 'read')
-        })
+        }, validate=validate)
         return employee
 
     @api.model

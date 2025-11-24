@@ -78,13 +78,13 @@ class BaseString(Field[str | typing.Literal[False]]):
         func = getattr(self.translate, 'get_text_content', lambda term: term)
         return func(term)
 
-    def convert_to_column_insert(self, value, record, values=None):
+    def convert_to_column_insert(self, value, record):
         if self.translate:
-            value = self.convert_to_column(value, record, values)
+            value = self.convert_to_column(value, record)
             if value is None:
                 return None
             return PsycopgJson({'en_US': value, record.env.lang or 'en_US': value})
-        return super().convert_to_column_insert(value, record, values)
+        return super().convert_to_column_insert(value, record)
 
     def get_column_update(self, record):
         if self.translate:

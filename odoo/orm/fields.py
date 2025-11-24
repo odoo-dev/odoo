@@ -1004,19 +1004,19 @@ class Field(typing.Generic[T]):
     # - write format: when you write on a recordset
     #
 
-    def convert_to_column(self, value, record, values=None):
+    def convert_to_column(self, value, record):
         """ Convert ``value`` from the cache format to the SQL parameter
         format for SQL conditions. This is used to compare a field's value when
         the field actually stores multiple values (translated or company-dependent).
         """
         return value
 
-    def convert_to_column_insert(self, value, record, values=None):
+    def convert_to_column_insert(self, value, record):
         """ Convert ``value`` from the cache format to the SQL parameter
         format for INSERT queries. This method handles the case of fields that
         store multiple values (translated or company-dependent).
         """
-        value = self.convert_to_column(value, record, values)
+        value = self.convert_to_column(value, record)
         if not self.company_dependent:
             return value
         fallback = record.env['ir.default']._get_model_defaults(record._name).get(self.name)

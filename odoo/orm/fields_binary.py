@@ -56,7 +56,7 @@ class Binary(Field):
     def _description_sortable(self, env):
         return False
 
-    def convert_to_column(self, value, record, values=None):
+    def convert_to_column(self, value, record):
         # Binary values may be byte strings (python 2.6 byte array), but
         # the legacy OpenERP convention is to transfer and store binaries
         # as base64-encoded strings. The base64 string may be provided as a

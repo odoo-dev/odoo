@@ -29,7 +29,7 @@ class Integer(Field[int]):
             res['aggregator'] = None
         return res
 
-    def convert_to_column(self, value, record, values=None):
+    def convert_to_column(self, value, record):
         return int(value or 0)
 
     def convert_to_cache(self, value, record, validate=True):
@@ -129,7 +129,7 @@ class Float(Field[float]):
     def _description_digits(self, env: Environment) -> tuple[int, int] | None:
         return self.get_digits(env)
 
-    def convert_to_column(self, value, record, values=None):
+    def convert_to_column(self, value, record):
         value_float = value = float(value or 0.0)
         if digits := self.get_digits(record.env):
             _precision, scale = digits
@@ -218,28 +218,20 @@ class Monetary(Field[float]):
         assert self.get_currency_field(model) in model._fields, \
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
 
-    def convert_to_column_insert(self, value, record, values=None):
+    def convert_to_column(self, value, record):
+        value = float(value or 0.0)
+
         # retrieve currency from values or record
         currency_field_name = self.get_currency_field(record)
-        currency_field = record._fields[currency_field_name]
-        if values and currency_field_name in values:
-            dummy = record.new({currency_field_name: values[currency_field_name]})
-            currency = dummy[currency_field_name]
-        elif values and currency_field.related and currency_field.related.split('.')[0] in values:
-            related_field_name = currency_field.related.split('.')[0]
-            dummy = record.new({related_field_name: values[related_field_name]})
-            currency = dummy[currency_field_name]
-        else:
+        if record:
             # Note: this is wrong if 'record' is several records with different
             # currencies, which is functional nonsense and should not happen.
             # sudo and only fetch the currency record in case the user doesn't
             # have the read permission of the currency field.
             currency = record[:1].sudo().with_context(prefetch_fields=False)[currency_field_name]
-            currency = currency.with_env(record.env)
-
-        value = float(value or 0.0)
-        if currency:
-            return float_repr(currency.round(value), currency.decimal_places)
+            if currency:
+                currency = currency.with_env(record.env)
+                return float_repr(currency.round(value), currency.decimal_places)
         return value
 
     def convert_to_cache(self, value, record, validate=True):
@@ -272,7 +264,7 @@ class Monetary(Field[float]):
         return value
 
     def convert_to_write(self, value, record):
-        return value
+        return self.convert_to_cache(value, record) or 0.0
 
     def convert_to_export(self, value, record):
         if value or value == 0.0:

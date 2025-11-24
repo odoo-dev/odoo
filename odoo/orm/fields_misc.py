@@ -24,7 +24,7 @@ class Boolean(Field[bool]):
     _column_type = ('bool', 'bool')
     falsy_value = False
 
-    def convert_to_column(self, value, record, values=None):
+    def convert_to_column(self, value, record):
         return bool(value)
 
     def convert_to_cache(self, value, record, validate=True):
@@ -75,9 +75,7 @@ class Json(Field):
             return None
         return json.loads(json.dumps(value, ensure_ascii=False, default=json_default))
 
-    def convert_to_column(self, value, record, values=None, validate=True):
-        if validate:
-            value = self.convert_to_cache(value, record)
+    def convert_to_column(self, value, record):
         if value is None:
             return None
         return PsycopgJson(value)

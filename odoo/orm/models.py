@@ -4055,6 +4055,7 @@ class BaseModel(metaclass=MetaModel):
 
         * default values,
         * discarded forbidden values (magic fields),
+        * currency fields,
         * precomputed fields.
 
         :param vals_list: List of create values
@@ -4101,7 +4102,7 @@ class BaseModel(metaclass=MetaModel):
         precomputable = {
             fname: field
             for fname, field in self._fields.items()
-            if field.precompute
+            if field.precompute or field.type == 'monetary'
         }
         if not precomputable:
             return
@@ -4116,7 +4117,7 @@ class BaseModel(metaclass=MetaModel):
             return
 
         # create new records for the vals that must be completed
-        records = self.browse().concat(*(self.new(vals) for vals in vals_list_todo))
+        records = self.browse().concat(*(self.new(vals, validate=True) for vals in vals_list_todo))
 
         for record, vals in zip(records, vals_list_todo):
             vals['__precomputed__'] = precomputed = set()
@@ -4155,9 +4156,8 @@ class BaseModel(metaclass=MetaModel):
                     for stored, row, record, data in zip(stored_list, rows, records, data_sublist):
                         if fname in stored:
                             cache_value = record._cache[fname]
-                            # cache_value = field.convert_to_cache(stored[fname], record)
                             data['cache'][fname] = cache_value
-                            row.append(field.convert_to_column_insert(cache_value, self, stored))
+                            row.append(field.convert_to_column_insert(cache_value, self))
                         else:
                             row.append(SQL_DEFAULT)
                 else:
@@ -4207,6 +4207,8 @@ class BaseModel(metaclass=MetaModel):
             for fname, cache_value in vals.items():
                 field = self._fields[fname]
                 if field.type not in ('one2many', 'many2many'):
+                    if field.relational and isinstance(cache_value, NewId):
+                        cache_value = cache_value.origin
                     field._update_cache(record, cache_value)
                     if field.type in ('many2one', 'many2one_reference') and self.pool.field_inverses[field]:
                         inverses_update[(field, cache_value)].append(record.id)
@@ -5722,7 +5724,7 @@ class BaseModel(metaclass=MetaModel):
 
     @api.model
     @api.private
-    def new(self, values: ValuesType | None = None, origin: Self | None = None, ref: str | None = None, validate=False) -> Self:
+    def new(self, values: ValuesType | None = None, origin: Self | None = None, ref: str | None = None, validate: bool = False) -> Self:
         """ Return a new record instance attached to the current environment and
         initialized with the provided ``value``. The record is *not* created
         in database, it only exists in memory.

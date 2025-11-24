@@ -88,6 +88,11 @@ class _Relational(Field[BaseModel]):
         """
         raise NotImplementedError
 
+    def convert_to_column(self, value, record):
+        if isinstance(value, NewId):
+            value = value.origin
+        return value
+
     def setup_nonrelated(self, model):
         super().setup_nonrelated(model)
         assert self.comodel_name in model.pool, \

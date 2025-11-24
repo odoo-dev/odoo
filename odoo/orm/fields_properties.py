@@ -123,7 +123,7 @@ class Properties(Field):
     #           'aa34746a6851ee4e': 1337,
     #       }
     #
-    def convert_to_column(self, value, record, values=None):
+    def convert_to_column(self, value, record):
         if not value:
             return None
         return json.dumps(value)
