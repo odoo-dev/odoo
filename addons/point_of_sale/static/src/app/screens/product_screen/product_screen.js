@@ -25,6 +25,7 @@ import {
 import { pick } from "@web/core/utils/objects";
 import { unaccent } from "@web/core/utils/strings";
 import { CameraBarcodeScanner } from "@point_of_sale/app/screens/product_screen/camera_barcode_scanner";
+import { memoize } from "@point_of_sale/app/utils/functions";
 
 export class ProductScreen extends Component {
     static template = "point_of_sale.ProductScreen";
@@ -201,6 +202,75 @@ export class ProductScreen extends Component {
             false
         );
     }
+
+    _getProducts = memoize(
+        function _getProducts() {
+            const { limit_categories, iface_available_categ_ids } = this.pos.config;
+            if (limit_categories && iface_available_categ_ids.length > 0) {
+                const productIds = new Set([]);
+                for (const categ of iface_available_categ_ids) {
+                    const categoryProducts = this.getProductsByCategory(categ);
+                    for (const p of categoryProducts) {
+                        productIds.add(p.id);
+                    }
+                }
+                return this.pos.models["product.product"].filter(
+                    (p) =>
+                        productIds.has(p.id) ||
+                        this.pos.session._pos_special_display_products_ids?.includes(p.id)
+                );
+            }
+            return this.pos.models["product.product"].getAll();
+        }.bind(this),
+        (() => [this.pos.models["product.product"].length]).bind(this)
+    );
+
+    _getProductsToDisplay = memoize(
+        function _getProductsToDisplay(searchWord, selectedCategoryId) {
+            let list = [];
+
+            if (searchWord !== "") {
+                if (!this._searchTriggered) {
+                    this.pos.setSelectedCategory(0);
+                    this._searchTriggered = true;
+                }
+                list = this.addMainProductsToDisplay(this.getProductsBySearchWord(searchWord));
+            } else {
+                this._searchTriggered = false;
+                if (selectedCategoryId) {
+                    list = this.getProductsByCategory(this.pos.selectedCategory);
+                } else {
+                    list = this.products;
+                }
+            }
+
+            if (!list || list.length === 0) {
+                return [];
+            }
+
+            const excludedProductIds = [
+                this.pos.config.tip_product_id?.id,
+                ...this.pos.hiddenProductIds,
+                ...this.pos.session._pos_special_products_ids,
+            ];
+
+            const filteredList = [];
+            for (const product of list) {
+                if (filteredList.length >= 100) {
+                    break;
+                }
+                if (!excludedProductIds.includes(product.id) && product.canBeDisplayed) {
+                    filteredList.push(product);
+                }
+            }
+
+            return searchWord !== ""
+                ? filteredList
+                : filteredList.sort((a, b) => a.display_name.localeCompare(b.display_name));
+        }.bind(this),
+        (() => [this.pos.models["product.product"].length]).bind(this)
+    );
+
     getProductName(product) {
         const productTmplValIds = product.attribute_line_ids
             .map((l) => l.product_template_value_ids)
@@ -352,65 +422,11 @@ export class ProductScreen extends Component {
     }
 
     get products() {
-        const { limit_categories, iface_available_categ_ids } = this.pos.config;
-        if (limit_categories && iface_available_categ_ids.length > 0) {
-            const productIds = new Set([]);
-            for (const categ of iface_available_categ_ids) {
-                const categoryProducts = this.getProductsByCategory(categ);
-                for (const p of categoryProducts) {
-                    productIds.add(p.id);
-                }
-            }
-            return this.pos.models["product.product"].filter(
-                (p) =>
-                    productIds.has(p.id) ||
-                    this.pos.session._pos_special_display_products_ids?.includes(p.id)
-            );
-        }
-        return this.pos.models["product.product"].getAll();
+        return this._getProducts();
     }
 
     get productsToDisplay() {
-        let list = [];
-
-        if (this.searchWord !== "") {
-            if (!this._searchTriggered) {
-                this.pos.setSelectedCategory(0);
-                this._searchTriggered = true;
-            }
-            list = this.addMainProductsToDisplay(this.getProductsBySearchWord(this.searchWord));
-        } else {
-            this._searchTriggered = false;
-            if (this.pos.selectedCategory?.id) {
-                list = this.getProductsByCategory(this.pos.selectedCategory);
-            } else {
-                list = this.products;
-            }
-        }
-
-        if (!list || list.length === 0) {
-            return [];
-        }
-
-        const excludedProductIds = [
-            this.pos.config.tip_product_id?.id,
-            ...this.pos.hiddenProductIds,
-            ...this.pos.session._pos_special_products_ids,
-        ];
-
-        const filteredList = [];
-        for (const product of list) {
-            if (filteredList.length >= 100) {
-                break;
-            }
-            if (!excludedProductIds.includes(product.id) && product.canBeDisplayed) {
-                filteredList.push(product);
-            }
-        }
-
-        return this.searchWord !== ""
-            ? filteredList
-            : filteredList.sort((a, b) => a.display_name.localeCompare(b.display_name));
+        return this._getProductsToDisplay(this.searchWord, this.pos.selectedCategory?.id);
     }
 
     getProductsBySearchWord(searchWord) {
