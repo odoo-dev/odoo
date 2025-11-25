@@ -36,6 +36,7 @@ export class BuilderSelect extends Component {
                 fixedButton: { type: Object, optional: true },
             },
         },
+        isActiveDebounce: { type: Boolean, optional: true },
     };
     static components = {
         Dropdown,
@@ -59,6 +60,7 @@ export class BuilderSelect extends Component {
             }
         };
         useSelectableComponent(this.props.id, {
+            isActiveDebounce: this.props.isActiveDebounce,
             onItemChange(item) {
                 currentLabel = item.getLabel();
                 updateCurrentLabel();

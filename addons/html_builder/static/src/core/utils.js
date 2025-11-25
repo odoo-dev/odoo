@@ -232,7 +232,7 @@ export function useGetItemValue() {
     };
 }
 
-export function useSelectableComponent(id, { onItemChange } = {}) {
+export function useSelectableComponent(id, { onItemChange, isActiveDebounce } = {}) {
     useBuilderComponent();
     const selectableItems = [];
     const refreshCurrentItemDebounced = useDebounced(refreshCurrentItem, 0, { immediate: true });
@@ -292,7 +292,8 @@ export function useSelectableComponent(id, { onItemChange } = {}) {
             },
             update: refreshCurrentItemDebounced,
             items: selectableItems,
-            refreshCurrentItem: () => refreshCurrentItem(),
+            refreshCurrentItem: () =>
+                isActiveDebounce ? refreshCurrentItemDebounced() : refreshCurrentItem(),
             getSelectableState: () => state,
         },
     });
