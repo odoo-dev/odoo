@@ -42,7 +42,12 @@ class WebsiteTechnicalPage(models.Model):
     @property
     def _table_query(self):
         routes = self.get_static_routes()
-        values = ", ".join(str(route) for route in routes)
+        def _esc(val):
+            return str(val).replace("'", "''")
+        values = ", ".join(
+            "('%s','%s')" % (_esc(col1), _esc(col2))
+            for col1, col2 in routes
+        )
 
         return SQL("""
             SELECT row_number() OVER () AS id,
