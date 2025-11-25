@@ -224,3 +224,8 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         '''
         decrypted_key = self.sudo().private_key_id._decrypt(base64.b64decode(symmetric_key))
         return self.env['certificate.key']._account_edi_fernet_decrypt(decrypted_key, base64.b64decode(data))
+
+    def write(self, vals):
+        if 'active' in vals and not vals.get('active') and self.company_id:
+            raise UserError(self.env._("You can not archive the user as it is linked to the company"))
+        return super().write(vals)
