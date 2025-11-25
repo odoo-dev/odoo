@@ -25,7 +25,7 @@ from werkzeug import urls
 
 from odoo import _, api, models, fields
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import posix_to_ldml
+from odoo.tools import posix_to_ldml, safe_eval
 from odoo.tools.json import scriptsafe as json_safe
 from odoo.tools.misc import file_open, get_lang, babel_locale_parse
 
@@ -239,6 +239,16 @@ class IrQwebFieldMany2one(models.AbstractModel):
     _description = 'Qweb Field Many to One'
     _inherit = ['ir.qweb.field.many2one']
 
+    def _get_eval_context(self, record=None):
+        """Return the evaluation context for many2one description domains."""
+        company = self.env.company
+        return {
+            'company_id': company.id,
+            'company_ids': company.ids,
+            'allowed_company_ids': self.env.context.get('allowed_company_ids', [company.id]),
+            'id': record.id if record else None,
+        }
+
     @api.model
     def attributes(self, record, field_name, options, values=None):
         field = record._fields[field_name]
@@ -252,7 +262,11 @@ class IrQwebFieldMany2one(models.AbstractModel):
                 attrs['data-oe-many2one-allowreset'] = 1
                 if not many2one:
                     attrs['data-oe-many2one-model'] = record._fields[field_name].comodel_name
-            attrs['data-oe-many2one-domain'] = json_safe.dumps(field._description_domain(self.env))
+            domain = field._description_domain(self.env)
+            if isinstance(domain, str):
+                ctx = self._get_eval_context(record)
+                domain = safe_eval.safe_eval(domain, ctx)
+            attrs['data-oe-many2one-domain'] = json_safe.dumps(domain)
         return attrs
 
     @api.model
