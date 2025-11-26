@@ -43,6 +43,11 @@ class AccountPaymentWithholdingLine(models.Model):
         for line in self:
             line.comodel_full_amount = line.payment_register_id.amount
 
+    @api.depends('payment_register_id.id')
+    def _compute_comodel_full_amount_2(self):
+        for line in self:
+            line.comodel_full_amount = line.payment_register_id.amount
+
     @api.depends('payment_id.date')
     def _compute_comodel_date(self):
         for line in self:
