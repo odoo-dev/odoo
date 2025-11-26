@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="mrp_bom_estimated_info_view_form" model="ir.ui.view">
+            <field name="name">mrp.bom.estimated.info.form</field>
+            <field name="model">mrp.bom.estimated.info</field>
+            <field name="arch" type="xml">
+                <form string="Days to Prepare Mo">
+                    <field name="bom_id" invisible="1"/>
+                    <group>
+                        <field name="estimated_info" readonly="1" class="oe_read_only"/>
+                    </group>
+                    <footer>
+                        <button string="Close" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+</odoo>

@@ -94,6 +94,7 @@ class MrpBom(models.Model):
     show_set_bom_button = fields.Boolean(compute="_compute_show_set_bom_button")
     batch_size = fields.Float('Batch Size', default=1.0, digits='Product Unit', help="All automatically generated manufacturing orders for this product will be of this size.")
     enable_batch_size = fields.Boolean(default=False)
+    estimated_info = fields.Text(compute='_compute_estimated_info')
 
     _qty_positive = models.Constraint(
         'check (product_qty > 0)',
@@ -333,21 +334,51 @@ class MrpBom(models.Model):
                 break
             bom.show_copy_operations_button = False
 
-    def action_compute_bom_days(self):
-        company_id = self.env.context.get('default_company_id', self.env.company.id)
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1)
-        for bom in self:
-            bom_data = self.env['report.mrp.report_bom_structure'].with_context(minimized=True)._get_bom_data(bom, warehouse, bom.product_id, ignore_stock=True)
-            bom.days_to_prepare_mo = self.env['report.mrp.report_bom_structure']._get_max_component_delay(bom_data['components'])
-            if bom_data.get('availability_state') == 'unavailable' and not bom_data.get('components_available', True):
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': _('Cannot compute days to prepare due to missing route info for at least 1 component or for the final product.'),
-                        'sticky': False,
-                    }
-                }
+    @api.depends('type')
+    def _compute_estimated_info(self):
+        warehouse = self.env.user._get_default_warehouse_id()
+        self.estimated_info = False
+        for bom in self.filtered(lambda bom: bom.type != 'phantom'):
+            bom_data = bom.env['report.mrp.report_bom_structure'].with_context(minimized=True)._get_bom_data(bom, warehouse, bom.product_id, ignore_stock=True)
+            component_info = max(bom_data.get('components'), key=lambda component: component.get('availability_delay', 0) or component.get('manufacture_delay', 0), default={'availability_delay': 0, 'manufacture_delay': 0, 'name': ''})
+            max_delay = component_info.get('availability_delay') or component_info.get('manufacture_delay')
+            if not component_info.get('name') or (
+                    component_info.get('product').type == 'consu' and not component_info.get('is_storable')):
+                bom.estimated_info = f"Estimated: {int(max_delay)} days"
+            elif max_delay is not False:
+                bom.estimated_info = f"Estimated: {int(max_delay)} days\n({component_info.get('name')})"
+            else:
+                bom.estimated_info = "Estimated: Not Available\n(Missing Routes information\nfor some components)"
+
+    def action_estimated_info(self):
+        self.ensure_one()
+        wizard = self.env['mrp.bom.estimated.info'].create({
+            'bom_id': self.id,
+            'estimated_info': self.estimated_info,
+        })
+        return {
+            'name': _("Days to Prepare Mo"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'mrp.bom.estimated.info',
+            'view_mode': 'form',
+            'res_id': wizard.id,
+            'target': 'new',
+        }
+
+    @api.depends('type')
+    def _compute_estimated_info(self):
+        warehouse = self.env.user._get_default_warehouse_id()
+        self.estimated_info = False
+        for bom in self.filtered(lambda bom: bom.type != 'phantom'):
+            bom_data = bom.env['report.mrp.report_bom_structure'].with_context(minimized=True)._get_bom_data(bom, warehouse, bom.product_id, ignore_stock=True)
+            component_info = max(bom_data.get('components'), key=lambda component: component.get('availability_delay', 0) or component.get('manufacture_delay', 0), default={'availability_delay': 0, 'manufacture_delay': 0, 'name': ''})
+            max_delay = component_info.get('availability_delay') or component_info.get('manufacture_delay')
+            if not component_info.get('name') or (component_info.get('product').type == 'consu' and not component_info.get('is_storable')):
+                bom.estimated_info = f"Estimated: {int(max_delay)} days"
+            elif max_delay is not False:
+                bom.estimated_info = f"Estimated: {int(max_delay)} days\n({component_info.get('name')})"
+            else:
+                bom.estimated_info = "Estimated: Not Available\n(Missing Routes information\nfor some components)"
 
     @api.constrains('product_tmpl_id', 'product_id', 'type')
     def check_kit_has_not_orderpoint(self):

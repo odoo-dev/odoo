@@ -16,6 +16,7 @@
         'data/mail_templates.xml',
         'data/mrp_data.xml',
         'data/mail_message_subtype_data.xml',
+        'wizard/mrp_bom_estimated_info.xml',
         'wizard/change_production_qty_views.xml',
         'wizard/mrp_workcenter_block_view.xml',
         'wizard/stock_warn_insufficient_qty_views.xml',
