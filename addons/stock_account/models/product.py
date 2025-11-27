@@ -223,7 +223,7 @@ class ProductProduct(models.Model):
         if date:
             last_in_domain &= Domain([('date', '<=', date)])
         last_in = self.env['stock.move'].search(last_in_domain, order='date desc, id desc', limit=1)
-        if not product_value and not last_in:
+        if not product_value:
             return self.standard_price
         if (product_value and last_in and product_value.date > last_in.date) or not last_in:
             return product_value.value
