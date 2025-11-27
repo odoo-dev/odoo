@@ -21,6 +21,8 @@ patch(PaymentForm.prototype, {
         if (chosenPaymentDetails){
             if (chosenPaymentDetails.id === "o_payment_installments_tab") {
                 this.paymentContext.amount = parseFloat(this.paymentContext.invoiceNextAmountToPay);
+            } else if (chosenPaymentDetails.id === "o_payment_with_next_tab") {
+                this.paymentContext.amount = parseFloat(this.paymentContext.invoiceOverdueAmountWithNext);
             } else {
                 this.paymentContext.amount = parseFloat(this.paymentContext.invoiceAmountDue);
             }

@@ -153,10 +153,28 @@
                                         aria-controls="o_payment_installments"
                                         aria-selected="true"
                                     >
-                                        <strong>Installment</strong>
+                                        <strong t-if="installment_state == 'overdue'">Overdue Payment</strong>
+                                        <strong t-else="">Installment</strong>
                                         <br/>
                                         <t
                                             t-out="next_amount_to_pay"
+                                            t-options="{'widget': 'monetary', 'display_currency': currency}"
+                                        />
+                                    </button>
+                                    <button class="btn btn-outline-primary o_btn_payment_tab"
+                                        id="o_payment_with_next_tab"
+                                        t-if="overdue_amount_with_next > 0"
+                                        data-bs-toggle="pill"
+                                        data-bs-target="#o_payment_with_next"
+                                        type="button"
+                                        role="tab"
+                                        aria-controls="o_payment_with_next"
+                                        aria-selected="true"
+                                    >
+                                        <strong>Overdue + Next Payment</strong>
+                                        <br/>
+                                        <t
+                                            t-out="overdue_amount_with_next"
                                             t-options="{'widget': 'monetary', 'display_currency': currency}"
                                         />
                                     </button>
@@ -195,6 +213,30 @@
                                             </t>
                                             <t t-call="payment.summary_item">
                                                 <t t-set="name" t-value="'reference_installment'"/>
+                                                <t t-set="label">Reference</t>
+                                                <t t-set="value" t-value="next_payment_reference"/>
+                                                <t t-set="include_separator" t-value="True"/>
+                                            </t>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="tab-pane my-3"
+                                        id="o_payment_with_next"
+                                        role="tabpanel"
+                                        aria-labelledby="o_payment_with_next_tab"
+                                        tabindex="0"
+                                    >
+                                        <div class="text-bg-light row row-cols-1 row-cols-md-2 mx-0 py-2 rounded">
+                                            <t t-call="payment.summary_item">
+                                                <t t-set="name" t-value="'amount_sample'"/>
+                                                <t t-set="label">Amount</t>
+                                                <t t-set="value" t-value="overdue_amount_with_next"/>
+                                                <t t-set="options"
+                                                    t-value="{'widget': 'monetary', 'display_currency': currency}"
+                                                />
+                                            </t>
+                                            <t t-call="payment.summary_item">
+                                                <t t-set="name" t-value="'reference_sample'"/>
                                                 <t t-set="label">Reference</t>
                                                 <t t-set="value" t-value="next_payment_reference"/>
                                                 <t t-set="include_separator" t-value="True"/>

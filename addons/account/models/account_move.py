@@ -6291,6 +6291,7 @@ class AccountMove(models.Model):
         epd_installment = next((installment for installment in installments if installment['type'] == 'early_payment_discount'), {})
         show_installments = len(installments) > 1
         additional_info = {}
+        overdue_amount_with_next = 0
 
         if show_installments and overdue_installments:
             installment_state = 'overdue'
@@ -6298,6 +6299,10 @@ class AccountMove(models.Model):
             next_amount_to_pay = sum(x['amount_residual_currency_unsigned'] for x in overdue_installments)
             next_payment_reference = f"{self.name}-{overdue_installments[0]['number']}"
             next_due_date = overdue_installments[0]['date_maturity']
+            overdue_amount_with_next = (
+                next_amount_to_pay + not_reconciled_installments[len(overdue_installments)]['amount_residual_currency_unsigned']
+                if len(not_reconciled_installments) > len(overdue_installments) else 0
+            )
         elif show_installments and not_reconciled_installments:
             installment_state = 'next'
             amount_due = self.amount_residual
@@ -6353,6 +6358,7 @@ class AccountMove(models.Model):
             'payment_state': self.payment_state,
             'installment_state': installment_state,
             'next_amount_to_pay': next_amount_to_pay,
+            "overdue_amount_with_next": overdue_amount_with_next,
             'next_payment_reference': next_payment_reference,
             'amount_paid': self.amount_total - self.amount_residual,
             'amount_due': amount_due,
