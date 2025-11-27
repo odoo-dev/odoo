@@ -409,6 +409,7 @@ test("performRPC: search_count", async () => {
 
 test("performRPC: search_count with domain", async () => {
     Partner._records.push({ id: 4, name: "José" });
+    Bar._records[2].partner_ids.push(4);
 
     await makeMockServer();
     const result = await ormRequest({
@@ -417,6 +418,26 @@ test("performRPC: search_count with domain", async () => {
         args: [[["name", "=", "José"]]],
     });
     expect(result).toBe(1);
+
+    for (const [domainClause, expectedCount] of [
+        [["partner_ids.name", "!=", "Not exists"], 6],
+        [["partner_ids.name", "=", "Jean-Michel"], 2],
+        [["partner_ids.name", "!=", "Jean-Michel"], 4],
+        [["partner_ids.name", "=", "José"], 1],
+        [["partner_ids.name", "!=", "José"], 5],
+        [["partner_ids.name", "in", ["Jean-Michel"]], 2],
+        [["partner_ids.name", "not in", ["Jean-Michel"]], 4],
+        [["partner_ids.name", "in", ["Jean-Michel", "José"]], 3],
+        [["partner_ids.name", "not in", ["Jean-Michel", "José"]], 3],
+        // Note that comparison with false doesn't work
+    ]) {
+        const resultNested = await ormRequest({
+            model: "bar",
+            method: "search_count",
+            args: [[domainClause, [1.0, "=", 1.0]]],
+        });
+        expect(resultNested).toBe(expectedCount);
+    }
 });
 
 test("performRPC: search_count with domain matching no record", async () => {
