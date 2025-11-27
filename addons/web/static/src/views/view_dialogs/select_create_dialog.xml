@@ -8,7 +8,6 @@
                     <t t-set="dismiss" t-value="scope.close"/>
                     <t t-set="fullscreen" t-value="scope.isFullscreen"/>
                 </t>
-                <button t-if="this.canUnselect" class="btn o_clear_button" t-on-click="() => this.unselect()">Clear</button>
             </t>
             <View t-props="viewProps" />
             <t t-set-slot="footer">
@@ -24,7 +23,13 @@
                 <t t-if="!props.noCreate">
                     <button class="btn btn-primary o_create_button" data-hotkey="c" t-on-click="createEditRecord">Create New</button>
                 </t>
-                <button class="btn o_form_button_cancel" t-att-class="(!props.multiSelect &amp;&amp; props.noCreate) ? 'btn-primary' : 'btn-secondary'" data-hotkey="z" t-on-click="() => this.props.close()">Close</button>
+                <button class="btn o_form_button_cancel" t-att-class="{
+                        'btn-primary' : (!this.props.multiSelect &amp;&amp; this.props.noCreate),
+                        'btn-secondary' : !(!this.props.multiSelect &amp;&amp; this.props.noCreate),
+                        'o_clear_button': this.canUnselect
+                    }"
+                    data-hotkey="z" t-on-click="() => this.canUnselect ? this.unselect() : this.props.close()"
+                    t-out="this.canUnselect ? 'Clear' : 'Close'"/>
             </t>
         </Dialog>
     </t>
