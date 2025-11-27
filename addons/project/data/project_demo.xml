@@ -755,22 +755,6 @@
             <field name="date" eval="DateTime.now() - relativedelta(months=1)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_1_task_2_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_1_task_2_mail_message_1"/>
-        </record>
-        <record id="project_1_task_2_mail_message_2_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">In Progress</field>
-            <field name="new_value_char">Done</field>
-            <field name="old_value_integer">2</field>
-            <field name="new_value_integer">3</field>
-            <field name="mail_message_id" ref="project_1_task_2_mail_message_2"/>
-        </record>
 
         <record id="project_1_task_3" model="project.task">
             <field name="allocated_hours" eval="10.0"/>
@@ -800,22 +784,6 @@
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() - relativedelta(months=4)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_1_task_3_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_1_task_3_mail_message_1"/>
-        </record>
-        <record id="project_1_task_3_mail_message_2_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">In Progress</field>
-            <field name="new_value_char">Done</field>
-            <field name="old_value_integer">2</field>
-            <field name="new_value_integer">3</field>
-            <field name="mail_message_id" ref="project_1_task_3_mail_message_2"/>
         </record>
 
         <record id="project_1_task_4" model="project.task">
@@ -847,22 +815,6 @@
             <field name="date" eval="DateTime.now() - relativedelta(months=3)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_1_task_4_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_1_task_4_mail_message_1"/>
-        </record>
-        <record id="project_1_task_4_mail_message_2_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">In Progress</field>
-            <field name="new_value_char">Done</field>
-            <field name="old_value_integer">2</field>
-            <field name="new_value_integer">3</field>
-            <field name="mail_message_id" ref="project_1_task_4_mail_message_2"/>
-        </record>
 
         <record id="project_1_task_5" model="project.task">
             <field name="allocated_hours" eval="15.0"/>
@@ -884,23 +836,6 @@
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() - relativedelta(months=4)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_1_task_5_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_1_task_5_mail_message_1"/>
-        </record>
-        <record id="project_1_task_5_activity_1" model="mail.activity">
-            <field name="res_id" ref="project_1_task_5"/>
-            <field name="res_model_id" ref="project.model_project_task"/>
-            <field name="activity_type_id" ref="mail.mail_activity_data_email"/>
-            <field name="date_deadline" eval="(DateTime.today() + relativedelta(hours=3)).strftime('%Y-%m-%d %H:%M')"/>
-            <field name="summary">Follow-up email</field>
-            <field name="create_uid" ref="base.user_admin"/>
-            <field name="user_id" ref="base.user_admin"/>
         </record>
 
         <record id="project_1_task_6" model="project.task">
@@ -925,14 +860,6 @@
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() - relativedelta(months=2)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_1_task_6_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_1_task_6_mail_message_1"/>
         </record>
         <record id="project_1_task_6_activity_1" model="mail.activity">
             <field name="res_id" ref="project_1_task_6"/>
@@ -964,14 +891,6 @@
             <field name="date" eval="DateTime.now() - relativedelta(months=3)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_1_task_7_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_1_task_7_mail_message_1"/>
-        </record>
 
         <record id="project_1_task_8" model="project.task">
             <field name="allocated_hours" eval="60.0"/>
@@ -995,14 +914,6 @@
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() - relativedelta(months=1)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_1_task_8_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_1_task_8_mail_message_1"/>
         </record>
         <record id="project_1_task_8_message_1" model="mail.message">
             <field name="model">project.task</field>
@@ -1230,14 +1141,6 @@
             <field name="date" eval="DateTime.now() - relativedelta(weeks=16)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_2_task_1_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_1_mail_message_1"/>
-        </record>
         <record id="project_2_task_1_mail_message_2" model="mail.message">
             <field name="model">project.task</field>
             <field name="res_id" ref="project.project_2_task_1"/>
@@ -1245,14 +1148,6 @@
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() + relativedelta(weeks=-16, days=4)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_2_task_1_mail_message_2_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">In Progress</field>
-            <field name="new_value_char">Done</field>
-            <field name="old_value_integer">2</field>
-            <field name="new_value_integer">3</field>
-            <field name="mail_message_id" ref="project_2_task_1_mail_message_2"/>
         </record>
 
         <record id="project_2_task_2" model="project.task">
@@ -1274,14 +1169,6 @@
             <field name="date" eval="DateTime.now() - relativedelta(weeks=15)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_2_task_2_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_2_mail_message_1"/>
-        </record>
         <record id="project_2_task_2_mail_message_2" model="mail.message">
             <field name="model">project.task</field>
             <field name="res_id" ref="project.project_2_task_2"/>
@@ -1289,14 +1176,6 @@
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() - relativedelta(weeks=14)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_2_task_2_mail_message_2_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">In Progress</field>
-            <field name="new_value_char">Done</field>
-            <field name="old_value_integer">2</field>
-            <field name="new_value_integer">3</field>
-            <field name="mail_message_id" ref="project_2_task_2_mail_message_2"/>
         </record>
 
         <record id="project_2_task_3" model="project.task">
@@ -1318,14 +1197,6 @@
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() + relativedelta(weeks=-14, days=1)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_2_task_3_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_3_mail_message_1"/>
         </record>
         <record id="project_2_task_3_message_1" model="mail.message">
             <field name="model">project.task</field>
@@ -1383,14 +1254,6 @@ Send it ASAP, its urgent.</field>
             <field name="date" eval="DateTime.now() + relativedelta(weeks=-11)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_2_task_4_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_4_mail_message_1"/>
-        </record>
 
         <record id="project_2_task_5" model="project.task">
             <field name="allocated_hours" eval="38.0"/>
@@ -1413,14 +1276,6 @@ Send it ASAP, its urgent.</field>
             <field name="date" eval="DateTime.now() + relativedelta(weeks=-12, days=6)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_2_task_5_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_5_mail_message_1"/>
-        </record>
 
         <record id="project_2_task_6" model="project.task">
             <field name="allocated_hours">42.0</field>
@@ -1440,14 +1295,6 @@ Send it ASAP, its urgent.</field>
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() + relativedelta(weeks=-11, days=3)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_2_task_6_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_6_mail_message_1"/>
         </record>
 
         <record id="project_2_task_7" model="project.task">
@@ -1471,14 +1318,6 @@ Send it ASAP, its urgent.</field>
             <field name="date" eval="DateTime.now() + relativedelta(weeks=-12, days=5)"/>
             <field name="author_id" ref="base.partner_admin"/>
         </record>
-        <record id="project_2_task_7_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_7_mail_message_1"/>
-        </record>
         <record id="project_2_task_7_mail_message_2" model="mail.message">
             <field name="model">project.task</field>
             <field name="res_id" ref="project.project_2_task_7"/>
@@ -1486,14 +1325,6 @@ Send it ASAP, its urgent.</field>
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() + relativedelta(weeks=-9, days=3)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_2_task_7_mail_message_2_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">In Progress</field>
-            <field name="new_value_char">Done</field>
-            <field name="old_value_integer">2</field>
-            <field name="new_value_integer">3</field>
-            <field name="mail_message_id" ref="project_2_task_7_mail_message_2"/>
         </record>
 
         <record id="project_2_task_8" model="project.task">
@@ -1516,14 +1347,6 @@ Send it ASAP, its urgent.</field>
             <field name="subtype_id" ref="mt_task_stage"/>
             <field name="date" eval="DateTime.now() - relativedelta(weeks=10)"/>
             <field name="author_id" ref="base.partner_admin"/>
-        </record>
-        <record id="project_2_task_8_mail_message_1_track_1" model="mail.tracking.value">
-            <field name="field_id" model="ir.model.fields" eval="obj().search([('model', '=', 'project.task'), ('name', '=', 'stage_id')])"/>
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">In Progress</field>
-            <field name="old_value_integer">1</field>
-            <field name="new_value_integer">2</field>
-            <field name="mail_message_id" ref="project_2_task_8_mail_message_1"/>
         </record>
 
         <record id="project_2_task_9" model="project.task">

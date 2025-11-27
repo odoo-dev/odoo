@@ -255,14 +255,6 @@
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
         </record>
-        <record id="scenario_applicant_macm_helen_mtv_1" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">Initial Qualification</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job0')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job1')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_helen_mm_1" />
-        </record>
 
         <record id="msg_scenario_applicant_macm_helen_mm_c_1" model="mail.message">
             <field name="model">hr.applicant</field>
@@ -288,14 +280,6 @@
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
         </record>
-        <record id="scenario_applicant_macm_helen_mtv_2" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">Initial Qualification</field>
-            <field name="new_value_char">First Interview</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job1')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job2')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_helen_mm_2" />
-        </record>
 
         <record id="msg_scenario_applicant_macm_helen_mm_c_2" model="mail.message">
             <field name="model">hr.applicant</field>
@@ -320,14 +304,6 @@
             <field name="date" eval="DateTime.today() - relativedelta(days=10)" />
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
-        </record>
-        <record id="scenario_applicant_macm_helen_mtv_3" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">First Interview</field>
-            <field name="new_value_char">Second Interview</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job2')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job3')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_helen_mm_3" />
         </record>
 
         <record id="msg_scenario_applicant_macm_helen_mm_c_3" model="mail.message">
@@ -356,14 +332,6 @@
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
         </record>
-        <record id="scenario_applicant_macm_helen_mtv_4" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">Second Interview</field>
-            <field name="new_value_char">Contract Proposal</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job3')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job4')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_helen_mm_4" />
-        </record>
 
         <record id="msg_scenario_applicant_macm_helen_mm_c_4" model="mail.message">
             <field name="model">hr.applicant</field>
@@ -389,14 +357,6 @@
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
         </record>
-        <record id="scenario_applicant_macm_helen_mtv_5" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">Contract Proposal</field>
-            <field name="new_value_char">Contract Signed</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job4')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job5')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_helen_mm_5" />
-        </record>
 
         <!-- APPLICANT ENRIQUE -->
         <!-- it's missing the initial email that acknowledges the application (subject: your Job
@@ -408,14 +368,6 @@
             <field name="date" eval="DateTime.today() - relativedelta(months=1, days=17)" />
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
-        </record>
-        <record id="scenario_applicant_macm_enrique_mtv_1" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">Initial Qualification</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job0')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job1')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_enrique_mm_1" />
         </record>
 
         <record id="msg_scenario_applicant_macm_enrique_mm_c_1" model="mail.message">
@@ -445,14 +397,6 @@
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
         </record>
-        <record id="scenario_applicant_macm_enrique_mtv_2" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">Initial Qualification</field>
-            <field name="new_value_char">First Interview</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job1')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job2')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_enrique_mm_2" />
-        </record>
 
         <record id="msg_scenario_applicant_macm_enrique_mm_c_2" model="mail.message">
             <field name="model">hr.applicant</field>
@@ -481,14 +425,6 @@
             <field name="date" eval="DateTime.today() - relativedelta(days=20)" />
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
-        </record>
-        <record id="scenario_applicant_macm_enrique_mtv_3" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">First Interview</field>
-            <field name="new_value_char">Second Interview</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job2')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job3')" />
-            <field name="mail_message_id" ref="scenario_applicant_macm_enrique_mm_3" />
         </record>
 
         <record id="msg_scenario_applicant_macm_enrique_mm_c_3" model="mail.message">
@@ -522,14 +458,6 @@
             <field name="date" eval="DateTime.today() - relativedelta(days=17)" />
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
-        </record>
-        <record id="scenario_applicant_fsd_hannah_mtv_1" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">Initial Qualification</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job0')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job1')" />
-            <field name="mail_message_id" ref="scenario_applicant_fsd_hannah_mm_1" />
         </record>
 
         <record id="scenario_applicant_fsd_hannah_mm_c_1" model="mail.message">
@@ -565,14 +493,6 @@
             <field name="date" eval="DateTime.today() - relativedelta(days=17)" />
             <field name="author_id" ref="base.user_admin" />
             <field name="subtype_id" ref="hr_recruitment.mt_applicant_stage_changed" />
-        </record>
-        <record id="scenario_applicant_fsd_simon_mtv_1" model="mail.tracking.value">
-            <field name="field_id" ref="hr_recruitment.field_hr_applicant__stage_id" />
-            <field name="old_value_char">New</field>
-            <field name="new_value_char">Initial Qualification</field>
-            <field name="old_value_integer" eval="ref('hr_recruitment.stage_job0')" />
-            <field name="new_value_integer" eval="ref('hr_recruitment.stage_job1')" />
-            <field name="mail_message_id" ref="scenario_applicant_fsd_simon_mm_1" />
         </record>
 
         <record id="scenario_applicant_fsd_simon_mm_c_1" model="mail.message">
