@@ -300,6 +300,7 @@ function normalizeDomainAST(domain, op = "&") {
  * @returns {boolean}
  */
 function matchCondition(record, condition) {
+    console.log(condition, record)
     if (typeof condition === "boolean") {
         return condition;
     }
@@ -345,6 +346,7 @@ function matchCondition(record, condition) {
         case "not in": {
             const val = Array.isArray(value) ? value : [value];
             const fieldVal = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
+            console.log("val", val, fieldVal)
             return Boolean(fieldVal.some((fv) => val.includes(fv))) != isNot;
         }
         case "like":
