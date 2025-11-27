@@ -414,7 +414,7 @@ class MailPluginController(http.Controller):
         """
         if partner:
             partner_response = self._get_partner_data(partner)
-            if partner.company_type == 'company':
+            if partner.is_company:
                 partner_response['company'] = self._get_company_data(partner)
             elif partner.parent_id:
                 partner_response['company'] = self._get_company_data(partner.parent_id)

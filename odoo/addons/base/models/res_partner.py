@@ -265,14 +265,10 @@ class ResPartner(models.Model):
         'Formatted Email', compute='_compute_email_formatted',
         help='Format email address "Name <email@domain>"')
     phone = fields.Char()
-    is_company = fields.Boolean(string='Is a Company', default=False,
+    is_company = fields.Boolean(string='Is a Company', default=False, compute="_compute_is_company", store=True,
         help="Check if the contact is a company, otherwise it is a person")
     is_public = fields.Boolean(compute='_compute_is_public', compute_sudo=True)
     industry_id: ResPartnerIndustry = fields.Many2one('res.partner.industry', 'Industry')
-    # company_type is only an interface field, do not use it in business logic
-    company_type = fields.Selection(string='Company Type',
-        selection=[('person', 'Person'), ('company', 'Company')],
-        compute='_compute_company_type', inverse='_write_company_type')
     company_id: ResCompany = fields.Many2one('res.company', 'Company', index=True)
     color = fields.Integer(string='Color Index', default=0)
     user_ids: ResUsers = fields.One2many('res.users', 'partner_id', string='Users', bypass_search_access=True)
@@ -406,7 +402,7 @@ class ResPartner(models.Model):
     @api.depends('parent_id')
     def _compute_user_id(self):
         """ Synchronize sales rep with parent if partner is a person """
-        for partner in self.filtered(lambda partner: not partner.user_id and partner.company_type == 'person' and partner.parent_id.user_id):
+        for partner in self.filtered(lambda partner: not partner.user_id and not partner.is_company and partner.parent_id.user_id):
             partner.user_id = partner.parent_id.user_id
 
     @api.depends_context("uid")
@@ -442,7 +438,7 @@ class ResPartner(models.Model):
             # so that you can reactivate it instead of creating a new one, which would lose its history.
             Partner = self.with_context(active_test=False).sudo()
             vats = [partner.vat]
-            should_check_vat = partner.vat and len(partner.vat) != 1
+            should_check_vat = partner.vat and partner.vat not in ['/', 'na', 'NA']
 
             if should_check_vat and partner.country_id and 'EU_PREFIX' in partner.country_id.country_group_codes:
                 if partner.vat[:2].isalpha():
@@ -483,8 +479,6 @@ class ResPartner(models.Model):
                 partner.type_address_label = _('Invoice Address')
             elif partner.type == 'delivery':
                 partner.type_address_label = _('Delivery Address')
-            elif partner.type == 'contact' and partner.parent_id:
-                partner.type_address_label = _('Company Address')
             else:
                 partner.type_address_label = _('Address')
 
@@ -616,19 +610,6 @@ class ResPartner(models.Model):
                     partner.name or u"False",
                     partner.email
                 ))
-
-    @api.depends('is_company')
-    def _compute_company_type(self):
-        for partner in self:
-            partner.company_type = 'company' if partner.is_company else 'person'
-
-    def _write_company_type(self):
-        for partner in self:
-            partner.is_company = partner.company_type == 'company'
-
-    @api.onchange('company_type')
-    def onchange_company_type(self):
-        self.is_company = (self.company_type == 'company')
 
     @api.constrains('barcode')
     def _check_barcode_unicity(self):
@@ -824,6 +805,13 @@ class ResPartner(models.Model):
                 url = url.replace(netloc=url.path, path='')
             website = url.replace(scheme='http').to_url()
         return website
+
+    @api.depends('vat', 'commercial_partner_id')
+    def _compute_is_company(self):
+        for partner in self:
+            partner.is_company = False
+            if partner.commercial_partner_id == partner and partner.vat and partner.vat not in ['na', 'NA', '/']:
+                partner.is_company = True
 
     def _compute_is_public(self):
         for partner in self.with_context(active_test=False):

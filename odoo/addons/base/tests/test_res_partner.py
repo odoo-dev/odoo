@@ -774,13 +774,11 @@ class TestPartnerAddressCompany(TransactionCase):
         # create your contact
         individual = self.env['res.partner'].create({
             'industry_id': self.test_industries[0].id,
-            'is_company': False,
             'name': 'Individual',
             'ref': 'REFINDIVIDUAL',
             'vat': 'BEINDIVIDUAL',
             **self.test_address_values,
         })
-        self.assertFalse(individual.is_company)
         self.assertEqual(individual.type, 'contact')
         self.assertEqual(individual.ref, 'REFINDIVIDUAL')
         self.assertEqual(individual.vat, 'BEINDIVIDUAL')
@@ -947,13 +945,11 @@ class TestPartnerAddressCompany(TransactionCase):
 
         # create your contact
         individual = self.env['res.partner'].create({
-            'is_company': False,
             'name': 'Individual',
             'ref': 'REFINDIV',
             'vat': 'BEINDIVIDUAL',
             **self.test_address_values,
         })
-        self.assertFalse(individual.is_company)
         self.assertEqual(individual.type, 'contact')
         self.assertEqual(individual.ref, 'REFINDIV')
         self.assertEqual(individual.vat, 'BEINDIVIDUAL')
@@ -1178,12 +1174,6 @@ class TestPartnerForm(TransactionCase):
             self.env['res.partner'].with_context(default_lang='de_DE'),
             'base.view_partner_form'
         )
-        # <field name="is_company" invisible="1"/>
-        # <field name="company_type" widget="radio" options="{'horizontal': true}"/>
-        # @api.onchange('company_type')
-        # def onchange_company_type(self):
-        #     self.is_company = (self.company_type == 'company')
-        partner_form.company_type = 'company'
         partner_form.name = "Test Company"
         self.assertEqual(partner_form.lang, 'de_DE', "New partner's lang should take default from context")
         with partner_form.child_ids.new() as child:
@@ -1212,13 +1202,11 @@ class TestPartnerForm(TransactionCase):
             'company_ids': [company_1.id],
         })
         test_parent_partner = self.env['res.partner'].create({
-            'company_type': 'company',
             'name': 'Micheline',
             'user_id': test_user.id,
         })
         with Form(self.env['res.partner']) as partner_form:
             partner_form.parent_id = test_parent_partner
-            partner_form.company_type = 'person'
             partner_form.name = 'Philip'
             self.assertEqual(partner_form.user_id, test_parent_partner.user_id)
 
