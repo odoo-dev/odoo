@@ -94,7 +94,6 @@ class TestEdiFacturaeXmls(AccountTestInvoicingCommon):
             'country_id': cls.env.ref('base.us').id,
             'state_id': cls.env['res.country.state'].search([('name', '=', 'California')]).id,
             'email': 'indigo.exterior@example.com',
-            'company_type': 'company',
             'is_company': True,
         })
 
