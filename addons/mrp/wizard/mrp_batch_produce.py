@@ -106,6 +106,9 @@ class MrpBatchProduct(models.TransientModel):
             })
         lots = lots + self.env['stock.lot'].create(raw_lots)
 
+        productions = productions.sorted(key=lambda production: production.move_raw_ids[0].move_line_ids[0].lot_id.name)
+        lots = lots.sorted(key=lambda lot: lot.name)
+        components_list.sort(key=lambda components: components[0])
         productions_to_set = OrderedSet()
         for production, finished_lot in zip(productions, lots):
             production.lot_producing_id = finished_lot
@@ -124,13 +127,15 @@ class MrpBatchProduct(models.TransientModel):
 
     def _process_components(self, production, components_line):
         lot_names = []
-        mls_to_unlink = set()
+        mls_to_unlink = defaultdict(list)
         moves_vals = defaultdict(list)
         for move_raw in production.move_raw_ids:
             if move_raw.product_id.tracking == "none" or not components_line:
                 continue
             component_line = components_line.popleft().strip()
             mls_lines = component_line.split(self.lots_separator)
+            for move_line in move_raw.move_line_ids:
+                mls_to_unlink[(move_line.quantity, move_line.lot_id.name)] += move_line
             for ml_line in mls_lines:
                 lot_name, qty = self._get_lot_and_qty(move_raw, ml_line)
                 moves_vals[move_raw].append((qty, lot_name))
@@ -139,12 +144,15 @@ class MrpBatchProduct(models.TransientModel):
         lots = {(l.name, l.product_id): l for  l in self.env['stock.lot'].search([('name', 'in', lot_names)])}
         mls_vals = []
         for move, mls in moves_vals.items():
-            if mls:
-                mls_to_unlink |= set(move.move_line_ids.ids)
             for qty, lot_name in mls:
-                ml_vals = self._prepapre_move_line_vals(move, qty, lot_name, lots)
-                mls_vals.append(ml_vals)
-        self.env['stock.move.line'].browse(mls_to_unlink).unlink()
+                old_move_line = mls_to_unlink[(qty, lot_name)]
+                if not old_move_line:
+                    ml_vals = self._prepapre_move_line_vals(move, qty, lot_name, lots)
+                    mls_vals.append(ml_vals)
+                else:
+                    old_move_line.pop()
+        for _, ml_to_unlink in mls_to_unlink.items():
+            self.env['stock.move.line'].browse(ml_to_unlink).unlink()
         self.env['stock.move.line'].create(mls_vals)
 
     def _prepapre_move_line_vals(self, move, qty, lot_name, lots):
