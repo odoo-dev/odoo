@@ -176,13 +176,6 @@ class MailMessage(models.Model):
     starred = fields.Boolean(
         'Starred', compute='_compute_starred', search='_search_starred', compute_sudo=False,
         help='Current user has a starred notification linked to this message')
-    # tracking
-    tracking_value_ids = fields.One2many(
-        'mail.tracking.value', 'mail_message_id',
-        string='Tracking values',
-        groups="base.group_system",
-        help='Tracked values are stored in a separate model. This field allow to reconstruct '
-             'the tracking and to generate statistics on the model.')
     # polls
     ended_poll_ids = fields.One2many('mail.poll', 'end_message_id')
     started_poll_ids = fields.One2many('mail.poll', 'start_message_id')
@@ -675,7 +668,6 @@ class MailMessage(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        tracking_values_list = []
         for values in vals_list:
             if 'email_from' not in values:  # needed to compute reply_to
                 _author_id, email_from = self.env['mail.thread']._message_compute_author(values.get('author_id'), email_from=None)
@@ -713,10 +705,6 @@ class MailMessage(models.Model):
                             data_to_url[key] = ['/web/image/%s?access_token=%s' % (attachment.id, attachment.access_token), name]
                     return '%s%s alt="%s"' % (data_to_url[key][0], match.group(3), data_to_url[key][1])
                 values['body'] = _image_dataurl.sub(base64_to_boundary, values['body'] or '')
-
-            # delegate creation of tracking after the create as sudo to avoid access rights issues
-            tracking_values_list.append(values.pop('tracking_value_ids', False))
-
         messages = super().create(vals_list)
 
         # link back attachments to records, to filter out attachments linked to
@@ -757,31 +745,7 @@ class MailMessage(models.Model):
         if attachments_tocheck:
             attachments_tocheck.check_access('read')
 
-        for message, values, tracking_values_cmd in zip(messages, vals_list, tracking_values_list):
-            if tracking_values_cmd:
-                vals_lst = [dict(cmd[2], mail_message_id=message.id) for cmd in tracking_values_cmd if len(cmd) == 3 and cmd[0] == 0]
-                other_cmd = [cmd for cmd in tracking_values_cmd if len(cmd) != 3 or cmd[0] != 0]
-                if vals_lst and vals_lst[0].get('fieldinfo'):
-                    tracking_value_list = [{
-                        **self.env['mail.thread']._format_display_value(tracking_values_cmd[0], vals_lst[0].get('fieldinfo'), message.author_id.id),
-                        'fieldInfo': {
-                            'changedField': vals_lst[0].get('fieldinfo')['name'],
-                            'fieldType': vals_lst[0].get('fieldinfo')['type'],
-                            'isPropertyField': vals_lst[0].get('fieldinfo')['type'] == 'properties',
-                        }
-                    }]
-                    html_body = self.env['ir.qweb']._render(
-                        "mail.mail_tracking_template",
-                        {
-                            'body': message.body,
-                            'trackingValues': tracking_value_list,
-                        }
-                    )
-                    message.body = html_body
-
-                if other_cmd:
-                    message.sudo().write({'tracking_value_ids': tracking_values_cmd})
-
+        for message, values in zip(messages, vals_list):
             if message._is_thread_message_visible(vals=values):
                 message._invalidate_documents(values.get('model'), values.get('res_id'))
 
@@ -964,9 +928,7 @@ class MailMessage(models.Model):
                     & self._get_tracking_values_domain(search_term)
                 )
                 # sudo: mail.tracking.value - searching allowed tracking values for acessible records
-                tracking_values = self.env["mail.tracking.value"].sudo().search(tracking_value_domain)
-                accessible_tracking_value_ids = tracking_values._filter_has_field_access(self.env)
-                message_domain |= Domain("id", "in", accessible_tracking_value_ids.mail_message_id.ids)
+                # to do: check access
             domain &= message_domain
             res["count"] = self.search_count(domain)
         if around is not None:
@@ -1363,10 +1325,6 @@ class MailMessage(models.Model):
             (not self.body or tools.is_html_empty(self.body))
             and (not self.subtype_id or not self.subtype_id.description)
             and not self.attachment_ids
-            and not (
-                self._has_field_access(self._fields["tracking_value_ids"], "read")
-                and self.tracking_value_ids
-            )
             and not self.has_poll
         )
 
@@ -1441,3 +1399,112 @@ class MailMessage(models.Model):
             .with_prefetch(records_by_model_name[message.model]._prefetch_ids)
             for message in self.filtered(lambda m: m.model and m.res_id)
         }
+
+    @api.model
+    def _create_tracking_values(self, initial_value, new_value, col_name, col_info, record):
+        """ Prepare values to create a mail.tracking.value. It prepares old and
+        new value according to the field type.
+
+        :param initial_value: field value before the change, could be text, int,
+          date, datetime, ...;
+        :param new_value: field value after the change, could be text, int,
+          date, datetime, ...;
+        :param str col_name: technical field name, column name (e.g. 'user_id);
+        :param dict col_info: result of fields_get(col_name);
+        :param <record> record: record on which tracking is performed, used for
+          related computation e.g. finding currency of monetary fields;
+
+        :return: a dict values valid for 'mail tracking value' creation;
+        """
+        field = self.env['ir.model.fields']._get(record._name, col_name)
+        if not field:
+            raise ValueError(f'Unknown field {col_name} on model {record._name}')
+
+        values = {'field_id': field.id, 'fieldinfo': col_info}
+
+        if col_info['type'] in {'integer', 'float', 'char', 'text', 'datetime'}:
+            values.update({
+                f'old_value_{col_info["type"]}': initial_value,
+                f'new_value_{col_info["type"]}': new_value
+            })
+        elif col_info['type'] == 'monetary':
+            values.update({
+                'currency_id': record[col_info['currency_field']].id,
+                'old_value_float': initial_value,
+                'new_value_float': new_value
+            })
+        elif col_info['type'] == 'date':
+            values.update({
+                'old_value_datetime': initial_value and fields.Datetime.to_string(datetime.combine(fields.Date.from_string(initial_value), datetime.min.time())) or False,
+                'new_value_datetime': new_value and fields.Datetime.to_string(datetime.combine(fields.Date.from_string(new_value), datetime.min.time())) or False,
+            })
+        elif col_info['type'] == 'boolean':
+            values.update({
+                'old_value_integer': initial_value,
+                'new_value_integer': new_value
+            })
+        elif col_info['type'] == 'selection':
+            values.update({
+                'old_value_char': initial_value and dict(col_info['selection']).get(initial_value, initial_value) or '',
+                'new_value_char': new_value and dict(col_info['selection'])[new_value] or ''
+            })
+        elif col_info['type'] == 'many2one':
+            # Can be:
+            # - False value
+            # - recordset, in case of standard field
+            # - (id, display name), in case of properties (read format)
+            if not initial_value:
+                initial_value = (0, '')
+            elif isinstance(initial_value, models.BaseModel):
+                initial_value = (initial_value.id, initial_value.display_name)
+
+            if not new_value:
+                new_value = (0, '')
+            elif isinstance(new_value, models.BaseModel):
+                new_value = (new_value.id, new_value.display_name)
+
+            values.update({
+                'old_value_integer': initial_value[0],
+                'new_value_integer': new_value[0],
+                'old_value_char': initial_value[1],
+                'new_value_char': new_value[1]
+            })
+        elif col_info['type'] in {'one2many', 'many2many', 'tags'}:
+            # Can be:
+            # - False value
+            # - recordset, in case of standard field
+            # - [(id, display name), ...], in case of properties (read format)
+            model_name = self.env['ir.model']._get(field.relation).display_name
+            if not initial_value:
+                old_value_char = ''
+            elif isinstance(initial_value, models.BaseModel):
+                old_value_char = ', '.join(
+                    value.display_name or self.env._(
+                        'Unnamed %(record_model_name)s (%(record_id)s)',
+                        record_model_name=model_name, record_id=value.id
+                    )
+                    for value in initial_value
+                )
+            else:
+                old_value_char = ', '.join(value[1] for value in initial_value)
+            if not new_value:
+                new_value_char = ''
+            elif isinstance(new_value, models.BaseModel):
+                new_value_char = ', '.join(
+                    value.display_name or self.env._(
+                        'Unnamed %(record_model_name)s (%(record_id)s)',
+                        record_model_name=model_name, record_id=value.id
+                    )
+                    for value in new_value
+                )
+            else:
+                new_value_char = ', '.join(value[1] for value in new_value)
+
+            values.update({
+                'old_value_char': old_value_char,
+                'new_value_char': new_value_char,
+            })
+        else:
+            raise NotImplementedError(f'Unsupported tracking on field {field.name} (type {col_info["type"]}')
+
+        return values

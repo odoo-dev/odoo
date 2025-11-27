@@ -40,20 +40,6 @@ class IrModelFields(models.Model):
         information for most tracking. """
         tracked = self.filtered('tracking')
         if tracked:
-            tracking_values = self.env['mail.tracking.value'].search(
-                [('field_id', 'in', tracked.ids)]
-            )
-            field_to_trackings = groupby(tracking_values, lambda track: track.field_id)
-            for field, trackings in field_to_trackings:
-                if field.model_id.model not in self.env:
-                    # Model is already deleted
-                    continue
-                self.env['mail.tracking.value'].concat(*trackings).write({
-                    'field_info': {
-                        'desc': field.field_description,
-                        'name': field.name,
-                        'sequence': self.env[field.model_id.model]._mail_track_get_field_sequence(field.name),
-                        'type': field.ttype,
-                    }
-                })
+            # to do: check this flow
+            return super().unlink()
         return super().unlink()

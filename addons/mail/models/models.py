@@ -266,29 +266,16 @@ class Base(models.AbstractModel):
                 continue
 
             if self._fields[col_name].type == "properties":
-                definition_record_field = self._fields[col_name].definition_record
-                if self[definition_record_field] == initial_values[definition_record_field]:
-                    # track the change only if the parent changed
-                    continue
-
-                updated.add(col_name)
-                tracking_value_ids.extend(
-                    [0, 0, self.env['mail.tracking.value']._create_tracking_values_property(
-                        property_, col_name, tracked_fields[col_name], self,
-                    )]
-                    # Show the properties in the same order as in the definition
-                    for property_ in initial_value[::-1]
-                    if property_['type'] not in ('separator', 'html') and property_.get('value')
-                )
+                # TO DO : check properties 
                 continue
 
             updated.add(col_name)
-            tracking_value_ids.append(
-                [0, 0, self.env['mail.tracking.value']._create_tracking_values(
-                    initial_value, new_value,
-                    col_name, tracked_fields[col_name],
-                    self
-                )])
+            # tracking_value_ids.append(
+            #     [0, 0, self.env['mail.messages']._create_tracking_values(
+            #         initial_value, new_value,
+            #         col_name, tracked_fields[col_name],
+            #         self
+            #     )])
 
         return updated, tracking_value_ids
 

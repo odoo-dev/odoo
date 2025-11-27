@@ -527,8 +527,6 @@ class MailThread(models.AbstractModel):
           * if no tracking;
           * only for user generated content;
         """
-        if messages.tracking_value_ids:
-            raise exceptions.UserError(_("Messages with tracking values cannot be modified"))
         if any(message.message_type != 'comment' for message in messages):
             raise exceptions.UserError(_("Only messages type comment can have their content updated"))
 
@@ -3015,7 +3013,6 @@ class MailThread(models.AbstractModel):
             'is_internal': True,
             'subject': subject,
             'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
-            'tracking_value_ids': tracking_value_ids,
             # recipients
             'email_add_signature': False,  # False as no notification -> no need to compute signature
             'message_id': generate_tracking_message_id('message-notify'),  # why? this is all but a notify
@@ -3166,7 +3163,6 @@ class MailThread(models.AbstractModel):
             'res_id',
             'subject',
             'subtype_id',
-            'tracking_value_ids',
         }
 
     def _get_message_create_ignore_field_names(self):
@@ -4572,24 +4568,7 @@ class MailThread(models.AbstractModel):
         :param return_line: type of return line
         :return: a string with the new text if there is one or more tracking value
         """
-        tracking_message = ''
-        if message.subtype_id and message.subtype_id.description:
-            tracking_message = return_line + message.subtype_id.description + return_line
-
-        for tracking in message.sudo().tracking_value_ids._filter_free_field_access():
-            if tracking.field_id.ttype == 'boolean':
-                old_value = str(bool(tracking.old_value_integer))
-                new_value = str(bool(tracking.new_value_integer))
-            else:
-                old_value = tracking.old_value_char or str(tracking.old_value_integer)
-                new_value = tracking.new_value_char or str(tracking.new_value_integer)
-
-            tracking_message += tracking.field_id.field_description + ': ' + old_value
-            if old_value != new_value:
-                tracking_message += ' → ' + new_value
-            tracking_message += return_line
-
-        return tracking_message
+        return message.body
 
     @api.model
     def _get_model_description(self, model_name):

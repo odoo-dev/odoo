@@ -192,7 +192,7 @@ class AccountLock_Exception(models.Model):
             field = exception.lock_date_field
             value = exception.lock_date
             field_info = exception.fields_get([field])[field]
-            tracking_values = self.env['mail.tracking.value']._create_tracking_values(
+            tracking_values = self.env['mail.message']._create_tracking_values(
                 company[field], value, field, field_info, exception,
             )
             tracking_value_ids = [Command.create(tracking_values)]
@@ -264,35 +264,11 @@ class AccountLock_Exception(models.Model):
             common_message_domain.append(('create_uid', '=', self.user_id.id))
         if self.end_datetime:
             common_message_domain.append(('date', '<=', self.end_datetime))
-
+        # To do: check journal items report
         # Add restrictions on the accounting date to avoid unnecessary entries
-        min_date = self.lock_date
-        max_date = self.company_lock_date
-        move_date_domain = []
-        tracking_old_datetime_domain = []
-        tracking_new_datetime_domain = []
-        if min_date:
-            move_date_domain.append([('date', '>=', min_date)])
-            tracking_old_datetime_domain.append([('tracking_value_ids.old_value_datetime', '>=', min_date)])
-            tracking_new_datetime_domain.append([('tracking_value_ids.new_value_datetime', '>=', min_date)])
-        if max_date:
-            move_date_domain.append([('date', '<=', max_date)])
-            tracking_old_datetime_domain.append([('tracking_value_ids.old_value_datetime', '<=', max_date)])
-            tracking_new_datetime_domain.append([('tracking_value_ids.new_value_datetime', '<=', max_date)])
-
         return [
             ('company_id', 'child_of', self.company_id.id),
             ('audit_trail_message_ids', 'any', common_message_domain),
-            '|',
-                # The date was changed from or to a value inside the excepted period
-                ('audit_trail_message_ids', 'any', [
-                    ('tracking_value_ids.field_id', '=', self.env['ir.model.fields']._get('account.move', 'date').id),
-                    '|',
-                        *Domain.AND(tracking_old_datetime_domain),
-                        *Domain.AND(tracking_new_datetime_domain),
-                ]),
-                # The date of the move is inside the excepted period and sth. was changed on the move
-                *Domain.AND(move_date_domain),
         ]
 
     def action_show_audit_trail_during_exception(self):
