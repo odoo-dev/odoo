@@ -15,3 +15,13 @@ class ResPartner(models.Model):
         frontend_writable_fields.update({'city_id', 'street_number', 'street_name', 'street_number2'})
 
         return frontend_writable_fields
+
+    def _compute_is_company(self):
+        cnpj = self.env.ref('l10n_br.cnpj', raise_if_not_found=False)
+        br_cnpj = self.env['res.partner']
+        if cnpj:
+            br_cnpj = self.filtered(lambda p: p.l10n_latam_identification_type_id == cnpj)
+            if br_cnpj:
+                br_cnpj.is_company = True
+
+        super(ResPartner, self - br_cnpj)._compute_is_company()
