@@ -350,6 +350,28 @@ class CustomerPortal(Controller):
             field_names.add('zip')
         return field_names
 
+    def _get_address_format_fields_mapping(self):
+        return {
+            'state_name': 'state_id',
+            'state_code': 'state_id',
+            'country_name': 'country_id',
+        }
+
+    def _get_address_fields(self, country):
+        address_format_fields = (country and country.get_address_fields()) or [
+            'street',
+            'zip',
+            'city',
+        ]
+
+        # Maps `res.country` 'address_format' fields to `res.partner` fields that have to be set on
+        # the address page.
+        mapping = self._get_address_format_fields_mapping()
+        if country.enforce_cities and country._has_cities():
+            mapping['city'] = 'city_id'
+
+        return [mapping.get(fname, fname) for fname in address_format_fields]
+
     def _get_required_address_fields(self, address_type, country):
         if address_type == 'billing':
             # TODO delivery as billing consideration might be missing ?
@@ -442,7 +464,7 @@ class CustomerPortal(Controller):
             email = current_partner.email
             phone = current_partner.phone
 
-        address_fields = (country_sudo and country_sudo.get_address_fields()) or ['city', 'zip']
+        address_fields = self._get_address_fields(country_sudo)
         # TODO address fields matching done in country_info but still needed here.
 
         cities = request.env['res.city']
@@ -873,8 +895,6 @@ class CustomerPortal(Controller):
         readonly=True,
     )
     def portal_address_country_info(self, country, address_type, **kw):
-        # TODO VFE use portal_address_country_info in the rendering values of the address template ?
-        address_fields = country.get_address_fields()
         required_fields = self._get_required_address_fields(address_type, country)
 
         cities_data = []
@@ -886,18 +906,7 @@ class CustomerPortal(Controller):
                 ['id', 'name'],
             )
 
-        # Maps `res.country` 'address_format' fields to `res.partner` fields that have to be set on
-        # the address page.
-        mapping = {
-            'state_name': 'state_id',
-            'state_code': 'state_id',
-            'country_name': 'country_id',
-        }
-        if 'city_id' in required_fields:
-            mapping['city'] = 'city_id'
-
-        address_fields = [mapping.get(fname, fname) for fname in address_fields]
-
+        address_fields = self._get_address_fields(country)
         return {
             'address_fields': address_fields,
             'required_fields': list(required_fields),
@@ -924,7 +933,7 @@ class CustomerPortal(Controller):
         website=True,
         readonly=True,
     )
-    def state_info(self, state, **kw):
+    def portal_address_state_info(self, state, **kw):
         # l10n_pe_code was read before for peru but unused.
         # l10n_co_edi_code was read before for columbia but unused.
         return {

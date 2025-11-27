@@ -17,7 +17,7 @@ class L10nPEPortalAccount(L10nLatamBasePortalAccount):
 
         District = request.env['l10n_pe.res.city.district'].sudo()
         districts = District
-        if (city := rendering_values['city']):
+        if city := rendering_values['city']:
             districts = District.search([('city_id', '=', city.id)])
         rendering_values['city_districts'] = districts
 
@@ -37,6 +37,22 @@ class L10nPEPortalAccount(L10nLatamBasePortalAccount):
             or super()._l10n_get_default_identification_type_id()
         )
 
+    def _get_address_format_fields_mapping(self):
+        res = super()._get_address_format_fields_mapping()
+        res['l10n_pe_district_name'] = 'l10n_pe_district'
+        return res
+
+    @route()
+    def portal_address_country_info(self, country, address_type, **kw):
+        res = super().portal_address_country_info(country, address_type, **kw)
+
+        if self._is_peru_company() and country.code == 'PE':
+            # Show the field once Peru is selected, but without any value as a city needs to be
+            # selected first.
+            res['selection']['l10n_pe_district'] = []
+
+        return res
+
     @route(
         '/my/address/city_info/<model("res.city"):city>',
         type='jsonrpc',
@@ -49,7 +65,7 @@ class L10nPEPortalAccount(L10nLatamBasePortalAccount):
         """Provide district choices on city change."""
         res = {}
 
-        if city.country_id.code == 'PE':
+        if self._is_peru_company() and city.country_id.code == 'PE':
             res['districts'] = request.env['l10n_pe.res.city.district'].sudo().search_read(
                 [('city_id', '=', city.id)],
                 ['id', 'name', 'code'],

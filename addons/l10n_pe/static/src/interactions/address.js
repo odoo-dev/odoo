@@ -12,16 +12,11 @@ patch(CustomerAddress.prototype, {
         }
     },
 
-    // TODO VFE see if this isn't already handled in a more generic way directly through the
-    // country address format and address fields
     async onChangeCountry() {
         await this.waitFor(super.onChangeCountry(...arguments));
         if (!this.isPeruvianCompany) return;
 
-        if (this._getSelectedCountryCode() === 'PE') {
-            this._showInput('l10n_pe_district');
-        } else {
-            this._hideInput('l10n_pe_district');
+        if (this._getSelectedCountryCode() !== 'PE') {
             this.addressForm.l10n_pe_district.value = '';
         }
     },
