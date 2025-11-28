@@ -220,7 +220,11 @@ export class StoreInternal extends RecordInternal {
         }
         if (shouldChange) {
             record._.updatingAttrs.set(fieldName, true);
-            targetRecord[fieldName] = newValue;
+            if (newValue !== null && typeof newValue === "object") {
+                record._proxy[fieldName] = newValue;
+            } else {
+                targetRecord[fieldName] = newValue;
+            }
             record._.updatingAttrs.delete(fieldName);
         }
     }
