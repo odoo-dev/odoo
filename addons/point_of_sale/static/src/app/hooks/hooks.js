@@ -1,6 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
-import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { ErrorDialog } from "@web/core/errors/error_dialogs";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import {
     useEnv,
     onMounted,
@@ -29,7 +28,7 @@ export function useErrorHandlers() {
     component._handlePushOrderError = async function (error) {
         // This error handler receives `error` equivalent to `error.message` of the rpc error.
         if (error.message === "Backend Invoice") {
-            dialog.add(ConfirmationDialog, {
+            dialog.add(ReloadErrorPopup, {
                 title: _t("Please print the invoice from the backend"),
                 body:
                     _t(
@@ -38,7 +37,7 @@ export function useErrorHandlers() {
             });
         } else if (error.code < 0) {
             // XmlHttpRequest Errors
-            dialog.add(ConfirmationDialog, {
+            dialog.add(ReloadErrorPopup, {
                 title: _t("Unable to sync order"),
                 body: _t(
                     "Check the internet connection then try to sync again by clicking on the red wifi button (upper right of the screen)."
@@ -46,14 +45,15 @@ export function useErrorHandlers() {
             });
         } else if (error.data) {
             // OpenERP Server Errors
-            dialog.add(ErrorDialog, {
-                traceback:
+            dialog.add(ReloadErrorPopup, {
+                title: _t("Server Error"),
+                body:
                     error.data.debug.status.message_body ||
                     _t("The server encountered an error while receiving your order."),
             });
         } else {
             // ???
-            await dialog.add(AlertDialog, {
+            dialog.add(ReloadErrorPopup, {
                 title: _t("Unknown Error"),
                 body: _t("The order could not be sent to the server due to an unknown error"),
             });

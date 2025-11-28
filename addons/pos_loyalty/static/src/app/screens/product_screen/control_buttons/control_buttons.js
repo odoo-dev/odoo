@@ -1,6 +1,6 @@
 import { useState, onWillRender } from "@odoo/owl";
 import { ControlButtons } from "@point_of_sale/app/screens/product_screen/control_buttons/control_buttons";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { TextInputPopup } from "@point_of_sale/app/components/popups/text_input_popup/text_input_popup";
 import { _t } from "@web/core/l10n/translation";
 import { SelectionPopup } from "@point_of_sale/app/components/popups/selection_popup/selection_popup";
@@ -38,7 +38,7 @@ patch(ControlButtons.prototype, {
         const orderTotal = order.getTotalWithTax();
         const eWalletRewards = this._getEWalletRewards(order);
         if (eWalletRewards.length === 0 && orderTotal >= 0) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("No valid eWallet found"),
                 body: _t("Please select a customer and a valid eWallet."),
             });
@@ -91,7 +91,7 @@ patch(ControlButtons.prototype, {
                 );
                 if (result !== true) {
                     // Returned an error
-                    this.dialog.add(AlertDialog, {
+                    this.dialog.add(ReloadErrorPopup, {
                         title: _t("Error"),
                         body: result,
                     });

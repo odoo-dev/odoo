@@ -5,7 +5,7 @@ import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/
 import { useState, Component } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { isValidEmail } from "@point_of_sale/utils";
 
 export class ReceiptScreen extends Component {
@@ -92,7 +92,7 @@ export class ReceiptScreen extends Component {
     async _sendReceiptToCustomer({ action, destination }) {
         const order = this.currentOrder;
         if (typeof order.id !== "number") {
-            this.dialog.add(ConfirmationDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Unsynced order"),
                 body: _t(
                     "This order is not yet synced to server. Make sure it is synced then try again."

@@ -1,5 +1,5 @@
 // Part of Odoo. See LICENSE file for full copyright and licensing details.
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Component, useState } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
@@ -67,7 +67,7 @@ export class EventSlotSelectionPopup extends Component {
     }
     confirm() {
         if (!this.slotId) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: "Error",
                 body: "Please select a slot.",
             });

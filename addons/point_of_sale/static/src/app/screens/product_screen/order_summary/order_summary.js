@@ -3,6 +3,7 @@ import { Component } from "@odoo/owl";
 import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
 import { useService } from "@web/core/utils/hooks";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { _t } from "@web/core/l10n/translation";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
@@ -76,7 +77,7 @@ export class OrderSummary extends Component {
             );
             const prep = JSON.parse(preparation_data.last_order_preparation_change || "{}");
             if (prep.lines && Object.keys(prep.lines).some((l) => l === orderline.uuid)) {
-                this.dialog.add(AlertDialog, {
+                this.dialog.add(ReloadErrorPopup, {
                     title: _t("Cannot edit orderline"),
                     body: _t(
                         "This orderline has already been sent to the kitchen and cannot be edited."

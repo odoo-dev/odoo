@@ -1,4 +1,4 @@
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { registry } from "@web/core/registry";
 import { cookie } from "@web/core/browser/cookie";
 import { kanbanView } from "@web/views/kanban/kanban_view";
@@ -86,7 +86,7 @@ export class PosKanbanRenderer extends KanbanRenderer {
             ]);
 
             if (!(isPosManager && isAdmin)) {
-                this.dialog.add(AlertDialog, {
+                this.dialog.add(ReloadErrorPopup, {
                     title: _t("Access Denied"),
                     body: _t(
                         "It seems like you don't have enough rights to create point of sale configurations."

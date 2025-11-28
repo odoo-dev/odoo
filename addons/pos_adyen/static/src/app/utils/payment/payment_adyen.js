@@ -1,6 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_interface";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { register_payment_method } from "@point_of_sale/app/services/pos_store";
 import { sprintf } from "@web/core/utils/strings";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
@@ -297,7 +297,7 @@ export class PaymentAdyen extends PaymentInterface {
         if (!title) {
             title = _t("Adyen Error");
         }
-        this.env.services.dialog.add(AlertDialog, {
+        this.env.services.dialog.add(ReloadErrorPopup, {
             title: title,
             body: msg,
         });

@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 import { patch } from "@web/core/utils/patch";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { useService } from "@web/core/utils/hooks";
 
 patch(PaymentScreen.prototype, {
@@ -58,7 +58,7 @@ patch(PaymentScreen.prototype, {
                     }
                 }
                 if (!successful) {
-                    this.dialog.add(AlertDialog, {
+                    this.dialog.add(ReloadErrorPopup, {
                         title: _t("Error validating rewards"),
                         body: payload.message,
                     });

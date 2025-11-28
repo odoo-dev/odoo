@@ -7,6 +7,7 @@ import { cookie } from "@web/core/browser/cookie";
 import { TextInputPopup } from "@point_of_sale/app/components/popups/text_input_popup/text_input_popup";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 import {
@@ -963,7 +964,7 @@ export class FloorScreen extends Component {
                 this.pos.session.id,
             ]);
         } catch {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Delete Error"),
                 body: _t("You cannot delete a floor with orders still in draft for this floor."),
             });
@@ -1020,7 +1021,7 @@ export class FloorScreen extends Component {
                 }
             }
         } catch {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Delete Error"),
                 body: _t("You cannot delete a table with orders still in draft for this table."),
             });
@@ -1072,7 +1073,7 @@ export class FloorScreen extends Component {
                 await this.pos.data.read("restaurant.floor", [this.activeFloor.id]);
                 this.env.services.ui.unblock();
             } else {
-                this.dialog.add(AlertDialog, {
+                this.dialog.add(ReloadErrorPopup, {
                     title: _t("Loading Image Error"),
                     body: _t("Encountered error when loading image. Please try again."),
                 });

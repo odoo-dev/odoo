@@ -4,6 +4,7 @@ import { parseDateTime } from "@web/core/l10n/dates";
 import { parseFloat } from "@web/views/fields/parsers";
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/action_pad/action_pad";
 import { BackButton } from "@point_of_sale/app/screens/product_screen/action_pad/back_button/back_button";
 import { InvoiceButton } from "@point_of_sale/app/screens/ticket_screen/invoice_button/invoice_button";
@@ -353,7 +354,7 @@ export class TicketScreen extends Component {
 
         //Add a check too see if the fiscal position exist in the pos
         if (order.fiscal_position_not_found) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Fiscal Position not found"),
                 body: _t(
                     "The fiscal position used in the original order is not loaded. Make sure it is loaded by adding it in the pos configuration."
