@@ -155,30 +155,17 @@ class ProjectUpdate(models.Model):
     @api.model
     def _get_last_updated_milestone(self, project):
         query = """
-            SELECT DISTINCT pm.id as milestone_id,
-                            pm.deadline as deadline,
-                            FIRST_VALUE(old_value_datetime::date) OVER w_partition as old_value,
-                            pm.deadline as new_value
-                       FROM mail_message mm
-                 INNER JOIN mail_tracking_value mtv
-                         ON mm.id = mtv.mail_message_id
-                 INNER JOIN ir_model_fields imf
-                         ON mtv.field_id = imf.id
-                        AND imf.model = 'project.milestone'
-                        AND imf.name = 'deadline'
-                 INNER JOIN project_milestone pm
-                         ON mm.res_id = pm.id
-                      WHERE mm.model = 'project.milestone'
-                        AND mm.message_type = 'notification'
-                        AND pm.project_id = %(project_id)s
+            SELECT pm.id AS milestone_id,
+                   pm.deadline AS deadline,
+                   pm.deadline_history->>'old_deadline' AS old_value,
+                   pm.deadline AS new_value
+              FROM project_milestone pm
+             WHERE pm.project_id = %(project_id)s
          """
+
         if project.last_update_id.create_date:
-            query = query + "AND mm.date > %(last_update_date)s"
+            query = query + "AND (pm.deadline_history->>'changed_on')::timestamp > %(last_update_date)s"
         query = query + """
-                     WINDOW w_partition AS (
-                             PARTITION BY pm.id
-                             ORDER BY mm.date ASC
-                            )
                    ORDER BY pm.deadline ASC
                    LIMIT 1;
         """

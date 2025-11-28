@@ -22,6 +22,7 @@ class ProjectMilestone(models.Model):
     sequence = fields.Integer('Sequence', default=10)
     project_id = fields.Many2one('project.project', required=True, default=_get_default_project_id, domain=[('is_template', '=', False)], index=True, ondelete='cascade')
     deadline = fields.Date(tracking=True, copy=False)
+    deadline_history = fields.Json(string="Deadline History", readonly=True)
     is_reached = fields.Boolean(string="Reached", default=False, copy=False)
     reached_date = fields.Date(compute='_compute_reached_date', store=True, export_string_translation=False)
     task_ids = fields.One2many('project.task', 'milestone_id', 'Tasks', export_string_translation=False)
@@ -38,6 +39,17 @@ class ProjectMilestone(models.Model):
     def _compute_reached_date(self):
         for ms in self:
             ms.reached_date = ms.is_reached and fields.Date.context_today(self)
+
+    def write(self, vals):
+        if 'deadline' in vals:
+            for milestone in self:
+                entry = {
+                    "old_deadline": milestone.deadline,
+                    "changed_on": fields.Datetime.now(),
+                }
+                milestone.deadline_history = entry
+
+        return super().write(vals)
 
     @api.depends('is_reached', 'deadline')
     def _compute_is_deadline_exceeded(self):
