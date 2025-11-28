@@ -5,6 +5,7 @@ import { markRaw, reactive } from "@odoo/owl";
 import { renderToElement } from "@web/core/utils/render";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import {
     deduceUrl,
     random5Chars,
@@ -301,7 +302,7 @@ export class PosStore extends WithLazyGetterTrap {
                 body: _t("The session is being closed by another user. The page will be reloaded."),
             });
         } catch {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Error"),
                 body: _t(
                     "An error occurred while closing the session. Unsynced orders will be available in the next session. The page will be reloaded."
@@ -804,7 +805,7 @@ export class PosStore extends WithLazyGetterTrap {
 
         // Handle refund constraints
         if (order.isSaleDisallowed(values, options)) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Oops.."),
                 body: _t("Ensure you validate the refund before taking another order."),
             });
@@ -1808,7 +1809,7 @@ export class PosStore extends WithLazyGetterTrap {
         ).toUTC();
 
         if (lastServerDate.isValid && lastServerDate.ts != lastLocalDate.ts) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Order Outdated"),
                 body: _t(
                     "The order has been modified on another device. If you have modified existing " +
@@ -2038,7 +2039,7 @@ export class PosStore extends WithLazyGetterTrap {
                 )
                 .join("");
 
-            const retry = await makeAwaitable(this.dialog, AlertDialog, {
+            const retry = await makeAwaitable(this.dialog, ReloadErrorPopup, {
                 title: _t("Printing failed"),
                 body: sprintf(
                     _t(
@@ -2226,7 +2227,7 @@ export class PosStore extends WithLazyGetterTrap {
         ]);
 
         if (!(isPosManager && isAdmin)) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Access Denied"),
                 body: _t("It seems like you don't have enough rights to load data."),
             });
@@ -2376,7 +2377,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
         const currentPartner = currentOrder.getPartner();
         if (currentPartner && currentOrder.getHasRefundLines()) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Can't change customer"),
                 body: _t(
                     "This order already has refund lines for %s. We can't change the customer associated to it. Create a new order for the new customer.",
@@ -2640,7 +2641,7 @@ export class PosStore extends WithLazyGetterTrap {
                 } else {
                     message = error.data.message;
                 }
-                this.env.services.dialog.add(AlertDialog, {
+                this.env.services.dialog.add(ReloadErrorPopup, {
                     title: _t("Failure to generate Payment QR Code"),
                     body: message,
                 });

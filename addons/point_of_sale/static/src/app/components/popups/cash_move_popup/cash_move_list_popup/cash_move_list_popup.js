@@ -4,7 +4,7 @@ import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 
 export class CashMoveListPopup extends Component {
     static template = "point_of_sale.CashMoveListPopup";
@@ -47,7 +47,7 @@ export class CashMoveListPopup extends Component {
             );
             this.props.cashMoves = this.props.cashMoves.filter((cashMove) => cashMove.id !== cm.id);
         } catch (error) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Odoo Server Error"),
                 body: error.data.message,
             });

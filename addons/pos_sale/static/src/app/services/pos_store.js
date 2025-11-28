@@ -2,7 +2,7 @@ import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 import { parseFloat } from "@web/views/fields/parsers";
 import { SelectionPopup } from "@point_of_sale/app/components/popups/selection_popup/selection_popup";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 import { ask, makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { enhancedButtons } from "@point_of_sale/app/components/numpad/numpad";
@@ -203,7 +203,7 @@ patch(PosStore.prototype, {
             await this.data.read("product.product", [this.config.raw.down_payment_product_id]);
         }
         if (!this.config.down_payment_product_id) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("No down payment product"),
                 body: _t(
                     "It seems that you didn't configure a down payment product in your point of sale. You can go to your point of sale configuration to choose one."
@@ -320,7 +320,7 @@ patch(PosStore.prototype, {
     },
     setPartnerToCurrentOrder(partner) {
         if (partner.sale_warn_msg) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Warning for %s", partner.name),
                 body: partner.sale_warn_msg,
             });
@@ -334,7 +334,7 @@ patch(PosStore.prototype, {
 
         const productTemplate = vals.product_tmpl_id;
         if (productTemplate.sale_line_warn_msg) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Warning for %s", productTemplate.name),
                 body: productTemplate.sale_line_warn_msg,
             });

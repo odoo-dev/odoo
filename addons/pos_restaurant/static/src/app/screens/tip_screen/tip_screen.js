@@ -1,6 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 import { Component, useRef, onMounted } from "@odoo/owl";
@@ -48,7 +48,7 @@ export class TipScreen extends Component {
         const serverId = typeof order.id === "number" && order.id;
 
         if (!serverId) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Unsynced order"),
                 body: _t(
                     "This order is not yet synced to server. Make sure it is synced then try again."

@@ -1,5 +1,5 @@
 import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
@@ -27,7 +27,7 @@ export class ScaleScreen extends Component {
     onError(message) {
         this.props.getPayload(null);
         this.dialog.add(
-            AlertDialog,
+            ReloadErrorPopup,
             {
                 title: _t("Scale error"),
                 body: message,

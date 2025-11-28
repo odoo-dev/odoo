@@ -5,7 +5,7 @@ import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { ProductCard } from "@point_of_sale/app/components/product_card/product_card";
 import { NumericInput } from "@point_of_sale/app/components/inputs/numeric_input/numeric_input";
 import { useService } from "@web/core/utils/hooks";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 
 export class EventRegistrationPopup extends Component {
     static template = "pos_event.EventRegistrationPopup";
@@ -77,7 +77,7 @@ export class EventRegistrationPopup extends Component {
         );
 
         if (requiredByRegistration || requiredByOrder) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: "Error",
                 body: "Please fill in all required fields",
             });

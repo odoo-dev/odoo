@@ -3,6 +3,7 @@ import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment
 import { patch } from "@web/core/utils/patch";
 import { OnlinePaymentPopup } from "@pos_online_payment/app/components/popups/online_payment_popup/online_payment_popup";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { qrCodeSrc } from "@point_of_sale/utils";
 import { ask } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { serializeDateTime } from "@web/core/l10n/dates";
@@ -72,7 +73,7 @@ patch(PaymentScreen.prototype, {
         if (onlinePaymentLines.length > 0) {
             if (!this.currentOrder.id) {
                 this.cancelOnlinePayment(this.currentOrder);
-                this.dialog.add(AlertDialog, {
+                this.dialog.add(ReloadErrorPopup, {
                     title: _t("Online payment unavailable"),
                     body: _t("The QR Code for paying could not be generated."),
                 });
@@ -88,7 +89,7 @@ patch(PaymentScreen.prototype, {
                     onlinePaymentLineAmount
                 );
                 if (!lastOrderServerOPData) {
-                    this.dialog.add(AlertDialog, {
+                    this.dialog.add(ReloadErrorPopup, {
                         title: _t("Online payment unavailable"),
                         body: _t(
                             "There is a problem with the server. The order online payment status cannot be retrieved."
@@ -99,7 +100,7 @@ patch(PaymentScreen.prototype, {
                 if (!lastOrderServerOPData.isPaid) {
                     if (lastOrderServerOPData.modified_payment_lines) {
                         this.cancelOnlinePayment(this.currentOrder);
-                        this.dialog.add(AlertDialog, {
+                        this.dialog.add(ReloadErrorPopup, {
                             title: _t("Updated online payments"),
                             body: _t("There are online payments that were missing in your view."),
                         });
@@ -181,7 +182,7 @@ patch(PaymentScreen.prototype, {
                 return false; // Cancel normal flow because the current order is already saved on the server.
             }
             if (orderServerOPData.modified_payment_lines) {
-                this.dialog.add(AlertDialog, {
+                this.dialog.add(ReloadErrorPopup, {
                     title: _t("Updated online payments"),
                     body: _t("There are online payments that were missing in your view."),
                 });
@@ -197,7 +198,7 @@ patch(PaymentScreen.prototype, {
     },
     async afterPaidOrderSavedOnServer(orderJSON) {
         if (!orderJSON) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Server error"),
                 body: _t("The saved order could not be retrieved."),
             });
@@ -213,7 +214,7 @@ patch(PaymentScreen.prototype, {
         // be invalid.
         const isInvoiceRequested = this.currentOrder.isToInvoice();
         if (!orderJSON[0] || this.currentOrder.id !== orderJSON[0].id) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Order saving issue"),
                 body: _t("The order has not been saved correctly on the server."),
             });

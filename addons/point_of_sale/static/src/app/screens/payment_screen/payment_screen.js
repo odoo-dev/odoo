@@ -5,6 +5,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 import { DatePickerPopup } from "@point_of_sale/app/components/popups/date_picker_popup/date_picker_popup";
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
@@ -90,7 +91,7 @@ export class PaymentScreen extends Component {
     }
 
     showMaxValueError() {
-        this.dialog.add(AlertDialog, {
+        this.dialog.add(ReloadErrorPopup, {
             title: _t("Maximum value reached"),
             body: _t(
                 "The amount cannot be higher than the due amount if you don't have a cash payment method configured."
@@ -134,7 +135,7 @@ export class PaymentScreen extends Component {
             );
         }
         if (this.pos.paymentTerminalInProgress && paymentMethod.use_payment_terminal) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Error"),
                 body: _t("There is already an electronic payment in progress."),
             });
@@ -158,7 +159,7 @@ export class PaymentScreen extends Component {
             }
             return true;
         } else {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Error"),
                 body: _t("There is already an electronic payment in progress."),
             });
@@ -376,7 +377,7 @@ export class PaymentScreen extends Component {
     async postPushOrderResolve(ordersServerId) {
         const postPushResult = await this._postPushOrderResolve(this.currentOrder, ordersServerId);
         if (!postPushResult) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Error: no internet connection."),
                 body: _t("Some, if not all, post-processing after syncing order failed."),
             });
@@ -473,7 +474,7 @@ export class PaymentScreen extends Component {
         }
 
         if (this.currentOrder.getOrderlines().length === 0 && this.currentOrder.isToInvoice()) {
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Empty Order"),
                 body: _t(
                     "There must be at least one product in your order before it can be validated and invoiced."
@@ -544,7 +545,7 @@ export class PaymentScreen extends Component {
             ) > 0.00001
         ) {
             if (!this.pos.models["pos.payment.method"].some((pm) => pm.is_cash_count)) {
-                this.dialog.add(AlertDialog, {
+                this.dialog.add(ReloadErrorPopup, {
                     title: _t("Cannot return change without a cash payment method"),
                     body: _t(
                         "There is no cash payment method available in this point of sale to handle the change.\n\n Please pay the exact amount or add a cash payment method in the point of sale configuration"
@@ -676,7 +677,7 @@ export class PaymentScreen extends Component {
                 continue;
             }
 
-            this.dialog.add(AlertDialog, {
+            this.dialog.add(ReloadErrorPopup, {
                 title: _t("Rounding error in payment lines"),
                 body: sprintf(
                     _t(

@@ -1,6 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_interface";
-import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { ReloadErrorPopup } from "@point_of_sale/app/components/popups/reload_error_popup/reload_error_popup";
 import { sprintf } from "@web/core/utils/strings";
 import { roundPrecision } from "@web/core/utils/numbers";
 import { uuidv4 } from "@point_of_sale/utils";
@@ -186,7 +186,7 @@ export class PaymentVivaCom extends PaymentInterface {
         if (!title) {
             title = _t("Viva.com Error");
         }
-        this.env.services.dialog.add(AlertDialog, {
+        this.env.services.dialog.add(ReloadErrorPopup, {
             title: title,
             body: msg,
         });
