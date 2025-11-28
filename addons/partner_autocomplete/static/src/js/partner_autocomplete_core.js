@@ -110,6 +110,9 @@ export function usePartnerAutocomplete() {
                     ...companyData,
                 };
             }
+            // If the companyData contains field: False like 'company_registry': False, it will trigger an explicit
+            // write to False for that field, and all depending computes won't be triggered.
+            companyData = Object.fromEntries(Object.entries(companyData).filter(([key, value]) => value));
             return {
                 company: companyData,
                 logo: companyData.logo || false,
