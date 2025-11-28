@@ -71,6 +71,12 @@ class ResConfigSettings(models.TransientModel):
     module_l10n_in_edi = fields.Boolean("Indian Electronic Invoicing")
     module_l10n_in_ewaybill = fields.Boolean("Indian Electronic Waybill")
 
+    def action_base_document_layout_configurator(self):
+        action = super().action_base_document_layout_configurator()
+        if self.country_code == 'IN':
+            action['view_id'] = self.env.ref('l10n_in.view_base_document_layout').id
+        return action
+
     def set_values(self):
         super().set_values()
         if self.country_code == 'IN':
