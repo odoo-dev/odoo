@@ -506,40 +506,28 @@ class HrEmployee(models.Model):
             ('other', self.env._('Other')),
         ]
 
+    def _get_first_versions_domain(self):
+        domain = Domain('employee_id', '=', self.id)
+        if before_date := self.env.context.get('before_date'):
+            domain &= Domain([
+                ('contract_date_start', '!=', False),
+                ('contract_date_start', '<=', before_date),
+                ('date_version', '<=', before_date),
+            ])
+        return domain
+
     def _get_first_versions(self):
         self.ensure_one()
-        versions = self.version_ids
-        if self.env.context.get('before_date'):
-            versions = versions.filtered(lambda c: c.date_start <= self.env.context['before_date'])
-        return versions
+        return self.env['hr.version'].search(self._get_first_versions_domain())
 
-    def _get_first_version_date(self, no_gap=True):
+    def _get_first_version_date(self):
         self.ensure_one()
-        if not self.env.su and not self.env.user.has_group("hr.group_hr_user"):
-            raise AccessError(_("Only HR users can access first version date on an employee."))
-
-        def remove_gap(versions):
-            # We do not consider a gap of more than 4 days to be a same occupation
-            # versions are considered to be ordered correctly
-            if not versions:
-                return self.env['hr.version']
-            if len(versions) == 1:
-                return versions
-            current_version = versions[0]
-            older_versions = versions[1:]
-            current_date = current_version.date_start
-            for i, other_version in enumerate(older_versions):
-                # Consider current_version.date_end being false as an error and cut the loop
-                gap = (current_date - (other_version.date_end or date(2100, 1, 1))).days
-                current_date = other_version.date_start
-                if gap >= 4:
-                    return older_versions[0:i] + current_version
-            return older_versions + current_version
-
-        versions = self._get_first_versions().sorted('date_start', reverse=True)
-        if no_gap:
-            versions = remove_gap(versions)
-        return min(versions.mapped('date_start')) if versions else False
+        date_version, contract_date_start = self.env['hr.version']._read_group(
+            self._get_first_versions_domain(),
+            [],
+            ['date_version:min', 'contract_date_start:min'],
+        )[0]
+        return max(date_version, contract_date_start)
 
     @api.depends('name')
     def _compute_legal_name(self):
