@@ -14,13 +14,15 @@
 # Dariusz Żbikowski <darek@krokus.com.pl>, 2022
 # Maksym <ms@myodoo.pl>, 2023
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Marta (wacm)" <wacm@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 15.5alpha1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-08 18:39+0000\n"
-"PO-Revision-Date: 2025-10-17 12:45+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"PO-Revision-Date: 2025-11-13 13:14+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
 "website_livechat/pl/>\n"
 "Language: pl\n"
@@ -103,7 +105,7 @@ msgstr "Ustawienia konfiguracji"
 #. odoo-javascript
 #: code:addons/website_livechat/static/src/web/livechat_channel_info_list_patch.xml:0
 msgid "Country"
-msgstr ""
+msgstr "Kraj"
 
 #. module: website_livechat
 #. odoo-javascript
@@ -156,7 +158,7 @@ msgstr "W trakcie rozmowy"
 #. odoo-javascript
 #: code:addons/website_livechat/static/src/web/livechat_channel_info_list_patch.xml:0
 msgid "Language"
-msgstr ""
+msgstr "Język"
 
 #. module: website_livechat
 #: model:ir.model,name:website_livechat.model_im_livechat_channel
@@ -189,7 +191,7 @@ msgstr "Nazwa operatora"
 #. module: website_livechat
 #: model:ir.model,name:website_livechat.model_website_page
 msgid "Page"
-msgstr ""
+msgstr "Strona"
 
 #. module: website_livechat
 #. odoo-javascript

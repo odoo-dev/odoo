@@ -54,9 +54,6 @@ export function getVideoUrl(platform, videoId, params) {
         case "instagram":
             url = new URL(`https://www.instagram.com/p/${videoId}/embed`);
             break;
-        case "youku":
-            url = new URL(`https://player.youku.com/embed/${videoId}`);
-            break;
         default:
             throw new Error(`Unsupported platform: ${platform}`);
     }
@@ -77,7 +74,7 @@ export function isAbsoluteURLInCurrentDomain(url, env = null) {
     // further as we will always leave those untouched.
     let hasProtocol;
     try {
-        hasProtocol = !!(new URL(url).protocol);
+        hasProtocol = !!new URL(url).protocol;
     } catch {
         hasProtocol = false;
     }
@@ -86,12 +83,14 @@ export function isAbsoluteURLInCurrentDomain(url, env = null) {
     }
 
     const urlObj = new URL(url, window.location.origin);
-    return urlObj.origin === window.location.origin
+    return (
+        urlObj.origin === window.location.origin ||
         // Chosen heuristic to detect someone trying to enter a link using
         // its Odoo instance domain. We just suppose it should be a relative
         // URL (if unexpected behavior, the user can just not enter its Odoo
         // instance domain but its real domain, or opt-out from the domain
         // stripping). Mentioning an .odoo.com domain, especially its own
         // one, is always a bad practice anyway.
-        || ODOO_DOMAIN_REGEX.test(urlObj.origin);
+        ODOO_DOMAIN_REGEX.test(urlObj.origin)
+    );
 }

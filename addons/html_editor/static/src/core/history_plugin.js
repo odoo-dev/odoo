@@ -31,6 +31,7 @@ import { trackOccurrences, trackOccurrencesPair } from "../utils/tracking";
  * @property { SerializedSelection } selection
  * @property { HistoryMutation[] } mutations
  * @property { string } previousStepId
+ * @property { Object } extraStepInfos
  *
  * @typedef { Object } HistoryMutationCharacterData
  * @property { "characterData" } type
@@ -137,6 +138,39 @@ import { trackOccurrences, trackOccurrencesPair } from "../utils/tracking";
  * @property { HistoryPlugin['getIsCurrentStepModified'] } getIsCurrentStepModified
  */
 
+/**
+ * @typedef {((record: HistoryMutationRecord) => void)[]} attribute_change_handlers
+ * @typedef {(() => void)[]} before_add_step_handlers
+ * @typedef {((records: HistoryMutationRecord[]) => void)[]} before_filter_mutation_record_handlers
+ * @typedef {((root: HTMLElement) => void)[]} content_updated_handlers
+ * @typedef {(() => void)[]} external_step_added_handlers
+ * @typedef {((records: HistoryMutationRecord[], currentOperation: "original"|"undo"|"redo"|"restore") => void)[]} handleNewRecords
+ * @typedef {(() => void)[]} history_cleaned_handlers
+ * @typedef {(() => void)[]} history_reset_handlers
+ * @typedef {(() => void)[]} history_reset_from_steps_handlers
+ * @typedef {((revertedStep: HistoryStep) => void)[]} post_redo_handlers
+ * @typedef {((revertedStep: HistoryStep) => void)[]} post_undo_handlers
+ * @typedef {(() => void)[]} restore_savepoint_handlers
+ * @typedef {((arg: { step: HistoryStep, stepCommonAncestor: HTMLElement, isPreviewing: boolean }) => void)[]} step_added_handlers
+ *
+ * @typedef {((record: HistoryMutationRecord) => boolean)[]} savable_mutation_record_predicates
+ * @typedef {((step: HistoryStep) => boolean)[]} unreversible_step_predicates
+ *
+ * @typedef {((
+ *    arg: {
+ *      target: Node,
+ *      attributeName: string,
+ *      oldValue: string,
+ *      value: string,
+ *      reverse: boolean,
+ *    },
+ *    options: { forNewStep: boolean }
+ *  ) => void)[]} attribute_change_processors
+ * @typedef {((step: HistoryStep) => HistoryStep)[]} history_step_processors
+ * @typedef {((node: Node, childTreesToSerialize: Tree[]) => Tree[])[]} serializable_descendants_processors
+ * @typedef {((node: Node, attributeName: string, attributeValue: string) => boolean)[]} set_attribute_overrides
+ */
+
 export class HistoryPlugin extends Plugin {
     static id = "history";
     static dependencies = ["selection", "sanitize"];
@@ -165,6 +199,7 @@ export class HistoryPlugin extends Plugin {
         "setStepExtra",
         "getIsCurrentStepModified",
     ];
+    /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
             {
@@ -209,13 +244,6 @@ export class HistoryPlugin extends Plugin {
             this.reset(this.config.content);
         },
         on_prepare_drag_handlers: this.disableIsCurrentStepModifiedWarning.bind(this),
-        // Resource definitions:
-        normalize_handlers: [
-            // (commonRootOfModifiedEl or editableEl) => {
-            //    clean up DOM before taking into account for next history step
-            //    remaining in edit mode
-            // }
-        ],
     };
 
     setup() {

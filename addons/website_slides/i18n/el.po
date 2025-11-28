@@ -7,13 +7,15 @@
 # Kostas Goutoudis <goutoudis@gmail.com>, 2018
 # George Tarasidis <george_tarasidis@yahoo.com>, 2018
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Panagiotis karampaglis <panosdotk@gmail.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:37+0000\n"
-"PO-Revision-Date: 2025-09-24 19:23+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-11-07 18:35+0000\n"
+"PO-Revision-Date: 2025-11-08 19:07+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Greek <https://translate.odoo.com/projects/odoo-19/"
 "website_slides/el/>\n"
 "Language: el\n"
@@ -475,7 +477,7 @@ msgstr ""
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
-msgid "<i class=\"fa fa-comments\"/> Comments ("
+msgid "<i class=\"fa fa-comments\"/> Comments"
 msgstr ""
 
 #. module: website_slides
@@ -918,7 +920,7 @@ msgstr "<span> ώρες</span>"
 #. module: website_slides
 #: model_terms:web_tour.tour,rainbow_man_message:website_slides.slides_tour
 msgid "<span><b>Good job!</b> You went through all steps of this tour.</span>"
-msgstr ""
+msgstr "<span><b>Εξαιρετικά!</b>Ολοκληρώσατε όλα τα βήματα του οδηγού</span>"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_main
@@ -1167,7 +1169,7 @@ msgstr "Δραστηριότητες"
 #. module: website_slides
 #: model:ir.model,name:website_slides.model_mail_activity
 msgid "Activity"
-msgstr ""
+msgstr "Δραστηριότητα"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__activity_exception_decoration
@@ -1646,7 +1648,7 @@ msgstr ""
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__can_upload
 msgid "Can Upload"
-msgstr "Μπορεί να μεταφορτωθεί."
+msgstr "Μπορεί να μεταφορτωθεί"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__can_vote
@@ -2498,6 +2500,15 @@ msgid "Defines the content that will be promoted on the course home page"
 msgstr ""
 
 #. module: website_slides
+#: model:ir.model.fields,help:website_slides.field_slide_channel__channel_type
+#: model:ir.model.fields,help:website_slides.field_slide_channel_partner__channel_type
+#: model:ir.model.fields,help:website_slides.field_slide_slide__channel_type
+msgid ""
+"Defines the course type (e.g., \"Training\" for interactive learning, or "
+"\"Documentation\" for resources and guides)."
+msgstr ""
+
+#. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__publish_template_id
 msgid ""
 "Defines the email your Attendees will receive each time you upload new "
@@ -2979,7 +2990,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "Filters"
-msgstr ""
+msgstr "Φίλτρα"
 
 #. module: website_slides
 #. odoo-javascript
@@ -3036,7 +3047,7 @@ msgstr "Ακόλουθοι (Συνεργάτες)"
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Γραμματοσειρά awesome  π.χ. fa-tasks"
+msgstr "Γραμματοσειρά awesome π.χ. fa-tasks"
 
 #. module: website_slides
 #: model:slide.slide,name:website_slides.slide_slide_demo_4_0
@@ -3537,7 +3548,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_slides/static/src/js/public/components/slide_upload_dialog/slide_upload_category.js:0
 msgid "Invalid file type. Please select pdf or image file"
-msgstr "Λάθος τύπος αρχείου. Παρακαλώ επιλέξτε αρχείο τύπου pdf ή εικόνα."
+msgstr "Λάθος τύπος αρχείου. Παρακαλώ επιλέξτε αρχείο τύπου pdf ή εικόνα"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel_partner__invitation_link
@@ -3852,7 +3863,7 @@ msgstr ""
 #. module: website_slides
 #: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_level
 msgid "Level"
-msgstr ""
+msgstr "Επίπεδο"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4341,7 +4352,7 @@ msgstr "Αριθμός σφαλμάτων"
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_needaction_counter
 #: model:ir.model.fields,help:website_slides.field_slide_slide__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr ""
+msgstr "Αριθμός μηνυμάτων που απαιτούν ενέργεια"
 
 #. module: website_slides
 #: model:ir.model.fields,help:website_slides.field_slide_channel__message_has_error_counter
@@ -4421,7 +4432,7 @@ msgstr "Επιλογές"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_home
 msgid "Overview"
-msgstr ""
+msgstr "Επισκόπηση"
 
 #. module: website_slides
 #: model:ir.model.fields.selection,name:website_slides.selection__slide_slide__slide_type__pdf
@@ -4568,7 +4579,7 @@ msgstr ""
 #: model:mail.message.subtype,description:website_slides.mt_channel_slide_published
 #: model:mail.message.subtype,name:website_slides.mt_channel_slide_published
 msgid "Presentation Published"
-msgstr "Η παρουσίαση δημοσιεύθηκε."
+msgstr "Η παρουσίαση δημοσιεύθηκε"
 
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.course_slides_list_slide
@@ -4580,7 +4591,7 @@ msgstr "Προεπισκόπηση"
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_content_detailed
 msgid "Previous"
-msgstr ""
+msgstr "Προηγούμενο"
 
 #. module: website_slides
 #. odoo-javascript
@@ -4962,7 +4973,7 @@ msgstr ""
 #. module: website_slides
 #: model:slide.channel.tag.group,name:website_slides.slide_channel_tag_group_role
 msgid "Role"
-msgstr ""
+msgstr "Ρόλος"
 
 #. module: website_slides
 #: model:ir.model.fields,field_description:website_slides.field_slide_channel__is_seo_optimized
@@ -6068,7 +6079,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.slide_channel_invite_view_form
 msgid "Use template"
-msgstr ""
+msgstr "Χρήση προτύπου"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6700,7 +6711,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_slides/models/slide_channel.py:0
 msgid "copy"
-msgstr ""
+msgstr "αντίγραφο"
 
 #. module: website_slides
 #. odoo-javascript
@@ -6826,7 +6837,7 @@ msgstr ""
 #. module: website_slides
 #: model_terms:ir.ui.view,arch_db:website_slides.courses_my
 msgid "hours"
-msgstr ""
+msgstr "ώρες"
 
 #. module: website_slides
 #. odoo-javascript

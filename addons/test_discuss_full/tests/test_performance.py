@@ -425,6 +425,8 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 {
                     "id": self.users[0].id,
                     "is_admin": False,
+                    "is_livechat_manager": False,
+                    "livechat_expertise_ids": [],
                     "notification_type": "inbox",
                     "share": False,
                     "signature": ["markup", str(self.users[0].signature)],
@@ -433,7 +435,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
             "Store": {
                 "channel_types_with_seen_infos": sorted(["chat", "group", "livechat"]),
                 "action_discuss_id": xmlid_to_res_id("mail.action_discuss"),
-                "hasCannedResponses": False,
+                "hasCannedResponses": True,
                 "hasGifPickerFeature": False,
                 "hasLinkPreviewFeature": True,
                 "has_access_livechat": True,

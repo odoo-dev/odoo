@@ -4,15 +4,16 @@
 #
 # Translators:
 # Martin Trigaux, 2022
-# Ryoko Tsuda <ryoko@quartile.co>, 2023
+# Ryoko Tsuda <ryoko@quartile.co>, 2023, 2025.
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Junko Augias (juau)" <juau@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0beta\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-10-08 18:38+0000\n"
-"PO-Revision-Date: 2025-10-14 06:33+0000\n"
+"PO-Revision-Date: 2025-11-20 07:10+0000\n"
 "Last-Translator: \"Junko Augias (juau)\" <juau@odoo.com>\n"
 "Language-Team: Japanese <https://translate.odoo.com/projects/odoo-19/"
 "resource/ja/>\n"
@@ -46,7 +47,7 @@ msgstr "%s (コピー)"
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "2 Week's Calendar"
-msgstr ""
+msgstr "2 週間カレンダー"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
@@ -56,7 +57,7 @@ msgstr "<span class=\"ms-1\">%</span>"
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "<span class=\"ms-2\">hours/day</span>"
-msgstr ""
+msgstr "<span class=\"ms-2\">時間/日</span>"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
@@ -110,7 +111,7 @@ msgstr "本当に2週間カレンダに変更しますか？勤務記録はす�
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__duration_based
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance__duration_based
 msgid "Attendance based on duration"
-msgstr ""
+msgstr "期間に基づく勤怠"
 
 #. module: resource
 #. odoo-python
@@ -137,7 +138,7 @@ msgstr "リソースがこのカレンダで働くと想定される 1 日あた
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "Avg"
-msgstr ""
+msgstr "平均"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__lunch
@@ -158,6 +159,9 @@ msgid ""
 "- Fully Fixed : define the days, periods and the start & end time for each "
 "period of the day"
 msgstr ""
+"スケジュールで設定する詳細レベルを選択してください\n"
+"- 柔軟：週あたりの勤務時間数を設定します。\n"
+"- 完全固定：曜日、時間帯ごとの開始時刻と終了時刻を詳細に設定します"
 
 #. module: resource
 #: model:ir.actions.act_window,name:resource.resource_calendar_closing_days
@@ -182,7 +186,7 @@ msgstr "会社"
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "Confirm"
-msgstr ""
+msgstr "確定"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__create_uid
@@ -224,7 +228,7 @@ msgstr "稼働時間のデフォルト値"
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
 msgid "Define Amount of Hours per day"
-msgstr ""
+msgstr "1日の労働時間を定義"
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_res_users__resource_calendar_id
@@ -346,17 +350,17 @@ msgstr "金曜 午前"
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__day_period__full_day
 msgid "Full Day"
-msgstr ""
+msgstr "全日"
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar__full_time_required_hours
 msgid "Full Time Equivalent"
-msgstr ""
+msgstr "フルタイム換算"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar__schedule_type__fully_fixed
 msgid "Fully Fixed"
-msgstr ""
+msgstr "完全固定"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_resource_form
@@ -474,7 +478,7 @@ msgstr "最終更新日"
 #: model:ir.model.fields.selection,name:resource.selection__resource_resource__resource_type__material
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
 msgid "Material"
-msgstr "製品"
+msgstr "材料"
 
 #. module: resource
 #: model:ir.model.fields.selection,name:resource.selection__resource_calendar_attendance__dayofweek__0
@@ -586,7 +590,7 @@ msgstr "リソースの休止"
 #. module: resource
 #: model:ir.model,name:resource.model_resource_calendar_leaves
 msgid "Resource Time Off Detail"
-msgstr "リソースの休止詳細"
+msgstr "リソースの休暇詳細"
 
 #. module: resource
 #: model:ir.model,name:resource.model_resource_calendar

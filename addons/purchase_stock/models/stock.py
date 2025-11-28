@@ -37,6 +37,10 @@ class StockPicking(models.Model):
     def _search_delay_pass(self, operator, value):
         return [('purchase_id.date_order', operator, value)]
 
+    def _action_done(self):
+        self.purchase_id.sudo().action_acknowledge()
+        return super()._action_done()
+
 
 class StockWarehouse(models.Model):
     _inherit = 'stock.warehouse'
@@ -129,7 +133,7 @@ class StockReturnPicking(models.TransientModel):
 
     def _create_return(self):
         picking = super()._create_return()
-        if len(picking.move_ids.partner_id) == 1:
+        if len(picking.move_ids.partner_id) == 1 and picking.partner_id != picking.move_ids.partner_id:
             picking.partner_id = picking.move_ids.partner_id
         return picking
 

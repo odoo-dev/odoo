@@ -1131,10 +1131,7 @@ class Field(typing.Generic[T]):
             return
         if column['udt_name'] == self.column_type[0]:
             return
-        if column['is_nullable'] == 'NO':
-            sql.drop_not_null(model.env.cr, model._table, self.name)
         self._convert_db_column(model, column)
-        column.clear()  # remove information, because it may no longer be valid
 
     def _convert_db_column(self, model: BaseModel, column: dict[str, typing.Any]):
         """ Convert the given database column to the type of the field. """
@@ -1441,7 +1438,7 @@ class Field(typing.Generic[T]):
                     yield '$'
                 # no need to match r'.*' in else because we only use .match()
 
-            like_regex = re.compile("".join(build_like_regex(unaccent(value), "=" in operator)))
+            like_regex = re.compile("".join(build_like_regex(unaccent(value), "=" in operator)), flags=re.DOTALL)
             return lambda rec: like_regex.match(unaccent(getter(rec)))
 
         # -------------------------------------------------

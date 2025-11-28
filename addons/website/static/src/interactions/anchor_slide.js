@@ -46,7 +46,8 @@ export class AnchorSlide extends Interaction {
         hash = "#" + CSS.escape(hash.substring(1));
         const anchorEl = this.el.ownerDocument.querySelector(hash);
         const scrollValue = anchorEl?.dataset.anchor;
-        if (!anchorEl || !scrollValue) {
+        // No need to scroll when target is _blank as it should open in new tab
+        if (!anchorEl || !scrollValue || this.el.target === "_blank") {
             return;
         }
 
@@ -64,7 +65,7 @@ export class AnchorSlide extends Interaction {
                 "hidden.bs.offcanvas",
                 () => this.manageScroll(hash, anchorEl, scrollValue),
                 // the listener must be automatically removed when invoked
-                { once: true },
+                { once: true }
             );
         } else {
             ev.preventDefault();
@@ -92,6 +93,4 @@ export class AnchorSlide extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website.anchor_slide", AnchorSlide);
+registry.category("public.interactions").add("website.anchor_slide", AnchorSlide);

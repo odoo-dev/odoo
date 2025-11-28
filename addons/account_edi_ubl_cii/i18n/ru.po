@@ -4,13 +4,15 @@
 #
 # Translators:
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Anastasiia Koroleva (koan)" <koan@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:37+0000\n"
-"PO-Revision-Date: 2025-09-16 04:37+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-11-07 18:36+0000\n"
+"PO-Revision-Date: 2025-11-08 21:51+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Russian <https://translate.odoo.com/projects/odoo-19/"
 "account_edi_ubl_cii/ru/>\n"
 "Language: ru\n"
@@ -18,8 +20,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || ("
+"n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: Weblate 5.12.2\n"
 
 #. module: account_edi_ubl_cii
@@ -57,7 +59,7 @@ msgstr "A-NZ BIS Billing 3.0"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__ae
 msgid "AE - Vat Reverse Charge"
-msgstr ""
+msgstr "AE – Обратное начисление НДС"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__as
@@ -101,14 +103,14 @@ msgid "Attachment"
 msgstr "Вложение"
 
 #. module: account_edi_ubl_cii
+#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__invoice_edi_format__ubl_a_nz
+msgid "Australia (BIS Billing 3.0 A-NZ)"
+msgstr "Австралия (BIS Billing 3.0 A-NZ)"
+
+#. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0151
 msgid "Australia ABN"
 msgstr "Australia ABN"
-
-#. module: account_edi_ubl_cii
-#: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__invoice_edi_format__ubl_a_nz
-msgid "Australia BIS Billing 3.0 A-NZ"
-msgstr ""
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9914
@@ -129,7 +131,7 @@ msgstr "Доступные адреса Peppol EAS"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__b
 msgid "B - Transferred (VAT), In Italy"
-msgstr ""
+msgstr "B – Перенос налога (НДС), используется в Италии"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model,name:account_edi_ubl_cii.model_account_edi_xml_ubl_de
@@ -237,6 +239,8 @@ msgid ""
 "Could not retrieve partner with details: Name: %(name)s, Vat: %(vat)s, "
 "Phone: %(phone)s, Email: %(email)s"
 msgstr ""
+"Не удалось получить данные партнера: имя: %(name)s, ИНН: %(vat)s, телефон: %"
+"(phone)s, e-mail: %(email)s"
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -261,7 +265,7 @@ msgstr ""
 #. module: account_edi_ubl_cii
 #: model:ir.model,website_form_label:account_edi_ubl_cii.model_res_partner
 msgid "Create a Customer"
-msgstr ""
+msgstr "Создать клиента"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9934
@@ -320,12 +324,12 @@ msgstr "Directorates of the European Commission"
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_ir_actions_report__display_name
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_res_partner__display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Отображаемое имя"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__e
 msgid "E - Exempt from Tax"
-msgstr ""
+msgstr "E – Освобождено от налога"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model,name:account_edi_ubl_cii.model_account_edi_xml_ubl_efff
@@ -345,7 +349,7 @@ msgstr "EN 16931"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__invoice_edi_format__ubl_bis3
 msgid "EU Standard (Peppol Bis 3.0)"
-msgstr ""
+msgstr "Стандарт ЕС (Peppol Bis 3.0)"
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -396,7 +400,7 @@ msgstr "Освобождено от налогообложения"
 #. odoo-python
 #: code:addons/account_edi_ubl_cii/models/account_move.py:0
 msgid "Export XML"
-msgstr ""
+msgstr "Экспортировать XML"
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -449,18 +453,18 @@ msgstr "При поставках внутри общины следует ук�
 #. odoo-python
 #: code:addons/account_edi_ubl_cii/models/account_edi_xml_ubl_bis3.py:0
 msgid "Format used to import the document: %s"
-msgstr ""
+msgstr "Формат, использованный для импорта документа: %s"
 
 #. module: account_edi_ubl_cii
 #. odoo-python
 #: code:addons/account_edi_ubl_cii/models/account_edi_common.py:0
 msgid "Format: %s"
-msgstr ""
+msgstr "Формат: %s"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__invoice_edi_format__facturx
 msgid "France (FacturX)"
-msgstr ""
+msgstr "Франция (FacturX)"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0225
@@ -490,7 +494,7 @@ msgstr "France VAT"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__g
 msgid "G - Free export item, VAT not charged"
-msgstr ""
+msgstr "G – Бесплатный экспорт, НДС не начисляется"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0209
@@ -500,7 +504,7 @@ msgstr "GS1 identification keys"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__invoice_edi_format__xrechnung
 msgid "Germany (XRechnung)"
-msgstr ""
+msgstr "Германия (XRechnung)"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0204
@@ -539,7 +543,7 @@ msgstr "Hungary VAT"
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_ir_actions_report__id
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_res_partner__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0196
@@ -566,7 +570,7 @@ msgstr "Счет-фактура, сгенерированный Odoo"
 #. odoo-python
 #: code:addons/account_edi_ubl_cii/models/account_edi_common.py:0
 msgid "Invoice imported"
-msgstr ""
+msgstr "Счет импортирован"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9935
@@ -613,7 +617,7 @@ msgstr "Запись в журнале"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__k
 msgid "K - VAT exempt for EEA intra-community supply of goods and services"
-msgstr ""
+msgstr "K – Освобождение от НДС для поставок товаров и услуг внутри ЕЭЗ"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9919
@@ -623,7 +627,7 @@ msgstr "Kennziffer des Unternehmensregisters"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__l
 msgid "L - Canary Islands general indirect tax"
-msgstr ""
+msgstr "L – Общий косвенный налог Канарских островов"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0218
@@ -663,7 +667,7 @@ msgstr "Luxembourg VAT"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__m
 msgid "M - Tax for production, services and importation in Ceuta and Melilla"
-msgstr ""
+msgstr "M – Налог на производство, услуги и импорт в Сеуте и Мелилье"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9942
@@ -693,7 +697,7 @@ msgstr "Montenegro VAT"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__invoice_edi_format__nlcius
 msgid "Netherlands (NLCIUS)"
-msgstr ""
+msgstr "Нидерланды (NLCIUS)"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0106
@@ -727,7 +731,7 @@ msgstr "Norway Org.nr."
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__o
 msgid "O - Services outside scope of tax"
-msgstr ""
+msgstr "O – Услуги, не подпадающие под действие налога"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__an
@@ -806,7 +810,7 @@ msgstr "Округление"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__s
 msgid "S - Standard rate"
-msgstr ""
+msgstr "S – Стандартная ставка"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9918
@@ -845,8 +849,8 @@ msgstr "Serbia VAT"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__invoice_edi_format__ubl_sg
-msgid "Singapore BIS Billing 3.0 SG"
-msgstr ""
+msgid "Singapore (BIS Billing 3.0 SG)"
+msgstr "Сингапур (BIS Billing 3.0 SG)"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__0195
@@ -891,7 +895,7 @@ msgstr "Swiss VAT"
 #. module: account_edi_ubl_cii
 #: model:ir.model,name:account_edi_ubl_cii.model_account_tax
 msgid "Tax"
-msgstr ""
+msgstr "Налог"
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -902,12 +906,12 @@ msgstr "Налог '%(tax_name)s' недействителен: %(error_message)
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_account_tax__ubl_cii_tax_category_code
 msgid "Tax Category Code"
-msgstr ""
+msgstr "Код категории налога"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_account_tax__ubl_cii_tax_exemption_reason_code
 msgid "Tax Exemption Reason Code"
-msgstr ""
+msgstr "Код причины освобождения от налога"
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -916,6 +920,8 @@ msgid ""
 "The Peppol endpoint (%s) is not valid. It should contain only letters and "
 "digit."
 msgstr ""
+"Конечная точка Peppol (%s) недействительна. Она должна содержать только "
+"буквы и цифры."
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -946,7 +952,7 @@ msgstr ""
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields,help:account_edi_ubl_cii.field_account_tax__ubl_cii_tax_category_code
 msgid "The VAT category code used for electronic invoicing purposes."
-msgstr ""
+msgstr "Код категории НДС, используемый для электронного выставления счетов."
 
 #. module: account_edi_ubl_cii
 #. odoo-python
@@ -1010,6 +1016,8 @@ msgid ""
 "The reason why the amount is exempted from VAT or why no VAT is being "
 "charged, used for electronic invoicing purposes."
 msgstr ""
+"Причина, по которой сумма освобождена от НДС или почему НДС не начисляется – "
+"используется для целей электронного выставления счетов."
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9952
@@ -1051,7 +1059,7 @@ msgstr "Файл UBL/CII"
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_account_bank_statement_line__ubl_cii_xml_filename
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_account_move__ubl_cii_xml_filename
 msgid "UBL/CII Filename"
-msgstr ""
+msgstr "Имя файла UBL/CII"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9959
@@ -1061,7 +1069,7 @@ msgstr "USA EIN"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_account_tax__ubl_cii_requires_exemption_reason
 msgid "Ubl Cii Requires Exemption Reason"
-msgstr ""
+msgstr "Ubl Cii требует указания причины освобождения"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields,help:account_edi_ubl_cii.field_res_partner__peppol_endpoint
@@ -1083,6 +1091,8 @@ msgstr "United Kingdom VAT"
 msgid ""
 "VATEX-EU-132 - Exempt based on article 132 of Council Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132 – Освобождение на основании статьи 132 Директивы Совета "
+"2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1a
@@ -1090,6 +1100,8 @@ msgid ""
 "VATEX-EU-132-1A - Exempt based on article 132, section 1 (a) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1A – Освобождение на основании статьи 132, раздел 1 (a) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1b
@@ -1097,6 +1109,8 @@ msgid ""
 "VATEX-EU-132-1B - Exempt based on article 132, section 1 (b) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1B – Освобождение на основании статьи 132, раздел 1 (b) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1c
@@ -1104,6 +1118,8 @@ msgid ""
 "VATEX-EU-132-1C - Exempt based on article 132, section 1 (c) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1C – Освобождение на основании статьи 132, раздел 1 (c) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1d
@@ -1111,6 +1127,8 @@ msgid ""
 "VATEX-EU-132-1D - Exempt based on article 132, section 1 (d) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1D – Освобождение на основании статьи 132, раздел 1 (d) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1e
@@ -1118,6 +1136,8 @@ msgid ""
 "VATEX-EU-132-1E - Exempt based on article 132, section 1 (e) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1E – Освобождение на основании статьи 132, раздел 1 (e) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1f
@@ -1125,6 +1145,8 @@ msgid ""
 "VATEX-EU-132-1F - Exempt based on article 132, section 1 (f) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1F – Освобождение на основании статьи 132, раздел 1 (f) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1g
@@ -1132,6 +1154,8 @@ msgid ""
 "VATEX-EU-132-1G - Exempt based on article 132, section 1 (g) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1G – Освобождение на основании статьи 132, раздел 1 (g) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1h
@@ -1139,6 +1163,8 @@ msgid ""
 "VATEX-EU-132-1H - Exempt based on article 132, section 1 (h) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1H – Освобождение на основании статьи 132, раздел 1 (h) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1i
@@ -1146,6 +1172,8 @@ msgid ""
 "VATEX-EU-132-1I - Exempt based on article 132, section 1 (i) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1I – Освобождение на основании статьи 132, раздел 1 (i) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1j
@@ -1153,6 +1181,8 @@ msgid ""
 "VATEX-EU-132-1J - Exempt based on article 132, section 1 (j) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1J – Освобождение на основании статьи 132, раздел 1 (j) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1k
@@ -1160,6 +1190,8 @@ msgid ""
 "VATEX-EU-132-1K - Exempt based on article 132, section 1 (k) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1K – Освобождение на основании статьи 132, раздел 1 (k) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1l
@@ -1167,6 +1199,8 @@ msgid ""
 "VATEX-EU-132-1L - Exempt based on article 132, section 1 (l) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1L – Освобождение на основании статьи 132, раздел 1 (l) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1m
@@ -1174,6 +1208,8 @@ msgid ""
 "VATEX-EU-132-1M - Exempt based on article 132, section 1 (m) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1M – Освобождение на основании статьи 132, раздел 1 (m) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1n
@@ -1181,6 +1217,8 @@ msgid ""
 "VATEX-EU-132-1N - Exempt based on article 132, section 1 (n) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1N – Освобождение на основании статьи 132, раздел 1 (n) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1o
@@ -1188,6 +1226,8 @@ msgid ""
 "VATEX-EU-132-1O - Exempt based on article 132, section 1 (o) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1O – Освобождение на основании статьи 132, раздел 1 (o) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1p
@@ -1195,6 +1235,8 @@ msgid ""
 "VATEX-EU-132-1P - Exempt based on article 132, section 1 (p) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1P – Освобождение на основании статьи 132, раздел 1 (p) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-132-1q
@@ -1202,12 +1244,16 @@ msgid ""
 "VATEX-EU-132-1Q - Exempt based on article 132, section 1 (q) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-132-1Q – Освобождение на основании статьи 132, раздел 1 (q) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143
 msgid ""
 "VATEX-EU-143 - Exempt based on article 143 of Council Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143 – Освобождение на основании статьи 143 Директивы Совета "
+"2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1a
@@ -1215,6 +1261,8 @@ msgid ""
 "VATEX-EU-143-1A - Exempt based on article 143, section 1 (a) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1A – Освобождение на основании статьи 143, раздел 1 (a) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1b
@@ -1222,6 +1270,8 @@ msgid ""
 "VATEX-EU-143-1B - Exempt based on article 143, section 1 (b) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1B – Освобождение на основании статьи 143, раздел 1 (b) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1c
@@ -1229,6 +1279,8 @@ msgid ""
 "VATEX-EU-143-1C - Exempt based on article 143, section 1 (c) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1C – Освобождение на основании статьи 143, раздел 1 (c) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1d
@@ -1236,6 +1288,8 @@ msgid ""
 "VATEX-EU-143-1D - Exempt based on article 143, section 1 (d) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1D – Освобождение на основании статьи 143, раздел 1 (d) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1e
@@ -1243,6 +1297,8 @@ msgid ""
 "VATEX-EU-143-1E - Exempt based on article 143, section 1 (e) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1E – Освобождение на основании статьи 143, раздел 1 (e) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1f
@@ -1250,6 +1306,8 @@ msgid ""
 "VATEX-EU-143-1F - Exempt based on article 143, section 1 (f) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1F – Освобождение на основании статьи 143, раздел 1 (f) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1fa
@@ -1257,6 +1315,8 @@ msgid ""
 "VATEX-EU-143-1FA - Exempt based on article 143, section 1 (fa) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1FA – Освобождение на основании статьи 143, раздел 1 (fa) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1g
@@ -1264,6 +1324,8 @@ msgid ""
 "VATEX-EU-143-1G - Exempt based on article 143, section 1 (g) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1G – Освобождение на основании статьи 143, раздел 1 (g) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1h
@@ -1271,6 +1333,8 @@ msgid ""
 "VATEX-EU-143-1H - Exempt based on article 143, section 1 (h) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1H – Освобождение на основании статьи 143, раздел 1 (h) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1i
@@ -1278,6 +1342,8 @@ msgid ""
 "VATEX-EU-143-1I - Exempt based on article 143, section 1 (i) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1I – Освобождение на основании статьи 143, раздел 1 (i) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1j
@@ -1285,6 +1351,8 @@ msgid ""
 "VATEX-EU-143-1J - Exempt based on article 143, section 1 (j) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1J – Освобождение на основании статьи 143, раздел 1 (j) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1k
@@ -1292,6 +1360,8 @@ msgid ""
 "VATEX-EU-143-1K - Exempt based on article 143, section 1 (k) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1K – Освобождение на основании статьи 143, раздел 1 (k) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-143-1l
@@ -1299,12 +1369,16 @@ msgid ""
 "VATEX-EU-143-1L - Exempt based on article 143, section 1 (l) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-143-1L – Освобождение на основании статьи 143, раздел 1 (l) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148
 msgid ""
 "VATEX-EU-148 - Exempt based on article 148 of Council Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148 – Освобождение на основании статьи 148 Директивы Совета "
+"2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148-a
@@ -1312,6 +1386,8 @@ msgid ""
 "VATEX-EU-148-A - Exempt based on article 148, section (a) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148-A – Освобождение на основании статьи 148, пункт (a) Директивы "
+"Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148-b
@@ -1319,6 +1395,8 @@ msgid ""
 "VATEX-EU-148-B - Exempt based on article 148, section (b) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148-B – Освобождение на основании статьи 148, пункт (b) Директивы "
+"Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148-c
@@ -1326,6 +1404,8 @@ msgid ""
 "VATEX-EU-148-C - Exempt based on article 148, section (c) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148-C – Освобождение на основании статьи 148, пункт (c) Директивы "
+"Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148-d
@@ -1333,6 +1413,8 @@ msgid ""
 "VATEX-EU-148-D - Exempt based on article 148, section (d) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148-D – Освобождение на основании статьи 148, пункт (d) Директивы "
+"Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148-e
@@ -1340,6 +1422,8 @@ msgid ""
 "VATEX-EU-148-E - Exempt based on article 148, section (e) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148-E – Освобождение на основании статьи 148, пункт (e) Директивы "
+"Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148-f
@@ -1347,6 +1431,8 @@ msgid ""
 "VATEX-EU-148-F - Exempt based on article 148, section (f) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148-F – Освобождение на основании статьи 148, пункт (f) Директивы "
+"Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-148-g
@@ -1354,12 +1440,16 @@ msgid ""
 "VATEX-EU-148-G - Exempt based on article 148, section (g) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-148-G – Освобождение на основании статьи 148, пункт (g) Директивы "
+"Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-151
 msgid ""
 "VATEX-EU-151 - Exempt based on article 151 of Council Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-151 – Освобождение на основании статьи 151 Директивы Совета "
+"2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-151-1a
@@ -1367,6 +1457,8 @@ msgid ""
 "VATEX-EU-151-1A - Exempt based on article 151, section 1 (a) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-151-1A – Освобождение на основании статьи 151, раздел 1 (a) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-151-1aa
@@ -1374,6 +1466,8 @@ msgid ""
 "VATEX-EU-151-1AA - Exempt based on article 151, section 1 (aa) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-151-1AA – Освобождение на основании статьи 151, раздел 1 (aa) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-151-1b
@@ -1381,6 +1475,8 @@ msgid ""
 "VATEX-EU-151-1B - Exempt based on article 151, section 1 (b) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-151-1B – Освобождение на основании статьи 151, раздел 1 (b) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-151-1c
@@ -1388,6 +1484,8 @@ msgid ""
 "VATEX-EU-151-1C - Exempt based on article 151, section 1 (c) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-151-1C – Освобождение на основании статьи 151, раздел 1 (c) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-151-1d
@@ -1395,6 +1493,8 @@ msgid ""
 "VATEX-EU-151-1D - Exempt based on article 151, section 1 (d) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-151-1D – Освобождение на основании статьи 151, раздел 1 (d) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-151-1e
@@ -1402,12 +1502,16 @@ msgid ""
 "VATEX-EU-151-1E - Exempt based on article 151, section 1 (e) of Council "
 "Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-151-1E – Освобождение на основании статьи 151, раздел 1 (e) "
+"Директивы Совета 2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-309
 msgid ""
 "VATEX-EU-309 - Exempt based on article 309 of Council Directive 2006/112/EC"
 msgstr ""
+"VATEX-EU-309 – Освобождение на основании статьи 309 Директивы Совета "
+"2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-79-c
@@ -1415,48 +1519,53 @@ msgid ""
 "VATEX-EU-79-C - Exempt based on article 79, point c of Council Directive "
 "2006/112/EC"
 msgstr ""
+"VATEX-EU-79-C – Освобождение на основании статьи 79, Директивы Совета "
+"2006/112/EC"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-ae
 msgid "VATEX-EU-AE - Reverse charge"
-msgstr ""
+msgstr "VATEX-EU-AE – Обратное начисление"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-d
 msgid ""
 "VATEX-EU-D - Intra-Community acquisition from second hand means of transport"
 msgstr ""
+"VATEX-EU-D – Внутрисоюзное приобретение подержанных транспортных средств"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-f
 msgid "VATEX-EU-F - Intra-Community acquisition of second hand goods"
-msgstr ""
+msgstr "VATEX-EU-F – Внутрисоюзное приобретение подержанных товаров"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-g
 msgid "VATEX-EU-G - Export outside the EU"
-msgstr ""
+msgstr "VATEX-EU-G – Экспорт за пределы ЕС"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-i
 msgid "VATEX-EU-I - Intra-Community acquisition of works of art"
-msgstr ""
+msgstr "VATEX-EU-I – Внутрисоюзное приобретение произведений искусства"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-ic
 msgid "VATEX-EU-IC - Intra-Community supply"
-msgstr ""
+msgstr "VATEX-EU-IC – Внутрисоюзная поставка"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-j
 msgid ""
 "VATEX-EU-J - Intra-Community acquisition of collectors items and antiques"
 msgstr ""
+"VATEX-EU-J – Внутрисоюзное приобретение коллекционных предметов и "
+"антиквариата"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-eu-o
 msgid "VATEX-EU-O - Not subject to VAT"
-msgstr ""
+msgstr "VATEX-EU-O – Не облагается НДС"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-cnwvat
@@ -1464,11 +1573,13 @@ msgid ""
 "VATEX-FR-CNWVAT - France domestic Credit Notes without VAT, due to supplier "
 "forfeit of VAT for discount"
 msgstr ""
+"VATEX-FR-CNWVAT – Внутренние кредитовые авизо Франции без НДС из-за отказа "
+"поставщика от НДС при предоставлении скидки"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_exemption_reason_code__vatex-fr-franchise
 msgid "VATEX-FR-FRANCHISE - France domestic VAT franchise in base"
-msgstr ""
+msgstr "VATEX-FR-FRANCHISE – Внутренний режим освобождения от НДС во Франции"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__res_partner__peppol_eas__9953
@@ -1516,7 +1627,7 @@ msgstr "Your endpoint"
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields.selection,name:account_edi_ubl_cii.selection__account_tax__ubl_cii_tax_category_code__z
 msgid "Z - Zero rated goods"
-msgstr ""
+msgstr "Z – Товары с нулевой ставкой"
 
 #. module: account_edi_ubl_cii
 #: model:ir.model.fields,field_description:account_edi_ubl_cii.field_res_partner__invoice_edi_format
@@ -1538,6 +1649,12 @@ msgstr "fx"
 #: model_terms:ir.ui.view,arch_db:account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata
 msgid "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
 msgstr "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+
+#~ msgid "Australia BIS Billing 3.0 A-NZ"
+#~ msgstr "Австралия BIS Счета 3.0 A-NZ"
+
+#~ msgid "Singapore BIS Billing 3.0 SG"
+#~ msgstr "Сингапур BIS Счета 3.0 SG"
 
 #~ msgid "Format used to import the invoice: %s"
 #~ msgstr "Формат, используемый для импорта счета-фактуры: %s"

@@ -883,7 +883,7 @@ test("should be able to apply color on icon along with text", async () => {
         contentAfterEdit:
             '<p>a<font style="color: rgb(255, 0, 0);">[bc</font><font style="color: rgb(255, 0, 0);">\ufeff<span class="fa fa-glass" contenteditable="false">\u200b</span>\ufeff</font><font style="color: rgb(255, 0, 0);">de]</font>f</p>',
         contentAfter:
-            '<p>a<font style="color: rgb(255, 0, 0);">[bc</font><font style="color: rgb(255, 0, 0);"><span class="fa fa-glass"></span></font><font style="color: rgb(255, 0, 0);">de]</font>f</p>',
+            '<p>a<font style="color: rgb(255, 0, 0);">[bc<span class="fa fa-glass"></span>de]</font>f</p>',
     });
 });
 
@@ -919,10 +919,10 @@ test("doesn't change the color of the whole section when there's an icon next to
         </section>`,
         stepFunction: setColor("rgb(0, 0, 255)", "color"),
         contentAfterEdit: `
-        <section style="color: rgb(255, 0, 0);">
+        <p data-selection-placeholder=""><br></p><section style="color: rgb(255, 0, 0);">
             <p>a<font style="color: rgb(0, 0, 255);">[bc]</font>d</p>
             <span class="fa fa-glass" contenteditable="false">\u200b</span>
-        </section>`,
+        </section><p data-selection-placeholder=""><br></p>`,
         contentAfter: `
         <section style="color: rgb(255, 0, 0);">
             <p>a<font style="color: rgb(0, 0, 255);">[bc]</font>d</p>
@@ -948,5 +948,21 @@ test("should remove remove color from `td`", async () => {
                 </tbody>
             </table>
         `),
+    });
+});
+
+test("should be able to remove color applied by 'text-*' classes (1)", async () => {
+    await testEditor({
+        contentBefore: '<p><span class="text-muted">[a]</span></p>',
+        stepFunction: setColor("", "color"),
+        contentAfter: "<p>[a]</p>",
+    });
+});
+
+test("should be able to remove color applied by 'text-*' classes (2)", async () => {
+    await testEditor({
+        contentBefore: '<p><a href="#" class="text-muted">[a]</a></p>',
+        stepFunction: setColor("", "color"),
+        contentAfter: '<p><a href="#">[a]</a></p>',
     });
 });

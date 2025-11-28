@@ -11,13 +11,15 @@
 # Giota Dandidou <giotadandidou@gmail.com>, 2018
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# Panagiotis karampaglis <panosdotk@gmail.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:37+0000\n"
-"PO-Revision-Date: 2025-09-24 19:22+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-11-07 18:35+0000\n"
+"PO-Revision-Date: 2025-11-08 21:54+0000\n"
+"Last-Translator: Weblate <noreply-mt-weblate@weblate.org>\n"
 "Language-Team: Greek <https://translate.odoo.com/projects/odoo-19/mrp/el/>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
@@ -189,7 +191,7 @@ msgstr "'Επισκόπηση Συνταγής Παραγωγής - %s' % object
 #. module: mrp
 #: model:ir.actions.report,print_report_name:mrp.action_report_finished_product
 msgid "'Finished products - %s' % object.name"
-msgstr "Τελικά Προϊόντα- %s' % αρχείο.όνομα"
+msgstr "'Τελικά Προϊόντα - %s' % object.name"
 
 #. module: mrp
 #: model:ir.actions.report,print_report_name:mrp.action_report_mrp_mo_overview
@@ -217,7 +219,13 @@ msgstr "(Σε"
 #. odoo-python
 #: code:addons/mrp/models/stock_rule.py:0
 msgid "+ %d day(s)"
-msgstr "Μέρα (ες)"
+msgstr "+ %d μέρα (ες)"
+
+#. module: mrp
+#. odoo-python
+#: code:addons/mrp/models/stock_rule.py:0
+msgid "+ %s day(s)"
+msgstr ""
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mo_overview_content
@@ -229,7 +237,9 @@ msgstr "Επισκόπηση"
 msgid ""
 ".\n"
 "            Manual actions may be needed."
-msgstr "Χειροκίνητες ενέργειες μπορεί να χρειαστούν"
+msgstr ""
+".\n"
+"            Χειροκίνητες ενέργειες μπορεί να χρειαστούν."
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_warehouse__manufacture_steps
@@ -805,7 +815,7 @@ msgstr "Όλες οι Κινήσεις Πρώτων Υλών"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_view
 msgid "All Products"
-msgstr ""
+msgstr "Όλα τα Είδη"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom__batch_size
@@ -879,7 +889,7 @@ msgstr "Επιτρέπεται"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__allowed_uom_ids
 msgid "Allowed Uom"
-msgstr ""
+msgstr "Επιτρεπόμενη Μονάδα Μέτρησης"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__reserve_visible
@@ -924,7 +934,7 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_serials_form
 msgid "Apply"
-msgstr ""
+msgstr "Εφαρμογή"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom_byproduct__bom_product_template_attribute_value_ids
@@ -1595,7 +1605,7 @@ msgstr "Χρόνος Καθαρισμού (λεπτά)"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 msgid "Clear"
-msgstr ""
+msgstr "Καθαρισμός"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
@@ -1789,7 +1799,7 @@ msgstr "Αντιγραφή επιλεγμένων εργασιών"
 #: code:addons/mrp/static/src/components/bom_overview_table/mrp_bom_overview_table.xml:0
 #: model:ir.model.fields,field_description:mrp.field_mrp_routing_workcenter__cost
 msgid "Cost"
-msgstr ""
+msgstr "Κόστος"
 
 #. module: mrp
 #. odoo-javascript
@@ -1832,7 +1842,7 @@ msgstr "Κόστος βάσει εκτίμησης κόστους"
 msgid "Cost based on related replenishments. Otherwise cost from product form"
 msgstr ""
 "Κόστος βάσει σχετικών αναπληρώσεων. Διαφορετικά, κόστος από τη φόρμα του "
-"προϊόντος."
+"προϊόντος"
 
 #. module: mrp
 #. odoo-javascript
@@ -2227,7 +2237,7 @@ msgstr "Τοποθεσία Προορισμού"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 msgid "Details"
-msgstr ""
+msgstr "Λεπτομέρειες"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__cost_mode
@@ -2337,7 +2347,7 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.stock_warn_insufficient_qty_unbuild_form_view
 msgid "Do you confirm you want to unbuild"
-msgstr "Επιβεβαιώνετε ότι θέλετε να αποσυναρμολογήσετε;"
+msgstr "Επιβεβαιώνετε ότι θέλετε να αποσυναρμολογήσετε"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_picking_type_form_inherit_mrp
@@ -2585,7 +2595,7 @@ msgstr ""
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_routing_workcenter__time_mode__manual
 msgid "Fixed"
-msgstr ""
+msgstr "Σταθερό"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_bom__consumption
@@ -2624,7 +2634,7 @@ msgstr "Ακόλουθοι (Συνεργάτες)"
 #: model:ir.model.fields,help:mrp.field_mrp_routing_workcenter__activity_type_icon
 #: model:ir.model.fields,help:mrp.field_mrp_unbuild__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr "Γραμματοσειρά awesome  π.χ. fa-tasks"
+msgstr "Γραμματοσειρά awesome π.χ. fa-tasks"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_consumption_warning_form
@@ -2916,9 +2926,9 @@ msgid ""
 "next procurement) is cancelled or split, the move generated by this move "
 "will too"
 msgstr ""
-"Αν ελεχθεί, όταν η προηγούμενη κίνηση απο την κίνηση (η οποία δημιουργείται "
-"απο μια επόμενη προμήθεια) έχει ακυρωθεί ή διαχωριστεί, η κίνηση "
-"δημιουργείται απο  αυτήν την κίνηση επίσης θα"
+"Εάν είναι επιλεγμένο, όταν η προηγούμενη κίνηση της κίνησης (η οποία "
+"δημιουργήθηκε από μια επόμενη προμήθεια) ακυρωθεί ή διαιρεθεί, η κίνηση που "
+"δημιουργήθηκε από αυτήν την κίνηση θα"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__active
@@ -3049,7 +3059,7 @@ msgstr "Κινήσεις Αποθεμάτων"
 #. module: mrp
 #: model:ir.model,name:mrp.model_stock_route
 msgid "Inventory Routes"
-msgstr ""
+msgstr "Διαδρομές Απογραφής"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__move_line_ids
@@ -3811,7 +3821,7 @@ msgstr "Αριθμός Παραγωγών Προγραμματισμού Απα�
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_unbuild_search_view
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
 msgid "My Activities"
-msgstr ""
+msgstr "Οι Δραστηριότητες μου"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__my_activity_date_deadline
@@ -3887,6 +3897,12 @@ msgid "No Backorder"
 msgstr "Χωρίς Υπόλοιπο Παραγγελίας"
 
 #. module: mrp
+#. odoo-python
+#: code:addons/mrp/models/stock_rule.py:0
+msgid "No BoM Found"
+msgstr ""
+
+#. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_routing_action
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
 msgid "No Operations Yet !"
@@ -3919,7 +3935,7 @@ msgstr "Δεν υπάρχουν δεδομένα ακόμη!"
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_production_action
 msgid "No manufacturing order found. Let's create one."
-msgstr "Δεν βρέθηκε εντολή παραγωγής. Δημιουργία νέας!"
+msgstr "Δεν βρέθηκε εντολή παραγωγής. Δημιουργία νέας."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.product_template_action
@@ -3978,7 +3994,7 @@ msgstr "Δεν είναι Έτοιμο"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 msgid "Note that another version of this BOM is available."
 msgstr ""
-"Σημειώστε ότι είναι διαθέσιμη μια άλλη έκδοση αυτής της Συνταγής Παραγωγής"
+"Σημειώστε ότι είναι διαθέσιμη μια άλλη έκδοση αυτής της Συνταγής Παραγωγής."
 
 #. module: mrp
 #. odoo-python
@@ -4240,7 +4256,7 @@ msgstr "Εργασίες που πρέπει να ολοκληρωθούν πρ�
 #. odoo-python
 #: code:addons/mrp/report/mrp_report_bom_structure.py:0
 msgid "Order"
-msgstr ""
+msgstr "Παραγγελία"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__orderpoint_id
@@ -4926,7 +4942,7 @@ msgstr "Ποσότητα"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workorder__qty_produced
 msgid "Quantity Done"
-msgstr ""
+msgstr "Ολοκληρωμένη Ποσότητα"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__qty_produced
@@ -5079,7 +5095,7 @@ msgstr "Παραπομπή:"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__reference_ids
 msgid "References"
-msgstr ""
+msgstr "Παραπομπές"
 
 #. module: mrp
 #. odoo-javascript
@@ -5151,7 +5167,7 @@ msgstr "Υπεύθυνος Χρήστης"
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/bom_overview_table/mrp_bom_overview_table.xml:0
 msgid "Resupply lead time."
-msgstr "Χρόνος Ανατροφοδότησης"
+msgstr "Χρόνος Ανατροφοδότησης."
 
 #. module: mrp
 #. odoo-javascript
@@ -5291,7 +5307,7 @@ msgstr "Ακολουθία"
 #: code:addons/mrp/models/mrp_production.py:0
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_serials_form
 msgid "Serial Numbers"
-msgstr ""
+msgstr "Σειριακοί Αριθμοί"
 
 #. module: mrp
 #. odoo-python
@@ -5349,7 +5365,7 @@ msgstr "Ρυθμίσεις και Προσαρμογές"
 #: model_terms:ir.actions.act_window,help:mrp.mrp_routing_action
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
 msgid "Shop Floor"
-msgstr ""
+msgstr "Χώρος Παραγωγής"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__show_allocation
@@ -5422,6 +5438,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
 msgid "Show all records whose next activity date is past"
 msgstr ""
+"Εμφάνιση όλων των καταγραφών των οποίων η επόμενη δραστηριότητα είναι "
+"προγενέστερη"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_backorder__show_backorder_lines
@@ -5649,7 +5667,7 @@ msgstr "Αναφορά Κανόνων Αποθέματος"
 #. module: mrp
 #: model:ir.model,name:mrp.model_stock_replenishment_info
 msgid "Stock supplier replenishment information"
-msgstr ""
+msgstr "Πληροφορίες Ανατροφοδότησης Αποθέματος από Προμηθευτή"
 
 #. module: mrp
 #. odoo-python
@@ -5784,7 +5802,7 @@ msgstr "Μεθαύριο"
 #. odoo-python
 #: code:addons/mrp/models/stock_orderpoint.py:0
 msgid "The following replenishment order has been generated"
-msgstr "Έχει δημιουργηθεί η παρακάτω εντολή αναπλήρωσης."
+msgstr "Έχει δημιουργηθεί η παρακάτω εντολή αναπλήρωσης"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workorder__qty_produced
@@ -5993,7 +6011,7 @@ msgid ""
 msgstr ""
 "Αυτό είναι το κόστος βάσει της Συνταγής Παραγωγής του προϊόντος. "
 "Υπολογίζεται αθροίζοντας τα κόστη των συστατικών και των εργασιών που "
-"απαιτούνται για την κατασκευή του προϊόντος"
+"απαιτούνται για την κατασκευή του προϊόντος."
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.action_mrp_unbuild_moves
@@ -6085,7 +6103,7 @@ msgstr "Ζώνη Ώρας"
 #: model_terms:digest.tip,tip_description:mrp.digest_tip_mrp_0
 msgid "Tip: Use tablets in the shop to control manufacturing"
 msgstr ""
-"Συμβουλή: Χρησιμοποιήστε tablets στο κατάστημα για τον έλεγχο της παραγωγής."
+"Συμβουλή: Χρησιμοποιήστε tablets στο κατάστημα για τον έλεγχο της παραγωγής"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
@@ -6212,7 +6230,7 @@ msgstr "Σύνολο Εκκρεμών Παραγγελιών"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_tree_view
 msgid "Total Qty"
-msgstr "Σύνολο Ποσ."
+msgstr "Σύνολο Ποσ"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__product_uom_qty
@@ -6537,7 +6555,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_view
 msgid "Visible to all"
-msgstr ""
+msgstr "Ορατό σε όλους"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_production__reservation_state__confirmed
@@ -6572,7 +6590,7 @@ msgstr "Αποθήκη"
 #. odoo-javascript
 #: code:addons/mrp/static/src/components/bom_overview_control_panel/mrp_bom_overview_control_panel.xml:0
 msgid "Warehouse:"
-msgstr ""
+msgstr "Αποθήκη:"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_stock_warn_insufficient_qty_unbuild
@@ -6928,7 +6946,7 @@ msgstr "Χρήστης που εργάζεται σε αυτή την εντολ
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_serials__workorder_id
 msgid "Workorder"
-msgstr ""
+msgstr "Εντολή Εργασίας"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_production__search_date_category__yesterday
@@ -6946,9 +6964,9 @@ msgid ""
 "Components\"."
 msgstr ""
 "Δεν επιτρέπεται η δημιουργία ή επεξεργασία παρτίδας ή σειριακού αριθμού για "
-"τα συστατικά με τύπο εργασίας 'Παραγωγή'. Για να το αλλάξετε, μεταβείτε στον "
-"τύπο εργασίας και επιλέξτε το πλαίσιο 'Δημιουργία νέων παρτίδων/σειριακών "
-"αριθμών για τα συστατικά'"
+"τα συστατικά με τύπο εργασίας \"Παραγωγή\". Για να το αλλάξετε, μεταβείτε "
+"στον τύπο εργασίας και επιλέξτε το πλαίσιο \"Δημιουργία νέων παρτίδων/"
+"σειριακών αριθμών για τα συστατικά\"."
 
 #. module: mrp
 #. odoo-python
@@ -6995,13 +7013,19 @@ msgstr ""
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You can only merge manufacturing with the same operation type"
 msgstr ""
-"Μπορείτε να συγχωνεύσετε μόνο εντολές παραγωγής με τον ίδιο τύπο εργασίας."
+"Μπορείτε να συγχωνεύσετε μόνο εντολές παραγωγής με τον ίδιο τύπο εργασίας"
 
 #. module: mrp
 #. odoo-python
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You can only merge manufacturing with the same state."
 msgstr "Μπορείτε να συγχωνεύσετε μόνο εντολές παραγωγής με την ίδια κατάσταση."
+
+#. module: mrp
+#. odoo-python
+#: code:addons/mrp/models/mrp_production.py:0
+msgid "You cannot cancel a manufacturing order that is already done."
+msgstr ""
 
 #. module: mrp
 #. odoo-python
@@ -7032,6 +7056,12 @@ msgstr "Δεν μπορείτε να δημιουργήσετε κυκλική �
 
 #. module: mrp
 #. odoo-python
+#: code:addons/mrp/models/mrp_production.py:0
+msgid "You cannot delete a manufacturing order that is already done."
+msgstr ""
+
+#. module: mrp
+#. odoo-python
 #: code:addons/mrp/models/mrp_unbuild.py:0
 msgid "You cannot delete an unbuild order if the state is 'Done'."
 msgstr ""
@@ -7043,7 +7073,7 @@ msgstr ""
 #: code:addons/mrp/models/mrp_production.py:0
 msgid "You cannot have %s  as the finished product and in the Byproducts"
 msgstr ""
-"Δεν μπορείτε να έχετε %s  ως τελικό προϊόν και ταυτόχρονα στα υποπροϊόντα."
+"Δεν μπορείτε να έχετε %s  ως τελικό προϊόν και ταυτόχρονα στα υποπροϊόντα"
 
 #. module: mrp
 #. odoo-python
@@ -7067,6 +7097,8 @@ msgid ""
 "You cannot set a scrap location as the destination location for a "
 "manufacturing type operation."
 msgstr ""
+"Δεν μπορείτε να ορίσετε μια τοποθεσία απόρριψης (scrap) ως τοποθεσία "
+"προορισμού για μια λειτουργία τύπου παραγωγής."
 
 #. module: mrp
 #. odoo-python

@@ -8,12 +8,13 @@
 #
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
 # "Kwanghee Park (kwpa)" <kwpa@odoo.com>, 2025.
+# Weblate <noreply-mt-weblate@weblate.org>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:37+0000\n"
-"PO-Revision-Date: 2025-10-13 08:02+0000\n"
+"POT-Creation-Date: 2025-11-07 18:36+0000\n"
+"PO-Revision-Date: 2025-11-20 03:04+0000\n"
 "Last-Translator: \"Kwanghee Park (kwpa)\" <kwpa@odoo.com>\n"
 "Language-Team: Korean <https://translate.odoo.com/projects/odoo-19/"
 "purchase_stock/ko/>\n"
@@ -43,9 +44,21 @@ msgstr ""
 
 #. module: purchase_stock
 #. odoo-python
+#: code:addons/purchase_stock/models/stock_move.py:0
+msgid "%(value)s for %(quantity)s %(unit)s from %(quotation)s (not billed)"
+msgstr ""
+
+#. module: purchase_stock
+#. odoo-python
 #: code:addons/purchase_stock/models/stock_rule.py:0
 msgid "+ %d day(s)"
 msgstr "+ %d 일"
+
+#. module: purchase_stock
+#. odoo-python
+#: code:addons/purchase_stock/models/stock_rule.py:0
+msgid "+ %s day(s)"
+msgstr "+ %s 일"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_partner_view_purchase_buttons_inherit
@@ -64,23 +77,23 @@ msgstr "<span class=\"o_stat_value\">%</span>"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.product_view_kanban_catalog_purchase_only
-msgid "<span class=\"text-info fw-bold fs-5\"> Suggest </span>"
+msgid "<span class=\"text-info fw-bold fs-5 me-1\">Suggest</span>"
 msgstr ""
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.product_view_kanban_catalog_purchase_only
-msgid "<span class=\"text-info fw-bold fs-5\"> units </span>"
+msgid "<span class=\"text-info fw-bold fs-5 me-1\">units</span>"
 msgstr ""
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.product_view_kanban_catalog_purchase_only
-msgid "<span class=\"text-muted small\"> Forecasted</span>"
-msgstr "<span class=\"text-muted small\">예상</span>"
+msgid "<span class=\"text-muted small me-1\">Monthly Demand:</span>"
+msgstr ""
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.product_view_kanban_catalog_purchase_only
-msgid "<span class=\"text-muted small\">Monthly Demand: </span>"
-msgstr "<span class=\"text-muted small\">월별 수요: </span>"
+msgid "<span class=\"text-muted small ms-1\">Forecasted</span>"
+msgstr ""
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_view_form_inherit
@@ -140,7 +153,7 @@ msgstr "추가 작업"
 #. odoo-javascript
 #: code:addons/purchase_stock/static/src/product_catalog/search/search_panel.xml:0
 msgid "Add All"
-msgstr ""
+msgstr "모두 추가"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.res_config_settings_view_form_purchase
@@ -169,7 +182,7 @@ msgstr "도착"
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__available_vendor
 msgid "Available Vendor"
-msgstr ""
+msgstr "가능한 업체"
 
 #. module: purchase_stock
 #. odoo-javascript
@@ -293,7 +306,7 @@ msgstr "납품 장소"
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.product_supplierinfo_replenishment_tree_view
 msgid "Delivery Time"
-msgstr ""
+msgstr "배송 기간"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__default_location_dest_id_usage
@@ -366,7 +379,7 @@ msgstr "유효 도착 일수"
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__effective_vendor_id
 msgid "Effective Vendor"
-msgstr ""
+msgstr "유효한 업체"
 
 #. module: purchase_stock
 #: model:ir.model.fields,help:purchase_stock.field_stock_warehouse_orderpoint__effective_vendor_id
@@ -388,7 +401,7 @@ msgstr "예외 :"
 #. module: purchase_stock
 #: model:ir.model.fields.selection,name:purchase_stock.selection__res_partner__group_on__default
 msgid "Expected Date"
-msgstr ""
+msgstr "예정일"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_view_form_inherit
@@ -404,12 +417,6 @@ msgstr "예상되는 문제점"
 #: model:ir.model.fields.selection,name:purchase_stock.selection__res_partner__group_on__5
 msgid "Friday"
 msgstr "금요일"
-
-#. module: purchase_stock
-#. odoo-python
-#: code:addons/purchase_stock/models/stock_move.py:0
-msgid "From %(quotation)s"
-msgstr ""
 
 #. module: purchase_stock
 #: model:ir.model.fields.selection,name:purchase_stock.selection__purchase_order__receipt_status__full
@@ -449,7 +456,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase_stock.field_res_partner__group_rfq
 #: model:ir.model.fields,field_description:purchase_stock.field_res_users__group_rfq
 msgid "Group RFQ"
-msgstr ""
+msgstr "RFQ 그룹"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_account_move__id
@@ -501,7 +508,7 @@ msgstr "인코텀즈 지역"
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_route
 msgid "Inventory Routes"
-msgstr ""
+msgstr "재고 경로"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__is_shipped
@@ -569,6 +576,12 @@ msgid "Next transfer(s) impacted:"
 msgstr "다음 배송에 영향 있음 :"
 
 #. module: purchase_stock
+#. odoo-python
+#: code:addons/purchase_stock/models/stock_rule.py:0
+msgid "No Vendor Found"
+msgstr "공급업체를 찾을 수 없습니다"
+
+#. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_help_message_template
 msgid "No receipt yet! Automate them with purchase orders."
 msgstr "아직 입고 내역이 없습니다! 구매 주문으로 이 프로세스를 자동화하세요."
@@ -598,7 +611,7 @@ msgstr "사용"
 #. module: purchase_stock
 #: model:ir.model.fields.selection,name:purchase_stock.selection__res_partner__group_rfq__default
 msgid "On Order"
-msgstr ""
+msgstr "주문 중"
 
 #. module: purchase_stock
 #: model_terms:ir.ui.view,arch_db:purchase_stock.vendor_delay_report_view_graph
@@ -633,7 +646,7 @@ msgstr "정시 비율"
 #. odoo-python
 #: code:addons/purchase_stock/models/stock_rule.py:0
 msgid "Order Deadline"
-msgstr ""
+msgstr "주문 마감일"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order_line__orderpoint_id
@@ -759,7 +772,7 @@ msgstr "입고"
 #. odoo-python
 #: code:addons/purchase_stock/models/stock_rule.py:0
 msgid "Receipt Date"
-msgstr ""
+msgstr "입고일"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_purchase_order__receipt_status
@@ -859,7 +872,7 @@ msgstr "공급업체 보기"
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_replenishment_info__show_vendor_tab
 msgid "Show Vendor Tab"
-msgstr ""
+msgstr "공급업체 탭 표시"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__show_supplier
@@ -890,7 +903,7 @@ msgstr "재고 규칙"
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_account_stock_valuation_report
 msgid "Stock Valuation"
-msgstr ""
+msgstr "재고 평가"
 
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_report_stock_report_stock_rule
@@ -917,29 +930,34 @@ msgstr "제안"
 #: model:ir.model.fields,field_description:purchase_stock.field_res_partner__suggest_based_on
 #: model:ir.model.fields,field_description:purchase_stock.field_res_users__suggest_based_on
 msgid "Suggest Based On"
-msgstr ""
+msgstr "제안 기준"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_res_partner__suggest_days
 #: model:ir.model.fields,field_description:purchase_stock.field_res_users__suggest_days
 msgid "Suggest Days"
-msgstr ""
+msgstr "제안 기간"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_product_product__suggest_estimated_price
 msgid "Suggest Estimated Price"
-msgstr ""
+msgstr "예상 가격 제안"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_res_partner__suggest_percent
 #: model:ir.model.fields,field_description:purchase_stock.field_res_users__suggest_percent
 msgid "Suggest Percent"
-msgstr ""
+msgstr "제안 비율"
+
+#. module: purchase_stock
+#: model_terms:ir.ui.view,arch_db:purchase_stock.product_view_search_catalog
+msgid "Suggested"
+msgstr "제안됨"
 
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_product_product__suggested_qty
 msgid "Suggested Qty"
-msgstr ""
+msgstr "제안 수량"
 
 #. module: purchase_stock
 #: model:ir.model.fields.selection,name:purchase_stock.selection__res_partner__group_on__7
@@ -949,7 +967,7 @@ msgstr "일요일"
 #. module: purchase_stock
 #: model:ir.model.fields,field_description:purchase_stock.field_stock_warehouse_orderpoint__supplier_id_placeholder
 msgid "Supplier Id Placeholder"
-msgstr ""
+msgstr "공급업체 ID 자리 표시자"
 
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_product_supplierinfo
@@ -1163,7 +1181,7 @@ msgstr "수요일"
 #: model:ir.model.fields,field_description:purchase_stock.field_res_partner__group_on
 #: model:ir.model.fields,field_description:purchase_stock.field_res_users__group_on
 msgid "Week Day"
-msgstr ""
+msgstr "평일"
 
 #. module: purchase_stock
 #: model:ir.model.fields.selection,name:purchase_stock.selection__res_partner__group_rfq__week
@@ -1213,6 +1231,15 @@ msgstr "다음 대신 주문됨"
 #: code:addons/purchase_stock/models/stock_rule.py:0
 msgid "this product should be manually replenished."
 msgstr "이 품목은 수동으로 보충해야 합니다."
+
+#~ msgid "<span class=\"text-muted small\"> Forecasted</span>"
+#~ msgstr "<span class=\"text-muted small\">예상</span>"
+
+#~ msgid "<span class=\"text-muted small\">Monthly Demand: </span>"
+#~ msgstr "<span class=\"text-muted small\">월별 수요: </span>"
+
+#~ msgid "From %(quotation)s"
+#~ msgstr "%(quotation)s"
 
 #~ msgid "Activate"
 #~ msgstr "활성화"

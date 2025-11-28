@@ -5,12 +5,24 @@ import { sendRequest } from "@website/js/utils";
 
 export class PostLink extends Interaction {
     static selector = ".post_link";
+    dynamicSelectors = {
+        ...this.dynamicSelectors,
+        // Distinguish _root according to node type.
+        _select: () => this.el.matches("select") && this.el,
+        _nonSelect: () => !this.el.matches("select") && this.el,
+    };
     dynamicContent = {
         _root: {
-            "t-on-click.prevent": this.onClickPost,
             "t-att-class": () => ({
-                "o_post_link_js_loaded": true,
+                o_post_link_js_loaded: true,
             }),
+        },
+        _nonSelect: {
+            "t-on-click.prevent": this.onClickPost,
+        },
+        _select: {
+            // In some browsers the click event is triggered when opening the select.
+            "t-on-change.prevent": this.onClickPost,
         },
     };
 
@@ -25,6 +37,4 @@ export class PostLink extends Interaction {
     }
 }
 
-registry
-    .category("public.interactions")
-    .add("website.post_link", PostLink);
+registry.category("public.interactions").add("website.post_link", PostLink);

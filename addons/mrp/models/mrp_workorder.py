@@ -345,7 +345,7 @@ class MrpWorkorder(models.Model):
     @api.depends('time_ids.duration', 'qty_produced')
     def _compute_duration(self):
         for order in self:
-            order.duration = sum(order.time_ids.mapped('duration'))
+            order.duration = order.get_duration()
             order.duration_unit = round(order.duration / max(order.qty_produced, 1), 2)  # rounding 2 because it is a time
             if order.duration_expected:
                 order.duration_percent = max(-2147483648, min(2147483647, 100 * (order.duration_expected - order.duration) / order.duration_expected))
@@ -360,7 +360,7 @@ class MrpWorkorder(models.Model):
             return minutes * 60 + seconds
 
         for order in self:
-            old_order_duration = sum(order.time_ids.mapped('duration'))
+            old_order_duration = order.get_duration()
             new_order_duration = order.duration
             if new_order_duration == old_order_duration:
                 continue
@@ -630,7 +630,7 @@ class MrpWorkorder(models.Model):
             else:
                 intervals = Intervals([
                     [t.date_start, t.date_end, t]
-                    for t in workorder.time_ids if not date or t.date_end < date
+                    for t in workorder.time_ids if t.date_end and (not date or t.date_end < date)
                 ])
                 duration = sum_intervals(intervals)
             total += duration * (workorder.costs_hour or workorder.workcenter_id.costs_hour)
@@ -688,20 +688,23 @@ class MrpWorkorder(models.Model):
     def button_finish(self):
         date_finished = fields.Datetime.now()
         all_vals_dict = defaultdict(lambda: self.env['mrp.workorder'])
-        for workorder in self:
-            if workorder.state in ('done', 'cancel'):
-                continue
-            moves = (self.move_raw_ids + self.production_id.move_byproduct_ids.filtered(lambda m: m.operation_id == self.operation_id))
-            for move in moves:
-                if not move.picked:
-                    if workorder.production_id.product_uom_id.is_zero(workorder.production_id.qty_producing):
-                        qty_available = workorder.production_id.product_qty
-                    else:
-                        qty_available = workorder.production_id.qty_producing
-                    new_qty = move.product_uom.round(qty_available * move.unit_factor)
-                    move._set_quantity_done(new_qty)
-            moves.picked = True
-            workorder.end_all()
+        workorders_to_end = self.filtered(lambda workorder: workorder.state not in ('done', 'cancel'))
+        operations = workorders_to_end.operation_id
+        moves_to_pick = workorders_to_end.move_raw_ids.filtered(lambda move: not move.picked)
+        moves_to_pick += workorders_to_end.production_id.move_byproduct_ids.filtered(lambda move: not move.picked and move.operation_id in operations)
+
+        for move in moves_to_pick:
+            production_id = move.raw_material_production_id or move.production_id
+            if production_id.product_uom_id.is_zero(production_id.qty_producing):
+                qty_available = production_id.product_qty
+            else:
+                qty_available = production_id.qty_producing
+            new_qty = move.product_uom.round(qty_available * move.unit_factor)
+            move._set_quantity_done(new_qty)
+
+        moves_to_pick.picked = True
+        workorders_to_end.end_all()
+        for workorder in workorders_to_end:
             vals = {
                 'qty_produced': workorder.qty_produced or workorder.qty_producing or workorder.qty_production,
                 'state': 'done',
@@ -890,8 +893,9 @@ class MrpWorkorder(models.Model):
         """Get the additional duration for 'open times' i.e. productivity lines with no date_end."""
         self.ensure_one()
         duration = 0
+        now = self.env.cr.now()
         for time in self.time_ids.filtered(lambda time: not time.date_end):
-            duration += (datetime.now() - time.date_start).total_seconds() / 60
+            duration += (now - time.date_start).total_seconds() / 60
         return duration
 
     def get_duration(self):

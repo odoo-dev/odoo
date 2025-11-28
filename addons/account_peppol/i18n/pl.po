@@ -4,13 +4,14 @@
 #
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # "Dylan Kiss (dyki)" <dyki@odoo.com>, 2025.
+# "Marta (wacm)" <wacm@odoo.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server saas~18.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 18:37+0000\n"
-"PO-Revision-Date: 2025-10-17 12:45+0000\n"
-"Last-Translator: \"Dylan Kiss (dyki)\" <dyki@odoo.com>\n"
+"POT-Creation-Date: 2025-11-07 18:36+0000\n"
+"PO-Revision-Date: 2025-10-30 13:03+0000\n"
+"Last-Translator: \"Marta (wacm)\" <wacm@odoo.com>\n"
 "Language-Team: Polish <https://translate.odoo.com/projects/odoo-19/"
 "account_peppol/pl/>\n"
 "Language: pl\n"
@@ -49,7 +50,7 @@ msgstr " (bez VAT)"
 #. odoo-python
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
 msgid " (no access)"
-msgstr ""
+msgstr " (brak dostępu)"
 
 #. module: account_peppol
 #. odoo-python
@@ -88,7 +89,7 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "<span><strong>Disconnected from Peppol!</strong></span>"
-msgstr ""
+msgstr "<span><strong>Rozłączono z Peppol!</strong></span>"
 
 #. module: account_peppol
 #: model:mail.template,body_html:account_peppol.mail_template_peppol_registration
@@ -396,7 +397,7 @@ msgstr "Kreator przenoszenia konta i wysyłania"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_contact_email
 msgid "Account Peppol Contact Email"
-msgstr ""
+msgstr "E-mail kontaktowy konta Peppol"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__account_peppol_edi_user
@@ -445,17 +446,17 @@ msgstr "Aktywuj Peppol (Test)"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__peppol_activate_self_billing
 msgid "Activate self-billing"
-msgstr ""
+msgstr "Aktywuj samodzielne fakturowanie"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_activate_self_billing_sending
 msgid "Activate self-billing sending"
-msgstr ""
+msgstr "Aktywuj wysyłanie samodzielnego fakturowania"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__active_parent_company
 msgid "Active Parent Company"
-msgstr ""
+msgstr "Aktywuj firmę nadrzędną"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
@@ -610,6 +611,9 @@ msgid ""
 "Any self-billed invoices / credit notes received via Peppol will be created "
 "in draft in this journal. Defaults to the first sale journal."
 msgstr ""
+"Wszystkie samodzielnie fakturowane faktury / noty kredytowe otrzymane przez "
+"Peppol w tym dzienniku będą utworzone w wersji roboczej. Domyślnie jest to "
+"dziennik pierwszej sprzedaży."
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_partner__available_peppol_edi_formats
@@ -634,7 +638,7 @@ msgstr ""
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__can_use_parent_connection
 msgid "Can Use Parent Connection"
-msgstr ""
+msgstr "Może korzystać z połączenia nadrzędnego"
 
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__res_company__account_peppol_proxy_state__receiver
@@ -706,6 +710,7 @@ msgstr ""
 msgid ""
 "Common functions for EDI documents: generate the data, the constraints, etc"
 msgstr ""
+"Wspólne funkcje dla dokumentów EDI: generowanie danych, ograniczeń, itp."
 
 #. module: account_peppol
 #: model:ir.model,name:account_peppol.model_res_company
@@ -721,7 +726,7 @@ msgstr "Firma"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__active_parent_company_name
 msgid "Company Name"
-msgstr ""
+msgstr "Nazwa firmy"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
@@ -809,18 +814,18 @@ msgstr "Odrzuć"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Disconnect"
-msgstr ""
+msgstr "Rozłącz"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Disconnect this database"
-msgstr ""
+msgstr "Rozłącz tę bazę danych"
 
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/res_config_settings.py:0
 msgid "Disconnected this branch company peppol configuration from %s."
-msgstr ""
+msgstr "Konfiguracja gałęzi Peppol została odłączona od %s."
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_common__display_name
@@ -918,6 +923,10 @@ msgid ""
 "please go to Settings > Accounting > Peppol Settings and click on 'Reconnect "
 "this database'."
 msgstr ""
+"Połączenie z punktem dostępu Peppol nie powiodło się. To może się wydarzyć, "
+"jeśli przywróciłeś bazę danych z kopii zapasowej, lub skopiowałeś ją bez "
+"neutralizacji. Aby to naprawić przejdź na Ustawienia > Księgowość > "
+"Ustawienia Peppol i kliknij na \"Połącz ponownie tę bazę danych\"."
 
 #. module: account_peppol
 #. odoo-javascript
@@ -962,6 +971,9 @@ msgid ""
 "Peppol.You can still disable reception by disabling the self-billing "
 "document types below."
 msgstr ""
+"Jeśli ta funkcja jest aktywna, będziesz w stanie wysyłać i otrzymywać "
+"samodzielnie fakturowane faktury przez Peppol. Możesz wciąż wyłączyć odbiór "
+"poprzez dezaktywowanie samodzielnie fakturowanych typów dokumentów poniżej."
 
 #. module: account_peppol
 #: model:ir.model.fields,help:account_peppol.field_res_company__peppol_activate_self_billing_sending
@@ -969,6 +981,8 @@ msgid ""
 "If activated, you will be able to send vendor bills as self-billed invoices "
 "via Peppol."
 msgstr ""
+"Jeśli ta funkcja jest aktywowana, będziesz w stanie wysyłać rachunki "
+"dostawcy jako samodzielnie fakturowane faktury przez Peppol."
 
 #. module: account_peppol
 #. odoo-python
@@ -992,7 +1006,7 @@ msgstr "Wysyłanie faktury"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__is_branch_company
 msgid "Is Branch Company"
-msgstr ""
+msgstr "Jest oddziałem firmy"
 
 #. module: account_peppol
 #: model:ir.model.fields,help:account_peppol.field_peppol_config_wizard__service_json
@@ -1247,22 +1261,22 @@ msgstr "Peppol ID"
 #. odoo-python
 #: code:addons/account_peppol/wizard/peppol_registration.py:0
 msgid "Peppol ID should be different from main company."
-msgstr ""
+msgstr "Peppol ID powinien być różny od głównej firmy."
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_metadata
 msgid "Peppol Metadata"
-msgstr ""
+msgstr "Metadane Peppol"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_parent_company_id
 msgid "Peppol Parent Company"
-msgstr ""
+msgstr "Firma nadrzędna Peppol"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__peppol_parent_company_name
 msgid "Peppol Parent Company Name"
-msgstr ""
+msgstr "Nazwa nadrzędnej firmy Peppol"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_purchase_journal_id
@@ -1288,13 +1302,13 @@ msgstr "Usługa Peppol"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__peppol_use_parent_company
 msgid "Peppol Use Parent Company"
-msgstr ""
+msgstr "Użyj firmy nadrzędnej Peppol"
 
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/models/account_edi_common.py:0
 msgid "Peppol document UUID: %s"
-msgstr ""
+msgstr "UUID dokumentu Peppol: %s"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.portal_my_details
@@ -1326,12 +1340,12 @@ msgstr "Błąd Peppol: %s"
 #. odoo-python
 #: code:addons/account_peppol/models/account_edi_common.py:0
 msgid "Peppol invoice received"
-msgstr ""
+msgstr "Otrzymano fakturę Peppol"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_metadata_updated_at
 msgid "Peppol meta updated at"
-msgstr ""
+msgstr "Zaktualizowano meta Peppol"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.account_peppol_view_account_invoice_filter
@@ -1393,12 +1407,6 @@ msgstr ""
 "dokumentów."
 
 #. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/models/account_move_send.py:0
-msgid "Please verify partner configuration in partner settings."
-msgstr "Sprawdź konfigurację partnera w ustawieniach partnera."
-
-#. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__contact_email
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__account_peppol_contact_email
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_peppol_contact_email
@@ -1415,6 +1423,10 @@ msgid ""
 "In particular, this email is used by Odoo to reconnect your Peppol account "
 "in case of database change."
 msgstr ""
+"Główny email kontaktowy na potrzeby komunikacji powiązanych z połączeniem "
+"Peppol i powiadomieniami.\n"
+"Ten email jest używany przez Odoo w celu ponownego połączenia Twojego konta "
+"Peppol w przypadku zmiany bazy danych."
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_account_edi_proxy_client_user__proxy_type
@@ -1449,7 +1461,7 @@ msgstr "Otrzymuj swoje elektroniczne faktury w Odoo"
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Reconnect this database"
-msgstr ""
+msgstr "Połącz ponownie tę bazę danych"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__smp_registration
@@ -1459,7 +1471,7 @@ msgstr "Zarejestruj się jako otrzymujący"
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__peppol_registration__use_parent_connection_selection__use_self
 msgid "Register this company on peppol"
-msgstr ""
+msgstr "Zarejestruj tę firmę w peppol"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
@@ -1508,18 +1520,18 @@ msgstr "Zapisz"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__selected_company_id
 msgid "Selected Company"
-msgstr ""
+msgstr "Wybrana firma"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
 msgid "Self Billing"
-msgstr ""
+msgstr "Samodzielne fakturowanie"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__peppol_self_billing_reception_journal_id
 #: model:ir.model.fields,field_description:account_peppol.field_res_company__peppol_self_billing_reception_journal_id
 msgid "Self-Billing reception journal"
-msgstr ""
+msgstr "Dziennik odbioru samofakturowania"
 
 #. module: account_peppol
 #. odoo-python
@@ -1531,11 +1543,12 @@ msgstr "Wyślij"
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
 msgid "Send electronic invoices, and receive bills automatically via Peppol."
 msgstr ""
+"Wysyłaj elektroniczne faktury i otrzymuj rachunki automatycznie przez Peppol."
 
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__peppol_registration__use_parent_connection_selection__use_parent
 msgid "Send from parent company"
-msgstr ""
+msgstr "Wyślij z firmy nadrzędnej"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_config_wizard__service_ids
@@ -1833,22 +1846,6 @@ msgstr "Wiadomość nie jest zgodna z zasadami AS4."
 
 #. module: account_peppol
 #. odoo-python
-#: code:addons/account_peppol/models/account_move_send.py:0
-msgid ""
-"The partner has indicated it does not accept this document type, so you "
-"cannot send this invoice via Peppol."
-msgstr ""
-
-#. module: account_peppol
-#. odoo-python
-#: code:addons/account_peppol/models/account_move_send.py:0
-msgid "The partner is missing Peppol EAS and/or Endpoint identifier."
-msgstr ""
-"Partnerowi brakuje identyfikatora Peppol EAS i/lub identyfikatora punktu "
-"końcowego."
-
-#. module: account_peppol
-#. odoo-python
 #: code:addons/account_peppol/exceptions.py:0
 msgid ""
 "The processor determined that the message's security methods, parameters, "
@@ -1858,13 +1855,6 @@ msgstr ""
 "Procesor określił, że metody bezpieczeństwa wiadomości, parametry, zakres "
 "lub inne wymagania bezpieczeństwa na poziomowe zasad lub zgód nie zostały "
 "spełnione."
-
-#. module: account_peppol
-#: model_terms:ir.ui.view,arch_db:account_peppol.res_partner_form_account_peppol
-msgid ""
-"The recommended identification method for Belgium is your Company Registry "
-"Number."
-msgstr "Zalecaną metodą identyfikacji w Belgii jest numer rejestru firmy."
 
 #. module: account_peppol
 #. odoo-python
@@ -1948,6 +1938,8 @@ msgstr "Wystąpił błąd z uczestnikiem Peppol."
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
 msgid "This branch company will use the active Peppol connection found on"
 msgstr ""
+"Ten oddział firmy będzie korzystał z aktywnego połączenia Peppol "
+"znalezionego w"
 
 #. module: account_peppol
 #. odoo-python
@@ -1955,6 +1947,8 @@ msgstr ""
 msgid ""
 "This connection has been superseded by another database. Register again."
 msgstr ""
+"To połączenie było zastąpione przez inną bazę danych. Zarejestruj się "
+"ponownie."
 
 #. module: account_peppol
 #: model:ir.model.fields,help:account_peppol.field_res_config_settings__account_is_token_out_of_sync
@@ -1963,6 +1957,9 @@ msgid ""
 "the proxy server. It is set to True when the token needs to be refreshed or "
 "updated."
 msgstr ""
+"To pole służy do wskazywania, że token użytkownika edi nie jest "
+"zsynchronizowany z serwerem proxy. Jego wartość jest ustawiona na True, gdy "
+"token wymaga odświeżenia lub aktualizacji."
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
@@ -1974,7 +1971,7 @@ msgstr "Ta faktura została także"
 #: model:ir.model.fields,help:account_peppol.field_res_company__account_peppol_phone_number
 #: model:ir.model.fields,help:account_peppol.field_res_config_settings__account_peppol_phone_number
 msgid "This number is used for identification purposes only."
-msgstr ""
+msgstr "Ten numer jest używany jedynie na potrzeby identyfikacji."
 
 #. module: account_peppol
 #. odoo-python
@@ -2009,12 +2006,12 @@ msgstr ""
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_res_config_settings__account_is_token_out_of_sync
 msgid "Token Out of Sync"
-msgstr ""
+msgstr "Token nie jest zsynchronizowany"
 
 #. module: account_peppol
 #: model:ir.model,name:account_peppol.model_account_edi_xml_ubl_20
 msgid "UBL 2.0"
-msgstr ""
+msgstr "UBL 2.0"
 
 #. module: account_peppol
 #. odoo-python
@@ -2048,12 +2045,12 @@ msgstr "Nieznany błąd Peppol: %s"
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__use_parent_connection
 msgid "Use Parent Connection"
-msgstr ""
+msgstr "Użyj połączenia nadrzędnego"
 
 #. module: account_peppol
 #: model:ir.model.fields,field_description:account_peppol.field_peppol_registration__use_parent_connection_selection
 msgid "Use Parent Connection Selection"
-msgstr ""
+msgstr "Użyj wyboru połączenia nadrzędnego"
 
 #. module: account_peppol
 #: model:ir.model.fields.selection,name:account_peppol.selection__res_partner__peppol_verification_state__valid
@@ -2123,13 +2120,13 @@ msgstr "Kreator"
 #. odoo-python
 #: code:addons/account_peppol/wizard/account_move_send_wizard.py:0
 msgid "You are not allowed to send invoice on behalf of %s."
-msgstr ""
+msgstr "Nie masz uprawnień do wysyłania faktur w imieniu %s."
 
 #. module: account_peppol
 #. odoo-python
 #: code:addons/account_peppol/exceptions.py:0
 msgid "You are not authorized to change the contact email."
-msgstr ""
+msgstr "Nie masz uprawnień do zmiany e-maila kontaktowego."
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
@@ -2141,7 +2138,7 @@ msgstr "Wysyłasz i otrzymujesz swoje e-faktury przez Odoo z tym Peppol ID."
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "You are sending from"
-msgstr ""
+msgstr "Wysyłasz z"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
@@ -2212,7 +2209,7 @@ msgstr ""
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.res_config_settings_view_form
 msgid "Your Peppol identification is:"
-msgstr ""
+msgstr "Twój identyfikator Peppol to:"
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_config_wizard_form
@@ -2220,6 +2217,8 @@ msgid ""
 "Your Peppol registration is being processed, it should be active within a "
 "day."
 msgstr ""
+"Twoja rejestracja w Peppol jest przetwarzana, powinna być aktywna w "
+"przeciągu jednego dnia."
 
 #. module: account_peppol
 #. odoo-python
@@ -2249,6 +2248,10 @@ msgid ""
 "                                        Make sure to reconnect the correct "
 "database."
 msgstr ""
+"Twoja baza danych nie jest już połączona z Peppol . To może być spowodowane "
+"duplikacją lub przywróceniem bazy danych.\n"
+"                                        Upewnij się, że nawiążesz ponownie "
+"połączenie z poprawną bazą danych."
 
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
@@ -2295,7 +2298,7 @@ msgstr "Twoje żądanie jest wciąż przetwarzane."
 #. module: account_peppol
 #: model_terms:ir.ui.view,arch_db:account_peppol.peppol_registration_form
 msgid "and send invoices via Peppol on their behalf."
-msgstr ""
+msgstr "i wyślij faktury przez Peppol w ich imieniu."
 
 #. module: account_peppol
 #. odoo-python
@@ -2323,6 +2326,26 @@ msgstr "aby wysyłać faktury, ale ta"
 #: model_terms:ir.ui.view,arch_db:account_peppol.mail_notification_layout_with_responsible_signature_and_peppol
 msgid "uses"
 msgstr "używa"
+
+#~ msgid "Please verify partner configuration in partner settings."
+#~ msgstr "Sprawdź konfigurację partnera w ustawieniach partnera."
+
+#~ msgid ""
+#~ "The partner has indicated it does not accept this document type, so you "
+#~ "cannot send this invoice via Peppol."
+#~ msgstr ""
+#~ "Partner wskazał, że nie akceptuje tego typu dokumentów, więc nie możesz "
+#~ "wysłać tej faktury przez Peppol."
+
+#~ msgid "The partner is missing Peppol EAS and/or Endpoint identifier."
+#~ msgstr ""
+#~ "Partnerowi brakuje identyfikatora Peppol EAS i/lub identyfikatora punktu "
+#~ "końcowego."
+
+#~ msgid ""
+#~ "The recommended identification method for Belgium is your Company "
+#~ "Registry Number."
+#~ msgstr "Zalecaną metodą identyfikacji w Belgii jest numer rejestru firmy."
 
 #~ msgid "Peppol document (UUID: %(uuid)s) has been received successfully"
 #~ msgstr "Dokument Peppol (UUID: %(uuid)s) został pomyślnie odebrany"

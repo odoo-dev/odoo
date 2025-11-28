@@ -12,12 +12,34 @@ import {
 import { Plugin } from "../../plugin";
 import { getAffineApproximation, getProjective } from "@html_editor/utils/perspective_utils";
 
-export const DEFAULT_IMAGE_QUALITY = "75";
+export const DEFAULT_IMAGE_QUALITY = "92";
 
 /**
  * @typedef { Object } ImagePostProcessShared
  * @property { ImagePostProcessPlugin['processImage'] } processImage
  * @property { ImagePostProcessPlugin['getProcessedImageSize'] } getProcessedImageSize
+ */
+
+/**
+ * @typedef {(
+ *   (img: HTMLImageElement, newDataset: object) => Promise<{
+ *     getHeight: (canvas: HTMLCanvasElement) => number,
+ *     perspective: string | null,
+ *     newDataset: object,
+ *     postProcessCroppedCanvas: (canvas: HTMLCanvasElement) => Promise<HTMLCanvasElement>,
+ *     svg: SVGElement,
+ *     svgAspectRatio: number,
+ *     svgWidth: number,
+ *   }>
+ * )[]} process_image_warmup_handlers
+ * @typedef {(
+ *   (
+ *     url: string,
+ *     newDataset: object,
+ *     processContext: { svg: SVGElement, svgAspectRatio: number, svgWidth: number }
+ *   ) => Promise<[newUrl: string, handlerDataset: object]>
+ * )[]} process_image_post_handlers
+ * @typedef {((args: {imageEl: HTMLElement}) => void)[]} on_image_updated_handlers
  */
 
 export class ImagePostProcessPlugin extends Plugin {
@@ -33,8 +55,8 @@ export class ImagePostProcessPlugin extends Plugin {
      * @param {Object} newDataset an object containing the modifications to apply
      * @param {Function} [onImageInfoLoaded] can be used to fill
      * newDataset after having access to image info, return true to cancel call
-     * @returns {Function} callback that sets dataURL of the image with the
-     * applied modifications to `img` element
+     * @returns {{ url: string, newDataset: object }} Object containing the image
+     * URL and the updated dataset.
      */
     async _processImage({ img, newDataset = {}, onImageInfoLoaded }) {
         const processContext = {};
@@ -82,7 +104,7 @@ export class ImagePostProcessPlugin extends Plugin {
                 newDataset,
                 processContext
             );
-            return () => this.updateImageAttributes(img, postUrl, postDataset);
+            return { url: postUrl, newDataset: postDataset };
         }
         // Crop
         const container = document.createElement("div");
@@ -240,7 +262,8 @@ export class ImagePostProcessPlugin extends Plugin {
     }
     async getProcessedImageSize(img) {
         const processed = await this._processImage({ img });
-        if (processed.url) {
+        // return undefined if the image is a gif
+        if (!shouldPreventGifTransformation(processed.newDataset)) {
             return getDataURLBinarySize(processed.url);
         }
         return undefined;
@@ -268,6 +291,7 @@ export class ImagePostProcessPlugin extends Plugin {
                 delete el.dataset[key];
             }
         }
+        this.dispatchTo("on_image_updated_handlers", { imageEl: el });
     }
 }
 

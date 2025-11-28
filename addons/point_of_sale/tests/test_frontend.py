@@ -627,7 +627,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env['ir.module.module'].search([('name', '=', 'point_of_sale')], limit=1).state = 'installed'
 
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_pricelist', login="pos_user")
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_basic_order_01_multi_payment_and_change', login="pos_user")
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_basic_order_02_decimal_order_quantity', login="pos_user")
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'pos_basic_order_03_tax_position', login="pos_user")
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'FloatingOrderTour', login="pos_user")
@@ -805,6 +804,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.write({
             'rounding_method': rouding_method.id,
             'cash_rounding': True,
+            'only_round_cash_method': True,
         })
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
@@ -827,48 +827,13 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.write({
             'rounding_method': rouding_method.id,
             'cash_rounding': True,
+            'only_round_cash_method': True,
         })
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenRoundingDown', login="pos_user")
         self.env["pos.order"].search([('state', '=', 'draft')]).write({'state': 'cancel'})
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenTotalDueWithOverPayment', login="pos_user")
-
-    def test_rounding_half_up(self):
-        rouding_method = self.env['account.cash.rounding'].create({
-            'name': 'Rounding HALF-UP',
-            'rounding': 0.5,
-            'rounding_method': 'HALF-UP',
-        })
-
-        self.env['product.product'].create({
-            'name': 'Product Test 1.20',
-            'available_in_pos': True,
-            'list_price': 1.2,
-            'taxes_id': False,
-        })
-
-        self.env['product.product'].create({
-            'name': 'Product Test 1.25',
-            'available_in_pos': True,
-            'list_price': 1.25,
-            'taxes_id': False,
-        })
-
-        self.env['product.product'].create({
-            'name': 'Product Test 1.4',
-            'available_in_pos': True,
-            'list_price': 1.4,
-            'taxes_id': False,
-        })
-
-        self.main_pos_config.write({
-            'rounding_method': rouding_method.id,
-            'cash_rounding': True,
-        })
-
-        self.main_pos_config.with_user(self.pos_user).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenRoundingHalfUp', login="pos_user")
 
     def test_pos_closing_cash_details(self):
         """Test cash difference *loss* at closing.
@@ -1353,6 +1318,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'taxes_id': False,
             'available_in_pos': True,
             'pos_categ_ids': [(4, limited_category.id)],
+            'tracking': 'lot',
             'attribute_line_ids': [(0, 0, {
                 'attribute_id': color_attribute.id,
                 'value_ids': [(6, 0, color_attribute.value_ids.ids)]
@@ -1571,6 +1537,9 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_customer_display(self):
         self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}", 'CustomerDisplayTour', login="pos_user")
 
+    def test_customer_display_scroll(self):
+        self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}", 'CustomerDisplayTourScroll', login="pos_user")
+
     def test_customer_display_with_qr(self):
         self.start_tour(f"/pos_customer_display/{self.main_pos_config.id}/{self.main_pos_config.access_token}", 'CustomerDisplayTourWithQr', login="pos_user")
 
@@ -1725,27 +1694,6 @@ class TestUi(TestPointOfSaleHttpCommon):
             'ProductComboDiscountTour',
             login="pos_user",
         )
-
-    def test_cash_rounding_payment(self):
-        """Verify than an error popup is shown if the payment value is more precise than the rounding method"""
-        rounding_method = self.env['account.cash.rounding'].create({
-            'name': 'Down 0.10',
-            'rounding': 0.10,
-            'strategy': 'add_invoice_line',
-            'profit_account_id': self.company_data['default_account_revenue'].copy().id,
-            'loss_account_id': self.company_data['default_account_expense'].copy().id,
-            'rounding_method': 'DOWN',
-        })
-
-        self.main_pos_config.write({
-            'cash_rounding': True,
-            'only_round_cash_method': False,
-            'rounding_method': rounding_method.id,
-        })
-
-        self.env['ir.config_parameter'].sudo().set_param('barcode.max_time_between_keys_in_ms', 1)
-        self.main_pos_config.open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'CashRoundingPayment', login="accountman")
 
     def test_product_categories_order(self):
         """ Verify that the order of categories doesnt change in the frontend """
@@ -2861,6 +2809,14 @@ class TestUi(TestPointOfSaleHttpCommon):
         This includes validating the refund order creation, amount, state, and payment processing.
         """
         # Open POS UI with the POS user
+        pricelists = self.env['product.pricelist'].create([
+            {'name': 'Test Pricelist'},
+            {'name': 'Percentage Pricelist'},
+        ])
+        self.main_pos_config.write({
+            'available_pricelist_ids': [Command.set(pricelists.ids)],
+            'pricelist_id': pricelists[0].id,
+        })
         self.main_pos_config.with_user(self.pos_user).open_ui()
 
         # Run the POS tour simulating a partial refund
@@ -2871,6 +2827,12 @@ class TestUi(TestPointOfSaleHttpCommon):
             ('session_id', '=', self.main_pos_config.current_session_id.id)
         ])
         self.assertEqual(len(orders), 2, "Expected two orders: original and refund.")
+        order, refund_order = orders[0], orders[1]
+        self.assertEqual(
+            refund_order.pricelist_id.id,
+            order.pricelist_id.id,
+            "Refund order pricelist should be the original order's pricelist."
+        )
 
         # Perform refund on order and retrieve the resulting draft refund order
         refund_action = orders[1].refund()
@@ -3103,6 +3065,36 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_cross_exclusion_attribute_values')
 
+    def test_custom_attribute_alone_displayed(self):
+        """
+        Tests that if product configurator will be shown if any of the
+        attributes have a free text field, even if there is only one
+        possible selection for every attributes.
+        """
+        attribute_custom = self.env['product.attribute'].create({
+            'name': 'Custom',
+            'display_type': 'radio',
+            'create_variant': 'no_variant',
+        })
+        attribute_value_custom = self.env['product.attribute.value'].create({
+            'name': 'Custom',
+            'attribute_id': attribute_custom.id,
+            'is_custom': True,
+        })
+        self.test_product_1 = self.env['product.template'].create({
+            'name': 'Only Custom',
+            'available_in_pos': True,
+            'list_price': 10.0,
+            'attribute_line_ids': [
+                Command.create({
+                    'attribute_id': attribute_custom.id,
+                    'value_ids': [Command.set([attribute_value_custom.id])],
+                }),
+            ],
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('test_custom_attribute_alone_displayed')
+
     def test_preset_customer_selection(self):
         self.preset_delivery = self.env['pos.preset'].create({
             'name': 'Delivery',
@@ -3172,6 +3164,43 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env['res.lang']._activate_lang('fr_BE')
         self.pos_user.write({'lang': 'fr_BE'})
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_add_money_button_with_different_decimal_separator', login="pos_user")
+
+    def test_sync_from_ui_one_by_one(self):
+        """
+        Sync from UI is now syncing orders one by one.
+        sync_from_ui should be called 6 times in this tour (6 orders created).
+        """
+
+        pos_order = self.env.registry.models['pos.order']
+        sync_counter = {'count': 0}
+
+        @api.model
+        def sync_from_ui_patch(self, orders):
+            sync_counter['count'] += 1
+            return super(pos_order, self).sync_from_ui(orders)
+
+        with patch.object(pos_order, "sync_from_ui", sync_from_ui_patch):
+            self.start_pos_tour("test_sync_from_ui_one_by_one", login="pos_user")
+            self.assertEqual(sync_counter['count'], 6)
+
+    def test_lot_refund_lower_qty(self):
+        product = self.env['product.product'].create({
+            'name': 'Serial Product',
+            'is_storable': True,
+            'tracking': 'serial',
+            'available_in_pos': True,
+        })
+        for sn in ["SN1", "SN2"]:
+            self.env['stock.quant'].create({
+                'product_id': product.id,
+                'inventory_quantity': 1,
+                'location_id': self.env.user._get_default_warehouse_id().lot_stock_id.id,
+                'lot_id': self.env['stock.lot'].create({'name': sn, 'product_id': product.id}).id,
+            }).sudo().action_apply_inventory()
+        self.env['stock.picking.type'].search([('name', '=', 'PoS Orders')]).use_create_lots = False
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour("test_lot_refund_lower_qty")
 
 
 # This class just runs the same tests as above but with mobile emulation
