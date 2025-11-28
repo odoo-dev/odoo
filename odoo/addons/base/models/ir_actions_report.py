@@ -1177,12 +1177,20 @@ class IrActionsReport(models.Model):
 
         return report_action
 
-    def _action_configure_external_report_layout(self, report_action, xml_id="web.action_base_document_layout_configurator"):
-        action = self.env["ir.actions.actions"]._for_xml_id(xml_id)
-        py_ctx = json.loads(action.get('context', {}))
+    def _action_configure_external_report_layout(self, report_action, view_xml_id='web.view_base_document_layout'):
         report_action['close_on_report_download'] = True
-        py_ctx['report_action'] = report_action
-        action['context'] = py_ctx
+        action = {
+            'type': 'ir.actions.act_window',
+            'name': _("Configure your document layout"),
+            'view_mode': 'form',
+            'res_model': 'base.document.layout',
+            'view_id': self.env.ref(view_xml_id).id,
+            'target': 'new',
+            'context': {
+                'dialog_size': 'extra-large',
+                'report_action': report_action,
+            },
+        }
         return action
 
     def get_valid_action_reports(self, model, record_ids):

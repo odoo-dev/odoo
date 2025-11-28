@@ -55,6 +55,17 @@ class ResConfigSettings(models.TransientModel):
             'target': 'current',
         }
 
+    def open_base_document_layout_configurator(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Configure your document layout"),
+            'view_mode': 'form',
+            'res_model': 'base.document.layout',
+            'view_id': self.env.ref('web.view_base_document_layout').id,
+            'target': 'new',
+            'context': {'dialog_size': 'extra-large'},
+        }
+
     def open_new_user_default_groups(self):
         default_group = self.env.ref('base.default_user_group', raise_if_not_found=False)
         if not default_group:

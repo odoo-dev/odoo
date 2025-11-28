@@ -45,15 +45,5 @@
                 </form>
             </field>
         </record>
-
-        <record id="action_base_document_layout_configurator" model="ir.actions.act_window">
-            <field name="name">Configure your document layout</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-            <field name="res_model">base.document.layout</field>
-            <field name="view_id" ref="web.view_base_document_layout"/>
-            <field name="context">{"dialog_size": "extra-large"}</field>
-        </record>
-
     </data>
 </odoo>

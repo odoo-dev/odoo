@@ -294,6 +294,17 @@ class ResConfigSettings(models.TransientModel):
             # to avoid landing on an error page (see terms.py controller)
             setting.preview_ready = self.env.company.terms_type == 'html' and setting.terms_type == 'html'
 
+    def open_base_document_layout_configurator(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Configure your document layout"),
+            'view_mode': 'form',
+            'res_model': 'base.document.layout',
+            'view_id': self.env.ref('account.view_base_document_layout').id,
+            'target': 'new',
+            'context': {'dialog_size': 'extra-large', 'default_from_invoice': True},
+        }
+
     def action_update_terms(self):
         self.ensure_one()
         if hasattr(self, 'website_id') and self.env.user.has_group('website.group_website_designer'):
