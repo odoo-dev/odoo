@@ -57,6 +57,7 @@ export class PropertyValue extends Component {
                 }
                 // maybe the record display name has changed
                 await record.load();
+                record.data.id = record.resId;
                 const recordData = m2oTupleFromData(record.data);
                 await this.onValueChange([{ id: recordData[0], name: recordData[1] }]);
             },

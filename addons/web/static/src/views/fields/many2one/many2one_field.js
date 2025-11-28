@@ -48,6 +48,12 @@ export function m2oTupleFromData(data) {
         const _name = data.name;
         name = Array.isArray(_name) ? _name[1] : _name;
     }
+    if (data.parent_id && Array.isArray(data.parent_id)) {
+        const parentName = data.parent_id[1].split("‒")[0].trim();
+        if (parentName) {
+            name = `${parentName}, ${name}`;
+        }
+    }
     return [id, name];
 }
 
