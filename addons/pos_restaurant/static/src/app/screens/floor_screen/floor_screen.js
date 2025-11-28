@@ -1059,6 +1059,7 @@ export class FloorScreen extends Component {
             this.dialog.add(AlertDialog, {
                 title: _t("Unsupported File Format"),
                 body: _t("Only web-compatible Image formats such as .png or .jpeg are supported."),
+                showReloadButton: false,
             });
         } else {
             const imageUrl = await getDataURLFromFile(file);
@@ -1075,6 +1076,7 @@ export class FloorScreen extends Component {
                 this.dialog.add(AlertDialog, {
                     title: _t("Loading Image Error"),
                     body: _t("Encountered error when loading image. Please try again."),
+                    showReloadButton: false,
                 });
             }
         }

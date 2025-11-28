@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+  <t t-name="web.ConfirmationDialog" t-inherit="web.ConfirmationDialog" t-inherit-mode="extension">
+    <xpath expr="//t[@t-set-slot='footer']" position="inside">
+      <button t-if="props.showReloadButton" class="btn btn-secondary" t-on-click="_reloadData">
+        Reload Data
+      </button>
+    </xpath>
+  </t>
+  <t t-name="web.AlertDialog" t-inherit="web.AlertDialog" t-inherit-mode="extension">
+    <xpath expr="//t[@t-set-slot='footer']" position="inside">
+      <button t-if="props.showReloadButton" class="btn btn-secondary" t-on-click="_reloadData">
+        Reload Data
+      </button>
+    </xpath>
+  </t>
+</templates>

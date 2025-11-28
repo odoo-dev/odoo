@@ -266,6 +266,7 @@ export class TicketScreen extends Component {
                                 quantity,
                                 refundableQty
                             ),
+                            showReloadButton: false,
                         });
                     }
                 } else {

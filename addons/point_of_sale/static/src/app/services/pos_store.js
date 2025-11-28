@@ -299,6 +299,7 @@ export class PosStore extends WithLazyGetterTrap {
             this.dialog.add(AlertDialog, {
                 title: _t("Closing Session"),
                 body: _t("The session is being closed by another user. The page will be reloaded."),
+                showReloadButton: false,
             });
         } catch {
             this.dialog.add(AlertDialog, {

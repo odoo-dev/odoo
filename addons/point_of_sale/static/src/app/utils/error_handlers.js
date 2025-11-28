@@ -40,6 +40,7 @@ export function offlineErrorHandler(env, error, originalError) {
                     "Until the connection is reestablished, Odoo Point of Sale will operate with limited functionality."
                 ),
                 confirmLabel: _t("Continue with limited functionality"),
+                showReloadButton: false,
             });
             env.services.pos.data.network.warningTriggered = true;
         }

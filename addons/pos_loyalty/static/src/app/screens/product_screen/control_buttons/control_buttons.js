@@ -41,6 +41,7 @@ patch(ControlButtons.prototype, {
             this.dialog.add(AlertDialog, {
                 title: _t("No valid eWallet found"),
                 body: _t("Please select a customer and a valid eWallet."),
+                showReloadButton: false,
             });
             return;
         }

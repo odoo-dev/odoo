@@ -510,6 +510,7 @@ export class PaymentScreen extends Component {
             this.dialog.add(AlertDialog, {
                 title: _t("Incorrect address for shipping"),
                 body: _t("The selected customer needs an address."),
+                showReloadButton: false,
             });
             return false;
         }
@@ -519,6 +520,7 @@ export class PaymentScreen extends Component {
             this.dialog.add(AlertDialog, {
                 title: field ? _t("%s required", field) : _t("Missing required"),
                 body: message || _t("Some required information is missing."),
+                showReloadButton: false,
             });
             return false;
         }

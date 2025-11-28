@@ -10,6 +10,7 @@ patch(PosStore.prototype, {
             this.dialog.add(AlertDialog, {
                 title: _t("Missing Country"),
                 body: _t("The company %s doesn't have a country set.", this.company.name),
+                showReloadButton: false,
             });
             return false;
         }
