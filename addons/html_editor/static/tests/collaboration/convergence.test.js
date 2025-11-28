@@ -2,6 +2,8 @@ import { describe, expect, test } from "@odoo/hoot";
 import { insertText } from "../_helpers/user_actions";
 import { setupEditor } from "../_helpers/editor";
 import { getContent } from "../_helpers/selection";
+import { CollaborationPlugin } from "@html_editor/others/collaboration/collaboration_plugin";
+import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 
 class TestCollaboration {
     editors = {};
@@ -20,25 +22,52 @@ class TestCollaboration {
         this.log("TestCollaboration::init()");
         // random collaboration channel id
         // const collaborationChannel = "collaboration-unit-test-" + Math.floor(Math.random() * 1000);
+        let peerId = 0;
 
         for (const name of Object.keys(initState)) {
             this.log("  Init Editor for : ", name);
+            peerId += 1;
             const content = initState[name];
             const className = name + "-test-editor";
             const { el, editor } = await setupEditor(content, {
                 props: { iframe: true },
                 styleContent: this.getContainerCssStyle(className, this.debugColors.shift()),
-                // collaborationChannel: collaborationChannel,
+                config: {
+                    Plugins: [...MAIN_PLUGINS, CollaborationPlugin],
+                    collaboration: { peerId },
+                    resources: {
+                        collaboration_step_added_handlers: (step) => {
+                            console.log(`collaboration_step_added_handlers : `, step);
+                        },
+                        history_missing_parent_step_handlers: (params) => {
+                            // historyMissingParentSteps(peerInfos, peerInfo, params);
+                            console.log(`history_missing_parent_step_handlers : `, params);
+                        },
+                    },
+                },
             });
+
             el.classList.add(className);
             this.editors[name] = {
                 el,
                 editor,
                 edit: async (fn) => {
                     this.log(name, " : edit | ", fn);
-                    return await fn(editor);
+                    await fn(editor);
+                    const historyPlugin = editor.plugins.find(
+                        (p) => p.constructor.id === "history"
+                    );
+
+                    const historySteps = historyPlugin.steps;
+                    return historySteps[historySteps.length - 1];
                 },
-                receive: (op) => this.log(name, " : received operation | ", op),
+                receive: (operation) => {
+                    this.log(name, " : received operation | ", operation);
+                    const collaborationPlugin = editor.plugins.find(
+                        (p) => p.constructor.id === "collaboration"
+                    );
+                    collaborationPlugin.onExternalHistorySteps([operation]);
+                },
                 getContent: () => getContent(el),
             };
         }
@@ -125,7 +154,6 @@ describe("concurent edition convergence", () => {
             carol: "<p>a3[]1b</p>",
             danny: "<p>a[]12b</p>",
         });
-
         alice.receive(op2);
         bobby.receive(op1);
         carol.receive(op2);

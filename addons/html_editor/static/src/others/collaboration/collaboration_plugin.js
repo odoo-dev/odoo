@@ -55,6 +55,7 @@ export class CollaborationPlugin extends Plugin {
     peerId = null;
 
     setup() {
+        console.log("CollaborationPlugin setup");
         this.peerId = this.config.collaboration.peerId;
         if (!this.peerId) {
             throw new Error("The collaboration plugin requires a peerId");
@@ -129,6 +130,7 @@ export class CollaborationPlugin extends Plugin {
      */
     onExternalHistorySteps(newSteps) {
         let stepIndex = 0;
+        console.log("CollaborationPlugin::onExternalHistorySteps()", newSteps);
         const selectionData = this.dependencies.selection.getSelectionData();
 
         const steps = this.dependencies.history.getHistorySteps();
@@ -136,6 +138,7 @@ export class CollaborationPlugin extends Plugin {
             // todo: add a test that no 2 history_missing_parent_step_handlers
             // are called in same stack.
             const insertIndex = this.getInsertStepIndex(steps, newStep);
+            console.log("  Inserting step ", newStep, " at index ", insertIndex);
             if (typeof insertIndex === "undefined") {
                 continue;
             }
@@ -161,6 +164,7 @@ export class CollaborationPlugin extends Plugin {
      * @param {HistoryStep} newStep
      */
     getInsertStepIndex(steps, newStep) {
+        console.log("======  getInsertStepIndex for new step ", newStep);
         let index = steps.length - 1;
         while (index >= 0 && steps[index].id !== newStep.previousStepId) {
             // Skip steps that are already in the list.
@@ -169,6 +173,7 @@ export class CollaborationPlugin extends Plugin {
             }
             index--;
         }
+        console.log(" ==> 1 : ", index);
 
         // When the previousStepId is not present in the steps it
         // could be either:
@@ -196,6 +201,7 @@ export class CollaborationPlugin extends Plugin {
             });
             return;
         }
+        console.log(" ==> 2 : ", index);
 
         let concurentSteps = [];
         index++;
@@ -216,6 +222,7 @@ export class CollaborationPlugin extends Plugin {
             index++;
         }
 
+        console.log(" ==> 3 : ", index);
         return index;
     }
 
