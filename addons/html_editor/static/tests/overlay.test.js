@@ -33,6 +33,22 @@ class Test extends models.Model {
                 ${"<p>text</p>".repeat(50)}`),
         },
         { id: 3, name: "Test", txt: "<p>text</p>" },
+        {
+            id: 4,
+            name: "Test",
+            txt: unformat(`
+                <table><tbody>
+                    <tr style="height: 300px">
+                        <td class="a"><p>cell 0</p></td>
+                    </tr>
+                    <tr style="height: 250px">
+                        <td><p>cell 1</p></td>
+                    </tr>
+                    <tr style="height: 300px">
+                        <td class="b"><p>cell 2</p></td>
+                    </tr>
+                </tbody></table>`),
+        },
     ];
 }
 
@@ -230,7 +246,6 @@ test("Table column control should always be displayed on top of the table", asyn
                 <field name="txt" widget="html"/>
             </form>`,
     });
-
     const scrollableElement = queryOne(".o_content");
     const table = queryOne(".odoo-editor-editable table");
     await hover(".odoo-editor-editable td");
@@ -281,6 +296,55 @@ test("Table menu should close on scroll", async () => {
 
     // Column menu should not be visible.
     expect(".o-dropdown--menu").not.toHaveCount();
+});
+
+test.tags("desktop");
+test("Table row control should hide when overflowing", async () => {
+    const top = (el) => el.getBoundingClientRect().top;
+    const bottom = (el) => el.getBoundingClientRect().bottom;
+
+    await mountView({
+        type: "form",
+        resId: 4,
+        resModel: "test",
+        arch: `
+            <form>
+                <field name="name"/>
+                <field name="txt" widget="html"/>
+            </form>`,
+    });
+
+    const scrollable = queryOne(".o_content");
+    const table = queryOne(".odoo-editor-editable table");
+
+    // Hover the first cell to show the table menu
+    await hover(".odoo-editor-editable td.a");
+    await waitFor(".o-we-table-menu[data-type='row']");
+    expect(queryAll(".o-we-table-menu[data-type='row']")).toHaveCount(1);
+    expect(".o-we-table-menu[data-type='row']").toBeVisible();
+
+    // Scroll down so the table menu overflows the top of the editable area
+    const toTopOffset = top(table) - top(scrollable);
+    scrollable.scrollTop += toTopOffset + 10;
+    await animationFrame();
+    // Table menu should now be hidden
+    await waitFor(".o-we-table-menu[data-type='row']");
+    expect(".o-we-table-menu[data-type='row']").not.toBeVisible();
+
+    // Hover another cell to make the table menu visible again
+    await hover(".odoo-editor-editable td.b");
+    await waitFor(".o-we-table-menu[data-type='row']");
+    await animationFrame();
+    expect(queryAll(".o-we-table-menu[data-type='row']")).toHaveCount(1);
+    expect(".o-we-table-menu[data-type='row']").toBeVisible();
+
+    // Scroll up so the table menu overflows the bottom of the editable area
+    const toBottomOffset = bottom(table) - (top(scrollable) + scrollable.clientHeight);
+    scrollable.scrollTop += toBottomOffset - 10;
+    await animationFrame();
+    // Table menu should now be hidden
+    await waitFor(".o-we-table-menu[data-type='row']");
+    expect(".o-we-table-menu[data-type='row']").not.toBeVisible();
 });
 
 test("Toolbar should keep stable while extending down the selection", async () => {
