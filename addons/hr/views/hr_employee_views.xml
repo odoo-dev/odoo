@@ -66,7 +66,7 @@
                     <filter string="Contract End Date" name="contract_date_end" date="contract_date_end" groups="hr.group_hr_manager"/>
                     <separator />
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
-                    <group>
+                    <group> 
                         <filter name="group_manager" string="Manager" domain="[]" context="{'group_by': 'parent_id'}"/>
                         <filter name="group_department" string="Department" domain="[]" context="{'group_by': 'department_id'}"/>
                         <filter name="group_job" string="Job Position" domain="[]" context="{'group_by': 'job_id'}"/>
