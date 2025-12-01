@@ -1,6 +1,8 @@
 import { Deferred } from "@web/core/utils/concurrency";
 import { IDBQuotaExceededError, IndexedDB } from "@web/core/utils/indexed_db";
 import { deepCopy } from "../utils/objects";
+import { registry } from "../registry";
+import { Component, xml } from "@odoo/owl";
 
 /**
  * @typedef {{
@@ -23,8 +25,28 @@ function validateSettings({ type, update }) {
     }
 }
 
+export class Test extends Component {
+    static template = xml`<input t-att-value="value" t-on-change="onChange"/>`;
+    static props = {};
+
+    get value() {
+        return window.MAX_STORAGE_SIZE / 1024 / 1024;
+    }
+
+    onChange(ev) {
+        localStorage.setItem("MAX_STORAGE_SIZE", parseInt(ev.target.value, 10) * 1024 * 1024);
+        window.location.reload();
+    }
+}
+
+export const systrayItem = {
+    Component: Test,
+};
+registry.category("systray").add("test_cth", systrayItem, { sequence: 1000 });
+
 const CRYPTO_ALGO = "AES-GCM";
-const MAX_STORAGE_SIZE = 2 * 1024 * 1024 * 1024; // 2Gb
+const lsValue = localStorage.getItem("MAX_STORAGE_SIZE");
+window.MAX_STORAGE_SIZE = lsValue ? parseInt(lsValue) : 2 * 1024 * 1024 * 1024; // 2Gb
 
 class Crypto {
     constructor(secret) {
