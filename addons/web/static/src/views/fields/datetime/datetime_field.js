@@ -9,6 +9,7 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { FIELD_WIDTHS } from "@web/views/list/column_width_hook";
 import { formatDate, formatDateTime } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
+import { usePopover } from "@web/core/popover/popover_hook";
 
 const { DateTime } = luxon;
 
@@ -163,6 +164,7 @@ export class DateTimeField extends Component {
         const dateTimePicker = useDateTimePicker({
             target: "root",
             showSeconds: this.props.showSeconds,
+            createPopover: usePopover,
             get pickerProps() {
                 return getPickerProps();
             },
