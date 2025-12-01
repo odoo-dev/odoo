@@ -4,7 +4,7 @@
         <field name="name">Website forum: User can only access to forum related to public courses</field>
         <field name="model_id" ref="website_forum.model_forum_forum"/>
         <field name="domain_force">[('slide_channel_ids.website_published', '=', True), ('slide_channel_ids.visibility', '=', 'public')]</field>
-        <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+        <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
     </record>
     <record id="website_slides_forum_signed_in_user" model="ir.rule">
         <field name="name">Website forum: Signed In user can only access to forum related to courses</field>
@@ -30,7 +30,7 @@
         <field name="name">Website forum post: User can only access to post linked to forum related to followed courses</field>
         <field name="model_id" ref="website_forum.model_forum_post"/>
         <field name="domain_force">[('forum_id.slide_channel_ids.website_published', '=', True), ('forum_id.slide_channel_ids.visibility', '=', 'public')]</field>
-        <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+        <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
     </record>
     <record id="website_slides_forum_post_signed_in_user" model="ir.rule">
         <field name="name">Website forum: Signed In user can only access to post linked to forum related to courses</field>
@@ -56,7 +56,7 @@
         <field name="name">Website slides forum tag: Public User can only access to tag linked to forum related to public courses</field>
         <field name="model_id" ref="website_forum.model_forum_tag"/>
         <field name="domain_force">[('forum_id.slide_channel_ids.website_published', '=', True), ('forum_id.slide_channel_ids.visibility', '=', 'public')]</field>
-        <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+        <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
     </record>
     <record id="website_slides_forum_tag_signed_in_user" model="ir.rule">
         <field name="name">Website forum: Signed In users can access tags linked to public or connected users-visibility courses</field>

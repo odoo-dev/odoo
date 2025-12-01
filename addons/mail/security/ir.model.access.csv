@@ -1,6 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_fetchmail_server,fetchmail.server,model_fetchmail_server,base.group_system,1,1,1,1
-access_mail_message_all,mail.message.all,model_mail_message,base.group_public,1,0,0,0
+access_mail_message_all,mail.message.all,model_mail_message,base.group_everyone,1,0,0,0
 access_mail_message_portal,mail.message.portal,model_mail_message,base.group_portal,1,1,1,1
 access_mail_message_user,mail.message.user,model_mail_message,base.group_user,1,1,1,1
 access_mail_message_scheduled_system,mail.message.scheduled.system,model_mail_message_schedule,base.group_system,1,1,1,1
@@ -10,19 +10,14 @@ access_mail_followers_system,mail.followers.system,model_mail_followers,base.gro
 access_mail_notification_portal,mail.notification.portal,model_mail_notification,base.group_portal,1,0,0,0
 access_mail_notification_user,mail.notification.user,model_mail_notification,base.group_user,1,1,1,0
 access_mail_notification_system, mail.notification.system,model_mail_notification,base.group_system,1,1,1,1
-access_discuss_channel_public,discuss.channel.public,model_discuss_channel,base.group_public,1,0,0,0
-access_discuss_channel_portal,discuss.channel.portal,model_discuss_channel,base.group_portal,1,0,0,0
+access_discuss_channel_public,discuss.channel.public,model_discuss_channel,base.group_everyone,1,0,0,0
 access_discuss_channel_user,discuss.channel.user,model_discuss_channel,base.group_user,1,1,1,0
 access_discuss_channel_system,discuss.channel.system,model_discuss_channel,base.group_system,1,1,1,1
 access_discuss_category_user,discuss.category.user,model_discuss_category,base.group_user,1,0,0,0
 access_discuss_category_erp_manager,discuss.category.erp_manager,model_discuss_category,base.group_erp_manager,1,1,1,1
-access_discuss_channel_member_public,discuss.channel.member.public,model_discuss_channel_member,base.group_public,1,1,1,1
-access_discuss_channel_member_portal,discuss.channel.member.portal,model_discuss_channel_member,base.group_portal,1,1,1,1
-access_discuss_channel_member_user,discuss.channel.member.user,model_discuss_channel_member,base.group_user,1,1,1,1
+access_discuss_channel_member_public,discuss.channel.member.public,model_discuss_channel_member,base.group_everyone,1,1,1,1
 access_discuss_channel_rtc_session_system,discuss.channel.rtc.session.system,model_discuss_channel_rtc_session,base.group_system,1,1,1,1
-access_discuss_call_history_user,discuss.call.history.user,model_discuss_call_history,base.group_user,1,0,0,0
-access_discuss_call_history_public,discuss.call.history.public,model_discuss_call_history,base.group_public,1,0,0,0
-access_discuss_call_history_portal,discuss.call.history.portal,model_discuss_call_history,base.group_portal,1,0,0,0
+access_discuss_call_history_public,discuss.call.history.public,model_discuss_call_history,base.group_everyone,1,0,0,0
 access_res_role_user,res.role.user,model_res_role,base.group_user,1,0,0,0
 access_res_role_admin,res.role.admin,model_res_role,base.group_erp_manager,1,1,1,1
 access_mail_alias_user,mail.alias.user,model_mail_alias,base.group_user,1,0,0,0
@@ -31,9 +26,7 @@ access_mail_alias_domain_user,mail.alias.domain.user,model_mail_alias_domain,bas
 access_mail_alias_domain_system,mail.alias.domain.system,model_mail_alias_domain,base.group_erp_manager,1,1,1,1
 access_mail_gateway_allowed_system,mail.gateway.allowed.system,model_mail_gateway_allowed,base.group_system,1,1,1,1
 access_mail_message_reaction_system,mail.message.reaction.system,model_mail_message_reaction,base.group_system,1,1,1,1
-access_mail_message_subtype_public,mail.message.subtype.all,model_mail_message_subtype,base.group_public,1,0,0,0
-access_mail_message_subtype_portal,mail.message.subtype.all,model_mail_message_subtype,base.group_portal,1,0,0,0
-access_mail_message_subtype_user,mail.message.subtype.user,model_mail_message_subtype,base.group_user,1,0,0,0
+access_mail_message_subtype_public,mail.message.subtype.all,model_mail_message_subtype,base.group_everyone,1,0,0,0
 access_mail_message_subtype_system,mail.message.subtype.system,model_mail_message_subtype,base.group_system,1,1,1,1
 access_mail_presence,mail.presence,model_mail_presence,base.group_system,1,1,1,1
 access_mail_tracking_value_system,mail.tracking.value.system,model_mail_tracking_value,base.group_system,1,1,1,1

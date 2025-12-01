@@ -3,12 +3,11 @@ access_mail_performance_thread,access_mail_performance_thread,model_mail_perform
 access_mail_performance_thread_recipients,access_mail_performance_thread_recipients,model_mail_performance_thread_recipients,base.group_user,1,1,1,1
 access_mail_performance_tracking_user,mail.performance.tracking,model_mail_performance_tracking,base.group_user,1,1,1,1
 access_mail_test_access_portal,mail.access.portal.portal,model_mail_test_access,base.group_portal,1,1,0,0
-access_mail_test_access_public,mail.access.portal.public,model_mail_test_access,base.group_public,1,0,0,0
+access_mail_test_access_public,mail.access.portal.public,model_mail_test_access,base.group_everyone,1,0,0,0
 access_mail_test_access_user,mail.access.portal.user,model_mail_test_access,base.group_user,1,1,1,1
 access_mail_test_access_custo_portal,mail.access.portal.portal,model_mail_test_access_custo,base.group_portal,1,0,0,0
 access_mail_test_access_custo_user,mail.access.portal.user,model_mail_test_access_custo,base.group_user,1,1,1,1
-access_mail_test_access_public_public,mail.test.access.public.public,model_mail_test_access_public,base.group_public,1,1,0,0
-access_mail_test_access_public_portal,mail.test.access.public.portal,model_mail_test_access_public,base.group_portal,1,1,0,0
+access_mail_test_access_public_public,mail.test.access.public.public,model_mail_test_access_public,base.group_everyone,1,1,0,0
 access_mail_test_access_public_user,mail.test.access.public.user,model_mail_test_access_public,base.group_user,1,1,1,1
 access_mail_test_alias_optional_portal,mail.test.alias.optional.portal,model_mail_test_alias_optional,base.group_portal,1,0,0,0
 access_mail_test_alias_optional_user,mail.test.alias.optional.user,model_mail_test_alias_optional,base.group_user,1,1,1,1

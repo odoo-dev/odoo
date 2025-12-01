@@ -32,7 +32,7 @@
         <record id="rule_slide_channel_visibility_public_user" model="ir.rule">
             <field name="name">Channel: public: restricted to public/link-based and published</field>
             <field name="model_id" ref="model_slide_channel"/>
-            <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+            <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
             <field name="domain_force">[('website_published', '=', True), ('visibility', 'in', ['public', 'link'])]</field>
             <field name="perm_unlink" eval="0"/>
             <field name="perm_write" eval="0"/>
@@ -96,7 +96,7 @@
             <field name="name">Channel Tag: public/portal: color = published</field>
             <field name="model_id" ref="model_slide_channel_tag"/>
             <field name="domain_force">['&amp;', ('color', '!=', False), ('color', '!=', 0)]</field>
-            <field name="groups" eval="[(4, ref('base.group_public')), (4, ref('base.group_portal'))]"/>
+            <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
             <field name="perm_create" eval="False"/>
@@ -113,7 +113,7 @@
         <record id="rule_slide_slide_public_user" model="ir.rule">
             <field name="name">Slide: public: restricted to published or public/link-based channel &amp; (category or previewable)</field>
             <field name="model_id" ref="model_slide_slide"/>
-            <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+            <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
             <field name="domain_force">[
                     ('channel_id.website_published', '=', True),
                     ('website_published', '=', True),

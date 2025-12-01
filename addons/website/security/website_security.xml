@@ -64,7 +64,7 @@
         <field name="name">website.page: portal/public: read published pages</field>
         <field name="model_id" ref="website.model_website_page"/>
         <field name="domain_force">[('website_published', '=', True)]</field>
-        <field name="groups" eval="[(4, ref('base.group_portal')), (4, ref('base.group_public'))]"/>
+        <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
     </record>
 
     <record id="view_rule_visibility_public" model="ir.rule">
@@ -75,7 +75,7 @@
         <field name="perm_write" eval="False"/>
         <field name="perm_create" eval="False"/>
         <field name="perm_unlink" eval="False"/>
-        <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+        <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
     </record>
     <record id="view_rule_visibility_connected" model="ir.rule">
         <field name="name">Website View Visibility Connected</field>

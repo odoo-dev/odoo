@@ -23,9 +23,7 @@
         <field name="name">Users can access only their own tokens</field>
         <field name="model_id" ref="payment.model_payment_token"/>
         <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
-        <field name="groups" eval="[(4, ref('base.group_user')),
-                                    (4, ref('base.group_portal')),
-                                    (4, ref('base.group_public'))]"/>
+        <field name="groups" eval="[(4, ref('base.group_everyone'))]"/>
     </record>
 
     <record id="payment_token_company_rule" model="ir.rule">
