@@ -165,15 +165,19 @@ export class EditorOverlay extends Component {
     shouldOverlayBeVisible(overlayElement, solution, container) {
         const containerRect = container.getBoundingClientRect();
         const top = solution.top - solution.variantOffset;
+        const left = solution.left - solution.variantOffset;
 
         const bottom = top + overlayElement.offsetHeight;
+        const right = left + overlayElement.offsetWidth;
 
         // Check if the overlay starts outside the container before applying variantOffset
-        const rawOverflowStart = solution.top < containerRect.top;
+        const rawOverflowStart =
+            solution.top < containerRect.top || solution.left < containerRect.left;
 
-        const overflowsStart = rawOverflowStart || top < containerRect.top;
+        const overflowsStart =
+            rawOverflowStart || top < containerRect.top || left < containerRect.left;
 
-        const overflowsEnd = bottom > containerRect.bottom;
+        const overflowsEnd = bottom > containerRect.bottom || right > containerRect.right;
         // Overlay is bigger than the container
         if (overflowsStart && overflowsEnd) {
             return true; // Always visible
