@@ -1963,7 +1963,7 @@ class AccountMoveLine(models.Model):
         query_account = self.env['account.account']._search([
             ('company_ids', 'in', self.env.companies.ids),
             ('code', '!=', False),
-            ('line_ids', 'any', domain),
+            ('line_ids', 'any', domain),  # comment for conflict
         ])
         account_codes = self.env.execute_query(query_account.select(SQL("DISTINCT %s", query_account.table.code)))
         return {

@@ -129,6 +129,11 @@ class AccountAccount(models.Model):
     opening_debit = fields.Monetary(string="Opening Debit", compute='_compute_opening_debit_credit', inverse='_set_opening_debit', currency_field='company_currency_id')
     opening_credit = fields.Monetary(string="Opening Credit", compute='_compute_opening_debit_credit', inverse='_set_opening_credit', currency_field='company_currency_id')
     opening_balance = fields.Monetary(string="Opening Balance", compute='_compute_opening_debit_credit', inverse='_set_opening_balance', currency_field='company_currency_id')
+    line_ids = fields.One2many(
+        comodel_name='account.move.line',
+        inverse_name='account_id',
+        string="Journal Items",
+    )
 
     current_balance = fields.Float(compute='_compute_current_balance')
     related_taxes_amount = fields.Integer(compute='_compute_related_taxes_amount')
