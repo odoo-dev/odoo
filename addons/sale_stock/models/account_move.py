@@ -158,3 +158,11 @@ class AccountMoveLine(models.Model):
     def _sale_can_be_reinvoice(self):
         self.ensure_one()
         return self.move_type != 'entry' and self.display_type != 'cogs' and super()._sale_can_be_reinvoice()
+
+    def _get_cogs_value(self):
+        result = super()._get_cogs_value()
+        if self.product_id.cost_method in ['standard', 'average']:
+            sale_line = self.sale_line_ids
+            effective_date = sale_line.order_id.effective_date if sale_line else None
+            result = self.product_id._get_standard_price_at_date(effective_date)
+        return result
