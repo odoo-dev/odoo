@@ -114,3 +114,12 @@ class TestHrLeaveType(TestHrHolidaysCommon):
             ).search([('has_valid_allocation', '=', True)], limit=1)
 
         self.assertFalse(leave_types, "Got valid leaves outside vaild period")
+
+    def test_search_virtual_remaining_leaves(self):
+        self.env['hr.leave.type'].create({
+            'name': 'virtual_remaining_leaves_testing_type',
+            'time_type': 'leave',
+            'requires_allocation': True,
+        })
+
+        self.assertIn('virtual_remaining_leaves_testing_type', self.env['hr.leave.type'].search(domain=[('virtual_remaining_leaves', '>', -1)]).mapped('name'))
