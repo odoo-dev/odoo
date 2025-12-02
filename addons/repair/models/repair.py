@@ -548,7 +548,7 @@ class Repair(models.Model):
 
         for sale_line in self.move_ids.sale_line_id:
             price_unit = sale_line.price_unit
-            sale_line.write({'product_uom_qty': sale_line.qty_delivered, 'price_unit': price_unit})
+            sale_line.write({'product_uom_qty': sale_line.qty_delivered, 'price_unit': price_unit, 'discount': sale_line.discount})
 
         self.state = 'done'
         return True
