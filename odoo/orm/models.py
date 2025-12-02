@@ -5588,6 +5588,9 @@ class BaseModel(metaclass=MetaModel):
         self._recompute_model(fnames)
         dirty_fields = self.env._field_dirty
         if fnames is None or any(self._fields[fname] in dirty_fields for fname in fnames):
+            if fnames is not None:
+                # recompute remaining fields to flush them together
+                self._recompute_model()
             self._flush()
 
     @api.private
@@ -5609,6 +5612,9 @@ class BaseModel(metaclass=MetaModel):
         ids = set(self._ids)
         dirty_fields = self.env._field_dirty
         if not all(ids.isdisjoint(dirty_fields.get(field, ())) for field in fields):
+            if fnames is not None:
+                # recompute remaining fields of the flushes recordset
+                self._recompute_recordset()
             self._flush()
 
     def _flush(self) -> None:
