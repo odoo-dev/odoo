@@ -523,6 +523,15 @@ class Many2one(_Relational):
 
         if isinstance(value, Domain):
             value = comodel._search(value, active_test=False, bypass_access=bypass_access)
+            if value._ids is None and value._where_clauses:
+                # try to fetch some ids
+                # actually, this makes sense only when model is big
+                value.limit = 100
+                if len(value.get_result_ids()) == 100:
+                    value.limit = None
+                    value._ids = None
+                # alternatives
+                # use a WITH MATERIALIZED and join on it, fully in DB, but removes parallelization possibilities
         if isinstance(value, Query):
             subselect = value.subselect()
         elif isinstance(value, SQL):
