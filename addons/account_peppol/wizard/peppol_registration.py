@@ -76,6 +76,7 @@ class PeppolRegistration(models.TransientModel):
         compute='_compute_smp_registration_external_provider'
     )
     peppol_external_provider = fields.Char(compute='_compute_smp_registration_external_provider')
+    peppol_kyc_data = fields.Json(string='Peppol KYC Data')
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
