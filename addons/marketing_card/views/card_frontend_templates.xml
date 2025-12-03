@@ -69,7 +69,7 @@
                 <meta property="og:image:alt" t-attf-content="{{ target_name }}"/>
                 <meta property="og:title" t-att-content="target_name"/>
                 <meta property="og:type" content="website"/>
-                <meta property="og:description" t-att-content="post_suggestion"/>
+                <meta property="og:description" t-att-content="post_text"/>
             </t>
             <t t-set="title" t-value="target_name"/>
             <t t-set="no_header" t-value="1"/>
