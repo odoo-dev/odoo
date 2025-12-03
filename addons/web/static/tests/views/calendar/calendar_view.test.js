@@ -70,6 +70,7 @@ import { CalendarRenderer } from "@web/views/calendar/calendar_renderer";
 import { calendarView } from "@web/views/calendar/calendar_view";
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
 import { WebClient } from "@web/webclient/webclient";
+import { serializeDateTime } from "@web/core/l10n/dates";
 
 class Event extends models.Model {
     name = fields.Char();
@@ -6031,4 +6032,63 @@ test("Revert to the previous state if updateRecord fails (onEventDrop)", async (
     event = findEvent(2);
     expect(columnEvent.contains(event)).toBe(true, { message: "Event shouldn't move column " });
     expect.verifyErrors(["RPC_ERROR: Odoo Server Error"]);
+});
+
+test.tags("desktop");
+test(`drag and drop events from side panel to schedule them`, async () => {
+    Event._records.push(
+        {
+            id: 8,
+            user_id: serverState.userId,
+            name: "event 8",
+            start: false,
+            stop: false,
+        },
+        {
+            id: 9,
+            user_id: serverState.userId,
+            name: "event 9",
+            start: false,
+            stop: false,
+        }
+    );
+    let expectedDate = null;
+    onRpc("event", "search_read", () => {
+        expect.step("search_read");
+    });
+    onRpc("event", "web_search_read", ({ kwargs }) => {
+        expect(kwargs.domain).toEqual(["&", ["start", "=", false], ["stop", "=", false]]);
+        expect(kwargs.specification).toEqual({
+            display_name: {},
+        });
+        expect.step("fetch events to schedule");
+    });
+    onRpc("event", "write", ({ args }) => {
+        expect(args[0][0]).toBe(8);
+        expect(args[1]).toEqual({
+            start: serializeDateTime(expectedDate),
+            stop: serializeDateTime(expectedDate.plus({ hours: 1 })),
+        });
+        expect.step("write");
+    });
+
+    await mountView({
+        resModel: "event",
+        type: "calendar",
+        arch: `
+            <calendar schedule="1" date_start="start" date_stop="stop" mode="week" color="partner_id">
+                <filter name="user_id" avatar_field="image"/>
+            </calendar>
+        `,
+    });
+    expect(".o_event_to_schedule_draggable").toHaveCount(2);
+    const { drop, moveTo } = await contains(".o_event_to_schedule_draggable:first").drag();
+    const dateCell = queryFirst(".fc-day.fc-day-today.fc-daygrid-day");
+    expectedDate = luxon.DateTime.fromISO(dateCell.dataset.date);
+    await moveTo(dateCell);
+    expect(queryFirst(".fc-highlight", { root: dateCell })).toHaveCount(1);
+    await drop();
+    expect.verifySteps(["search_read", "fetch events to schedule", "write", "search_read"]);
+    expect(".o_event_to_schedule_draggable").toHaveCount(1);
+    expect(".o_event_to_schedule_draggable").toHaveText("event 9");
 });

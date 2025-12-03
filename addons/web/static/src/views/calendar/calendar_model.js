@@ -81,7 +81,7 @@ export class CalendarModel extends Model {
             // to avoid flickering on date change
             this.notify();
         }
-        await this.keepLast.add(this.updateData(data));
+        await this.keepLast.add(this.updateData(data, params.scheduleEvent));
         this.data = data;
         this.notify();
     }
@@ -149,6 +149,9 @@ export class CalendarModel extends Model {
     }
     get hasQuickCreate() {
         return this.meta.quickCreate;
+    }
+    get hasTimePrecision() {
+        return ["day", "week"].includes(this.scale);
     }
     get isDateHidden() {
         return this.meta.isDateHidden;
@@ -354,7 +357,7 @@ export class CalendarModel extends Model {
     }
 
     //--------------------------------------------------------------------------
-    getAllDayDates(start, end) {
+    getAllDayDates(start, end = start) {
         return [start.set({ hours: 7 }), end.set({ hours: 19 })];
     }
 
@@ -434,7 +437,7 @@ export class CalendarModel extends Model {
     /**
      * @protected
      */
-    async updateData(data) {
+    async updateData(data, scheduleEvent = false) {
         data.range = this.computeRange();
         let unusualDaysProm;
         if (this.meta.loadSurroundings) {
@@ -453,7 +456,12 @@ export class CalendarModel extends Model {
 
         // Load records and dynamic filters only with fresh filters
         data.filterSections = sections;
-        data.records = await this.loadRecords(data);
+        [data.records] = await Promise.all([
+            this.loadRecords(data),
+            scheduleEvent || !this.meta.canScheduleEvents
+                ? null
+                : this.fetchEventsToSchedule({ data }),
+        ]);
         const dynamicSections = await this.loadDynamicFilters(data, dynamicFiltersInfo);
 
         // Apply newly computed filter sections
@@ -632,6 +640,23 @@ export class CalendarModel extends Model {
             ]),
         ]).toList();
     }
+    /**
+     * @protected
+     */
+    computeEventsToScheduleDomain(data) {
+        const { date_start, date_stop } = this.meta.fieldMapping;
+        const domain = Domain.removeDomainLeaves(
+            Domain.and([this.meta.domain, this.computeFiltersDomain(data)]),
+            [date_start, date_stop]
+        );
+        if (date_start === date_stop) {
+            return Domain.and([domain, [[date_start, "=", false]]]);
+        }
+        return Domain.and([
+            domain,
+            Domain.and([[[date_start, "=", false]], [[date_stop, "=", false]]]),
+        ]);
+    }
 
     //--------------------------------------------------------------------------
 
@@ -659,6 +684,28 @@ export class CalendarModel extends Model {
     /**
      * @protected
      */
+    async fetchEventsToSchedule(params, loadMore = false) {
+        const { data, limit, offset } = params;
+        const domain = this.computeEventsToScheduleDomain(data);
+        const result = await this.orm.webSearchRead(
+            this.resModel,
+            domain.toList(this.meta.context),
+            {
+                specification: { display_name: {} },
+                limit: limit || 20,
+                offset: offset || 0,
+            }
+        );
+        if (loadMore) {
+            const { records: newRecords } = result;
+            data.eventsToSchedule.records.push(...newRecords);
+        } else {
+            data.eventsToSchedule = result;
+        }
+    }
+    /**
+     * @protected
+     */
     fetchRecords(data) {
         const { context, fieldNames, resModel } = this.meta;
         return this.orm.searchRead(
@@ -678,6 +725,38 @@ export class CalendarModel extends Model {
             records[rawRecord.id] = this.normalizeRecord(rawRecord);
         }
         return records;
+    }
+    /**
+     * @protected
+     */
+    async loadMoreEventsToSchedule() {
+        const { records } = this.data.eventsToSchedule;
+        const offset = records.length;
+        const limit = offset + 20;
+        await this.fetchEventsToSchedule({ data: this.data, limit, offset }, true);
+        this.notify();
+    }
+    /**
+     * @protected
+     * @param {Number} eventId
+     * @param {DateTime} rawRecord
+     */
+    async scheduleEvent(eventId, date) {
+        const index = this.data.eventsToSchedule.records.findIndex((ev) => ev.id === eventId);
+        if (index < 0) {
+            return;
+        }
+        this.data.eventsToSchedule.records.splice(index, 1);
+        this.data.eventsToSchedule.length -= 1;
+        const [start, end] = this.hasTimePrecision
+            ? [date, date.plus({ hours: 1 })]
+            : this.getAllDayDates(date);
+        const { date_start, date_stop } = this.meta.fieldMapping;
+        await this.orm.write(this.meta.resModel, [eventId], {
+            [date_stop]: serializeDateTime(end),
+            [date_start]: serializeDateTime(start),
+        });
+        await this.load({ scheduleEvent: true });
     }
     /**
      * @protected
