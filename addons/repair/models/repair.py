@@ -407,9 +407,7 @@ class RepairOrder(models.Model):
                 repair._update_sale_order_line_price()
         if moves_to_reassign:
             moves_to_reassign._do_unreserve()
-            moves_to_reassign = moves_to_reassign.filtered(
-                lambda move: move.state in ('confirmed', 'partially_available')
-                and move._should_assign_at_confirm())
+            moves_to_reassign = moves_to_reassign._should_assign()
             moves_to_reassign._action_assign()
         return res
 

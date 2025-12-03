@@ -1022,8 +1022,7 @@ class MrpProduction(models.Model):
                     production.date_finished = new_date_start + datetime.timedelta(hours=1)
         if moves_to_reassign:
             moves_to_reassign._do_unreserve()
-            moves_to_reassign = moves_to_reassign.filtered(
-                lambda move: move.state in ('confirmed', 'partially_available') and move._should_assign_at_confirm())
+            moves_to_reassign = moves_to_reassign._should_assign()
             moves_to_reassign._action_assign()
         return res
 
@@ -2110,8 +2109,7 @@ class MrpProduction(models.Model):
         self.env['stock.move'].browse(assigned_moves).write({'state': 'assigned'})
         self.env['stock.move'].browse(partially_assigned_moves).write({'state': 'partially_available'})
         self.env['stock.move.line'].create(move_lines_vals)
-        move_to_assign = move_to_assign.filtered(
-            lambda move: move.state in ('confirmed', 'partially_available') and move._should_assign_at_confirm())
+        move_to_assign = move_to_assign._should_assign()
         move_to_assign._action_assign()
 
         # Avoid triggering a useless _recompute_state
