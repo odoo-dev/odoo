@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { animationFrame, describe, expect, test } from "@odoo/hoot";
 
 import {
     click,
@@ -583,6 +583,26 @@ test("activity with a link to a record", async () => {
     await openFormView("res.partner", partnerId1);
     await click(".o-mail-Activity-note a", { text: "record" });
     await contains(".o_form_view input", { value: "Partner 2" });
+});
+
+test("activity with a external link", async () => {
+    const pyEnv = await startServer();
+    const partnerId1 = pyEnv["res.partner"].create({ name: "Partner 1" });
+    pyEnv["mail.activity"].create({
+        note: `<p>
+            <a class="absolute" href="${location.origin}/odoo">${location.origin}/odoo</a>
+            <a class="relative" href="/odoo">/odoo</a>
+            <a class="external" href="https://github.com">https://github.com</a>
+        </p>`,
+        res_id: partnerId1,
+        res_model: "res.partner",
+    });
+    await start();
+    await openFormView("res.partner", partnerId1);
+    await animationFrame();
+    expect(".relative").not.toHaveAttribute("target");
+    expect(".absolute").not.toHaveAttribute("target");
+    expect(".external").toHaveAttribute("target", "_blank");
 });
 
 test("activity with a user mention", async () => {

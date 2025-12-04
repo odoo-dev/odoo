@@ -4,13 +4,14 @@ import { ActivityMarkAsDone } from "@mail/core/web/activity_markasdone_popover";
 import { computeDelay, getMsToTomorrow } from "@mail/utils/common/dates";
 import { AvatarCardPopover } from "@mail/discuss/web/avatar_card/avatar_card_popover";
 
-import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
+import { Component, markup, onMounted, onWillUnmount, useState } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { normalizeHTML } from "@html_editor/utils/html";
 
 /**
  * @typedef {Object} Props
@@ -35,6 +36,18 @@ export class Activity extends Component {
         });
         onWillUnmount(() => browser.clearTimeout(this.updateDelayMidnightTimeout));
         this.attachmentUploader = useAttachmentUploader(this.thread);
+    }
+
+    get activityNote() {
+        return markup(
+            normalizeHTML(this.props.activity.note, (body) => {
+                for (const link of body.querySelectorAll("a")) {
+                    if (link.origin !== location.origin) {
+                        link.setAttribute("target", "_blank");
+                    }
+                }
+            })
+        );
     }
 
     get displayName() {
