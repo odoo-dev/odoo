@@ -76,6 +76,11 @@ const deepSerialization = (
                             childRecord.id,
                             recursiveSerialize(childRecord, field.inverse_name),
                         ]),
+                        ...toUpdate.map((childRecord) => [
+                            4,
+                            childRecord.id,
+                            recursiveSerialize(childRecord, field.inverse_name),
+                        ]),
                         ...toCreate.map((childRecord) => [
                             0,
                             0,

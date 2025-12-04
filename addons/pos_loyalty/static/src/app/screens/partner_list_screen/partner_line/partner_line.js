@@ -10,7 +10,11 @@ patch(PartnerLine.prototype, {
         this.pos = usePos();
     },
     _getLoyaltyPointsRepr(loyaltyCard) {
+        // debugger
         const program = loyaltyCard.program_id;
+        if (!program) {
+            return "";
+        }
         if (program.program_type === "ewallet") {
             return `${program.name}: ${this.env.utils.formatCurrency(loyaltyCard.points)}`;
         }
