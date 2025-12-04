@@ -16,6 +16,7 @@ class StockPicking(models.Model):
 
     days_to_arrive = fields.Datetime(compute='_compute_effective_date', search="_search_days_to_arrive", copy=False)
     delay_pass = fields.Datetime(compute='_compute_date_order', search="_search_delay_pass", index=True, copy=False)
+    priority = fields.Selection(compute='_compute_priority', store=True, readonly=False)
 
     @api.depends('state', 'location_dest_id.usage', 'date_done')
     def _compute_effective_date(self):
@@ -28,6 +29,19 @@ class StockPicking(models.Model):
     def _compute_date_order(self):
         for picking in self:
             picking.delay_pass = picking.purchase_id.date_order if picking.purchase_id else fields.Datetime.now()
+
+    @api.depends('purchase_id.priority', 'purchase_id.picking_ids')
+    def _compute_priority(self):
+        for picking in self:
+            all_pickings = picking._get_all_po_pickings()
+            purchase_line_id, _partner = picking.move_ids._get_purchase_line_and_partner_from_chain()
+            po_id = self.env['purchase.order.line'].browse(purchase_line_id).order_id
+            all_pickings.filtered(lambda p: p.state != 'done').write({'priority': po_id.priority or '0'})
+
+    def _get_all_po_pickings(self):
+        self.ensure_one()
+        all_pickings = self.reference_ids.picking_ids
+        return all_pickings
 
     @api.model
     def _search_days_to_arrive(self, operator, value):

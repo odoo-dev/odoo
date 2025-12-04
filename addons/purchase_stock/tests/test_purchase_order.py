@@ -864,3 +864,32 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
                 'debit': 0.0,
             },
         ])
+
+    def test_po_priority_toggles_to_related_pickings(self):
+        """Ensure that toggling a purchase order's priority also toggles the priority of its related pickings."""
+        warehouse = self.env.user._get_default_warehouse_id()
+        warehouse.reception_steps = 'three_steps'
+
+        self.po_vals["priority"] = "1"
+        po = self.env['purchase.order'].create(self.po_vals)
+        po.button_confirm()
+
+        input_picking = po.picking_ids
+        self.assertEqual(input_picking.priority, '1', "Input picking should inherit priority '1' from PO.")
+        input_picking.button_validate()
+
+        qc_picking = input_picking._get_next_transfers()
+        self.assertEqual(qc_picking.priority, '1', "QC picking should inherit priority '1' from PO.")
+        po.priority = '0'  # Change PO priority → future pickings must follow.
+        qc_picking.button_validate()
+
+        stock_picking = qc_picking._get_next_transfers()
+        self.assertEqual(stock_picking.priority, '0', "Stock picking should inherit updated priority '0' from PO.")
+        stock_picking.button_validate()
+
+        # Create a return picking → it must also follow the PO's latest priority.
+        po.priority = '1'
+        wizard = Form(self.env['stock.return.picking'].with_context(active_ids=stock_picking.ids, active_id=stock_picking.id, active_model='stock.picking')).save()
+        res = wizard.action_create_returns_all()
+        return_picking = self.env['stock.picking'].browse(res['res_id'])
+        self.assertEqual(return_picking.priority, '1', "Return picking should inherit updated priority '1' from PO.")
