@@ -748,9 +748,9 @@ export class HistoryPlugin extends Plugin {
      * @returns {HistoryMutationRecord[]}
      */
     filterAndAdjustHistoryMutationRecords(records) {
-        this.dispatchTo("before_filter_mutation_record_handlers", records);
-        const savableRecordPredicates = this.getResource("savable_mutation_record_predicates");
-        const isRecordSavable = (record) => savableRecordPredicates.every((p) => p(record));
+        this.trigger("before_filter_mutation_record_handlers", records);
+        const isRecordSavable = (record) =>
+            this.checkPredicates("savable_mutation_record_predicates", record) ?? true;
         const result = [];
         for (const record of records) {
             if (!this.isObservedNode(record.target)) {

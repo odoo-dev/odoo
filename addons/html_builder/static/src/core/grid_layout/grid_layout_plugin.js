@@ -87,7 +87,6 @@ export class GridLayoutPlugin extends Plugin {
                 return false;
             }
         }
-        return true;
     }
 
     getActiveOverlayButtons(target) {
