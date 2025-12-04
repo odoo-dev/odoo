@@ -17,7 +17,8 @@ class ResUsers(models.Model):
         - add a welcome message
         - add suggestion preference
     """
-    _inherit = 'res.users'
+    _name = 'res.users'
+    _inherit = ['res.users', 'mail.thread']
 
     role_ids = fields.Many2many(
         "res.role",
@@ -71,6 +72,9 @@ class ResUsers(models.Model):
         "CHECK (notification_type = 'email' OR NOT share)",
         'Only internal user can receive notifications in Odoo',
     )
+
+    def _track_get_fields(self):
+        return set()
 
     @api.depends('share', 'all_group_ids')
     def _compute_notification_type(self):

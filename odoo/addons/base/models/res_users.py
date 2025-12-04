@@ -634,6 +634,7 @@ class ResUsers(models.Model):
         if 'group_ids' in vals and self.ids:
             # clear caches linked to the users
             self.env['ir.model.access'].call_cache_clearing_methods()
+            _logger.info("User #%d modified the groups of user(s) %s with value %s", self.env.user.id, self.ids, vals['group_ids'])
 
         # per-method / per-model caches have been removed so the various
         # clear_cache/clear_caches methods pretty much just end up calling
