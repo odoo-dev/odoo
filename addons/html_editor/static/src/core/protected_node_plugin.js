@@ -26,9 +26,18 @@ export class ProtectedNodePlugin extends Plugin {
         clean_for_save_processors: ({ root }) => this.cleanForSave(root),
 
         /** Predicates */
-        unsplittable_node_predicates: [
-            isProtecting, // avoid merge
-            isUnprotecting,
+        splittable_node_predicates: [
+            (node) => {
+                // avoid merge
+                if (isProtecting(node)) {
+                    return false;
+                }
+            },
+            (node) => {
+                if (isUnprotecting(node)) {
+                    return false;
+                }
+            },
         ],
         savable_mutation_record_predicates: this.isMutationRecordSavable.bind(this),
 
