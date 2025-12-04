@@ -29,6 +29,26 @@ class StockPicking(models.Model):
         for picking in self:
             picking.delay_pass = picking.purchase_id.date_order if picking.purchase_id else fields.Datetime.now()
 
+    @api.depends('purchase_id.priority', 'purchase_id.picking_ids')
+    def _compute_priority(self):
+        super()._compute_priority()
+        for picking in self:
+            purchase_line_id, _partner = picking.move_ids._get_purchase_line_and_partner_from_chain()
+            po_id = self.env['purchase.order.line'].browse(purchase_line_id).order_id
+            if po_id:
+                all_pickings = picking._get_all_po_pickings()
+                all_pickings|= all_pickings.return_ids
+                all_pickings.filtered(lambda p: p.state != 'done').write({'priority': po_id.priority or '0'})
+
+    def _get_all_po_pickings(self):
+        self.ensure_one()
+        all_pickings = self.env['stock.picking']
+        next_picking = self
+        while next_picking:
+            all_pickings |= next_picking
+            next_picking = next_picking._get_next_transfers()
+        return all_pickings
+
     @api.model
     def _search_days_to_arrive(self, operator, value):
         return [('date_done', operator, value)]

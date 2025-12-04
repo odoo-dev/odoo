@@ -587,7 +587,7 @@ class StockPicking(models.Model):
     reference_ids = fields.Many2many(
         'stock.reference', related="move_ids.reference_ids", string="References", readonly=True)
     priority = fields.Selection(
-        PROCUREMENT_PRIORITIES, string='Priority', default='0',
+        PROCUREMENT_PRIORITIES, string='Priority', default='0', compute='_compute_priority', store=True, readonly=False,
         help="Products will be reserved first for the transfers with the highest priorities.")
     scheduled_date = fields.Datetime(
         'Scheduled Date', compute='_compute_scheduled_date', inverse='_set_scheduled_date', store=True,
@@ -851,6 +851,9 @@ class StockPicking(models.Model):
                         picking.state = 'assigned'
                     else:
                         picking.state = relevant_move_state
+
+    def _compute_priority(self):
+        pass
 
     @api.depends('move_ids.state', 'move_ids.date', 'move_type')
     def _compute_scheduled_date(self):

@@ -305,6 +305,10 @@ class StockPicking(models.Model):
         self.ensure_one()
         return super()._can_return() or self.sale_id
 
+    def _get_all_po_pickings(self):
+        all_pickings = super()._get_all_po_pickings()
+        return all_pickings.filtered(lambda p: not p.sale_id)
+
 
 class StockLot(models.Model):
     _inherit = 'stock.lot'
