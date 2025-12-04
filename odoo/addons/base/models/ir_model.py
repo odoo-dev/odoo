@@ -221,12 +221,14 @@ class Unknown(models.AbstractModel):
     _description = 'Unknown'
 
 
-class IrModel(models.Model):
+class IrModel(models.ValueModel):
     _name = 'ir.model'
     _description = "Model"
     _order = 'model'
     _rec_names_search = ('name', 'model')
     _allow_sudo_commands = False
+    _code_field = 'model'
+    _cached_data_fields = ('model', 'name')  # TODO add field_id
 
     def _default_field_id(self):
         if self.env.context.get('install_mode'):
@@ -324,20 +326,30 @@ class IrModel(models.Model):
             if model.fold_name and model.fold_name not in model.field_id.mapped('name'):
                 raise ValidationError(_("The value of 'Fold Field' should be a field name of the model."))
 
-    _obj_name_uniq = models.Constraint('UNIQUE (model)', 'Each model must have a unique name.')
+    def _fetch_field(self, field):
+        if field is self._fields['field_id'] and any(self._ids):
+            self.check_field_access(field, 'read')
+            self.check_access('read')
+            # cache representation for o2m is a tuple of ids
+            mapped_field_ids = [
+                tuple(self.env['ir.model.fields']._get_ids(model.model).values())
+                for model in self
+            ]
+            field._insert_cache(self, mapped_field_ids)
+            return
+        return super()._fetch_field(field)
 
+    @api.model
     def _get(self, name):
         """ Return the (sudoed) `ir.model` record with the given name.
         The result may be an empty recordset if the model is not found.
         """
-        model_id = self._get_id(name) if name else False
-        return self.sudo().browse(model_id)
+        return self.sudo().get(name)
 
-    @api.ormcache('name', cache='stable')
+    @api.model
+    # TODO deprecate
     def _get_id(self, name):
-        self.env.cr.execute("SELECT id FROM ir_model WHERE model=%s", (name,))
-        result = self.env.cr.fetchone()
-        return result and result[0]
+        return self.get(name).id
 
     def _drop_table(self):
         for model in self:
@@ -568,16 +580,19 @@ class IrModel(models.Model):
 FIELD_TYPES = [(key, key) for key in sorted(fields.Field._by_type__)]
 
 
-class IrModelFields(models.Model):
+class IrModelFields(models.ValueModel):
     _name = 'ir.model.fields'
     _description = "Field"
     _order = "name, id"
     _rec_name = 'field_description'
     _allow_sudo_commands = False
+    _code_field = 'full_name'
+    _cached_data_fields = ('full_name', 'name', 'model', 'model_id', 'ttype', 'field_description')
 
     name = fields.Char(string='Field Name', default='x_', required=True, index=True)
     model = fields.Char(string='Model Name', required=True, index=True,
                         help="The technical name of the model this field belongs to")
+    full_name = fields.Char(store=True, required=True, compute='_compute_full_name', precompute=True)
     relation = fields.Char(string='Related Model',
                            help="For relationship fields, the technical name of the target model")
     relation_field = fields.Char(help="For one2many fields, the field on the target model that implements the opposite many2one relationship")
@@ -648,6 +663,10 @@ class IrModelFields(models.Model):
     strip_style = fields.Boolean(string='Strip Style Attribute', default=False)
     strip_classes = fields.Boolean(string='Strip Class Attribute', default=False)
 
+    @api.depends('model', 'name')
+    def _compute_full_name(self):
+        for rec in self:
+            rec.full_name = f'{rec.model}.{rec.name}'
 
     @api.depends('relation', 'relation_field')
     def _compute_relation_field_id(self):
@@ -792,7 +811,7 @@ class IrModelFields(models.Model):
     @api.constrains('relation')
     def _check_relation(self):
         for rec in self:
-            if rec.state == 'manual' and rec.relation and not rec.env['ir.model']._get_id(rec.relation):
+            if rec.state == 'manual' and rec.relation and not rec.env['ir.model'].get(rec.relation):
                 raise ValidationError(_("Unknown model name '%s' in Related Model", rec.relation))
 
     @api.constrains('depends')
@@ -905,6 +924,7 @@ class IrModelFields(models.Model):
                     "as being 'set null'. Only 'restrict' and 'cascade' make sense.", rec.name,
                 ))
 
+    @api.model
     def _get(self, model_name, name):
         """ Return the (sudoed) `ir.model.fields` record with the given model and name.
         The result may be an empty recordset if the model is not found.
@@ -913,10 +933,13 @@ class IrModelFields(models.Model):
         return self.sudo().browse(field_id)
 
     @api.ormcache('model_name', cache='stable')
+    @api.model
     def _get_ids(self, model_name):
-        cr = self.env.cr
-        cr.execute("SELECT name, id FROM ir_model_fields WHERE model=%s", [model_name])
-        return dict(cr.fetchall())
+        return {
+            field.name: field.id
+            for field in self.get_all()
+            if field.model == model_name
+        }
 
     def _drop_column(self):
         from odoo.orm.model_classes import pop_field  # noqa: PLC0415
@@ -1116,7 +1139,7 @@ class IrModelFields(models.Model):
         for vals in vals_list:
             if vals.get('state', 'manual') == 'manual':
                 relation = vals.get('relation')
-                if relation and not IrModel._get_id(relation):
+                if relation and not IrModel.get(relation):
                     raise UserError(_("Model %s does not exist!", vals['relation']))
 
                 if (
@@ -1249,6 +1272,7 @@ class IrModelFields(models.Model):
             'model_id': model_id,
             'model': field.model_name,
             'name': field.name,
+            'full_name': f'{field.model_name}.{field.name}',
             'field_description': field.string,
             'help': field.help or None,
             'ttype': field.type,
@@ -1284,8 +1308,6 @@ class IrModelFields(models.Model):
 
     def _reflect_fields(self, model_names):
         """ Reflect the fields of the given models. """
-        cr = self.env.cr
-
         for model_name in model_names:
             model = self.env[model_name]
             by_label = {}
@@ -1299,13 +1321,14 @@ class IrModelFields(models.Model):
 
         # determine expected and existing rows
         rows = []
+        model_ids = dict(self.env.execute_query(SQL("SELECT model, id FROM ir_model WHERE model IN %s", tuple(model_names))))
         for model_name in model_names:
-            model_id = self.env['ir.model']._get_id(model_name)
+            model_id = model_ids[model_name]
             for field in self.env[model_name]._fields.values():
                 rows.append(self._reflect_field_params(field, model_id))
         if not rows:
             return
-        cols = list(unique(['model', 'name'] + list(rows[0])))
+        cols = list(unique(['model', 'name', 'full_name'] + list(rows[0])))
         expected = [tuple(row[col] for col in cols) for row in rows]
 
         field_ids = {}
