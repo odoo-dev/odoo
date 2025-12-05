@@ -307,6 +307,7 @@ export class X2ManyField extends Component {
             }
             return;
         }
+        debugger;
         return this._openRecord({ context });
     }
 

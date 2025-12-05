@@ -85,6 +85,8 @@ export class StaticList extends DataPoint {
      * }>}
      */
     setup(_config, data, options = {}) {
+        window.s ??= [];
+        window.s.push(this);
         this._parent = options.parent;
         this._onUpdate = options.onUpdate;
 

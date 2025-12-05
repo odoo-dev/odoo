@@ -91,6 +91,7 @@ export class Record extends DataPoint {
     }
 
     /**
+     * set the data from the server value
      * @param {RecordType<string, unknown>} data
      * @param {FieldSpecifications} [params]
      */
