@@ -26,12 +26,12 @@ class AccountTax(models.Model):
     # Onchange, Constraint methods
     # ----------------------------
 
-    @api.onchange('is_withholding_tax_on_payment')
-    def _onchange_is_withholding_tax_on_payment(self):
-        """ Ensure that we don't keep cash basis enabled if it was before checking the withholding tax option. """
-        if self.is_withholding_tax_on_payment:
-            self.tax_exigibility = 'on_invoice'
-            self.price_include_override = 'tax_excluded'
+    # @api.onchange('is_withholding_tax_on_payment')
+    # def _onchange_is_withholding_tax_on_payment(self):
+    #     """ Ensure that we don't keep cash basis enabled if it was before checking the withholding tax option. """
+    #     if self.is_withholding_tax_on_payment:
+    #         self.tax_exigibility = 'on_invoice'
+    #         self.price_include_override = 'tax_excluded'
 
     @api.onchange('amount')
     def _onchange_amount(self):
@@ -39,12 +39,12 @@ class AccountTax(models.Model):
         if self.amount >= 0:
             self.is_withholding_tax_on_payment = False
 
-    @api.constrains('amount_type', 'is_withholding_tax_on_payment')
-    def _check_amount_type(self):
-        """ The computation of withholding taxes needs to be limited in computation types to ensure that it works as expected. """
-        for tax in self:
-            if tax.is_withholding_tax_on_payment and tax.amount_type in ['group', 'division']:
-                raise UserError(tax.env._("Withholding On Payment taxes cannot use the 'Group of Taxes' or the 'Percentage Tax Included' computations."))
+    # @api.constrains('amount_type', 'is_withholding_tax_on_payment')
+    # def _check_amount_type(self):
+    #     """ The computation of withholding taxes needs to be limited in computation types to ensure that it works as expected. """
+    #     for tax in self:
+    #         if tax.is_withholding_tax_on_payment and tax.amount_type in ['group', 'division']:
+    #             raise UserError(tax.env._("Withholding On Payment taxes cannot use the 'Group of Taxes' or the 'Percentage Tax Included' computations."))
 
     # --------------------------------
     # Compute, inverse, search methods

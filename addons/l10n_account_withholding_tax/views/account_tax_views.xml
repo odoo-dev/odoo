@@ -11,18 +11,18 @@
             <field name="hide_tax_exigibility" position="after">
                 <field name="withholding_sequence_id" context="{'default_name': name}" invisible="type_tax_use == 'sale' or not is_withholding_tax_on_payment"/>
             </field>
-            <field name="tax_exigibility" position="attributes">
-                <attribute name="invisible" add="is_withholding_tax_on_payment" separator=" or "/>
-            </field>
-            <field name="price_include_override" position="attributes">
-                <attribute name="invisible" add="is_withholding_tax_on_payment" separator=" or "/>
-            </field>
+<!--            <field name="tax_exigibility" position="attributes">-->
+<!--                <attribute name="invisible" add="is_withholding_tax_on_payment" separator=" or "/>-->
+<!--            </field>-->
+<!--            <field name="price_include_override" position="attributes">-->
+<!--                <attribute name="invisible" add="is_withholding_tax_on_payment" separator=" or "/>-->
+<!--            </field>-->
             <field name="cash_basis_transition_account_id" position="attributes">
                 <attribute name="invisible" add="is_withholding_tax_on_payment" separator=" or "/>
             </field>
-            <field name="is_base_affected" position="attributes">
-                <attribute name="invisible" add="not is_withholding_tax_on_payment" separator=" and "/>
-            </field>
+<!--            <field name="is_base_affected" position="attributes">-->
+<!--                <attribute name="invisible" add="not is_withholding_tax_on_payment" separator=" and "/>-->
+<!--            </field>-->
         </field>
     </record>
 </odoo>
