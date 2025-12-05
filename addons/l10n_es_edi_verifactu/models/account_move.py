@@ -1,4 +1,5 @@
 from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class AccountMove(models.Model):
@@ -235,6 +236,11 @@ class AccountMove(models.Model):
         }
 
     def l10n_es_edi_verifactu_button_cancel(self):
+        if not self.l10n_es_edi_verifactu_show_cancel_button:
+            raise ValidationError(self.env._(
+                "For the invoice in state %(state)s, it is not possible to proceed with 'Request Veri*Factu Cancellation'",
+                state=self.l10n_es_edi_verifactu_state
+            ))
         self._l10n_es_edi_verifactu_mark_for_next_batch(cancellation=True)
 
     def _l10n_es_edi_verifactu_check(self, cancellation=False):

@@ -342,8 +342,6 @@ voip/static/lib/**/*
 !addons/l10n_ar_pos/**/*
 !addons/l10n_co_pos
 !addons/l10n_co_pos/**/*
-!addons/l10n_es_pos
-!addons/l10n_es_pos/**/*
 !addons/l10n_fr_pos_cert
 !addons/l10n_fr_pos_cert/**/*
 !addons/l10n_gcc_pos
