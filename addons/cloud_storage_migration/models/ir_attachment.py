@@ -77,10 +77,9 @@ class CloudStorageAttachmentMigration(models.Model):
             cron._trigger()
             return
 
-        def commit_min_attachment_id(attachment_id):
+        def update_min_attachment_id(attachment_id):
             # directly write data of ir_config_parameter to avoid invalidating ormcache
             self.env.cr.execute("UPDATE ir_config_parameter SET value = %s WHERE key = 'cloud_storage_migration_min_attachment_id'", (str(attachment_id),))
-            self.env.cr.commit()
 
         limit_time_real = config['limit_time_real']
         # ``config['limit_time_real_cron'] == 0`` means unlimited time for cron worker,
@@ -153,19 +152,22 @@ class CloudStorageAttachmentMigration(models.Model):
             attachment = self.env['ir.attachment'].browse(res[0] if res else False)
 
             if not attachment:
-                commit_min_attachment_id(max_attachment_id)
+                update_min_attachment_id(max_attachment_id)
+                self.env['ir.cron']._commit_progress(processed=0, remaining=0)
                 return
 
             total_file_size += attachment.file_size
             if max_batch_file_size and total_file_size >= max_batch_file_size:
                 if first_attachment:
                     # skip in case attachment.file_size > max_batch_file_size
-                    commit_min_attachment_id(attachment.id)
+                    update_min_attachment_id(attachment.id)
+                    self.env['ir.cron']._commit_progress(processed=1, remaining=1)
                 break
             first_attachment = False
 
             # commit before migration to upload the file only once even if it causes timeout
-            commit_min_attachment_id(attachment.id)
+            update_min_attachment_id(attachment.id)
+            self.env['ir.cron']._commit_progress(processed=1, remaining=1)
 
             try:
                 attachment._migrate_local_to_cloud_storage(session)
@@ -177,5 +179,3 @@ class CloudStorageAttachmentMigration(models.Model):
 
             if end_time < time.monotonic():
                 break
-
-        cron._trigger()
