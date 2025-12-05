@@ -29,7 +29,7 @@ import { uniqueId } from "@web/core/utils/functions";
 export class SavePlugin extends Plugin {
     static id = "savePlugin";
     static shared = ["save", "ignoreDirty"];
-    static dependencies = ["history"];
+    static dependencies = ["domMutation"];
 
     /** @type {import("plugins").BuilderResources} */
     resources = {
@@ -106,7 +106,7 @@ export class SavePlugin extends Plugin {
         // used to track dirty out of the editable scope, like header, footer or wrapwrap
         const willSaves = this.getResource("save_handlers").map((c) => c());
         await Promise.all(saveProms.concat(willSaves));
-        this.dependencies.history.reset();
+        this.dependencies.domMutation.reset();
     }
 
     startObserving() {

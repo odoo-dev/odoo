@@ -30,7 +30,7 @@ export class ToggleBlockPlugin extends Plugin {
         "delete",
         "dom",
         "embeddedComponents", // toggle is an embedded component.
-        "history",
+        "domMutation",
         "selection",
         "split",
     ];
@@ -54,7 +54,10 @@ export class ToggleBlockPlugin extends Plugin {
         move_node_blacklist_selectors: `${toggleSelector} ${titleSelector} *`,
         selection_blocker_predicates: (blocker) => {
             // Prevent the insertion of selection placeholders around toggle blocks.
-            if (blocker.nodeType === Node.ELEMENT_NODE && blocker.dataset.embedded === "toggleBlock") {
+            if (
+                blocker.nodeType === Node.ELEMENT_NODE &&
+                blocker.dataset.embedded === "toggleBlock"
+            ) {
                 return false;
             }
         },
@@ -418,7 +421,7 @@ export class ToggleBlockPlugin extends Plugin {
                 containerContent.append(...siblings);
                 closestToggleAncestor.after(toggle);
                 this.forceToggle(toggle, { showContent: true, restoreSelection: cursors.restore });
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             }
             return true;
         }
@@ -511,7 +514,7 @@ export class ToggleBlockPlugin extends Plugin {
                     showContent: true,
                     restoreSelection: cursors.restore,
                 });
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             }
             return true;
         }
@@ -522,7 +525,7 @@ export class ToggleBlockPlugin extends Plugin {
         const target = block.querySelector(`${titleSelector} > ${baseContainerGlobalSelector}`);
         this.dependencies.dom.insert(block);
         this.dependencies.selection.setCursorStart(target);
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     manageToggleFromTitle() {

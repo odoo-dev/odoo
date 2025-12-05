@@ -375,7 +375,7 @@ class ModifyRibbonAction extends BuilderAction {
         return this.ribbonOptions.getRibbonsObject()[ribbonId][params.mainParam] === value;
     }
     apply({ editingElement, params, value }) {
-        const isPreviewMode = this.dependencies.history.getIsPreviewing();
+        const isPreviewMode = this.dependencies.domMutation.getIsPreviewing();
         const ribbonEl = editingElement.querySelector('.o_ribbons')
         const setting = params.mainParam;
         const ribbonId = parseInt(ribbonEl.dataset.ribbonId);

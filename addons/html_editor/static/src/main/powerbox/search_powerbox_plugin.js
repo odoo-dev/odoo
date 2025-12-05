@@ -8,7 +8,7 @@ import { Plugin } from "../../plugin";
 
 export class SearchPowerboxPlugin extends Plugin {
     static id = "searchPowerbox";
-    static dependencies = ["powerbox", "selection", "history", "input"];
+    static dependencies = ["powerbox", "selection", "domMutation", "input"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         beforeinput_handlers: this.onBeforeInput.bind(this),
@@ -30,7 +30,7 @@ export class SearchPowerboxPlugin extends Plugin {
     }
     onBeforeInput(ev) {
         if (ev.data === "/") {
-            this.historySavePointRestore = this.dependencies.history.makeSavePoint();
+            this.historySavePointRestore = this.dependencies.domMutation.makeSavePoint();
         }
     }
     onInput(ev) {

@@ -12,7 +12,7 @@ test("do not update builder if in preview mode", async () => {
     const pluginId = uniqueId("test-action-plugin");
     class P extends Plugin {
         static id = pluginId;
-        static dependencies = ["history"];
+        static dependencies = ["domMutation"];
         resources = {
             builder_actions: {
                 CustomAction,
@@ -34,10 +34,10 @@ test("do not update builder if in preview mode", async () => {
 
 class CustomAction extends BuilderAction {
     static id = "customAction";
-    static dependencies = ["history"];
+    static dependencies = ["domMutation"];
     apply({ editingElement }) {
         editingElement.classList.add("applied");
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
     isApplied({ editingElement }) {
         return editingElement.classList.contains("applied");

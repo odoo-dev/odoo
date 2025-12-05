@@ -33,7 +33,14 @@ import { isProtected, isProtecting } from "@html_editor/utils/dom_info";
  */
 
 export class SplitPlugin extends Plugin {
-    static dependencies = ["baseContainer", "selection", "history", "input", "delete", "lineBreak"];
+    static dependencies = [
+        "baseContainer",
+        "selection",
+        "domMutation",
+        "input",
+        "delete",
+        "lineBreak",
+    ];
     static id = "split";
     static shared = [
         "splitBlock",
@@ -328,7 +335,7 @@ export class SplitPlugin extends Plugin {
         if (e.inputType === "insertParagraph") {
             e.preventDefault();
             this.splitBlock();
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
         }
     }
 }

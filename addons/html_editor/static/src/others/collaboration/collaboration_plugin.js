@@ -28,7 +28,7 @@ const HISTORY_SNAPSHOT_BUFFER_TIME = 1000 * 10;
 
 export class CollaborationPlugin extends Plugin {
     static id = "collaboration";
-    static dependencies = ["history", "selection", "sanitize"];
+    static dependencies = ["domMutation", "selection", "sanitize"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
@@ -74,7 +74,7 @@ export class CollaborationPlugin extends Plugin {
         this.branchStepIds = [];
     }
     onHistoryReset() {
-        const firstStep = this.dependencies.history.getHistorySteps()[0];
+        const firstStep = this.dependencies.domMutation.getHistorySteps()[0];
         this.snapshots = [{ step: firstStep }];
     }
     /**
@@ -99,7 +99,7 @@ export class CollaborationPlugin extends Plugin {
      * Get all the history ids for the current history branch.
      */
     getBranchIds() {
-        const steps = this.dependencies.history.getHistorySteps();
+        const steps = this.dependencies.domMutation.getHistorySteps();
         return (this.initialBranchStepId || "")
             .split(",")
             .concat(this.branchStepIds)
@@ -131,7 +131,7 @@ export class CollaborationPlugin extends Plugin {
         let stepIndex = 0;
         const selectionData = this.dependencies.selection.getSelectionData();
 
-        const steps = this.dependencies.history.getHistorySteps();
+        const steps = this.dependencies.domMutation.getHistorySteps();
         for (const newStep of newSteps) {
             // todo: add a test that no 2 history_missing_parent_step_handlers
             // are called in same stack.
@@ -139,7 +139,7 @@ export class CollaborationPlugin extends Plugin {
             if (typeof insertIndex === "undefined") {
                 continue;
             }
-            this.dependencies.history.addExternalStep(newStep, insertIndex);
+            this.dependencies.domMutation.addExternalStep(newStep, insertIndex);
             stepIndex++;
         }
         if (selectionData.documentSelectionIsInEditable) {
@@ -225,7 +225,7 @@ export class CollaborationPlugin extends Plugin {
      * @param {string} [params.toStepId]
      */
     historyGetMissingSteps({ fromStepId, toStepId }) {
-        const steps = this.dependencies.history.getHistorySteps();
+        const steps = this.dependencies.domMutation.getHistorySteps();
         const fromIndex = steps.findIndex((x) => x.id === fromStepId);
         const toIndex = toStepId ? steps.findIndex((x) => x.id === toStepId) : steps.length;
         if (fromIndex === -1 || toIndex === -1) {
@@ -235,7 +235,7 @@ export class CollaborationPlugin extends Plugin {
     }
 
     getSnapshotSteps() {
-        const historySteps = this.dependencies.history.getHistorySteps();
+        const historySteps = this.dependencies.domMutation.getHistorySteps();
         // If the current snapshot has no time, it means that there is the no
         // other snapshot that have been made (either it is the one created upon
         // initialization or reseted by history's resetFromSteps).
@@ -266,7 +266,7 @@ export class CollaborationPlugin extends Plugin {
     }
     resetFromSteps(steps, branchStepIds) {
         this.dependencies.selection.resetSelection();
-        this.dependencies.history.resetFromSteps(steps);
+        this.dependencies.domMutation.resetFromSteps(steps);
         this.snapshots = [{ step: steps[0] }];
         this.branchStepIds = branchStepIds;
 
@@ -279,10 +279,10 @@ export class CollaborationPlugin extends Plugin {
     }
 
     makeSnapshot() {
-        const historyLength = this.dependencies.history.getHistorySteps().length;
+        const historyLength = this.dependencies.domMutation.getHistorySteps().length;
         if (!this.lastSnapshotLength || this.lastSnapshotLength < historyLength) {
             this.lastSnapshotLength = historyLength;
-            const step = this.dependencies.history.makeSnapshotStep();
+            const step = this.dependencies.domMutation.makeSnapshotStep();
             const snapshot = {
                 time: Date.now(),
                 step: step,

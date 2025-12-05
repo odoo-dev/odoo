@@ -10,7 +10,7 @@ import { childNodeIndex } from "@html_editor/utils/position";
 
 export class LinkPastePlugin extends Plugin {
     static id = "linkPaste";
-    static dependencies = ["link", "clipboard", "selection", "dom", "history"];
+    static dependencies = ["link", "clipboard", "selection", "dom", "domMutation"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         before_paste_handlers: this.selectFullySelectedLink.bind(this),

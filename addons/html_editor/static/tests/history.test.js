@@ -78,7 +78,7 @@ describe("undo", () => {
         const { el, editor } = await setupEditor(`<p>[]c</p>`);
         const p = el.querySelector("p");
         editor.shared.dom.insert("a");
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         p.prepend(document.createTextNode("b"));
         undo(editor);
         expect(getContent(el)).toBe(`<p>[]c</p>`);
@@ -218,7 +218,7 @@ describe("redo", () => {
         const { el, editor } = await setupEditor(`<p>[]c</p>`);
         const p = el.querySelector("p");
         editor.shared.dom.insert("a");
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         undo(editor);
         expect(getContent(el)).toBe(`<p>[]c</p>`);
         p.prepend(document.createTextNode("b"));
@@ -294,7 +294,7 @@ describe("step", () => {
             stepFunction: async (editor) => {
                 const editable = '<div contenteditable="true">abc</div>';
                 editor.editable.querySelector("div").innerHTML = editable;
-                editor.shared.history.addStep();
+                editor.shared.history.commitChanges();
             },
             contentAfter: `<div contenteditable="false"><div contenteditable="true">abc</div></div>`,
         });
@@ -316,7 +316,7 @@ describe("system classes and attributes", () => {
             stepFunction: async (editor) => {
                 const p = editor.editable.querySelector("p");
                 p.className = "x";
-                editor.shared.history.addStep();
+                editor.shared.history.commitChanges();
                 const history = editor.plugins.find((p) => p.constructor.id === "history");
                 expect(history.steps.length).toBe(1);
             },
@@ -430,7 +430,7 @@ describe("makeSavePoint", () => {
         const savepoint = editor.shared.history.makeSavePoint();
         // step to revert
         editor.shared.dom.insert("z");
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         let steps = editor.shared.history.getHistorySteps();
         expect(steps.length).toBe(2);
         const zStep = steps.at(-1);
@@ -706,7 +706,7 @@ describe("custom mutation", () => {
                 expect.step("custom revert");
             },
         });
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect.verifySteps(["custom apply"]);
         expect(getContent(el)).toBe(`<p>a[]c</p>`);
 
@@ -782,25 +782,25 @@ describe("same text node mutations", () => {
         const p = el.querySelector("p");
         const textNode = editor.document.createTextNode("a");
         p.append(textNode);
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect(getContent(el)).toBe(`<p>[]testa</p>`);
         // Replace text node with a new one with the same content
         p.replaceChild(editor.document.createTextNode("a"), textNode);
         // addStep returns false when there are no mutations
-        expect(editor.shared.history.addStep()).toBe(false);
+        expect(editor.shared.history.commitChanges()).toBe(false);
     });
     test("same text node mutation should not break history", async () => {
         const { el, editor } = await setupEditor(`<p>[]hello </p>`);
         const p = el.querySelector("p");
         const textNode = editor.document.createTextNode("world");
         p.append(textNode);
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect(getContent(el)).toBe(`<p>[]hello world</p>`);
         // Replace text node with a new one with the same content
         p.replaceChild(editor.document.createTextNode("world"), textNode);
         // It should not create a step but, the old node should be remapped to
         // the new one and history keep working
-        expect(editor.shared.history.addStep()).toBe(false);
+        expect(editor.shared.history.commitChanges()).toBe(false);
         editor.shared.history.undo();
         expect(getContent(el)).toBe(`<p>[]hello </p>`);
         editor.shared.history.redo();
@@ -813,7 +813,7 @@ describe("same text node mutations", () => {
         p.append(textNode);
         expect(getContent(el)).toBe(`<p>[]hello world</p>`);
         p.replaceChild(textNode.cloneNode(true), textNode);
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect(getContent(el)).toBe(`<p>[]hello world</p>`);
         editor.shared.history.undo();
         expect(getContent(el)).toBe(`<p>[]hello </p>`);
@@ -825,7 +825,7 @@ describe("same text node mutations", () => {
 describe("unobserved mutations", () => {
     const withAddStep = (editor, callback) => {
         callback();
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
     };
 
     describe("classes", () => {
@@ -1190,7 +1190,7 @@ describe("serialization", () => {
         const p = el.querySelector("p");
         const textNode = editor.document.createTextNode("test");
         p.prepend(textNode);
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         const serializedNode = historyPlugin.serializeNode(textNode);
         const unserializedTextNode = historyPlugin.unserializeNode(serializedNode);
         expect(unserializedTextNode).toBe(textNode);
@@ -1202,10 +1202,10 @@ describe("mutations order", () => {
         const { el, editor } = await setupEditor(`<p>[]<br></p>`);
         const p = el.querySelector("p");
         p.replaceChildren(editor.document.createTextNode("a"), editor.document.createTextNode("b"));
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect(getContent(el)).toBe(`<p>[]ab</p>`);
         p.replaceChildren();
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         editor.shared.history.undo();
         expect(getContent(el)).toBe(`<p>[]ab</p>`);
     });

@@ -9,7 +9,7 @@ import { _t } from "@web/core/l10n/translation";
 
 export class EmojiPlugin extends Plugin {
     static id = "emoji";
-    static dependencies = ["history", "overlay", "dom", "selection"];
+    static dependencies = ["domMutation", "overlay", "dom", "selection"];
     static shared = ["showEmojiPicker"];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -56,7 +56,7 @@ export class EmojiPlugin extends Plugin {
                         return;
                     }
                     this.dependencies.dom.insert(str);
-                    this.dependencies.history.addStep();
+                    this.dependencies.domMutation.commitChanges();
                 },
             },
             target,

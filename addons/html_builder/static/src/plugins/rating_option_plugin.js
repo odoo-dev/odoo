@@ -10,7 +10,7 @@ export class RatingOption extends BaseOptionComponent {
 
 class RatingOptionPlugin extends Plugin {
     static id = "ratingOption";
-    static dependencies = ["history", "media"];
+    static dependencies = ["domMutation", "media"];
     selector = ".s_rating";
     /** @type {import("plugins").BuilderResources} */
     resources = {

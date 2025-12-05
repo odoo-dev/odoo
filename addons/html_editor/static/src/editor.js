@@ -89,7 +89,7 @@ function sortPlugins(plugins) {
         const messages = [];
         for (const P of initialPlugins) {
             messages.push(
-                `"${P.id}" is missing (${P.dependencies
+                `"${P.id}" is missing dependencies (${P.dependencies
                     .filter((d) => !inResult.has(d))
                     .join(", ")})`
             );

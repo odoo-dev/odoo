@@ -133,7 +133,7 @@ test("should not lose track of temporary hints on split block", async () => {
         `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]</p>`
     );
     editor.shared.split.splitBlock();
-    editor.shared.history.addStep();
+    editor.shared.history.commitChanges();
     await animationFrame();
     expect(getContent(el)).toBe(
         unformat(`
@@ -172,7 +172,7 @@ test("hint should only Be display for focused empty block element", async () => 
     // @todo @phoenix: getContent does not place the selection when anchor is BR
     expect(el.innerHTML).toBe(`<h1 o-we-hint-text="Heading 1" class="o-we-hint"><br></h1>`);
     editor.shared.split.splitBlock();
-    editor.shared.history.addStep();
+    editor.shared.history.commitChanges();
     await animationFrame();
     expect(getContent(el)).toBe(
         unformat(`

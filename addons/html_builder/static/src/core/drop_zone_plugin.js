@@ -30,7 +30,7 @@ import { _t } from "@web/core/l10n/translation";
 
 export class DropZonePlugin extends Plugin {
     static id = "dropzone";
-    static dependencies = ["history", "setup_editor_plugin"];
+    static dependencies = ["domMutation", "setup_editor_plugin"];
     static shared = [
         "activateDropzones",
         "removeDropzones",

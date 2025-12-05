@@ -106,7 +106,7 @@ export class ImageTransformButton extends Component {
                 document: this.props.document,
                 editable: this.props.editable,
                 destroy: () => this.closeImageTransformation(),
-                onChange: () => this.props.addStep(),
+                onChange: () => this.props.commitChanges(),
             },
         });
     }

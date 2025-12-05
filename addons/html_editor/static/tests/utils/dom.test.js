@@ -295,7 +295,7 @@ describe("wrapInlinesInBlocks", () => {
                 `<div contenteditable="false" style="display: inline;">inline</div>`
             )
         );
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         // It is debatable whether an empty paragraph-related element
         // should be kept or not after inserting an inline flow-content element
         // (which would be wrapped inside a div, not in the paragraph-related
@@ -331,7 +331,7 @@ describe("wrapInlinesInBlocks", () => {
                 `text<div contenteditable="false" style="display: inline;">inline</div><span class="a">span</span>`
             )
         );
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect(getContent(el)).toBe(
             unformat(`
                 <div class="o-paragraph">text</div>
@@ -364,7 +364,7 @@ describe("wrapInlinesInBlocks", () => {
                 `text<br><div contenteditable="false" style="display: inline;">inline</div><br><span class="a">span</span>`
             )
         );
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect(getContent(el)).toBe(
             unformat(`
                 <div class="o-paragraph">text</div>

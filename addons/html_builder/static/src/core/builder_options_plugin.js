@@ -111,7 +111,7 @@ import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
 
 export class BuilderOptionsPlugin extends Plugin {
     static id = "builderOptions";
-    static dependencies = ["operation", "history"];
+    static dependencies = ["operation", "domMutation"];
     static shared = [
         "checkElement",
         "computeContainers",
@@ -244,12 +244,12 @@ export class BuilderOptionsPlugin extends Plugin {
     }
 
     updateContainers(target, { forceUpdate = false } = {}) {
-        if (this.dependencies.history.getIsCurrentStepModified()) {
+        if (this.dependencies.domMutation.getIsCurrentStepModified()) {
             console.warn(
                 "Should not have any mutations in the current step when you update the container selection"
             );
         }
-        if (this.dependencies.history.getIsPreviewing()) {
+        if (this.dependencies.domMutation.getIsPreviewing()) {
             return;
         }
         if (target) {
@@ -414,7 +414,7 @@ export class BuilderOptionsPlugin extends Plugin {
                 button.handler = (...args) => {
                     this.dependencies.operation.next(async () => {
                         await handler(...args);
-                        this.dependencies.history.addStep();
+                        this.dependencies.domMutation.commitChanges();
                     });
                 };
             }
@@ -442,16 +442,16 @@ export class BuilderOptionsPlugin extends Plugin {
      * @param {HTMLElement|Boolean} targetEl the element to activate or `false`
      */
     setNextTarget(targetEl) {
-        if (this.dependencies.history.getIsPreviewing()) {
+        if (this.dependencies.domMutation.getIsPreviewing()) {
             return;
         }
         // Store the next target to activate in the current step.
-        this.dependencies.history.setStepExtra("nextTarget", targetEl);
+        this.dependencies.domMutation.setStepExtra("nextTarget", targetEl);
     }
 
     onWillAddStep() {
         // Store the current target in the current step.
-        this.dependencies.history.setStepExtra("currentTarget", this.target);
+        this.dependencies.domMutation.setStepExtra("currentTarget", this.target);
     }
 
     onStepAdded({ step }) {

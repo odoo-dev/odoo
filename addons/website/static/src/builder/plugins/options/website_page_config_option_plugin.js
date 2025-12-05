@@ -31,7 +31,7 @@ export class HideFooterOption extends BaseOptionComponent {
 
 class WebsitePageConfigOptionPlugin extends Plugin {
     static id = "websitePageConfigOptionPlugin";
-    static dependencies = ["history", "visibility", "builderActions"];
+    static dependencies = ["domMutation", "visibility", "builderActions"];
     static shared = [
         "setDirty",
         "setFooterVisible",
@@ -139,11 +139,11 @@ class WebsitePageConfigOptionPlugin extends Plugin {
 }
 export class BaseWebsitePageConfigAction extends BuilderAction {
     static id = "baseWebsitePageConfig";
-    static dependencies = ["websitePageConfigOptionPlugin", "history", "visibility"];
+    static dependencies = ["websitePageConfigOptionPlugin", "domMutation", "visibility"];
     setup() {
         this.websitePageConfig = this.dependencies.websitePageConfigOptionPlugin;
         this.visibility = this.dependencies.visibility;
-        this.history = this.dependencies.history;
+        this.history = this.dependencies.domMutation;
         this.visibilityHandlers = {
             overTheContent: () => {
                 this.setHeaderOverlay(true);

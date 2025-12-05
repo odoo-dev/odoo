@@ -239,28 +239,24 @@ export class HistoryPlugin extends Plugin {
             { hotkey: "control+y", commandId: "historyRedo", global: true },
             { hotkey: "control+shift+z", commandId: "historyRedo", global: true },
         ],
-        start_edition_handlers: () => {
-            this.enableObserver();
-            this.reset(this.config.content);
-        },
         on_prepare_drag_handlers: this.disableIsCurrentStepModifiedWarning.bind(this),
     };
 
     setup() {
-        this.mutationFilteredClasses = new Set(this.getResource("system_classes"));
-        this.mutationFilteredAttributes = new Set(this.getResource("system_attributes"));
-        this._onKeyupResetContenteditableNodes = [];
-        this.addDomListener(this.document, "beforeinput", this._onDocumentBeforeInput.bind(this));
-        this.addDomListener(this.document, "input", this._onDocumentInput.bind(this));
-        this.addGlobalDomListener("pointerup", (ev) => {
-            if (this.editable.contains(ev.target)) {
-                this.stageSelection();
-            }
-        });
-        this.observer = new MutationObserver((records) => this.handleNewRecords(records));
-        this.enableObserverCallbacks = new Set();
-        this._cleanups.push(() => this.observer.disconnect());
-        this.clean();
+        // this.mutationFilteredClasses = new Set(this.getResource("system_classes"));
+        // this.mutationFilteredAttributes = new Set(this.getResource("system_attributes"));
+        // this._onKeyupResetContenteditableNodes = [];
+        // this.addDomListener(this.document, "beforeinput", this._onDocumentBeforeInput.bind(this));
+        // this.addDomListener(this.document, "input", this._onDocumentInput.bind(this));
+        // this.addGlobalDomListener("pointerup", (ev) => {
+        //     if (this.editable.contains(ev.target)) {
+        //         this.stageSelection();
+        //     }
+        // });
+        // this.observer = new MutationObserver((records) => this.handleNewRecords(records));
+        // this.enableObserverCallbacks = new Set();
+        // this._cleanups.push(() => this.observer.disconnect());
+        // this.clean();
     }
 
     getIsPreviewing() {
@@ -481,25 +477,6 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @param { MutationRecord[] } records
-     * @param { boolean } [dispatch]
-     */
-    handleNewRecords(records, dispatch = true) {
-        const processedRecords = this.processNewRecords(records);
-        if (processedRecords.length) {
-            // TODO modify `handleMutations` of web_studio to handle
-            // `undoOperation`
-            if (dispatch) {
-                const stepType = this.currentStep.type;
-                this.dispatchTo("handleNewRecords", processedRecords, stepType);
-            }
-            // Process potential new records adds by handleNewRecords.
-            this.processNewRecords(this.observer.takeRecords());
-            this.dispatchContentUpdated();
-        }
-    }
-
-    /**
      * @param {HistoryMutationRecord} record
      */
     setIdOnAddedNodes(record) {
@@ -510,93 +487,6 @@ export class HistoryPlugin extends Plugin {
             .flatMap(treeToNodes)
             .filter((node) => !this.nodeMap.hasNode(node))
             .forEach((node) => this.nodeMap.set(this.generateId(), node));
-    }
-
-    /**
-     * @param { MutationRecord[] } records
-     * @returns { MutationRecord[] }
-     */
-    filterMutationRecords(records) {
-        records = this.filterAttributeMutationRecords(records);
-        records = this.filterSameTextContentMutationRecords(records);
-        records = this.filterOutIntermediateStateMutationRecords(records);
-        return records;
-    }
-
-    /**
-     * @param { MutationRecord[] } records
-     */
-    filterAttributeMutationRecords(records) {
-        return records.filter((record) => {
-            if (record.type !== "attributes") {
-                return true;
-            }
-            // Skip the attributes change on the dom.
-            if (record.target === this.editable) {
-                return false;
-            }
-            if (record.attributeName === "contenteditable") {
-                return false;
-            }
-            return true;
-        });
-    }
-
-    /**
-     * @param { MutationRecord[] } records
-     * @returns { MutationRecord[] }
-     */
-    filterSameTextContentMutationRecords(records) {
-        const filteredRecords = [];
-        for (const record of records) {
-            if (record.type === "childList" && this.isSameTextContentMutation(record)) {
-                const { addedNodes, removedNodes } = record;
-                const oldId = this.nodeMap.getId(removedNodes[0]);
-                if (oldId) {
-                    this.nodeMap.set(oldId, addedNodes[0]);
-                    continue;
-                }
-            }
-            filteredRecords.push(record);
-        }
-        return filteredRecords;
-    }
-
-    /**
-     * Mutation records of type "attribute" and "characterData" provide the old
-     * value, but not the new value. When multiple mutations occur in the same
-     * batch for an element's attribute or characterData, we only know the final
-     * value of the accumulated changes, which is the DOM's current state.
-     *
-     *  The oldValue provided by mutations after the first one are intermediate
-     *  states that we do not care about. Discarding them allows us to store a
-     *  single record representing the accumulated changes, instead of
-     *  reconstructing the new value introduced by each mutation.
-     *
-     * @param { MutationRecord[] } records
-     */
-    filterOutIntermediateStateMutationRecords(records) {
-        // Keep track of visited attributes per each node
-        const isFirstAttributeOccurrence = trackOccurrencesPair();
-        // Keep track of visited nodes for characterData mutations
-        const isFirstCharDataOccurence = trackOccurrences();
-        const filteredRecords = [];
-        for (const record of records) {
-            if (record.type === "attributes") {
-                // Keep only the first mutation record for each (node, attribute) pair.
-                if (isFirstAttributeOccurrence(record.target, record.attributeName)) {
-                    filteredRecords.push(record);
-                }
-            } else if (record.type === "characterData") {
-                // Keep only the first charData mutation record for each node.
-                if (isFirstCharDataOccurence(record.target)) {
-                    filteredRecords.push(record);
-                }
-            } else {
-                filteredRecords.push(record);
-            }
-        }
-        return filteredRecords;
     }
 
     /**
@@ -1122,6 +1012,8 @@ export class HistoryPlugin extends Plugin {
         return this.getNextRedoIndex() > 0;
     }
     undo() {
+        console.log("undo");
+        return;
         if (this.steps.length === 1) {
             return;
         }
@@ -1152,6 +1044,8 @@ export class HistoryPlugin extends Plugin {
         this.dispatchTo("post_undo_handlers", revertedStep);
     }
     redo() {
+        console.log("redo");
+        return;
         this.handleObserverRecords();
         // Current step is considered an uncommitted draft, so revert it,
         // otherwise a redo would not be possible.
@@ -1550,13 +1444,13 @@ export class HistoryPlugin extends Plugin {
                 // The operation should be similar than in the 'commit'
                 // (normalize etc...) hence the 'addStep' (but we need to remove
                 // it for the collaboration).
-                this.addStep();
+                this.commitChanges();
             },
             commit: (...args) => {
                 revertOperation();
                 this.isPreviewing = false;
                 operation(...args);
-                this.addStep();
+                this.commitChanges();
             },
             revert: () => {
                 revertOperation();
@@ -1602,7 +1496,7 @@ export class HistoryPlugin extends Plugin {
                 // The operation should be similar than in the 'commit'
                 // (normalize etc...) hence the 'addStep' (but we need to remove
                 // it for the collaboration).
-                this.addStep();
+                this.commitChanges();
             },
             commit: async (...args) => {
                 await revertOperation();
@@ -1617,7 +1511,7 @@ export class HistoryPlugin extends Plugin {
                 if (this.isDestroyed) {
                     return;
                 }
-                this.addStep();
+                this.commitChanges();
             },
             revert: async () => {
                 await revertOperation();

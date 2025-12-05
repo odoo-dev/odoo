@@ -10,7 +10,7 @@ import { registry } from "@web/core/registry";
 
 class ChartOptionPlugin extends Plugin {
     static id = "chartOptionPlugin";
-    static dependencies = ["history"];
+    static dependencies = ["domMutation"];
     static shared = ["isPieChart"];
 
     /** @type {import("plugins").WebsiteResources} */

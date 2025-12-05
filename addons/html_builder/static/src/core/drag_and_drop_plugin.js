@@ -77,7 +77,7 @@ import { DragAndDropMoveHandle } from "./drag_and_drop_move_handle";
 
 export class DragAndDropPlugin extends Plugin {
     static id = "dragAndDrop";
-    static dependencies = ["dropzone", "history", "operation", "builderOptions"];
+    static dependencies = ["dropzone", "domMutation", "operation", "builderOptions"];
     /** @type {import("plugins").BuilderResources} */
     resources = {
         has_overlay_options: { hasOption: (el) => this.isDraggable(el) },
@@ -219,7 +219,7 @@ export class DragAndDropPlugin extends Plugin {
                 this.dependencies.operation.next(async () => await dragAndDropProm, {
                     withLoadingEffect: false,
                 });
-                const restoreDragSavePoint = this.dependencies.history.makeSavePoint();
+                const restoreDragSavePoint = this.dependencies.domMutation.makeSavePoint();
                 this.cancelDragAndDrop = () => {
                     this.dependencies.dropzone.removeDropzones();
                     // Undo the changes needed to ease the drag and drop.
@@ -451,7 +451,7 @@ export class DragAndDropPlugin extends Plugin {
                         startParentEl === parentEl;
                 }
                 if (!hasSamePositionAsStart) {
-                    this.dependencies.history.addStep();
+                    this.dependencies.domMutation.commitChanges();
                 } else {
                     this.cancelDragAndDrop();
                     return;

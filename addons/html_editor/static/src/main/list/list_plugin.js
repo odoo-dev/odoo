@@ -72,7 +72,7 @@ export class ListPlugin extends Plugin {
     static dependencies = [
         "baseContainer",
         "tabulation",
-        "history",
+        "domMutation",
         "input",
         "split",
         "selection",
@@ -225,7 +225,7 @@ export class ListPlugin extends Plugin {
 
     toggleListCommand({ mode, listStyle } = {}) {
         this.toggleList(mode, listStyle);
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     getBlocksToToggleList() {
@@ -868,7 +868,7 @@ export class ListPlugin extends Plugin {
                 this.adjustListPadding(list);
             }
             // Do nothing to nav-items.
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             return true;
         }
     }
@@ -892,7 +892,7 @@ export class ListPlugin extends Plugin {
             this.outdentListNodes(listItems);
             this.dependencies.tabulation.outdentBlocks(nonListItems);
             // Do nothing to nav-items.
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             return true;
         }
     }
@@ -1061,7 +1061,7 @@ export class ListPlugin extends Plugin {
                 this.dependencies.selection.setSelection({ anchorNode: node, anchorOffset: 0 });
             }
             ev.preventDefault();
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
         }
     }
 

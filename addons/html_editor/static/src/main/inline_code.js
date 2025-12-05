@@ -9,7 +9,7 @@ import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 
 export class InlineCodePlugin extends Plugin {
     static id = "inlineCode";
-    static dependencies = ["selection", "history", "input", "split", "feff"];
+    static dependencies = ["selection", "domMutation", "input", "split", "feff"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         input_handlers: this.onInput.bind(this),
@@ -42,7 +42,7 @@ export class InlineCodePlugin extends Plugin {
         const targetBlocks = this.dependencies.selection.getTargetedBlocks();
         const hasTextNode = this.dependencies.selection.getTargetedNodes().some(isTextNode);
         if (targetBlocks.size === 1 && hasTextNode) {
-            this.historySavePointRestore = this.dependencies.history.makeSavePoint();
+            this.historySavePointRestore = this.dependencies.domMutation.makeSavePoint();
         }
     }
 
@@ -107,7 +107,7 @@ export class InlineCodePlugin extends Plugin {
                 anchorNode: codeElement,
                 anchorOffset: nodeSize(codeElement),
             });
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             delete this.historySavePointRestore;
             return;
         }
@@ -142,7 +142,7 @@ export class InlineCodePlugin extends Plugin {
                 anchorNode: textNode,
                 anchorOffset: offset,
             });
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             const insertedBacktickIndex = offset - 1;
             const textBeforeInsertedBacktick = textNode.textContent.substring(
                 0,
@@ -179,20 +179,20 @@ export class InlineCodePlugin extends Plugin {
             textNode.before(codeElement);
             codeElement.append(textNode);
             if (!codeElement.textContent.length) {
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
                 this.dependencies.selection.setSelection({
                     anchorNode: codeElement.firstChild,
                     anchorOffset: 1,
                 });
             } else if (isClosingForward) {
                 // Move selection out of code element.
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
                 this.dependencies.selection.setSelection({
                     anchorNode: codeElement.nextSibling,
                     anchorOffset: 1,
                 });
             } else {
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
                 this.dependencies.selection.setSelection({
                     anchorNode: codeElement.firstChild,
                     anchorOffset: 0,

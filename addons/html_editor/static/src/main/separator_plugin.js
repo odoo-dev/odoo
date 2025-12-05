@@ -14,7 +14,14 @@ import { fillEmpty } from "../utils/dom";
 
 export class SeparatorPlugin extends Plugin {
     static id = "separator";
-    static dependencies = ["selection", "history", "split", "delete", "lineBreak", "baseContainer"];
+    static dependencies = [
+        "selection",
+        "domMutation",
+        "split",
+        "delete",
+        "lineBreak",
+        "baseContainer",
+    ];
     /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
@@ -76,7 +83,7 @@ export class SeparatorPlugin extends Plugin {
                 this.dependencies.selection.setCursorStart(baseContainer);
             }
         }
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     deselectHR(root = this.editable) {

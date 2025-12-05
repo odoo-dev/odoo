@@ -19,7 +19,7 @@ const PLACEHOLDER_SELECTOR = `[${PLACEHOLDER_ATTRIBUTE}]`;
 
 export class SelectionPlaceholderPlugin extends Plugin {
     static id = "selectionPlaceholder";
-    static dependencies = ["baseContainer", "history", "selection"];
+    static dependencies = ["baseContainer", "domMutation", "selection"];
     resources = {
         external_history_step_handlers: this.updatePlaceholders.bind(this),
         normalize_handlers: this.updatePlaceholders.bind(this),
@@ -37,7 +37,11 @@ export class SelectionPlaceholderPlugin extends Plugin {
             }
         },
         selection_blocker_predicates: (blocker) => {
-            if ((blocker.nodeType === Node.ELEMENT_NODE && blocker.hasAttribute(PLACEHOLDER_ATTRIBUTE)) || !isBlock(blocker)) {
+            if (
+                (blocker.nodeType === Node.ELEMENT_NODE &&
+                    blocker.hasAttribute(PLACEHOLDER_ATTRIBUTE)) ||
+                !isBlock(blocker)
+            ) {
                 return false;
             } else if (isNotEditableNode(blocker)) {
                 return true;
@@ -217,7 +221,7 @@ export class SelectionPlaceholderPlugin extends Plugin {
             ) {
                 // If it's at the bottom of the document, just persist immediately.
                 this.persistPlaceholder(anchor);
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             }
         }
     }

@@ -27,7 +27,7 @@ export class ImageAndFaOption extends BaseOptionComponent {
 class ImageToolOptionPlugin extends Plugin {
     static id = "imageToolOption";
     static dependencies = [
-        "history",
+        "domMutation",
         "userCommand",
         "imagePostProcess",
         "imageCrop",

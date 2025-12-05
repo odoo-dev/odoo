@@ -24,7 +24,7 @@ function isAvailable(selection) {
 export class BannerPlugin extends Plugin {
     static id = "banner";
     // sanitize plugin is required to handle `contenteditable` attribute.
-    static dependencies = ["baseContainer", "history", "dom", "emoji", "selection", "sanitize"];
+    static dependencies = ["baseContainer", "domMutation", "dom", "emoji", "selection", "sanitize"];
     static shared = ["insertBanner"];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -141,7 +141,7 @@ export class BannerPlugin extends Plugin {
         if (bannerElement.nextSibling?.nodeName === blockEl.nodeName) {
             bannerElement.nextSibling.remove();
         }
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     onBannerEmojiChange(iconElement) {
@@ -149,7 +149,7 @@ export class BannerPlugin extends Plugin {
             target: iconElement,
             onSelect: (emoji) => {
                 iconElement.textContent = emoji;
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             },
         });
     }

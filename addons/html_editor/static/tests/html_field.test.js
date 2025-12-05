@@ -1180,13 +1180,11 @@ test("add Vimeo video link in 'Videos' tab of MediaDialog", async () => {
     });
     setSelectionInHtmlField();
 
-    await onRpc("/html_editor/video_url/data", async () => {
-        return {
-            video_id: "1128489814",
-            platform: "vimeo",
-            embed_url: vimeoVideoLink,
-        };
-    });
+    await onRpc("/html_editor/video_url/data", async () => ({
+        video_id: "1128489814",
+        platform: "vimeo",
+        embed_url: vimeoVideoLink,
+    }));
 
     // Insert Vimeo video link
     await insertText(htmlEditor, "/video");
@@ -2219,7 +2217,7 @@ describe("save image", () => {
         sendBeaconDef = new Deferred();
         setSelectionInHtmlField(".test_target");
         await insertText(htmlEditor, "a");
-        htmlEditor.shared.history.addStep();
+        htmlEditor.shared.history.commitChanges();
         await formController.beforeUnload();
         await sendBeaconDef;
 
@@ -2228,7 +2226,7 @@ describe("save image", () => {
         const imageContainerElement = parseHTML(htmlEditor.document, imageContainerHTML).firstChild;
         const paragraph = htmlEditor.editable.querySelector(".test_target");
         htmlEditor.editable.replaceChild(imageContainerElement, paragraph);
-        htmlEditor.shared.history.addStep();
+        htmlEditor.shared.history.commitChanges();
 
         // Simulate an urgent save before the end of the RPC roundtrip for the
         // image.

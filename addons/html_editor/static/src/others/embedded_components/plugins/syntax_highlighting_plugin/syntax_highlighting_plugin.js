@@ -15,7 +15,7 @@ export class SyntaxHighlightingPlugin extends Plugin {
     static id = "syntaxHighlighting";
     static dependencies = [
         "overlay",
-        "history",
+        "domMutation",
         "selection",
         "protectedNode",
         "embeddedComponents",
@@ -96,7 +96,7 @@ export class SyntaxHighlightingPlugin extends Plugin {
                         const textarea = codeBlock.querySelector("textarea");
                         if (textarea !== codeBlock.ownerDocument.activeElement) {
                             textarea.focus();
-                            this.dependencies.history.stageFocus();
+                            this.dependencies.domMutation.stageFocus();
                         }
                     }
                 }
@@ -115,7 +115,7 @@ export class SyntaxHighlightingPlugin extends Plugin {
     setupNewCodeBlock({ name, props }) {
         if (name === "syntaxHighlighting") {
             Object.assign(props, {
-                onTextareaFocus: () => this.dependencies.history.stageFocus(),
+                onTextareaFocus: () => this.dependencies.domMutation.stageFocus(),
             });
             props.host.removeAttribute("data-syntax-highlighting-autofocus");
         }

@@ -14,7 +14,7 @@ export class CaptionPlugin extends Plugin {
     static dependencies = [
         "image",
         "split",
-        "history",
+        "domMutation",
         "embeddedComponents",
         "selection",
         "baseContainer",
@@ -164,7 +164,7 @@ export class CaptionPlugin extends Plugin {
             }),
         });
         figure.append(caption);
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
         this.captionsBeingAdded.delete(captionId);
     }
 
@@ -194,7 +194,7 @@ export class CaptionPlugin extends Plugin {
                 focusOffset,
             });
             this.dependencies.selection.focusEditable();
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
         }
     }
 
@@ -219,14 +219,14 @@ export class CaptionPlugin extends Plugin {
                         // If the caption is being added, we update without
                         // adding a history step because it will be added at the
                         // end of adding the caption, by `addImageCaption`.
-                        this.dependencies.history.addStep();
+                        this.dependencies.domMutation.commitChanges();
                     }
                 },
                 onEditorHistoryApply: (redo = false) => {
                     if (redo) {
-                        this.dependencies.history.redo();
+                        this.dependencies.domMutation.redo();
                     } else {
-                        this.dependencies.history.undo();
+                        this.dependencies.domMutation.undo();
                     }
                 },
             });
@@ -292,7 +292,7 @@ export class CaptionPlugin extends Plugin {
                 anchorNode: sibling,
                 anchorOffset: 0,
             });
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             return true;
         }
     }

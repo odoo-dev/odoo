@@ -20,7 +20,7 @@ import { renderToElement } from "@web/core/utils/render";
  */
 export class EmbeddedComponentPlugin extends Plugin {
     static id = "embeddedComponents";
-    static dependencies = ["history", "protectedNode", "selection"];
+    static dependencies = ["domMutation", "protectedNode", "selection"];
     static shared = ["renderBlueprintToElement"];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -162,7 +162,7 @@ export class EmbeddedComponentPlugin extends Plugin {
         if (!this.hostToStateChangeManagerMap.has(host)) {
             const config = {
                 host,
-                commitStateChanges: () => this.dependencies.history.addStep(),
+                commitStateChanges: () => this.dependencies.domMutation.commitChanges(),
             };
             const stateChangeManager = embedding.getStateChangeManager(config);
             stateChangeManager.setup();
@@ -221,7 +221,7 @@ export class EmbeddedComponentPlugin extends Plugin {
     destroyRemovedComponents(infos) {
         // Avoid registering mutations if removed hosts are handled in
         // the same microtask as when they were removed.
-        this.dependencies.history.ignoreDOMMutations(() => {
+        this.dependencies.domMutation.ignoreDOMMutations(() => {
             for (const info of infos) {
                 if (!this.editable.contains(info.host)) {
                     const host = info.host;

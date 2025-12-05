@@ -31,7 +31,7 @@ class ImageGalleryOption extends Plugin {
     static dependencies = [
         "media",
         "dom",
-        "history",
+        "domMutation",
         "operation",
         "selection",
         "builderOptions",

@@ -7,6 +7,7 @@ import { DomPlugin } from "./core/dom_plugin";
 import { SeparatorPlugin } from "./main/separator_plugin";
 import { FormatPlugin } from "./core/format_plugin";
 import { HistoryPlugin } from "./core/history_plugin";
+import { DomMutationPlugin } from "@html_editor/core/dom_mutation_plugin";
 import { InputPlugin } from "./core/input_plugin";
 import { LineBreakPlugin } from "./core/line_break_plugin";
 import { NoInlineRootPlugin } from "./core/no_inline_root_plugin";
@@ -88,6 +89,7 @@ export const CORE_PLUGINS = [
     DomPlugin,
     FormatPlugin,
     HistoryPlugin,
+    DomMutationPlugin,
     InputPlugin,
     LineBreakPlugin,
     NoInlineRootPlugin,

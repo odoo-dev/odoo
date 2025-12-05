@@ -58,7 +58,7 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
                     },
                     removeVideo: () => {
                         this.videoBlock.remove();
-                        this.props.addStep();
+                        this.props.commitChanges();
                     },
                     focusEditable: this.props.focusEditable,
                     dropdown: this.dropdown,

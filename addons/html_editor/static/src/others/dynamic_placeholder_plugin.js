@@ -11,7 +11,7 @@ import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 
 export class DynamicPlaceholderPlugin extends Plugin {
     static id = "dynamicPlaceholder";
-    static dependencies = ["overlay", "selection", "history", "dom"];
+    static dependencies = ["overlay", "selection", "domMutation", "dom"];
     static shared = ["updateDphDefaultModel"];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -93,7 +93,7 @@ export class DynamicPlaceholderPlugin extends Plugin {
         }
 
         this.dependencies.dom.insert(t);
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     async _onValidateDatetime(chain, defaultValue) {

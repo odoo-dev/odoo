@@ -2,7 +2,7 @@ import { patch } from "@web/core/utils/patch";
 import { Many2OneAction } from "@html_builder/plugins/many2one_option_plugin";
 
 patch(Many2OneAction, {
-    dependencies: [...Many2OneAction.dependencies, "history"],
+    dependencies: [...Many2OneAction.dependencies, "domMutation"],
 });
 
 patch(Many2OneAction.prototype, {

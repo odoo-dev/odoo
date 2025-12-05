@@ -1073,7 +1073,7 @@ test("can copy/paste a highlighted code block", async () => {
                 `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>`
             );
             editor.shared.dom.insert(parseHTML(editor.document, copiedValue));
-            editor.shared.history.addStep();
+            editor.shared.history.commitChanges();
             await animationFrame();
         },
         contentAfterEdit: unformat(

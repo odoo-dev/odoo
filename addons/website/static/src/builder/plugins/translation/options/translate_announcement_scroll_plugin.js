@@ -20,7 +20,7 @@ export class TranslateAnnouncementScrollPlugin extends Plugin {
 
         for (const announcementScrollEl of announcementScrollEls) {
             this.addDomListener(announcementScrollEl, "click", () => {
-                this.rollbackHistory = this.dependencies.history.makeSavePoint();
+                this.rollbackHistory = this.dependencies.domMutation.makeSavePoint();
 
                 const translatableEl = announcementScrollEl.querySelector(
                     ".s_announcement_scroll_marquee_item:first-child > [data-oe-translation-source-sha]"
@@ -53,7 +53,7 @@ export class TranslateAnnouncementScrollPlugin extends Plugin {
         if (inputValue !== translatableEl.textContent) {
             translatableEl.textContent = inputValue;
             translatableEl.dataset.oeTranslationState = "translated";
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
         }
     }
 }

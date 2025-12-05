@@ -6,7 +6,7 @@ import { childNodes } from "@html_editor/utils/dom_traversal";
 
 export class NoInlineRootPlugin extends Plugin {
     static id = "noInlineRoot";
-    static dependencies = ["baseContainer", "selection", "history"];
+    static dependencies = ["baseContainer", "selection", "domMutation"];
 
     /** @type {import("plugins").EditorResources} */
     resources = {

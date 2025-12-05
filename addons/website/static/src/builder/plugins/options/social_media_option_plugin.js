@@ -133,7 +133,7 @@ export class SocialMediaAnimateOption extends AnimateOption {
 
 class SocialMediaOptionPlugin extends Plugin {
     static id = "socialMediaOptionPlugin";
-    static dependencies = ["history", "animateOption"];
+    static dependencies = ["domMutation", "animateOption"];
     static shared = [
         "newLinkElement",
         "getRecordedSocialMedia",
@@ -413,7 +413,7 @@ export class ToggleRecordedSocialMediaLinkAction extends BuilderAction {
 }
 export class EditRecordedSocialMediaLinkAction extends BuilderAction {
     static id = "editRecordedSocialMediaLink";
-    static dependencies = ["socialMediaOptionPlugin", "history"];
+    static dependencies = ["socialMediaOptionPlugin", "domMutation"];
     getValue({ params: { mainParam } }) {
         return this.dependencies.socialMediaOptionPlugin.getRecordedSocialMedia(mainParam);
     }
@@ -421,7 +421,7 @@ export class EditRecordedSocialMediaLinkAction extends BuilderAction {
         this.dependencies.socialMediaOptionPlugin.setRecordedSocialMediaAreEdited(true);
         const oldValue =
             this.dependencies.socialMediaOptionPlugin.getRecordedSocialMedia(mainParam);
-        this.dependencies.history.applyCustomMutation({
+        this.dependencies.domMutation.applyCustomMutation({
             apply: () =>
                 this.dependencies.socialMediaOptionPlugin.setRecordedSocialMedia(mainParam, value),
             revert: () =>

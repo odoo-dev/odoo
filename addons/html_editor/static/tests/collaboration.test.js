@@ -41,7 +41,7 @@ import { wrapInlinesInBlocks } from "@html_editor/utils/dom";
  */
 function insert(editor, value) {
     editor.shared.dom.insert(value);
-    editor.shared.history.addStep();
+    editor.shared.history.commitChanges();
 }
 
 describe("Conflict resolution", () => {
@@ -237,7 +237,7 @@ describe("history addExternalStep", () => {
         peerInfos.c1.editor.shared.dom.insert("b");
         insert(peerInfos.c2.editor, "a");
         mergePeersSteps(peerInfos);
-        peerInfos.c1.editor.shared.history.addStep();
+        peerInfos.c1.editor.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         cleanHints(peerInfos.c1.editor);
         cleanHints(peerInfos.c2.editor);
@@ -258,7 +258,7 @@ test("wrapInlinesInBlocks should not create impossible mutations in a collaborat
     const cursors1 = e1.shared.selection.preserveSelection();
     wrapInlinesInBlocks(div1, cursors1);
     cursors1.restore();
-    e1.shared.history.addStep();
+    e1.shared.history.commitChanges();
     mergePeersSteps(peerInfos);
     expect(getContent(e1.editable, { sortAttrs: true })).toBe(
         '<p data-selection-placeholder=""><br></p>' +
@@ -592,7 +592,7 @@ describe("selection", () => {
         });
         const e1 = peerInfos.c1.editor;
         e1.shared.dom.insert(parseHTML(e1.document, `<span contenteditable="false">a</span>`));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         const e2 = peerInfos.c2.editor;
         expect(getContent(e1.editable)).toBe(`<p>a<span contenteditable="false">a</span>[]</p>`);
@@ -697,7 +697,7 @@ describe("data-oe-protected", () => {
                 `)
             )
         );
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         expect(getContent(e1.editable, { sortAttrs: true })).toBe(
             unformat(`
@@ -736,7 +736,7 @@ describe("serialize/unserialize", () => {
                 editor.editable.append(divA);
                 const p = editor.editable.querySelector("p:not([data-selection-placeholder])");
                 divA.append(p);
-                editor.shared.history.addStep();
+                editor.shared.history.commitChanges();
             },
         });
         mergePeersSteps(peerInfos);
@@ -760,7 +760,7 @@ describe("serialize/unserialize", () => {
                 divB.textContent = "b";
                 editor.editable.append(divB);
                 divB.append(divA);
-                editor.shared.history.addStep();
+                editor.shared.history.commitChanges();
             },
         });
         mergePeersSteps(peerInfos);
@@ -848,7 +848,7 @@ describe("Collaboration with embedded components", () => {
         const e1 = peerInfos.c1.editor;
         const e2 = peerInfos.c2.editor;
         e1.shared.dom.insert(parseHTML(e1.document, `<span data-embedded="counter"></span>`));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         await animationFrame();
         expect.verifySteps(["1 mounted", "2 mounted"]);
@@ -905,13 +905,13 @@ describe("Collaboration with embedded components", () => {
         const e1 = peerInfos.c1.editor;
         const e2 = peerInfos.c2.editor;
         e1.shared.dom.insert(parseHTML(e1.document, `<span data-embedded="counter"></span>`));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         await animationFrame();
         e2.shared.dom.insert(parseHTML(e2.document, `<span data-embedded="counter"></span>`));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         await animationFrame();
         e2.shared.dom.insert(parseHTML(e2.document, `<span data-embedded="counter"></span>`));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         await animationFrame();
         expect.verifySteps(["1 mounted", "2 mounted", "3 mounted"]);
         expect(getContent(e1.editable, { sortAttrs: true })).toBe(
@@ -967,14 +967,14 @@ describe("Collaboration with embedded components", () => {
                 `)
             )
         );
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         const deep1 = e1.editable.querySelector("[data-embedded-editable='deep'] > p");
         deep1.append(e1.document.createTextNode("1"));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         const deep2 = e2.editable.querySelector("[data-embedded-editable='deep'] > p");
         deep2.append(e2.document.createTextNode("2"));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         // Before mount:
         let editable = unformat(`
@@ -1006,10 +1006,10 @@ describe("Collaboration with embedded components", () => {
         expect(getContent(e1.editable, { sortAttrs: true })).toBe(editable);
         expect(getContent(e2.editable, { sortAttrs: true })).toBe(editable);
         deep1.append(e1.document.createTextNode("3"));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         deep2.append(e2.document.createTextNode("4"));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         editable = unformat(`
             <p data-selection-placeholder=""><br></p>
@@ -1062,7 +1062,7 @@ describe("Collaboration with embedded components", () => {
                 `)
             )
         );
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         // ensure wrappers[0] is for c1
         await animationFrame();
         mergePeersSteps(peerInfos);
@@ -1073,12 +1073,12 @@ describe("Collaboration with embedded components", () => {
         // change state for c1
         wrappers[0].state.switch = true;
         deep1.append(e1.document.createTextNode("1"));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         // wait for patch for c1
         await animationFrame();
         mergePeersSteps(peerInfos);
         deep2.append(e2.document.createTextNode("2"));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         expect(getContent(e1.editable, { sortAttrs: true })).toBe(
             unformat(`
@@ -1142,7 +1142,7 @@ describe("Collaboration with embedded components", () => {
                 `)
             )
         );
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         await animationFrame();
         deleteBackward(e1);
@@ -1152,12 +1152,12 @@ describe("Collaboration with embedded components", () => {
         undo(e1);
         const deep1 = e1.editable.querySelector("[data-embedded-editable='deep'] > p");
         deep1.append(e1.document.createTextNode("1"));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         await animationFrame();
         const deep2 = e2.editable.querySelector("[data-embedded-editable='deep'] > p");
         deep2.append(e2.document.createTextNode("2"));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         const editable = unformat(`
             <p data-selection-placeholder=""><br></p>
@@ -1207,22 +1207,22 @@ describe("Collaboration with embedded components", () => {
                 `)
             )
         );
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         const shallow1 = e1.editable.querySelector("[data-embedded-editable='deep'] > p");
         shallow1.append(e1.document.createTextNode("1"));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         const deep1 = e1.editable.querySelectorAll("[data-embedded-editable='deep'] > p")[1];
         deep1.append(e1.document.createTextNode("9"));
-        e1.shared.history.addStep();
+        e1.shared.history.commitChanges();
         await animationFrame();
         mergePeersSteps(peerInfos);
         const shallow2 = e2.editable.querySelector("[data-embedded-editable='deep'] > p");
         shallow2.append(e2.document.createTextNode("2"));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         const deep2 = e2.editable.querySelectorAll("[data-embedded-editable='deep'] > p")[1];
         deep2.append(e2.document.createTextNode("8"));
-        e2.shared.history.addStep();
+        e2.shared.history.commitChanges();
         mergePeersSteps(peerInfos);
         const editable = unformat(`
             <p data-selection-placeholder=""><br></p>
@@ -1483,7 +1483,7 @@ describe("Collaboration with embedded components", () => {
                     `<span data-embedded="counter" data-embedded-props='{"value":1}'></span>`
                 )
             );
-            e2.shared.history.addStep();
+            e2.shared.history.commitChanges();
             await animationFrame();
             const counter2 = [...peerInfos.c2.plugins.get("embeddedComponents").components][0].root
                 .node.component;

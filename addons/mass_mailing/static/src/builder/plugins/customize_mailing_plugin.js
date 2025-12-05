@@ -188,7 +188,7 @@ export class CustomizeMailingPlugin extends Plugin {
 
 export class CustomizeMailingVariable extends BuilderAction {
     static id = "mass_mailing.CustomizeMailingVariable";
-    static dependencies = ["builderActions", "mass_mailing.CustomizeMailingPlugin", "history"];
+    static dependencies = ["builderActions", "mass_mailing.CustomizeMailingPlugin", "domMutation"];
     isApplied({ value }) {
         return this.getValue(...arguments) === value;
     }
@@ -204,7 +204,7 @@ export class CustomizeMailingVariable extends BuilderAction {
     }
     apply({ params, value }) {
         const oldValue = this.getValue(...arguments);
-        this.dependencies.history.applyCustomMutation({
+        this.dependencies.domMutation.applyCustomMutation({
             apply: () => {
                 this.dependencies["mass_mailing.CustomizeMailingPlugin"].setVariable(
                     params.variable,
@@ -221,7 +221,7 @@ export class CustomizeMailingVariable extends BuilderAction {
     }
     clean({ params }) {
         const oldValue = this.getValue(...arguments);
-        this.dependencies.history.applyCustomMutation({
+        this.dependencies.domMutation.applyCustomMutation({
             apply: () => {
                 this.dependencies["mass_mailing.CustomizeMailingPlugin"].setVariable(
                     params.variable,

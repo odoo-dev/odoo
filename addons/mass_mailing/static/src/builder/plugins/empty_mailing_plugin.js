@@ -35,7 +35,7 @@ export class EmptyMailingPlugin extends Plugin {
                 anchorNode: baseContainer,
                 anchorOffset: 0,
             });
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             this.dependencies.builderOptions.updateContainers(textSnippet);
             this.dependencies.disableSnippets.disableUndroppableSnippets();
         }

@@ -20,7 +20,7 @@ class WebsiteSaleMegaMenuOptionPlugin extends Plugin {
     static dependencies = [
         "builderOptions",
         "customizeWebsite",
-        "history",
+        "domMutation",
         "megaMenuOptionPlugin",
     ];
     resources = {

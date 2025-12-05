@@ -92,7 +92,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 
 export class PowerboxPlugin extends Plugin {
     static id = "powerbox";
-    static dependencies = ["overlay", "selection", "history", "userCommand"];
+    static dependencies = ["overlay", "selection", "domMutation", "userCommand"];
     static shared = [
         "closePowerbox",
         "getAvailablePowerboxCommands",

@@ -36,12 +36,12 @@ export class MailFullComposerSuggestionPlugin extends Plugin {
         mentionBlock.appendChild(nameNode);
         this.historySavePointRestore();
         this.dependencies.dom.insert(mentionBlock);
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     onBeforeInput(ev) {
         if (ev.data === "@" || ev.data === "#") {
-            this.historySavePointRestore = this.dependencies.history.makeSavePoint();
+            this.historySavePointRestore = this.dependencies.domMutation.makeSavePoint();
             this.mentionList.open({
                 props: {
                     onSelect: this.onSelect.bind(this),

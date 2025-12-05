@@ -21,7 +21,7 @@ import { closestBlock } from "../utils/blocks";
 
 export class HintPlugin extends Plugin {
     static id = "hint";
-    static dependencies = ["history", "selection"];
+    static dependencies = ["domMutation", "selection"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */

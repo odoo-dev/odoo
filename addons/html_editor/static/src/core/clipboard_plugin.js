@@ -120,7 +120,7 @@ export class ClipboardPlugin extends Plugin {
         "dom",
         "selection",
         "sanitize",
-        "history",
+        "domMutation",
         "split",
         "delete",
         "lineBreak",
@@ -137,9 +137,9 @@ export class ClipboardPlugin extends Plugin {
 
     onCut(ev) {
         this.onCopy(ev);
-        this.dependencies.history.stageSelection();
+        this.dependencies.domMutation.stageSelection();
         this.dependencies.delete.deleteSelection();
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     /**
@@ -186,7 +186,7 @@ export class ClipboardPlugin extends Plugin {
         }
         ev.preventDefault();
 
-        this.dependencies.history.stageSelection();
+        this.dependencies.domMutation.stageSelection();
 
         this.dispatchTo("before_paste_handlers", selection, ev);
         // refresh selection after potential changes from `before_paste` handlers
@@ -198,7 +198,7 @@ export class ClipboardPlugin extends Plugin {
             this.handlePasteText(selection, ev.clipboardData);
 
         this.dispatchTo("after_paste_handlers", selection);
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
     /**
      * @param {EditorSelection} selection
@@ -253,7 +253,7 @@ export class ClipboardPlugin extends Plugin {
                 // @phoenix @todo: should it be handled in image plugin?
                 return this.addImagesFiles(files).then((html) => {
                     this.dependencies.dom.insert(html);
-                    this.dependencies.history.addStep();
+                    this.dependencies.domMutation.commitChanges();
                 });
             } else if (clipboardElem.hasChildNodes()) {
                 if (closestElement(selection.anchorNode, "a")) {
@@ -660,15 +660,15 @@ export class ClipboardPlugin extends Plugin {
             const fragment = this.document.createDocumentFragment();
             fragment.append(image);
             this.dependencies.dom.insert(fragment);
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
         } else if (fileTransferItems.length) {
             const html = await this.addImagesFiles(fileTransferItems);
             this.dependencies.dom.insert(html);
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
         } else if (htmlTransferItem) {
             htmlTransferItem.getAsString((pastedText) => {
                 this.dependencies.dom.insert(this.prepareClipboardData(pastedText));
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             });
         }
     }

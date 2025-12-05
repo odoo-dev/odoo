@@ -11,7 +11,7 @@ import { useComponent } from "@odoo/owl";
 
 export class OperationPlugin extends Plugin {
     static id = "operation";
-    static dependencies = ["history"];
+    static dependencies = ["domMutation"];
     static shared = ["next"];
 
     setup() {

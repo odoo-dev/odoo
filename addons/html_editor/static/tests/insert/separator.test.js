@@ -109,7 +109,7 @@ describe("insert separator", () => {
         const separator = editor.document.createElement("hr");
         div.append(separator);
         el.append(div);
-        editor.shared.history.addStep();
+        editor.shared.history.commitChanges();
         expect(getContent(el)).toBe(
             `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p><div><hr contenteditable="false"></div><p data-selection-placeholder=""><br></p>`
         );

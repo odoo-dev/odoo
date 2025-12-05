@@ -109,7 +109,7 @@ export class SetBackgroundSizeAction extends BuilderAction {
 
 export class BackgroundPositionOverlayAction extends BuilderAction {
     static id = "backgroundPositionOverlay";
-    static dependencies = ["overlayButtons", "history", "backgroundPositionOption"];
+    static dependencies = ["overlayButtons", "domMutation", "backgroundPositionOption"];
     setup() {
         this.withLoadingEffect = false;
     }
@@ -146,7 +146,7 @@ export class BackgroundPositionOverlayAction extends BuilderAction {
                     getPosition: () => getComputedStyle(editingElement).backgroundPosition,
                     editable: this.editable,
                     history: {
-                        makeSavePoint: this.dependencies.history.makeSavePoint,
+                        makeSavePoint: this.dependencies.domMutation.makeSavePoint,
                     },
                 },
                 { onRemove: () => this.dependencies.overlayButtons.showOverlayButtonsUi() }

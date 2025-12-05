@@ -143,7 +143,7 @@ export class LinkPlugin extends Plugin {
     static id = "link";
     static dependencies = [
         "dom",
-        "history",
+        "domMutation",
         "input",
         "selection",
         "split",
@@ -408,7 +408,7 @@ export class LinkPlugin extends Plugin {
             link = this.createLink(url, label);
             this.dependencies.dom.insert(link);
         }
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
         const linkParent = link.parentElement;
         const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
         this.dependencies.selection.setSelection(
@@ -428,7 +428,7 @@ export class LinkPlugin extends Plugin {
             icon: "fa-link",
             run: () => {
                 this.dependencies.dom.insert(this.createLink(url, text));
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             },
         };
         return pasteAsURLCommand;
@@ -476,7 +476,7 @@ export class LinkPlugin extends Plugin {
         ) {
             this.extendLinkToSelection(linkElement, selection);
             linkElement = findInSelection(selection, "a");
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             cursorsToRestore = this.dependencies.selection.preserveSelection();
         }
         this.linkInDocument = linkElement;
@@ -594,7 +594,7 @@ export class LinkPlugin extends Plugin {
             }
         };
 
-        this.restoreSavePoint = this.dependencies.history.makeSavePoint();
+        this.restoreSavePoint = this.dependencies.domMutation.makeSavePoint();
         const props = {
             document: this.document,
             linkElement,
@@ -604,7 +604,7 @@ export class LinkPlugin extends Plugin {
                 applyCallback(...args);
                 this.closeLinkTools(cursorsToRestore);
                 this.dependencies.selection.focusEditable();
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             },
             onChange: applyCallback,
             onDiscard: () => {
@@ -627,7 +627,7 @@ export class LinkPlugin extends Plugin {
                 this.currentOverlay.close();
             },
             onEdit: () => {
-                this.restoreSavePoint = this.dependencies.history.makeSavePoint();
+                this.restoreSavePoint = this.dependencies.domMutation.makeSavePoint();
             },
             getInternalMetaData: this.getInternalMetaData,
             getExternalMetaData: this.getExternalMetaData,
@@ -877,7 +877,7 @@ export class LinkPlugin extends Plugin {
         }
         cursors.restore();
         this.linkInDocument = null;
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     removeLinkFromSelectionIsDisabled(selection) {
@@ -955,7 +955,7 @@ export class LinkPlugin extends Plugin {
                 selectedImageNodes.length === 1 &&
                 selectedImageNodes.length === targetedNodes.length
             ) {
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
                 return;
             }
         }
@@ -1017,7 +1017,7 @@ export class LinkPlugin extends Plugin {
         if (endBlock && endBlock !== startBlock) {
             this.removeEmptyLinks(endBlock);
         }
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commitChanges();
     }
 
     removeEmptyLinks(root) {
@@ -1065,7 +1065,7 @@ export class LinkPlugin extends Plugin {
             const nodeForSelectionRestore = this.handleAutomaticLinkInsertion();
             if (nodeForSelectionRestore) {
                 this.dependencies.selection.setCursorStart(nodeForSelectionRestore);
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
             }
         }
         if (ev.inputType === "insertText" && ev.data === " ") {
@@ -1079,14 +1079,14 @@ export class LinkPlugin extends Plugin {
                     anchorNode: nodeForSelectionRestore,
                     anchorOffset: 0,
                 });
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
                 nodeForSelectionRestore.textContent =
                     "\u00A0" + nodeForSelectionRestore.textContent;
                 this.dependencies.selection.setSelection({
                     anchorNode: nodeForSelectionRestore,
                     anchorOffset: 1,
                 });
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commitChanges();
                 ev.preventDefault();
             }
         }
@@ -1124,7 +1124,7 @@ export class LinkPlugin extends Plugin {
             cursors.update(callbacksForCursorUpdate.remove(imageToDelete));
             imageToDelete.remove();
             this.closeLinkTools(cursors);
-            this.dependencies.history.addStep();
+            this.dependencies.domMutation.commitChanges();
             return true;
         }
         return false;
