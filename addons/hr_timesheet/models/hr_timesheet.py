@@ -7,6 +7,8 @@ import re
 from odoo import api, fields, models, _, _lt
 from odoo.exceptions import UserError, AccessError, ValidationError
 from odoo.osv import expression
+from odoo.tools import column_exists, create_column
+
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
@@ -67,6 +69,33 @@ class AccountAnalyticLine(models.Model):
     encoding_uom_id = fields.Many2one('uom.uom', compute='_compute_encoding_uom_id')
     partner_id = fields.Many2one(compute='_compute_partner_id', store=True, readonly=False)
     readonly_timesheet = fields.Boolean(string="Readonly Timesheet", compute="_compute_readonly_timesheet", compute_sudo=True)
+
+    def _auto_init(self):
+        # At install implementation of `_compute_task_id` -> default value of NULL for all rows
+        if not column_exists(self.env.cr, 'account_analytic_line', 'task_id'):
+            create_column(self.env.cr, 'account_analytic_line', 'task_id', 'int4')
+
+        # Avoid triggering the computation of `parent_task_id`, related to `task_id`
+        if not column_exists(self.env.cr, 'account_analytic_line', 'parent_task_id'):
+            create_column(self.env.cr, 'account_analytic_line', 'parent_task_id', 'int4')
+
+        # At install implementation of `_compute_project_id` -> default value of NULL for all rows
+        if not column_exists(self.env.cr, 'account_analytic_line', 'project_id'):
+            create_column(self.env.cr, 'account_analytic_line', 'project_id', 'int4')
+
+        # At install implementation of `_compute_user_id` -> default value of NULL for all rows
+        if not column_exists(self.env.cr, 'account_analytic_line', 'user_id'):
+            create_column(self.env.cr, 'account_analytic_line', 'user_id', 'int4')
+
+        # At install implementation of `_compute_department_id` -> default value of NULL for all rows
+        if not column_exists(self.env.cr, 'account_analytic_line', 'department_id'):
+            create_column(self.env.cr, 'account_analytic_line', 'department_id', 'int4')
+
+        # Avoid triggering the computation of `manager_id`, related to `employee_id`
+        if not column_exists(self.env.cr, 'account_analytic_line', 'manager_id'):
+            create_column(self.env.cr, 'account_analytic_line', 'manager_id', 'int4')
+
+        return super()._auto_init()
 
     @api.depends('project_id', 'task_id')
     def _compute_display_name(self):

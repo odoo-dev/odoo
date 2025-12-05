@@ -6,6 +6,7 @@ from odoo.exceptions import UserError
 from odoo import api, fields, models, _
 from odoo.osv import expression
 from odoo.tools.misc import unquote
+from odoo.tools import column_exists, create_column
 
 TIMESHEET_INVOICE_TYPES = [
     ('billable_time', 'Billed on Timesheets'),
@@ -46,6 +47,17 @@ class AccountAnalyticLine(models.Model):
     order_id = fields.Many2one(related='so_line.order_id', store=True, readonly=True, index=True)
     is_so_line_edited = fields.Boolean("Is Sales Order Item Manually Edited")
     allow_billable = fields.Boolean(related="project_id.allow_billable")
+
+    def _auto_init(self):
+        # Avoid triggering the computation of `so_line`
+        if not column_exists(self.env.cr, 'account_analytic_line', 'so_line'):
+            create_column(self.env.cr, 'account_analytic_line', 'so_line', 'int4')
+
+        # Avoid triggering the computation of `order_id`, related to `so_line`
+        if not column_exists(self.env.cr, 'account_analytic_line', 'order_id'):
+            create_column(self.env.cr, 'account_analytic_line', 'order_id', 'int4')
+
+        return super()._auto_init()
 
     def _default_sale_line_domain(self):
         # [XBO] TODO: remove me in master
