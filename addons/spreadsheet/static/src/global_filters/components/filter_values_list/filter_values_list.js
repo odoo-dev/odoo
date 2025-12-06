@@ -17,7 +17,7 @@ import { deepEqual } from "@web/core/utils/objects";
  * and confirm or discard the changes.
  */
 export class FilterValuesList extends Component {
-    static template = "spreadsheet_dashboard.FilterValuesList";
+    static template = "spreadsheet.FilterValuesList";
     static components = { FilterValue };
 
     static props = {
