@@ -1,3 +1,4 @@
+import logging
 from werkzeug.exceptions import NotFound
 
 from odoo import http
@@ -7,6 +8,8 @@ from odoo.addons.mail.controllers.thread import ThreadController
 from odoo.addons.mail.tools.discuss import Store
 from odoo.addons.portal.utils import get_portal_partner
 
+
+_logger = logging.getLogger(__name__)
 
 class PortalChatter(ThreadController):
 
@@ -57,6 +60,8 @@ class PortalChatter(ThreadController):
 
         res.attr("can_react", can_react)
         res.attr("hasReadAccess", lambda t: t.sudo(False).has_access("read"))
+        if not request.env.user._is_public():
+            _logger.warning('Computing portal_partner as non-public user', stack_info=True)
         res.one(
             "portal_partner",
             lambda res: (
