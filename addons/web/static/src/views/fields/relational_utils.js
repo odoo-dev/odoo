@@ -281,6 +281,7 @@ export class Many2XAutocomplete extends Component {
             onSelected: (resId) => {
                 const resIds = Array.isArray(resId) ? resId : [resId];
                 const values = resIds.map((id) => ({ id }));
+                console.log(values);
                 return update(values);
             },
             onCreateEdit: ({ context }) => this.openMany2X({ context }),

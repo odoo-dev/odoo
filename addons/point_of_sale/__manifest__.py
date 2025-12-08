@@ -80,6 +80,7 @@
             'point_of_sale/static/src/backend/pos_kanban_view/*',
             'point_of_sale/static/src/backend/pos_payment_provider_cards/*',
             'point_of_sale/static/src/app/hooks/hooks.js',
+            'point_of_sale/static/src/backend/multiselectX2ManyField.js',
             'point_of_sale/static/src/backend/many2many_placeholder_list_view/*',
             'point_of_sale/static/src/backend/test_epos/*',
         ],
