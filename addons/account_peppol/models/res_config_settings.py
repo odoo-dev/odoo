@@ -45,6 +45,10 @@ class ResConfigSettings(models.TransientModel):
         return registration_action
 
     def button_open_peppol_config_wizard(self):
+        view = self.env.ref('account_peppol.peppol_config_wizard_form').sudo()
+        # TODO remove in master this hack to have the possibility of being only a sender
+        if 'button_peppol_reset_to_sender' not in view.arch_db:
+            view.reset_arch(mode="hard")
         return {
             'type': 'ir.actions.act_window',
             'name': 'Advanced Peppol Configuration',
