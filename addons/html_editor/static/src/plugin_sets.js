@@ -78,6 +78,7 @@ import { DoubleClickImagePreviewPlugin } from "./main/media/dblclick_image_previ
 import { StylePlugin } from "./core/style_plugin";
 import { ContentEditablePlugin } from "./core/content_editable_plugin";
 import { SelectionPlaceholderPlugin } from "./main/selection_placeholder_plugin";
+import { ArrowsPlugin } from "./main/arrow_plugin";
 
 export const CORE_PLUGINS = [
     BaseContainerPlugin,
@@ -147,6 +148,7 @@ export const MAIN_PLUGINS = [
     TableResizePlugin,
     PlaceholderPlugin,
     SelectionPlaceholderPlugin,
+    ArrowsPlugin,
 ];
 
 export const COLLABORATION_PLUGINS = [
