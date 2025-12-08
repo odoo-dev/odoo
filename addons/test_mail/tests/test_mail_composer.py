@@ -1311,6 +1311,28 @@ class TestComposerInternals(TestMailComposer):
                 finally:
                     new_partners.unlink()
 
+    @mute_logger('odoo.addons.mail.models.mail_mail')
+    @users('employee')
+    def test_log_note_template_no_partner(self):
+        """ Test to make sure log notes with mail templates are not sent to customer"""
+        self.template.partner_to = self.partner_1.id
+        composer_record = self.env['mail.compose.message'].with_context(
+            self._get_web_context(self.test_record, add_web=True, default_template_id=self.template.id)
+        ).create({
+            'body': '<p>Test Body 2</p>',
+            'email_add_signature': False,
+            'email_layout_xmlid': 'mail.mail_notification_light',
+            'message_type': 'notification',
+            'subtype_id': self.env.ref('mail.mt_note').id,
+            'record_name': 'Custom record name',
+            'template_id':  self.template.id
+        })
+        composer_form = Form(composer_record)
+        composer = composer_form.save()
+        with self.mock_mail_gateway(mail_unlink_sent=True), self.mock_mail_app():
+            composer._action_send_mail()
+        self.assertEqual(len(self._mails), 0, 'Should have sent 0 emails but 1 email was sent')
+
 
 @tagged('mail_composer', 'multi_lang', 'multi_company')
 class TestComposerResultsComment(TestMailComposer, CronMixinCase):

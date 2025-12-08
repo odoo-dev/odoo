@@ -526,7 +526,7 @@ class MailComposer(models.TransientModel):
                     {'email_cc', 'email_to', 'partner_ids'},
                     find_or_create_partners=True,
                 )[res_ids[0]]
-                if rendered_values.get('partner_ids'):
+                if rendered_values.get('partner_ids') and not composer.subtype_is_log:
                     composer.partner_ids = rendered_values['partner_ids']
             elif composer.parent_id and composer.composition_mode == 'comment':
                 composer.partner_ids = composer.parent_id.partner_ids

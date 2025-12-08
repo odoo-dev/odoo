@@ -213,7 +213,6 @@ class TestMailComposerForm(TestMailComposer):
         )
         self.assertEqual(message.subject, 'MSO FTW')
 
-
 @tagged('mail_composer')
 class TestMailComposerRendering(TestMailComposer):
     """ Test rendering and support of various html tweaks in composer """
