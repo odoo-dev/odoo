@@ -550,12 +550,6 @@ class AccountMove(models.Model):
             return 'l10n_in.l10n_in_report_invoice_document_inherit'
         return super()._get_name_invoice_report()
 
-    def _get_base_document_layout_configurator_view_xml_id(self):
-        fiscal_country = self.company_id.account_fiscal_country_id
-        if len(fiscal_country) == 1 and fiscal_country.code == 'IN':
-            return "l10n_in.view_base_document_layout"
-        return super()._get_base_document_layout_configurator_view_xml_id()
-
     def _post(self, soft=True):
         """Use journal type to define document type because not miss state in any entry including POS entry"""
         posted = super()._post(soft)

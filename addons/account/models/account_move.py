@@ -6293,9 +6293,6 @@ class AccountMove(models.Model):
     def is_outbound(self, include_receipts=True):
         return self.move_type in self.get_outbound_types(include_receipts)
 
-    def _get_base_document_layout_configurator_view_xml_id(self):
-        return "account.view_base_document_layout"
-
     def _get_action_with_base_document_layout_configurator(self, report_action):
         if (
             self.env.is_admin()
@@ -6304,7 +6301,7 @@ class AccountMove(models.Model):
         ):
             report_action = self.env['ir.actions.report']._action_configure_external_report_layout(
                 report_action,
-                self._get_base_document_layout_configurator_view_xml_id(),
+                "account.action_base_document_layout_configurator",
             )
             report_action['context']['default_from_invoice'] = self.move_type == 'out_invoice'
         return report_action
