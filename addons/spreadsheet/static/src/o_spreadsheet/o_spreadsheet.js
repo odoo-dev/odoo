@@ -20415,6 +20415,10 @@ function getFontSizeMatchingWidth(lineWidth, maxFontSize, getTextWidth, precisio
 function toLowerCase(str) {
     return str ? str.toLowerCase() : "";
 }
+/** Transform a string to lowercase and removes whitespace from both ends of the string*/
+function normalize(value) {
+    return toLowerCase(value).trim();
+}
 /**
  * Extract the fontSize from a context font string
  * @param font The (context) font string to parse
@@ -40171,8 +40175,8 @@ criterionEvaluatorRegistry.add("notContainsText", {
 criterionEvaluatorRegistry.add("isEqualText", {
     type: "isEqualText",
     isValueValid: (value, criterion) => {
-        const strValue = String(value);
-        return strValue.toLowerCase() === String(criterion.values[0]).toLowerCase();
+        const strValue = normalize(String(value));
+        return strValue === normalize(String(criterion.values[0]));
     },
     getErrorString: (criterion) => {
         return _t('The value must be exactly "%s"', String(criterion.values[0]));
@@ -40634,8 +40638,8 @@ criterionEvaluatorRegistry.add("customFormula", {
 criterionEvaluatorRegistry.add("beginsWithText", {
     type: "beginsWithText",
     isValueValid: (value, criterion) => {
-        const strValue = String(value);
-        return strValue.toLowerCase().startsWith(String(criterion.values[0]).toLowerCase());
+        const strValue = normalize(String(value));
+        return strValue.startsWith(normalize(String(criterion.values[0])));
     },
     getErrorString: (criterion) => {
         return _t('The value must be a text that begins with "%s"', String(criterion.values[0]));
@@ -40649,8 +40653,8 @@ criterionEvaluatorRegistry.add("beginsWithText", {
 criterionEvaluatorRegistry.add("endsWithText", {
     type: "endsWithText",
     isValueValid: (value, criterion) => {
-        const strValue = String(value);
-        return strValue.toLowerCase().endsWith(String(criterion.values[0]).toLowerCase());
+        const strValue = normalize(String(value));
+        return strValue.endsWith(normalize(String(criterion.values[0])));
     },
     getErrorString: (criterion) => {
         return _t('The value must be a text that ends with "%s"', String(criterion.values[0]));
@@ -57115,7 +57119,7 @@ class FilterEvaluationPlugin extends UIPlugin {
                 continue;
             }
             if (filterValue.filterType === "values") {
-                const filteredValues = filterValue.hiddenValues?.map(toLowerCase);
+                const filteredValues = filterValue.hiddenValues?.map(normalize);
                 if (!filteredValues)
                     continue;
                 const filteredValuesSet = new Set(filteredValues);
@@ -57157,7 +57161,7 @@ class FilterEvaluationPlugin extends UIPlugin {
     }
     getCellValueAsString(sheetId, col, row) {
         const value = this.getters.getEvaluatedCell({ sheetId, col, row }).formattedValue;
-        return value.toLowerCase();
+        return normalize(value);
     }
     exportForExcel(data) {
         for (const sheetData of data.sheets) {
@@ -74513,11 +74517,11 @@ class FilterMenuValueList extends Component {
         }
         const cellValues = cells.map((val) => val.cellValue);
         const filterValues = filterValue?.filterType === "values" ? filterValue.hiddenValues : [];
-        const normalizedFilteredValues = new Set(filterValues.map(toLowerCase));
+        const normalizedFilteredValues = new Set(filterValues.map(normalize));
         const set = new Set();
         const values = [];
         const addValue = (value) => {
-            const normalizedValue = toLowerCase(value);
+            const normalizedValue = normalize(value);
             if (!set.has(normalizedValue)) {
                 values.push({
                     string: value || "",
@@ -86748,6 +86752,7 @@ class FindAndReplacePanel extends Component {
     }
 }
 
+<<<<<<< HEAD
 /**
  * Registry intended to support usual currencies. It is mainly used to create
  * currency formats that can be selected or modified when customizing formats.
@@ -87017,6 +87022,25 @@ class MoreFormatsStore extends SpreadsheetStore {
     }
 }
 
+=======
+const DATE_FORMAT_ACTIONS = createActions([
+    formatNumberFullDateTime,
+    formatNumberISODate,
+    formatNumberISODateTime,
+    formatNumberFullWeekDayAndMonth,
+    formatNumberDayAndFullMonth,
+    formatNumberShortWeekDay,
+    formatNumberDayAndShortMonth,
+    formatNumberFullMonth,
+    formatNumberShortMonth,
+    formatNumberDate,
+    formatNumberTime,
+    formatNumberDateTime,
+    formatNumberDuration,
+    formatNumberQuarter,
+    formatNumberFullQuarter,
+]);
+>>>>>>> 380822d90e2f ([IMP] Data filter: Trim whitespace)
 class MoreFormatsPanel extends Component {
     static template = "o-spreadsheet-MoreFormatsPanel";
     static props = {
@@ -97864,9 +97888,15 @@ const chartHelpers = { ...CHART_HELPERS, ...CHART_RUNTIME_HELPERS };
 Object.assign(__exports, { AbstractCellClipboardHandler, AbstractChart, AbstractFigureClipboardHandler, CellErrorType, ClientDisconnectedError, CommandResult, CorePlugin, CoreViewPlugin, DEFAULT_LOCALE, DEFAULT_LOCALES, DispatchResult, EvaluationError, LocalTransportService, Model, PivotRuntimeDefinition,Registry:  Registry$1, Revision, SPREADSHEET_DIMENSIONS, Spreadsheet, SpreadsheetPivotTable, UIPlugin, __info__, addFunction, addRenderingLayer, astToFormula, categories, chartHelpers, compile, compileTokens, components, constants, convertAstNodes, coreTypes, createAutocompleteArgumentsProvider, findCellInNewZone, functionCache, getCaretDownSvg, getCaretUpSvg, helpers, hooks, invalidateCFEvaluationCommands, invalidateChartEvaluationCommands, invalidateDependenciesCommands, invalidateEvaluationCommands, iterateAstNodes, links, load,parse:  parse$1, parseTokens, readonlyAllowedCommands, registries, setDefaultSheetViewSize, setTranslationMethod, stores, tokenColors, tokenize });
 
 
+<<<<<<< HEAD
 __info__.version = "19.1.0-alpha.16";
 __info__.date = "2025-12-17T09:58:50.082Z";
 __info__.hash = "337f64dbe";
+=======
+__info__.version = "19.1.0-alpha.12";
+__info__.date = "2025-11-12T14:43:08.020Z";
+__info__.hash = "6fefc9ceb";
+>>>>>>> 380822d90e2f ([IMP] Data filter: Trim whitespace)
 //# sourceMappingURL=o_spreadsheet.esm.js.map
 return __exports;
 });
