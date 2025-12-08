@@ -34,14 +34,12 @@ class StockPicking(models.Model):
     def _compute_priority(self):
         for picking in self:
             all_pickings = picking._get_all_po_pickings()
-            purchase_line_id, _partner = picking.move_ids._get_purchase_line_and_partner_from_chain()
-            po_id = self.env['purchase.order.line'].browse(purchase_line_id).order_id
-            all_pickings.filtered(lambda p: p.state != 'done').write({'priority': po_id.priority or '0'})
+            po_id = all_pickings.purchase_id
+            if all_pickings and po_id:
+                all_pickings.filtered(lambda p: p.state != 'done').write({'priority': po_id.priority})
 
     def _get_all_po_pickings(self):
-        self.ensure_one()
-        all_pickings = self.reference_ids.picking_ids
-        return all_pickings
+        return self.reference_ids.picking_ids
 
     @api.model
     def _search_days_to_arrive(self, operator, value):
