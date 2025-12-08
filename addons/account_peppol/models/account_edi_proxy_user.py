@@ -314,7 +314,13 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                     "type": "binary",
                     "mimetype": "application/xml",
                 })
-                vals_to_ack = edi_user._peppol_import_invoice(attachment, content["state"], uuid)
+                journal = [False]
+                import xml.etree.ElementTree as ET
+                etree = ET.ElementTree(ET.fromstring(decoded_document))
+                mail_alias_node = etree.findall('{*}AccountingCustomerParty/{*}Party/{*}Contact/{*}ElectronicMail')
+                if mail_alias_node:
+                    journal = self.env['account.journal'].search([('alias_id.alias_full_name', '=', mail_alias_node[0].text)])
+                vals_to_ack = edi_user._peppol_import_invoice(attachment, content["state"], uuid, journal=journal[0])
                 if move_to_ack := vals_to_ack.get('move'):
                     created_moves |= move_to_ack
                 if uuid_to_ack := vals_to_ack.get('uuid'):

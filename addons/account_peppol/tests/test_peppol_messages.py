@@ -352,7 +352,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
 
     def test_receive_success_peppol(self):
         # a correct move should be created
-        self.env['account_edi_proxy_client.user']._cron_peppol_get_new_documents()
+        self.env['account_edi_proxy_client.user'].with_context(toto=True)._cron_peppol_get_new_documents()
 
         move = self.env['account.move'].search([('peppol_message_uuid', '=', FAKE_UUID[1])])
         self.assertRecordValues(
