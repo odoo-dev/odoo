@@ -24,6 +24,7 @@ from odoo.orm.models_cached import CachedModel
 from odoo.orm.models_transient import TransientModel
 from odoo.orm.query import Query, TableSQL
 from odoo.orm.table_objects import Constraint, Index, UniqueIndex
+from odoo.orm import models_company as company_dependent
 from odoo.orm.utils import (
     READ_GROUP_NUMBER_GRANULARITY,
     READ_GROUP_TIME_GRANULARITY,

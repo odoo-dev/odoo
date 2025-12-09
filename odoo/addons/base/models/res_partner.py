@@ -173,6 +173,13 @@ class ResPartnerCategory(models.Model):
         return domain
 
 
+class ResPartnerCompanyData(models.company_dependent.CompanyDataModel):
+    _name = _description = 'res.partner.company_data'
+    record_id = fields.Many2one('res.partner')
+
+    barcode = fields.Char(help="Use a barcode to identify this contact.", copy=False)
+
+
 class ResPartner(models.Model):
     _name = 'res.partner'
     _description = 'Contact'
@@ -298,7 +305,8 @@ class ResPartner(models.Model):
     commercial_company_name = fields.Char('Company Name Entity', compute='_compute_commercial_company_name',
                                           store=True)
     company_name = fields.Char('Company Name')
-    barcode = fields.Char(help="Use a barcode to identify this contact.", copy=False, company_dependent=True)
+    company_data_ids = models.company_dependent.company_data_ids(_name)
+    barcode = models.company_dependent.field(fields.Char)
 
     # hack to allow using plain browse record in qweb views, and used in ir.qweb.field.contact
     self: ResPartner = fields.Many2one(comodel_name='res.partner', compute='_compute_get_ids')
