@@ -455,7 +455,9 @@ class HolidaysType(models.Model):
         leave_types = self.search(domain, order='id')
         employee = self.env['hr.employee']._get_contextual_employee()
         if employee:
-            return leave_types.get_allocation_data(employee, target_date)[employee]
+            allocation_data = leave_types.get_allocation_data(employee, target_date)[employee]
+            result = [data for data in allocation_data if data[1].get('has_allocation', False)]
+            return result
         return []
 
     def get_allocation_data(self, employees, target_date=None):
@@ -474,8 +476,6 @@ class HolidaysType(models.Model):
 
         for employee in employees:
             for leave_type in leave_type_requires_allocation:
-                if len(allocations_leaves_consumed[employee][leave_type]) == 0:
-                    continue
                 lt_info = (
                     leave_type.name,
                     {
@@ -497,9 +497,14 @@ class HolidaysType(models.Model):
                         'icon': leave_type.sudo().icon_id.url,
                         'allows_negative': leave_type.allows_negative,
                         'max_allowed_negative': leave_type.max_allowed_negative,
+                        'has_allocation': True,
                     },
                     leave_type.requires_allocation,
                     leave_type.id)
+                if len(allocations_leaves_consumed[employee][leave_type]) == 0:
+                    lt_info[1]['has_allocation'] = False
+                    allocation_data[employee].append(lt_info)
+                    continue
                 for excess_date, excess_days in extra_data[employee][leave_type]['excess_days'].items():
                     amount = excess_days['amount']
                     lt_info[1]['virtual_excess_data'].update({
