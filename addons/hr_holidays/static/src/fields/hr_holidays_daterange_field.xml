@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr_holidays.HrHolidaysDateRangeField"
+       t-inherit="web.DateTimeField"
+       t-inherit-mode="extension">
+
+        <!-- Insert Start Period next to Start Date -->
+        <xpath expr="//*[@t-ref='start-date']" position="after">
+            <select t-if="props.startPeriodField"
+                    t-on-change="onChangeStartPeriod"
+                    class="o_input ms-2">
+                <option value="am" t-att-selected="startPeriod == 'am'">Morning</option>
+                <option value="pm" t-att-selected="startPeriod == 'pm'">Afternoon</option>
+            </select>
+        </xpath>
+
+        <!-- Insert End Period next to End Date -->
+        <xpath expr="//*[@t-ref='end-date']" position="after">
+            <select t-if="props.endPeriodField"
+                    t-on-change="onChangeEndPeriod"
+                    class="o_input ms-2">
+                <option value="am" t-att-selected="endPeriod == 'am'">Morning</option>
+                <option value="pm" t-att-selected="endPeriod == 'pm'">Afternoon</option>
+            </select>
+        </xpath>
+
+    </t>
+</templates>
+
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="hr_holidays.HrHolidaysDateTimeField" t-inherit="web.DateTimeField" t-inherit-mode="primary">
+        <xpath expr="//*[@t-ref='start-date']" position="after">
+            <div class="px-2">
+                <select t-ref="start-period" class="o_input cursor-pointer user-select-none" t-att-class="props.warnFuture and isDateInTheFuture(1) ? 'text-danger' : ''">
+                    <option value="AM">Morning</option>
+                    <option value="PM">Afternoon</option>
+                </select>
+                 <input
+                            t-ref="start-period"
+                            type="text"
+                            t-att-id="props.startDateField and props.id"
+                            t-att-class="'o_input cursor-pointer user-select-none' + (props.warnFuture and isDateInTheFuture(1) ? 'text-danger' : '')"
+                            autocomplete="off"
+                            inputmode="none"
+                            t-att-placeholder="props.placeholder"
+                            t-att-data-field="endPeriodField"
+                            t-on-input="onInput"
+                            t-on-focus="() => picker.activeInput = endDateField"
+                            t-att-title="props.warnFuture and isDateInTheFuture(1) ? futureWarningMsg : ''"
+                        />
+            </div>
+        </xpath>
+        <xpath expr="//*[@t-ref='end-date']" position="after">
+            <div class="px-2">
+                <select t-ref="end-period" class="o_input cursor-pointer user-select-none" t-att-class="props.warnFuture and isDateInTheFuture(1) ? 'text-danger' : ''">
+                    <option value="AM">Morning</option>
+                    <option value="PM">Afternoon</option>
+                </select>
+                 <input
+                            t-ref="end-period"
+                            type="selection"
+                            t-att-id="props.startDateField and props.id"
+                            t-att-class="'o_input cursor-pointer user-select-none' + (props.warnFuture and isDateInTheFuture(1) ? 'text-danger' : '')"
+                            autocomplete="off"
+                            inputmode="none"
+                            t-att-placeholder="props.placeholder"
+                            t-att-data-field="endPeriodField"
+                            t-att-title="props.warnFuture and isDateInTheFuture(1) ? futureWarningMsg : ''"
+                        />
+            </div>
+        </xpath>
+
+    </t>
+</templates> -->
