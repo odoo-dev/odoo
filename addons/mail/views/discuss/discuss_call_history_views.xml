@@ -24,6 +24,7 @@
                         <field name="end_dt"/>
                         <field name="duration_hour" widget="float_time" options="{'displaySeconds': True}"/>
                     </group>
+                    <field name="artifact_ids" widget="call_debrief" options="{'callStartDateField': 'start_dt', 'callEndDateField': 'end_dt'}"/>
                 </form>
             </field>
         </record>

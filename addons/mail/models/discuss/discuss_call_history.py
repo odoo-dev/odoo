@@ -13,6 +13,7 @@ class DiscussCallHistory(models.Model):
     start_dt = fields.Datetime(index=True, required=True)
     end_dt = fields.Datetime()
     start_call_message_id = fields.Many2one("mail.message", index=True)
+    artifact_ids = fields.One2many('call.artifact', 'res_id', string='Artifacts', domain=[('res_model', '=', 'discuss.call.history')], help="Artifacts (recordings, transcripts, markers) linked to this call")
 
     _channel_id_not_null_constraint = models.Constraint(
         "CHECK (channel_id IS NOT NULL)", "Call history must have a channel"

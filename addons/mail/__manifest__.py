@@ -58,7 +58,7 @@ For more specific needs, you may also assign custom-defined actions
 (technically: Server Actions) to be triggered for each incoming mail.
     """,
     'website': 'https://www.odoo.com/app/discuss',
-    'depends': ['base', 'base_setup', 'bus', 'web_tour', 'html_editor'],
+    'depends': ['base', 'base_setup', 'bus', 'web_tour', 'html_editor', 'call_debrief'],
     'data': [
         'data/mail_groups.xml',
         'wizard/mail_activity_schedule_views.xml',
