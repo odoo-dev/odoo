@@ -33,9 +33,8 @@ export class PaymentPineLabs extends PaymentInterface {
     }
 
     _callPineLabs(data, action) {
-        return this.pos.data
-            .call("pos.payment.method", action, [[this.payment_method_id.id], data])
-            .catch((error) => {
+        return this.callPaymentMethod(action, [[this.payment_method_id.id], data]).catch(
+            (error) => {
                 const line = this.pendingPineLabsPaymentLine();
                 this.pos.paymentTerminalInProgress = false;
                 if (line) {
@@ -48,7 +47,8 @@ export class PaymentPineLabs extends PaymentInterface {
                 } else {
                     throw error;
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -205,10 +205,10 @@ export class PaymentPineLabs extends PaymentInterface {
             clearTimeout(this.pollingTimeout);
 
             // If the user navigates to another screen, stop the polling
-            if (this.pos.router.state.current !== "PaymentScreen") {
-                this._removePaymentHandler();
-                return;
-            }
+            // if (this.pos?.router.state.current !== "PaymentScreen") {
+            //     this._removePaymentHandler();
+            //     return;
+            // }
 
             if (this.payment_stopped) {
                 this._pineLabsCancel().then(() => {
