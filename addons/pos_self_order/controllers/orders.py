@@ -59,6 +59,8 @@ class PosSelfOrderController(http.Controller):
         if amount_total == 0:
             order_ids._process_saved_order(False)
 
+        pos_config._notify('SELF_ORDER_KITCHEN_PRINT', {'pos.order': order_ids.read(order_ids._load_pos_self_data_fields(order_ids.config_id.id), load=False),})
+
         return self._generate_return_values(order_ids, pos_config)
 
     def _get_prefixes(self, device_type):

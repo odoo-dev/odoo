@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import json
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -89,3 +90,19 @@ class PosOrder(models.Model):
         })
         if payment_result == 'Success':
             self._send_order()
+
+    def get_order_to_kitchen_print(self):
+        self.ensure_one()
+
+        try:
+            # Lock the line
+            self.env.cr.execute("SELECT id FROM pos_order WHERE id = %s FOR UPDATE NOWAIT", (self.id,))
+        except:
+            raise UserError(_("Order is being printed by another session."))
+
+        prep_data = self.get_preparation_change()
+        lopc_lines = json.loads(prep_data.get("last_order_preparation_change", {}))
+        if isinstance(lopc_lines.get("lines"), dict) and len(lopc_lines.get("lines")) == len(self.lines):
+            return
+
+        return self.read_pos_data([], self.config_id.id)
