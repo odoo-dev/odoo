@@ -372,17 +372,13 @@
                                                 nolabel="1"/>
                                         </div>
                                         <label for="contract_date_start" string="Contract"/>
-                                        <div class="o_row" name="contract_dates">
-                                            <field name="contract_date_start" string="Start Date" placeholder="Not Employed" class="o_hr_narrow_field me-3"/>
-                                            <span invisible="not contract_date_start">to</span>
-                                            <field name="contract_date_end" string="End Date" placeholder="Indefinite"
-                                                class="o_hr_narrow_field ms-3" invisible="not contract_date_start"/>
-                                            <widget name="button_new_contract"/>
+                                        <div name="contract_dates" class="d-flex">
+                                            <field name="contract_date_start" placeholder="Not employed" widget="daterange" options="{
+                                                'end_date_field': 'contract_date_end',
+                                                'placeholder' : 'Indefinite'}"/>
+                                            <widget name="button_new_contract" class="flex-shrink-0"/>
                                         </div>
-                                        <label for="wage"/>
-                                        <div class="o_row" name="wage">
-                                            <field name="wage" class="oe_inline o_hr_narrow_field" nolabel="1"/>
-                                        </div>
+                                        <field name="wage" class="o_hr_narrow_field"/>
                                         <field name="employee_type"/>
                                         <field name="contract_type_id" string="Contract Type" placeholder="Contract Type"
                                                invisible="not has_country_contract_type" domain="[('country_id', '=', company_country_id)]"/>
