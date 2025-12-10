@@ -640,6 +640,8 @@ Attempting to double-book your time off won't magically make your vacation 2x be
                 raise ValidationError(_("This modification is not allowed in the current state."))
 
     def _check_validity(self):
+        if self.env.context.get('skip_leave_validity_check'):
+            return
         sorted_leaves = defaultdict(lambda: self.env['hr.leave'])
         for leave in self:
             sorted_leaves[(leave.holiday_status_id, leave.date_from.date())] |= leave
@@ -651,7 +653,7 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             if leave_type.allows_negative:
                 max_excess = leave_type.max_allowed_negative
                 for employee in employees:
-                    if not leave_data[employee]:
+                    if not leave_data[employee][0][1]['has_allocation']:
                         raise ValidationError(_("You do not have any allocation for this time off type.\n"
                                                 "Please request an allocation before submitting your time off request."))
                     if leave_data[employee] and leave_data[employee][0][1]['virtual_remaining_leaves'] < -max_excess:
@@ -664,7 +666,7 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             for employee in employees:
                 previous_emp_data = previous_leave_data[employee] and previous_leave_data[employee][0][1]['virtual_excess_data']
                 emp_data = leave_data[employee] and leave_data[employee][0][1]['virtual_excess_data']
-                if not leave_data[employee]:
+                if not leave_data[employee][0][1]['has_allocation']:
                     raise ValidationError(_("You do not have any allocation for this time off type.\n"
                                             "Please request an allocation before submitting your time off request."))
                 if not previous_emp_data and not emp_data:
@@ -1545,6 +1547,9 @@ Attempting to double-book your time off won't magically make your vacation 2x be
             leave_type = leave.holiday_status_id
             date = leave.date_from.date()
             leave_type_data = leave_type.get_allocation_data(leave.employee_id, date)
+            if not leave_type_data[leave.employee_id][0][1]['has_allocation']:
+                leave.with_context(skip_leave_validity_check=True)._force_cancel(reason, 'mail.mt_note')
+                continue
             exceeding_duration = leave_type_data[leave.employee_id][0][1]['total_virtual_excess']
             excess_limit = leave_type.max_allowed_negative if leave_type.allows_negative else 0
             if exceeding_duration <= excess_limit:

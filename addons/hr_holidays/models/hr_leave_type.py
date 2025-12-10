@@ -474,8 +474,8 @@ class HolidaysType(models.Model):
 
         for employee in employees:
             for leave_type in leave_type_requires_allocation:
-                if len(allocations_leaves_consumed[employee][leave_type]) == 0:
-                    continue
+                # if len(allocations_leaves_consumed[employee][leave_type]) == 0:
+                #     continue
                 lt_info = (
                     leave_type.name,
                     {
@@ -497,9 +497,14 @@ class HolidaysType(models.Model):
                         'icon': leave_type.sudo().icon_id.url,
                         'allows_negative': leave_type.allows_negative,
                         'max_allowed_negative': leave_type.max_allowed_negative,
+                        'has_allocation': False,
                     },
                     leave_type.requires_allocation,
                     leave_type.id)
+                if len(allocations_leaves_consumed[employee][leave_type]) == 0:
+                    allocation_data[employee].append(lt_info)
+                    continue
+                lt_info[1]['has_allocation'] = True
                 for excess_date, excess_days in extra_data[employee][leave_type]['excess_days'].items():
                     amount = excess_days['amount']
                     lt_info[1]['virtual_excess_data'].update({
