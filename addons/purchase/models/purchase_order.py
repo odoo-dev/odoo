@@ -1235,6 +1235,11 @@ class PurchaseOrder(models.Model):
                     price = seller.currency_id._convert(seller.price_discounted, self.currency_id)
                 # Fix the PO line's price on the seller's one.
                 pol.price_unit = price
+        else:  # quantity of 0, no line to update, return price used by the purchase's catalog
+            return self._get_product_price_and_data(
+                self.env['product.product'].browse(product_id)
+            )['price']
+
         return pol.price_unit_discounted
 
     def _create_update_date_activity(self, updated_dates):

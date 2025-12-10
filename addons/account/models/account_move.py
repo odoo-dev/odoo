@@ -2653,6 +2653,11 @@ class AccountMove(models.Model):
                 'quantity': quantity,
                 'product_id': product_id,
             })
+        else:  # quantity of 0, no line to update, return price used by the account's catalog
+            return self._get_product_price_and_data(
+                self.env['product.product'].browse(product_id)
+            )['price']
+
         return move_line.price_unit
 
     def _is_readonly(self):

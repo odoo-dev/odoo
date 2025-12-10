@@ -101,3 +101,26 @@ class TestPurchaseProductCatalog(AccountTestInvoicingCommon, HttpCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json()['result'], company_product_price)
+
+    def test_remove_product_from_catalog_without_pol(self):
+        """Test that removing a product from the purchase catalog right after clicking Add button"""
+        self.authenticate(self.env.user.login, self.env.user.login)
+        purchase_order = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+        })
+        resp = self.url_open(
+            url='/product/catalog/update_order_line_info',
+            data=json.dumps({
+                'params': {
+                    'child_field': 'order_line',
+                    'order_id': purchase_order.id,
+                    'product_id': self.product_a.id,
+                    'quantity': 0,
+                    'res_model': 'purchase.order'
+                }
+            }),
+            headers={'Content-Type': 'application/json'},
+        )
+
+        self.assertFalse(purchase_order.order_line)
+        self.assertEqual(resp.json()['result'], self.product_a.standard_price)
