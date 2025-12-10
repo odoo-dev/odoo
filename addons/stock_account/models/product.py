@@ -282,8 +282,8 @@ class ProductProduct(models.Model):
             moves_domain &= Domain([
                 ('date', '<=', at_date),
             ])
-        moves_in = self.env['stock.move'].search(moves_domain & Domain(['|', ('is_in', '=', True), ('is_dropship', '=', True)]))
-        moves_out = self.env['stock.move'].search(moves_domain & Domain(['|', ('is_out', '=', True), ('is_dropship', '=', True)])) if method == "realtime" else self.env['stock.move']
+        moves_in = self.env['stock.move'].search_fetch(moves_domain & Domain(['|', ('is_in', '=', True), ('is_dropship', '=', True)]), ['is_in', 'is_out', 'is_dropship', 'date', 'value'])
+        moves_out = self.env['stock.move'].search_fetch(moves_domain & Domain(['|', ('is_out', '=', True), ('is_dropship', '=', True)]), ['is_in', 'is_out', 'is_dropship', 'date', 'value']) if method == "realtime" else self.env['stock.move']
         # TODO convert to company UoM
         product_value_domain = Domain([('product_id', '=', self.id)])
         if lot:
