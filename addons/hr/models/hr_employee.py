@@ -438,6 +438,11 @@ class HrEmployee(models.Model):
         if version_to_copy.date_version == date:
             return version_to_copy
 
+        start = version_to_copy.contract_date_start or version_to_copy.date_version
+        end = version_to_copy.contract_date_end or date
+        if start and start <= date <= end:
+            raise ValidationError(self.env._("A contract version already exists for this date."))
+        
         date_from, date_to = self.sudo()._get_contract_dates(date)
         contract_date_start = values.get('contract_date_start', date_from)
         contract_date_end = values.get('contract_date_end', date_to)

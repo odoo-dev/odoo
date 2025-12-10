@@ -51,10 +51,22 @@ export class VersionsTimeline extends StatusBarField {
     }
 
     async createVersion(date) {
-        const version_id = await this.orm.call('hr.employee', 'create_version',
-            [this.props.record.evalContext.id, {'date_version': date}]);
+        try {
+            const version_id = await this.orm.call("hr.employee", "create_version", [
+                this.props.record.evalContext.id,
+                { date_version: date },
+            ]);
+            // TODO: why chat button and org chart button disappear
+            await this.loadVersion(version_id);
+        } catch (error) {
+            if (error.data?.name === "odoo.exceptions.ValidationError") {
+                this.dateTimePicker.state.onSelect(false);
+            }
+            throw error;
+        }
+    }
 
-        // TODO: why chat button and org chart button disappear
+    async loadVersion(version_id) {
         const { record } = this.props;
         await record.save();
         await this.props.record.model.load({
