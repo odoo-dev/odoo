@@ -172,6 +172,7 @@ export class FormOptionPlugin extends Plugin {
             ToggleDescriptionAction,
             SelectTextareaValueAction,
             ToggleRequiredAction,
+            ToggleSendCopyAction,
             SetVisibilityAction,
             SetVisibilityDependencyAction,
             SetFormCustomFieldValueListAction,
@@ -408,6 +409,8 @@ export class FormOptionPlugin extends Plugin {
                 }
             });
         }
+        // Initialize email_opt_in hidden field if needed
+        this.initializeEmailOptIn(el);
     }
     /**
      * Ensures formInfo fields are fetched.
@@ -755,6 +758,8 @@ export class FormOptionPlugin extends Plugin {
     async onSnippetDropped({ snippetEl }) {
         // Re-render the fields to ensure each field gets a unique ID.
         await this.rerenderFieldsInElement(snippetEl);
+        // Initialize email_opt_in hidden field if needed
+        this.initializeEmailOptIn(snippetEl);
     }
     /**
      * Handler called when an element is cloned.
@@ -767,6 +772,8 @@ export class FormOptionPlugin extends Plugin {
         await this.rerenderFieldsInElement(cloneEl);
 
         this.removeSuccessMessagePreviews(cloneEl);
+        // Initialize email_opt_in hidden field if needed
+        this.initializeEmailOptIn(cloneEl);
     }
     /**
      * Re-renders all valid fields inside the given element to ensure
@@ -810,6 +817,26 @@ export class FormOptionPlugin extends Plugin {
     removeSuccessMessagePreviews(rootEl) {
         const toCleanEls = rootEl.querySelectorAll(".o_show_form_success_message");
         toCleanEls.forEach((el) => el.classList.remove("o_show_form_success_message"));
+    }
+    /**
+     * Initializes the email_opt_in hidden field if it doesn't exist but should be enabled by default.
+     * This is called when forms are loaded/dropped/cloned to ensure consistency.
+     *
+     * @param {HTMLElement} rootEl - The root element (form or container with forms)
+     */
+    initializeEmailOptIn(rootEl) {
+        const forms = rootEl.matches("form") ? [rootEl] : rootEl.querySelectorAll("form");
+        for (const formEl of forms) {
+            const existingField = formEl.querySelector('input[name="email_opt_in"]');
+            // If hidden field doesn't exist but email_from field exists, 
+            // we might want to enable by default (for templates that have email field)
+            // But only if it's a new form snippet or template
+            if (!existingField && formEl.querySelector('[name="email_from"]')) {
+                // Check if this is a default template form (has email_from but no email_opt_in)
+                // In this case, enable by default
+                this.addHiddenField(formEl, "true", "email_opt_in");
+            }
+        }
     }
     /**
      * Clear the dataset of the field to avoid keeping old values.
@@ -1332,6 +1359,70 @@ export class ToggleRequiredAction extends BuilderAction {
     }
     isApplied({ editingElement: fieldEl, params: { mainParam: activeValue } }) {
         return fieldEl.classList.contains(activeValue);
+    }
+}
+
+export class ToggleSendCopyAction extends BuilderAction {
+    static id = "toggleSendCopy";
+    static dependencies = ["websiteFormOption"];
+
+    getFormEl(el) {
+        return el.tagName === "FORM" ? el : el.closest("form");
+    }
+
+    async apply({ editingElement: el }) {
+        const formEl = this.getFormEl(el);
+        if (!formEl) {
+            return;
+        }
+        const existingField = formEl.querySelector('input[name="email_opt_in"]');
+        if (existingField && existingField.value === "true") {
+            // Disable: remove or set to empty
+            this.dependencies.websiteFormOption.addHiddenField(formEl, "", "email_opt_in");
+        } else {
+            // Enable: add hidden field
+            this.dependencies.websiteFormOption.addHiddenField(formEl, "true", "email_opt_in");
+            await this.ensureEmailFrom(formEl);
+        }
+    }
+
+    isApplied({ editingElement: el }) {
+        const formEl = this.getFormEl(el);
+        if (!formEl) return false;
+        const field = formEl.querySelector('input[name="email_opt_in"]');
+        return field ? field.value === "true" : false;
+    }
+
+    async ensureEmailFrom(formEl) {
+        if (formEl.querySelector('[name="email_from"]')) {
+            return;
+        }
+
+        const authorizedFields = await this.dependencies.websiteFormOption.fetchAuthorizedFields(
+            formEl
+        );
+        const emailFieldData = authorizedFields["email_from"];
+
+        if (emailFieldData) {
+            const field = {
+                ...emailFieldData,
+                name: "email_from",
+                string: emailFieldData.string,
+                type: emailFieldData.type,
+            };
+            field.formatInfo = getDefaultFormat(formEl);
+
+            const fieldEl = renderField(field);
+            let locationEl = formEl.querySelector(
+                ".s_website_form_submit, .s_website_form_recaptcha"
+            );
+            if (!locationEl) {
+                locationEl = formEl.querySelector(".s_website_form_rows");
+                locationEl.insertAdjacentElement("beforeend", fieldEl);
+            } else {
+                locationEl.insertAdjacentElement("beforebegin", fieldEl);
+            }
+        }
     }
 }
 

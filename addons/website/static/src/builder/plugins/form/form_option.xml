@@ -10,6 +10,9 @@
             </t>
         </BuilderSelect>
     </BuilderRow>
+    <BuilderRow label.translate="Send a copy" title.translate="Email a copy of the answers to the visitor." level="1">
+        <BuilderCheckbox action="'toggleSendCopy'" preview="false"/>
+    </BuilderRow>
     <FormActionFieldsOption activeForm="state.activeForm"/>
     <BuilderRow label.translate="Marked Fields">
         <BuilderSelect id="'field_mark_select'" action="'updateLabelsMark'">

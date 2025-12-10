@@ -92,6 +92,34 @@ class WebsiteForm(http.Controller):
                             raise AccessDenied(self.env._('invalid website_form_signature'))
                     request.env[model_name].sudo().browse(id_record).send()
 
+                if kwargs.get('email_opt_in') in ('true', True, 'True', '1', 1) and kwargs.get('email_from'):
+                    visitor_email = kwargs.get('email_from')
+                    authorized_fields = model_record.with_user(SUPERUSER_ID)._get_form_writable_fields(kwargs)
+                    email_copy_values = []
+                    for field_name, value in data['record'].items():
+                        if field_name in authorized_fields:
+                            label = authorized_fields[field_name]['string']
+                            email_copy_values.append((label, value))
+                    if data['custom']:
+                        for line in data['custom'].split('\n'):
+                            if ' : ' in line:
+                                parts = line.split(' : ', 1)
+                                email_copy_values.append((parts[0], parts[1]))
+                    body_html = request.env['ir.qweb']._render('website.email_copy_template', {
+                        'questions': email_copy_values,
+                        'name': kwargs.get('name'),
+                        'company_name': request.env.company.name,
+                    })
+                    mail_values = {
+                        'email_to': visitor_email,
+                        'email_from': request.env.company.email_formatted or request.env.user.email_formatted,
+                        'subject': _('Your answer to %s') % (model_record.website_form_label or _('the form')),
+                        'body_html': body_html,
+                        'auto_delete': True,
+                    }
+                    mail = request.env['mail.mail'].sudo().create(mail_values)
+                    mail.send()
+
         # Some fields have additional SQL constraints that we can't check generically
         # Ex: crm.lead.probability which is a float between 0 and 1
         # TODO: How to get the name of the erroneous field ?

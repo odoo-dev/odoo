@@ -93,6 +93,7 @@
                                                         </label>
                                                         <div class="col-sm">
                                                             <input id="contact7" type="hidden" class="form-control s_website_form_input" name="email_to"/>
+                                                            <input type="hidden" class="form-control s_website_form_input" name="email_opt_in" value="true"/>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -578,4 +579,25 @@
             <field name="user_id" ref="base.public_user"/>
         </record>
     </data>
+
+    <template id="email_copy_template" name="Website: send a copy" t-name="website.email_copy_template">
+        <div style="margin: 0px; padding: 0px;">
+            <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                Hello<t t-if="name"> <t t-out="name"/></t>,
+                <br/><br/>
+                Thank you for filling in the form.
+                <br/><br/>
+                <strong style="font-size: 15px;">Copy of your Form Submission</strong>
+                <br/>
+                <t t-foreach="questions" t-as="question">
+                    <br/>
+                    <strong><t t-out="question[0]"/>: </strong> <t t-out="question[1]"/>
+                </t>
+                <br/><br/>
+                Thank you,
+                <br/>
+                <t t-out="company_name"/>
+            </p>
+        </div>
+    </template>
 </odoo>
