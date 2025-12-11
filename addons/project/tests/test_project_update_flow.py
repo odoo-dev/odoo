@@ -124,3 +124,58 @@ class TestProjectUpdate(TestProjectCommon):
         self.task_2.copy()
         project_update_data_list = create_project_update_view()
         self.assertListEqual(project_update_data_list, [self.project_pigs.task_count, 2, 67])
+
+    def test_project_update_milestones_tracking(self):
+        d1 = fields.Date.today() + relativedelta(days=10)
+        milestone1 = self.env['project.milestone'].create({
+            'name': 'M1',
+            'project_id': self.project_pigs.id,
+            'deadline': d1,
+        })
+        self.env['project.update'].create({
+            'name': "Update 1",
+            'status': 'on_track',
+            'project_id': self.project_pigs.id,
+        })
+
+        # 1. Edit M1 -> D2
+        d2 = fields.Date.today() + relativedelta(days=20)
+        milestone1.write({'deadline': d2})
+
+        # Check result: Old=D1, New=D2
+        res = self.env['project.update']._get_last_updated_milestone(self.project_pigs)
+        self.assertEqual(res[0]['name'], 'M1', "The updated milestone should be M1")
+        self.assertEqual(res[0]['old_value'], d1, "Old value should be the original deadline D1")
+        self.assertEqual(res[0]['new_value'], d2, "New value should be the updated deadline D2")
+
+        # 2. Milestone 2 (Empty -> D3)
+        milestone2 = self.env['project.milestone'].create({
+            'name': 'M2',
+            'project_id': self.project_pigs.id,
+        })
+        self.env['project.update'].create({
+            'name': "Update 2",
+            'status': 'on_track',
+            'project_id': self.project_pigs.id,
+        })
+
+        d3 = fields.Date.today() + relativedelta(days=5)
+        milestone2.write({'deadline': d3})
+
+        # Check result: Old=False, New=D3
+        res = self.env['project.update']._get_last_updated_milestone(self.project_pigs)
+        self.assertEqual(res[0]['name'], 'M2', "The updated milestone should be M2")
+        self.assertEqual(res[0]['old_value'], False, "Old value should be False (initially empty)")
+        self.assertEqual(res[0]['new_value'], d3, "New value should be the updated deadline D3")
+
+        # 3. Sorting Check
+        # Modify M1 again (D1 -> D4). D4 is far future.
+        d4 = fields.Date.today() + relativedelta(days=100)
+        milestone1.write({'deadline': d4})
+
+        # Both M1 (D4) and M2 (D3) are updated since Update 2.
+        # M2 (D3 +5 days) is earlier than M1 (D4 +100 days).
+        # Should return M2.
+        res = self.env['project.update']._get_last_updated_milestone(self.project_pigs)
+        self.assertEqual(len(res), 1, "Should return exactly one updated milestone")
+        self.assertEqual(res[0]['name'], 'M2', "M2 should be returned as it has the earlier deadline")

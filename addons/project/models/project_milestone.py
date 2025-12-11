@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import defaultdict
+from datetime import date
 
 from odoo import api, fields, models
 from odoo.tools import format_date
@@ -22,6 +23,7 @@ class ProjectMilestone(models.Model):
     sequence = fields.Integer('Sequence', default=10)
     project_id = fields.Many2one('project.project', required=True, default=_get_default_project_id, domain=[('is_template', '=', False)], index=True, ondelete='cascade')
     deadline = fields.Date(tracking=True, copy=False)
+    last_deadline = fields.Date('Last Deadline', copy=False, export_string_translation=False)
     is_reached = fields.Boolean(string="Reached", default=False, copy=False)
     reached_date = fields.Date(compute='_compute_reached_date', store=True, export_string_translation=False)
     task_ids = fields.One2many('project.task', 'milestone_id', 'Tasks', export_string_translation=False)
@@ -97,6 +99,13 @@ class ProjectMilestone(models.Model):
             ('allow_milestones', operator, value),
         ])
         return [('project_id', 'in', query)]
+
+    def write(self, vals):
+        if 'deadline' in vals:
+            for milestone in self:
+                if not milestone.last_deadline:
+                    milestone.last_deadline = milestone.deadline or date.min
+        return super().write(vals)
 
     def toggle_is_reached(self, is_reached):
         self.ensure_one()

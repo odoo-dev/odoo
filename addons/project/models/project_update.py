@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import date
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models
@@ -94,6 +95,8 @@ class ProjectUpdate(models.Model):
                 "task_count": project.task_count,
                 "closed_task_count": project.task_count - project.open_task_count,
             })
+            project.milestone_ids.sudo().write({'last_deadline': False})
+
         return updates
 
     def unlink(self):
@@ -154,43 +157,17 @@ class ProjectUpdate(models.Model):
 
     @api.model
     def _get_last_updated_milestone(self, project):
-        query = """
-            SELECT DISTINCT pm.id as milestone_id,
-                            pm.deadline as deadline,
-                            FIRST_VALUE(old_value_datetime::date) OVER w_partition as old_value,
-                            pm.deadline as new_value
-                       FROM mail_message mm
-                 INNER JOIN mail_tracking_value mtv
-                         ON mm.id = mtv.mail_message_id
-                 INNER JOIN ir_model_fields imf
-                         ON mtv.field_id = imf.id
-                        AND imf.model = 'project.milestone'
-                        AND imf.name = 'deadline'
-                 INNER JOIN project_milestone pm
-                         ON mm.res_id = pm.id
-                      WHERE mm.model = 'project.milestone'
-                        AND mm.message_type = 'notification'
-                        AND pm.project_id = %(project_id)s
-         """
-        if project.last_update_id.create_date:
-            query = query + "AND mm.date > %(last_update_date)s"
-        query = query + """
-                     WINDOW w_partition AS (
-                             PARTITION BY pm.id
-                             ORDER BY mm.date ASC
-                            )
-                   ORDER BY pm.deadline ASC
-                   LIMIT 1;
-        """
-        query_params = {'project_id': project.id}
-        if project.last_update_id.create_date:
-            query_params['last_update_date'] = project.last_update_id.create_date
-        self.env.cr.execute(query, query_params)
-        results = self.env.cr.dictfetchall()
-        mapped_result = {res['milestone_id']: {'new_value': res['new_value'], 'old_value': res['old_value']} for res in results}
-        milestones = self.env['project.milestone'].search([('id', 'in', list(mapped_result.keys()))])
+        milestone = self.env['project.milestone'].search([
+            ('project_id', '=', project.id),
+            ('last_deadline', '!=', False)
+        ], order='deadline asc', limit=1)
+
+        if not milestone:
+            return []
+
+        old_value = milestone.last_deadline
         return [{
             **milestone._get_data(),
-            'new_value': mapped_result[milestone.id]['new_value'],
-            'old_value': mapped_result[milestone.id]['old_value'],
-        } for milestone in milestones]
+            'new_value': milestone.deadline,
+            'old_value': old_value if old_value != date.min else False,
+        }]
