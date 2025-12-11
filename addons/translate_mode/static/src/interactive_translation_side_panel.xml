@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.InteractiveTranslationSidePanel">
+        <t t-set="categories" t-value="this.getTranslationCategories()" />
+        <aside
+            class="o-translate-side-panel d-flex flex-column position-fixed top-0 end-0 bg-view shadow"
+            data-translation-highlight="off"
+            t-ref="root"
+            t-translation="off"
+        >
+            <header class="d-flex flex-column p-2 gap-2">
+                <form t-on-submit.prevent="this.updateLanguage">
+                    <h2 class="d-flex align-items-center gap-2 p-2 m-0 text-nowrap">
+                        Translate into
+                        <select class="o_input fw-bold" name="language" t-att-value="this.state.lang" t-on-change="onLanguageChange">
+                            <t t-foreach="this.state.languages" t-as="language" t-key="language.id">
+                                <option
+                                    t-att-value="language.code"
+                                    t-esc="language.display_name"
+                                />
+                            </t>
+                        </select>
+                        <t t-if="this.currentLang !== this.state.lang">
+                            <button
+                                class="btn btn-link px-1 py-0"
+                                t-att-title="'Update language and refresh'"
+                                type="submit"
+                            >
+                                <i class="fa fa-refresh" />
+                            </button>
+                        </t>
+                    </h2>
+                </form>
+                <t t-if="this.interactiveTranslation.highlightsEnabled">
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn p-1" t-on-click="() => this.switchMode()">
+                            <i
+                                class="fa fa-lg"
+                                t-att-class="this.state.mode === 'keep' ? 'fa-stop-circle-o text-danger' : 'fa-circle text-muted'"
+                                t-att-title="'Keep track of all previous translations'"
+                            />
+                        </button>
+                        <search class="o_searchview form-control d-flex align-items-center gap-2">
+                            <i class="oi oi-search text-muted" />
+                            <div class="o_searchview_input_container d-flex flex-grow-1">
+                                <input
+                                    name="filter-translations"
+                                    type="text"
+                                    class="o_searchview_input flex-grow-1 border-0 p-0 bg-transparent"
+                                    t-att-placeholder="'Filter'"
+                                    t-model="this.state.filter"
+                                />
+                            </div>
+                        </search>
+                    </div>
+                </t>
+                <t t-else="">
+                    <h5 class="text-muted fw-bold fst-italic text-center p-4">
+                        Translation highlighting has been disabled for this language.
+                    </h5>
+                </t>
+            </header>
+            <div class="d-flex flex-column overflow-auto h-100">
+                <t t-foreach="categories" t-as="category" t-key="category.id">
+                    <details open="">
+                        <summary class="d-flex justify-content-between p-2">
+                            <h3 class="d-flex gap-2 align-items-center m-0">
+                                <i class="oi oi-chevron-down oi-small" />
+                                <t t-esc="category.label" />
+                            </h3>
+                            <span class="fs-3">
+                                <strong t-esc="category.translations.length" />
+                                /
+                                <t t-esc="this.props.translations.length" />
+                            </span>
+                        </summary>
+                        <ul class="list-unstyled m-0 d-flex flex-column overflow-y-auto">
+                            <t t-foreach="category.translations" t-as="translation" t-key="translation.source">
+                                <li
+                                    t-attf-class="border-4 border-start border-{{ translation.translated ? 'success' : 'danger' }}"
+                                >
+                                    <div
+                                        class="o-translate-card card card-body gap-2 p-2"
+                                        tabindex="0"
+                                        t-on-click="(ev) => this.onCardClick(translation, ev)"
+                                    >
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="d-flex gap-2 align-items-center m-0">
+                                                <span t-esc="formatTarget(translation.targets)" />
+                                                <t t-if="this.hiddenTranslations.has(translation)">
+                                                    <i
+                                                        class="fa fa-eye-slash text-muted"
+                                                        t-att-title="'These elements are hidden in the current user interface'"
+                                                    />
+                                                </t>
+                                            </h5>
+                                            <a
+                                                class="d-flex gap-1 align-items-center user-select-none"
+                                                target="_blank"
+                                                t-att-href="translation.link"
+                                                t-att-title="'Edit translation on Weblate'"
+                                            >
+                                                <i class="fa fa-external-link" />
+                                                Translate
+                                            </a>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <img
+                                                class="o-translation-flag user-select-none"
+                                                t-att-src="this.defaultLangFlag[0]"
+                                                t-att-alt="this.defaultLangFlag[1]"
+                                            />
+                                            <t t-if="this.isMissingSource(translation)">
+                                                <span class="text-muted">
+                                                    No source term
+                                                </span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-wrap" t-esc="translation.source" />
+                                            </t>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <img
+                                                class="o-translation-flag user-select-none"
+                                                t-att-src="this.currentLangFlag[0]"
+                                                t-att-alt="this.currentLangFlag[1]"
+                                            />
+                                            <t t-if="this.isMissingTranslation(translation)">
+                                                <span class="text-muted">
+                                                    Missing translation
+                                                </span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-wrap" t-esc="translation.translation" />
+                                            </t>
+                                        </div>
+                                    </div>
+                                </li>
+                            </t>
+                        </ul>
+                    </details>
+                </t>
+            </div>
+        </aside>
+    </t>
+
+</templates>
