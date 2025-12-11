@@ -261,6 +261,14 @@ class HrLeaveAccrualLevel(models.Model):
             if level.start_count == 0:
                 level.milestone_date = 'creation'
 
+    @api.onchange('yearly_month', 'yearly_day')
+    def _onchange_yearly_day(self):
+        if self.yearly_month and self.yearly_day:
+            if self.yearly_month=='2' and int(self.yearly_day) > 28:
+                self.yearly_day = '28'
+            elif self.yearly_month in ('4', '6', '9', '11') and int(self.yearly_day) > 30:
+                self.yearly_day = '30'
+
     def _inverse_milestone_date(self):
         for level in self:
             if level.milestone_date == 'creation':
