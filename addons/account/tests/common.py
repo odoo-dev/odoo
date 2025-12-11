@@ -108,12 +108,6 @@ class AccountTestInvoicingCommon(ProductCommon):
                 }),
             ] if cls.env.registry.loaded else [],
         })
-        if cls.tax_sale_b:
-            cls.tax_sale_b.fiscal_position_ids = cls.fiscal_pos_a.ids
-            cls.tax_sale_b.original_tax_ids = cls.tax_sale_a
-        if cls.tax_purchase_b:
-            cls.tax_purchase_b.fiscal_position_ids = cls.fiscal_pos_a.ids
-            cls.tax_purchase_b.original_tax_ids = cls.tax_purchase_a
 
         # ==== Payment terms ====
         cls.pay_terms_a = cls.env.ref('account.account_payment_term_immediate')
