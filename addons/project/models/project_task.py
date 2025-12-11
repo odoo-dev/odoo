@@ -1534,6 +1534,19 @@ class ProjectTask(models.Model):
                     model_description=task_model_description,
                     mail_auto_delete=False,
                 )
+    def _notify_get_action_link(self, link_type, **kwargs):
+        if link_type == "view":
+            self.ensure_one()
+            project = self.project_id
+            parent_path = f"/odoo/project/{project.id}/tasks"
+            task_path = f"{parent_path}/{self.id}"
+            url = (
+                f"{task_path}"
+                f"?active_id={project.id}"
+                f"&parent_path={parent_path}"
+            )
+            return self.get_base_url() + url
+
 
     def _message_auto_subscribe_followers(self, updated_values, default_subtype_ids):
         if 'user_ids' not in updated_values:
