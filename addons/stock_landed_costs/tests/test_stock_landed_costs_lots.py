@@ -8,7 +8,7 @@ from odoo import Command
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
+
 class TestStockLandedCostsLots(TestLotValuation):
     @classmethod
     def setUpClass(cls):

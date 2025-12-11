@@ -10,7 +10,7 @@ from odoo.tests import tagged, Form
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
+
 class TestStockLandedCostsRounding(TestStockLandedCostsCommon):
 
     def test_stock_landed_costs_rounding(self):

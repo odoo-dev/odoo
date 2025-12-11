@@ -9,7 +9,7 @@ from odoo.addons.stock_landed_costs.tests.common import TestStockLandedCostsComm
 from freezegun import freeze_time
 
 
-@skip('Temporary to fast merge new valuation')
+
 class TestStockValuationLCCommon(TestStockLandedCostsCommon):
 
     @classmethod

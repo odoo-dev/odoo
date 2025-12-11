@@ -7,7 +7,6 @@ from odoo.tests import tagged, Form
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class TestStockLandedCostsMrp(ValuationReconciliationTestCommon):
 
     @classmethod
