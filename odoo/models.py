@@ -3281,6 +3281,7 @@ class BaseModel(metaclass=MetaModel):
                     copy=field.copy,
                     readonly=field.readonly,
                     export_string_translation=field.export_string_translation,
+                    manual=field.manual
                 ))
 
     @api.model
