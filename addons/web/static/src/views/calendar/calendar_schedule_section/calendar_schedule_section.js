@@ -1,4 +1,5 @@
-import { Component, useEffect, useRef } from "@odoo/owl";
+import { Component, useEffect, useRef, useState } from "@odoo/owl";
+import { useBus } from "@web/core/utils/hooks";
 
 export class CalendarScheduleSection extends Component {
     static template = "web.CalendarScheduleSection";
@@ -8,6 +9,10 @@ export class CalendarScheduleSection extends Component {
     };
     setup() {
         this.rootRef = useRef("eventsToSchedule");
+        this.state = useState({ isDragging: false });
+        useBus(this.props.model.bus, "CALENDAR_EVENT_DRAG", ({ detail }) => {
+            this.state.isDragging = detail.drag;
+        });
         useEffect(
             (el) => {
                 new FullCalendar.Interaction.Draggable(el, {

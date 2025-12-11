@@ -3,3 +3,10 @@
     // style when needed (unlike with bootstrap's d-flex)
     display: flex;
 }
+
+.o_calendar_unschedule_zone {
+    min-height: 120px;
+    border: 1px solid rgba($o-enterprise-action-color, 0.4);
+    border-radius: 10px;
+    background-color: mix($o-enterprise-action-color, $o-view-background-color, 10%);
+}

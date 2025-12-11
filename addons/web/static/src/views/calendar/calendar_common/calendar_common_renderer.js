@@ -113,10 +113,12 @@ export class CalendarCommonRenderer extends Component {
         return {
             ...this.options,
             dayMaxEventRows: this.props.model.eventLimit,
+            dragRevertDuration: 0,
             droppable: true,
             editable: this.props.model.canEdit,
             eventClick: this.onEventClick,
             eventDragStart: this.onEventDragStart,
+            eventDragStop: this.onEventDragStop,
             eventDrop: this.onEventDrop,
             eventMouseEnter: this.onEventMouseEnter,
             eventMouseLeave: this.onEventMouseLeave,
@@ -365,13 +367,23 @@ export class CalendarCommonRenderer extends Component {
     isSelectionAllowed(event) {
         return event.end.getDate() === event.start.getDate() || event.allDay;
     }
+    onEventDragStop(info) {
+        this.ref.el.classList.remove("o_interacting", "o_grabbing");
+        const x = info.jsEvent.clientX;
+        const y = info.jsEvent.clientY;
+        const dropTarget = document.elementFromPoint(x, y);
+        if (dropTarget && dropTarget.closest(".o_calendar_unschedule_zone")) {
+            info.event.remove();
+            this.props.model.unscheduleEvent(Number(info.event.id));
+        }
+        this.props.model.bus.trigger("CALENDAR_EVENT_DRAG", { drag: false });
+    }
     onEventDrop(info) {
         this.fc.api.unselect();
         this.props.model.updateRecord(this.fcEventToRecord(info.event)).catch((e) => {
             info.revert();
             throw e;
         });
-        this.ref.el.classList.remove("o_interacting", "o_grabbing");
     }
     onEventResize(info) {
         this.fc.api.unselect();
@@ -432,6 +444,7 @@ export class CalendarCommonRenderer extends Component {
         this.fc.api.unselect();
         this.highlightEvent(info.event, "o_cw_custom_highlight");
         this.ref.el.classList.add("o_interacting", "o_grabbing");
+        this.props.model.bus.trigger("CALENDAR_EVENT_DRAG", { drag: true });
     }
     onEventResizeStart(info) {
         this.props.cleanSquareSelection();

@@ -2,23 +2,28 @@
 <templates xml:space="preserve">
 
     <t t-name="web.CalendarScheduleSection">
-        <h5>To Schedule</h5>
-        <div t-ref="eventsToSchedule" class="d-flex flex-column">
-            <div 
-                class="align-items-center cursor-pointer o_event_to_schedule_draggable py-1"
-                t-foreach="props.model.data.eventsToSchedule.records"
-                t-as="event"
-                t-key="event.id"
-                t-att-data-res-id="event.id" 
-                t-on-click="() => this.openRecord(event)"
-            >
-                <i class="text-muted oi oi-draggable"/>
-                <span class="ps-1 text-truncate" t-out="event.display_name" t-att-title="event.display_name"/>
-            </div>
+        <div t-if="state.isDragging" class="d-flex o_calendar_unschedule_zone align-items-center justify-content-center h-100 mb-2">
+            <b>Drop here to unschedule</b>
         </div>
-        <button t-if="displayLoadMoreButton" class="btn btn-link" t-on-click="() => this.props.model.loadMoreEventsToSchedule()">
-            Load More
-        </button>
+        <div t-att-class="{ 'd-none': state.isDragging }">
+            <h5>To Schedule</h5>
+            <div t-ref="eventsToSchedule" class="d-flex flex-column">
+                <div 
+                    class="align-items-center cursor-pointer o_event_to_schedule_draggable py-1"
+                    t-foreach="props.model.data.eventsToSchedule.records"
+                    t-as="event"
+                    t-key="event.id"
+                    t-att-data-res-id="event.id" 
+                    t-on-click="() => this.openRecord(event)"
+                >
+                    <i class="text-muted oi oi-draggable"/>
+                    <span class="ps-1 text-truncate" t-out="event.display_name" t-att-title="event.display_name"/>
+                </div>
+            </div>
+            <button t-if="displayLoadMoreButton" class="btn btn-link" t-on-click="() => this.props.model.loadMoreEventsToSchedule()">
+                Load More
+            </button>
+        </div>
     </t>
 
 </templates>
