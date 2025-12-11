@@ -222,7 +222,7 @@ class HrWorkEntry(models.Model):
             ('state', '=', 'validated'),
             ('date', '<=', max(self.mapped('date'))),
             ('date', '>=', min(self.mapped('date'))),
-            ('company_id', '=', self.env.company)
+            ('company_id', '=', self.env.company.id),
         ])
         validated_entries_by_employee_date = defaultdict(lambda: self.env['hr.work.entry'])
         for entry in validated_work_entries:
