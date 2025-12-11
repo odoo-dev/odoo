@@ -901,12 +901,6 @@ class IrAttachment(models.Model):
             stream.last_modified = stat.st_mtime
             stream.size = stat.st_size
 
-        elif self.db_datas:
-            stream.type = 'data'
-            stream.data = self.raw
-            stream.last_modified = self.write_date
-            stream.size = len(stream.data)
-
         elif self.url:
             # When the URL targets a file located in an addon, assume it
             # is a path to the resource. It saves an indirection and
@@ -923,8 +917,13 @@ class IrAttachment(models.Model):
 
         else:
             stream.type = 'data'
-            stream.data = b''
-            stream.size = 0
+            stream.last_modified = self.write_date
+            if self.raw:
+                stream.data = self.raw
+                stream.size = len(stream.data)
+            else:
+                stream.data = b''
+                stream.size = 0
 
         return stream
 

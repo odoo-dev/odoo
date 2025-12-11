@@ -40,17 +40,27 @@ class IrBinary(models.AbstractModel):
         :returns: single record
         :raises MissingError: when no record was found.
         """
+
         record = None
+        record_su = None
         if xmlid:
-            record = self.env.ref(xmlid, False)
-        elif res_id is not None and res_model in self.env:
-            record = self.env[res_model].browse(res_id).exists()
+            res_model, res_id = self.env['ir.model.data']._xmlid_to_res_model_res_id(xmlid, raise_if_not_found=False)
+        if res_id is not None and res_model in self.env:
+            record = self.env[res_model].browse(res_id)
+            record_su = record.sudo()
+            fields_to_fetch = [name for name, field in record._fields.items() if field.prefetch]
+            record_su.fetch(fields_to_fetch)
+            try:
+                record_su[fields_to_fetch[0]]
+            except MissingError:
+                record = None
+                record_su = None
         if not record:
             raise MissingError(f"No record found for xmlid={xmlid}, res_model={res_model}, id={res_id}")  # pylint: disable=missing-gettext
         if access_token and verify_limited_field_access_token(record, field, access_token, scope="binary"):
-            return record.sudo()
+            return record_su
         if record._can_return_content(field, access_token):
-            return record.sudo()
+            return record_su
         record.check_access("read")
         return record
 

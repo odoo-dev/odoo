@@ -16,6 +16,7 @@ models which only purpose is to run tests.""",
         'web_unsplash',
         'website',
         'theme_default',
+        'test_http',
     ],
     'demo': [
         'data/test_website_demo.xml',

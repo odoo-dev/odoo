@@ -127,11 +127,21 @@ class TestStandardPerformance(UtilPerf):
 
     @mute_logger('odoo.http')
     def test_10_perf_sql_img_controller(self):
-        self.authenticate('demo', 'demo')
-        # not published user, get the not found image placeholder
-        self.assertEqual(self.env['res.users'].sudo().browse(2).website_published, False)
-        url = '/web/image/res.users/2/image_256'
-        self.assertEqual(self._get_url_hot_query(url), 7)
+        with self.subTest(name="non access to the record"):
+            url = '/web/image/res.users/2/image_256'
+            self.assertEqual(self._get_url_hot_query(url), 13)
+
+        with self.subTest(name="access to the record"):
+            self.env['res.users'].sudo().browse(2).website_published = True
+            url = '/web/image/res.users/2/image_256'
+            self.assertEqual(self._get_url_hot_query(url), 4)
+
+        with self.subTest(name="access to the placeholder"):
+            self.authenticate('demo', 'demo')
+            # not published user, get the not found image placeholder
+            self.env['res.users'].sudo().browse(2).website_published = False
+            url = '/web/image/res.users/2/image_256'
+            self.assertEqual(self._get_url_hot_query(url), 6)
 
     @mute_logger('odoo.http')
     def test_11_perf_sql_img_controller(self):
@@ -140,18 +150,18 @@ class TestStandardPerformance(UtilPerf):
         url = '/web/image/res.users/2/image_256'
         select_tables_perf = {
             'orm_signaling_registry': 1,
-            'res_users': 2,
+            'res_users': 1,
             'res_partner': 1,
             'ir_attachment': 1,
         }
-        self._check_url_hot_query(url, 5, select_tables_perf)
+        self._check_url_hot_query(url, 4, select_tables_perf)
 
     @mute_logger('odoo.http')
     def test_20_perf_sql_img_controller_bis(self):
         url = '/web/image/website/1/favicon'
         select_tables_perf = {
             'orm_signaling_registry': 1,
-            'website': 2,
+            'website': 1,
             # 1. `_find_record()` performs an access right check through
             #    `exists()` which perform a request on the website.
             # 2. `_get_stream_from` ends up reading the requested record to
@@ -160,10 +170,23 @@ class TestStandardPerformance(UtilPerf):
             # 1. `_record_to_stream()` does a `search()`..
             # 2. ..followed by a `_read()`
         }
-        self._check_url_hot_query(url, 5, select_tables_perf)
+        self._check_url_hot_query(url, 4, select_tables_perf)
 
         self.authenticate('portal', 'portal')
-        self._check_url_hot_query(url, 5, select_tables_perf)
+        self._check_url_hot_query(url, 4, select_tables_perf)
+
+    def test_30_perf_sql_img_controller_xmlid(self):
+        with self.subTest(name="existing xmlid"):
+            url = '/web/image/web.image_placeholder'
+            self.assertEqual(self._get_url_hot_query(url), 3)
+
+        with self.subTest(name="non existing xmlid"):
+            url = '/web/image/no.xmlid_2'
+            self.assertEqual(self._get_url_hot_query(url), 5)
+
+        with self.subTest(name="non existing id"):
+            url = '/web/image/99999'
+            self.assertEqual(self._get_url_hot_query(url), 7)
 
 
 class TestWebsitePerformanceCommon(UtilPerf):

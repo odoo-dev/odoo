@@ -726,3 +726,17 @@ class TestHttpStaticUpload(TestHttpStaticCommon):
             )
         self.assertFalse(capture.records, "No attachment should have been created")
         self.assertEqual(res.status_code, HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+
+
+class TestImagePerformance(TestHttpStaticCommon):
+    def test_01_web_image_performance(self):
+        self.assertDownloadPlaceholder('/web/image/no.xmlid')
+
+        with self.subTest(name="existing xmlid"), self.assertQueryCount(2):
+            self.assertDownloadPlaceholder('/web/image/web.image_placeholder')
+
+        with self.subTest(name="non existing xmlid"), self.assertQueryCount(4):
+            self.assertDownloadPlaceholder('/web/image/no.xmlid_2')
+
+        with self.subTest(name="non existing id"), self.assertQueryCount(7):
+            self.assertDownloadPlaceholder('/web/image/99999')
