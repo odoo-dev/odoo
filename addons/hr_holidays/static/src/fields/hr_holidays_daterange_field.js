@@ -15,11 +15,10 @@ export class HrHolidaysDateRangeField extends dateRangeField.component {
         super.setup();
     }
 
-    // convenient getters to read ORM values
     get startPeriod() {
         return this.props.record.data[this.props.startPeriodField];
     }
-
+    
     get endPeriod() {
         return this.props.record.data[this.props.endPeriodField];
     }
@@ -29,7 +28,7 @@ export class HrHolidaysDateRangeField extends dateRangeField.component {
             [this.props.startPeriodField]: ev.target.value,
         });
     }
-
+    
     onChangeEndPeriod(ev) {
         this.props.record.update({
             [this.props.endPeriodField]: ev.target.value,

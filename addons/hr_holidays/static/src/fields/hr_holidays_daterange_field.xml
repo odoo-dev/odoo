@@ -2,9 +2,8 @@
 <templates xml:space="preserve">
     <t t-name="hr_holidays.HrHolidaysDateRangeField"
        t-inherit="web.DateTimeField"
-       t-inherit-mode="extension">
+       t-inherit-mode="primary">
 
-        <!-- Insert Start Period next to Start Date -->
         <xpath expr="//*[@t-ref='start-date']" position="after">
             <select t-if="props.startPeriodField"
                     t-on-change="onChangeStartPeriod"
@@ -14,7 +13,6 @@
             </select>
         </xpath>
 
-        <!-- Insert End Period next to End Date -->
         <xpath expr="//*[@t-ref='end-date']" position="after">
             <select t-if="props.endPeriodField"
                     t-on-change="onChangeEndPeriod"
