@@ -76,6 +76,7 @@ export function defineWebsiteModels() {
     }));
 }
 
+const domParserCache = new Map();
 /**
  * This helper will be moved to website. Prefer using setupHTMLBuilder
  * for builder-specific tests
@@ -187,6 +188,17 @@ export async function setupWebsiteBuilder(
             return true;
         },
     });
+
+    patchWithCleanup(DOMParser.prototype, {
+        parseFromString(html, type) {
+            const cacheKey = `${html}::${type}`;
+            if (!domParserCache.has(cacheKey)) {
+                domParserCache.set(cacheKey, super.parseFromString(html, type));
+            }
+            return domParserCache.get(cacheKey);
+        },
+    });
+
     await getService("action").doAction({
         name: "Website Builder",
         tag: "website_preview",
