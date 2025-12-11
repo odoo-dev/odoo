@@ -129,10 +129,6 @@
                                         </span>
                                     </div>
                                     <field name="categ_id" string="Category"/>
-                                    <field name="company_id"
-                                        groups="base.group_multi_company"
-                                        options="{'no_create': True}"
-                                        placeholder="Visible to all"/>
                                     <field name="currency_id" invisible="1"/>
                                     <field name="cost_currency_id" invisible="1"/>
                                     <field name="product_variant_id" invisible="1"/>
@@ -152,9 +148,6 @@
                                         groups="uom.group_uom"
                                         force_save="1"
                                         context="{'product_id': product_variant_id if product_variant_count == 1 else False, 'product_ids': product_variant_ids, 'show_variant_name': product_variant_count > 1}"/>
-                                </group>
-                                <group name="extra_info" string="Extra Info">
-                                    <field name="product_tag_ids" widget="many2many_tags" context="{'product_template_id': id}"/>
                                 </group>
                                 <group string="Short Description" name="description">
                                     <field colspan="2" name="description_sale" nolabel="1" placeholder="This note is added to sales orders and invoices."/>
@@ -348,7 +341,6 @@
                         </div>
                         <group>
                             <group name="codes" string="Codes">
-                                <field name="default_code"/>
                                 <field name="barcode"/>
                                 <field name="type" invisible="1"/>
                             </group>
@@ -390,8 +382,6 @@
                                     groups="uom.group_uom"
                                     force_save="1"
                                     context="{'product_id': id}"/>
-                                <field name="product_tag_ids" widget="many2many_tags" readonly="1"/>
-                                <field name="additional_product_tag_ids" widget="many2many_tags" context="{'product_variant_id': id}"/>
                             </group>
                         </group>
                     </sheet>
@@ -428,16 +418,11 @@
             <field name="arch" type="xml">
                 <list string="Product Variants" multi_edit="1" duplicate="false" sample="1" default_order="is_favorite desc, default_code, name, id">
                     <field name="is_favorite" widget="boolean_favorite" nolabel="1" readonly="1"/>
-                    <field name="default_code" optional="show" readonly="1"/>
                     <field name="barcode" optional="hide" readonly="1"/>
                     <field name="name" readonly="1"/>
                     <field name="product_template_variant_value_ids" widget="many2many_tags" groups="product.group_product_variant" readonly="1"/>
-                    <field name="company_id" groups="base.group_multi_company" optional="hide" readonly="1"/>
                     <field name="lst_price" optional="show" string="Sales Price"/>
                     <field name="standard_price" optional="show"/>
-                    <field name="categ_id" optional="hide"/>
-                    <field name="product_tag_ids" widget="many2many_tags" readonly="1" optional="hide"/>
-                    <field name="additional_product_tag_ids" widget="many2many_tags" optional="hide"/>
                     <field name="type" optional="hide" readonly="1"/>
                     <field name="uom_id" groups="uom.group_uom" optional="show" readonly="1"/>
                     <field name="product_tmpl_id" readonly="1" column_invisible="True"/>
@@ -495,7 +480,6 @@
                     <attribute name="duplicate">false</attribute>
                 </form>
                 <xpath expr="//div[@name='standard_price_uom']" position="after">
-                    <field name="default_code"/>
                     <field name="barcode"/>
                 </xpath>
                 <xpath expr="//field[@name='is_favorite']" position="attributes">
@@ -517,17 +501,6 @@
                 <xpath expr="//div[hasclass('oe_title')]" position="inside">
                     <field name="product_template_variant_value_ids" widget="many2many_tags" readonly="1" invisible="not product_template_variant_value_ids" groups="product.group_product_variant"/>
                 </xpath>
-                <field name="product_tag_ids" position="attributes">
-                    <attribute name="options">{'no_open': True}</attribute>
-                    <attribute name="context">{'product_template_id': product_tmpl_id}</attribute>
-                </field>
-                <field name="product_tag_ids" position="after">
-                    <field
-                        name="additional_product_tag_ids"
-                        widget="many2many_tags"
-                        invisible="product_variant_count == 1"
-                    />
-                </field>
                 <field name="uom_ids" position="attributes">
                     <attribute name="context">{'product_id': id}</attribute>
                 </field>
