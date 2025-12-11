@@ -10,7 +10,7 @@ const UNCROSSABLE_ELEMENT_SELECTOR = ["blockquote", "form", "div", "section", ".
 
 export class BuilderSelectionRestrictionPlugin extends Plugin {
     static id = "builderSelectionRestriction";
-    static dependencies = ["history", "selection", "operation", "builderOptions"];
+    static dependencies = ["selection", "operation", "builderOptions"];
 
     resources = {
         uncrossable_element_selector: UNCROSSABLE_ELEMENT_SELECTOR,
@@ -24,9 +24,19 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         this.special_block_with_text_in_non_div = [
             ...new Set(this.getResource("special_block_with_text_in_non_div")),
         ];
-        this.selectionCorrected = false;
+        // Check if the selection has been corrected to avoid multiple
+        // corrections.
+        this.isSelectionCorrected = false;
 
         this.addDomListener(this.editable, "keydown", this.onKeydown);
+        this.addDomListener(this.editable, "keydown", (ev) => {
+            if (getActiveHotkey(ev) !== "control+a") {
+                return;
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.onCtrlAKeydown();
+        });
         this.addDomListener(this.document, "mouseup", this.restrictSelectionInClosestDiv);
         this.addDomListener(this.document, "touchend", this.restrictSelectionInClosestDiv);
 
@@ -41,49 +51,52 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         this.editable.removeEventListener("click", this.onClick, { capture: true });
     }
 
+    /**
+     * Activates the options of the clicked element.
+     * Note: if the selection was corrected, the click is ignored, as the
+     * selection already managed it.
+     */
     onClick(ev) {
         this.dependencies.operation.next(() => {
-            if (this.selectionCorrected) {
-                this.selectionCorrected = false;
+            if (this.isSelectionCorrected) {
+                this.isSelectionCorrected = false;
                 return;
             }
             this.dependencies.builderOptions.updateContainers(ev.target);
         });
     }
 
-    onKeydown(ev) {
-        if (getActiveHotkey(ev) === "control+a") {
-            const { editableSelection, currentSelectionIsInEditable } =
-                this.dependencies.selection.getSelectionData();
-            if (
-                !currentSelectionIsInEditable ||
-                // edge case: when click the image, then ctrl+a the selection should stay on the image
-                editableSelection.commonAncestorContainer.nodeName === "FIGURE" ||
-                // edge case: when main body is empty, and click the footer outer blue container
-                // then ctrl+a, the selection is collapsed in editable but to the main body div,
-                // which causes options updating
-                (editableSelection.anchorNode.isContentEditable === false &&
-                    editableSelection.isCollapsed)
-            ) {
-                ev.preventDefault();
-                ev.stopPropagation();
-                return;
-            }
-            ev.preventDefault();
-            const closestSpecialBlock = closestElement(
-                editableSelection.anchorNode,
-                this.special_block_with_text_in_non_div.join(",")
-            );
-            const closestDiv = closestElement(editableSelection.anchorNode, "div");
+    /**
+     * Manages the selection made with the "Control + A" key.
+     */
+    onCtrlAKeydown() {
+        const { editableSelection, currentSelectionIsInEditable } =
+            this.dependencies.selection.getSelectionData();
+        if (
+            !currentSelectionIsInEditable ||
+            // If we clicked on an image inside a <figure> element, keep the
+            // selection on the image only, to not select the whole <figure>.
+            editableSelection.commonAncestorContainer.nodeName === "FIGURE" ||
+            // When main body is empty, and click the footer outer blue
+            // container then ctrl+a, the selection is collapsed in editable but
+            // to the main body div, which causes options updating.
+            (editableSelection.anchorNode.isContentEditable === false &&
+                editableSelection.isCollapsed)
+        ) {
+            return;
+        }
+        const closestSpecialBlock = closestElement(
+            editableSelection.anchorNode,
+            this.special_block_with_text_in_non_div.join(",")
+        );
+        const closestDiv = closestElement(editableSelection.anchorNode, "div");
 
-            // if the closest special block doesn't contains the closest div block,
-            // we select the paragraph, otherwise we select the whole closest div block
-            if (closestSpecialBlock && !closestSpecialBlock.contains(closestDiv)) {
-                this.selectAllInElement(closestElement(editableSelection.anchorNode, "p"));
-            } else {
-                this.selectAllInElement(closestDiv);
-            }
-            ev.stopPropagation();
+        // if the closest special block doesn't contains the closest div block,
+        // we select the paragraph, otherwise we select the whole closest div block
+        if (closestSpecialBlock && !closestSpecialBlock.contains(closestDiv)) {
+            this.selectAllInElement(closestElement(editableSelection.anchorNode, "p"));
+        } else {
+            this.selectAllInElement(closestDiv);
         }
     }
 
@@ -225,7 +238,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
                     this.dependencies.builderOptions.updateContainers(
                         closestElement(currentSelection.commonAncestorContainer)
                     );
-                    this.selectionCorrected = true;
+                    this.isSelectionCorrected = true;
                     break;
                 } else {
                     break;
@@ -237,6 +250,6 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         this.dependencies.builderOptions.updateContainers(
             closestElement(selection.commonAncestorContainer)
         );
-        this.selectionCorrected = true;
+        this.isSelectionCorrected = true;
     }
 }
