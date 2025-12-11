@@ -67,12 +67,6 @@
         </div>
         <div class="o-mail-Chatter-content d-flex flex-column flex-grow-1 bg-inherit">
             <t>
-                <t t-if="props.has_activities and activities.length and !messageSearch.searching and !messageSearch.searched">
-                    <t t-call="mail.ActivityList"/>
-                </t>
-                <t t-if="scheduledMessages.length">
-                    <t t-call="mail.ScheduledMessagesList"/>
-                </t>
                 <div t-if="state.isAttachmentBoxOpened" class="o-mail-AttachmentBox position-relative">
                     <div class="d-flex align-items-center">
                         <hr class="flex-grow-1"/>
@@ -96,6 +90,12 @@
                         </FileUploader>
                     </div>
                 </div>
+                <t t-if="props.has_activities and activities.length and !messageSearch.searching and !messageSearch.searched">
+                    <t t-call="mail.ActivityList"/>
+                </t>
+                <t t-if="scheduledMessages.length">
+                    <t t-call="mail.ScheduledMessagesList"/>
+                </t>
                 <div t-if="state.showPinnedMessages and hasPinnedMessages" class="o-mail-pinnedMessages bg-inherit">
                     <div class="d-flex align-items-center">
                         <hr class="flex-grow-1"/>
