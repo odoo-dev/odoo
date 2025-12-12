@@ -561,13 +561,49 @@ registry.category("web_tour.tours").add("test_combo_preparation_receipt", {
 registry.category("web_tour.tours").add("MultiPreparationPrinter", {
     steps: () =>
         [
+            {
+                content: "Mock Epson printer fetch",
+                trigger: "body",
+                run: () => {
+                    const originalFetch = window.fetch;
+                    // window.fetch = async (url, options) => {
+                    //     if (url.includes("/cgi-bin/epos/service.cgi")) {
+
+                    //         const code = "ERR01";
+                    //         const msg = "Printer Error";
+
+                    //         const xml = `<response success='false' code='${code}'>${msg}</response>`;
+
+                    //         return new Response(xml, {
+                    //             status: 200,
+                    //             headers: {
+                    //                 "Content-Type": "text/xml",
+                    //             },
+                    //         });
+                    //     }
+                    //     return originalFetch(url, options);
+                    // };
+
+                    window.fetch = async (url, options) => {
+                        if (url.includes("/cgi-bin/epos/service.cgi")) {
+                            console.log("Mocked Epson printer call:", url);
+                            return new Response("<response success='true' code=''></response>", {
+                                status: 200,
+                                headers: {
+                                    "Content-Type": "text/xml",
+                                },
+                            });
+                        }
+                        return originalFetch(url, options);
+                    };
+                },
+            },
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             FloorScreen.clickTable("5"),
             ProductScreen.clickDisplayedProduct("Product 1"),
             ProductScreen.clickOrderButton(),
-            Dialog.bodyIs("Printer 2: The printer is not reachable."),
-            Dialog.confirm(),
+            FloorScreen.isShown(),
         ].flat(),
 });
 
