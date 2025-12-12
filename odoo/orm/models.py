@@ -64,7 +64,7 @@ from .fields_temporal import Date, Datetime
 from .fields_textual import Char, StoredTranslations
 
 from .identifiers import NewId
-from .query import Query, TableSQL
+from .query import Query, TableSQL, domain_to_ids
 from .utils import (
     OriginIds, Prefetch, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
@@ -4712,13 +4712,29 @@ class BaseModel(metaclass=MetaModel):
             # to avoid reoptimizing it
             domain = Domain(self._active_name, 'in', OrderedSet((True,))) & domain
 
+        # check if access already made a query
+        if (ids := domain_to_ids(sec_domain)) is not None:
+            records = self.browse(ids).filtered_domain(domain)
+            if order:
+                records = records.sorted(order)
+            if offset or limit is not None:
+                if offset is None:
+                    offset = 0
+                if limit is None:
+                    limit = len(records)
+                records = records.browse(records._ids[offset:offset + limit])
+            return records._as_query(bool(order))
+
         # build the query
         domain = domain.optimize_full(self)
         if domain.is_false():
             return self.browse()._as_query()
         query = Query(self)
         if not domain.is_true():
-            query.add_where(domain._to_sql(query.table))
+            if (ids := domain_to_ids(domain)) is not None:
+                query.set_result_ids(self.browse(ids).filtered_domain(domain).ids)
+            else:
+                query.add_where(domain._to_sql(query.table))
 
         # security access domain
         if not sec_domain.is_true():

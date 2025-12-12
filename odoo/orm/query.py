@@ -28,6 +28,18 @@ _SQL_JOINS = {
 }
 
 
+def domain_to_ids(domain) -> tuple | None:
+    """Given an optimized domain, check if it is bound to some ids and return them."""
+    if (
+        hasattr(domain, 'field_expr')
+        and domain.field_expr == 'id'
+        and domain.operator == 'any!'
+        and isinstance((query := domain.value), Query)
+    ):
+        return query._ids
+    return None
+
+
 def _generate_table_alias(src_table_alias: str, link: str) -> str:
     """ Generate a standard table alias name. An alias is generated as following:
 
