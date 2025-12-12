@@ -41,6 +41,16 @@ class StockPicking(models.Model):
         self.purchase_id.sudo().action_acknowledge()
         return super()._action_done()
 
+    def _get_all_po_pickings(self):
+        all_pickings = self.env['stock.picking']
+        for picking in self:
+            next_picking = picking
+            while next_picking:
+                all_pickings |= next_picking
+                next_picking = next_picking._get_next_transfers()
+        all_pickings |= all_pickings.return_ids
+        return all_pickings
+
 
 class StockWarehouse(models.Model):
     _inherit = 'stock.warehouse'

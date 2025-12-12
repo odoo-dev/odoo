@@ -43,3 +43,9 @@ class StockPicking(models.Model):
         res = super()._get_subcontract_mo_confirmation_ctx()
         res['po_to_notify'] = self.move_ids.purchase_line_id.order_id
         return res
+
+    def _get_all_po_pickings(self):
+        all_pickings = super()._get_all_po_pickings()
+        for picking in self:
+            all_pickings |= picking.purchase_id._get_subcontracting_resupplies()
+        return all_pickings

@@ -129,6 +129,10 @@ class PurchaseOrder(models.Model):
                         to_log[order_line] = (order_line.product_qty, pre_order_line_qty[order_line])
                 if to_log:
                     order._log_decrease_ordered_quantity(to_log)
+        if 'priority' in vals:
+            for order in self:
+                all_picking_ids = order.picking_ids._get_all_po_pickings().filtered(lambda p: p.state not in ['cancel', 'done'])
+                all_picking_ids.write({'priority': vals['priority']})
         return res
 
     # --------------------------------------------------

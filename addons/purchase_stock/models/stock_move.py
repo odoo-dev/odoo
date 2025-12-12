@@ -157,6 +157,13 @@ class StockMove(models.Model):
             already_set_ids.update(move.purchase_line_id.ids)
             move.with_context(date_planned_set_ids=already_set_ids).purchase_line_id.date_planned = date_planned
 
+    def _get_new_picking_values(self):
+        vals = super()._get_new_picking_values()
+        po = self.reference_ids.purchase_ids
+        if po.priority == '1':
+            vals['priority'] = po.priority
+        return vals
+
     # --------------------------------------------------------
     # Valuation
     # --------------------------------------------------------
