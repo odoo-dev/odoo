@@ -85,7 +85,7 @@ patch(PosStore.prototype, {
         let previousProductLine = null;
 
         // Add a down payment for transactions that were already done online
-        if (sale_order.amount_paid > 0) {
+        if (sale_order.amount_paid > 0 && !this.session._is_sale_automatic_invoice) {
             if (!(await this.loadDownPaymentProduct())) {
                 return;
             }

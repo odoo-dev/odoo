@@ -3,10 +3,11 @@
 import odoo
 from uuid import uuid4
 
+from odoo.addons.sale.tests.test_payment_flow import TestSalePayment
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
 from odoo.tests import Form
 from odoo import fields, Command
-from odoo.tools import format_date
+from odoo.tools import format_date, mute_logger
 
 @odoo.tests.tagged('post_install', '-at_install')
 class TestPoSSale(TestPointOfSaleHttpCommon):
@@ -1886,3 +1887,28 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
             "The amount_unpaid for the SO should not be 0 if there are no transactions."
         )
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_ecommerce_unpaid_order_is_shown_in_pos', login="accountman")
+
+
+class TestPoSSalePayment(TestSalePayment, TestPointOfSaleHttpCommon):
+
+    def test_pos_sale_payment_flow(self):
+        """
+        Test that an SO with an existing online payment (Automatic Invoice = True)
+        does not result in duplicate down payment lines when settled in POS.
+        """
+        # Set automatic invoice
+        self.sale_order.require_payment = True
+        self.sale_order.prepayment_percent = 0.2
+        self.env['ir.config_parameter'].sudo().set_param('sale.automatic_invoice', 'True')
+
+        tx = self._create_transaction(
+            flow='direct',
+            amount=self.sale_order.amount_total * self.sale_order.prepayment_percent,
+            sale_order_ids=[self.sale_order.id],
+            state='done')
+
+        with mute_logger('odoo.addons.sale.models.payment_transaction'):
+            tx._post_process()
+        self.main_pos_config.down_payment_product_id = self.env.ref("pos_sale.default_downpayment_product")
+        self.main_pos_config.open_ui()
+        self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_pos_sale_payment_flow', login="accountman")

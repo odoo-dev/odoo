@@ -595,3 +595,23 @@ registry.category("web_tour.tours").add("test_ecommerce_unpaid_order_is_shown_in
             PosSale.checkOrdersListNotEmpty(),
         ].flat(),
 });
+registry.category("web_tour.tours").add("test_pos_sale_payment_flow", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            PosSale.settleNthOrder(1),
+            ProductScreen.selectedOrderlineHas("Down Payment (POS)"),
+            {
+                content: "Check orderline count",
+                trigger: `.order-container .orderline`,
+                run: () => {
+                    const orderlines = document.querySelectorAll(".orderline");
+                    if (orderlines.length !== 3) {
+                        throw new Error(`Expected 3 orderlines, found ${orderlines.length}`);
+                    }
+                },
+            },
+            ProductScreen.totalAmountIs(580.0),
+        ].flat(),
+});
