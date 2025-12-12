@@ -3927,7 +3927,7 @@ class BaseModel(metaclass=MetaModel):
                 raise ValueError(f"Invalid field {field_name!r} in {self._name!r}")
             self._check_field_access(field, 'write')
 
-        new_vals_list = self._prepare_create_values(vals_list)
+        new_records = self._prepare_create_values(vals_list)
 
         # classify fields for each record
         data_list = []
@@ -4049,7 +4049,8 @@ class BaseModel(metaclass=MetaModel):
 
         return records
 
-    def _prepare_create_values(self, vals_list: list[ValuesType]) -> list[ValuesType]:
+    @api.model
+    def _prepare_create_values(self, vals_list: list[ValuesType]) -> BaseModel:
         """ Clean up and complete the given create values, and return a list of
         new vals containing:
 
@@ -4074,7 +4075,7 @@ class BaseModel(metaclass=MetaModel):
             if field.precompute and field.readonly
         )
 
-        result_vals_list = []
+        record_ids = []
         for vals in vals_list:
             # add default values
             vals = self._add_missing_default_values(vals)
@@ -4088,14 +4089,15 @@ class BaseModel(metaclass=MetaModel):
                 vals.setdefault('write_uid', self.env.uid)
                 vals.setdefault('write_date', self.env.cr.now())
 
-            result_vals_list.append(vals)
+            record_ids.append(self.new(vals, validate=True).id)
+        records = self.browse(record_ids)
 
         # add precomputed fields
-        self._add_precomputed_values(result_vals_list)
+        records._compute_precomputed_values()
 
-        return result_vals_list
+        return records
 
-    def _add_precomputed_values(self, vals_list: list[ValuesType]) -> None:
+    def _compute_precomputed_values(self) -> None:
         """ Add missing precomputed fields to ``vals_list`` values.
         Only applies for precompute=True fields.
         """
@@ -4107,29 +4109,12 @@ class BaseModel(metaclass=MetaModel):
         if not precomputable:
             return
 
-        # determine which vals must be completed
-        vals_list_todo = [
-            vals
-            for vals in vals_list
-            if any(fname not in vals for fname in precomputable)
-        ]
-        if not vals_list_todo:
-            return
-
-        # create new records for the vals that must be completed
-        records = self.browse().concat(*(self.new(vals, validate=True) for vals in vals_list_todo))
-
-        for record, vals in zip(records, vals_list_todo):
-            vals['__precomputed__'] = precomputed = set()
+        for record in self:
             for fname, field in precomputable.items():
-                if fname not in vals:
-                    # computed stored fields with a column
-                    # have to be computed before create
-                    # s.t. required and constraints can be applied on those fields.
-                    vals[fname] = field.convert_to_write(record[fname], self)
-                    precomputed.add(field)
-
-        records.invalidate_recordset()
+                # computed stored fields with a column
+                # have to be computed before create
+                # s.t. required and constraints can be applied on those fields.
+                record[fname] = field.convert_to_write(record[fname], self)
 
     @api.model
     def _create(self, data_list: list[dict]) -> Self:
