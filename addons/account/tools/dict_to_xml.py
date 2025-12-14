@@ -38,6 +38,8 @@ def dict_to_xml(node, *, nsmap={}, template=None, render_empty_nodes=False, tag=
     :param path: (optional) The path of the currently rendered node in the XML tree (needed only for recursive calls).
     :return: The rendered XML node as an lxml.Element.
     """
+    nsmap = node.get('_nsmap', {}) or nsmap
+
     def convert_tag_to_lxml_convention(tag):
         if ':' in tag:
             namespace, local_name = tag.split(':')

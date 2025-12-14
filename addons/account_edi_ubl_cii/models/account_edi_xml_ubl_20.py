@@ -30,32 +30,35 @@ class AccountEdiXmlUBL20(models.AbstractModel):
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_ubl_20.xml"
 
-    def _get_document_type_code_node(self, invoice, invoice_data):
-        """Returns the `DocumentTypeCode` node tag"""
-        # To be overriden by custom format if required
-        pass
-
-    def _export_invoice(self, invoice):
-        """ Generates an UBL 2.0 xml for a given invoice. """
-        # 1. Validate the structure of the taxes
+    def _export_invoice_node(self, invoice):
+        # Validate the structure of the taxes
         self._validate_taxes(invoice.invoice_line_ids.tax_ids)
 
-        # 2. Instantiate the XML builder
+        # Instantiate the XML builder
         vals = {'invoice': invoice.with_context(lang=invoice.partner_id.lang)}
         document_node = self._get_invoice_node(vals)
 
-        # 3. Run constraints
-        vals['document_node'] = document_node
+        # Run constraints
+        vals['document_node'] = {
+            **document_node,
+            '_nsmap': self._get_document_nsmap(vals),
+        }
         errors = [constraint for constraint in self._export_invoice_constraints(invoice, vals).values() if constraint]
+        return vals, errors
 
+    def _turn_invoice_node_to_string(self, vals):
         template = self._get_document_template(vals)
-        nsmap = self._get_document_nsmap(vals)
 
-        # 4. Render the XML
-        xml_content = dict_to_xml(document_node, nsmap=nsmap, template=template)
+        # Render the XML
+        xml_content = dict_to_xml(vals['document_node'], template=template)
 
-        # 5. Format the XML
-        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8'), set(errors)
+        # Format the XML
+        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8')
+
+    def _export_invoice(self, invoice):
+        vals, errors = self._export_invoice_node(invoice)
+        xml_content = self._turn_invoice_node_to_string(vals)
+        return xml_content, errors
 
     # -------------------------------------------------------------------------
     # EXPORT: Helpers

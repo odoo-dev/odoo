@@ -90,14 +90,18 @@ class AccountEdiXmlOIOUBL21(models.AbstractModel):
             } if vals['document_type'] == 'credit_note' else None,
         })
 
-    def _get_document_type_code_node(self, invoice, invoice_data):
-        # EXTENDS 'account_edi_ubl_cii
-        # http://www.datypic.com/sc/ubl20/e-cbc_DocumentTypeCode.html
-        return {
-            '_text': '380' if invoice.move_type == 'out_invoice' else '381',
-            'listAgencyID': '6',
-            'listID': 'UN/ECE 1001',
-        }
+    def _ubl_get_additional_document_reference_invoice_pdf_node(self, vals, attachment_values):
+        # EXTENDS
+        node = super()._ubl_get_additional_document_reference_invoice_pdf_node(vals, attachment_values)
+        invoice = vals.get('invoice')
+        if invoice and invoice.move_type in ('out_invoice', 'out_refund'):
+            if invoice.move_type == 'out_invoice':
+                node['cbc:DocumentTypeCode']['_text'] = '380'
+            else:
+                node['cbc:DocumentTypeCode']['_text'] = '381'
+            node['cbc:DocumentTypeCode']['listAgencyID'] = '6'
+            node['cbc:DocumentTypeCode']['listAgencyID'] = 'UN/ECE 1001'
+        return node
 
     def _get_address_node(self, vals):
         # EXTENDS account.edi.xml.ubl_20
