@@ -294,6 +294,6 @@ class ResPartner(models.Model):
         if invoice_edi_format == 'nlcius':
             return self.env['account.edi.xml.ubl_nl']
         if invoice_edi_format == 'ubl_bis3':
-            return self.env['account.edi.xml.ubl_bis3']
+            return self.env['account.edi.ubl_pint_eu_invoice']
         if invoice_edi_format == 'ubl_sg':
             return self.env['account.edi.xml.ubl_sg']

@@ -1,6 +1,10 @@
 from odoo import _, models
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
-from odoo.tools import frozendict
+from odoo.addons.account_edi_ubl_cii.tools import Invoice, CreditNote, DebitNote
+from odoo.addons.account.tools import dict_to_xml
+from odoo.tools import frozendict, html2plaintext
+
+from lxml import etree
 
 
 class AccountEdiUBL(models.AbstractModel):
@@ -53,8 +57,8 @@ class AccountEdiUBL(models.AbstractModel):
         :param currency:    The currency for which the grouping key is expressed.
         :return:            A dictionary that could be used as a grouping key for the taxes helpers.
         """
-        customer = vals['customer']
-        supplier = vals['supplier']
+        customer = vals['customer']['partner']
+        supplier = vals['supplier']['partner']
         if tax_data and (
             tax_data['tax'].amount_type != 'percent'
             or self._ubl_is_recycling_contribution_tax(tax_data)
@@ -109,15 +113,22 @@ class AccountEdiUBL(models.AbstractModel):
             'currency': tax_subtotal_grouping_key['currency'],
         }
 
-    def _ubl_turn_emptying_taxes_as_new_base_lines(self, base_lines, company, vals):
+    def _ubl_turn_base_lines_price_unit_as_always_positive(self, vals):
+        for base_line in vals['base_lines']:
+            if base_line['price_unit'] < 0.0:
+                base_line['quantity'] *= -1
+                base_line['price_unit'] *= -1
+
+    def _ubl_turn_emptying_taxes_as_new_base_lines(self, vals):
         """ Extract emptying taxes such as "Vidanges" on bottles from the current base lines and turn them into
         additional base lines.
 
         :param base_lines:  The original 'base_lines' of the document.
-        :param company:     The company owning the 'base_lines'.
         :param vals:        Some custom data.
         """
         AccountTax = self.env['account.tax']
+        company = vals['company']
+        base_lines = vals['base_lines']
 
         def exclude_function(base_line, tax_data):
             if not tax_data:
@@ -144,7 +155,12 @@ class AccountEdiUBL(models.AbstractModel):
             base_line['price_unit'] /= base_line['_aggregated_quantity']
             base_line['product_id'] = self.env['product.product']
 
-        return new_base_lines + extra_base_lines
+        vals['base_lines'] = new_base_lines + extra_base_lines
+        vals['_turn_emptying_taxes_as_new_base_lines'] = {
+            'original_base_lines': base_lines,
+            'new_base_lines': new_base_lines,
+            'extra_base_lines': extra_base_lines,
+        }
 
     # -------------------------------------------------------------------------
     # EXPORT: Collecting data
@@ -175,7 +191,7 @@ class AccountEdiUBL(models.AbstractModel):
         base_lines = vals['base_lines']
         company = vals['company']
         company_currency = company.currency_id
-        currency = vals['currency_id']
+        currency = vals['currency']
 
         for base_line in base_lines:
             ubl_values = base_line['_ubl_values']
@@ -222,7 +238,7 @@ class AccountEdiUBL(models.AbstractModel):
         base_lines = vals['base_lines']
         company = vals['company']
         company_currency = company.currency_id
-        currency = vals['currency_id']
+        currency = vals['currency']
 
         for base_line in base_lines:
             ubl_values = base_line['_ubl_values']
@@ -260,7 +276,7 @@ class AccountEdiUBL(models.AbstractModel):
         base_lines = vals['base_lines']
         company = vals['company']
         company_currency = company.currency_id
-        currency = vals['currency_id']
+        currency = vals['currency']
 
         for base_line in base_lines:
             ubl_values = base_line['_ubl_values']
@@ -333,7 +349,7 @@ class AccountEdiUBL(models.AbstractModel):
         base_lines = vals['base_lines']
         company = vals['company']
         company_currency = company.currency_id
-        currency = vals['currency_id']
+        currency = vals['currency']
 
         for sub_currency, suffix in ((currency, '_currency'), (company_currency, '')):
             base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
@@ -374,6 +390,50 @@ class AccountEdiUBL(models.AbstractModel):
             for currency_suffix in ('_currency', ''):
                 ubl_values[f'price_amount{currency_suffix}'] = tax_details[f'raw_gross_price_unit{currency_suffix}']
 
+    def _ubl_init_values(self):
+        return {
+            'is_sale_module_installed': self.env['ir.module.module']._get('sale').state == 'installed',
+        }
+
+    def _ubl_add_values_company(self, vals, company):
+        vals['company'] = company
+        vals['company_currency'] = company.currency_id
+
+    def _ubl_add_values_currency(self, vals, currency):
+        vals['currency'] = currency
+
+    def _ubl_add_values_supplier(self, vals):
+        company = vals['company']
+
+        vals['supplier'] = {
+            'partner': company.partner_id,
+            'commercial_partner': company.partner_id.commercial_partner_id,
+        }
+
+    def _ubl_add_values_customer(self, vals, customer):
+        vals['customer'] = {
+            'partner': customer,
+            'commercial_partner': customer.commercial_partner_id,
+        }
+
+    def _ubl_add_values_delivery(self, vals, delivery):
+        vals['delivery'] = {
+            'partner': delivery,
+            'commercial_partner': delivery.commercial_partner_id,
+        }
+
+    def _ubl_add_values_payee_financial_account(self, vals, partner_bank):
+        vals['payee_financial_account'] = {
+            'record': partner_bank,
+            'account_number': partner_bank.acc_number.replace(' ', ''),
+        }
+
+    def _ubl_add_values_payment_term(self, vals, payment_term):
+        vals['payment_term'] = {
+            'record': payment_term,
+            'note': html2plaintext(payment_term.note) or None,
+        }
+
     def _ubl_add_values_tax_currency_code_company_currency_if_foreign_currency(self, vals):
         """ Add 'vals' -> '_ubl_values' -> 'tax_currency_code'
 
@@ -382,7 +442,7 @@ class AccountEdiUBL(models.AbstractModel):
         :param vals:    Some custom data.
         """
         company = vals['company']
-        currency = vals['currency_id']
+        currency = vals['currency']
         vals['tax_currency_code'] = None if currency == company.currency_id else company.currency_id.name
 
     def _ubl_add_values_tax_currency_code_company_currency(self, vals):
@@ -424,13 +484,12 @@ class AccountEdiUBL(models.AbstractModel):
         base_lines = vals['base_lines']
         company = vals['company']
         company_currency = company.currency_id
-        currency = vals['currency_id']
+        currency = vals['currency']
 
-        ubl_values = vals['_ubl_values']
-        ubl_values['tax_totals'] = {}
-        ubl_values['tax_totals_currency'] = {}
-        ubl_values['withholding_tax_totals'] = {}
-        ubl_values['withholding_tax_totals_currency'] = {}
+        vals['tax_totals'] = {}
+        vals['tax_totals_currency'] = {}
+        vals['withholding_tax_totals'] = {}
+        vals['withholding_tax_totals_currency'] = {}
 
         def tax_totals_grouping_function(base_line, tax_data, sub_currency):
             tax_grouping_key = self._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, sub_currency)
@@ -467,7 +526,7 @@ class AccountEdiUBL(models.AbstractModel):
                     target_key = f'tax_totals{suffix}'
                     sign = 1
 
-                ubl_values[target_key][frozendict(grouping_key)] = {
+                vals[target_key][frozendict(grouping_key)] = {
                     **grouping_key,
                     'amount': sign * values[f'tax_amount{suffix}'],
                     'subtotals': {},
@@ -495,7 +554,7 @@ class AccountEdiUBL(models.AbstractModel):
                 if not tax_total_grouping_key:
                     continue
 
-                tax_total_values = ubl_values[target_key][frozendict(tax_total_grouping_key)]
+                tax_total_values = vals[target_key][frozendict(tax_total_grouping_key)]
                 tax_total_values['subtotals'][frozendict(grouping_key)] = {
                     **grouping_key,
                     'base_amount': values[f'base_amount{suffix}'],
@@ -534,7 +593,7 @@ class AccountEdiUBL(models.AbstractModel):
                 if not tax_total_grouping_key:
                     continue
 
-                tax_total_values = ubl_values[target_key][frozendict(tax_total_grouping_key)]
+                tax_total_values = vals[target_key][frozendict(tax_total_grouping_key)]
                 tax_total_values['subtotals'][frozendict(tax_subtotal_grouping_key)]['tax_categories'][frozendict(grouping_key)] = {
                     **grouping_key,
                     'base_amount': values[f'base_amount{suffix}'],
@@ -542,8 +601,8 @@ class AccountEdiUBL(models.AbstractModel):
                 }
 
             for key in (f'withholding_tax_totals{suffix}', f'tax_totals{suffix}'):
-                if not ubl_values[key]:
-                    ubl_values[key][None] = {
+                if not vals[key]:
+                    vals[key][None] = {
                         'currency': sub_currency,
                         'amount': 0.0,
                         'subtotals': {},
@@ -567,18 +626,23 @@ class AccountEdiUBL(models.AbstractModel):
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
-        ubl_values = vals['_ubl_values']
-        ubl_values['payable_rounding_amount'] = 0.0
-        ubl_values['payable_rounding_amount_currency'] = 0.0
-        ubl_values['payable_rounding_base_lines'] = []
+        vals['payable_rounding_amount'] = 0.0
+        vals['payable_rounding_amount_currency'] = 0.0
+        vals['payable_rounding_base_lines'] = []
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key:
                 continue
 
-            ubl_values['payable_rounding_amount_currency'] += values['total_excluded_currency']
-            ubl_values['payable_rounding_amount'] += values['total_excluded']
+            vals['payable_rounding_amount_currency'] += values['total_excluded_currency']
+            vals['payable_rounding_amount'] += values['total_excluded']
             for base_line, _taxes_data in values['base_line_x_taxes_data']:
-                ubl_values['payable_rounding_base_lines'].append(base_line)
+                vals['payable_rounding_base_lines'].append(base_line)
+
+        vals['base_lines'] = [
+            base_line
+            for base_line in vals['base_lines']
+            if base_line not in vals['payable_rounding_base_lines']
+        ]
 
     def _ubl_add_values_allowance_charge_early_payment(self, vals):
         """ Add 'vals' -> '_ubl_values' -> 'allowance_charges_early_payment' representing the allowance/charges
@@ -604,9 +668,7 @@ class AccountEdiUBL(models.AbstractModel):
         base_lines = vals['base_lines']
         company = vals['company']
         company_currency = company.currency_id
-        currency = vals['currency_id']
-
-        ubl_values = vals['_ubl_values']
+        currency = vals['currency']
 
         def grouping_function(base_line, tax_data, sub_currency):
             if self._ubl_is_early_payment_base_line(base_line):
@@ -619,7 +681,7 @@ class AccountEdiUBL(models.AbstractModel):
             )
             values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
 
-            allowance_charges_early_payment = ubl_values[f'allowance_charges_early_payment{suffix}'] = []
+            allowance_charges_early_payment = vals[f'allowance_charges_early_payment{suffix}'] = []
             for grouping_key, values in values_per_grouping_key.items():
                 if not grouping_key:
                     continue
@@ -639,6 +701,42 @@ class AccountEdiUBL(models.AbstractModel):
     # -------------------------------------------------------------------------
     # EXPORT: Building nodes
     # -------------------------------------------------------------------------
+
+    def _ubl_get_line_quantity_node(self, vals, base_line, index):
+        return {
+            '_text': base_line['quantity'],
+            'unitCode': self._get_uom_unece_code(base_line['product_uom_id']),
+        }
+
+    def _ubl_get_line_extension_amount_node(self, vals, base_line, index):
+        currency = vals['currency']
+
+        return {
+            '_text': FloatFmt(base_line['_ubl_values']['line_extension_amount'], min_dp=currency.decimal_places),
+            'currencyID': currency.name,
+        }
+
+    def _ubl_get_line_allowance_charge_nodes(self, vals, base_line, index):
+        ubl_values = base_line['_ubl_values']
+        allowance_charges_nodes = []
+
+        # Discount.
+        discount_values = ubl_values['allowance_charge_discount_currency']
+        if discount_values:
+            allowance_charges_nodes.append(self._ubl_get_line_allowance_charge_discount_node(vals, discount_values))
+
+        # Recycling contribution taxes.
+        for recycling_contribution_values in base_line['_ubl_values']['allowance_charges_recycling_contribution_currency']:
+            allowance_charges_nodes.append(self._ubl_get_line_allowance_charge_recycling_contribution_node(vals, recycling_contribution_values))
+
+        # Excise taxes.
+        for excise_values in base_line['_ubl_values']['allowance_charges_excise_currency']:
+            allowance_charges_nodes.append(self._ubl_get_line_allowance_charge_excise_node(vals, excise_values))
+
+        return allowance_charges_nodes
+
+    def _ubl_get_line_tax_total_nodes(self, vals, base_line, index):
+        return []
 
     def _ubl_get_line_item_node_classified_tax_category_node(self, vals, tax_category):
         """ Generate the node 'cac:ClassifiedTaxCategory' in 'cac:Item'.
@@ -714,6 +812,28 @@ class AccountEdiUBL(models.AbstractModel):
         ]
         return item_node
 
+    def _ubl_get_line_item_node_company_currency(self, vals, base_line, index):
+        return self._ubl_get_line_item_node(vals, base_line['_ubl_values']['item'])
+
+    def _ubl_get_line_item_node_foreign_currency(self, vals, base_line, index):
+        return self._ubl_get_line_item_node(vals, base_line['_ubl_values']['item_currency'])
+
+    def _ubl_get_line_price_node(self, vals, base_line, index, in_foreign_currency=True):
+        currency = base_line['currency_id'] if in_foreign_currency else vals['company_currency']
+        suffix = '_currency' if in_foreign_currency else ''
+        return {
+            'cbc:PriceAmount': {
+                '_text': FloatFmt(base_line['_ubl_values'][f'price_amount{suffix}'], min_dp=1, max_dp=6),
+                'currencyID': currency.name,
+            },
+        }
+
+    def _ubl_get_line_price_node_company_currency(self, vals, base_line, index):
+        return self._ubl_get_line_price_node(vals, base_line, index, in_foreign_currency=False)
+
+    def _ubl_get_line_price_node_foreign_currency(self, vals, base_line, index):
+        return self._ubl_get_line_price_node(vals, base_line, index)
+
     def _ubl_get_line_allowance_charge_recycling_contribution_node(self, vals, recycling_contribution_values):
         currency = recycling_contribution_values['currency']
         amount = recycling_contribution_values['amount']
@@ -762,6 +882,241 @@ class AccountEdiUBL(models.AbstractModel):
                 '_text': FloatFmt(abs(base_amount), max_dp=currency.decimal_places),
                 'currencyID': currency.name,
             },
+        }
+
+    def _ubl_get_ubl_version_id_node(self, vals):
+        return {'_text': None}
+
+    def _ubl_get_ubl_customization_id_node(self, vals):
+        return {'_text': None}
+
+    def _ubl_get_ubl_profile_id_node(self, vals):
+        return {'_text': None}
+
+    def _ubl_get_ubl_tax_currency_code_node(self, vals):
+        return {'_text': None}
+
+    def _ubl_get_ubl_document_currency_code_company_currency_if_foreign_currency_node(self, vals):
+        company = vals['company']
+        currency = vals['currency']
+        return {'_text': None if currency == company.currency_id else company.currency_id.name}
+
+    def _ubl_get_ubl_document_currency_code_company_currency_node(self, vals):
+        return {'_text': vals['company'].currency_id.name}
+
+    def _ubl_get_ubl_document_currency_code_node(self, vals):
+        return self._ubl_get_ubl_document_currency_code_company_currency_if_foreign_currency_node(vals)
+
+    def _ubl_get_ubl_party_endpoint_id_node(self, vals, partner_vals):
+        return {
+            '_text': None,
+            'schemeID': None,
+        }
+
+    def _ubl_get_ubl_party_identification_node(self, vals, partner_vals):
+        commercial_partner = partner_vals['commercial_partner']
+        return {
+            'cbc:ID': {'_text': commercial_partner.ref},
+        }
+
+    def _ubl_get_ubl_party_name_node(self, vals, partner_vals):
+        return {'_text': partner_vals['partner'].display_name}
+
+    def _ubl_get_ubl_address_node(self, vals, partner_vals):
+        partner = partner_vals['partner']
+        return {
+            'cbc:StreetName': {'_text': partner.street},
+            'cbc:AdditionalStreetName': {'_text': partner.street2},
+            'cbc:CityName': {'_text': partner.city},
+            'cbc:PostalZone': {'_text': partner.zip},
+            'cbc:CountrySubentity': {'_text': partner.state_id.name},
+            'cbc:CountrySubentityCode': {'_text': partner.state_id.code},
+            'cac:Country': {
+                'cbc:IdentificationCode': {'_text': partner.country_id.code},
+                'cbc:Name': {'_text': partner.country_id.name},
+            },
+        }
+
+    def _ubl_get_ubl_contact_node(self, vals, partner_vals):
+        partner = partner_vals['partner']
+        return {
+            'cbc:ID': {'_text': partner.id},
+            'cbc:Name': {'_text': partner.name},
+            'cbc:Telephone': {'_text': partner.phone},
+            'cbc:ElectronicMail': {'_text': partner.email},
+        }
+
+    def _ubl_get_ubl_party_tax_scheme_registration_address_node(self, vals, partner_vals):
+        return self._ubl_get_ubl_address_node(vals, partner_vals)
+
+    def _ubl_get_ubl_party_tax_scheme_node(self, vals, partner_vals):
+        commercial_partner = partner_vals['commercial_partner']
+        commercial_partner_vals = {
+            'partner': commercial_partner,
+            **partner_vals,
+        }
+
+        if commercial_partner.country_id and commercial_partner.vat and not commercial_partner.vat[:2].isalpha():
+            tax_scheme_id = {'_text': 'NOT_EU_VAT'}
+        elif commercial_partner.vat:
+            tax_scheme_id = {'_text': 'VAT'}
+        else:
+            tax_scheme_id = {'_text': None}
+
+        return {
+            'cbc:RegistrationName': {'_text': commercial_partner.name},
+            'cbc:CompanyID': {'_text': commercial_partner.vat},
+            'cac:RegistrationAddress': self._ubl_get_ubl_party_tax_scheme_registration_address_node(vals, commercial_partner_vals),
+            'cac:TaxScheme': {
+                'cbc:ID': {'_text': tax_scheme_id},
+            },
+        }
+
+    def _ubl_get_ubl_party_legal_entity_registration_address_node(self, vals, partner_vals):
+        return self._ubl_get_ubl_address_node(vals, partner_vals)
+
+    def _ubl_get_ubl_party_legal_entity_node(self, vals, partner_vals):
+        commercial_partner = partner_vals['commercial_partner']
+        commercial_partner_vals = {
+            'partner': commercial_partner,
+            **partner_vals,
+        }
+        return {
+            'cbc:RegistrationName': {'_text': commercial_partner.name},
+            'cbc:CompanyID': {
+                '_text': commercial_partner.vat,
+                'schemeID': None,
+            },
+            'cac:RegistrationAddress': self._ubl_get_ubl_party_legal_entity_registration_address_node(vals, commercial_partner_vals),
+        }
+
+    def _ubl_get_ubl_accounting_supplier_party_endpoint_id_node(self, vals):
+        return self._ubl_get_ubl_party_endpoint_id_node(vals, vals['supplier'])
+
+    def _ubl_get_ubl_accounting_supplier_party_identification_node(self, vals):
+        return self._ubl_get_ubl_party_identification_node(vals, vals['supplier'])
+
+    def _ubl_get_ubl_accounting_supplier_party_name_node(self, vals):
+        return self._ubl_get_ubl_party_name_node(vals, vals['supplier'])
+
+    def _ubl_get_ubl_accounting_supplier_party_postal_address_node(self, vals):
+        return self._ubl_get_ubl_address_node(vals, vals['supplier'])
+
+    def _ubl_get_ubl_accounting_supplier_party_tax_scheme_node(self, vals):
+        return self._ubl_get_ubl_party_tax_scheme_node(vals, vals['supplier'])
+
+    def _ubl_get_ubl_accounting_supplier_party_legal_entity_node(self, vals):
+        return self._ubl_get_ubl_party_legal_entity_node(vals, vals['supplier'])
+
+    def _ubl_get_ubl_accounting_supplier_party_contact_node(self, vals):
+        return self._ubl_get_ubl_contact_node(vals, vals['supplier'])
+
+    def _ubl_get_ubl_accounting_supplier_party_node(self, vals):
+        return {
+            'cac:Party': {
+                'cbc:EndpointID': self._ubl_get_ubl_accounting_supplier_party_endpoint_id_node(vals),
+                'cac:PartyIdentification': self._ubl_get_ubl_accounting_supplier_party_identification_node(vals),
+                'cbc:PartyName': self._ubl_get_ubl_accounting_supplier_party_name_node(vals),
+                'cac:PostalAddress': self._ubl_get_ubl_accounting_supplier_party_postal_address_node(vals),
+                'cac:PartyTaxScheme': self._ubl_get_ubl_accounting_supplier_party_tax_scheme_node(vals),
+                'cac:PartyLegalEntity': self._ubl_get_ubl_accounting_supplier_party_legal_entity_node(vals),
+                'cac:Contact': self._ubl_get_ubl_accounting_supplier_party_contact_node(vals),
+            },
+        }
+
+    def _ubl_get_ubl_accounting_customer_party_endpoint_id_node(self, vals):
+        return self._ubl_get_ubl_party_endpoint_id_node(vals, vals['customer'])
+
+    def _ubl_get_ubl_accounting_customer_party_identification_node(self, vals):
+        return self._ubl_get_ubl_party_identification_node(vals, vals['customer'])
+
+    def _ubl_get_ubl_accounting_customer_party_name_node(self, vals):
+        return self._ubl_get_ubl_party_name_node(vals, vals['customer'])
+
+    def _ubl_get_ubl_accounting_customer_party_postal_address_node(self, vals):
+        return self._ubl_get_ubl_address_node(vals, vals['customer'])
+
+    def _ubl_get_ubl_accounting_customer_party_tax_scheme_node(self, vals):
+        return self._ubl_get_ubl_party_tax_scheme_node(vals, vals['customer'])
+
+    def _ubl_get_ubl_accounting_customer_party_legal_entity_node(self, vals):
+        return self._ubl_get_ubl_party_legal_entity_node(vals, vals['customer'])
+
+    def _ubl_get_ubl_accounting_customer_party_contact_node(self, vals):
+        return self._ubl_get_ubl_contact_node(vals, vals['customer'])
+
+    def _ubl_get_ubl_accounting_customer_party_node(self, vals):
+        return {
+            'cac:Party': {
+                'cbc:EndpointID': self._ubl_get_ubl_accounting_customer_party_endpoint_id_node(vals),
+                'cac:PartyIdentification': self._ubl_get_ubl_accounting_customer_party_identification_node(vals),
+                'cbc:PartyName': self._ubl_get_ubl_accounting_customer_party_name_node(vals),
+                'cac:PostalAddress': self._ubl_get_ubl_accounting_customer_party_postal_address_node(vals),
+                'cac:PartyTaxScheme': self._ubl_get_ubl_accounting_customer_party_tax_scheme_node(vals),
+                'cac:PartyLegalEntity': self._ubl_get_ubl_accounting_customer_party_legal_entity_node(vals),
+                'cac:Contact': self._ubl_get_ubl_accounting_customer_party_contact_node(vals),
+            },
+        }
+
+    def _ubl_get_ubl_delivery_location_address_node(self, vals):
+        return self._ubl_get_ubl_address_node(vals, vals['delivery'])
+
+    def _ubl_get_ubl_delivery_location_node(self, vals):
+        return {
+            'cac:Address': self._ubl_get_ubl_delivery_location_address_node(vals),
+        }
+
+    def _ubl_get_ubl_delivery_node(self, vals):
+        return {
+            'cbc:ActualDeliveryDate': {'_text': None},
+            'cac:DeliveryLocation': self._ubl_get_ubl_delivery_location_node(vals),
+        }
+
+    def _ubl_get_ubl_payment_means_payee_financial_account_institution_node(self, vals):
+        payee_financial_account_vals = vals['payee_financial_account']
+        bank = payee_financial_account_vals['record'].bank_id
+        if not bank:
+            return None
+
+        return {
+            'cbc:ID': {
+                '_text': bank.bic,
+                'schemeID': 'BIC',
+            },
+            'cac:FinancialInstitution': {
+                'cbc:ID': {
+                    '_text': bank.bic,
+                    'schemeID': 'BIC',
+                },
+                'cbc:Name': {'_text': bank.name},
+                'cac:Address': self._get_address_node({**vals, 'partner': bank})
+            }
+        }
+
+    def _ubl_get_ubl_payment_means_payee_financial_account_node(self, vals):
+        payee_financial_account_vals = vals['payee_financial_account']
+        return {
+            'cbc:ID': {'_text': payee_financial_account_vals['account_number']},
+            'cac:FinancialInstitutionBranch': self._ubl_get_ubl_payment_means_payee_financial_account_institution_node(vals),
+        }
+
+    def _ubl_get_ubl_payment_means_node(self, vals):
+        return {
+            'cbc:PaymentMeansCode': {'_text': None, 'name': None},
+            'cbc:PaymentDueDate': {'_text': None},
+            'cbc:InstructionID': {'_text': None},
+            'cbc:PaymentID': {'_text': None},
+            'cac:PayeeFinancialAccount': None,
+        }
+
+    def _ubl_get_ubl_payment_terms_node(self, vals):
+        payment_term_vals = vals['payment_term']
+        payment_term = payment_term_vals['record']
+        if not payment_term:
+            return None
+
+        return {
+            'cbc:Note': {'_text': payment_term_vals['note']}
         }
 
     def _ubl_get_allowance_charge_early_payment(self, vals, early_payment_values):
@@ -868,3 +1223,114 @@ class AccountEdiUBL(models.AbstractModel):
         :return:                A new node in 'cac:WithholdingTaxTotal'.
         """
         return self._ubl_get_tax_total_node(vals, tax_total)
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Invoice
+    # -------------------------------------------------------------------------
+
+    def _ubl_invoice_get_order_reference_node(self, vals):
+        invoice = vals['invoice']
+
+        if vals['is_sale_module_installed']:
+            so_names = set(invoice.invoice_line_ids.sale_line_ids.order_id.mapped('name'))
+        else:
+            so_names = set()
+
+        return {
+            'cbc:ID': {'_text': invoice.ref or invoice.name},
+            'cbc:SalesOrderID': {
+                '_text': ",".join(so_names)
+            },
+        }
+
+    def _ubl_invoice_get_invoice_line_period_node(self, vals, base_line, index):
+        if not base_line.get('deferred_start_date') and not base_line.get('deferred_end_date'):
+            return
+
+        return {
+            'cbc:StartDate': {'_text': base_line['deferred_start_date']},
+            'cbc:EndDate': {'_text': base_line['deferred_end_date']},
+        }
+
+    def _ubl_invoice_get_invoice_line_allowance_charge_nodes(self, vals, base_line, index):
+        return self._ubl_get_line_allowance_charge_nodes(vals, base_line, index)
+
+    def _ubl_invoice_get_invoice_line_tax_total_nodes(self, vals, base_line, index):
+        return self._ubl_get_line_tax_total_nodes(vals, base_line, index)
+
+    def _ubl_invoice_get_invoice_line_item_node(self, vals, base_line, index):
+        return self._ubl_get_line_item_node_foreign_currency(vals, base_line, index)
+
+    def _ubl_invoice_get_invoice_line_price_node(self, vals, base_line, index):
+        return self._ubl_get_line_price_node_foreign_currency(vals, base_line, index)
+
+    def _ubl_invoice_get_invoice_line_node(self, vals, base_line, index):
+        return {
+            'cbc:ID': {'_text': index},
+            'cbc:InvoicedQuantity': self._ubl_get_line_quantity_node(vals, base_line, index),
+            'cbc:LineExtensionAmount': self._ubl_get_line_extension_amount_node(vals, base_line, index),
+            'cac:InvoicePeriod': self._ubl_invoice_get_invoice_line_period_node(vals, base_line, index),
+            'cac:AllowanceCharge': self._ubl_invoice_get_invoice_line_allowance_charge_nodes(vals, base_line, index),
+            'cac:TaxTotal': self._ubl_invoice_get_invoice_line_tax_total_nodes(vals, base_line, index),
+            'cac:Item': self._ubl_invoice_get_invoice_line_item_node(vals, base_line, index),
+            'cac:Price': self._ubl_invoice_get_invoice_line_price_node(vals, base_line, index),
+        }
+
+    def _ubl_invoice_get_invoice_line_nodes(self, vals):
+        invoice_lines = []
+        for index, base_line in enumerate(vals['base_lines'], start=1):
+            invoice_lines.append(self._ubl_invoice_get_invoice_line_node(vals, base_line, index))
+        return invoice_lines
+
+    def _ubl_invoice_get_node(self, vals):
+        invoice = vals['invoice']
+        return {
+            'cbc:UBLVersionID': self._ubl_get_ubl_version_id_node(vals),
+            'cbc:CustomizationID': self._ubl_get_ubl_customization_id_node(vals),
+            'cbc:ProfileID': self._ubl_get_ubl_profile_id_node(vals),
+            'cbc:ID': {'_text': invoice.name},
+            'cbc:IssueDate': {'_text': invoice.invoice_date},
+            'cbc:InvoiceTypeCode': {'_text': 380},
+            'cbc:Note': {'_text': html2plaintext(invoice.narration)},
+            'cbc:TaxCurrencyCode': self._ubl_get_ubl_tax_currency_code_node(vals),
+            'cbc:DocumentCurrencyCode': self._ubl_get_ubl_document_currency_code_node(vals),
+            'cac:OrderReference': self._ubl_invoice_get_order_reference_node(vals),
+            'cac:AccountingSupplierParty': self._ubl_get_ubl_accounting_supplier_party_node(vals),
+            'cac:AccountingCustomerParty': self._ubl_get_ubl_accounting_customer_party_node(vals),
+            'cac:Delivery': self._ubl_get_ubl_delivery_node(vals),
+            'cac:PaymentMeans': self._ubl_get_ubl_payment_means_node(vals),
+            'cac:PaymentTerms': self._ubl_get_ubl_payment_terms_node(vals),
+            'cac:InvoiceLine': self._ubl_invoice_get_invoice_line_nodes(vals),
+        }
+
+    def _export_invoice_nsmap(self, vals):
+        return {
+            None: "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
+            'cac': "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
+            'cbc': "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+            'ext': "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2",
+        }
+
+    def _export_invoice_prepare_values(self, vals, invoice):
+        vals['invoice'] = invoice.with_context(lang=invoice.partner_id.lang)
+
+        invoice = vals['invoice']
+        vals['base_lines'], vals['tax_lines'] = invoice._get_rounded_base_and_tax_lines()
+
+        for base_line in vals['base_lines']:
+            base_line['_ubl_values'] = {}
+
+    def _export_invoice(self, invoice):
+        vals = self._ubl_init_values()
+        self._export_invoice_prepare_values(vals, invoice)
+        document_node = self._ubl_invoice_get_node(vals)
+
+        # errors = [constraint for constraint in self._export_invoice_constraints_new(invoice, vals).values() if constraint]
+        errors = []
+
+        xml_content = dict_to_xml(
+            document_node,
+            nsmap=self._export_invoice_nsmap(vals),
+            template=Invoice,
+        )
+        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8'), set(errors)
