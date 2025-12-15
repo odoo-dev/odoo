@@ -1652,6 +1652,11 @@ class MailThread(models.AbstractModel):
         if not isinstance(email_message, EmailMessage):
             raise TypeError('message must be an email.message.EmailMessage at this point')
 
+        if self._is_ses_notification(email_message):
+            ses_bounce_data = self._extract_ses_bounce_data(email_message, message_dict)
+            if ses_bounce_data and ses_bounce_data.get('is_bounce'):
+                return ses_bounce_data
+
         is_bounce = self._detect_is_bounce(email_message, message_dict)
         if not is_bounce:
             return {'is_bounce': False}
@@ -1701,6 +1706,101 @@ class MailThread(models.AbstractModel):
             'bounced_message': bounced_message,
             'is_bounce': True,
         }
+
+    @api.model
+    def _is_ses_notification(self, email_message) -> bool:
+        """ Check if email is an Amazon SES SNS notification.
+
+        :param email_message: email.message.Message instance
+        :return bool: True if this appears to be a SES notification
+        """
+        has_sns_header = 'x-amz-sns-message-id' in email_message
+
+        is_json_content = email_message.get_content_type() in (
+            'application/json', 'text/plain'
+        )
+
+        return has_sns_header and is_json_content
+
+    @api.model
+    def _extract_ses_bounce_data(self, email_message, message_dict) -> dict:
+        """ Extract bounce information from Amazon SES SNS notification.
+
+        This method parses the entire nested JSON structure from SNS
+        and extracts the relevant bounce details.
+
+        :param email_message: email.message.Message with SES notification
+        :return dict: bounce data or {'is_bounce': False} if parsing fails
+        """
+        try:
+            content = email_message.get_content()
+            if isinstance(content, bytes):
+                content = content.decode('utf-8')
+
+            sns_notification = json.loads(content)
+
+            if sns_notification.get('Type') != 'Notification':
+                _logger.debug('SES SNS Type is not Notification: %s', sns_notification.get('Type'))
+                return {'is_bounce': False}
+            if 'Message' not in sns_notification:
+                _logger.warning('SES SNS notification missing Message field')
+                return {'is_bounce': False}
+
+            message_content = sns_notification['Message']
+            ses_message = json.loads(message_content)
+
+            if ses_message.get('notificationType') != 'Bounce':
+                _logger.debug(
+                    'SES notification type is %s, not Bounce',
+                    ses_message.get('notificationType')
+                )
+                return {'is_bounce': False}
+
+            bounce_info = ses_message.get('bounce', {})
+            bounced_recipients = bounce_info.get('bouncedRecipients', [])
+
+            if not bounced_recipients:
+                _logger.warning('SES bounce notification has no bounced recipients')
+                return {'is_bounce': False}
+
+            # TODO: can SES group bounces for multiple recipients in one notification ???
+            first_recipient = bounced_recipients[0]
+            bounced_email = email_normalize(first_recipient.get('emailAddress', ''))
+
+            if not bounced_email:
+                _logger.warning('Could not normalize bounced email address')
+                return {'is_bounce': False}
+
+            bounced_partner = self.env['res.partner'].sudo().search([
+                ('email_normalized', '=', bounced_email)
+            ], limit=1)
+
+            headers = ses_message.get('mail', {}).get("headers", [])
+            email_msg = EmailMessage()
+
+            for header in headers:
+                email_msg[header["name"]] = header["value"]
+
+            # Since SES SNS does NOT include original email body, we leave it empty
+            email_msg.set_content("")
+
+            bounced_message, bounced_msg_ids = self._get_bounced_message_data(email_msg, message_dict)
+
+            return {
+                'bounced_email': bounced_email,
+                'bounced_partner': bounced_partner,
+                'bounced_msg_ids': bounced_msg_ids,
+                'bounced_message': bounced_message,
+                'is_bounce': True,
+            }
+
+        except (json.JSONDecodeError, UnicodeDecodeError, AttributeError) as e:
+            _logger.warning('Failed to parse SES bounce notification (JSON/Decode): %s', e)
+            return {'is_bounce': False}
+        except Exception as e:
+            _logger.warning('Failed to parse SES bounce notification: %s', e, exc_info=True)
+            return {'is_bounce': False}
+
 
     @api.model
     def message_parse(self, message, save_original=False):
