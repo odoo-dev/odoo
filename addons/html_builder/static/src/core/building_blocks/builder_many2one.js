@@ -42,7 +42,7 @@ export class BuilderMany2One extends Component {
         this.cachedModel = useCachedModel();
         this.callOperation = callOperation;
         this.hasPreview = useHasPreview(getAllActions);
-        this.applyOperation = this.env.editor.shared.history.makePreviewableAsyncOperation(
+        this.applyOperation = this.env.editor.shared.domMutation.makePreviewableAsyncOperation(
             this.callApply.bind(this)
         );
         // Detect if any action requires a reload.
@@ -90,7 +90,7 @@ export class BuilderMany2One extends Component {
             this.createAction = this.env.editor.shared.builderActions.getAction(
                 this.props.createAction
             );
-            this.createOperation = this.env.editor.shared.history.makePreviewableOperation(
+            this.createOperation = this.env.editor.shared.domMutation.makePreviewableOperation(
                 this.createAction.apply
             );
         }

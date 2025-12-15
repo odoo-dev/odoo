@@ -21,7 +21,7 @@ export class ImagePositionOverlay extends Component {
          */
         getDelta: { type: Function },
         editable: { validate: (p) => p.nodeType === Node.ELEMENT_NODE },
-        history: { type: Object, optional: true },
+        domMutation: { type: Object, optional: true },
         scrollToElement: { type: Boolean, optional: true },
     };
     static defaultProps = { scrollToElement: true };
@@ -76,8 +76,7 @@ export class ImagePositionOverlay extends Component {
         });
 
         onMounted(() => {
-            const makeSavePoint = this.props.history?.makeSavePoint;
-            this.reloadSavePoint = makeSavePoint ? makeSavePoint() : () => {};
+            this.reloadSavePoint = this.props.domMutation?.makeSavePoint() ?? (() => {});
             this.dimensionOverlay();
             this.props.targetEl.classList.add("o_we_image_positioning");
         });

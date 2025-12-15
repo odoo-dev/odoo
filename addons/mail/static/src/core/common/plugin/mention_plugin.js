@@ -4,7 +4,7 @@ import { generateChannelMentionElement } from "@mail/utils/common/format";
 
 export class MentionPlugin extends Plugin {
     static id = "mention";
-    static dependencies = ["baseContainer", "selection", "history"];
+    static dependencies = ["baseContainer", "selection", "domMutation"];
     resources = {
         is_node_editable_predicates: (node) => {
             for (const { selector } of this.MENTION_SELECTORS) {
@@ -56,7 +56,7 @@ export class MentionPlugin extends Plugin {
                 checker: (el) => this.isValidChannelMentionElement(el),
                 validMentionsHandler: (channelLinks) => {
                     this.store.handleValidChannelMention(channelLinks);
-                    this.dependencies.history.addStep();
+                    this.dependencies.domMutation.commit();
                 },
             },
             {
@@ -98,7 +98,7 @@ export class MentionPlugin extends Plugin {
                 const baseContainer = this.dependencies.baseContainer.createBaseContainer();
                 baseContainer.appendChild(el.cloneNode(true));
                 this.editable.replaceChild(baseContainer, el);
-                this.dependencies.history.addStep();
+                this.dependencies.domMutation.commit();
             }
         }
     }

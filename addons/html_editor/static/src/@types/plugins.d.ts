@@ -10,7 +10,7 @@ declare module "plugins" {
     import { DialogShared } from "@html_editor/core/dialog_plugin";
     import { on_inserted_handlers, before_insert_processors, on_will_set_tag_handlers, DomShared, node_to_insert_processors, system_attributes, system_classes, system_style_properties, are_inlines_allowed_at_root_predicates } from "@html_editor/core/dom_plugin";
     import { is_format_class_predicates, on_will_format_selection_handlers, FormatShared, has_format_predicates, on_all_formats_removed_handlers } from "@html_editor/core/format_plugin";
-    import { on_attribute_changed_handlers, attribute_change_processors, on_will_add_step_handlers, on_will_filter_mutation_record_handlers, on_content_updated_handlers, on_external_step_added_handlers, on_new_records_handled_handlers, on_history_cleaned_handlers, on_history_reset_from_steps_handlers, on_history_reset_handlers, history_step_processors, HistoryShared, on_redone_handlers, on_undone_handlers, on_savepoint_restored_handlers, is_mutation_record_savable_predicates, serializable_descendants_processors, set_attribute_overrides, on_step_added_handlers, is_step_reversible_predicates } from "@html_editor/core/history_plugin";
+    import { on_attribute_changed_handlers, attribute_change_processors, on_will_write_commit_handlers, on_will_filter_mutation_record_handlers, on_content_updated_handlers, on_external_step_added_handlers, on_new_records_handled_handlers, on_history_cleaned_handlers, on_history_reset_from_steps_handlers, on_history_reset_handlers, history_step_processors, HistoryShared, on_redone_handlers, on_undone_handlers, on_savepoint_restored_handlers, is_mutation_record_savable_predicates, serializable_descendants_processors, set_attribute_overrides, on_step_added_handlers, is_step_reversible_predicates } from "@html_editor/core/history_plugin";
     import { on_beforeinput_handlers, on_input_handlers } from "@html_editor/core/input_plugin";
     import { on_will_break_line_handlers, insert_line_break_element_overrides, LineBreakShared } from "@html_editor/core/line_break_plugin";
     import { OverlayShared } from "@html_editor/core/overlay_plugin";
@@ -53,6 +53,9 @@ declare module "plugins" {
     import { DynamicPlaceholderShared } from "@html_editor/others/dynamic_placeholder_plugin";
     import { EmbeddedComponentShared, on_will_mount_component_handlers, on_component_mounted_handlers } from "@html_editor/others/embedded_component_plugin";
 
+    import { DomMutationShared } from "@html_editor/core/dom_mutation_plugin";
+    import { HistoryShared } from "@html_editor/core/history_plugin";
+
     /* Misc */
     export interface CSSSelector extends String {}
     export interface LazyTranslatedString extends String {}
@@ -71,6 +74,7 @@ declare module "plugins" {
         delete: DeleteShared;
         dialog: DialogShared;
         dom: DomShared;
+        domMutation: DomMutationShared;
         format: FormatShared;
         history: HistoryShared;
         lineBreak: LineBreakShared;
@@ -157,7 +161,7 @@ declare module "plugins" {
         on_selectionchange_handlers: on_selectionchange_handlers;
         on_step_added_handlers: on_step_added_handlers;
         on_undone_handlers: on_undone_handlers;
-        on_will_add_step_handlers: on_will_add_step_handlers;
+        on_will_write_commit_handlers: on_will_write_commit_handlers;
         on_will_break_line_handlers: on_will_break_line_handlers;
         on_will_delete_handlers: on_will_delete_handlers;
         on_will_filter_mutation_record_handlers: on_will_filter_mutation_record_handlers;
@@ -169,6 +173,7 @@ declare module "plugins" {
         on_will_set_tag_handlers: on_will_set_tag_handlers;
         on_will_split_block_handlers: on_will_split_block_handlers;
         on_will_unset_movable_element_handlers: on_will_unset_movable_element_handlers;
+        on_will_write_commit_handlers: on_will_write_commit_handlers;
 
         // Overrides
         apply_color_style_overrides: apply_color_style_overrides;

@@ -19,7 +19,7 @@ import { toolbarButtonProps } from "@html_editor/main/toolbar/toolbar";
 
 export class HighlightPlugin extends Plugin {
     static id = "highlight";
-    static dependencies = ["history", "selection", "split", "format", "edit_interaction"];
+    static dependencies = ["domMutation", "selection", "split", "format", "edit_interaction"];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
         toolbar_groups: [withSequence(50, { id: "websiteDecoration" })],
@@ -79,10 +79,10 @@ export class HighlightPlugin extends Plugin {
     };
 
     setup() {
-        this.previewableApplyHighlight = this.dependencies.history.makePreviewableOperation(
+        this.previewableApplyHighlight = this.dependencies.domMutation.makePreviewableOperation(
             this._applyHighlight.bind(this)
         );
-        this.previewableApplyHighlightStyle = this.dependencies.history.makePreviewableOperation(
+        this.previewableApplyHighlightStyle = this.dependencies.domMutation.makePreviewableOperation(
             this._applyHighlightStyle.bind(this)
         );
         this.highlightState = reactive({
@@ -242,7 +242,7 @@ export class HighlightPlugin extends Plugin {
             focusOffset,
         });
         this.dependencies.selection.focusEditable();
-        this.dependencies.history.stageSelection();
+        this.dependencies.domMutation.stageSelection();
     }
 
     deleteSelectedHighlight() {

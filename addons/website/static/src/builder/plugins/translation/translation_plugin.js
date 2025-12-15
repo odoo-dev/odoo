@@ -49,7 +49,7 @@ function findOEditable(containerEl) {
 
 export class TranslationPlugin extends Plugin {
     static id = "translation";
-    static dependencies = ["history"];
+    static dependencies = ["domMutation"];
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
@@ -300,8 +300,8 @@ export class TranslationPlugin extends Plugin {
                 this.dialogService.add(AttributeTranslateDialog, {
                     node: translateEl,
                     elToTranslationInfoMap: elToTranslationInfoMap,
-                    addStep: this.dependencies.history.addStep,
-                    applyCustomMutation: this.dependencies.history.applyCustomMutation,
+                    addStep: this.dependencies.domMutation.commit,
+                    applyCustomMutation: this.dependencies.domMutation.applyCustomMutation,
                 });
             });
         }

@@ -19,7 +19,7 @@ function isResizable(el) {
 
 export class BuilderOverlayPlugin extends Plugin {
     static id = "builderOverlay";
-    static dependencies = ["builderOptions", "localOverlay", "history", "operation"];
+    static dependencies = ["builderOptions", "localOverlay", "domMutation", "operation"];
     static shared = ["showOverlayPreview", "hideOverlayPreview", "refreshOverlays"];
     /** @type {import("plugins").BuilderResources} */
     resources = {
@@ -115,7 +115,7 @@ export class BuilderOverlayPlugin extends Plugin {
             const overlay = new BuilderOverlay(option.element, {
                 iframe: this.iframe,
                 overlayContainer: this.overlayContainer,
-                history: this.dependencies.history,
+                domMutation: this.dependencies.domMutation,
                 hasOverlayOptions:
                     this.dependencies.builderOptions.checkElement(option.element, {}) &&
                     option.hasOverlayOptions,
@@ -205,7 +205,7 @@ export class BuilderOverlayPlugin extends Plugin {
         const overlay = new BuilderOverlay(el, {
             iframe: this.iframe,
             overlayContainer: this.overlayContainer,
-            history: this.dependencies.history,
+            domMutation: this.dependencies.domMutation,
             hasOverlayOptions: false,
             next: this.dependencies.operation.next,
             isMobileView: this.config.isMobileView,

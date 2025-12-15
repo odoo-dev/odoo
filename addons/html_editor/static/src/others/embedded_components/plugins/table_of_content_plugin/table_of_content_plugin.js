@@ -9,7 +9,7 @@ import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 
 export class TableOfContentPlugin extends Plugin {
     static id = "tableOfContent";
-    static dependencies = ["dom", "selection", "embeddedComponents", "link", "history"];
+    static dependencies = ["dom", "selection", "embeddedComponents", "link", "domMutation"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
@@ -34,8 +34,10 @@ export class TableOfContentPlugin extends Plugin {
         on_history_reset_handlers: () => this.delayedUpdateTableOfContents(this.editable),
         on_history_reset_from_steps_handlers: () =>
             this.delayedUpdateTableOfContents(this.editable),
-        on_step_added_handlers: ({ stepCommonAncestor }) =>
-            this.delayedUpdateTableOfContents(stepCommonAncestor),
+        on_step_added_handlers: (step) =>
+            this.delayedUpdateTableOfContents(
+                this.dependencies.domMutation.getNodeById(step.commit.root)
+            ),
         on_external_step_added_handlers: this.delayedUpdateTableOfContents.bind(
             this,
             this.editable
@@ -57,7 +59,7 @@ export class TableOfContentPlugin extends Plugin {
     insertTableOfContent() {
         const tableOfContentBlueprint = renderToElement("html_editor.TableOfContentBlueprint");
         this.dependencies.dom.insert(tableOfContentBlueprint);
-        this.dependencies.history.addStep();
+        this.dependencies.domMutation.commit();
     }
 
     /**
