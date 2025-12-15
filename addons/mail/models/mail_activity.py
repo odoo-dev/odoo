@@ -24,6 +24,32 @@ _logger = logging.getLogger(__name__)
 SECURITY_FIELDS = ('res_model', 'res_id', 'user_id')
 
 
+def get_accessible_and_existing(records, operation):
+    try:
+        accessible = records._filtered_access(operation)
+    except MissingError:
+        accessible = records.exists()._filtered_access(operation)
+    if accessible == records and records:
+        # all are accessible, just make sure records exist
+        some_field = None
+        for field in records._fields.values():
+            if not (field.store and field.column_type):
+                continue
+            if records._ids[0] in field._get_all_cache_ids(records.env):
+                break
+            if field.prefetch is True and records._has_field_access(field, 'read'):
+                some_field = field
+        else:
+            if some_field is not None:
+                try:
+                    some_field.__get__(records[0])
+                except MissingError:
+                    accessible = records.exists()
+            else:
+                accessible = records.exists()
+    return set(accessible._ids)
+
+
 class MailActivity(models.Model):
     """ An actual activity to perform. Activities are linked to
     documents using res_id and res_model_id fields. Activities have a deadline
@@ -179,7 +205,7 @@ class MailActivity(models.Model):
             if self.activity_type_id.default_note:
                 self.note = self.activity_type_id.default_note
 
-    def _check_access(self, operation: str) -> tuple | None:
+    def _access_domain(self, operation: str, user_domain: Domain | None = None) -> Domain:
         """ Determine the subset of ``self`` for which ``operation`` is allowed.
         A custom implementation is done on activities as this document has some
         access rules and is based on related document for activities that are
@@ -192,59 +218,118 @@ class MailActivity(models.Model):
           * create: access rule AND (``mail_post_access`` or write) right on related documents;
           * unlink: access rule OR (``mail_post_access`` or write) rights on related documents);
         """
-        result = super()._check_access(operation)
-        if not self:
-            return result
+        main_domain = super()._access_domain(operation, user_domain)
+        if main_domain.is_false() or self.env.su:
+            return main_domain
 
-        # determine activities on which to check the related document
+        has_user_domain = user_domain is not None
+        user_domain = user_domain.optimize(self) if has_user_domain else Domain.TRUE
         if operation == 'read':
-            # check activities allowed by access rules
-            activities = self - result[0] if result else self
-            activities -= activities.sudo().filtered_domain([('user_id', '=', self.env.uid)])
-        elif operation == 'create':
-            # check activities allowed by access rules
-            activities = self - result[0] if result else self
+            sec_domain = Domain('user_id', '=', self.env.uid)
+            cooperation = 'read'
         else:
-            assert operation in ('write', 'unlink'), f"Unexpected operation {operation!r}"
-            # check access to the model, and check the forbidden records only
-            if self.browse()._check_access(operation):
-                return result
-            activities = result[0] if result else self.browse()
-            result = None
+            sec_domain = Domain.FALSE
+            cooperation = 'write'
 
-        if not activities:
-            return result
+        if (
+            has_user_domain
+            and (res_model_names := condition_values(self, 'res_model', user_domain))
+            and 0 < len(res_model_names) <= 5
+        ):
+            # search by model and res_id
+            sec_domain = Domain('user_id', '=', self.env.uid)
+            env = self.with_context(active_test=False).env
+            for res_model_name in res_model_names:
+                comodel = env.get(res_model_name)
+                if comodel is None:
+                    continue
+                codomain = Domain('res_model', '=', comodel._name)
+                comodel_res_ids = condition_values(self, 'res_id', user_domain.map_conditions(
+                    lambda cond: codomain & cond if cond.field_expr == 'res_model' else cond
+                ))
+                comodel_operation = getattr(comodel, '_mail_post_access', cooperation)
+                if comodel_res_ids is not None:
+                    if not comodel_res_ids:
+                        continue
+                    comodel_res_ids = comodel.browse(comodel_res_ids)._filtered_access(comodel_operation).ids
+                    codomain &= Domain('res_id', 'in', comodel_res_ids)
+                else:
+                    if comodel_operation == 'read':
+                        query = comodel._search(Domain.TRUE)
+                    else:
+                        comodel_access_domain = comodel._access_domain(comodel_operation, Domain.TRUE)
+                        query = comodel.sudo()._search(comodel_access_domain)
+                    if query.is_empty():
+                        continue
+                    if query.where_clause:
+                        codomain &= Domain('res_id', 'in', query)
+                sec_domain |= codomain
 
-        # now check access on related document of 'activities', and collect the
-        # ids of forbidden activities; free activities are checked against user_id
-        model_docid_actids = defaultdict(lambda: defaultdict(list))
-        forbidden_ids = []
-        for activity in activities.sudo():
-            if activity.res_model and activity.res_id:
-                model_docid_actids[activity.res_model][activity.res_id].append(activity.id)
-            elif activity.user_id.id != self.env.uid:
-                forbidden_ids.append(activity.id)
+            if operation in ('write', 'unlink'):
+                return main_domain | sec_domain
+            return main_domain & sec_domain
+        else:
+            comodel_access = {}  # cache for the predicate
+            if not has_user_domain:
+                user_domain = Domain('id', 'in', self.ids)
 
-        allowed = _find_allowed_doc_ids(self.env, model_docid_actids, operation)
-        forbidden_ids.extend(
-            act_id
-            for docid_actids in model_docid_actids.values()
-            for act_ids in docid_actids.values()
-            for act_id in act_ids
-            if act_id not in allowed
-        )
+            def attachment_predicate(attachment_to_check: MailActivity):
+                if (val := comodel_access.get(attachment_to_check.id)) is not None:
+                    return val
 
-        if forbidden_ids:
-            forbidden = self.browse(forbidden_ids)
-            if result:
-                result = (result[0] + forbidden, result[1])
-            else:
-                result = (forbidden, lambda: forbidden._make_access_error(operation))
-            forbidden.invalidate_recordset()  # avoid cache pollution
+                attachments = attachment_to_check.with_context(active_test=False).sudo()
+                if not comodel_access:
+                    # first call, compute for all ids
+                    attachments |= attachments.browse(condition_values(attachments, 'id', user_domain))
+                for id_ in attachments._ids:
+                    comodel_access[id_] = False
+                # check main_domain and sec_domain
+                main_attachments = attachments.filtered_domain(main_domain)
+                if operation in ('write', 'unlink'):
+                    assert sec_domain.is_false()
+                    accessible = main_attachments
+                else:
+                    attachments = main_attachments
+                    accessible = attachments.filtered_domain(sec_domain)
+                for id_ in accessible._ids:
+                    comodel_access[id_] = True
+                attachments -= accessible
+                if not attachments:
+                    return comodel_access[attachment_to_check.id]
 
-        return result
+                attachments.fetch(SECURITY_FIELDS)
+                for res_model, model_activities in attachments.grouped('res_model').items():
+                    if res_model not in self.env:
+                        continue
+                    documents = self.env[res_model].browse(OrderedSet(filter(None, model_activities.mapped('res_id'))))
+                    doc_operation = getattr(
+                        documents, '_mail_post_access', 'read' if operation == 'read' else 'write'
+                    )
+                    doc_ids = get_accessible_and_existing(documents, doc_operation)
+                    for activity in model_activities:
+                        if activity.res_id in doc_ids:
+                            comodel_access[activity.id] = True
 
-    def _make_access_error(self, operation: str) -> AccessError:
+                return comodel_access[attachment_to_check.id]
+
+            def attachment_optimize(custom_domain, model):
+                assert model._name == 'mail.activity'
+                if operation in ('write', 'unlink'):
+                    comodel_optimize_domain = user_domain
+                else:
+                    comodel_optimize_domain = main_domain & user_domain
+                records = model.sudo().search_fetch(comodel_optimize_domain, SECURITY_FIELDS)
+                accessible = records.filtered_domain(custom_domain)
+                return Domain('id', 'in', accessible._as_query(ordered=False))
+
+            return Domain.custom(
+                optimize=attachment_optimize,
+                predicate=attachment_predicate,
+            )
+
+    def _make_access_error_message(self, operation, domain):
+        if domain.is_false():
+            return super()._make_access_error_message(operation, domain)
         return AccessError(_(
             "The requested operation cannot be completed due to security restrictions. "
             "Please contact your system administrator.\n\n"
@@ -350,7 +435,7 @@ class MailActivity(models.Model):
         return super().unlink()
 
     @api.model
-    def _search(self, domain, offset=0, limit=None, order=None, *, bypass_access=False, **kwargs):
+    def _search(self, domain, offset=0, limit=None, order=None, **kwargs):
         """Implement custom access rules and `active_test` behavior.
 
         This method enhances the standard search in two ways:
@@ -369,80 +454,14 @@ class MailActivity(models.Model):
         """
         domain = Domain(domain).optimize(self)
 
+        domain = Domain(domain)
         if any(
             condition.field_expr == 'date_done' and condition.value
             for condition in domain.iter_conditions()
         ):
             kwargs['active_test'] = False
 
-        # Rules do not apply to administrator or when we search only activities assigned to the current user
-        domain = Domain(domain).optimize(self)
-        if self.env.su or bypass_access or domain.is_false() or tuple(condition_values(self, 'user_id', domain) or ()) == (self.env.uid,):
-            return super()._search(domain, offset, limit, order, bypass_access=bypass_access, **kwargs)
-        if self.env.context.get('_read_groupby'):
-            raise ValueError("Cannot group by mail.activity")
-
-        # search by ids
-        if (ids := condition_values(self, 'id', domain)) is not None:
-            if (not order or order[:2] == 'id') and domain.map_conditions(lambda d: Domain.TRUE if d.field_expr == 'id' and d.operator == 'in' else d).is_true():
-                # trivial domain, can skip search, in most cases check access removes inexisting records
-                records = exists_in_cache(self.browse(ids), hint_field='res_model')
-                records = records._filtered_access('read')
-                if order:
-                    records = records.sorted(order)
-            else:
-                records = self.browse(super()._search(domain, order=order, **kwargs))
-                records = records._filtered_access('read')
-            if offset > 0:
-                records = records[offset:]
-            if limit is not None:
-                records = records[:limit]
-            return records._as_query(ordered=bool(order))
-
-        # searching for all messages or a subset of models
-        res_model_names = condition_values(self, 'res_model', domain) or ()
-        if not (0 < len(res_model_names) <= MAX_COMODELS_FOR_DOMAIN):
-            query = super()._search(domain, offset, limit, order, **kwargs)
-            records = self._fetch_query(query, [self._fields[f] for f in SECURITY_FIELDS])
-            return records._filtered_access('read')._as_query(ordered=bool(order))
-
-        # search by model and res_id
-        sec_domain = Domain('user_id', '=', self.env.uid)
-        env = self.with_context(active_test=False).env
-        for res_model_name in res_model_names:
-            if res_model_name not in env:
-                continue
-            comodel = env[res_model_name]
-            codomain = Domain('res_model', '=', comodel._name)
-            comodel_res_ids = condition_values(self, 'res_id', domain.map_conditions(
-                lambda cond: codomain & cond if cond.field_expr == 'res_model' else cond
-            ))
-            # similar implementation to what is in mail.message._search
-            comodel_domain = Domain.FALSE
-            comodel_domain_remaining = Domain.TRUE
-            for domain_operation, doc_operation in comodel._mail_get_operation_for_mail_message_operation('read'):
-                domain_operation, comodel_domain_remaining = (
-                    comodel_domain_remaining & domain_operation,
-                    comodel_domain_remaining & ~domain_operation,
-                )
-                if not comodel.has_access(doc_operation):
-                    continue
-                if doc_operation == 'read':
-                    comodel_rule = Domain.TRUE  # covered by the search below
-                else:
-                    comodel_rule = self.env['ir.rule']._compute_domain(comodel._name, doc_operation)
-                comodel_domain |= (domain_operation & comodel_rule)
-            if comodel_res_ids is not None:
-                comodel_domain &= Domain('id', 'in', comodel_res_ids)
-            comodel_domain = comodel_domain.optimize_full(comodel.sudo())
-            query = comodel._search(comodel_domain)
-            if query.is_empty():
-                continue
-            if query.where_clause:
-                codomain &= Domain('res_id', 'any!', query)
-            sec_domain |= codomain
-
-        return super()._search(domain & sec_domain, offset, limit, order, **kwargs)
+        return super()._search(domain, offset, limit, order, **kwargs)
 
     @api.depends('summary', 'activity_type_id')
     def _compute_display_name(self):
