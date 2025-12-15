@@ -16,6 +16,7 @@ import {
     constructFullProductName,
     random5Chars,
     orderUsageUTCtoLocalUtil,
+    getOnNotified,
 } from "@point_of_sale/utils";
 import { getOrderLineValues } from "./card_utils";
 import {
@@ -26,7 +27,6 @@ import {
     EpsonPrinter,
     EpsonServerDirectPrinter,
 } from "@point_of_sale/app/utils/printer/epson_printer";
-
 export class SelfOrder extends Reactive {
     constructor(...args) {
         super();
@@ -158,6 +158,29 @@ export class SelfOrder extends Reactive {
             this.receiptPrinter = new EpsonPrinter(this.config);
             this.printer.setPrinter(this.receiptPrinter);
         }
+        const prepDisplays = this.models["pos.prep.display"]?.getAll();
+        prepDisplays?.forEach((p) => {
+            this.getPrepNotified = getOnNotified(this.bus, p.access_token);
+            this.getPrepNotified("CHANGE_STATE_STAGE", (data) => {
+                this.updateOrderLinesKitchenStatus(data);
+            });
+        });
+    }
+
+    updateOrderLinesKitchenStatus(data) {
+        data.pdis_state_stages.forEach((stage) => {
+            if (!stage.is_last_stage) {
+                return;
+            }
+
+            const posOrderLine = this.models["pos.order.line"].get(
+                stage.prep_line_id?.[0]?.pos_order_line_id?.[0]
+            );
+
+            if (posOrderLine) {
+                posOrderLine.isPrepLastStage = true;
+            }
+        });
     }
 
     get selfService() {

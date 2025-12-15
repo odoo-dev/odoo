@@ -79,6 +79,7 @@
                                                 }}">
                                                     <t t-esc="status"></t>
                                                 </div>
+                                                <!-- <div class="badge rounded fs-6 text-bg-info" t-out="'Kitchen status'"></div> -->
                                             </td>
                                             <td class="text-end delete-column" name="delete-column">
                                                 <button t-if="!shouldHideDeleteButton(order) and this.pos.cashier._role !== 'minimal'" t-on-click.stop="() => this.onDeleteOrder(order)" class="btn btn-link btn-lg text-danger">
@@ -113,6 +114,7 @@
                                                 }}">
                                                     <t t-esc="status"></t>
                                                 </div>
+                                                <!-- <div class="badge rounded fs-6 text-bg-info" t-out="'Kitchen status'"></div> -->
                                     </div>
                                     <div class="mx-2" name="delete-column">
                                         <div t-if="!shouldHideDeleteButton(order) and this.pos.cashier._role !== 'minimal'" class="d-flex align-items-center justify-content-center h-100" name="delete" t-on-click.stop="() => this.onDeleteOrder(order)">

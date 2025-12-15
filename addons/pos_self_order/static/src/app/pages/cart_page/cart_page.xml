@@ -61,6 +61,10 @@
                                                     class="btn btn-secondary py-1 px-2"><i class="oi oi-plus fa-fw"/></button>
                                         </div>
                                         <div t-else=""/>
+                                        <div t-if="line.isSynced" class="Kitchen Status">
+                                            <t t-if="line.isPrepLastStage"><i class="fa fa-check-circle text-success me-1"/> Prepared</t>
+                                            <t t-else=""> <i class="fa fa-clock-o me-1"/> Preparing</t>
+                                        </div>
                                         <div class="fs-4 fw-bold line-price mb-0 o-so-tabular-nums fw-bold text-primary" t-esc="selfOrder.formatMonetary(getPrice(line))"/>
                                     </div>
                                 </div>
