@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <div t-name="mrp.bomPopover">
+        <h6><t t-out="props.title"/></h6>
+        <t t-out="props.msg"/>
+        <br/>
+        <t t-out="props.msg2"/>
+        </div>
+</templates>
