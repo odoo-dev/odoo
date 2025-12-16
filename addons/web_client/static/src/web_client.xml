@@ -3,8 +3,91 @@
 
 <t t-name="web_client.WebClient">
     <Navbar/>
-    <div class="p-3">
-        hello world
+    <div class="content flex-grow overflow-y-auto">
+        <h1>Welcome to the page!</h1>
+        <p>This is the content of the page. Scroll down to see more.</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
     </div>
 </t>
 

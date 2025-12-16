@@ -2,8 +2,13 @@
 <templates xml:space="preserve">
 
 <t t-name="web_client.Navbar">
-    <div class="p-3">
-        navbar
+    <div class="o-navbar d-flex align-items-center flex-shrink-0">
+      <a class="ps-1 pe-2 text-white" href="#">Odoo</a>
+      <div class="d-flex align-items-center">
+        <span class="px-1"><a href="#" class="text-white">Dashboard</a></span>
+        <span class="px-1"><a href="#" class="text-white">Customers</a></span>
+        <span class="px-1"><a href="#" class="text-white">Vendors</a></span>
+      </div>
     </div>
 </t>
 
