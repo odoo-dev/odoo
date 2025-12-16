@@ -8,16 +8,18 @@ export class Notification extends Component {
             type: Array,
         },
         id: Number,
-        lifespan: Number,
+        duration: Number,
         message: String,
-        pop: Function,
+        close: Function,
         title: { type: String, optional: true },
         type: String,
     });
 
     setup() {
-        setTimeout(() => {
-            this.props.pop();
-        }, this.props.lifespan);
+        if (Number.isFinite(this.props.duration)) {
+            setTimeout(() => {
+                this.props.close();
+            }, this.props.duration);
+        }
     }
 }

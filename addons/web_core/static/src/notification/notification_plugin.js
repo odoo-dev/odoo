@@ -54,7 +54,7 @@ export class NotificationPlugin extends Plugin {
      *      isPrimary?: boolean;
      *      label: string;
      *  }[];
-     *  lifespan?: number | "sticky";
+     *  duration?: number;
      *  title?: string;
      *  type?: "danger" | "info" | "success" | "warning";
      * }} [options]
@@ -73,10 +73,10 @@ export class NotificationPlugin extends Plugin {
         const notification = {
             buttons,
             id,
-            lifespan: options.lifespan ?? (buttons.length ? 10_000 : 4_000),
+            lifespan: options.duration ?? (buttons.length ? 10_000 : 4_000),
             message,
             /** @param {any} result */
-            pop: (result) => {
+            close: (result) => {
                 delete this.notifications()[id];
                 this.notifications.update();
                 resolve(result);
