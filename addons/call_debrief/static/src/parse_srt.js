@@ -6,7 +6,13 @@
  * @returns {number}
  **/
 function parseTimestamp(timestamp) {
+    if (!timestamp) {
+        return 0;
+    }
     const parts = timestamp.split(":");
+    if (parts.length < 3) {
+        return 0;
+    }
     const secondsParts = parts[2].split(",");
     const hours = parseInt(parts[0], 10);
     const minutes = parseInt(parts[1], 10);
@@ -33,6 +39,9 @@ export function parseSRT(srtContent) {
                 return null;
             }
             const timestampLine = lines[1];
+            if (!timestampLine) {
+                return null;
+            }
             const [start, end] = timestampLine.split(" --> ");
             if (!start || !end) {
                 return null;
