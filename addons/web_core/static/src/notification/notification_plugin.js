@@ -1,6 +1,6 @@
-import { computed, effect, onWillDestroy, plugin, Plugin, signal } from "@odoo/owl";
+import { computed, plugin, Plugin, signal } from "@odoo/owl";
 import { NotificationContainer } from "@web_core/notification/notification_container";
-import { OverlayContainerPlugin } from "@web_core/overlay/overlay_container_plugin";
+import { OverlayPlugin } from "@web_core/overlay/overlay_plugin";
 import { registry } from "@web_core/registry";
 import { service } from "@web_core/services";
 
@@ -19,31 +19,21 @@ export class NotificationPlugin extends Plugin {
     }
 
     /** @private */
-    overlayContainer = plugin(OverlayContainerPlugin);
+    _overlayContainer = plugin(OverlayPlugin);
 
     /** @private */
-    nextId = 0;
+    _nextId = 0;
 
     /** @private @type {import("@odoo/owl").Signal<{ [K: number]: {} }>} */
-    notifications = signal({});
+    _notificationMap = signal({});
 
-    setup() {
-        const notificationValues = computed(() => Object.values(this.notifications()));
-
-        /** @type {import("@web_core/overlay/overlay_container_plugin").OverlayContainerPluginItem | null} */
-        let overlay = null;
-        onWillDestroy(effect(() => {
-            if (!overlay?.isAlive && notificationValues().length) {
-                overlay = this.overlayContainer.push(NotificationContainer, {
-                    props: { notifications: notificationValues },
-                    section: "notifications",
-                });
-            }
-            if (overlay?.isAlive && !notificationValues().length) {
-                overlay.pop();
-            }
-        }));
-    }
+    notifications = computed(() => Object.values(this._notificationMap()));
+    overlay = this._overlayContainer.createOverlay(NotificationContainer, {
+        props: {
+            notifications: this.notifications,
+        },
+        section: "notifications",
+    });
 
     /**
      * @param {string} message
@@ -60,7 +50,7 @@ export class NotificationPlugin extends Plugin {
      * }} [options]
      */
     push(message, options = {}) {
-        const id = ++this.nextId;
+        const id = ++this._nextId;
         const buttons = Array.from(options.buttons ?? [], (button) => ({
             action: button.action,
             icon: button.icon ?? "",
@@ -77,16 +67,21 @@ export class NotificationPlugin extends Plugin {
             message,
             /** @param {any} result */
             close: (result) => {
-                delete this.notifications()[id];
-                this.notifications.update();
+                delete this._notificationMap()[id];
+                this._notificationMap.update();
+                if (!this.notifications().length) {
+                    this.overlay.pop();
+                }
                 resolve(result);
             },
             title: options.title,
             type: options.type ?? "warning",
         };
 
-        this.notifications()[id] = notification;
-        this.notifications.update();
+        this._notificationMap()[id] = notification;
+        this._notificationMap.update();
+
+        this.overlay.push();
 
         return promise;
     }

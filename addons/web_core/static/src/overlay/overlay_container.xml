@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="web_core.OverlayContainerItem">
-    <div class="wcore_overlay_container_item position-fixed h-100 w-100 top-0">
+    <div class="wcore_overlay_container_item position-fixed h-100 w-100 top-0" style="pointer-events: none;">
         <t t-component="this.props.overlay.component" t-props="this.props.overlay.props"/>
     </div>
 </t>
