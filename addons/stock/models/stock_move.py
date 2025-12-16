@@ -7,7 +7,7 @@ from operator import itemgetter
 from re import findall as regex_findall
 
 from odoo import _, api, Command, fields, models, SUPERUSER_ID
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 from odoo.tools.misc import clean_context, OrderedSet, groupby
@@ -1349,13 +1349,17 @@ Please change the quantity done or the rounding precision in your settings.""",
         self.update({'quantity': quantity})
 
         base_location = self.picking_id.location_id or self.location_id
-        quants = self.env['stock.quant'].sudo().search([
-            ('product_id', '=', self.product_id.id),
-            ('lot_id', 'in', self.lot_ids.ids),
-            ('quantity', '!=', 0),
-            ('location_id.usage', 'in', ('internal', 'transit', 'customer')),
-            ('location_id', 'not any', [('location_id', 'child_of', base_location.id)])
-        ])
+
+        try:
+            quants = self.env['stock.quant'].search([
+                ('product_id', '=', self.product_id.id),
+                ('lot_id', 'in', self.lot_ids.ids),
+                ('quantity', '!=', 0),
+                ('location_id.usage', 'in', ('internal', 'transit', 'customer')),
+                ('location_id', 'not any', [('location_id', 'child_of', base_location.id)])
+            ])
+        except AccessError:
+            return
 
         if quants:
             sn_to_location = ""
