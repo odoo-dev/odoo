@@ -25,7 +25,7 @@ export class ThemeModel extends Reactive {
         super();
         this.orm = services.orm;
         this.loadedAssets = new Set();
-        this.loadedThemes = new Map();
+        this.commonThemes = new Map();
         this.simpleThemes = new Map();
         this.loadingPromise = new Deferred();
     }
@@ -65,7 +65,7 @@ export class ThemeModel extends Reactive {
             if (["basic", "empty"].includes(themeOptions.name)) {
                 this.simpleThemes.set(themeOptions.name, themeOptions);
             } else {
-                this.loadedThemes.set(themeOptions.name, themeOptions);
+                this.commonThemes.set(themeOptions.name, themeOptions);
             }
         }
     }
@@ -84,8 +84,8 @@ export class ThemeModel extends Reactive {
         return themeClass && getNameFromClass(themeClass);
     }
 
-    getThemes() {
-        return this.loadedThemes;
+    getCommonThemes() {
+        return this.commonThemes;
     }
 
     // The simple themes (basic, empty) are separated as they are displayed separately

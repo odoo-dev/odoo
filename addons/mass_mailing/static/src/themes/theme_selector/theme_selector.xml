@@ -1,6 +1,6 @@
 <templates id="template">
     <div t-name="mass_mailing.ThemeSelector" class="o_mail_theme_selector">
-        <div class="o_mailing_template_preview_wrapper d-inline-block w-100">
+        <div t-ref="themeSelectorWrapper" class="o_mailing_template_preview_wrapper d-inline-block w-100">
             <div class="o_mail_templates_grid w-100">
                 <div t-foreach="simpleThemes.values()" t-as="theme" t-key="theme_index" role="menuitem" class="cursor-pointer dropdown-item px-4"
                     t-on-click="() => this.onSelectTheme(theme)" t-att-data-name="theme.name">
@@ -8,26 +8,16 @@
                     <div class="o_thumb large mb-2" t-attf-style="background-image: url(#{theme.imgPath}_large.png)"/>
                     <h5 class="text-capitalize text-truncate" t-out="theme.title"/>
                 </div>
-                <div t-foreach="favoriteTemplates" t-as="template" t-key="template_index"
+                <div t-foreach="state.favoriteTemplates" t-as="template" t-key="template_index"
                     class="cursor-pointer dropdown-item px-4 o_mail_template_preview d-flex flex-column justify-content-between" role="menuitem"
-                    t-if="template.modelId === this.props.config.mailingModelId"
                     t-on-click="() => this.onSelectFavorite(template.html)">
                     <!-- Template HTML preview -->
                         <div t-if="template.imagePreviewSrc" class="s_dialog_preview s_dialog_preview_image">
-                            <img t-att-src="template.imagePreviewSrc" loading="eager"/>
+                            <img t-att-src="template.imagePreviewSrc"/>
                         </div>
                         <t t-else="">
-                            <div class="o_mail_favorite_preview_wrapper mb-2">
-                                <div class="o_mail_favorite_preview" inert="inert">
-                                    <iframe role="thumbnail" src="about:blank"
-                                        t-att-aria-label="template.name"
-                                        t-att-id="'iframe_fav_' + template.id"
-                                        t-att-data-id="template.id"
-                                        scrolling="no"
-                                        t-att-sandbox="this.isBrowserSafari ? 'allow-same-origin allow-scripts' : 'allow-same-origin'"
-                                        class="h-100"
-                                        style="visibility: hidden;"/>
-                                </div>
+                            <div class="d-flex flex-grow-1">
+                                <FavoritePreview template="template" styleSheetsPromise="this.props.styleSheetsPromise"/>
                             </div>
                         </t>
                     <div class="d-flex flex-row align-items-center mb-2 w-100 position-relative">
@@ -40,7 +30,7 @@
                         </div> 
                     </div>
                 </div>
-                <div t-foreach="themes.values()" t-as="theme" t-key="theme_index" role="menuitem" class="cursor-pointer dropdown-item px-4"
+                <div t-foreach="commonThemes.values()" t-as="theme" t-key="theme_index" role="menuitem" class="cursor-pointer dropdown-item px-4"
                     t-on-click="() => this.onSelectTheme(theme)" t-att-data-name="theme.name">
                     <div class="o_thumb small mb-2" t-attf-style="background-image: url(#{theme.imgPath}_small.png)"/>
                     <div class="o_thumb large mb-2" t-attf-style="background-image: url(#{theme.imgPath}_large.png)"/>
@@ -49,11 +39,4 @@
             </div>
         </div>
     </div>
-
-    <t t-name="mass_mailing.FavoriteThemePreviewBody">
-        <div class="o_mass_mailing_value o_readonly"
-            t-att-class="{'o_rtl': isRTL}">
-            <t t-out="markedUpHtml"/>
-        </div>
-    </t>
 </templates>

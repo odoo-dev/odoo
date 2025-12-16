@@ -1,101 +1,92 @@
-import { Component, markup, onWillStart, useEffect, useState } from "@odoo/owl";
-import { loadBundle } from "@web/core/assets";
-import { isBrowserSafari } from "@web/core/browser/feature_detection";
-import { localization } from "@web/core/l10n/localization";
+import {
+    Component,
+    onMounted,
+    onWillStart,
+    onWillUnmount,
+    status,
+    useRef,
+    useState,
+} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { renderToFragment } from "@web/core/utils/render";
+import { FavoritePreview } from "./favorite_preview";
+import { useThrottleForAnimation } from "@web/core/utils/timing";
+import { effect } from "@web/core/utils/reactive";
+import { KeepLast } from "@web/core/utils/concurrency";
 
 export class ThemeSelector extends Component {
     static template = "mass_mailing.ThemeSelector";
     static props = {
         config: { type: Object },
+        styleSheetsPromise: Promise,
+        themesPromise: Promise,
+        // Reactive wrapper for favoriteThemes promise: { promise }
+        favoriteThemes: Object,
+        iframeRef: Object,
+    };
+    static components = {
+        FavoritePreview,
     };
 
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
         this.themeService = useService("mass_mailing.themes");
+        this.themeSelectorWrapperRef = useRef("themeSelectorWrapper");
         this.config = this.props.config;
-        this.themes = this.themeService.getThemes();
+        this.commonThemes = this.themeService.getCommonThemes();
         this.simpleThemes = this.themeService.getSimpleThemes();
-        this.favoriteTemplates = useState([]);
-        this.isRTL = localization.direction === "rtl";
-        this.renderedTemplatesIndex = {};
-        onWillStart(async () => {
-            const themeServicePromise = this.themeService.load();
-            const favoritePromise = this.orm.call("mailing.mailing", "action_fetch_favorites", [
-                this.favoriteDomain,
-            ]);
-            const [favoriteTemplates] = await Promise.all([favoritePromise, themeServicePromise]);
-            Object.assign(
-                this.favoriteTemplates,
-                favoriteTemplates.map((favorite) => ({
-                    html: favorite.body_arch,
-                    id: favorite.id,
-                    modelId: favorite.mailing_model_id[0],
-                    modelName: favorite.mailing_model_id[1],
-                    name: `template_${favorite.id}`,
-                    nowrap: true,
-                    subject: favorite.subject,
-                    userId: favorite.user_id[0],
-                    userName: favorite.user_id[1],
-                }))
-            );
+        this.state = useState({
+            loading: false,
+            favoriteTemplates: [],
         });
-        useEffect(
-            () => {
-                this.updateTemplatePreviews();
-                return () => {};
+        onWillStart(async () => {
+            const { themesPromise, favoriteThemes } = this.props;
+            const [favoriteTemplates] = await Promise.all([favoriteThemes.promise, themesPromise]);
+            Object.assign(this.state, { favoriteTemplates });
+        });
+        let favoriteThemesPromise = this.props.favoriteThemes.promise;
+        const keepLastFavoriteThemes = new KeepLast();
+        effect(
+            async (favoriteThemes) => {
+                if (status(this) === "destroyed") {
+                    return;
+                }
+                if (favoriteThemesPromise !== favoriteThemes.promise) {
+                    favoriteThemesPromise = favoriteThemes.promise;
+                    this.state.loading = true;
+                    const favoriteTemplates = await keepLastFavoriteThemes.add(
+                        favoriteThemesPromise
+                    );
+                    Object.assign(this.state, { favoriteTemplates });
+                    this.state.loading = false;
+                }
             },
-            () => [this.props.config.mailingModelId]
+            [this.props.favoriteThemes]
         );
-    }
-
-    async updateTemplatePreviews() {
-        const activeIframes = document.querySelectorAll(".o_mail_favorite_preview iframe");
-        if (activeIframes.length == 0) {
-            this.renderedTemplatesIndex = {};
-            return;
-        }
-        const activeTemplates = [...activeIframes].map((iframe) =>
-            this.favoriteTemplates.find((t) => t.id == Number(iframe.dataset.id))
-        );
-
-        if (activeTemplates.every((t) => this.renderedTemplatesIndex[t.id])) {
-            return;
-        }
-
-        const iframePromises = [];
-        for (const template of activeTemplates) {
-            const iframe = document.querySelector("#iframe_fav_" + template.id);
-
-            if (iframe.contentDocument.readyState === "complete") {
-                iframePromises.push(this.setupIframe(template, iframe));
-            } else {
-                iframePromises.push(
-                    new Promise((resolve) => {
-                        iframe.addEventListener("load", () => resolve());
-                    }).then(() => this.setupIframe(template, iframe))
-                );
+        this.throttledResize = useThrottleForAnimation(() => {
+            if (status(this) === "destroyed") {
+                return;
             }
-        }
-        await Promise.all(iframePromises);
-
-        // Cache the currently-rendered templates' IDs to prevent immediate rerenders on patch
-        this.renderedTemplatesIndex = {};
-        activeTemplates.map((t) => (this.renderedTemplatesIndex[t.id] = t));
-    }
-
-    get favoriteDomain() {
-        return this.props.config.filterTemplates
-            ? [["mailing_model_id", "=", this.props.config.mailingModelId]]
-            : [];
+            const iframe = this.props.iframeRef.el;
+            iframe.style.width = "";
+            const height = Math.trunc(
+                this.themeSelectorWrapperRef.el.getBoundingClientRect().height
+            );
+            iframe.style.height = height + "px";
+        });
+        onMounted(() => {
+            this.htmlResizeObserver = new ResizeObserver(this.throttledResize);
+            this.htmlResizeObserver.observe(this.themeSelectorWrapperRef.el);
+        });
+        onWillUnmount(() => {
+            this.htmlResizeObserver.disconnect();
+        });
     }
 
     async onRemoveFavorite(ev, index) {
         ev.stopPropagation();
-        const favorite = this.favoriteTemplates[index];
-        if (!favorite) {
+        const favorite = this.state.favoriteTemplates[index];
+        if (this.state.loading || !favorite) {
             return;
         }
         const notificationAction = await this.orm.call(
@@ -103,45 +94,21 @@ export class ThemeSelector extends Component {
             "action_remove_favorite",
             [favorite.id]
         );
-        this.favoriteTemplates.splice(index, 1);
-        delete this.renderedTemplatesIndex[favorite.id];
+        this.state.favoriteTemplates.splice(index, 1);
         this.action.doAction(notificationAction);
     }
 
     onSelectFavorite(html) {
+        if (this.state.loading) {
+            return;
+        }
         this.props.config.setThemeHTML(html);
     }
 
     onSelectTheme(themeOptions) {
+        if (this.state.loading) {
+            return;
+        }
         this.props.config.setThemeHTML(themeOptions.html);
-    }
-
-    get isBrowserSafari() {
-        return isBrowserSafari();
-    }
-
-    async setupIframe(template, iframe) {
-        iframe.contentDocument.head.appendChild(this.renderHeadContent(template));
-        iframe.contentDocument.body.classList.add("o_in_iframe");
-        iframe.contentDocument.body.parentElement.classList.add("o_favorite_template_preview");
-        iframe.contentDocument.body.style.setProperty("direction", localization.direction);
-        iframe.contentDocument.body.append(this.renderBodyContent(template));
-
-        const loadOptions = { targetDoc: iframe.contentDocument, js: false };
-        await loadBundle("mass_mailing.assets_iframe_style", loadOptions);
-
-        iframe.style.visibility = null;
-    }
-
-    renderHeadContent() {
-        return renderToFragment("mass_mailing.IframeHead");
-    }
-
-    renderBodyContent(template) {
-        return renderToFragment("mass_mailing.FavoriteThemePreviewBody", {
-            ...template,
-            markedUpHtml: markup(template.html),
-            isRTL: this.isRTL,
-        });
     }
 }
