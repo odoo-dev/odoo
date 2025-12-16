@@ -117,11 +117,11 @@ class TestMassMailValues(MassMailCommon):
                                 <img src="data:image/jpg;base64,{BASE_64_STRING}10">
                                 <div style='color: red; background-image:url("data:image/jpg;base64,{BASE_64_STRING}11"); display: block;'>Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"
                                 Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"</div>
-                                <div style="color: red; background-image:url('data:image/jpg;base64,{BASE_64_STRING}12'); display: block;"/>
-                                <div style="color: red; background-image:url(&quot;data:image/jpg;base64,{BASE_64_STRING}13&quot;); display: block;"/>
-                                <div style="color: red; background-image:url(&#34;data:image/jpg;base64,{BASE_64_STRING}14&#34;); display: block;"/>
-                                <div style="color: red; background-image:url(data:image/jpg;base64,{BASE_64_STRING}15); display: block;"/>
-                                <div style="color: red; background-image: url(data:image/jpg;base64,{BASE_64_STRING}16); background: url('data:image/jpg;base64,{BASE_64_STRING}17'); display: block;"/>
+                                <div style="color: red; background-image:url('data:image/jpg;base64,{BASE_64_STRING}12'); display: block;"></div>
+                                <div style="color: red; background-image:url(&quot;data:image/jpg;base64,{BASE_64_STRING}13&quot;); display: block;"></div>
+                                <div style="color: red; background-image:url(&#34;data:image/jpg;base64,{BASE_64_STRING}14&#34;); display: block;"></div>
+                                <div style="color: red; background-image:url(data:image/jpg;base64,{BASE_64_STRING}15); display: block;"></div>
+                                <div style="color: red; background-image: url(data:image/jpg;base64,{BASE_64_STRING}16); background: url('data:image/jpg;base64,{BASE_64_STRING}17'); display: block;"></div>
                             <![endif]-->
                             <img src="data:image/png;base64,{BASE_64_STRING}0">
                         </section>
@@ -131,27 +131,27 @@ class TestMassMailValues(MassMailCommon):
         self.assertEqual(attachments[0]['id'], attachments[18]['id'])
         self.assertEqual(str(mailing.body_html).strip(), f"""
                         <section>
-                            <img src="/web/image/{attachments[0]['id']}?access_token={attachments[0]['token']}"/>
-                            <img src="/web/image/{attachments[1]['id']}?access_token={attachments[1]['token']}"/>
-                            <div style="color: red; background-image:url(&quot;/web/image/{attachments[2]['id']}?access_token={attachments[2]['token']}&quot;); display: block;"/>
-                            <div style="color: red; background-image:url('/web/image/{attachments[3]['id']}?access_token={attachments[3]['token']}'); display: block;"/>
-                            <div style="color: red; background-image:url(&quot;/web/image/{attachments[4]['id']}?access_token={attachments[4]['token']}&quot;); display: block;"/>
-                            <div style="color: red; background-image:url(&quot;/web/image/{attachments[5]['id']}?access_token={attachments[5]['token']}&quot;); display: block;"/>
-                            <div style="color: red; background-image:url(/web/image/{attachments[6]['id']}?access_token={attachments[6]['token']}); display: block;"/>
-                            <div style="color: red; background-image: url(/web/image/{attachments[7]['id']}?access_token={attachments[7]['token']}); background: url('/web/image/{attachments[8]['id']}?access_token={attachments[8]['token']}'); display: block;"/>
+                            <img src="/web/image/{attachments[0]['id']}?access_token={attachments[0]['token']}">
+                            <img src="/web/image/{attachments[1]['id']}?access_token={attachments[1]['token']}">
+                            <div style='color: red; background-image:url("/web/image/{attachments[2]['id']}?access_token={attachments[2]['token']}"); display: block;'></div>
+                            <div style="color: red; background-image:url('/web/image/{attachments[3]['id']}?access_token={attachments[3]['token']}'); display: block;"></div>
+                            <div style='color: red; background-image:url("/web/image/{attachments[4]['id']}?access_token={attachments[4]['token']}"); display: block;'></div>
+                            <div style='color: red; background-image:url("/web/image/{attachments[5]['id']}?access_token={attachments[5]['token']}"); display: block;'></div>
+                            <div style="color: red; background-image:url(/web/image/{attachments[6]['id']}?access_token={attachments[6]['token']}); display: block;"></div>
+                            <div style="color: red; background-image: url(/web/image/{attachments[7]['id']}?access_token={attachments[7]['token']}); background: url('/web/image/{attachments[8]['id']}?access_token={attachments[8]['token']}'); display: block;"></div>
                             <!--[if mso]>
                                 <img src="/web/image/{attachments[9]['id']}?access_token={attachments[9]['token']}">Fake url, in text: img src="data:image/png;base64,{BASE_64_STRING}"
                                 Fake url, in text: img src="data:image/png;base64,{BASE_64_STRING}"
                                 <img src="/web/image/{attachments[10]['id']}?access_token={attachments[10]['token']}">
                                 <div style='color: red; background-image:url("/web/image/{attachments[11]['id']}?access_token={attachments[11]['token']}"); display: block;'>Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"
                                 Fake url, in text: style="background-image:url('data:image/png;base64,{BASE_64_STRING}');"</div>
-                                <div style="color: red; background-image:url('/web/image/{attachments[12]['id']}?access_token={attachments[12]['token']}'); display: block;"/>
-                                <div style="color: red; background-image:url(&quot;/web/image/{attachments[13]['id']}?access_token={attachments[13]['token']}&quot;); display: block;"/>
-                                <div style="color: red; background-image:url(&#34;/web/image/{attachments[14]['id']}?access_token={attachments[14]['token']}&#34;); display: block;"/>
-                                <div style="color: red; background-image:url(/web/image/{attachments[15]['id']}?access_token={attachments[15]['token']}); display: block;"/>
-                                <div style="color: red; background-image: url(/web/image/{attachments[16]['id']}?access_token={attachments[16]['token']}); background: url('/web/image/{attachments[17]['id']}?access_token={attachments[17]['token']}'); display: block;"/>
+                                <div style="color: red; background-image:url('/web/image/{attachments[12]['id']}?access_token={attachments[12]['token']}'); display: block;"></div>
+                                <div style="color: red; background-image:url(&quot;/web/image/{attachments[13]['id']}?access_token={attachments[13]['token']}&quot;); display: block;"></div>
+                                <div style="color: red; background-image:url(&#34;/web/image/{attachments[14]['id']}?access_token={attachments[14]['token']}&#34;); display: block;"></div>
+                                <div style="color: red; background-image:url(/web/image/{attachments[15]['id']}?access_token={attachments[15]['token']}); display: block;"></div>
+                                <div style="color: red; background-image: url(/web/image/{attachments[16]['id']}?access_token={attachments[16]['token']}); background: url('/web/image/{attachments[17]['id']}?access_token={attachments[17]['token']}'); display: block;"></div>
                             <![endif]-->
-                            <img src="/web/image/{attachments[18]['id']}?access_token={attachments[18]['token']}"/>
+                            <img src="/web/image/{attachments[18]['id']}?access_token={attachments[18]['token']}">
                         </section>
         """.strip())
 
