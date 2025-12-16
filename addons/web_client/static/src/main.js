@@ -1,51 +1,30 @@
-import { whenReady, mount, Plugin, App } from "@odoo/owl";
-import { WebClient } from "./web_client";
+import { App, Plugin, whenReady } from "@odoo/owl";
 import { getTemplate } from "@web/core/templates";
-import { registry } from "@web/core/registry";
-import { rpc } from "@web/core/rpc";
-import { serviceManager } from "@web/core/services";
-
-// class Test extends Plugin {
-//     static id = "test";
-//     static dependencies = ["rpc"];
-
-//     async setup() {
-//         const result = await this.plugins.rpc.call("/web/dataset/call_kw/res.partner/web_read", {
-//             model: "res.partner",
-//             kwargs: {
-//                 specification: {
-//                     display_name: {}
-//                 }
-//             },
-//             method: "web_read",
-//             args: [[34]]
-//         });
-//         console.log(result);
-//     }
-// }
-
-// registry.get("services").addById(Test);
+import { registry } from "@web_core/registry";
+import { service, serviceManager } from "@web_core/services";
+import { WebClient } from "./web_client";
 
 const config = {
     dev: true,
     name: "WebCore Playground",
     getTemplate,
-    pluginManager: serviceManager
-    // Plugins: registry.get("services").items
+    pluginManager: serviceManager,
 };
 
-const app = new App(WebClient, config);
+const app = new App(config);
 
-registry.get("services").addById(class AppPlugin extends Plugin {
+class AppPlugin extends Plugin {
     static id = "app";
+    static {
+        registry.get("services").addById(this);
+    }
 
     app = app;
-});
+}
 
 export function getMainApp() {
-    const appPlugin = getService("app");
+    const appPlugin = service(AppPlugin);
     return appPlugin.app;
 }
 
-
-whenReady(() => app.mount(document.body));
+whenReady(() => app.createRoot(WebClient).mount(document.body));

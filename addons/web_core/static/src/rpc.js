@@ -1,18 +1,29 @@
-/** @odoo-module alias=@web/core/rpc default=false */
+/**
+ * -----------------------------------------------------------------------------
+ * RPC
+ * -----------------------------------------------------------------------------
+ * File description
+ * -----------------------------------------------------------------------------
+ */
 
 import { EventBus, Plugin } from "@odoo/owl";
 import { registry } from "./registry";
-import { getService } from "./services";
+import { service } from "./services";
 
 export function rpc(url, params = {}, settings = {}) {
-    const rpc = getService("rpc");
+    const rpc = service(RPC);
     return rpc.call(url, params, settings);
 }
 
 export class RPC extends Plugin {
     static id = "rpc";
+    static {
+        registry.get("services").addById(this);
+    }
 
+    /** @private */
     _bus = new EventBus();
+    /** @private */
     _rpcId = 1;
 
     call(url, params = {}, settings = {}) {
@@ -94,8 +105,6 @@ export class RPC extends Plugin {
     }
 }
 
-registry.get("services").addById(RPC)
-
 // -----------------------------------------------------------------------------
 
 export class RPCError extends Error {
@@ -117,7 +126,7 @@ export class ConnectionLostError extends Error {
     }
 }
 
-export class ConnectionAbortedError extends Error { }
+export class ConnectionAbortedError extends Error {}
 
 export function makeErrorFromResponse(reponse) {
     // Odoo returns error like this, in a error field instead of properly

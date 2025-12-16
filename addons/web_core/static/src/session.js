@@ -1,5 +1,3 @@
-/** @odoo-module alias=@web/core/session default=false */
-
 /**
  * -----------------------------------------------------------------------------
  * Odoo Session

@@ -8,8 +8,8 @@
  * This file defines the bootstrap mechanism for Odoo's JavaScript module
  * system. It introduces a `ModuleLoader` class that manages the lifecycle of
  * JavaScript modules, handling their registration, dependency resolution, and
- * initialization. 
- * 
+ * initialization.
+ *
  * The loader attaches to the global `odoo` object and provides a `define`
  * method for declaring modules. Errors such as missing modules or dependency
  * cycles are logged, and a banner is shown in debug mode for visibility.
@@ -24,7 +24,6 @@
     }
 
     class ModuleLoader {
-
         _bus = new EventTarget();
         _checkErrorProm = null;
         _factories = new Map();
@@ -76,9 +75,9 @@
                 this._startModule(job);
             }
         }
-        
+
         /**
-         * @param {string} name 
+         * @param {string} name
          */
         _addJob(name) {
             this._jobs.add(name);
@@ -86,7 +85,7 @@
         }
 
         /**
-         * @param {string[]} moduleNames 
+         * @param {string[]} moduleNames
          * @returns {any[]}
          */
         _findErrors(moduleNames) {
