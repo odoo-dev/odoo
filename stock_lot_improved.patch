@@ -1,0 +1,43 @@
+diff --git a/addons/stock/models/stock_move.py b/addons/stock/models/stock_move.py
+index 83d1a9ec845e..33903c7decd0 100644
+--- a/addons/stock/models/stock_move.py
++++ b/addons/stock/models/stock_move.py
+@@ -1406,33 +1406,21 @@ Please change the quantity done or the rounding precision in your settings.""",
+             quantity = sum((mls_with_existing_lots | mls_without_lots).mapped('quantity_product_uom'))
+             newly_added_lots = self.lot_ids.filtered(lambda lot: lot._origin.id not in self._origin.lot_ids.ids)
+             if newly_added_lots:
+-                quants_by_lot = self.env['stock.quant']._read_group(
+-                    domain=[
+-                        ('product_id', '=', self.product_id.id),
+-                        ('location_id', 'child_of', self.location_id.id),
+-                        '|', ('lot_id', 'in', newly_added_lots.ids), ('lot_id', '=', False),
+-                    ], groupby=['lot_id'], aggregates=['available_quantity:sum'],
+-                )
+-                available_qty_by_lot = {lot.id: available_qty for lot, available_qty in quants_by_lot}
+                 demand = self.uom_id._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
+-                no_lot_available_qty = available_qty_by_lot.get(False, 0)
+-                # in case we have mls/quant without lots, it won't be reserved immediately and should
+-                # only be assigned to the first lot that took it
+                 assigned_mls = self.env['stock.move.line']
+-                empty_quant_taken = False
+-
+                 for lot in newly_added_lots:
+-                    available_qty = available_qty_by_lot.get(lot._origin.id, 0)
+                     remaining_move_qty = demand - quantity
++                    reserved_quants = self.env['stock.quant']._get_reserve_quantity(
++                        self.product_id, self.location_id, remaining_move_qty, lot_id=lot._origin
++                    ) if remaining_move_qty > 0 else []
++                    available_qty = reserved_quants and reserved_quants[0][1]
+                     unassigned_empty_ml = (mls_without_lots - assigned_mls)[:1]
++
+                     if unassigned_empty_ml and remaining_move_qty > 0:
+                         qty_to_add = 0
+                         assigned_mls |= unassigned_empty_ml
+                     elif remaining_move_qty > 0 and available_qty > 0:
+                         qty_to_add = min(available_qty, remaining_move_qty)
+-                    elif remaining_move_qty > 0 and no_lot_available_qty > 0 and not empty_quant_taken:
+-                        qty_to_add = min(no_lot_available_qty, remaining_move_qty)
+-                        empty_quant_taken = True
+                     else:
+                         qty_to_add = 1
+                     quantity += qty_to_add
