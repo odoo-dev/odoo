@@ -69,6 +69,21 @@ class StockLot(models.Model):
             if not lot.name:
                 lot.name = lot.product_id.lot_sequence_id.next_by_id() if lot.product_id.lot_sequence_id else False
 
+    @api.depends_context('active_move_id')
+    def _compute_display_name(self):
+        super()._compute_display_name()
+        ctx = self.env.context
+        move_id = self.env['stock.move'].browse(ctx.get('active_move_id'))
+        if not ctx.get('formatted_display_name') or not move_id or move_id.product_id.tracking != 'lot' or move_id.location_id.usage != 'internal':
+            return
+        not_selected_lot = self - move_id.lot_ids  # dont find a case where formatted_display_name is true and self is multiple.
+        if not_selected_lot:
+            available_quants = not_selected_lot.quant_ids.filtered(lambda q: q.location_id == move_id.location_id)
+            if not available_quants:
+                return
+            available_qty = move_id.product_id.uom_id._compute_quantity(sum(available_quants.mapped('available_quantity')), move_id.uom_id)
+            not_selected_lot.display_name = f"{not_selected_lot.name}\t--{available_qty} {move_id.uom_id.name}--"
+
     @api.model
     def generate_lot_names(self, first_lot, count):
         """Generate `lot_names` from a string."""
