@@ -95,7 +95,7 @@ class MrpBom(models.Model):
     show_set_bom_button = fields.Boolean(compute="_compute_show_set_bom_button")
     batch_size = fields.Float('Batch Size', default=1.0, digits='Product Unit', help="All automatically generated manufacturing orders for this product will be of this size.")
     enable_batch_size = fields.Boolean(default=False)
-    estimated_info = fields.Text(compute='_compute_estimated_info')
+    estimated_info = fields.Text(compute='_compute_json_popover')
     json_popover = fields.Char('JSON data for the popover widget', compute='_compute_json_popover')
 
     _qty_positive = models.Constraint(
@@ -336,40 +336,36 @@ class MrpBom(models.Model):
                 break
             bom.show_copy_operations_button = False
 
-    @api.depends('type')
-    def _compute_estimated_info(self):
+    @api.depends('type', 'produce_delay', 'days_to_prepare_mo')
+    def _compute_json_popover(self):
         warehouse = self.env.user._get_default_warehouse_id()
-        self.estimated_info = False
+        self.estimated_info = self.json_popover = False
         for bom in self.filtered(lambda bom: bom.type != 'phantom'):
             bom_data = bom.env['report.mrp.report_bom_structure'].with_context(minimized=True)._get_bom_data(bom, warehouse, bom.product_id, ignore_stock=True)
             component_info = max(bom_data.get('components'), key=lambda component: component.get('availability_delay', 0) or component.get('manufacture_delay', 0), default={'availability_delay': 0, 'manufacture_delay': 0, 'name': ''})
             max_delay = component_info.get('availability_delay') or component_info.get('manufacture_delay')
-            if not component_info.get('name') or (component_info.get('product').type == 'consu' and not component_info.get('is_storable')):
-                bom.estimated_info = f"Estimated: {int(max_delay)} days"
+            if not (component_info.get('name') and component_info.get('is_storable')):
+                bom.estimated_info = self.env._("Estimated: %s Days", {int(max_delay)})
+                bom.json_popover = json.dumps({
+                    'estimated_delay': self.env._("Estimated: %s Days", {int(max_delay)}),
+                })
             elif max_delay is not False:
-                bom.estimated_info = f"Estimated: {int(max_delay)} days\n({component_info.get('name')})"
+                bom.estimated_info = self.env._("Estimated: %s Days", {int(max_delay)})
+                bom.json_popover = json.dumps({
+                    'component': f"{component_info.get('name')}",
+                    'component_id': component_info.get('product').id,
+                    'route_name': component_info.get('route_name'),
+                    'route_detail': component_info.get('route_detail'),
+                    'route_type': component_info.get('route_type'),
+                    'route_id': component_info.get('bom_id'),
+                    'delay': f"{int(max_delay)} Days",
+                })
             else:
-                bom.estimated_info = "Estimated: Not Available\n(Missing Routes information\nfor some components)"
-
-    @api.depends('estimated_info')
-    def _compute_json_popover(self):
-        warehouse = self.env.user._get_default_warehouse_id()
-        for bom in self.filtered(lambda bom: bom.type != 'phantom'):
-            bom_data = bom.env['report.mrp.report_bom_structure'].with_context(minimized=True)._get_bom_data(bom, warehouse, bom.product_id, ignore_stock=True)
-            component_info = max(bom_data.get('components'), key=lambda component: component.get('availability_delay', 0) or component.get('manufacture_delay', 0), default={'availability_delay': 0, 'manufacture_delay': 0, 'name': ''})
-            route_info = " "
-            if component_info.get('route_detail'):
-                route_info = f"{component_info.get('route_type')}: {component_info.get('route_detail')}"
-            if bom.estimated_info:
-                infos = bom.estimated_info
-                json_data = {
-                    'title': _("Scheduling Information"),
-                    'msg': infos,
-                    'msg2': route_info,
-                }
-                bom.json_popover = json.dumps(json_data)
-            else:
-                bom.json_popover = False
+                bom.estimated_info = self.env._("Estimated: Not Available")
+                bom.json_popover = json.dumps({
+                    'no_estimated_info': self.env._(
+                        "Estimated: Not Available (Missing Routes information for some components)")
+                })
 
     @api.constrains('product_tmpl_id', 'product_id', 'type')
     def check_kit_has_not_orderpoint(self):

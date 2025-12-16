@@ -183,8 +183,10 @@
                                     <label for="days_to_prepare_mo"/>
                                     <div class="o_row">
                                         <field name="days_to_prepare_mo" class="oe_inline"/> days
-                                         <field name="estimated_info" class="ms-2 text-muted" invisible="type == 'phantom'"/>
-                                        <field name="json_popover" widget="mrp_bom_popover" class="oe_inline mx-2" invisible="type == 'phantom'"/>
+                                        <div class="d-inline-flex align-items-center ms-2" invisible="type == 'phantom'">
+                                            <field name="estimated_info" class="text-muted text-nowrap"/>
+                                            <field name="json_popover" widget="mrp_bom_popover"/>
+                                        </div>
                                     </div>
                                     <label for="batch_size" invisible="type != 'normal'"/>
                                     <div class="o_row" invisible="type != 'normal'">

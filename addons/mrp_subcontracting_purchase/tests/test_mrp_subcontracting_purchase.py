@@ -19,7 +19,6 @@ _logger = logging.getLogger(__name__)
 
 
 @tagged('post_install', '-at_install')
-@skip('Temporary to fast merge new valuation')
 class MrpSubcontractingPurchaseTest(TestMrpSubcontractingCommon):
 
     def setUp(self):

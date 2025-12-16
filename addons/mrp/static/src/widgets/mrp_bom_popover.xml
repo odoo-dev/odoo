@@ -1,9 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <div t-name="mrp.bomPopover">
-        <h6><t t-out="props.title"/></h6>
-        <t t-out="props.msg"/>
-        <br/>
-        <t t-out="props.msg2"/>
-        </div>
+        <table class="table table-sm mb-0">
+            <tbody>
+                <t t-if="props.estimated_delay">
+                    <tr><td><t t-esc="props.estimated_delay"/></td></tr>
+                </t>
+                <t t-elif="props.component">
+                    <tr>
+                        <td class="fw-bolder">Component</td>
+                        <td><a href="#" t-on-click.prevent="() => this.goToAction(props.component_id, 'product.product')"><t t-esc="props.component"/></a></td>
+                    </tr>
+                    <tr t-if="props.route_name and props.route_detail">
+                        <td class="fw-bolder">Route</td>
+                        <td>
+                            <t t-esc="props.route_name"/>:
+                            <t t-if="props.route_type === 'manufacture'">
+                                <a href="#" t-on-click.prevent="() => this.goToAction(props.route_id, 'mrp.bom')">
+                                    <t t-esc="props.route_detail"/>
+                                </a>
+                            </t>
+                            <t t-else="">
+                                <t t-esc="props.route_detail"/>
+                            </t>
+                        </td>
+                    </tr>
+                    <tr t-if="props.delay">
+                        <td class="fw-bolder">Lead Time</td>
+                        <td><t t-esc="props.delay"/></td>
+                    </tr>
+                </t>
+                <t t-else="">
+                    <tr><td><t t-esc="props.no_estimated_info"/></td></tr>
+                </t>
+            </tbody>
+        </table>
+    </div>
 </templates>
