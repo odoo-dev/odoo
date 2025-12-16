@@ -13,7 +13,8 @@ class DiscussCallHistory(models.Model):
     start_dt = fields.Datetime(index=True, required=True)
     end_dt = fields.Datetime()
     start_call_message_id = fields.Many2one("mail.message", index=True)
-    artifact_ids = fields.One2many('call.artifact', 'res_id', string='Artifacts', domain=[('res_model', '=', 'discuss.call.history')], help="Artifacts (recordings, transcripts, markers) linked to this call")
+    # Call artifacts are stored in a polymorphic way (res_model, res_id), use of computed Many2many avoids OLS03022
+    artifact_ids = fields.Many2many('call.artifact', string='Artifacts', compute='_compute_artifact_ids', help="Artifacts (recordings, transcripts, markers) linked to this call")
 
     _channel_id_not_null_constraint = models.Constraint(
         "CHECK (channel_id IS NOT NULL)", "Call history must have a channel"
@@ -31,3 +32,10 @@ class DiscussCallHistory(models.Model):
         for record in self:
             end_dt = record.end_dt or fields.Datetime.now()
             record.duration_hour = (end_dt - record.start_dt).total_seconds() / 3600
+
+    def _compute_artifact_ids(self):
+        for record in self:
+            record.artifact_ids = self.env['call.artifact'].search([
+                ('res_model', '=', 'discuss.call.history'),
+                ('res_id', '=', record.id),
+            ])
