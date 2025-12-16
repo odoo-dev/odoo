@@ -1366,7 +1366,7 @@ class AccountChartTemplate(models.AbstractModel):
         return res
 
     def _load_pre_defined_data(self, spec):
-        for company in self.env['res.company'].search([('chart_template', '!=', False)], order="parent_path"):
+        for company in self.env['res.company'].search([('chart_template', '!=', False)]):
             ChartTemplate = self.with_company(company)
             pre_defined_data = {
                 model: {

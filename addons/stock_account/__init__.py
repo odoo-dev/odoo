@@ -32,7 +32,7 @@ def _create_product_value(env):
 
 
 def _configure_journals(env):
-    for company in env['res.company'].search([('chart_template', '!=', False)], order="parent_path"):
+    for company in env['res.company'].search([('chart_template', '!=', False)]):
         journal = env['account.journal'].search([
             ('code', '=', 'STJ'),
             ('company_id', '=', company.id),

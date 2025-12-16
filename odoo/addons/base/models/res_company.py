@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 class ResCompany(models.CachedModel):
     _name = 'res.company'
     _description = 'Company'
-    _order = 'sequence, name'
+    _order = 'sequence, parent_path, name'
     _inherit = ['format.address.mixin', 'format.vat.label.mixin']
     _parent_store = True
     _clear_asset_cache_on_fields = {'font', 'primary_color', 'secondary_color', 'external_report_layout_id'}
