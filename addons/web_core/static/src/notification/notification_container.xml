@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="web_core.NotificationContainer">
-    <div class="wcore_notification_container position-fixed">
+    <div class="wcore_notification_container position-fixed" style="inset: 50px 1rem auto 1rem; left: auto; width: 400px;">
         <t t-foreach="this.props.notifications()" t-as="notification" t-key="notification.id">
             <Notification t-props="notification"/>
         </t>
