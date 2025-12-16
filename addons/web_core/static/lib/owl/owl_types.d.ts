@@ -699,4 +699,4 @@ declare const __info__: {
     version: string;
 };
 
-export { App, Component, ComponentConstructor, EventBus, GetProps, OwlError, Plugin, PluginConstructor, PluginManager, PropsValidation, Registry, Resource, __info__, batched, blockDom, computed, effect, htmlEscape, markRaw, markup, mount, onError, onMounted, onPatched, onWillDestroy, onWillPatch, onWillStart, onWillUnmount, onWillUpdateProps, plugin, props, proxy, signal, status, toRaw, untrack, useComponent, useEffect, useListener, usePlugins, useResource, validate, validateType, whenReady, xml };
+export { App, Component, ComponentConstructor, EventBus, GetProps, OwlError, Plugin, PluginConstructor, PluginManager, PropsValidation, ReactiveValue, Registry, Resource, __info__, batched, blockDom, computed, effect, htmlEscape, markRaw, markup, mount, onError, onMounted, onPatched, onWillDestroy, onWillPatch, onWillStart, onWillUnmount, onWillUpdateProps, plugin, props, proxy, signal, Signal, status, toRaw, untrack, useComponent, useEffect, useListener, usePlugins, useResource, validate, validateType, whenReady, xml };

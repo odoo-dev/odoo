@@ -5,6 +5,7 @@
     <Navbar/>
     <div class="content flex-grow overflow-y-auto">
         <h1>Welcome to the page!</h1>
+        <button t-on-click="this.notify">Push notification</button>
         <p>This is the content of the page. Scroll down to see more.</p>
         <p>...more content...</p>
         <p>...more content...</p>
@@ -89,6 +90,7 @@
         <p>...more content...</p>
         <p>...more content...</p>
     </div>
+    <OverlayContainer/>
 </t>
 
 </templates>

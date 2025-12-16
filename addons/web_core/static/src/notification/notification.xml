@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="web_core.Notification">
+    <div class="wcore_notification d-flex mb-2 position-relative rounded shadow-lg">
+        <span t-attf-class="wcore_notification_bar bg-{{this.props.type}} rounded-start"/>
+        <div class="w-100 py-2 ps-3 pe-5 border border-start-0 rounded-end text-break">
+            <button type="button" class="wcore_notification_close btn-close position-absolute top-0 end-0 mt-2 me-2" aria-label="Close" t-on-click="() => this.props.pop()" data-available-offline=""/>
+            <div class="wcore_notification_body d-flex align-items-center">
+                <span class="me-auto wcore_notification_content w-100">
+                    <t t-if="this.props.title"><t t-out="this.props.title"/>. </t>
+                    <t t-out="this.props.message"/>
+                </span>
+                <div t-if="this.props.buttons.length" class="wcore_notification_buttons justify-content-end w-50">
+                    <button t-foreach="this.props.buttons" t-as="button" type="button" t-key="button_index" t-attf-class="btn btn-link" t-on-click="button.action">
+                        <t t-if="button.icon">
+                            <i t-if="button.icon.indexOf('fa-') === 0" role="img" t-att-aria-label="button.label" t-att-title="button.label" t-attf-class="fa fa-fw {{button.icon}} me-1"/>
+                            <img t-else="" t-att-src="button.icon" t-att-alt="button.label"/>
+                        </t>
+                        <span class="fw-bolder" t-out="button.label"/>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</t>
+
+</templates>
