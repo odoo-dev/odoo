@@ -3,6 +3,11 @@ import { Component, computed, props } from "@odoo/owl";
 export class Popover extends Component {
     static template = "web_core.Popover";
 
+    content = props({
+        component: Function,
+        props: { type: Object, optional: true },
+    });
+
     props = props({
         target: Function,
     });

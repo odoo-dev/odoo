@@ -87,7 +87,7 @@ export class NotificationPlugin extends Plugin {
                 delete this._notificationMap()[id];
                 this._notificationMap.update();
                 if (!this.notifications().length) {
-                    this.overlay.pop();
+                    this.overlay.close();
                 }
                 resolve(result);
             },
@@ -98,7 +98,7 @@ export class NotificationPlugin extends Plugin {
         this._notificationMap()[id] = notification;
         this._notificationMap.update();
 
-        this.overlay.push();
+        this.overlay.open();
 
         return promise;
     }
