@@ -13,14 +13,14 @@ enableInDir () {
     git config core.hooksPath "$hooksPath"
     cp "$tooling/_eslintignore" .eslintignore
     cp "$tooling/_eslintrc.json" .eslintrc.json
-    cp "$tooling/_jsconfig.json" jsconfig.json
+    # cp "$tooling/_jsconfig.json" jsconfig.json
     cp "$tooling/_package.json" package.json
     if [[ $2 == "copy" ]]; then
         # -i is not supported on mac
         sed "s@addons@$pathFromEnterpriseToCommunity/addons@g" jsconfig.json > tmp.json
         mv tmp.json jsconfig.json
         # copy over node_modules and package-lock to avoid double "npm install"
-        cp "$community/package-lock.json" package-lock.json
+        # cp "$community/package-lock.json" package-lock.json
         cp -a "$community/node_modules" node_modules
     else
         npm install
