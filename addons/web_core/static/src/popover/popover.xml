@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_core.Popover">
+    <div class="wcore_popover position-fixed bg-white rounded shadow" t-att-style="this.style()">
+        <t t-call-slot="default"/>
+    </div>
+</t>
+
+</templates>
