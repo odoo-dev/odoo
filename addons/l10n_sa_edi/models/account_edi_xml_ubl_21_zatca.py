@@ -299,6 +299,37 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             })
         return res
 
+    def _get_invoice_line_allowance_vals_list(self, line, tax_values_list=None):
+        return []
+
+    def _get_invoice_line_price_allowance_vals_list(self, line, tax_values_list=None):
+        if not line.discount:
+            return []
+
+        # Price subtotal without discount:
+        net_price_subtotal = line.price_subtotal
+
+        # Price subtotal with discount:
+        if line.discount == 100.0:
+            gross_price_subtotal = 0.0
+        else:
+            gross_price_subtotal = net_price_subtotal / (1.0 - (line.discount or 0.0) / 100.0)
+        
+        # Price unit before discount:
+        gross_price_unit = line.currency_id.round(gross_price_subtotal / line.quantity) if line.quantity and not line.currency_id.is_zero(gross_price_subtotal) else 0.0
+        
+        # Price unit after discount:
+        net_price_unit = line.currency_id.round(line.price_subtotal / line.quantity) if line.quantity and not line.currency_id.is_zero(line.price_subtotal) else 0.0
+        
+        return [{
+            'charge_indicator': 'false',
+            'allowance_charge_reason': 'DISCOUNT',
+            'currency_name': line.currency_id.name,
+            'currency_dp': self._get_currency_decimal_places(line.currency_id),
+            'amount': gross_price_unit - net_price_unit,
+            'base_amount': gross_price_unit
+        }]
+
     def _export_invoice_vals(self, invoice):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
         vals = super()._export_invoice_vals(invoice)
@@ -428,6 +459,9 @@ class AccountEdiXmlUBL21Zatca(models.AbstractModel):
             # used during computation of prepaid amount as ZATCA sums up tax amount/taxable amount of all lines
             # irrespective of whether they are down-payment lines.
             line_vals['tax_total_vals'][0].pop('tax_subtotal_vals', None)
+            line_vals["price_vals"]["price_amount"] = round(line.price_subtotal / line.quantity, 10)
+        
+        line_vals["price_allowance_charge_vals"] = self._get_invoice_line_price_allowance_vals_list(line)
         line_vals['tax_total_vals'][0]['total_amount_sa'] = total_amount_sa
         line_vals['line_quantity'] = abs(line_vals['line_quantity'])
         line_vals['line_extension_amount'] = extension_amount

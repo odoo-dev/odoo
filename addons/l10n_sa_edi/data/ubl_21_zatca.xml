@@ -135,6 +135,16 @@
                     </cac:DocumentReference>
                 </t>
             </xpath>
+
+            <xpath expr="//*[local-name()='Price']//*[local-name()='BaseQuantity']" position="after">
+                <cac:AllowanceCharge
+                    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                    t-foreach="vals.get('price_allowance_charge_vals', [])" t-as="foreach_vals">
+                    <t t-call="{{AllowanceChargeType_template}}">
+                        <t t-set="vals" t-value="foreach_vals"/>
+                    </t>
+                </cac:AllowanceCharge>
+            </xpath>
         </template>
 
         <template id="ubl_21_CreditNoteLineType_zatca" inherit_id="account_edi_ubl_cii.ubl_21_CreditNoteLineType" primary="True">
@@ -158,6 +168,15 @@
                     </cac:DocumentReference>
                 </t>
             </xpath>
+            <xpath expr="//*[local-name()='Price']//*[local-name()='BaseQuantity']" position="after">
+                <cac:AllowanceCharge
+                    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                    t-foreach="vals.get('price_allowance_charge_vals', [])" t-as="foreach_vals">
+                    <t t-call="{{AllowanceChargeType_template}}">
+                        <t t-set="vals" t-value="foreach_vals"/>
+                    </t>
+                </cac:AllowanceCharge>
+            </xpath>
         </template>
 
         <template id="ubl_21_DebitNoteLineType_zatca" inherit_id="account_edi_ubl_cii.ubl_21_DebitNoteLineType" primary="True">
@@ -180,6 +199,15 @@
                         <cbc:DocumentTypeCode t-out="prepayment_vals.get('document_type_code')"/>
                     </cac:DocumentReference>
                 </t>
+            </xpath>
+            <xpath expr="//*[local-name()='Price']//*[local-name()='BaseQuantity']" position="after">
+                <cac:AllowanceCharge
+                    xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+                    t-foreach="vals.get('price_allowance_charge_vals', [])" t-as="foreach_vals">
+                    <t t-call="{{AllowanceChargeType_template}}">
+                        <t t-set="vals" t-value="foreach_vals"/>
+                    </t>
+                </cac:AllowanceCharge>
             </xpath>
         </template>
 
