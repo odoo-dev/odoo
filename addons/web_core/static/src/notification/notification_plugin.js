@@ -1,7 +1,25 @@
+/**
+ * -----------------------------------------------------------------------------
+ * Notification Plugin
+ * -----------------------------------------------------------------------------
+ *
+ * This file defines the `NotificationPlugin`, a service-level plugin responsible
+ * for managing application notifications. It integrates with the overlay system
+ * to display notifications, maintains a reactive collection of active entries,
+ * and supports configurable types, durations, titles, and action buttons.
+ *
+ * A standalone `notify` function is also provided as a convenience wrapper
+ * around the service, allowing callers to trigger notifications without
+ * directly accessing the plugin instance.
+ * -----------------------------------------------------------------------------
+ */
+
 import { computed, plugin, Plugin, signal } from "@odoo/owl";
 import { NotificationContainer } from "@web_core/notification/notification_container";
 import { OverlayPlugin } from "@web_core/overlay/overlay_plugin";
 import { service, serviceRegistry } from "@web_core/services";
+
+
 
 /**
  * @type {NotificationPlugin["push"]}

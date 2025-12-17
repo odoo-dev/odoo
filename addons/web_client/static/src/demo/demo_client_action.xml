@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_client.DemoClientAction">
+    <div class="demo">
+        <h1>Demo Client Action!</h1>
+        <button t-on-click="this.notify">Push notification</button>
+        <p>This is the content of the page. Scroll down to see more.</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+        <p>...more content...</p>
+    </div>
+</t>
+
+</templates>
