@@ -5,8 +5,6 @@ from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo import api, fields, models, _
 from odoo.fields import Domain
 
-from .base_automation import get_webhook_request_payload
-
 
 class IrActionsServer(models.Model):
     _inherit = "ir.actions.server"
@@ -55,9 +53,6 @@ class IrActionsServer(models.Model):
         eval_context = super()._get_eval_context(action)
         if action and action.state == "code":
             eval_context['json'] = json_scriptsafe
-            payload = get_webhook_request_payload()
-            if payload:
-                eval_context["payload"] = payload
         return eval_context
 
     def action_open_automation(self):

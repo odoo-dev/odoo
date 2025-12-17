@@ -13,7 +13,6 @@ from dateutil.relativedelta import relativedelta
 from odoo import _, api, exceptions, fields, models
 from odoo.exceptions import LockError, MissingError
 from odoo.fields import Domain
-from odoo.http import request
 from odoo.tools import safe_eval
 
 _logger = logging.getLogger(__name__)
@@ -118,16 +117,6 @@ TIME_TRIGGERS = [
     'on_time_created',
     'on_time_updated',
 ]
-
-
-def get_webhook_request_payload():
-    if not request:
-        return None
-    try:
-        payload = request.get_json_data()
-    except ValueError:
-        payload = {**request.httprequest.args}
-    return payload
 
 
 class BaseAutomation(models.Model):

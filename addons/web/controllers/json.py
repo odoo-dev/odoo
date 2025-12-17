@@ -240,6 +240,7 @@ class WebJsonController(http.Controller):
             action._get_eval_context(action),
             active_id=active_id,
             context=context,
+            payload=get_webhook_request_payload(),
             allowed_company_ids=request.env.user.company_ids.ids,
         )
         # update the context and return
@@ -352,3 +353,13 @@ def get_groupby(view_tree, groupby=None, fields=None):
         field = view_tree.attrib.get('default_group_by')
         return (None, [field] if field else [])
     return None, None
+
+
+def get_webhook_request_payload():
+    if not request:
+        return None
+    try:
+        payload = request.get_json_data()
+    except ValueError:
+        payload = {**request.httprequest.args}
+    return payload
