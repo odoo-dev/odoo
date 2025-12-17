@@ -132,6 +132,8 @@
                 <field name="expected_date" optional="hide"/>
                 <field name="partner_id" readonly="1"/>
                 <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <!-- Hide Activities column by default to avoid empty/unsupported widget in lightweight contexts (e.g. POS SelectCreateDialog) -->
+                <!-- <field name="activity_ids" widget="list_activity" optional="hide"/> -->
                 <field name="activity_ids" widget="list_activity" optional="show"/>
                 <field name="team_id" optional="hide"/>
                 <field name="company_id" groups="!base.group_multi_company" column_invisible="True"/>
