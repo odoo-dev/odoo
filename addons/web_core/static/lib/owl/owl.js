@@ -2432,7 +2432,7 @@
         }
         else {
             const node = getCurrent();
-            node.willDestroy.push(decorate(node, fn, "onWillDestroy"));
+            node.willDestroy.unshift(decorate(node, fn, "onWillDestroy"));
         }
     }
     function onError(callback) {
@@ -6300,6 +6300,9 @@
         }
     }
 
+    // -----------------------------------------------------------------------------
+    // useEffect
+    // -----------------------------------------------------------------------------
     /**
      * This hook will run a callback when a component is mounted and patched, and
      * will run a cleanup function before patching and before unmounting the
@@ -6313,30 +6316,8 @@
      *      again. The default value returns an array containing only NaN because
      *      NaN !== NaN, which will cause the effect to rerun on every patch.
      */
-    function useEffect(effect, computeDependencies = () => [NaN]) {
-        const context = getCurrent().component.__owl__.signalComputation;
-        let cleanup;
-        let dependencies;
-        const runEffect = () => runWithComputation(context, () => {
-            cleanup = effect(...dependencies);
-        });
-        const computeDependenciesWithContext = () => runWithComputation(context, computeDependencies);
-        onMounted(() => {
-            dependencies = computeDependenciesWithContext();
-            runEffect();
-        });
-        onPatched(() => {
-            const newDeps = computeDependenciesWithContext();
-            const shouldReapply = newDeps.some((val, i) => val !== dependencies[i]);
-            if (shouldReapply) {
-                dependencies = newDeps;
-                if (cleanup) {
-                    cleanup();
-                }
-                runEffect();
-            }
-        });
-        onWillUnmount(() => cleanup && cleanup());
+    function useEffect(fn) {
+        onWillDestroy(effect(fn));
     }
     // -----------------------------------------------------------------------------
     // useListener
@@ -6445,8 +6426,8 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2025-12-15T15:23:34.460Z';
-    __info__.hash = '1943b6f';
+    __info__.date = '2025-12-17T13:43:38.783Z';
+    __info__.hash = '4dfa9f0';
     __info__.url = 'https://github.com/odoo/owl';
 
 

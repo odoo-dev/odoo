@@ -626,14 +626,6 @@ declare function computed<T>(fn: () => T, opts?: Opts): ReactiveValue<T>;
 
 declare function effect<T>(fn: () => T, opts?: Opts): () => void;
 
-type EffectDeps<T extends unknown[]> = T | (T extends [...infer H, never] ? EffectDeps<H> : never);
-/**
- * @template T
- * @param {...T} dependencies the dependencies computed by computeDependencies
- * @returns {void|(()=>void)} a cleanup function that reverses the side
- *      effects of the effect callback.
- */
-type Effect<T extends unknown[]> = (...dependencies: EffectDeps<T>) => void | (() => void);
 /**
  * This hook will run a callback when a component is mounted and patched, and
  * will run a cleanup function before patching and before unmounting the
@@ -647,7 +639,7 @@ type Effect<T extends unknown[]> = (...dependencies: EffectDeps<T>) => void | ((
  *      again. The default value returns an array containing only NaN because
  *      NaN !== NaN, which will cause the effect to rerun on every patch.
  */
-declare function useEffect<T extends unknown[]>(effect: Effect<T>, computeDependencies?: () => [...T]): void;
+declare function useEffect(fn: Parameters<typeof effect>[0]): void;
 /**
  * When a component needs to listen to DOM Events on element(s) that are not
  * part of his hierarchy, we can use the `useListener` hook.
@@ -699,4 +691,4 @@ declare const __info__: {
     version: string;
 };
 
-export { App, Component, ComponentConstructor, EventBus, GetProps, OwlError, Plugin, PluginConstructor, PluginManager, PropsValidation, ReactiveValue, Registry, Resource, __info__, batched, blockDom, computed, effect, htmlEscape, markRaw, markup, mount, onError, onMounted, onPatched, onWillDestroy, onWillPatch, onWillStart, onWillUnmount, onWillUpdateProps, plugin, props, proxy, signal, Signal, status, toRaw, untrack, useComponent, useEffect, useListener, usePlugins, useResource, validate, validateType, whenReady, xml };
+export { App, Component, ComponentConstructor, EventBus, GetProps, OwlError, Plugin, PluginConstructor, PluginManager, PropsValidation, ReactiveValue, Registry, Resource, Signal, __info__, batched, blockDom, computed, effect, htmlEscape, markRaw, markup, mount, onError, onMounted, onPatched, onWillDestroy, onWillPatch, onWillStart, onWillUnmount, onWillUpdateProps, plugin, props, proxy, signal, status, toRaw, untrack, useComponent, useEffect, useListener, usePlugins, useResource, validate, validateType, whenReady, xml };
