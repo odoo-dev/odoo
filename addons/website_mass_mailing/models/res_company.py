@@ -9,7 +9,7 @@ class ResCompany(models.Model):
 
     def _get_social_media_links(self):
         social_media_links = super()._get_social_media_links()
-        website_id = self.env['website'].get_current_website()
+        website_id = self.env['website']._get_current_website()
         social_media_links.update({
             'social_facebook': website_id.social_facebook or social_media_links.get('social_facebook'),
             'social_linkedin': website_id.social_linkedin or social_media_links.get('social_linkedin'),

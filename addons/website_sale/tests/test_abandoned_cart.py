@@ -151,7 +151,7 @@ class TestWebsiteSaleCartAbandoned(TestWebsiteSaleCartAbandonedCommon):
 
     def test_website_sale_abandoned_cart_email(self):
         """Make sure the send_abandoned_cart_email method sends the correct emails."""
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         website.send_abandoned_cart_email = True
         website.write(
             {

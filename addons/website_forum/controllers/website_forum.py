@@ -81,7 +81,7 @@ class WebsiteForum(WebsiteProfile):
     def sitemap_forum(env, rule, qs):
         Forum = env['forum.forum']
         dom = sitemap_qs2dom(qs, '/forum', Forum._rec_name)
-        dom &= env['website'].get_current_website().website_domain()
+        dom &= env['website']._get_current_website().website_domain()
         slug = env['ir.http']._slug
         for f in Forum.search(dom):
             loc = '/forum/%s' % slug(f)
@@ -291,7 +291,7 @@ class WebsiteForum(WebsiteProfile):
     def sitemap_forum_post(env, rule, qs):
         ForumPost = env['forum.post']
         dom = (
-            env['website'].get_current_website().website_domain()
+            env['website']._get_current_website().website_domain()
             & Domain('parent_id', '=', False)
             & Domain('can_view', '=', True)
         )

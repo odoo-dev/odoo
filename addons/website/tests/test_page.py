@@ -229,7 +229,7 @@ class WithContext(HttpCase):
         })
 
     def test_unpublished_page(self):
-        specific_page = self.page.copy({'website_id': self.env['website'].get_current_website().id})
+        specific_page = self.page.copy({'website_id': self.env['website']._get_current_website().id})
         specific_page.write({'is_published': False, 'arch': self.page.arch.replace('I am a generic page', 'I am a specific page')})
 
         self.authenticate(None, None)
@@ -245,7 +245,7 @@ class WithContext(HttpCase):
     def test_search(self):
         dbname = common.get_db_name()
         admin_uid = self.env.ref('base.user_admin').id
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
 
         pages = self.xmlrpc_object.execute(
             dbname, admin_uid, 'admin',
@@ -519,7 +519,7 @@ class WithContext(HttpCase):
             self.assertEqual(alternate_fr_url, f'{self.base_url()}/fr/page_1')
 
     def test_alternate_hreflang(self):
-        website = self.env['website'].get_current_website() or self.env['website'].browse(1)
+        website = self.env['website']._get_current_website() or self.env['website'].browse(1)
         lang_en = self.env.ref('base.lang_en')
         ResLang = self.env['res.lang'].with_context(website_id=website.id)
         lang_fr = ResLang._activate_lang('fr_FR')
@@ -551,7 +551,7 @@ class WithContext(HttpCase):
 
     def test_07_not_authorized(self):
         # Create page that requires specific user role.
-        specific_page = self.page.copy({'website_id': self.env['website'].get_current_website().id})
+        specific_page = self.page.copy({'website_id': self.env['website']._get_current_website().id})
         specific_page.write({
             'arch': self.page.arch.replace('I am a generic page', 'I am a specific page not available for visitors'),
             'is_published': True,

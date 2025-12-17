@@ -14,7 +14,7 @@ class TestWebsiteSaleReorderFromPortal(HttpCaseWithUserPortal):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.website = cls.env['website'].get_current_website()
+        cls.website = cls.env['website']._get_current_website()
         cls.website.write({
             'prevent_zero_price_sale': False,
         })

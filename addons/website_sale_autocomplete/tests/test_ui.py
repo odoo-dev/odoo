@@ -40,5 +40,5 @@ class TestUI(HttpCase):
                                      'formatted_address': f'Result {x}',
                                      'google_place_id': MOCK_GOOGLE_ID
                                  } for x in range(5)]}):
-            self.env['website'].get_current_website().google_places_api_key = MOCK_API_KEY
+            self.env['website']._get_current_website().google_places_api_key = MOCK_API_KEY
             self.start_tour('/shop/address', 'autocomplete_tour')

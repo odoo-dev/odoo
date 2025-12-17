@@ -41,7 +41,7 @@ class ProductProduct(models.Model):
         self.ensure_one()
         if not self.is_storable or self.allow_out_of_stock_order:
             return False
-        free_qty = self.env['website'].get_current_website()._get_product_available_qty(self.sudo())
+        free_qty = self.env['website']._get_current_website()._get_product_available_qty(self.sudo())
         return free_qty <= 0
 
     def _website_show_quick_add(self):
@@ -53,7 +53,7 @@ class ProductProduct(models.Model):
         )
         self.env['ir.cron']._commit_progress(remaining=len(products.stock_notification_partner_ids))
 
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         for product_id in products.ids:
             product = self.env['product.product'].browse(product_id)
             for partner_id in product.with_context(

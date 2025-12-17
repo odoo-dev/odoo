@@ -331,7 +331,7 @@ class WebsiteAssets(models.AbstractModel):
         assert op in ('in', '='), 'Invalid operator'
         if self.env.user.has_group('website.group_website_designer'):
             self = self.sudo()
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         res = self.env["ir.attachment"].search([("url", op, custom_url)])
         # It is guaranteed that the attachment we are looking for has a website_id.
         # When we serve an attachment we normally serve the ones which have the right website_id
@@ -353,13 +353,13 @@ class WebsiteAssets(models.AbstractModel):
             ir.asset()
         Return the views related to the current website.
         """
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         url = custom_url[1:] if custom_url.startswith(('/', '\\')) else custom_url
         res = self.env['ir.asset'].search([('path', 'like', url)])
         return res.with_context(website_id=website.id).filter_duplicate()
 
     @api.model
     def _add_website_id(self, values):
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         values['website_id'] = website.id
         return values

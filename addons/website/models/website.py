@@ -678,7 +678,7 @@ class Website(models.CachedModel):
     @api.model
     def configurator_init(self):
         r = dict()
-        current_website = self.get_current_website()
+        current_website = self._get_current_website()
         company = current_website.company_id
         configurator_features = self.env['website.configurator.feature'].search([])
         r['features'] = [{
@@ -723,7 +723,7 @@ class Website(models.CachedModel):
 
     @api.model
     def configurator_skip(self):
-        website = self.get_current_website()
+        website = self._get_current_website()
         theme = self.env["ir.module.module"].search([("name", "=", "theme_default")])
         website.configurator_done = True
         return theme.button_choose_theme()
@@ -740,7 +740,7 @@ class Website(models.CachedModel):
 
     @api.model
     def configurator_apply(self, **kwargs):
-        website = self.get_current_website()
+        website = self._get_current_website()
         theme_name = kwargs['theme_name']
         theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
         redirect_url = theme.button_choose_theme()
@@ -910,7 +910,7 @@ class Website(models.CachedModel):
         industry = kwargs['industry_name']
 
         IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
-        text_generation_target_lang = self.get_current_website().default_lang_id.code
+        text_generation_target_lang = self._get_current_website().default_lang_id.code
         # If the target language is not English, we need a good translation
         # coverage. But if the target lang is en_XX it's ok to have en_US text.
         text_must_be_translated_for_openai = not text_generation_target_lang.startswith('en_')
@@ -1249,7 +1249,7 @@ class Website(models.CachedModel):
         if view.arch_fs:
             view.arch_fs = False
 
-        website = self.get_current_website()
+        website = self._get_current_website()
         if ispage:
             default_page_values = {
                 'url': page_url,
@@ -1288,7 +1288,7 @@ class Website(models.CachedModel):
         # we only want a unique_path for website specific.
         # we need to be able to have /url for website=False, and /url for website=1
         # in case of duplicate, page manager will allow you to manage this case
-        website_id = self.env.context.get('website_id', False) or self.get_current_website().id
+        website_id = self.env.context.get('website_id', False) or self._get_current_website().id
         domain_static = [('website_id', '=', website_id)]  # .website_domain()
         page_temp = page_url
         while self.env['website.page'].with_context(active_test=False).sudo().search([('url', '=', page_temp)] + domain_static):
@@ -1323,7 +1323,7 @@ class Website(models.CachedModel):
         # Look for unique key
         key_copy = string
         inc = 0
-        domain_static = self.get_current_website().website_domain()
+        domain_static = self._get_current_website().website_domain()
         website_id = self.env.context.get('website_id', False)
         if website_id:
             domain_static = [('website_id', 'in', (False, website_id))]
@@ -1341,7 +1341,7 @@ class Website(models.CachedModel):
                 view, and the value is the list of text and link to the resource using given page
         """
         dependencies = {}
-        current_website = self.get_current_website()
+        current_website = self._get_current_website()
         page_model_name = 'Page'
 
         def _handle_views_and_pages(views):
@@ -1400,7 +1400,7 @@ class Website(models.CachedModel):
     # ----------------------------------------------------------
 
     @api.model
-    def get_current_website(self, fallback=True):
+    def _get_current_website(self, fallback=True):
         """ The current website is returned in the following order:
         - the website forced in session `force_website_id`
         - the website set in context
@@ -1742,7 +1742,7 @@ class Website(models.CachedModel):
         return pages_by_website
 
     def _get_website_pages(self, domain=None, order='name', limit=None):
-        website = self.get_current_website()
+        website = self._get_current_website()
         domain = Domain(domain or Domain.TRUE) & website.website_domain()
         pages = self.env['website.page'].sudo().search(domain, order=order, limit=limit)
         pages = pages.with_context(website_id=website.id)._get_most_specific_pages()

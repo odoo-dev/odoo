@@ -2,7 +2,7 @@
 <odoo>
     <template id="availability_email_body">
         <t t-set="partner" t-value="object"/>
-        <t t-set="website" t-value="env['website'].get_current_website()"/>
+        <t t-set="website" t-value="env['website']._get_current_website()"/>
         <div id="body">
             <img t-att-src="website.image_url(website, 'logo')" style="display: block; height: 50px; margin: 0 0 16px;" alt="Logo"/>
             <p>Hello <t t-out="partner.name"/>,</p>
@@ -11,7 +11,7 @@
                 <div style="font-size: 14px; margin: 0 0 16px;"><t t-out="user.signature or ''">Mitchell Admin</t></div>
             </t>
             <div t-attf-style="margin-bottom: 22px; font-size: 14px;">
-                <a t-attf-href="#{product.website_url}" t-attf-style="background-color: {{product.website_id.get_current_website().company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{product.website_id.get_current_website().company_id.email_primary_color or '#fff'}}; border-radius: 5px; font-size:14px;">
+                <a t-attf-href="#{product.website_url}" t-attf-style="background-color: {{product.website_id._get_current_website().company_id.email_secondary_color or '#875A7B'}}; padding: 8px 16px 8px 16px; text-decoration: none; color: {{product.website_id._get_current_website().company_id.email_primary_color or '#fff'}}; border-radius: 5px; font-size:14px;">
                     Order Now
                 </a>
             </div>

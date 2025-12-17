@@ -17,7 +17,7 @@ class WebsiteSaleWishlist(main.WebsiteSale):
     def _change_website_config(self, **options):
         result = super()._change_website_config(**options)
 
-        current_website = request.env['website'].get_current_website()
+        current_website = request.env['website']._get_current_website()
 
         wishlist_writable_fields = {'wishlist_opt_products_design_classes', 'wishlist_grid_columns', 'wishlist_mobile_columns', 'wishlist_gap'}
 

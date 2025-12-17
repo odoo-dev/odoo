@@ -295,7 +295,7 @@ class ThemeUtils(models.AbstractModel):
     def _toggle_asset(self, key, active):
         ThemeIrAsset = self.env['theme.ir.asset'].sudo().with_context(active_test=False)
         obj = ThemeIrAsset.search([('key', '=', key)])
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         if obj:
             obj = obj.copy_ids.filtered(lambda x: x.website_id == website)
         else:
@@ -312,7 +312,7 @@ class ThemeUtils(models.AbstractModel):
     @api.model
     def _toggle_view(self, xml_id, active):
         obj = self.env.ref(xml_id)
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         if obj._name == 'theme.ir.ui.view':
             obj = obj.with_context(active_test=False)
             obj = obj.copy_ids.filtered(lambda x: x.website_id == website)

@@ -978,7 +978,7 @@ class SlideSlide(models.Model):
           (e.g: 'Video could not be found') """
 
         self.ensure_one()
-        google_app_key = self.env['website'].get_current_website().sudo().website_slide_google_app_key
+        google_app_key = self.env['website']._get_current_website().sudo().website_slide_google_app_key
         error_message = False
         try:
             response = requests.get(
@@ -1069,7 +1069,7 @@ class SlideSlide(models.Model):
                 params['access_token'] = access_token
 
         if not params.get('access_token'):
-            params['key'] = self.env['website'].get_current_website().sudo().website_slide_google_app_key
+            params['key'] = self.env['website']._get_current_website().sudo().website_slide_google_app_key
 
         error_message = False
         try:

@@ -551,7 +551,7 @@ class TestUi(HttpCaseWithWebsiteUser):
         to test (TODO).
         """
         # Remove all menu items but the first one
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         website.menu_id.child_id[1:].unlink()
         # Create a new menu item whose text is very long so that we are sure
         # it is folded into the extra items "+" menu outside of edit mode and
@@ -568,7 +568,7 @@ class TestUi(HttpCaseWithWebsiteUser):
         # Previous tests are testing the dirty behavior when the extra items
         # "+" menu comes in play. For other "no dirty" tests, we just remove
         # most menu items first to make sure they pass independently.
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         website.menu_id.child_id[1:].unlink()
 
         self.start_tour('/', 'website_no_dirty_page', login='admin')

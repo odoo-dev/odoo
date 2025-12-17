@@ -18,7 +18,7 @@ class TestWebsiteSaleTechnicalPage(TestWebsiteTechnicalPage):
 
     def _set_extra_info_active(self, active):
         """Helper to activate or deactivate the 'extra_info' view."""
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         view = website.viewref('website_sale.extra_info')
         view.active = active
 

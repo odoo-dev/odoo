@@ -148,7 +148,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def _get_search_order(self, post):
         # OrderBy will be parsed in orm and so no direct sql injection
         # id is added to be sure that order is a unique sort key
-        order = post.get('order') or request.env['website'].get_current_website().shop_default_sort
+        order = post.get('order') or request.env['website']._get_current_website().shop_default_sort
         return 'is_published desc, %s, id desc' % order
 
     def _add_search_subdomains_hook(self, search):
@@ -183,7 +183,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         return Domain.AND(domains)
 
     def sitemap_shop(env, rule, qs):
-        website = env['website'].get_current_website()
+        website = env['website']._get_current_website()
         if website and website.ecommerce_access == 'logged_in' and not qs:
             # Make sure urls are not listed in sitemap when restriction is active
             # and no autocomplete query string is provided
@@ -201,7 +201,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 yield {'loc': loc}
 
     def sitemap_products(env, rule, qs):
-        website = env['website'].get_current_website()
+        website = env['website']._get_current_website()
         if website and website.ecommerce_access == 'logged_in' and not qs:
             # Make sure urls are not listed in sitemap when restriction is active
             # and no autocomplete query string is provided
@@ -310,7 +310,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         except ValueError:
             max_price = 0
 
-        website = request.env['website'].get_current_website()
+        website = request.env['website']._get_current_website()
         website_domain = website.website_domain()
 
         ppg = website.shop_ppg or 21
@@ -880,7 +880,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         sitemap=False,
     )
     def pricelist_change(self, pricelist, **post):
-        website = request.env['website'].get_current_website()
+        website = request.env['website']._get_current_website()
         redirect_url = request.httprequest.referrer
         prev_pricelist = request.pricelist
         if (
@@ -948,7 +948,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :rtype: bool
         """
         if (
-            request.env['website'].get_current_website().is_pricelist_available(pricelist_id)
+            request.env['website']._get_current_website().is_pricelist_available(pricelist_id)
             and (pricelist := request.env['product.pricelist'].browse(pricelist_id))
             and (
                 pricelist.selectable
@@ -1494,7 +1494,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     # === CHECKOUT FLOW - EXTRA STEP METHODS === #
     def system_page_extra_info(env):
-        website = env['website'].get_current_website()
+        website = env['website']._get_current_website()
         if website.is_view_active('website_sale.extra_info'):
             return _lt("Shop Checkout - Extra Information")
         return False
@@ -1788,7 +1788,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if not request.env.user.has_group('website.group_website_restricted_editor'):
             raise NotFound()
 
-        current_website = request.env['website'].get_current_website()
+        current_website = request.env['website']._get_current_website()
         # Restrict options we can write to.
         writable_fields = {
             'shop_page_container', 'shop_ppg', 'shop_ppr', 'shop_default_sort', 'shop_gap',

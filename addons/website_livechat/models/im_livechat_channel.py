@@ -38,7 +38,7 @@ class Im_LivechatChannel(models.Model):
     def create(self, vals_list):
         channels = super().create(vals_list)
         if self.env.context.get("create_from_website"):
-            website = self.env['website'].get_current_website()
+            website = self.env['website']._get_current_website()
             bot = self.env.ref("im_livechat.chatbot_script_welcome_bot", raise_if_not_found=False)
             website.channel_id = channels[0].id
             channel_rule_vals = []

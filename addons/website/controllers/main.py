@@ -208,6 +208,10 @@ class Website(Home):
     # Business
     # ------------------------------------------------------
 
+    @http.route('/website/get_current_website', type='jsonrpc', auth="user", website=True, readonly=True)
+    def get_current_website(self, **kwargs):
+        return request.env['ir.http']._get_current_website_id().id
+
     @http.route('/website/get_languages', type='jsonrpc', auth="user", website=True, readonly=True)
     def website_languages(self, **kwargs):
         return [(py_to_js_locale(lg.code), lg.url_code, lg.name) for lg in request.website.language_ids]

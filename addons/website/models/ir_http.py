@@ -161,7 +161,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _get_public_users(cls):
         public_users = super()._get_public_users()
-        website = request.env(user=SUPERUSER_ID)['website'].with_context(lang='en_US').get_current_website()  # sudo
+        website = request.env(user=SUPERUSER_ID)['website'].with_context(lang='en_US')._get_current_website()  # sudo
         if website:
             public_users.append(website.user_id.id)
         return public_users
@@ -172,7 +172,7 @@ class IrHttp(models.AbstractModel):
             public user as request uid.
         """
         if not request.session.uid:
-            website = request.env(user=SUPERUSER_ID)['website'].with_context(lang='en_US').get_current_website()  # sudo
+            website = request.env(user=SUPERUSER_ID)['website'].with_context(lang='en_US')._get_current_website()  # sudo
             if website:
                 request.update_env(user=website.user_id.id)
 
@@ -203,7 +203,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _match(cls, path):
         if not hasattr(request, 'website_routing'):
-            website = request.env['website'].with_context(lang=None).get_current_website()
+            website = request.env['website'].with_context(lang=None)._get_current_website()
             request.website_routing = website.id
 
         return super()._match(path)
@@ -239,7 +239,7 @@ class IrHttp(models.AbstractModel):
             with contextlib.suppress(ZoneInfoNotFoundError):
                 request.update_context(tz=ZoneInfo(tz).key)
 
-        website = request.env['website'].get_current_website()
+        website = request.env['website']._get_current_website()
         user = request.env.user
 
         # This is mainly to avoid access errors in website controllers
@@ -284,7 +284,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _get_default_lang(cls):
         if getattr(request, 'is_frontend', True):
-            website = request.env['website'].sudo().get_current_website()
+            website = request.env['website'].sudo()._get_current_website()
             return request.env['res.lang']._get_data(id=website.default_lang_id.id)
         return super()._get_default_lang()
 
@@ -422,7 +422,7 @@ class IrHttp(models.AbstractModel):
     def _is_allowed_cookie(cls, cookie_type):
         result = super()._is_allowed_cookie(cookie_type)
         if result and cookie_type == 'optional':
-            if not request.env['website'].get_current_website().cookies_bar:
+            if not request.env['website']._get_current_website().cookies_bar:
                 # Cookies bar is disabled on this website
                 return True
             accepted_cookie_types = json_scriptsafe.loads(request.cookies.get('website_cookies_bar', '{}'))
@@ -452,7 +452,7 @@ class ModelConverter(ir_http.ModelConverter):
     def generate(self, env, args, dom=None):
         Model = env[self.model]
         # Allow to current_website_id directly in route domain
-        args['current_website_id'] = env['website'].get_current_website().id
+        args['current_website_id'] = env['website']._get_current_website().id
         domain = safe_eval(self.domain, args)
         domain = Domain(domain)
         if dom:

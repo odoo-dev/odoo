@@ -69,7 +69,7 @@ class WebsitePage(models.Model):
             page.parent_ids = self.browse(reversed(parent_ids))
 
     def _compute_is_homepage(self):
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         for page in self:
             page.is_homepage = page.url == (website.homepage_url or page.website_id == website and '/')
 
@@ -137,7 +137,7 @@ class WebsitePage(models.Model):
             :param page_id : website.page identifier
         """
         page = self.browse(int(page_id))
-        copy_param = dict(name=page_name or page.name, website_id=self.env['website'].get_current_website().id)
+        copy_param = dict(name=page_name or page.name, website_id=self.env['website']._get_current_website().id)
         if page_name:
             url = '/' + self.env['ir.http']._slugify(page_name, max_length=1024, path=True)
             copy_param['url'] = self.env['website'].get_unique_path(url)
@@ -183,7 +183,7 @@ class WebsitePage(models.Model):
                     url = self.env['website'].with_context(website_id=website_id).get_unique_path(url)
                     page.menu_ids.write({'url': url})
                     # Sync website's homepage URL
-                    website = self.env['website'].get_current_website()
+                    website = self.env['website']._get_current_website()
                     page_url_normalized = {'homepage_url': page.url}
                     website._handle_homepage_url(page_url_normalized)
                     if website.homepage_url == page_url_normalized['homepage_url']:

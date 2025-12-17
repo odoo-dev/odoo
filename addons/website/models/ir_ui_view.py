@@ -281,7 +281,7 @@ class IrUiView(models.Model):
         # website_id. (It will then always fallback on a website, this
         # method should never be called in a generic context, even for
         # tests)
-        current_website = self.env['website'].get_current_website()
+        current_website = self.env['website']._get_current_website()
         return super(IrUiView, self.with_context(
             website_id=current_website.id
         )).get_related_views(key, bundles=bundles).with_context(
@@ -628,7 +628,7 @@ class IrUiView(models.Model):
     @api.model
     def _save_oe_structure_hook(self):
         res = {}
-        res['website_id'] = self.env['website'].get_current_website().id
+        res['website_id'] = self.env['website']._get_current_website().id
         return res
 
     @api.model
@@ -648,7 +648,7 @@ class IrUiView(models.Model):
         :param str xpath: valid xpath to the tag to replace
         """
         self.ensure_one()
-        current_website = self.env['website'].get_current_website()
+        current_website = self.env['website']._get_current_website()
         # xpath condition is important to be sure we are editing a view and not
         # a field as in that case `self` might not exist (check commit message)
         if xpath and self.key and current_website:

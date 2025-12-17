@@ -37,12 +37,12 @@ class ResUsers(models.Model):
 
     @api.model
     def _get_login_domain(self, login):
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         return super()._get_login_domain(login) & website.website_domain()
 
     @api.model
     def _get_email_domain(self, email):
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         return super()._get_email_domain(email) & website.website_domain()
 
     @api.model
@@ -51,7 +51,7 @@ class ResUsers(models.Model):
 
     @api.model
     def _signup_create_user(self, values):
-        current_website = self.env['website'].get_current_website()
+        current_website = self.env['website']._get_current_website()
         # Note that for the moment, portal users can connect to all websites of
         # all companies as long as the specific_user_account setting is not
         # activated.
@@ -64,7 +64,7 @@ class ResUsers(models.Model):
 
     @api.model
     def _get_signup_invitation_scope(self):
-        current_website = self.env['website'].sudo().get_current_website()
+        current_website = self.env['website'].sudo()._get_current_website()
         return current_website.auth_signup_uninvited or super(ResUsers, self)._get_signup_invitation_scope()
 
     def authenticate(self, credential, user_agent_env):

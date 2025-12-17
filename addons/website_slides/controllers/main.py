@@ -42,7 +42,7 @@ class WebsiteSlides(WebsiteProfile):
     def sitemap_slide(env, rule, qs):
         Channel = env['slide.channel']
         dom = sitemap_qs2dom(qs=qs, route='/slides/', field=Channel._rec_name)
-        dom &= env['website'].get_current_website().website_domain()
+        dom &= env['website']._get_current_website().website_domain()
         for channel in Channel.search(dom):
             loc = '/slides/%s' % env['ir.http']._slug(channel)
             if not qs or qs.lower() in loc:

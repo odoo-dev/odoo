@@ -640,7 +640,7 @@ class TestPortalWizardMultiWebsites(HttpCase):
         partner_specific_current_website = self.env['res.partner'].create({
             'name': 'partner_specific_current_website',
             'email': self.email_address,
-            'website_id': self.env['website'].get_current_website().id,
+            'website_id': self.env['website']._get_current_website().id,
         })
         portal_user_specific_current_website = self._create_portal_user(partner_specific_current_website)
         portal_user_specific_current_website.action_grant_access()

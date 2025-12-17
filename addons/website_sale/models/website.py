@@ -344,7 +344,7 @@ class Website(models.Model):
         """
         res = super().configurator_apply(**kwargs)
 
-        website = self.get_current_website()
+        website = self._get_current_website()
         website_settings = {}
         category_settings = {}
         views_to_disable = []
@@ -644,7 +644,7 @@ class Website(models.Model):
         return request and request.geoip.country_code or False
 
     def sale_product_domain(self):
-        website_domain = self.get_current_website().website_domain()
+        website_domain = self._get_current_website().website_domain()
         if self.env.user._is_internal():
             user_domain = Domain.TRUE
         else:

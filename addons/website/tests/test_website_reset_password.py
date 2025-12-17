@@ -68,7 +68,7 @@ class TestWebsiteResetPassword(HttpCase):
     def test_02_multi_user_login(self):
         # In case Specific User Account is activated on a website, the same login can be used for
         # several users. Make sure we can still log in if 2 users exist.
-        website = self.env["website"].get_current_website()
+        website = self.env["website"]._get_current_website()
         website.ensure_one()
         internal_group = self.env.ref('base.group_user')
         portal_group = self.env.ref('base.group_portal')

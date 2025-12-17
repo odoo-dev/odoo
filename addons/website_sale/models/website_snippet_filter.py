@@ -18,7 +18,7 @@ class WebsiteSnippetFilter(models.Model):
     )
 
     def _prepare_values(self, limit=None, search_domain=None, **kwargs):
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         if (
             (self.model_name or kwargs.get('res_model')) in ('product.product', 'product.public.category')
             and not website.has_ecommerce_access()
@@ -51,7 +51,7 @@ class WebsiteSnippetFilter(models.Model):
 
     @api.model
     def _get_website_currency(self):
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         return website.currency_id
 
     def _get_hardcoded_sample(self, model):
@@ -174,7 +174,7 @@ class WebsiteSnippetFilter(models.Model):
     def _get_products(self, mode, **kwargs):
         dynamic_filter = self.env.context.get('dynamic_filter')
         handler = getattr(self, '_get_products_%s' % mode, self._get_products_latest_sold)
-        website = self.env['website'].get_current_website()
+        website = self.env['website']._get_current_website()
         search_domain = self.env.context.get('search_domain')
         limit = self.env.context.get('limit')
         hide_variants = self.env.context.get('hide_variants')

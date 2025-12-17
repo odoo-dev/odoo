@@ -44,7 +44,7 @@ class TestSnippets(HttpCase):
         user = self.env['res.users'].search([('login', '=', 'admin')])
         website_visitor = Visitor.search([('partner_id', '=', user.partner_id.id)])
         if not website_visitor:
-            with MockRequest(user.with_user(user).env, website=self.env['website'].get_current_website()):
+            with MockRequest(user.with_user(user).env, website=self.env['website']._get_current_website()):
                 website_visitor = Visitor.create({'partner_id': user.partner_id.id})
         self.assertEqual(website_visitor.name, user.name, "The visitor should be linked to the admin user, not OdooBot or anything.")
         self.product = self.env['product.product'].create({

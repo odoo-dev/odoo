@@ -678,7 +678,7 @@ class ProductTemplate(models.Model):
         self, price, currency, product_taxes, taxes, product_or_template,
         website=None,
     ):
-        website = website or self.env['website'].get_current_website()
+        website = website or self.env['website']._get_current_website()
         price = self.env['product.product']._get_tax_included_unit_price_from_price(
             price,
             product_taxes,
@@ -906,7 +906,7 @@ class ProductTemplate(models.Model):
         with_category = 'extra_link' in mapping
         with_price = 'detail' in mapping
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
-        current_website = self.env['website'].get_current_website()
+        current_website = self.env['website']._get_current_website()
         for product, data in zip(self, results_data):
             categ_ids = product.public_categ_ids.filtered(lambda c: not c.website_id or c.website_id == current_website)
             if with_price:

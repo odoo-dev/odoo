@@ -66,7 +66,7 @@ class WebsiteSnippetFilter(models.Model):
         if search_domain is None:
             search_domain = []
 
-        if self.website_id and self.env['website'].get_current_website() != self.website_id:
+        if self.website_id and self.env['website']._get_current_website() != self.website_id:
             return ''
 
         if self.model_name and self.model_name.replace('.', '_') not in template_key:
@@ -102,9 +102,9 @@ class WebsiteSnippetFilter(models.Model):
                 filter_sudo = self.filter_id.sudo()
                 domain = Domain(filter_sudo._get_eval_domain())
                 if 'website_id' in self.env[model_name]:
-                    domain &= self.env['website'].get_current_website().website_domain()
+                    domain &= self.env['website']._get_current_website().website_domain()
                 if 'company_id' in self.env[model_name]:
-                    website = self.env['website'].get_current_website()
+                    website = self.env['website']._get_current_website()
                     domain &= Domain('company_id', 'in', [False, website.company_id.id])
                 if 'is_published' in self.env[model_name]:
                     domain &= Domain('is_published', '=', True)
@@ -274,7 +274,7 @@ class WebsiteSnippetFilter(models.Model):
                         data[field_name] = model_currency._convert(
                             record[field_name],
                             website_currency,
-                            Website.get_current_website().company_id,
+                            Website._get_current_website().company_id,
                             fields.Date.today()
                         )
                     else:
@@ -289,5 +289,5 @@ class WebsiteSnippetFilter(models.Model):
 
     @api.model
     def _get_website_currency(self):
-        company = self.env['website'].get_current_website().company_id
+        company = self.env['website']._get_current_website().company_id
         return company.currency_id

@@ -18,7 +18,7 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
-import { RPCError } from "@web/core/network/rpc";
+import { RPCError, rpc } from "@web/core/network/rpc";
 import { uniqueId } from "@web/core/utils/functions";
 import { useChildRef, useService, useBus } from "@web/core/utils/hooks";
 import { effect } from "@web/core/utils/reactive";
@@ -131,11 +131,7 @@ export class WebsiteBuilderClientAction extends Component {
                 updateWebsiteId(this.websiteId);
                 await Promise.all(proms);
             } else {
-                const [backendWebsiteRepr] = await Promise.all([
-                    this.orm.call("website", "get_current_website"),
-                    ...proms,
-                ]);
-                updateWebsiteId(backendWebsiteRepr[0]);
+                updateWebsiteId(await rpc("/website/get_current_website"));
             }
         });
         onMounted(() => {

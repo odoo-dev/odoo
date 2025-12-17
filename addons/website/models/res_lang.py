@@ -26,7 +26,7 @@ class ResLang(models.Model):
                 langs = sorted(map(dict, self._get_active_by('code').values()),
                                key=lambda lang: lang['name'])
             else:
-                lang_ids = self.env['website'].get_current_website().with_context(lang=False).language_ids.sorted('name').ids
+                lang_ids = self.env['website']._get_current_website().with_context(lang=False).language_ids.sorted('name').ids
                 langs = [dict(self.env['res.lang']._get_data(id=id_)) for id_ in lang_ids]
             es_419_exists = any(lang['code'] == 'es_419' for lang in langs)
             already_shortened = []
