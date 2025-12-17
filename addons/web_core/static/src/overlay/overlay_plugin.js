@@ -1,6 +1,5 @@
 import { computed, Plugin, signal } from "@odoo/owl";
-import { registry } from "@web_core/registry";
-import "@web_core/services";
+import { serviceRegistry } from "@web_core/services";
 
 export class Overlay {
     component;
@@ -81,7 +80,7 @@ export class Overlay {
 export class OverlayPlugin extends Plugin {
     static id = this.name;
     static {
-        registry.get("services").addById(this);
+        serviceRegistry.addById(this);
     }
 
     static sectionSequence = ["default", "notifications"];

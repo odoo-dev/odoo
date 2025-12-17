@@ -7,8 +7,7 @@
  */
 
 import { EventBus, Plugin } from "@odoo/owl";
-import { registry } from "./registry";
-import { service } from "./services";
+import { service, serviceRegistry } from "./services";
 
 export function rpc(url, params = {}, settings = {}) {
     const rpc = service(RPC);
@@ -18,7 +17,7 @@ export function rpc(url, params = {}, settings = {}) {
 export class RPC extends Plugin {
     static id = "rpc";
     static {
-        registry.get("services").addById(this);
+        serviceRegistry.addById(this);
     }
 
     /** @private */

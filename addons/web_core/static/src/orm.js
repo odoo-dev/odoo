@@ -1,12 +1,12 @@
 import { plugin, Plugin } from "@odoo/owl";
 import { protect } from "@web_core/plugin_protection";
-import { registry } from "@web_core/registry";
 import { RPC } from "@web_core/rpc";
+import { serviceRegistry } from "@web_core/services";
 
 export class ORM extends Plugin {
     static id = "orm";
     static {
-        registry.get("services").addById(this);
+        serviceRegistry.addById(this);
     }
 
     /** @private */

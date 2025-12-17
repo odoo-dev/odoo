@@ -1,8 +1,7 @@
 import { computed, plugin, Plugin, signal } from "@odoo/owl";
 import { NotificationContainer } from "@web_core/notification/notification_container";
 import { OverlayPlugin } from "@web_core/overlay/overlay_plugin";
-import { registry } from "@web_core/registry";
-import { service } from "@web_core/services";
+import { service, serviceRegistry } from "@web_core/services";
 
 /**
  * @type {NotificationPlugin["push"]}
@@ -15,7 +14,7 @@ export function notify(message, options = {}) {
 export class NotificationPlugin extends Plugin {
     static id = this.name;
     static {
-        registry.get("services").addById(this);
+        serviceRegistry.addById(this);
     }
 
     /** @private */
@@ -63,7 +62,7 @@ export class NotificationPlugin extends Plugin {
         const notification = {
             buttons,
             id,
-            lifespan: options.duration ?? (buttons.length ? 10_000 : 4_000),
+            duration: options.duration ?? (buttons.length ? 10_000 : 4_000),
             message,
             /** @param {any} result */
             close: (result) => {
