@@ -39,21 +39,6 @@ import { serviceRegistry } from "@web_core/services";
 */
 
 class MenuItem {
-    /** @type {number | null} */
-    actionId;
-    /** @type {number} */
-    id;
-    /** @type {MenuItem[]} */
-    menuItems;
-    /** @type {string} */
-    name;
-    /** @type {string | null} */
-    path;
-    /** @type {string | null} */
-    resModel;
-    /** @type {string} */
-    xmlId;
-
     /**
      * @param {MenuItemData} menuItemData
      * @param {MenuDataMap} dataMap
