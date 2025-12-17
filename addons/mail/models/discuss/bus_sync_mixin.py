@@ -60,7 +60,11 @@ class BusSyncMixin(models.AbstractModel):
             for (channels, subchannel), values in get_vals(record).items():
                 diff = defaultdict(Store.FieldList)
                 for field_name, (value, field_description) in values.items():
-                    if value != old_vals[record][channels, subchannel][field_name][0]:
+                    record_old_vals = old_vals[record].get((channels, subchannel))
+                    if not record_old_vals or field_name not in record_old_vals:
+                        diff[channels, subchannel].append(field_description)
+                        continue
+                    if value != record_old_vals[field_name][0]:
                         diff[channels, subchannel].append(field_description)
                 if diff:
                     for (channels, subchannel), diff_fields in diff.items():
