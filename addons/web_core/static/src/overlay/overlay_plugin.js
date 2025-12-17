@@ -52,7 +52,7 @@ export class Overlay {
      * @template T
      * @param {T} [result]
      */
-    pop(result) {
+    close(result) {
         if (!this._displayDeferred) {
             return;
         }
@@ -66,7 +66,7 @@ export class Overlay {
      * @template T
      * @returns {Promise<T>}
      */
-    push() {
+    open() {
         if (this._displayDeferred) {
             return this._displayDeferred.promise;
         }

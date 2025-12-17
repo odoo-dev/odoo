@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-<t t-name="web_client.AppMenuPopover">
-  <Popover t-props="this.popoverProps">
+<t t-name="web_client.AppMenu">
     <div class="d-flex flex-column py-1">
-      <t t-foreach="this.apps()" t-as="app" t-key="app.id">
-        <button class="btn btn-light rounded-0 text-start py-1 px-3" t-att-class="{active: this.menu.currentAppId() === app.id}" t-on-click.prevent="() => this.openApp(app.id)">
-          <t t-out="app.name"/>
-        </button>
-      </t>
+        <t t-foreach="this.apps()" t-as="app" t-key="app.id">
+            <button class="btn btn-light rounded-0 text-start py-1 px-3" t-att-class="{active: this.menu.currentAppId() === app.id}" t-on-click.prevent="() => this.openApp(app.id)">
+                <t t-out="app.name"/>
+            </button>
+        </t>
     </div>
-  </Popover>
 </t>
 
 <t t-name="web_client.Navbar">
     <div class="o-navbar d-flex flex-shrink-0 ps-2 gap-4">
-      <div class="d-flex align-items-center cursor-pointer" t-ref="this.appMenuToggler" t-on-click.prevent="this.openPopover">
-        <a href="#" class="text-white">Odoo</a>
-      </div>
-      <t t-foreach="this.menu.currentMenuItems()" t-as="menuItem" t-key="menuItem.id">
-        <div class="d-flex align-items-center cursor-pointer" t-on-click.prevent="">
-          <a href="#" class="text-white" t-out="menuItem.name"/>
+        <div class="d-flex align-items-center cursor-pointer" t-ref="this.appMenuToggler" t-on-click.prevent="this.openPopover">
+            <a href="#" class="text-white">Odoo</a>
         </div>
-      </t>
+        <t t-foreach="this.menu.currentMenuItems()" t-as="menuItem" t-key="menuItem.id">
+            <div class="d-flex align-items-center cursor-pointer" t-on-click.prevent="">
+                <a href="#" class="text-white" t-out="menuItem.name"/>
+            </div>
+        </t>
     </div>
 </t>
 

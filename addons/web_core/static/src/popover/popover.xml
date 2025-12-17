@@ -3,7 +3,7 @@
 
 <t t-name="web_core.Popover">
     <div class="wcore_popover position-fixed bg-white rounded shadow" t-att-style="this.style()">
-        <t t-call-slot="default"/>
+        <t t-component="this.content.component" t-props="this.content.props"/>
     </div>
 </t>
 
