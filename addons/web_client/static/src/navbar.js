@@ -1,5 +1,5 @@
 import { Component, computed, plugin, props, signal } from "@odoo/owl";
-import { MenuPlugin } from "@web_core/menu_plugin";
+import { MenuPlugin } from "@web_client/menu_plugin";
 import { OverlayPlugin } from "@web_core/overlay/overlay_plugin";
 import { Popover } from "@web_core/popover/popover";
 
