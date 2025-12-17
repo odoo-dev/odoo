@@ -1,7 +1,6 @@
 import { App, Plugin, whenReady } from "@odoo/owl";
 import { getTemplate } from "@web/core/templates";
-import { registry } from "@web_core/registry";
-import { service, serviceManager } from "@web_core/services";
+import { service, serviceManager, serviceRegistry } from "@web_core/services";
 import { WebClient } from "./web_client";
 
 const config = {
@@ -16,7 +15,7 @@ const app = new App(config);
 class AppPlugin extends Plugin {
     static id = "app";
     static {
-        registry.get("services").addById(this);
+        serviceRegistry.addById(this);
     }
 
     app = app;

@@ -5,7 +5,6 @@
  */
 
 import { Registry, Plugin, PluginManager, effect } from "@odoo/owl";
-import { registry } from "./registry";
 
 /**
  * Main service registry
@@ -15,8 +14,7 @@ import { registry } from "./registry";
  *
  * @type {Registry<import("@odoo/owl").PluginConstructor>}
  */
-const serviceRegistry = new Registry("services", Plugin.prototype);
-registry.add("services", serviceRegistry);
+export const serviceRegistry = new Registry("services", Plugin.prototype);
 
 /**
  * This is the main plugin manager. All plugins started here are available in

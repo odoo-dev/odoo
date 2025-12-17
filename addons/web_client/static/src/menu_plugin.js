@@ -1,6 +1,5 @@
 import { computed, Plugin, signal } from "@odoo/owl";
-import { registry } from "@web_core/registry";
-import "@web_core/services";
+import { serviceRegistry } from "@web_core/services";
 
 /**
 @typedef {{
@@ -145,7 +144,7 @@ const DEFAULT_ROOT_MENU = {
 export class MenuPlugin extends Plugin {
     static id = this.name;
     static {
-        registry.get("services").addById(this);
+        serviceRegistry.addById(this);
     }
 
     /** @private @type {import("@odoo/owl").Signal<RootMenu>} */
