@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_client.UserMenu">
+    <div class="wclient_user_menu d-flex align-items-center cursor-pointer">
+        <span class="text-white">Mitchell admin</span>
+    </div>
+</t>
+
+</templates>
