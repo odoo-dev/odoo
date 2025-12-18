@@ -4,31 +4,31 @@ import { getDeepestPosition } from "@html_editor/utils/dom_info";
 import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 
-// we probably need to move these special blocks to a resource in different plugins
-const SPECIAL_BLOCK_WITH_TEXT_IN_NON_DIV = ["BLOCKQUOTE"];
-const UNCROSSABLE_ELEMENT_SELECTOR = ["blockquote", "form", "div", "section", ".alert", ".row"];
-
 export class BuilderSelectionRestrictionPlugin extends Plugin {
     static id = "builderSelectionRestriction";
     static dependencies = ["selection", "operation", "builderOptions"];
 
     resources = {
-        uncrossable_element_selector: UNCROSSABLE_ELEMENT_SELECTOR,
-        special_block_with_text_in_non_div: SPECIAL_BLOCK_WITH_TEXT_IN_NON_DIV,
+        // uncrossable_element_selector: CSS selectors of elements that should not be
+        // crossed by the selection.
+        uncrossable_element_selector: ["blockquote", "form", "div", "section", ".alert", ".row"],
+        // restricted_to_paragraph_blocks_selector: CSS selectors of elements that
+        // the selection should be restricted to paragraph blocks.
+        restricted_to_paragraph_blocks_selector: ["BLOCKQUOTE"],
     };
 
     setup() {
-        this.uncrossable_element_selector = [
+        this.uncrossableSelectors = [
             ...new Set(this.getResource("uncrossable_element_selector")),
-        ].join(",");
-        this.special_block_with_text_in_non_div = [
-            ...new Set(this.getResource("special_block_with_text_in_non_div")),
-        ];
+        ].join(", ");
+        this.restrictedToPSelectors = [
+            ...new Set(this.getResource("restricted_to_paragraph_blocks_selector")),
+        ].join(", ");
+
         // Check if the selection has been corrected to avoid multiple
         // corrections.
         this.isSelectionCorrected = false;
 
-        this.addDomListener(this.editable, "keydown", this.onKeydown);
         this.addDomListener(this.editable, "keydown", (ev) => {
             if (getActiveHotkey(ev) !== "control+a") {
                 return;
@@ -72,36 +72,34 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     onCtrlAKeydown() {
         const { editableSelection, currentSelectionIsInEditable } =
             this.dependencies.selection.getSelectionData();
+        const { anchorNode, commonAncestorContainer } = editableSelection;
         if (
             !currentSelectionIsInEditable ||
             // If we clicked on an image inside a <figure> element, keep the
             // selection on the image only, to not select the whole <figure>.
-            editableSelection.commonAncestorContainer.nodeName === "FIGURE" ||
+            commonAncestorContainer.nodeName === "FIGURE" ||
             // When main body is empty, and click the footer outer blue
             // container then ctrl+a, the selection is collapsed in editable but
             // to the main body div, which causes options updating.
-            (editableSelection.anchorNode.isContentEditable === false &&
-                editableSelection.isCollapsed)
+            (anchorNode.isContentEditable === false && editableSelection.isCollapsed)
         ) {
             return;
         }
-        const closestSpecialBlock = closestElement(
-            editableSelection.anchorNode,
-            this.special_block_with_text_in_non_div.join(",")
-        );
-        const closestDiv = closestElement(editableSelection.anchorNode, "div");
+        const closestSpecialBlock = closestElement(anchorNode, this.restrictedToPSelectors);
+        const closestDiv = closestElement(anchorNode, "div");
 
-        // if the closest special block doesn't contains the closest div block,
-        // we select the paragraph, otherwise we select the whole closest div block
+        // If the closest special block doesn't contains the closest div block,
+        // we select the paragraph, otherwise we select the whole closest div
+        // block.
         if (closestSpecialBlock && !closestSpecialBlock.contains(closestDiv)) {
-            this.selectAllInElement(closestElement(editableSelection.anchorNode, "p"));
+            this.selectAllInElement(closestElement(anchorNode, "p"));
         } else {
             this.selectAllInElement(closestDiv);
         }
     }
 
-    // we extend the selection to the whole element step by step to properly
-    // handle uncrossable elements (like row, blockquote...)
+    // We extend the selection to the whole element step by step to properly
+    // handle uncrossable elements (like row, blockquote...).
     selectAllInElement(element) {
         let selection = this.dependencies.selection.getEditableSelection();
         let { anchorNode, anchorOffset, focusNode, focusOffset, direction } = selection;
@@ -159,6 +157,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     restrictSelectionInClosestDiv(ev) {
         const { editableSelection, currentSelectionIsInEditable } =
             this.dependencies.selection.getSelectionData();
+        const { anchorNode } = editableSelection;
         if (!currentSelectionIsInEditable) {
             return;
         }
@@ -166,14 +165,11 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             return;
         }
 
-        const closestSpecialBlock = closestElement(
-            editableSelection.anchorNode,
-            this.special_block_with_text_in_non_div.join(",")
-        );
-        const closestDiv = closestElement(editableSelection.anchorNode, "div");
+        const closestSpecialBlock = closestElement(anchorNode, this.restrictedToPSelectors);
+        const closestDiv = closestElement(anchorNode, "div");
 
         if (closestSpecialBlock && !closestSpecialBlock.contains(closestDiv)) {
-            const closestParagraph = closestElement(editableSelection.anchorNode, "p");
+            const closestParagraph = closestElement(anchorNode, "p");
             this.restrictSelectionInElement(editableSelection, closestParagraph);
         } else {
             this.restrictSelectionInElement(editableSelection, closestDiv);
@@ -182,8 +178,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
 
     isNodeSelectionUncrossable(node, selectedNodes) {
         return (
-            node.matches(this.uncrossable_element_selector) ||
-            selectedNodes.includes(closestElement(node, this.uncrossable_element_selector))
+            node.matches(this.uncrossableSelectors) ||
+            selectedNodes.includes(closestElement(node, this.uncrossableSelectors))
         );
     }
 
@@ -196,9 +192,11 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         const selectedNodesLooping =
             direction === DIRECTIONS.RIGHT ? selectedNodes : selectedNodes.reverse();
 
-        // do not do selection correction if 1. the only selected node is an image cause we force
-        // the selection to be around the image when clicking on it, correction would break the
-        // option container for images 2. icon elements (i.fa, span.fa...)
+        // Do not do selection correction if
+        // 1. the only selected node is an image cause we force the selection to
+        // be around the image when clicking on it, correction would break the
+        // option container for images
+        // 2. icon elements (i.fa, span.fa...).
         if (
             selectedNodesLooping.length === 1 &&
             (selectedNodesLooping[0].tagName === "IMG" ||

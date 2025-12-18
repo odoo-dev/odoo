@@ -21,13 +21,13 @@ test("the selection should be restricted in the closest div when press ctrl+a", 
     const editor = getEditor();
     const first_grandchild = editor.editable.querySelector("p.first-grandchild");
 
-    // set the selection to be inside the first grandchild
+    // Set the selection to be inside the first grandchild.
     setSelection({
         anchorNode: first_grandchild.firstChild,
         anchorOffset: 0,
     });
 
-    // press ctrl+a to select all the content in the first grandchild
+    // Press ctrl+a to select all the content in the first grandchild.
     await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
         key: "a",
         ctrlKey: true,
@@ -61,7 +61,7 @@ test("the selection should be restricted when it acrosses different div from lef
     const first_grandchild = editor.editable.querySelector("p.first-grandchild");
     const second_grandchild = editor.editable.querySelector("p.second-grandchild");
 
-    // set the selection to be inside the first grandchild
+    // Set the selection to be inside the first grandchild.
     setSelection({
         anchorNode: first_grandchild.firstChild,
         anchorOffset: 0,
@@ -74,7 +74,8 @@ test("the selection should be restricted when it acrosses different div from lef
     manuallyDispatchProgrammaticEvent(first_grandchild, "click");
     await animationFrame();
 
-    // the selection should be not be modified when it is inside the most inner container
+    // The selection should be not be modified when it is inside the most inner
+    // container.
     expect(getContent(editableContent)).toBe(
         `<section class="parent-target o_colored_level">
             <div class="child-target first-child">
@@ -100,7 +101,8 @@ test("the selection should be restricted when it acrosses different div from lef
     manuallyDispatchProgrammaticEvent(second_grandchild, "click");
     await animationFrame();
 
-    // the selection should be modified when it is outside the most inner container
+    // The selection should be modified when it is outside the most inner
+    // container.
     expect(getContent(editableContent)).toBe(
         `<section class="parent-target o_colored_level">
             <div class="child-target first-child">
@@ -129,7 +131,7 @@ test("the selection should be restricted when it acrosses different div from rig
     const first_grandchild = editor.editable.querySelector("p.first-grandchild");
     const second_grandchild = editor.editable.querySelector("p.second-grandchild");
 
-    // set the selection to be inside the first grandchild
+    // Set the selection to be inside the first grandchild.
     setSelection({
         anchorNode: first_grandchild.firstChild,
         anchorOffset: 4,
@@ -142,7 +144,8 @@ test("the selection should be restricted when it acrosses different div from rig
     manuallyDispatchProgrammaticEvent(first_grandchild, "click");
     await animationFrame();
 
-    // the selection should be not be modified when it is inside the most inner container
+    // The selection should be not be modified when it is inside the most inner
+    // container.
     expect(getContent(editableContent)).toBe(
         `<section class="parent-target o_colored_level">
             <div class="child-target first-child">
@@ -154,7 +157,7 @@ test("the selection should be restricted when it acrosses different div from rig
         </section>`
     );
 
-    // set the selection across the two grandchildren
+    // Set the selection across the two grandchildren.
     setSelection({
         anchorNode: second_grandchild.firstChild,
         anchorOffset: 4,
@@ -168,7 +171,8 @@ test("the selection should be restricted when it acrosses different div from rig
     manuallyDispatchProgrammaticEvent(second_grandchild, "click");
     await animationFrame();
 
-    // the selection should be modified when it is outside the most inner container
+    // The selection should be modified when it is outside the most inner
+    // container.
     expect(getContent(editableContent)).toBe(
         `<section class="parent-target o_colored_level">
             <div class="child-target first-child">
@@ -204,13 +208,13 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     const editor = getEditor();
     const p_element = editor.editable.querySelector("p.p-target");
 
-    // set the selection to be inside the p element
+    // Set the selection to be inside the p element.
     setSelection({
         anchorNode: p_element.firstChild,
         anchorOffset: 0,
     });
 
-    // press ctrl+a to select all the content in the p element
+    // Press ctrl+a to select all the content in the p element.
     await manuallyDispatchProgrammaticEvent(editor.editable, "keydown", {
         key: "a",
         ctrlKey: true,
@@ -260,7 +264,7 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     const p_element = editor.editable.querySelector("p.p-target");
     const muted_element = editor.editable.querySelector("span.text-muted");
 
-    // set the selection to be inside the p element
+    // Set the selection to be inside the p element.
     setSelection({
         anchorNode: p_element.firstChild,
         anchorOffset: 0,
@@ -318,7 +322,7 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     const p_element = editor.editable.querySelector("p.p-target");
     const muted_element = editor.editable.querySelector("span.text-muted");
 
-    // set the selection to be inside the p element
+    // Set the selection to be inside the p element.
     setSelection({
         anchorNode: muted_element.firstChild,
         anchorOffset: 3,
