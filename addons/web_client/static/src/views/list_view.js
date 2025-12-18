@@ -1,7 +1,12 @@
 import { Component } from "@odoo/owl";
 import { ControlPanel } from "@web_client/views/control_panel";
+import { viewRegistry } from "@web_client/views/view_registry";
 
 export class ListView extends Component {
+    static {
+        viewRegistry.add("list", this);
+    }
+
     static template = "web_client.ListView";
     static components = { ControlPanel };
 

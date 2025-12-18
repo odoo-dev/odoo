@@ -2,20 +2,18 @@
 <templates xml:space="preserve">
 
 <t t-name="web_client.KanbanView">
-    <div>
-        <ControlPanel/>
-        <main>
-            <div class="d-grid gap-3 px-3" style="grid-template-columns: repeat(4, 1fr);">
-                <t t-foreach="this.records" t-as="record" t-key="record.id">
-                    <div class="border rounded">
-                        <div class="p-3">
-                            <span t-out="record.name"/>
-                        </div>
+    <ControlPanel/>
+    <main>
+        <div class="d-grid gap-3 px-3" style="grid-template-columns: repeat(4, 1fr);">
+            <t t-foreach="this.records" t-as="record" t-key="record.id">
+                <div class="border rounded">
+                    <div class="p-3">
+                        <span t-out="record.name"/>
                     </div>
-                </t>
-            </div>
-        </main>
-    </div>
+                </div>
+            </t>
+        </div>
+    </main>
 </t>
 
 </templates>

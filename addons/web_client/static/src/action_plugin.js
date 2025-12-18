@@ -1,7 +1,6 @@
-import { Component, plugin, Plugin, signal, usePlugins, xml } from "@odoo/owl";
+import { Component, computed, plugin, Plugin, signal, usePlugins, xml } from "@odoo/owl";
 import { ViewPlugin } from "@web_client/view_plugin";
-import { KanbanView } from "@web_client/views/kanban_view";
-import { ListView } from "@web_client/views/list_view";
+import { viewRegistry } from "@web_client/views/view_registry";
 import { notify } from "@web_core/notification/notification_plugin";
 import { rpc } from "@web_core/rpc";
 import { serviceRegistry } from "@web_core/services";
@@ -9,25 +8,12 @@ import { session } from "@web_core/session";
 import { actionRegistry } from "./action_registry";
 
 class ActionContainer extends Component {
-    static template = xml`
-        <div>
-            <h1>
-                <t t-out="this.action.action().description.display_name"/>
-            </h1>
-            <t t-if="this.view.viewType() === 'list'">
-                <ListView/>
-            </t>
-            <t t-elif="this.view.viewType() === 'kanban'">
-                <KanbanView/>
-            </t>
-        </div>
-    `;
-    static components = { ListView, KanbanView };
-    action = plugin(ActionPlugin);
+    static template = xml`<t t-component="this.component()"/>`;
 
     setup() {
         usePlugins([ViewPlugin]);
         this.view = plugin(ViewPlugin);
+        this.component = computed(() => viewRegistry.get(this.view.viewType()));
     }
 }
 
@@ -37,6 +23,7 @@ export class ActionPlugin extends Plugin {
         serviceRegistry.addById(this);
     }
 
+    /** @type {import("@odoo/owl").Signal<any>} */
     action = signal(null);
 
     // action = computed(() => {
@@ -46,7 +33,7 @@ export class ActionPlugin extends Plugin {
     // });
 
     /**
-     * @param {string | number} actionId 
+     * @param {string | number} actionId
      */
     async doAction(actionId) {
         if (typeof actionId === "number") {
@@ -59,8 +46,7 @@ export class ActionPlugin extends Plugin {
     }
 
     /**
-     * 
-     * @param {import("./menu_plugin").AppMenu} app 
+     * @param {import("./menu_plugin").AppMenu} app
      */
     switchApp(app) {
         console.log(app);
@@ -85,12 +71,12 @@ export class ActionPlugin extends Plugin {
     _doClientAction(actionDescr) {
         console.log("client action");
         const actionId = actionDescr.tag;
-        const obj = {}
+        const obj = {};
         if (actionRegistry.get(actionId, obj) === obj) {
             notify("Nope, action does not exist");
         } else {
             this.action.set({
-                Component: actionRegistry.get(actionId)
+                Component: actionRegistry.get(actionId),
             });
         }
     }
@@ -103,6 +89,6 @@ export class ActionPlugin extends Plugin {
         this.action.set({
             Component: ActionContainer,
             description: actionDescr,
-        })
+        });
     }
 }
