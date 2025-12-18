@@ -30,17 +30,13 @@ export class PopoverPlugin extends Plugin {
      *  props?: import("@odoo/owl").GetProps<InstanceType<T>>;
      * }} [options]
      */
-    add(target, options = {}) {
-        const overlay = this.overlay.createOverlay(Popover, {
+    createPopover(target, options = {}) {
+        return this.overlay.createOverlay(Popover, {
             props: {
                 component: options.component ?? DefaultSlotPopover,
                 props: options.props ?? {},
                 target,
             },
         });
-        return {
-            promise: overlay.open(),
-            overlay,
-        };
     }
 }

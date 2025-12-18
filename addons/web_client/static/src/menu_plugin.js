@@ -101,8 +101,10 @@ class AppMenu {
 }
 
 class RootMenu {
+    /** @type {AppMenu[]} */
+    appList = [];
     /** @type {{ [K: number]: AppMenu }} */
-    apps = {};
+    appMap = {};
     /** @type {string | null} */
     backgroundImage;
 
@@ -113,7 +115,9 @@ class RootMenu {
         for (const childId of dataMap.root.children) {
             /** @type {any} */
             const appData = dataMap[childId];
-            this.apps[childId] = new AppMenu(appData, dataMap);
+            const appMenu = new AppMenu(appData, dataMap);
+            this.appMap[childId] = appMenu;
+            this.appList.push(appMenu);
         }
         this.backgroundImage = dataMap.root.backgroundImage;
     }
@@ -134,10 +138,10 @@ export class MenuPlugin extends Plugin {
 
     /** @private @type {import("@odoo/owl").Signal<RootMenu>} */
     _rootMenu = signal(new RootMenu({ root: DEFAULT_ROOT_MENU }));
-    currentAppId = signal(1);
+    currentAppId = signal(0);
 
-    apps = computed(() => this._rootMenu().apps);
-    currentApp = computed(() => this.apps()[this.currentAppId()]);
+    apps = computed(() => this._rootMenu().appList);
+    currentApp = computed(() => this._rootMenu().appMap[this.currentAppId()]);
     currentMenuItems = computed(() => {
         const app = this.currentApp();
         if (app) {
@@ -150,7 +154,7 @@ export class MenuPlugin extends Plugin {
         this.load();
     }
 
-    /** @private */
+    /** @private @returns {Promise<MenuDataMap>} */
     async _fetchMenus() {
         const response = await fetch(LOAD_MENU_ROUTE, { cache: "no-store" });
         if (!response.ok) {
@@ -163,6 +167,7 @@ export class MenuPlugin extends Plugin {
         const dataMap = await this._fetchMenus();
         const rootMenu = new RootMenu(dataMap);
         this._rootMenu.set(rootMenu);
+        this.currentAppId.set(dataMap.root.children[0]);
         console.log(this.apps());
     }
 }

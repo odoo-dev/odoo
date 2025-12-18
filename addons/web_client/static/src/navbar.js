@@ -1,41 +1,62 @@
-import { Component, computed, plugin, props, signal } from "@odoo/owl";
+import { Component, computed, plugin, signal } from "@odoo/owl";
 import { MenuPlugin } from "@web_client/menu_plugin";
-import { PopoverPlugin } from "@web_core/popover/popover_plugin";
-
-class AppMenu extends Component {
-    static template = "web_client.AppMenu";
-
-    menu = plugin(MenuPlugin);
-    props = props({
-        close: Function,
-    });
-
-    apps = computed(() => Object.values(this.menu.apps()));
-
-    /**
-     * @param {number} appId
-     */
-    openApp(appId) {
-        this.menu.currentAppId.set(appId);
-        this.props.close();
-    }
-}
+import { Menu, MenuItem } from "@web_core/menu/menu";
+import { notify } from "@web_core/notification/notification_plugin";
 
 export class Navbar extends Component {
     static template = "web_client.Navbar";
+    static components = { Menu, MenuItem };
 
     menu = plugin(MenuPlugin);
-    popover = plugin(PopoverPlugin);
+    apps = computed(() => Object.values(this.menu.apps()));
 
     /** @type {import("@odoo/owl").Signal<HTMLElement | null>} */
     appMenuToggler = signal(null);
+    isAppMenuOpen = signal(false);
 
-    openPopover() {
-        const { overlay } = this.popover.add(this.appMenuToggler, {
-            component: AppMenu,
-            props: {
-                close: () => overlay.close(),
-            },
-        });
+    /** @type {import("@odoo/owl").Signal<HTMLElement | null>} */
+    navMenuToggler = signal(null);
+    isNavMenuOpen = signal(false);
+    /** @type {import("@odoo/owl").Signal<null>} */
+    menuItem = signal(null);
+
+    /**
+     * @param {any} app
+     */
+    selectApp(app) {
+        this.menu.currentAppId.set(app.id);
+        this.isAppMenuOpen.set(false);
+
+        notify(`Opening app "${app.name}"`, { type: "danger" });
+    }
+
+    /**
+     * @param {any} menuItem
+     */
+    selectMenuItem(menuItem) {
+        this.isAppMenuOpen.set(false);
+        if (menuItem.menuItems.length) {
+            this.isNavMenuOpen.update((open) => !open);
+        } else {
+            this.isNavMenuOpen.set(false);
+
+            notify(`Opening menu "${menuItem.name}"`, { type: "info" });
+        }
+    }
+
+    /**
+     * @param {HTMLElement} target
+     * @param {any} menuItem
+     */
+    setCurrentNavMenu(target, menuItem) {
+        if (menuItem.menuItems.length) {
+            this.navMenuToggler.set(target);
+            this.menuItem.set(menuItem);
+        }
+    }
+
+    toggleAppMenu() {
+        this.isNavMenuOpen.set(false);
+        this.isAppMenuOpen.update((open) => !open);
     }
 }
