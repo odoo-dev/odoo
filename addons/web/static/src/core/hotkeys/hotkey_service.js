@@ -209,6 +209,10 @@ export const hotkeyService = {
             }
         }
 
+        function normalizeHotkey(hotkey) {
+            return hotkey.split("+").sort().join("+");
+        }
+
         /**
          * Dispatches an hotkey to first matching registration.
          * Registrations are iterated in following order:
@@ -228,6 +232,9 @@ export const hotkeyService = {
         function dispatch(infos) {
             const { activeElement, hotkey, isRepeated, target, shouldProtectEditable } = infos;
 
+            // Normalize the active hotkey
+            const normalizedHotkey = normalizeHotkey(hotkey);
+
             // Prepare registrations and the common filter
             const reversedRegistrations = Array.from(registrations.values()).reverse();
             const domRegistrations = getDomRegistrations(hotkey, activeElement);
@@ -236,7 +243,7 @@ export const hotkeyService = {
             // Find all candidates
             const candidates = allRegistrations.filter(
                 (reg) =>
-                    reg.hotkey === hotkey &&
+                    normalizeHotkey(reg.hotkey) === normalizedHotkey &&
                     (reg.allowRepeat || !isRepeated) &&
                     (reg.bypassEditableProtection || !shouldProtectEditable) &&
                     (reg.global || reg.activeElement === activeElement) &&
