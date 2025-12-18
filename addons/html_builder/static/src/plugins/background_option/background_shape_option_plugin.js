@@ -372,6 +372,7 @@ export class BackgroundShapeOptionPlugin extends Plugin {
         if (shape.includes("html_builder/Connections/")) {
             this.applyShape(editingElement, () => ({
                 colors: this.getComputedConnectionsColors(editingElement, shape),
+                // colors: this.getImplicitColors(editingElement, shape),
             }));
         }
         const elements = this.getNeighborShape(editingElement);
@@ -380,6 +381,7 @@ export class BackgroundShapeOptionPlugin extends Plugin {
             if (shape.includes("html_builder/Connections/")) {
                 this.applyShape(element, () => ({
                     colors: this.getComputedConnectionsColors(element, shape, newColor),
+                    // colors: this.getImplicitColors(element, shape),
                 }));
             }
         }
@@ -417,6 +419,9 @@ export class BackgroundShapeOptionPlugin extends Plugin {
         const selectedBackgroundUrl = this.getShapeStyleUrl(shapeName);
         const defaultColors = this.getShapeDefaultColors(selectedBackgroundUrl);
         const defaultKey = Object.keys(defaultColors)[0];
+        // if (editingElement.dataset.userDefined === "true") {
+        //     return this.getShapeData(editingElement).colors;
+        // }
         let neighborElHexColor;
         if (!neighborElBgColor) {
             const targetRect = editingElement.getBoundingClientRect();
@@ -429,6 +434,17 @@ export class BackgroundShapeOptionPlugin extends Plugin {
             neighborElHexColor = rgbToHex(neighborElBgColor);
         }
         const curBgHexColor = this.getEffectiveBackgroundColor(editingElement);
+        if (editingElement.dataset.userDefined === "true") {
+            let currentColor = this.getShapeData(editingElement).colors[defaultKey];
+            if (/^o-color-[12345]$/.test(currentColor)) {
+                const style = getHtmlStyle(this.document);
+                currentColor = getCSSVariableValue(currentColor, style).toLowerCase();
+            }
+            if (neighborElHexColor === currentColor) {
+                editingElement.dataset.userDefined = false;
+            }
+            return { [defaultKey]: currentColor };
+        }
 
         return {
             [defaultKey]:
@@ -695,6 +711,9 @@ class SetBackgroundShapeAction extends BaseAnimationAction {
     static id = "setBackgroundShape";
     apply({ editingElement, params, value }) {
         params = params || {};
+        if (!value) {
+            editingElement.dataset.userDefined = false;
+        }
         const shapeData = this.getShapeData(editingElement);
         const applyShapeParams = {
             shape: value,
@@ -784,6 +803,11 @@ class BackgroundShapeColorAction extends BaseAnimationAction {
         return (color && normalizeColor(color, getHtmlStyle(this.document))) || "";
     }
     apply({ editingElement, params: { mainParam: colorName }, value }) {
+        if (value) {
+            editingElement.dataset.userDefined = true;
+        } else {
+            editingElement.dataset.userDefined = false;
+        }
         this.applyShape(editingElement, () => {
             value = getValueFromVar(value);
             const { colors: previousColors } = this.getShapeData(editingElement);
