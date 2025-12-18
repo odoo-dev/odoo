@@ -7,7 +7,6 @@ export class Notification extends Component {
         buttons: {
             type: Array,
         },
-        id: Number,
         duration: Number,
         message: String,
         close: Function,
