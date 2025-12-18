@@ -1,7 +1,7 @@
 import { App, Plugin, whenReady } from "@odoo/owl";
 import { getTemplate } from "@web/core/templates";
+import { WebClient } from "@web_client/web_client/web_client";
 import { service, serviceManager, serviceRegistry } from "@web_core/services";
-import { WebClient } from "./web_client";
 
 const config = {
     dev: true,

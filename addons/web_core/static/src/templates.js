@@ -8,7 +8,7 @@
  * This file defines the `templateRegistry`, a central store for XML templates
  * used in the Odoo web client. It provides functions to register and retrieve
  * templates, and applies XPath operations at runtime when necessary.
- * 
+ *
  * Note that this registry is not an instance of the main odoo Registry class,
  * it is specialized to handle and process templates.
  * -----------------------------------------------------------------------------

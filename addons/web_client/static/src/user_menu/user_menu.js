@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { systrayRegistry } from "@web_client/systray/systray";
+import { systrayRegistry } from "@web_client/systray_menu/systray_menu";
 
 export class UserMenu extends Component {
     static {
