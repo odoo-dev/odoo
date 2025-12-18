@@ -303,9 +303,9 @@ class Image(Binary):
             self._update_cache(record, cache_value)
         super().create(new_record_values)
 
-    def to_write(self, records, value):
+    def to_write(self, records, value, values=None):
         try:
-            return super().to_write(records, value)
+            return super().to_write(records, value, values)
         except ValueError:
             if not any(records._ids):
                 # Some crap is assigned to a new record. This can happen in an

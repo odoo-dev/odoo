@@ -319,13 +319,13 @@ class BaseString(Field[str | typing.Literal[False]]):
             if target and bool(target.id) == bool(record.id):
                 target[field.name] = record_value[record]
 
-    def to_write(self, records, value):
+    def to_write(self, records, value, values=None):
         if self.translate and isinstance(value, dict):
             if isinstance(value, StoredTranslations):
                 return super().to_write(records.with_context(prefetch_langs=True), value)
             # force update all records
             return records._ids, value
-        return super().to_write(records, value)
+        return super().to_write(records, value, values)
 
     def write(self, records, value):
         if not self.translate or value is None:
