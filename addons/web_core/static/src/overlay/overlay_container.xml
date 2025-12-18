@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-<t t-name="web_core.OverlayContainerItem">
-    <div class="wcore_overlay_container_item position-fixed h-100 w-100 top-0" style="pointer-events: none;">
-        <div style="pointer-events: all;">
-            <t t-component="this.props.overlay.component" t-props="this.props.overlay.props"/>
-        </div>
-    </div>
-</t>
-
 <t t-name="web_core.OverlayContainer">
     <t t-foreach="this.overlayContainer.overlays()" t-as="overlay" t-key="overlay.id">
-        <OverlayContainerItem overlay="overlay"/>
+        <t t-component="overlay.component" t-props="overlay.props"/>
     </t>
 </t>
 
