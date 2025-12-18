@@ -37,8 +37,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             ev.stopPropagation();
             this.onCtrlAKeydown();
         });
-        this.addDomListener(this.document, "mouseup", this.restrictSelectionInClosestDiv);
-        this.addDomListener(this.document, "touchend", this.restrictSelectionInClosestDiv);
+        this.addDomListener(this.document, "mouseup", this.restrictMouseSelection);
+        this.addDomListener(this.document, "touchend", this.restrictMouseSelection);
 
         // doing this manually instead of using addDomListener. This is because
         // addDomListener will ignore all events from protected targets. But in
@@ -101,13 +101,39 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     }
 
     /**
+     * Restricts the mouse selection inside paragraph or div.
+     * @param {Event} ev
+     * @returns
+     */
+    restrictMouseSelection(ev) {
+        const { editableSelection, currentSelectionIsInEditable } =
+            this.dependencies.selection.getSelectionData();
+        const { anchorNode } = editableSelection;
+        if (!currentSelectionIsInEditable || editableSelection.isCollapsed) {
+            return;
+        }
+
+        // Check if the selection is inside a special block that we need to
+        // restrict to paragraph blocks.
+        const closestPRestrictedEl = closestElement(anchorNode, this.restrictedToPSelectors);
+        const closestDivEl = closestElement(anchorNode, "div");
+
+        if (closestPRestrictedEl && !closestPRestrictedEl.contains(closestDivEl)) {
+            const closestParagraphEl = closestElement(anchorNode, "p");
+            this.restrictSelectionInElement(editableSelection, closestParagraphEl);
+        } else {
+            this.restrictSelectionInElement(editableSelection, closestDivEl);
+        }
+    }
+
+    /**
      * Extend the selection to the whole element side by aide to properly
      * handle uncrossable elements, see uncrossable_element_selector
      * @param {Element} element
      */
     selectAllInElement(element) {
         let selection = this.dependencies.selection.getEditableSelection();
-        let { focusNode, focusOffset } = selection;
+        const { focusNode, focusOffset } = selection;
 
         const [newAnchorNode, newAnchorOffset] = getDeepestPosition(element, 0);
         const [newFocusNode, newFocusOffset] = getDeepestPosition(element, nodeSize(element));
@@ -127,10 +153,9 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         // Get the fixed extended selection after the first step, and then
         // extend it to the end of the element.
         selection = this.dependencies.selection.getEditableSelection();
-        ({ focusNode, focusOffset } = selection);
         this.dependencies.selection.setSelection({
-            anchorNode: focusNode,
-            anchorOffset: focusOffset,
+            anchorNode: selection.focusNode,
+            anchorOffset: selection.focusOffset,
             focusNode: newFocusNode,
             focusOffset: newFocusOffset,
         });
@@ -139,16 +164,24 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         this.correctSelectionOnUncrossable();
     }
 
-    restrictSelectionInElement(selection, block) {
+    /**
+     * Restricts the selection inside a block element.
+     * @param {Selection} selection
+     * @param {Element} elementEl
+     */
+    restrictSelectionInElement(selection, elementEl) {
         const { anchorNode, anchorOffset, focusNode, direction } = selection;
-        const isFocusInBlock = block.contains(focusNode);
+        const isFocusInBlock = elementEl.contains(focusNode);
 
+        // If the focus node is not in the block, we need to put it inside the
+        // elementEl. If the selection is left to right, we put it at the end of
+        // the block, otherwise at the start of the block.
         if (!isFocusInBlock) {
             let focusNode, focusOffset;
             if (direction === DIRECTIONS.RIGHT) {
-                [focusNode, focusOffset] = getDeepestPosition(block, nodeSize(block));
+                [focusNode, focusOffset] = getDeepestPosition(elementEl, nodeSize(elementEl));
             } else {
-                [focusNode, focusOffset] = getDeepestPosition(block, 0);
+                [focusNode, focusOffset] = getDeepestPosition(elementEl, 0);
             }
             this.dependencies.selection.setSelection({
                 anchorNode,
@@ -157,29 +190,9 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
                 focusOffset,
             });
         }
+        // Finally, we correct the selection if some uncrossable elements are
+        // crossed.
         this.correctSelectionOnUncrossable();
-    }
-
-    restrictSelectionInClosestDiv(ev) {
-        const { editableSelection, currentSelectionIsInEditable } =
-            this.dependencies.selection.getSelectionData();
-        const { anchorNode } = editableSelection;
-        if (!currentSelectionIsInEditable) {
-            return;
-        }
-        if (editableSelection.isCollapsed) {
-            return;
-        }
-
-        const closestPRestrictedEl = closestElement(anchorNode, this.restrictedToPSelectors);
-        const closestDivEl = closestElement(anchorNode, "div");
-
-        if (closestPRestrictedEl && !closestPRestrictedEl.contains(closestDivEl)) {
-            const closestParagraph = closestElement(anchorNode, "p");
-            this.restrictSelectionInElement(editableSelection, closestParagraph);
-        } else {
-            this.restrictSelectionInElement(editableSelection, closestDivEl);
-        }
     }
 
     isNodeSelectionUncrossable(node, selectedNodes) {
