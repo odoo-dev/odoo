@@ -1672,7 +1672,7 @@ class Field[T]:
         for record, value in record_values:
             self.write(record, value)
 
-    def to_write(self, records: BaseModel, value: typing.Any) -> tuple[tuple[IdType, ...], typing.Any]:
+    def to_write(self, records: BaseModel, value: typing.Any, values=None) -> tuple[tuple[IdType, ...], typing.Any]:
         """ Convert ``value`` to the format internally used by ``self.write()``,
         and determine the subset of ``records._ids`` that should be updated.
         """

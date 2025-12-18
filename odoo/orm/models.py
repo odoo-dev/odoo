@@ -3903,7 +3903,7 @@ class BaseModel(metaclass=MetaModel):
         fnames_modifying_relations = []
 
         for field, value in field_values.items():
-            ids, value = field.to_write(self, value)
+            ids, value = field.to_write(self, value, vals)
             if ids:
                 field_updates[field] = value
                 if field.name not in ignore_magic:

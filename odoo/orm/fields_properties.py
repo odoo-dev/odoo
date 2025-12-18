@@ -291,7 +291,7 @@ class Properties(Field):
             if self._must_update_definition(value):
                 self._update_definition(record, value)
 
-    def to_write(self, records, value):
+    def to_write(self, records, value, values=None):
         if len(records[self.definition_record]) > 1 and value:
             raise UserError(records.env._("Updating records with different property fields definitions is not supported. Update by separate definition instead."))
 
@@ -299,7 +299,7 @@ class Properties(Field):
         if self._must_update_definition(value):
             return records._ids, value
 
-        return super().to_write(records, value)
+        return super().to_write(records, value, values)
 
     def write(self, records, value):
         # update the field and its definitions
