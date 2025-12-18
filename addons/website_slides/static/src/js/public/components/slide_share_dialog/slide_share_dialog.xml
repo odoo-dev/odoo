@@ -11,7 +11,7 @@
                     <div class="input-group">
                         <input type="text" class="form-control text-center" t-att-value="this.props.url"
                                readonly="readonly" onClick="this.select();"/>
-                        <CopyButton content="this.props.url" copyText="copyUrlText" className="'btn-primary'" successText="successText"/>
+                        <CopyButton content="this.props.url" className="'btn-primary'" successText="successText"/>
                     </div>
                 </div>
                 <div class="col-12 mt-4">
@@ -48,11 +48,12 @@
                 </div>
                 <div class="col-12 o_wslides_embed_code" t-if="this.props.embedCode">
                     <h5 class="mt-4">Embed in another Website</h5>
-                    <div class="input-group">
+                    <div class="position-relative">
                         <textarea t-ref="codeInput" class="form-control" t-att-value="this.props.embedCode"
                                   readonly="readonly" onClick="this.select();"/>
-                        <CopyButton content="this.props.embedCode" copyText="copyEmbedCodeText"
-                                    successText="successText"/>
+                        <CopyButton content="this.props.embedCode"
+                                    successText="successText"
+                                    className="'position-absolute top-0 end-0 m-2 btn-sm btn-light border'"/>
                     </div>
                     <div t-if="this.props.category == 'document' and this.props.documentMaxPage > 1" class="input-group mt-4">
                         <span class="input-group-text">Start at Page</span>

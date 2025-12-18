@@ -24,7 +24,7 @@ class CopyClipboardField extends Component {
     }
 
     get copyButtonClassName() {
-        return `o_btn_${this.type}_copy btn-sm`;
+        return `o_btn_${this.type}_copy btn-sm btn-light m-1 border`;
     }
     get fieldProps() {
         return omit(this.props, "string", "disabledExpr");

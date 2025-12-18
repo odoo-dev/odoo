@@ -24,8 +24,6 @@ export class SlideShareDialog extends Component {
 
     setup() {
         this.codeInput = useRef("codeInput");
-        this.copyUrlText = _t("Copy Link");
-        this.copyEmbedCodeText = _t("Copy Embed Code");
         this.successText = _t("Copied");
     }
 

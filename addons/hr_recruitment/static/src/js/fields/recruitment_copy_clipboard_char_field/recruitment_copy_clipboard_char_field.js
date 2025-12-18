@@ -20,6 +20,14 @@ class RecruitmentCopyClipboardCharField extends CopyClipboardCharField {
         this.orm = useService("orm");
     }
 
+    get copyButtonIcon() {
+        return `${super.copyButtonIcon} align-middle`;
+    }
+
+    get copyButtonClassName() {
+        return `o_btn_${this.type}_copy btn-sm btn-light border ms-2`;
+    }
+
     get fieldProps() {
         return omit(super.fieldProps, "displayedValue", "contentGenerationFunctionName");
     }
