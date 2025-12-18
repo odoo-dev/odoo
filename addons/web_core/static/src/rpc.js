@@ -7,7 +7,7 @@
  */
 
 import { EventBus, Plugin } from "@odoo/owl";
-import { service, serviceRegistry } from "./services";
+import { service, serviceRegistry } from "@web_core/services";
 
 export function rpc(url, params = {}, settings = {}) {
     const rpc = service(RPC);

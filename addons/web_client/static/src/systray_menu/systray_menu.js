@@ -5,8 +5,8 @@ import { Component, computed, Registry } from "@odoo/owl";
  */
 export const systrayRegistry = new Registry("systray", Component.prototype);
 
-export class Systray extends Component {
-    static template = "web_client.Systray";
+export class SystrayMenu extends Component {
+    static template = "web_client.SystrayMenu";
 
     entries = computed(() => systrayRegistry.entries());
 }

@@ -19,8 +19,6 @@ import { NotificationContainer } from "@web_core/notification/notification_conta
 import { OverlayPlugin } from "@web_core/overlay/overlay_plugin";
 import { service, serviceRegistry } from "@web_core/services";
 
-
-
 /**
  * @type {NotificationPlugin["push"]}
  */

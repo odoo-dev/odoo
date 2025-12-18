@@ -12,7 +12,7 @@
             </div>
         </t>
         <div class="mx-auto"/>
-        <Systray/>
+        <SystrayMenu/>
     </div>
     <Menu target="this.appMenuToggler" isOpen="this.isAppMenuOpen">
         <t t-foreach="this.apps()" t-as="app" t-key="app.id">

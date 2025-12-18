@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-<t t-name="web_client.Systray">
+<t t-name="web_client.SystrayMenu">
     <t t-foreach="this.entries()" t-as="entry" t-key="entry[0]">
         <t t-component="entry[1]"/>
     </t>

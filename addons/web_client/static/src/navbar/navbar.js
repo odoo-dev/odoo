@@ -1,12 +1,12 @@
 import { Component, computed, plugin, signal } from "@odoo/owl";
 import { MenuPlugin } from "@web_client/menu_plugin";
-import { Systray } from "@web_client/systray/systray";
+import { SystrayMenu } from "@web_client/systray_menu/systray_menu";
 import { Menu, MenuItem } from "@web_core/menu/menu";
 import { notify } from "@web_core/notification/notification_plugin";
 
 export class Navbar extends Component {
     static template = "web_client.Navbar";
-    static components = { Menu, MenuItem, Systray };
+    static components = { Menu, MenuItem, SystrayMenu };
 
     menu = plugin(MenuPlugin);
     apps = computed(() => Object.values(this.menu.apps()));
