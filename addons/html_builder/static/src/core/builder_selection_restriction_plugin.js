@@ -55,6 +55,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
      * Activates the options of the clicked element.
      * Note: if the selection was corrected, the click is ignored, as the
      * selection already managed it.
+     *
+     * @param {Event} ev
      */
     onClick(ev) {
         this.dependencies.operation.next(() => {
@@ -85,27 +87,37 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         ) {
             return;
         }
-        const closestSpecialBlock = closestElement(anchorNode, this.restrictedToPSelectors);
-        const closestDiv = closestElement(anchorNode, "div");
+        const closestPRestrictedEl = closestElement(anchorNode, this.restrictedToPSelectors);
+        const closestDivEl = closestElement(anchorNode, "div");
 
         // If the closest special block doesn't contains the closest div block,
         // we select the paragraph, otherwise we select the whole closest div
         // block.
-        if (closestSpecialBlock && !closestSpecialBlock.contains(closestDiv)) {
+        if (closestPRestrictedEl && !closestPRestrictedEl.contains(closestDivEl)) {
             this.selectAllInElement(closestElement(anchorNode, "p"));
         } else {
-            this.selectAllInElement(closestDiv);
+            this.selectAllInElement(closestDivEl);
         }
     }
 
-    // We extend the selection to the whole element step by step to properly
-    // handle uncrossable elements (like row, blockquote...).
+    /**
+     * Extend the selection to the whole element step by step to properly
+     * handle uncrossable elements, see uncrossable_element_selector
+     * @param {Element} element
+     */
     selectAllInElement(element) {
         let selection = this.dependencies.selection.getEditableSelection();
         let { anchorNode, anchorOffset, focusNode, focusOffset, direction } = selection;
 
         const [newAnchorNode, newAnchorOffset] = getDeepestPosition(element, 0);
         const [newFocusNode, newFocusOffset] = getDeepestPosition(element, nodeSize(element));
+
+        // First extend the selection to the start of the element from the
+        // furtherest point of the selection to the start. If current
+        // selection is not collapsed, we pick the new selection's anchorNode
+        // based on the selection's direction, e.g. selection is from the left
+        // to the right, we pick the focusNode as the new selection's anchorNode,
+        // otherwise we pick the anchorNode.
         if (direction === DIRECTIONS.RIGHT) {
             this.dependencies.selection.setSelection({
                 anchorNode: focusNode,
@@ -122,6 +134,11 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             });
         }
         this.correctSelectionOnUncrossable();
+
+        // Get the extended selection after the first step, and then extend it
+        // to the end of the element. No need to consider the selection
+        // direction here, cause we are sure the anchorNode of the current
+        // selection is the start of the element.
         selection = this.dependencies.selection.getEditableSelection();
         ({ focusNode, focusOffset } = selection);
         this.dependencies.selection.setSelection({
@@ -165,14 +182,14 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             return;
         }
 
-        const closestSpecialBlock = closestElement(anchorNode, this.restrictedToPSelectors);
-        const closestDiv = closestElement(anchorNode, "div");
+        const closestPRestrictedEl = closestElement(anchorNode, this.restrictedToPSelectors);
+        const closestDivEl = closestElement(anchorNode, "div");
 
-        if (closestSpecialBlock && !closestSpecialBlock.contains(closestDiv)) {
+        if (closestPRestrictedEl && !closestPRestrictedEl.contains(closestDivEl)) {
             const closestParagraph = closestElement(anchorNode, "p");
             this.restrictSelectionInElement(editableSelection, closestParagraph);
         } else {
-            this.restrictSelectionInElement(editableSelection, closestDiv);
+            this.restrictSelectionInElement(editableSelection, closestDivEl);
         }
     }
 
