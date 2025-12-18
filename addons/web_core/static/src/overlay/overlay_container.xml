@@ -2,8 +2,12 @@
 <templates xml:space="preserve">
 
 <t t-name="web_core.OverlayContainer">
-    <t t-foreach="this.overlayContainer.overlays()" t-as="overlay" t-key="overlay.id">
-        <t t-component="overlay.component" t-props="overlay.props"/>
+    <t t-if="this.overlayContainer.overlays().length">
+        <div class="o_overlay_container" style="z-index: 1;">
+            <t t-foreach="this.overlayContainer.overlays()" t-as="overlay" t-key="overlay.id">
+                <t t-component="overlay.component" t-props="overlay.props"/>
+            </t>
+        </div>
     </t>
 </t>
 

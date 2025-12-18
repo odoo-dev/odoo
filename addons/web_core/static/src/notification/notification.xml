@@ -4,7 +4,7 @@
 <t t-name="web_core.Notification">
     <div class="wcore_notification d-flex mb-2 position-relative rounded shadow-lg">
         <span t-attf-class="wcore_notification_bar bg-{{this.props.type}} rounded-start" style="width: 0.5rem;"/>
-        <div class="w-100 py-2 ps-3 pe-5 border border-start-0 rounded-end text-break">
+        <div class="w-100 py-2 ps-3 pe-5 border border-start-0 rounded-end text-break bg-white">
             <button type="button" class="wcore_notification_close btn-close position-absolute top-0 end-0 mt-2 me-2" aria-label="Close" t-on-click="() => this.props.close()" data-available-offline=""/>
             <div class="wcore_notification_body d-flex align-items-center">
                 <span class="me-auto wcore_notification_content w-100">
