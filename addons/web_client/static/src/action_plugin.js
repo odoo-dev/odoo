@@ -1,9 +1,12 @@
-import { Component, computed, plugin, Plugin, signal, xml } from "@odoo/owl";
-import { serviceRegistry } from "@web_core/services";
-import { actionRegistry } from "./action_registry";
-import { rpc } from "@web_core/rpc";
-import { session } from "@web_core/session";
+import { Component, plugin, Plugin, signal, usePlugins, xml } from "@odoo/owl";
+import { ViewPlugin } from "@web_client/view_plugin";
+import { KanbanView } from "@web_client/views/kanban_view";
+import { ListView } from "@web_client/views/list_view";
 import { notify } from "@web_core/notification/notification_plugin";
+import { rpc } from "@web_core/rpc";
+import { serviceRegistry } from "@web_core/services";
+import { session } from "@web_core/session";
+import { actionRegistry } from "./action_registry";
 
 class ActionContainer extends Component {
     static template = xml`
@@ -11,9 +14,21 @@ class ActionContainer extends Component {
             <h1>
                 <t t-out="this.action.action().description.display_name"/>
             </h1>
-        </div>`;
+            <t t-if="this.view.viewType() === 'list'">
+                <ListView/>
+            </t>
+            <t t-elif="this.view.viewType() === 'kanban'">
+                <KanbanView/>
+            </t>
+        </div>
+    `;
+    static components = { ListView, KanbanView };
     action = plugin(ActionPlugin);
 
+    setup() {
+        usePlugins([ViewPlugin]);
+        this.view = plugin(ViewPlugin);
+    }
 }
 
 export class ActionPlugin extends Plugin {
