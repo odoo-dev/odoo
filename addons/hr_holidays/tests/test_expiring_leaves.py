@@ -809,3 +809,60 @@ class TestExpiringLeaves(HttpCase, TestHrHolidaysCommon):
 
         # Assert the number of expiring leaves
         self.assertEqual(allocation_data[logged_in_emp][0][1]['closest_allocation_remaining'], 1)
+
+    def test_leap_year_in_accrual_plan(self):
+        """
+        This test case aims to assert that the system correctly handles recurring plan dates that are set on 29th of February
+
+        - We create an accrual plan with a carryover date of 29/2 as well as first_month accrual cutoff set to 29/2
+        - We create a new testing accrual plan on 1/8/2023 to be followed by a leap year
+        - We test the correct accrual on 29/2/2024 to check that the 10 days have been accrued correctly
+        - We test the correct accrual on 1/7/2024 to check that it doesn't affect the other cycle in a biyearly setup
+        - Finally, we test the correct accrual on 28/2/2025 to check the number of days was accrued correctly even though
+            it's a normal year with 1 day less than a leap one
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+            'name': 'Accrual Plan For Test',
+            'can_be_carryover': True,
+            'carryover_date': 'other',
+            'carryover_day': 29,
+            'carryover_month': '2',
+            'level_ids': [(0, 0, {
+                'added_value_type': 'day',
+                'milestone_date': 'creation',
+                'start_type': 'day',
+                'added_value': 10,
+                'frequency': 'biyearly',
+                'first_month': '2',
+                'first_month_day': 29,
+                'second_month': '7',
+                'second_month_day': 1,
+                'action_with_unused_accruals': 'all',
+                'accrual_validity': True,
+                'accrual_validity_type': 'month',
+                'accrual_validity_count': 5,
+            })],
+        })
+        with freeze_time('2023-07-01'):
+            allocation = self.env['hr.leave.allocation'].sudo().with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation for employee',
+                'accrual_plan_id': accrual_plan.id,
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+            })
+            allocation.action_approve()
+
+        with freeze_time('2023-07-01'):
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 0)
+        with freeze_time('2024-02-29'):
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 10)
+        with freeze_time('2025-01-01'):
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 20)
+        with freeze_time('2025-02-28'):
+            allocation._update_accrual()
+            self.assertEqual(allocation.number_of_days, 30)
