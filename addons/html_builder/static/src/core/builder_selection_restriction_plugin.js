@@ -238,6 +238,15 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         ) {
             return;
         }
+        // If no uncrossable element is selected, no need to correct the
+        // selection.
+        if (selectedNodes.every((node) => !node.matches(this.uncrossableSelectors))) {
+            this.dependencies.builderOptions.updateContainers(
+                closestElement(selection.commonAncestorContainer)
+            );
+            this.isSelectionCorrected = true;
+            return;
+        }
 
         let tempFocusNode;
         for (const node of selectedNodes) {
