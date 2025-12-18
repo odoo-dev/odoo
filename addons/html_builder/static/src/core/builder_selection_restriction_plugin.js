@@ -1,9 +1,8 @@
 import { Plugin } from "@html_editor/plugin";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
-import { getDeepestPosition } from "@html_editor/utils/dom_info";
+import { getDeepestPosition, isElement, isIconElement } from "@html_editor/utils/dom_info";
 import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { isElement } from "@html_editor/utils/dom_info";
 
 export class BuilderSelectionRestrictionPlugin extends Plugin {
     static id = "builderSelectionRestriction";
@@ -216,31 +215,33 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         return false;
     }
 
+    /**
+     * Corrects the current editablale selection if any uncrossable element is
+     * crossed, see uncrossable_element_selector.
+     */
     correctSelectionOnUncrossable() {
         const selection = this.dependencies.selection.getEditableSelection();
         const { anchorNode, anchorOffset, focusNode, direction } = selection;
         const selectedNodes = this.dependencies.selection
             .getTargetedNodes(selection)
             .filter(isElement);
-        const selectedNodesLooping =
-            direction === DIRECTIONS.RIGHT ? selectedNodes : selectedNodes.reverse();
+        if (direction !== DIRECTIONS.RIGHT) {
+            selectedNodes.reverse();
+        }
 
-        // Do not do selection correction if
-        // 1. the only selected node is an image cause we force the selection to
-        // be around the image when clicking on it, correction would break the
-        // option container for images
-        // 2. icon elements (i.fa, span.fa...).
+        // Do not correct the selection if the only selected node is an image or
+        // an icon, otherwise it would break their option containers (because we
+        // force the selection to be around them when we click on them).
         if (
-            selectedNodesLooping.length === 1 &&
-            (selectedNodesLooping[0].tagName === "IMG" ||
-                selectedNodesLooping[0].classList?.contains("fa"))
+            selectedNodes.length === 1 &&
+            (selectedNodes[0].tagName === "IMG" || isIconElement(selectedNodes[0]))
         ) {
             return;
         }
 
         let tempFocusNode;
-        for (const node of selectedNodesLooping) {
-            if (this.isNodeSelectionUncrossable(node, selectedNodesLooping)) {
+        for (const node of selectedNodes) {
+            if (this.isNodeSelectionUncrossable(node, selectedNodes)) {
                 if (node.contains(anchorNode) && node.contains(focusNode)) {
                     break;
                 } else if (!node.contains(anchorNode)) {
