@@ -26,7 +26,7 @@ export class Popover extends Component {
     });
 
     style = computed(() => {
-        const values = ["pointer-events: all"];
+        const values = [];
         const position = this.position();
         if (position) {
             values.push(`top: ${position.top}px`);
