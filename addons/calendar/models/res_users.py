@@ -153,8 +153,10 @@ class ResUsers(models.Model):
         meetings_lines = EventModel.search_read(
             self._systray_get_calendar_event_domain(),
             ['id', 'start', 'name', 'allday'],
-            order='start')
+            order='start', limit=3)
         if meetings_lines:
+            total_meetings_count = EventModel.search_count(self._systray_get_calendar_event_domain())
+
             meeting_label = _("Today's Meetings")
             meetings_systray = {
                 'id': self.env['ir.model']._get('calendar.event').id,
@@ -166,6 +168,7 @@ class ResUsers(models.Model):
                 'domain': [('active', 'in', [True, False])],
                 'meetings': meetings_lines,
                 "view_type": EventModel._systray_view,
+                "remaining_meetings":  total_meetings_count - len(meetings_lines)
             }
             res.insert(0, meetings_systray)
         return res
