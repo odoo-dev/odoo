@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_core.MenuPopover">
+    <div class="d-flex flex-column py-1 overflow-y-auto" style="max-height: 60vh; min-width: 200px;">
+        <t t-call-slot="default"/>
+    </div>
+</t>
+
+<t t-name="web_core.MenuItem">
+    <button class="btn btn-light rounded-0 text-start fw-normal py-1 px-4" t-att-class="{ active: this.props.isActive }" t-on-click.prevent="() => this.props.onSelected()">
+        <t t-call-slot="default"/>
+    </button>
+</t>
+
+</templates>

@@ -1,27 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-<t t-name="web_client.AppMenu">
-    <div class="d-flex flex-column py-1">
-        <t t-foreach="this.apps()" t-as="app" t-key="app.id">
-            <button class="btn btn-light rounded-0 text-start py-1 px-3" t-att-class="{active: this.menu.currentAppId() === app.id}" t-on-click.prevent="() => this.openApp(app.id)">
-                <t t-out="app.name"/>
-            </button>
-        </t>
-    </div>
-</t>
-
 <t t-name="web_client.Navbar">
     <div class="o-navbar d-flex flex-shrink-0 ps-2 gap-4">
-        <div class="d-flex align-items-center cursor-pointer" t-ref="this.appMenuToggler" t-on-click.prevent="this.openPopover">
+        <div class="d-flex align-items-center cursor-pointer" t-ref="this.appMenuToggler" t-on-click.prevent="this.toggleAppMenu">
             <a href="#" class="text-white">Odoo</a>
         </div>
         <t t-foreach="this.menu.currentMenuItems()" t-as="menuItem" t-key="menuItem.id">
-            <div class="d-flex align-items-center cursor-pointer" t-on-click.prevent="">
+            <div class="d-flex align-items-center cursor-pointer" t-on-click.prevent="() => this.selectMenuItem(menuItem)" t-on-mouseenter="(ev) => this.setCurrentNavMenu(ev.target, menuItem)">
                 <a href="#" class="text-white" t-out="menuItem.name"/>
             </div>
         </t>
     </div>
+    <Menu target="this.appMenuToggler" isOpen="this.isAppMenuOpen">
+        <t t-foreach="this.apps()" t-as="app" t-key="app.id">
+            <MenuItem isActive="this.menu.currentAppId() === app.id" onSelected="() => this.selectApp(app)">
+                <t t-out="app.name"/>
+            </MenuItem>
+        </t>
+    </Menu>
+    <Menu target="this.navMenuToggler" isOpen="this.isNavMenuOpen">
+        <t t-foreach="this.menuItem().menuItems" t-as="menuItem" t-key="menuItem.id">
+            <t t-if="menuItem.menuItems.length">
+                <div class="px-3 py-1 text-muted fw-bold">
+                    <t t-out="menuItem.name"/>
+                </div>
+                <t t-foreach="menuItem.menuItems" t-as="subMenuItem" t-key="subMenuItem.id">
+                    <MenuItem onSelected="() => this.selectMenuItem(subMenuItem)">
+                        <t t-out="subMenuItem.name"/>
+                    </MenuItem>
+                </t>
+            </t>
+            <t t-else="">
+                <MenuItem onSelected="() => this.selectMenuItem(menuItem)">
+                    <t t-out="menuItem.name"/>
+                </MenuItem>
+            </t>
+        </t>
+    </Menu>
 </t>
 
 </templates>
