@@ -792,7 +792,7 @@ class _RelationalMulti(_Relational):
         ]
         self.write_batch(records_commands_list, create=True)
 
-    def to_write(self, records, value):
+    def to_write(self, records, value, values=None):
         commands = self.convert_to_commands(value)
         if not commands:
             # non-stored fields without a value are considered not equal,

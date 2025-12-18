@@ -3906,7 +3906,7 @@ class BaseModel(metaclass=MetaModel):
             ):
                 # records being computed: no business logic, no recomputation
                 records = self.__class__(env, prot_ids, self._prefetch_ids)
-                ids_to_write, value_to_write = field.to_write(records, value)
+                ids_to_write, value_to_write = field.to_write(records, value, values)
                 if ids_to_write:
                     recs = self.__class__(env, ids_to_write, self._prefetch_ids)
                     field.write(recs, value_to_write)
@@ -3961,7 +3961,7 @@ class BaseModel(metaclass=MetaModel):
             field_updates = {}
             ids_to_update = set()
             for field, value in field_vals.items():
-                ids, value = field.to_write(records, value)
+                ids, value = field.to_write(records, value, values)
                 if ids:
                     field_updates[field] = value
                     ids_to_update.update(ids)
@@ -4119,7 +4119,7 @@ class BaseModel(metaclass=MetaModel):
         fnames_modifying_relations = []
 
         for field, value in field_values.items():
-            ids, value = field.to_write(self, value)
+            ids, value = field.to_write(self, value, vals)
             if ids:
                 field_updates[field] = value
                 if field.name not in ignore_magic:
