@@ -3,6 +3,7 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { getDeepestPosition } from "@html_editor/utils/dom_info";
 import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 import { closestElement } from "@html_editor/utils/dom_traversal";
+import { isElement } from "@html_editor/utils/dom_info";
 
 export class BuilderSelectionRestrictionPlugin extends Plugin {
     static id = "builderSelectionRestriction";
@@ -199,11 +200,20 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         this.correctSelectionOnUncrossable();
     }
 
+    /**
+     * Checks if the the given nodes are uncrossable.
+     *
+     * @param {Node} node
+     * @param {Array<Node>} selectedNodes
+     * @returns {Boolean}
+     */
     isNodeSelectionUncrossable(node, selectedNodes) {
-        return (
-            node.matches(this.uncrossableSelectors) ||
-            selectedNodes.includes(closestElement(node, this.uncrossableSelectors))
-        );
+        const closestUncrossableEl = closestElement(node, this.uncrossableSelectors);
+        if (closestUncrossableEl) {
+            return node === closestUncrossableEl || selectedNodes.includes(closestUncrossableEl);
+        }
+
+        return false;
     }
 
     correctSelectionOnUncrossable() {
@@ -211,7 +221,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         const { anchorNode, anchorOffset, focusNode, direction } = selection;
         const selectedNodes = this.dependencies.selection
             .getTargetedNodes(selection)
-            .filter((node) => node.nodeType === Node.ELEMENT_NODE);
+            .filter(isElement);
         const selectedNodesLooping =
             direction === DIRECTIONS.RIGHT ? selectedNodes : selectedNodes.reverse();
 
@@ -228,7 +238,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             return;
         }
 
-        let temperaryFocusNode;
+        let tempFocusNode;
         for (const node of selectedNodesLooping) {
             if (this.isNodeSelectionUncrossable(node, selectedNodesLooping)) {
                 if (node.contains(anchorNode) && node.contains(focusNode)) {
@@ -236,18 +246,18 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
                 } else if (!node.contains(anchorNode)) {
                     let focusNode, focusOffset;
                     if (direction === DIRECTIONS.RIGHT) {
-                        temperaryFocusNode = node.previousElementSibling
+                        tempFocusNode = node.previousElementSibling
                             ? node.previousElementSibling
-                            : temperaryFocusNode;
+                            : tempFocusNode;
                         [focusNode, focusOffset] = getDeepestPosition(
-                            temperaryFocusNode,
-                            nodeSize(temperaryFocusNode)
+                            tempFocusNode,
+                            nodeSize(tempFocusNode)
                         );
                     } else {
-                        temperaryFocusNode = node.nextElementSibling
+                        tempFocusNode = node.nextElementSibling
                             ? node.nextElementSibling
-                            : temperaryFocusNode;
-                        [focusNode, focusOffset] = getDeepestPosition(temperaryFocusNode, 0);
+                            : tempFocusNode;
+                        [focusNode, focusOffset] = getDeepestPosition(tempFocusNode, 0);
                     }
 
                     const currentSelection = this.dependencies.selection.setSelection({
@@ -265,7 +275,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
                     break;
                 }
             } else {
-                temperaryFocusNode = node;
+                tempFocusNode = node;
             }
         }
         this.dependencies.builderOptions.updateContainers(
