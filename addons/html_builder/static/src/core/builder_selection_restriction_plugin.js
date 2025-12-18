@@ -101,44 +101,31 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     }
 
     /**
-     * Extend the selection to the whole element step by step to properly
+     * Extend the selection to the whole element side by aide to properly
      * handle uncrossable elements, see uncrossable_element_selector
      * @param {Element} element
      */
     selectAllInElement(element) {
         let selection = this.dependencies.selection.getEditableSelection();
-        let { anchorNode, anchorOffset, focusNode, focusOffset, direction } = selection;
+        let { focusNode, focusOffset } = selection;
 
         const [newAnchorNode, newAnchorOffset] = getDeepestPosition(element, 0);
         const [newFocusNode, newFocusOffset] = getDeepestPosition(element, nodeSize(element));
 
         // First extend the selection to the start of the element from the
-        // furtherest point of the selection to the start. If current
-        // selection is not collapsed, we pick the new selection's anchorNode
-        // based on the selection's direction, e.g. selection is from the left
-        // to the right, we pick the focusNode as the new selection's anchorNode,
-        // otherwise we pick the anchorNode.
-        if (direction === DIRECTIONS.RIGHT) {
-            this.dependencies.selection.setSelection({
-                anchorNode: focusNode,
-                anchorOffset: focusOffset,
-                focusNode: newAnchorNode,
-                focusOffset: newAnchorOffset,
-            });
-        } else {
-            this.dependencies.selection.setSelection({
-                anchorNode: anchorNode,
-                anchorOffset: anchorOffset,
-                focusNode: newAnchorNode,
-                focusOffset: newAnchorOffset,
-            });
-        }
+        // focusNode.
+        this.dependencies.selection.setSelection({
+            anchorNode: focusNode,
+            anchorOffset: focusOffset,
+            focusNode: newAnchorNode,
+            focusOffset: newAnchorOffset,
+        });
+        // Then correct the selection if some uncrossable elements are crossed
+        // on the extended part.
         this.correctSelectionOnUncrossable();
 
-        // Get the extended selection after the first step, and then extend it
-        // to the end of the element. No need to consider the selection
-        // direction here, cause we are sure the anchorNode of the current
-        // selection is the start of the element.
+        // Get the fixed extended selection after the first step, and then
+        // extend it to the end of the element.
         selection = this.dependencies.selection.getEditableSelection();
         ({ focusNode, focusOffset } = selection);
         this.dependencies.selection.setSelection({
@@ -147,6 +134,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             focusNode: newFocusNode,
             focusOffset: newFocusOffset,
         });
+        // Finally correct the selection if some uncrossable elements are
+        // crossed on the extended part.
         this.correctSelectionOnUncrossable();
     }
 
