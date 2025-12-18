@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="web_client.Navbar">
-    <div class="o-navbar d-flex flex-shrink-0 ps-2 gap-4">
+    <div class="o-navbar d-flex flex-shrink-0 px-2 gap-4">
         <div class="d-flex align-items-center cursor-pointer" t-ref="this.appMenuToggler" t-on-click.prevent="this.toggleAppMenu">
             <a href="#" class="text-white">Odoo</a>
         </div>
@@ -11,6 +11,8 @@
                 <a href="#" class="text-white" t-out="menuItem.name"/>
             </div>
         </t>
+        <div class="mx-auto"/>
+        <Systray/>
     </div>
     <Menu target="this.appMenuToggler" isOpen="this.isAppMenuOpen">
         <t t-foreach="this.apps()" t-as="app" t-key="app.id">
