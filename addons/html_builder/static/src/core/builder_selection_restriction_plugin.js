@@ -87,23 +87,15 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         ) {
             return;
         }
-        const closestPRestrictedEl = closestElement(anchorNode, this.restrictedToPSelectors);
-        const closestDivEl = closestElement(anchorNode, "div");
 
-        // If the closest special block doesn't contains the closest div block,
-        // we select the paragraph, otherwise we select the whole closest div
-        // block.
-        if (closestPRestrictedEl && !closestPRestrictedEl.contains(closestDivEl)) {
-            this.selectAllInElement(closestElement(anchorNode, "p"));
-        } else {
-            this.selectAllInElement(closestDivEl);
-        }
+        const restrictingEl = this.getRestrictingElement(anchorNode);
+        this.selectAllInElement(restrictingEl);
     }
 
     /**
      * Restricts the mouse selection inside paragraph or div.
+     *
      * @param {Event} ev
-     * @returns
      */
     restrictMouseSelection(ev) {
         const { editableSelection, currentSelectionIsInEditable } =
@@ -113,22 +105,14 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             return;
         }
 
-        // Check if the selection is inside a special block that we need to
-        // restrict to paragraph blocks.
-        const closestPRestrictedEl = closestElement(anchorNode, this.restrictedToPSelectors);
-        const closestDivEl = closestElement(anchorNode, "div");
-
-        if (closestPRestrictedEl && !closestPRestrictedEl.contains(closestDivEl)) {
-            const closestParagraphEl = closestElement(anchorNode, "p");
-            this.restrictSelectionInElement(editableSelection, closestParagraphEl);
-        } else {
-            this.restrictSelectionInElement(editableSelection, closestDivEl);
-        }
+        const restrictingEl = this.getRestrictingElement(anchorNode);
+        this.restrictSelectionInElement(editableSelection, restrictingEl);
     }
 
     /**
      * Extend the selection to the whole element side by aide to properly
-     * handle uncrossable elements, see uncrossable_element_selector
+     * handle uncrossable elements, see uncrossable_element_selector.
+     *
      * @param {Element} element
      */
     selectAllInElement(element) {
@@ -165,9 +149,29 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     }
 
     /**
-     * Restricts the selection inside a block element.
+     * Returns the element in which the selection should be restricted (by default,
+     * the closest `div` element).
+     *
+     * @param {Node} anchorNode the current selection anchorNode
+     * @returns {HTMLElement}
+     */
+    getRestrictingElement(anchorNode) {
+        // Check if the selection is inside a special block that we need to
+        // restrict to paragraph blocks.
+        const closestPRestrictedEl = closestElement(anchorNode, this.restrictedToPSelectors);
+        const closestDivEl = closestElement(anchorNode, "div");
+
+        if (closestPRestrictedEl && !closestPRestrictedEl.contains(closestDivEl)) {
+            return closestElement(anchorNode, "p");
+        }
+        return closestDivEl;
+    }
+
+    /**
+     * Restricts the selection inside a given element.
+     *
      * @param {Selection} selection
-     * @param {Element} elementEl
+     * @param {Element} elementEl the element that the selection should be restricted in
      */
     restrictSelectionInElement(selection, elementEl) {
         const { anchorNode, anchorOffset, focusNode, direction } = selection;
