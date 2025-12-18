@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_client.DiscussAction">
+    <div class="demo">
+        <h1>Discuss!!!</h1>
+        <!-- <button t-on-click="this.notify">Push notification</button> -->
+    </div>
+</t>
+
+</templates>

@@ -38,7 +38,7 @@ import { serviceRegistry } from "@web_core/services";
 }} MenuDataMap
 */
 
-class MenuItem {
+export class MenuItem {
     /**
      * @param {MenuItemData} menuItemData
      * @param {MenuDataMap} dataMap
@@ -58,7 +58,7 @@ class MenuItem {
     }
 }
 
-class AppMenu {
+export class AppMenu {
     /** @type {number} */
     actionId;
     /** @type {{ path: string | null; data: string | null; mimetype: string | null }} */
@@ -123,7 +123,6 @@ class RootMenu {
     }
 }
 
-const LOAD_MENU_ROUTE = "/web/webclient/load_menus";
 /** @type {RootMenuData} */
 const DEFAULT_ROOT_MENU = {
     backgroundImage: null,
@@ -156,7 +155,7 @@ export class MenuPlugin extends Plugin {
 
     /** @private @returns {Promise<MenuDataMap>} */
     async _fetchMenus() {
-        const response = await fetch(LOAD_MENU_ROUTE, { cache: "no-store" });
+        const response = await fetch("/web/webclient/load_menus", { cache: "no-store" });
         if (!response.ok) {
             throw new Error("Error while fetching menus");
         }

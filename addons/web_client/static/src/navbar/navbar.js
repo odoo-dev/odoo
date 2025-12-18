@@ -1,8 +1,8 @@
 import { Component, computed, plugin, signal } from "@odoo/owl";
+import { ActionPlugin } from "@web_client/action_plugin";
 import { MenuPlugin } from "@web_client/menu_plugin";
 import { SystrayMenu } from "@web_client/systray_menu/systray_menu";
 import { Menu, MenuItem } from "@web_core/menu/menu";
-import { notify } from "@web_core/notification/notification_plugin";
 
 export class Navbar extends Component {
     static template = "web_client.Navbar";
@@ -20,6 +20,7 @@ export class Navbar extends Component {
     isNavMenuOpen = signal(false);
     /** @type {import("@odoo/owl").Signal<null>} */
     menuItem = signal(null);
+    action = plugin(ActionPlugin);
 
     /**
      * @param {any} app
@@ -27,12 +28,11 @@ export class Navbar extends Component {
     selectApp(app) {
         this.menu.currentAppId.set(app.id);
         this.isAppMenuOpen.set(false);
-
-        notify(`Opening app "${app.name}"`, { type: "danger" });
+        this.action.switchApp(app);
     }
 
     /**
-     * @param {any} menuItem
+     * @param {import("../menu_plugin").MenuItem} menuItem
      */
     selectMenuItem(menuItem) {
         this.isAppMenuOpen.set(false);
@@ -40,8 +40,9 @@ export class Navbar extends Component {
             this.isNavMenuOpen.update((open) => !open);
         } else {
             this.isNavMenuOpen.set(false);
-
-            notify(`Opening menu "${menuItem.name}"`, { type: "info" });
+            if (menuItem.actionId) {
+                this.action.doAction(menuItem.actionId)
+            }
         }
     }
 
