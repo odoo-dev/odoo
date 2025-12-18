@@ -2,31 +2,29 @@
 <templates xml:space="preserve">
 
 <t t-name="web_client.ListView">
-    <div>
-        <ControlPanel/>
-        <main>
-            <div class="table-responsive">
-                <table class="table table-sm table-striped px-3">
-                    <thead>
+    <ControlPanel/>
+    <main>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped px-3">
+                <thead>
+                    <tr>
+                        <t t-foreach="this.columns" t-as="column" t-key="column.id">
+                            <th><t t-out="column.title"/></th>
+                        </t>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="this.records" t-as="record" t-key="record.id">
                         <tr>
                             <t t-foreach="this.columns" t-as="column" t-key="column.id">
-                                <th><t t-out="column.title"/></th>
+                                <td><t t-out="record[column.fieldName]"/></td>
                             </t>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="this.records" t-as="record" t-key="record.id">
-                            <tr>
-                                <t t-foreach="this.columns" t-as="column" t-key="column.id">
-                                    <td><t t-out="record[column.fieldName]"/></td>
-                                </t>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
-            </div>
-        </main>
-    </div>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </main>
 </t>
 
 </templates>
