@@ -24,3 +24,29 @@ class TestUblCiiCommonChorusPro(TestUblCiiCommon):
             'country_id': cls.env.ref('base.fr').id,
             **kwargs,
         })
+<<<<<<< HEAD
+=======
+
+
+class TestUblCiiFRCommonChorusPro(TestUblCiiCommonChorusPro, TestUblCiiFRCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        if cls.env['ir.module.module']._get('l10n_fr_pdp').state == 'installed':
+            # The PDP module sets a 0225 identifier (based on the siret)
+            cls.env.company.partner_id.write({
+                'peppol_eas': '0009',
+                'peppol_endpoint': '40678483500521'
+            })
+
+    @classmethod
+    def _create_company(cls, **create_values):
+        create_values.setdefault('siret', '40678483500521')
+        return super()._create_company(**create_values)
+
+    @classmethod
+    def subfolders(cls):
+        subfolder_format, subfolder_document, _subfolder_country = super().subfolders()
+        return subfolder_format, subfolder_document, 'fr'
+>>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)

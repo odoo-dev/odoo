@@ -62,8 +62,13 @@ EAS_MAPPING = {
     'DK': {'0184': 'vat', '0198': 'vat'},
     'EE': {'9931': 'vat'},
     'ES': {'9920': 'vat'},
+<<<<<<< HEAD
     'FI': {'0216': None},
     'FR': {'0009': 'company_registry', '9957': 'vat', '0002': None},
+=======
+    'FI': {'0216': None, '0213': 'vat'},
+    'FR': {'0225': 'peppol_endpoint', '0009': 'siret', '9957': 'vat', '0002': None},  # `peppol_endpoint` used as place holder for custom logic via `_get_peppol_endpoint_value`
+>>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
     'SG': {'0195': 'l10n_sg_unique_entity_number'},
     'GB': {'9932': 'vat'},
     'GR': {'9933': 'vat'},

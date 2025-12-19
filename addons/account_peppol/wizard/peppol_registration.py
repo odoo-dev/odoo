@@ -437,10 +437,38 @@ class PeppolRegistration(models.TransientModel):
                 'target': 'new',
             }
 
+<<<<<<< HEAD
         # No auth required
         peppol_identifier = f'{self.peppol_eas}:{self.peppol_endpoint}'.lower()
         db_uuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
         self._create_connection(peppol_identifier, db_uuid, self.company_id)
+=======
+        blocking_proxy_types = set(self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()) - {'peppol'}
+        blocking_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in blocking_proxy_types)
+        if blocking_user:
+            blocking_proxy_type = dict(blocking_user._fields['proxy_type']._description_selection(self.env))[blocking_user[:1].proxy_type]
+            raise UserError(self.env._("A connection to '%s' already exists.", blocking_proxy_type))
+
+        edi_user = self.edi_user_id or self.env['account_edi_proxy_client.user']._register_proxy_user(self.company_id, 'peppol', self.edi_mode)
+
+        # if there is an error when activating the participant below,
+        # the client side is rolled back and the edi user is deleted on the client side
+        # but remains on the proxy side.
+        # it is important to keep these two in sync, so commit before activating.
+        if not modules.module.current_test:
+            self.env.cr.commit()
+
+        edi_user._peppol_register_sender()
+
+        if self.smp_registration:
+            try:
+                edi_user._peppol_register_sender_as_receiver()
+            except (UserError, AccountEdiProxyError) as e:
+                self.button_deregister_peppol_participant()
+                raise
+
+        # success
+>>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
         notifications = {
             'sender': {
                 'message': _('You can now send electronic invoices via Peppol.'),
