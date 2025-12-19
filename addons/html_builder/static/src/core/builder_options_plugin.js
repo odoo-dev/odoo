@@ -111,7 +111,7 @@ import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
 
 export class BuilderOptionsPlugin extends Plugin {
     static id = "builderOptions";
-    static dependencies = ["operation", "history"];
+    static dependencies = ["builderOverlay", "operation", "history"];
     static shared = [
         "checkElement",
         "computeContainers",
@@ -187,7 +187,7 @@ export class BuilderOptionsPlugin extends Plugin {
 
         this.addDomListener(this.editable, "mousemove", (ev) => {
             let el = ev.target;
-            while (el && !this.hasOverlayOptions(el)) {
+            while (el && !this.hasContainers(el)) {
                 el = el.parentElement;
             }
             if (el) {
@@ -320,6 +320,12 @@ export class BuilderOptionsPlugin extends Plugin {
         this.target = null;
         this.lastContainers = [];
         this.dispatchTo("change_current_options_containers_listeners", this.lastContainers);
+    }
+
+    hasContainers(el) {
+        return this.builderOptions.some(
+            (Option) => el.matches(Option.selector) && this.checkElement(el, Option)
+        );
     }
 
     computeContainers(target) {
