@@ -9,7 +9,7 @@
  * @hash 337f64dbe
 =======
  * @version 19.1.0-alpha.14
- * @date 2025-12-19T09:56:47.792Z
+ * @date 2025-12-19T10:00:52.978Z
  * @hash 13ef82cb3
 >>>>>>> 9d582ba7e5c4 ([IMP] update spreadsheet)
  */
@@ -97968,7 +97968,7 @@ __info__.hash = "6fefc9ceb";
 >>>>>>> 380822d90e2f ([IMP] Data filter: Trim whitespace)
 =======
 __info__.version = "19.1.0-alpha.14";
-__info__.date = "2025-12-19T09:56:47.792Z";
+__info__.date = "2025-12-19T10:00:52.978Z";
 __info__.hash = "13ef82cb3";
 >>>>>>> 9d582ba7e5c4 ([IMP] update spreadsheet)
 //# sourceMappingURL=o_spreadsheet.esm.js.map
