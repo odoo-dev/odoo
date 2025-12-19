@@ -21,6 +21,12 @@ PAYMENT_MEAN_CODES = {
     'SEPA direct debit': 59
 }
 
+FR_DEFAULT_NOTES = {
+    'PMT': "En cas de retard de paiement, une indemnité forfaitaire de 40€ pour frais de recouvrement sera exigée (art. L.441-10 et D.441-5 du Code de commerce).",
+    'PMD': "Pénalités de retard au taux annuel de 10% en cas de paiement après la date d'échéance.",
+    'AAB': "Pas d'escompte pour paiement anticipé.",
+}
+
 
 class AccountEdiXmlCII(models.AbstractModel):
     _name = "account.edi.xml.cii"
@@ -119,6 +125,12 @@ class AccountEdiXmlCII(models.AbstractModel):
             'type_code': '380' if invoice.move_type == 'out_invoice' else '381',
             'issue_date_time': invoice.invoice_date,
             'included_note': html2plaintext(invoice.narration) if invoice.narration else "",
+            'included_note_list': [
+                {
+                    'subject_code': code,
+                    'content': content,
+                } for code, content in FR_DEFAULT_NOTES.items()
+            ],
         }
 
     def _export_invoice_vals(self, invoice):
