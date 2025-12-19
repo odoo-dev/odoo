@@ -125,6 +125,10 @@
 
                 <!-- Address. -->
                 <t t-call="account_edi_ubl_cii.account_invoice_address_facturx_export_22"/>
+
+                <ram:URIUniversalCommunication t-if="partner.peppol_eas and partner.peppol_endpoint">
+                    <ram:URIID t-att-schemeID="partner.peppol_eas" t-out="partner.peppol_endpoint"/>
+                </ram:URIUniversalCommunication>
             </t>
         </template>
 
@@ -173,6 +177,10 @@
                     </ram:IssueDateTime>
                     <ram:IncludedNote>
                         <ram:Content t-out="ExchangedDocument_vals.get('included_note')"/>
+                    </ram:IncludedNote>
+                    <ram:IncludedNote t-foreach="ExchangedDocument_vals.get('included_note_list')" t-as="included_note">
+                        <ram:Content t-out="included_note.get('content')"/>
+                        <ram:SubjectCode t-out="included_note.get('subject_code')"/>
                     </ram:IncludedNote>
                 </rsm:ExchangedDocument>
 
