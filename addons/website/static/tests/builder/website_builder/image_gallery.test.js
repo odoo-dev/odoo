@@ -4,7 +4,7 @@ import {
     waitForEndOfOperation,
 } from "@html_builder/../tests/helpers";
 import { expect, test } from "@odoo/hoot";
-import { click, queryAll, queryOne, waitFor } from "@odoo/hoot-dom";
+import { animationFrame, click, queryAll, queryOne, setInputRange, waitFor } from "@odoo/hoot-dom";
 import { contains, dataURItoBlob, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { uniqueId } from "@web/core/utils/functions";
 import {
@@ -15,8 +15,10 @@ import {
 
 defineWebsiteModels();
 
-async function setupWbsiteBuilderWithImageWall() {
-    const builder = await setupWebsiteBuilderWithSnippet("s_images_wall");
+async function setupWbsiteBuilderWithImageWall(loadIframeBundles = false) {
+    const builder = await setupWebsiteBuilderWithSnippet("s_images_wall", {
+        loadIframeBundles,
+    });
     queryAll(":iframe img").forEach((imgEl) => (imgEl.src = dummyBase64Img));
     builder.getEditor().shared.history.addStep();
     return builder;
@@ -250,4 +252,25 @@ test("Click the outline option for the image gallery thumbnails", async () => {
         ".o-dropdown--menu [data-action-param='s_image_gallery_indicators_dots']"
     ).click();
     expect(":iframe section.o_slideshow").not.toHaveClass("s_image_gallery_indicators_outline");
+});
+
+test("Size option should be present when scroll down button is enabled", async () => {
+    const sizeRangeOptionSelector =
+        "[data-container-title='Images Wall'] [data-label='Size'] input";
+    await setupWbsiteBuilderWithImageWall(true);
+    await contains(":iframe img").click();
+    await contains(
+        "[data-label='Height'] button[data-action-param='o_full_screen_height']"
+    ).click();
+    await contains("[data-label='Scroll Down Button'] input").click();
+    await waitFor(sizeRangeOptionSelector);
+    await setInputRange(sizeRangeOptionSelector, 50);
+    await animationFrame();
+    const scrollDownButtonEl = queryOne(":iframe .s_image_gallery .o_scroll_button");
+    const computedStyle = getComputedStyle(scrollDownButtonEl);
+    expect(computedStyle.width).toBe("50px");
+    expect(computedStyle.height).toBe("50px");
+    expect(computedStyle.lineHeight).toBe("50px");
+    const iconEl = scrollDownButtonEl.querySelector("i");
+    expect(iconEl).toHaveAttribute("class", "fa fa-angle-down");
 });

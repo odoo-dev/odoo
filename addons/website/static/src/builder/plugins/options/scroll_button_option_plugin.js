@@ -43,7 +43,7 @@ class ScrollButtonManager {
         anchor.title = _t("Scroll down to next section");
 
         const arrow = document.createElement("i");
-        arrow.classList.add("fa", "fa-angle-down", "fa-3x");
+        arrow.classList.add("fa", "fa-angle-down");
         anchor.appendChild(arrow);
 
         return anchor;

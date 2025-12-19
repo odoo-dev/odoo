@@ -3324,3 +3324,13 @@ input[value*="data-oe-translation-source-sha"] {
 img.o_image_popup {
     cursor: pointer;
 }
+
+a.o_scroll_button {
+    --scroll-down-button-size: 40px;
+    i {
+        font-size: calc(var(--scroll-down-button-size)*0.9);
+    }
+    width: var(--scroll-down-button-size);
+    height: var(--scroll-down-button-size);
+    line-height: var(--scroll-down-button-size);
+}

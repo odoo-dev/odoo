@@ -19,6 +19,15 @@
     </BuilderRow>
 
     <t t-if="this.isActiveItem('scroll_button_opt')">
+        <BuilderRow label.translate="Size" level="1">
+            <BuilderRange
+                applyTo="'.o_scroll_button'"
+                styleAction="{ mainParam: '--scroll-down-button-size'}"
+                unit="'px'"
+                min="40"
+                max="80"
+                step="1" />
+        </BuilderRow>
         <BuilderRow label.translate="Animation" level="1" applyTo="':scope > .o_scroll_button'">
             <BuilderSelect>
                 <BuilderSelectItem classAction="''">None</BuilderSelectItem>
