@@ -2,7 +2,7 @@ from markupsafe import Markup
 
 from odoo import _, api, Command, fields, models
 from odoo.exceptions import ValidationError, UserError
-from odoo.tools import float_compare
+from odoo.tools import float_compare, float_round
 
 
 class L10n_InWithholdWizard(models.TransientModel):
@@ -208,7 +208,7 @@ class L10n_InWithholdWizard(models.TransientModel):
                     is_refund=False,
                 )
                 tax_amount = taxes_res['total_included'] - taxes_res['total_excluded']
-            wizard.amount = abs(tax_amount)
+            wizard.amount = abs(float_round(tax_amount, precision_rounding=1, rounding_method='UP'))
 
     def _get_withhold_type(self):
         if self.related_move_id:
