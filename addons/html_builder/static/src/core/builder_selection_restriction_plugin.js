@@ -200,7 +200,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     }
 
     /**
-     * Checks if the the given nodes are uncrossable.
+     * Checks if the the given node is uncrossable or inside an uncrossable. If
+     * so, checks if the selected nodes contains the uncrossable.
      *
      * @param {Node} node
      * @param {Array<Node>} selectedNodes
@@ -220,7 +221,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
      * crossed, see uncrossable_element_selector.
      */
     correctSelectionOnUncrossable() {
-        const selection = this.dependencies.selection.getEditableSelection();
+        let selection = this.dependencies.selection.getEditableSelection();
         const { anchorNode, anchorOffset, focusNode, direction } = selection;
         const selectedNodes = this.dependencies.selection
             .getTargetedNodes(selection)
@@ -248,6 +249,11 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
             return;
         }
 
+        // This for loop checks for the first uncrossable element in the
+        // selection based on the selection direction. If an uncrossable is
+        // found that is crossed by the selection, the selection is
+        // corrected to be just before or after the uncrossable element based on
+        // the selection direction.
         let tempFocusNode;
         for (const node of selectedNodes) {
             if (this.isNodeSelectionUncrossable(node, selectedNodes)) {
@@ -256,34 +262,24 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
                 } else if (!node.contains(anchorNode)) {
                     let focusNode, focusOffset;
                     if (direction === DIRECTIONS.RIGHT) {
-                        tempFocusNode = node.previousElementSibling
-                            ? node.previousElementSibling
-                            : tempFocusNode;
+                        tempFocusNode = node.previousElementSibling || tempFocusNode;
                         [focusNode, focusOffset] = getDeepestPosition(
                             tempFocusNode,
                             nodeSize(tempFocusNode)
                         );
                     } else {
-                        tempFocusNode = node.nextElementSibling
-                            ? node.nextElementSibling
-                            : tempFocusNode;
+                        tempFocusNode = node.nextElementSibling || tempFocusNode;
                         [focusNode, focusOffset] = getDeepestPosition(tempFocusNode, 0);
                     }
 
-                    const currentSelection = this.dependencies.selection.setSelection({
+                    selection = this.dependencies.selection.setSelection({
                         anchorNode,
                         anchorOffset,
                         focusNode,
                         focusOffset,
                     });
-                    this.dependencies.builderOptions.updateContainers(
-                        closestElement(currentSelection.commonAncestorContainer)
-                    );
-                    this.isSelectionCorrected = true;
-                    break;
-                } else {
-                    break;
                 }
+                break;
             } else {
                 tempFocusNode = node;
             }
