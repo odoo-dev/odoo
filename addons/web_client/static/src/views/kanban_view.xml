@@ -6,9 +6,9 @@
     <main>
         <div class="d-grid gap-3 px-3" style="grid-template-columns: repeat(4, 1fr);">
             <t t-foreach="this.records" t-as="record" t-key="record.id">
-                <div class="border rounded">
+                <div class="border rounded cursor-pointer" t-on-click="() => this.view.openRecord(record.id)">
                     <div class="p-3">
-                        <span t-out="record.name"/>
+                        <span t-out="record.display_name"/>
                     </div>
                 </div>
             </t>

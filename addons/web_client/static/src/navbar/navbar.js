@@ -1,54 +1,62 @@
-import { Component, computed, plugin, signal } from "@odoo/owl";
-import { ActionPlugin } from "@web_client/action_plugin";
+import { Component, computed, plugin, signal, useListener } from "@odoo/owl";
+import { ActionPlugin } from "@web_client/action/action_plugin";
 import { MenuPlugin } from "@web_client/menu_plugin";
 import { SystrayMenu } from "@web_client/systray_menu/systray_menu";
+import { Dropdown } from "@web_core/dropdown/dropdown";
 import { Menu, MenuItem } from "@web_core/menu/menu";
 
 export class Navbar extends Component {
     static template = "web_client.Navbar";
-    static components = { Menu, MenuItem, SystrayMenu };
+    static components = { Dropdown, Menu, MenuItem, SystrayMenu };
 
     menu = plugin(MenuPlugin);
     apps = computed(() => Object.values(this.menu.apps()));
 
     /** @type {import("@odoo/owl").Signal<HTMLElement | null>} */
-    appMenuToggler = signal(null);
-    isAppMenuOpen = signal(false);
-
-    /** @type {import("@odoo/owl").Signal<HTMLElement | null>} */
     navMenuToggler = signal(null);
     isNavMenuOpen = signal(false);
-    /** @type {import("@odoo/owl").Signal<null>} */
+    /** @type {import("@odoo/owl").Signal<import("@web_client/menu_plugin").MenuItem | null>} */
     menuItem = signal(null);
     action = plugin(ActionPlugin);
 
-    /**
-     * @param {any} app
-     */
-    selectApp(app) {
-        this.menu.currentAppId.set(app.id);
-        this.isAppMenuOpen.set(false);
-        this.action.switchApp(app);
+    setup() {
+        useListener(
+            document.body,
+            "click",
+            (ev) => {
+                if (!this.navMenuToggler()?.contains(ev.target)) {
+                    this.isNavMenuOpen.set(false);
+                }
+            },
+            { capture: true }
+        );
     }
 
     /**
-     * @param {import("../menu_plugin").MenuItem} menuItem
+     * @param {import("@web_client/menu_plugin").AppMenu} app
+     */
+    selectApp(app) {
+        this.menu.currentAppId.set(app.id);
+        this.action.doAction(app.actionId);
+    }
+
+    /**
+     * @param {import("@web_client/menu_plugin").MenuItem} menuItem
      */
     selectMenuItem(menuItem) {
-        this.isAppMenuOpen.set(false);
         if (menuItem.menuItems.length) {
             this.isNavMenuOpen.update((open) => !open);
         } else {
             this.isNavMenuOpen.set(false);
             if (menuItem.actionId) {
-                this.action.doAction(menuItem.actionId)
+                this.action.doAction(menuItem.actionId);
             }
         }
     }
 
     /**
      * @param {HTMLElement} target
-     * @param {any} menuItem
+     * @param {import("@web_client/menu_plugin").MenuItem} menuItem
      */
     setCurrentNavMenu(target, menuItem) {
         if (menuItem.menuItems.length) {
@@ -59,6 +67,5 @@ export class Navbar extends Component {
 
     toggleAppMenu() {
         this.isNavMenuOpen.set(false);
-        this.isAppMenuOpen.update((open) => !open);
     }
 }

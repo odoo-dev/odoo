@@ -1,6 +1,8 @@
-import { Component } from "@odoo/owl";
+import { Component, onWillStart, plugin } from "@odoo/owl";
 import { ControlPanel } from "@web_client/views/control_panel";
+import { ViewPlugin } from "@web_client/views/view_plugin";
 import { viewRegistry } from "@web_client/views/view_registry";
+import { ORM } from "@web_core/orm";
 
 export class KanbanView extends Component {
     static {
@@ -10,11 +12,21 @@ export class KanbanView extends Component {
     static template = "web_client.KanbanView";
     static components = { ControlPanel };
 
-    records = [
-        { id: 1, name: "Mitchell Admin" },
-        { id: 2, name: "Marc Demo" },
-        { id: 5, name: "Joel Willis" },
-        { id: 15, name: "Azure Interior" },
-        { id: 16, name: "Azure Interior, Brandon Freeman" },
-    ];
+    /** @type {Record<string, any>[]} */
+    records = [];
+
+    orm = plugin(ORM);
+    view = plugin(ViewPlugin);
+
+    setup() {
+        onWillStart(async () => {
+            const resModel = this.view.resModel();
+            this.records = await this.orm.call(resModel, "search_read", {
+                args: [[], ["id", "display_name"]],
+                kwargs: {
+                    limit: 20,
+                },
+            });
+        });
+    }
 }

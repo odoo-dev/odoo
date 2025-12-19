@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_client.FormView">
+    <div class="px-3 pt-2">
+        <a href="#" t-on-click.prevent="() => this.view.closeRecord()" t-out="this.view.displayName()"/>
+        <span> / </span>
+        <span t-out="this.record.display_name"/>
+    </div>
+    <main class="px-3">
+        Form view
+    </main>
+</t>
+
+</templates>

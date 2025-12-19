@@ -3,9 +3,18 @@
 
 <t t-name="web_client.Navbar">
     <div class="o-navbar d-flex flex-shrink-0 px-3 gap-4">
-        <div class="d-flex align-items-center cursor-pointer" t-ref="this.appMenuToggler" t-on-click.prevent="this.toggleAppMenu">
-            <a href="#" class="text-white">Odoo</a>
-        </div>
+        <Dropdown t-slot-scope="dropdown">
+            <div class="d-flex align-items-center cursor-pointer" t-ref="dropdown.toggler">
+                <a href="#" class="text-white">Odoo</a>
+            </div>
+            <t t-set-slot="menu">
+                <t t-foreach="this.apps()" t-as="app" t-key="app.id">
+                    <MenuItem isActive="this.menu.currentAppId() === app.id" onSelected="() => this.selectApp(app)">
+                        <t t-out="app.name"/>
+                    </MenuItem>
+                </t>
+            </t>
+        </Dropdown>
         <t t-foreach="this.menu.currentMenuItems()" t-as="menuItem" t-key="menuItem.id">
             <div class="d-flex align-items-center cursor-pointer" t-on-click.prevent="() => this.selectMenuItem(menuItem)" t-on-mouseenter="(ev) => this.setCurrentNavMenu(ev.target, menuItem)">
                 <a href="#" class="text-white" t-out="menuItem.name"/>
@@ -14,14 +23,7 @@
         <div class="mx-auto"/>
         <SystrayMenu/>
     </div>
-    <Menu target="this.appMenuToggler" isOpen="this.isAppMenuOpen">
-        <t t-foreach="this.apps()" t-as="app" t-key="app.id">
-            <MenuItem isActive="this.menu.currentAppId() === app.id" onSelected="() => this.selectApp(app)">
-                <t t-out="app.name"/>
-            </MenuItem>
-        </t>
-    </Menu>
-    <Menu target="this.navMenuToggler" isOpen="this.isNavMenuOpen">
+    <Menu anchor="this.navMenuToggler" isOpen="this.isNavMenuOpen">
         <t t-foreach="this.menuItem().menuItems" t-as="menuItem" t-key="menuItem.id">
             <t t-if="menuItem.menuItems.length">
                 <div class="px-3 py-1 text-muted fw-bold">

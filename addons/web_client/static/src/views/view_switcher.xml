@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_client.ViewSwitcher">
+    <div class="btn-group">
+        <t t-foreach="this.view.modes()" t-as="mode" t-key="mode">
+            <t t-set="info" t-value="this.getModeInfo(mode)"/>
+            <t t-if="info.multi_record">
+                <button class="btn btn-light" t-att-class="{active: this.view.mode() === mode}" t-on-click="() => this.view.switchView(mode)">
+                    <i t-att-class="info.icon" t-att-title="info.display_name"/>
+                </button>
+            </t>
+        </t>
+    </div>
+</t>
+
+</templates>

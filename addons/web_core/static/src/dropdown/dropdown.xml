@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+<t t-name="web_core.Dropdown">
+    <t t-call-slot="default" toggler="this.toggler"/>
+    <Menu anchor="this.toggler" isOpen="this.isMenuOpen">
+        <t t-call-slot="menu"/>
+    </Menu>
+</t>
+
+</templates>

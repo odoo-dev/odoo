@@ -6174,6 +6174,9 @@
             this._items.set(items);
             return this;
         }
+        has(item) {
+            return this._items().some(([s, value]) => value === item);
+        }
     }
     function useResource(r, elements) {
         for (let elem of elements) {
@@ -6227,6 +6230,9 @@
         remove(key) {
             delete this._map()[key];
             this._map.update();
+        }
+        has(key) {
+            return key in this._map();
         }
     }
 
@@ -6426,8 +6432,8 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2025-12-17T13:43:38.783Z';
-    __info__.hash = '4dfa9f0';
+    __info__.date = '2025-12-19T14:18:42.031Z';
+    __info__.hash = 'da75e84';
     __info__.url = 'https://github.com/odoo/owl';
 
 

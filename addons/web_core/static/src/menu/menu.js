@@ -9,13 +9,13 @@ export class Menu extends Component {
     static template = xml``;
 
     controls = props({
-        target: Function,
+        anchor: Function,
         isOpen: Function,
     });
 
     content = props(["slots"]);
 
-    popover = plugin(PopoverPlugin).createPopover(this.controls.target, {
+    popover = plugin(PopoverPlugin).createPopover(this.controls.anchor, {
         component: MenuPopover,
         props: {
             slots: this.content.slots,

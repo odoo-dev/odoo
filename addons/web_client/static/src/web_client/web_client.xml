@@ -4,9 +4,7 @@
 <t t-name="web_client.WebClient">
     <Navbar/>
     <div class="content flex-grow overflow-y-auto">
-        <t t-if="this.action.action()">
-            <t t-component="this.action.action().Component" />
-        </t>
+        <t t-component="this.displayedAction.component" t-key="this.displayedAction.description.id"/>
     </div>
     <OverlayContainer/>
 </t>

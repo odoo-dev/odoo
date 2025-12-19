@@ -17,6 +17,7 @@ Long description of module's purpose
         'web_client.assets': [
             ('include', 'web._assets_helpers'),
             ('include', 'web._assets_backend_helpers'),
+            ('include', 'web.icons_fonts'),
             'web/static/src/scss/pre_variables.scss',
             'web/static/lib/bootstrap/scss/_variables.scss',
             'web/static/lib/bootstrap/scss/_variables-dark.scss',

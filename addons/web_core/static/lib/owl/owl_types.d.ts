@@ -202,6 +202,7 @@ declare class Resource<T> {
     items: ReactiveValue<T[]>;
     add(item: T, sequence?: number): Resource<T>;
     remove(item: T): Resource<T>;
+    has(item: T): boolean;
 }
 declare function useResource<T>(r: Resource<T>, elements: T[]): void;
 
@@ -220,6 +221,7 @@ declare class Registry<T> {
     add(key: string, value: T, sequence?: number): Registry<T>;
     get(key: string, defaultValue?: T): T;
     remove(key: string): void;
+    has(key: string): boolean;
 }
 
 declare const enum STATUS {

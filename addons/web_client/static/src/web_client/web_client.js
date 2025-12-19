@@ -1,5 +1,6 @@
-import { Component, onWillStart, plugin } from "@odoo/owl";
-import { ActionPlugin } from "@web_client/action_plugin";
+import { Component, plugin } from "@odoo/owl";
+import { ActionPlugin } from "@web_client/action/action_plugin";
+import { DisplayedActionPlugin } from "@web_client/action/displayed_action_plugin";
 import { DemoClientAction } from "@web_client/demo/demo_client_action";
 import { MenuPlugin } from "@web_client/menu_plugin";
 import { Navbar } from "@web_client/navbar/navbar";
@@ -11,17 +12,12 @@ export class WebClient extends Component {
     static template = "web_client.WebClient";
     static components = { Navbar, OverlayContainer, DemoClientAction };
 
-    orm = protectedPlugin(ORM);
     action = plugin(ActionPlugin);
+    displayedAction = plugin(DisplayedActionPlugin);
     menu = plugin(MenuPlugin);
+    orm = protectedPlugin(ORM);
 
     setup() {
-        // this.action.switchApp(this.menu.currentApp());
-
-        onWillStart(() => {
-            this.orm.call("res.partner", "read", {
-                args: [[7], ["id", "display_name"]],
-            });
-        });
+        this.action.doAction("demo");
     }
 }

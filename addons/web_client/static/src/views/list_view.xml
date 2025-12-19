@@ -4,8 +4,8 @@
 <t t-name="web_client.ListView">
     <ControlPanel/>
     <main>
-        <div class="table-responsive">
-            <table class="table table-sm table-striped px-3">
+        <div class="px-3">
+            <table class="table table-sm table-striped">
                 <thead>
                     <tr>
                         <t t-foreach="this.columns" t-as="column" t-key="column.id">
@@ -15,9 +15,11 @@
                 </thead>
                 <tbody>
                     <t t-foreach="this.records" t-as="record" t-key="record.id">
-                        <tr>
+                        <tr class="cursor-pointer" t-on-click="() => this.view.openRecord(record.id)">
                             <t t-foreach="this.columns" t-as="column" t-key="column.id">
-                                <td><t t-out="record[column.fieldName]"/></td>
+                                <td>
+                                    <div class="text-truncate" style="width: 200px;" t-out="record[column.fieldName]"/>
+                                </td>
                             </t>
                         </tr>
                     </t>
