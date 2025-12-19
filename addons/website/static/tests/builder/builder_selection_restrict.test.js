@@ -3,20 +3,41 @@ import { defineWebsiteModels, setupWebsiteBuilder } from "./website_helpers";
 import { dummyBase64Img } from "@html_builder/../tests/helpers";
 import { getContent, setSelection } from "@html_editor/../tests/_helpers/selection";
 import { manuallyDispatchProgrammaticEvent, animationFrame } from "@odoo/hoot-dom";
+import { unformat } from "@html_editor/../tests/_helpers/format";
 
 defineWebsiteModels();
 
-test("the selection should be restricted in the closest div when press ctrl+a", async () => {
-    const { getEditableContent, getEditor } = await setupWebsiteBuilder(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">first grand child</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">second grand child</p>
-            </div>
-        </section>`
-    );
+const sectionSnippet = unformat(`
+    <section class="parent-target o_colored_level">
+        <div class="child-target first-child">
+            <p class="grandchild-target first-grandchild">first grand child</p>
+        </div>
+        <div class="child-target second-child">
+            <p class="grandchild-target second-grandchild">second grand child</p>
+        </div>
+    </section>
+    `);
+
+const blockquoteSnippet = unformat(`
+    <section class="parent-target o_colored_level">
+        <div class="container first-child">
+            <blockquote class="o_draggable">
+                <p class="p-target">p element in blockquote</p>
+                <div class="s_blockquote_infos">
+                    <img src="${dummyBase64Img}">
+                    <div class="s_blockquote_author o-paragraph">
+                        <span class="o_small">
+                            <strong>Paul Dawson</strong><br>
+                            <span class="text-muted">CEO of MyCompany</span>
+                        </span>
+                    </div>
+                </div>
+            </blockquote>
+        </div>
+    </section>
+    `);
+test("the selection should be restricted in the closest div when pressing ctrl+a", async () => {
+    const { getEditableContent, getEditor } = await setupWebsiteBuilder(sectionSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
     const first_grandchild = editor.editable.querySelector("p.first-grandchild");
@@ -34,28 +55,21 @@ test("the selection should be restricted in the closest div when press ctrl+a", 
     });
 
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">[first grand child]</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">second grand child</p>
-            </div>
-        </section>`
+        unformat(
+            `<section class="parent-target o_colored_level">
+                <div class="child-target first-child">
+                    <p class="grandchild-target first-grandchild">[first grand child]</p>
+                </div>
+                <div class="child-target second-child">
+                    <p class="grandchild-target second-grandchild">second grand child</p>
+                </div>
+            </section>`
+        )
     );
 });
 
 test("the selection should be restricted when it acrosses different div from left to right", async () => {
-    const { getEditableContent, getEditor } = await setupWebsiteBuilder(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">first grand child</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">second grand child</p>
-            </div>
-        </section>`
-    );
+    const { getEditableContent, getEditor } = await setupWebsiteBuilder(sectionSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
     const first_grandchild = editor.editable.querySelector("p.first-grandchild");
@@ -77,14 +91,16 @@ test("the selection should be restricted when it acrosses different div from lef
     // The selection should be not be modified when it is inside the most inner
     // container.
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">[firs]t grand child</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">second grand child</p>
-            </div>
-        </section>`
+        unformat(
+            `<section class="parent-target o_colored_level">
+                <div class="child-target first-child">
+                    <p class="grandchild-target first-grandchild">[firs]t grand child</p>
+                </div>
+                <div class="child-target second-child">
+                    <p class="grandchild-target second-grandchild">second grand child</p>
+                </div>
+            </section>`
+        )
     );
 
     // set the selection across the two grandchildren
@@ -104,28 +120,21 @@ test("the selection should be restricted when it acrosses different div from lef
     // The selection should be modified when it is outside the most inner
     // container.
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">[first grand child]</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">second grand child</p>
-            </div>
-        </section>`
+        unformat(
+            `<section class="parent-target o_colored_level">
+                <div class="child-target first-child">
+                    <p class="grandchild-target first-grandchild">[first grand child]</p>
+                </div>
+                <div class="child-target second-child">
+                    <p class="grandchild-target second-grandchild">second grand child</p>
+                </div>
+            </section>`
+        )
     );
 });
 
 test("the selection should be restricted when it acrosses different div from right to left", async () => {
-    const { getEditableContent, getEditor } = await setupWebsiteBuilder(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">first grand child</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">second grand child</p>
-            </div>
-        </section>`
-    );
+    const { getEditableContent, getEditor } = await setupWebsiteBuilder(sectionSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
     const first_grandchild = editor.editable.querySelector("p.first-grandchild");
@@ -147,14 +156,16 @@ test("the selection should be restricted when it acrosses different div from rig
     // The selection should be not be modified when it is inside the most inner
     // container.
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">]firs[t grand child</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">second grand child</p>
-            </div>
-        </section>`
+        unformat(
+            `<section class="parent-target o_colored_level">
+                <div class="child-target first-child">
+                    <p class="grandchild-target first-grandchild">]firs[t grand child</p>
+                </div>
+                <div class="child-target second-child">
+                    <p class="grandchild-target second-grandchild">second grand child</p>
+                </div>
+            </section>`
+        )
     );
 
     // Set the selection across the two grandchildren.
@@ -174,36 +185,21 @@ test("the selection should be restricted when it acrosses different div from rig
     // The selection should be modified when it is outside the most inner
     // container.
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level">
-            <div class="child-target first-child">
-                <p class="grandchild-target first-grandchild">first grand child</p>
-            </div>
-            <div class="child-target second-child">
-                <p class="grandchild-target second-grandchild">]seco[nd grand child</p>
-            </div>
-        </section>`
+        unformat(
+            `<section class="parent-target o_colored_level">
+                <div class="child-target first-child">
+                    <p class="grandchild-target first-grandchild">first grand child</p>
+                </div>
+                <div class="child-target second-child">
+                    <p class="grandchild-target second-grandchild">]seco[nd grand child</p>
+                </div>
+            </section>`
+        )
     );
 });
 
 test("selection restriction should be inside a <p> for special snippets - blockquote when pressing ctrl+a", async () => {
-    const { getEditableContent, getEditor } = await setupWebsiteBuilder(
-        `<section class="parent-target o_colored_level">
-            <div class="container first-child">
-                <blockquote>
-                    <p class="p-target">p element in blockquote</p>
-                    <div class="s_blockquote_infos">
-                        <img src="${dummyBase64Img}">
-                        <div class="s_blockquote_author o-paragraph">
-                            <span class="o_small">
-                                <strong>Paul Dawson</strong><br>
-                                <span class="text-muted">CEO of MyCompany</span>
-                            </span>
-                        </div>
-                    </div>
-                </blockquote>
-            </div>
-        </section>`
-    );
+    const { getEditableContent, getEditor } = await setupWebsiteBuilder(blockquoteSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
     const p_element = editor.editable.querySelector("p.p-target");
@@ -221,44 +217,29 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     });
 
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level" contenteditable="false">
-            <div class="container first-child" contenteditable="true">
-                <blockquote>
-                    <p class="p-target">[p element in blockquote]</p>
-                    <div class="s_blockquote_infos">
-                        <img src="${dummyBase64Img}">
-                        <div class="s_blockquote_author o-paragraph">
-                            <span class="o_small">
-                                <strong>Paul Dawson</strong><br>
-                                <span class="text-muted">CEO of MyCompany</span>
-                            </span>
+        unformat(
+            `<section class="parent-target o_colored_level" contenteditable="false">
+                <div class="container first-child" contenteditable="true">
+                    <blockquote class="o_draggable">
+                        <p class="p-target">[p element in blockquote]</p>
+                        <div class="s_blockquote_infos">
+                            <img src="${dummyBase64Img}">
+                            <div class="s_blockquote_author o-paragraph">
+                                <span class="o_small">
+                                    <strong>Paul Dawson</strong><br>
+                                    <span class="text-muted">CEO of MyCompany</span>
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                </blockquote>
-            </div>
-        </section>`
+                    </blockquote>
+                </div>
+            </section>`
+        )
     );
 });
 
 test("selection restriction should be inside a <p> for special snippets - blockquote when selecting cross elements (left to right)", async () => {
-    const { getEditableContent, getEditor } = await setupWebsiteBuilder(
-        `<section class="parent-target o_colored_level">
-            <div class="container first-child">
-                <blockquote class="o_draggable">
-                    <p class="p-target">p element in blockquote</p>
-                    <div class="s_blockquote_infos">
-                        <img src="${dummyBase64Img}">
-                        <div class="s_blockquote_author o-paragraph">
-                            <span class="o_small">
-                                <strong>Paul Dawson</strong><br>
-                                <span class="text-muted">CEO of MyCompany</span>
-                            </span>
-                        </div>
-                    </div>
-                </blockquote>
-            </div>
-        </section>`
-    );
+    const { getEditableContent, getEditor } = await setupWebsiteBuilder(blockquoteSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
     const p_element = editor.editable.querySelector("p.p-target");
@@ -279,44 +260,29 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     await animationFrame();
 
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level" contenteditable="false">
-            <div class="container first-child" contenteditable="true">
-                <blockquote class="o_draggable">
-                    <p class="p-target">[p element in blockquote]</p>
-                    <div class="s_blockquote_infos">
-                        <img src="${dummyBase64Img}">
-                        <div class="s_blockquote_author o-paragraph">
-                            <span class="o_small">
-                                <strong>Paul Dawson</strong><br>
-                                <span class="text-muted">CEO of MyCompany</span>
-                            </span>
+        unformat(
+            `<section class="parent-target o_colored_level" contenteditable="false">
+                <div class="container first-child" contenteditable="true">
+                    <blockquote class="o_draggable">
+                        <p class="p-target">[p element in blockquote]</p>
+                        <div class="s_blockquote_infos">
+                            <img src="${dummyBase64Img}">
+                            <div class="s_blockquote_author o-paragraph">
+                                <span class="o_small">
+                                    <strong>Paul Dawson</strong><br>
+                                    <span class="text-muted">CEO of MyCompany</span>
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                </blockquote>
-            </div>
-        </section>`
+                    </blockquote>
+                </div>
+            </section>`
+        )
     );
 });
 
 test("selection restriction should be inside a <p> for special snippets - blockquote when selecting cross elements (right to left)", async () => {
-    const { getEditableContent, getEditor } = await setupWebsiteBuilder(
-        `<section class="parent-target o_colored_level">
-            <div class="container first-child">
-                <blockquote class="o_draggable">
-                    <p class="p-target">p element in blockquote</p>
-                    <div class="s_blockquote_infos">
-                        <img src="${dummyBase64Img}">
-                        <div class="s_blockquote_author o-paragraph">
-                            <span class="o_small">
-                                <strong>Paul Dawson</strong><br>
-                                <span class="text-muted">CEO of MyCompany</span>
-                            </span>
-                        </div>
-                    </div>
-                </blockquote>
-            </div>
-        </section>`
-    );
+    const { getEditableContent, getEditor } = await setupWebsiteBuilder(blockquoteSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
     const p_element = editor.editable.querySelector("p.p-target");
@@ -337,21 +303,23 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     await animationFrame();
 
     expect(getContent(editableContent)).toBe(
-        `<section class="parent-target o_colored_level" contenteditable="false">
-            <div class="container first-child" contenteditable="true">
-                <blockquote class="o_draggable">
-                    <p class="p-target">p element in blockquote</p>
-                    <div class="s_blockquote_infos">
-                        <img src="${dummyBase64Img}">
-                        <div class="s_blockquote_author o-paragraph">
-                            <span class="o_small">
-                                <strong>]Paul Dawson</strong><br>
-                                <span class="text-muted">CEO[ of MyCompany</span>
-                            </span>
+        unformat(
+            `<section class="parent-target o_colored_level" contenteditable="false">
+                <div class="container first-child" contenteditable="true">
+                    <blockquote class="o_draggable">
+                        <p class="p-target">p element in blockquote</p>
+                        <div class="s_blockquote_infos">
+                            <img src="${dummyBase64Img}">
+                            <div class="s_blockquote_author o-paragraph">
+                                <span class="o_small">
+                                    <strong>]Paul Dawson</strong><br>
+                                    <span class="text-muted">CEO[ of MyCompany</span>
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                </blockquote>
-            </div>
-        </section>`
+                    </blockquote>
+                </div>
+            </section>`
+        )
     );
 });
