@@ -40,14 +40,3 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_stock_valuation_id': 'l10n_th_account_113100',
             },
         }
-
-    @template('th', 'account.account')
-    def _get_th_account_account(self):
-        return {
-            "bank": {"default_account_id": "l10n_th_account_111200"},
-            "cash": {
-                "name": self.env._("Cash"),
-                "type": "cash",
-                "default_account_id": "l10n_th_account_111100",
-            },
-        }
