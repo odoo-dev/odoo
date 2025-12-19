@@ -393,7 +393,11 @@ class Registry(Mapping[str, type["BaseModel"]]):
         model_names = []
         for model_def in models.MetaModel._module_to_models__.get(module.name, []):
             # models register themselves in self.models
-            model_cls = model_classes.add_to_registry(self, model_def)
+            try:
+                model_cls = model_classes.add_to_registry(self, model_def)
+            except Exception as e:
+                e.add_note(f'while loading {model_def}')
+                raise
             model_names.append(model_cls._name)
 
         return model_names
