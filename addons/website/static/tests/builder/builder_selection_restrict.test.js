@@ -40,11 +40,11 @@ test("the selection should be restricted in the closest div when pressing ctrl+a
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(sectionSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
-    const first_grandchild = editor.editable.querySelector("p.first-grandchild");
+    const firstGrandchildEl = editor.editable.querySelector("p.first-grandchild");
 
     // Set the selection to be inside the first grandchild.
     setSelection({
-        anchorNode: first_grandchild.firstChild,
+        anchorNode: firstGrandchildEl.firstChild,
         anchorOffset: 0,
     });
 
@@ -68,27 +68,27 @@ test("the selection should be restricted in the closest div when pressing ctrl+a
     );
 });
 
-test("the selection should be restricted when it acrosses different div from left to right", async () => {
+test("the selection should be restricted when it crosses different div from left to right", async () => {
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(sectionSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
-    const first_grandchild = editor.editable.querySelector("p.first-grandchild");
-    const second_grandchild = editor.editable.querySelector("p.second-grandchild");
+    const firstGrandchildEl = editor.editable.querySelector("p.first-grandchild");
+    const secondGrandchildEl = editor.editable.querySelector("p.second-grandchild");
 
     // Set the selection to be inside the first grandchild.
     setSelection({
-        anchorNode: first_grandchild.firstChild,
+        anchorNode: firstGrandchildEl.firstChild,
         anchorOffset: 0,
         focusOffset: 4,
     });
 
-    manuallyDispatchProgrammaticEvent(first_grandchild, "mouseup", {
+    manuallyDispatchProgrammaticEvent(firstGrandchildEl, "mouseup", {
         detail: 1,
     });
-    manuallyDispatchProgrammaticEvent(first_grandchild, "click");
+    manuallyDispatchProgrammaticEvent(firstGrandchildEl, "click");
     await animationFrame();
 
-    // The selection should be not be modified when it is inside the most inner
+    // The selection should not be modified when it is inside the innermost
     // container.
     expect(getContent(editableContent)).toBe(
         unformat(
@@ -103,21 +103,21 @@ test("the selection should be restricted when it acrosses different div from lef
         )
     );
 
-    // set the selection across the two grandchildren
+    // Set the selection across the two grandchildren
     setSelection({
-        anchorNode: first_grandchild.firstChild,
+        anchorNode: firstGrandchildEl.firstChild,
         anchorOffset: 0,
-        focusNode: second_grandchild.firstChild,
+        focusNode: secondGrandchildEl.firstChild,
         focusOffset: 4,
     });
 
-    manuallyDispatchProgrammaticEvent(second_grandchild, "mouseup", {
+    manuallyDispatchProgrammaticEvent(secondGrandchildEl, "mouseup", {
         detail: 1,
     });
-    manuallyDispatchProgrammaticEvent(second_grandchild, "click");
+    manuallyDispatchProgrammaticEvent(secondGrandchildEl, "click");
     await animationFrame();
 
-    // The selection should be modified when it is outside the most inner
+    // The selection should be modified when it is outside the innermost
     // container.
     expect(getContent(editableContent)).toBe(
         unformat(
@@ -133,27 +133,27 @@ test("the selection should be restricted when it acrosses different div from lef
     );
 });
 
-test("the selection should be restricted when it acrosses different div from right to left", async () => {
+test("the selection should be restricted when it crosses different div from right to left", async () => {
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(sectionSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
-    const first_grandchild = editor.editable.querySelector("p.first-grandchild");
-    const second_grandchild = editor.editable.querySelector("p.second-grandchild");
+    const firstGrandchildEl = editor.editable.querySelector("p.first-grandchild");
+    const secondGrandchildEl = editor.editable.querySelector("p.second-grandchild");
 
     // Set the selection to be inside the first grandchild.
     setSelection({
-        anchorNode: first_grandchild.firstChild,
+        anchorNode: firstGrandchildEl.firstChild,
         anchorOffset: 4,
         focusOffset: 0,
     });
 
-    manuallyDispatchProgrammaticEvent(first_grandchild, "mouseup", {
+    manuallyDispatchProgrammaticEvent(firstGrandchildEl, "mouseup", {
         detail: 1,
     });
-    manuallyDispatchProgrammaticEvent(first_grandchild, "click");
+    manuallyDispatchProgrammaticEvent(firstGrandchildEl, "click");
     await animationFrame();
 
-    // The selection should be not be modified when it is inside the most inner
+    // The selection should not be modified when it is inside the innermost
     // container.
     expect(getContent(editableContent)).toBe(
         unformat(
@@ -170,19 +170,19 @@ test("the selection should be restricted when it acrosses different div from rig
 
     // Set the selection across the two grandchildren.
     setSelection({
-        anchorNode: second_grandchild.firstChild,
+        anchorNode: secondGrandchildEl.firstChild,
         anchorOffset: 4,
-        focusNode: first_grandchild.firstChild,
+        focusNode: firstGrandchildEl.firstChild,
         focusOffset: 0,
     });
 
-    manuallyDispatchProgrammaticEvent(second_grandchild, "mouseup", {
+    manuallyDispatchProgrammaticEvent(secondGrandchildEl, "mouseup", {
         detail: 1,
     });
-    manuallyDispatchProgrammaticEvent(second_grandchild, "click");
+    manuallyDispatchProgrammaticEvent(secondGrandchildEl, "click");
     await animationFrame();
 
-    // The selection should be modified when it is outside the most inner
+    // The selection should be modified when it is outside the innermost
     // container.
     expect(getContent(editableContent)).toBe(
         unformat(
@@ -202,11 +202,11 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(blockquoteSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
-    const p_element = editor.editable.querySelector("p.p-target");
+    const paragraphEl = editor.editable.querySelector("p.p-target");
 
     // Set the selection to be inside the p element.
     setSelection({
-        anchorNode: p_element.firstChild,
+        anchorNode: paragraphEl.firstChild,
         anchorOffset: 0,
     });
 
@@ -242,21 +242,21 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(blockquoteSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
-    const p_element = editor.editable.querySelector("p.p-target");
-    const muted_element = editor.editable.querySelector("span.text-muted");
+    const paragraphEl = editor.editable.querySelector("p.p-target");
+    const mutedEl = editor.editable.querySelector("span.text-muted");
 
     // Set the selection to be inside the p element.
     setSelection({
-        anchorNode: p_element.firstChild,
+        anchorNode: paragraphEl.firstChild,
         anchorOffset: 0,
-        focusNode: muted_element.firstChild,
+        focusNode: mutedEl.firstChild,
         focusOffset: 2,
     });
 
-    manuallyDispatchProgrammaticEvent(muted_element, "mouseup", {
+    manuallyDispatchProgrammaticEvent(mutedEl, "mouseup", {
         detail: 1,
     });
-    manuallyDispatchProgrammaticEvent(muted_element, "click");
+    manuallyDispatchProgrammaticEvent(mutedEl, "click");
     await animationFrame();
 
     expect(getContent(editableContent)).toBe(
@@ -285,21 +285,21 @@ test("selection restriction should be inside a <p> for special snippets - blockq
     const { getEditableContent, getEditor } = await setupWebsiteBuilder(blockquoteSnippet);
     const editableContent = getEditableContent();
     const editor = getEditor();
-    const p_element = editor.editable.querySelector("p.p-target");
-    const muted_element = editor.editable.querySelector("span.text-muted");
+    const paragraphEl = editor.editable.querySelector("p.p-target");
+    const mutedEl = editor.editable.querySelector("span.text-muted");
 
     // Set the selection to be inside the p element.
     setSelection({
-        anchorNode: muted_element.firstChild,
+        anchorNode: mutedEl.firstChild,
         anchorOffset: 3,
-        focusNode: p_element.firstChild,
+        focusNode: paragraphEl.firstChild,
         focusOffset: 2,
     });
 
-    manuallyDispatchProgrammaticEvent(muted_element, "mouseup", {
+    manuallyDispatchProgrammaticEvent(mutedEl, "mouseup", {
         detail: 1,
     });
-    manuallyDispatchProgrammaticEvent(muted_element, "click");
+    manuallyDispatchProgrammaticEvent(mutedEl, "click");
     await animationFrame();
 
     expect(getContent(editableContent)).toBe(
