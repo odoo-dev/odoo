@@ -52,7 +52,7 @@ class SaleOrderLine(models.Model):
             is_time_product = line.product_uom_id and line.product_uom_id._has_common_reference(self.env.ref('uom.product_uom_hour'))
             line.remaining_hours_available = is_ordered_prepaid and is_time_product
 
-    @api.depends('qty_delivered', 'product_uom_qty', 'analytic_line_ids')
+    @api.depends('qty_delivered', 'product_uom_qty')
     def _compute_remaining_hours(self):
         uom_hour = self.env.ref('uom.product_uom_hour')
         for line in self:
