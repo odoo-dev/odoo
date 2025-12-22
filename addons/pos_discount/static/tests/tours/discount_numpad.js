@@ -11,6 +11,7 @@ registry.category("web_tour.tours").add("pos_discount_numpad", {
             Dialog.confirm("Open Register"),
             ProductScreen.addOrderline("Desk Pad", "4", "25"),
             ProductScreen.clickControlButton("Discount"),
+            Dialog.is({ title: "Discount" }),
             NumberPopup.isShown("20 %"),
             NumberPopup.enterValue("10"),
             NumberPopup.clickType("fixed"),
