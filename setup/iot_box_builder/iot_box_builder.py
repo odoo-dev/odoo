@@ -21,8 +21,8 @@ logger.addHandler(handler)
 
 IOTBOX_IMAGE = "iotbox.img"
 IOTBOX_VERSION = datetime.now().strftime('%Y.%m.%0d')
-RASPI_IMAGE = "2025-10-01-raspios-trixie-armhf-lite.img.xz"
-RASPI_IMAGE_URl = f"https://downloads.raspberrypi.com/raspios_lite_armhf/images/raspios_lite_armhf-2025-10-02/{RASPI_IMAGE}"
+RASPI_IMAGE = "2025-12-04-raspios-trixie-arm64-lite.img.xz"
+RASPI_IMAGE_URl = f"https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2025-12-04/{RASPI_IMAGE}"
 NGROK_TGZ = "ngrok-v3-stable-linux-arm.tgz"
 NGROK_URL = f"https://bin.equinox.io/c/bNyj1mQVY4c/{NGROK_TGZ}"
 BUILD_DIR = "/iot_build"
