@@ -12,7 +12,6 @@ from odoo.tools import float_is_zero, is_html_empty
 from odoo.tools.sql import SQL, column_exists, create_column
 from odoo.tools.translate import html_translate
 
-from odoo.addons.website.models import ir_http
 from odoo.addons.website.tools import text_from_html
 from odoo.addons.website_sale.const import SHOP_PATH
 
@@ -499,7 +498,7 @@ class ProductTemplate(models.Model):
         self.ensure_one()
 
         combination = combination or self.env['product.template.attribute.value']
-        website = request.website.with_context(self.env.context)
+        website = self.env['website']._get_current_website()
         uom = self.env['uom.uom'].browse(uom_id) or self.uom_id
 
         if not product_id and not combination and not only_template:
@@ -971,7 +970,8 @@ class ProductTemplate(models.Model):
         self.ensure_one()
         if not self.filtered_domain(self.env['website']._product_domain()):
             return False
-        return not request.website.prevent_zero_price_sale or self._get_contextual_price()
+        website = self.env['website']._get_current_website()
+        return not website.prevent_zero_price_sale or self._get_contextual_price()
 
     @api.model
     def _get_configurator_display_price(
@@ -993,7 +993,7 @@ class ProductTemplate(models.Model):
             product_or_template, quantity, date, currency, pricelist, **kwargs
         )
 
-        if website := ir_http.get_request_website():
+        if website := self.env['website']._get_current_website(fallback=False):
             product_taxes = product_or_template.sudo().taxes_id._filter_taxes_by_company(
                 self.env.company
             )

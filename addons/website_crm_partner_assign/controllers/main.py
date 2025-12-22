@@ -71,7 +71,8 @@ class WebsiteAccount(CustomerPortal):
 
         # pager
         lead_count = CrmLead.search_count(domain)
-        pager = request.website.pager(
+        website = request.env['website']._get_current_website()
+        pager = website.pager(
             url="/my/leads",
             url_args={'date_begin': date_begin, 'date_end': date_end, 'sortby': sortby},
             total=lead_count,
@@ -138,7 +139,8 @@ class WebsiteAccount(CustomerPortal):
         leads_sudo = CrmLead.sudo()._search(domain)
         domain = [('id', 'in', leads_sudo)]
         opp_count = CrmLead.search_count(domain)
-        pager = request.website.pager(
+        website = request.env['website']._get_current_website()
+        pager = website.pager(
             url="/my/opportunities",
             url_args={'date_begin': date_begin, 'date_end': date_end, 'sortby': sortby, 'filterby': filterby},
             total=opp_count,
@@ -327,7 +329,8 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
             url_args['industry'] = slug(current_industry)
 
         partner_count = partner_obj.sudo().search_count(base_partner_domain)
-        pager = request.website.pager(
+        website = request.env['website']._get_current_website()
+        pager = website.pager(
             url=url, total=partner_count, page=page, step=references_per_page, scope=7,
             url_args=url_args)
 
@@ -337,7 +340,7 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage, GoogleMap):
             offset=pager['offset'], limit=references_per_page)
         partners = partner_ids.sudo()
 
-        google_maps_api_key = request.website.google_maps_api_key
+        google_maps_api_key = website.google_maps_api_key
 
         values = {
             'industries': industries,

@@ -16,7 +16,8 @@ from odoo.addons.website_sale.controllers.main import WebsiteSale
 class WebsiteSaleL10nTW(WebsiteSale):
     def _l10n_tw_is_extra_info_needed(self):
         order_sudo = request.cart
-        invoicing_step = request.website._get_checkout_step(
+        website = request.env['website']._get_current_website()
+        invoicing_step = website._get_checkout_step(
             '/shop/l10n_tw_invoicing_info'
         )
         invoicing_info_needed = invoicing_step.sudo().is_published = (
@@ -80,7 +81,8 @@ class WebsiteSaleL10nTW(WebsiteSale):
             'carrier_number_2': order_sudo.l10n_tw_edi_carrier_number_2,
         }
         values = self._get_render_context(order_sudo, default_vals)
-        values.update(request.website._get_checkout_step_values())
+        website = request.env['website']._get_current_website()
+        values.update(website._get_checkout_step_values())
         return request.render('l10n_tw_edi_ecpay_website_sale.l10n_tw_edi_invoicing_info', values)
 
     @route('/shop/l10n_tw_invoicing_info/submit', type='http', auth='public', methods=['POST'], website=True, sitemap=False)
@@ -131,15 +133,16 @@ class WebsiteSaleL10nTW(WebsiteSale):
                 vals_to_write['l10n_tw_edi_carrier_number_2'] = default_vals.get('carrier_number_2')
 
         order_sudo.write(vals_to_write)
+        website = request.env['website']._get_current_website()
 
         if not errors:
             request.httprequest.path = '/shop/l10n_tw_invoicing_info'
             return request.redirect(
-                request.website._get_checkout_step_values()['next_website_checkout_step_href']
+                website._get_checkout_step_values()['next_website_checkout_step_href']
             )
 
         values = self._get_render_context(order_sudo, default_vals, errors)
-        values.update(request.website._get_checkout_step_values())
+        values.update(website._get_checkout_step_values())
         return request.render('l10n_tw_edi_ecpay_website_sale.l10n_tw_edi_invoicing_info', values)
 
     @http.route("/payment/ecpay/check_mobile_barcode/<int:sale_order_id>", type="jsonrpc", auth="public")
@@ -176,7 +179,8 @@ class WebsiteSaleL10nTW(WebsiteSale):
             address_values, partner_sudo, address_type, *args, **kwargs
         )
 
-        if address_type == 'billing' and request.website.sudo().company_id.country_id.code == 'TW' and request.website.sudo().company_id._is_ecpay_enabled():
+        website = request.env['website']._get_current_website().sudo()
+        if address_type == 'billing' and website.company_id.country_id.code == 'TW' and website.company_id._is_ecpay_enabled():
             phone = address_values.get('phone')
             if phone:
                 formatted_phone = request.env['account.move']._reformat_phone_number(phone)
@@ -194,8 +198,8 @@ class WebsiteSaleL10nTW(WebsiteSale):
 
     def _handle_extra_form_data(self, extra_form_data, address_values):
         super()._handle_extra_form_data(extra_form_data, address_values)
-
-        if request.website.sudo().company_id.country_id.code == 'TW' and request.website.sudo().company_id._is_ecpay_enabled():
+        website = request.env['website']._get_current_website().sudo()
+        if website.company_id.country_id.code == 'TW' and website.company_id._is_ecpay_enabled():
             order_sudo = request.cart
             if address_values.get('company_name'):
                 l10n_tw_edi_is_print = True

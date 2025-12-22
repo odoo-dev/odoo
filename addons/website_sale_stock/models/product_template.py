@@ -5,8 +5,6 @@ from odoo.http import request
 from odoo.tools import float_round
 from odoo.tools.translate import html_translate
 
-from odoo.addons.website.models import ir_http
-
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -126,7 +124,7 @@ class ProductTemplate(models.Model):
             product_or_template, date, currency, pricelist, **kwargs
         )
 
-        if (website := ir_http.get_request_website()) and product_or_template.is_product_variant:
+        if (website := self.env['website']._get_current_website(fallback=False)) and product_or_template.is_product_variant:
             max_quantity = product_or_template._get_max_quantity(website, request.cart, **kwargs)
             if max_quantity is not None:
                 if uom:

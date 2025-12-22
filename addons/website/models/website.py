@@ -9,7 +9,6 @@ import json
 import logging
 import re
 import requests
-import threading
 import types
 
 from collections import defaultdict
@@ -114,7 +113,7 @@ class Website(models.CachedModel):
     _clear_cache_name = 'default'
     _cached_data_fields = (
         'user_id', 'company_id', 'default_lang_id', 'homepage_url',
-        'domain', 'cookies_bar',
+        'domain', 'cookies_bar', 'theme_id',
     )
 
     @tools.ormcache(cache='default')
@@ -1400,115 +1399,18 @@ class Website(models.CachedModel):
     # ----------------------------------------------------------
 
     @api.model
-    def _get_current_website(self, fallback=True):
-        """ The current website is returned in the following order:
-        - the website forced in session `force_website_id`
-        - the website set in context
-        - (if frontend or fallback) the website matching the request's "domain"
-        - arbitrary the first website found in the database if `fallback` is set
-          to `True`
-        - empty browse record
-        """
-        is_frontend_request = request and getattr(request, 'is_frontend', False)
-        if request and request.session.get('force_website_id'):
-            website_id = self.browse(request.session['force_website_id']).exists()
-            if not website_id:
-                # Don't crash is session website got deleted
-                request.session.pop('force_website_id')
-            else:
-                return website_id
+    def _get_current_website(self, fallback=None):
+        """Get the current website id from the context.
 
-        website_id = self.env.context.get('website_id')
-        if website_id:
+        The context is set in env['ir.http']._match and env['ir.http']._pre_dispatch
+        """
+        if website_id := self.env.context.get('website_id'):
             return self.browse(website_id)
-
-        if not is_frontend_request and not fallback:
-            # It's important than backend requests with no fallback requested
-            # don't go through
-            return self.browse(False)
-
-        # Reaching this point means that:
-        # - We didn't find a website in the session or in the context.
-        # - And we are either:
-        #   - in a frontend context
-        #   - in a backend context (or early in the dispatch stack) and a
-        #     fallback website is requested.
-        # We will now try to find a website matching the request host/domain (if
-        # there is one on request) or return a random one.
-
-        # The format of `httprequest.host` is `domain:port`
-        domain_name = (
-            request and request.httprequest.host
-            or hasattr(threading.current_thread(), 'url') and threading.current_thread().url
-            or '')
-        website_id = self.sudo()._get_current_website_id(domain_name, fallback=fallback)
-        return self.browse(website_id)
-
-    @api.model
-    @tools.ormcache('domain_name', 'fallback')
-    def _get_current_website_id(self, domain_name, fallback=True):
-        """Get the current website id.
-
-        First find the website for which the configured `domain` (after
-        ignoring a potential scheme) is equal to the given
-        `domain_name`. If a match is found, return it immediately.
-
-        If there is no website found for the given `domain_name`, either
-        fallback to the first found website (no matter its `domain`) or return
-        False depending on the `fallback` parameter.
-
-        :param domain_name: the domain for which we want the website.
-            In regard to the `url_parse` method, only the `netloc` part should
-            be given here, no `scheme`.
-        :type domain_name: string
-
-        :param fallback: if True and no website is found for the specificed
-            `domain_name`, return the first website (without filtering them)
-        :type fallback: bool
-
-        :return: id of the found website, or False if no website is found and
-            `fallback` is False
-        :rtype: int or False
-
-        :raises: if `fallback` is True but no website at all is found
-        """
-        def _remove_port(domain_name):
-            return (domain_name or '').split(':')[0]
-
-        def _filter_domain(website, domain_name, ignore_port=False):
-            """Ignore `scheme` from the `domain`, just match the `netloc` which
-            is host:port in the version of `url_parse` we use."""
-            website_domain = get_base_domain(website.domain_punycode)
-            if ignore_port:
-                website_domain = _remove_port(website_domain)
-                domain_name = _remove_port(domain_name)
-            return website_domain.lower() == (domain_name or '').lower()
-
-        # We need to test two possibilities unicode or punycode (safety guard)
-        domain_name = domain_name.encode("idna").decode("ascii")
-        domain_name_idna = domain_name.encode("ascii").decode("idna")
-
-        # TODO: in master, store the computed field domain_punycode to avoid
-        #       the need to search on domain_name and domain_name_idna.
-        found_websites = self.search([
-            '|',
-            ('domain', 'ilike', _remove_port(domain_name)),
-            ('domain', 'ilike', _remove_port(domain_name_idna)),
-        ])
-        # Filter for the exact domain (to filter out potential subdomains) due
-        # to the use of ilike.
-        # `domain_name` could be an empty string, in that case multiple website
-        # without a domain will be returned
-        websites = found_websites.filtered(lambda w: _filter_domain(w, domain_name))
-        # If there is no domain matching for the given port, ignore the port.
-        websites = websites or found_websites.filtered(lambda w: _filter_domain(w, domain_name, ignore_port=True))
-
-        if not websites:
-            if not fallback:
-                return False
-            return self.search([], limit=1).id
-
-        return websites[0].id
+        if fallback is None and (website_id := self.env.context.get('fallback_website_id', False)):
+            return self.browse(website_id)
+        if fallback is True:
+            return self.search([], limit=1)
+        return self
 
     def _force(self):
         self._force_website(self.id)
@@ -1519,7 +1421,8 @@ class Website(models.CachedModel):
 
     @api.model
     def is_public_user(self):
-        return request.env.user == request.website.user_id
+        website = self._get_current_website()
+        return request.env.user == website.user_id
 
     @api.model
     def viewref(self, view_id, raise_if_not_found=True):

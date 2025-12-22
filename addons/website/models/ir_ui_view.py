@@ -416,10 +416,11 @@ class IrUiView(models.Model):
         visibility = self._get_cached_visibility()
 
         if visibility and not request.env.user.has_group('website.group_website_designer'):
-            if (visibility == 'connected' and request.website.is_public_user()):
+            website = self.env['website']._get_current_website()
+            if (visibility == 'connected' and website.is_public_user()):
                 error = werkzeug.exceptions.Forbidden()
             elif visibility == 'password' and \
-                    (request.website.is_public_user() or self.id not in request.session.get('views_unlock', [])):
+                    (website.is_public_user() or self.id not in request.session.get('views_unlock', [])):
                 pwd = request.params.get('visibility_password')
                 if pwd and self.env.user._crypt_context().verify(
                         pwd, self.visibility_password):
@@ -439,14 +440,6 @@ class IrUiView(models.Model):
             else:
                 return False
         return True
-
-    @api.readonly
-    @api.model
-    def render_public_asset(self, template, values=None):
-        # to get the specific asset for access checking
-        if request and hasattr(request, 'website'):
-            return super(IrUiView, self.with_context(website_id=request.website.id)).render_public_asset(template, values=values)
-        return super().render_public_asset(template, values=values)
 
     def _render_template(self, template, values=None):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """

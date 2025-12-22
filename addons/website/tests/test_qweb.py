@@ -201,7 +201,6 @@ class TestQweb(TransactionCaseWithUserDemo):
             self.assertEqual(env.cr.sql_log_count - init, queries, f'Maximum queries: {queries}')
 
         def check_website(template, name, queries):
-            queries += 1
             init = env.cr.sql_log_count
             with MockRequest(env, website=website) as request:
                 value = str(request.env['ir.qweb']._render(template, {'doc': name}))
@@ -312,6 +311,8 @@ class TestQwebProcessAtt(TransactionCase):
         self.website.cdn_activated = True
         self.website.cdn_url = "http://test.cdn"
         self.website.cdn_filters = "\n".join(["^(/[a-z]{2}_[A-Z]{2})?/a$", "^(/[a-z]{2})?/a$", "^/b$"])
+
+        self.env = self.env(context=dict(fallback_website_id=self.website.id))
 
     def _test_att(self, url, expect, tag='a', attribute='href'):
         env = http.request.env if http.request else self.env

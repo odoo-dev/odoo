@@ -29,9 +29,8 @@ def MockRequest(
     if 'website' in env:
         if website:
             env_context['website_id'] = website.id
-            env_context['website_id_fallback'] = website.id
         else:
-            env_context['website_id_fallback'] = 1
+            env_context['fallback_website_id'] = 1
 
     env = env(context=env_context)
 
@@ -79,8 +78,8 @@ def MockRequest(
         update_context=None,
     )
     if 'website' in env:
-        mock_spec['website_routing'] = env_context.get('website_id') or env_context.get('website_id_fallback')
         mock_spec['is_frontend'] = True
+        mock_spec['website_routing'] = env_context.get('website_id') or env_context.get('fallback_website_id')
 
     request = Mock(
         spec_set=list(mock_spec),

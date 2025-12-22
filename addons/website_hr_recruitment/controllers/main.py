@@ -111,7 +111,7 @@ class WebsiteHrRecruitment(WebsiteForm):
             return int(query_arg) if query_arg and query_arg.isdigit() else False
 
         env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
-        website = request.website
+        website = env['website']._get_current_website()
         department = env['hr.department'].browse(to_int(department_id)).exists().sudo()
         country = env['res.country'].browse(to_int(country_id)).exists()
         office = env['res.partner'].browse(to_int(office_id)).exists()
@@ -218,7 +218,7 @@ class WebsiteHrRecruitment(WebsiteForm):
         applications_by_status = http.request.env['hr.applicant'].sudo().search(Domain.AND([
             field_domain,
             [
-                ('job_id.website_id', 'in', [http.request.website.id, False]),
+                ('job_id.website_id', 'in', [http.request.env['website']._get_current_website().id, False]),
                 '|',
                     ('application_status', '=', 'ongoing'),
                     '&',

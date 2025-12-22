@@ -24,13 +24,14 @@ class ProductWishlist(models.Model):
     def current(self):
         """Get all wishlist items that belong to current user or session,
         filter products that are unpublished."""
-        if not request:
+        website = self.env['website']._get_current_website()
+        if not request or not website:
             return self
 
-        if request.website.is_public_user():
+        if website.is_public_user():
             wish = self.sudo().search([('id', 'in', request.session.get('wishlist_ids', []))])
         else:
-            wish = self.search([("partner_id", "=", self.env.user.partner_id.id), ('website_id', '=', request.website.id)])
+            wish = self.search([("partner_id", "=", self.env.user.partner_id.id), ('website_id', '=', website.id)])
 
         return wish.filtered(
             lambda wish:

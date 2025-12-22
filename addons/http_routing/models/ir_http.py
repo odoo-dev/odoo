@@ -298,23 +298,6 @@ class IrHttp(models.AbstractModel):
         """
         return ['web']
 
-    @api.model
-    def get_nearest_lang(self, lang_code: str) -> str:
-        """ Try to find a similar lang. Eg: fr_BE and fr_FR
-            :param lang_code: the lang `code` (en_US)
-        """
-        if not lang_code:
-            return None
-
-        frontend_langs = self.env['res.lang']._get_frontend()
-        if lang_code in frontend_langs:
-            return lang_code
-
-        short = lang_code.partition('_')[0]
-        if not short:
-            return None
-        return next((code for code in frontend_langs if code.startswith(short)), None)
-
     # ------------------------------------------------------------
     # Routing and diplatch
     # ------------------------------------------------------------
@@ -400,14 +383,33 @@ class IrHttp(models.AbstractModel):
         # the public user. Don't try it at home!
         real_env = request.env
         try:
+            resLang = request.env['res.lang']
+            active_langs = resLang._get_active_by('code')
+            def get_nearest_lang(lang_code: str) -> str:
+                """ Try to find a similar lang. Eg: fr_BE and fr_FR
+                    :param lang_code: the lang `code` (en_US)
+                """
+                if not lang_code:
+                    return None
+
+                if lang_code in active_langs:
+                    return lang_code
+
+                short = lang_code.partition('_')[0]
+                if not short:
+                    return None
+                return next((code for code in active_langs if code.startswith(short)), None)
+
             request.registry['ir.http']._auth_method_public()  # it calls update_env
-            nearest_url_lang = request.env['ir.http'].get_nearest_lang(request.env['res.lang']._get_data(url_code=url_lang_str).code or url_lang_str)
-            cookie_lang = request.env['ir.http'].get_nearest_lang(request.cookies.get('frontend_lang'))
-            context_lang = request.env['ir.http'].get_nearest_lang(real_env.context.get('lang'))
+            nearest_url_lang = get_nearest_lang(resLang._get_data(url_code=url_lang_str).code or url_lang_str)
+            cookie_lang = get_nearest_lang(request.cookies.get('frontend_lang'))
+            context_lang = get_nearest_lang(real_env.context.get('lang'))
             default_lang = cls._get_default_lang()
+
             request.lang = request.env['res.lang']._get_data(code=(
                 nearest_url_lang or cookie_lang or context_lang or default_lang.code
             ))
+
             request_url_code = request.lang.url_code
         finally:
             request.env = real_env
@@ -514,7 +516,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _frontend_pre_dispatch(cls):
         request.update_context(lang=request.lang.code)
-        if request.cookies.get('frontend_lang') != request.lang.code:
+        if request.lang.code and request.cookies.get('frontend_lang') != request.lang.code:
             request.future_response.set_cookie('frontend_lang', request.lang.code)
 
     # ------------------------------------------------------------

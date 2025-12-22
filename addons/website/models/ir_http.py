@@ -2,6 +2,7 @@
 import contextlib
 import functools
 import logging
+import threading
 import unittest
 from zoneinfo import ZoneInfoNotFoundError, ZoneInfo
 
@@ -18,6 +19,7 @@ from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.safe_eval import safe_eval
 from odoo.addons.http_routing.models import ir_http
 from odoo.addons.portal.controllers.portal import _build_url_w_params
+from odoo.addons.website.tools import get_base_domain
 
 logger = logging.getLogger(__name__)
 
@@ -34,23 +36,6 @@ def sitemap_qs2dom(qs, route, field='name'):
         else:
             return Domain.FALSE
     return Domain.TRUE
-
-
-def get_request_website():
-    """ Return the website set on `request` if called in a frontend context
-    (website=True on route).
-    This method can typically be used to check if we are in the frontend.
-
-    This method is easy to mock during python tests to simulate frontend
-    context, rather than mocking every method accessing request.website.
-
-    Don't import directly the method or it won't be mocked during tests, do:
-    ```
-    from odoo.addons.website.models import ir_http
-    my_var = ir_http.get_request_website()
-    ```
-    """
-    return request and getattr(request, 'website', False) or False
 
 
 class IrHttp(models.AbstractModel):
@@ -202,15 +187,27 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _match(cls, path):
+        # set website into the context
+        if website_id := request.env['ir.http']._get_current_website_id():
+            request.update_context(website_id=website_id)
+        elif website_id := request.env['ir.http']._get_current_website_fallback():
+            request.update_context(fallback_website_id=website_id)
+
         if not hasattr(request, 'website_routing'):
-            website = request.env['website'].with_context(lang=None)._get_current_website()
-            request.website_routing = website.id
+            request.website_routing = website_id
 
         return super()._match(path)
 
     @classmethod
     def _pre_dispatch(cls, rule, arguments):
         super()._pre_dispatch(rule, arguments)
+
+        if not request.env.context.get('website_id'):
+            if website_id := request.env['ir.http']._get_current_website_fallback():
+                if request.is_frontend:
+                    request.update_context(website_id=website_id)
+                else:
+                    request.update_context(fallback_website_id=website_id)
 
         for record in arguments.values():
             if isinstance(record, models.BaseModel) and hasattr(record, 'can_access_from_current_website'):
@@ -224,6 +221,119 @@ class IrHttp(models.AbstractModel):
                     # low level.
                     raise werkzeug.exceptions.Forbidden()
 
+    @api.model
+    def _get_current_website_id(self):
+        """ The current website is return in the following order:
+        - the website forced in session `force_website_id`
+        - None
+        """
+        if force_website_id := request.session.get('force_website_id'):
+            website_id = self._get_current_forced_website_id(force_website_id)
+            if website_id:
+                return website_id
+            else:
+                # Don't crash is session website got deleted
+                request.session.pop('force_website_id')
+
+        if website_id := request.env.context.get('website_id'):
+            return self._get_current_forced_website_id(website_id)
+
+    @api.model
+    @tools.ormcache('force_website_id')
+    def _get_current_forced_website_id(self, force_website_id):
+        if force_website_id and request.env['website'].browse(force_website_id).exists():
+            return force_website_id
+
+    @api.model
+    def _get_current_website_fallback(self):
+        """ The current fallback website is return in the following order:
+        - (if frontend or fallback) the website matching the request's "domain"
+        - arbitrary the first website found in the database if `fallback` is set
+          to `True`
+        - None
+        """
+        # Reaching this point means that:
+        # - We didn't find a website in the session or in the context.
+        # - And we are either:
+        #   - in a frontend context
+        #   - in a backend context (or early in the dispatch stack) and a
+        #     fallback website is requested.
+        # We will now try to find a website matching the request host/domain (if
+        # there is one on request) or return a random one.
+
+        # The format of `httprequest.host` is `domain:port`
+        domain_name = (
+            request and request.httprequest.host
+            or hasattr(threading.current_thread(), 'url') and threading.current_thread().url
+            or '')
+        return self._get_current_fallback_website_id(domain_name)
+
+    @api.model
+    @tools.ormcache('domain_name')
+    def _get_current_fallback_website_id(self, domain_name):
+        """Get the current website id.
+
+        First find the website for which the configured `domain` (after
+        ignoring a potential scheme) is equal to the given
+        `domain_name`. If a match is found, return it immediately.
+
+        If there is no website found for the given `domain_name`, either
+        fallback to the first found website (no matter its `domain`) or return
+        False depending on the `fallback` parameter.
+
+        :param domain_name: the domain for which we want the website.
+            In regard to the `url_parse` method, only the `netloc` part should
+            be given here, no `scheme`.
+        :type domain_name: string
+
+        :param fallback: if True and no website is found for the specificed
+            `domain_name`, return the first website (without filtering them)
+        :type fallback: bool
+
+        :return: id of the found website, or False if no website is found and
+            `fallback` is False
+        :rtype: int or False
+
+        :raises: if `fallback` is True but no website at all is found
+        """
+        def _remove_port(domain_name):
+            return (domain_name or '').split(':')[0]
+
+        def _filter_domain(website, domain_name, ignore_port=False):
+            """Ignore `scheme` from the `domain`, just match the `netloc` which
+            is host:port in the version of `url_parse` we use."""
+            website_domain = get_base_domain(website.domain_punycode)
+            if ignore_port:
+                website_domain = _remove_port(website_domain)
+                domain_name = _remove_port(domain_name)
+            return website_domain.lower() == (domain_name or '').lower()
+
+        # We need to test two possibilities unicode or punycode (safety guard)
+        domain_name = domain_name.encode("idna").decode("ascii")
+        domain_name_idna = domain_name.encode("ascii").decode("idna")
+
+        Website = self.env['website'].sudo()
+
+        # TODO: in master, store the computed field domain_punycode to avoid
+        #       the need to search on domain_name and domain_name_idna.
+        found_websites = Website.search([
+            '|',
+            ('domain', 'ilike', _remove_port(domain_name)),
+            ('domain', 'ilike', _remove_port(domain_name_idna)),
+        ])
+        # Filter for the exact domain (to filter out potential subdomains) due
+        # to the use of ilike.
+        # `domain_name` could be an empty string, in that case multiple website
+        # without a domain will be returned
+        websites = found_websites.filtered(lambda w: _filter_domain(w, domain_name))
+        # If there is no domain matching for the given port, ignore the port.
+        websites = websites or found_websites.filtered(lambda w: _filter_domain(w, domain_name, ignore_port=True))
+
+        if not websites:
+            return Website.search([], limit=1).id
+
+        return websites[0].id
+
     @classmethod
     def _get_editor_context(cls):
         ctx = super()._get_editor_context()
@@ -233,6 +343,17 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _frontend_pre_dispatch(cls):
+        """
+        tz is added into the context
+
+        The current website is add on the context in the following order:
+        - the website forced in session `force_website_id`
+        - the website set in context
+        - (if frontend or fallback) the website matching the request's "domain"
+        - arbitrary the first website found in the database if `fallback` is set
+          to `True`
+        - empty browse record
+        """
         super()._frontend_pre_dispatch()
 
         if not request.env.context.get('tz') and (tz := request.geoip.location.time_zone):
@@ -258,11 +379,8 @@ class IrHttp(models.AbstractModel):
 
         request.update_context(
             allowed_company_ids=allowed_company_ids,
-            website_id=website.id,
             **cls._get_editor_context(),
         )
-
-        request.website = website.with_context(request.env.context)
 
     @classmethod
     def _post_dispatch(cls, response):
@@ -278,7 +396,7 @@ class IrHttp(models.AbstractModel):
         # is set.
         website_id = False
         if getattr(request, 'is_frontend', True):
-            website_id = self.env.get('website_id', request.website_routing)
+            website_id = self.env.context.get('website_id', request.website_routing)
         return super(IrHttp, self.with_context(website_id=website_id)).get_nearest_lang(lang_code)
 
     @classmethod
@@ -328,7 +446,7 @@ class IrHttp(models.AbstractModel):
             Domain('redirect_type', 'in', ('301', '302'))
             # trailing / could have been removed by server_page
             & Domain('url_from', 'in', [req_page_with_qs, req_page.rstrip('/'), req_page + '/'])
-            & request.website.website_domain()
+            & request.env['website']._get_current_website().website_domain()
         )
         return request.env['website.rewrite'].sudo().search(domain, order='url_from DESC', limit=1)
 
@@ -401,21 +519,22 @@ class IrHttp(models.AbstractModel):
 
     @api.model
     def get_frontend_session_info(self):
+        website = self.env['website']._get_current_website()
         session_info = super().get_frontend_session_info()
         geoip_country_code = request.geoip.country_code
         geoip_phone_code = request.env['res.country']._phone_code_for(geoip_country_code) if geoip_country_code else None
         session_info.update({
-            'is_website_user': request.env.user.id == request.website.user_id.id,
+            'is_website_user': request.env.user.id == website.user_id.id,
             'geoip_country_code': geoip_country_code,
             'geoip_phone_code': geoip_phone_code,
             'lang_url_code': request.lang.url_code,
         })
         if request.env.user.has_group('website.group_website_restricted_editor'):
             session_info.update({
-                'website_id': request.website.id,
-                'website_company_id': request.website.company_id.id,
+                'website_id': website.id,
+                'website_company_id': website.company_id.id,
             })
-        session_info['bundle_params']['website_id'] = request.website.id
+        session_info['bundle_params']['website_id'] = website.id
         return session_info
 
     @classmethod

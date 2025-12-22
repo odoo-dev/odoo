@@ -12,7 +12,9 @@ class WebsiteSaleWishlist(Controller):
         price = product._get_combination_info_variant()['price']
 
         Wishlist = request.env['product.wishlist']
-        if request.website.is_public_user():
+        website = request.env['website']._get_current_website()
+
+        if website.is_public_user():
             Wishlist = Wishlist.sudo()
             partner_id = False
         else:
@@ -20,8 +22,8 @@ class WebsiteSaleWishlist(Controller):
 
         wish = Wishlist._add_to_wishlist(
             request.pricelist.id,
-            request.website.currency_id.id,
-            request.website.id,
+            website.currency_id.id,
+            website.id,
             price,
             product_id,
             partner_id
@@ -46,7 +48,8 @@ class WebsiteSaleWishlist(Controller):
     @route('/shop/wishlist/remove/<int:wish_id>', type='jsonrpc', auth='public', website=True)
     def remove_from_wishlist(self, wish_id, **kw):
         wish = request.env['product.wishlist'].browse(wish_id)
-        if request.website.is_public_user():
+        website = request.env['website']._get_current_website()
+        if website.is_public_user():
             wish_ids = request.session.get('wishlist_ids') or []
             if wish_id in wish_ids:
                 request.session['wishlist_ids'].remove(wish_id)
