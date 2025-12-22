@@ -979,7 +979,7 @@ class Website(models.Model):
             href = rewrite('/shop/checkout')
 
         allowed_steps_domain = self._get_allowed_steps_domain()
-        current_step = request.env['website.checkout.step'].sudo()
+        current_step = self.env['website.checkout.step'].sudo()
         for step in current_step.search(allowed_steps_domain):
             if rewrite(step.step_href) == href:
                 current_step = step

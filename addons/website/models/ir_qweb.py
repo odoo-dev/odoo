@@ -115,7 +115,7 @@ class IrQweb(models.AbstractModel):
         # DOM structure should reflect it after a reload and not be stuck in its
         # previous state (see the part related to cookies in
         # `_post_processing_att`).
-        is_allowed_optional_cookies = request.env['ir.http']._is_allowed_cookie('optional')
+        is_allowed_optional_cookies = self.env['ir.http']._is_allowed_cookie('optional')
         irQweb = irQweb.with_context(cookies_allowed=is_allowed_optional_cookies)
 
         return irQweb
@@ -141,7 +141,7 @@ class IrQweb(models.AbstractModel):
             website.cookies_bar
             and website.block_third_party_domains
             and not self.env.context.get('cookies_allowed')
-            and not request.env.user.has_group('website.group_website_restricted_editor')
+            and not self.env.user.has_group('website.group_website_restricted_editor')
         ):
             # If the cookie banner is activated, 3rd-party embedded iframes and
             # scripts should be controlled. As such:

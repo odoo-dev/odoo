@@ -276,7 +276,7 @@ class IrHttp(models.AbstractModel):
 
     @api.model
     def get_translation_frontend_modules(self) -> list[str]:
-        Modules = request.env['ir.module.module'].sudo()
+        Modules = self.env['ir.module.module'].sudo()
         extra_modules_name = self._get_translation_frontend_modules_name()
         extra_modules_domain = Domain(self._get_translation_frontend_modules_domain())
         if not extra_modules_domain.is_true():

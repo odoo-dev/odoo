@@ -74,8 +74,8 @@ class ResUsers(models.Model):
         Purpose is to try to aggregate as much sub-records (tracked pages,
         leads, ...) as possible. """
         visitor_pre_authenticate_sudo = None
-        if request and request.env:
-            visitor_pre_authenticate_sudo = request.env['website.visitor']._get_visitor_from_request()
+        if request:
+            visitor_pre_authenticate_sudo = self.env['website.visitor']._get_visitor_from_request()
         auth_info = super().authenticate(credential, user_agent_env)
         if auth_info.get('uid') and visitor_pre_authenticate_sudo:
             env = self.env(user=auth_info['uid'])

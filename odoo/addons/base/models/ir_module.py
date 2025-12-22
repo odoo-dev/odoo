@@ -623,9 +623,9 @@ class IrModuleModule(models.Model):
         registry = modules.registry.Registry.new(self.env.cr.dbname, update_module=True)
         self.env.cr.commit()
         if request and request.registry is self.env.registry:
-            request.env.transaction.reset()
-            request.registry = request.env.registry
-            assert request.env.registry is registry
+            self.env.transaction.reset()
+            self.registry = request.env.registry
+            assert self.env.registry is registry
         self.env.transaction.reset()
         assert self.env.registry is registry
 

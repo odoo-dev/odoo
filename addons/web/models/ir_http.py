@@ -179,9 +179,9 @@ class IrHttp(models.AbstractModel):
             'profile_session': request.session.get('profile_session'),
             'profile_collectors': request.session.get('profile_collectors'),
             'profile_params': request.session.get('profile_params'),
-            'show_effect': request.env['ir.config_parameter'].sudo().get_bool('base_setup.show_effect'),
+            'show_effect': self.env['ir.config_parameter'].sudo().get_bool('base_setup.show_effect'),
             'currencies': self.env['res.currency'].get_all_currencies(),
-            'quick_login': request.env['ir.config_parameter'].sudo().get_bool('web.quick_login', True),
+            'quick_login': self.env['ir.config_parameter'].sudo().get_bool('web.quick_login', True),
             'bundle_params': {
                 'lang': request.session.context['lang'],
             },

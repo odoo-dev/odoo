@@ -56,7 +56,7 @@ class ResUsers(models.Model):
             # (Can be unbounded if executed from a server action or a unit test.)
 
             key = request.cookies.get('td_id')
-            if not key or not request.env['auth_totp.device']._check_credentials_for_uid(
+            if not key or not self.env['auth_totp.device']._check_credentials_for_uid(
                     scope="browser", key=key, uid=user.id):
                 # 2FA enabled but not a trusted device
                 user._notify_security_setting_update(

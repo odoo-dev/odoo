@@ -33,7 +33,7 @@ class IrHttp(models.AbstractModel):
         super()._verify_request_recaptcha_token(action)
         ip_addr = request.httprequest.remote_addr
         token = request.params.pop('turnstile_captcha', False)
-        turnstile_result = request.env['ir.http']._verify_turnstile_token(ip_addr, token, action)
+        turnstile_result = self.env['ir.http']._verify_turnstile_token(ip_addr, token, action)
         if turnstile_result in ['is_human', 'no_secret']:
             return
         if turnstile_result == 'wrong_secret':
@@ -65,7 +65,7 @@ class IrHttp(models.AbstractModel):
                      internal-error: The request failed.
             :rtype: str
         """
-        private_key = request.env['ir.config_parameter'].sudo().get_str('cf.turnstile_secret_key')
+        private_key = self.env['ir.config_parameter'].sudo().get_str('cf.turnstile_secret_key')
         if not private_key:
             return 'no_secret'
         try:

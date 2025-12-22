@@ -15,7 +15,7 @@ class Website(models.Model):
 
     def _website_form_last_record(self):
         if request and request.session.get('form_builder_model_model'):
-            return request.env[request.session['form_builder_model_model']].browse(request.session['form_builder_id'])
+            return self.env[request.session['form_builder_model_model']].browse(request.session['form_builder_id'])
         return False
 
 

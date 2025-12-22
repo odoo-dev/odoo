@@ -39,13 +39,13 @@ class IrHttp(models.AbstractModel):
             is considered inactive and this method will return True.
         """
         super()._verify_request_recaptcha_token(action)
-        config_params = request.env['ir.config_parameter'].sudo()
+        config_params = self.env['ir.config_parameter'].sudo()
         recaptcha_enabled = config_params.get_bool('enable_recaptcha', True)
         if not recaptcha_enabled:
             return
         ip_addr = request.httprequest.remote_addr
         token = request.params.pop('recaptcha_token_response', False)
-        recaptcha_result = request.env['ir.http']._verify_recaptcha_token(ip_addr, token, action)
+        recaptcha_result = self.env['ir.http']._verify_recaptcha_token(ip_addr, token, action)
         if recaptcha_result in ['is_human', 'no_secret']:
             return
         if recaptcha_result == 'wrong_secret':
@@ -76,10 +76,10 @@ class IrHttp(models.AbstractModel):
                      bad_request: The request is invalid or malformed.
             :rtype: str
         """
-        private_key = request.env['ir.config_parameter'].sudo().get_str('recaptcha_private_key')
+        private_key = self.env['ir.config_parameter'].sudo().get_str('recaptcha_private_key')
         if not private_key:
             return 'no_secret'
-        min_score = request.env['ir.config_parameter'].sudo().get_float('recaptcha_min_score', 0.7)
+        min_score = self.env['ir.config_parameter'].sudo().get_float('recaptcha_min_score', 0.7)
         try:
             r = requests.post('https://www.recaptcha.net/recaptcha/api/siteverify', {
                 'secret': private_key,

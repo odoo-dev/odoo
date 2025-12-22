@@ -703,7 +703,7 @@ class Website(models.CachedModel):
 
     @api.model
     def configurator_recommended_themes(self, industry_id, palette, result_nbr_max=3):
-        Module = request.env['ir.module.module']
+        Module = self.env['ir.module.module']
         domain = Module.get_themes_domain()
         domain = Domain.AND([[('name', '!=', 'theme_default')], domain])
         client_themes = Module.search(domain).mapped('name')
@@ -1422,7 +1422,7 @@ class Website(models.CachedModel):
     @api.model
     def is_public_user(self):
         website = self._get_current_website()
-        return request.env.user == website.user_id
+        return self.env.user == website.user_id
 
     @api.model
     def viewref(self, view_id, raise_if_not_found=True):

@@ -415,7 +415,7 @@ class IrUiView(models.Model):
 
         visibility = self._get_cached_visibility()
 
-        if visibility and not request.env.user.has_group('website.group_website_designer'):
+        if visibility and not self.env.user.has_group('website.group_website_designer'):
             website = self.env['website']._get_current_website()
             if (visibility == 'connected' and website.is_public_user()):
                 error = werkzeug.exceptions.Forbidden()

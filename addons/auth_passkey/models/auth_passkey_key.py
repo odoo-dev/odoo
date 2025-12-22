@@ -165,7 +165,7 @@ class AuthPasskeyKeyCreate(models.TransientModel):
         # We add in these fields with JS, if we didn't give them default values we would get a XML validation warning.
         assert registration, "registration can not be empty"
         self.ensure_one()
-        verification = request.env['auth.passkey.key']._verify_registration_options(registration)
+        verification = self.env['auth.passkey.key']._verify_registration_options(registration)
         # Force to go through `res.users.auth_passkey_key_ids` to trigger the session token cache invalidation
         # See `res.users.write` and `_clear_cache_on_fields`
         # `self.env.user` is already sudo, so no need to re-apply `sudo` to get create access right.
