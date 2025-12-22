@@ -902,10 +902,9 @@ class StockMoveLine(models.Model):
             quantity = move_line.uom_id._compute_quantity(move_line.quantity, uom)
             packaging_quantity = move_line.uom_id._compute_quantity(quantity, move_line.move_id.packaging_uom_id)
             if line_key not in aggregated_move_lines:
-                qty_ordered = None
+                qty_ordered = None if kwargs.get('strict') else move_line.move_id.product_uom_qty
                 packaging_qty_ordered = None
                 if backorders and not kwargs.get('strict'):
-                    qty_ordered = move_line.move_id.product_uom_qty
                     # Filters on the aggregation key (product, description and uom) to add the
                     # quantities delayed to backorders to retrieve the original ordered qty.
                     following_move_lines = backorders.move_line_ids.filtered(
@@ -927,7 +926,8 @@ class StockMoveLine(models.Model):
                     'product': move_line.product_id,
                 }
             else:
-                aggregated_move_lines[line_key]['qty_ordered'] += quantity
+                if kwargs.get('strict'):
+                    aggregated_move_lines[line_key]['qty_ordered'] += quantity
                 aggregated_move_lines[line_key]['packaging_qty_ordered'] += packaging_quantity
                 aggregated_move_lines[line_key]['quantity'] += quantity
                 aggregated_move_lines[line_key]['packaging_quantity'] += packaging_quantity
