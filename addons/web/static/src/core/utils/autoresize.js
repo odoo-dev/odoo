@@ -43,19 +43,29 @@ function resizeInput(input) {
     // This mesures the maximum width of the input which can get from the flex layout.
     input.style.width = "100%";
     const maxWidth = input.clientWidth;
-    // Somehow Safari 16 computes input sizes incorrectly. This is fixed in Safari 17
+    // Safari 16 and Firefox 145+: scrollWidth excludes input padding, so we add it manually
     const isSafari16 = /Version\/16.+Safari/i.test(browser.navigator.userAgent);
+    const isFirefox145OrLater = /Firefox\/(14[5-9]|1[5-9]\d|[2-9]\d{2,})/.test(
+        browser.navigator.userAgent
+    );
+    const style = window.getComputedStyle(input);
+    let boxExtraWidth = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
     // Minimum width of the input
     input.style.width = "10px";
     if (input.value === "" && input.placeholder !== "") {
         input.style.width = "auto";
         return;
     }
-    if (input.scrollWidth + 5 + (isSafari16 ? 8 : 0) > maxWidth) {
+    if (isSafari16 || isFirefox145OrLater) {
+        const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+        boxExtraWidth += padding;
+    }
+    const desiredWidth = input.scrollWidth + boxExtraWidth + 1;
+    if (desiredWidth > maxWidth) {
         input.style.width = "100%";
         return;
     }
-    input.style.width = input.scrollWidth + 5 + (isSafari16 ? 8 : 0) + "px";
+    input.style.width = `${desiredWidth}px`;
 }
 
 export function resizeTextArea(textarea, options = {}) {
