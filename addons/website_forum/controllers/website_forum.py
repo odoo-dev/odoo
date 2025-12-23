@@ -147,7 +147,7 @@ class WebsiteForum(WebsiteProfile):
 
         slug = request.env['ir.http']._slug
         question_count, details, fuzzy_search_term = request.website._search_with_fuzzy(
-            "forum_posts_only", search, limit=page * self._post_per_page, order=sorting, options=options)
+            "forum_posts_only", search, limit=page * self._post_per_page, offset=0, order=sorting, options=options)
         question_ids = details[0].get('results', Post)
         question_ids = question_ids[(page - 1) * self._post_per_page:page * self._post_per_page]
 
@@ -245,7 +245,7 @@ class WebsiteForum(WebsiteProfile):
             values.update(search=search)
             search_domain = domain if filters in ('all', 'followed') else None
             __, details, __ = request.website._search_with_fuzzy(
-                'forum_tags_only', search, limit=None, order=order, options={'forum': forum, 'domain': search_domain},
+                'forum_tags_only', search, limit=None, offset=0, order=order, options={'forum': forum, 'domain': search_domain},
             )
             tags = details[0].get('results', tags)
 

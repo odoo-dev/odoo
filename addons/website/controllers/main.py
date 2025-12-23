@@ -591,7 +591,7 @@ class Website(Home):
         return 'is_published desc, %s, id desc' % order
 
     @http.route('/website/snippet/autocomplete', type='jsonrpc', auth='public', website=True, readonly=True)
-    def autocomplete(self, search_type=None, term=None, order=None, limit=6, max_nb_chars=999, options=None):
+    def autocomplete(self, search_type=None, term=None, order=None, limit=6, offset=0, max_nb_chars=999, options=None):
         """
         Returns list of results according to the term and options
 
@@ -599,6 +599,7 @@ class Website(Home):
         :param str term: search term written by the user
         :param str order:
         :param int limit: number of results to consider, defaults to 5
+        :param int offset: number of results to skip, defaults to 0
         :param int max_nb_chars: max number of characters for text fields
         :param dict options: options map containing
             allowFuzzy: enables the fuzzy matching when truthy
@@ -615,7 +616,7 @@ class Website(Home):
         """
         order = self._get_search_order(order)
         options = options or {}
-        results_count, search_results, fuzzy_term = request.website._search_with_fuzzy(search_type, term, limit, order, options)
+        results_count, search_results, fuzzy_term = request.website._search_with_fuzzy(search_type, term, limit, offset, order, options)
         # Sort result based in sequence for ordered results.
         search_results.sort(key=lambda d: d.get('sequence', float('inf')))
         if not results_count:
@@ -635,7 +636,7 @@ class Website(Home):
             search_result['results_data'].sort(key=lambda r: r.get('name', ''), reverse='name desc' in order)
             mappings.append(search_result['mapping'])
             group_name = search_result.get("group_name")
-            group_key = '_'.join(group_name.lower().split())
+            group_key = search_result.get("model").replace('.', '_')
             result_data = []
             for record in search_result['results_data']:
                 model = request.env[search_result['model']]
@@ -643,7 +644,6 @@ class Website(Home):
                 mapped = {
                     '_fa': record.get('_fa'),
                 }
-                model = request.env[search_result['model']]
                 for mapped_name, field_meta in mapping.items():
                     value = record.get(field_meta.get('name'))
                     if not value:
@@ -671,7 +671,7 @@ class Website(Home):
             result[group_key] = {
                 "groupName": group_name,
                 "templateKey": search_result.get("template_key"),
-                "search_count": search_result.get('count'),
+                "searchCount": search_result.get('count'),
                 "data": result_data,
             }
 
@@ -692,7 +692,7 @@ class Website(Home):
         options = self._get_page_search_options(**kw)
         step = 50
         pages_count, details, fuzzy_search_term = request.website._search_with_fuzzy(
-            "pages", search, limit=page * step, order='name asc, website_id desc, id',
+            "pages", search, limit=page * step, offset=0, order='name asc, website_id desc, id',
             options=options)
         pages = details[0].get('results', request.env['website.page'])
 
@@ -729,21 +729,41 @@ class Website(Home):
             return request.render("website.list_hybrid")
 
         options = self._get_hybrid_search_options(**kw)
-        data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=100, max_nb_chars=200, options=options)
+        limit = kw.get('limit', 24)
+        data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=limit, offset=0, max_nb_chars=200, options=options)
 
         results = data.get('results', [])
         search_count = data.get('results_count', 0)
         parts = data.get('parts', {})
 
-        # TODO: Implement pagination or load more button for more records
         values = {
             'results': results,
             'parts': parts,
             'search': search,
+            'limit': limit,
             'fuzzy_search': data.get('fuzzy_search'),
             'search_count': search_count,
         }
         return request.render("website.list_hybrid", values)
+
+    @http.route('/website/load_more_search', type='jsonrpc', auth="public", website=True, readonly=True)
+    def load_more_search(self, search='', search_type='all', offset=0, **kwargs):
+        options = self._get_hybrid_search_options(**kwargs)
+        limit = kwargs.get('limit', 24)
+        max_nb_chars = kwargs.get('max_nb_chars')
+        row_classes = kwargs.get('row_classes', {})
+        data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=limit, offset=offset, max_nb_chars=max_nb_chars, options=options)
+
+        bucket = next(iter(data.get("results").values()), {})
+        template_name = f"{bucket.get('templateKey')}_view"
+        has_more = bucket.get("searchCount") > offset + limit
+
+        values = {
+            'bucket': bucket,
+            'row_classes': row_classes,
+        }
+        html = self.env['ir.ui.view']._render_template(template_name, values)
+        return html, has_more
 
     # ------------------------------------------------------
     # Edit

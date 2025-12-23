@@ -3187,7 +3187,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
         <div id="wrap">
             <div class="container pt24 pb24">
                 <t t-call="website.website_search_box_input"
-                    _classes.f="mt8 mb24"
+                    _classes.f="mt8"
                     search_type.f="all"
                     action.f="/website/search"/>
                 <t t-if="not results">
@@ -3207,9 +3207,9 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
                         Results are displayed for '<t t-out="fuzzy_search"/>'.
                     </div>
                 </t>
-                <div t-if="results" class="table-responsive">
-                    <t t-foreach="results.values()" t-as="group_result">
-                        <t t-set="bucket" t-value="group_result"/>
+                <div t-if="results" class="o_searchbar_result table-responsive mt24">
+                    <t t-foreach="results.items()" t-as="group_result">
+                        <t t-set="bucket" t-value="group_result[1]"/>
                         <t t-set="template_key" t-value="bucket.get('templateKey') + '_view'"/>
                         <div t-att-id="bucket['groupName'].replace(' ', '_').lower()">
                             <!-- Group header -->
@@ -3219,8 +3219,14 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
 
                             <t t-set="row_classes" t-value="'o_search_result_item col-12 col-md-6 col-lg-4'"/>
                             <!-- Items -->
-                             <div class="row g-0 p-2">
+                            <div class="row g-0 p-2">
                                 <t t-call="{{ template_key }}"/>
+                                <t t-set="has_more" t-value="(bucket.get('searchCount') &gt; limit)"/>
+                                <button
+                                    t-attf-class="btn btn-small btn-light o_load_more #{(not has_more and 'd-none')}"
+                                    t-att-data-search-type="group_result[0]">
+                                    Load More
+                                </button>
                             </div>
                         </div>
                     </t>
@@ -3228,41 +3234,6 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
             </div>
         </div>
     </t>
-</template>
-
-<template id="one_hybrid" name="Single any Search Results">
-    <a t-att-href="result.get('website_url')" class="dropdown-item p-2 text-wrap">
-        <div class="d-flex align-items-center flex-wrap o_search_result_item o_cc o_cc1 text-decoration-none">
-            <img t-if="result.get('image_url')" t-att-src="result.get('image_url')" role="presentation" alt="" class="flex-shrink-0 o_image_64_contain"/>
-            <i t-else="" t-att-class="'o_image_64_contain text-center pt16 fa %s' % result.get('_fa')" style="font-size: 34px;"/>
-            <div class="o_search_result_item_content p-2">
-                <t t-set="description" t-value="result.get('description')"/>
-                <t t-set="extra_link" t-value="result.get('extra_link_url') and result.get('extra_link')"/>
-                <t t-set="extra_link_html" t-value="not result.get('extra_link_url') and result.get('extra_link')"/>
-                <div t-att-class="'h6 fw-bold %s' % ('' if description else 'mb-0')" t-out="result['name']"/>
-                <p t-if="description" class="mb-0" t-out="description"/>
-                <button t-if="extra_link" class="extra_link btn btn-link btn-sm" t-out="extra_link"
-                    t-attf-onclick="location.href='#{result.get('extra_link_url')}';return false;"/>
-                <t t-if="extra_link_html" t-out="extra_link_html"/>
-                <div t-if="result.get('tags')" t-out="result.get('tags')" class="my-2"/>
-            </div>
-            <div class="flex-shrink-0 ms-auto">
-                <t t-if="result.get('detail_strike')">
-                    <span class="text-muted text-nowrap" style="text-decoration: line-through;">
-                        <t t-out="result.get('detail_strike')"/>
-                    </span>
-                    <br/>
-                </t>
-                <b t-if="result.get('detail')" class="text-nowrap">
-                    <t t-out="result.get('detail')"/>
-                </b>
-                <t t-if="result.get('detail_extra')">
-                    <br/>
-                    <span class="text-nowrap" t-out="result.get('detail_extra')"/>
-                </t>
-            </div>
-        </div>
-    </a>
 </template>
 
 <!-- Search Bar input-group template -->

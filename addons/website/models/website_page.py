@@ -244,7 +244,7 @@ class WebsitePage(models.Model):
         }
 
     @api.model
-    def _search_fetch(self, search_detail, search, limit, order):
+    def _search_fetch(self, search_detail, search, limit, offset, order):
         with_description = 'description' in search_detail['mapping']
         # Cannot rely on the super's _search_fetch because the search must be
         # performed among the most specific pages only.
@@ -290,7 +290,9 @@ class WebsitePage(models.Model):
                 return re.findall('(%s)' % pattern, text, flags=re.I) if pattern else False
             return True
         results = results.filtered(lambda result: filter_page(search, result, results))
-        return results[:limit], len(results)
+        start = offset
+        end = offset + limit
+        return results[start:end], len(results)
 
     def action_page_debug_view(self):
         return {

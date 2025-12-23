@@ -689,7 +689,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
         raise NotImplementedError()
 
     @api.model
-    def _search_fetch(self, search_detail, search, limit, order):
+    def _search_fetch(self, search_detail, search, limit, offset, order):
         fields = search_detail['search_fields']
         base_domain = search_detail['base_domain']
         domain = self._search_build_domain(base_domain, search, fields, search_detail.get('search_extra'))
@@ -697,6 +697,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
         results = model.search(
             domain,
             limit=limit,
+            offset=offset,
             order=search_detail.get('order', order)
         )
         count = model.search_count(domain) if limit and limit == len(results) else len(results)

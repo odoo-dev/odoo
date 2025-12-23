@@ -80,7 +80,7 @@ class WebsiteEventController(http.Controller):
         order = 'is_published desc, ' + order + ', id desc'
         search = searches.get('search')
         event_count, details, fuzzy_search_term = website._search_with_fuzzy("events", search,
-            limit=page * step, order=order, options=options)
+            limit=page * step, offset=0, order=order, options=options)
         event_details = details[0]
         events = event_details.get('results', Event)
         events = events[(page - 1) * step:page * step]

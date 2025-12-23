@@ -44,13 +44,13 @@
         <t t-set="bucket" t-value="group_result"/>
         <!-- Group header -->
         <div class="d-flex align-items-center justify-content-between">
-            <div t-if="Object.keys(results).length > 1" class="d-flex gap-1 p-2">
+            <div t-if="Object.keys(results).length > 1 || widget.searchType === 'all'" class="d-flex gap-1 p-2">
                 <span class="fw-bold" t-out="bucket.groupName"/>
-                <span class="text-muted"> - <t t-out="bucket.search_count"/> <t t-out="(bucket.search_count > 1) ? 'results': 'result'" /></span>
+                <span class="text-muted"> - <t t-out="bucket.searchCount"/> <t t-out="(bucket.searchCount > 1) ? 'results': 'result'" /></span>
             </div>
             <!-- Show 'View More' if bucket has more results than visibility limit -->
             <t t-set="redirect_hash" t-value="bucket['groupName'].replace(' ', '_').toLowerCase()"/>
-            <a t-if="bucket.search_count > limit and widget.searchType === 'all'"
+            <a t-if="bucket.searchCount > limit and widget.searchType === 'all'"
                 type="button"
                 class="text-primary-emphasis fw-semibold btn btn-link btn-sm"
                 t-attf-href="/website/search?search=#{search}##{redirect_hash}">
