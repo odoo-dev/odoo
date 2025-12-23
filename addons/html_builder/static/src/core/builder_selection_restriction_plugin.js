@@ -14,7 +14,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         uncrossable_element_selector: ["blockquote", "form", "div", "section", ".alert", ".row"],
         // restricted_to_paragraph_blocks_selector: CSS selectors of elements that
         // the selection should be restricted to paragraph blocks.
-        restricted_to_paragraph_blocks_selector: ["BLOCKQUOTE"],
+        restricted_to_paragraph_blocks_selector: [".s_blockquote"],
     };
 
     setup() {
@@ -257,33 +257,55 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         let tempFocusNode;
         for (const node of selectedNodes) {
             if (this.isNodeSelectionUncrossable(node, selectedNodes)) {
+                let newfocusNode, newfocusOffset;
+                // the selection is inside one uncrossable node, no need to
+                // correct it
                 if (node.contains(anchorNode) && node.contains(focusNode)) {
                     break;
                 } else if (!node.contains(anchorNode)) {
-                    let focusNode, focusOffset;
+                    // the node is not the first selected node and it's
+                    // uncrossable, we need to move the focusNode
+                    // before/after this uncrossable node
                     if (direction === DIRECTIONS.RIGHT) {
                         tempFocusNode = node.previousElementSibling || tempFocusNode;
-                        [focusNode, focusOffset] = getDeepestPosition(
+                        [newfocusNode, newfocusOffset] = getDeepestPosition(
                             tempFocusNode,
                             nodeSize(tempFocusNode)
                         );
                     } else {
                         tempFocusNode = node.nextElementSibling || tempFocusNode;
-                        [focusNode, focusOffset] = getDeepestPosition(tempFocusNode, 0);
+                        [newfocusNode, newfocusOffset] = getDeepestPosition(tempFocusNode, 0);
                     }
 
                     selection = this.dependencies.selection.setSelection({
                         anchorNode,
                         anchorOffset,
-                        focusNode,
-                        focusOffset,
+                        focusNode: newfocusNode,
+                        focusOffset: newfocusOffset,
                     });
+                } else {
+                    // the node is the first selected node and it's uncrossable, we
+                    // need to move the focusNode to the end/start of the uncrossable
+                    // node
+                    if (direction === DIRECTIONS.RIGHT) {
+                        [newfocusNode, newfocusOffset] = getDeepestPosition(node, nodeSize(node));
+                    } else {
+                        [newfocusNode, newfocusOffset] = getDeepestPosition(node, 0);
+                    }
+
+                    selection = this.dependencies.selection.setSelection({
+                        anchorNode,
+                        anchorOffset,
+                        focusNode: newfocusNode,
+                        focusOffset: newfocusOffset,
+                    });
+                    break;
                 }
-                break;
             } else {
                 tempFocusNode = node;
             }
         }
+
         this.dependencies.builderOptions.updateContainers(
             closestElement(selection.commonAncestorContainer)
         );
