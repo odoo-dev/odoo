@@ -7,6 +7,7 @@ import {
     isEmpty,
     isInPre,
     isProtected,
+    isSelfClosingElement,
     isShrunkBlock,
     isTangible,
     isTextNode,
@@ -1424,7 +1425,7 @@ export class DeletePlugin extends Plugin {
 
     // @todo: no need for this once selection in the editable root is corrected?
     normalizeEnterBlock(node, offset) {
-        while (isBlock(node.childNodes[offset])) {
+        while (isBlock(node.childNodes[offset]) && !isSelfClosingElement(node.childNodes[offset])) {
             [node, offset] = [node.childNodes[offset], 0];
         }
         return [node, offset];
