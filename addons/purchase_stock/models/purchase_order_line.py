@@ -239,6 +239,8 @@ class PurchaseOrderLine(models.Model):
         self.ensure_one()
         order = self.order_id
         price_unit = self.price_unit
+        if self.discount:
+            price_unit = price_unit * (1 - self.discount / 100.0)
         price_unit_prec = self.env['decimal.precision'].precision_get('Product Price')
         if self.tax_ids:
             qty = self.product_qty or 1
