@@ -12,9 +12,6 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         // uncrossable_element_selector: CSS selectors of elements that should not be
         // crossed by the selection.
         uncrossable_element_selector: ["blockquote", "form", "div", "section", ".alert", ".row"],
-        // restricted_to_paragraph_blocks_selector: CSS selectors of elements that
-        // the selection should be restricted to paragraph blocks.
-        restricted_to_paragraph_blocks_selector: [".s_blockquote"],
     };
 
     setup() {
