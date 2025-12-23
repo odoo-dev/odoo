@@ -212,7 +212,7 @@ class Website(Home):
 
     @http.route('/website/get_current_website', type='jsonrpc', auth="user", website=True, readonly=True)
     def get_current_website(self, **kwargs):
-        return request.env['ir.http']._get_current_website_id().id
+        return request.env['ir.http']._get_current_website_id()
 
     @http.route('/website/get_languages', type='jsonrpc', auth="user", website=True, readonly=True)
     def website_languages(self, **kwargs):

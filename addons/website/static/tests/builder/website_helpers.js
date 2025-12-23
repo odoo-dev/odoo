@@ -63,6 +63,7 @@ export function defineWebsiteModels() {
     defineMailModels();
     defineModels([Website, IrUiView]);
     onRpc("/website/theme_customize_data_get", () => []);
+    onRpc("/website/get_current_website", () => 1);
     onRpc("website", "web_search_read", () => ({
         length: 1,
         records: [
