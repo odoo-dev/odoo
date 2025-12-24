@@ -9,9 +9,17 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     static dependencies = ["selection", "operation", "builderOptions"];
 
     resources = {
-        // uncrossable_element_selector: CSS selectors of elements that should not be
-        // crossed by the selection.
-        uncrossable_element_selector: ["blockquote", "form", "div", "section", ".alert", ".row"],
+        // uncrossable_element_selector: CSS selectors of elements that should
+        // not be crossed by the selection.
+        uncrossable_element_selector: [
+            "blockquote",
+            "figcaption",
+            "form",
+            "div",
+            "section",
+            ".alert",
+            ".row",
+        ],
     };
 
     setup() {
@@ -139,8 +147,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     }
 
     /**
-     * Returns the element in which the selection should be restricted (by default,
-     * the closest `div` element).
+     * Returns the element in which the selection should be restricted (by
+     * default, the closest `div` element).
      *
      * @param {Node} anchorNode the current selection anchorNode
      * @returns {HTMLElement}
@@ -161,7 +169,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
      * Restricts the selection inside a given element.
      *
      * @param {Selection} selection
-     * @param {Element} elementEl the element that the selection should be restricted in
+     * @param {Element} elementEl element in which selection will be restricted
      */
     restrictSelectionInElement(selection, elementEl) {
         const { anchorNode, anchorOffset, focusNode, direction } = selection;
