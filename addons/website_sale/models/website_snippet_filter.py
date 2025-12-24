@@ -126,7 +126,10 @@ class WebsiteSnippetFilter(models.Model):
 
                     # TODO VFE combination_info is only called to get the price here
                     # factorize and avoid computing the rest
-                    if product.is_product_variant:
+                    if hide_variants:
+                        res_product.update(product._get_combination_info(only_template=True))
+                        res_product['product_id'] = product.product_variant_id.id
+                    elif product.is_product_variant:
                         res_product.update(product._get_combination_info_variant())
                     else:
                         res_product.update(product._get_combination_info())
