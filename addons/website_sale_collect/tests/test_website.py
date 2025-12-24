@@ -7,7 +7,7 @@ from odoo.addons.website_sale.tests.common import MockRequest
 from odoo.addons.website_sale_collect.tests.common import ClickAndCollectCommon
 
 
-@tagged('post_install', '-at_install')
+@tagged("post_install", "-at_install")
 class TestWebsite(ClickAndCollectCommon):
     @classmethod
     def setUpClass(cls):
