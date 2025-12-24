@@ -21,7 +21,7 @@ const sectionSnippet = unformat(`
 const blockquoteSnippet = unformat(`
     <section class="parent-target o_colored_level">
         <div class="container first-child">
-            <blockquote class="o_draggable">
+            <blockquote class="s_blockquote o_colored_level o_draggable">
                 <p class="p-target">p element in blockquote</p>
                 <div class="s_blockquote_infos">
                     <img src="${dummyBase64Img}">
@@ -220,7 +220,7 @@ test("selection restriction should be inside a <p> for special snippets - blockq
         unformat(
             `<section class="parent-target o_colored_level" contenteditable="false">
                 <div class="container first-child" contenteditable="true">
-                    <blockquote class="o_draggable">
+                    <blockquote class="s_blockquote o_colored_level o_draggable">
                         <p class="p-target">[p element in blockquote]</p>
                         <div class="s_blockquote_infos">
                             <img src="${dummyBase64Img}">
@@ -263,7 +263,7 @@ test("selection restriction should be inside a <p> for special snippets - blockq
         unformat(
             `<section class="parent-target o_colored_level" contenteditable="false">
                 <div class="container first-child" contenteditable="true">
-                    <blockquote class="o_draggable">
+                    <blockquote class="s_blockquote o_colored_level o_draggable">
                         <p class="p-target">[p element in blockquote]</p>
                         <div class="s_blockquote_infos">
                             <img src="${dummyBase64Img}">
@@ -306,7 +306,7 @@ test("selection restriction should be inside a <p> for special snippets - blockq
         unformat(
             `<section class="parent-target o_colored_level" contenteditable="false">
                 <div class="container first-child" contenteditable="true">
-                    <blockquote class="o_draggable">
+                    <blockquote class="s_blockquote o_colored_level o_draggable">
                         <p class="p-target">p element in blockquote</p>
                         <div class="s_blockquote_infos">
                             <img src="${dummyBase64Img}">
