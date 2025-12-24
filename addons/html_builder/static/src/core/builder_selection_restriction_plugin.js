@@ -36,7 +36,7 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         // corrections.
         this.isSelectionCorrected = false;
 
-        this.addDomListener(this.editable, "keydown", (ev) => {
+        this.addDomListener(this.editable.ownerDocument, "keydown", (ev) => {
             if (getActiveHotkey(ev) !== "control+a") {
                 return;
             }
