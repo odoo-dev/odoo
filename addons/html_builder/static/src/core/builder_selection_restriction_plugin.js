@@ -282,9 +282,9 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
                         focusOffset: newfocusOffset,
                     });
                 } else {
-                    // the node is the first selected node and it's uncrossable, we
-                    // need to move the focusNode to the end/start of the uncrossable
-                    // node
+                    // the node is the first selected node and it's uncrossable,
+                    // we need to move the focusNode to the end/start of the
+                    // uncrossable node
                     if (direction === DIRECTIONS.RIGHT) {
                         [newfocusNode, newfocusOffset] = getDeepestPosition(node, nodeSize(node));
                     } else {
