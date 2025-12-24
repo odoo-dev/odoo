@@ -21,6 +21,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
         this.restrictedToPSelectors = [
             ...new Set(this.getResource("restricted_to_paragraph_blocks_selector")),
         ].join(", ");
+        this.isCtrlAIgnoredPredicate = (selection) =>
+            this.getResource("ignore_ctrl_a_predicates").some((fn) => fn(selection));
 
         // Check if the selection has been corrected to avoid multiple
         // corrections.
@@ -71,17 +73,8 @@ export class BuilderSelectionRestrictionPlugin extends Plugin {
     onCtrlAKeydown() {
         const { editableSelection, currentSelectionIsInEditable } =
             this.dependencies.selection.getSelectionData();
-        const { anchorNode, commonAncestorContainer } = editableSelection;
-        if (
-            !currentSelectionIsInEditable ||
-            // If we clicked on an image inside a <figure> element, keep the
-            // selection on the image only, to not select the whole <figure>.
-            commonAncestorContainer.nodeName === "FIGURE" ||
-            // When main body is empty, and click the footer outer blue
-            // container then ctrl+a, the selection is collapsed in editable but
-            // to the main body div, which causes options updating.
-            (anchorNode.isContentEditable === false && editableSelection.isCollapsed)
-        ) {
+        const { anchorNode } = editableSelection;
+        if (!currentSelectionIsInEditable || this.isCtrlAIgnoredPredicate(editableSelection)) {
             return;
         }
 
