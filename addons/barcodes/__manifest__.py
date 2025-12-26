@@ -15,7 +15,7 @@
             'barcodes/static/src/**/*',
         ],
         'web.assets_unit_tests': [
-            'barcodes/static/tests/*.test.js',
+            'barcodes/static/tests/**/*',
         ],
     },
     'author': 'Odoo S.A.',

@@ -2,7 +2,7 @@
 
 import { Macro } from "@web/core/macro";
 import { beforeEach, expect, test } from "@odoo/hoot";
-import { advanceTime, animationFrame, press } from "@odoo/hoot-dom";
+import { advanceTime, animationFrame } from "@odoo/hoot-dom";
 import {
     contains,
     defineModels,
@@ -13,12 +13,7 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
-
-async function simulateBarCode(chars) {
-    for (const char of chars) {
-        await press(char);
-    }
-}
+import { simulateBarCode } from "@barcodes/../tests/helpers";
 
 class Product extends models.Model {
     name = fields.Char({ string: "Product name" });
@@ -49,7 +44,6 @@ beforeEach(() => {
     });
 });
 
-test.tags("desktop");
 test("Button with barcode_trigger", async () => {
     mockService("action", {
         doActionButton: (data) => {
@@ -80,7 +74,6 @@ test("Button with barcode_trigger", async () => {
     expect.verifySteps(["do_something"]);
 });
 
-test.tags("desktop");
 test("Two buttons with same barcode_trigger and the same string and action", async () => {
     mockService("action", {
         doActionButton: (data) => {
@@ -110,7 +103,6 @@ test("Two buttons with same barcode_trigger and the same string and action", asy
     expect.verifySteps(["do_something"]);
 });
 
-test.tags("desktop");
 test("edit, save and cancel buttons", async () => {
     onRpc("web_save", () => expect.step("save"));
     await mountView({

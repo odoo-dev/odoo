@@ -9,7 +9,6 @@ import { Component, xml } from "@odoo/owl";
 beforeEach(() => {
     patchWithCleanup(barcodeService, {
         maxTimeBetweenKeysInMs: 0,
-        isMobileChrome: true,
     });
 });
 class Root extends Component {

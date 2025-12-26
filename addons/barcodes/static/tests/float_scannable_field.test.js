@@ -13,13 +13,8 @@ import {
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { barcodeService } from "@barcodes/barcode_service";
-import { press } from "@odoo/hoot-dom";
+import { simulateBarCode } from "@barcodes/../tests/helpers";
 
-async function simulateBarCode(chars) {
-    for (const char of chars) {
-        await press(char);
-    }
-}
 class Product extends models.Model {
     name = fields.Char({ string: "Product name" });
     float_field = fields.Float({ string: "Float" });
@@ -81,7 +76,6 @@ test("widget field_float_scannable", async () => {
     view.env.services.barcode.bus.removeEventListener("barcode_scanned", onBarcodeScanned);
 });
 
-test.tags("mobile");
 test("do no update form twice after a command barcode scanned", async () => {
     patchWithCleanup(FormController.prototype, {
         onPagerUpdate(...args) {

@@ -96,7 +96,6 @@
             'point_of_sale/static/src/backend/pos_kanban_view/pos_kanban_view.dark.scss',
         ],
         'web.assets_tests': [
-            'barcodes/static/tests/legacy/helpers.js',
             'point_of_sale/static/tests/pos/tours/**/*',
             'point_of_sale/static/tests/generic_helpers/**/*',
             'point_of_sale/static/tests/customer_display/**/*',
@@ -216,7 +215,6 @@
             "web/static/lib/hoot-dom/**/*",
             "web_tour/static/src/js/**/*",
             'web_tour/static/src/tour_utils.js',
-            "barcodes/static/tests/legacy/helpers.js",
             "web/static/tests/legacy/helpers/utils.js",
             "web/static/tests/legacy/helpers/cleanup.js",
         ],
@@ -248,7 +246,6 @@
         ],
         'point_of_sale.assets_debug': [
             ('include', 'point_of_sale.base_tests'),
-            'barcodes/static/tests/legacy/helpers.js',
             'point_of_sale/static/tests/generic_helpers/**/*',
             'point_of_sale/static/tests/pos/tours/**/*',
         ],

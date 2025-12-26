@@ -250,7 +250,12 @@ patch(TourHelpers.prototype, {
      *  run : "press Enter",
      */
     async press(...args) {
-        await hoot.press(args.flatMap((arg) => typeof arg === "string" && arg.split("+")));
+        const options = typeof args.at(-1) === "object" ? args.pop() : undefined;
+
+        await hoot.press(
+            args.flatMap((arg) => (typeof arg === "string" ? arg.split("+") : arg)),
+            options
+        );
     },
 
     /**
