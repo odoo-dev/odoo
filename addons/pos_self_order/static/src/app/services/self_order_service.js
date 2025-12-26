@@ -129,7 +129,7 @@ export class SelfOrder extends Reactive {
                 return;
             }
             const product = this.models["product.product"].filter(
-                (p) => p.barcode === ev.detail.barcode
+                (p) => p.barcode === ev.detail.scannedCode
             )?.[0];
             if (!product) {
                 this.notification.add(_t("Product not found"), {

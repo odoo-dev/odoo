@@ -154,7 +154,7 @@ export const barcodeReaderService = {
 
         barcode.bus.addEventListener("barcode_scanned", (ev) => {
             if (barcodeReader) {
-                barcodeReader.scan(ev.detail.barcode);
+                barcodeReader.scan(ev.detail.scannedCode);
             } else {
                 dialog.add(AlertDialog, {
                     title: _t("Unable to parse barcode"),

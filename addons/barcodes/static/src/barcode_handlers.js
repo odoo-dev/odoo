@@ -78,7 +78,7 @@ export const barcodeGenericHandlers = {
     start(env, { ui, barcode, notification }) {
 
         barcode.bus.addEventListener("barcode_scanned", (ev) => {
-            const barcode = ev.detail.barcode;
+            const barcode = ev.detail.scannedCode;
             if (barcode.startsWith("OBT")) {
                 let targets = [];
                 try {

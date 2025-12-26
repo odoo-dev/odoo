@@ -44,7 +44,7 @@ test("widget field_float_scannable", async () => {
     Product._records[0].float_field = 4;
 
     const onBarcodeScanned = (event) => {
-        expect.step(`barcode scanned ${event.detail.barcode}`);
+        expect.step(`barcode scanned ${event.detail.scannedCode}`);
     };
 
     const view = await mountView({

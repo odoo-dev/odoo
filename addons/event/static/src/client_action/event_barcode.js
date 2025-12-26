@@ -27,7 +27,7 @@ export class EventScanView extends Component {
         this.isDisplayStandalone = isDisplayStandalone();
 
         const barcode = useService("barcode");
-        useBus(barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.barcode));
+        useBus(barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.scannedCode));
 
         onWillStart(this.onWillStart);
     }

@@ -11,8 +11,8 @@ export class BarcodeHandlerField extends Component {
         useBus(barcode.bus, "barcode_scanned", this.onBarcodeScanned);
     }
     onBarcodeScanned(event) {
-        const { barcode } = event.detail;
-        this.props.record.update({ [this.props.name]: barcode });
+        const { scannedCode } = event.detail;
+        this.props.record.update({ [this.props.name]: scannedCode });
     }
 }
 

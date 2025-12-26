@@ -54,10 +54,10 @@ class kioskAttendanceApp extends Component{
         this.lockScanner = false;
         if (this.props.kioskMode === 'settings' || this.props.fromTrialMode){
             this.manualKioskMode = false;
-            useBus(this.barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.barcode));
+            useBus(this.barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.scannedCode));
         }
         else if (this.props.kioskMode !== 'manual') {
-            useBus(this.barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.barcode));
+            useBus(this.barcode.bus, "barcode_scanned", (ev) => this.onBarcodeScanned(ev.detail.scannedCode));
             this.state.active_display = "main";
             this.manualKioskMode = false;
         } else {

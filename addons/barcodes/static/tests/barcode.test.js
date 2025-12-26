@@ -49,7 +49,7 @@ beforeEach(() => {
     });
 });
 
-test.tags("desktop");
+
 test("Button with barcode_trigger", async () => {
     mockService("action", {
         doActionButton: (data) => {
