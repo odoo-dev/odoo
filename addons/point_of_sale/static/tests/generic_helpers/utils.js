@@ -1,7 +1,4 @@
 /* global posmodel */
-
-import { simulateBarCode } from "@barcodes/../tests/legacy/helpers";
-
 export function negate(selector, parent = "body") {
     return `${parent}:not(:has(${selector}))`;
 }
@@ -13,8 +10,13 @@ export function scan_barcode(barcode) {
         {
             content: `PoS model scan barcode '${barcode}'`,
             trigger: "body", // The element here does not really matter as long as it is present
-            run: () => {
-                simulateBarCode([...barcode, "Enter"]);
+            run: async ({ press }) => {
+                //To remove after HOOT input event fix.
+                await press("");
+                for (const char of barcode) {
+                    await press(char, { shiftKey: /^[A-Z]$/.test(char) });
+                }
+                await press("Enter");
             },
         },
     ];
