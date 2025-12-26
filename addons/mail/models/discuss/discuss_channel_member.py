@@ -110,6 +110,69 @@ class DiscussChannelMember(models.Model):
         for store in stores.values():
             store.bus_send()
 
+    @api.autovacuum
+    def _gc_unpin_obsolete_conversations(self):
+        outdated_dt = fields.Datetime.now() - timedelta(days=30)
+        keep_last = 30
+        max_unpin = 1000
+        self.env["discuss.channel"].flush_model()
+        self.env["discuss.channel.member"].flush_model()
+        self.env["mail.message"].flush_model()
+        self.env.cr.execute(
+            """
+            WITH member_activity AS (
+                SELECT member.id,
+                       member.partner_id,
+                       member.guest_id,
+                       GREATEST(
+                           COALESCE(member.last_interest_dt, member.create_date),
+                           COALESCE(channel.last_interest_dt, channel.create_date)
+                       ) AS last_activity_dt
+                  FROM discuss_channel_member member
+                  JOIN discuss_channel channel
+                    ON channel.id = member.channel_id
+                 WHERE channel.channel_type IN ('chat', 'group')
+                   AND (member.is_favorite IS NOT TRUE)
+                   AND (
+                           member.unpin_dt IS NULL
+                        OR member.last_interest_dt >= member.unpin_dt
+                        OR channel.last_interest_dt >= member.unpin_dt
+                   )
+                   AND GREATEST(
+                           COALESCE(member.last_interest_dt, member.create_date),
+                           COALESCE(channel.last_interest_dt, channel.create_date)
+                       ) < %(outdated_dt)s
+                   AND NOT EXISTS (
+                       SELECT 1
+                         FROM mail_message
+                        WHERE mail_message.model = 'discuss.channel'
+                          AND mail_message.res_id = channel.id
+                          AND mail_message.message_type NOT IN ('notification', 'user_notification')
+                          AND mail_message.id >= member.new_message_separator
+                   )
+            ),
+            ranked AS (
+                SELECT id,
+                       last_activity_dt,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY COALESCE(partner_id, 0), COALESCE(guest_id, 0)
+                           ORDER BY last_activity_dt DESC
+                       ) AS rn
+                  FROM member_activity
+            )
+            SELECT id
+              FROM ranked
+             WHERE rn > %(keep_last)s
+             ORDER BY last_activity_dt ASC
+             LIMIT %(max_unpin)s
+            """,
+            {"outdated_dt": outdated_dt, "keep_last": keep_last, "max_unpin": max_unpin},
+        )
+        member_ids = [row[0] for row in self.env.cr.fetchall()]
+        if not member_ids:
+            return
+        self.env["discuss.channel.member"].browse(member_ids).unpin_dt = fields.Datetime.now()
+
     @api.constrains('partner_id')
     def _contrains_no_public_member(self):
         for member in self:
