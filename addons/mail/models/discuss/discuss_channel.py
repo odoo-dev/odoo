@@ -1535,6 +1535,7 @@ class DiscussChannel(models.Model):
             }
         )
         sub_channel.add_members(partner_ids=(self.env.user.partner_id | message.author_id).ids, post_joined_message=False)
+        Store(bus_channel=self).add(sub_channel).bus_send()
         notification = (
             Markup('<div class="o_mail_notification">%s</div>')
             % _(
