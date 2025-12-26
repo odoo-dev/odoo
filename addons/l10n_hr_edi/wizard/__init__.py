@@ -1,4 +1,1 @@
-from . import account_move_send_batch_wizard
-from . import account_move_send_wizard
-#from . import eracun_registration
-from . import mer_registration
+from . import l10n_hr_edi_mojeracun_reject_wizard

@@ -29,7 +29,7 @@ class TestHrEdiFlowsMocked(TestL10nHrEdiCommon, TestAccountMoveSendCommon, Patch
         return {
             'Username': '...',
             'Password': '...',
-            'CompanyId': self.env.company.l10n_hr_mer_company_id,
+            'CompanyId': self.env.company.l10n_hr_mer_company_ident,
             'SoftwareId': 'Test-002',
         }
 
@@ -81,7 +81,7 @@ class TestHrEdiFlowsMocked(TestL10nHrEdiCommon, TestAccountMoveSendCommon, Patch
 
     def test_10_send_invoice(self):
         self.setup_partner_as_hr(self.env.company.partner_id)
-        self.setup_partner_as_be(self.partner_a)
+        self.setup_partner_as_hr_alt(self.partner_a)
         tax = self.env['account.chart.template'].ref('VAT_S_IN_ROC_25')
 
         invoice = self.env['account.move'].create({
@@ -101,7 +101,7 @@ class TestHrEdiFlowsMocked(TestL10nHrEdiCommon, TestAccountMoveSendCommon, Patch
 
         send_and_print = self.create_send_and_print(invoice)
 
-        with file_open(f'l10n_hr_edi/tests/test_files/test_invoice.xml', 'r') as f:
+        with file_open('l10n_hr_edi/tests/test_files/test_invoice.xml', 'r') as f:
             expected_invoice_xml = f.read().replace('INV/2017/00001', invoice.name).encode()
 
         with self.assert_requests([
@@ -121,7 +121,7 @@ class TestHrEdiFlowsMocked(TestL10nHrEdiCommon, TestAccountMoveSendCommon, Patch
         # TODO: Any other fields to assert?
         self.assertRecordValues(invoice, [{
             'l10n_hr_mer_document_status': '20',
-            'l10n_hr_mer_document_id': '3083666',
+            'l10n_hr_mer_document_eid': '3083666',
         }])
 
 

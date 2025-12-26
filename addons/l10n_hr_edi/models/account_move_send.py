@@ -1,11 +1,38 @@
-from datetime import timedelta
+import logging
+import pytz
 
-from odoo import _, fields, models
-from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
+from odoo import api, fields, models
+from odoo.addons.l10n_hr_edi.models.l10n_hr_edi_mojeracun_connection import MojEracunServiceError
+from odoo.exceptions import UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountMoveSend(models.AbstractModel):
     _inherit = 'account.move.send'
+
+    @api.model
+    def _check_move_constrains(self, moves):
+        # HR-BR-37: Invoice must contain HR-BT-4: Operator code in accordance with the Fiscalization Act.
+        if any((move.country_code == 'HR' and not move.l10n_hr_operator_name) for move in moves):
+            raise UserError(self.env._("Operator label is required for sending invoices in Croatia."))
+        # HR-BR-9: Invoice must contain HR-BT-5: Operator OIB in accordance with the Fiscalization Act.
+        if any((move.country_code == 'HR' and not move.l10n_hr_operator_oib) for move in moves):
+            raise UserError(self.env._("Operator OIB is required for sending invoices in Croatia."))
+        # HR-BR-25: ensure KPD is provided for every business line except for advance (P4)
+        if any((move.country_code == 'HR' and move.l10n_hr_process_type != 'P4' and
+                any(line.display_type == 'product' and not line.l10n_hr_kpd_category_id for line in move.line_ids)) for move in moves):
+            raise UserError(self.env._('KPD categories must be defined on every invoice line for any Business Process Type other than P4.'))
+        if any((move.country_code == 'HR' and move.l10n_hr_process_type == 'P99' and not move.l10n_hr_customer_defined_process_name) for move in moves):
+            raise UserError(self.env._('Name of custom business process is required for Business Process Type P99.'))
+        if any((move.country_code == 'HR' and
+                len({line.tax_ids.tax_exigibility for line in move.line_ids if line.display_type == 'product'}) != 1) for move in moves):
+            raise ValidationError(self.env._('For Croatia, all VAT taxes on an invoice should either be cash basis or not.'))
+        if any(move.country_code == 'HR' and
+            any(any((tax.tax_exigibility == 'on_payment' and not tax.invoice_legal_notes) for tax in line.tax_ids
+             ) for line in move.line_ids if line.display_type == 'product') for move in moves):
+            raise ValidationError(self.env._('For Croatia, Legal Notes should be provided for all cash basis taxes.'))
+        super()._check_move_constrains(moves)
 
     # -------------------------------------------------------------------------
     # SENDING METHODS
@@ -15,13 +42,12 @@ class AccountMoveSend(models.AbstractModel):
         # EXTENDS 'account'
         if 'mojeracun' in kwargs.get('sending_methods', []):
             return 'ubl_hr'
-
         return super()._get_default_invoice_edi_format(move, **kwargs)
 
     def _is_applicable_to_company(self, method, company):
         # EXTENDS 'account'
         if method == 'mojeracun':
-            return company.l10n_hr_mer_proxy_state != 'rejected'
+            return company.l10n_hr_mer_connection_state == 'active' and company.country_code == 'HR'
         return super()._is_applicable_to_company(method, company)
 
     def _is_applicable_to_move(self, method, move, **move_data):
@@ -31,12 +57,10 @@ class AccountMoveSend(models.AbstractModel):
             invoice_edi_format = move_data.get('invoice_edi_format') or 'ubl_hr'
             return all([
                 self._is_applicable_to_company(method, move.company_id),
-                #partner._get_eracun_verification_state(invoice_edi_format) == 'valid', # Not required for MER
-                move.company_id.l10n_hr_mer_proxy_state != 'rejected',
+                partner.vat,    # Alternatively, partner GLN when proper support for that is added
                 move._need_ubl_cii_xml(invoice_edi_format)
-                or move.ubl_cii_xml_id and move.l10n_hr_mer_document_status not in {'20', '30', '40'},
+                or (move.ubl_cii_xml_id and move.l10n_hr_mer_document_status not in {'20', '30', '40'}),
             ])
-
         return super()._is_applicable_to_move(method, move, **move_data)
 
     def _hook_if_errors(self, moves_data, allow_raising=True):
@@ -45,103 +69,62 @@ class AccountMoveSend(models.AbstractModel):
         for move, move_data in moves_data.items():
             if 'mojeracun' in move_data['sending_methods'] and move_data.get('blocking_error'):
                 moves_failed_file_generation |= move
-
-        moves_failed_file_generation.l10n_hr_mer_document_status = '45'
-
+        moves_failed_file_generation.l10n_hr_mer_document_status = '50'
         return super()._hook_if_errors(moves_data, allow_raising=allow_raising)
 
+    @api.model
+    def _generate_and_send_invoices(self, moves, from_cron=False, allow_raising=True, allow_fallback_pdf=False, **custom_settings):
+        for move in moves:
+            if move.country_code == 'HR' and move.is_sale_document():
+                move.l10n_hr_edi_addendum_id = self.env['l10n_hr_edi.addendum'].create({
+                    'move_id': move.id,
+                    'fiscalization_number': move._get_l10n_hr_fiscalization_number(move.name),
+                    'invoice_sending_time': fields.Datetime.now(pytz.timezone('Europe/Zagreb')),
+                })
+        return super()._generate_and_send_invoices(moves, from_cron=from_cron, allow_raising=allow_raising, allow_fallback_pdf=allow_fallback_pdf, **custom_settings)
+
     def _call_web_service_after_invoice_pdf_render(self, invoices_data):
-        print("--- DEBUG: _call_web_service() ---")
         # EXTENDS 'account'
         super()._call_web_service_after_invoice_pdf_render(invoices_data)
 
-        #self.env.invalidate_all()
-        #self.env.flush_all()
-        params = {'documents': []}
         for invoice, invoice_data in invoices_data.items():
-            print("--- DEBUG: _call_web_service() - loop:", invoice, "---")
-            # Looks like MojEracun determines the receiver endpoint entirely from the XML
-            # (as there are no other parameters for the send API), so no need to check for partner endpoint
-            #partner = invoice.partner_id.commercial_partner_id.with_company(invoice.company_id)
+            # MojEracun determines the receiver endpoint entirely from the XML,
+            # so there is no need to check for partner endpoint
             if 'mojeracun' not in invoice_data['sending_methods']:
-                print("--- DEBUG: _call_web_service() - not in sending methods! ---")
                 continue
-
-            """if not partner.eracun_identifier_type or not partner.eracun_identifier_value:
-                invoice.eracun_move_state = 'error'
-                invoice_data['error'] = _('The partner is missing eRacun Endpoint Type or Value.')
-                continue"""
-
-            # Verification of a partner existing can be done with check ID API if it starts working,
-            # but otherwise there is no such thing as externally available MER ID to even save
-            """if partner._get_eracun_verification_state(invoice_data['invoice_edi_format']) != 'valid':
-                invoice.eracun_move_state = 'error'
-                invoice_data['error'] = _('Please verify partner configuration in partner settings.')
-                continue"""
-
             if not self._is_applicable_to_move('mojeracun', invoice, **invoice_data):
-                print("--- DEBUG: _call_web_service() - not appliccable! ---")
-                continue
+                raise UserError(self.env._("Failed to send invoice via MojEracun: check configuration."))
 
             if invoice_data.get('ubl_cii_xml_attachment_values'):
-                print("--- DEBUG: _call_web_service() - getting raw from invoice_data ---")
                 xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
-                #filename = invoice_data['ubl_cii_xml_attachment_values']['name']
-            # Check appliccable states!
             elif invoice.ubl_cii_xml_id and invoice.l10n_hr_mer_document_status not in {'20', '30', '40'}:
-                print("--- DEBUG: _call_web_service() - getting raw from invoice ---")
                 xml_file = invoice.ubl_cii_xml_id.raw
-                #filename = invoice.ubl_cii_xml_id.name
             else:
-                print("--- DEBUG: _call_web_service() - error getting xml ---")
-                invoice.l10n_hr_mer_document_status = '45'
+                invoice.l10n_hr_edi_addendum_id.mer_document_status = '50'
                 builder = invoice.partner_id.commercial_partner_id._get_edi_builder(invoice_data['invoice_edi_format'])
-                invoice_data['error'] = _(
+                invoice_data['error'] = self.env._(
                     "Errors occurred while creating the EDI document (format: %s):",
                     builder._description,
                 )
-                continue
+                return
+            invoice_data['error'] = self._l10n_hr_send_to_mer(invoice, xml_file)
 
-            #receiver_identification = f"{partner.eracun_identifier_type}:{partner.eracun_identifier_value}"
-            """params['documents'].append({
-                'filename': filename,
-                #'receiver': receiver_identification,
-                'ubl': b64encode(xml_file).decode(),
-            })
-            invoices_data_mer[invoice] = invoice_data"""
-
-            # For MojEracun, we can only send invoices one by one
-            """if not params['documents']:
-                print("--- DEBUG: _call_web_service() - no documents! ---")
-                return"""
-
-            edi_user = invoice.company_id.l10n_hr_mojeracun_user
-
-            print("--- DEBUG: _call_web_service(): xml_file:", xml_file[:100], "---")
-            # This instead should call the _mer_send() method now, giving it only needs the move itself.
-            try:
-                response = edi_user._mer_api_send(xml_file.decode())
-            except AccountEdiProxyError as e:
-                print("--- DEBUG: _call_web_service() - error sending 1 ---")
-                invoice.l10n_hr_mer_document_status = '45'
-                invoice_data['error'] = e.message
+    def _l10n_hr_send_to_mer(self, invoice, xml_file):
+        addendum = invoice.l10n_hr_edi_addendum_id
+        try:
+            response = self.env['l10n_hr_edi.mojeracun_connection']._mer_api_send(invoice.company_id, xml_file.decode())
+        except MojEracunServiceError as e:
+            addendum.mer_document_status = '50'
+            return e.message
+        else:
+            if not isinstance(response, list) and response.get('File'):
+                addendum.mer_document_status = '50'
+                return response.get('File')['Messages']
             else:
-                print("--- DEBUG: _call_web_service() - response:", response,  "---")
-                if response.status_code != 200:
-                    invoice.l10n_hr_mer_document_status = '45'
-                    invoice_data['error'] = f"HTTP error: status code {response.status_code}"
-                else:
-                    if response.json().get('File'): # This appears to be the "error" format
-                        print("--- DEBUG: _call_web_service() - error sending:", response.json().get('File'), "---")
-                        invoice.l10n_hr_mer_document_status = '45'
-                        invoice_data['error'] = response.json().get('File')
-                    else:
-                        print("--- DEBUG: _call_web_service() - response:", response.json(), "---")
-                        invoice.l10n_hr_mer_document_id = response.json()['ElectronicId']
-                        invoice.l10n_hr_mer_document_status = '20'
-                        log_message = _('The document has been sent to MojEracun service provider for processing')
-                        invoice._message_log(body=log_message)
-                        self.env.ref('l10n_hr_edi.ir_cron_mer_update_outbox_document_status')._trigger(at=fields.Datetime.now() + timedelta(minutes=5))
-
+                addendum.mer_document_eid = response['ElectronicId']
+                addendum.mer_document_status = '20'
+                log_message = self.env._('The document has been sent to MojEracun service provider for processing')
+                invoice._message_log(body=log_message)
         if self._can_commit():
-            self._cr.commit()
+            self.env.cr.commit()
+        return

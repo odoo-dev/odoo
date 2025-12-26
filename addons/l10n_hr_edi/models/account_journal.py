@@ -4,22 +4,41 @@ from odoo import fields, models
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
-    l10n_hr_mer_proxy_state = fields.Selection(related='company_id.l10n_hr_mer_proxy_state')
-    is_eracun_journal = fields.Boolean(string='Journal used for eRacun')
+    l10n_hr_business_premises_label = fields.Char(
+        string="Business premises label",
+        default='1',
+        required=True,
+        size=20,
+        help="Must contain at least one character and a maximum of 20 numeric (0-9) and/or alphabetic (a-z, A-Z) characters.",
+    )
+    l10n_hr_issuing_device_label = fields.Char(
+        string="Issuing device label",
+        default=1,
+        required=True,
+        help="Must contain only numeric characters",
+    )
+    l10n_hr_business_premises_label_refund = fields.Char(
+        string="Business premises label (refund approval)",
+        default='1',
+        required=True,
+        size=20,
+        help="Must contain at least one character and a maximum of 20 numeric (0-9) and/or alphabetic (a-z, A-Z) characters.",
+    )
+    l10n_hr_issuing_device_label_refund = fields.Char(
+        string="Issuing device label (refund approval)",
+        default=2,
+        required=True,
+        help="Must contain only numeric characters",
+    )
+    # MER-specific fields
+    l10n_hr_mer_connection_state = fields.Selection(related='company_id.l10n_hr_mer_connection_state')
+    l10n_hr_is_mer_journal = fields.Boolean(string='Journal used for eRacun via MojEracun')
 
-    # These don't have parameters for Nemhandel, not even 'self', just triggering general calls - do we need this in eRacun?
-    """def nemhandel_get_new_documents(self):
-        edi_users = self.env['account_edi_proxy_client.user'].search([
-            ('company_id.l10n_dk_nemhandel_proxy_state', '=', 'receiver'),
-            ('company_id', 'in', self.company_id.ids),
-            ('proxy_type', '=', 'nemhandel'),
-        ])
-        edi_users._nemhandel_get_new_documents()"""
+    def l10n_hr_mer_get_new_documents(self):
+        self.env['l10n_hr_edi.mojeracun_connection']._mer_get_new_documents(self.company_id, undelivered_only=True)
 
-    """def nemhandel_get_message_status(self):
-        edi_users = self.env['account_edi_proxy_client.user'].search([
-            ('company_id.l10n_dk_nemhandel_proxy_state', '=', 'receiver'),
-            ('company_id', 'in', self.company_id.ids),
-            ('proxy_type', '=', 'nemhandel'),
-        ])
-        edi_users._nemhandel_get_message_status()"""
+    def l10n_hr_mer_get_new_documents_all(self):
+        self.env['l10n_hr_edi.mojeracun_connection']._mer_get_new_documents(self.company_id, undelivered_only=False)
+
+    def l10n_hr_mer_get_message_status(self):
+        self.env['l10n_hr_edi.mojeracun_connection']._mer_fetch_document_status_company(self.company_id)

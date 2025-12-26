@@ -2027,7 +2027,7 @@ class PatchRequestsMixin(TestCase):
     def assert_requests(self, expected_requests_and_responses: list[tuple[dict, requests.Response]]):
         """ Assert expected requests and provide mocked responses in a record/replay fashion.
 
-        Patches `requests.Session.request`, which is the main method internally used by the 
+        Patches `requests.Session.request`, which is the main method internally used by the
         `requests` library to perform HTTP requests.
 
         This allows simulating external APIs during tests.
@@ -2111,11 +2111,11 @@ class PatchRequestsMixin(TestCase):
                 try:
                     diff = generate_diff(response.json(), expected_response.json())
                     warning_msg += 'Content: \n%s' % diff
-                except Exception:
+                except (TypeError, requests.exceptions.InvalidJSONError):
                     try:
                         diff = generate_diff(response.text, expected_response.text)
                         warning_msg += 'Content: \n%s' % diff
-                    except Exception:
+                    except (TypeError, requests.exceptions.InvalidJSONError):
                         warning_msg += 'Content: \n%s\n != \n%s' % (response.content, expected_response.content)
                 _logger.warning(warning_msg)
 
