@@ -954,7 +954,8 @@ class BaseAutomation(models.Model):
                 # check postconditions, and execute automations on the records that satisfy them
                 for automation in automations.with_context(old_values=old_values):
                     records, domain_post = automation._filter_post_export_domain(pre[automation], feedback=True)
-                    automation._process(records, domain_post=domain_post, trigger='_compute_field_value')
+                    with self.env.protecting(list(records._fields.values()), records):
+                        automation._process(records, domain_post=domain_post, trigger='_compute_field_value')
                 return True
 
             return _compute_field_value
