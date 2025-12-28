@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <field name="dest_address_id" position="attributes">
                     <attribute name="groups">sales_team.group_sale_salesman</attribute>
-                    <attribute name="readonly">locked or has_sale_order</attribute>
+                    <attribute name="readonly">locked</attribute>
                 </field>
             </field>
         </record>
