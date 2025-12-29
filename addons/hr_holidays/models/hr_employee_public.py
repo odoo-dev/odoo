@@ -16,6 +16,11 @@ class HrEmployeePublic(models.Model):
         help='Select the user responsible for approving "Time Off" of this employee.\n'
              'If empty, the approval is done by an Administrator or Approver (determined in settings/users).')
     leave_date_to = fields.Date('To Date', compute='_compute_leave_status')
+    leave_date_to_period = fields.Selection(
+        [('am', 'Morning'), ('pm', 'Afternoon')],
+        string="Return Period",
+        compute='_compute_leave_status',
+    )
     show_leaves = fields.Boolean('Able to see Remaining Time Off', compute='_compute_show_leaves')
     is_absent = fields.Boolean('Absent Today', compute='_compute_leave_status', search='_search_absent_employee')
     allocation_display = fields.Char(compute='_compute_allocation_display')
@@ -28,7 +33,7 @@ class HrEmployeePublic(models.Model):
         self._compute_from_employee('leave_manager_id')
 
     def _compute_leave_status(self):
-        self._compute_from_employee(['leave_date_to', 'is_absent'])
+        self._compute_from_employee(['leave_date_to', 'leave_date_to_period', 'is_absent'])
 
     def _search_absent_employee(self, operator, value):
         if operator != 'in':
@@ -72,3 +77,4 @@ class HrEmployeePublic(models.Model):
     def _store_avatar_card_fields(self, res: Store.FieldList):
         super()._store_avatar_card_fields(res)
         res.attr("leave_date_to")
+        res.attr("leave_date_to_period")

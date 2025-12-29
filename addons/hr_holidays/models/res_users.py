@@ -10,6 +10,11 @@ class ResUsers(models.Model):
     _inherit = "res.users"
 
     leave_date_to = field_employee(fields.Date, 'leave_date_to')
+    leave_date_to_period = field_employee(
+        fields.Selection,
+        'leave_date_to_period',
+        selection=[('am', 'Morning'), ('pm', 'Afternoon')],
+    )
 
     def _compute_im_status(self):
         super()._compute_im_status()
@@ -76,4 +81,4 @@ class ResUsers(models.Model):
     def _store_main_user_fields(self, res: Store.FieldList):
         super()._store_main_user_fields(res)
         if res.is_for_internal_users():
-            res.many("employee_ids", ["leave_date_to"])
+            res.many("employee_ids", ["leave_date_to", "leave_date_to_period"])

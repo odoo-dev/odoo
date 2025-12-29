@@ -4,6 +4,6 @@ import { patch } from "@web/core/utils/patch";
 
 patch(HrEmployeePublic.prototype, {
     _get_store_avatar_card_fields() {
-        return [...super._get_store_avatar_card_fields(), "leave_date_to"];
+        return [...super._get_store_avatar_card_fields(), "leave_date_to", "leave_date_to_period"];
     },
 });

@@ -109,6 +109,25 @@ test("Discuss Sidebar shows out of office indication", async () => {
     });
 });
 
+test("Discuss Sidebar shows out of office indication for half-day leave", async () => {
+    mockDate("2025-04-08 12:00:00");
+    const pyEnv = await startServer();
+    pyEnv["hr.employee"].create({
+        user_id: serverState.userId,
+        leave_date_to: DateTime.now().plus({ days: 3 }).toISODate(),
+        leave_date_to_period: "pm",
+    });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [Command.create({ partner_id: serverState.partnerId })],
+        channel_type: "chat",
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-DiscussSidebarChannel-itemName .text-warning", {
+        text: "Back on Apr 11 afternoon",
+    });
+});
+
 test("CTRL+K command shows out of office indication", async () => {
     mockDate("2025-04-08 12:00:00");
     const pyEnv = await startServer();

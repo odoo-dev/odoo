@@ -9,6 +9,9 @@ patch(AvatarCardResourcePopover.prototype, {
         if (!this.employee?.leave_date_to) {
             return "";
         }
-        return getOutOfOfficeDateEndText(this.employee.leave_date_to);
+        return getOutOfOfficeDateEndText(
+            this.employee.leave_date_to,
+            this.employee.leave_date_to_period
+        );
     },
 });

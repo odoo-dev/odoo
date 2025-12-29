@@ -34,6 +34,11 @@ class HrEmployee(models.Model):
         ], groups="hr.group_hr_user")
     leave_date_from = fields.Date('From Date', compute='_compute_leave_status', groups="hr.group_hr_user")
     leave_date_to = fields.Date('To Date', compute='_compute_leave_status')
+    leave_date_to_period = fields.Selection(
+        [('am', 'Morning'), ('pm', 'Afternoon')],
+        string="Return Period",
+        compute='_compute_leave_status',
+    )
     allocation_count = fields.Float('Total number of days allocated.', compute='_compute_allocation_count',
                                     groups="hr.group_hr_user")
     allocations_count = fields.Integer('Total number of allocations', compute="_compute_allocation_count",
@@ -152,11 +157,17 @@ class HrEmployee(models.Model):
             leave_data[holiday.employee_id.id]['leave_date_from'] = holiday.date_from.date()
             back_on = holiday.employee_id._get_first_working_interval(holiday.date_to)
             leave_data[holiday.employee_id.id]['leave_date_to'] = back_on.date() if back_on else None
+            leave_data[holiday.employee_id.id]['leave_date_to_period'] = (
+                'pm' if holiday.leave_type_request_unit == 'half_day' and back_on and back_on.hour >= 12
+                else 'am' if holiday.leave_type_request_unit == 'half_day' and back_on
+                else False
+            )
             leave_data[holiday.employee_id.id]['current_leave_state'] = holiday.state
 
         for employee in self:
             employee.leave_date_from = leave_data.get(employee.id, {}).get('leave_date_from')
             employee.leave_date_to = leave_data.get(employee.id, {}).get('leave_date_to')
+            employee.leave_date_to_period = leave_data.get(employee.id, {}).get('leave_date_to_period')
             employee.current_leave_state = leave_data.get(employee.id, {}).get('current_leave_state')
             employee.is_absent = leave_data.get(employee.id) and leave_data.get(employee.id).get('current_leave_state') == 'validate'
 
@@ -634,3 +645,4 @@ class HrEmployee(models.Model):
     def _store_avatar_card_fields(self, res: Store.FieldList):
         super()._store_avatar_card_fields(res)
         res.attr("leave_date_to")
+        res.attr("leave_date_to_period")

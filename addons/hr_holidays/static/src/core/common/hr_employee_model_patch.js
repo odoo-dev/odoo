@@ -6,5 +6,6 @@ patch(HrEmployee.prototype, {
     setup() {
         super.setup();
         this.leave_date_to = fields.Date();
+        this.leave_date_to_period = fields.Attr(undefined);
     },
 });
