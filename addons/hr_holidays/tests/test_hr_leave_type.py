@@ -114,3 +114,24 @@ class TestHrLeaveType(TestHrHolidaysCommon):
             ).search([('has_valid_allocation', '=', True)], limit=1)
 
         self.assertFalse(leave_types, "Got valid leaves outside vaild period")
+
+    def test_virtual_leave_search(self):
+        leave_type = self.env['hr.leave.type'].create({
+            'name': 'Paid Time Off',
+            'time_type': 'leave',
+            'requires_allocation': False,
+        })
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+        employee_allocation = self.env['hr.leave.allocation'].create({
+            'employee_id': employee.id,
+            'holiday_status_id': leave_type.id,
+            'allocation_type': 'regular',
+            'number_of_days': 3
+        })
+        employee_allocation.action_approve()
+
+        matching_types = self.env['hr.leave.type'].with_context(employee_id=employee.id).search([
+            ('virtual_remaining_leaves', '>=', 1),
+        ])
+
+        self.assertIn(leave_type, matching_types)
