@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import ast
 import json
 import functools
 import itertools
@@ -303,6 +304,16 @@ class IrFieldsConverter(models.AbstractModel):
                     raise self._format_import_error(ValueError, msg, {'value': val, 'label_property': property_dict['string']})
 
         return value, warnings
+
+    def _str_to_properties_definition(self, model, field, value):
+        try:
+            return ast.literal_eval(value), []
+        except (SyntaxError, ValueError):
+            raise self._format_import_error(
+                ValueError,
+                self.env._("'%s' does not seem to be a valid properties definition for field '%%(field)s'"),
+                value
+            )
 
     @api.model
     def _str_to_boolean(self, model, field, value):
