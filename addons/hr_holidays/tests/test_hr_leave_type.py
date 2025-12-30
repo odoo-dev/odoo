@@ -114,3 +114,32 @@ class TestHrLeaveType(TestHrHolidaysCommon):
             ).search([('has_valid_allocation', '=', True)], limit=1)
 
         self.assertFalse(leave_types, "Got valid leaves outside vaild period")
+
+    def test_search_virtual_remaining_leaves_with_allocation(self):
+        leave_type_with_alloc = self.env['hr.leave.type'].create({
+            'name': 'Paid Time Off (Allocated)',
+            'requires_allocation': True
+        })
+
+        alloc = self.env['hr.leave.allocation'].create({
+            'name': 'Ten Days Allocation',
+            'holiday_status_id': leave_type_with_alloc.id,
+            'number_of_days': 10,
+            'employee_id': self.employee_emp.id,
+            'state': 'confirm',
+        })
+        alloc.action_approve()
+
+        search_results = self.env['hr.leave.type'].with_user(self.user_employee).search([('virtual_remaining_leaves', '>', 5)])
+
+        self.assertIn(leave_type_with_alloc, search_results, "The leave type should be found as it has 7 virtual days left.")
+
+    def test_search_virtual_remaining_leaves_without_allocation(self):
+        leave_type_no_alloc = self.env['hr.leave.type'].create({
+            'name': 'Sick Leave (Non-Allocated)',
+            'requires_allocation': False
+        })
+
+        search_results = self.env['hr.leave.type'].with_user(self.user_employee).search([('virtual_remaining_leaves', '>', 5)])
+
+        self.assertIn(leave_type_no_alloc, search_results, "The leave type should be found as it has infinite virtual days left.")
