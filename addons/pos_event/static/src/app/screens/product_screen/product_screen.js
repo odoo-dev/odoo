@@ -125,7 +125,7 @@ patch(ProductScreen.prototype, {
                     { simpleChoice: {}, textAnswer: {} }
                 );
 
-                this.pos.models["event.registration"].create({
+                const data = this.pos.models["event.registration"].create({
                     ...userData,
                     event_id: event,
                     event_ticket_id: ticket,

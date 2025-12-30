@@ -28,25 +28,60 @@ export class EventRegistrationPopup extends Component {
             }
             return acc;
         }, []);
-
         for (const [idx, data] of Object.entries(this.dataInQty)) {
             this.state.byRegistration[idx] = {
                 ticket_id: data.ticket_id,
                 product_id: data.product_id,
                 questions: {},
             };
-
+            const QUESTION_TYPE_MAP = {
+                name: "name",
+                email: "email",
+                phone: "phone",
+                company_name: "company_name",
+                registration_answer_ids: "value_text_box",
+                registration_answer_choice_ids: "value_answer_id",
+            };
             for (const question of this.questionsByRegistration) {
-                this.state.byRegistration[idx].questions[question.id] = "";
+                if (data.registration_ids) {
+                    const registration = data.registration_ids[idx];
+                    const answers = this.state.byRegistration[idx].questions;
+                    if (!answers[question.id]) {
+                        answers[question.id] =
+                            registration?.[QUESTION_TYPE_MAP[question.question_type]] || "";
+                    }
+                    if (question.question_type === "simple_choice") {
+                        const choiceAnswer = registration.registration_answer_choice_ids?.find(
+                            (ans) =>
+                                ans.question_id?.id == question.id && // match the question
+                                ans.question_id?.question_type === "simple_choice"
+                        );
+                        if (choiceAnswer) {
+                            answers[question.id] = choiceAnswer.value_answer_id?.id || "";
+                        }
+                    }
+                    if (question.question_type === "text_box") {
+                        const textBoxAnswer = registration?.registration_answer_ids?.find(
+                            (ans) =>
+                                ans.question_id.id === question.id &&
+                                ans.question_id.question_type === "text_box"
+                        );
+
+                        if (textBoxAnswer) {
+                            answers[question.id] = textBoxAnswer.value_text_box || "";
+                        }
+                    }
+                } else {
+                    this.state.byRegistration[idx].questions[question.id] = "";
+                }
             }
-        }
+            for (const question of this.questionsOncePerOrder) {
+                this.state.byOrder[question.id] = "";
+            }
 
-        for (const question of this.questionsOncePerOrder) {
-            this.state.byOrder[question.id] = "";
-        }
-
-        if (this.props.event.question_ids.length === 0) {
-            this.confirm();
+            if (this.props.event.question_ids.length === 0) {
+                this.confirm();
+            }
         }
     }
 
