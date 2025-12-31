@@ -21,16 +21,21 @@ class L10nAccountDocumentType(models.Model):
             return document_number
 
         document_number = document_number.strip()
-        number_part = re.findall(r'[\d]+', document_number)
-        serie_part = re.findall(r'^[A-Za-z]+', document_number)
-        if not serie_part or len(serie_part) > 1 or len(serie_part[0]) > 2 \
-           or not number_part or len(number_part) > 1 or len(number_part[0]) > 7:
+        match = re.match(r'^([A-Za-z0-9]{1,2})(\d{7})$', document_number)
+        if not match:
             raise UserError(_(
                 "%(document_number)s is not a valid value for %(document_type)s.\n"
-                "The document number must be entered with a maximum of 2 letters for the first part "
-                "and 7 numbers for the second. The following are examples of valid document numbers:\n"
-                "- XX0000001\n - YY0000123\n - A0000001",
+                "The document number must have a maximum of 2 alphanumeric characters "
+                "for the first part and 7 digits for the second part. The following are "
+                "examples of valid document numbers:\n"
+                "- A00000001\n"
+                "- 1A0000001\n"
+                "- XX0000001\n"
+                "- YY0000123\n"
+                "- A0000001",
                 document_number=document_number,
                 document_type=self.name,
             ))
-        return serie_part[0].upper() + number_part[0].zfill(7)
+
+        serie, number = match.groups()
+        return serie.upper() + number
