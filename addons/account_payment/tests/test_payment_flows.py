@@ -3,10 +3,10 @@
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from odoo import Command
+from odoo import Command, fields
 from odoo.exceptions import AccessError
 from odoo.tests import tagged, JsonRpcException
-from odoo.tools import mute_logger
+from odoo.tools import format_date, mute_logger
 
 from odoo.addons.account_payment.controllers.payment import PaymentPortal
 from odoo.addons.account_payment.controllers.portal import PortalAccount
@@ -227,3 +227,60 @@ class TestFlows(AccountPaymentCommon, PaymentHttpCommon):
         self.assertEqual(values['next_amount_to_pay'], 26.0)
         self.assertEqual(values['payment_state'], 'not_paid')
         self.assertTrue(values['payment'])
+
+    def test_payment_link_wizard_defaults_from_invoice(self):
+        """
+        Test that the payment link wizard opened from the QR code
+        correctly uses default values from the invoice.
+        """
+        payment_term = self.env['account.payment.term'].create({
+            'name': '30% now, rest in 60 days',
+            'line_ids': [
+                Command.create({
+                    'value': 'percent',
+                    'value_amount': 30.00,
+                    'delay_type': 'days_after',
+                    'nb_days': 0,
+                }),
+                Command.create({
+                    'value': 'percent',
+                    'value_amount': 70.00,
+                    'delay_type': 'days_after',
+                    'nb_days': 60,
+                }),
+            ],
+        })
+        invoice_date = fields.Date.today() - timedelta(days=1)
+        invoice = self.init_invoice(
+            'out_invoice', partner=self.partner, invoice_date=invoice_date, amounts=[1000.0]
+        )
+        invoice.invoice_payment_term_id = payment_term
+        invoice.action_post()
+        wizard = self.env['payment.link.wizard'].with_context(
+            active_model='account.move',
+            active_id=invoice.id,
+        ).create({})
+
+        self.assertEqual(wizard.res_model, 'account.move')
+        self.assertEqual(wizard.res_id, invoice.id)
+        self.assertEqual((wizard.amount), 300.0)  # 30% of 1000 first installment
+        self.assertEqual(wizard.amount_max, invoice.amount_residual)
+        self.assertEqual(
+            wizard.open_installments,
+            [
+                {
+                    "type": "overdue",
+                    "number": 1,
+                    "amount": 300.0,
+                    "date_maturity": format_date(self.env, invoice_date),
+                },
+                {
+                    "type": "next",
+                    "number": 2,
+                    "amount": 700.0,
+                    "date_maturity": format_date(
+                        self.env, invoice_date + timedelta(days=60)
+                    ),
+                },
+            ],
+        )
