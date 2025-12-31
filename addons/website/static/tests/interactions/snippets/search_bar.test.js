@@ -90,6 +90,7 @@ test("searchbar triggers a search when text is entered", async () => {
  * 3. ArrowLeft/Right navigate horizontally within the grid
  * 4. ArrowDown wraps around rows to next row's first column
  */
+test.tags("desktop");
 test("search results keyboard navigation with arrow keys", async () => {
     supportAutocomplete(6);
     await startInteractions(searchTemplate);
@@ -104,37 +105,37 @@ test("search results keyboard navigation with arrow keys", async () => {
 
     const resultEls = queryAll("form .o_search_result_item > a");
     expect(resultEls).toHaveLength(6);
-    expect("form input[type=search]").toBeFocused();
+    expect(inputEl).toBeFocused();
 
     // ArrowDown from input focuses first result
     await press("down");
     await animationFrame();
-    expect("form .o_search_result_item:eq(0) > a").toBeFocused();
+    expect(resultEls[0]).toBeFocused();
 
     // ArrowDown moves to next row, same column
     await press("down");
     await animationFrame();
-    expect("form .o_search_result_item:eq(3) > a").toBeFocused();
+    expect(resultEls[3]).toBeFocused();
 
     // ArrowRight navigates to adjacent result (same row)
     await press("right");
     await animationFrame();
-    expect("form .o_search_result_item:eq(4) > a").toBeFocused();
+    expect(resultEls[4]).toBeFocused();
 
     // ArrowUp moves to previous row, same column
     await press("up");
     await animationFrame();
-    expect("form .o_search_result_item:eq(1) > a").toBeFocused();
+    expect(resultEls[1]).toBeFocused();
 
     // ArrowLeft navigates to adjacent result (same row)t
     await press("left");
     await animationFrame();
-    expect("form .o_search_result_item:eq(0) > a").toBeFocused();
+    expect(resultEls[0]).toBeFocused();
 
     // ArrowUp moves back to input
     await press("up");
     await animationFrame();
-    expect("form input[type=search]").toBeFocused();
+    expect(inputEl).toBeFocused();
 });
 
 test("searchbar removes results on escape", async () => {

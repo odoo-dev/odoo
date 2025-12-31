@@ -2,6 +2,7 @@ import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { rpc } from "@web/core/network/rpc";
+import { parseHTML } from "@html_editor/utils/html";
 
 export class SearchResults extends Interaction {
     static selector = ".container:has(.o_searchbar_result)";
@@ -46,7 +47,8 @@ export class SearchResults extends Interaction {
         if (!hasMore) {
             ev.target.classList.add("d-none");
         }
-        ev.target.insertAdjacentHTML("beforebegin", html);
+        const doc = parseHTML(document, html);
+        ev.target.parentNode.insertBefore(doc, ev.target);
         // Set offset for next loadMore
         ev.target.dataset.offset = offset + this.limit;
     }
