@@ -1,4 +1,4 @@
-import { Component } from "@odoo/owl";
+import { Component, onMounted, useEffect, useRef } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
@@ -14,8 +14,8 @@ export class TableMenu extends Component {
         addRow: Function,
         removeRow: Function,
         resetTableSize: Function,
-        overlay: Object,
         dropdownState: Object,
+        close: Function,
         target: { validate: (el) => el.nodeType === Node.ELEMENT_NODE },
         direction: { type: String, optional: true },
     };
@@ -23,15 +23,26 @@ export class TableMenu extends Component {
     static components = { Dropdown, DropdownItem };
 
     setup() {
-        if (this.props.type === "column") {
-            this.isFirst = this.props.target.cellIndex === 0;
-            this.isLast = !this.props.target.nextElementSibling;
-        } else {
-            const tr = this.props.target.parentElement;
-            this.isFirst = !tr.previousElementSibling;
-            this.isLast = !tr.nextElementSibling;
-        }
-        this.items = this.props.type === "column" ? this.colItems() : this.rowItems();
+        useEffect(
+            () => {
+                requestAnimationFrame(() => this.updatePosition());
+
+                if (this.props.type === "column") {
+                    this.isFirst = this.props.target.cellIndex === 0;
+                    this.isLast = !this.props.target.nextElementSibling;
+                } else {
+                    const tr = this.props.target.parentElement;
+                    this.isFirst = !tr.previousElementSibling;
+                    this.isLast = !tr.nextElementSibling;
+                }
+                this.items = this.props.type === "column" ? this.colItems() : this.rowItems();
+            },
+            () => [this.props.target]
+        );
+        this.dropdownRef = useRef("oe-menu");
+        onMounted(() => {
+            this.overlayEl = this.dropdownRef.el;
+        });
     }
 
     get hasCustomSize() {
@@ -42,9 +53,32 @@ export class TableMenu extends Component {
         );
     }
 
+    updatePosition() {
+        if (!this.overlayEl || !this.props.target) {
+            return;
+        }
+        const targetRect = this.props.target.getBoundingClientRect();
+        const container = this.overlayEl.parentElement;
+        const containerRect = container.getBoundingClientRect();
+        if (this.props.type === "column") {
+            Object.assign(this.overlayEl.style, {
+                position: "relative",
+                top: `${targetRect.top - containerRect.top - 18}px`,
+                left: `${targetRect.left - containerRect.left}px`,
+                width: `${targetRect.width}px`,
+            });
+        } else {
+            Object.assign(this.overlayEl.style, {
+                position: "relative",
+                top: `${targetRect.top - containerRect.top}px`,
+                left: `${targetRect.left - containerRect.left - 18}px`,
+                height: `${targetRect.height}px`,
+            });
+        }
+    }
     onSelected(item) {
         item.action(this.props.target);
-        this.props.overlay.close();
+        this.props.close();
     }
 
     colItems() {
