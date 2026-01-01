@@ -38,21 +38,13 @@ export default class OrderPaymentValidation {
     }
 
     get nextPage() {
+        const params = { orderUuid: this.order.uuid };
         if (this.pos.config.set_tip_after_payment && !this.order.is_tipped) {
             if (this.order.adjustableTipLine) {
-                return {
-                    page: "TipScreen",
-                    params: { orderUuid: this.order.uuid },
-                };
+                return { page: "TipScreen", params: params };
             }
         }
-
-        return {
-            page: "FeedbackScreen",
-            params: {
-                orderUuid: this.order.uuid,
-            },
-        };
+        return { page: "FeedbackScreen", params: params };
     }
 
     get paymentLines() {
@@ -115,13 +107,7 @@ export default class OrderPaymentValidation {
         }
         if (await this.isOrderValid(isForceValidate)) {
             // remove pending payments before finalizing the validation
-            const toRemove = [];
-            for (const line of this.paymentLines) {
-                if (!line.isDone() || line.amount === 0) {
-                    toRemove.push(line);
-                }
-            }
-
+            const toRemove = this.paymentLines.filter((pl) => pl.amount === 0 || !pl.isDone());
             for (const line of toRemove) {
                 this.order.removePaymentline(line);
             }

@@ -863,10 +863,6 @@ export class PosStore extends WithLazyGetterTrap {
         let merge = true;
         order.assertEditable();
 
-        const options = {
-            ...opts,
-        };
-
         if ("price_unit" in vals) {
             merge = false;
         }
@@ -884,11 +880,12 @@ export class PosStore extends WithLazyGetterTrap {
             qty: this.getOrder().preset_id?.is_return ? -1 : 1,
             tax_ids: productTemplate.taxes_id.map((tax) => ["link", tax]),
             product_id: productTemplate.product_variant_ids[0],
+            note: vals.note || "[]",
             ...vals,
         };
 
         // Handle refund constraints
-        if (order.isSaleDisallowed(values, options)) {
+        if (order.isSaleDisallowed(values, opts)) {
             this.dialog.add(AlertDialog, {
                 title: _t("Oops.."),
                 body: _t("Ensure you validate the refund before taking another order."),
@@ -916,7 +913,7 @@ export class PosStore extends WithLazyGetterTrap {
             vals,
             values,
             order,
-            options,
+            opts,
             configure
         );
 
@@ -924,16 +921,16 @@ export class PosStore extends WithLazyGetterTrap {
         this.handlePriceUnit(values, order, vals.price_unit);
 
         const line = this.data.models["pos.order.line"].create({ ...values, order_id: order });
-        line.setOptions(options);
+        line.setOptions(opts);
         this.selectOrderLine(order, line);
         if (configure) {
             this.numberBuffer.reset();
         }
         let selectedOrderline = order.getSelectedOrderline();
-        if (options.draftPackLotLines && configure) {
+        if (opts.draftPackLotLines && configure) {
             selectedOrderline.setPackLotLines({
-                ...options.draftPackLotLines,
-                setQuantity: options.quantity === undefined,
+                ...opts.draftPackLotLines,
+                setQuantity: opts.quantity === undefined,
             });
         }
 
@@ -1083,6 +1080,7 @@ export class PosStore extends WithLazyGetterTrap {
                         "link",
                         attr,
                     ]),
+                    note: "[]",
                     custom_attribute_value_ids: Object.entries(
                         comboItem.attribute_custom_values
                     ).map(([id, cus]) => [
@@ -1832,8 +1830,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         const data = await this.data.call("pos.order", "get_preparation_change", [order.id]);
-        const rawchange = data.last_order_preparation_change || "{}";
-        const lastChanges = JSON.parse(rawchange);
+        const lastChanges = JSON.parse(data.last_order_preparation_change || "{}");
         const lastServerDate = DateTime.fromSQL(lastChanges.metadata?.serverDate).toUTC();
         const lastLocalDate = DateTime.fromSQL(
             order.last_order_preparation_change?.metadata?.serverDate

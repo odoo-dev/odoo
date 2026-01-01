@@ -158,21 +158,6 @@ patch(PosOrder.prototype, {
         }
         return productIds;
     },
-    getOrderlines() {
-        const orderlines = super.getOrderlines(this, arguments);
-        const rewardLines = [];
-        const nonRewardLines = [];
-
-        for (const line of orderlines) {
-            if (line.is_reward_line) {
-                rewardLines.push(line);
-            } else {
-                nonRewardLines.push(line);
-            }
-        }
-
-        return [...nonRewardLines, ...rewardLines];
-    },
     _get_reward_lines() {
         if (this.lines) {
             return this.lines.filter((line) => line.is_reward_line);

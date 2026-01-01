@@ -38,7 +38,7 @@ class PosMakeInvoice(models.TransientModel):
 
         invoices = self.env['account.move']
 
-        if not self.consolidated_billing or len(selected_orders) == 1:
+        if not self.consolidated_billing or is_single_order:
             for order in selected_orders:
                 invoices |= order._generate_pos_order_invoice()
         else:
@@ -58,17 +58,9 @@ class PosMakeInvoice(models.TransientModel):
                     'context': {'orders': selected_orders.ids, 'dialog_size': 'medium'},
                 }
 
-            grouped_orders = []
-            for config, config_orders in selected_orders.grouped('config_id').items():
-                for partner, partner_orders in config_orders.grouped('partner_id').items():
-                    if not partner:
+            for config, partner, user, fp, orders in self.env['pos.order']._read_group([('id', 'in', self.env.context.get('active_ids'))], groupby=['config_id', 'partner_id', 'user_id', 'fiscal_position_id'], aggregates=['id:recordset']):
+                if not partner:
                         raise UserError(_("Kindly ensure that each order contains a customer."))
-
-                    for user, user_orders in partner_orders.grouped('user_id').items():
-                        for fiscal_position, fiscal_position_orders in user_orders.grouped('fiscal_position_id').items():
-                            grouped_orders.append(((config, partner, user, fiscal_position), fiscal_position_orders))
-
-            for _key, orders in grouped_orders:
                 invoices |= orders._generate_pos_order_invoice()
 
         if invoices:
