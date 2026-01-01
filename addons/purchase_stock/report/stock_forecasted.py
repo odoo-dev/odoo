@@ -36,3 +36,8 @@ class StockForecasted_Product_Product(models.AbstractModel):
                 [('product_tmpl_id', 'in', product_template_ids)]
             )
             return [('product_id', 'in', subquery_products)]
+
+    def _get_report_data(self, product_template_ids=False, product_ids=False):
+        res = super()._get_report_data(product_template_ids, product_ids)
+        res['user_can_edit_pickings'] = res.get('user_can_edit_pickings') or self.env.user.has_group('purchase.group_purchase_user')
+        return res
