@@ -290,14 +290,14 @@ class ResourceCalendar(models.Model):
             resources_list = list(resources) + [self.env['resource.resource']]
         resource_ids = [r.id for r in resources_list]
         domain = domain if domain is not None else []
-        domain = expression.AND([domain, [
+        domain_test = expression.AND([domain, [
             ('calendar_id', '=', self.id),
             ('resource_id', 'in', resource_ids),
             ('display_type', '=', False),
             ('day_period', '!=' if not lunch else '=', 'lunch'),
         ]])
 
-        attendances = self.env['resource.calendar.attendance'].search(domain)
+        attendances = self.env['resource.calendar.attendance'].search(domain_test)
         # Since we only have one calendar to take in account
         # Group resources per tz they will all have the same result
         resources_per_tz = defaultdict(list)
@@ -364,6 +364,7 @@ class ResourceCalendar(models.Model):
         }
         resource_calendars = resources._get_calendar_at(start_dt, tz)
         result_per_resource_id = dict()
+        compute_leaves = self.env.context.get('compute_leaves')
         for tz, tz_resources in resources_per_tz.items():
             res = result_per_tz[tz]
             res_intervals = WorkIntervals(res)
@@ -395,6 +396,27 @@ class ResourceCalendar(models.Model):
 
                     intervals = []
                     current_start_day = start_date
+                    holidays = self._leave_intervals_batch(start_dt, end_dt, resource, domain, tz=tz)
+                    current_holidays = holidays.get(resource.id if resource else False, [])
+
+                    # 1. Fetch current holidays/leaves
+                    current_holidays = holidays.get(resource.id if resource else False, [])
+
+                    # 2. Separate Personal Leaves from Public Holidays
+                    personal_leave_dates = set()
+                    public_holiday_dates = set()
+
+                    for start, end, record in current_holidays:
+                        curr_date = start.date()
+                        while curr_date <= end.date():
+                            if record.resource_id:
+                                personal_leave_dates.add(curr_date)
+                            else:
+                                public_holiday_dates.add(curr_date)
+                            curr_date += timedelta(days=1)
+
+                    # Calculate this once outside the while loops for performance
+                    is_leave_request = (end_date - start_date).days > 0
 
                     while current_start_day <= end_date:
                         current_end_of_week = current_start_day + timedelta(days=6)
@@ -413,6 +435,18 @@ class ResourceCalendar(models.Model):
 
                         current_day = week_start
                         while current_day <= week_end:
+                            day_noon = tz.localize(datetime.combine(current_day, time(12, 0)))
+
+                            is_public_holiday = any(
+                                h_start <= day_noon <= h_end
+                                for h_start, h_end, h_record in current_holidays
+                                if not h_record.resource_id
+                            )
+
+                            if compute_leaves and is_leave_request and is_public_holiday:
+                                current_day += timedelta(days=1)
+                                continue
+
                             if remaining_hours > 0:
                                 day_start = tz.localize(datetime.combine(current_day, time.min))
                                 day_end = tz.localize(datetime.combine(current_day, time.max))
@@ -531,7 +565,8 @@ class ResourceCalendar(models.Model):
         else:
             resources_list = list(resources) + [self.env['resource.resource']]
 
-        attendance_intervals = self._attendance_intervals_batch(start_dt, end_dt, resources, tz=tz or self.env.context.get("employee_timezone"))
+        attendance_intervals = self.with_context(compute_leaves=compute_leaves)._attendance_intervals_batch(start_dt, end_dt, resources, tz=tz or self.env.context.get("employee_timezone"))
+
         if compute_leaves:
             leave_intervals = self._leave_intervals_batch(start_dt, end_dt, resources, domain, tz=tz)
             return {
