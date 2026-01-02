@@ -47,6 +47,9 @@ export class BuilderInputBase extends Component {
     }
 
     onChange(ev) {
+        if (!this.isEditing) {
+            return;
+        }
         this.isEditing = false;
         const normalizedDisplayValue = this.props.commit(ev.target.value);
         ev.target.value = normalizedDisplayValue;
@@ -67,6 +70,9 @@ export class BuilderInputBase extends Component {
     }
 
     onKeydown(ev) {
+        if (ev.key === "Enter") {
+            this.onChange(ev);
+        }
         this.props.onKeydown?.(ev);
     }
 

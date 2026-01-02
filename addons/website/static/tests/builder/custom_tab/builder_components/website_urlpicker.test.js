@@ -143,3 +143,21 @@ test("collects anchors in current page and suggests them", async () => {
     expect(".we-bg-options-container input").toHaveValue("#anchor1");
     await expect(":iframe .test-options-target").toHaveAttribute("data-url", "#anchor1");
 });
+
+test("apply on enter", async () => {
+    mockGetSuggestedLinks();
+    addOption({
+        selector: ".test-options-target",
+        template: xml`<WebsiteUrlPicker dataAttributeAction="'url'" preview="false" />`,
+    });
+    await setupWebsiteBuilder(`<div class="test-options-target">b</div>`);
+    await contains(":iframe .test-options-target").click();
+
+    await contains(".we-bg-options-container input").edit("/test", { confirm: "enter" });
+    expect(".we-bg-options-container input").toHaveValue("/test");
+    expect(":iframe .test-options-target").toHaveAttribute("data-url", "/test");
+
+    await contains(".we-bg-options-container input").edit("", { confirm: "enter" });
+    expect(".we-bg-options-container input").toHaveValue("");
+    expect(":iframe .test-options-target").not.toHaveAttribute("data-url");
+});

@@ -120,3 +120,55 @@ test("Test Carousel Option (s_image_gallery)", async () => {
     expect(carouselEl).toHaveAttribute("data-bs-ride", "false");
     expect(carouselEl).toHaveAttribute("data-bs-interval", "1000");
 });
+
+test("Snippet carousel clickable slides", async () => {
+    const slideLinkSelector = ":iframe .carousel-item.active a.slide-link";
+    const slideUrlInputSelector = "div[data-action-id='setSlideAnchorUrl'] input[title='Your URL']";
+
+    await setupWebsiteBuilderWithSnippet("s_carousel");
+    await contains(":iframe .carousel .carousel-item.active").click();
+
+    // Make the Slide clickable
+    await contains("[data-action-id='makeSlideClickable'] input").click();
+    expect(":iframe .carousel-item.active").toHaveClass("clickable-slide", {
+        message: "Check that the 'clickable-slide' class is added to the carousel item",
+    });
+
+    // Set URL
+    await contains(slideUrlInputSelector).edit("/contactus-thank-you");
+    expect(slideLinkSelector).toHaveAttribute("href", "/contactus-thank-you", {
+        message: "Check that the anchor tag is added to the carousel item",
+    });
+
+    // Enable the option to open the link in a new tab
+    await contains("[data-label='Open in New Tab'] [data-attribute-action='target'] input").click();
+    expect(slideLinkSelector).toHaveAttribute("href", "/contactus-thank-you");
+    expect(slideLinkSelector).toHaveAttribute("target", "_blank");
+
+    // Remove URL
+    expect(slideUrlInputSelector).toHaveValue("/contactus-thank-you");
+    await contains(slideUrlInputSelector).edit("", { confirm: "enter" });
+
+    expect(":iframe .carousel-item.active").toHaveClass("clickable-slide", {
+        message: "Check that the 'clickable-slide' class is still in the carousel item",
+    });
+    expect(slideLinkSelector).toHaveCount(0, {
+        message: "Check that the anchor tag is removed",
+    });
+
+    // Check that 'Open in New Tab' is hidden
+    expect("[data-label='Open in New Tab']").not.toBeVisible();
+
+    // Re-add URL
+    await contains(slideUrlInputSelector).edit("/contactus-thank-you");
+
+    // Disable Clickable
+    await contains("[data-action-id='makeSlideClickable'] input").click();
+    expect(":iframe .carousel-item.active").not.toHaveClass("clickable-slide");
+    expect(slideLinkSelector).toHaveCount(0);
+
+    // Enable Clickable again
+    await contains("[data-action-id='makeSlideClickable'] input").click();
+    expect(":iframe .carousel-item.active").toHaveClass("clickable-slide");
+    expect(slideLinkSelector).toHaveCount(0);
+});
