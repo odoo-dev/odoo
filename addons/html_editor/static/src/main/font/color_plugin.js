@@ -12,7 +12,6 @@ import {
     isEmptyBlock,
     isRedundantElement,
     isTextNode,
-    isWhitespace,
     isZwnbsp,
 } from "@html_editor/utils/dom_info";
 import { closestElement, descendants, selectElements } from "@html_editor/utils/dom_traversal";
@@ -330,14 +329,7 @@ export class ColorPlugin extends Plugin {
                     }
                 } else if (
                     (node.nodeType === Node.TEXT_NODE && !isZwnbsp(node)) ||
-                    (node.nodeName === "BR" && isEmptyBlock(node.parentNode)) ||
-                    (node.nodeType === Node.ELEMENT_NODE &&
-                        ["inline", "inline-block"].includes(getComputedStyle(node).display) &&
-                        !isWhitespace(node.textContent) &&
-                        !node.classList.contains("btn") &&
-                        !node.querySelector("font") &&
-                        node.nodeName !== "A" &&
-                        !(node.nodeName === "SPAN" && node.style["fontSize"]))
+                    (node.nodeName === "BR" && isEmptyBlock(node.parentNode))
                 ) {
                     // Node is a visible text or inline node without font nor a button:
                     // wrap it in a <font>.
