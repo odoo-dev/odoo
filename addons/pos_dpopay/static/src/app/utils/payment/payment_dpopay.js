@@ -1,11 +1,8 @@
 import { registry } from "@web/core/registry";
-import { handleRPCError, offlineErrorHandler } from "@point_of_sale/app/utils/error_handlers";
 import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_interface";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
-import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
-import { isNull } from "@web/views/utils";
 
 const POLLING_REQUEST_MS = 3 * 1000; // 3 seconds
 const CANCEL_REQUEST_TIME_LIMIT_MS = 3 * 60 * 1000; // 3 minutes
@@ -52,7 +49,7 @@ export class PaymentDPOPay extends PaymentInterface {
             const recoveryStatus = await this._attemptTransactionRecovery(paymentLine);
 
             //  null  → API call failed or could not retrieve transaction status
-            if (isNull(recoveryStatus)) {
+            if ([null, undefined].includes(recoveryStatus)) {
                 return false;
             }
 
@@ -102,7 +99,8 @@ export class PaymentDPOPay extends PaymentInterface {
         const dpopayFetchPaymentStatus = async (resolve, reject) => {
             clearTimeout(this.pollingTimeout);
 
-            if (this.pos.router.state.current !== "PaymentScreen") {
+            const router = this.pos.router;
+            if (router?.activeSlot !== "payment" && router.state?.current !== "PaymentScreen") {
                 this._removePaymentHandler();
                 return;
             }
@@ -262,24 +260,16 @@ export class PaymentDPOPay extends PaymentInterface {
 
     async _callDpoPayMakeRequest(data, action) {
         try {
-            return await this.pos.data.call("pos.payment.method", "send_dpopay_request", [
+            return await this.callPaymentMethod("send_dpopay_request", [
                 [this.payment_method_id.id],
                 data,
                 action,
             ]);
-        } catch (error) {
+        } catch {
             const line = this._pendingDPOPaymentLine();
             this.pos.paymentTerminalInProgress = false;
             if (line) {
                 line.setPaymentStatus("force_done");
-            }
-
-            if (error instanceof ConnectionLostError) {
-                offlineErrorHandler(this.env, error, error);
-            } else if (error instanceof RPCError) {
-                handleRPCError(error, this.pos.dialog);
-            } else {
-                throw error;
             }
         }
     }

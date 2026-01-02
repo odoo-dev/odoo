@@ -11,7 +11,7 @@ from requests.exceptions import (
     Timeout,
 )
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -37,6 +37,10 @@ class PosPaymentMethod(models.Model):
 
     def _get_payment_terminal_selection(self):
         return super()._get_payment_terminal_selection() + [('dpopay', 'DPO Pay')]
+
+    @api.model
+    def _allowed_actions_in_self_order(self):
+        return super()._allowed_actions_in_self_order() + ["send_dpopay_request"]
 
     def _is_write_forbidden(self, fields):
         # Allow the modification of these fields even if a pos_session is open

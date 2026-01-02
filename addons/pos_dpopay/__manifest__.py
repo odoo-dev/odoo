@@ -26,6 +26,9 @@ Features include:
         'point_of_sale._assets_pos': [
             'pos_dpopay/static/src/**/*',
         ],
+        'point_of_sale.payment_terminals': [
+            'pos_dpopay/static/src/app/utils/payment/payment_dpopay.js',
+        ],
     },
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
