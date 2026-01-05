@@ -209,9 +209,9 @@ export function clickPartnerButton() {
         },
     ];
 }
-export function clickCustomer(name, pressEnter = false) {
+export function clickCustomer(name, searchMore = true) {
     return [
-        ...PartnerList.searchCustomerValue(name, pressEnter),
+        ...PartnerList.searchCustomerValue(name, searchMore),
         PartnerList.clickPartner(name),
         { ...back(), isActive: ["mobile"] },
     ];

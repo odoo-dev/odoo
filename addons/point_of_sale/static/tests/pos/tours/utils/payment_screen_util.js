@@ -378,8 +378,8 @@ export function clickPartnerButton() {
     ];
 }
 
-export function clickCustomer(name, pressEnter = false) {
-    return [...PartnerList.searchCustomerValue(name, pressEnter), PartnerList.clickPartner(name)];
+export function clickCustomer(name, searchMore = true) {
+    return [...PartnerList.searchCustomerValue(name, searchMore), PartnerList.clickPartner(name)];
 }
 
 export function shippingLaterHighlighted() {
