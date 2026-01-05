@@ -42,6 +42,24 @@ class TestMimeGuessing(BaseCase):
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         )
 
+    def test_xlsx_2025_zip(self):
+        self.assertEqual(
+            guess_mimetype(contents('2025.zip')),
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+
+    def test_xlsx_2025_export365(self):
+        self.assertEqual(
+            guess_mimetype(contents('2025_export365.xlsx')),
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+
+    def test_xlsx_2025_rmtrash(self):
+        self.assertEqual(
+            guess_mimetype(contents('2025_rmtrash.xlsx')),
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+
     def test_odt(self):
         self.assertEqual(
             guess_mimetype(contents('odt')),
