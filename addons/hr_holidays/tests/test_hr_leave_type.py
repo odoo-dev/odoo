@@ -11,6 +11,17 @@ from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestHrLeaveType(TestHrHolidaysCommon):
+    def test_virtual_remaining_leaves(self):
+
+        paid_leave_type = self.env['hr.leave.type'].create({'name': "test_paid_leave", 'requires_allocation': True})
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+        allocation = self.env['hr.leave.allocation'].create({'name': 'test_allocation', 'holiday_status_id': paid_leave_type.id, 'number_of_days': 5, 'employee_id': employee.id, 'state': 'confirm', 'allocation_type': 'regular'})
+        allocation.action_approve()
+
+        searched_leave_type_ids = self.env['hr.leave.type'].with_context(employee_id=employee.id).search([('virtual_remaining_leaves', '>', 4)]).mapped('id')
+        self.assertIn(paid_leave_type.id, searched_leave_type_ids)
+        with self.assertRaises(ValueError):
+            searched_leave_type_ids = self.env['hr.leave.type'].with_context(employee_id=employee.id).search([('virtual_remaining_leaves', '>')]).mapped('id')
 
     def test_time_type(self):
         employee = self.env['hr.employee'].create({'name': 'Test Employee'})
