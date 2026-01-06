@@ -36,17 +36,20 @@
                                 </span>
                                 <span name="biyearly" invisible="frequency != 'biyearly'">
                                     on the
-                                    <field nolabel="1" name="first_month_day" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field name="max_day_in_first_month" invisible="1"/>
+                                    <field name="max_day_in_second_month" invisible="1"/>
+                                    <field nolabel="1" name="biyearly_day_for_first_month_id" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'" domain="[('number', '&lt;=', max_day_in_first_month)]" widget="selection"/>
                                     of
                                     <field name="first_month" class="o_field_accrual" placeholder="select a month" required="frequency == 'biyearly'"/>
                                     and the
-                                    <field nolabel="1" name="second_month_day" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field nolabel="1" name="biyearly_day_for_second_month_id" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'" domain="[('number', '&lt;=', max_day_in_second_month)]" widget="selection"/>
                                     of
                                     <field nolabel="1" name="second_month" class="o_field_accrual" placeholder="select a month" required="frequency == 'biyearly'"/>
                                 </span>
                                 <span name="yearly" invisible="frequency != 'yearly'">
                                     on the
-                                    <field nolabel="1" name="yearly_day" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a day"/>
+                                    <field name="max_day_in_month" invisible="1"/>
+                                    <field nolabel="1" name="yearly_day_id" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a day" domain="[('number', '&lt;=', max_day_in_month)]" widget="selection"/>
                                     of
                                     <field nolabel="1" name="yearly_month" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a month"/>
                                 </span>
