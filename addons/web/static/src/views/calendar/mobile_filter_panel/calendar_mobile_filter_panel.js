@@ -1,5 +1,7 @@
 import { Component } from "@odoo/owl";
 import { getColor } from "../utils";
+import { useService } from "@web/core/utils/hooks";
+import { CalendarSidePanel } from "../calendar_side_panel/calendar_side_panel";
 
 export class CalendarMobileFilterPanel extends Component {
     static components = {};
@@ -8,7 +10,24 @@ export class CalendarMobileFilterPanel extends Component {
         model: Object,
         sideBarShown: Boolean,
         toggleSideBar: Function,
+        editRecord: Function,
     };
+    setup() {
+        this.bottomSheet = useService("bottom_sheet");
+    }
+
+    openFilters(ev) {
+        ev.stopPropagation();
+        this.bottomSheet.add(
+            ev.currentTarget,
+            CalendarSidePanel,
+            {
+                model: this.props.model,
+                editRecord: this.props.editRecord,
+            }
+        );
+    }
+
     get caretDirection() {
         return this.props.sideBarShown ? "down" : "left";
     }
