@@ -148,24 +148,6 @@ test("should make two paragraphs (separated with whitespace) underline, then not
     });
 });
 
-test("should get ready to type in underline", async () => {
-    await testEditor({
-        contentBefore: `<p>ab[]cd</p>`,
-        stepFunction: underline,
-        contentAfterEdit: `<p>ab<u data-oe-zws-empty-inline="">[]\u200B</u>cd</p>`,
-        contentAfter: `<p>ab[]cd</p>`,
-    });
-});
-
-test("should get ready to type in not underline", async () => {
-    await testEditor({
-        contentBefore: `<p><u>ab[]cd</u></p>`,
-        stepFunction: underline,
-        contentAfterEdit: `<p><u>ab</u><span data-oe-zws-empty-inline="">[]\u200B</span><u>cd</u></p>`,
-        contentAfter: `<p><u>ab[]cd</u></p>`,
-    });
-});
-
 test("should not format non-editable text (underline)", async () => {
     await testEditor({
         contentBefore: '<p>[a</p><p contenteditable="false">b</p><p>c]</p>',
@@ -223,6 +205,7 @@ test("should make a few characters underline inside table (underline)", async ()
 });
 
 describe("with strikeThrough", () => {
+    // todo change to a setupeditor test case cause i need input to check this.
     test("should get ready to write in strikeThrough without underline (underline was first)", async () => {
         await testEditor({
             contentBefore: `<p>ab<u><s>cd[]ef</s></u></p>`,
@@ -232,6 +215,7 @@ describe("with strikeThrough", () => {
         });
     });
 
+    // Same as above
     test("should restore underline after removing it (collapsed, strikeThrough)", async () => {
         await testEditor({
             contentBefore: `<p>ab<u><s>cd</s></u><s data-oe-zws-empty-inline="">\u200b[]</s><u><s>ef</s></u></p>`,
@@ -241,6 +225,7 @@ describe("with strikeThrough", () => {
         });
     });
 
+    // Same as above
     test("should remove underline after restoring it after removing it (collapsed, strikeThrough)", async () => {
         await testEditor({
             contentBefore: `<p>ab<u><s>cd</s></u><s><u>[]\u200b</u></s><u><s>ef</s></u></p>`,
@@ -250,6 +235,7 @@ describe("with strikeThrough", () => {
         });
     });
 
+    // Same as above
     test("should remove underline after restoring it and writing after removing it (collapsed, strikeThrough)", async () => {
         await testEditor({
             contentBefore: `<p>ab<u><s>cd</s></u><s><u>ghi[]</u></s><u><s>ef</s></u></p>`,
@@ -416,7 +402,7 @@ test("should not add history step for underline on collapsed selection", async (
     // step. The empty inline tag is temporary: auto-cleaned if unused. We want
     // to avoid having a phantom step in the history.
     await press(["ctrl", "u"]);
-    expect(getContent(el)).toBe(`<p>abcd<u data-oe-zws-empty-inline="">[]\u200B</u></p>`);
+    expect(getContent(el)).toBe(`<p>abcd[]</p>`);
 
     await insertText(editor, "A");
     expect(getContent(el)).toBe(`<p>abcd<u>A[]</u></p>`);

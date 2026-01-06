@@ -7,45 +7,31 @@ import { closestBlock, isBlock } from "../utils/blocks";
 import { cleanTextNode, fillEmpty, removeClass, splitTextNode, unwrapContents } from "../utils/dom";
 import {
     areSimilarElements,
-    hasVisibleContent,
     isContentEditable,
     isElement,
-    isEmptyBlock,
     isEmptyTextNode,
-    isPhrasingContent,
     isSelfClosingElement,
     isStylable,
     isTextNode,
-    isVisible,
     isVisibleTextNode,
     isZwnbsp,
     isZWS,
     previousLeaf,
 } from "../utils/dom_info";
 import { isFakeLineBreak } from "../utils/dom_state";
-import {
-    childNodes,
-    closestElement,
-    descendants,
-    findFurthest,
-    selectElements,
-} from "../utils/dom_traversal";
+import { childNodes, closestElement, descendants, selectElements } from "../utils/dom_traversal";
 import { formatsSpecs, FORMATTABLE_TAGS } from "../utils/formatting";
 import { boundariesIn, boundariesOut, DIRECTIONS, leftPos, rightPos } from "../utils/position";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 
 const allWhitespaceRegex = /^[\s\u200b]*$/;
 
-function isFormatted(formatPlugin, format) {
-    return (sel, nodes) => formatPlugin.isSelectionFormat(format, nodes);
-}
-
 /**
  * @typedef {Object} FormatShared
  * @property { FormatPlugin['isSelectionFormat'] } isSelectionFormat
  * @property { FormatPlugin['insertAndSelectZws'] } insertAndSelectZws
  * @property { FormatPlugin['mergeAdjacentInlines'] } mergeAdjacentInlines
- * @property { FormatPlugin['formatSelection'] } formatSelection
+ * @property { FormatPlugin['requestFormat'] } requestFormat
  */
 
 /**
@@ -67,7 +53,7 @@ export class FormatPlugin extends Plugin {
         "isSelectionFormat",
         "insertAndSelectZws",
         "mergeAdjacentInlines",
-        "formatSelection",
+        "requestFormat",
         "removeFormats",
     ];
     /** @type {import("plugins").EditorResources} */
@@ -77,34 +63,34 @@ export class FormatPlugin extends Plugin {
                 id: "formatBold",
                 description: _t("Toggle bold"),
                 icon: "fa-bold",
-                run: this.formatSelection.bind(this, "bold"),
+                run: this.requestFormat.bind(this, "bold"),
                 isAvailable: this.canFormatContent.bind(this),
             },
             {
                 id: "formatItalic",
                 description: _t("Toggle italic"),
                 icon: "fa-italic",
-                run: this.formatSelection.bind(this, "italic"),
+                run: this.requestFormat.bind(this, "italic"),
                 isAvailable: this.canFormatContent.bind(this),
             },
             {
                 id: "formatUnderline",
                 description: _t("Toggle underline"),
                 icon: "fa-underline",
-                run: this.formatSelection.bind(this, "underline"),
+                run: this.requestFormat.bind(this, "underline"),
                 isAvailable: this.canFormatContent.bind(this),
             },
             {
                 id: "formatStrikethrough",
                 description: _t("Toggle strikethrough"),
                 icon: "fa-strikethrough",
-                run: this.formatSelection.bind(this, "strikeThrough"),
+                run: this.requestFormat.bind(this, "strikeThrough"),
                 isAvailable: this.canFormatContent.bind(this),
             },
             {
                 id: "formatFontSize",
                 run: ({ size }) =>
-                    this.formatSelection("fontSize", {
+                    this.requestFormat("fontSize", {
                         applyStyle: true,
                         formatProps: { size },
                     }),
@@ -113,7 +99,7 @@ export class FormatPlugin extends Plugin {
             {
                 id: "formatFontSizeClassName",
                 run: ({ className }) =>
-                    this.formatSelection("setFontSizeClassName", {
+                    this.requestFormat("setFontSizeClassName", {
                         applyStyle: true,
                         formatProps: { className },
                     }),
@@ -145,7 +131,8 @@ export class FormatPlugin extends Plugin {
                 groupId: "decoration",
                 namespaces: ["compact", "expanded"],
                 commandId: "formatBold",
-                isActive: isFormatted(this, "bold"),
+                isActive: (sel, nodes) =>
+                    this.isSelectionFormat("bold", nodes) || !!this.activeFormats["bold"],
                 isDisabled: (sel, nodes) => nodes.some((node) => !isStylable(node)),
             },
             {
@@ -154,7 +141,8 @@ export class FormatPlugin extends Plugin {
                 groupId: "decoration",
                 namespaces: ["compact", "expanded"],
                 commandId: "formatItalic",
-                isActive: isFormatted(this, "italic"),
+                isActive: (sel, nodes) =>
+                    this.isSelectionFormat("italic", nodes) || !!this.activeFormats["italic"],
                 isDisabled: (sel, nodes) => nodes.some((node) => !isStylable(node)),
             },
             {
@@ -163,7 +151,8 @@ export class FormatPlugin extends Plugin {
                 groupId: "decoration",
                 namespaces: ["compact", "expanded"],
                 commandId: "formatUnderline",
-                isActive: isFormatted(this, "underline"),
+                isActive: (sel, nodes) =>
+                    this.isSelectionFormat("underline", nodes) || !!this.activeFormats["underline"],
                 isDisabled: (sel, nodes) => nodes.some((node) => !isStylable(node)),
             },
             {
@@ -171,7 +160,9 @@ export class FormatPlugin extends Plugin {
                 description: _t("Strikethrough (Ctrl + 5)"),
                 groupId: "decoration",
                 commandId: "formatStrikethrough",
-                isActive: isFormatted(this, "strikeThrough"),
+                isActive: (sel, nodes) =>
+                    this.isSelectionFormat("strikeThrough", nodes) ||
+                    !!this.activeFormats["strikethrough"],
                 isDisabled: (sel, nodes) => nodes.some((node) => !isStylable(node)),
             },
             withSequence(20, {
@@ -209,6 +200,7 @@ export class FormatPlugin extends Plugin {
         }
     }
 
+    // Will be removed if comment in delete plugin is implemented
     unwrapEmptyFormat(insertedNode) {
         const anchorNode = this.dependencies.selection.getEditableSelection().anchorNode;
         if (!allWhitespaceRegex.test(insertedNode.textContent)) {
@@ -288,6 +280,26 @@ export class FormatPlugin extends Plugin {
         return targetedNodes.some((node) =>
             this.getResource("has_format_predicates").some((predicate) => predicate(node))
         );
+    }
+
+    requestFormat(formatName, options) {
+        const sel = this.dependencies.selection.getEditableSelection();
+        if (sel.isCollapsed) {
+            const isSelectionFormat = this.isSelectionFormat(formatName);
+            if (
+                this.activeFormats[formatName] === true ||
+                (this.activeFormats[formatName] !== false && isSelectionFormat)
+            ) {
+                this.activeFormats[formatName] = false;
+                this.dispatchTo("format_changed_handlers");
+                return;
+            } else if (!this.activeFormats[formatName] && !isSelectionFormat) {
+                this.activeFormats[formatName] = true;
+                this.dispatchTo("format_changed_handlers");
+                return;
+            }
+        }
+        this.formatSelection(formatName, options);
     }
 
     formatSelection(formatName, options) {
@@ -430,6 +442,7 @@ export class FormatPlugin extends Plugin {
                 } else if (formatName !== "fontSize" || formatProps.size !== undefined) {
                     formatSpec.addStyle(getOrCreateSpan(node, inlineAncestors), formatProps);
                 }
+                delete this.activeFormats[formatName];
             }
         }
 
@@ -448,10 +461,10 @@ export class FormatPlugin extends Plugin {
                 unformattedTextNodes.includes(siblings[0]) &&
                 unformattedTextNodes.includes(siblings[siblings.length - 1])
             ) {
-                zws.parentElement.setAttribute("data-oe-zws-empty-inline", "");
+                //zws.parentElement.setAttribute("data-oe-zws-empty-inline", "");
             } else {
                 const span = this.document.createElement("span");
-                span.setAttribute("data-oe-zws-empty-inline", "");
+                //span.setAttribute("data-oe-zws-empty-inline", "");
                 zws.before(span);
                 span.append(zws);
             }
@@ -462,7 +475,14 @@ export class FormatPlugin extends Plugin {
             unformattedTextNodes[0] &&
             unformattedTextNodes[0].textContent === "\u200B"
         ) {
-            this.dependencies.selection.setCursorStart(unformattedTextNodes[0]);
+            const parentNode = unformattedTextNodes[0].parentElement;
+            const [anchorNode, anchorOffset, focusNode, focusOffset] = boundariesIn(parentNode);
+            this.dependencies.selection.setSelection({
+                anchorNode,
+                anchorOffset,
+                focusNode,
+                focusOffset,
+            });
         } else if (selectedTextNodes.length) {
             const firstNode = selectedTextNodes[0];
             const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
@@ -530,26 +550,27 @@ export class FormatPlugin extends Plugin {
     }
 
     removeEmptyInlineElement(selectionData) {
-        const { anchorNode } = selectionData.editableSelection;
-        const blockEl = closestBlock(anchorNode);
-        const inlineElement = findFurthest(
-            closestElement(anchorNode),
-            blockEl,
-            (e) => isPhrasingContent(e) && !isVisible(e) && !hasVisibleContent(e)
-        );
-        if (
-            this.lastEmptyInlineElement?.isConnected &&
-            this.lastEmptyInlineElement !== inlineElement
-        ) {
-            // Remove last empty inline element.
-            this.cleanElement(this.lastEmptyInlineElement, { preserveSelection: true });
-        }
-        // Skip if current block is empty.
-        if (inlineElement && !isEmptyBlock(blockEl)) {
-            this.lastEmptyInlineElement = inlineElement;
-        } else {
-            this.lastEmptyInlineElement = null;
-        }
+        this.activeFormats = {};
+        //const { anchorNode } = selectionData.editableSelection;
+        //const blockEl = closestBlock(anchorNode);
+        //const inlineElement = findFurthest(
+        //    closestElement(anchorNode),
+        //    blockEl,
+        //    (e) => isPhrasingContent(e) && !isVisible(e) && !hasVisibleContent(e)
+        //);
+        //if (
+        //    this.lastEmptyInlineElement?.isConnected &&
+        //    this.lastEmptyInlineElement !== inlineElement
+        //) {
+        //    // Remove last empty inline element.
+        //    this.cleanElement(this.lastEmptyInlineElement, { preserveSelection: true });
+        //}
+        //// Skip if current block is empty.
+        //if (inlineElement && !isEmptyBlock(blockEl)) {
+        //    this.lastEmptyInlineElement = inlineElement;
+        //} else {
+        //    this.lastEmptyInlineElement = null;
+        //}
     }
 
     cleanElement(element, { preserveSelection }) {
@@ -639,8 +660,17 @@ export class FormatPlugin extends Plugin {
             if (!selection.isCollapsed) {
                 return;
             }
+            if (this.activeFormats) {
+                Object.entries(this.activeFormats).forEach(([formatName, isActive]) => {
+                    if (isActive) {
+                        this.formatSelection(formatName, { applyStyle: true });
+                    } else {
+                        this.formatSelection(formatName, { applyStyle: false });
+                    }
+                });
+            }
             const element = closestElement(selection.anchorNode);
-            if (element.hasAttribute("data-oe-zws-empty-inline")) {
+            if (!element.hasChildNodes()) {
                 // Select its ZWS content to make sure the text will be
                 // inserted inside the element, and not before (outside) it.
                 // This addresses an undesired behavior of the

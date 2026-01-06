@@ -1324,6 +1324,7 @@ test("MediaDialog contains 'Videos' tab when sanitize_tags = true and 'allowVide
     ]);
 });
 
+// If comment in delete plugin is implemented remove this test!
 test("Image should not be inserted in a formatted empty node", async () => {
     Partner._records = [
         {

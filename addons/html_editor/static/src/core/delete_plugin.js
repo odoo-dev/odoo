@@ -535,6 +535,12 @@ export class DeletePlugin extends Plugin {
             // @todo: mind Icons?
             // Probably need to get deepest position's element
             // @todo: update fillEmpty
+            // Question Time!
+            // Currently delete backward works like <p>ab<strong>c[]</strong></p>
+            // deleteBackward -> <p>ab<strong data-oe-zws-empty-inline>[]\u200B</strong></p>
+            // I prefer chaning it to <p>ab[]</p> so and change the state of activeFormat
+            // in format_plugin. Do you agree?
+            // Bare contenteditable works like that.
             if (!isBlock(node) && !isTangible(node) && !isZWS(node) && !isZwnbsp(node)) {
                 node.appendChild(this.document.createTextNode("\u200B"));
                 node.setAttribute("data-oe-zws-empty-inline", "");

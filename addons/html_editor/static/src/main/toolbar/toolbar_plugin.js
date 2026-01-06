@@ -164,6 +164,7 @@ export class ToolbarPlugin extends Plugin {
         selectionchange_handlers: this.handleSelectionChange.bind(this),
         selection_leave_handlers: () => this.closeToolbar(),
         step_added_handlers: () => this.updateToolbar(),
+        format_changed_handlers: () => this.updateToolbar(),
         user_commands: {
             id: "expandToolbar",
             run: () => {

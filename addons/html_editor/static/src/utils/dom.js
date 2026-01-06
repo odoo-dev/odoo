@@ -166,7 +166,8 @@ export function removeStyle(element, ...styleProperties) {
  */
 export function fillEmpty(el) {
     const document = el.ownerDocument;
-    if (!isBlock(el) && !isVisible(el) && !el.hasAttribute("data-oe-zws-empty-inline")) {
+    //if (!isBlock(el) && !isVisible(el) && !el.hasAttribute("data-oe-zws-empty-inline")) {
+    if (!isBlock(el) && !isVisible(el)) {
         const zws = document.createTextNode("\u200B");
         el.appendChild(zws);
         el.setAttribute("data-oe-zws-empty-inline", "");
