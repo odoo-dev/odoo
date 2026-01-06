@@ -2131,7 +2131,7 @@ function correctBorderAttributes(style) {
 function waitUntilImagesLoaded(root) {
     const promises = [];
     for (const img of root.querySelectorAll("img")) {
-        promises.push(loadImage(getImageSrc(img)));
+        promises.push(loadImage(getImageSrc(img), img));
     }
     return Promise.all(promises);
 }
