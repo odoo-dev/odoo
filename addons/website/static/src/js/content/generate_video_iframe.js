@@ -76,7 +76,7 @@ export function generateVideoIframe(parentEl, manageIframeSrcFct) {
  * Auto generate video iframes.
  */
 document.addEventListener("DOMContentLoaded", () => {
-    for (const videoIframeEl of document.querySelectorAll(".media_iframe_video")) {
+    for (const videoIframeEl of document.querySelectorAll(".media_iframe_video:not([data-embedded='video'])")) {
         if (!videoIframeEl.querySelector(":scope > iframe")) {
             generateVideoIframe(videoIframeEl);
         }

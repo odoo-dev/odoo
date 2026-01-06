@@ -6,7 +6,7 @@ import { setupAutoplay, triggerAutoplay } from "@website/utils/videos";
 import { generateVideoIframe } from "@website/js/content/generate_video_iframe";
 
 export class MediaVideo extends Interaction {
-    static selector = ".media_iframe_video";
+    static selector = ".media_iframe_video:not([data-embedded='video'])";
     dynamicSelectors = {
         ...this.dynamicSelectors,
         _popup: () => this.el.closest(".s_popup"),
