@@ -13,6 +13,7 @@
         'account',
     ],
     'data': [
+        'data/tax_report.xml',
     ],
     'demo': [
         'demo/demo_company.xml',

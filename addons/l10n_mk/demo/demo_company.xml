@@ -23,7 +23,7 @@
     </function>
     <function model="account.chart.template" name="try_loading">
         <value eval="[]"/>
-        <value>kh</value>
+        <value>mk</value>
         <value model="res.company" eval="obj().env.ref('l10n_mk.demo_company_mk')"/>
         <value name="install_demo" eval="True"/>
     </function>
