@@ -3316,6 +3316,15 @@ class TestX2many(TransactionExpressionCase):
         self.assertEqual(field.column1, 'test_orm_multi_line2_id')
         self.assertEqual(field.column2, 'test_orm_multi_tag_id')
 
+    def test_trigger_many2many_same_model(self):
+        # A, B -> D
+        # B -> C
+        messages = self.env['test_orm.message']
+        a, b, c, d = messages.create([{'name': letter} for letter in 'ABCD'])
+        a.related_message_ids = d
+        b.related_message_ids = c + d
+        messages.flush_model()
+
     def test_10_ondelete_many2many(self):
         """Test A can't be deleted when used on the relation."""
         record_a = self.env['test_orm.model_a'].create({'name': 'a'})

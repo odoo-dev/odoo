@@ -6187,10 +6187,15 @@ class BaseModel(metaclass=MetaModel):
                 continue
 
             inverses = self.pool.field_inverses[field]
-            if create and field.type == 'many2many' and field.store and not inverses:
-                # upon creation, no other record has a reference to self
-                # for this M2M because no inverse has been able to use commands.
-                continue
+            if field.type == 'many2many' and field.store and not inverses:
+                if create:
+                    # upon creation, no other record has a reference to self
+                    # for this M2M because no inverse has been able to use commands.
+                    continue
+                if field.comodel_name == field.model_name:
+                    # the M2M has no inverse field, but the comodel is the model
+                    # of the field, so the field is it's own inverse
+                    inverses = (field,)
 
             # subtree is another tree of dependencies
             model = self.env[field.model_name]

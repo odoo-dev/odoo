@@ -155,6 +155,7 @@ class TestOrmMessage(models.Model):
     priority = fields.Integer()
     active = fields.Boolean(default=True)
     has_important_sibling = fields.Boolean(compute='_compute_has_important_sibling')
+    related_message_ids = fields.Many2many('test_orm.message')
 
     attributes = fields.Properties(
         string='Discussion Properties',
