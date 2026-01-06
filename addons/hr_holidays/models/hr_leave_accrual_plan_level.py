@@ -4,6 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
+from datetime import datetime
 
 
 def _get_selection_days(self):
@@ -145,6 +146,13 @@ class HrLeaveAccrualLevel(models.Model):
         default='day', export_string_translation=False, required=True,
         help="This field defines the unit of time after which the accrual ends.")
 
+    max_day_in_month = fields.Integer(compute="_compute_max_day_in_month")
+    max_day_in_first_month = fields.Integer(compute="_compute_max_day_in_first_month")
+    max_day_in_second_month = fields.Integer(compute="_compute_max_day_in_second_month")
+    yearly_day_id = fields.Many2one("hr.leave.accrual.day", string="Day", default=1)
+    biyearly_day_for_first_month_id = fields.Many2one("hr.leave.accrual.day", string="Day", default=1)
+    biyearly_day_for_second_month_id = fields.Many2one("hr.leave.accrual.day", string="Day", default=1)
+
     _start_count_check = models.Constraint(
         "CHECK((start_count > 0 AND milestone_date = 'after') OR (start_count = 0 AND milestone_date = 'creation'))",
         'You can not start an accrual in the past.',
@@ -165,6 +173,7 @@ class HrLeaveAccrualLevel(models.Model):
         'CHECK(cap_accrued_time_yearly IS NOT TRUE OR COALESCE(maximum_leave_yearly, 0) > 0)',
         'You cannot have a cap on yearly accrued time without setting a maximum amount.',
     )
+
 
     @api.constrains('first_day', 'second_day', 'week_day', 'frequency')
     def _check_dates(self):
@@ -213,6 +222,31 @@ class HrLeaveAccrualLevel(models.Model):
                 level.added_value_type = level.accrual_plan_id.level_ids[0].added_value_type
             elif not level.added_value_type:
                 level.added_value_type = "day"  # default value
+
+    def _compute_days(self, month_type):
+        # month_type -> yearly_month, first_month, second_month
+        for record in self:
+            month = record.yearly_month if month_type == "yearly_month" else (record.first_month if month_type == "first_month" else record.second_month)
+            current_year = datetime.now().year
+            max_day = monthrange(current_year, int(month))[1]
+            if month_type == "yearly_month":
+                record.max_day_in_month = max_day
+            elif month_type == "first_month":
+                record.max_day_in_first_month = max_day
+            else:
+                record.max_day_in_second_month = max_day
+
+    @api.depends('yearly_month')
+    def _compute_max_day_in_month(self):
+        self._compute_days('yearly_month')
+    
+    @api.depends('first_month')
+    def _compute_max_day_in_first_month(self):
+        self._compute_days("first_month")
+
+    @api.depends('second_month')
+    def _compute_max_day_in_second_month(self):
+        self._compute_days("second_month")
 
     def _set_day(self, day_field, month_field):
         for level in self:

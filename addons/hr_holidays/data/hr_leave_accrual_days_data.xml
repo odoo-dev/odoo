@@ -1,0 +1,127 @@
+<odoo>
+    <data noupdate="0">
+        <record id="accrual_day_1" model="hr.leave.accrual.day">
+            <field name="name">1</field>
+            <field name="number">1</field>
+        </record>
+        <record id="accrual_day_2" model="hr.leave.accrual.day">
+            <field name="name">2</field>
+        </record>
+        <record id="accrual_day_3" model="hr.leave.accrual.day">
+            <field name="name">3</field>
+            <field name="number">3</field>
+        </record>
+        <record id="accrual_day_4" model="hr.leave.accrual.day">
+            <field name="name">4</field>
+            <field name="number">4</field>
+        </record>
+        <record id="accrual_day_5" model="hr.leave.accrual.day">
+            <field name="name">5</field>
+            <field name="number">5</field>
+        </record>
+        <record id="accrual_day_6" model="hr.leave.accrual.day">
+            <field name="name">6</field>
+            <field name="number">6</field>
+        </record>
+        <record id="accrual_day_7" model="hr.leave.accrual.day">
+            <field name="name">7</field>
+            <field name="number">7</field>
+        </record>
+        <record id="accrual_day_8" model="hr.leave.accrual.day">
+            <field name="name">8</field>
+            <field name="number">8</field>
+        </record>
+        <record id="accrual_day_9" model="hr.leave.accrual.day">
+            <field name="name">9</field>
+            <field name="number">9</field>
+        </record>
+        <record id="accrual_day_10" model="hr.leave.accrual.day">
+            <field name="name">10</field>
+            <field name="number">10</field>
+        </record>
+        <record id="accrual_day_11" model="hr.leave.accrual.day">
+            <field name="name">11</field>
+            <field name="number">11</field>
+        </record>
+        <record id="accrual_day_12" model="hr.leave.accrual.day">
+            <field name="name">12</field>
+            <field name="number">12</field>
+        </record>
+        <record id="accrual_day_13" model="hr.leave.accrual.day">
+            <field name="name">13</field>
+            <field name="number">13</field>
+        </record>
+        <record id="accrual_day_14" model="hr.leave.accrual.day">
+            <field name="name">14</field>
+            <field name="number">14</field>
+        </record>
+        <record id="accrual_day_15" model="hr.leave.accrual.day">
+            <field name="name">15</field>
+            <field name="number">15</field>
+        </record>
+        <record id="accrual_day_16" model="hr.leave.accrual.day">
+            <field name="name">16</field>
+            <field name="number">16</field>
+        </record>
+        <record id="accrual_day_17" model="hr.leave.accrual.day">
+            <field name="name">17</field>
+            <field name="number">17</field>
+        </record>
+        <record id="accrual_day_18" model="hr.leave.accrual.day">
+            <field name="name">18</field>
+            <field name="number">18</field>
+        </record>
+        <record id="accrual_day_19" model="hr.leave.accrual.day">
+            <field name="name">19</field>
+            <field name="number">19</field>
+        </record>
+        <record id="accrual_day_20" model="hr.leave.accrual.day">
+            <field name="name">20</field>
+            <field name="number">20</field>
+        </record>
+        <record id="accrual_day_21" model="hr.leave.accrual.day">
+            <field name="name">21</field>
+            <field name="number">21</field>
+        </record>
+        <record id="accrual_day_22" model="hr.leave.accrual.day">
+            <field name="name">22</field>
+            <field name="number">22</field>
+        </record>
+        <record id="accrual_day_23" model="hr.leave.accrual.day">
+            <field name="name">23</field>
+            <field name="number">23</field>
+        </record>
+        <record id="accrual_day_24" model="hr.leave.accrual.day">
+            <field name="name">24</field>
+            <field name="number">24</field>
+        </record>
+        <record id="accrual_day_25" model="hr.leave.accrual.day">
+            <field name="name">25</field>
+            <field name="number">25</field>
+        </record>
+        <record id="accrual_day_26" model="hr.leave.accrual.day">
+            <field name="name">26</field>
+            <field name="number">26</field>
+        </record>
+        <record id="accrual_day_27" model="hr.leave.accrual.day">
+            <field name="name">27</field>
+            <field name="number">27</field>
+        </record>
+        <record id="accrual_day_28" model="hr.leave.accrual.day">
+            <field name="name">28</field>
+            <field name="number">28</field>
+        </record>
+        <record id="accrual_day_29" model="hr.leave.accrual.day">
+            <field name="name">29</field>
+            <field name="number">29</field>
+        </record>
+        <record id="accrual_day_30" model="hr.leave.accrual.day">
+            <field name="name">30</field>
+            <field name="number">30</field>
+        </record>
+        <record id="accrual_day_31" model="hr.leave.accrual.day">
+            <field name="name">31</field>
+            <field name="number">31</field>
+        </record>
+    </data>
+</odoo>
