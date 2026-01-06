@@ -549,8 +549,8 @@ Please change the quantity done or the rounding precision of your unit of measur
                             move_line_vals = self._prepare_move_line_vals(quantity=0, reserved_quant=reserved_quants[0][0])
                         else:
                             move_line_vals = self._prepare_move_line_vals(quantity=0)
-                            move_line_vals['lot_id'] = lot.id
-                            move_line_vals['lot_name'] = lot.name
+                        move_line_vals['lot_id'] = lot.id
+                        move_line_vals['lot_name'] = lot.name
                         move_line_vals['product_uom_id'] = move.product_id.uom_id.id
                         move_line_vals['quantity'] = 1
                         move_lines_commands.append((0, 0, move_line_vals))
