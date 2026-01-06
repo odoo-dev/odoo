@@ -78,7 +78,7 @@ class TestMenusAdminLight(odoo.tests.HttpCase):
         if 'project.task' in self.env and 'is_fsm' in self.env['project.task']:
             self.env['project.task'].create({
                 'name': 'Zizizbroken',
-                'project_id': self.env.ref('industry_fsm.fsm_project').id,
+                'project_id': self.env.ref('planning_field_service.fsm_project').id,
                 'user_ids': [(4, self.env.ref('base.user_admin').id)],
                 'date_deadline': datetime.now() + relativedelta(hour=12),
                 'planned_date_begin': datetime.now() + relativedelta(hour=10),
