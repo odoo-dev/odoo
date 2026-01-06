@@ -176,4 +176,20 @@ QUnit.module("Components", ({ beforeEach }) => {
         await advanceTime(300);
         assert.verifySteps(["resized"]);
     });
+
+    QUnit.test("signature remains empty after resize without drawing", async function (assert) {
+        const { advanceTime } = mockTimeout();
+        await mount(NameAndSignature, target, { env, props });
+        await editInput(target, ".o_web_sign_name_group input", "Deco Addict");
+        await nextTick();
+        await click(target, ".o_web_sign_draw_button");
+        await nextTick();
+
+        assert.strictEqual(props.signature.isSignatureEmpty, true, "signature should be empty initially in draw mode");
+
+        await triggerEvent(window, null, "resize");
+        await advanceTime(300);
+
+        assert.strictEqual(props.signature.isSignatureEmpty, true, "signature should remain empty after resize without drawing");
+    });
 });

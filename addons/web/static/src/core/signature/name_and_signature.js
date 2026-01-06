@@ -362,6 +362,8 @@ export class NameAndSignature extends Component {
     get isSignatureEmpty() {
         const signature = this.jSignature("getData");
         return signature && this.emptySignature ? this.emptySignature === signature : true;
+        // const signature = this.jSignature("getData", "native");
+        // return !signature || signature.length === 0;
     }
 
     get loadIsInvalid() {
