@@ -371,7 +371,10 @@ publicWidget.registry.WebsiteSaleCheckout = publicWidget.Widget.extend({
 
         // When no dm is set and a price span is hidden, hide the message and show the price span.
         if (amountDelivery.classList.contains('d-none')) {
-            amountDelivery.querySelector('span[name="o_message_no_dm_set"]').classList.add('d-none');
+            const noDmMessage = amountDelivery.querySelector('span[name="o_message_no_dm_set"]');
+            if (noDmMessage) {
+                noDmMessage.classList.add('d-none');
+            }
             amountDelivery.classList.remove('d-none');
         }
 
