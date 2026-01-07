@@ -37,7 +37,9 @@ class AccountReconcileModelLine(models.Model):
     amount_string = fields.Char(string="Amount", default='100', required=True, help="""Value for the amount of the writeoff line
     * Percentage: Percentage of the balance, between 0 and 100.
     * Fixed: The fixed value of the writeoff. The amount will count as a debit if it is negative, as a credit if it is positive.
-    * From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\nR:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\nYou could enter\nBRT: ([\\d,]+)""")
+    * From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\nR:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\nYou could enter\nBRT: ([\\d,]+)
+    If Label is 01870912 0009065 00115 and you need amount in decimal 90.65 then you can use something like:\n\\s+0*(?P<integer>\\d+?)(?P<fraction>\\d{2})(?=\\s)\n
+    use named group 'integer' and 'fraction' and logic will treat last two digits as fraction part""")
     tax_ids = fields.Many2many(
         comodel_name='account.tax',
         string="Taxes",
@@ -72,7 +74,20 @@ class AccountReconcileModelLine(models.Model):
                 raise UserError(_("Statement line percentage can't be 0"))
             if record.amount_type == 'regex':
                 try:
-                    re.compile(record.amount_string)
+                    pattern = re.compile(record.amount_string)
+                    group_names = pattern.groupindex.keys()
+                    has_integer = 'integer' in group_names
+                    has_fraction = 'fraction' in group_names
+                    if has_integer and not has_fraction:
+                        raise UserError(_(
+                            "Incorrect Regex: You defined a named group 'integer' "
+                            "but did not define a named group 'fraction'."
+                        ))
+                    if has_fraction and not has_integer:
+                        raise UserError(_(
+                            "Incorrect Regex: You defined a named group 'fraction' "
+                            "but did not define a named group 'integer'."
+                        ))
                 except re.error:
                     raise UserError(_('The regex is not valid'))
 
