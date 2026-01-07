@@ -559,7 +559,7 @@ export class Thread extends Record {
             return "/discuss/channel/messages";
         }
         if (this.model === "mail.box" && this.id === "inbox") {
-            return `/mail/inbox/messages`;
+            return `/mail/inbox/messages`; // TODO rename route to inbox/data
         }
         if (this.model === "mail.box" && this.id === "starred") {
             return `/mail/starred/messages`;

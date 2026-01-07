@@ -26,6 +26,7 @@ from . import mail_activity
 from . import mail_activity_plan
 from . import mail_activity_plan_template
 from . import mail_blacklist
+from . import mail_folder
 from . import mail_followers
 from . import mail_gateway_allowed
 from . import mail_link_preview

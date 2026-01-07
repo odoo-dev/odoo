@@ -10,6 +10,9 @@
         <xpath expr="//*[@name='thread']" position="inside">
             <t t-if="!ui.isSmall" t-call="mail.Discuss.loading"/>
         </xpath>
+        <xpath expr="//div[hasclass('o-mail-DiscussContent-space')]" position="before">
+            <t t-if="thread.id === 'inbox'" t-call="mail.FolderList"/>
+        </xpath>
     </t>
     <t t-name="mail.DiscussContent.mobileTopbar">
         <div class="btn-group d-flex w-100 p-1">
@@ -23,5 +26,25 @@
                 <t t-set="mailbox" t-value="store.history"/>
             </t>
         </div>
+    </t>
+    <t t-name="mail.FolderList">
+        <div class="o-mail-FolderList border-end o-mail-discussSidebarBgColor h-100 d-flex flex-column">
+            <div class="o-mail-FolderList-folders flex-grow-1 overflow-auto o-scrollbar-thin">
+                <t t-foreach="store.folders or []" t-as="folder" t-key="folder.id">
+                    <button class="btn btn-light w-100 text-start d-flex align-items-center px-3 py-2"
+                        t-att-class="{
+                            'active o-active': store.discuss.activeTab === 'inbox' and thread?.folder_id?.eq(folder),
+                        }"
+                        t-on-click="store.setDiscussFolder(folder)"
+                    >
+                        <span class="flex-grow-1" t-esc="folder.name"/>
+                        <span class="badge bg-secondary ms-2" t-if="folder.unread_count > 0" t-esc="folder.unread_count"/>
+                    </button>
+                </t>
+            </div>
+        </div>
+        <a class="btn btn-link" title="Manage folders" href="#" t-on-click="onClickManageFolders">
+            <i class="fa fa-fw fa-gear"/>
+        </a>
     </t>
 </templates>

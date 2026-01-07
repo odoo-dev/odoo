@@ -25,6 +25,7 @@ class MailNotification(models.Model):
     # when the notification type is "email" (with or without a partner)
     # must be normalized except if notification is cancel/failure from invalid email
     mail_email_address = fields.Char(help='Recipient email address', groups='base.group_user')
+    folder_id = fields.Many2one("mail.folder", "Folder")
     # status
     notification_type = fields.Selection([
         ('inbox', 'Inbox'), ('email', 'Email')

@@ -6,7 +6,7 @@ from odoo.addons.mail.tools.discuss import Store
 
 
 class MailboxController(http.Controller):
-    @http.route("/mail/inbox/messages", methods=["POST"], type="jsonrpc", auth="user", readonly=True)
+    @http.route("/mail/inbox/messages", methods=["POST"], type="jsonrpc", auth="user", readonly=True) # TODO rename route to inbox/data
     def discuss_inbox_messages(self, fetch_params=None):
         domain = [("needaction", "=", True)]
         res = request.env["mail.message"]._message_fetch(domain, **(fetch_params or {}))
