@@ -774,6 +774,30 @@ class DiscussChannel(models.Model):
             if channel.sudo().livechat_status == "need_help":
                 # sudo: discuss.channel - writing livechat_status when a new operator joins is acceptable
                 channel.sudo().livechat_status = "in_progress"
+        for member in all_new_members:
+            channel = member.channel_id
+            if channel.channel_type != "livechat":
+                continue
+            if member.livechat_member_type == "agent" and channel.livechat_operator_id not in channel.livechat_agent_partner_ids:
+                channel._action_unfollow(partner=channel.livechat_operator_id, post_leave_message=False)
+                channel.livechat_operator_id = member.partner_id
+                channel._update_forwarded_channel_data(
+                    livechat_failure="no_answer",
+                    livechat_operator_id=member.partner_id,
+                    operator_name=member.partner_id.user_livechat_username if member.partner_id.user_livechat_username else member.partner_id.name,
+                )
+                for history in channel.livechat_customer_history_ids:
+                    store = Store(bus_channel=history.partner_id or history.guest_id)
+                    store.add_model_values(
+                        "Chatbot",
+                        lambda res: (
+                            res.attr("id", (channel.chatbot_current_step_id.chatbot_script_id.id, channel.id)),
+                            res.attr("script", channel.chatbot_current_step_id.chatbot_script_id.id),
+                            res.attr("channel_id", channel.id),
+                            res.attr("forwarded", True),
+                        ),
+                    )
+                    store.bus_send()
         return all_new_members
 
     def _message_post_after_hook(self, message, msg_vals):
