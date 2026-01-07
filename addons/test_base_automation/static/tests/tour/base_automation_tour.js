@@ -533,10 +533,7 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
         },
         {
             trigger:
-                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin)",
-            run() {
-                assertEqual(this.anchor.innerText, "test stage\nSearch more...");
-            },
+                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin):text(test stage\nSearch more...)",
         },
         {
             content: "Open select",
@@ -557,10 +554,7 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
         },
         {
             trigger:
-                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin)",
-            run() {
-                assertEqual(this.anchor.innerText, "test tag\nSearch more...");
-            },
+                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin):text(test tag\nSearch more...)",
         },
         {
             trigger: ".o_form_button_cancel",

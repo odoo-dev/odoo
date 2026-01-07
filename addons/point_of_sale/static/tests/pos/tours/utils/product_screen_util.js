@@ -475,6 +475,10 @@ export function deleteNthLotNumber(number) {
             trigger: `.lot-container .lot-item:eq(${number - 1}) .btn`,
             run: "click",
         },
+        {
+            content: "Wait the lot number has been deleted",
+            trigger: `.lot-container:not(:has(.lot-item))`,
+        },
     ];
 }
 export function selectNthLotNumber(number) {

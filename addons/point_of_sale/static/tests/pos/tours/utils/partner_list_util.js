@@ -127,30 +127,23 @@ export function searchCustomerValue(val, pressEnter = false) {
         {
             content: `Search customer with "${val}"`,
             trigger: `.modal-dialog .input-group input`,
-            run: `edit ${val}`,
+            async run({ edit, waitFor, press }) {
+                const timeout = 2000;
+                await edit(val);
+                const result = await Promise.race([
+                    waitFor(`.partner-list .partner-info:nth-child(1):contains(${val})`, {
+                        timeout,
+                    }),
+                    waitFor(`.modal-dialog .modal-body:contains(no customers found)`, {
+                        timeout,
+                    }),
+                ]);
+                if (result.innerText.startsWith("No customers found")) {
+                    await press("Enter");
+                }
+            },
         },
     ];
-
-    if (pressEnter) {
-        steps.push({
-            content: `Manually trigger keyup event`,
-            trigger: ".modal-header .input-group input",
-            run: function () {
-                document
-                    .querySelector(".modal-header .input-group input")
-                    .dispatchEvent(new KeyboardEvent("keyup", { key: "" }));
-            },
-        });
-        steps.push({
-            content: `Press Enter to trigger "search more"`,
-            trigger: `.modal-dialog .input-group input`,
-            run: function () {
-                document
-                    .querySelector(".modal-dialog .input-group input")
-                    .dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
-            },
-        });
-    }
     steps.push(checkCustomerShown(val));
     return steps;
 }
