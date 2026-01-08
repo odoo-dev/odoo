@@ -39,7 +39,7 @@ async function performAction(trigger, action) {
         throw new MacroError(
             "Action",
             error.stack || `ERROR during perform action: ${error.message}`,
-            {cause: error}
+            { cause: error }
         );
     }
 }
@@ -49,7 +49,7 @@ async function waitForTrigger(trigger) {
         return;
     }
     try {
-        await delay(50);
+        // await delay(50);
         return await waitUntil(() => {
             if (typeof trigger === "function") {
                 return trigger();
