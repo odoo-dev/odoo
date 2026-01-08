@@ -151,7 +151,6 @@ class ProductProduct(models.Model):
                 [('location_id.warehouse_id', '=', warehouse_id)],
                 Domain.OR([
                     [('location_dest_id.warehouse_id', '!=', warehouse_id)],
-                    [('location_final_id.warehouse_id', '!=', warehouse_id)]
                 ]),  # includes moves going to customer or production
                 [('location_dest_id.usage', '!=', 'inventory')]  # exclude scrap
             ])
