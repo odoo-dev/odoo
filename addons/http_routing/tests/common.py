@@ -83,7 +83,7 @@ def MockRequest(
         mock_spec['website_routing'] = env_context.get('website_id') or env_context.get('fallback_website_id')
 
     request = Mock(
-        spec_set=list(mock_spec),
+        # spec_set=list(mock_spec),  TODO: enable when cart and pricelist are removed from request
         **mock_spec,
     )
     if url_root is not None:
