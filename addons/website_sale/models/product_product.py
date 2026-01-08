@@ -13,11 +13,10 @@ class ProductProduct(models.Model):
     variant_ribbon_id = fields.Many2one(string="Variant Ribbon", comodel_name="product.ribbon")
     website_id = fields.Many2one(related="product_tmpl_id.website_id", readonly=False)
 
-    product_variant_image_ids = fields.One2many(
-        string="Extra Variant Images",
-        comodel_name="product.image",
-        inverse_name="product_variant_id",
+    product_template_image_ids = fields.One2many(
+        related="product_tmpl_id.product_template_image_ids", readonly=False
     )
+    is_main_image_manually_set = fields.Boolean(default=False)
 
     website_url = fields.Char(
         string="Website URL",
@@ -42,6 +41,29 @@ class ProductProduct(models.Model):
                 pav_ids = [str(pav.id) for pav in pavs]
                 url = f"{url}?attribute_values={','.join(pav_ids)}"
             product.website_url = url
+
+    def _set_image_1920(self):
+        super()._set_image_1920()
+        self.is_main_image_manually_set = True
+
+    # === CRUD METHODS === #
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        products = super().create(vals_list)
+        templates = products.mapped("product_tmpl_id")
+        templates.mapped("product_template_image_ids")._sync_variant_images()
+        return products
+
+    def write(self, vals):
+        if "active" in vals and not vals["active"]:
+            # unlink draft lines containing the archived product
+            self.env["sale.order.line"].sudo().search([
+                ("state", "=", "draft"),
+                ("product_id", "in", self.ids),
+                ("order_id", "any", [("website_id", "!=", False)]),
+            ]).unlink()
+        return super().write(vals)
 
     # === BUSINESS METHODS ===#
 
@@ -70,9 +92,15 @@ class ProductProduct(models.Model):
         image of the template, if unset), the Variant Extra Images, and the Template Extra Images.
         """
         self.ensure_one()
-        variant_images = list(self.product_variant_image_ids)
-        template_images = list(self.product_tmpl_id.product_template_image_ids)
-        return [self] + variant_images + template_images
+        extra_images = list(self._get_extra_images())
+
+        if (
+            extra_images
+            and not self.is_main_image_manually_set
+            and extra_images[0].image_1920.content == self.image_1920.content
+        ):
+            extra_images = extra_images[1:]
+        return [self] + extra_images
 
     def _get_combination_info_variant(self, **kwargs):
         """Return the variant info based on its combination.
@@ -178,19 +206,15 @@ class ProductProduct(models.Model):
         self.ensure_one()
         return [
             self.env["website"].image_url(extra_image, "image_1920")
-            for extra_image in self.product_variant_image_ids + self.product_template_image_ids
+            for extra_image in self._get_extra_images()
             if extra_image.image_128  # only images, no video urls
         ]
 
-    def write(self, vals):
-        if "active" in vals and not vals["active"]:
-            # unlink draft lines containing the archived product
-            self.env["sale.order.line"].sudo().search([
-                ("state", "=", "draft"),
-                ("product_id", "in", self.ids),
-                ("order_id", "any", [("website_id", "!=", False)]),
-            ]).unlink()
-        return super().write(vals)
+    def _get_extra_images(self):
+        self.ensure_one()
+        return self.product_template_image_ids.filtered(
+            lambda img: self in img.product_variant_ids
+        ).sorted(key=lambda img: (not bool(img.attribute_value_ids), img.sequence))
 
     def _is_in_wishlist(self):
         if not self:

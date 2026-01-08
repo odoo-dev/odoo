@@ -698,35 +698,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if not request.env.user.has_group("website.group_website_restricted_editor"):
             raise NotFound
 
-        if type == "image":  # Image case
-            image_ids = request.env["ir.attachment"].browse(i["id"] for i in media)
-            media_create_data = [
-                Command.create({
-                    "name": image.name,  # Images uploaded from url do not have any datas.
-                    # This recovers them manually.
-                    "image_1920": image.raw
-                    or request.env["ir.qweb.field.image"].load_remote_url(image.url),
-                })
-                for image in image_ids
-            ]
-        elif type == "video":  # Video case
-            video_data = media[0]
-            thumbnail = None
-            if video_data.get("src"):  # Check if a valid video URL is provided
-                try:
-                    thumbnail = BinaryBytes(get_video_thumbnail(video_data["src"]))
-                except Exception:  # noqa: BLE001
-                    thumbnail = None
-            else:
-                raise ValidationError(_("Invalid video URL provided."))
-            media_create_data = [
-                Command.create({
-                    "name": video_data.get("name", "Odoo Video"),
-                    "video_url": video_data["src"],
-                    "image_1920": thumbnail,
-                })
-            ]
-
         product_product = (
             request.env["product.product"].browse(int(product_product_id))
             if product_product_id
@@ -746,17 +717,49 @@ class WebsiteSale(payment_portal.PaymentPortal):
             product_product = product_template._get_variant_for_combination(combination)
             if not product_product:
                 product_product = product_template._create_product_variant(combination)
-        if (
+
+        is_variant_media = (
             product_template.has_configurable_attributes
             and product_product
             and not all(
                 pa.create_variant == "no_variant"
                 for pa in product_template.attribute_line_ids.attribute_id
             )
-        ):
-            product_product.write({"product_variant_image_ids": media_create_data})
-        else:
-            product_template.write({"product_template_image_ids": media_create_data})
+        )
+        if type == "image":  # Image case
+            image_ids = request.env["ir.attachment"].browse(i["id"] for i in media)
+            media_create_data = []
+            for image in image_ids:
+                media_create_values = {
+                    "name": image.name,  # Images uploaded from url do not have any datas.
+                    # This recovers them manually
+                    "image_1920": image.raw
+                    or request.env["ir.qweb.field.image"].load_remote_url(image.url),
+                }
+                if is_variant_media:
+                    media_create_values["attribute_value_ids"] = [
+                        Command.set(product_product.product_template_attribute_value_ids.ids)
+                    ]
+                media_create_data.append(Command.create(media_create_values))
+        elif type == "video":  # Video case
+            video_data = media[0]
+            thumbnail = None
+            if video_data.get("src"):  # Check if a valid video URL is provided
+                try:
+                    thumbnail = BinaryBytes(get_video_thumbnail(video_data["src"]))
+                except Exception:  # noqa: BLE001
+                    thumbnail = None
+            else:
+                raise ValidationError(_("Invalid video URL provided."))
+            media_create_data = [
+                Command.create({
+                    "name": video_data.get("name", "Odoo Video"),
+                    "video_url": video_data["src"],
+                    "image_1920": thumbnail,
+                })
+            ]
+
+        product_template.write({"product_template_image_ids": media_create_data})
 
     @route(["/shop/product/clear-images"], type="jsonrpc", auth="user", website=True)
     def clear_product_images(self, product_product_id, product_template_id):
@@ -778,13 +781,23 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if product_product and not product_template:
             product_template = product_product.product_tmpl_id
 
-        if product_product and product_product.product_variant_image_ids:
-            product_product.product_variant_image_ids.unlink()
+        product_variant_images = (
+            product_template.product_template_image_ids.filtered(
+                lambda img: product_product in img.product_variant_ids and img.attribute_value_ids
+            )
+            if product_product
+            else False
+        )
+
+        if product_product and product_variant_images:
+            product_variant_images.unlink()
         else:
-            product_template.product_template_image_ids.unlink()
+            product_template.product_template_image_ids.filtered(
+                lambda img: not img.attribute_value_ids
+            ).unlink()
 
     @route(["/shop/product/resequence-image"], type="jsonrpc", auth="user", website=True)
-    def resequence_product_image(self, image_res_model, image_res_id, move):
+    def resequence_product_image(self, image_res_model, image_res_id, move, product_variant_id):
         """
         Move the product image in the given direction and update all images' sequence.
 
@@ -792,6 +805,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
                                     'product.product', or 'product.image'.
         :param str image_res_id: The record ID of the image to move.
         :param str move: The direction of the move. It can be 'first', 'left', 'right', or 'last'.
+        :param str product_variant_id: The ID of the product variant in whose context the image
+                                       resequencing is performed
         :raises NotFound: If the user does not have the required permissions, if the model of the
                           image is not allowed, or if the move direction is not allowed.
         :raise ValidationError: If the product is not found.
@@ -815,8 +830,14 @@ class WebsiteSale(payment_portal.PaymentPortal):
             product_template = image_to_resequence
             product = product_template.product_variant_id
         else:
-            product = image_to_resequence.product_variant_id
-            product_template = product.product_tmpl_id or image_to_resequence.product_tmpl_id
+            product = (
+                image_to_resequence.product_variant_ids.filtered(
+                    lambda p: p.id == int(product_variant_id)
+                )
+                if image_to_resequence.attribute_value_ids
+                else False
+            )
+            product_template = image_to_resequence.product_tmpl_id
 
         if not product and not product_template:
             raise ValidationError(_("Product not found"))

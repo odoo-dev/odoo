@@ -32,14 +32,16 @@ class TestProductPictureController(HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.website = cls.env.ref('website.default_website')
+        cls.website = cls.env.ref("website.default_website")
         cls.WebsiteSaleController = WebsiteSale()
         cls.product = cls.env["product.product"].create({
             "name": "Storage Test Box",
             "standard_price": 70.0,
             "list_price": 79.0,
             "website_published": True,
+            "is_main_image_manually_set": True,
         })
+        cls.product.product_tmpl_id.write({"is_main_image_manually_set": True})
 
         cls.attachments = cls.env["ir.attachment"].create([
             {"raw": ATTACHMENT_DATA[i], "name": f"image0{i}.gif", "public": True}
@@ -124,7 +126,7 @@ class TestProductPictureController(HttpCase):
             images = self.product._get_images()
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             self.WebsiteSaleController.resequence_product_image(
-                images[2]._name, images[2].id, "first"
+                images[2]._name, images[2].id, "first", self.product.id
             )
             # Trigger the reordering of product.image records based on their sequence.
             self.env["product.image"].invalidate_model()
@@ -137,7 +139,7 @@ class TestProductPictureController(HttpCase):
             images = self.product._get_images()
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             self.WebsiteSaleController.resequence_product_image(
-                images[2]._name, images[2].id, "left"
+                images[2]._name, images[2].id, "left", self.product.id
             )
             self.env["product.image"].invalidate_model()
             self.assertListEqual(self._get_product_image_data(), [i1, i3, i2, i4, i5, i6])
@@ -148,7 +150,7 @@ class TestProductPictureController(HttpCase):
             images = self.product._get_images()
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             self.WebsiteSaleController.resequence_product_image(
-                images[2]._name, images[2].id, "right"
+                images[2]._name, images[2].id, "right", self.product.id
             )
             self.env["product.image"].invalidate_model()
             self.assertListEqual(self._get_product_image_data(), [i1, i2, i4, i3, i5, i6])
@@ -159,7 +161,7 @@ class TestProductPictureController(HttpCase):
             images = self.product._get_images()
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             self.WebsiteSaleController.resequence_product_image(
-                images[2]._name, images[2].id, "last"
+                images[2]._name, images[2].id, "last", self.product.id
             )
             self.env["product.image"].invalidate_model()
             self.assertListEqual(self._get_product_image_data(), [i1, i2, i4, i5, i6, i3])
@@ -171,7 +173,7 @@ class TestProductPictureController(HttpCase):
             images = self.product._get_images()
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             self.WebsiteSaleController.resequence_product_image(
-                images[0]._name, images[0].id, "last"
+                images[0]._name, images[0].id, "last", self.product.id
             )
             self.env["product.image"].invalidate_model()
             self.assertListEqual(self._get_product_image_data(), [i2, i3, i4, i5, i6, i1])
@@ -184,7 +186,7 @@ class TestProductPictureController(HttpCase):
             images[2].video_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             self.WebsiteSaleController.resequence_product_image(
-                images[2]._name, images[2].id, "left"
+                images[2]._name, images[2].id, "left", self.product.id
             )
             self.env["product.image"].invalidate_model()
             self.assertListEqual(self._get_product_image_data(), [i1, i3, i2, i4, i5, i6])
@@ -198,7 +200,7 @@ class TestProductPictureController(HttpCase):
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             with self.assertRaises(ValidationError):
                 self.WebsiteSaleController.resequence_product_image(
-                    images[2]._name, images[2].id, "first"
+                    images[2]._name, images[2].id, "first", self.product.id
                 )
             self.env["product.image"].invalidate_model()
             self.assertListEqual(self._get_product_image_data(), [i1, i2, i3, i4, i5, i6])
@@ -212,7 +214,7 @@ class TestProductPictureController(HttpCase):
             i1, i2, i3, i4, i5, i6 = self._get_product_image_data()
             with self.assertRaises(ValidationError):
                 self.WebsiteSaleController.resequence_product_image(
-                    images[0]._name, images[0].id, "right"
+                    images[0]._name, images[0].id, "right", self.product.id
                 )
             self.env["product.image"].invalidate_model()
             self.assertListEqual(self._get_product_image_data(), [i1, i2, i3, i4, i5, i6])
@@ -266,7 +268,7 @@ class TestProductVideoUpload(HttpCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.website = cls.env.ref('website.default_website')
+        cls.website = cls.env.ref("website.default_website")
         cls.WebsiteSaleController = WebsiteSale()
         cls.product = cls.env["product.product"].create({
             "name": "Test Video Product",

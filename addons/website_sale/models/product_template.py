@@ -154,6 +154,7 @@ class ProductTemplate(models.Model):
         inverse_name="product_tmpl_id",
         copy=True,
     )
+    is_main_image_manually_set = fields.Boolean(default=False)
 
     compare_list_price = fields.Monetary(
         string="Compare to Price",
@@ -274,14 +275,23 @@ class ProductTemplate(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get("image_1920"):
+                vals["is_main_image_manually_set"] = True
+
         records = super().create(vals_list)
         # Compute the suggest_x fields based on the m2m x now correctly saved
         for record, vals in zip(records, vals_list):
-            record.write({
+            update_vals = {
                 "suggest_optional_products": not vals.get("optional_product_ids"),
                 "suggest_accessory_products": not vals.get("accessory_product_ids"),
                 "suggest_alternative_products": not vals.get("alternative_product_ids"),
-            })
+            }
+
+            if record.product_template_image_ids and not record.is_main_image_manually_set:
+                update_vals["image_1920"] = record.product_template_image_ids.sorted("sequence")[0].image_1920
+
+            record.write(update_vals)
         return records
 
     def write(self, vals):
@@ -297,6 +307,8 @@ class ProductTemplate(models.Model):
                     else v
                 ),
             )
+        if "image_1920" in vals and not self.env.context.get("from_extra_image"):
+            self.is_main_image_manually_set = True
         return super().write(vals)
 
     # === BUSINESS METHODS ===#
@@ -1472,6 +1484,72 @@ class ProductTemplate(models.Model):
         self.ensure_one()
 
         return bool(self.valid_product_template_attribute_line_ids)
+
+    def get_attribute_values_for_image_assignment(self):
+        return [
+            {
+                "id": line.attribute_id.id,
+                "values": [
+                    {"id": ptav.id, "name": ptav.name}
+                    for ptav in line.product_template_value_ids
+                    if ptav.ptav_active
+                ],
+            }
+            for line in self.attribute_line_ids
+            if line.attribute_id.create_variant != "no_variant"
+        ]
+
+    def _set_main_image_from_extra_images(self, variants=None):
+        """
+        Set the main image for product templates and their variants based on extra images.
+
+        For each template:
+        - If `variants` is provided, update each related variant's main image using
+        the first extra image that has attribute values.
+        - Skip updates if the variant's image was manually set.
+        - Update the template's main image using the first extra image without
+        attribute values. If none exists, fall back to the first variant's image.
+        - Skip updates if the template's main image was manually set.
+
+        :param variants: optional recordset of `product.product` to restrict updates
+                        to specific variants.
+        :return: None
+        """
+        if self.env.context.get("install_mode"):
+            return  # skipped on demo data
+        for template in self:
+            if variants:
+                product_variants = variants.filtered(lambda v: v.product_tmpl_id == template)
+                for variant in product_variants:
+                    if variant.is_main_image_manually_set:
+                        continue
+
+                    image = next(
+                        (img for img in variant._get_extra_images() if img.attribute_value_ids),
+                        None,
+                    )
+                    variant.image_variant_1920 = image.image_1920 if image else False
+
+            if template.is_main_image_manually_set:
+                continue
+
+            template_image = next(
+                (
+                    img
+                    for img in template.product_template_image_ids.sorted("sequence")
+                    if not img.attribute_value_ids
+                ),
+                None,
+            )
+
+            new_image = (
+                template_image.image_1920
+                if template_image
+                else template._create_first_product_variant().image_variant_1920
+            )
+
+            if template.image_1920 != new_image:
+                template.with_context(from_extra_image=True).image_1920 = new_image
 
     def _has_multiple_uoms(self) -> bool:
         """Check if the product has multiple available uoms for the current website.

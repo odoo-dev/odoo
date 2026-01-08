@@ -79,6 +79,7 @@ class TestWebsiteSaleImage(HttpCaseWithWebsiteUser):
                     "value_ids": [Command.set(product_attribute.value_ids.ids)],
                 })
             ],
+            "image_1920": blue_image,
         })
 
         line = template.attribute_line_ids
@@ -96,12 +97,21 @@ class TestWebsiteSaleImage(HttpCaseWithWebsiteUser):
             else:
                 val.price_extra = 20
 
-        # Get RED variant, and set image to blue (will be set on the template
-        # because the template image is empty and there is only one variant)
+        # Get RED variant, and set image to blue
         product_red = template._get_variant_for_combination(value_red)
         product_red.write({
             "image_1920": blue_image,
-            "product_variant_image_ids": [(0, 0, {"name": "image 2", "image_1920": image_bmp})],
+            "product_template_image_ids": [
+                (
+                    0,
+                    0,
+                    {
+                        "name": "image 2",
+                        "image_1920": image_bmp,
+                        "attribute_value_ids": [Command.link(value_red.id)],
+                    },
+                )
+            ],
         })
 
         self.assertEqual(template.image_1920.content, blue_image.content)
@@ -110,7 +120,17 @@ class TestWebsiteSaleImage(HttpCaseWithWebsiteUser):
         product_green = template._get_variant_for_combination(value_green)
         product_green.write({
             "image_1920": green_image,
-            "product_variant_image_ids": [(0, 0, {"name": "image 3", "image_1920": image_png})],
+            "product_template_image_ids": [
+                (
+                    0,
+                    0,
+                    {
+                        "name": "image 3",
+                        "image_1920": image_png,
+                        "attribute_value_ids": [Command.link(value_green.id)],
+                    },
+                )
+            ],
         })
 
         # now set the red image on the first variant, that works because
@@ -122,9 +142,9 @@ class TestWebsiteSaleImage(HttpCaseWithWebsiteUser):
         self.assertFalse(template.product_template_image_ids[0].can_image_1024_be_zoomed)
         self.assertFalse(template.product_template_image_ids[1].can_image_1024_be_zoomed)
         self.assertFalse(product_red.can_image_1024_be_zoomed)
-        self.assertFalse(product_red.product_variant_image_ids[0].can_image_1024_be_zoomed)
+        self.assertFalse(product_red._get_extra_images()[0].can_image_1024_be_zoomed)
         self.assertTrue(product_green.can_image_1024_be_zoomed)
-        self.assertTrue(product_green.product_variant_image_ids[0].can_image_1024_be_zoomed)
+        self.assertTrue(product_green._get_extra_images()[0].can_image_1024_be_zoomed)
 
         # jpeg encoding is changing the color a bit
         jpeg_blue = (65, 105, 227)
@@ -238,37 +258,6 @@ class TestWebsiteSaleImage(HttpCaseWithWebsiteUser):
         self.assertEqual(image_png.size, (1268, 1920))
         self.assertEqual(images[2].image_1920.content, image_gif.content)
         self.assertEqual(images[3].image_1920.content, image_svg.content)
-
-        # CASE: When uploading a product variant image
-        # we don't want the default_product_tmpl_id from the context to be applied if we have a
-        # product_variant_id set we want the default_product_tmpl_id from the context to be applied
-        # if we don't have a product_variant_id set
-
-        additionnal_context = {"default_product_tmpl_id": template.id}
-
-        product = self.env["product.product"].create({"product_tmpl_id": template.id})
-
-        product_image = (
-            self
-            .env["product.image"]
-            .with_context(**additionnal_context)
-            .create([
-                {"name": "Template image", "image_1920": red_image},
-                {
-                    "name": "Variant image",
-                    "image_1920": blue_image,
-                    "product_variant_id": product.id,
-                },
-            ])
-        )
-
-        template_image = product_image.filtered(lambda i: i.name == "Template image")
-        variant_image = product_image.filtered(lambda i: i.name == "Variant image")
-
-        self.assertEqual(template_image.product_tmpl_id.id, template.id)
-        self.assertFalse(template_image.product_variant_id.id)
-        self.assertFalse(variant_image.product_tmpl_id.id)
-        self.assertEqual(variant_image.product_variant_id.id, product.id)
 
     def test_02_image_holder(self):
         image = _create_image(color="#FF0000", dims=(800, 500))

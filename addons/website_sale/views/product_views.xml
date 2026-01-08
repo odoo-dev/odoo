@@ -222,19 +222,16 @@
                         <group string="Ribbon" name="ribbon">
                             <field name="variant_ribbon_id" options="{'no_quick_create': True}"/>
                         </group>
-                        <group string="Extra Variant Media" name="product_template_images">
-                            <field
-                                name="product_variant_image_ids"
-                                class="o_website_sale_image_list"
-                                context="{'default_name': name}"
-                                mode="kanban"
-                                add-label="Add Media"
-                                nolabel="1"
-                                colspan="2"
-                                widget="x2_many_media_viewer"
-                                options="{'convert_to_webp': True}"
-                            />
-                        </group>
+                        <field name="product_template_image_ids" position="attributes">
+                            <attribute name="context">
+                                {
+                                    'default_name': name,
+                                    'default_product_variant_ids': [id],
+                                    'default_attribute_value_ids': product_template_attribute_value_ids,
+                                    'default_product_tmpl_id': product_tmpl_id,
+                                }
+                            </attribute>
+                        </field>
                     </group>
                 </page>
             </page>

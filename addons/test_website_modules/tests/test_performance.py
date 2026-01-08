@@ -113,11 +113,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         })
         cls.product_images = cls.env['product.image'].with_context(default_product_tmpl_id=cls.productC.product_tmpl_id.id).create([{
             'name': 'Template image',
-            'image_1920': blue_image,
-        }, {
-            'name': 'Variant image',
             'image_1920': red_image,
-            'product_variant_id': cls.productC.id,
         }])
 
         for i in range(20):
@@ -148,7 +144,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
                 images.append({
                     'name': 'Variant image',
                     'image_1920': red_image,
-                    'product_variant_id': variant.id,
+                    'product_variant_ids': [Command.link(variant.id)],
                 })
             cls.env['product.image'].create(images)
 
@@ -288,9 +284,9 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
 
     def _get_queries_shop(self):
         html = self.url_open('/shop').text
-        self.assertIn(f'<img src="/web/image/product.product/{self.productC.id}/', html)
+        self.assertIn(f'<img src="/web/image/product.template/{self.productC.product_tmpl_id.id}/', html)
         self.assertIn(f'<img src="/web/image/product.template/{self.productA.product_tmpl_id.id}/', html)
-        self.assertIn(f'<img src="/web/image/product.image/{self.product_images.ids[1]}/', html)
+        self.assertIn(f'<img src="/web/image/product.image/{self.product_images.ids[0]}/', html)
 
         query_count = 41  # To increase this number you must ask the permission to al
         queries = {
@@ -313,7 +309,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'product_attribute_value': 3,
             'product_attribute': 1,
             'ir_attachment': 4,
-            'product_image': 3,
+            'product_image': 2,
             'product_template_attribute_value': 1,
             'ir_ui_view': 2,
             'website_menu': 1,
@@ -334,14 +330,10 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             queries['account_tax_repartition_line'] = 2
 
         if self._has_demo_data():
-            query_count += 5
+            query_count += 4
             queries['product_product'] += 2
-            queries['ir_attachment'] += 1
             queries['product_ribbon'] += 1
             queries['res_company'] += 1
-        else:
-            query_count += 3
-            queries['product_template_attribute_value'] += 3
 
         if self.env['res.groups']._is_feature_enabled('uom.group_uom'):
             query_count += 1
