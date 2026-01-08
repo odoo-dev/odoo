@@ -40,6 +40,7 @@ class MrpProductionSerials(models.TransientModel):
                 'product_id': lot.product_id.id,
                 'lot_id': lot.id,
                 'move_id': sbc_move.id,
+                'picking_id': sbc_move.picking_id.id,
                 'quantity': 1,
             } for lot in all_lots[1:]
         ])
