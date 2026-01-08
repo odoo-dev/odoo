@@ -348,15 +348,16 @@ class ResCompany(models.Model):
             if not currency.active:
                 currency.write({'active': True})
 
-        res = super().write(values)
-        invalidation_fields = self.cache_invalidation_fields()
-        asset_invalidation_fields = {'font', 'primary_color', 'secondary_color', 'external_report_layout_id'}
-
         companies_needs_l10n = (
             values.get('country_id')
             and self.filtered(lambda company: not company.country_id)
             or self.browse()
         )
+
+        res = super().write(values)
+        invalidation_fields = self.cache_invalidation_fields()
+        asset_invalidation_fields = {'font', 'primary_color', 'secondary_color', 'external_report_layout_id'}
+
         if not invalidation_fields.isdisjoint(values):
             self.env.registry.clear_cache()
 
