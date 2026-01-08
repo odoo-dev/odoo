@@ -89,7 +89,7 @@ msgstr ""
 #. module: account
 #. odoo-python
 #: code:addons/account/models/product.py:0
-msgid "%(amount)s Excl. Taxes"
+msgid "%(amount)s Excl. Tax"
 msgstr ""
 
 #. module: account
