@@ -71,7 +71,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__supplier_invoice_count
 #: model:ir.model.fields,field_description:account.field_res_users__supplier_invoice_count
-msgid "# Vendor Bills"
+msgid "# Vendor Bill"
 msgstr ""
 
 #. module: account
