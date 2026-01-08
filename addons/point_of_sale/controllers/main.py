@@ -154,7 +154,7 @@ class PosController(PortalAccount):
                     ('ticket_code', '=', form_values['ticket_code']),
                 ], limit=1)
                 if order:
-                    return request.redirect('/pos/ticket/validate?access_token=%s' % (order.access_token))
+                    return request.redirect('/pos/ticket/action_selector?access_token=%s' % (order.access_token))
                 else:
                     errors['generic'] = _("No sale order found.")
 
@@ -162,13 +162,44 @@ class PosController(PortalAccount):
             if kwargs.get('order_uuid'):
                 order = self.env['pos.order'].sudo().search([('uuid', '=', kwargs['order_uuid'])], limit=1)
                 if order:
-                    return request.redirect('/pos/ticket/validate?access_token=%s' % (order.access_token))
+                    return request.redirect('/pos/ticket/action_selector?access_token=%s' % (order.access_token))
 
         return request.render("point_of_sale.ticket_request_with_code", {
             'errors': errors,
             'banner_error': " ".join(errors.values()),
             'form_values': form_values,
         })
+
+    @http.route(['/pos/ticket/action_selector'], type='http', auth="public", website=True, sitemap=False)
+    def show_ticket_action_selector(self, access_token='', **kwargs):
+        if not access_token:
+            return request.not_found()
+
+        pos_order = request.env['pos.order'].sudo().search([
+            ('access_token', '=', access_token)
+        ], limit=1)
+
+        if not pos_order:
+            return request.not_found()
+
+        if request.httprequest.method == 'GET' and kwargs.get('action'):
+            if kwargs['action'] == 'invoice':
+                return request.redirect(
+                    '/pos/ticket/validate?access_token=%s' % access_token
+                )
+
+            if kwargs['action'] == 'feedback':
+                return request.redirect(
+                    '/pos/ticket/feedback?access_token=%s' % access_token
+                )
+
+        return request.render(
+            "point_of_sale.ticket_action_selector",
+            {
+                'access_token': access_token,
+                'pos_order': pos_order,
+            }
+        )
 
     @http.route(['/pos/ticket/validate'], type='http', auth="public", website=True, sitemap=False)
     def show_ticket_validation_screen(self, access_token='', **kwargs):
@@ -241,7 +272,6 @@ class PosController(PortalAccount):
                 messages=form_values.get('messages'),
                 invalid_fields=form_values.get('invalid_fields'),
             ))
-
         elif user_is_connected:
             return self._get_invoice(partner, {}, pos_order, additional_invoice_fields, kwargs)
 
@@ -250,8 +280,6 @@ class PosController(PortalAccount):
             if additional_partner_fields:
                 form_values['extra_field_values'] = {'partner_' + field.name: partner[field.name] for field in additional_partner_fields if field.name not in form_values['extra_field_values']}
 
-            # This is just to ensure that the user went and filled its information at least once.
-            # Another more thorough check is done upon posting the form.
             if not partner.country_id or not partner.street:
                 form_values['partner_address'] = False
             else:
@@ -280,6 +308,37 @@ class PosController(PortalAccount):
             'invoice_sending_methods': {'email': _("by Email")},
             **form_values,
         })
+
+    @http.route(['/pos/ticket/feedback'], type='http', auth="public", website=True, sitemap=False)
+    def show_ticket_feedback(self, access_token='', **kwargs):
+        if not access_token:
+            return request.not_found()
+
+        pos_order = request.env['pos.order'].sudo().search([('access_token', '=', access_token)], limit=1)
+        if not pos_order:
+            return request.not_found()
+
+        if request.httprequest.method == 'POST':
+            rating = kwargs.get('rating')
+            feedback = kwargs.get('feedback')
+
+            if rating and feedback:
+                pos_order.sudo().message_post(body=feedback)
+                return request.render(
+                    "point_of_sale.ticket_feedback_thankyou",
+                    {
+                        'pos_order': pos_order,
+                        'access_token': access_token,
+                    }
+                )
+
+        return request.render(
+            "point_of_sale.ticket_feedback_demo",
+            {
+                'pos_order': pos_order,
+                'access_token': access_token,
+            }
+        )
 
     def _validate_extra_form_details(self, addtional_form_values, additional_required_fields):
         """ Ensure that all additional required fields have a value in the data. """

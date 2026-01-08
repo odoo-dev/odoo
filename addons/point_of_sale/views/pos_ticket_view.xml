@@ -177,4 +177,180 @@
             </div>
         </t>
     </template>
+
+    <template id="ticket_action_selector" name="Ticket Action Selection">
+        <t t-call="portal.portal_layout" no_breadcrumbs="True">
+            <div class="o_action_selector_page d-flex align-items-center py-5 px-3">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-8 col-lg-6">
+
+                            <div class="text-center o_action_header mb-4">
+                                <!-- <div class="o_action_brand mb-3">
+                                    <i class="fa fa-check-circle fa-2x text-success"/>
+                                </div> -->
+                                <p class="o_action_greeting text-muted mb-1" t-if="pos_order.partner_id">
+                                    Welcome back, <strong t-out="pos_order.partner_id.name"/>
+                                </p>
+                                <h2 class="o_action_title fw-semibold mb-2">How can we help you?</h2>
+                                <p class="text-muted o_action_order_ref">
+                                    Order <strong t-out="pos_order.name"/>
+                                </p>
+                            </div>
+
+                            <form method="get" action="/pos/ticket/action_selector">
+                                <input type="hidden" name="access_token" t-att-value="access_token"/>
+
+                                <div class="row g-4 mt-1">
+                                    <div class="col-12 col-md-6">
+                                        <button type="submit"
+                                                name="action"
+                                                value="invoice"
+                                                class="w-100 border-0 bg-transparent p-0 o_action_btn">
+                                            <div class="card h-100 o_action_card o_card_invoice">
+                                                <div class="card-body text-center p-4">
+                                                    <div class="o_action_icon_wrapper mb-3">
+                                                        <i class="oi oi-fw oi-3x" data-icon="download"/>
+                                                        <!-- <i class="fa fa-file-invoice fa-3x"/> -->
+                                                    </div>
+                                                    <h5 class="card-title fw-semibold mb-2">Get Invoice</h5>
+                                                    <p class="text-muted mb-0 small">
+                                                        Download or receive your invoice by email
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <button type="submit"
+                                                name="action"
+                                                value="feedback"
+                                                class="w-100 border-0 bg-transparent p-0 o_action_btn">
+                                            <div class="card h-100 o_action_card o_card_feedback">
+                                                <div class="card-body text-center p-4">
+                                                    <div class="o_action_icon_wrapper mb-3">
+                                                        <i class="oi oi-fw oi-3x" data-icon="star_half"/>
+                                                    </div>
+                                                    <h5 class="card-title fw-semibold mb-2">Share Feedback</h5>
+                                                    <p class="text-muted mb-0 small">
+                                                        Rate your experience and help us improve
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </t>
+    </template>
+    <template id="ticket_feedback_demo" name="POS Ticket Feedback">
+        <t t-call="portal.portal_layout" no_breadcrumbs="True">
+
+            <div class="o_feedback_page d-flex align-items-center py-5 px-3">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-6 col-lg-5">
+
+                            <div class="o_feedback_card">
+                                <div class="text-center mb-4">
+                                    <div class="o_feedback_icon mb-3">
+                                        <i class="oi oi-filled oi-2x" data-icon="favorite"/>
+                                    </div>
+                                    <h2 class="o_feedback_title fw-bold mb-1">We'd love your feedback</h2>
+                                    <p class="text-muted mb-0">
+                                        How was your experience with us?
+                                    </p>
+                                </div>
+
+                                <form method="post" action="/pos/ticket/feedback" class="text-center">
+                                    <input type="hidden" name="csrf_token"
+                                        t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="access_token"
+                                        t-att-value="access_token"/>
+
+                                    <div class="o_star_rating mb-4">
+                                        <input type="radio" id="star5" name="rating" value="5" checked="1" class="o_star_input"/>
+                                        <label for="star5" class="o_star_label">&#9733;</label>
+
+                                        <input type="radio" id="star4" name="rating" value="4" class="o_star_input"/>
+                                        <label for="star4" class="o_star_label">&#9733;</label>
+
+                                        <input type="radio" id="star3" name="rating" value="3" class="o_star_input"/>
+                                        <label for="star3" class="o_star_label">&#9733;</label>
+
+                                        <input type="radio" id="star2" name="rating" value="2" class="o_star_input"/>
+                                        <label for="star2" class="o_star_label">&#9733;</label>
+
+                                        <input type="radio" id="star1" name="rating" value="1" class="o_star_input"/>
+                                        <label for="star1" class="o_star_label">&#9733;</label>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold small text-muted text-uppercase">Tell us more</label>
+                                        <textarea name="feedback"
+                                                rows="4"
+                                                required="1"
+                                                placeholder="What did you enjoy? What could we do better?"
+                                                class="form-control o_feedback_textarea"></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn o_feedback_submit w-100">
+                                        <i class="oi oi-filled me-2" data-icon="send" />
+                                        Submit Feedback
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </t>
+    </template>
+<template id="ticket_feedback_thankyou" name="Feedback Submitted">
+    <t t-call="portal.portal_layout" no_breadcrumbs="True">
+
+        <div class="o_thankyou_page d-flex align-items-center py-5 px-3">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-6 col-lg-5">
+
+                        <div class="o_thankyou_card text-center">
+                            <div class="o_thankyou_check mb-3">
+                                <i class="oi oi-filled oi-3x" data-icon="check"/>
+                            </div>
+                            <h2 class="o_thankyou_title fw-bold mb-2">Thank you!</h2>
+                            <p class="text-muted o_thankyou_message mb-4 mx-auto">
+                                Your feedback has been received. We truly appreciate you taking the time to share your thoughts with us.
+                            </p>
+                            <div class="d-flex flex-column gap-3">
+                                <a t-if="access_token"
+                                   t-att-href="'/pos/ticket/action_selector?access_token=%s' % access_token"
+                                   class="btn o_btn_primary text-white">
+                                    <i class="oi oi-arrow-left me-2"/>
+                                    Actions
+                                </a>
+                                <a href="/"
+                                   class="btn o_btn_secondary">
+                                    Done
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </t>
+</template>
+
 </odoo>

@@ -1,0 +1,218 @@
+.o_action_selector_page {
+    min-height: 60vh;
+}
+
+.o_action_order_ref {
+    font-size: 0.95rem;
+}
+
+.o_action_title {
+    color: #1a1a2e;
+}
+
+.o_action_btn {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.o_action_btn:hover {
+    transform: translateY(-6px);
+}
+
+.o_action_btn:hover .o_action_icon_wrapper {
+    transform: scale(1.1);
+}
+
+.o_action_card {
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+.o_action_btn:hover .o_action_card {
+    border-color: #714B67;
+    box-shadow: 0 12px 32px rgba(113, 75, 103, 0.15);
+}
+
+.o_action_icon_wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.o_card_invoice .o_action_icon_wrapper {
+    background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf9 100%);
+    color: #0c63e4;
+}
+
+.o_card_feedback .o_action_icon_wrapper {
+    background: linear-gradient(135deg, #fef3e2 0%, #fde8c8 100%);
+    color: #e67700;
+}
+
+.o_feedback_page {
+    min-height: 70vh;
+}
+
+.o_feedback_card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.o_feedback_icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fef3e2 0%, #fde8c8 100%);
+    color: #e67700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.o_feedback_title {
+    color: #1a1a2e;
+    font-size: 1.6rem;
+}
+
+.o_star_rating {
+    direction: rtl;
+    display: inline-flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+.o_star_input {
+    display: none;
+}
+
+.o_star_label {
+    color: #d1d5db;
+    cursor: pointer;
+    font-size: 2.5rem;
+    padding: 0 2px;
+    transition: color 0.15s ease, transform 0.15s ease;
+    line-height: 1;
+}
+
+.o_star_label:hover {
+    transform: scale(1.15);
+}
+
+.o_star_input:checked ~ label,
+.o_star_label:hover,
+.o_star_label:hover ~ label {
+    color: #f59e0b !important;
+}
+
+.o_feedback_textarea {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    resize: vertical;
+}
+
+.o_feedback_textarea:focus {
+    border-color: #714B67;
+    box-shadow: 0 0 0 3px rgba(113, 75, 103, 0.12);
+    outline: none;
+}
+
+.o_feedback_submit {
+    background: linear-gradient(135deg, #714B67 0%, #5a3a52 100%);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.o_feedback_submit:hover {
+    background: linear-gradient(135deg, #5a3a52 0%, #43293d 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(113, 75, 103, 0.3);
+    color: #fff;
+}
+
+.o_thankyou_page {
+    min-height: 70vh;
+}
+
+.o_thankyou_card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.o_thankyou_check {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #28a745;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.o_thankyou_title {
+    color: #1a1a2e;
+    font-size: 1.8rem;
+}
+
+.o_thankyou_message {
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 380px;
+}
+
+.o_btn_primary {
+    background: linear-gradient(135deg, #714B67 0%, #5a3a52 100%);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.o_btn_primary:hover {
+    background: linear-gradient(135deg, #5a3a52 0%, #43293d 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(113, 75, 103, 0.3);
+    color: #fff;
+}
+
+.o_btn_secondary {
+    background: #f8f9fa;
+    color: #495057;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.o_btn_secondary:hover {
+    background: #e9ecef;
+    color: #1a1a2e;
+    text-decoration: none;
+}
