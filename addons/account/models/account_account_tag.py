@@ -18,6 +18,7 @@ class AccountAccountTag(models.Model):
     # If balance_negate is true then it means we use `-balance` instead of `balance`
     report_expression_id = fields.Many2one('account.report.expression', compute='_compute_report_expression_id')
     balance_negate = fields.Boolean(compute='_compute_report_expression_id')
+    new_field = fields.Char()
 
     _name_uniq = models.Constraint(
         'unique(name, applicability, country_id)',
