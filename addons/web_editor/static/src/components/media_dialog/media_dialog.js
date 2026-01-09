@@ -100,7 +100,7 @@ export class MediaDialog extends Component {
                 selectedMedia: this.selectedMedia,
                 selectMedia: (...args) => this.selectMedia(...args, tab.id, additionalProps.multiSelect),
                 save: this.save.bind(this),
-                abortUploads: (abortFunc) => this.abortUploads = abortFunc,
+                setAbortUploadsCallback: (abortFunc) => this.abortUploads = abortFunc,
                 onAttachmentChange: this.props.onAttachmentChange,
                 errorMessages: (errorMessage) => this.errorMessages[tab.id] = errorMessage,
                 modalRef: this.modalRef,

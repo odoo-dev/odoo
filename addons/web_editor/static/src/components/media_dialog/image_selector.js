@@ -140,10 +140,23 @@ export class ImageSelector extends FileSelector {
     }
 
     async uploadFiles(files) {
-        const uploadResult = await this.uploadService.uploadFilesWithAbort(files, { resModel: this.props.resModel, resId: this.props.resId, isImage: true }, (attachment) => this.onUploaded(attachment));
-        this.props.abortUploads(() => uploadResult.abort());
-        await uploadResult.promise;
-    }
+        let abortFn;
+
+        const uploadPromise = this.uploadService.uploadFiles(
+            files,
+            {
+                resModel: this.props.resModel,
+                resId: this.props.resId,
+                isImage: true,
+            },
+            (attachment) => this.onUploaded(attachment),
+            (abort) => {
+                abortFn = abort;
+            }
+        );
+        this.props.setAbortUploadsCallback(() => abortFn?.());
+        await uploadPromise;
+}
 
     async uploadUrl(url) {
         await fetch(url).then(async result => {
