@@ -113,20 +113,6 @@ class Base_ImportMapping(models.Model):
     field_name = fields.Char()
 
 
-class ResUsers(models.Model):
-    _inherit = 'res.users'
-
-    def _can_import_remote_urls(self):
-        """ Hook to decide whether the current user is allowed to import
-        images via URL (as such an import can DOS a worker). By default,
-        allows the administrator group.
-
-        :rtype: bool
-        """
-        self.ensure_one()
-        return self._is_admin()
-
-
 class Base_ImportImport(models.TransientModel):
     """
     This model is used to prepare the loading of data coming from a user file.
@@ -1291,11 +1277,6 @@ class Base_ImportImport(models.TransientModel):
 
                     for num, line in enumerate(data):
                         if re.match(config.get("import_url_regex"), line[index]):
-                            if not self.env.user._can_import_remote_urls():
-                                raise ImportValidationError(
-                                    _("You can not import file via URL, check with your administrator or support for the reason."),
-                                    field=name, field_type=field['type']
-                                )
                             line[index] = self._import_file_by_url(line[index], session, name, num)
                         elif '.' in line[index]:
                             # Detect if it's a filename
