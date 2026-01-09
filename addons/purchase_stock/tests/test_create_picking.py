@@ -910,3 +910,25 @@ class TestCreatePicking(ProductVariantsCommon):
         po.picking_ids.button_validate()
         # Update the quantity to 10 to trigger the discount
         self.assertEqual(self.product_id_1.standard_price, 450.0)
+
+    def test_move_description_picking_supplier(self):
+        product_with_description = self.env['product.template'].create({
+            'name': 'Product with description',
+            'seller_ids': [Command.create({
+                'partner_id': self.partner_id.id,
+                'product_name': 'ABCD',
+                'product_code': 'HELLO',
+                'min_qty': 1,
+                'price': 1,
+            })],
+        })
+        po = self.env['purchase.order'].create({
+            'partner_id': self.partner_id.id,
+            'order_line': [Command.create({
+                    'product_id': product_with_description.product_variant_ids.id,
+                    'product_qty': 1,
+                }),
+            ]
+        })
+        po.button_confirm()
+        self.assertEqual(po.picking_ids.move_ids.description_picking, '[HELLO] ABCD')
