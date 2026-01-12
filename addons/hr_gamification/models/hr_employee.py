@@ -21,10 +21,11 @@ class HrEmployee(models.Model):
     @api.depends('user_id.goal_ids.challenge_id.challenge_category')
     def _compute_employee_goals(self):
         for employee in self:
-            employee.goal_ids = self.env['gamification.goal'].search([
+            goals = self.env['gamification.goal'].search([
                 ('user_id', '=', employee.user_id.id),
                 ('challenge_id.challenge_category', '=', 'hr'),
             ])
+            employee.goal_ids = [(6, 0, goals.ids)]
 
     @api.depends('direct_badge_ids', 'user_id.badge_ids.employee_id')
     def _compute_employee_badges(self):
