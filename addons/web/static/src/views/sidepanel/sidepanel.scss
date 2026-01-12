@@ -1,0 +1,127 @@
+@mixin _forceFormViewColumnLayout($_reset_padding: true) {
+    .o_form_view.o_xxl_form_view {
+        flex-flow: column nowrap !important;
+        height: 100%;
+
+        .o_form_view_container {
+            width: 100%;
+        }
+
+        .o_form_renderer {
+            flex-flow: column nowrap !important;
+        }
+
+        .o_form_sheet_bg {
+            @if ($_reset_padding) {
+                --formView-sheetBg-padding-right: 0 !important;
+            }
+            flex: 0 0 auto;
+        }
+
+        .o-mail-Form-chatter.o-aside {
+            width: 100%;
+        }
+    }
+}
+
+.o_sidepanel {
+    width: 100%;
+
+    &:focus {
+        outline: none;
+    }
+
+    .o_sidepanel_header {
+        @media (max-width: ($sidepanel-static-media-breakpoint - 1px)) {
+            height: auto!important;
+            .btn {
+                --btn-font-size: #{$btn-font-size-sm};
+                --btn-padding-x: #{$btn-padding-x-sm};
+                --btn-padding-y: #{$btn-padding-y-sm};
+            }
+        }
+    }
+
+    .o_sidepanel_content {
+        scrollbar-gutter: stable;
+
+        .o_sidepanel_form_wrapper {
+            .o_form_sheet_bg {
+                padding: 0;
+
+                .o_form_sheet {
+                    --formView-sheet-border-width: 0px 0 1px 0;
+                    --formView-sheet-border-radius: 0;
+                    --formView-sheet-padding-y: 16px;
+                    --formView-sheet-padding-x: 16px;
+                }
+
+            }
+
+            .o_form_statusbar, .o-mail-ChatterContainer, .o-mail-Form-chatter, .o-mail-Chatter-top {
+                background: none;
+            }
+
+            @include _forceFormViewColumnLayout();
+        }
+    }
+}
+
+.o_sidepanel {
+    width: $sidepanel-formView-minimal-width;
+    display: flex;
+    flex-direction: column;
+    z-index: $zindex-offcanvas;
+
+    @media (max-width: ($sidepanel-static-media-breakpoint - 1px)) {
+        position: fixed;
+        box-shadow: $box-shadow-lg;
+    }
+
+    @media (min-width: $sidepanel-static-media-breakpoint) {
+        height: 100%;
+        top: 0!important;
+    }
+
+    &.o_sidepanel_visible {
+        .o_action_manager:has(&):where(:not(:has(.o_home_menu))) {
+            @media (min-width: map-get($grid-breakpoints, "xxl")) {
+                display: flex;
+
+                @include _forceFormViewColumnLayout(false);
+
+                > .o_action {
+                    flex-grow: 1;
+
+                    > .o_content, > .o_form_view_container > .o_content {
+                        width: calc(100vw - #{$sidepanel-formView-minimal-width});
+                    }
+                }
+
+            }
+
+
+            @media (min-width: $sidepanel-static-media-breakpoint) {
+                border-top: $border-width solid $border-color;
+            }
+        }
+        &:not(:hover) {
+            #o_sidepanel_container_toggler {display: none}
+        }
+    }
+
+    &.o_sidepanel_folded {
+        width: 0;
+    }
+
+    .o_home_menu + &.o_sidepanel_pinned {
+        position: fixed;
+        width: 300px;
+        inset: 100px 12px auto auto !important;
+        height: auto!important;
+
+        .o_sidepanel_content {
+            display: none;
+        }
+    }
+}

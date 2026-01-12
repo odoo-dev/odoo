@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.SidePanel">
+        <div t-if="isOpen"
+             class="o_sidepanel bg-view d-none d-xxl-flex border-start end-0 flex-column bottom-0 flex-shrink-0"
+             t-att-class="{
+                'o_sidepanel_folded' : this.sidepanelState.isFolded,
+                'o_sidepanel_visible' : !this.sidepanelState.isFolded,
+                'o_sidepanel_pinned' : this.sidepanelState.isPinned
+             }"
+             t-ref="panel"
+             t-on-keydown="onKeydown"
+             tabindex="-1">
+
+            <!-- Header -->
+            <div
+                class="o_sidepanel_header position-relative z-1 border-bottom shadow-sm"
+            >
+                <div class="o_sidepanel_header_content border d-flex align-items-center py-2 ps-2 pe-3"
+                    t-att-class="{
+                        'bg-view': !this.sidepanelState.isPinned,
+                        'border-transparent' : !this.sidepanelState.isPinned,
+                        'border-info': this.sidepanelState.isPinned,
+                    }">
+                    <button
+                        t-if="!this.sidepanelState.isFolded"
+                        class="btn btn-light position-absolute top-0 end-100 pe-auto p-2 rounded-end-0 border border-top-0  h-100"
+                        t-on-click="toggleFold"
+                        id="o_sidepanel_container_toggler"
+                    >
+                        <i class="oi oi-arrow-right" role="presentation"/>
+                    </button>
+
+                    <div class="flex-grow-1 small">
+                        <t t-esc="this.sidepanelState.resModel"/> #<t t-esc="this.sidepanelState.resId"/>
+                    </div>
+
+                    <div class="o_sidepanel_header_buttons d-flex gap-2">
+                        <!-- Pin Button -->
+                        <button class="btn btn-sm btn-secondary"
+                                t-att-class="this.sidepanelState.isPinned and 'active'"
+                                t-on-click="togglePin"
+                                title="Pin this panel"
+                            >
+                            <i class="fa fa-thumb-tack"
+                               role="presentation"
+                               t-att-style="!this.sidepanelState.isPinned and 'transform: rotate(45deg);'"
+                            />
+                        </button>
+
+                        <!-- Full View Button -->
+                        <button class="btn btn-sm btn-primary"
+                                t-on-click="openInFullView"
+                                title="Open in full view"
+                        >
+                            <small>Open</small>
+                            <i class="oi oi-arrows-v ms-2" role="presentation" style="transform: rotate(45deg)"/>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button
+                    t-if="this.sidepanelState.isFolded"
+                    class="btn btn-light position-absolute top-0 end-100 pe-auto p-2 rounded-end-0 border border-top-0"
+                    t-on-click="toggleFold"
+                    id="o_sidepanel_container_toggler"
+            >
+                <i class="oi oi-view" role="presentation"/>
+                <i class="oi oi-arrow-left" role="presentation"/>
+            </button>
+
+            <!-- Content -->
+            <div class="o_sidepanel_content z-0 flex-grow-1 flex-shrink-1 h-100 overflow-y-auto">
+                <SidePanelFormView
+                        resModel="sidepanelState.resModel"
+                        resId="sidepanelState.resId"
+                        context="sidepanelState.context"
+                        viewId="sidepanelState.viewId"
+                        onRecordSaved.bind="onRecordSaved"
+                />
+            </div>
+        </div>
+    </t>
+
+</templates>

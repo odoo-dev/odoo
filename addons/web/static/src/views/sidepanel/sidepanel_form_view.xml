@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web.SidePanelFormView">
+        <div class="o_sidepanel_form_wrapper h-100 w-100">
+            <t t-if="!state.loading">
+                <View t-props="viewProps" t-key="getViewKey()"/>
+            </t>
+            <t t-else="">
+                <div class="text-center p-5">
+                    <i class="fa fa-spinner fa-spin fa-2x text-muted"/>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>
