@@ -139,3 +139,21 @@ class TestStockPickingTour(HttpCase):
             {'quantity': 3.0, 'lot_id': lot_1.id},
             {'quantity': 15.0, 'lot_id': lot_2.id},
         ])
+
+    def test_demo(self):
+        product = self.env['product.product'].create({
+            'name': 'Test Product',
+            'is_storable': True,
+        })
+        self.env['res.partner'].create({'name': 'Demo Customer'})
+        warehouse = self.env.ref("stock.warehouse0")
+        delivery = self.env['stock.picking'].create({
+            'picking_type_id': warehouse.out_type_id.id,
+            'move_ids': [Command.create({
+                'product_id': product.id,
+                'product_uom_qty': 10,
+            })]
+        })
+        delivery.action_confirm()
+        url = '/odoo/deliveries/%s' % (delivery.id)
+        self.start_tour(url, 'test_demo', login='admin', timeout=100)

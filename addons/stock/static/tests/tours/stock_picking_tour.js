@@ -521,3 +521,60 @@ registry.category("web_tour.tours").add("test_add_new_line_in_detailled_op", {
         },
     ],
 });
+
+registry.category("web_tour.tours").add("test_demo", {
+    steps: () => [
+        {
+            content: "Click Add a Product button",
+            trigger: "div[name=move_ids] .o_field_x2many_list_row_add a",
+            run: "click",
+        },
+        {
+            trigger: ".o_field_widget[name=product_uom_qty] input",
+            run: "edit 10",
+        },
+        // {
+        //     content: "Change Scheduled Date",
+        //     trigger: "div[name=scheduled_date] .o_input.o_daterange_start",
+        //     run: "click",
+        // },
+        // {
+        //     content: "Wait for the datepicker to be opened",
+        //     trigger: ".o_datetime_picker",
+        // },
+        // {
+        //     content:  "Select next month",
+        //     trigger:  ".o_datetime_picker .o_next",
+        //     run: "click",
+        // },
+        // {
+        //     content: "Select Date",
+        //     trigger: ".o_date_picker > .o_date_item_cell:not(.o_out_of_range)",
+        //     run: "click",
+        // },
+        // {
+        //     content: "Click Apply button",
+        //     trigger: ".o_datetime_buttons .btn-primary",
+        //     run: "click",
+        // },
+        {
+            content: "Click partner field",
+            trigger: "div[name=partner_id] .o_input",
+            run: "click",
+        },
+        {
+            content: "Select partner",
+            trigger: ".ui-menu-item > a:contains('Demo Customer')",
+            run: "click",
+        },
+        {
+            trigger: ".o_field_widget[name=product_uom_qty] input",
+            run: "edit 1",
+        },
+        {
+            content: "Save",
+            trigger: ".o_form_button_save",
+            run: "click",
+        },
+    ],
+});
