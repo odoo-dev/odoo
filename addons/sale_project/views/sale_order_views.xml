@@ -17,13 +17,13 @@
                     groups="project.group_project_user"
                 >
                     <div class="o_stat_info">
-                        <div class="o_row">
+                        <div class="o_row o_readonly">
                             <span class="o_stat_value order-first">
                                 <field name="project_count"/>
                             </span>
                             <span class="o_stat_text"> Projects</span>
                         </div>
-                        <div class="o_row">
+                        <div class="o_row o_readonly">
                             <span class="o_stat_value order-first">
                                 <field name="tasks_count"/>
                             </span>
