@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 
-from odoo import api, fields, models, modules, tools, _
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.http import request
 
@@ -81,22 +81,7 @@ class BaseGeocoder(models.AbstractModel):
         Use Openstreemap Nominatim service to retrieve location
         :return: (latitude, longitude) or None if not found
         """
-        if not addr:
-            _logger.info('invalid address given')
-            return None
-        import requests  # noqa: PLC0415
-        url = 'https://nominatim.openstreetmap.org/search'
-        try:
-            headers = {'User-Agent': 'Odoo (http://www.odoo.com/contactus)'}
-            response = requests.get(url, headers=headers, params={'format': 'json', 'q': addr})
-            _logger.info('openstreetmap nominatim service called')
-            if response.status_code != 200:
-                _logger.warning('Request to openstreetmap failed.\nCode: %s\nContent: %s', response.status_code, response.content)
-            result = response.json()
-        except Exception as e:
-            self._raise_query_error(e)
-        geo = result[0]
-        return float(geo['lat']), float(geo['lon'])
+        return self.env.company._call_nominatim(addr)
 
     @api.model
     def _call_openstreetmap_reverse(self, lat, lon):
@@ -107,31 +92,7 @@ class BaseGeocoder(models.AbstractModel):
         :return: Address string or None if not found
 
         """
-        if not (lat and lon):
-            _logger.info("invalid latitude or longitude given")
-            return None
-        if tools.config['test_enable'] or modules.module.current_test:
-            raise UserError(_("OpenStreetMap calls disabled in testing environment."))
-        import requests  # noqa: PLC0415
-        try:
-            headers = {"User-Agent": "Odoo (http://www.odoo.com/contactus)"}
-            response = requests.get(
-                "https://nominatim.openstreetmap.org/reverse",
-                headers=headers,
-                params={"format": "json", "lat": lat, "lon": lon},
-                timeout=10,
-            )
-            _logger.info("openstreetmap nominatim service called")
-            if response.status_code != 200:
-                _logger.warning(
-                    "Request to openstreetmap failed.\nCode: %s\nContent: %s",
-                    response.status_code,
-                    response.content,
-                )
-            result = response.json()
-        except Exception as e:  # noqa: BLE001
-            self._raise_query_error(e)
-        return result
+        return self.env.company._call_nominatim_reverse(lat, lon)
 
     @api.model
     def _call_googlemap(self, addr, **kw):
