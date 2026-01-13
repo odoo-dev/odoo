@@ -21,6 +21,17 @@ class MrpBomPopover extends PopoverComponent {
             context: { active_id: id },
         });
     }
+
+    async openBomOverview() {
+        return this.actionService.doAction("mrp.action_report_mrp_bom", {
+            additionalContext: {
+                active_id: this.props.bom_id,
+                active_product_id: this.props.res_id,
+                active_model: 'product.product',
+                mode: "forecast",
+            },
+        });
+    }
 }
 
 class MrpBomPopoverField extends PopoverWidgetField {

@@ -347,7 +347,7 @@ class MrpBom(models.Model):
             if not (component_info.get('name') and component_info.get('is_storable')):
                 bom.estimated_info = self.env._("Estimated: %s Days", {int(max_delay)})
                 bom.json_popover = json.dumps({
-                    'estimated_delay': self.env._("Estimated: %s Days", {int(max_delay)}),
+                    'estimated_delay': self.env._("%s Days", {int(max_delay)}),
                 })
             elif max_delay is not False:
                 bom.estimated_info = self.env._("Estimated: %s Days", {int(max_delay)})
@@ -363,8 +363,9 @@ class MrpBom(models.Model):
             else:
                 bom.estimated_info = self.env._("Estimated: Not Available")
                 bom.json_popover = json.dumps({
-                    'no_estimated_info': self.env._(
-                        "Estimated: Not Available (Missing Routes information for some components)")
+                    'no_estimated_info': self.env._("Not Available"),
+                    'bom_id': bom.id,
+                    'res_id': bom.product_id.id,
                 })
 
     @api.constrains('product_tmpl_id', 'product_id', 'type')

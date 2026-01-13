@@ -4,9 +4,16 @@
         <table class="table table-sm mb-0">
             <tbody>
                 <t t-if="props.estimated_delay">
-                    <tr><td><t t-esc="props.estimated_delay"/></td></tr>
+                    <tr>
+                        <td class="fw-bolder">Days to prepare estimation</td>
+                        <td><t t-esc="props.estimated_delay"/></td>
+                    </tr>
                 </t>
                 <t t-elif="props.component">
+                    <tr>
+                        <td class="fw-bolder">Days to prepare estimation</td>
+                        <td><t t-esc="props.delay"/></td>
+                    </tr>
                     <tr>
                         <td class="fw-bolder">Component</td>
                         <td><a href="#" t-on-click.prevent="() => this.goToAction(props.component_id, 'product.product')"><t t-esc="props.component"/></a></td>
@@ -31,7 +38,14 @@
                     </tr>
                 </t>
                 <t t-else="">
-                    <tr><td><t t-esc="props.no_estimated_info"/></td></tr>
+                    <tr>
+                        <td class="fw-bolder">Days to prepare estimation</td>
+                        <td class="text-danger"><t t-esc="props.no_estimated_info"/></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bolder">Missing route info for components/final product.</td>
+                        <td><a href="#" t-on-click.prevent="openBomOverview">See BoM overview</a></td>
+                    </tr>
                 </t>
             </tbody>
         </table>
