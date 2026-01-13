@@ -652,7 +652,7 @@ export class HistoryPlugin extends Plugin {
     stageSelection() {
         const selection = this.dependencies.selection.getEditableSelection();
         if (this.getIsCurrentStepModified()) {
-            console.warn(
+            console.error(
                 `should not have any "characterData", "remove" or "add" mutations in current step when you update the selection`
             );
             return;
