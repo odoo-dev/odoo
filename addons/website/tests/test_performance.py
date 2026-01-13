@@ -152,7 +152,7 @@ class TestStandardPerformance(UtilPerf):
         url = '/web/image/website/1/favicon'
         select_tables_perf = {
             'orm_signaling_registry': 1,
-            'website': 2,
+            'website': 1,
             # 1. `_find_record()` performs an access right check through
             #    `exists()` which perform a request on the website.
             # 2. `_get_stream_from` ends up reading the requested record to
@@ -161,10 +161,10 @@ class TestStandardPerformance(UtilPerf):
             # 1. `_record_to_stream()` does a `search()`..
             # 2. ..followed by a `_read()`
         }
-        self._check_url_hot_query(url, 5, select_tables_perf)
+        self._check_url_hot_query(url, 4, select_tables_perf)
 
         self.authenticate('portal', 'portal')
-        self._check_url_hot_query(url, 5, select_tables_perf)
+        self._check_url_hot_query(url, 4, select_tables_perf)
 
 
 class TestWebsitePerformanceCommon(UtilPerf):
@@ -228,12 +228,11 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     'website_page': 2,
                     # 1. `_serve_page` search page matching URL..
                     # 2. ..then reads it (`is_visible`)
-                    'website': 1,
                     # menu and layout
                     'website_menu': 1,
                     'ir_ui_view': 1,
                 }
-                expected_query_count = 7
+                expected_query_count = 6
                 self._check_url_hot_query(self.page.url, expected_query_count, select_tables_perf, nocache=True)
                 self.assertEqual(self._get_url_hot_query(self.page.url, nocache=True), expected_query_count)
 
@@ -253,12 +252,11 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     'website_page': 2,
                     # 1. `_serve_page` search page matching URL..
                     # 2. ..then reads it (`is_visible`)
-                    'website': 1,
                     # menu and layout
                     'website_menu': 1,
                     'ir_ui_view': 1,
                 }
-                expected_query_count = 2 if cache else 7
+                expected_query_count = 2 if cache else 6
                 insert_tables_perf = {}
                 if not readonly_enabled:
                     insert_tables_perf = {
@@ -298,11 +296,10 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
                     'website_page': 2,
                     # 1. the menu prefetching is also prefetching all menu's pages
                     # 2. find page matching the `/` url
-                    'website': 1,
                     # layout
                     'ir_ui_view': 1,
                 }
-                expected_query_count = 6
+                expected_query_count = 5
                 insert_tables_perf = {}
                 if not readonly_enabled:
                     insert_tables_perf = {
@@ -363,12 +360,11 @@ class TestWebsitePerformance(TestWebsitePerformanceCommon):
             'website_page': 2,
             # 1. `_serve_page` search page matching URL..
             # 2. ..then reads it (`is_visible`)
-            'website': 1,
             'website_menu': 1,
             'ir_ui_view': 1,
         }
-        self._check_url_hot_query(self.page.url, 7, select_tables_perf, nocache=True)
-        self.assertEqual(self._get_url_hot_query(self.page.url, nocache=True), 7)
+        self._check_url_hot_query(self.page.url, 6, select_tables_perf, nocache=True)
+        self.assertEqual(self._get_url_hot_query(self.page.url, nocache=True), 6)
 
 @tagged('-at_install', 'post_install')
 class TestWebsitePerformancePost(UtilPerf):

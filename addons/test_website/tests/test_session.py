@@ -19,8 +19,9 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
         self.authenticate(None, None, session_extra={'context': {'lang': 'fr_FR'}})
         self.env.ref('base.lang_fr').active = False
 
-        # ensure that _get_current_website_id will be able to match a website
-        current_website_id = self.env["website"]._get_current_website_id(odoo.tests.HOST)
+        # ensure that _get_current_fallback_website_id will be able to match a website
+        # if _get_current_website_id doesn't match (from forced website, cookie...)
+        current_website_id = self.env["ir.http"]._get_current_fallback_website_id(odoo.tests.HOST)
         self.env["website"].browse(current_website_id).domain = odoo.tests.HOST
 
         res = self.url_open('/test_website_sitemap')  # any auth='public' route would do
@@ -30,8 +31,9 @@ class TestWebsiteSession(HttpCaseWithUserDemo):
         self.authenticate(None, None, session_extra={'context': {'lang': 'fr_FR'}})
         self.env.ref('base.lang_fr').active = False
 
-        # ensure that _get_current_website_id will be able to match a website
-        current_website_id = self.env["website"]._get_current_website_id(odoo.tests.HOST)
+        # ensure that _get_current_fallback_website_id will be able to match a website
+        # if _get_current_website_id doesn't match (from forced website, cookie...)
+        current_website_id = self.env["ir.http"]._get_current_fallback_website_id(odoo.tests.HOST)
         self.env["website"].browse(current_website_id).domain = odoo.tests.HOST
 
         with patch.object(self.env.registry["res.users"], "_mfa_url", return_value="/web/login/totp"):
