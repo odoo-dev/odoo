@@ -223,7 +223,7 @@ class TestHttpEchoReplyJsonWithDB(TestHttpBase):
         res = self.db_url_open("/test_http/echo-json-context", data=payload, headers=CT_JSON)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.text, '{"jsonrpc": "2.0", "id": 0, "result": '
-            f'{{"lang": "en_US", "tz": false, "uid": {self.jackoneill.id}}}'
+            f'{{"lang": "en_US", "tz": false, "uid": {self.jackoneill.id}, "fallback_website_id": 1}}'
             '}')
 
     def test_echojson3_bad_json(self):
