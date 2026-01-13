@@ -16,7 +16,7 @@ class InStoreDelivery(Delivery):
         if kwargs.get('product_id'):  # Called from the product page.
             website = self.env['website'].get_current_website()
             order_sudo = website.current_session_sale_order_id.sudo()
-            in_store_dm = request.website.sudo().in_store_dm_id
+            in_store_dm = website.sudo().in_store_dm_id
             if not order_sudo:  # Pickup location requested without a cart creation.
                 # Create a temporary order to fetch pickup locations.
                 temp_order = request.env['sale.order'].new({'carrier_id': in_store_dm.id})
@@ -38,9 +38,9 @@ class InStoreDelivery(Delivery):
         :return: None
         """
         website = self.env['website'].get_current_website()
-        order_sudo = website.current_session_sale_order_id.sudo() or request.website._create_cart()
+        order_sudo = website.current_session_sale_order_id.sudo() or website._create_cart()
         if order_sudo.carrier_id.delivery_type != 'in_store':
-            in_store_dm = request.website.sudo().in_store_dm_id
+            in_store_dm = website.sudo().in_store_dm_id
             order_sudo.set_delivery_line(in_store_dm, in_store_dm.product_id.list_price)
         order_sudo._set_pickup_location(pickup_location_data)
 
@@ -50,7 +50,7 @@ class InStoreDelivery(Delivery):
         res = super()._get_additional_delivery_context()
         website = self.env['website'].get_current_website()
         order_sudo = website.current_session_sale_order_id.sudo()
-        if request.website.sudo().in_store_dm_id:
+        if website.sudo().in_store_dm_id:
             res.update(order_sudo._prepare_in_store_default_location_data())
         return res
 

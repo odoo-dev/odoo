@@ -44,7 +44,8 @@ class WebsiteSaleVariantController(Controller):
             combination_info['no_product_change'] = True
             return combination_info
 
-        if request.website.product_page_image_width != 'none' and not request.env.context.get('website_sale_no_images', False):
+        website = request.env['website'].get_current_website()
+        if website.product_page_image_width != 'none' and not request.env.context.get('website_sale_no_images', False):
             product_or_template = product or product_template
             combination_info['display_image'] = bool(product_or_template.image_128)
             combination_info['carousel'] = request.env['ir.ui.view']._render_template(
@@ -52,11 +53,11 @@ class WebsiteSaleVariantController(Controller):
                 values={
                     'product': product_template,
                     'product_variant': product,
-                    'website': request.website,
+                    'website': website,
                 },
             )
 
-        if request.website.is_view_active('website_sale.product_tags'):
+        if website.is_view_active('website_sale.product_tags'):
             all_tags = product.all_product_tag_ids if product else product_template.product_tag_ids
             combination_info['product_tags'] = request.env['ir.ui.view']._render_template(
                 'website_sale.product_tags', values={

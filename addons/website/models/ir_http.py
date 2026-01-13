@@ -376,8 +376,6 @@ class IrHttp(models.AbstractModel):
             **cls._get_editor_context(),
         )
 
-        request.website = website.with_context(request.env.context)
-
     @classmethod
     def _post_dispatch(cls, response):
         super()._post_dispatch(response)

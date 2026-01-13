@@ -131,9 +131,10 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
             has_zero_price = float_is_zero(
                 basic_product_information['price'], precision_rounding=currency.rounding
             )
+            website = request.env['website'].get_current_website()
             basic_product_information['can_be_sold'] = not (
-                request.website.prevent_sale
-                and request.website._prevent_product_sale(product_or_template, has_zero_price)
+                website.prevent_sale
+                and website._prevent_product_sale(product_or_template, has_zero_price)
             )
             # Don't compute the strikethrough price if there's a custom price (i.e. if `price_info`
             # is populated).
@@ -225,10 +226,11 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
         """
         should_show_product = super()._should_show_product(product_template)
         if request.is_frontend:
+            website = request.env['website'].get_current_website()
             return (
                 should_show_product
                 and product_template._is_add_to_cart_possible()
-                and product_template.filtered_domain(request.website.website_domain())
+                and product_template.filtered_domain(website.website_domain())
             )
         return should_show_product
 
@@ -241,6 +243,6 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
             website = request.env['website'].get_current_website()
             taxes = website.current_session_fiscal_position_id.sudo().map_tax(product_taxes)
             return request.env['product.template']._apply_taxes_to_price(
-                price, currency, product_taxes, taxes, product_or_template, website=request.website
+                price, currency, product_taxes, taxes, product_or_template, website=website
             )
         return price
