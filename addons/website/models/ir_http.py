@@ -323,6 +323,9 @@ class IrHttp(models.AbstractModel):
         # If there is no domain matching for the given port, ignore the port.
         websites = websites or websites.filtered(lambda w: _filter_domain(w, domain_name, ignore_port=True))
 
+        if not websites:
+            websites = websites.sudo().search([], limit=1)
+
         return websites[0].id if websites else False
 
     @classmethod
