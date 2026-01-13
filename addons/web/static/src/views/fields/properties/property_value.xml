@@ -54,7 +54,6 @@
                 <div class="text-nowrap d-inline-flex w-100 align-items-baseline position-relative">
                     <span class="o_input position-absolute pe-none d-flex w-100">
                         <span t-if="this.currency?.position === 'before'" t-out="this.currency.symbol + this.nbsp"/>
-                        <span class="opacity-0 d-inline-block overflow-hidden mw-100 o_monetary_ghost_value" t-out="displayValue"/>
                         <span t-if="this.currency?.position === 'after'" t-out="this.nbsp + this.currency.symbol"/>
                     </span>
                     <span class="opacity-0" t-if="this.currency?.position === 'before'" t-out="this.currency.symbol + this.nbsp"/>

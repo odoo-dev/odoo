@@ -779,7 +779,7 @@ test("monetary field with pending onchange", async () => {
     await contains(".o_field_widget[name='float_field'] input").edit("1", { confirm: false });
     def.resolve();
     await animationFrame();
-    expect(".o_field_monetary .o_monetary_ghost_value").toHaveText("1");
+    expect(".o_field_monetary input").toHaveValue("1");
 });
 
 test("with 'hide_trailing_zeros' option", async () => {
