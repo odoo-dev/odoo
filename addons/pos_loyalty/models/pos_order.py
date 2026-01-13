@@ -57,8 +57,7 @@ class PosOrder(models.Model):
             'payload': {},
         }
 
-    def _add_loyalty_history_lines(self, sell_loyalty_cards, loyalty_cards_to_update, loyalty_cards_to_update_before):
-        update_map = {i['coupon_id']: i for i in loyalty_cards_to_update}
+    def _add_loyalty_history_lines(self, sell_loyalty_cards, loyalty_cards_to_update_before):
         before_map = {i['id']: i for i in loyalty_cards_to_update_before}
         history_vals = []
         orders = self.browse({c['order'] for c in sell_loyalty_cards}).exists()
@@ -68,14 +67,8 @@ class PosOrder(models.Model):
             order = order_map.get(card['order'])
             if not order:
                 continue
-            before = before_map.get(card_id)
-            points = 0
-            if card_id in update_map:
-                if not before:
-                    continue
-                points = card['points'] - before['points']
-            else:
-                points = card['points']
+            before = before_map.get(card_id, {})
+            points = card['points'] - before.get('points', 0)
             if not points:
                 continue
             history_vals.append({
@@ -92,7 +85,6 @@ class PosOrder(models.Model):
     @api.model
     def sync_from_ui(self, orders):
         card_fields = self._load_pos_data_fields(orders[0].get('config_id'))
-        loyalty_cards_to_update = []
         loyalty_cards_before = []
         sell_loyalty_cards = []
         order_card_map = defaultdict(list)
@@ -106,7 +98,6 @@ class PosOrder(models.Model):
                     order_card_map[order_token].append(card_id)
                     card = LoyaltyCard.browse(card_id).read(card_fields, load=False)[0]
                     loyalty_cards_before.append({'order': order_token, **card})
-                    loyalty_cards_to_update.append({'order': order_token, 'coupon_id': card_id, **card_vals})
                 card_vals['code'] = card_vals['code'] or LoyaltyCard._generate_code()
 
         data = super().sync_from_ui(orders)
@@ -116,7 +107,7 @@ class PosOrder(models.Model):
             for loyalty_card in order.loyalty_card_ids:
                 sell_loyalty_cards.append({'order': order.id, **loyalty_card.read(card_fields, load=False)[0]})
             order._add_log_for_gift_cards(order.loyalty_card_ids.filtered(lambda c: c.program_type == 'gift_card'))
-        self._add_loyalty_history_lines(sell_loyalty_cards, loyalty_cards_to_update, loyalty_cards_before)
+        self._add_loyalty_history_lines(sell_loyalty_cards, loyalty_cards_before)
         if not skip_deduction:
             history_vals = []
             for line in created_orders.filtered(lambda o: not o.is_refund).lines.filtered('coupon_id'):
