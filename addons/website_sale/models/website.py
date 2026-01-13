@@ -814,7 +814,9 @@ class Website(models.Model):
         else:
             pricelist_sudo = self.env.user.partner_id.property_product_pricelist
             available_pricelists = self.get_pricelist_available()
-            if available_pricelists and pricelist_sudo not in available_pricelists:
+            if not available_pricelists:
+                pricelist_sudo = available_pricelists
+            elif pricelist_sudo not in available_pricelists:
                 pricelist_sudo = available_pricelists[0].sudo()
 
         if request:
