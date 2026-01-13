@@ -27,7 +27,7 @@
             <field name="priority">4</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@name='standard_price_uom']" position="inside">
+                <xpath expr="//group[@name='standard_price_uom']" position="inside">
                     <t groups="mrp.group_mrp_manager">
                         <field name="bom_count" invisible="1"/>
                         <field name="cost_method" invisible="1"/>

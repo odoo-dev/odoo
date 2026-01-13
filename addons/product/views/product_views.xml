@@ -94,26 +94,25 @@
                                         string=""
                                         invisible="not product_tooltip"
                                     />
-                                    <label for="is_storable" class="oe_inline" invisible="type != 'consu'"/>
+                                    <label for="is_storable" invisible="type != 'consu'"/>
                                     <field name="show_qty_update_button" invisible="1"/>
-                                    <div name="tracking_and_qty_no_stock" class="o_row w-100" invisible="type != 'consu'">
+                                    <group name="tracking_and_qty_no_stock" invisible="type != 'consu'">
                                         <field name="is_storable"/>
-                                        <div name="product_template_qty_field" class="d-flex" invisible="is_product_variant or not is_storable">
+                                        <div name="product_template_qty_field" invisible="is_product_variant or not is_storable">
                                             <a type="action" name="%(product_variant_edit_qty_action)d" invisible="not show_qty_update_button">
                                                 <field name="qty_available" readonly="True"/>
                                             </a>
-                                            <field name="qty_available" invisible="show_qty_update_button" style="max-width: fit-content;"/>
-                                            <field name="uom_name" class="ms-2 oe_inline" groups="uom.group_uom"/>
+                                            <field name="qty_available" invisible="show_qty_update_button"/>
+                                            <field name="uom_name" groups="uom.group_uom"/>
                                         </div>
-                                        <div name="product_product_qty_field" class="d-flex" invisible="not is_product_variant or not is_storable">
-                                            <field name="qty_available" style="max-width: fit-content;"/>
-                                            <field name="uom_name" class="ms-2 oe_inline" groups="uom.group_uom"/>
+                                        <div name="product_product_qty_field" invisible="not is_product_variant or not is_storable">
+                                            <field name="qty_available"/>
+                                            <field name="uom_name" groups="uom.group_uom"/>
                                         </div>
-                                    </div>
+                                    </group>
                                 </group>
                                 <group name="group_standard_price">
-                                    <div name="list_price_uom">
-                                        <label for="list_price"/>
+                                    <group name="list_price_uom">
                                         <field name="list_price"
                                             widget="monetary"
                                             options="{'currency_field': 'currency_id', 'field_digits': True}"/>
@@ -121,18 +120,10 @@
                                         <field
                                             name="uom_id" widget="many2one_uom"
                                             options="{'no_quick_create': True}"
+                                            nolabel="1"
                                         />
-                                    </div>
-                                    <label
-                                        for="standard_price"
-                                        invisible="type == 'combo'
-                                                    or (not is_product_variant and (
-                                                        product_variant_count &gt; 1
-                                                        or (product_variant_count == 0 and is_dynamically_created)
-                                                    ))"
-                                        id="standard_price_label"
-                                    />
-                                    <div
+                                    </group>
+                                    <group
                                         name="standard_price_uom"
                                         invisible="type == 'combo'
                                                     or (not is_product_variant and (
@@ -142,22 +133,21 @@
                                     >
                                         <field
                                             name="standard_price"
-                                            class="oe_inline"
                                             widget="monetary"
                                             options="{
                                                 'currency_field': 'cost_currency_id',
                                                 'field_digits': True,
                                             }"
                                         />
-                                        <span groups="uom.group_uom">
-                                            per
+                                        <div groups="uom.group_uom">
+                                            <label for="uom_id" string="per"/>
                                             <field
                                                 name="uom_id" widget="many2one_uom"
-                                                class="oe_inline" style="max-width:136px"
                                                 options="{'no_quick_create': True}"
+                                                nolabel="1"
                                             />
-                                        </span>
-                                    </div>
+                                        </div>
+                                    </group>
                                     <field name="categ_id" string="Category"/>
                                     <field name="company_id"
                                         groups="base.group_multi_company"
@@ -384,17 +374,10 @@
                             </group>
                             <group name="pricing" string="Pricing">
                                 <field name="product_variant_count" invisible="1"/>
-                                <label for="lst_price" string="Sales Price"/>
-                                <div class="o_row">
-                                    <field name="lst_price" class="oe_inline" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
-                                </div>
-                                <label for="standard_price"/>
-                                <div class="o_row">
-                                    <field name="standard_price"
-                                        class="oe_inline"
-                                        widget="monetary"
-                                        options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
-                                </div>
+                                <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
+                                <field name="standard_price"
+                                    widget="monetary"
+                                    options="{'currency_field': 'cost_currency_id', 'field_digits': True}"/>
                                 <field name="currency_id" invisible='1'/>
                                 <field name="cost_currency_id" invisible="1"/>
                             </group>
@@ -538,7 +521,7 @@
                     <attribute name="string">Product Variant</attribute>
                     <attribute name="duplicate">false</attribute>
                 </form>
-                <xpath expr="//div[@name='standard_price_uom']" position="after">
+                <xpath expr="//group[@name='standard_price_uom']" position="after">
                     <field name="default_code"/>
                     <field name="barcode"/>
                 </xpath>
@@ -549,11 +532,8 @@
                    <attribute name="invisible">1</attribute>
                    <attribute name="readonly">product_variant_count &gt; 1</attribute>
                 </field>
-                <label for="list_price" position="replace">
-                    <label for="lst_price"/>
-                </label>
                 <field name="list_price" position="after">
-                   <field name="lst_price" class="oe_inline" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
+                   <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                 </field>
                 <field name="name" position="after">
                     <field name="product_tmpl_id" class="oe_inline" readonly="1" invisible="1" required="id"/>
