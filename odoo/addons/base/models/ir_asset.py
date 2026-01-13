@@ -92,7 +92,6 @@ class IrAsset(models.Model):
         bundle_name, asset_type = bundle_name.rsplit('.', 1)
         if asset_type in BINARY_EXTENSIONS:
             asset_type = 'binary'
-            bundle_name = bundle_name.rsplit('.', 1)[0]
         rtl = False
         autoprefix = False
         if not debug_assets and asset_type != 'binary':

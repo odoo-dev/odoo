@@ -145,7 +145,7 @@ class AssetsBundle(object):
     def get_link(self, asset_type):
         use_debug = self.is_debug_assets and not self.has_binary
         unique = self.get_version(asset_type) if not use_debug else 'debug'
-        extension = asset_type if use_debug else f'min.{asset_type}'
+        extension = asset_type if use_debug or self.has_binary else f'min.{asset_type}'
         return self.get_asset_url(unique=unique, extension=extension)
 
     def get_version(self, asset_type):
@@ -752,8 +752,7 @@ css_error_message {
             base_ext = binary.extension
             if base_ext != extension:
                 continue
-            is_minified = not self.is_debug_assets
-            extension = f'min.{base_ext}' if is_minified else base_ext
+            extension = base_ext
             attachments = self.get_attachments(extension)
             if attachments:
                 return attachments

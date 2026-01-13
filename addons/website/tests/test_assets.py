@@ -140,13 +140,13 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
         # Verify that CSS contains link to binary asset
         css = self.url_open('/web/assets/_______/web.assets_frontend.min.css').text
         self.assertNotIn('''/web/static/src/libs/fontawesome/fonts/fontawesome-webfont.woff''', css, "Fonts should have been replaced")
-        fontface = re.findall(r'''@font-face{font-family: 'FontAwesome'; src: url\("/web/assets/\w{7}/web.fontawesome.min.woff2"\) format\('woff2'\), url\("/web/assets/\w{7}/web.fontawesome.min.woff"\) format\('woff'\);''', css)
+        fontface = re.findall(r'''@font-face{font-family: 'FontAwesome'; src: url\("/web/assets/\w{7}/web.fontawesome.woff2"\) format\('woff2'\), url\("/web/assets/\w{7}/web.fontawesome.woff"\) format\('woff'\);''', css)
         self.assertTrue(fontface, "Font should have been replaced")
         # Verify that links actually return expected binary
-        font = self.url_open('/web/assets/_______/web.fontawesome.min.woff2')
+        font = self.url_open('/web/assets/_______/web.fontawesome.woff2')
         self.assertEqual('font/woff2', font.headers.get('Content-Type'), "Should be woff2")
         self.assertEqual(b'wOF2', font.content[:4])
-        font = self.url_open('/web/assets/_______/web.fontawesome.min.woff')
+        font = self.url_open('/web/assets/_______/web.fontawesome.woff')
         self.assertEqual('font/woff', font.headers.get('Content-Type'), "Should be woff")
         self.assertEqual(b'wOFF', font.content[:4])
 
@@ -160,13 +160,13 @@ class TestWebsiteAssets(odoo.tests.HttpCase):
         # Verify that CSS contains link to binary asset
         css = self.url_open('/web/assets/1/_______/web.assets_frontend.min.css').text
         self.assertNotIn('''/web/static/src/libs/fontawesome/fonts/fontawesome-webfont.woff''', css, "Fonts should have been replaced")
-        fontface = re.findall(r'''@font-face{font-family: 'FontAwesome'; src: url\("/web/assets/1/\w{7}/web.fontawesome.min.woff2"\) format\('woff2'\), url\("/web/assets/1/\w{7}/web.fontawesome.min.woff"\) format\('woff'\);''', css)
+        fontface = re.findall(r'''@font-face{font-family: 'FontAwesome'; src: url\("/web/assets/1/\w{7}/web.fontawesome.woff2"\) format\('woff2'\), url\("/web/assets/1/\w{7}/web.fontawesome.woff"\) format\('woff'\);''', css)
         self.assertTrue(fontface, "Font should have been replaced")
         # Verify that links actually return expected binary
-        font = self.url_open('/web/assets/1/_______/web.fontawesome.min.woff2')
+        font = self.url_open('/web/assets/1/_______/web.fontawesome.woff2')
         self.assertEqual('font/woff2', font.headers.get('Content-Type'), "Should be woff2")
         self.assertEqual(b'wOF2', font.content[:4])
-        font = self.url_open('/web/assets/1/_______/web.fontawesome.min.woff')
+        font = self.url_open('/web/assets/1/_______/web.fontawesome.woff')
         self.assertEqual('font/woff', font.headers.get('Content-Type'), "Should be woff")
         self.assertEqual(b'wOFF', font.content[:4])
 
