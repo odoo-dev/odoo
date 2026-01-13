@@ -44,7 +44,7 @@ msgstr ""
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_lock_exception.py:0
-msgid " for '%s'"
+msgid "for '%s'"
 msgstr ""
 
 #. module: account
