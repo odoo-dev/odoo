@@ -28,7 +28,7 @@ patch(SelfOrder.prototype, {
     hasPaymentMethod() {
         if (
             this.config.self_ordering_mode === "mobile" &&
-            this.config.self_order_online_payment_method_id
+            this.config.self_order_online_payment_method_ids.length
         ) {
             return true;
         }

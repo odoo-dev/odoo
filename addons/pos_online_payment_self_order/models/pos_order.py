@@ -20,10 +20,10 @@ class PosOrder(models.Model):
         self.nb_print += 1
         return self.read_pos_data([], self.config_id.id)
 
-    @api.depends('config_id.self_order_online_payment_method_id')
+    @api.depends('config_id.self_order_online_payment_method_ids')
     def _compute_use_self_order_online_payment(self):
         for order in self:
-            order.use_self_order_online_payment = bool(order.config_id.self_order_online_payment_method_id)
+            order.use_self_order_online_payment = bool(order.config_id.self_order_online_payment_method_ids)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -31,7 +31,7 @@ class PosOrder(models.Model):
             if 'use_self_order_online_payment' not in vals or vals['use_self_order_online_payment']:
                 session = self.env['pos.session'].browse(vals['session_id'])
                 config = session.config_id
-                vals['use_self_order_online_payment'] = bool(config.self_order_online_payment_method_id)
+                vals['use_self_order_online_payment'] = bool(config.self_order_online_payment_method_ids)
         return super().create(vals_list)
 
     def write(self, vals):
@@ -42,7 +42,7 @@ class PosOrder(models.Model):
 
         can_change_self_order_domain = [('state', '=', 'draft')]
         if vals['use_self_order_online_payment']:
-            can_change_self_order_domain += [('config_id.self_order_online_payment_method_id', '!=', False)]
+            can_change_self_order_domain += [('config_id.self_order_online_payment_method_ids', '!=', False)]
 
         can_change_self_order_orders = self.filtered_domain(can_change_self_order_domain)
         cannot_change_self_order_orders = self - can_change_self_order_orders
@@ -57,14 +57,13 @@ class PosOrder(models.Model):
 
         return res
 
-    @api.depends('use_self_order_online_payment', 'config_id.self_order_online_payment_method_id', 'config_id.payment_method_ids')
+    @api.depends('use_self_order_online_payment', 'config_id.self_order_online_payment_method_ids')
     def _compute_online_payment_method_id(self):
         for order in self:
             if order.use_self_order_online_payment:
-                # It is expected to use the self order online payment method.
-                # If for any reason it is not defined, then the online payment
-                # of the order is set to null to make the problem noticeable.
-                order.online_payment_method_id = order.config_id.self_order_online_payment_method_id
+                # We use the Many2many field from the config.
+                # [:1] safely returns the first record if it exists, or an empty recordset (False).
+                order.online_payment_method_id = order.config_id.self_order_online_payment_method_ids[:1]
             else:
                 super(PosOrder, order)._compute_online_payment_method_id()
 
@@ -74,7 +73,7 @@ class PosOrder(models.Model):
             # This method is only called in the POS frontend flow, not self order.
             # If the next online payment is 0, then the online payment of the frontend
             # flow is cancelled, and the default flow is self order if it is configured.
-            self.use_self_order_online_payment = tools.float_is_zero(next_online_payment_amount, precision_rounding=self.currency_id.rounding) and self.config_id.self_order_online_payment_method_id
+            self.use_self_order_online_payment = tools.float_is_zero(next_online_payment_amount, precision_rounding=self.currency_id.rounding) and self.config_id.self_order_online_payment_method_ids
         return res
 
     def _send_notification_online_payment_status(self, status):

@@ -15,8 +15,8 @@ class PosPaymentMethod(models.Model):
                 Domain('is_online_payment', '=', True),
                 Domain('id', 'in', config.payment_method_ids.ids)
             ])
-        elif config.self_order_online_payment_method_id:
-            online_payment_domain = Domain('id', '=', config.self_order_online_payment_method_id.id)
+        elif config.self_order_online_payment_method_ids:
+            online_payment_domain = Domain('id', 'in', config.self_order_online_payment_method_ids.ids)
 
         if not online_payment_domain:
             return super_domain
