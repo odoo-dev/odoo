@@ -27,7 +27,7 @@ from odoo.fields import Domain
 from odoo.http import request
 from odoo.models import Query
 from odoo.modules.module import get_manifest
-from odoo.tools import SQL
+from odoo.tools import SQL, lazy
 from odoo.tools.image import image_process
 from odoo.tools.sql import escape_psql
 from odoo.tools.translate import _
@@ -704,7 +704,7 @@ class Website(models.CachedModel):
 
     @api.model
     def configurator_recommended_themes(self, industry_id, palette, result_nbr_max=3):
-        Module = request.env['ir.module.module']
+        Module = self.env['ir.module.module']
         domain = Module.get_themes_domain()
         domain = Domain.AND([[('name', '!=', 'theme_default')], domain])
         client_themes = Module.search(domain).mapped('name')
@@ -1229,7 +1229,8 @@ class Website(models.CachedModel):
             name = 'Home'
             page_key = 'home'
 
-        template_record = self.env.ref(template)
+        website = self.get_current_website()
+        template_record = self.env.ref(template).with_context(website_id=website.id)
         arch = template_record.arch
         if sections_arch:
             tree = html.fromstring(arch)
@@ -1237,9 +1238,8 @@ class Website(models.CachedModel):
             for section in html.fromstring(f'<wrap>{sections_arch}</wrap>'):
                 wrap.append(section)
             arch = etree.tostring(tree, encoding="unicode")
-        website_id = self.env.context.get('website_id')
         key = self.get_unique_key(page_key, template_module)
-        view = template_record.copy({'website_id': website_id, 'key': key})
+        view = template_record.copy({'website_id': website.id, 'key': key})
 
         view.with_context(lang=None).write({
             'arch': arch.replace(template, key),
@@ -1436,7 +1436,7 @@ class Website(models.CachedModel):
             # The request is not currently accessible for this route; you must
             # call the fallback which will be done with respect to the URL on
             # the current thread.
-            website_id = self.env['ir.http']._get_current_website_fallback()
+            website_id = self.env['ir.http'].get_current_website_fallback()
 
         if not website_id and fallback is True:
             # TODO: check if we can remove it
@@ -1444,12 +1444,15 @@ class Website(models.CachedModel):
 
         return self.browse(website_id)
 
-    def _force(self):
-        self._force_website(self.id)
+    @api.model
+    @tools.ormcache('website_id')
+    def _website_id_exists(self, website_id):
+        if website_id and self.browse(website_id).exists():
+            return website_id
 
-    def _force_website(self, website_id):
+    def _force(self):
         if request:
-            request.session['force_website_id'] = website_id and str(website_id).isdigit() and int(website_id)
+            request.session['force_website_id'] = self.id
 
     @api.model
     def is_public_user(self):
@@ -1471,6 +1474,79 @@ class Website(models.CachedModel):
             raise ValueError('Expecting a string or an integer, not a %s.' % (type(view_id)))
 
         return self.env['ir.ui.view'].sudo().with_context(active_test=False)._get_template_view(view_id, raise_if_not_found=raise_if_not_found)
+
+    @api.model
+    def _render_template(self, template, values=None):
+        """ Render the template. If website is enabled on request, then extend rendering context with website values. """
+        self.ensure_one()
+
+        view = self.env['ir.ui.view']._get_template_view(template).sudo()
+        view._handle_visibility(do_raise=True)
+
+        if values is None:
+            values = {}
+        if 'main_object' not in values:
+            values['main_object'] = view
+
+        editable = self.env.user.has_group('website.group_website_designer')
+        has_group_restricted_editor = self.env.user.has_group('website.group_website_restricted_editor')
+        if not editable and has_group_restricted_editor and 'main_object' in values:
+            try:
+                main_object = values['main_object'].with_user(self.env.user.id)
+                self._check_user_can_modify(main_object)
+                editable = True
+            except AccessError:
+                pass
+        translatable = has_group_restricted_editor and self.env.context.get('lang') != self.env['ir.http']._get_default_lang().code
+        editable = editable and not translatable
+
+        if has_group_restricted_editor and self.env.user.has_group('website.group_multi_website'):
+            values['multi_website_websites_current'] = lazy(lambda: self.name)
+            values['multi_website_websites'] = lazy(lambda: [
+                {'website_id': website.id, 'name': website.name, 'domain': website.domain}
+                for website in self.search([('id', '!=', self.id)])
+            ])
+
+            cur_company = self.env.company
+            values['multi_website_companies_current'] = lazy(lambda: {'company_id': cur_company.id, 'name': cur_company.name})
+            values['multi_website_companies'] = lazy(lambda: [
+                {'company_id': comp.id, 'name': comp.name}
+                for comp in self.env.user.company_ids if comp != cur_company
+            ])
+
+        # update values
+
+        values.update(dict(
+            website=self,
+            is_view_active=lazy(lambda: self.is_view_active),
+            res_company=lazy(self.company_id.sudo),
+            translatable=translatable,
+            editable=editable,
+        ))
+
+        if editable:
+            # form editable object, add the backend configuration link
+            if 'main_object' in values and has_group_restricted_editor:
+                func = getattr(values['main_object'], 'get_backend_menu_id', False)
+                values['backend_menu_id'] = lazy(lambda: func and func() or self.env['ir.model.data']._xmlid_to_res_id('website.menu_website_configuration'))
+
+        # update context
+
+        # Avoid cache inconsistencies: if the cookies have been accepted, the
+        # DOM structure should reflect it after a reload and not be stuck in its
+        # previous state (see the part related to cookies in
+        # `_post_processing_att`).
+        is_allowed_optional_cookies = self.env['ir.http']._is_allowed_cookie('optional')
+        context = { 'website_id': self.id, 'cookies_allowed': is_allowed_optional_cookies }
+        if 'inherit_branding' not in self.env.context and not self.env.context.get('rendering_bundle'):
+            if editable:
+                # in edit mode add branding on ir.ui.view tag nodes
+                context['inherit_branding'] = True
+            elif has_group_restricted_editor:
+                # will add the branding on fields (into values)
+                context['inherit_branding_auto'] = True
+
+        return self.env['ir.qweb'].with_context(**context)._render(template, values)
 
     @api.model
     def is_view_active(self, key):

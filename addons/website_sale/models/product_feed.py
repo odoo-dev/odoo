@@ -178,7 +178,7 @@ class ProductFeed(models.Model):
             'items': self.with_context(pricelist_id=pricelist_id)._prepare_gmc_items(),
         }
 
-        return self.env['ir.ui.view'].sudo()._render_template(
+        return self.website_id.sudo()._render_template(
             'website_sale.gmc_xml', gmc_data,
         )
 

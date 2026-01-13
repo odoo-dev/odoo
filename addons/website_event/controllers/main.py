@@ -324,7 +324,8 @@ class WebsiteEventController(http.Controller):
             (slot, ticket)
             for ticket in event.event_ticket_ids
         ]
-        return request.env['ir.ui.view']._render_template("website_event.modal_ticket_registration", {
+        website = request.env['website'].get_current_website()
+        return website._render_template("website_event.modal_ticket_registration", {
             'event': event,
             'event_slot': slot,
             'seats_available_slot_tickets': {
@@ -369,7 +370,8 @@ class WebsiteEventController(http.Controller):
                     "email": visitor.email,
                     "phone": visitor.mobile,
                 }
-        return request.env['ir.ui.view']._render_template("website_event.registration_attendee_details", {
+        website = request.env['website'].get_current_website()
+        return website._render_template("website_event.registration_attendee_details", {
             'tickets': tickets,
             'event_slot_id': slot_id,
             'event': event,

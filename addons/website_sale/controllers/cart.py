@@ -242,6 +242,7 @@ class Cart(PaymentPortal):
     )
     def quick_add(self, product_template_id, product_id, quantity=1.0, **kwargs):
         values = self.add_to_cart(product_template_id, product_id, quantity=quantity, **kwargs)
+        website = request.env['website'].get_current_website()
 
         website = self.env['website'].get_current_website()
         IrUiView = request.env['ir.ui.view']
@@ -253,8 +254,7 @@ class Cart(PaymentPortal):
                 'suggested_products': order_sudo._cart_accessories(),
             }
         )
-        website = request.env['website'].get_current_website()
-        values['website_sale.shorter_cart_summary'] = IrUiView._render_template(
+        values['website_sale.shorter_cart_summary'] = website._render_template(
             'website_sale.shorter_cart_summary', {
                 'website_sale_order': order_sudo,
                 'show_shorter_cart_summary': True,
@@ -262,7 +262,7 @@ class Cart(PaymentPortal):
                 **website._get_checkout_step_values(),
             }
         )
-        values['website_sale.quick_reorder_history'] = IrUiView._render_template(
+        values['website_sale.quick_reorder_history'] = website._render_template(
             'website_sale.quick_reorder_history', {
                 'website_sale_order': order_sudo,
                 **self._prepare_order_history(),

@@ -151,6 +151,11 @@ class Website(Home):
 
         raise request.not_found()
 
+    def _force_website(self, website_id):
+        website_id = website_id and str(website_id).isdigit() and int(website_id)
+        request.session['force_website_id'] = website_id
+        return website_id
+
     @http.route('/website/force/<int:website_id>', type='http', auth="user", website=True, sitemap=False, multilang=False, readonly=True)
     def website_force(self, website_id, path='/', isredir=False, **kw):
         """ To switch from a website to another, we need to force the website in
@@ -181,7 +186,7 @@ class Website(Home):
                     f'/website/force/{website.id}?{query_params}',
                 )
                 return request.redirect(url_to)
-        website._force()
+        self._force_website(website.id)
         return request.redirect(path)
 
     @http.route(['/@/', '/@/<path:path>'], type='http', auth='public', website=True, sitemap=False, multilang=False, readonly=True)
@@ -269,15 +274,14 @@ class Website(Home):
 
     @http.route('/sitemap.xml', type='http', auth="public", website=True, multilang=False, sitemap=False)
     def sitemap_xml_index(self, **kwargs):
-        current_website = request.env['website'].get_current_website()
+        website = request.env['website'].get_current_website()
         Attachment = request.env['ir.attachment'].sudo()
-        View = request.env['ir.ui.view'].sudo()
         mimetype = 'application/xml;charset=utf-8'
         content = None
         url_root = request.httprequest.url_root
         # For a same website, each domain has its own sitemap (cache)
         hashed_url_root = md5(url_root.encode()).hexdigest()[:8]
-        sitemap_base_url = '/sitemap-%d-%s' % (current_website.id, hashed_url_root)
+        sitemap_base_url = '/sitemap-%d-%s' % (website.id, hashed_url_root)
 
         def create_sitemap(url, content):
             return Attachment.create({
@@ -304,16 +308,15 @@ class Website(Home):
             sitemaps.unlink()
 
             pages = 0
-            website = request.env['website'].get_current_website()
             locs = website.with_user(website.user_id)._enumerate_pages(ignore_custom_homepage=True)
             while True:
                 values = {
                     'locs': islice(locs, 0, LOC_PER_SITEMAP),
                     'url_root': url_root[:-1],
                 }
-                urls = View._render_template('website.sitemap_locs', values)
+                urls = website._render_template('website.sitemap_locs', values)
                 if urls.strip():
-                    content = View._render_template('website.sitemap_xml', {'content': urls})
+                    content = website._render_template('website.sitemap_xml', {'content': urls})
                     pages += 1
                     last_sitemap = create_sitemap('%s-%d.xml' % (sitemap_base_url, pages), content)
                 else:
@@ -329,10 +332,10 @@ class Website(Home):
                 })
             else:
                 # TODO: in master/saas-15, move current_website_id in template directly
-                pages_with_website = ["%d-%s-%d" % (current_website.id, hashed_url_root, p) for p in range(1, pages + 1)]
+                pages_with_website = ["%d-%s-%d" % (website.id, hashed_url_root, p) for p in range(1, pages + 1)]
 
                 # Sitemaps must be split in several smaller files with a sitemap index
-                content = View._render_template('website.sitemap_index_xml', {
+                content = website._render_template('website.sitemap_index_xml', {
                     'pages': pages_with_website,
                     # URLs inside the sitemap index have to be on the same
                     # domain as the sitemap index itself
@@ -774,7 +777,7 @@ class Website(Home):
     # ------------------------------------------------------
 
     @http.route(['/website/add', '/website/add/<path:path>'], type='http', auth="user", website=True, methods=['POST'])
-    def pagenew(self, path="", add_menu=False, template=False, redirect=False, **kwargs):
+    def pagenew(self, path="", website_id=False, add_menu=False, template=False, redirect=False, **kwargs):
         # for supported mimetype, get correct default template
         _, ext = os.path.splitext(path)
         ext_special_case = ext != '.html' and ext in EXTENSION_TO_WEB_MIMETYPES
@@ -785,11 +788,10 @@ class Website(Home):
                 template = default_templ
 
         template = template and dict(template=template) or {}
-        website_id = kwargs.get('website_id')
         if website_id:
-            website = request.env['website'].browse(int(website_id))
-            website._force()
-        page = request.env['website'].new_page(
+            Website = request.env['website'].with_context(website_id=self._force_website(website_id))
+
+        page = Website.new_page(
             path,
             add_menu=add_menu,
             sections_arch=kwargs.get('sections_arch'),
@@ -818,8 +820,9 @@ class Website(Home):
     @http.route('/website/get_new_page_templates', type='jsonrpc', auth='user', website=True, readonly=True)
     def get_new_page_templates(self, **kw):
         View = request.env['ir.ui.view']
+        website = request.env['website'].get_current_website()
         result = []
-        groups_html = View._render_template("website.new_page_template_groups")
+        groups_html = website._render_template("website.new_page_template_groups")
         groups_el = etree.fromstring(f'<data>{groups_html}</data>')
         for group_el in groups_el.getchildren():
             group = {
@@ -827,10 +830,9 @@ class Website(Home):
                 'title': group_el.text,
                 'templates': [],
             }
-            website = request.env['website'].get_current_website()
             if group_el.attrib['id'] == 'custom':
                 for page in website._get_website_pages(domain=[('is_new_page_template', '=', True)]):
-                    html_tree = html.fromstring(View.with_context(inherit_branding=False)._render_template(
+                    html_tree = html.fromstring(website.with_context(inherit_branding=False)._render_template(
                         page.key,
                     ))
                     wrap_el = html_tree.xpath('//div[@id="wrap"]')[0]
@@ -850,7 +852,7 @@ class Website(Home):
                 website.website_domain(),
             ], order='key'):
                 try:
-                    html_tree = html.fromstring(View.with_context(inherit_branding=False)._render_template(
+                    html_tree = html.fromstring(website.with_context(inherit_branding=False)._render_template(
                         template.key,
                     ))
                     for section_el in html_tree.xpath("//section[@data-snippet]"):

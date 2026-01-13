@@ -49,7 +49,9 @@ class Rating(http.Controller):
             })
 
         lang = rating.partner_id.lang or get_lang(request.env).code
+
         return request.env['ir.ui.view'].with_context(lang=lang)._render_template('rating.rating_external_page_submit', {
+            'request': request,
             'rating': rating,
             'token': token,
             'rate_names': {
@@ -83,6 +85,7 @@ class Rating(http.Controller):
 
         lang = rating.partner_id.lang or get_lang(request.env).code
         return request.env['ir.ui.view'].with_context(lang=lang)._render_template('rating.rating_external_page_view', {
+            'request': request,
             'web_base_url': rating.get_base_url(),
             'rating': rating,
         })

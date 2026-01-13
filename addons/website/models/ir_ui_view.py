@@ -415,7 +415,7 @@ class IrUiView(models.Model):
 
         visibility = self._get_cached_visibility()
 
-        if visibility and not request.env.user.has_group('website.group_website_designer'):
+        if visibility and not self.env.user.has_group('website.group_website_designer'):
             website = self.env['website'].get_current_website()
             if (visibility == 'connected' and website.is_public_user()):
                 error = werkzeug.exceptions.Forbidden()
@@ -442,13 +442,9 @@ class IrUiView(models.Model):
         return True
 
     def _render_template(self, template, values=None):
-        """ Render the template. If website is enabled on request, then extend rendering context with website values. """
-        view = self._get_template_view(template).sudo()
-        view._handle_visibility(do_raise=True)
-        if values is None:
-            values = {}
-        if 'main_object' not in values:
-            values['main_object'] = view
+        if values and values.get('request') and values['request'].is_frontend:
+            website = self.env['website'].get_current_website()
+            return website._render_template(template, values)
         return super()._render_template(template, values=values)
 
     @api.model
@@ -641,48 +637,51 @@ class IrUiView(models.Model):
         :param str xpath: valid xpath to the tag to replace
         """
         self.ensure_one()
-        current_website = self.env['website'].get_current_website()
+        current_website = self.env['website'].get_current_website(fallback=False)
+
+        view = self.with_context(website_id=current_website.id)
+
         # xpath condition is important to be sure we are editing a view and not
         # a field as in that case `self` might not exist (check commit message)
-        if xpath and self.key and current_website:
+        if xpath and view.key and current_website:
             # The first time a generic view is edited, if multiple editable parts
             # were edited at the same time, multiple call to this method will be
             # done but the first one may create a website specific view. So if there
             # already is a website specific view, we need to divert the super to it.
-            website_specific_view = self.env['ir.ui.view'].search([
-                ('key', '=', self.key),
+            website_specific_view = view.search([
+                ('key', '=', view.key),
                 ('website_id', '=', current_website.id)
             ], limit=1)
             if website_specific_view:
-                self = website_specific_view
+                view = website_specific_view
         arch_section = html.fromstring(value)
 
         if xpath is None:
             # value is an embedded field on its own, not a view section
-            self.save_embedded_field(arch_section)
+            view.save_embedded_field(arch_section)
             return
 
-        for el in self.extract_embedded_fields(arch_section):
-            self.save_embedded_field(el)
+        for el in view.extract_embedded_fields(arch_section):
+            view.save_embedded_field(el)
 
             # transform embedded field back to t-field
-            el.getparent().replace(el, self.to_field_ref(el))
+            el.getparent().replace(el, view.to_field_ref(el))
 
-        for el in self.extract_oe_structures(arch_section):
-            if self.save_oe_structure(el):
+        for el in view.extract_oe_structures(arch_section):
+            if view.save_oe_structure(el):
                 # empty oe_structure in parent view
-                empty = self.to_empty_oe_structure(el)
+                empty = view.to_empty_oe_structure(el)
                 if el == arch_section:
                     arch_section = empty
                 else:
                     el.getparent().replace(el, empty)
 
-        new_arch = self.replace_arch_section(xpath, arch_section)
-        old_arch = etree.fromstring(self.arch.encode('utf-8'))
-        if not self._are_archs_equal(old_arch, new_arch):
-            self._set_noupdate()
-            self.write({'arch': etree.tostring(new_arch, encoding='unicode')})
-            self._copy_custom_snippet_translations(self, 'arch_db')
+        new_arch = view.replace_arch_section(xpath, arch_section)
+        old_arch = etree.fromstring(view.arch.encode('utf-8'))
+        if not view._are_archs_equal(old_arch, new_arch):
+            view._set_noupdate()
+            view.write({'arch': etree.tostring(new_arch, encoding='unicode')})
+            view._copy_custom_snippet_translations(view, 'arch_db')
 
     @api.model
     def _get_allowed_root_attrs(self):

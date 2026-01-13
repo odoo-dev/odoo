@@ -3,6 +3,7 @@
 import re
 from contextlib import contextmanager
 
+from odoo import http
 from odoo.http.router import root
 from odoo.tests.common import TransactionCase, tagged
 
@@ -554,8 +555,8 @@ class TestQwebDataSnippet(TransactionCase):
     def test_call_query_count_snippets_template(self):
         actual_queries = []
         with contextmanager(lambda: self._patchExecute(actual_queries))():
-            with MockRequest(self.env, website=self.env['website'].browse(1)):
-                render = self.env['ir.ui.view'].render_public_asset('website.snippets')
+            with MockRequest(self.env, website=self.env['website'].browse(1)) as request:
+                render = request.env['ir.ui.view'].render_public_asset('website.snippets')
                 self.assertTrue('name="Blockquote"' in render)
 
         re_sql = re.compile(r'\bir_ui_view\b', re.IGNORECASE)
