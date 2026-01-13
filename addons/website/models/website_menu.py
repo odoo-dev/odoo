@@ -30,10 +30,11 @@ class WebsiteMenu(models.Model):
             menu.is_mega_menu = bool(menu.mega_menu_content)
 
     def _set_field_is_mega_menu(self):
+        website = self.env['website'].get_current_website()
         for menu in self:
             if menu.is_mega_menu:
                 if not menu.mega_menu_content:
-                    menu.mega_menu_content = self.env['ir.ui.view']._render_template('website.s_mega_menu_odoo_menu')
+                    menu.mega_menu_content = website._render_template('website.s_mega_menu_odoo_menu')
             else:
                 menu.mega_menu_content = False
                 menu.mega_menu_classes = False

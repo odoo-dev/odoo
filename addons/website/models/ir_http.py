@@ -20,7 +20,6 @@ from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.safe_eval import safe_eval
 from odoo.addons.http_routing.models import ir_http
 from odoo.addons.portal.controllers.portal import _build_url_w_params
-from odoo.addons.website.tools import get_base_domain
 
 logger = logging.getLogger(__name__)
 
@@ -188,28 +187,34 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _match(cls, path):
-        # set website into the context
-        if website_id := request.env['ir.http']._get_current_website_id():
-            request.update_context(website_id=website_id)
-        else:
-            website_id = request.env['ir.http']._get_current_website_fallback()
-            request.update_context(fallback_website_id=website_id)
+        website_id = request.env['ir.http'].get_current_website_id()
+        fallback_website_id = website_id or request.env['ir.http'].get_current_website_fallback()
 
         if not hasattr(request, 'website_routing'):
-            request.website_routing = website_id
+            request.website_routing = website_id or fallback_website_id
 
-        return super()._match(path)
+        # set website into the context, used by match for the default lang
+        if website_id:
+            request.update_context(website_id=website_id)
+        elif fallback_website_id:
+            request.update_context(fallback_website_id=fallback_website_id)
+
+        rule, args = super()._match(path)
+
+        # remove website_id from the context if it's not a website route
+        if website_id and not rule.endpoint.routing.get('website', False):
+            request.update_context(website_id=None, fallback_website_id=fallback_website_id)
+
+        return rule, args
 
     @classmethod
     def _pre_dispatch(cls, rule, arguments):
         super()._pre_dispatch(rule, arguments)
 
-        if not request.env.context.get('website_id'):
-            if website_id := request.env['ir.http']._get_current_website_fallback():
-                if request.is_frontend:
-                    request.update_context(website_id=website_id)
-                else:
-                    request.update_context(fallback_website_id=website_id)
+        env = request.env
+        if not env.context.get('website_id') and not env.context.get('fallback_website_id'):
+            if website_id := env['ir.http'].get_current_website_fallback():
+                request.update_context(fallback_website_id=website_id)
 
         for record in arguments.values():
             if isinstance(record, models.BaseModel) and hasattr(record, 'can_access_from_current_website'):
@@ -224,13 +229,13 @@ class IrHttp(models.AbstractModel):
                     raise werkzeug.exceptions.Forbidden()
 
     @api.model
-    def _get_current_website_id(self):
+    def get_current_website_id(self):
         """ The current website is return in the following order:
         - the website forced in session `force_website_id`
         - False
         """
         if force_website_id := request.session.get('force_website_id'):
-            website_id = self._get_current_forced_website_id(force_website_id)
+            website_id = self.env['website']._website_id_exists(force_website_id)
             if website_id:
                 return website_id
             else:
@@ -238,17 +243,11 @@ class IrHttp(models.AbstractModel):
                 request.session.pop('force_website_id')
 
         if website_id := request.env.context.get('website_id'):
-            return self._get_current_forced_website_id(website_id)
+            return self.env['website']._website_id_exists(website_id)
         return False
 
     @api.model
-    @tools.ormcache('force_website_id')
-    def _get_current_forced_website_id(self, force_website_id):
-        if force_website_id and request.env['website'].browse(force_website_id).exists():
-            return force_website_id
-
-    @api.model
-    def _get_current_website_fallback(self):
+    def get_current_website_fallback(self):
         """ The current fallback website is return in the following order:
         - (if frontend or fallback) the website matching the request's "domain"
         - arbitrary the first website found in the database if `fallback` is set
@@ -313,15 +312,15 @@ class IrHttp(models.AbstractModel):
 
         # TODO: in master, store the computed field domain_punycode to avoid
         #       the need to search on domain_name and domain_name_idna.
-        websites = self.env['website'].sudo().search([])
+        all_websites = self.env['website'].sudo().search([])
 
         # Filter for the exact domain (to filter out potential subdomains) due
         # to the use of ilike.
         # `domain_name` could be an empty string, in that case multiple website
         # without a domain will be returned
-        websites = websites.filtered(lambda w: _filter_domain(w, domain_name))
+        websites = all_websites.filtered(lambda w: _filter_domain(w, domain_name))
         # If there is no domain matching for the given port, ignore the port.
-        websites = websites or websites.filtered(lambda w: _filter_domain(w, domain_name, ignore_port=True))
+        websites = websites or all_websites.filtered(lambda w: _filter_domain(w, domain_name, ignore_port=True))
 
         if not websites:
             websites = websites.sudo().search([], limit=1)
@@ -331,7 +330,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _get_editor_context(cls):
         ctx = super()._get_editor_context()
-        if request.is_frontend_multilang and request.lang == cls._get_default_lang():
+        if request.is_frontend_multilang and request.lang == request.env['ir.http']._get_default_lang():
             ctx['edit_translations'] = False
         return ctx
 
@@ -354,27 +353,31 @@ class IrHttp(models.AbstractModel):
             with contextlib.suppress(ZoneInfoNotFoundError):
                 request.update_context(tz=ZoneInfo(tz).key)
 
-        website = request.env['website'].get_current_website()
-        user = request.env.user
+        context = cls._get_editor_context()
+
+        website_id = request.env['ir.http'].get_current_website_id()
+        if website_id:
+            context['website_id'] = website_id
+        elif website_id := request.env['ir.http'].get_current_website_fallback():
+            context['fallback_website_id'] = website_id
 
         # This is mainly to avoid access errors in website controllers
         # where there is no context (eg: /shop), and it's not going to
         # propagate to the global context of the tab. If the company of
         # the website is not in the allowed companies of the user, set
         # the main company of the user.
+        website = request.env['website'].browse(website_id)
+        user = request.env.user
         website_company_id = website.company_id.id
         if user == website.user_id:
             # avoid a read on res_company_user_rel in case of public user
-            allowed_company_ids = [website_company_id]
+            context['allowed_company_ids'] = [website_company_id]
         elif website_company_id in user._get_company_ids():
-            allowed_company_ids = [website_company_id]
+            context['allowed_company_ids'] = [website_company_id]
         else:
-            allowed_company_ids = user.company_id.ids
+            context['allowed_company_ids'] = user.company_id.ids
 
-        request.update_context(
-            allowed_company_ids=allowed_company_ids,
-            **cls._get_editor_context(),
-        )
+        request.update_context(**context)
 
     @classmethod
     def _post_dispatch(cls, response):
@@ -388,17 +391,15 @@ class IrHttp(models.AbstractModel):
         # matched. We have to assume we are going to match a frontend
         # route, hence the default True. Elsewhere, request.is_frontend
         # is set.
-        website_id = False
-        if getattr(request, 'is_frontend', True):
-            website_id = self.env.context.get('website_id', request.website_routing)
-        return super(IrHttp, self.with_context(website_id=website_id)).get_nearest_lang(lang_code)
+        irHttp = self
+        if website_id := (self.env['website'].sudo().get_current_website().id or request.website_routing):
+            irHttp = irHttp.with_context(website_id=website_id)
+        return super(IrHttp, irHttp).get_nearest_lang(lang_code)
 
-    @classmethod
-    def _get_default_lang(cls):
-        if getattr(request, 'is_frontend', True):
-            website = request.env['website'].sudo().get_current_website()
-            return request.env['res.lang']._get_data(id=website.default_lang_id.id)
-        return super()._get_default_lang()
+    @api.model
+    def _get_default_lang(self):
+        website = self.env['website'].sudo().get_current_website()
+        return self.env['res.lang']._get_data(id=website.default_lang_id.id)
 
     @classmethod
     def _get_translation_frontend_modules_name(cls):
@@ -421,7 +422,7 @@ class IrHttp(models.AbstractModel):
         if not page_info and req_page != "/" and req_page.endswith("/"):
             # mimick `_postprocess_args()` redirect
             path = request.httprequest.path[:-1]
-            if request.lang != cls._get_default_lang():
+            if request.lang != request.env['ir.http']._get_default_lang():
                 path = '/' + request.lang.url_code + path
             if request.httprequest.query_string:
                 path += '?' + request.httprequest.query_string.decode('utf-8')
@@ -508,7 +509,8 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _get_error_html(cls, env, code, values):
         if code in ('page_404', 'protected_403'):
-            return code.split('_')[1], env['ir.ui.view']._render_template('website.%s' % code, values)
+            website = request.env['website'].get_current_website(fallback=True)
+            return code.split('_')[1], website._render_template('website.%s' % code, values)
         return super()._get_error_html(env, code, values)
 
     @api.model
@@ -531,11 +533,11 @@ class IrHttp(models.AbstractModel):
         session_info['bundle_params']['website_id'] = website.id
         return session_info
 
-    @classmethod
-    def _is_allowed_cookie(cls, cookie_type):
+    @api.model
+    def _is_allowed_cookie(self, cookie_type):
         result = super()._is_allowed_cookie(cookie_type)
         if result and cookie_type == 'optional':
-            if not request.env['website'].get_current_website().cookies_bar:
+            if not self.env['website'].get_current_website().cookies_bar:
                 # Cookies bar is disabled on this website
                 return True
             accepted_cookie_types = json_scriptsafe.loads(request.cookies.get('website_cookies_bar', '{}'))
@@ -543,7 +545,7 @@ class IrHttp(models.AbstractModel):
             # pre-16.0 compatibility, `website_cookies_bar` was `"true"`.
             # In that case we delete that cookie and let the user choose again.
             if not isinstance(accepted_cookie_types, dict):
-                request.future_response.set_cookie('website_cookies_bar', max_age=0)
+                self.future_response.set_cookie('website_cookies_bar', max_age=0)
                 return False
 
             if 'optional' in accepted_cookie_types:

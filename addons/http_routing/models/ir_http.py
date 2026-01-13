@@ -257,12 +257,12 @@ class IrHttp(models.AbstractModel):
             _logger.warning(exception)
             return False
 
-    @classmethod
-    def _get_default_lang(cls) -> LangData:
-        lang_code = request.env['ir.default'].sudo()._get('res.partner', 'lang')
+    @api.model
+    def _get_default_lang(self) -> LangData:
+        lang_code = self.env['ir.default'].sudo()._get('res.partner', 'lang')
         if lang_code:
-            return request.env['res.lang']._get_data(code=lang_code)
-        return next(iter(request.env['res.lang']._get_active_by('code').values()))
+            return self.env['res.lang']._get_data(code=lang_code)
+        return next(iter(self.env['res.lang']._get_active_by('code').values()))
 
     @api.model
     def get_frontend_session_info(self) -> dict:
@@ -406,7 +406,7 @@ class IrHttp(models.AbstractModel):
             nearest_url_lang = request.env['ir.http'].get_nearest_lang(request.env['res.lang']._get_data(url_code=url_lang_str).code or url_lang_str)
             cookie_lang = request.env['ir.http'].get_nearest_lang(request.cookies.get('frontend_lang'))
             context_lang = request.env['ir.http'].get_nearest_lang(real_env.context.get('lang'))
-            default_lang = cls._get_default_lang()
+            default_lang = request.env['ir.http']._get_default_lang()
             request.lang = request.env['res.lang']._get_data(code=(
                 nearest_url_lang or cookie_lang or context_lang or default_lang.code
             ))
@@ -508,7 +508,7 @@ class IrHttp(models.AbstractModel):
                 generated_path = werkzeug.urls.url_unquote_plus(path)
                 current_path = werkzeug.urls.url_unquote_plus(request.httprequest.path)
                 if generated_path != current_path:
-                    if request.lang != cls._get_default_lang():
+                    if request.lang != request.env['ir.http']._get_default_lang():
                         path = f'/{request.lang.url_code}{path}'
                     redirect = request.redirect_query(path, request.httprequest.args, code=301)
                     werkzeug.exceptions.abort(redirect)
@@ -548,6 +548,7 @@ class IrHttp(models.AbstractModel):
                 code = 500
 
         values.update(
+            request=request,
             status_message=werkzeug.http.HTTP_STATUS_CODES.get(code, ''),
             status_code=code,
         )
@@ -561,6 +562,7 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _get_error_html(cls, env, code, values):
+        values['request'] = request
         try:
             return code, env['ir.ui.view']._render_template('http_routing.%s' % code, values)
         except MissingError:
