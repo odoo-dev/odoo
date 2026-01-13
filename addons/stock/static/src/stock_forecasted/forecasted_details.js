@@ -26,12 +26,32 @@ export class ForecastedDetails extends Component {
         this.props.reloadReport();
     }
 
-    async _unreserve(move_id){
+    async _prereserve(out_move, qty, in_move){
         await this.orm.call(
-            'stock.forecasted_product_product',
-            'action_unreserve_linked_picks',
-            [move_id],
+            'report.stock.report_reception',
+            'action_assign',
+            [false, [out_move], [qty], [in_move]],
         );
+        this.props.reloadReport();
+    }
+
+    async _unreserve(line){
+        let model, method, args;
+        if (line.is_pre_reserved) {
+            model = "report.stock.report_reception";
+            method = "action_unassign";
+            args = [
+                false,
+                line.move_out.id,
+                line.quantity,
+                line.move_in.id,
+            ];
+        } else {
+            model = "stock.forecasted_product_product";
+            method = "action_unreserve_linked_picks";
+            args = [line.move_out.id];
+        }
+        await this.orm.call(model, method, args);
         this.props.reloadReport();
     }
 
@@ -185,11 +205,15 @@ export class ForecastedDetails extends Component {
         }
         const hasFreeStock = this.props.docs.product[line.product.id].free_qty > 0;
         return this.props.docs.user_can_edit_pickings && !line.in_transit && this.canReserveOperation(line) &&
-            (this.isOnHand(line) || (hasFreeStock && !splittedLine));
+            (this.isOnHand(line) || (hasFreeStock && !splittedLine) || this.canPrereserveOperation(line));
     }
 
     canReserveOperation(line){
         return line.move_out?.picking_id;
+    }
+
+    canPrereserveOperation(line) {
+        return Boolean(line.document_in && line.document_out)
     }
 
     futureVirtualAvailable(line) {
