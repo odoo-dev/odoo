@@ -26,8 +26,9 @@ class IrHttp(models.AbstractModel):
 
     @api.model
     def get_frontend_session_info(self):
+        website = self.env['website'].get_current_website()
         session_info = super().get_frontend_session_info()
         session_info.update({
-            'add_to_cart_action': request.website.add_to_cart_action,
+            'add_to_cart_action': website.add_to_cart_action,
         })
         return session_info

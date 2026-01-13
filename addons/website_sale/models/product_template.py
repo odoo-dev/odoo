@@ -502,7 +502,7 @@ class ProductTemplate(models.Model):
         self.ensure_one()
 
         combination = combination or self.env['product.template.attribute.value']
-        website = request.website.with_context(self.env.context)
+        website = self.env['website'].get_current_website()
         uom = self.env['uom.uom'].browse(uom_id) or self.uom_id
 
         if not product_id and not combination and not only_template:

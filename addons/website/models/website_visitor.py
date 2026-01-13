@@ -202,13 +202,15 @@ class WebsiteVisitor(models.Model):
         :return: a tuple containing the visitor id and the upsert result (either
             `inserted` or `updated).
         """
+        website = self.env['website'].get_current_website()
+
         create_values = {
             'access_token': access_token,
             'lang_id': request.lang.id,
             # Note that it's possible for the GEOIP database to return a country
             # code which is unknown in Odoo
             'country_code': request.geoip.country_code,
-            'website_id': request.website.id,
+            'website_id': website.id,
             'timezone': self._get_visitor_timezone() or None,
             'write_uid': self.env.uid,
             'create_uid': self.env.uid,

@@ -19,7 +19,8 @@ class WebsiteMail(http.Controller):
         record.check_access('read')
 
         # search partner_id
-        if request.env.user != request.website.user_id:
+        website = request.env['website'].get_current_website()
+        if request.env.user != website.user_id:
             partner_ids = request.env.user.partner_id.ids
         else:
             # mail_thread method
@@ -58,7 +59,8 @@ class WebsiteMail(http.Controller):
         """
         user = request.env.user
         partner = None
-        public_user = request.website.user_id
+        website = request.env['website'].get_current_website()
+        public_user = website.user_id
         if user != public_user:
             partner = request.env.user.partner_id
         elif request.session.get('partner_id'):

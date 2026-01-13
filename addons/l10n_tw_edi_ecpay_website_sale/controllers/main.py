@@ -134,15 +134,16 @@ class WebsiteSaleL10nTW(WebsiteSale):
                 vals_to_write['l10n_tw_edi_carrier_number_2'] = default_vals.get('carrier_number_2')
 
         order_sudo.write(vals_to_write)
+        website = request.env['website'].get_current_website()
 
         if not errors:
             request.httprequest.path = '/shop/l10n_tw_invoicing_info'
             return request.redirect(
-                request.website._get_checkout_step_values()['next_website_checkout_step_href']
+                website._get_checkout_step_values()['next_website_checkout_step_href']
             )
 
         values = self._get_render_context(order_sudo, default_vals, errors)
-        values.update(request.website._get_checkout_step_values())
+        values.update(website._get_checkout_step_values())
         return request.render('l10n_tw_edi_ecpay_website_sale.l10n_tw_edi_invoicing_info', values)
 
     @http.route("/payment/ecpay/check_mobile_barcode/<int:sale_order_id>", type="jsonrpc", auth="public")

@@ -157,7 +157,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         return []
 
     def _get_shop_domain(self, search, category, attribute_value_dict, search_in_description=True):
-        domains = [request.website.sale_product_domain()]
+        website = request.env['website'].get_current_website()
+        domains = [website.sale_product_domain()]
         if search:
             for srch in search.split(" "):
                 subdomains = [
@@ -293,7 +294,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         handle_params_access_error=lambda e, **kwargs: NotFound.code,
     )
     def shop(self, page=0, category=None, search='', min_price=0.0, max_price=0.0, tags='', **post):
-        if not request.website.has_ecommerce_access():
+        website = request.env['website'].get_current_website()
+        if not website.has_ecommerce_access():
             return request.redirect(f'/web/login?redirect={request.httprequest.path}')
 
         is_category_in_query = category and isinstance(category, str)
@@ -360,8 +362,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
         filter_by_price_enabled = website.is_view_active('website_sale.filter_products_price')
         if filter_by_price_enabled:
             company_currency = website.company_id.sudo().currency_id
+            website = request.env['website'].get_current_website()
             conversion_rate = request.env['res.currency']._get_conversion_rate(
-                company_currency, website.currency_id, request.website.company_id, fields.Date.today())
+                company_currency, website.currency_id, website.company_id, fields.Date.today())
         else:
             conversion_rate = 1
 
@@ -558,7 +561,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         handle_params_access_error=handle_product_params_error,
     )
     def product(self, product, category=None, pricelist=None, **kwargs):
-        if not request.website.has_ecommerce_access():
+        website = request.env['website'].get_current_website()
+        if not website.has_ecommerce_access():
             return request.redirect(f'/web/login?redirect={request.httprequest.path}')
 
         if pricelist is not None:
@@ -806,7 +810,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         return product.sudo()._is_add_to_cart_allowed()
 
     def _prepare_product_values(self, product, category, **kwargs):
-        website = request.website
+        website = request.env['website'].get_current_website()
         ProductCategory = request.env['product.public.category']
         category = (
             (category and ProductCategory.browse(int(category)).exists())
@@ -907,12 +911,13 @@ class WebsiteSale(payment_portal.PaymentPortal):
             min_price = args.get('min_price')
             max_price = args.get('max_price')
             if min_price or max_price:
+                website = request.env['website'].get_current_website()
                 try:
                     min_price = float(min_price)
                     args['min_price'] = min_price and str(prev_pricelist.currency_id._convert(
                         min_price,
                         pricelist.currency_id,
-                        request.website.company_id,
+                        website.company_id,
                         fields.Date.today(),
                         round=False,
                     ))
@@ -923,7 +928,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                     args['max_price'] = max_price and str(prev_pricelist.currency_id._convert(
                         max_price,
                         pricelist.currency_id,
-                        request.website.company_id,
+                        website.company_id,
                         fields.Date.today(),
                         round=False,
                     ))
@@ -938,7 +943,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         redirect = post.get('r', '/shop/cart')
         if promo:
             pricelist_sudo = request.env['product.pricelist'].sudo().search([('code', '=', promo)], limit=1)
-            if not (pricelist_sudo and request.website.is_pricelist_available(pricelist_sudo.id)):
+            website = request.env['website'].get_current_website()
+            if not (pricelist_sudo and website.is_pricelist_available(pricelist_sudo.id)):
                 return request.redirect("%s?code_not_available=1" % redirect)
 
             self._apply_pricelist(pricelist=pricelist_sudo)
@@ -1047,8 +1053,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 ):
                     order_sudo._set_delivery_method(delivery_method, rate=rate)
 
+        website = request.env['website'].get_current_website()
         checkout_page_values.update(
-            request.website._get_checkout_step_values()
+            website._get_checkout_step_values()
         )
         if try_skip_step and can_skip_delivery:
             return request.redirect(
@@ -1123,8 +1130,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
             use_delivery_as_billing=use_delivery_as_billing,
             **query_params
         )
+        website = request.env['website'].get_current_website()
         address_form_values.update(
-            request.website._get_checkout_step_values()
+            website._get_checkout_step_values()
         )
         return request.render('website_sale.address', address_form_values)
 
@@ -1150,9 +1158,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
         is_anonymous_cart = order_sudo._is_anonymous_cart()
         # Display b2b field is feature is enabled on given website
+        website = request.env['website'].get_current_website()
         rendering_values['display_b2b_fields'] = (
             rendering_values.get('display_b2b_fields', False)
-            or request.website.is_view_active('website_sale.address_b2b')
+            or website.is_view_active('website_sale.address_b2b')
         )
 
         if rendering_values['commercial_address_update_url']:
@@ -1309,7 +1318,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if order_sudo and order_sudo._is_anonymous_cart():
             address_values['type'] = 'contact'
 
-        if address_values['lang'] not in request.website.mapped('language_ids.code'):
+        website = request.env['website'].get_current_website()
+        if address_values['lang'] not in website.mapped('language_ids.code'):
             address_values.pop('lang')
 
         if not order_sudo:
@@ -1520,8 +1530,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route(['/shop/extra_info'], type='http', auth="public", website=True, sitemap=False, list_as_website_content=system_page_extra_info)
     def extra_info(self, **post):
+        website = request.env['website'].get_current_website()
         # Check that this option is activated
-        extra_step = request.website.viewref('website_sale.extra_info')
+        extra_step = website.viewref('website_sale.extra_info')
         if not extra_step.active:
             return request.redirect("/shop/payment")
 
@@ -1539,7 +1550,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'order': order_sudo,
         }
 
-        values.update(request.website._get_checkout_step_values())
+        values.update(website._get_checkout_step_values())
 
         return request.render("website_sale.extra_info", values)
 
@@ -1553,9 +1564,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'partner': order.partner_invoice_id,
             'order': order,
         }
+        website = request.env['website'].get_current_website()
         payment_form_values = {
             **sale_portal.CustomerPortal._get_payment_values(
-                self, order, website_id=request.website.id
+                self, order, website_id=website.id
             ),
             'display_submit_button': False,  # The submit button is re-added outside the form.
             'transaction_route': f'/shop/payment/transaction/{order.id}',
@@ -1621,7 +1633,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
             render_values.pop('payment_methods_sudo', '')
             render_values.pop('tokens_sudo', '')
 
-        render_values.update(request.website._get_checkout_step_values())
+        website = request.env['website'].get_current_website()
+        render_values.update(website._get_checkout_step_values())
 
         return request.render("website_sale.payment", render_values)
 
@@ -1663,7 +1676,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
             order_sudo._validate_order()
 
         # clean context and session, then redirect to the confirmation page
-        request.website.sale_reset()
+        website = request.env['website'].get_current_website()
+        website.sale_reset()
         if tx_sudo and tx_sudo.state == 'draft':
             return request.redirect(self._get_shop_path())
 
@@ -1697,7 +1711,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         }
         if (
             request.env['res.users']._get_signup_invitation_scope() == 'b2c'
-            and request.website.is_public_user()
+            and request.env['website'].get_current_website().is_public_user()
         ):
             order.partner_id.signup_prepare()
             signup_url = urlparse(
@@ -1797,7 +1811,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
             return request.redirect('/shop/cart')
 
         # Check that public orders are allowed.
-        if request.env.user._is_public() and request.website.account_on_checkout == 'mandatory':
+        website = request.env['website'].get_current_website()
+        if request.env.user._is_public() and website.account_on_checkout == 'mandatory':
             return request.redirect('/web/login?redirect=/shop/checkout')
 
     def _check_addresses(self, order_sudo):
@@ -1988,7 +2003,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @staticmethod
     def _populate_currency_and_pricelist(kwargs):
-        website = request.website
+        website = request.env['website'].get_current_website()
         kwargs.update({
             'currency_id': website.currency_id.id,
             'pricelist_id': website.current_session_pricelist_id.sudo().id,
