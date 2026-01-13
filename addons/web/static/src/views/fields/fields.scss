@@ -91,7 +91,8 @@
     .o_wrap_cell :is(input:not([type]), [type='text'], [type='email'], [type='number'], [type='password'], [type='tel'], [type='search'], button.o_input) + .o_form_label,
     .o_wrap_label:not(.o_wrap_inline):has(+ .o_cell :is(input:not([type]), [type='text'], textarea, [contenteditable], [type='email'], [type='number'], [type='password'], [type='tel'], [type='search'], button.o_input)) .o_form_label,
     .oe_title .o_form_label:not(.o_form_label:has(+ * .o_field_widget.o_readonly_modifier)),
-    .o_wrap_label .o_form_label.o_form_label_readonly {
+    .o_wrap_label .o_form_label.o_form_label_readonly,
+    .o_wrap_cell .o_form_label:not(.o_field_widget .o_form_label) {
         position: absolute;
         transform: translate(calc(1.5 * var(--spacing)), calc(-.5 * var(--fieldWidget-label-height) - #{$input-border-width}));
         background: linear-gradient(transparent 0px, transparent .3rem, $o-view-background-color .3rem, $o-view-background-color 1rem, transparent 1rem);
