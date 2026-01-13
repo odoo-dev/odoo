@@ -382,6 +382,7 @@ def serve_db(request: Request) -> Response:
             raise RegistryError(f"Cannot get registry {request.db}") from e
 
         # find the controller endpoint to use
+        # TODO: have host_id in the context.
         request.env = Environment(cr, request.session.uid, request.session.context)
         try:
             rule, args = request.registry['ir.http']._match(request.httprequest.path)
