@@ -1164,4 +1164,7 @@
     .o_horizontal_separator {
         box-shadow: none;
     }
+    .o-wysiwyg div:has([contenteditable="true"]) {
+        padding: $input-border-width;
+    }
 }
