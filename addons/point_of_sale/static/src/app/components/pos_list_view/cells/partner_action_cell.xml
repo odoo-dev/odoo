@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.PartnerActionCell">
+        <div t-att-class="this.ui.isSmall ? this.props.classes?.mobile : this.props.classes?.desktop">
+            <Dropdown>
+                <button class="btn btn-light btn-lg lh-lg border">
+                    <i class="fa fa-fw fa-bars"/>
+                </button>
+                <t t-set-slot="content">
+                    <DropdownItem onSelected="() => this.editDetails()">
+                        Edit Details
+                    </DropdownItem>
+                    <DropdownItem onSelected="() => this.viewOrders()">
+                        All Orders
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+</templates>

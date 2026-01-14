@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="point_of_sale.PosListView">
+        <div t-if="props.header" class="sticky-top d-flex align-items-center p-3 border-bottom bg-white">
+            <div class="d-flex align-items-center w-100">
+                <button t-if="!ui.isSmall and props.headerAction"
+                    class="btn btn-primary btn-lg lh-lg me-2" role="img" aria-label="Add a customer"
+                    t-on-click="() => props.headerAction.action()"
+                    title="Add a customer"
+                    t-esc="props.headerAction.label" />
+                <h3 t-if="props.headerTitle" class="m-0 flex-grow-1">
+                    <t t-esc="props.headerTitle"/>
+                </h3>
+            </div>
+            <Input tModel="[state, 'searchInput']"
+                class="'ms-auto'"
+                isSmall="ui.isSmall"
+                placeholder.translate="Search..."
+                icon="{type: 'fa', value: 'fa-search'}"
+                t-on-enter="() => this.searchRecords()"
+                autofocus="true"
+                debounceMillis="100" />
+        </div>
+        <table t-if="!ui.isSmall" class="table table-hover pos-list-view">
+            <thead t-if="props.showHeader">
+                <tr>
+                    <th t-foreach="this.cells" t-as="field" t-key="field_index">
+                        <t t-esc="field.name"/>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="h-100">
+                <tr t-foreach="records" t-as="record" t-key="record_index" t-att-class="getRowClass(record_index)" t-on-click="() => this.clickRecord(record)">
+                    <td t-foreach="this.cells" t-as="field" t-key="field_index" class="text-break w-25">
+                        <t t-if="field.type === 'char'" t-esc="field.formatter(record)"/>
+                        <t t-if="field.type === 'component'"
+                            t-component="field.component"
+                            t-props="{ record: record, close: props.close, classes: field.classes }"/>
+                    </td>
+                    <td t-if="this.action || props.value === record.id">
+                        <div class="d-flex justify-content-end h-100">
+                            <button t-if="props.value === record.id"
+                                class="unselect-tag-mobile d-inline-block btn btn-light border me-2"
+                                t-on-click="() => this.clickRecord()">
+                                Unselect
+                            </button>
+                            <t t-if="this.action"
+                                t-component="this.action.component"
+                                t-props="{ record: record, close: props.close, classes: this.action.classes }"/>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div t-else="">
+            <div t-foreach="records" t-as="record" t-key="record_index" class="border-bottom d-flex p-2">
+                <div class="flex-grow-1">
+                    <div t-foreach="this.cells" t-as="field" t-key="field_index" class="mb-2">
+                        <t t-if="field.type === 'char'" t-esc="field.formatter(record)"/>
+                        <t t-if="field.type === 'component'"
+                            t-component="field.component"
+                            t-props="{ record: record, close: props.close, classes: field.classes }"/>
+                    </div>
+                </div>
+                <div t-if="this.action" class="d-flex align-items-start">
+                    <t t-component="this.action.component"
+                        t-props="{ record: record, close: props.close, classes: this.action.classes }"/>
+                </div>
+            </div>
+        </div>
+        <div class="p-3 sticky-bottom bg-white border-top">
+            <button t-if="props.close" class="btn btn-secondary btn-lg w-100" t-on-click="() => props.close()">
+                Discard
+            </button>
+        </div>
+    </t>
+</templates>

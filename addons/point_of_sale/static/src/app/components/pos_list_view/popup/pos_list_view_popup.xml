@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="point_of_sale.PosListViewPopup">
+        <Dialog bodyClass="'p-0'" contentClass="'position-relative rounded overflow-hidden'" header="false">
+            <PosListView t-props="this.listProps" />
+        </Dialog>
+    </t>
+</templates>

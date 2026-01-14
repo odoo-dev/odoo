@@ -19,7 +19,6 @@ import {
     ask,
     makeActionAwaitable,
 } from "@point_of_sale/app/utils/make_awaitable_dialog";
-import { PartnerList } from "../screens/partner_list/partner_list";
 import { computeComboItems } from "../models/utils/compute_combo_items";
 import {
     changesToOrder,
@@ -45,6 +44,8 @@ import OrderPaymentValidation from "../utils/order_payment_validation";
 import { logPosMessage } from "../utils/pretty_console_log";
 import { initLNA } from "../utils/init_lna";
 import { uuid } from "@web/core/utils/strings";
+import { PosListViewPopup } from "../components/pos_list_view/popup/pos_list_view_popup";
+import { getPartnerProps } from "../components/pos_list_view/props/get_partner_props";
 
 const { DateTime } = luxon;
 export const CONSOLE_COLOR = "#F5B427";
@@ -2329,10 +2330,7 @@ export class PosStore extends WithLazyGetterTrap {
             });
             return currentPartner;
         }
-        const payload = await makeAwaitable(this.dialog, PartnerList, {
-            partner: currentPartner,
-        });
-
+        const payload = await makeAwaitable(this.dialog, PosListViewPopup, getPartnerProps(this));
         this.setPartnerToCurrentOrder(payload || false);
 
         return payload;
