@@ -36,17 +36,17 @@
                                 </span>
                                 <span name="biyearly" invisible="frequency != 'biyearly'">
                                     on the
-                                    <field nolabel="1" name="first_month_day" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field nolabel="1" name="first_month_day" widget="day_of_month" options="{'depends_on': 'first_month'}" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'"/>
                                     of
                                     <field name="first_month" class="o_field_accrual" placeholder="select a month" required="frequency == 'biyearly'"/>
                                     and the
-                                    <field nolabel="1" name="second_month_day" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'"/>
+                                    <field nolabel="1" name="second_month_day" widget="day_of_month" options="{'depends_on': 'second_month'}" class="o_field_accrual" placeholder="select a day" required="frequency == 'biyearly'"/>
                                     of
                                     <field nolabel="1" name="second_month" class="o_field_accrual" placeholder="select a month" required="frequency == 'biyearly'"/>
                                 </span>
                                 <span name="yearly" invisible="frequency != 'yearly'">
                                     on the
-                                    <field nolabel="1" name="yearly_day" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a day"/>
+                                    <field nolabel="1" name="yearly_day" widget="day_of_month" options="{'depends_on': 'yearly_month'}" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a day"/>
                                     of
                                     <field nolabel="1" name="yearly_month" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a month"/>
                                 </span>
