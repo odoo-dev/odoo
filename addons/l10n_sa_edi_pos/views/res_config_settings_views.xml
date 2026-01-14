@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.l10n_sa_edi_pos</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <setting id="pos-avatax" position="after">
+                    <setting id="l10n_sa_edi_pos_enabled" help="Send Receipts to ZATCA">
+                        <field name="l10n_sa_edi_pos_enabled"/>
+                    </setting>
+                </setting>
+            </field>
+        </record>
+    </data>
+</odoo>

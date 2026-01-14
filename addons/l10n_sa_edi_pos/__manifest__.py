@@ -11,6 +11,7 @@
     ],
     'data': [
         'receipt/pos_order_receipt.xml',
+        'views/res_config_settings_views.xml',
     ],
     'summary': "ZATCA E-Invoicing, support for PoS",
     'description': """

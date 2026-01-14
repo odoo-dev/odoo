@@ -17,7 +17,7 @@ patch(OrderPaymentValidation.prototype, {
         if (
             this.order.isInvoiceMandatoryForSA() &&
             this.order.finalized &&
-            this.order.l10n_sa_invoice_edi_state !== "sent"
+            this.order.l10n_sa_invoice_edi_state !== "accepted"
         ) {
             const orderError = _t(
                 "%s by going to Backend > Orders > Invoice",
