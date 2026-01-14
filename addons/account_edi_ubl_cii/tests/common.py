@@ -1,3 +1,6 @@
+from contextlib import contextmanager
+from unittest.mock import patch
+
 from odoo import Command
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
@@ -106,6 +109,20 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
             'rounding_method': 'HALF-UP',
             **kwargs,
         })
+
+    @contextmanager
+    def avoiding_predictions(self):
+        model = self.env.registry['account.move.line']
+
+        with (
+            patch.object(model, '_predict_product', return_value=False) as _pp,
+            patch.object(model, '_predict_account', return_value=False) as _pa,
+            patch.object(model, '_predict_deductible_amount', return_value=False) as _da,
+        ):
+            yield
+            _pp.assert_not_called()
+            _pa.assert_not_called()
+            _da.assert_not_called()
 
     # -------------------------------------------------------------------------
     # EXPORT HELPERS

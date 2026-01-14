@@ -205,7 +205,8 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
             })
 
         # Import the document for the first time
-        bill = self._import_as_attachment_on(attachment=xml_attachment)
+        with self.avoiding_predictions():
+            bill = self._import_as_attachment_on(attachment=xml_attachment)
 
         # Ensure the first tax is retrieved as there isn't any prediction that could be leverage
         self.assertEqual(bill.invoice_line_ids.tax_ids, new_tax_1)
@@ -302,7 +303,8 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
         partner_match = self.env['res.partner']._retrieve_partner(**partner_vals)
         self.assertFalse(partner_match)
 
-        bill = self._import_as_attachment_on(attachment=xml_attachment)
+        with self.avoiding_predictions():
+            bill = self._import_as_attachment_on(attachment=xml_attachment)
 
         self.assertRecordValues(bill.partner_id, [partner_vals])
         self.assertEqual(bill.partner_id.contact_address,
@@ -461,7 +463,8 @@ class TestAccountEdiUblCii(TestUblCiiCommon, HttpCase):
                 'raw': file.read(),
             })
 
-        bill = self._import_as_attachment_on(attachment=xml_attachment)
+        with self.avoiding_predictions():
+            bill = self._import_as_attachment_on(attachment=xml_attachment)
 
         self.assertRecordValues(bill.partner_id, [{
             'name': "ALD Automotive LU",
