@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit pos.order form view to add ZATCA EDI fields -->
+    <record id="view_pos_order_form_zatca_edi" model="ir.ui.view">
+        <field name="name">pos.order.form.zatca.edi</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <field name="fiscal_position_id" position="after">
+                <field name="l10n_sa_edi_document_id" />
+            </field>
+        </field>    
+    </record>
+</odoo>

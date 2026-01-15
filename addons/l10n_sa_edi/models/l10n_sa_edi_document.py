@@ -7,6 +7,7 @@ from hashlib import sha256
 from lxml import etree
 from markupsafe import Markup
 from odoo import _, api, fields, models
+from odoo.models import BaseModel
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -64,11 +65,11 @@ class L10nSaEdiDocument(models.Model):
             id_mapping[record.res_model].append(record.res_id)
         recordset_mapping = dict()
         for model, ids in id_mapping.items():
-            recordset_mapping[model] = dict(self.env[model]._read_group(
+            recordset_mapping[model] = {b: c for a, b, c in self.env[model]._read_group(
                 domain=[('id', 'in', ids)],
                 groupby=['id'],
-                aggregates=['id:recordset']
-            ))
+                aggregates=['id:max', 'id:recordset']
+            )}
         return recordset_mapping
 
     @api.depends('res_id', 'res_model')
@@ -76,10 +77,12 @@ class L10nSaEdiDocument(models.Model):
         mapping = self._get_resources_grouped_by_model()
         for record in self:
             field = self._get_resource_field_mapping()[record.res_model]
+            otherfield = 'account_move_id' if field == 'pos_order_id' else 'pos_order_id'
             record[field] = mapping[record.res_model][record.res_id]
+            record[otherfield] = False
 
     @property
-    def resource(self):
+    def resource(self) -> BaseModel:
         self.ensure_one()
         field = self._get_resource_field_mapping()[self.res_model]
         return self[field]

@@ -7,6 +7,13 @@ class PosEdiXmlUBL21Zatca(models.AbstractModel):
     _inherit = ['zatca.edi.common.mixin', 'pos.edi.xml.ubl_21']
     _description = 'ZATCA UBL 2.1 for POS Orders'
 
+    def _add_pos_order_config_vals(self, vals):
+        super()._add_pos_order_config_vals(vals)
+        vals['document_type'] = 'invoice'
+
+    def _is_credit_note(self, pos_order):
+        return pos_order.amount_total < 0
+
     def _get_pos_order_node(self, vals):
         """Override to add ZATCA-specific delivery nodes."""
         # Get the base document node from parent
@@ -59,6 +66,16 @@ class PosEdiXmlUBL21Zatca(models.AbstractModel):
         vals['total_grouping_function'] = total_grouping_function
         vals['tax_grouping_function'] = tax_grouping_function
 
+    def _get_party_node(self, vals):
+        """
+        Override to ensure ZATCA-compliant party node is generated.
+
+        This explicit override is necessary to ensure the zatca.edi.common.mixin
+        version is called instead of the base UBL version due to Python's MRO.
+        """
+        # Explicitly call the ZATCA mixin's version
+        return super(PosEdiXmlUBL21Zatca, self)._get_party_node(vals)
+
     def _l10n_sa_get_payment_means_code(self, order):
         """
         Return payment means code for POS order based on payment method.
@@ -100,9 +117,16 @@ class PosEdiXmlUBL21Zatca(models.AbstractModel):
                 'cbc:IssueTime': {'_text': issue_datetime.strftime('%H:%M:%S')},
                 'cbc:UUID': {'_text': pos_order.l10n_sa_uuid},
                 'cbc:InvoiceTypeCode': {
-                    '_text': 388,  # Simplified tax invoice
+                    '_text': 381 if self._is_credit_note(pos_order) else 388,  # Simplified tax invoice
                     'name': self._get_invoice_type_code_name(pos_order),
                 },
+                'cac:BillingReference': {
+                    'cac:InvoiceDocumentReference': {
+                        'cbc:ID': {
+                            '_text': pos_order.refunded_order_id.name
+                        }
+                    }
+                } if self._is_credit_note(pos_order) else None,
                 'cbc:TaxCurrencyCode': {'_text': pos_order.company_id.currency_id.name},
                 'cac:OrderReference': None,
                 'cac:AdditionalDocumentReference': self._get_zatca_additional_document_references(pos_order),
@@ -145,7 +169,8 @@ class PosEdiXmlUBL21Zatca(models.AbstractModel):
                 'listID': 'UN/ECE 4461',
             },
             'cbc:PaymentDueDate': {'_text': issue_date.strftime('%Y-%m-%d')},
-            'cbc:InstructionID': {'_text': pos_order.name},
+            'cbc:InstructionID': {'_text': pos_order.name} if not self._is_credit_note(pos_order) else None,
+            'cbc:InstructionNote': {'_text': pos_order.l10n_sa_reason or "Temp Reason"} if self._is_credit_note(pos_order) else None,
             'cbc:PaymentID': {'_text': pos_order.name},
         }
 
@@ -165,7 +190,7 @@ class PosEdiXmlUBL21Zatca(models.AbstractModel):
                 'currencyID': vals['currency_name'],
             },
             'cbc:PayableAmount': {
-                '_text': self.format_float(pos_order.amount_total, vals['currency_dp']),
+                '_text': self.format_float(abs(pos_order.amount_total), vals['currency_dp']),
                 'currencyID': vals['currency_name'],
             },
         })

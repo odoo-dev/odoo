@@ -16,112 +16,85 @@ class L10nSaEdiDocument(models.Model):
     def _get_resource_field_mapping(self):
         return {
             **super()._get_resource_field_mapping(),
-            'pos.order': pos_order_id,
+            'pos.order': 'pos_order_id',
         }
 
-    @api.model
-    def _get_auto_post_search_domain(self):
-        """Get domain for finding documents that need auto-posting"""
-        return [
-            ('state', '=', 'to_send'),
+    def _get_documents_to_retry(self) -> dict:
+        """Return documents that should be retried grouped by EGS"""
+        return self.search([
             ('res_model', '=', 'pos.order'),
-        ]
+            ('state', '=', 'to_send'),
+            ('l10n_sa_chain_index', '!=', 0)
+        ]).grouped('journal_id')
 
-    def _cron_l10n_sa_auto_post_documents(self, batch_size=100):
-        """
-        Cron job to automatically post POS orders to ZATCA.
+    @api.model
+    def _get_documents_to_post(self, limit=100) -> dict:
+        """Return documents that should be posted grouped by EGS"""
+        return self.search([
+            ('res_model', '=', 'pos.order'),
+            ('state', '=', 'to_send'),
+        ]).grouped('journal_id')
+    
+    def _log_successful_post(self):
+        _logger.info("I should log a message to chatter here")
+        self.resource.message_post("Successfully posted to zatca, here is the document")
 
-        Processing logic:
-        1. Documents with existing chain_index are processed first (retries)
-        2. Documents are grouped by company and journal
-        3. Within each group, documents are ordered by confirmation datetime
-        4. Each document is processed individually with proper error handling
-        5. Failed documents remain in 'to_send' or 'error' state for retry
+    def _log_failed_post(self, message="", log_only=False):
+        _logger.info("I should log a warning to chatter here")
+        self.resource.message_post("Successfully posted to zatca, here is the document")
 
-        :param batch_size: Maximum number of documents to process in one run
-        """
-        # First, find all documents that need posting
-        domain = self._get_auto_post_search_domain()
+    def _l10n_sa_mark_failed(self, error):
+        self.ensure_one()
+        self.write({
+            'state': 'error',
+            'feedback': f"Submission Failed: {error}"
+        })
+    
+    def _l10n_sa_post(self):
+        self.ensure_one()
+        try:
+            self.lock_for_update()
+            self.resource.lock_for_update()
 
-        # Order by: chain_index DESC (retries first), then confirmation datetime ASC
-        all_docs = self._read_group(
-            domain,
-            order='l10n_sa_chain_index DESC NULLS LAST, id ASC',
-            limit=batch_size,
-            groupby='res_model',
-        )
+            self._l10n_sa_post_zatca_edi()
 
-        if not all_docs:
-            _logger.info("No POS documents to auto-post to ZATCA")
-            return
+            if self.state == 'sent':
+                self._log_successful_post()
+            else:
+                self._log_failed_post()
+
+            self.env.cr.commit()
+        except LockError:
+            self._log_failed_post(message="Document is locked by another process, skipping", log_only=True)
+        except Exception as e:
+            error = str(e)
+            self._log_failed_post(message=error)
+            self._l10n_sa_mark_failed(error)
+        finally:
+            self._l10n_sa_create_log()
+            self.env.cr.commit()
+            return self.state == 'sent'
+
+    def _cron_l10n_sa_auto_post_documents(self, batch_size=100, retry_only=False):
+        documents_by_egs = self._get_documents_to_retry()
+        if not retry_only and (to_post := self._get_documents_to_post(limit=batch_size - len(documents_by_egs))):
+            for egs, docs in to_post.items():
+                if egs in documents_by_egs:
+                    documents_by_egs[egs] |= docs
+                else:
+                    documents_by_egs[egs] = docs
 
         # Process each group
-        total_processed = 0
         total_success = 0
         total_failed = 0
 
-        for doc in docs:
-            try:
-                doc.lock_for_update()
-                doc.resource.lock_for_update()
-
-                _logger.debug(
-                    "Posting ZATCA document %d for %s %s (chain index: %s)",
-                    doc.id, doc.res_model, doc.res_id, doc.l10n_sa_chain_index or 'new'
-                )
-
-                # Post to ZATCA
-                doc._l10n_sa_post_zatca_edi()
-
-                if doc.state == 'sent':
+        for egs, documents in documents_by_egs.items():
+            for doc in documents:
+                if doc._l10n_sa_post():
                     total_success += 1
-                    _logger.info(
-                        "Successfully posted document %d for order %s",
-                        doc.id, order.name
-                    )
                 else:
                     total_failed += 1
-                    _logger.warning(
-                        "Failed to post document %d for order %s: %s",
-                        doc.id, order.name, doc.feedback or 'Unknown error'
-                    )
-
-                total_processed += 1
-
-                # Commit after each successful processing to avoid losing progress
-                self.env.cr.commit()
-
-            except LockError:
-                _logger.warning(
-                    "Document %d is locked by another process, skipping",
-                    doc.id
-                )
-                continue
-
-            except Exception as e:
-                # Log error but continue with other documents
-                _logger.error(
-                    "Unexpected error posting document %d: %s",
-                    doc.id, str(e), exc_info=True
-                )
-                total_failed += 1
-
-                # Mark document as error if not already
-                try:
-                    if doc.state != 'error':
-                        doc.write({
-                            'state': 'error',
-                            'feedback': f"Cron error: {str(e)}"
-                        })
-                        doc._l10n_sa_create_log()
-                    self.env.cr.commit()
-                except Exception as commit_error:
-                    _logger.error(
-                        "Failed to save error state for document %d: %s",
-                        doc.id, str(commit_error)
-                    )
-                    self.env.cr.rollback()
-                continue
+        total_processed  = total_success + total_failed
 
         _logger.info(
             "ZATCA auto-post completed: %d processed, %d successful, %d failed",

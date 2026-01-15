@@ -1,4 +1,5 @@
 import json
+import logging
 from base64 import b64decode, b64encode
 from datetime import datetime
 
@@ -35,6 +36,9 @@ SANDBOX_AUTH = {
 }
 
 ERROR_MESSAGE = _lt("Something went wrong. Please onboard the journal again.")
+
+
+_logger = logging.getLogger(__name__)
 
 
 class AccountJournal(models.Model):
@@ -583,6 +587,7 @@ class AccountJournal(models.Model):
                 'error': error,
                 'blocking_level': 'error',
             }
+        _logger.info(response_data)
         return response_data
 
     def _l10n_sa_api_headers(self):
