@@ -73,19 +73,17 @@ export const barcodeService = {
                 barcodeInput.focus();
                 browser.requestAnimationFrame(() => barcodeInput.setAttribute("inputmode", "text"));
             }
-
-            if (document.activeElement === barcodeInput) {
-                if (ev.key.match(/(Enter|Tab)/)) {
-                    checkBarcode();
-                };
-            }
         }
 
-        function inputHandler() {
+        function inputHandler(ev) {
             barcodeInput.setAttribute("inputmode", "none");
 
             clearTimeout(timeout);
             timeout = setTimeout(checkBarcode, barcodeService.maxTimeBetweenKeysInMs);
+
+            if (ev.key.match(/(Enter|Tab)/)) {
+                checkBarcode();
+            };
         }
 
         whenReady(() => {
