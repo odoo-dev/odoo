@@ -74,6 +74,7 @@ class PrinterDriver(Driver):
         self.connected_by_usb = self.device_connection == 'direct'
         connection_prefix = "[USB] " if self.connected_by_usb else ""
         self.device_name = connection_prefix + device['device-make-and-model']
+        self.disconnect_counter = 0
         self.state = {
             'status': 'connecting',
             'message': 'Connecting to printer',
@@ -151,8 +152,16 @@ class PrinterDriver(Driver):
         return {'status': status, 'messages': ''}
 
     def disconnect(self):
-        self.update_status('disconnected', 'Printer was disconnected')
-        super(PrinterDriver, self).disconnect()
+        # Printers are often removed then added to cups detected printers.
+        # The interface loop has a long delay between the detections which we cannot change.
+        # To avoid disconnecting the printer too eagerly, we use a counter to
+        # wait for two consecutive misses before disconnecting the printer.
+        if self.disconnect_counter >= 2:
+            self.update_status('disconnected', 'Printer was disconnected')
+            super(PrinterDriver, self).disconnect()
+        else:
+            self.disconnect_counter += 1
+            _logger.warning("Printer %s not found by cups. Counter: %s", self.device_name, self.disconnect_counter)
 
     def update_status(self, status, message, reason=None):
         """Updates the state of the current printer.

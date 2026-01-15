@@ -7,6 +7,8 @@ from threading import Lock
 import time
 
 from odoo.addons.hw_drivers.interface import Interface
+from odoo.addons.hw_drivers.main import iot_devices
+
 
 conn = CupsConnection()
 PPDs = conn.getPPDs()
@@ -54,6 +56,18 @@ class PrinterInterface(Interface):
             self.start_time = None  # Reset start_time to avoid changing the loop delay again
 
         return discovered_devices
+
+    def update_iot_devices(self, devices={}):
+        """
+        Extends the base method to reset the disconnect counter
+        of rediscovered devices.
+        """
+        super().update_iot_devices(devices)
+        if devices:
+            rediscovered_devices = devices.keys() & self._detected_devices
+            for device in rediscovered_devices:
+                if device in iot_devices:
+                    iot_devices[device].disconnect_counter = 0
 
     def get_identifier(self, path):
         """
