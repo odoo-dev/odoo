@@ -264,78 +264,58 @@ class ProductProduct(models.Model):
         inventory value and all the incoming moves during the period."""
         # TODO remove at the end and do at real time
         self.ensure_one()
-        # Get value and quantity from last closing
-        quantity = 0
-        # Get value and quantity for all incoming
-        moves_domain = Domain([
-            ('product_id', '=', self.id),
-            ('company_id', '=', self.env.company.id),
-        ])
-        if lot:
-            moves_domain &= Domain([
-                ('move_line_ids.lot_id', 'in', lot.id),
-            ])
-        if at_date:
-            moves_domain &= Domain([
-                ('date', '<=', at_date),
-            ])
 
-        # PERF avoid memoryerror
-        move_fields = ['date', 'is_dropship', 'is_in', 'is_out', 'location_dest_id', 'location_id', 'move_line_ids', 'picked', 'value']
-        # load in before in case of quick return
-        moves_in = self.env['stock.move'].search_fetch(
-            moves_domain & Domain(['|', ('is_in', '=', True), ('is_dropship', '=', True)]),
-            field_names=move_fields,
-            order='date, id'
-        )
-        # TODO convert to company UoM
-        product_value_domain = Domain([('product_id', '=', self.id)])
+        # Fetch Last product value
+        product_value_domain = Domain([('product_id', '=', self.id), ('move_id', '=', False)])
         if lot:
             product_value_domain &= Domain(['|', ('lot_id', '=', lot.id), ('lot_id', '=', False)])
         else:
             product_value_domain &= Domain([('lot_id', '=', False)])
         if at_date:
             product_value_domain &= Domain([('date', '<=', at_date)])
+        last_product_value = self.env['product.value'].sudo().search(product_value_domain, order="date desc, id desc", limit=1)
 
-        product_values = self.env['product.value'].sudo().search(product_value_domain, order="date, id")
+        # Fetch Moves
+        moves_domain = Domain([
+            ('product_id', '=', self.id),
+            ('company_id', '=', self.env.company.id),
+        ])
+        if lot:
+            moves_domain &= Domain([('move_line_ids.lot_id', 'in', lot.id)])
+        if at_date:
+            moves_domain &= Domain([('date', '<=', at_date)])
+        if method == "realtime":
+            # Move FULL domain
+            moves_domain &= Domain(['|', '|', ('is_in', '=', True), ('is_out', '=', True), ('is_dropship', '=', True)])
+        else:
+            # Move IN domain
+            moves_domain &= Domain(['|', ('is_in', '=', True), ('is_dropship', '=', True)])
+        if last_product_value:
+            first_move = self.env['stock.move'].search_fetch(moves_domain, field_names=['date'], order='date, id', limit=1)
+            moves_domain &= Domain([('date', '>=', last_product_value.date)])
+        else:
+            first_move = self.env['stock.move']
 
-        # If the last value was defined by the user just return it
-        if product_values and not moves_in:
-            quantity = self._with_valuation_context().with_context(to_date=at_date).qty_available
-            last_value = product_values[-1]
-            return last_value.value, last_value.value * quantity
-        if product_values and moves_in and product_values[-1].date > moves_in[-1].date:
-            quantity = self._with_valuation_context().with_context(to_date=at_date).qty_available
-            if lot:
-                quantity = lot.product_qty
-            avco_value = product_values[-1].value
-            return avco_value, avco_value * quantity
+        # PERF avoid memory-error
+        move_fields = ['date', 'is_dropship', 'is_in', 'is_out', 'location_dest_id', 'location_id', 'move_line_ids', 'picked', 'value']
+        line_fields = ['company_id', 'location_id', 'location_dest_id', 'lot_id', 'owner_id', 'picked', 'quantity_product_uom']
 
+        moves = self.env['stock.move'].search_fetch(moves_domain, field_names=move_fields, order='date, id')
+        moves.move_line_ids.fetch(line_fields)
+
+        quantity = 0
         avco_value = 0
         avco_total_value = 0
 
-        if method == "realtime":
-            moves_full_domain = moves_domain & Domain([
-                '|',
-                '|', ('is_in', '=', True),
-                ('is_out', '=', True),
-                ('is_dropship', '=', True)
-            ])
-            moves = self.env['stock.move'].search_fetch(moves_full_domain, field_names=move_fields, order='date, id')
-        else:
-            # no needed to join + reorder
-            moves = moves_in
-
-        # PERF avoid memoryerror
-        moves.move_line_ids.fetch(['company_id', 'location_id', 'location_dest_id', 'lot_id', 'owner_id', 'picked', 'quantity_product_uom'])
-
-        # TODO Only browse from last product_value
-        for move in moves:
-            while product_values and move.date >= product_values[0].date:
-                product_value = product_values[0]
-                product_values = product_values[1:]
-                avco_value = product_value.value
+        if last_product_value:
+            avco_value = last_product_value.value
+            # Only fetch the qty_available if there are moves before the last product.value
+            if first_move and first_move.date < last_product_value.date:
+                lot_id = lot.id if lot else None
+                quantity = self._with_valuation_context().with_context(to_date=last_product_value.date, lot_id=lot_id).qty_available
                 avco_total_value = avco_value * quantity
+
+        for move in moves:
             if move.is_in or move.is_dropship:
                 in_qty = move._get_valued_qty()
                 in_value = move.value
