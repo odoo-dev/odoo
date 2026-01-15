@@ -982,6 +982,23 @@ class IrQweb(models.AbstractModel):
         tools.ormcache('ref', 'tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())', cache='templates'),
     )
     def _generate_code_cached(self, ref: int):
+        # The method preloads templates to put information into the transaction
+        # cache in addition to browse records. It also loads in batch the
+        # template from directives (like: t-call and t-snippet).
+        try:
+            document = self._get_template(ref)[1]
+        except Exception:  # noqa: BLE001
+            return self._generate_code_uncached(ref)
+
+        view_hash = hash(document)
+        cache_key = tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())
+        return self._generate_code_cached_memo(ref, memo_key=(view_hash, cache_key))
+
+    @tools.conditional(
+        'xml' not in tools.config['dev_mode'],
+        tools.ormcache('ref', 'memo_key', cache='templates_memo'),
+    )
+    def _generate_code_cached_memo(self, ref: int, memo_key):
         return self._generate_code_uncached(ref)
 
     def _generate_code_uncached(self, template: int | str | etree._Element):
