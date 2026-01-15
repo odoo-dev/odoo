@@ -115,7 +115,8 @@ class MailTestRating(models.Model):
         return self.customer_id
 
     @api.model
-    def _allow_publish_rating_stats(self):
+    @staticmethod
+    def _allow_publish_rating_stats():
         return True
 
 

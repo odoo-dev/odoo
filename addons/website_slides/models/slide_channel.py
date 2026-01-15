@@ -1097,5 +1097,6 @@ class SlideChannel(models.Model):
         return super()._get_placeholder_filename(field)
 
     @api.model
-    def _allow_publish_rating_stats(self):
+    @staticmethod
+    def _allow_publish_rating_stats():
         return True

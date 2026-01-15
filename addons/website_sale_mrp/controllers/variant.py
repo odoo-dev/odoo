@@ -6,7 +6,6 @@ from odoo.addons.website_sale.controllers.variant import WebsiteSaleVariantContr
 
 
 class WebsiteSaleMrpVariantController(WebsiteSaleVariantController):
-
     @route()
     def get_combination_info_website(
         self, product_template_id, product_id, combination, add_qty, uom_id=None, **kwargs
@@ -22,7 +21,7 @@ class WebsiteSaleMrpVariantController(WebsiteSaleVariantController):
             and not combination_info.get('allow_out_of_stock_order')
         ):
             combination_info['unavailable_kit_qty'] = so._get_unavailable_quantity_from_kits(
-                request.env['product.product'].browse(combination_info['product_id']),
+                request.env['product.product'].browse(combination_info['product_id'])
             )
 
         return combination_info

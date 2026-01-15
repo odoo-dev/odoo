@@ -19,5 +19,5 @@ class ProductPricelistItem(models.Model):
         return self.compute_price == 'percentage' or (
             self.compute_price == 'formula'
             and self.price_discount
-            and self.base in ('list_price', 'pricelist')
+            and self.base in {'list_price', 'pricelist'}
         )

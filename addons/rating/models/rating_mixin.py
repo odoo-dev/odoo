@@ -235,6 +235,7 @@ class RatingMixin(models.AbstractModel):
         return stats_per_record
 
     @api.model
-    def _allow_publish_rating_stats(self):
+    @staticmethod
+    def _allow_publish_rating_stats():
         """Override to allow the rating stats to be demonstrated."""
         return False
