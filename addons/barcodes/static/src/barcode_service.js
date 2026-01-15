@@ -52,6 +52,17 @@ export const barcodeService = {
         }
 
         function keydownHandler(ev) {
+            // Ignore 'Shift', 'Escape', 'Backspace', 'Insert', 'Delete', 'Home', 'End', Arrow*, F*, Page*, ...
+            // meta is often used for UX purpose (like shortcuts)
+            // Notes:
+            // - shiftKey is not ignored because it can be used by some barcode scanner for digits.
+            // - altKey/ctrlKey are not ignored because it can be used in some barcodes (e.g. GS1 separator)
+            const isSpecialKey = !['Control', 'Alt'].includes(ev.key) && (ev.key.length > 1 || ev.metaKey);
+            // Don't catch non-printable keys
+            if (isSpecialKey) {
+                return;
+            }
+
             currentTarget = ev.target;
             if (currentTarget.getAttribute("barcode_events") === "true") {
                 currentTarget.addEventListener('input', inputHandler);
