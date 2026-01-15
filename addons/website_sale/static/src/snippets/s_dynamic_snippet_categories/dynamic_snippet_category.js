@@ -47,8 +47,11 @@ export class DynamicSnippetCategory extends DynamicSnippet {
     }
 
     getRpcParameters(){
+        const productTemplateIdEl = document.body.querySelector("#product_details .product_template_id");
+        const productTemplateId = productTemplateIdEl ? productTemplateIdEl.value : this.el.dataset.productTemplateId;
         return Object.assign(super.getRpcParameters(), {
             parentId: parseInt(this.el.dataset.parentCategoryId),
+            productTemplateId: productTemplateId,
         });
     }
 
