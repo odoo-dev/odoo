@@ -778,7 +778,7 @@ class AccountTestInvoicingCommon(TransactionCase):
     ####################################################
 
     @classmethod
-    def _get_xml_ignore_schema(cls, subfolder: str) -> etree._Element | None:
+    def _get_xml_ignore_schema(cls, subfolder: str, dbg='') -> etree._Element | None:
         """
         Recursively look for the closest `ignore_schema.xml` from the given `subfolder`, and
         return its content as an XML element object if found.
@@ -800,6 +800,14 @@ class AccountTestInvoicingCommon(TransactionCase):
             ignore_schema_paths.append(f"{cls.test_module}/tests/test_files/{'/'.join(subfolders)}/ignore_schema.xml")
             subfolders.pop()
         ignore_schema_paths.append(f"{cls.test_module}/tests/test_files/ignore_schema.xml")
+
+        if dbg:
+            if 'out_refund' in dbg or 'credit_note' in dbg:
+                ignore_schema_paths = [f"account/tests/test_files/dbg/ubl_refund.xml"]
+            elif 'debit_note' in dbg:
+                ignore_schema_paths = [f"account/tests/test_files/dbg/ubl_debit_note.xml"]
+            else:
+                ignore_schema_paths = [f"account/tests/test_files/dbg/ubl_invoice.xml"]
 
         for ignore_schema_path in ignore_schema_paths:
             try:
@@ -960,7 +968,8 @@ class AccountTestInvoicingCommon(TransactionCase):
 
     def _get_test_file_path(self, file_name: str, subfolder=''):
         optional_subfolder = f"{subfolder}/" if subfolder else ''
-        return file_path(f"{self.test_module}/tests/test_files/{optional_subfolder}{file_name}")
+        return f"/home/yosuanicolaus/work/enterprise/{self.test_module}/tests/test_files/{optional_subfolder}{file_name}"
+        # return file_path(f"{self.test_module}/tests/test_files/{optional_subfolder}{file_name}")
 
     def assert_xml(
             self,
@@ -1007,7 +1016,7 @@ class AccountTestInvoicingCommon(TransactionCase):
                     date_format='',
                 )
             # Search for closest `ignore_schema.xml` from the file path and apply the change to xml_element
-            xml_ignore_schema = self._get_xml_ignore_schema(subfolder)
+            xml_ignore_schema = self._get_xml_ignore_schema(subfolder, dbg=test_name)
             if xml_ignore_schema is not None:
                 self._prepare_xml_ignore_schema(xml_ignore_schema)
                 self._merge_two_xml(
@@ -1024,7 +1033,9 @@ class AccountTestInvoicingCommon(TransactionCase):
             xml_element = self._rebuild_xml_with_sorted_namespaces(xml_element)
 
             # Save the xml_element content
-            with file_open(test_file_path, 'wb') as f:
+            from pathlib import Path
+            Path(test_file_path.rsplit('/', maxsplit=1)[0]).mkdir(parents=True, exist_ok=True)
+            with open(test_file_path, 'wb') as f:
                 f.write(etree.tostring(xml_element, pretty_print=True, encoding='UTF-8'))
                 _logger.info("Saved the generated xml content to %s", file_name)
         else:
