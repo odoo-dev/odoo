@@ -1357,6 +1357,7 @@ export class HistoryPlugin extends Plugin {
      * @param { number } index
      */
     addExternalStep(newStep, index) {
+        console.log(`history_plugin.js::addExternalStep: Inserting step at index ${index}`);
         this.withObserverOff(() => {
             // The last step is an uncommited draft, revert it first
             this.revertMutations(this.currentStep.mutations);

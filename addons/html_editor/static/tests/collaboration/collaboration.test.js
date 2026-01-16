@@ -27,10 +27,10 @@ import {
     testMultiEditor,
     validateContent,
     validateSameHistory,
-} from "./_helpers/collaboration";
-import { cleanHints } from "./_helpers/dispatch";
-import { unformat } from "./_helpers/format";
-import { getContent } from "./_helpers/selection";
+} from "../_helpers/collaboration";
+import { cleanHints } from "../_helpers/dispatch";
+import { unformat } from "../_helpers/format";
+import { getContent } from "../_helpers/selection";
 import {
     addStep,
     deleteBackward,
@@ -38,8 +38,9 @@ import {
     ensureDistinctHistoryStep,
     redo,
     undo,
-} from "./_helpers/user_actions";
-import { execCommand } from "./_helpers/userCommands";
+} from "../_helpers/user_actions";
+import { execCommand } from "../_helpers/userCommands";
+import { wrapInlinesInBlocks } from "@html_editor/utils/dom";
 
 /**
  * @param {Editor} editor

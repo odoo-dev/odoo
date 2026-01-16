@@ -126,6 +126,7 @@ export class CollaborationPlugin extends Plugin {
      * @param {Object} newSteps External steps to be applied
      */
     onExternalHistorySteps(newSteps) {
+        console.log("collaboration_plugin.js::onExternalHistorySteps() : ", newSteps);
         let stepIndex = 0;
         const selectionData = this.dependencies.selection.getSelectionData();
 
@@ -134,6 +135,7 @@ export class CollaborationPlugin extends Plugin {
             // todo: add a test that no 2 on_history_missing_parent_step_handlers
             // are called in same stack.
             const insertIndex = this.getInsertStepIndex(steps, newStep);
+            console.log("insertIndex : ", insertIndex);
             if (typeof insertIndex === "undefined") {
                 continue;
             }
@@ -160,6 +162,7 @@ export class CollaborationPlugin extends Plugin {
      */
     getInsertStepIndex(steps, newStep) {
         let index = steps.length - 1;
+        console.log("     > getInsertStepIndex:: 0 : ", index);
         while (index >= 0 && steps[index].id !== newStep.previousStepId) {
             // Skip steps that are already in the list.
             if (steps[index].id === newStep.id) {
@@ -167,6 +170,7 @@ export class CollaborationPlugin extends Plugin {
             }
             index--;
         }
+        console.log("     > getInsertStepIndex:: 1 : ", index);
 
         // When the previousStepId is not present in the steps it
         // could be either:
@@ -194,6 +198,7 @@ export class CollaborationPlugin extends Plugin {
             });
             return;
         }
+        console.log("     > getInsertStepIndex:: 2 : ", index);
 
         let concurentSteps = [];
         index++;
@@ -213,7 +218,7 @@ export class CollaborationPlugin extends Plugin {
             }
             index++;
         }
-
+        console.log("     > getInsertStepIndex:: 3 : ", index);
         return index;
     }
 
