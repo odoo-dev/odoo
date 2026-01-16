@@ -151,6 +151,10 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         fg_color, bg_color = LEVEL_COLOR_MAPPING.get(record.levelno, (GREEN, DEFAULT))
         record.levelname = COLOR_PATTERN % (30 + fg_color, 40 + bg_color, record.levelname)
+        if tools.config['workers']:
+            record.process = COLOR_PATTERN % (30 + DEFAULT, 40 + record.process % 7, record.process)
+        else:
+            record.process = COLOR_PATTERN % (30 + DEFAULT, 40 + record.thread % 7, record.process)
         return super().format(record)
 
 
