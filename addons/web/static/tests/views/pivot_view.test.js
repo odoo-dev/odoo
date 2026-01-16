@@ -436,6 +436,7 @@ test("clicking on a cell triggers a doAction", async () => {
                 domain: [["product_id", "=", 37]],
                 name: "Partners",
                 res_model: "partner",
+                search_view_id: [67, "search"],
                 target: "current",
                 type: "ir.actions.act_window",
                 view_mode: "list",
@@ -457,6 +458,7 @@ test("clicking on a cell triggers a doAction", async () => {
 				<field name="foo" type="measure"/>
 			</pivot>`,
         context: { someKey: true, search_default_test: 3 },
+        searchViewId: 67,
         config: {
             views: [
                 [2, "form"],
