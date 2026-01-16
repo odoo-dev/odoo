@@ -141,9 +141,18 @@ class WebsiteForum(WebsiteProfile):
             **post
         )
 
+        print('options:')
+        print(options)
+
+        options['allowFuzzy'] = False
+        fuzzy_search_term = False
+        # {'allowFuzzy': True, 'create_uid': False, 'displayDescription': False, 'displayDetail': False, 'displayExtraDetail': False, 'displayExtraLink': False, 'displayImage': False, 'filters': 'all', 'forum': '1', 'include_answers': False, 'my': None, 'tag': None}
+
         slug = request.env['ir.http']._slug
-        question_count, details, fuzzy_search_term = request.website._search_with_fuzzy(
-            "forum_posts_only", search, limit=page * self._post_per_page, order=sorting, options=options)
+
+        search_details = request.website._search_get_details("forum_posts_only", sorting, options)
+        question_count, details = request.website._search_exact(search_details, search, (page + 10) * self._post_per_page, sorting)
+
         question_ids = details[0].get('results', Post)
         question_ids = question_ids[(page - 1) * self._post_per_page:page * self._post_per_page]
 
@@ -162,7 +171,13 @@ class WebsiteForum(WebsiteProfile):
 
         pager = tools.lazy(lambda: request.website.pager(
             url=url, total=question_count, page=page, step=self._post_per_page,
-            scope=5, url_args=url_args))
+            scope=-5, url_args=url_args))  # scope broken, never used
+
+        # print(pager)
+        # if question_count == (page + 5) * self._post_per_page:
+        #     print('HAS MORE')
+        #     pager['pages'][-1]['num'] = 'More...'
+
 
         values = self._prepare_user_values(forum=forum, searches=post)
         values.update({

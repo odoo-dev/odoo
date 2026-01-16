@@ -52,14 +52,37 @@ def pager(url, total, page=1, step=30, scope=5, url_args=None):
         return _url
 
     # Build page list based on conditions
-    if page_count <= 5:
-        page_list = list(range(1, page_count + 1))
-    elif page <= 3:
-        page_list = [1, 2, 3, 4, "…", page_count]
-    elif page >= page_count - 2:
-        page_list = [1, "…"] + list(range(page_count - 3, page_count + 1))
+    if scope < 0:
+        # In v19, scope has been unused and ignored until now.
+        # We reuse this parameter to allow to supply a fixed scope (number of pages to display around current page)
+        # To distinguish from the previous behavior, negative scope means fixed scope while positive scope 
+        # means old leftover scope. From this way we don't change behavior of current running databases.
+        PAGER_SIZE = (-scope * 2) + 1
+
+        start = page - (PAGER_SIZE // 2)
+        end = start + PAGER_SIZE - 1
+
+        if start < 1:
+            start = 1
+            end = min(PAGER_SIZE, page_count)
+
+        if end > page_count:
+            end = page_count
+            start = max(1, page_count - PAGER_SIZE + 1)
+
+        start = int(start)
+        end = int(end) + 1
+
+        page_list = list(range(start, end))
     else:
-        page_list = [1, "…", page - 1, page, page + 1, "…", page_count]
+        if page_count <= 5:
+            page_list = list(range(1, page_count + 1))
+        elif page <= 3:
+            page_list = [1, 2, 3, 4, "…", page_count]
+        elif page >= page_count - 2:
+            page_list = [1, "…"] + list(range(page_count - 3, page_count + 1))
+        else:
+            page_list = [1, "…", page - 1, page, page + 1, "…", page_count]
 
     pages = [
         {"num": p, "url": get_url(p) if p != "…" else None, "is_current": p == page}

@@ -1512,7 +1512,7 @@ class Website(models.Model):
         return self.env['ir.ui.view']._get_template_view(template).sudo()
 
     @api.model
-    def pager(self, url, total, page=1, step=30, scope=5, url_args=None):
+    def pager(self, url, total, page=1, step=30, scope=1, url_args=None):
         return pager(url, total, page=page, step=step, scope=scope, url_args=url_args)
 
     def rule_is_enumerable(self, rule):
@@ -2087,8 +2087,10 @@ class Website(models.Model):
                 - count: number of results for the model
                 - results: model list equivalent to a `model.search()`
         """
+        print(search_details)
         all_results = []
         total_count = 0
+        print(limit)
         for search_detail in search_details:
             model = self.env[search_detail['model']]
             results, count = model._search_fetch(search_detail, search, limit, order)

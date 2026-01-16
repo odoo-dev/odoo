@@ -923,6 +923,19 @@ class ForumPost(models.Model):
                 data['date'] = self.env['ir.qweb.field.date'].record_to_html(post, 'write_date', {})
         return results_data
 
+    @api.model
+    def _search_fetch(self, search_detail, search, limit, order):
+        fields = search_detail['search_fields']
+        base_domain = search_detail['base_domain']
+        domain = self._search_build_domain(base_domain, search, fields, search_detail.get('search_extra'))
+        model = self.sudo() if search_detail.get('requires_sudo') else self
+        results = model.search(
+            domain,
+            limit=limit,
+            order=search_detail.get('order', order)
+        )
+        return results, len(results)
+
     def _get_related_posts(self, limit=5):
         """Return at most a list of {limit} posts related to the main post, based on tag
         Jaccard similarity. It computes similarity of sets based on ratio of sets
