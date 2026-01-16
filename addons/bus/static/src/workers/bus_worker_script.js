@@ -12,7 +12,7 @@ import { WebsocketWorker } from "./websocket_worker";
 
     if (self.name.includes("shared")) {
         // The script is running in a shared worker.
-        onconnect = (ev) => {
+        self.addEventListener("connect", (ev) => {
             const client = ev.ports[0];
             // Register the base worker to handle first init message.
             // Register the current client for main tab election.
@@ -24,7 +24,7 @@ import { WebsocketWorker } from "./websocket_worker";
             // notifications coming from the websocket.
             websocketWorker.registerClient(client);
             client.start();
-        };
+        });
     } else {
         // The script is running in a simple web worker.
         self.addEventListener("message", (ev) => baseWorker.handleMessage(ev));
