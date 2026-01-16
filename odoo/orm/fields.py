@@ -1648,7 +1648,8 @@ class Field[T]:
         # for record, value in zip(records._ids, values):
         #   field_cache.setdefault(record, value)
         # ```
-        collections.deque(map(field_cache.setdefault, records._ids, values), maxlen=0)
+        for record, value in zip(records._ids, values):
+            field_cache[record] = value
 
     def _update_cache(self, records: BaseModel, cache_value: typing.Any, dirty: bool = False) -> None:
         """ Update the value in the cache for the given records, and optionally
