@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import contextlib
 import json
@@ -6,7 +5,6 @@ import logging
 import logging.handlers
 import os
 import platform
-import pprint
 import sys
 import threading
 import traceback
@@ -14,23 +12,9 @@ import warnings
 
 import werkzeug.serving
 
-from . import release
-from . import sql_db
-from . import tools
+from . import release, sql_db, tools
 
 _logger = logging.getLogger(__name__)
-
-def log(logger, level, prefix, msg, depth=None):
-    warnings.warn(
-        "odoo.netsvc.log is deprecated starting Odoo 18, use normal logging APIs",
-        category=DeprecationWarning,
-        stacklevel=2,
-    )
-    indent=''
-    indent_after=' '*len(prefix)
-    for line in (prefix + pprint.pformat(msg, depth=depth)).split('\n'):
-        logger.log(level, indent+line)
-        indent=indent_after
 
 
 class WatchedFileHandler(logging.handlers.WatchedFileHandler):
@@ -42,6 +26,7 @@ class WatchedFileHandler(logging.handlers.WatchedFileHandler):
 
     def _open(self):
         return open(self.baseFilename, self.mode, encoding=self.encoding, errors=self.errors)
+
 
 class PostgreSQLHandler(logging.Handler):
     """ PostgreSQL Logging Handler will store logs in the database, by default
@@ -77,7 +62,7 @@ class PostgreSQLHandler(logging.Handler):
             val = ('server', ct_db, record.name, levelname, msg, record.pathname, record.lineno, record.funcName)
 
             if self._support_metadata:
-                from . import modules
+                from . import modules  # noqa: PLC0415
                 metadata = {}
                 if modules.module.current_test:
                     with contextlib.suppress(Exception):
@@ -95,9 +80,10 @@ class PostgreSQLHandler(logging.Handler):
                 VALUES (NOW() at time zone 'UTC', %s, %s, %s, %s, %s, %s, %s, %s)
             """, val)
 
+
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, _NOTHING, DEFAULT = range(10)
-#The background is set with 40 plus the number of the color, and the foreground with 30
-#These are the sequences needed to get colored output
+# The background is set with 40 plus the number of the color, and the foreground with 30
+# These are the sequences needed to get colored output
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
@@ -109,6 +95,7 @@ LEVEL_COLOR_MAPPING = {
     logging.ERROR: (RED, DEFAULT),
     logging.CRITICAL: (WHITE, RED),
 }
+
 
 class PerfFilter(logging.Filter):
 
@@ -134,6 +121,7 @@ class PerfFilter(logging.Filter):
                 record.perf_info = "- - - -"
             record.perf_info = "- - -"
         return True
+
 
 class ColoredPerfFilter(PerfFilter):
     def format_perf(self, query_count, query_time, remaining_time):
@@ -175,7 +163,7 @@ class LogRecord(logging.LogRecord):
 
 
 showwarning = None
-def init_logger():
+def init_logger():  # noqa: E302
     global showwarning  # noqa: PLW0603
     if logging.getLogRecordFactory() is LogRecord:
         return
@@ -194,12 +182,12 @@ def init_logger():
     warnings.filterwarnings('ignore', r'^\'urllib3.contrib.pyopenssl\' module is deprecated.+', category=DeprecationWarning)
     # ignore a bunch of warnings we can't really fix ourselves
     for module in [
-        'babel.util', # deprecated parser module, no release yet
-        'zeep.loader',# zeep using defusedxml.lxml
-        'reportlab.lib.rl_safe_eval',# reportlab importing ABC from collections
-        'ofxparse',# ofxparse importing ABC from collections
+        'babel.util',  # deprecated parser module, no release yet
+        'zeep.loader',  # zeep using defusedxml.lxml
+        'reportlab.lib.rl_safe_eval',  # reportlab importing ABC from collections
+        'ofxparse',  # ofxparse importing ABC from collections
         'astroid',  # deprecated imp module (fixed in 2.5.1)
-        'requests_toolbelt', # importing ABC from collections (fixed in 0.9)
+        'requests_toolbelt',  # importing ABC from collections (fixed in 0.9)
     ]:
         warnings.filterwarnings('ignore', category=DeprecationWarning, module=module)
 
@@ -223,7 +211,7 @@ def init_logger():
     # This warning is triggered library only during the python precompilation which does not occur on readonly filesystem
     warnings.filterwarnings("ignore", r'invalid escape sequence', category=DeprecationWarning, module=".*vobject")
     warnings.filterwarnings("ignore", r'invalid escape sequence', category=SyntaxWarning, module=".*vobject")
-    from .tools.translate import resetlocale
+    from .tools.translate import resetlocale  # noqa: PLC0415
     resetlocale()
 
     # create a format for log messages and dates
@@ -253,8 +241,9 @@ def init_logger():
                 handler = WatchedFileHandler(logf)
             else:
                 handler = logging.FileHandler(logf)
-        except Exception:
+        except Exception:  # noqa: BLE001
             sys.stderr.write("ERROR: couldn't create the logfile directory. Logging to the standard output.\n")
+            traceback.print_exc()
 
     # Check that handler.stream has a fileno() method: when running OpenERP
     # behind Apache with mod_wsgi, handler.stream will have type mod_wsgi.Log,
@@ -316,13 +305,15 @@ PSEUDOCONFIG_MAPPER = {
 }
 
 logging.RUNBOT = 25
-logging.addLevelName(logging.RUNBOT, "INFO") # displayed as info in log
+logging.addLevelName(logging.RUNBOT, "INFO")  # displayed as info in log
 IGNORE = {
-    'Comparison between bytes and int', # a.foo != False or some shit, we don't care
+    'Comparison between bytes and int',  # a.foo != False or some shit, we don't care
 }
+
+
 def showwarning_with_traceback(message, category, filename, lineno, file=None, line=None):
     if category is BytesWarning and message.args[0] in IGNORE:
-        return
+        return None
 
     # find the stack frame matching (filename, lineno)
     filtered = []
@@ -337,9 +328,12 @@ def showwarning_with_traceback(message, category, filename, lineno, file=None, l
     return showwarning(
         message, category, filename, lineno,
         file=file,
-        line=''.join(traceback.format_list(filtered))
+        line=''.join(traceback.format_list(filtered)),
     )
+
 
 def runbot(self, message, *args, **kws):
     self.log(logging.RUNBOT, message, *args, **kws)
+
+
 logging.Logger.runbot = runbot
