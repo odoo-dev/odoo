@@ -182,7 +182,7 @@ class ProductProduct(models.Model):
         if not self:
             return False
         self.ensure_one()
-        return self in self.env["product.wishlist"].current().mapped("product_id")
+        return self.id in self.env["product.wishlist"]._get_wished_product_ids()
 
     def _prepare_categories_for_display(self):
         """On the comparison page group on the same line the values of each

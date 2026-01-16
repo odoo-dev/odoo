@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models
+from odoo.fields import Domain
 from odoo.http import request
 
 
@@ -10,78 +11,97 @@ class ProductWishlist(models.Model):
     _name = "product.wishlist"
     _description = "Product Wishlist"
     _product_unique_partner_id = models.Constraint(
-        "UNIQUE(product_id, partner_id)", "Duplicated wishlisted product for this partner."
+        "UNIQUE(product_id, partner_id, website_id)",
+        "Duplicated wishlisted product for this partner.",
     )
 
-    partner_id = fields.Many2one("res.partner", string="Owner", index="btree_not_null")
-    product_id = fields.Many2one("product.product", string="Product", required=True)
-    currency_id = fields.Many2one("res.currency", related="website_id.currency_id", readonly=True)
-    pricelist_id = fields.Many2one(
-        "product.pricelist", string="Pricelist", help="Pricelist when added"
-    )
-    price = fields.Monetary(
-        currency_field="currency_id",
+    partner_id = fields.Many2one(string="Owner", comodel_name="res.partner", index="btree_not_null")
+    product_id = fields.Many2one(comodel_name="product.product", required=True)
+    website_id = fields.Many2one(comodel_name="website", ondelete="cascade", required=True)
+    company_id = fields.Many2one(related="website_id.company_id")
+
+    # The following fields are currently unused.
+    # Nevertheless, they are kept for backward compatibility and for custom modules
+    # as some users might want to display the price difference to encourage sales.
+    price = fields.Float(
         string="Price",
-        help="Price of the product when it has been added in the wishlist",
+        help="Price of the product when added to the wishlist",
+        digits="Product Price",
     )
-    website_id = fields.Many2one("website", ondelete="cascade", required=True)
-    active = fields.Boolean(default=True, required=True)
+    currency_id = fields.Many2one(comodel_name="res.currency", compute="_compute_currency_id")
+    pricelist_id = fields.Many2one(
+        help="Pricelist when added to the wishlist", comodel_name="product.pricelist"
+    )
 
-    @api.model
-    def current(self):
-        """Get all wishlist items that belong to current user or session,
-        filter products that are unpublished."""
+    # === COMPUTE METHODS === #
+
+    @api.depends("pricelist_id", "website_id")
+    def _compute_currency_id(self):
+        for wish in self:
+            wish.currency_id = (
+                wish.pricelist_id.currency_id or wish.website_id.company_id.currency_id.id
+            )
+
+    # === BUSINESS METHODS === #
+
+    def _get_wishes_domain(self):
         if not request:
-            return self
+            return Domain(False)
 
-        if request.website.is_public_user():
-            wish = self.sudo().search([("id", "in", request.session.get("wishlist_ids", []))])
+        if partner := self.env["res.partner"]._get_current_partner(order_sudo=request.cart):
+            user_domain = [("partner_id", "=", partner.id)]
+        elif wish_ids := request.session.get("wishlist_ids", []):
+            user_domain = [("id", "in", wish_ids)]
         else:
-            wish = self.search([
-                ("partner_id", "=", self.env.user.partner_id.id),
-                ("website_id", "=", request.website.id),
+            user_domain = Domain(False)
+
+        product_domain = [("active", "=", True)]
+        if not self.env.user.has_group("base.group_system"):
+            product_domain = Domain.AND([
+                product_domain,
+                [("product_tmpl_id.is_published", "=", True)],
             ])
 
-        # TODO for /shop page, no need to check _is_add_to_cart_possible as it's only used to see
-        # whether the product is in the wishlist.
-        return wish.filtered(
-            lambda wish: (
-                (
-                    self.env.user.has_group("base.group_system")
-                    or wish.sudo().product_id.product_tmpl_id.website_published
-                )
-                and wish.sudo().product_id.product_tmpl_id._is_add_to_cart_possible()
-            )
-        )
+        return Domain.AND([
+            user_domain,
+            [("website_id", "=", request.website.id), ("product_id", "any", product_domain)],
+        ])
 
     @api.model
-    def _add_to_wishlist(
-        self, pricelist_id, currency_id, website_id, price, product_id, partner_id=False
-    ):
-        return self.env["product.wishlist"].create({
-            "partner_id": partner_id,
-            "product_id": product_id,
-            "currency_id": currency_id,
-            "pricelist_id": pricelist_id,
-            "price": price,
-            "website_id": website_id,
-        })
+    def _get_wishes(self):
+        return self.sudo().search(self._get_wishes_domain())
 
     @api.model
-    def _check_wishlist_from_session(self):
-        """Assign all wishlist withtout partner from this the current session."""
-        session_wishes = self.sudo().search([("id", "in", request.session.get("wishlist_ids", []))])
-        partner_wishes = self.sudo().search([("partner_id", "=", self.env.user.partner_id.id)])
-        partner_products = partner_wishes.mapped("product_id")
-        # Remove session products already present for the user
-        duplicated_wishes = session_wishes.filtered(
-            lambda wish: wish.product_id <= partner_products
+    def _get_wished_product_ids(self):
+        """Return the `product.product` ids in wishlist.
+
+        This method doesn't filter out products that are not valid anymore
+        (archived, unpublished, not sale_ok anymore ...)
+        """
+        return self.sudo()._read_group(
+            self._get_wishes_domain(), aggregates=["product_id:array_agg"]
+        )[0][0]
+
+    @api.model
+    def _get_wished_template_ids(self):
+        """Return the `product.template` ids in wishlist.
+
+        This method doesn't filter out products that are not valid anymore
+        (archived, unpublished, not sale_ok anymore ...)
+        """
+        domain = self._get_wishes_domain()
+        if domain.is_false():
+            return []
+        wishes = self.sudo()._search(domain)
+        return (
+            self
+            .env["product.template"]
+            .sudo()
+            ._search([("product_variant_ids", "any", wishes.subselect("product_id"))])
         )
-        session_wishes -= duplicated_wishes
-        duplicated_wishes.unlink()
-        # Assign the rest to the user
-        session_wishes.write({"partner_id": self.env.user.partner_id.id})
-        request.session.pop("wishlist_ids")
+
+    def _get_wishlist_count(self):
+        return self.sudo().search_count(self._get_wishes_domain())
 
     @api.autovacuum
     def _gc_sessions(self, *_args, **kwargs):

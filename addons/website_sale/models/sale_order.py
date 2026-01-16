@@ -321,6 +321,7 @@ class SaleOrder(models.Model):
         if not fnames:
             return
 
+        partner_before = self.partner_id
         fpos_before = self.fiscal_position_id
         pricelist_before = self.pricelist_id
 
@@ -363,6 +364,10 @@ class SaleOrder(models.Model):
             delivery_methods = self._get_delivery_methods()
             delivery_method = self._get_preferred_delivery_method(delivery_methods)
             self._set_delivery_method(delivery_method)
+
+        # TODO VFE add test
+        if self.partner_id != partner_before and not self.partner_id.is_public:
+            self.partner_id._assign_session_wishes()
 
     def _cart_add(
         self, product_id: int, quantity: float = 1.0, *, uom_id: int | None = None, **kwargs
@@ -979,6 +984,9 @@ class SaleOrder(models.Model):
         :return: Whether the cart is anonymous.
         :rtype: bool
         """
+        if not self:
+            return True
+
         self.ensure_one()
         return self.partner_id.id == request.website.user_id.sudo().partner_id.id
 

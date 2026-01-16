@@ -7,7 +7,6 @@ from . import (
     product_product,
     product_ribbon,
     product_template,
-    product_wishlist,
     res_config_settings,
     res_partner,
     sale_order,

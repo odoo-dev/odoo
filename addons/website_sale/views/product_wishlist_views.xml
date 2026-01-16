@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="product_wishlist_form" model="ir.ui.view">
+        <field name="name">product.wishlist.view.form</field>
+        <field name="model">product.wishlist</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="partner_id" required="True"/>
+                <field name="product_id"/>
+                <field name="website_id" groups="website.group_multi_website"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="product_wishlist_list" model="ir.ui.view">
+        <field name="name">product.wishlist.view.list</field>
+        <field name="model">product.wishlist</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false">
+                <field name="partner_id" widget="res_partner_many2one" invisible="context.get('default_partner_id')"/>
+                <field name="product_id"/>
+                <field name="website_id" groups="website.group_multi_website"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+</odoo>

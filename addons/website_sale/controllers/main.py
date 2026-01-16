@@ -269,11 +269,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def _get_additional_shop_values(self, _values, **_kwargs):
         """Update values used for rendering website_sale.products template."""
         return {
-            # TODO lazy to avoid queries when wishlist disabled on shop page ?
-            "products_in_wishlist": request
-            .env["product.wishlist"]
-            .current()
-            .product_id.product_tmpl_id
+            "product_ids_in_wishlist": request.env["product.wishlist"]._get_wished_template_ids()
         }
 
     def _get_product_query_params(self, **_kwargs):
