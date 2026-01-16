@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="stock.Many2OneStockLocationField">
+        <StockLocationMany2One t-props="m2oProps">
+            <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                <t t-if="autoCompleteItemScope.record?.is_empty">
+                    <div class="d-flex justify-content-between">
+                        <span t-out="autoCompleteItemScope.label"/>
+                        <span class="text-muted ms-2 fs-4 lh-1 fst-italic opacity-75">Empty</span>
+                    </div>
+                </t>
+                <t t-else="">
+                    <span t-out="autoCompleteItemScope.label"/>
+                </t>
+            </t>
+        </StockLocationMany2One>
+    </t>
+</templates>
