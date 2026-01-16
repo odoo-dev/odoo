@@ -54,6 +54,8 @@ export function label(operator, fieldType) {
             return "between";
         case "starts with":
             return "starts with";
+        case "<%":
+            return "is similar to";
     }
 }
 

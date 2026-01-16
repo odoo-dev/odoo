@@ -293,6 +293,7 @@ test("building a domain with an invalid operator", async () => {
         label("starts with"),
         label("set"),
         label("not set"),
+        label("<%"),
     ]);
     expect(getCurrentOperator()).toBe(label("="));
     expect(getCurrentValue()).toBe("abc");
@@ -1052,6 +1053,7 @@ test("support properties", async () => {
                 label("starts with"),
                 label("set"),
                 label("not set"),
+                label("<%"),
             ],
         },
         {

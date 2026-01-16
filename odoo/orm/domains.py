@@ -84,6 +84,7 @@ STANDARD_CONDITION_OPERATORS = frozenset([
     'ilike', 'not ilike',
     '=like', 'not =like',
     '=ilike', 'not =ilike',
+    '<%',
 ])
 """List of standard operators for conditions.
 This should be supported in the framework at all levels.

@@ -1406,6 +1406,10 @@ class Field[T]:
             sql_operator = SQL_OPERATORS["in" if operator == "any!" else "not in"]
             return SQL("%s%s%s", sql_field, sql_operator, subselect)
 
+        # operator: similarity
+        if operator in ('<%'):
+            return SQL("%s%s%s", value, SQL_OPERATORS[operator], sql_field)
+
         raise NotImplementedError(f"Invalid operator {operator!r} for SQL in domain term {(field_expr, operator, value)!r}")
 
     def _condition_to_sql_company(self, table: TableSQL, sql_expr: SQL, field_expr: str, operator: str, value) -> SQL:

@@ -90,7 +90,12 @@ const OPERATOR_DESCRIPTIONS = {
                 return _t("match none of");
         }
     },
-
+    "<%": (fieldDefType) => {
+        switch (fieldDefType) {
+            default:
+                return _t("is similar to");
+        }
+    },
     // virtual operators
     set: _t("is set"),
     "not set": _t("is not set"),
