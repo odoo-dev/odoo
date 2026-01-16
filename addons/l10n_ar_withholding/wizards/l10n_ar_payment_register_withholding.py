@@ -63,7 +63,7 @@ class L10n_ArPaymentRegisterWithholding(models.TransientModel):
         net_amount = max(0, net_amount - self.tax_id.l10n_ar_non_taxable_amount)
         taxes_res = self.tax_id.compute_all(
             net_amount,
-            currency=self.payment_register_id.currency_id,
+            currency=self.company_id.currency_id,
             quantity=1.0,
             product=False,
             partner=False,
@@ -88,7 +88,7 @@ class L10n_ArPaymentRegisterWithholding(models.TransientModel):
         l10n_ar_minimum_threshold = self.tax_id.l10n_ar_minimum_threshold
         if l10n_ar_minimum_threshold > tax_amount:
             tax_amount = 0.0
-        return tax_amount, tax_account_id, tax_repartition_line_id
+        return self.company_id.currency_id._convert(tax_amount, self.currency_id, self.company_id, self.payment_register_id.payment_date), tax_account_id, tax_repartition_line_id
 
     @api.depends('base_amount', 'tax_id')
     def _compute_amount(self):
@@ -105,3 +105,5 @@ class L10n_ArPaymentRegisterWithholding(models.TransientModel):
                 wth.base_amount = wth.payment_register_id.amount
             else:
                 wth.base_amount = wth.payment_register_id.amount * sum(wth.payment_register_id.line_ids.mapped('move_id.amount_untaxed')) / sum(wth.payment_register_id.line_ids.mapped("move_id.amount_total"))
+
+            wth.base_amount = wth.currency_id._convert(wth.base_amount, wth.company_id.currency_id, wth.company_id, wth.payment_register_id.payment_date)
