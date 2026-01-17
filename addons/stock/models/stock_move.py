@@ -740,7 +740,8 @@ Please change the quantity done or the rounding precision of your unit of measur
         if 'product_packaging_id' in vals:
             self._propagate_product_packaging(vals['product_packaging_id'])
         if 'date_deadline' in vals:
-            self._set_date_deadline(vals.get('date_deadline'))
+            moves = self.filtered(lambda m: m.date_deadline != vals.get('date_deadline'))
+            moves._set_date_deadline(vals.get('date_deadline'))
         if 'move_orig_ids' in vals:
             move_to_recompute_state |= self.filtered(lambda m: m.state not in ['draft', 'cancel', 'done'])
         if 'location_id' in vals:
