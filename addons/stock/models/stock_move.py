@@ -542,24 +542,37 @@ Please change the quantity done or the rounding precision of your unit of measur
 
     def _set_date_deadline(self, new_deadline):
         # Handle the propagation of `date_deadline` fields (up and down stream - only update by up/downstream documents)
+        def _compute_delta(move, new_deadline):
+            if move.date_deadline:
+                return move.date_deadline - fields.Datetime.to_datetime(new_deadline)
+            return 0
+
         already_propagate_ids = self.env.context.get('date_deadline_propagate_ids', set())
         already_propagate_ids.update(self.ids)
-        self = self.with_context(date_deadline_propagate_ids=already_propagate_ids)
-        for move in self:
-            moves_to_update = move._get_moves_to_propagate_date_deadline()
-            if move.date_deadline:
-                delta = move.date_deadline - fields.Datetime.to_datetime(new_deadline)
-            else:
-                delta = 0
-            for move_update in moves_to_update:
-                if move_update.state in ('done', 'cancel'):
-                    continue
-                if move_update.id in already_propagate_ids:
-                    continue
+        # stack for DFS (no recursion)
+        stack = [(move, new_deadline) for move in self]
+        # batch updates per date_deadline
+        batched_updates = defaultdict(list)
+        while stack:
+            move, new_deadline = stack.pop()
+            delta = _compute_delta(move, new_deadline)
+            move_updates = move._get_moves_to_propagate_date_deadline().filtered(
+                lambda m: (
+                    m.state not in ('done', 'cancel')
+                    and m.id not in already_propagate_ids
+                )
+            )
+            already_propagate_ids.update(move_updates.ids)
+            for move_update in move_updates:
                 if move_update.date_deadline and delta:
-                    move_update.date_deadline -= delta
+                    update_deadline = move_update.date_deadline - delta
                 else:
-                    move_update.date_deadline = new_deadline
+                    update_deadline = new_deadline
+                if move_update.date_deadline != update_deadline:
+                    batched_updates[update_deadline].append(move_update)
+                    stack.append((move_update, update_deadline))
+        for deadline, move_ids in batched_updates.items():
+            move_ids[0].with_context(already_propagate_deadline_date=True).date_deadline = deadline
 
     @api.depends('move_line_ids.lot_id', 'move_line_ids.quantity')
     def _compute_lot_ids(self):
@@ -739,7 +752,7 @@ Please change the quantity done or the rounding precision of your unit of measur
         # propagate product_packaging_id changes in the stock move chain
         if 'product_packaging_id' in vals:
             self._propagate_product_packaging(vals['product_packaging_id'])
-        if 'date_deadline' in vals:
+        if 'date_deadline' in vals and not self.env.context.get('already_propagate_deadline_date', False):
             self._set_date_deadline(vals.get('date_deadline'))
         if 'move_orig_ids' in vals:
             move_to_recompute_state |= self.filtered(lambda m: m.state not in ['draft', 'cancel', 'done'])
