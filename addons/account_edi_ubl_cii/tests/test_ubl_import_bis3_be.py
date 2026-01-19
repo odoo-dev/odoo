@@ -1,13 +1,15 @@
-from odoo import Command
-from odoo.addons.account_edi_ubl_cii.tests.common import TestUblBis3BECommon
+from odoo.addons.account_edi_ubl_cii.tests.common import TestUblBis3Common
 from odoo.tests import tagged
-from odoo.tools import misc
 
 from freezegun import freeze_time
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
-class TestUblImportBis3BE(TestUblBis3BECommon):
+class TestUblImportBis3BE(TestUblBis3Common):
+
+    @classmethod
+    def subfolder_import(cls):
+        return f"{super().subfolder_import()}/bis3/invoice/be"
 
     @freeze_time('2020-01-01')
     def test_import_partner(self):
@@ -16,7 +18,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Test the partner has been created.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_partner.xml',
+            test_name='test_import_partner',
             journal=self.company_data['default_journal_sale'],
         )
         partner = invoice.partner_id
@@ -32,7 +34,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Test the partner has been retrieved.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_partner.xml',
+            test_name='test_import_partner',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(invoice.partner_id, [{'id': partner.id}])
@@ -42,7 +44,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
         tax_21 = self.percent_tax(21.0)
 
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_discount_per_line_price_on_big_quantity.xml',
+            test_name='test_import_discount_per_line_price_on_big_quantity',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(
@@ -78,7 +80,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
         tax_21 = self.percent_tax(21.0)
 
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_lot_of_decimals_in_quantities.xml',
+            test_name='test_import_lot_of_decimals_in_quantities',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(
@@ -131,7 +133,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
     def test_import_not_matched_tax(self):
         """ The tax has not been retrieved. Do not store any 'extra_tax_data'. """
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_discount_per_line_price_on_big_quantity.xml',
+            test_name='test_import_discount_per_line_price_on_big_quantity',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(
@@ -170,7 +172,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
         tax_0 = self.env['account.chart.template'].ref('sale_export_tax_template')
 
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_mixed_allowance_charges.xml',
+            test_name='test_import_mixed_allowance_charges',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(
@@ -247,7 +249,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Retrieve the tax having the lower sequence.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_discount_per_line_price_on_big_quantity.xml',
+            test_name='test_import_discount_per_line_price_on_big_quantity',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(
@@ -274,7 +276,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Retrieve the tax having the lower sequence.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_discount_per_line_price_on_big_quantity.xml',
+            test_name='test_import_discount_per_line_price_on_big_quantity',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(
@@ -311,7 +313,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
         )
 
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_discount_per_line_price_on_big_quantity.xml',
+            test_name='test_import_discount_per_line_price_on_big_quantity',
             journal=self.company_data['default_journal_sale'],
         )
         self.assertRecordValues(
@@ -347,7 +349,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
         tax_21 = self.percent_tax(21.0)
 
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_cash_rounding_add_invoice_line.xml',
+            test_name='test_import_cash_rounding_add_invoice_line',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -382,7 +384,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
         tax_21 = self.percent_tax(21.0)
 
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_import_cash_rounding_biggest_tax.xml',
+            test_name='test_import_cash_rounding_biggest_tax',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -410,7 +412,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
     @freeze_time('2020-01-01')
     def test_partial_import_invoice_line_name(self):
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_partial_import_invoice_line_name_1.xml',
+            test_name='test_partial_import_invoice_line_name_1',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -419,7 +421,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
         ])
 
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_partial_import_invoice_line_name_2.xml',
+            test_name='test_partial_import_invoice_line_name_2',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -430,7 +432,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
     @freeze_time('2020-01-01')
     def test_partial_import_invoice_line_price_unit_quantity(self):
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_partial_import_invoice_line_price_unit_quantity_1.xml',
+            test_name='test_partial_import_invoice_line_price_unit_quantity_1',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -443,7 +445,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Combined with a quantity.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_partial_import_invoice_line_price_unit_quantity_2.xml',
+            test_name='test_partial_import_invoice_line_price_unit_quantity_2',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -456,7 +458,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Combined with both allowance and charge.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_partial_import_invoice_line_price_unit_quantity_3.xml',
+            test_name='test_partial_import_invoice_line_price_unit_quantity_3',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -475,7 +477,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Compute from PriceAmount and BaseQuantity.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_partial_import_invoice_line_price_unit_quantity_4.xml',
+            test_name='test_partial_import_invoice_line_price_unit_quantity_4',
             journal=self.company_data['default_journal_sale'],
         )
 
@@ -488,7 +490,7 @@ class TestUblImportBis3BE(TestUblBis3BECommon):
 
         # Combine with allowance/charge on price.
         invoice = self._import_as_attachment_on(
-            file_path='bis3/import/test_partial_import_invoice_line_price_unit_quantity_5.xml',
+            test_name='test_partial_import_invoice_line_price_unit_quantity_5',
             journal=self.company_data['default_journal_sale'],
         )
 

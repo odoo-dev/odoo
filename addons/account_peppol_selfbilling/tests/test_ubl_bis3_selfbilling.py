@@ -16,7 +16,7 @@ class TestUblBis3SelfBilling(TestUblBis3Common, TestUblCiiBECommon):
             'is_self_billing': True,
         })
 
-    def subfolder(self):
+    def subfolder_export(self):
         return ''
 
     def test_export_selfbilling(self):

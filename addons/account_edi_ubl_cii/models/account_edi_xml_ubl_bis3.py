@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 
-from odoo import _, api, models
-from odoo.tools.misc import formatLang, str2bool, NON_BREAKING_SPACE
+from odoo import _, api, models, fields, Command
+from odoo.tools.misc import formatLang, frozendict, str2bool, NON_BREAKING_SPACE
 from odoo.addons.account.tools import dict_to_xml
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt, UOM_TO_UNECE_CODE
 from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import UBL_NAMESPACES
 
 from stdnum.no import mva
@@ -1221,7 +1222,7 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
 
     def _import_bis3_add_file_type_code_and_file_document_sign(self, tree, collected_values):
         suffix_invoice_type, document_sign = self._get_import_document_amount_sign(tree)
-        collected_values['is_refund'] = True if suffix_invoice_type == 'refund' else False
+        collected_values['is_refund'] = suffix_invoice_type == 'refund'
         collected_values['file_document_sign'] = document_sign
 
     def _import_bis3_invoice_update_move_type(self, collected_values):

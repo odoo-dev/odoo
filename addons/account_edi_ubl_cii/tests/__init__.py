@@ -6,3 +6,4 @@ from . import test_download_docs
 from . import test_ubl_cii
 from . import test_ubl_import_bis3_be
 from . import test_ubl_export_bis3_be
+from . import test_ubl_import_bis3_be

@@ -5226,6 +5226,7 @@ class AccountTax(models.Model):
 
         return self.env['account.tax']
 
+
 class AccountTaxRepartitionLine(models.Model):
     _name = 'account.tax.repartition.line'
     _description = "Tax Repartition Line"
