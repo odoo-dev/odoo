@@ -3067,6 +3067,16 @@ class Base(models.AbstractModel):
         tools.ormcache('self._get_view_cache_key(view_id, view_type, **options)', cache='templates'),
     )
     def _get_view_cache(self, view_id=None, view_type='form', **options):
+        view_hash = self.env['ir.ui.view'].sudo().browse(view_id)._get_combined_archs_hash()
+        cache_key = self._get_view_cache_key(view_id, view_type, **options)
+        return self.__get_view_cache(view_id=None, view_type='form', memo_key=(view_hash, cache_key), **options)
+
+    @api.model
+    @tools.conditional(
+        'xml' not in config['dev_mode'],
+        tools.ormcache('memo_key', cache='templates_memo'),
+    )
+    def __get_view_cache(self, view_id=None, view_type='form', memo_key=None, **options):
         """ Get the view information ready to be cached
 
         The cached view includes the postprocessed view, including inherited
