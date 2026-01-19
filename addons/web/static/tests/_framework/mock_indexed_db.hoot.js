@@ -28,6 +28,13 @@ export function mockIndexedDB(_name, { fn }) {
                 return this.mockIndexedDB[table]?.[key];
             }
 
+            async getAllEntries(table) {
+                return Object.keys(this.mockIndexedDB[table] || {}).map((key) => ({
+                    key,
+                    value: this.mockIndexedDB[table][key],
+                }));
+            }
+
             async getAllKeys(table) {
                 return Object.keys(this.mockIndexedDB[table] || {});
             }
