@@ -574,6 +574,7 @@ QUnit.module("Views", (hooks) => {
                                 domain: [["product_id", "=", 37]],
                                 name: "Partners",
                                 res_model: "partner",
+                                search_view_id: [100000002, "search"],
                                 target: "current",
                                 type: "ir.actions.act_window",
                                 view_mode: "list",

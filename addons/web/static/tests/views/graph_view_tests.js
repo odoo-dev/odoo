@@ -3423,6 +3423,7 @@ QUnit.module("Views", (hooks) => {
                                 domain: [["bar", "=", false]],
                                 name: "Foo Analysis",
                                 res_model: "foo",
+                                search_view_id: [100000002, "search"],
                                 target: "current",
                                 type: "ir.actions.act_window",
                                 views: [
@@ -3474,6 +3475,7 @@ QUnit.module("Views", (hooks) => {
                                     domain: [["bar", "=", false]],
                                     name: "Foo Analysis",
                                     res_model: "foo",
+                                    search_view_id: [100000002, "search"],
                                     target: "current",
                                     type: "ir.actions.act_window",
                                     views: [
@@ -3529,6 +3531,7 @@ QUnit.module("Views", (hooks) => {
                                     domain: [["bar", "=", false]],
                                     name: "Foo Analysis",
                                     res_model: "foo",
+                                    search_view_id: [100000002, "search"],
                                     target: "current",
                                     type: "ir.actions.act_window",
                                     views: [
