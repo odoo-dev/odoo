@@ -10,6 +10,10 @@ import {
 } from "@spreadsheet/global_filters/helpers";
 import { useService } from "@web/core/utils/hooks";
 import { deepEqual } from "@web/core/utils/objects";
+import { FACET_ICONS } from "@web/search/utils/misc";
+import { DashboardCustomFavoriteItem } from "./dashboard_custom_favorite_item";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 
 /**
  * This component is used to display a list of all the global filters of a dashboard.
@@ -17,7 +21,12 @@ import { deepEqual } from "@web/core/utils/objects";
  */
 export class DashboardSearchBarMenu extends Component {
     static template = "spreadsheet_dashboard.DashboardSearchBarMenu";
-    static components = { FilterValue };
+    static components = {
+        CheckboxItem,
+        DashboardCustomFavoriteItem,
+        DropdownItem,
+        FilterValue,
+    };
 
     static props = {
         close: Function,
@@ -26,6 +35,11 @@ export class DashboardSearchBarMenu extends Component {
 
     setup() {
         this.orm = useService("orm");
+        this.facet_icons = FACET_ICONS;
+        this.actionService = useService("action");
+        this.loader = useService("spreadsheet_dashboard_loader");
+        this.searchModel = this.loader.getDashboard(this.loader.activeDashboardId).searchModel;
+        this.sharedFavoritesExpanded = useState({ value: false });
         this.state = useState({
             filtersAndValues: this.globalFilters.map((globalFilter) => {
                 const value = this.props.model.getters.getGlobalFilterValue(globalFilter.id);
@@ -42,6 +56,23 @@ export class DashboardSearchBarMenu extends Component {
 
     get globalFilters() {
         return this.props.model.getters.getGlobalFilters();
+    }
+
+    get favorites() {
+        return this.searchModel.getFavoriteList((item) => item.userIds.length === 1);
+    }
+
+    get sharedFavorites() {
+        const sharedFavorites = this.searchModel.getFavoriteList(
+            (item) => item.userIds.length !== 1
+        );
+
+        if (sharedFavorites.length <= 4 || this.sharedFavoritesExpanded.value) {
+            this.sharedFavoritesExpanded.value = true;
+        } else {
+            sharedFavorites.length = 3;
+        }
+        return sharedFavorites;
     }
 
     setGlobalFilterValue(node, value) {
@@ -104,6 +135,10 @@ export class DashboardSearchBarMenu extends Component {
         }
     }
 
+    onFavoriteSelected(itemId) {
+        this.state.filtersAndValues = this.searchModel.toggleFavorite(itemId);
+    }
+
     onConfirm() {
         for (const node of this.state.filtersAndValues) {
             const { globalFilter, value } = node;
@@ -118,10 +153,24 @@ export class DashboardSearchBarMenu extends Component {
             });
         }
         this.props.close();
+        this.searchModel.handleManualFilterConfirm(this.state.filtersAndValues);
     }
 
     onDiscard() {
         this.props.close();
+    }
+
+    editFavorite(itemId) {
+        this.actionService.doAction({
+            type: "ir.actions.act_window",
+            res_model: "spreadsheet.dashboard.favorite.filters",
+            views: [[false, "form"]],
+            context: {
+                form_view_ref:
+                    "spreadsheet_dashboard.spreadsheet_dashboard_favorite_filters_view_edit_form",
+            },
+            res_id: itemId,
+        });
     }
 
     fetchSearchableParentRelation() {

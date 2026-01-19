@@ -1,13 +1,24 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { queryAll, press, queryAllTexts } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { getBasicData, Product } from "@spreadsheet/../tests/helpers/data";
+import { Product } from "@spreadsheet/../tests/helpers/data";
 import { createSpreadsheetDashboard } from "@spreadsheet_dashboard/../tests/helpers/dashboard_action";
 import {
     defineSpreadsheetDashboardModels,
     getDashboardServerData,
+    getServerData,
 } from "@spreadsheet_dashboard/../tests/helpers/data";
-import { contains, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import {
+    contains,
+    editFavoriteName,
+    mockService,
+    onRpc,
+    patchWithCleanup,
+    saveAndEditFavorite,
+    saveFavorite,
+    toggleSaveFavorite,
+    toggleSearchBarMenu,
+} from "@web/../tests/web_test_helpers";
 import { browser } from "@web/core/browser/browser";
 import { RPCError } from "@web/core/network/rpc";
 import { Deferred } from "@web/core/utils/concurrency";
@@ -16,31 +27,6 @@ import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_fi
 
 describe.current.tags("desktop");
 defineSpreadsheetDashboardModels();
-
-function getServerData(spreadsheetData) {
-    const serverData = getDashboardServerData();
-    serverData.models = {
-        ...serverData.models,
-        ...getBasicData(),
-    };
-    serverData.models["spreadsheet.dashboard.group"].records = [
-        {
-            published_dashboard_ids: [789],
-            id: 1,
-            name: "Pivot",
-        },
-    ];
-    serverData.models["spreadsheet.dashboard"].records = [
-        {
-            id: 789,
-            name: "Spreadsheet with Pivot",
-            json_data: JSON.stringify(spreadsheetData),
-            spreadsheet_data: JSON.stringify(spreadsheetData),
-            dashboard_group_id: 1,
-        },
-    ];
-    return serverData;
-}
 
 test("display available spreadsheets", async () => {
     await createSpreadsheetDashboard();
@@ -730,5 +716,87 @@ describe("Quick search bar", () => {
 
         filterValue = model.getters.getGlobalFilterValue(productFilter.id);
         expect(filterValue).toEqual(undefined);
+    });
+});
+
+describe("Favorite filters in search bar", () => {
+    const spreadsheetData = {
+        globalFilters: [
+            {
+                id: "1",
+                type: "relation",
+                label: "Relation Filter",
+                modelName: "product",
+            },
+        ],
+    };
+    const serverData = getServerData(spreadsheetData);
+
+    beforeEach(async () => {
+        await createSpreadsheetDashboard({ serverData });
+    });
+
+    test("simple favorite menu rendering", async function () {
+        await toggleSearchBarMenu();
+        await toggleSaveFavorite();
+        expect(`.o_add_favorite + .o_accordion_values input[type="text"]`).toHaveValue(
+            "Spreadsheet with Pivot"
+        );
+        expect(`.o_add_favorite + .o_accordion_values input[type="checkbox"]`).toHaveCount(1);
+        expect(`.o_add_favorite + .o_accordion_values .form-check label`).toHaveText(
+            "Default filter"
+        );
+    });
+
+    test("save favorite filters", async function () {
+        onRpc("create", ({ args, route }) => {
+            expect.step(route);
+            const favoriteFilter = args[0][0];
+            expect(favoriteFilter.name).toBe("aaa");
+            expect(favoriteFilter.dashboard_id).toBe(789);
+            expect(favoriteFilter.global_filters).toEqual({});
+            expect(favoriteFilter.is_default).toBe(false);
+            expect(favoriteFilter.user_ids).toEqual([7]);
+            return [7];
+        });
+
+        expect.verifySteps([]);
+        await toggleSaveFavorite();
+        await editFavoriteName("aaa");
+        await saveFavorite();
+        expect.verifySteps(["/web/dataset/call_kw/spreadsheet.dashboard.favorite.filters/create"]);
+    });
+
+    test("save and edit favorite filters", async function () {
+        onRpc("create", ({ args, route }) => {
+            expect.step(route);
+            const favoriteFilter = args[0][0];
+            expect(favoriteFilter.name).toBe("aaa");
+            return [7];
+        });
+        mockService("action", {
+            doAction(action) {
+                expect(action).toEqual({
+                    context: {
+                        form_view_ref:
+                            "spreadsheet_dashboard.spreadsheet_dashboard_favorite_filters_view_edit_form",
+                    },
+                    res_id: 7,
+                    res_model: "spreadsheet.dashboard.favorite.filters",
+                    type: "ir.actions.act_window",
+                    views: [[false, "form"]],
+                });
+                expect.step("Edit favorite");
+            },
+        });
+
+        expect.verifySteps([]);
+        await toggleSaveFavorite();
+        await editFavoriteName("aaa");
+        await saveAndEditFavorite();
+        expect.verifySteps([
+            "/web/dataset/call_kw/spreadsheet.dashboard.favorite.filters/create",
+            "Edit favorite",
+        ]);
     });
 });
