@@ -3,11 +3,8 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.fields import Domain
-from odoo.tools import float_is_zero, float_repr, float_round, float_compare
+from odoo.tools import float_is_zero, float_repr, float_round, float_compare, SQL
 from odoo.exceptions import ValidationError
-from collections import defaultdict
-from datetime import datetime
-
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -142,12 +139,13 @@ class ProductProduct(models.Model):
         """Compute totals of multiple svl related values"""
         company_id = self.env.company
         self.company_currency_id = company_id.currency_id
+        at_date = fields.Datetime.to_datetime(self.env.context.get('to_date'))
+        if at_date:
+            at_date = at_date.replace(hour=23, minute=59, second=59)
+            self = self.with_context(at_date=at_date)
 
+        product_with_qty = set()
         for product in self:
-            at_date = fields.Datetime.to_datetime(product.env.context.get('to_date'))
-            if at_date:
-                at_date = at_date.replace(hour=23, minute=59, second=59)
-                product = product.with_context(at_date=at_date)
             valuated_product = product.sudo(False)._with_valuation_context()
             qty_valued = valuated_product.qty_available
             qty_available = valuated_product.with_context(warehouse_id=False).qty_available if self.env.context.get('warehouse_id') else qty_valued
@@ -157,16 +155,30 @@ class ProductProduct(models.Model):
                 product.total_value = 0
             elif product.uom_id.is_zero(qty_available):
                 product.total_value = product.standard_price * qty_valued
-            elif product.cost_method == 'standard':
-                standard_price = product.standard_price
-                if at_date:
-                    standard_price = product._get_standard_price_at_date(at_date)
-                product.total_value = standard_price * qty_valued
-            elif product.cost_method == 'average':
-                product.total_value = product._run_avco(at_date=at_date)[1] * qty_valued / qty_available
             else:
-                product.total_value = product.with_context(warehouse_id=False)._run_fifo(qty_available, at_date=at_date) * qty_valued / qty_available
-            product.avg_cost = product.total_value / qty_valued if not product.uom_id.is_zero(qty_valued) else 0
+                product_with_qty.add(product.id)
+
+        for cost_method, products in self.env['product.product'].browse(product_with_qty).grouped('cost_method').items():
+            if cost_method in ['standard', 'average'] and not at_date:
+                for product in products:
+                    product.total_value = product.standard_price * product.qty_available
+            elif cost_method == 'standard' and at_date:
+                std_price_by_product = products._get_standard_price_at_date(at_date)
+                for product in products:
+                    product.total_value = std_price_by_product[product] * product.qty_available
+            elif cost_method == 'average' and at_date:
+                std_price_by_product = products._run_avco(at_date)[0]
+                for product in products:
+                    product.total_value = std_price_by_product[product] * product.qty_available
+            else:
+                for product in products:
+                    qty_valued = product.qty_available
+                    qty_available = product.with_context(
+                        warehouse_id=False).qty_available if self.env.context.get('warehouse_id') else qty_valued
+                    product.total_value = product.with_context(warehouse_id=False)._run_fifo(qty_available, at_date=at_date) * qty_valued / qty_available
+
+        for product in self:
+            product.avg_cost = product.total_value / product.qty_available if not product.uom_id.is_zero(product.qty_available) else 0
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -262,88 +274,94 @@ class ProductProduct(models.Model):
     def _run_avco(self, at_date=None, lot=None, method="realtime"):
         """ Recompute the average cost of the product base on the last closing
         inventory value and all the incoming moves during the period."""
-        # TODO remove at the end and do at real time
-        self.ensure_one()
-
         # Fetch Last product value
-        product_value_domain = Domain([('product_id', '=', self.id), ('move_id', '=', False)])
+        product_value_domain = Domain([('product_id', 'in', self.ids), ('move_id', '=', False)])
         if lot:
             product_value_domain &= Domain(['|', ('lot_id', '=', lot.id), ('lot_id', '=', False)])
         else:
             product_value_domain &= Domain([('lot_id', '=', False)])
         if at_date:
             product_value_domain &= Domain([('date', '<=', at_date)])
-        last_product_value = self.env['product.value'].sudo().search(product_value_domain, order="date desc, id desc", limit=1)
 
-        # Fetch Moves
-        moves_domain = Domain([
-            ('product_id', '=', self.id),
-            ('company_id', '=', self.env.company.id),
-        ])
-        if lot:
-            moves_domain &= Domain([('move_line_ids.lot_id', 'in', lot.id)])
-        if at_date:
-            moves_domain &= Domain([('date', '<=', at_date)])
-        if method == "realtime":
-            # Move FULL domain
-            moves_domain &= Domain(['|', '|', ('is_in', '=', True), ('is_out', '=', True), ('is_dropship', '=', True)])
-        else:
-            # Move IN domain
-            moves_domain &= Domain(['|', ('is_in', '=', True), ('is_dropship', '=', True)])
-        if last_product_value:
-            first_move = self.env['stock.move'].search_fetch(moves_domain, field_names=['date'], order='date, id', limit=1)
-            moves_domain &= Domain([('date', '>=', last_product_value.date)])
-        else:
-            first_move = self.env['stock.move']
+        last_product_value = self.env['product.value'].sudo()._read_group(product_value_domain, ['product_id'], ['date:max'])
+        last_product_value_by_product = { product: date for product, date in last_product_value }
+
+        move_queries = set()
+        for product in self:
+            domain = Domain([
+                ('product_id', '=', product.id),
+                ('company_id', '=', self.env.company.id)
+            ])
+            if lot:
+                domain &= Domain([('move_line_ids.lot_id', 'in', lot.id)])
+            if at_date:
+                domain &= Domain([('date', '<=', at_date)])
+            if method == "realtime":
+                # Move FULL domain
+                domain &= Domain(['|', '|', ('is_in', '=', True), ('is_out', '=', True), ('is_dropship', '=', True)])
+            else:
+                # Move IN domain
+                domain &= Domain(['|', ('is_in', '=', True), ('is_dropship', '=', True)])
+            if product in last_product_value_by_product:
+                domain &= Domain([('date', '>', last_product_value_by_product[product])])
+            move_queries.add(self.env['stock.move']._search(domain).ids)
 
         # PERF avoid memory-error
-        move_fields = ['date', 'is_dropship', 'is_in', 'is_out', 'location_dest_id', 'location_id', 'move_line_ids', 'picked', 'value']
+        move_fields = ['product_id', 'date', 'is_dropship', 'is_in', 'is_out', 'location_dest_id', 'location_id', 'move_line_ids', 'picked', 'value']
         line_fields = ['company_id', 'location_id', 'location_dest_id', 'lot_id', 'owner_id', 'picked', 'quantity_product_uom']
 
-        moves = self.env['stock.move'].search_fetch(moves_domain, field_names=move_fields, order='date, id')
+        moves_domain = Domain.OR([Domain([('id', 'in', move_query)]) for move_query in move_queries])
+        moves = self.env['stock.move'].search_fetch(moves_domain, move_fields, order='date, id')
         moves.move_line_ids.fetch(line_fields)
 
-        quantity = 0
-        avco_value = 0
-        avco_total_value = 0
+        average_value_by_product = {}
+        total_value_by_product = {}
+        for product, moves in moves.grouped('product_id').items():
+            quantity = 0
+            avco_value = 0
+            avco_total_value = 0
 
-        if last_product_value:
-            avco_value = last_product_value.value
-            # Only fetch the qty_available if there are moves before the last product.value
-            if first_move and first_move.date < last_product_value.date:
+            if product in last_product_value_by_product:
+                last_product_value = self.env['product.value'].search([
+                    ('product_id', '=', product.id),
+                ], limit=1, order='date desc, id DESC')
+                avco_value = last_product_value.value
                 lot_id = lot.id if lot else None
                 quantity = self._with_valuation_context().with_context(to_date=last_product_value.date, lot_id=lot_id).qty_available
                 avco_total_value = avco_value * quantity
 
-        for move in moves:
-            if move.is_in or move.is_dropship:
-                in_qty = move._get_valued_qty()
-                in_value = move.value
-                if at_date or move.is_dropship:
-                    in_value = move._get_value(at_date=at_date)
-                if lot:
-                    lot_qty = move._get_valued_qty(lot)
-                    in_value = (in_value * lot_qty / in_qty) if in_qty else 0
-                    in_qty = lot_qty
-                if quantity < 0 and quantity + in_qty >= 0:
-                    positive_qty = quantity + in_qty
-                    ratio = positive_qty / in_qty
-                    avco_total_value = ratio * in_value
-                else:
-                    avco_total_value += in_value
-                quantity += in_qty
-                avco_value = avco_total_value / quantity if quantity else 0
-            if move.is_out or move.is_dropship:
-                out_qty = move._get_valued_qty()
-                out_value = out_qty * avco_value
-                if lot:
-                    lot_qty = move._get_valued_qty(lot)
-                    out_value = (out_value * lot_qty / out_qty) if out_qty else 0
-                    out_qty = lot_qty
-                avco_total_value -= out_value
-                quantity -= out_qty
+            for move in moves:
+                if move.is_in or move.is_dropship:
+                    in_qty = move._get_valued_qty()
+                    in_value = move.value
+                    if at_date or move.is_dropship:
+                        in_value = move._get_value(at_date=at_date)
+                    if lot:
+                        lot_qty = move._get_valued_qty(lot)
+                        in_value = (in_value * lot_qty / in_qty) if in_qty else 0
+                        in_qty = lot_qty
+                    if quantity < 0 and quantity + in_qty >= 0:
+                        positive_qty = quantity + in_qty
+                        ratio = positive_qty / in_qty
+                        avco_total_value = ratio * in_value
+                    else:
+                        avco_total_value += in_value
+                    quantity += in_qty
+                    avco_value = avco_total_value / quantity if quantity else 0
+                if move.is_out or move.is_dropship:
+                    out_qty = move._get_valued_qty()
+                    out_value = out_qty * avco_value
+                    if lot:
+                        lot_qty = move._get_valued_qty(lot)
+                        out_value = (out_value * lot_qty / out_qty) if out_qty else 0
+                        out_qty = lot_qty
+                    avco_total_value -= out_value
+                    quantity -= out_qty
 
-        return avco_value, avco_total_value
+            average_value_by_product[product] = avco_value
+            total_value_by_product[product] = avco_total_value
+
+        return average_value_by_product, total_value_by_product
 
     def _run_fifo(self, quantity, lot=None, at_date=None, location=None):
         """ Returns the value for the next outgoing product base on the qty give as argument."""

@@ -318,7 +318,7 @@ class TestAccountMove(TestStockValuationCommon):
         product = self.product_avco
         product.standard_price = 10.0
         self._use_inventory_location_accounting()
-        with freeze_time(fields.Datetime.now() - timedelta(seconds=10)):
+        with freeze_time(fields.Datetime.now() + timedelta(seconds=10)):
             self._make_in_move(product, 10, location_id=self.inventory_location.id)
             mail_context = {
                 'tracking_disable': False,
@@ -344,12 +344,13 @@ class TestAccountMove(TestStockValuationCommon):
                 {'account_id': self.account_stock_valuation.id, 'debit': 100.0, 'credit': 0.0},
             ])
 
-        self._make_in_move(product, 10, location_id=self.inventory_location.id)
-        closing = self._close()
-        self.assertRecordValues(closing.line_ids, [
-            {'account_id': self.account_inventory.id, 'debit': 0.0, 'credit': 100.0},
-            {'account_id': self.account_stock_valuation.id, 'debit': 100.0, 'credit': 0.0},
-        ])
+        with freeze_time(fields.Datetime.now() + timedelta(minutes=10)):
+            self._make_in_move(product, 10, location_id=self.inventory_location.id)
+            closing = self._close()
+            self.assertRecordValues(closing.line_ids, [
+                {'account_id': self.account_inventory.id, 'debit': 0.0, 'credit': 100.0},
+                {'account_id': self.account_stock_valuation.id, 'debit': 100.0, 'credit': 0.0},
+            ])
 
     def test_invoice_with_journal_item_without_label(self):
         """Test posting an invoice whose invoice lines have no label.
