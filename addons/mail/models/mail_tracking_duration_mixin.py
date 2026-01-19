@@ -117,6 +117,8 @@ class MailTrackingDurationMixin(models.AbstractModel):
         })
 
         for tracking in trackings:
+            if not tracking['old_value_integer']:
+                continue
             json[tracking['old_value_integer']] += int((tracking['create_date'] - previous_date).total_seconds())
             previous_date = tracking['create_date']
 
