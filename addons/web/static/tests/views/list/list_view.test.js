@@ -605,7 +605,7 @@ test.tags("desktop");
 test(`[Offline] disable unavailable records when offline`, async () => {
     const setOffline = mockOffline();
     mockService("offline", {
-        isAvailableOffline(actionId, viewType, resId) {
+        isAvailableOffline(actionId, viewType, { resId }) {
             if (actionId === 234 && viewType === "form") {
                 return [2, 3].includes(resId);
             }

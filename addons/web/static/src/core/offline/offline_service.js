@@ -108,19 +108,18 @@ class OfflineManager extends Reactive {
             this._timeout = browser.setTimeout(_checkConnection, delay);
 
             // Retrieve the information about visited items from indexeddb.
-            this._idb.getAllKeys(this._idbTable).then((result) => {
+            this._idb.getAllEntries(this._idbTable).then((result) => {
                 if (offline !== this._offline) {
                     return; // status changed again meanwhile
                 }
-                for (const r of result) {
-                    const value = JSON.parse(r);
-                    this._visited[value.action] = this._visited[value.action] || { views: {} };
-                    if (value.viewType === "form") {
-                        this._visited[value.action].views.form =
-                            this._visited[value.action].views.form || [];
-                        this._visited[value.action].views.form.push(value.resId);
+                for (const { key, value } of result) {
+                    const { action, viewType, resId } = JSON.parse(key);
+                    this._visited[action] = this._visited[action] || { views: {} };
+                    if (viewType === "form") {
+                        this._visited[action].views.form = this._visited[action].views.form || [];
+                        this._visited[action].views.form.push(resId);
                     } else {
-                        this._visited[value.action].views[value.viewType] = true;
+                        this._visited[action].views[viewType] = value;
                     }
                 }
             });
@@ -143,24 +142,44 @@ class OfflineManager extends Reactive {
     }
 
     /**
+     * Returns search queries that are available offline, their facets and the number of times they
+     * have been accessed, given an action id and a view type.
+     *
+     * @param {number} actionId
+     * @param {"kanban"|"list"}
+     * @returns Object
+     */
+    async getAvailableQueries(actionId, viewType) {
+        // return this._visited[actionId]?.views[viewType] || {};
+        let queries;
+        if (actionId) {
+            const key = JSON.stringify({ action: actionId, viewType });
+            queries = await this._idb.read(this._idbTable, key);
+        }
+        return queries || {};
+    }
+
+    /**
      * Returns a boolean indicating whether the requested element is available offline, i.e.
      * if it has been visited online and stored in cache.
      *
      * @param {number} actionId
      * @param {"kanban"|"list"|"form"} [viewType]
-     * @param {number} [resId]
+     * @param {Object} params
+     * @param {number} [params.resId]
+     * @param {?} [params.query]
      * @returns boolean
      */
-    isAvailableOffline(actionId, viewType, resId) {
+    isAvailableOffline(actionId, viewType, { resId, query } = {}) {
         const action = this._visited[actionId];
         if (!viewType) {
             return !!action;
         }
         const view = action?.views[viewType];
-        if (viewType !== "form") {
-            return !!view;
+        if (viewType === "form") {
+            return view?.includes(resId);
         }
-        return view?.includes(resId);
+        return view && JSON.stringify(query) in view;
     }
 
     /**
@@ -171,10 +190,23 @@ class OfflineManager extends Reactive {
      * @param {Object} params
      * @param {number} [params.resId] the record id, when viewType is "form"
      */
-    async setAvailableOffline(actionId, viewType, { resId }) {
+    async setAvailableOffline(actionId, viewType, { resId, facets, query }) {
         if (!this.offline) {
             const key = JSON.stringify({ action: actionId, viewType, resId });
-            this._idb.write(this._idbTable, key, true);
+            let value;
+            if (viewType === "form") {
+                value = true;
+            } else {
+                value = (await this._idb.read(this._idbTable, key)) || {};
+                const queryStr = JSON.stringify(query);
+                let count = value[queryStr]?.count || 0;
+                delete value[queryStr]; // delete and re-add to mark it as "last visited"
+                value[queryStr] = {
+                    count: count++,
+                    facets,
+                };
+            }
+            this._idb.write(this._idbTable, key, value);
         }
     }
 

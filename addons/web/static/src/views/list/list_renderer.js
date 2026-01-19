@@ -904,9 +904,10 @@ export class ListRenderer extends Component {
     }
 
     isRecordAvailable(record) {
+        const resId = record.resId;
         return (
             !this.offlineService.offline ||
-            this.offlineService.isAvailableOffline(this.env.config.actionId, "form", record.resId)
+            this.offlineService.isAvailableOffline(this.env.config.actionId, "form", { resId })
         );
     }
 

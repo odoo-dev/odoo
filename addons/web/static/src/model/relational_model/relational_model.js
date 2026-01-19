@@ -308,7 +308,12 @@ export class RelationalModel extends Model {
                 const markAsAvailableOffline =
                     actionId && (config.isMonoRecord ? config.resId : result.length);
                 if (markAsAvailableOffline) {
-                    const params = config.isMonoRecord ? { resId: config.resId } : {};
+                    const params = config.isMonoRecord
+                        ? { resId: config.resId }
+                        : {
+                              facets: this.env.searchModel.facets,
+                              query: this.env.searchModel.query,
+                          };
                     this.offline.setAvailableOffline(actionId, viewType, params);
                 }
                 if (!hasChanged) {

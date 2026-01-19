@@ -410,7 +410,9 @@ export class ControlPanel extends Component {
     isViewAvailable(view) {
         return (
             !this.offlineService.offline ||
-            this.offlineService.isAvailableOffline(this.env.config.actionId, view.type)
+            this.offlineService.isAvailableOffline(this.env.config.actionId, view.type, {
+                query: this.env.searchModel.query,
+            })
         );
     }
 

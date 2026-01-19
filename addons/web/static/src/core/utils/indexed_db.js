@@ -42,6 +42,15 @@ export class IndexedDB {
         });
     }
 
+    getAllEntries(table) {
+        this._tables.add(table);
+        return this.execute((db) => {
+            if (db) {
+                return this._getAllEntries(db, table);
+            }
+        });
+    }
+
     /**
      * Reads all keys from a given table.
      *
@@ -50,7 +59,7 @@ export class IndexedDB {
      */
     async getAllKeys(table) {
         this._tables.add(table);
-        return this.execute((db) => {
+        return this.execute(async (db) => {
             if (db) {
                 return this._getAllKeys(db, table);
             }
@@ -253,11 +262,26 @@ export class IndexedDB {
         });
     }
 
+    async _getAllEntries(db, table) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(table, "readonly");
+            const store = transaction.objectStore(table);
+            const keysReq = store.getAllKeys();
+            const valuesReq = store.getAll(); // be careful, is order guaranteed??
+            transaction.oncomplete = () => {
+                const keys = keysReq.result;
+                const values = valuesReq.result;
+                resolve(keys.map((key, i) => ({ key, value: values[i] })));
+            };
+            transaction.onerror = () => reject(transaction.error);
+        });
+    }
+
     async _getAllKeys(db, table) {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(table, "readonly");
             const objectStore = transaction.objectStore(table);
-            const r = objectStore.getAllKeys();
+            const r = objectStore.getAll();
             r.onsuccess = () => resolve(r.result);
             transaction.onerror = () => reject(transaction.error);
         });

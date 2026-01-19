@@ -34,6 +34,7 @@ import {
     useState,
     useSubEnv,
 } from "@odoo/owl";
+import { OfflineSearchBar } from "@web/search/search_bar/offline_search_bar";
 
 // -----------------------------------------------------------------------------
 
@@ -45,6 +46,7 @@ export class ListController extends Component {
         ViewButton,
         MultiRecordViewButton,
         SearchBar,
+        OfflineSearchBar,
         CogMenu: ListCogMenu,
         DropdownItem,
         SelectionBox,

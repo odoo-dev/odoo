@@ -302,7 +302,7 @@ export class FormController extends Component {
                     resIds = resIds.filter(
                         (resId) =>
                             resId === this.model.root.resId ||
-                            this.offlineService.isAvailableOffline(actionId, "form", resId)
+                            this.offlineService.isAvailableOffline(actionId, "form", { resId })
                     );
                 }
                 return {
