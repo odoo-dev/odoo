@@ -19584,6 +19584,7 @@ test(`cache web_read_group (switch view, go back)`, async () => {
 test(`cache web_read_group: do not send opening_info if not necessary`, async () => {
     // This test ensures that the params of the web_read_group aren't polluted by the opening_info
     // kwargs when successively toggling different filters
+    expect.errors(2);
     const setOffline = mockOffline();
     onRpc("web_read_group", async () => {
         expect.step("web_read_group");
@@ -19631,7 +19632,7 @@ test(`cache web_read_group: do not send opening_info if not necessary`, async ()
     expect(`.o_group_header`).toHaveCount(1);
 
     // Do not follow the same steps as earlier, directly remove the filter
-    await removeFacet("First filter");
+    await contains(".o_searchview_facet .oi-close").click();
     expect(`.o_group_header`).toHaveCount(4);
 
     expect.verifyErrors([
