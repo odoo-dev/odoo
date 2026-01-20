@@ -19708,6 +19708,7 @@ test(`[Offline] cache web_search_read: enable filter online/offline`, async () =
             <search>
                 <filter string="My filter" name="my_filter" domain="[['foo', '=', 'blip']]"/>
             </search>`,
+        config: { actionId: 234 },
     });
 
     // put data in cache
@@ -19733,9 +19734,12 @@ test(`[Offline] cache web_search_read: enable filter online/offline`, async () =
     // switch offline => use data from cache
     await setOffline(true);
 
-    await toggleMenuItem("My filter");
+    expect(".o_offline_search_bar").toHaveCount(1);
+    await contains(".o_offline_search_bar .dropdown-toggle").click();
+    expect(".o_search_bar_menu_offline .o-dropdown-item").toHaveCount(1);
+    await contains(".o_search_bar_menu_offline .o-dropdown-item").click();
     expect(queryAllTexts(`.o_list_char`)).toEqual(["blip", "blip"]);
-    await toggleMenuItem("My filter");
+    await contains(".o_searchview_facet .oi-close").click();
     expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip", "gnap", "blip"]);
 
     expect.verifyErrors([
