@@ -75,8 +75,8 @@ function stackTemplate(label, owner) {
     // Defined with string concat because line returns are taken into account in <pre> tags.
     const preContent =
         /* xml */ `<t t-foreach="parseStack(${owner}.stack)" t-as="part" t-key="part_index">` +
-        /* xml */ `<t t-if="typeof part === 'string'" t-esc="part" />` +
-        /* xml */ `<span t-else="" t-att-class="part.className" t-esc="part.value" />` +
+        /* xml */ `<t t-if="typeof part === 'string'" t-out="part" />` +
+        /* xml */ `<span t-else="" t-att-class="part.className" t-out="part.value" />` +
         /* xml */ `</t>`;
     return /* xml */ `
         <t t-if="${owner}?.stack">
@@ -95,12 +95,12 @@ const DOC_URL = `https://www.odoo.com/documentation/18.0/developer/reference/fro
 const ERROR_TEMPLATE = /* xml */ `
     <div class="text-rose flex items-center gap-1 px-2 truncate">
         <i class="fa fa-exclamation" />
-        <strong t-esc="event.label" />
-        <span class="flex truncate" t-esc="event.message.join(' ')" />
+        <strong t-out="event.label" />
+        <span class="flex truncate" t-out="event.message.join(' ')" />
     </div>
     <t t-set="timestamp" t-value="formatTime(event.ts - (result.ts || 0), 'ms')" />
     <small class="text-gray flex items-center" t-att-title="timestamp">
-        <t t-esc="'@' + timestamp" />
+        <t t-out="'@' + timestamp" />
     </small>
     ${stackTemplate("Source", "event")}
     ${stackTemplate("Cause", "event.cause")}
@@ -111,7 +111,7 @@ const EVENT_TEMPLATE = /* xml */ `
         t-attf-class="text-{{ eventColor }} flex items-center gap-1 px-2 truncate"
     >
         <t t-if="sType === 'assertion'">
-            <t t-esc="event.number + '.'" />
+            <t t-out="event.number + '.'" />
         </t>
         <t t-else="">
             <i class="fa" t-att-class="eventIcon" />
@@ -127,18 +127,18 @@ const EVENT_TEMPLATE = /* xml */ `
                 <i t-elif="event.hasFlag('resolves')" class="fa fa-arrow-right" />
                 <i t-if="event.hasFlag('not')" class="fa fa-exclamation" />
             </t>
-            <strong t-esc="event.label" />
+            <strong t-out="event.label" />
         </a>
         <span class="flex gap-1 truncate items-center">
             <t t-foreach="event.message" t-as="part" t-key="part_index">
                 <t t-if="isLabel(part)">
                     <t t-if="!part[1]">
-                        <span t-esc="part[0]" />
+                        <span t-out="part[0]" />
                     </t>
                     <t t-elif="part[1].endsWith('[]')">
                         <strong class="hoot-array">
                             <t>[</t>
-                            <span t-attf-class="hoot-{{ part[1].slice(0, -2) }}" t-esc="part[0].slice(1, -1)" />
+                            <span t-attf-class="hoot-{{ part[1].slice(0, -2) }}" t-out="part[0].slice(1, -1)" />
                             <t>]</t>
                         </strong>
                     </t>
@@ -151,29 +151,29 @@ const EVENT_TEMPLATE = /* xml */ `
                                 <a
                                     class="underline"
                                     t-att-href="part[0]"
-                                    t-esc="part[0]"
+                                    t-out="part[0]"
                                     target="_blank"
                                 />
                             </t>
                             <t t-else="">
-                                <t t-esc="part[0]" />
+                                <t t-out="part[0]" />
                             </t>
                         </strong>
                     </t>
                 </t>
                 <t t-else="">
-                    <span t-esc="part" />
+                    <span t-out="part" />
                 </t>
             </t>
         </span>
     </div>
     <t t-set="timestamp" t-value="formatTime(event.ts - (result.ts || 0), 'ms')" />
     <small class="flex items-center text-gray" t-att-title="timestamp">
-        <t t-esc="'@' + timestamp" />
+        <t t-out="'@' + timestamp" />
     </small>
     <t t-if="event.additionalMessage">
         <div class="flex items-center ms-4 px-2 gap-1 col-span-2">
-            <em class="text-blue truncate" t-esc="event.additionalMessage" />
+            <em class="text-blue truncate" t-out="event.additionalMessage" />
             <HootCopyButton text="event.additionalMessage" />
         </div>
     </t>
@@ -183,7 +183,7 @@ const EVENT_TEMPLATE = /* xml */ `
                 <t t-foreach="event.failedDetails" t-as="details" t-key="details_index">
                     <t t-if="isMarkup(details, 'group')">
                         <div class="col-span-2 flex gap-2 ps-2 mt-1" t-att-class="details.className">
-                            <t t-esc="details.groupIndex" />.
+                            <t t-out="details.groupIndex" />.
                             <HootTechnicalValue value="details.content" />
                         </div>
                     </t>
@@ -254,11 +254,11 @@ export class HootTestResult extends Component {
                     <t t-if="results.length > 1">
                         <div class="flex justify-between mx-2 my-1">
                             <span t-attf-class="text-{{ result.pass ? 'emerald' : 'rose' }}">
-                                <t t-esc="ordinal(index)" /> run:
+                                <t t-out="ordinal(index)" /> run:
                             </span>
                             <t t-set="timestamp" t-value="formatTime(result.duration, 'ms')" />
                             <small class="text-gray flex items-center" t-att-title="timestamp">
-                                <t t-esc="timestamp" />
+                                <t t-out="timestamp" />
                             </small>
                         </div>
                     </t>

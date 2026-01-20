@@ -396,7 +396,7 @@ QUnit.module('core', {}, function () {
             `<ol>
                 <li t-foreach="[0, 1, 2, 3, 4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">
                     <input/>
-                    <t t-esc="counter"/>
+                    <t t-out="counter"/>
                 </li>
             </ol>`
         );
@@ -419,7 +419,7 @@ QUnit.module('core', {}, function () {
         renderToString.app.addTemplate(
             "test.widget.template.2",
             `<p>
-                <t t-esc="widget.value"/>
+                <t t-out="widget.value"/>
             </p>`
         );
         var widget = new (Widget.extend({
@@ -450,7 +450,7 @@ QUnit.module('core', {}, function () {
             `<ol>
                 <li t-foreach="[0,1,2,3,4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">
                     <input/>
-                    <t t-esc="counter"/>
+                    <t t-out="counter"/>
                 </li>
             </ol>`
         );
@@ -474,7 +474,7 @@ QUnit.module('core', {}, function () {
             `<ol>
                 <li t-foreach="[0,1,2,3,4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">
                     <input/>
-                    <t t-esc="counter"/>
+                    <t t-out="counter"/>
                 </li>
             </ol>`
         );
@@ -512,7 +512,7 @@ QUnit.module('core', {}, function () {
             `<ol>
                 <li t-foreach="[0,1,2,3,4]" t-as="counter" t-key="counter_index" t-attf-class="class-#{counter}">
                     <input/>
-                    <t t-esc="counter"/>
+                    <t t-out="counter"/>
                 </li>
             </ol>`
         );

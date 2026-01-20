@@ -724,7 +724,7 @@ test("kanban with t-set outside card", async () => {
                     <t t-name="card">
                         <t t-set="x" t-value="record.int_field.value"/>
                         <div>
-                            <t t-esc="x"/>
+                            <t t-out="x"/>
                         </div>
                     </t>
                 </templates>
@@ -4862,8 +4862,8 @@ test("rendering date and datetime (raw value)", async () => {
                 <field name="datetime"/>
                 <templates>
                     <t t-name="card">
-                        <span class="date" t-esc="record.date.raw_value"/>
-                        <span class="datetime" t-esc="record.datetime.raw_value"/>
+                        <span class="date" t-out="record.date.raw_value"/>
+                        <span class="datetime" t-out="record.datetime.raw_value"/>
                     </t>
                 </templates>
             </kanban>`,
@@ -4907,7 +4907,7 @@ test("rendering many2one (raw value)", async () => {
                 <field name="product_id"/>
                 <templates>
                     <t t-name="card">
-                        <span class="product_id" t-esc="record.product_id.raw_value"/>
+                        <span class="product_id" t-out="record.product_id.raw_value"/>
                     </t>
                 </templates>
             </kanban>`,
@@ -5631,7 +5631,7 @@ test("resequence a record twice", async () => {
 
 test("basic support for widgets (being Owl Components)", async () => {
     class MyComponent extends Component {
-        static template = xml`<div t-att-class="props.class" t-esc="value"/>`;
+        static template = xml`<div t-att-class="props.class" t-out="value"/>`;
         static props = ["*"];
         get value() {
             return JSON.stringify(this.props.record.data);
@@ -6519,7 +6519,7 @@ test("kanban view with monetary and currency fields without widget", async () =>
 
 test("kanban widget can extract props from attrs", async () => {
     class TestWidget extends Component {
-        static template = xml`<div class="o-test-widget-option" t-esc="props.title"/>`;
+        static template = xml`<div class="o-test-widget-option" t-out="props.title"/>`;
         static props = ["*"];
     }
     const testWidget = {
@@ -6627,7 +6627,7 @@ test("Missing t-key is automatically filled with a warning", async () => {
                 <templates>
                     <t t-name="card">
                         <div>
-                            <span t-foreach="[1, 2, 3]" t-as="i" t-esc="i" />
+                            <span t-foreach="[1, 2, 3]" t-as="i" t-out="i" />
                         </div>
                     </t>
                 </templates>
@@ -6905,7 +6905,7 @@ test("can use JSON in kanban template", async () => {
                 <templates>
                     <t t-name="card">
                         <div>
-                            <span t-foreach="JSON.parse(record.foo.raw_value)" t-as="v" t-key="v_index" t-esc="v"/>
+                            <span t-foreach="JSON.parse(record.foo.raw_value)" t-as="v" t-key="v_index" t-out="v"/>
                         </div>
                     </t>
                 </templates>
@@ -7108,7 +7108,7 @@ test("no leak of TransactionInProgress (not grouped case)", async () => {
 test("fieldDependencies support for fields", async () => {
     const customField = {
         component: class CustomField extends Component {
-            static template = xml`<span t-esc="props.record.data.int_field"/>`;
+            static template = xml`<span t-out="props.record.data.int_field"/>`;
             static props = ["*"];
         },
         fieldDependencies: [{ name: "int_field", type: "integer" }],
@@ -7135,7 +7135,7 @@ test("fieldDependencies support for fields", async () => {
 test("fieldDependencies support for fields: dependence on a relational field", async () => {
     const customField = {
         component: class CustomField extends Component {
-            static template = xml`<span t-esc="props.record.data.product_id.display_name"/>`;
+            static template = xml`<span t-out="props.record.data.product_id.display_name"/>`;
             static props = ["*"];
         },
         fieldDependencies: [{ name: "product_id", type: "many2one", relation: "product" }],
@@ -7494,10 +7494,10 @@ test("Can't use KanbanRecord implementation details in arch", async () => {
                 <templates>
                     <t t-name="card">
                         <div>
-                            <t t-esc="__owl__"/>
-                            <t t-esc="props"/>
-                            <t t-esc="env"/>
-                            <t t-esc="render"/>
+                            <t t-out="__owl__"/>
+                            <t t-out="props"/>
+                            <t t-out="env"/>
+                            <t t-out="render"/>
                         </div>
                     </t>
                 </templates>

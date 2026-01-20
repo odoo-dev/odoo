@@ -3,7 +3,7 @@
     <t t-name="point_of_sale.SyncPopup">
         <Dialog size="'md'">
             <t t-set-slot="header">
-                <h4 class="modal-title" t-esc="props.title" />
+                <h4 class="modal-title" t-out="props.title" />
             </t>
             <div class="payment-methods-overview overflow-auto">
                 <p>You can update it by selecting one of the following options:</p>

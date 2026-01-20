@@ -141,7 +141,7 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                 t-att-title="job.fullName"
             >
                 <t t-foreach="getShortPath(job.path)" t-as="suite" t-key="suite.id">
-                    <span class="text-gray px-1" t-esc="suite.name" />
+                    <span class="text-gray px-1" t-out="suite.name" />
                     <span class="font-normal">/</span>
                 </t>
                 <t t-set="isSet" t-value="job.id in runnerState.includeSpecs.id" />
@@ -155,7 +155,7 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                         'text-primary': !isSet and !hasIncludeValue,
                         'italic': hasIncludeValue ? includeStatus lte 0 : includeStatus lt 0,
                     }"
-                    t-esc="job.name"
+                    t-out="job.name"
                 />
             </span>
         </t>
@@ -220,7 +220,7 @@ const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
                         text
                     </t>
                 </h4>
-                <t t-esc="wrappedQuery()" />
+                <t t-out="wrappedQuery()" />
             </button>
         </t>
         <t t-else="">
@@ -236,7 +236,7 @@ const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
             <div class="flex flex-col mb-2 max-h-48 overflow-hidden">
                 <h4
                     class="text-primary font-bold flex items-center mb-2"
-                    t-esc="title(category)"
+                    t-out="title(category)"
                 />
                 <ul class="flex flex-col overflow-y-auto gap-1">
                     <t t-foreach="jobs" t-as="job" t-key="job.id">
@@ -244,7 +244,7 @@ const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
                     </t>
                     <t t-if="remainingCount > 0">
                         <div class="italic">
-                            <t t-esc="remainingCount" /> more items ...
+                            <t t-out="remainingCount" /> more items ...
                         </div>
                     </t>
                 </ul>
@@ -268,7 +268,7 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
                             class="w-full px-2 hover:bg-gray-300 dark:hover:bg-gray-700"
                             type="button"
                             t-on-click.stop="() => this.setQuery(text)"
-                            t-esc="text"
+                            t-out="text"
                         />
                     </li>
                 </t>
@@ -325,13 +325,13 @@ export class HootSearch extends Component {
                             class="flex border border-primary rounded"
                             t-att-title="count.tip"
                         >
-                            <span class="bg-btn px-1 transition-colors" t-esc="count.category" />
+                            <span class="bg-btn px-1 transition-colors" t-out="count.category" />
                             <span class="mx-1 flex gap-1">
                                 <t t-if="count.include.length">
-                                    <span class="text-emerald" t-esc="count.include.length" />
+                                    <span class="text-emerald" t-out="count.include.length" />
                                 </t>
                                 <t t-if="count.exclude.length">
-                                    <span class="text-rose" t-esc="count.exclude.length" />
+                                    <span class="text-rose" t-out="count.exclude.length" />
                                 </t>
                             </span>
                         </button>
