@@ -978,6 +978,7 @@ class PosConfig(models.Model):
             'name': _('Cash'),
             'journal_id': cash_journal.id,
             'company_id': self.env.company.id,
+            'sequence': 1,
         })
 
     def _create_journal_and_payment_methods(self, cash_ref=None, cash_journal_vals=None):
@@ -1016,7 +1017,7 @@ class PosConfig(models.Model):
                 'name': _('Card'),
                 'journal_id': bank_journal.id,
                 'company_id': self.env.company.id,
-                'sequence': 1,
+                'sequence': 2,
             })
 
         payment_methods |= bank_pm
@@ -1027,7 +1028,7 @@ class PosConfig(models.Model):
                 'name': _('Customer Account'),
                 'company_id': self.env.company.id,
                 'split_transactions': True,
-                'sequence': 2,
+                'sequence': 4,
             })
 
         payment_methods |= pay_later_pm
