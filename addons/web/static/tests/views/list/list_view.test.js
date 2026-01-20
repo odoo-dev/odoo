@@ -19581,10 +19581,10 @@ test(`cache web_read_group (switch view, go back)`, async () => {
     expect(`.o_group_header`).toHaveCount(4);
 });
 
-test(`cache web_read_group: do not send opening_info if not necessary`, async () => {
+test.debug(`cache web_read_group: do not send opening_info if not necessary`, async () => {
     // This test ensures that the params of the web_read_group aren't polluted by the opening_info
     // kwargs when successively toggling different filters
-    expect.errors(2);
+    expect.errors(2); // JUM
     const setOffline = mockOffline();
     onRpc("web_read_group", async () => {
         expect.step("web_read_group");

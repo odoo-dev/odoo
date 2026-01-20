@@ -864,9 +864,13 @@ export class RelationalModel extends Model {
             pick(config.fields, ...config.fieldsToAggregate)
         );
         let currentGroupInfos;
-        if (config.sendOpeningInfo) {
-            currentGroupInfos = getGroupInfo(config.groups);
-        }
+        // OK
+        // if (config.sendOpeningInfo) {
+        //     currentGroupInfos = getGroupInfo(config.groups);
+        // }
+        // KO
+        currentGroupInfos = getGroupInfo(config.groups);
+        //
         const { activeFields, fields } = config;
         const evalContext = getBasicEvalContext(config);
         const unfoldReadSpecification = getFieldsSpec(activeFields, fields, evalContext);
