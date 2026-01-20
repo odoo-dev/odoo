@@ -1464,6 +1464,8 @@ class SaleOrderLine(models.Model):
         * Lines cannot be deleted if the order is confirmed.
         * Down payment lines who have not yet been invoiced bypass that exception.
         * Sections and Notes can always be deleted.
+        * Lines with expense policy `cost` and an ordered quantity 0 bypass this restriction
+          when deleted from the services and material view.
 
         :returns: Sales Order Lines that cannot be deleted
         :rtype: `sale.order.line` recordset
@@ -1473,6 +1475,11 @@ class SaleOrderLine(models.Model):
                 line.state == 'sale'
                 and (line.invoice_lines or not line.is_downpayment)
                 and not line.display_type
+                and not (
+                    self.env.context.get('from_services_and_material')
+                    and line.product_id.expense_policy == 'cost'
+                    and not line.product_uom_qty
+                )
         )
 
     @api.ondelete(at_uninstall=False)
@@ -1838,3 +1845,17 @@ class SaleOrderLine(models.Model):
     def _get_rounding(self):
         self.ensure_one()
         return self.product_uom_id.rounding
+
+    def _is_line_reinvoicable(self):
+        """Determine whether this sale order line should be used to retrieve analytic lines
+        to be linked to the generated invoice.
+
+        Only non-expense lines invoiced based on delivered quantities are considered
+        valid sources for analytic line reinvoicing.
+        """
+        self.ensure_one()
+        return (
+            not self.is_expense
+            and self.product_id.invoice_policy == 'delivery'
+            and self.product_id.expense_policy != 'no'
+        )
