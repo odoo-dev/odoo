@@ -42,4 +42,4 @@ class TestMassMailingSnippets(MassMailCommon):
         saved_view = IrUiView.search([("name", "=", saved_name)])
         value = IrUiView.render_public_asset("mass_mailing.email_designer_snippets")
         data_snippet = saved_view.key.split(".")[1]
-        self.assertIn(f'data-snippet="{data_snippet}"', str(value))
+        self.assertIn(f"data-snippet='{data_snippet}'", str(value))
