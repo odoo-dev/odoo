@@ -6,8 +6,6 @@
     'description': """Export FA(3) compliant XML invoices and prepare for integration with KSeF.""",
     'data': [
         'views/account_move_views.xml',
-        'security/ir.model.access.csv',
-        'wizard/l10n_pl_edi_cert_upload_wizard_views.xml',
         'views/res_config_settings_views.xml',
         'data/ir_cron_data.xml',
         'data/fa3_template.xml',
