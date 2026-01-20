@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template>
+    <t t-name="web.JsonSelection">
+        
+        <div t-foreach="state.identifiers" t-as="identifier" t-key="identifier_index" class="d-flex gap-1 mb-1">
+
+            <select class="form-select form-select-sm" 
+                    t-on-change="(ev) => this.onChangeRow(identifier_index, 'key', ev)">
+                
+                <t t-foreach="formats" t-as="format" t-key="format[0]">
+                    <t t-if="!format[2] or format[2].includes(state.country)">
+                        <option t-att-value="format[0]"
+                            t-att-selected="identifier.key === format[0]">
+                            <t t-esc="format[1]"/>
+                        </option>
+                    </t>
+                </t>
+                
+            </select>
+
+            <input type="text" 
+                    class="form-control form-control-sm" 
+                    placeholder="Value"
+                    t-att-value="identifier.value" 
+                    t-on-change="(ev) => this.onChangeRow(identifier_index, 'value', ev)"/>
+            
+            <button class="btn btn-sm" t-on-click="() => this.removeRow(identifier_index)">
+                <i class="fa fa-trash"/>
+            </button>
+        </div>
+
+        <button class="btn btn-sm btn-link p-0" t-on-click="addRow">
+            <i class="fa fa-plus"/> Add Identifier
+        </button>
+
+    </t>
+</template>

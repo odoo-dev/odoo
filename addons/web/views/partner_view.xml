@@ -14,4 +14,20 @@
             }
         </field>
     </record>
+
+    <record id="view_partner_form_inherit" model="ir.ui.view">
+        <field name="name">res.partner.inherit.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <data>
+                <xpath expr="//field[@name='vat']" position="after">
+                    <field name="country_code" invisible="1"/>
+                    <field name="additional_identifiers" nolabel="1" colspan="2" widget="json_selection"/>
+
+                    <field name="additional_identifiers" widget="json" invisible="0"/>
+                </xpath>
+            </data>
+        </field>
+    </record>
 </odoo>
