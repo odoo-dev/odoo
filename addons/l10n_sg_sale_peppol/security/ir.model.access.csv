@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sale_peppol_advanced_order_transaction,sale.peppol.advanced.order.transaction,model_sale_peppol_advanced_order_transaction,sales_team.group_sale_salesman,1,1,1,0
+access_sale_peppol_advanced_order_transaction_account_readonly,sale.peppol.advanced.order.transaction,model_sale_peppol_advanced_order_transaction,account.group_account_readonly,1,0,0,0
+access_sale_peppol_advanced_order_transaction_account_invoice,sale.peppol.advanced.order.transaction,model_sale_peppol_advanced_order_transaction,account.group_account_invoice,1,1,1,0
