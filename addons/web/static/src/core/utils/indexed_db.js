@@ -281,7 +281,7 @@ export class IndexedDB {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(table, "readonly");
             const objectStore = transaction.objectStore(table);
-            const r = objectStore.getAll();
+            const r = objectStore.getAllKeys();
             r.onsuccess = () => resolve(r.result);
             transaction.onerror = () => reject(transaction.error);
         });
