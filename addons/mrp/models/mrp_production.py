@@ -802,7 +802,7 @@ class MrpProduction(models.Model):
                 updated_values = {}
                 if production.date_finished:
                     updated_values['date'] = production.date_finished
-                if production.date_deadline:
+                if production.date_deadline and production.move_finished_ids.filtered(lambda m: m.date_deadline != production.date_deadline):
                     updated_values['date_deadline'] = production.date_deadline
                 if 'date' in updated_values or 'date_deadline' in updated_values:
                     production.move_finished_ids = [
