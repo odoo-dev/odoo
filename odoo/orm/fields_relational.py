@@ -404,10 +404,11 @@ class Many2one(_Relational):
 
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
-        try:
-            records.env[self.comodel_name].browse(cache_value).check_access('read')
-        except AccessError:
-            raise UserError(records.env._("You are not allowed to write to this field"))
+        if self.store:
+            try:
+                records.env[self.comodel_name].browse(cache_value).check_access('read')
+            except AccessError:
+                raise UserError(records.env._("You are not allowed to write to this field"))
         records = self._filter_not_equal(records, cache_value)
         if not records:
             return
