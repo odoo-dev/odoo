@@ -21,7 +21,7 @@ class SpreadsheetDashboardFavoriteFilters(models.Model):
         index=True
     )
     is_default = fields.Boolean(string='Default Filter')
-    global_filters = fields.Json()
+    global_filters = fields.Json(readonly=False)
     active = fields.Boolean(default=True)
 
     @api.model

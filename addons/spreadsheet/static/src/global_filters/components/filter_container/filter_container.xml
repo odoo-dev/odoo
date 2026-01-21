@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+
+    <t t-name="spreadsheet.FilterContainer">
+        <t t-set="filter" t-value="props.filter"/>
+        <t t-set="isHorizontal" t-value="props.isLayoutHorizontal"/>
+
+        <div class="pivot-dimension w-100" t-att-class="isHorizontal ? 'd-flex align-items-center' : ' shadow-sm d-flex flex-column py-1 px-2 mb-2'">
+
+            <!-- Header -->
+            <div t-if="!isHorizontal"
+                class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center text-nowrap overflow-hidden">
+                    <i class="fa me-2" t-att-class="getFilterIcon(filter.type)"/>
+                    <span class="fw-bold" t-esc="filter.label"/>
+                </div>
+                <i t-if="props.onOpenEditor"
+                    class="fa fa-cog o-button-icon"
+                    t-on-click="() => props.onOpenEditor(filter.id)"/>
+            </div>
+            <div t-else="" class="me-1 w-25">
+                <t t-esc="filter.label"/>
+            </div>
+
+            <!-- Body -->
+            <div class="d-flex w-100"  t-att-class="isHorizontal ? 'align-items-center' : 'align-items-end py-1'">
+                <div class="d-flex w-100 mt-1"
+                    t-att-class="isHorizontal ? 'align-items-center' : 'flex-column align-items-stretch flex-grow-1 gap-1'">
+
+                    <!-- Operator -->
+                    <select t-if="operators.length"
+                            class="o_input text-truncate pe-3"
+                            t-att-class="isHorizontal ? 'w-25 me-3' : 'w-50'"
+                            t-on-change="(ev) => this.updateOperator(ev.target.value)"
+                            t-on-pointerdown.stop="">
+                        <t t-foreach="operators" t-as="operator" t-key="operator">
+                            <option t-att-value="operator"
+                                    t-att-selected="state.value?.operator === operator"
+                                    t-esc="getOperatorLabel(operator)"/>
+                        </t>
+                    </select>
+                    <div t-else="" class="w-25 me-3"/>
+
+                    <!-- Value -->
+                    <div class="w-100"
+                        t-on-pointerdown.stop="">
+                        <FilterValue
+                            filter="filter"
+                            model="props.model"
+                            globalFilterValue="state.value"
+                            setGlobalFilterValue="(_id, value) => this.setGlobalFilterValue(value)"/>
+                    </div>
+                </div>
+
+                <!-- Clear -->
+                <i t-att-class="hasClearButton ? 'visible' : 'invisible'"
+                    class="btn btn-link fa fa-times text-danger px-1"
+                    title="Clear"
+                    t-on-click="clearFilter"/>
+            </div>
+        </div>
+    </t>
+
+</templates>

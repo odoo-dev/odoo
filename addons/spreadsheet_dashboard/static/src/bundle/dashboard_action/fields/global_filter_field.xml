@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="spreadsheet.GlobalFilterField">
+        <t t-if="getDashboardId()">
+            <t t-if="state.folded">
+                <div class="d-flex align-items-center"
+                    t-on-click="() => state.folded = false">
+                    <i class="fa fa-lg fa-caret-right pe-2"
+                    data-tooltip="Modify global filter"/>
+
+                    <div class="d-print-contents d-flex flex-wrap gap-1">
+                        <t t-if="!state.facets.length">
+                            <span>No global filter applied</span>
+                        </t>
+                        <t t-foreach="state.facets" t-as="facet" t-key="facet.id">
+                            <div class="d-inline-flex align-items-stretch text-nowrap px-1 position-relative" role="listitem" tabindex="0">
+                                <div class="o_searchview_facet_label rounded-start-2 btn btn-primary px-1 rounded-end-0 p-0"  role="button">
+                                    <small class="px-1" t-esc="facet.title"/>
+                                </div>
+                                <div class="o_facet_values d-flex flex-wrap align-items-center bg-200 rounded-end-2">
+                                    <small t-if="facet.operator" class="opacity-50 ps-1 text-wrap" t-esc="facet.operator"/>
+                                    <t t-foreach="facet.values" t-as="value" t-key="value_index">
+                                        <em t-if="!value_first" class="opacity-50 text-wrap" t-esc="facet.separator"/>
+                                        <small class="px-1 text-wrap" t-esc="value"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="d-flex">
+                    <a t-on-click="() => state.folded = true">
+                        <i class="fa fa-lg fa-caret-down pe-2"/>
+                    </a>
+                    <div class="d-flex flex-column flex-grow-1 gap-2">
+                        <t t-foreach="state.filtersAndValues"
+                        t-as="item"
+                        t-key="item.globalFilter.id">
+                            <FilterContainer
+                                filter="item.globalFilter"
+                                model="state.dashboard.model"
+                                defaultValue="item.value"
+                                isLayoutHorizontal="true"
+                                updateFilterValue="(value) => this.updateFilterValue(item.globalFilter.id, value)"/>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </t>
+        <t t-else="">
+            <div class="text-muted">
+                Select a dashboard to edit global filters.
+            </div>
+        </t>
+    </t>
+
+</templates>
