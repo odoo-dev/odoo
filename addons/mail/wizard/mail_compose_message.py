@@ -608,9 +608,9 @@ class MailComposeMessage(models.TransientModel):
         removing the template, reset it. """
         for composer in self:
             if composer.template_id.mail_server_id:
-                composer.mail_server_id = composer.template_id.mail_server_id
+                composer.sudo().mail_server_id = composer.template_id.mail_server_id
             if not composer.template_id:
-                composer.mail_server_id = False
+                composer.sudo().mail_server_id = False
 
     @api.depends('composition_mode')
     def _compute_notify_author(self):
