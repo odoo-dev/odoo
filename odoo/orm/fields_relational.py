@@ -404,7 +404,7 @@ class Many2one(_Relational):
 
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
-        if self.store:
+        if self.store and any(id_ not in records.env._protected.get(self, ()) for id_ in records._ids):
             try:
                 records.env[self.comodel_name].browse(cache_value).check_access('read')
             except AccessError:
