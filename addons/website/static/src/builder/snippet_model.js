@@ -1,8 +1,9 @@
 import { applyTextHighlight } from "@website/js/highlight_utils";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
+import { SnippetModel } from "@html_builder/snippets/snippet_service";
 
-export const websiteSnippetModelPatch = {
+export class WebsiteSnippetModel extends SnippetModel {
     /**
      * @override
      */
@@ -12,7 +13,7 @@ export const websiteSnippetModelPatch = {
         for (const textEl of snippetEl?.querySelectorAll(".o_text_highlight") || []) {
             applyTextHighlight(textEl);
         }
-    },
+    }
 
     /**
      * @override
@@ -30,13 +31,15 @@ export const websiteSnippetModelPatch = {
             }
         }
         return label;
-    },
+    }
+
     cleanSnippetForSave(snippetCopyEl, cleanForSaveHandlers) {
         const rootEl = snippetCopyEl.matches(".s_popup")
             ? snippetCopyEl.firstElementChild
             : snippetCopyEl;
         super.cleanSnippetForSave(rootEl, cleanForSaveHandlers);
-    },
+    }
+
     getContext(snippetEl) {
         const context = super.getContext(...arguments);
         const editableParentEl = snippetEl.closest("[data-oe-model][data-oe-field][data-oe-id]");
@@ -45,8 +48,10 @@ export const websiteSnippetModelPatch = {
             field: editableParentEl.dataset.oeField,
             resId: editableParentEl.dataset.oeId,
         });
-    },
-};
+    }
+}
+
+registry.category("html_builder.snippetsModel").add("website.snippets", WebsiteSnippetModel);
 
 registry
     .category("html_builder.snippetsPreprocessor")
