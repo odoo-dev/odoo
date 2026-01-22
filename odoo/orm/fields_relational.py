@@ -6,6 +6,8 @@ import typing
 from collections import defaultdict
 from operator import attrgetter
 
+from werkzeug.datastructures import cache_control
+
 from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.tools import SQL, OrderedSet, sql, unique
 from odoo.tools.constants import PREFETCH_MAX
@@ -328,17 +330,13 @@ class Many2one(_Relational):
         return value or None
 
     def convert_to_column_insert(self, value, record, values=None, validate=True):
-        if isinstance(value, BaseModel):
-            check_record = value
-            value = value.id
-        else:
-            check_record = record.env[self.comodel_name].browse(value)
-        if value:
+        cache_value = self.convert_to_cache(value, record, validate)
+        if cache_value and not isinstance(value, BaseModel):
             try:
-                check_record.check_access('read')
+                record.env[self.comodel_name].browse(cache_value).check_access('read')
             except AccessError:
                 raise UserError(record.env._("You are not allowed to write to this field with value %s", value))
-        return super().convert_to_column_insert(value, record, values, validate)
+        return super().convert_to_column_insert(cache_value, record, values, validate)
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
@@ -417,10 +415,9 @@ class Many2one(_Relational):
 
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
-        if value and self.store and any(id_ not in records.env._protected.get(self, ()) for id_ in records._ids):
+        if cache_value and not isinstance(value, BaseModel):
             try:
-                env = value.env if isinstance(value, BaseModel) else records.env
-                env[self.comodel_name].browse(cache_value).check_access('read')
+                records.env[self.comodel_name].browse(tuple(cache_value)).check_access('read')
             except AccessError:
                 raise UserError(records.env._("You are not allowed to write to this field with value %s", value))
         records = self._filter_not_equal(records, cache_value)
