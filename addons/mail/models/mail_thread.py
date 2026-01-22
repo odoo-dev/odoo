@@ -2292,8 +2292,6 @@ class MailThread(models.AbstractModel):
         # split message additional values from notify additional values
         msg_kwargs = {key: val for key, val in kwargs.items()
                       if key in self.env['mail.message']._fields}
-        if 'message_tracking_values' in kwargs:
-            msg_kwargs['message_tracking_values'] = kwargs.get('message_tracking_values')
         notif_kwargs = {key: val for key, val in kwargs.items()
                         if key not in msg_kwargs}
 
@@ -2361,7 +2359,7 @@ class MailThread(models.AbstractModel):
         msg_values.update(
             self._process_attachments_for_post(attachments, attachment_ids, msg_values)
         )  # attachement_ids, body
-        new_message = self._message_create([msg_values])
+        new_message = self._message_create([msg_values], kwargs.get('message_tracking_values'))
 
         # subscribe author(s) so that they receive answers; do it only when it is
         # a manual post by the author (aka not a system notification, not a message
@@ -2385,7 +2383,6 @@ class MailThread(models.AbstractModel):
         we have to remove these tracking values to prevent tracking information from
         passed to _notify_thread.
         """
-        notif_kwargs.pop('message_tracking_values', False)
         self._notify_thread(new_message, msg_values, **notif_kwargs)
         return new_message
 
@@ -2965,7 +2962,6 @@ class MailThread(models.AbstractModel):
             'is_internal': True,
             'subject': subject,
             'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
-            'message_tracking_values': message_tracking_values,
             # recipients
             'email_add_signature': False,  # False as no notification -> no need to compute signature
             'message_id': generate_tracking_message_id('message-notify'),  # why? this is all but a notify
@@ -2977,7 +2973,7 @@ class MailThread(models.AbstractModel):
                             res_id=record.id,
                             body=escape(bodies.get(record.id, '')))
                        for record in self]
-        return self.sudo()._message_create(values_list)
+        return self.sudo()._message_create(values_list, message_tracking_values)
 
     def set_message_pin(self, message_id, pinned):
         """(Un)pin a message on the thread.
@@ -3084,7 +3080,7 @@ class MailThread(models.AbstractModel):
         self.ensure_one()
         return self.display_name
 
-    def _message_create(self, values_list):
+    def _message_create(self, values_list, tracking=None):
         """ Low-level helper to create mail.message records. It is mainly used
         to hide the cleanup of given values, for mail gateway or helpers."""
         values_list = [
@@ -3106,8 +3102,12 @@ class MailThread(models.AbstractModel):
         for values in values_list:
             create_values = dict(values)
             create_values['partner_ids'] = [(4, pid) for pid in (create_values.get('partner_ids') or [])]
+            if tracking:
+                tracking_template_message = self.env['ir.qweb']._render(
+                    "mail.mail_tracking_template", {'trackingValues': tracking}
+                )
+                create_values['body'] = tracking_template_message + Markup(values['body']) if values.get('body') else tracking_template_message
             create_values_list.append(create_values)
-
         # remove context, notably for default keys, as this thread method is not
         # meant to propagate default values for messages, only for master records
         return self.env['mail.message'].with_context(
@@ -3147,7 +3147,6 @@ class MailThread(models.AbstractModel):
             'res_id',
             'subject',
             'subtype_id',
-            'message_tracking_values',
         }
 
     def _get_message_create_ignore_field_names(self):

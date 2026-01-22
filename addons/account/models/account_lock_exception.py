@@ -206,6 +206,7 @@ class AccountLock_Exception(models.Model):
             )
             company.sudo().message_post(
                 body=company_chatter_message,
+                message_type="tracking",
                 message_tracking_values=[tracking_values],
             )
 

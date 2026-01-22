@@ -713,12 +713,6 @@ class MailMessage(models.Model):
                     return '%s%s alt="%s"' % (data_to_url[key][0], match.group(3), data_to_url[key][1])
                 values['body'] = _image_dataurl.sub(base64_to_boundary, values['body'] or '')
 
-            tracking_values_cmd = values.pop('message_tracking_values', False)
-            if tracking_values_cmd:
-                tracking_template_message = self.env['ir.qweb']._render(
-                    "mail.mail_tracking_template", {'trackingValues': tracking_values_cmd}
-                )
-                values['body'] = tracking_template_message + Markup(values['body']) if values.get('body') else tracking_template_message
         messages = super().create(vals_list)
 
         # link back attachments to records, to filter out attachments linked to
