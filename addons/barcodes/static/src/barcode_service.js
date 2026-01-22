@@ -70,15 +70,18 @@ export const barcodeService = {
             }
         }
 
-        function inputHandler(ev) {
+        function scanKeydownHandler(ev) {
+            if (ev.key.match(/(Enter|Tab)/)) {
+                clearTimeout(timeout);
+                checkBarcode();
+            };
+        }
+
+        function scanInputHandler(ev) {
             barcodeInput.setAttribute("inputmode", "none");
 
             clearTimeout(timeout);
             timeout = setTimeout(checkBarcode, barcodeService.maxTimeBetweenKeysInMs);
-
-            if (ev.key.match(/(Enter|Tab)/)) {
-                checkBarcode();
-            };
         }
 
         whenReady(() => {
@@ -87,7 +90,10 @@ export const barcodeService = {
             document.body.addEventListener('keydown', keydownHandler);
 
             [barcodeInput, ...document.querySelectorAll('input[barcode_events]')].forEach(
-                el => el.addEventListener('input', inputHandler)
+                el => {
+                    el.addEventListener('keydown', scanKeydownHandler);
+                    el.addEventListener('input', scanInputHandler);
+                }
             );
         });
 
