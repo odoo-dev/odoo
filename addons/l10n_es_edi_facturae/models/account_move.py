@@ -315,7 +315,6 @@ class AccountMove(models.Model):
 
         xml_values = {
             'ReceiverTransactionReference': receiver_transaction_reference,
-            'FileReference': invoice_ref,
             'ReceiverContractReference': invoice_ref,
             'FileDate': fields.Date.context_today(self),
             'ItemDescription': line.name,
@@ -421,7 +420,6 @@ class AccountMove(models.Model):
                 'LanguageName': self.env.context.get('lang', 'en_US').split('_')[0],
                 'InvoicingPeriod': None,
                 'ReceiverTransactionReference': invoice_ref,
-                'FileReference': invoice_ref,
                 'ReceiverContractReference': invoice_ref,
             },
             'TaxOutputs': [],
