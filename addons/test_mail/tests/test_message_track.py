@@ -784,8 +784,8 @@ class TestTrackingInternals(MailCommon):
             body='Custom Log with Tracking',
             message_tracking_values=[{
                     'field_id': field.id,
-                    'new_value_char': 'secret',
-                    'old_value_char': False,
+                    'new_value': 'secret',
+                    'old_value': False,
                     'fieldinfo': {
                         'string': field.field_description,
                         'name': field.name,
@@ -800,8 +800,8 @@ class TestTrackingInternals(MailCommon):
                         'sequence': 35,
                         'type': "float",
                     },
-                    'new_value_float': 1,
-                    'old_value_float': False,
+                    'new_value': 1,
+                    'old_value': False,
                 }, {
                     'field_id': 5,
                     'fieldinfo': {
@@ -810,8 +810,8 @@ class TestTrackingInternals(MailCommon):
                         'sequence': 35,
                         'type': 'integer',
                     },
-                    'new_value_integer': 35,
-                    'old_value_integer': 30,
+                    'new_value': 35,
+                    'old_value': 30,
                 },
             ],
         )

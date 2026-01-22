@@ -714,23 +714,9 @@ class MailMessage(models.Model):
                 values['body'] = _image_dataurl.sub(base64_to_boundary, values['body'] or '')
 
             tracking_values_cmd = values.pop('message_tracking_values', False)
-            tracking_value_list = []
             if tracking_values_cmd:
-                for vals in tracking_values_cmd:
-                    fieldinfo = vals.get('fieldinfo')
-                    if not fieldinfo:
-                        continue
-
-                    formatted_vals = self.env['mail.thread']._format_display_value(
-                        vals,
-                        fieldinfo,
-                        values.get('author_id'),
-                    )
-                    tracking_value_list.append({**formatted_vals, 'field_name': fieldinfo['string']})
-
-            if tracking_value_list:
                 tracking_template_message = self.env['ir.qweb']._render(
-                    "mail.mail_tracking_template", {'trackingValues': tracking_value_list}
+                    "mail.mail_tracking_template", {'trackingValues': tracking_values_cmd}
                 )
                 values['body'] = tracking_template_message + Markup(values['body']) if values.get('body') else tracking_template_message
         messages = super().create(vals_list)

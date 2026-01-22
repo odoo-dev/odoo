@@ -8,7 +8,7 @@ from markupsafe import Markup
 
 from odoo import api, exceptions, fields, models, tools, _
 from odoo.addons.mail.tools.alias_error import AliasError
-from odoo.tools import parse_contact_from_email
+from odoo.tools import parse_contact_from_email, format_datetime, format_date, format_amount, formatLang
 from odoo.tools.mail import email_normalize, email_split_and_format
 
 import logging
@@ -942,33 +942,38 @@ class Base(models.AbstractModel):
         if not field:
             raise ValueError(f'Unknown field {col_name} on model {self._name}')
 
-        values = {'field_id': field.id, 'field_name': field.name, 'fieldinfo': col_info}
+        values = {'field_id': field.id, 'fieldinfo': col_info}
 
-        if col_info['type'] in {'integer', 'float', 'char', 'text', 'datetime'}:
+        if col_info['type'] in {'integer', 'float', 'char', 'text'}:
             values.update({
-                f'old_value_{col_info["type"]}': initial_value,
-                f'new_value_{col_info["type"]}': new_value
+                'old_value': initial_value or self.env._('None'),
+                'new_value': new_value or self.env._('None')
             })
         elif col_info['type'] == 'monetary':
+            currency = self.env['res.currency'].browse(self[col_info['currency_field']].id)
             values.update({
-                'currency_id': self[col_info['currency_field']].id,
-                'old_value_float': initial_value,
-                'new_value_float': new_value
+                'old_value': format_amount(self.env, initial_value, currency) if initial_value else 0,
+                'new_value': format_amount(self.env, new_value, currency) if new_value else 0
+            })
+        elif col_info['type'] == 'datetime':
+            values.update({
+                'old_value': format_datetime(self.env, initial_value, tz=self.env.user.tz) if initial_value else self.env._('None'),
+                'new_value': format_datetime(self.env, new_value, tz=self.env.user.tz) if new_value else self.env._('None'),
             })
         elif col_info['type'] == 'date':
             values.update({
-                'old_value_datetime': initial_value and fields.Datetime.to_string(datetime.combine(fields.Date.from_string(initial_value), datetime.min.time())) or False,
-                'new_value_datetime': new_value and fields.Datetime.to_string(datetime.combine(fields.Date.from_string(new_value), datetime.min.time())) or False,
+                'old_value': format_date(self.env, initial_value) if initial_value else self.env._('None'),
+                'new_value': format_date(self.env, new_value) if new_value else self.env._('None'),
             })
         elif col_info['type'] == 'boolean':
             values.update({
-                'old_value_integer': initial_value,
-                'new_value_integer': new_value
+                'old_value': initial_value or self.env._('False'),
+                'new_value': new_value or self.env._('False')
             })
         elif col_info['type'] == 'selection':
             values.update({
-                'old_value_char': initial_value and dict(col_info['selection']).get(initial_value, initial_value) or '',
-                'new_value_char': new_value and dict(col_info['selection'])[new_value] or ''
+                'old_value': initial_value and dict(col_info['selection']).get(initial_value, initial_value) or 'None',
+                'new_value': new_value and dict(col_info['selection'])[new_value] or 'None'
             })
         elif col_info['type'] == 'many2one':
             # Can be:
@@ -986,10 +991,8 @@ class Base(models.AbstractModel):
                 new_value = (new_value.id, new_value.display_name)
 
             values.update({
-                'old_value_integer': initial_value[0],
-                'new_value_integer': new_value[0],
-                'old_value_char': initial_value[1],
-                'new_value_char': new_value[1]
+                'old_value': initial_value[1] or self.env._('None'),
+                'new_value': new_value[1] or self.env._('None'),
             })
         elif col_info['type'] in {'one2many', 'many2many', 'tags'}:
             # Can be:
@@ -1023,10 +1026,14 @@ class Base(models.AbstractModel):
                 new_value_char = ', '.join(value[1] for value in new_value)
 
             values.update({
-                'old_value_char': old_value_char,
-                'new_value_char': new_value_char,
+                'old_value': old_value_char or self.env._('None'),
+                'new_value': new_value_char or self.env._('None'),
             })
         else:
             raise NotImplementedError(f'Unsupported tracking on field {field.name} (type {col_info["type"]}')
+        values.update({
+            'company_name': self.env.company.name if col_info.get('company_dependent') else False,
+            'field_name': self.env['mail.thread']._get_field_string(col_info),
+        })
 
         return values

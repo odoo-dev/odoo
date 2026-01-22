@@ -634,8 +634,7 @@ class MailThread(models.AbstractModel):
             and f.definition_record in model_fields
             and getattr(f, "tracking", None) is not False
         }
-
-        return model_fields and set(self.fields_get(model_fields, attributes=()))
+        return model_fields and set(self.fields_get(model_fields, attributes=())) - set(self._skip_track_fields())
 
     def _track_subtype(self, initial_values):
         """ Give the subtypes triggered by the changes on the record according
@@ -648,51 +647,6 @@ class MailThread(models.AbstractModel):
         """
         self.ensure_one()
         return False
-
-    def _format_display_value(self, data, fieldinfo, author_id):
-        old = new = None
-        field_type = fieldinfo['type']
-        if field_type in ['many2many', 'many2one', 'one2many', 'char', 'selection', 'tags']:
-            old = data.get('old_value_char') or self.env._('None')
-            new = data.get('new_value_char') or self.env._('None')
-        elif field_type in ['integer', 'boolean']:
-            if field_type == 'integer':
-                old = formatLang(self.env, data.get('old_value_integer')) if data.get('old_value_integer') else 0
-                new = formatLang(self.env, data.get('new_value_integer')) if data.get('new_value_integer') else 0
-            else:
-                old = data.get('old_value_integer') or 'False'
-                new = data.get('new_value_integer') or 'False'
-        elif field_type in ['float', 'monetary']:
-            if field_type == 'monetary' and data.get('currency_id'):
-                currency = self.env['res.currency'].browse(data.get('currency_id'))
-                old = format_amount(self.env, data.get('old_value_float'), currency) if data.get('old_value_float') else 0
-                new = format_amount(self.env, data.get('new_value_float'), currency) if data.get('new_value_float') else 0
-            else:
-                old = formatLang(self.env, data.get('old_value_float')) if data.get('old_value_float') else 0
-                new = formatLang(self.env, data.get('new_value_float')) if data.get('new_value_float') else 0
-        elif field_type == 'text':
-            old = data.get('old_value_text') or self.env._('None')
-            new = data.get('new_value_text') or self.env._('None')
-        elif field_type in ['date', 'datetime']:
-            tz = self.env.user.tz
-            if author_id:
-                tz = self.env['res.partner'].browse(author_id).tz
-            if field_type == 'datetime':
-                old = format_datetime(self.env, data.get('old_value_datetime'), tz=tz) if data.get('old_value_datetime') else self.env._('None')
-                new = format_datetime(self.env, data.get('new_value_datetime'), tz=tz) if data.get('new_value_datetime') else self.env._('None')
-            else:
-                old = format_date(self.env, data.get('old_value_datetime')) if data.get('old_value_datetime') else self.env._('None')
-                new = format_date(self.env, data.get('new_value_datetime')) if data.get('new_value_datetime') else self.env._('None')
-        # property field case: new_value empty
-        if not new:
-            new = old
-            old = None
-        return {
-            "old_value": old,
-            "new_value": new,
-            'company_name': (data.get('company_name') or self.env.company.name) if fieldinfo.get('company_dependent') else False,
-            'field_name': self._get_field_string(fieldinfo),
-        }
 
     @api.model
     def _skip_track_fields(self):
@@ -712,14 +666,8 @@ class MailThread(models.AbstractModel):
         """
         return fieldinfo.get('string', '')
 
-    def _log_tracking_values_in_body(self, body, message_tracking_values, skip_fields, author_id, subtype=False):
-        tracking_value_list = []
-        for val_item in message_tracking_values:
-            field_data = val_item['fieldinfo']
-            if field_data['name'] in skip_fields:
-                continue
-            tracking_value_list.append(self._format_display_value(val_item, field_data, author_id))
-        html_body = self.env['ir.qweb']._render("mail.mail_tracking_template", {'trackingValues': tracking_value_list})
+    def _log_tracking_values_in_body(self, body, message_tracking_values, author_id, subtype=False):
+        html_body = self.env['ir.qweb']._render("mail.mail_tracking_template", {'trackingValues': message_tracking_values})
         html_body = html_body + Markup(body) if body else html_body
         if subtype:
             self.message_post(
@@ -778,8 +726,7 @@ class MailThread(models.AbstractModel):
                 if not subtype.exists():
                     _logger.debug('subtype "%s" not found' % subtype.name)
                     continue
-            skip_fields = record._skip_track_fields()
-            record._log_tracking_values_in_body(body, message_tracking_values, skip_fields, author_id, subtype)
+            record._log_tracking_values_in_body(body, message_tracking_values, author_id, subtype)
 
         return tracking
 

@@ -458,7 +458,7 @@ class AccountTax(models.Model):
             remaining_values = []
             for val_item in message_tracking_values:
                 if val_item.get('field_id') == repartition_line_str_field_id:
-                    self._message_log_repartition_lines(val_item['old_value_char'], val_item['new_value_char'])
+                    self._message_log_repartition_lines(val_item['old_value'], val_item['new_value'])
                 else:
                     remaining_values.append(val_item)
             if remaining_values:

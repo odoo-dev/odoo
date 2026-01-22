@@ -42,14 +42,12 @@ class FullBaseMailPerformance(BaseMailPostPerformance):
         cls.message_tracking_values = [
             {
                 'field_id': cls.env['ir.model.fields']._get(cls.record_ticket._name, 'email_from').id,
-                'new_value_char': 'new_value',
-                'old_value_char': 'old_value',
+                'old_value': 'new_value',
+                'new_value': 'old_value',
             }, {
                 'field_id': cls.env['ir.model.fields']._get(cls.record_ticket._name, 'customer_id').id,
-                'new_value_char': 'New Fake',
-                'new_value_integer': 2,
-                'old_value_char': 'Old Fake',
-                'old_value_integer': 1,
+                'old_value': 'New Fake',
+                'new_value': 'Old Fake',
             },
         ]
 
