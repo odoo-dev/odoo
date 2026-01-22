@@ -8,13 +8,12 @@ import {
     getFilterTypeOperators,
 } from "@spreadsheet/global_filters/helpers";
 import { useService } from "@web/core/utils/hooks";
-import { isEmptyFilterValue } from "../../helpers";
+import { isEmptyFilterValue } from "../../../../../../spreadsheet/static/src/global_filters/helpers";
 import { deepEqual } from "@web/core/utils/objects";
 
 /**
- * This component is used to display a list of all the global filters of a
- * spreadsheet/dashboard. It allows the user to select the values of the filters
- * and confirm or discard the changes.
+ * This component is used to display a list of all the global filters of a dashboard.
+ * It allows the user to select the values of the filters and confirm or discard the changes.
  */
 export class FilterValuesList extends Component {
     static template = "spreadsheet.FilterValuesList";
@@ -23,7 +22,6 @@ export class FilterValuesList extends Component {
     static props = {
         close: Function,
         model: Object,
-        openFiltersEditor: { type: Function, optional: true },
     };
 
     setup() {

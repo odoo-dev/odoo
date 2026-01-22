@@ -8,7 +8,7 @@ import { addGlobalFilter } from "@spreadsheet/../tests/helpers/commands";
 
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 import { Component, onWillUnmount, xml } from "@odoo/owl";
-import { FilterValuesList } from "@spreadsheet/global_filters/components/filter_values_list/filter_values_list";
+import { FilterValuesList } from "@spreadsheet_dashboard/bundle/dashboard_action/filter_values_list/filter_values_list";
 
 describe.current.tags("headless");
 defineSpreadsheetModels();
@@ -55,16 +55,6 @@ test("basic text filter", async function () {
     await mountFilterValuesList(env, { model });
     expect(".o-filter-values").toHaveCount(1);
     expect(".fa-pencil").toHaveCount(0);
-});
-
-test("Edit filter is displayed when the props openFiltersEditor is set", async function () {
-    const env = await makeMockEnv();
-    const model = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
-    await mountFilterValuesList(env, {
-        model,
-        openFiltersEditor: () => {},
-    });
-    expect(queryAllTexts(".o-filter-values-footer button")).toEqual(["Filter", "Edit", "Discard"]);
 });
 
 test("filter search dialog with no active filters", async function () {

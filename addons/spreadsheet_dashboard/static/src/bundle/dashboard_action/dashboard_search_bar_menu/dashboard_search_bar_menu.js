@@ -1,10 +1,10 @@
-import { FilterValuesList } from "@spreadsheet/global_filters/components/filter_values_list/filter_values_list";
 import { FACET_ICONS } from "@web/search/utils/misc";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { DashboardCustomFavoriteItem } from "./dashboard_custom_favorite_item";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { FilterValuesList } from "../filter_values_list/filter_values_list";
 
 export class DashboardSearchBarMenu extends FilterValuesList {
     static template = "spreadsheet_dashboard.DashboardSearchBarMenu";
