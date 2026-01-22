@@ -327,6 +327,19 @@ class Many2one(_Relational):
     def convert_to_column(self, value, record, values=None, validate=True):
         return value or None
 
+    def convert_to_column_insert(self, value, record, values=None, validate=True):
+        if isinstance(value, BaseModel):
+            check_record = value
+            value = value.id
+        else:
+            check_record = record.env[self.comodel_name].browse(value)
+        if value:
+            try:
+                check_record.check_access('read')
+            except AccessError:
+                raise UserError(record.env._("You are not allowed to write to this field with value %s", value))
+        return super().convert_to_column_insert(value, record, values, validate)
+
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
         if type(value) is int or type(value) is NewId:
@@ -404,11 +417,12 @@ class Many2one(_Relational):
 
         # discard the records that are not modified
         cache_value = self.convert_to_cache(value, records)
-        if self.store and any(id_ not in records.env._protected.get(self, ()) for id_ in records._ids):
+        if value and self.store and any(id_ not in records.env._protected.get(self, ()) for id_ in records._ids):
             try:
-                records.env[self.comodel_name].browse(cache_value).check_access('read')
+                env = value.env if isinstance(value, BaseModel) else records.env
+                env[self.comodel_name].browse(cache_value).check_access('read')
             except AccessError:
-                raise UserError(records.env._("You are not allowed to write to this field"))
+                raise UserError(records.env._("You are not allowed to write to this field with value %s", value))
         records = self._filter_not_equal(records, cache_value)
         if not records:
             return
