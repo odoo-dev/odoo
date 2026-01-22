@@ -63,11 +63,6 @@ export const barcodeService = {
                 return;
             }
 
-            currentTarget = ev.target;
-            if (currentTarget.getAttribute("barcode_events") === "true") {
-                currentTarget.addEventListener('input', inputHandler);
-            }
-
             if (document.activeElement && !document.activeElement.matches('input:not([type]), input[type="text"], textarea, [contenteditable], ' +
                 '[type="email"], [type="number"], [type="password"], [type="tel"], [type="search"]')) {
                 barcodeInput.focus();
@@ -88,9 +83,12 @@ export const barcodeService = {
 
         whenReady(() => {
             document.body.appendChild(barcodeInput);
-            barcodeInput.addEventListener('input', inputHandler);
 
             document.body.addEventListener('keydown', keydownHandler);
+
+            [barcodeInput, ...document.querySelectorAll('input[barcode_events]')].forEach(
+                el => el.addEventListener('input', inputHandler)
+            );
         });
 
         return {
