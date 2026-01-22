@@ -128,7 +128,6 @@
             <InvoiceLine>
                 <ReceiverContractReference t-out="line.get('ReceiverContractReference')"/>
                 <ReceiverTransactionReference t-out="line.get('ReceiverTransactionReference')"/>
-                <FileReference t-out="line.get('FileReference')"/>
                 <FileDate t-out="line.get('FileDate')"/>
                 <SequenceNumber t-out="line.get('SequenceNumber')"/>
                 <ItemDescription t-out="line['ItemDescription']"/>
@@ -207,7 +206,6 @@
                     <TaxCurrencyCode t-out="invoice['invoice_currency'].name"/>
                     <LanguageName t-out="invoice['InvoiceIssueData']['LanguageName']"/>
                     <ReceiverTransactionReference t-out="invoice['InvoiceIssueData']['ReceiverTransactionReference']"/>
-                    <FileReference t-out="invoice['InvoiceIssueData']['FileReference']"/>
                     <ReceiverContractReference t-out="invoice['InvoiceIssueData']['ReceiverContractReference']"/>
                 </InvoiceIssueData>
                 <TaxesOutputs>
