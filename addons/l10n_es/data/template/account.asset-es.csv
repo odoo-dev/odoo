@@ -1,0 +1,19 @@
+id,account_asset_id,account_depreciation_id,account_expense_id,name,method_number,method_period
+asset_model_research,280000,280000,680000,Research,5,12
+asset_model_development,280000,280000,680000,Development,5,12
+asset_model_admin_concessions,280000,280000,682000,Administrative concessions,5,12
+asset_model_industrial_property,280000,280000,682000,Industrial property,10,12
+asset_model_goodwill,280000,280000,682000,Goodwill,10,12
+asset_model_leaseholds,280000,280000,682000,Leaseholds,5,12
+asset_model_software,280000,280000,682000,Computer software,5,12
+asset_model_advances_intangibles,280000,280000,682000,Advances for intangible assets,5,12
+asset_model_buildings,281100,281100,681000,Buildings,30,12
+asset_model_technical_installations,281200,281200,681000,Technical installations,10,12
+asset_model_machinery,281300,281300,681000,Machinery,8,12
+asset_model_equipment,281400,281400,681000,Equipment,5,12
+asset_model_other_installations,281500,281500,681000,Other installations,10,12
+asset_model_furniture,281600,281600,681000,Furniture,10,12
+asset_model_it_equipment,281700,281700,681000,Information technology equipment,4,12
+asset_model_motor_vehicles,281800,281800,681000,Motor vehicles,4,12
+asset_model_other_property,281900,281900,681000,"Other property, plant and equipment",5,12
+asset_model_investments_buildings,282000,282000,682000,Investments in buildings,30,12
