@@ -129,6 +129,24 @@ class SaleOrderLine(models.Model):
         compute='_compute_product_uom_qty',
         digits='Product Unit', default=1.0,
         store=True, readonly=False, required=True, precompute=True)
+    
+    delivered_percent = fields.Float(
+        string="Delivered (%)",
+        compute="_compute_delivered_percent",
+        inverse="_inverse_delivered_percent",
+        copy=False
+    )
+
+    product_template_invoice_policy = fields.Selection(
+        related='product_template_id.invoice_policy',
+        string="Invoice Policy",
+    )
+
+    product_template_service_type = fields.Selection(
+        related='product_template_id.service_type',
+        string="Service Type",
+    )
+
     product_uom_id = fields.Many2one(
         comodel_name='uom.uom',
         string="Unit",
@@ -582,6 +600,19 @@ class SaleOrderLine(models.Model):
                     product=line.product_id,
                     **line._get_pricelist_kwargs(),
                 )
+    @api.depends('product_uom_qty', 'qty_delivered')
+    def _compute_delivered_percent(self):
+        for line in self:
+            if line.product_uom_qty:
+                line.delivered_percent = line.qty_delivered / line.product_uom_qty
+            else:
+                line.delivered_percent = 0.0
+
+    @api.onchange('delivered_percent')
+    def _inverse_delivered_percent(self):
+        for line in self:
+            if line.product_uom_qty:
+                line.qty_delivered = line.delivered_percent * line.product_uom_qty
 
     @api.depends('product_id', 'product_uom_id', 'product_uom_qty')
     def _compute_price_unit(self):

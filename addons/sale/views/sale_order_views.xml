@@ -632,7 +632,8 @@
                                 <field name="linked_virtual_id" column_invisible="1"/>
                                 <field name="collapse_composition" column_invisible="1"/>
                                 <field name="collapse_prices" column_invisible="1"/>
-
+                                <field name="product_template_invoice_policy" column_invisible="1"/>
+                                <field name="product_template_service_type" column_invisible="1"/>
                                 <!-- Currency, needed for monetary widgets to display the currency symbol -->
                                 <field name="currency_id" column_invisible="True"/>
 
@@ -693,6 +694,16 @@
                                     column_invisible="parent.state != 'sale'"
                                     readonly="qty_delivered_method != 'manual' or is_downpayment"
                                     optional="show"/>
+                                <field
+                                    name="delivered_percent"
+                                    string="Delivered (%)"
+                                    widget="percentage"
+                                    optional="hide"
+                                    column_invisible="parent.state != 'sale'"
+                                    readonly="qty_delivered_method != 'manual' 
+                                    or is_downpayment
+                                    or product_template_invoice_policy != 'manual'
+                                    or product_template_service_type != 'delivery'"/>    
                                 <field
                                     name="qty_invoiced"
                                     string="Invoiced"
