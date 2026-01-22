@@ -29,6 +29,8 @@ from odoo.tools import posix_to_ldml
 from odoo.tools.json import scriptsafe as json_safe
 from odoo.tools.misc import file_open, get_lang, babel_locale_parse
 
+from odoo.addons.base.models.ir_qweb import indent_code
+
 REMOTE_CONNECTION_TIMEOUT = 2.5
 
 logger = logging.getLogger(__name__)
@@ -39,43 +41,6 @@ class IrQweb(models.AbstractModel):
     """
     _inherit = 'ir.qweb'
 
-    def _compile_node(self, el, compile_context, level):
-        snippet_key = compile_context.get('snippet-key')
-
-        template = compile_context['ref_name']
-        sub_call_key = compile_context.get('snippet-sub-call-key')
-
-        # We only add the 'data-snippet' & 'data-name' attrib once when
-        # compiling the root node of the template.
-        if not template or template not in {snippet_key, sub_call_key} or el.getparent() is not None:
-            return super()._compile_node(el, compile_context, level)
-
-        snippet_base_node = el
-        if el.tag == 't':
-            el_children = [child for child in list(el) if isinstance(child.tag, str) and child.tag != 't']
-            if len(el_children) == 1:
-                snippet_base_node = el_children[0]
-            elif not el_children:
-                # If there's not a valid base node we check if the base node is
-                # a t-call to another template. If so the called template's base
-                # node must take the current snippet key.
-                el_children = [child for child in list(el) if isinstance(child.tag, str)]
-                if len(el_children) == 1:
-                    sub_call = el_children[0].get('t-call')
-                    if sub_call:
-                        el_children[0].set('t-options', f"{{'snippet-key': '{snippet_key}', 'snippet-sub-call-key': '{sub_call}'}}")
-        # If it already has a data-snippet it is a saved or an
-        # inherited snippet. Do not override it.
-        if 'data-snippet' not in snippet_base_node.attrib:
-            snippet_base_node.attrib['data-snippet'] = \
-                snippet_key.split('.', 1)[-1]
-        # If it already has a data-name it is a saved or an
-        # inherited snippet. Do not override it.
-        snippet_name = compile_context.get('snippet-name')
-        if snippet_name and 'data-name' not in snippet_base_node.attrib:
-            snippet_base_node.attrib['data-name'] = snippet_name
-        return super()._compile_node(el, compile_context, level)
-
     def _get_preload_attribute_xmlids(self):
         return super()._get_preload_attribute_xmlids() + ['t-snippet', 't-snippet-call']
 
@@ -83,12 +48,10 @@ class IrQweb(models.AbstractModel):
 
     def _compile_directive_snippet(self, el, compile_context, indent):
         key = el.attrib.pop('t-snippet')
-        el.set('t-call', key)
         snippet_lang = self.env.context.get('snippet_lang')
         if snippet_lang:
             el.set('t-lang', f"'{snippet_lang}'")
 
-        el.set('t-options', f"{{'snippet-key': {key!r}}}")
         view = self.env['ir.ui.view']._get_template_view(key)
         name = el.attrib.pop('string', view.name)
         thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")
@@ -115,16 +78,43 @@ class IrQweb(models.AbstractModel):
             Markup('data-o-label="%s"') % label if label else '',
         )
         self._append_text(div, compile_context)
-        code = self._compile_node(el, compile_context, indent)
+
+        el.set('t-snippet-call', key)
+        code = self._compile_directive_snippet_call(el, compile_context, indent)
+
         self._append_text('</div>', compile_context)
         return code
 
     def _compile_directive_snippet_call(self, el, compile_context, indent):
-        key = el.attrib.pop('t-snippet-call')
+        snippet_key = el.attrib.pop('t-snippet-call')
         snippet_name = el.attrib.pop('string', None)
-        el.set('t-call', key)
-        el.set('t-options', f"{{'snippet-key': {key!r}, 'snippet-name': {snippet_name!r}}}")
-        return self._compile_node(el, compile_context, indent)
+
+        el.set('t-call', snippet_key)
+
+        set_name = compile_context['make_name']('t_snippet')
+        tset = etree.Element('t', {'t-set': set_name})
+        parent = el.getparent()
+        if parent is not None:
+            parent.insert(parent.index(el), tset)
+        tset.insert(0, el)
+        el = tset
+
+        code = self._compile_node(el, compile_context, indent)
+        code.append(indent_code(f"""
+            snippet_call_content = str(values[{set_name!r}])
+            if '<' in snippet_call_content:
+                before, tag = snippet_call_content.split('<', 1)
+                in_tag, after = tag.split('>', 1)
+                insertion = ''
+                if ' data-snippet=' not in in_tag:
+                    insertion = " data-snippet={snippet_key.split('.', 1)[-1]!r}"
+                if {snippet_name!r} and ' data-name=' not in in_tag:
+                    insertion += " data-name={snippet_name!r}"
+                snippet_call_content = f"{{before}}<{{in_tag}}{{insertion}}>{{after}}"
+            yield snippet_call_content
+        """, indent))
+
+        return code
 
     def _compile_directive_install(self, el, compile_context, indent):
         key = el.attrib.pop('t-install')
