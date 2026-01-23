@@ -8,6 +8,7 @@ from . import domain
 from . import export
 from . import json
 from . import home
+from . import kpi_provider
 from . import model
 from . import pivot
 from . import profiling
