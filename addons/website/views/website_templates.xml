@@ -354,7 +354,9 @@
                 <path fill="#FFF" d="M8 8V1a1 1 0 1 1 2 0v8a1 1 0 0 1-1 1H1a1 1 0 1 1 0-2h7z"/>
             </svg>
             <div class="o_frontend_to_backend_buttons d-flex">
-                <a href="#" title="Go to your Odoo Apps" class="o_frontend_to_backend_apps_btn fa fa-th d-flex align-items-center justify-content-center text-decoration-none" data-bs-toggle="dropdown"/>
+                <a href="#" title="Go to your Odoo Apps" class="o_frontend_to_backend_apps_btn d-flex align-items-center justify-content-center text-decoration-none" data-bs-toggle="dropdown">
+                    <i class="oi oi-apps oi-large" aria-hidden="true"/>
+                </a>
                 <div class="dropdown-menu o_frontend_to_backend_apps_menu" role="menu">
                     <a role="menuitem" class="dropdown-item" t-out="menu['name']"
                        t-as="menu" t-foreach="env['ir.ui.menu'].with_context(force_action=True).load_menus_root()['children']"

@@ -736,9 +736,6 @@ font[class*='bg-'] {
     object-fit: cover;
 }
 // Icons
-.fa {
-    font-family: "FontAwesome" !important;
-}
 .fa, .social_media_img {
     $-size: map-get($spacers, 5);
 

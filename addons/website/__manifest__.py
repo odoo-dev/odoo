@@ -237,6 +237,7 @@
             "website/static/src/mail/core/common/**/*",
         ],
         'web.assets_frontend': [
+            ('include', 'web.icons_fonts'),
             'html_builder/static/src/utils/scrolling.js',
             'website/static/src/interactions/**/*',
             'website/static/src/core/**/*',
