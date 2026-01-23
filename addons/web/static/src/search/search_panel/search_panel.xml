@@ -17,7 +17,7 @@
         <t t-set="filters" t-value="getFilterSelection()" />
         <div class="d-flex">
             <button title="Open sidebar" aria-label="Open sidebar" class="btn btn-light btn-sm m-2 p-1 py-2">
-                <i class="oi oi-panel-right fa-flip-horizontal align-middle"/>
+                <i class="mi fa-flip-horizontal align-middle" data-icon="left_panel_open"/>
             </button>
             <div class="o_search_panel_current_selection text-truncate mx-auto">
                 <t t-if="!categories.length and !filters.length">
@@ -27,7 +27,7 @@
                     <t t-foreach="categories" t-as="category" t-key="category_index">
                         <span class="o_search_panel_category mb-2">
                             <i t-if="category.icon"
-                                t-attf-class="o_search_panel_section_icon fa {{ category.icon }} fa-rotate-90 mb-2"
+                                t-attf-class="o_search_panel_section_icon fa {{ category.icon }} mb-2"
                                 t-att-style="category.color and ('color: ' + category.color)"
                             />
                             <t t-out="category.values.join(' / ')" />
@@ -36,7 +36,7 @@
                     <t t-foreach="filters" t-as="filter" t-key="filter_index">
                         <span class="o_search_panel_filter mb-2">
                             <i t-if="filter.icon"
-                                t-attf-class="o_search_panel_section_icon fa {{ filter.icon }} fa-rotate-90 mb-2"
+                                t-attf-class="o_search_panel_section_icon fa {{ filter.icon }} mb-2"
                                 t-att-style="filter.color and ('color: ' + filter.color)"
                             />
                             <t t-out="filter.values.join(', ')" />
@@ -53,7 +53,7 @@
          t-att-class="env.searchModel.searchPanelInfo.className"
          t-custom-ref="root">
         <button t-if="!env.isSmall" class="btn btn-light btn-sm end-0 m-2 position-absolute px-2 py-1 top-0 z-1" t-on-click="toggleSidebar">
-            <i class="oi oi-fw oi-panel-right fa-flip-horizontal"/>
+            <i class="mi oi-fw fa-flip-horizontal" ata-icon="left_panel_close"/>
         </button>
         <div t-if="!sections or sections.length === 0" class="o_search_panel_empty_state me-3">
             <button class="btn mt-2 w-100 overflow-visible">
