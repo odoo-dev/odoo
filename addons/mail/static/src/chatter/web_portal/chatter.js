@@ -6,6 +6,7 @@ import {
     onMounted,
     onWillUpdateProps,
     useChildSubEnv,
+    useEffect,
     useRef,
     useState,
 } from "@odoo/owl";
@@ -36,7 +37,15 @@ export class Chatter extends Component {
         this.rootRef = useRef("root");
         this.onScrollDebounced = useThrottleForAnimation(this.onScroll);
         useChildSubEnv(this.childSubEnv);
-
+        useEffect(
+            (thread) => {
+                if (thread) {
+                    thread.inChatter++;
+                    return () => thread.inChatter--;
+                }
+            },
+            () => [this.state.thread]
+        );
         onMounted(this._onMounted);
         onWillUpdateProps((nextProps) => {
             this.state.disabled = !nextProps.threadId;

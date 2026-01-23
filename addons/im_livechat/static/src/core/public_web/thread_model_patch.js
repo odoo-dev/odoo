@@ -1,8 +1,35 @@
 import { fields } from "@mail/core/common/record";
 import { Thread } from "@mail/core/common/thread_model";
+import { effectWithDebouncedCleanup } from "@mail/utils/common/misc";
 import { _t } from "@web/core/l10n/translation";
 
 import { patch } from "@web/core/utils/patch";
+
+export const NOT_SHOWN_GC_DELAY = 5000; // Clean useless threads after 5 minutes.
+
+/** @type {typeof Thread} */
+const threadStaticPatch = {
+    new() {
+        /** @type {import("models").Thread} */
+        const thread = super.new(...arguments);
+        effectWithDebouncedCleanup({
+            delay: NOT_SHOWN_GC_DELAY,
+            dependencies: (thread) => ({ thread }),
+            effect({ thread }) {
+                return () => {
+                    if (thread.exists()) {
+                        console.warn("GC thread", thread.localId);
+                        thread.delete();
+                    }
+                };
+            },
+            predicate: (thread) => thread.shouldNotGC,
+            reactiveTargets: [thread],
+        });
+        return thread;
+    },
+};
+patch(Thread, threadStaticPatch);
 
 patch(Thread.prototype, {
     setup() {
@@ -139,6 +166,9 @@ patch(Thread.prototype, {
     },
     get shouldSubscribeToBusChannel() {
         return super.shouldSubscribeToBusChannel || Boolean(this.shadowedBySelf);
+    },
+    get shouldNotGC() {
+        return super.shouldNotGC || Boolean(this.shadowedBySelf);
     },
     async leaveChannel({ force = false } = {}) {
         if (

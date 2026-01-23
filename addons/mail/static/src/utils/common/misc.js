@@ -288,7 +288,7 @@ export function effectWithCleanup({ effect: effectFn, dependencies, reactiveTarg
  * @param {number} options.delay Debounce delay in milliseconds before running
  * cleanup.
  * @param {(...targets: T) => D} options.dependencies Function returning an
- * array of values tracked by the effect; passed to setup/cleanup.
+ * object of values tracked by the effect; passed to setup/cleanup.
  * @param {(...targets: T) => boolean} options.predicate Function returning a
  * boolean to determine whether the effect should be activated.
  * @param {[...T]} options.reactiveTargets Array of reactive objects that the

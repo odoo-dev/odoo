@@ -501,6 +501,9 @@ const threadPatch = {
                 (this.isLocallyPinned || this.chat_window?.isOpen)
         );
     },
+    get shouldNotGC() {
+        return super.shouldNotGC || this.displayInSidebar || Boolean(this.chat_window);
+    },
     get showUnreadBanner() {
         return this.self_member_id?.message_unread_counter_ui > 0;
     },

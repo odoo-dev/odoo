@@ -127,7 +127,11 @@ export class Message extends Record {
     notification_ids = fields.Many("mail.notification", { inverse: "mail_message_id" });
     partner_ids = fields.Many("res.partner");
     subtype_id = fields.One("mail.message.subtype");
-    thread = fields.One("Thread");
+    thread = fields.One("Thread", {
+        onDelete() {
+            this.delete();
+        },
+    });
     threadAsNeedaction = fields.One("Thread", {
         compute() {
             if (this.needaction) {
