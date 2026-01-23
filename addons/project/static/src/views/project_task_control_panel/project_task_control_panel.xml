@@ -6,7 +6,7 @@
             <t t-if="showTaskOptions and !env.isSmall or env.isSmall and !state.embeddedInfos.embeddedActions?.length">
                 <Dropdown>
                     <button class="btn btn-secondary" t-att-title="taskOptionsTitle">
-                        <i class="fa fa-sliders"/>
+                        <i class="mi" data-icon="tune" aria-hidden="true"/>
                     </button>
                     <t t-set-slot="content">
                         <DropdownItem onSelected="() => this.onClickShowSubtasks()" class="state.showSubtasks ? 'selected' : ''">

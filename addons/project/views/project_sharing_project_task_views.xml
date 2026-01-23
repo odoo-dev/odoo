@@ -54,7 +54,7 @@
                     <field t-if="record.date_deadline.raw_value" name="date_deadline" invisible="state in ['1_done', '1_canceled']" widget="remaining_days"/>
                     <field t-if="record.displayed_image_id.value" groups="base.group_user" name="displayed_image_id" widget="attachment_image"/>
                     <footer t-if="!selection_mode">
-                        <field name="priority" class="pt-1" widget="priority"/>
+                        <field name="priority" widget="priority"/>
                         <div class="d-flex ms-auto text-truncate">
                             <span t-if="record.portal_user_names.raw_value.length > 0" class="pe-2 text-truncate" t-att-title="record.portal_user_names.raw_value">
                                 <t t-set="user_count" t-value="record.portal_user_names.raw_value.split(',').length"/>
