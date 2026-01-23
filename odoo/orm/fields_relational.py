@@ -417,7 +417,7 @@ class Many2one(_Relational):
         cache_value = self.convert_to_cache(value, records)
         if cache_value and not isinstance(value, BaseModel):
             try:
-                records.env[self.comodel_name].browse(tuple(cache_value)).check_access('read')
+                records.env[self.comodel_name].browse(cache_value).check_access('read')
             except AccessError:
                 raise UserError(records.env._("You are not allowed to write to this field with value %s", value))
         records = self._filter_not_equal(records, cache_value)
