@@ -304,13 +304,15 @@ class Websocket:
     # How many seconds between each request.
     RL_DELAY = float(config['websocket_rate_limit_delay'])
 
-    def __init__(self, sock, session, cookies):
+    def __init__(self, sock, get_h11_trailing_data, session, cookies):
         # Session linked to the current websocket connection.
         self._session = session
         # Cookies linked to the current websocket connection.
         self._cookies = cookies
         self._db = session.db
         self.__socket = sock
+        self._get_h11_trailing_data = get_h11_trailing_data
+        self._h11_trailing_data = None
         self._close_sent = False
         self._close_received = False
         self._timeout_manager = TimeoutManager()
@@ -439,6 +441,13 @@ class Websocket:
         def recv_bytes(n):
             """ Pull n bytes from the socket """
             data = bytearray()
+            if self._get_h11_trailing_data:
+                self._trailing_data = bytearray(self._get_h11_trailing_data()[0])
+                self._get_h11_trailing_data = None
+            if self._trailing_data:
+                # TODO: Py3.15, bytearray.take_bytes
+                data.extend(self._trailing_data[:n])
+                self._trailing_data = self._trailing_data[n:]
             while len(data) < n:
                 received_data = self.__socket.recv(n - len(data))
                 if not received_data:
@@ -1003,9 +1012,10 @@ class WebsocketConnectionHandler:
         try:
             response = cls._get_handshake_response(request.httprequest.headers)
             socket = request.httprequest._HTTPRequest__environ['socket']
+            get_h11_trailing_data = request.httprequest._HTTPRequest__environ.get('h11.get_trailing_data', None)
             session, db, httprequest = (public_session or request.session), request.db, request.httprequest
             response.call_on_close(lambda: cls._serve_forever(
-                Websocket(socket, session, httprequest.cookies),
+                Websocket(socket, get_h11_trailing_data, session, httprequest.cookies),
                 db,
                 httprequest,
                 version
