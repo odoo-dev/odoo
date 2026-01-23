@@ -141,7 +141,20 @@ export class ImageShapeOptionPlugin extends Plugin {
     }
     async loadShape(img, newData = {}) {
         // todo: find a way to apply to carousel thumbnail after processImage
-        return this.dependencies.imagePostProcess.processImage({ img, newDataset: newData });
+        const updateImageAttributes = await this.dependencies.imagePostProcess.processImage({
+            img,
+            newDataset: newData,
+        });
+        return () => {
+            updateImageAttributes();
+            if (img.dataset.shape && img.dataset.stretch) {
+                const shapeURL = getShapeURL(img.dataset.shape);
+                img.style.mask = `url(${shapeURL}) no-repeat center / 100% 100%`;
+            } else {
+                img.style.removeProperty("mask");
+                delete img.dataset.stretch;
+            }
+        };
     }
     async processImageWarmup(img, newDataset) {
         const getData = (propName) =>
@@ -161,6 +174,12 @@ export class ImageShapeOptionPlugin extends Plugin {
         newDataset.shapeColors =
             newDataset.shapeColors ??
             (isNewShape ? defaultShapeColors : img.dataset.shapeColors ?? defaultShapeColors);
+
+        if (newDataset.stretch) {
+            return {
+                newDataset,
+            };
+        }
 
         const getNaturalWidth = async () => {
             if (img.naturalWidth) {
@@ -185,17 +204,6 @@ export class ImageShapeOptionPlugin extends Plugin {
         const svgAspectRatio =
             parseInt(svg.getAttribute("width")) / parseInt(svg.getAttribute("height"));
         const imgAspectRatio = svg.dataset.imgAspectRatio;
-
-        if (isNewShape && !("aspectRatio" in newDataset)) {
-            const data = getImageTransformationData({ ...img.dataset, ...newDataset });
-
-            // The togglable ratio is squared by default.
-            const shouldBeSquared =
-                this.imageShapes[shapeId].togglableRatio && !img.dataset.aspectRatio;
-            if (shouldBeSquared && !shouldPreventGifTransformation(data)) {
-                newDataset.aspectRatio = "1/1";
-            }
-        }
 
         /**
          * @param {HTMLCanvasElement} canvas
@@ -554,9 +562,10 @@ export class ToggleImageShapeRatioAction extends BuilderAction {
         return img.dataset.aspectRatio !== "1/1";
     }
     async load({ editingElement: img }) {
-        const isStretched = img.dataset.aspectRatio !== "1/1";
+        const stretch = !this.isApplied({ editingElement: img });
         return this.dependencies.imageShapeOption.loadShape(img, {
-            aspectRatio: isStretched ? "1/1" : "0/0",
+            stretch,
+            aspectRatio: stretch ? undefined : "1/1",
             x: undefined,
             y: undefined,
             width: undefined,

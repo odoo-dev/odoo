@@ -110,7 +110,7 @@
         }
 
         &.o_grid_item_image_contain img,
-        img[data-shape] {
+        img[data-shape]:not([data-stretch="true"]) {
             object-fit: contain !important;
         }
 
