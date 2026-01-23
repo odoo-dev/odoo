@@ -2064,13 +2064,7 @@ class StockPicking(models.Model):
         if reception_labels_to_print:
             moves_to_print = reception_labels_to_print.move_ids.move_dest_ids
             if moves_to_print:
-                # needs to be string to support python + js calls to report
-                quantities = ','.join(str(qty) for qty in moves_to_print.mapped(lambda m: math.ceil(m.product_uom_qty)))
-                data = {
-                    'docids': moves_to_print.ids,
-                    'quantity': quantities,
-                }
-                action = self.env.ref('stock.label_picking').report_action(moves_to_print, data=data, config=False)
+                action = moves_to_print.action_open_allocation_report()
                 clean_action(action, self.env)
                 report_actions.append(action)
         pickings_print_product_label = self.filtered(lambda p: p.picking_type_id.auto_print_product_labels)
