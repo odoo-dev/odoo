@@ -138,8 +138,12 @@ class AccountEdiXmlUBLSG(models.AbstractModel):
             'name': 'Credit Card',
         }
 
-    def _get_party_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        party_node = super()._get_party_node(vals)
-        party_node['cac:PartyTaxScheme'][0]['cac:TaxScheme']['cbc:ID']['_text'] = 'GST'
-        return party_node
+    def _ubl_add_party_tax_scheme_nodes(self, vals):
+        # EXTENDS
+        super()._ubl_add_party_tax_scheme_nodes(vals)
+        nodes = vals['party_node']['cac:PartyTaxScheme']
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+
+        if commercial_partner.country_code == 'SG':
+            nodes[0]['cac:TaxScheme']['cbc:ID']['_text'] = 'GST'

@@ -1,6 +1,6 @@
 from odoo import _, models
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
-from odoo.tools import frozendict
+from odoo.tools import frozendict, html2plaintext
 
 
 class AccountEdiUBL(models.AbstractModel):
@@ -214,6 +214,31 @@ class AccountEdiUBL(models.AbstractModel):
     # -------------------------------------------------------------------------
     # EXPORT: Collecting data
     # -------------------------------------------------------------------------
+
+    def _ubl_add_values_company(self, vals, company):
+        vals['company'] = company
+        vals['root_company'] = company
+
+    def _ubl_add_values_currency(self, vals, currency):
+        vals['currency'] = currency
+        # TODO: For retro-compatibility with previous code
+        vals['currency_id'] = currency
+
+    def _ubl_add_values_customer(self, vals, customer):
+        vals['customer'] = customer
+
+    def _ubl_add_values_supplier(self, vals, supplier=None):
+        vals['supplier'] = supplier or vals['company'].partner_id
+
+    def _ubl_add_values_delivery(self, vals, delivery):
+        vals['delivery'] = delivery
+
+    def _ubl_add_values_partner_bank(self, vals, partner_bank):
+        vals['partner_bank'] = partner_bank
+
+    def _ubl_add_values_payment_term(self, vals, payment_term):
+        vals['payment_term'] = payment_term
+        vals['payment_term_node'] = html2plaintext(payment_term.note) if payment_term else None
 
     def _ubl_add_base_line_ubl_values_allowance_charges_recycling_contribution(self, vals):
         """ Extract recycling contribution taxes such as RECUPEL, AUVIBEL, etc from the current base lines.
@@ -861,6 +886,166 @@ class AccountEdiUBL(models.AbstractModel):
                 'currencyID': currency.name,
             },
         }
+
+    def _ubl_add_party_endpoint_id_node(self, vals):
+        vals['party_node']['cbc:EndpointID'] = {
+            '_text': None,
+            'schemeID': None,
+        }
+
+    def _ubl_add_party_identification_nodes(self, vals):
+        vals['party_node']['cac:PartyIdentification'] = []
+
+    def _ubl_add_party_name_node(self, vals):
+        partner = vals['party_vals']['partner']
+
+        # When the selected partner is a contact or an invoice address, there is nothing ensuring the partner's name is set.
+        # In that case, fallback on the commercial partner's name.
+        if partner.name:
+            name = partner.display_name
+        else:
+            name = partner.commercial_partner_id.display_name
+
+        vals['party_node']['cac:PartyName'] = {
+            'cbc:Name': {'_text': name},
+        }
+
+    def _ubl_get_partner_address_node(self, vals, partner):
+        return {
+            'cbc:StreetName': {'_text': partner.street},
+            'cbc:AdditionalStreetName': {'_text': partner.street2},
+            'cbc:CityName': {'_text': partner.city},
+            'cbc:PostalZone': {'_text': partner.zip},
+            'cbc:CountrySubentity': {'_text': partner.state_id.name},
+            'cbc:CountrySubentityCode': {'_text': partner.state_id.code},
+            'cac:Country': {
+                'cbc:IdentificationCode': {'_text': partner.country_id.code},
+                'cbc:Name': {'_text': partner.country_id.name},
+            },
+        }
+
+    def _ubl_add_party_postal_address_node(self, vals):
+        partner = vals['party_vals']['partner']
+        vals['party_node']['cac:PostalAddress'] = self._ubl_get_partner_address_node(vals, partner)
+
+    def _ubl_add_party_tax_scheme_nodes(self, vals):
+        vals['party_node']['cac:PartyTaxScheme'] = []
+
+    def _ubl_add_party_legal_entity_nodes(self, vals):
+        vals['party_node']['cac:PartyLegalEntity'] = []
+
+    def _ubl_add_party_contact_node(self, vals):
+        partner = vals['party_vals']['partner']
+        vals['party_node']['cac:Contact'] = {
+            'cbc:ID': {'_text': None},
+            'cbc:Name': {'_text': partner.name},
+            'cbc:Telephone': {'_text': partner.phone},
+            'cbc:ElectronicMail': {'_text': partner.email},
+        }
+
+    def _ubl_add_accounting_supplier_party_endpoint_id_node(self, vals):
+        self._ubl_add_party_endpoint_id_node(vals)
+
+    def _ubl_add_accounting_supplier_party_identification_nodes(self, vals):
+        self._ubl_add_party_identification_nodes(vals)
+
+    def _ubl_add_accounting_supplier_party_name_node(self, vals):
+        self._ubl_add_party_name_node(vals)
+
+    def _ubl_add_accounting_supplier_party_postal_address_node(self, vals):
+        self._ubl_add_party_postal_address_node(vals)
+
+    def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
+        self._ubl_add_party_tax_scheme_nodes(vals)
+
+    def _ubl_add_accounting_supplier_party_legal_entity_nodes(self, vals):
+        self._ubl_add_party_legal_entity_nodes(vals)
+
+    def _ubl_add_accounting_supplier_party_contact_node(self, vals):
+        self._ubl_add_party_contact_node(vals)
+
+    def _ubl_add_accounting_supplier_party_node(self, vals):
+        node = vals['document_node']['cac:AccountingSupplierParty'] = {'cac:Party': {}}
+        party_node = node['cac:Party']
+        sub_vals = {
+            **vals,
+            'party_vals': {'partner': vals['supplier']},
+            'party_node': party_node,
+        }
+        self._ubl_add_accounting_supplier_party_endpoint_id_node(sub_vals)
+        self._ubl_add_accounting_supplier_party_identification_nodes(sub_vals)
+        self._ubl_add_accounting_supplier_party_name_node(sub_vals)
+        self._ubl_add_accounting_supplier_party_postal_address_node(sub_vals)
+        self._ubl_add_accounting_supplier_party_tax_scheme_nodes(sub_vals)
+        self._ubl_add_accounting_supplier_party_legal_entity_nodes(sub_vals)
+        self._ubl_add_accounting_supplier_party_contact_node(sub_vals)
+
+    def _ubl_add_accounting_customer_party_endpoint_id_node(self, vals):
+        self._ubl_add_party_endpoint_id_node(vals)
+
+    def _ubl_add_accounting_customer_party_identification_nodes(self, vals):
+        self._ubl_add_party_identification_nodes(vals)
+
+    def _ubl_add_accounting_customer_party_name_node(self, vals):
+        self._ubl_add_party_name_node(vals)
+
+    def _ubl_add_accounting_customer_party_postal_address_node(self, vals):
+        self._ubl_add_party_postal_address_node(vals)
+
+    def _ubl_add_accounting_customer_party_tax_scheme_nodes(self, vals):
+        self._ubl_add_party_tax_scheme_nodes(vals)
+
+    def _ubl_add_accounting_customer_party_legal_entity_nodes(self, vals):
+        self._ubl_add_party_legal_entity_nodes(vals)
+
+    def _ubl_add_accounting_customer_party_contact_node(self, vals):
+        self._ubl_add_party_contact_node(vals)
+
+    def _ubl_add_accounting_customer_party_node(self, vals):
+        node = vals['document_node']['cac:AccountingCustomerParty'] = {'cac:Party': {}}
+        party_node = node['cac:Party']
+        sub_vals = {
+            **vals,
+            'party_vals': {'partner': vals['customer']},
+            'party_node': party_node,
+        }
+        self._ubl_add_accounting_customer_party_endpoint_id_node(sub_vals)
+        self._ubl_add_accounting_customer_party_identification_nodes(sub_vals)
+        self._ubl_add_accounting_customer_party_name_node(sub_vals)
+        self._ubl_add_accounting_customer_party_postal_address_node(sub_vals)
+        self._ubl_add_accounting_customer_party_tax_scheme_nodes(sub_vals)
+        self._ubl_add_accounting_customer_party_legal_entity_nodes(sub_vals)
+        self._ubl_add_accounting_customer_party_contact_node(sub_vals)
+
+    def _ubl_get_delivery_node_from_delivery_address(self, vals):
+        delivery_partner = vals['delivery']
+        node = {
+            'cbc:ActualDeliveryDate': {'_text': None},
+            'cac:DeliveryLocation': {
+                'cbc:ID': {
+                    'schemeID': None,
+                    '_text': None,
+                },
+                'cac:Address': self._ubl_get_partner_address_node(vals, delivery_partner),
+            },
+            'cac:DeliveryParty': {
+                'cac:PartyName': {
+                    'cbc:Name': {'_text': delivery_partner.name},
+                }
+            },
+        }
+
+        if self.module_installed('account_add_gln') and delivery_partner.global_location_number:
+            node['cac:DeliveryLocation']['cbc:ID']['schemeID'] = '0088'
+            node['cac:DeliveryLocation']['cbc:ID']['_text'] = delivery_partner.global_location_number
+
+        return node
+
+    def _ubl_add_invoice_delivery_nodes(self, vals):
+        nodes = vals['document_node']['cac:Delivery'] = []
+
+        if vals.get('delivery'):
+            nodes.append(self._ubl_get_delivery_node_from_delivery_address(vals))
 
     def _ubl_get_allowance_charge_early_payment(self, vals, early_payment_values):
         currency = early_payment_values['currency']

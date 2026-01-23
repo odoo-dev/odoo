@@ -9,6 +9,7 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
         super().setUpClass()
         cls.partner_be = cls._create_partner_be()
         cls.partner_lu_dig = cls._create_partner_lu_dig()
+        cls.partner_nl = cls._create_partner_nl()
         cls.partner_au = cls._create_partner_au()
 
     @classmethod
@@ -45,6 +46,7 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
             'zip': "L-1528",
             'city': "Luxembourg",
             'vat': None,
+            'company_registry': None,
             'invoice_sending_method': 'manual',
             'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
             'property_account_payable_id': cls.company_data['default_account_payable'].id,
@@ -52,6 +54,23 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
             'country_id': cls.env.ref('base.lu').id,
             'peppol_eas': '9938',
             'peppol_endpoint': '00005000041',
+            **kwargs,
+        })
+
+    @classmethod
+    def _create_partner_nl(cls, **kwargs):
+        return cls.env['res.partner'].create({
+            'name': "partner_nl",
+            'street': "Kunststraat, 3",
+            'zip': "1000",
+            'city': "Amsterdam",
+            'vat': 'NL000099998B57',
+            'invoice_sending_method': 'manual',
+            'company_registry': None,
+            'company_id': cls.company_data['company'].id,
+            'country_id': cls.env.ref('base.nl').id,
+            'peppol_eas': '0106',
+            'peppol_endpoint': '77777677',
             **kwargs,
         })
 
@@ -168,6 +187,11 @@ class TestUblBis3Common(TestUblCiiCommon):
     def _create_partner_lu_dig(cls, **kwargs):
         kwargs.setdefault('invoice_edi_format', 'ubl_bis3')
         return super()._create_partner_lu_dig(**kwargs)
+
+    @classmethod
+    def _create_partner_nl(cls, **kwargs):
+        kwargs.setdefault('invoice_edi_format', 'ubl_bis3')
+        return super()._create_partner_nl(**kwargs)
 
     # -------------------------------------------------------------------------
     # EXPORT HELPERS

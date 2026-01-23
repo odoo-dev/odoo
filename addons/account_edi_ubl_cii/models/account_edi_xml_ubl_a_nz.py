@@ -131,29 +131,54 @@ class AccountEdiXmlUBLANZ(models.AbstractModel):
         super()._add_invoice_header_nodes(document_node, vals)
         document_node['cbc:CustomizationID'] = {'_text': self._get_customization_ids()['ubl_a_nz']}
 
-    def _get_party_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        party_node = super()._get_party_node(vals)
-        partner = vals['partner']
+    def _ubl_add_party_endpoint_id_node(self, vals):
+        # EXTENDS
+        super()._ubl_add_party_endpoint_id_node(vals)
+        partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
 
         if commercial_partner.country_code == 'AU' and commercial_partner.vat:
             vat = commercial_partner.vat.replace(" ", "")
-            party_node['cbc:EndpointID']['_text'] = vat
-            party_node['cac:PartyTaxScheme'][0]['cbc:CompanyID']['_text'] = vat
-            party_node['cac:PartyLegalEntity']['cbc:CompanyID'] = {
-                '_text': vat,
-                'schemeID': '0151',
-            }
+            vals['party_node']['cbc:EndpointID']['_text'] = vat
+        elif commercial_partner.country_code == 'NZ' and commercial_partner.company_registry:
+            vals['party_node']['cbc:EndpointID']['_text'] = commercial_partner.company_registry
 
-        elif commercial_partner.country_code == 'NZ':
-            party_node['cbc:EndpointID']['_text'] = commercial_partner.company_registry
-            party_node['cac:PartyTaxScheme'][0]['cbc:CompanyID']['_text'] = commercial_partner.company_registry
-            party_node['cac:PartyLegalEntity']['cbc:CompanyID'] = {
-                '_text': commercial_partner.company_registry,
-                'schemeID': '0088',
-            }
+    def _ubl_add_party_tax_scheme_nodes(self, vals):
+        # EXTENDS
+        super()._ubl_add_party_tax_scheme_nodes(vals)
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
 
-        party_node['cac:PartyTaxScheme'][0]['cac:TaxScheme']['cbc:ID']['_text'] = 'GST'
+        if (
+            (commercial_partner.country_code == 'AU' and commercial_partner.vat)
+            or (commercial_partner.country_code == 'NZ' and commercial_partner.company_registry)
+        ):
+            vals['party_node']['cac:PartyTaxScheme'] = [{
+                'cbc:CompanyID': {'_text': vals['party_node']['cbc:EndpointID']['_text']},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'GST'},
+                },
+            }]
 
-        return party_node
+    def _ubl_add_party_legal_entity_nodes(self, vals):
+        # EXTENDS
+        super()._ubl_add_party_legal_entity_nodes(vals)
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+
+        if commercial_partner.country_code == 'AU' and commercial_partner.vat:
+            vals['party_node']['cac:PartyLegalEntity'] = [{
+                'cbc:RegistrationName': {'_text': commercial_partner.name},
+                'cbc:CompanyID': {
+                    '_text': vals['party_node']['cbc:EndpointID']['_text'],
+                    'schemeID': '0151',
+                },
+            }]
+        elif commercial_partner.country_code == 'NZ' and commercial_partner.company_registry:
+            vals['party_node']['cac:PartyLegalEntity'] = [{
+                'cbc:RegistrationName': {'_text': commercial_partner.name},
+                'cbc:CompanyID': {
+                    '_text': vals['party_node']['cbc:EndpointID']['_text'],
+                    'schemeID': '0088',
+                },
+            }]
