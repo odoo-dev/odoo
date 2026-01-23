@@ -422,6 +422,7 @@ class ThreadedServer(CommonServer):
 
             http_client = HTTPClient(client, address, prelude=prelude)
             del prelude
+            # TODO loop in case of HTTP/1.1
             http_client.serve()
             # if http_client.upgrade == b'websocket':
             #     ws_client = WSClient(client, address, prelude=http_client.conn.trailing_data)
@@ -464,13 +465,23 @@ class ThreadedServer(CommonServer):
 
         server.settimeout(1)  # it uses poll(2) under the hood
         with piscine, server:
+            futures = [] if piscine._max_workers > 0 else None
             while not stop_event.is_set():
+                # pause accepting while we have enough futures
+                if futures and len(futures) >= piscine._max_workers:
+                    futures = [f for f in futures if not f.done()]
+                    if len(futures) >= piscine._max_workers:
+                        import concurrent.futures
+                        concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_COMPLETED)
+                        continue
                 try:
                     client, address = server.accept()
                 except TimeoutError:
                     continue
                 else:
-                    piscine.submit(self.http_client_thread, client, address)
+                    future = piscine.submit(self.http_client_thread, client, address)
+                    if futures is not None:
+                        futures.append(future)
 
     def http_spawn(self):
         threading.Thread(
