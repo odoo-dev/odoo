@@ -6,6 +6,7 @@ from base64 import b64decode
 from unittest import skipIf
 
 import odoo
+from odoo.exceptions import ValidationError
 import odoo.tests
 
 try:
@@ -524,6 +525,15 @@ class TestReportsRendering(TestReportsRenderingCommon):
 
         pages_contents = [[elem[1] for elem in page] for page in pages]
         self.assertEqual(pages_contents, expected_pages_contents)
+
+    def test_negative_margins_raise_usererror(self):
+        """Test that negative margins raise a ValidationError when creating a report.paperformat."""
+        with self.assertRaises(ValidationError):
+            self.env['report.paperformat'].sudo().create({
+                'name': 'Negative margins',
+                'format': 'A4',
+                'margin_top': -1,
+            })
 
     def test_report_specific_paperformat_args(self):
         """

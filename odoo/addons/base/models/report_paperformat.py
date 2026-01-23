@@ -193,6 +193,11 @@ class report_paperformat(models.Model):
         if self.filtered(lambda x: x.format != 'custom' and (x.page_width or x.page_height)):
             raise ValidationError(_('You can select either a format or a specific page width/height, but not both.'))
 
+    @api.constrains('margin_top', 'margin_bottom', 'margin_left', 'margin_right')
+    def _check_margins_not_negative(self):
+        if self.filtered(lambda x: x.margin_top < 0 or x.margin_bottom < 0 or x.margin_left < 0 or x.margin_right < 0):
+            raise ValidationError(_('Margins cannot be negative values.'))
+
     def _compute_print_page_size(self):
         for record in self:
             width = height = 0.0

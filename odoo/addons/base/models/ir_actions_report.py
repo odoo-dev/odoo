@@ -452,6 +452,11 @@ class IrActionsReport(models.Model):
         :rtype: bytes
         '''
         paperformat_id = self._get_report(report_ref).get_paperformat() if report_ref else self.get_paperformat()
+        if paperformat_id and (paperformat_id.margin_top < 0 or paperformat_id.margin_bottom < 0 or
+                               paperformat_id.margin_left < 0 or paperformat_id.margin_right < 0):
+            raise UserError(_(
+                "Please check the paper format margins. Negative margins are not allowed."
+            ))
 
         # Build the base command args for wkhtmltopdf bin
         command_args = self._build_wkhtmltopdf_args(
