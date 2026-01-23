@@ -1,4 +1,6 @@
-export class ElectionWorker {
+import { WorkerChannelHub, WorkerChannelController } from "@bus/workers/worker_hub";
+
+export class ElectionWorker extends WorkerChannelController {
     MAIN_TAB_TIMEOUT_PERIOD = 3000;
 
     /** @type {Set<MessagePort>} */
@@ -14,6 +16,7 @@ export class ElectionWorker {
     masterTab = null;
 
     constructor() {
+        super(...arguments);
         setInterval(() => {
             if (Date.now() - this.lastHeartbeat > this.MAIN_TAB_TIMEOUT_PERIOD) {
                 this.startElection();
@@ -23,11 +26,11 @@ export class ElectionWorker {
 
     requestHeartbeat(messagePort) {
         if (messagePort) {
-            messagePort.postMessage({ type: "ELECTION:HEARTBEAT_REQUEST" });
+            messagePort.postMessage({ type: "HEARTBEAT_REQUEST" });
             return;
         }
         for (const candidate of this.candidates) {
-            candidate.postMessage({ type: "ELECTION:HEARTBEAT_REQUEST" });
+            candidate.postMessage({ type: "HEARTBEAT_REQUEST" });
         }
     }
 
@@ -43,7 +46,7 @@ export class ElectionWorker {
 
     startElection() {
         clearInterval(this.heartbeatRequestInterval);
-        this.masterTab?.postMessage({ type: "ELECTION:UNASSIGN_MASTER" });
+        this.masterTab?.postMessage({ type: "UNASSIGN_MASTER" });
         this.masterTab = null;
         this.electionResolver ??= Promise.withResolvers();
         this.requestHeartbeat();
@@ -51,7 +54,7 @@ export class ElectionWorker {
 
     finishElection(messagePort) {
         this.masterTab = messagePort;
-        messagePort.postMessage({ type: "ELECTION:ASSIGN_MASTER" });
+        messagePort.postMessage({ type: "ASSIGN_MASTER" });
         this.electionResolver.resolve();
         this.electionResolver = null;
         this.heartbeatRequestInterval = setInterval(
@@ -60,37 +63,29 @@ export class ElectionWorker {
         );
     }
 
-    async handleMessage(event) {
-        const { action } = event.data;
-        if (!action?.startsWith("ELECTION:")) {
-            return;
-        }
+    async handleRequest(client, action, data) {
         switch (action) {
-            case "ELECTION:REGISTER":
-                this.candidates.add(event.target);
+            case "REGISTER":
+                this.candidates.add(client);
                 await this.electionResolver?.promise;
                 if (!this.masterTab) {
                     this.startElection();
                 }
                 break;
-            case "ELECTION:UNREGISTER":
-                this.candidates.delete(event.target);
-                if (this.masterTab === event.target) {
+            case "UNREGISTER":
+                this.candidates.delete(client);
+                if (this.masterTab === client) {
                     this.startElection();
                 }
                 break;
-            case "ELECTION:IS_MASTER?":
+            case "IS_MASTER?":
                 await this.ensureMasterPresence();
-                event.target.postMessage({
-                    type: "ELECTION:IS_MASTER_RESPONSE",
-                    data: { answer: this.masterTab === event.target },
-                });
-                break;
-            case "ELECTION:HEARTBEAT":
+                return { answer: this.masterTab === client };
+            case "HEARTBEAT":
                 if (this.electionResolver) {
-                    this.finishElection(event.target);
+                    this.finishElection(client);
                 }
-                if (this.masterTab === event.target) {
+                if (this.masterTab === client) {
                     this.lastHeartbeat = Date.now();
                     this.masterReplyResolver?.resolve();
                     this.masterReplyResolver = null;
@@ -101,3 +96,5 @@ export class ElectionWorker {
         }
     }
 }
+
+WorkerChannelHub.register("ELECTION", ElectionWorker);

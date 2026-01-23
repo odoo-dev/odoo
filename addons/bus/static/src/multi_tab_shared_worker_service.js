@@ -1,6 +1,5 @@
-import { browser } from "@web/core/browser/browser";
-import { Deferred } from "@web/core/utils/concurrency";
 import { EventBus } from "@odoo/owl";
+import { browser } from "@web/core/browser/browser";
 
 const STATE = Object.freeze({
     INIT: "INIT",
@@ -13,50 +12,29 @@ export const multiTabSharedWorkerService = {
     dependencies: ["worker_service"],
     start(env, { worker_service: workerService }) {
         const bus = new EventBus();
-        let responseDeferred = null;
         let state = STATE.INIT;
         browser.addEventListener("pagehide", unregister);
-
-        function messageHandler(messageEv) {
-            const { type, data } = messageEv.data;
-            if (!type?.startsWith("ELECTION:")) {
-                return;
+        const workerClient = workerService.get("ELECTION");
+        workerClient.subscribe("HEARTBEAT_REQUEST", () => workerClient.send("HEARTBEAT"));
+        workerClient.subscribe("ASSIGN_MASTER", () => {
+            state = STATE.MASTER;
+            bus.trigger("become_main_tab");
+        });
+        workerClient.subscribe("UNASSIGN_MASTER", () => {
+            if (state !== STATE.UNREGISTERED) {
+                state = STATE.REGISTERED;
             }
-            switch (type) {
-                case "ELECTION:IS_MASTER_RESPONSE":
-                    responseDeferred?.resolve(data.answer);
-                    responseDeferred = null;
-                    break;
-                case "ELECTION:HEARTBEAT_REQUEST":
-                    workerService.send("ELECTION:HEARTBEAT");
-                    break;
-                case "ELECTION:ASSIGN_MASTER":
-                    state = STATE.MASTER;
-                    bus.trigger("become_main_tab");
-                    break;
-                case "ELECTION:UNASSIGN_MASTER":
-                    if (state !== STATE.UNREGISTERED) {
-                        state = STATE.REGISTERED;
-                    }
-                    bus.trigger("no_longer_main_tab");
-                    break;
-                default:
-                    console.warn(
-                        "multiTabSharedWorkerService received unknown message type:",
-                        type
-                    );
-            }
-        }
+            bus.trigger("no_longer_main_tab");
+        });
 
         async function startWorker() {
-            await workerService.ensureWorkerStarted();
-            await workerService.registerHandler(messageHandler);
-            workerService.send("ELECTION:REGISTER");
+            await workerClient.ensureStarted();
+            workerClient.send("REGISTER");
             state = STATE.REGISTERED;
         }
 
         function unregister() {
-            workerService.send("ELECTION:UNREGISTER");
+            workerClient.send("UNREGISTER");
             state = STATE.UNREGISTERED;
         }
 
@@ -69,9 +47,7 @@ export const multiTabSharedWorkerService = {
                 if (state === STATE.INIT) {
                     await startWorker();
                 }
-                responseDeferred = new Deferred();
-                workerService.send("ELECTION:IS_MASTER?");
-                return responseDeferred;
+                return workerClient.send("IS_MASTER?");
             },
             unregister,
         };

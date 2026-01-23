@@ -31,16 +31,16 @@ test("show warning when bus connection encounters issues", async () => {
         );
     }
     addBusServiceListeners(
-        ["BUS:CONNECT", () => expect.step("BUS:CONNECT")],
-        ["BUS:RECONNECT", () => expect.step("BUS:RECONNECT")],
-        ["BUS:RECONNECTING", () => expect.step("BUS:RECONNECTING")]
+        ["CONNECT", () => expect.step("CONNECT")],
+        ["RECONNECT", () => expect.step("RECONNECT")],
+        ["RECONNECTING", () => expect.step("RECONNECTING")]
     );
     await start();
     await openDiscuss();
-    await expect.waitForSteps(["BUS:CONNECT"]);
+    await expect.waitForSteps(["CONNECT"]);
     const unlockWebsocket = lockWebsocketConnect();
     MockServer.env["bus.bus"]._simulateDisconnection(WEBSOCKET_CLOSE_CODES.ABNORMAL_CLOSURE);
-    await expect.waitForSteps(["BUS:RECONNECTING"]);
+    await expect.waitForSteps(["RECONNECTING"]);
     expect(await waitFor(".o-bus-ConnectionAlert", { timeout: 2500 })).toHaveText(
         "Real-time connection lost..."
     );
@@ -49,6 +49,6 @@ test("show warning when bus connection encounters issues", async () => {
     expect(".o-bus-ConnectionAlert").toHaveText("Real-time connection lost...");
     unlockWebsocket();
     await runAllTimers();
-    await expect.waitForSteps(["BUS:RECONNECT"]);
+    await expect.waitForSteps(["RECONNECT"]);
     await waitForNone(".o-bus-ConnectionAlert");
 });

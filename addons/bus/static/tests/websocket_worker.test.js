@@ -29,36 +29,36 @@ const startWebSocketWorker = async (onBroadcast) => {
 
 test("connect event is broadcasted after calling start", async () => {
     await startWebSocketWorker((type) => {
-        if (type !== "BUS:WORKER_STATE_UPDATED") {
+        if (type !== "WORKER_STATE_UPDATED") {
             expect.step(`broadcast ${type}`);
         }
     });
-    await expect.waitForSteps(["broadcast BUS:CONNECT"]);
+    await expect.waitForSteps(["broadcast CONNECT"]);
 });
 
 test("disconnect event is broadcasted", async () => {
     const worker = await startWebSocketWorker((type) => {
-        if (type !== "BUS:WORKER_STATE_UPDATED") {
+        if (type !== "WORKER_STATE_UPDATED") {
             expect.step(`broadcast ${type}`);
         }
     });
-    await expect.waitForSteps(["broadcast BUS:CONNECT"]);
+    await expect.waitForSteps(["broadcast CONNECT"]);
     worker.websocket.close(WEBSOCKET_CLOSE_CODES.CLEAN);
     await runAllTimers();
-    await expect.waitForSteps(["broadcast BUS:DISCONNECT"]);
+    await expect.waitForSteps(["broadcast DISCONNECT"]);
 });
 
 test("reconnecting/reconnect event is broadcasted", async () => {
     const worker = await startWebSocketWorker((type) => {
-        if (type !== "BUS:WORKER_STATE_UPDATED") {
+        if (type !== "WORKER_STATE_UPDATED") {
             expect.step(`broadcast ${type}`);
         }
     });
-    await expect.waitForSteps(["broadcast BUS:CONNECT"]);
+    await expect.waitForSteps(["broadcast CONNECT"]);
     worker.websocket.close(WEBSOCKET_CLOSE_CODES.ABNORMAL_CLOSURE);
-    await expect.waitForSteps(["broadcast BUS:DISCONNECT", "broadcast BUS:RECONNECTING"]);
+    await expect.waitForSteps(["broadcast DISCONNECT", "broadcast RECONNECTING"]);
     await runAllTimers();
-    await expect.waitForSteps(["broadcast BUS:RECONNECT"]);
+    await expect.waitForSteps(["broadcast RECONNECT"]);
 });
 
 test("notification event is broadcasted", async () => {
@@ -74,30 +74,30 @@ test("notification event is broadcasted", async () => {
         },
     ];
     await startWebSocketWorker((type, message) => {
-        if (type === "BUS:NOTIFICATION") {
+        if (type === "NOTIFICATION") {
             expect(message).toEqual(notifications);
         }
-        if (["BUS:CONNECT", "BUS:NOTIFICATION"].includes(type)) {
+        if (["CONNECT", "NOTIFICATION"].includes(type)) {
             expect.step(`broadcast ${type}`);
         }
     });
-    await expect.waitForSteps(["broadcast BUS:CONNECT"]);
+    await expect.waitForSteps(["broadcast CONNECT"]);
     for (const serverWs of MockServer.current._websockets) {
         serverWs.send(JSON.stringify(notifications));
     }
-    await expect.waitForSteps(["broadcast BUS:NOTIFICATION"]);
+    await expect.waitForSteps(["broadcast NOTIFICATION"]);
 });
 
 test("disconnect event is sent when stopping the worker", async () => {
     const worker = await startWebSocketWorker((type) => {
-        if (type !== "BUS:WORKER_STATE_UPDATED") {
+        if (type !== "WORKER_STATE_UPDATED") {
             expect.step(`broadcast ${type}`);
         }
     });
-    await expect.waitForSteps(["broadcast BUS:CONNECT"]);
+    await expect.waitForSteps(["broadcast CONNECT"]);
     worker._stop();
     await runAllTimers();
-    await expect.waitForSteps(["broadcast BUS:DISCONNECT"]);
+    await expect.waitForSteps(["broadcast DISCONNECT"]);
 });
 
 test("check connection health during inactivity", async () => {
@@ -128,11 +128,11 @@ test("check connection health during inactivity", async () => {
         },
     });
     const worker = await startWebSocketWorker((type) => {
-        if (type === "BUS:CONNECT") {
+        if (type === "CONNECT") {
             expect.step(`broadcast ${type}`);
         }
     });
-    await expect.waitForSteps(["broadcast BUS:CONNECT", "_restartConnectionCheckInterval"]);
+    await expect.waitForSteps(["broadcast CONNECT", "_restartConnectionCheckInterval"]);
     worker.websocket.dispatchEvent(
         new MessageEvent("message", {
             data: JSON.stringify([{ id: 70, message: { type: "foo" } }]),

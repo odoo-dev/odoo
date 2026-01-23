@@ -255,7 +255,7 @@ registry.category("web_tour.tours").add('totp_login_device', {
     async run() {
         await new Promise((resolve) => {
             const bus = odoo.__WOWL_DEBUG__.root.env.services.bus_service;
-            bus.addEventListener("BUS:CONNECT", resolve, { once: true });
+            bus.addEventListener("CONNECT", resolve, { once: true });
             if (bus.workerState === WORKER_STATE.CONNECTED) {
                 resolve();
             }

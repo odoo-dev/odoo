@@ -18,10 +18,10 @@ describe.current.tags("desktop");
 test("disconnect during vacuum should ask for reload", async () => {
     browser.location.addEventListener("reload", () => expect.step("reload"));
     addBusServiceListeners(
-        ["BUS:CONNECT", () => expect.step("BUS:CONNECT")],
-        ["BUS:DISCONNECT", () => expect.step("BUS:DISCONNECT")],
-        ["BUS:RECONNECTING", () => expect.step("BUS:RECONNECTING")],
-        ["BUS:RECONNECT", () => expect.step("BUS:RECONNECT")]
+        ["CONNECT", () => expect.step("CONNECT")],
+        ["DISCONNECT", () => expect.step("DISCONNECT")],
+        ["RECONNECTING", () => expect.step("RECONNECTING")],
+        ["RECONNECT", () => expect.step("RECONNECT")]
     );
     onRpc("/bus/has_missed_notifications", () => true);
     await mountWithCleanup(WebClient);
@@ -29,11 +29,11 @@ test("disconnect during vacuum should ask for reload", async () => {
     startBusService();
     expect(await getService("multi_tab").isOnMainTab()).toBe(true);
     await runAllTimers();
-    await expect.waitForSteps(["BUS:CONNECT"]);
+    await expect.waitForSteps(["CONNECT"]);
     MockServer.env["bus.bus"]._simulateDisconnection(WEBSOCKET_CLOSE_CODES.ABNORMAL_CLOSURE);
-    await expect.waitForSteps(["BUS:DISCONNECT", "BUS:RECONNECTING"]);
+    await expect.waitForSteps(["DISCONNECT", "RECONNECTING"]);
     await runAllTimers();
-    await expect.waitForSteps(["BUS:RECONNECT"]);
+    await expect.waitForSteps(["RECONNECT"]);
     await waitFor(".o_notification");
     expect(".o_notification_content:first").toHaveText(
         "The page is out of date. Save your work and refresh to get the latest updates and avoid potential issues."
@@ -44,8 +44,8 @@ test("disconnect during vacuum should ask for reload", async () => {
 
 test("reconnect after going offline after bus gc should ask for reload", async () => {
     addBusServiceListeners(
-        ["BUS:CONNECT", () => expect.step("BUS:CONNECT")],
-        ["BUS:DISCONNECT", () => expect.step("BUS:DISCONNECT")]
+        ["CONNECT", () => expect.step("CONNECT")],
+        ["DISCONNECT", () => expect.step("DISCONNECT")]
     );
     onRpc("/bus/has_missed_notifications", () => true);
     await mountWithCleanup(WebClient);
@@ -53,12 +53,12 @@ test("reconnect after going offline after bus gc should ask for reload", async (
     startBusService();
     expect(await getService("multi_tab").isOnMainTab()).toBe(true);
     await runAllTimers();
-    await expect.waitForSteps(["BUS:CONNECT"]);
+    await expect.waitForSteps(["CONNECT"]);
     browser.dispatchEvent(new Event("offline"));
-    await expect.waitForSteps(["BUS:DISCONNECT"]);
+    await expect.waitForSteps(["DISCONNECT"]);
     browser.dispatchEvent(new Event("online"));
     await runAllTimers();
-    await expect.waitForSteps(["BUS:CONNECT"]);
+    await expect.waitForSteps(["CONNECT"]);
     await waitFor(".o_notification");
     expect(".o_notification_content:first").toHaveText(
         "The page is out of date. Save your work and refresh to get the latest updates and avoid potential issues."

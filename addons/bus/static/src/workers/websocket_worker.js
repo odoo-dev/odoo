@@ -1,15 +1,16 @@
 import { debounce, Logger } from "@bus/workers/bus_worker_utils";
+import { WorkerChannelHub, WorkerChannelController } from "./worker_hub";
 
 /**
  * Type of events that can be sent from the worker to its clients.
  *
- * @typedef { 'BUS:CONNECT' | 'BUS:RECONNECT' | 'BUS:DISCONNECT' | 'BUS:RECONNECTING' | 'BUS:NOTIFICATION' | 'BUS:INITIALIZED' | 'BUS:OUTDATED'| 'BUS:WORKER_STATE_UPDATED' | 'BUS:PROVIDE_LOGS' } WorkerEvent
+ * @typedef { 'CONNECT' | 'RECONNECT' | 'DISCONNECT' | 'RECONNECTING' | 'NOTIFICATION' | 'WORKER_STATE_UPDATED' } WorkerEvent
  */
 
 /**
  * Type of action that can be sent from the client to the worker.
  *
- * @typedef {'BUS:ADD_CHANNEL' | 'BUS:DELETE_CHANNEL' | 'BUS:FORCE_UPDATE_CHANNELS' | 'BUS:INITIALIZE_CONNECTION' | 'BUS:REQUEST_LOGS' | 'BUS:SEND' | 'BUS:SET_LOGGING_ENABLED' | 'BUS:LEAVE' | 'BUS:STOP' | 'BUS:START'} WorkerAction
+ * @typedef {'ADD_CHANNEL' | 'DELETE_CHANNEL' | 'FORCE_UPDATE_CHANNELS' | 'INITIALIZE_CONNECTION' | 'REQUEST_LOGS' | 'SEND' | 'SET_LOGGING_ENABLED' | 'LEAVE' | 'STOP' | 'START'} WorkerAction
  */
 
 export const WEBSOCKET_CLOSE_CODES = Object.freeze({
@@ -48,12 +49,13 @@ const logger = new Logger("bus_websocket_worker");
  * is used in this case. The logic is almost the same than the one used
  * for SharedWorker and this class implements it.
  */
-export class WebsocketWorker {
+export class WebsocketWorker extends WorkerChannelController {
     INITIAL_RECONNECT_DELAY = 1000;
     RECONNECT_JITTER = 1000;
     CONNECTION_CHECK_DELAY = 60_000;
 
-    constructor(name) {
+    constructor() {
+        super(...arguments);
         this.active = true;
         this.channelsByClient = new Map();
         this.connectRetryDelay = this.INITIAL_RECONNECT_DELAY;
@@ -67,7 +69,7 @@ export class WebsocketWorker {
         this.lastNotificationId = 0;
         this.loggingEnabled = null;
         this.messageWaitQueue = [];
-        this.name = name;
+        this.name = globalThis.name;
         this.newestStartTs = undefined;
         this.state = WORKER_STATE.IDLE;
         this.websocketURL = "";
@@ -92,69 +94,12 @@ export class WebsocketWorker {
     }
 
     //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * Send the message to all the clients that are connected to the
-     * worker.
-     *
-     * @param {WorkerEvent} type Event to broadcast to connected
-     * clients.
-     * @param {Object} data
-     */
-    broadcast(type, data) {
-        this._logDebug("broadcast", type, data);
-        for (const client of this.channelsByClient.keys()) {
-            client.postMessage({ type, data: data ? JSON.parse(JSON.stringify(data)) : undefined });
-        }
-    }
-
-    /**
-     * Register a client handled by this worker.
-     *
-     * @param {MessagePort} messagePort
-     */
-    registerClient(messagePort) {
-        messagePort.addEventListener("message", (ev) => {
-            this._onClientMessage(messagePort, ev.data);
-        });
-        this.channelsByClient.set(messagePort, []);
-    }
-
-    /**
-     * Send message to the given client.
-     *
-     * @param {number} client
-     * @param {WorkerEvent} type
-     * @param {Object} data
-     */
-    sendToClient(client, type, data) {
-        if (type !== "BUS:PROVIDE_LOGS") {
-            this._logDebug("sendToClient", type, data);
-        }
-        client.postMessage({ type, data: data ? JSON.parse(JSON.stringify(data)) : undefined });
-    }
-
-    //--------------------------------------------------------------------------
     // PRIVATE
     //--------------------------------------------------------------------------
 
-    /**
-     * Called when a message is posted to the worker by a client (i.e. a
-     * MessagePort connected to this worker).
-     *
-     * @param {MessagePort} client
-     * @param {Object} message
-     * @param {WorkerAction} [message.action]
-     * Action to execute.
-     * @param {Object|undefined} [message.data] Data required by the
-     * action.
-     */
-    _onClientMessage(client, { action, data }) {
-        this._logDebug("_onClientMessage", action, data);
+    async handleRequest(client, action, data) {
         switch (action) {
-            case "BUS:SEND": {
+            case "SEND": {
                 if (data["event_name"] === "update_presence") {
                     this._debouncedSendToServer(data);
                 } else {
@@ -162,24 +107,32 @@ export class WebsocketWorker {
                 }
                 return;
             }
-            case "BUS:START":
-                return this._start();
-            case "BUS:STOP":
-                return this._stop();
-            case "BUS:LEAVE":
-                return this._unregisterClient(client);
-            case "BUS:ADD_CHANNEL":
-                return this._addChannel(client, data);
-            case "BUS:DELETE_CHANNEL":
-                return this._deleteChannel(client, data);
-            case "BUS:FORCE_UPDATE_CHANNELS":
-                return this._forceUpdateChannels();
-            case "BUS:SET_LOGGING_ENABLED":
+            case "START":
+                this._start();
+                return;
+            case "STOP":
+                this._stop();
+                return;
+            case "LEAVE":
+                this.unregisterClient(client);
+                return;
+            case "ADD_CHANNEL":
+                this._addChannel(client, data);
+                return;
+            case "DELETE_CHANNEL":
+                this._deleteChannel(client, data);
+                return;
+            case "FORCE_UPDATE_CHANNELS":
+                this._forceUpdateChannels();
+                return;
+            case "SET_LOGGING_ENABLED":
                 this.loggingEnabled = data;
                 break;
-            case "BUS:REQUEST_LOGS":
-                logger.getLogs().then((logs) => {
-                    const workerInfo = {
+            case "REQUEST_LOGS": {
+                const logs = await logger.getLogs();
+                return {
+                    logs,
+                    workerInfo: {
                         UUID,
                         active: this.active,
                         channels: [
@@ -193,11 +146,10 @@ export class WebsocketWorker {
                         reconnect_delay: this.connectRetryDelay,
                         uid: this.currentUID,
                         websocket_url: this.websocketURL,
-                    };
-                    this.sendToClient(client, "BUS:PROVIDE_LOGS", { workerInfo, logs });
-                });
-                break;
-            case "BUS:INITIALIZE_CONNECTION":
+                    },
+                };
+            }
+            case "INITIALIZE_CONNECTION":
                 return this._initializeConnection(client, data);
         }
     }
@@ -210,7 +162,9 @@ export class WebsocketWorker {
      * @param {string} channel
      */
     _addChannel(client, channel) {
-        this.channelsByClient.get(client).push(channel);
+        const channels = this.channelsByClient.get(client) ?? [];
+        channels.push(channel);
+        this.channelsByClient.set(client, channels);
         this._debouncedUpdateChannels();
     }
 
@@ -248,7 +202,8 @@ export class WebsocketWorker {
      *
      * @param {MessagePort} client
      */
-    _unregisterClient(client) {
+    unregisterClient(client) {
+        super.unregisterClient(client);
         this.channelsByClient.delete(client);
         this._debouncedUpdateChannels();
     }
@@ -269,9 +224,8 @@ export class WebsocketWorker {
      */
     _initializeConnection(client, { db, debug, lastNotificationId, uid, websocketURL, startTs }) {
         if (this.newestStartTs && this.newestStartTs > startTs) {
-            this.sendToClient(client, "BUS:WORKER_STATE_UPDATED", this.state);
-            this.sendToClient(client, "BUS:INITIALIZED");
-            return;
+            this.send(client, "WORKER_STATE_UPDATED", this.state);
+            return this.active;
         }
         this.newestStartTs = startTs;
         this.websocketURL = websocketURL;
@@ -290,11 +244,8 @@ export class WebsocketWorker {
             }
             this.channelsByClient.forEach((_, key) => this.channelsByClient.set(key, []));
         }
-        this.sendToClient(client, "BUS:WORKER_STATE_UPDATED", this.state);
-        this.sendToClient(client, "BUS:INITIALIZED");
-        if (!this.active) {
-            this.sendToClient(client, "BUS:OUTDATED");
-        }
+        this.send(client, "WORKER_STATE_UPDATED", this.state);
+        return this.active;
     }
 
     /**
@@ -320,18 +271,18 @@ export class WebsocketWorker {
             // this case.
             return;
         }
-        this.broadcast("BUS:DISCONNECT", { code, reason });
+        this.broadcast("DISCONNECT", { code, reason });
         if (code === WEBSOCKET_CLOSE_CODES.CLEAN) {
             if (reason === "OUTDATED_VERSION") {
                 console.warn("Worker deactivated due to an outdated version.");
                 this.active = false;
-                this.broadcast("BUS:OUTDATED");
+                this.broadcast("OUTDATED");
             }
             // WebSocket was closed on purpose, do not try to reconnect.
             return;
         }
         // WebSocket was not closed cleanly, let's try to reconnect.
-        this.broadcast("BUS:RECONNECTING", { closeCode: code });
+        this.broadcast("RECONNECTING", { closeCode: code });
         this.isReconnecting = true;
         if (
             [
@@ -368,7 +319,7 @@ export class WebsocketWorker {
         const notifications = JSON.parse(messageEv.data);
         this._logDebug("_onWebsocketMessage", notifications);
         this.lastNotificationId = notifications[notifications.length - 1].id;
-        this.broadcast("BUS:NOTIFICATION", notifications);
+        this.broadcast("NOTIFICATION", notifications);
     }
 
     async _logDebug(title, ...args) {
@@ -393,7 +344,7 @@ export class WebsocketWorker {
     _onWebsocketOpen() {
         this._logDebug("_onWebsocketOpen");
         this._updateState(WORKER_STATE.CONNECTED);
-        this.broadcast(this.isReconnecting ? "BUS:RECONNECT" : "BUS:CONNECT");
+        this.broadcast(this.isReconnecting ? "RECONNECT" : "CONNECT");
         this._debouncedUpdateChannels();
         this.connectRetryDelay = this.INITIAL_RECONNECT_DELAY;
         this.connectTimeout = null;
@@ -520,7 +471,7 @@ export class WebsocketWorker {
         this._removeWebsocketListeners();
         this.websocket = null;
         if (shouldBroadcastClose) {
-            this.broadcast("BUS:DISCONNECT", { code: WEBSOCKET_CLOSE_CODES.CLEAN });
+            this.broadcast("DISCONNECT", { code: WEBSOCKET_CLOSE_CODES.CLEAN });
         }
     }
 
@@ -554,6 +505,8 @@ export class WebsocketWorker {
      */
     _updateState(newState) {
         this.state = newState;
-        this.broadcast("BUS:WORKER_STATE_UPDATED", newState);
+        this.broadcast("WORKER_STATE_UPDATED", newState);
     }
 }
+
+WorkerChannelHub.register("BUS", WebsocketWorker);
