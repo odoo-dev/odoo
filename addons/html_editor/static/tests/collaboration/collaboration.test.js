@@ -241,11 +241,17 @@ describe("history addExternalStep", () => {
             peerIds: ["c1", "c2"],
             contentBefore: `<p>i[c1}{c1][c2}{c2]</p>`,
         });
+        console.log("--- C1 insert b ---");
         peerInfos.c1.editor.shared.dom.insert("b");
+        console.log("--- C2  insert a and addStep ---");
         insert(peerInfos.c2.editor, "a");
+        console.log("--- merge peers steps ---");
         mergePeersSteps(peerInfos);
+        console.log("--- C1 addStep ---");
         peerInfos.c1.editor.shared.history.addStep();
+        console.log("--- merge peers steps ---");
         mergePeersSteps(peerInfos);
+
         cleanHints(peerInfos.c1.editor);
         cleanHints(peerInfos.c2.editor);
         // TODO @phoenix c1 editable should be `<p>iab[]</p>`, but its selection

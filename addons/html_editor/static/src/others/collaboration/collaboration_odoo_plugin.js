@@ -66,6 +66,7 @@ export class CollaborationOdooPlugin extends Plugin {
     };
 
     setup() {
+        console.warn("CollaborationOdooPlugin setup");
         this.isDocumentStale = false;
 
         this.ptpJoined = false;
@@ -133,6 +134,12 @@ export class CollaborationOdooPlugin extends Plugin {
         const fieldName = collaborationChannel.collaborationFieldName;
         const resId = collaborationChannel.collaborationResId;
         const channelName = `editor_collaboration:${modelName}:${fieldName}:${resId}`;
+
+        console.warn("setupCollaboration");
+        console.log("modelName", modelName);
+        console.log("fieldName", fieldName);
+        console.log("resId", resId);
+        console.log("channelName", channelName);
 
         if (
             !(modelName && fieldName && resId)

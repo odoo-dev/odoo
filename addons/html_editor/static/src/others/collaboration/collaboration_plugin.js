@@ -135,8 +135,9 @@ export class CollaborationPlugin extends Plugin {
             // todo: add a test that no 2 on_history_missing_parent_step_handlers
             // are called in same stack.
             const insertIndex = this.getInsertStepIndex(steps, newStep);
-            console.log("insertIndex : ", insertIndex);
+            console.log("= insertIndex : ", insertIndex);
             if (typeof insertIndex === "undefined") {
+                console.log("onExternalHistorySteps loop continue : ");
                 continue;
             }
             this.dependencies.history.addExternalStep(newStep, insertIndex);

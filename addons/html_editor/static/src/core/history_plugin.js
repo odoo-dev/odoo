@@ -1133,6 +1133,8 @@ export class HistoryPlugin extends Plugin {
             isPreviewing: this.isPreviewing,
         });
         this.config.onChange?.({ isPreviewing: this.isPreviewing });
+
+        console.log(`history_plugin.js::addStep: Inserting step with id ${this.currentStep.id}`);
         return currentStep;
     }
     canUndo() {

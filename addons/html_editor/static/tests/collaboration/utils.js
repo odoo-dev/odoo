@@ -45,7 +45,7 @@ class TestCollaborationEditor {
     }
 
     async edit(fn) {
-        this.parent.log(`[${this.name}] edit : `, fn);
+        this.parent.log(`[${this.name}] edit() : `, fn);
         await fn(this.editor);
 
         const historyPlugin = this._getPluginInstance("history");
@@ -54,14 +54,14 @@ class TestCollaborationEditor {
     }
 
     receive(operation) {
-        this.parent.log(`[${this.name}] receive : `, operation);
+        this.parent.log(`[${this.name}] receive() : `, operation);
         const collaborationPlugin = this._getPluginInstance("collaboration");
         collaborationPlugin.onExternalHistorySteps([operation]);
     }
 
     get content() {
         const content = getContent(this.el);
-        this.parent.log(`[${this.name}] get content called : `, content);
+        this.parent.log(`[${this.name}] get content : `, content);
         return content;
     }
 
