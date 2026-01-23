@@ -1669,7 +1669,7 @@ class SaleOrderLine(models.Model):
     #=== HOOKS ===#
 
     def _has_regular_product(self):
-        """Return whether the line is reqular line with sellable product or not."""
+        """Return whether the line is regular line with sellable product or not."""
         self.ensure_one()
         return (
             not bool(self.display_type)
