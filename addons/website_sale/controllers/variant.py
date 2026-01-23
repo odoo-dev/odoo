@@ -29,7 +29,7 @@ class WebsiteSaleVariantController(Controller):
             add_qty=add_qty,
             uom_id=uom_id,
         )
-        combination_info['currency_precision'] = combination_info['currency'].decimal_places
+        combination_info['currency_id'] = combination_info['currency'].id
 
         for key in (
             # Only provided to ease server-side computations.

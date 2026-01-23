@@ -7,6 +7,7 @@ import { rpc } from '@web/core/network/rpc';
 import { url } from '@web/core/utils/urls';
 import { memoize, uniqueId } from '@web/core/utils/functions';
 import { KeepLast } from '@web/core/utils/concurrency';
+import { formatCurrency } from '@web/core/currency';
 import { insertThousandsSep } from '@web/core/utils/numbers';
 import { throttleForAnimation } from '@web/core/utils/timing';
 import { markup } from '@odoo/owl';
@@ -563,7 +564,7 @@ export class ProductPage extends Interaction {
             const hasPrice = isCombinationPossible && combination.base_unit_price !== 0;
             pricePerUom.closest('.o_base_unit_price_wrapper').classList.toggle('d-none', !hasPrice);
             if (hasPrice) {
-                pricePerUom.textContent = this._priceToStr(combination.base_unit_price, precision);
+                pricePerUom.textContent = formatCurrency(combination.base_unit_price, combination.currency_id);
                 const unit = parent.querySelector('.oe_custom_base_unit');
                 if (unit) {
                     unit.textContent = combination.base_unit_name;
@@ -611,10 +612,10 @@ export class ProductPage extends Interaction {
             ?.querySelector('.oe_currency_value');
         const comparePrice = parent.querySelector('.oe_compare_list_price');
         if (price) {
-            price.textContent = this._priceToStr(combination.price, precision);
+            price.textContent = formatCurrency(combination.price, combination.currency_id);
         }
         if (defaultPrice) {
-            defaultPrice.textContent = this._priceToStr(combination.list_price, precision);
+            defaultPrice.textContent = formatCurrency(combination.list_price, combination.currency_id);
             defaultPrice.closest('.oe_website_sale').classList
                 .toggle('discount', combination.has_discounted_price);
             defaultPrice.parentElement.classList
@@ -641,25 +642,6 @@ export class ProductPage extends Interaction {
         ));
 
         this.handleCustomValues(ev.target);
-    }
-
-    /**
-     * Return the formatted price.
-     *
-     * @param {float} price - The price to format.
-     * @param {integer} precision - Number of decimals to display.
-     * @return {string} - The formatted price.
-     */
-    _priceToStr(price, precision) {
-        if (!Number.isInteger(precision)) {
-            precision = parseInt(
-                this.el.querySelector('.decimal_precision:last-of-type')?.dataset.precision ?? 2
-            );
-        }
-        const formatted = price.toFixed(precision).split('.');
-        const { thousandsSep, decimalPoint, grouping } = localization;
-        formatted[0] = insertThousandsSep(formatted[0], thousandsSep, grouping);
-        return formatted.join(decimalPoint);
     }
 
     /**
