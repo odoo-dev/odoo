@@ -413,6 +413,7 @@ class ThreadedServer(CommonServer):
             _logger.debug("cron%d started!", i)
 
     def http_client_thread(self, client, address, prelude=b''):
+        takeover = False
         try:
             from odoo.http.client import HTTPClient  # noqa: PLC0415
 
@@ -424,6 +425,7 @@ class ThreadedServer(CommonServer):
             del prelude
             # TODO loop in case of HTTP/1.1
             http_client.serve()
+            takeover = http_client.takeover.is_set()
             # if http_client.upgrade == b'websocket':
             #     ws_client = WSClient(client, address, prelude=http_client.conn.trailing_data)
             #     del http_client
@@ -433,7 +435,8 @@ class ThreadedServer(CommonServer):
             _logger.critical("Thread %s (%s) Exception occurred, quitting...",
                 current_thread.name, current_thread.ident, exc_info=True)
         finally:
-            client.close()
+            if not takeover:
+                client.close()
 
     def http_server_thread(self, interface, port, stop_event):
 
@@ -790,12 +793,14 @@ class PreforkServer(CommonServer):
         # working vars
         self.beat = 4
         self.socket = None
+        self.socket_async = None
+        self.port_async = config['gevent_port']
         self.workers_http = {}
         self.workers_cron = {}
+        self.workers_async = {}
         self.workers = {}
         self.generation = 0
         self.queue = collections.deque()
-        self.servers_gevent = {}
 
     def pipe_new(self):
         pipe = os.pipe()
@@ -837,16 +842,7 @@ class PreforkServer(CommonServer):
         worker.run()
         sys.exit(0)
 
-    def gevent_spawn(self):
-        nargs = stripped_sys_argv()
-        cmd = [sys.executable, sys.argv[0], 'gevent'] + nargs[1:]
-        popen = subprocess.Popen(cmd)
-        self.servers_gevent[popen.pid] = popen
-
     def worker_pop(self, pid):
-        if pid in self.servers_gevent:
-            _logger.debug("Gevent worker (%s) unregistered", pid)
-            self.servers_gevent.pop(pid)
         if pid in self.workers:
             _logger.debug("Worker (%s) unregistered", pid)
             try:
@@ -936,9 +932,9 @@ class PreforkServer(CommonServer):
             while len(self.workers_http) < self.population:
                 check_registries()
                 self.worker_spawn(WorkerHTTP, self.workers_http)
-            while len(self.servers_gevent) < config['gevent_workers']:
+            while len(self.workers_async) < config['gevent_workers']:
                 check_registries()
-                self.gevent_spawn()
+                self.worker_spawn(WorkerAsyncHTTP, self.workers_async)
         while len(self.workers_cron) < config['max_cron_threads']:
             check_registries()
             self.worker_spawn(WorkerCron, self.workers_cron)
@@ -1001,6 +997,13 @@ class PreforkServer(CommonServer):
                 self.socket.bind((self.interface, self.port))
                 self.socket.listen(8 * self.population)
 
+            if self.port_async:
+                self.socket_async = sock = socket.socket(family, socket.SOCK_STREAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.setblocking(0)
+                sock.bind((self.interface, self.port_async))
+                sock.listen(32)
+
     def fork_and_reload(self):
         _logger.info("Reloading server")
         pid = os.fork()
@@ -1012,10 +1015,6 @@ class PreforkServer(CommonServer):
             os.environ['ODOO_HTTP_SOCKET_FD'] = str(http_socket_fileno)
             os.environ['ODOO_READY_SIGHUP_PID'] = str(pid)
 
-            if not hasattr(socket, 'SO_REUSEPORT'):
-                # The new GeventServer won't be able to spawn if the address is in use
-                for pid in list(self.servers_gevent):
-                    self.worker_kill(pid, signal.SIGKILL)
             _reexec()  # stops execution
 
         # child process handles old server shutdown
@@ -1050,25 +1049,18 @@ class PreforkServer(CommonServer):
         is_main_server = self.pid == os.getpid()  # False if server reload, cannot reap children -> use psutil
         if not is_main_server:
             processes = {}
-            for pid in list(self.workers) + list(self.servers_gevent):
+            for pid in list(self.workers):
                 try:
                     processes[pid] = psutil.Process(pid)
                 except psutil.NoSuchProcess:
                     self.worker_pop(pid)
-
-        if self.servers_gevent:
-            if respawn_time:
-                # gevent servers take a bit longer to start so sleep a bit as a best effort to avoid downtime
-                time.sleep(respawn_time + 1)
-                for pid in self.servers_gevent:
-                    self.worker_kill(pid, signal.SIGINT)
 
         timeout_gevent = time.monotonic()
         if respawn_time:
             timeout_gevent += config['limit_time_real']
 
         self.beat = 0.1
-        while self.workers or self.servers_gevent:
+        while self.workers:
             try:
                 self.process_signals()
             except KeyboardInterrupt:
@@ -1085,9 +1077,6 @@ class PreforkServer(CommonServer):
 
             self.sleep()
             self.process_timeout()
-            if self.servers_gevent and time.monotonic() > timeout_gevent:
-                for pid in list(self.servers_gevent):
-                    self.worker_kill(pid, signal.SIGKILL)
 
     def stop(self, graceful=True):
         global server_phoenix  # noqa: PLW0603
@@ -1109,8 +1098,6 @@ class PreforkServer(CommonServer):
         else:
             _logger.info("Stopping forcefully")
 
-        for pid in list(self.servers_gevent):
-            self.worker_kill(pid, signal.SIGKILL)
         for pid in list(self.workers):
             self.worker_kill(pid, signal.SIGTERM)
 
@@ -1307,17 +1294,33 @@ class WorkerHTTP(Worker):
 
         from odoo.http.client import HTTPClient  # noqa: PLC0415
         http_client = HTTPClient(client, addr)
-        http_client.serve()
+        try:
+            http_client.serve()
+        finally:
+            if not http_client.takeover.is_set():
+                client.close()
 
         self.request_count += 1
 
+    def _accept(self):
+        return self.multi.socket.accept()
+
     def process_work(self):
         try:
-            client, addr = self.multi.socket.accept()
+            client, addr = self._accept()
             self.process_request(client, addr)
         except OSError as e:
             if e.errno not in (errno.EAGAIN, errno.ECONNABORTED):
                 raise
+
+
+class WorkerAsyncHTTP(WorkerHTTP):
+    def __init__(self, multi):
+        super().__init__(multi)
+
+    def _accept(self):
+        sock = self.multi.socket_async or self.multi.socket
+        return sock.accept()
 
 
 class WorkerCron(Worker):

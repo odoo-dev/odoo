@@ -75,6 +75,7 @@ class HTTPClient:
 
         self._request_line = None
         self.chunked_response = False
+        self.takeover = threading.Event()
 
     def _make_environ(self):
         # h11 made sure the target, http_version, header names and
@@ -110,9 +111,10 @@ class HTTPClient:
             'wsgi.multiprocess': config['workers'] and not odoo.evented,
             'wsgi.run_once': False,
         }
-        if environ['wsgi.multithread']:
+        if environ['wsgi.multithread'] or True:  # XXX
             environ['odoo.socket'] = self.sock
             environ['odoo.prelude'] = lambda: memoryview(self.buffer)
+            environ['odoo.takeover'] = self.takeover
 
         environ.update({
             'HTTP_' + header.upper().replace('-', '_'): value.decode('latin-1')
@@ -252,7 +254,6 @@ class HTTPClient:
             # if we switched protocol, we had no body and the remaining connection
             # is handled on close... in any case, closing here
             wsgi_response.close()
-        self.sock.close()
         http_log(_logger, logging.DEBUG, '[END] ', extra={
             'remote_addr': self.ip,
             'http_request_line': self._request_line,

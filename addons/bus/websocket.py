@@ -1,5 +1,8 @@
+import asyncio
 import base64
 import bisect
+import contextlib
+import contextvars
 import functools
 import hashlib
 import json
@@ -12,7 +15,6 @@ import struct
 import threading
 import time
 from collections import defaultdict, deque
-from contextlib import contextmanager, suppress
 from enum import IntEnum
 from itertools import count
 from queue import PriorityQueue
@@ -23,7 +25,7 @@ import psycopg2
 from psycopg2.pool import PoolError
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 from werkzeug.exceptions import BadRequest, HTTPException, ServiceUnavailable
-from werkzeug.local import LocalStack
+from werkzeug.local import LocalProxy
 
 import odoo
 from odoo import modules
@@ -47,25 +49,25 @@ DELAY_ON_POOL_ERROR = 0.15
 JITTER_ON_POOL_ERROR = 0.3
 
 
-@contextmanager
-def acquire_cursor(db):
+@contextlib.asynccontextmanager
+async def acquire_cursor(db):
     """ Try to acquire a cursor up to `MAX_TRY_ON_POOL_ERROR` """
     delay = DELAY_ON_POOL_ERROR
     try:
         for _ in range(MAX_TRY_ON_POOL_ERROR):
             # Yield before trying to acquire the cursor to let other
             # greenlets release their cursor.
-            time.sleep(0)
-            with suppress(PoolError), Registry(db).cursor() as cr:
+            # time.sleep(0) # nah
+            with contextlib.suppress(PoolError), Registry(db).cursor() as cr:
                 yield cr
                 return
-            time.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
+            await asyncio.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
             delay *= 1.5
         raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
     finally:
         # Yield after releasing the cursor to let waiting greenlets
         # immediately pick up the freed connection.
-        time.sleep(0)
+        await asyncio.sleep(0)
 
 # ------------------------------------------------------
 # EXCEPTIONS
@@ -311,6 +313,8 @@ class Websocket:
         self._cookies = cookies
         self._db = session.db
         self.__socket = sock
+        self.__loop = get_event_loop()
+        self.__cmd_queue2 = asyncio.Queue()  # TODO
         self._prelude = memoryview(prelude) if prelude else None
         self._close_sent = False
         self._close_received = False
@@ -345,36 +349,58 @@ class Websocket:
     # PUBLIC METHODS
     # ------------------------------------------------------
 
-    def get_messages(self):
+    async def serve(self, db, httprequest):
+        loop = asyncio.get_running_loop()
+        async for message in self.get_messages():
+            if message == b'\x00':
+                # Ignore internal sentinel message used to detect dead/idle connections.
+                continue
+            req = WebsocketRequest(db, httprequest, self)
+            reset = wsrequest_var.set(req)
+            try:
+                await loop.run_in_executor(None, req.serve_websocket_message, message)
+            except SessionExpiredException:
+                self.close(CloseCode.SESSION_EXPIRED)
+            except PoolError:
+                self.close(CloseCode.TRY_LATER)
+            except Exception:
+                _logger.exception("Exception occurred during websocket request handling")
+            finally:
+                wsrequest_var.reset(reset)
+
+    async def get_messages(self):
+        loop = self.__loop
         while self.state is not ConnectionState.CLOSED:
             try:
-                readables = {
-                    selector_key[0].fileobj
-                    for selector_key in self.__selector.select(TimeoutManager.TIMEOUT)
-                }
+                get_cmd = loop.create_task(self.__cmd_queue2.get())
+                read_msg = loop.create_task(loop.sock_recv(self.__socket, 1))  # TODO read buffer
+                done, pending = asyncio.wait((get_cmd, read_msg), return_when=asyncio.FIRST_COMPLETED)
+                for task in pending:
+                    task.cancel()
                 if (
                     self._timeout_manager.has_keep_alive_timed_out()
                     and self.state is ConnectionState.OPEN
                 ):
-                    self._disconnect(CloseCode.KEEP_ALIVE_TIMEOUT)
+                    await self._disconnect(CloseCode.KEEP_ALIVE_TIMEOUT)
                     continue
                 if self._timeout_manager.has_frame_response_timed_out():
-                    self._terminate()
+                    await self._terminate()
                     continue
-                if not readables and self._timeout_manager.should_send_ping_frame():
-                    self._send_ping_frame()
+                if not done and self._timeout_manager.should_send_ping_frame():
+                    await self._send_ping_frame()
                     continue
-                if self.__cmd_queue in readables:
-                    cmd, _, data = self.__cmd_queue.get_nowait()
-                    self._process_control_command(cmd, data)
+                if get_cmd in done:
+                    cmd, _, data = get_cmd.result()
+                    await self._process_control_command(cmd, data)
+                    self.__cmd_queue2.task_done()
                     if self.state is ConnectionState.CLOSED:
                         continue
-                if self.__socket in readables:
-                    message = self._process_next_message()
+                if read_msg in done:
+                    message = self._process_next_message(read_msg)
                     if message is not None:
                         yield message
             except Exception as exc:
-                self._handle_transport_error(exc)
+                await self._handle_transport_error(exc)
 
     def close(self, code, reason=None):
         """Notify the socket to initiate closure. The closing handshake
@@ -412,14 +438,14 @@ class Websocket:
             return
         self._waiting_for_dispatch = True
         # Ignore if the socket was closed in the meantime.
-        with suppress(OSError):
+        with contextlib.suppress(OSError):
             self._send_control_command(ControlCommand.DISPATCH)
 
     # ------------------------------------------------------
     # PRIVATE METHODS
     # ------------------------------------------------------
 
-    def _get_next_frame(self):
+    async def _get_next_frame(self):
         #     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
         #    +-+-+-+-+-------+-+-------------+-------------------------------+
         #    |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
@@ -437,14 +463,14 @@ class Websocket:
         #    + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
         #    |                     Payload Data continued ...                |
         #    +---------------------------------------------------------------+
-        def recv_bytes(n):
+        async def recv_bytes(n):
             """ Pull n bytes from the socket """
             data = bytearray()
             if self._prelude:
                 data.extend(self._prelude[:n])
                 self._prelude = self._prelude[n:] if n < len(self._prelude) else None
             while len(data) < n:
-                received_data = self.__socket.recv(n - len(data))
+                received_data = await self.__loop.sock_recv(self.__socket, n - len(data))
                 if not received_data:
                     raise ConnectionClosed()
                 data.extend(received_data)
@@ -467,7 +493,7 @@ class Websocket:
             return payload
 
         self._limit_rate()
-        first_byte, second_byte = recv_bytes(2)
+        first_byte, second_byte = await recv_bytes(2)
         fin, rsv1, rsv2, rsv3 = (is_bit_set(first_byte, n) for n in range(4))
         try:
             opcode = Opcode(first_byte & 0b00001111)
@@ -487,28 +513,28 @@ class Websocket:
                     "Control frames payload must be smaller than 126"
                 )
         if payload_length == 126:
-            payload_length = struct.unpack('!H', recv_bytes(2))[0]
+            payload_length = struct.unpack('!H', await recv_bytes(2))[0]
         elif payload_length == 127:
-            payload_length = struct.unpack('!Q', recv_bytes(8))[0]
+            payload_length = struct.unpack('!Q', await recv_bytes(8))[0]
         if payload_length > self.MESSAGE_MAX_SIZE:
             raise PayloadTooLargeException()
 
-        mask = recv_bytes(4)
-        payload = apply_mask(recv_bytes(payload_length), mask)
+        mask = await recv_bytes(4)
+        payload = apply_mask(await recv_bytes(payload_length), mask)
         frame = Frame(opcode, bytes(payload), fin, rsv1, rsv2, rsv3)
         self._timeout_manager.acknowledge_frame_receipt(frame)
         return frame
 
-    def _process_next_message(self):
+    async def _process_next_message(self):
         """
         Process the next message coming throught the socket. If a
         data message can be extracted, return its decoded payload.
         As per the RFC, only control frames will be processed once
         the connection reaches the closing state.
         """
-        frame = self._get_next_frame()
+        frame = await self._get_next_frame()
         if frame.opcode in CTRL_OP:
-            self._handle_control_frame(frame)
+            await self._handle_control_frame(frame)
             return
         if self.state is not ConnectionState.OPEN:
             # After receiving a control frame indicating the connection
@@ -519,20 +545,20 @@ class Websocket:
             raise ProtocolError("Unexpected continuation frame")
         message = frame.payload
         if not frame.fin:
-            message = self._recover_fragmented_message(frame)
+            message = await self._recover_fragmented_message(frame)
         return (
             message.decode('utf-8')
             if message is not None and frame.opcode is Opcode.TEXT else message
         )
 
-    def _recover_fragmented_message(self, initial_frame):
+    async def _recover_fragmented_message(self, initial_frame):
         message_fragments = bytearray(initial_frame.payload)
         while True:
             frame = self._get_next_frame()
             if frame.opcode in CTRL_OP:
                 # Control frames can be received in the middle of a
                 # fragmented message, process them as soon as possible.
-                self._handle_control_frame(frame)
+                await self._handle_control_frame(frame)
                 if self.state is not ConnectionState.OPEN:
                     return
                 continue
@@ -544,7 +570,7 @@ class Websocket:
             if frame.fin:
                 return bytes(message_fragments)
 
-    def _send(self, message):
+    async def _send(self, message):
         if self.state is not ConnectionState.OPEN:
             raise InvalidStateException(
                 "Trying to send a frame on a closed socket"
@@ -552,9 +578,9 @@ class Websocket:
         opcode = Opcode.BINARY
         if not isinstance(message, (bytes, bytearray)):
             opcode = Opcode.TEXT
-        self._send_frame(Frame(opcode, message))
+        await self._send_frame(Frame(opcode, message))
 
-    def _send_frame(self, frame):
+    async def _send_frame(self, frame):
         if frame.opcode in CTRL_OP and len(frame.payload) > 125:
             raise ProtocolError(
                 "Control frames should have a payload length smaller than 126"
@@ -586,7 +612,7 @@ class Websocket:
                 struct.pack('!BBQ', first_byte, 127, payload_length)
             )
         output.extend(frame.payload)
-        self.__socket.sendall(output)
+        await self.__loop.sock_sendall(self.__socket, output)
         self._timeout_manager.acknowledge_frame_sent(frame)
         if not isinstance(frame, CloseFrame):
             return
@@ -596,25 +622,25 @@ class Websocket:
             frame.code in (CloseCode.ABNORMAL_CLOSURE, CloseCode.KILL_NOW)
             or self._close_received
         ):
-            self._terminate()
+            await self._terminate()
             return
         # After sending a control frame indicating the connection
         # should be closed, a peer does not send any further data.
         self.__selector.unregister(self.__cmd_queue)
 
-    def _send_close_frame(self, code, reason=None):
+    async def _send_close_frame(self, code, reason=None):
         """ Send a close frame. """
-        self._send_frame(CloseFrame(code, reason))
+        await self._send_frame(CloseFrame(code, reason))
 
-    def _send_ping_frame(self):
+    async def _send_ping_frame(self):
         """ Send a ping frame """
-        self._send_frame(Frame(Opcode.PING))
+        await self._send_frame(Frame(Opcode.PING))
 
-    def _send_pong_frame(self, payload):
+    async def _send_pong_frame(self, payload):
         """ Send a pong frame """
-        self._send_frame(Frame(Opcode.PONG, payload))
+        await self._send_frame(Frame(Opcode.PONG, payload))
 
-    def _disconnect(self, code, reason=None):
+    async def _disconnect(self, code, reason=None):
         """Initiate the closing handshake. Once the acknowledgment is received,
         `self._terminate` will be invoked to execute a graceful shutdown of the
         TCP connection. If the connection is already dead, skip the handshake
@@ -623,38 +649,39 @@ class Websocket:
         `self.close`.
         """
         if code in (CloseCode.ABNORMAL_CLOSURE, CloseCode.KILL_NOW):
-            self._terminate()
+            await self._terminate()
         else:
-            self._send_close_frame(code, reason)
+            await self._send_close_frame(code, reason)
 
-    def _terminate(self):
+    async def _terminate(self):
         """ Close the underlying TCP socket. """
         if self.state == ConnectionState.CLOSED:
             return
         self.state = ConnectionState.CLOSED
-        with suppress(OSError, TimeoutError):
+        with contextlib.suppress(OSError, TimeoutError):
             self.__socket.shutdown(socket.SHUT_WR)
             # Call recv until obtaining a return value of 0 indicating
             # the other end has performed an orderly shutdown. A timeout
             # is set to ensure the connection will be closed even if
             # the other end does not close the socket properly.
             self.__socket.settimeout(1)
-            while self.__socket.recv(4096):
+            buf = bytearray(4096)
+            while await self.__loop.sock_recv_into(self.__socket, buf):
                 pass
-        with suppress(KeyError):
+        with contextlib.suppress(KeyError):
             self.__selector.unregister(self.__socket)
         self.__selector.close()
         self.__socket.close()
         self.__cmd_queue.close()
         dispatch.unsubscribe(self)
-        self._trigger_lifecycle_event(LifecycleEvent.CLOSE)
-        with acquire_cursor(self._db) as cr:
+        async with acquire_cursor(self._db) as cr:
+            self._trigger_lifecycle_event(LifecycleEvent.CLOSE, cr=cr)
             env = new_env(cr, self._session)
             env["ir.websocket"]._on_websocket_closed(self._cookies)
 
-    def _handle_control_frame(self, frame):
+    async def _handle_control_frame(self, frame):
         if frame.opcode is Opcode.PING:
-            self._send_pong_frame(frame.payload)
+            await self._send_pong_frame(frame.payload)
         elif frame.opcode is Opcode.CLOSE:
             self.state = ConnectionState.CLOSING
             self._close_received = True
@@ -665,11 +692,11 @@ class Websocket:
             elif frame.payload:
                 raise ProtocolError("Malformed closing frame")
             if not self._close_sent:
-                self._send_close_frame(code, reason)
+                await self._send_close_frame(code, reason)
             else:
-                self._terminate()
+                await self._terminate()
 
-    def _handle_transport_error(self, exc):
+    async def _handle_transport_error(self, exc):
         """
         Find out which close code should be sent according to given
         exception and call `self._disconnect` in order to close the
@@ -698,9 +725,9 @@ class Websocket:
             else:
                 _logger.error(exc, exc_info=True)
         if self.state is ConnectionState.OPEN:
-            self._disconnect(code, reason)
+            await self._disconnect(code, reason)
         else:
-            self._terminate()
+            await self._terminate()
 
     def _limit_rate(self):
         """
@@ -717,7 +744,7 @@ class Websocket:
                 raise RateLimitExceededException()
         self._incoming_frame_timestamps.append(now)
 
-    def _trigger_lifecycle_event(self, event_type):
+    def _trigger_lifecycle_event(self, event_type, cr=None):
         """
         Trigger a lifecycle event that is, call every function
         registered for this event type. Every callback is given both the
@@ -725,7 +752,7 @@ class Websocket:
         """
         if not self.__event_callbacks[event_type]:
             return
-        with acquire_cursor(self._db) as cr:
+        with (Registry(self._db).cursor() if cr is None else contextlib.nullcontext(cr)) as cr:
             env = new_env(cr, self._session, set_lang=True)
             for callback in self.__event_callbacks[event_type]:
                 try:
@@ -737,7 +764,7 @@ class Websocket:
                         exc_info=True
                     )
 
-    def _assert_session_validity(self):
+    async def _assert_session_validity(self):
         """Ensure the current session exists and validate it using
         `check_session`.
 
@@ -751,11 +778,11 @@ class Websocket:
             raise SessionExpiredException(e)
         if 'next_sid' in session:
             self._session = root.session_store.get(session['next_sid'])
-            self._assert_session_validity()
+            await self._assert_session_validity()
             return
         if session.uid is None:
             return
-        with acquire_cursor(session.db) as cr:
+        async with acquire_cursor(session.db) as cr:
             check_session(cr, session)
 
     def _send_control_command(self, command, data=None):
@@ -764,9 +791,9 @@ class Websocket:
         :param ControlCommand command: The command to be executed.
         :param dict | None data: An optional dictionary of parameters.
         """
-        self.__cmd_queue.put((command, next(_command_uid), data))
+        self.__loop.call_soon_threadsafe(self.__cmd_queue2.put_nowait, (command, next(_command_uid), data))
 
-    def _process_control_command(self, command, data):
+    async def _process_control_command(self, command, data):
         """Process a command received in `self.__cmd_queue`.
 
         :param ControlCommand command: The command to be executed. This key is required.
@@ -774,14 +801,14 @@ class Websocket:
         """
         match command:
             case ControlCommand.DISPATCH:
-                self._assert_session_validity()
-                self._dispatch_bus_notifications()
+                await self._assert_session_validity()
+                await self._dispatch_bus_notifications()
             case ControlCommand.CLOSE:
-                self._disconnect(data['code'], data.get('reason'))
+                await self._disconnect(data['code'], data.get('reason'))
 
-    def _dispatch_bus_notifications(self):
+    async def _dispatch_bus_notifications(self):
         self._waiting_for_dispatch = False
-        with acquire_cursor(self._session.db) as cr:
+        async with acquire_cursor(self._session.db) as cr:
             notifications = fetch_bus_notifications(
                 cr, self._channels, self._last_notif_sent_id, [n[0] for n in self._notif_history]
             )
@@ -809,7 +836,7 @@ class Websocket:
         if last_index != -1:
             self._last_notif_sent_id = self._notif_history[last_index][0]
             self._notif_history = self._notif_history[last_index + 1 :]
-        self._send(notifications)
+        await self._send(notifications)
 
 
 class TimeoutManager:
@@ -883,8 +910,9 @@ class TimeoutManager:
 # ------------------------------------------------------
 
 
-_wsrequest_stack = LocalStack()
-wsrequest = _wsrequest_stack()
+wsrequest_var = contextvars.ContextVar('wsrequest')
+wsrequest = LocalProxy(wsrequest_var)
+
 
 class WebsocketRequest:
     def __init__(self, db, httprequest, websocket):
@@ -892,13 +920,6 @@ class WebsocketRequest:
         self.httprequest = httprequest
         self.session = None
         self.ws = websocket
-
-    def __enter__(self):
-        _wsrequest_stack.push(self)
-        return self
-
-    def __exit__(self, *args):
-        _wsrequest_stack.pop()
 
     def serve_websocket_message(self, message):
         try:
@@ -922,7 +943,7 @@ class WebsocketRequest:
         ) as exc:
             raise InvalidDatabaseException() from exc
 
-        with acquire_cursor(self.db) as cr:
+        with self.registry.cursor() as cr:
             self.env = new_env(cr, self.session, set_lang=True)
             retrying(
                 functools.partial(self._serve_ir_websocket, event_name, data),
@@ -1006,15 +1027,20 @@ class WebsocketConnectionHandler:
         public_session = cls._handle_public_configuration(request)
         try:
             response = cls._get_handshake_response(request.httprequest.headers)
-            socket = request.httprequest._HTTPRequest__environ['odoo.socket']
-            next_bytes = request.httprequest._HTTPRequest__environ['odoo.prelude']
+            socket = request.httprequest._HTTPRequest__environ['socket']
+            takeover = request.httprequest._HTTPRequest__environ.get('odoo.takeover')
+            next_bytes = request.httprequest._HTTPRequest__environ.get('odoo.prelude', lambda: b'')
             session, db, httprequest = (public_session or request.session), request.db, request.httprequest
-            response.call_on_close(lambda: cls._serve_forever(
-                Websocket(socket, session, httprequest.cookies, prelude=next_bytes()),
-                db,
-                httprequest,
-                version
-            ))
+
+            def websocket_handle():
+                websocket = Websocket(socket, session, httprequest.cookies, prelude=next_bytes())
+                future = cls._serve_async(websocket, db, httprequest, version)
+                if takeover is None:
+                    future.result()
+                else:
+                    future.add_done_callback(functools.partial(cls._done_async, socket.close))
+                    takeover.set()
+            response.call_on_close(websocket_handle)
             # Force save the session. Session must be persisted to handle
             # WebSocket authentication.
             request.session.is_dirty = True
@@ -1104,14 +1130,20 @@ class WebsocketConnectionHandler:
             raise BadRequest(
                 "Sec-WebSocket-Key should be of length 16 once decoded"
             )
+    @classmethod
+    def _done_async(cls, close, task):
+        try:
+            task.result()
+        except Exception:
+            _logger.exception("exception on websocket")
+        finally:
+            close()
 
     @classmethod
-    def _serve_forever(cls, websocket, db, httprequest, version):
+    def _serve_async(cls, websocket: Websocket, db, httprequest, version):
         """
         Process incoming messages and dispatch them to the application.
         """
-        current_thread = threading.current_thread()
-        current_thread.type = 'websocket'
         if httprequest.user_agent and version != cls._VERSION:
             # Close the connection from an outdated worker. We can't use a
             # custom close code because the connection is considered successful,
@@ -1123,19 +1155,8 @@ class WebsocketConnectionHandler:
             # Non browsers are ignored since IOT devices do not provide the
             # worker version.
             websocket.close(CloseCode.CLEAN, "OUTDATED_VERSION")
-        for message in websocket.get_messages():
-            if message == b'\x00':
-                # Ignore internal sentinel message used to detect dead/idle connections.
-                continue
-            with WebsocketRequest(db, httprequest, websocket) as req:
-                try:
-                    req.serve_websocket_message(message)
-                except SessionExpiredException:
-                    websocket.close(CloseCode.SESSION_EXPIRED)
-                except PoolError:
-                    websocket.close(CloseCode.TRY_LATER)
-                except Exception:
-                    _logger.exception("Exception occurred during websocket request handling")
+        loop = get_event_loop()
+        return asyncio.run_coroutine_threadsafe(websocket.serve(db, httprequest), loop)
 
 
 def _kick_all(code=CloseCode.GOING_AWAY):
@@ -1154,3 +1175,22 @@ def _kick_all(code=CloseCode.GOING_AWAY):
 
 
 CommonServer.on_stop(_kick_all)
+
+_ws_loop = None
+
+def get_event_loop() -> asyncio.AbstractEventLoop:
+    global _ws_loop
+    if _ws_loop is None:
+        _logger.info("Start websocket event loop")
+        _ws_loop = asyncio.new_event_loop()
+        thread = threading.Thread(name='websocket_loop', target=_ws_loop.run_forever)
+        thread.daemon = True
+        thread.start()
+    return _ws_loop
+
+def _stop_event_loop():
+    if _ws_loop is None:
+        return
+    _ws_loop.stop()
+
+CommonServer.on_stop(_stop_event_loop)
