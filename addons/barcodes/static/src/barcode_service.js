@@ -27,7 +27,6 @@ export const barcodeService = {
         const bus = new EventBus();
         let timeout = null;
 
-        let currentTarget = null;
         let barcodeInput = makeBarcodeInput();
 
         function handleBarcode(barcode, target) {
@@ -42,7 +41,8 @@ export const barcodeService = {
          * check if we have a barcode, and trigger appropriate events
          */
         function checkBarcode() {
-            let str = currentTarget?.value || barcodeInput.value;
+            let currentTarget = document.activeElement;
+            let str = currentTarget.value || barcodeInput.value;
             str = barcodeService.cleanBarcode(str);
             for (let scannedCode of str.split(RegExp(REGEX_END_CHARACTER)).filter(Boolean)) {
                 handleBarcode(scannedCode, currentTarget);
@@ -77,7 +77,7 @@ export const barcodeService = {
             };
         }
 
-        function scanInputHandler(ev) {
+        function scanInputHandler() {
             barcodeInput.setAttribute("inputmode", "none");
 
             clearTimeout(timeout);
