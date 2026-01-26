@@ -723,3 +723,7 @@
 "","","","","","","","","","","","","","","","","","","tax","","invoice","","","","","","","",""
 "","","","","","","","","","","","","","","","","","","base","","refund","","","","","","","",""
 "","","","","","","","","","","","","","","","","","","tax","","refund","","","","","","","",""
+account_tax_template_s_ct,,True,Business Trip Expenses,Business Trip Exp.,none,Business Trip Expenses,Gastos Deducibles,Despeses Deduïbles,0.0,percent,tax_group_retenciones_0,,,,,,,base,,invoice,"",,Gastos Deducibles,,,,,
+"","","","","","","","","","","","","","","","","","",tax,"",invoice,account_common_603,"","","","","","",""
+"","","","","","","","","","","","","","","","","","",base,"",refund,"","","","","","","",""
+"","","","","","","","","","","","","","","","","","",tax,"",refund,account_common_603,"","","","","","",""
