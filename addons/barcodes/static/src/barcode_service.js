@@ -40,8 +40,7 @@ export const barcodeService = {
         /**
          * check if we have a barcode, and trigger appropriate events
          */
-        function checkBarcode() {
-            let currentTarget = document.activeElement;
+        function checkBarcode(currentTarget) {
             let str = currentTarget.value || barcodeInput.value;
             str = barcodeService.cleanBarcode(str);
             for (let scannedCode of str.split(RegExp(REGEX_END_CHARACTER)).filter(Boolean)) {
@@ -50,6 +49,26 @@ export const barcodeService = {
             barcodeInput.value = "";
             currentTarget = null;
         }
+
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.type === "childList") {
+                    mutation.addedNodes.forEach(el => {
+                        if (el.tagName === 'INPUT' && el.attributes.barcode_events) {
+                            el.addEventListener('keydown', scanKeydownHandler);
+                            el.addEventListener('input', scanInputHandler);
+                            console.log("##################### addEventListener");
+                        }
+                    });
+                } else if (mutation.type === "attributes") {
+                    if (mutation.target.matches('input[barcode_events]')) {
+                        mutation.target.addEventListener('keydown', scanKeydownHandler);
+                        //mutation.target.addEventListener('input', scanInputHandler);
+                    }
+                }
+            }
+        });
+        observer.observe(document.body, { attributes: true, childList: true, subtree: true });
 
         function keydownHandler(ev) {
             // Ignore 'Shift', 'Escape', 'Backspace', 'Insert', 'Delete', 'Home', 'End', Arrow*, F*, Page*, ...
@@ -73,28 +92,20 @@ export const barcodeService = {
         function scanKeydownHandler(ev) {
             if (ev.key.match(/(Enter|Tab)/)) {
                 clearTimeout(timeout);
-                checkBarcode();
+                checkBarcode(ev.target);
             };
         }
 
-        function scanInputHandler() {
+        function scanInputHandler(ev) {
             barcodeInput.setAttribute("inputmode", "none");
-
+            console.log(ev.target.value);
             clearTimeout(timeout);
-            timeout = setTimeout(checkBarcode, barcodeService.maxTimeBetweenKeysInMs);
+            timeout = setTimeout(() => checkBarcode(ev.target), barcodeService.maxTimeBetweenKeysInMs);
         }
 
         whenReady(() => {
             document.body.appendChild(barcodeInput);
-
             document.body.addEventListener('keydown', keydownHandler);
-
-            [barcodeInput, ...document.querySelectorAll('input[barcode_events]')].forEach(
-                el => {
-                    el.addEventListener('keydown', scanKeydownHandler);
-                    el.addEventListener('input', scanInputHandler);
-                }
-            );
         });
 
         return {
