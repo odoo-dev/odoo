@@ -7,6 +7,7 @@ class AccountMove(models.Model):
 
     l10n_es_is_simplified = fields.Boolean("Is Simplified",
                                            compute="_compute_l10n_es_is_simplified", readonly=False, store=True)
+    l10n_es_current_company_is_es = fields.Boolean(compute='_compute_l10n_es_current_company_is_es')
 
     # Note: We depend on 'line_ids.balance' instead of 'amount_total_signed' directly.
     # Otherwise the field is recomputed when the 'state' changes (since 'amount_total_signed' depends on it);
@@ -25,6 +26,10 @@ class AccountMove(models.Model):
                     and move.commercial_partner_id.country_id in self.env.ref('base.europe').country_ids
                 )
             )
+
+    @api.depends_context('company')
+    def _compute_l10n_es_current_company_is_es(self):
+        self.l10n_es_current_company_is_es = self.env.company.country_code == 'ES'
 
     def _l10n_es_is_dua(self):
         self.ensure_one()
