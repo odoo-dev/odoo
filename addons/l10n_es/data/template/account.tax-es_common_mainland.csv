@@ -723,7 +723,7 @@ account_tax_template_s_gd0,"","True","Deductible Expenses","Deduct. Exp.","none"
 ,"","","","","","","","","","","","","","","","","","tax","","invoice","","","","","","","",""
 "","","","","","","","","","","","","","","","","","","base","","refund","","","","","","","",""
 "","","","","","","","","","","","","","","","","","","tax","","refund","","","","","","","",""
-"business_trip_tax",,"True","Taxes for the Business Trip",,"purchase","21% Business Trip","Tasas Viaje de negocios","Tases viatge de negocis","21.0","percent",,,,,,,,"base",,"invoice",,,,,,,,,""
-,,,,,,,,,,,,,,,,,,tax,,invoice,account_common_7994,,,,,,,
-,,,,,,,,,,,,,,,,,,base,,refund,,,,,,,,
-,,,,,,,,,,,,,,,,,,tax,,refund,account_common_7994,,,,,,,
+"business_trip_tax","","True","Taxes for the Business Trip","","purchase","21% Business Trip","Tasas Viaje de negocios","Tases viatge de negocis","21.0","percent","","","","","","base","","invoice","","","","","","","","",""
+"","","","","","","","","","","","","","","","","","","tax","","invoice","account_common_7994","","","","","","","","",""
+"","","","","","","","","","","","","","","","","","","base","","refund","","","","","","","","",""
+"","","","","","","","","","","","","","","","","","","tax","","refund","account_common_7994","","","","","","","","",""
