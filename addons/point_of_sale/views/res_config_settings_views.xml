@@ -294,6 +294,14 @@
                                         </div>
                                     </div>
                                 </setting>
+                                <setting id="pos_service_charge" help="Add service charge to orders" documentation="/applications/sales/point_of_sale/pricing/service_charge.html">
+                                    <field name="pos_module_pos_service_charge"/>
+                                    <div class="content-group mt16" invisible="not pos_module_pos_service_charge">
+                                        <div class="text-warning mb4" id="warning_text_pos_service_charge" >
+                                            Save this page and come back here to set up the feature.
+                                        </div>
+                                    </div>
+                                </setting>
                                 <setting id="pos_pricer" string="Pricer" title="Pricer tags" help="Display and update your products information through electronic price tags">
                                     <field name="module_pos_pricer"/>
                                 </setting>

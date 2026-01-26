@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pos_service_charge</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='pos_pricing_section']" position="after">
+                <block title="Service Charge" id="pos_service_charge_section">
+                    <div id="warning_text_pos_service_charge" position="replace">
+                        <div class="row">
+                            <label string="Rate (%)" for="pos_service_charge_rate" class="col-lg-3 o_light_label"/>
+                            <field name="pos_service_charge_rate"/>
+                        </div>
+                        <div class="row">
+                            <label string="Calculation Method" for="pos_service_charge_calculation_method" class="col-lg-3 o_light_label"/>
+                            <field name="pos_service_charge_calculation_method"/>
+                        </div>
+                        <div class="row">
+                            <label string="Apply on Presets" for="pos_service_charge_preset_ids" class="col-lg-3 o_light_label"/>
+                            <field name="pos_service_charge_preset_ids" widget="many2many_tags"/>
+                        </div>
+                        <div class="row">
+                            <label string="Product" for="pos_service_charge_product_id" class="col-lg-3 o_light_label"/>
+                            <field name="pos_service_charge_product_id"/>
+                        </div>
+                    </div>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>
