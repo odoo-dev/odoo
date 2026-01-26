@@ -1,10 +1,12 @@
 import { threadActionsRegistry } from "@mail/core/common/thread_actions";
+import { NO_MEMBERS_DEFAULT_OPEN_LS } from "@mail/core/public_web/discuss_app_model";
 import { AttachmentPanel } from "@mail/discuss/core/common/attachment_panel";
 import { ChannelInvitation } from "@mail/discuss/core/common/channel_invitation";
 import { ChannelMemberList } from "@mail/discuss/core/common/channel_member_list";
 import { NotificationSettings } from "@mail/discuss/core/common/notification_settings";
 
 import { Component, xml, useComponent } from "@odoo/owl";
+import { browser } from "@web/core/browser/browser";
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -175,11 +177,13 @@ threadActionsRegistry
         close(component) {
             if (component.env.inDiscussApp) {
                 component.store.discuss.isMemberPanelOpenByDefault = false;
+                browser.localStorage.setItem(NO_MEMBERS_DEFAULT_OPEN_LS, "true");
             }
         },
         open(component) {
             if (component.env.inDiscussApp) {
                 component.store.discuss.isMemberPanelOpenByDefault = true;
+                browser.localStorage.removeItem(NO_MEMBERS_DEFAULT_OPEN_LS);
             }
         },
         sequence: 30,

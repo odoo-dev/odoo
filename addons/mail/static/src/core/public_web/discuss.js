@@ -15,6 +15,8 @@ import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
+import { browser } from "@web/core/browser/browser";
+import { NO_MEMBERS_DEFAULT_OPEN_LS } from "./discuss_app_model";
 
 export class Discuss extends Component {
     static components = {
@@ -97,6 +99,7 @@ export class Discuss extends Component {
                         return; // no-op (already open)
                     } else {
                         this.store.discuss.isMemberPanelOpenByDefault = false;
+                        browser.localStorage.setItem(NO_MEMBERS_DEFAULT_OPEN_LS, "true");
                     }
                 }
             },
