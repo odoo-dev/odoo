@@ -723,3 +723,7 @@
 "","","","","","","","","","","","","","","","","","","tax","","invoice","","","","","","","",""
 "","","","","","","","","","","","","","","","","","","base","","refund","","","","","","","",""
 "","","","","","","","","","","","","","","","","","","tax","","refund","","","","","","","",""
+"account_tax_template_p_trip21_bc","0","True","TRIP 21% (goods + services)","","purchase","21% TRIP (current goods + services)","21% TRIP (bienes y servicios corrientes)","21% TRIP (béns + serveis corrents)","21.0","percent","tax_group_iva_21","","sujeto","","","consu","","base","mod303[28]||mod390[605]","invoice","","","","","","fp_irpf20a,fp_irpf2,fp_irpfnrue19,fp_irpfnrnue0,fp_irpf21,fp_irpf9,fp_recargo_isp,fp_irpf1,fp_irpf7,fp_irpf195a,fp_intra_private,fp_irpf24,fp_irpfnrnue24,fp_irpfnrue0,fp_irpf20,fp_irpf18,fp_irpf15,fp_irpf19,fp_irpf19a,fp_irpf21a,l10n_es_domestic_fiscal_position,fp_recargo","account_tax_template_p_iva21_bc",""
+"","","","","","","","","","","","","","","","","","","tax","mod303[29]||mod390[606]","invoice","account_common_472","","","","","","",""
+"","","","","","","","","","","","","","","","","","","base","mod303[40]||mod390[605]","refund","","","","","","","",""
+"","","","","","","","","","","","","","","","","","","tax","mod303[41]||mod390[606]","refund","account_common_472","","","","","","",""
