@@ -2454,12 +2454,30 @@ class AccountMoveLine(models.Model):
                             remaining_credit_amount_curr -= credit_exchange_amount
 
             if exchange_lines_to_fix:
+                def _is_invoice_tax_caba_reconcile(aml, counterpart_aml):
+                    return (aml.move_id.tax_cash_basis_origin_move_id == counterpart_aml.move_id
+                        and counterpart_aml.tax_line_id and counterpart_aml.move_id.is_invoice())
+
+                exch_move = self.env['account.move']
+
+                if _is_invoice_tax_caba_reconcile(debit_aml, credit_aml):
+                    exch_move = debit_aml.move_id.tax_cash_basis_rec_id.exchange_move_id
+                elif _is_invoice_tax_caba_reconcile(credit_aml, debit_aml):
+                    exch_move = credit_aml.move_id.tax_cash_basis_rec_id.exchange_move_id
+
+                exchange_account = exch_move.line_ids.filtered(
+                    lambda l: l.account_id in (exch_move.company_id.expense_currency_exchange_account_id,
+                        exch_move.company_id.income_currency_exchange_account_id)
+                ).account_id[:1]
+
                 res['exchange_values'] = exchange_lines_to_fix._prepare_exchange_difference_move_vals(
                     amounts_list,
                     exchange_date=max(
                         debit_aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
                         credit_aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
                     ),
+                    exchange_account=exchange_account,
+                    ref=','.join((debit_aml | credit_aml).move_id.filtered(lambda m: m.is_invoice() and m.name).mapped('name')),
                 )
                 res['exchange_values']['to_post'] = debit_aml.parent_state == 'posted' and credit_aml.parent_state == 'posted'
 
@@ -2979,7 +2997,10 @@ class AccountMoveLine(models.Model):
             'journal_id': journal.id,
             'line_ids': [],
             'always_tax_exigible': True,
+            'ref': kwargs.get('ref')
         }
+
+        exchange_account = kwargs.get('exchange_account')
         to_reconcile = []
         for line, amounts in zip(self, amounts_list):
 
@@ -3002,7 +3023,7 @@ class AccountMoveLine(models.Model):
             else:
                 continue
 
-            exchange_line_account = self._get_exchange_account(company, amount_residual_to_fix)
+            exchange_line_account = exchange_account or self._get_exchange_account(company, amount_residual_to_fix)
 
             sequence = len(move_vals['line_ids'])
             line_vals = [
