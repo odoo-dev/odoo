@@ -316,6 +316,7 @@ class AccountMove(models.Model):
         xml_values = {
             'ReceiverTransactionReference': receiver_transaction_reference,
             'ReceiverContractReference': invoice_ref,
+            'FileReference': invoice_ref,
             'FileDate': fields.Date.context_today(self),
             'ItemDescription': line.name,
             'Quantity': line.quantity,
@@ -421,6 +422,7 @@ class AccountMove(models.Model):
                 'InvoicingPeriod': None,
                 'ReceiverTransactionReference': invoice_ref,
                 'ReceiverContractReference': invoice_ref,
+                'FileReference': invoice_ref,
             },
             'TaxOutputs': [],
             'TaxesWithheld': [],
