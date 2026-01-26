@@ -62,17 +62,14 @@ class AccountMove(models.Model):
     def _compute_payments_widget_reconciled_info(self):
         """Add pos_payment_name field in the reconciled vals to be able to show the payment method in the invoice."""
         super()._compute_payments_widget_reconciled_info()
-        for move in self:
-            if widget := move.invoice_payments_widget:
-                if move.state == 'posted' and move.is_invoice(include_receipts=True):
-                    reconciled_partials = move._get_all_reconciled_invoice_partials()
-                    for i, reconciled_partial in enumerate(reconciled_partials):
-                        counterpart_line = reconciled_partial['aml']
-                        pos_payment = counterpart_line.move_id.sudo().pos_payment_ids[:1]
-                        widget['content'][i].update({
-                            'pos_payment_name': pos_payment.payment_method_id.name,
-                        })
-                        move.invoice_payments_widget = widget
+        moves_with_payment_widget = self.filtered(lambda m: m.invoice_payments_widget and m.state == 'posted' and m.is_invoice(include_receipts=True))
+        move_ids = [vals['move_id'] for move in moves_with_payment_widget for vals in move.invoice_payments_widget['content']]
+        for move in moves_with_payment_widget:
+            widget = move.invoice_payments_widget
+            for vals in widget['content']:
+                counterpart_move = self.env['account.move'].browse(vals['move_id']).with_prefetch(move_ids)
+                vals['pos_payment_name'] = counterpart_move.sudo().pos_payment_ids[:1].payment_method_id.name
+            move.invoice_payments_widget = widget
 
     def _compute_amount(self):
         super()._compute_amount()

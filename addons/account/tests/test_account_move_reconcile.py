@@ -2939,6 +2939,153 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 ],
             )
 
+    def test_reconcile_trigger_caba_exchange_same_acc_out_invoice_reconcile(self):
+        """Test that when a reconciliation with exchange diff on an out invoice and cash basis is triggered.
+        the exchange move of the partial of the invoice with the payment shares the same account.
+        from the exchange move of the partial of the invoice with the caba entry
+        """
+        self.env.company.tax_exigibility = True
+        currency = self.setup_other_currency('EUR', rates=[('2014-12-31', 1), ('2015-12-31', 3), ('2016-12-31', 0.5)])
+        expense_exchange_account = self.env.company.expense_currency_exchange_account_id
+        income_exchange_account = self.env.company.income_currency_exchange_account_id
+
+        # Rate 1/1 in 2015
+        invoice = self._create_invoice(
+            date='2015-01-01',
+            currency_id=currency,
+            partner_id=self.partner_a,
+            invoice_line_ids=[
+                self._prepare_invoice_line(
+                    price_unit=90,
+                    product_id=self.product_a,
+                    tax_ids=self.cash_basis_tax_a_third_amount,  # 120 EUR -> 120 USD
+                )
+            ]
+        )
+        invoice.action_post()
+
+        # Rate 1/3 in 2016
+        # 60 EUR -> 20 USD -> an exchange amount of 40 USD
+        # Taxes paid: 15 EUR -> 5 USD -> an exchange amount of 10 USD
+        payment_01 = self._register_payment(
+            invoice,
+            payment_date='2016-01-01',
+            amount=60.0,
+        )
+
+        # Get exchange reconciled with the invoice
+        invoice_exchange_moves_01 = payment_01.move_id.line_ids.filtered(lambda l: l.account_type == 'asset_receivable').matched_debit_ids.exchange_move_id
+        caba_moves_01 = self._get_caba_moves(invoice)
+
+        caba_exchange_moves_01 = caba_moves_01.line_ids.filtered(lambda l: l.account_id.id == self.cash_basis_transfer_account.id).matched_credit_ids.exchange_move_id
+
+        # Rate 2/1 in 2017. Paid total of the amount
+        # 60 EUR -> 120 USD -> an exchange amount of 60 USD
+        # Taxes paid: 15 EUR -> 30 -> an exchange amount of 15 USD
+        payment_02 = self._register_payment(
+            invoice,
+            payment_date='2017-01-01',
+        )
+
+        invoice_exchange_moves_02 = payment_02.move_id.line_ids.filtered(lambda l: l.account_type == 'asset_receivable').matched_debit_ids.exchange_move_id
+        caba_moves_02 = self._get_caba_moves(invoice) - caba_moves_01
+
+        caba_exchange_moves_02 = caba_moves_02.line_ids.filtered(lambda l: l.account_id.id == self.cash_basis_transfer_account.id).matched_credit_ids.exchange_move_id
+
+        # Exchange moves created from first partial chain should share the same expense account
+        self.assertRecordValues(invoice_exchange_moves_01.line_ids + caba_exchange_moves_01.line_ids, [
+            # Invoice with payment exchange lines
+            {'account_id': self.receivable_account.id, 'debit': 0.0, 'credit': 40.0},
+            {'account_id': expense_exchange_account.id, 'debit': 40.0, 'credit': 0.0},
+            # Invoice with Caba exchange lines
+            {'account_id': self.cash_basis_transfer_account.id, 'debit': 10.0, 'credit': 0.0},
+            {'account_id': expense_exchange_account.id, 'debit': 0.0, 'credit': 10.0},
+        ])
+
+        # Exchange moves created from second partial chain should share same income account
+        self.assertRecordValues(invoice_exchange_moves_02.line_ids + caba_exchange_moves_02.line_ids, [
+            # Invoice with payment exchange lines
+            {'account_id': self.receivable_account.id, 'debit': 60.0, 'credit': 0.0},
+            {'account_id': income_exchange_account.id, 'debit': 0.0, 'credit': 60.0},
+            # Invoice with Caba exchange lines
+            {'account_id': self.cash_basis_transfer_account.id, 'debit': 0.0, 'credit': 15.0},
+            {'account_id': income_exchange_account.id, 'debit': 15.0, 'credit': 0.0},
+        ])
+
+    def test_reconcile_trigger_caba_exchange_same_acc_in_invoice_reconcile(self):
+        """Test that when a reconciliation with exchange diff of an in invoice and cash basis is triggered.
+        the exchange move of the partial of the invoice with the payment shares the same account.
+        from the exchange move of the partial of the invoice with the caba entry
+        """
+        self.env.company.tax_exigibility = True
+        currency = self.setup_other_currency('EUR', rates=[('2014-12-31', 1), ('2015-12-31', 3), ('2016-12-31', 0.5)])
+        expense_exchange_account = self.env.company.expense_currency_exchange_account_id
+        income_exchange_account = self.env.company.income_currency_exchange_account_id
+
+        # Rate 1/1 in 2015
+        invoice = self._create_invoice(
+            move_type="in_invoice",
+            date='2015-01-01',
+            currency_id=currency,
+            partner_id=self.partner_a,
+            invoice_line_ids=[
+                self._prepare_invoice_line(
+                    price_unit=90,
+                    product_id=self.product_a,
+                    tax_ids=self.cash_basis_tax_a_third_amount,  # 120.00 EUR -> 120.00 USD
+                )
+            ]
+        )
+        invoice.action_post()
+
+        # Rate 1/3 in 2016
+        # 60 EUR -> 20 USD -> an exchange amount of 40 USD
+        # Taxes paid: 15 EUR -> 5 USD -> an exchange amount of 10 USD
+        payment_01 = self._register_payment(
+            invoice,
+            payment_date='2016-01-01',
+            amount=60.0,
+        )
+
+        # Get exchange reconciled with the invoice
+        invoice_exchange_moves_01 = payment_01.move_id.line_ids.filtered(lambda l: l.account_type == 'liability_payable').matched_credit_ids.exchange_move_id
+        caba_moves_01 = self._get_caba_moves(invoice)
+
+        caba_exchange_moves_01 = caba_moves_01.line_ids.filtered(lambda l: l.account_id.id == self.cash_basis_transfer_account.id).matched_debit_ids.exchange_move_id
+
+        # Rate 2/1 in 2017. Paid total of the amount
+        # 60 EUR -> 120 USD -> an exchange amount of 60 USD
+        # Taxes paid: 15 EUR -> 30 -> an exchange amount of 15 USD
+        payment_02 = self._register_payment(
+            invoice,
+            payment_date='2017-01-01',
+        )
+
+        invoice_exchange_moves_02 = payment_02.move_id.line_ids.filtered(lambda l: l.account_type == 'liability_payable').matched_credit_ids.exchange_move_id
+        caba_moves_02 = self._get_caba_moves(invoice) - caba_moves_01
+
+        caba_exchange_moves_02 = caba_moves_02.line_ids.filtered(lambda l: l.account_id.id == self.cash_basis_transfer_account.id).matched_debit_ids.exchange_move_id
+
+        # Exchange moves created from first partial chain should share same income account
+        self.assertRecordValues(invoice_exchange_moves_01.line_ids + caba_exchange_moves_01.line_ids, [
+            # Invoice with payment exchange lines
+            {'account_id': self.payable_account.id, 'debit': 40.0, 'credit': 0.0},
+            {'account_id': income_exchange_account.id, 'debit': 0.0, 'credit': 40.0},
+            # Invoice with Caba exchange lines
+            {'account_id': self.cash_basis_transfer_account.id, 'debit': 0.0, 'credit': 10.0},
+            {'account_id': income_exchange_account.id, 'debit': 10.0, 'credit': 0.0},
+        ])
+
+        # Exchange moves created from second partial chain should share the same expense account
+        self.assertRecordValues(invoice_exchange_moves_02.line_ids + caba_exchange_moves_02.line_ids, [
+            # Invoice with payment exchange lines
+            {'account_id': self.payable_account.id, 'debit': 0.0, 'credit': 60.00},
+            {'account_id': expense_exchange_account.id, 'debit': 60.00, 'credit': 0.0},
+            # Invoice with Caba exchange lines
+            {'account_id': self.cash_basis_transfer_account.id, 'debit': 15.00, 'credit': 0.0},
+            {'account_id': expense_exchange_account.id, 'debit': 0.0, 'credit': 15.00},
+        ])
+
     # -------------------------------------------------------------------------
     # Test creation of extra journal entries during the reconciliation to
     # deal with taxes that are exigible on payment (cash basis).

@@ -63,6 +63,54 @@ class TestAccountMovePaymentsWidget(AccountTestInvoicingCommon):
         })
         cls.payment_2017_curr_3.action_post()
 
+        cash_basis_base_account = cls.env['account.account'].create({
+            'code': 'cash.basis.base.account',
+            'name': 'cash_basis_base_account',
+            'account_type': 'income',
+        })
+        cls.company_data['company'].account_cash_basis_base_account_id = cash_basis_base_account
+
+        cash_basis_transfer_account = cls.env['account.account'].create({
+            'code': 'cash.basis.transfer.account',
+            'name': 'cash_basis_transfer_account',
+            'account_type': 'income',
+            'reconcile': True,
+        })
+
+        cash_basis_tax_account = cls.env['account.account'].create({
+            'code': 'caba.account',
+            'name': 'caba_account',
+            'account_type': 'income',
+        })
+
+        cls.cash_basis_tax = cls.env['account.tax'].create({
+            'name': 'caba_tax',
+            'amount': 10,
+            'company_id': cls.company_data['company'].id,
+            'cash_basis_transition_account_id': cash_basis_transfer_account.id,
+            'tax_exigibility': 'on_payment',
+            'invoice_repartition_line_ids': [
+                (0, 0, {
+                    'repartition_type': 'base',
+                }),
+
+                (0, 0, {
+                    'repartition_type': 'tax',
+                    'account_id': cash_basis_tax_account.id,
+                }),
+            ],
+            'refund_repartition_line_ids': [
+                (0, 0, {
+                    'repartition_type': 'base',
+                }),
+
+                (0, 0, {
+                    'repartition_type': 'tax',
+                    'account_id': cash_basis_tax_account.id,
+                }),
+            ],
+        })
+
     # -------------------------------------------------------------------------
     # TESTS
     # -------------------------------------------------------------------------
@@ -204,3 +252,63 @@ class TestAccountMovePaymentsWidget(AccountTestInvoicingCommon):
                 expected_amounts[ln.matched_credit_ids.exchange_move_id.id] = 50.0
 
         self.assert_invoice_outstanding_reconciled_widget(out_invoice, expected_amounts)
+
+    def test_payments_with_exchange_difference_invoice_with_caba(self):
+        ''' Test the payments widget on invoices with caba taxes and having a foreign currency.
+        that triggers an exchange difference on the invoice.'''
+        self.env.company.tax_exigibility = True
+
+        invoice = self._create_invoice(
+            date='2017-01-01',
+            partner_id=self.partner_a,
+            currency_id=self.curr_2,
+            invoice_line_ids=[
+                self._prepare_invoice_line(
+                    product_id=self.product_a,
+                    price_unit=300,
+                    tax_ids=self.cash_basis_tax
+                )
+            ]
+        )
+
+        payment = self._register_payment(invoice, payment_date='2016-01-01')
+
+        expected_amounts = {payment.move_id.id: 330.0}
+        # Get exchange difference from both payment/invoice reconciliation and invoice/caba reconciliation
+        for line in invoice.line_ids:
+            if line.matched_credit_ids.exchange_move_id:
+                expected_amounts[line.matched_credit_ids.exchange_move_id.id] = 55.0
+            if line.matched_debit_ids.exchange_move_id:
+                expected_amounts[line.matched_debit_ids.exchange_move_id.id] = 5.0
+
+        self.assert_invoice_outstanding_reconciled_widget(invoice, expected_amounts)
+
+    def test_payments_with_exchange_difference_payment_with_caba(self):
+        ''' Test the payments widget on invoices with caba taxes and having a foreign currency.
+        that triggers an exchange difference on the payment.'''
+        self.env.company.tax_exigibility = True
+
+        invoice = self._create_invoice(
+            date='2016-01-01',
+            partner_id=self.partner_a,
+            currency_id=self.curr_2,
+            invoice_line_ids=[
+                self._prepare_invoice_line(
+                    product_id=self.product_a,
+                    price_unit=300,
+                    tax_ids=self.cash_basis_tax
+                )
+            ]
+        )
+
+        payment = self._register_payment(invoice, payment_date='2017-01-01')
+
+        expected_amounts = {payment.move_id.id: 330.0}
+        # Get exchange difference from both payment/invoice reconciliation and invoice/caba reconciliation
+        for line in invoice.line_ids:
+            if line.matched_credit_ids.exchange_move_id:
+                expected_amounts[line.matched_credit_ids.exchange_move_id.id] = 55.0
+            if line.matched_debit_ids.exchange_move_id:
+                expected_amounts[line.matched_debit_ids.exchange_move_id.id] = 5.0
+
+        self.assert_invoice_outstanding_reconciled_widget(invoice, expected_amounts)

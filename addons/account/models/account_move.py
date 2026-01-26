@@ -1507,13 +1507,22 @@ class AccountMove(models.Model):
     @api.depends('move_type', 'line_ids.amount_residual')
     def _compute_payments_widget_reconciled_info(self):
         for move in self:
-            payments_widget_vals = {'title': _('Less Payment'), 'outstanding': False, 'content': []}
+            payments_widget_vals = {
+                'title': _('Less Payment'),
+                'outstanding': False,
+                'content': [],
+                'company_currency_id': move.company_currency_id.id,
+            }
 
             if move.state in {'draft', 'posted'} and move.is_invoice(include_receipts=True):
                 reconciled_vals = []
-                reconciled_partials = move.sudo()._get_all_reconciled_invoice_partials()
+                reconciled_partials = move.sudo()._get_all_reconciled_invoice_partials(include_caba=True)
                 for reconciled_partial in reconciled_partials:
                     counterpart_line = reconciled_partial['aml']
+
+                    if counterpart_line.move_id.tax_cash_basis_rec_id:
+                        continue
+
                     if counterpart_line.move_id.ref:
                         reconciliation_ref = '%s (%s)' % (counterpart_line.move_id.name, counterpart_line.move_id.ref)
                     else:
@@ -1525,9 +1534,11 @@ class AccountMove(models.Model):
 
                     reconciled_vals.append({
                         'name': counterpart_line.name,
+                        'aml_id': counterpart_line.id,
                         'journal_name': counterpart_line.journal_id.name,
                         'company_name': counterpart_line.journal_id.company_id.name if counterpart_line.journal_id.company_id != move.company_id else False,
                         'amount': reconciled_partial['amount'],
+                        'balance': counterpart_line.balance,
                         'currency_id': move.company_id.currency_id.id if reconciled_partial['is_exchange'] else reconciled_partial['currency'].id,
                         'date': counterpart_line.date,
                         'partial_id': reconciled_partial['partial_id'],
@@ -5299,9 +5310,13 @@ class AccountMove(models.Model):
         """Helper used to retrieve the reconciled invoices on this journal entry"""
         return self._get_reconciled_amls().move_id.filtered(lambda move: move.is_invoice(include_receipts=True))
 
-    def _get_all_reconciled_invoice_partials(self):
+    def _get_all_reconciled_invoice_partials(self, include_caba=False):
         self.ensure_one()
-        reconciled_lines = self.line_ids.filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
+        reconciled_lines = self.line_ids.filtered(lambda l:
+            l.account_type in ('asset_receivable', 'liability_payable')
+            or include_caba and l.tax_line_id.tax_exigibility == 'on_payment'
+        )
+
         if not reconciled_lines.ids:
             return {}
 
@@ -5790,6 +5805,12 @@ class AccountMove(models.Model):
 
     def open_reconcile_view(self):
         return self.line_ids.open_reconcile_view()
+
+    @api.model
+    def action_open_exchange_items(self, line_ids):
+        action = self.env['ir.actions.act_window']._for_xml_id('account.action_account_moves_all_grouped_matching')
+        action['domain'] = [('id', 'in', line_ids)]
+        return action
 
     def action_open_business_doc(self):
         self.ensure_one()

@@ -31,7 +31,12 @@ export class AccountPaymentField extends Component {
             outstanding: false,
             title: "",
             move_id: this.props.record.resId,
+            company_currency_id: false,
         };
+
+        let totalExchangeAmount = 0.0;
+        const exchangeLineIds = [];
+
         for (const [key, value] of Object.entries(info.content)) {
             value.index = key;
             value.amount_formatted = formatMonetary(value.amount, {
@@ -41,9 +46,23 @@ export class AccountPaymentField extends Component {
                 // value.date is a string, parse to date and format to the users date format
                 value.formattedDate = formatDate(deserializeDate(value.date))
             }
-        }
+            if (value.is_exchange) {
+                totalExchangeAmount += value.balance
+                exchangeLineIds.push(value.aml_id)
+            }
+        };
+        const exchangeInfo = {};
+        if (exchangeLineIds.length > 0) {
+            exchangeInfo.totalExchangeAmountFormatted = formatMonetary(Math.abs(totalExchangeAmount), {
+                currencyId: info.company_currency_id,
+            });
+            exchangeInfo.totalExchangeAmount = totalExchangeAmount;
+        };
+
         return {
             lines: info.content,
+            exchangeInfo: exchangeInfo,
+            exchangeLineIds: exchangeLineIds,
             outstanding: info.outstanding,
             title: info.title,
             moveId: info.move_id,
@@ -57,6 +76,11 @@ export class AccountPaymentField extends Component {
             _onRemoveMoveReconcile: this.removeMoveReconcile.bind(this),
             _onOpenMove: this.openMove.bind(this),
         });
+    }
+
+    async onExchangeInfoClick(exchangeLineIds) {
+        const action = await this.orm.call(this.props.record.resModel, 'action_open_exchange_items', [exchangeLineIds], {});
+        this.action.doAction(action)
     }
 
     async assignOutstandingCredit(moveId, id) {
