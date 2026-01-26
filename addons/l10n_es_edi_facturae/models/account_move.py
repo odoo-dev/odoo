@@ -313,6 +313,9 @@ class AccountMove(models.Model):
             else invoice_ref
         )
 
+        if not line.move_name:
+            raise UserError(_("The invoice line should be linked to an invoice with a name."))
+
         xml_values = {
             'ReceiverTransactionReference': receiver_transaction_reference,
             'ReceiverContractReference': invoice_ref,
@@ -323,6 +326,7 @@ class AccountMove(models.Model):
             'DiscountsAndRebates': [],
             'Charges': [],
             'GrossAmount': float_round(tax_details['raw_total_excluded_currency'], precision_digits=8),
+            'FileReference': invoice_ref
         }
 
         if line.discount == 100.0:
@@ -394,6 +398,9 @@ class AccountMove(models.Model):
         if self.move_type == "entry":
             return False
 
+        if not self.name:
+            raise UserError(_("The invoice needs to have a name"))
+
         operation_date = None
         if self.delivery_date and self.delivery_date != self.invoice_date:
             operation_date = self.delivery_date.isoformat()
@@ -421,6 +428,7 @@ class AccountMove(models.Model):
                 'InvoicingPeriod': None,
                 'ReceiverTransactionReference': invoice_ref,
                 'ReceiverContractReference': invoice_ref,
+                'FileReference': invoice_ref
             },
             'TaxOutputs': [],
             'TaxesWithheld': [],
