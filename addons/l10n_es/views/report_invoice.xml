@@ -19,5 +19,9 @@
                 ID: <span t-field="o.partner_id.company_registry"/>
             </div>
         </xpath>
+
+        <xpath expr="//t[@t-set='forced_vat']" position="after">
+            <t t-set="delivery_date" t-value="o.delivery_date" t-if="o.company_id.country_code == 'ES'"/>
+        </xpath>
     </template>
 </odoo>
