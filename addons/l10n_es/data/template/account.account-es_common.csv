@@ -609,4 +609,4 @@
 "account_common_7991","Reversal of impairment of current loans, associates","Reversión del deterioro de créditos a corto plazo, empresas asociadas","Reversió del deteriorament de crèdits a curt termini, empreses associades","7991","income","False","","","","",""
 "account_common_7992","Reversal of impairment of current loans, other related parties","Reversión del deterioro de créditos a corto plazo, otras partes vinculadas","Reversió del deteriorament de crèdits a curt termini, altres parts vinculades","7992","income","False","","","","",""
 "account_common_7993","Reversal of impairment of current loans, other companies","Reversión del deterioro de créditos a corto plazo, otras empresas","Reversió del deteriorament de crèdits a curt termini, altres empreses","7993","income","False","","","","",""
-account_common_7994	,Business Trip,Viaje de negocios,Viatge de negocis,7994,expense_other,False
+"account_common_6994","Business Trip","Viaje de negocios","Viatge de negocis","7994","expense_other","False","","","","",""
