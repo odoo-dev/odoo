@@ -6,7 +6,10 @@
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@id='other_tab']//field[@name='delivery_date']" position="after">
-                <field name="l10n_es_is_simplified"/>
+                <field name="l10n_es_is_simplified"
+                    invisible="country_code != 'ES'"
+                    readonly="state == 'posted'"
+                />
             </xpath>
         </field>
     </record>
