@@ -2620,7 +2620,7 @@ class Json2Dispatcher(Dispatcher):
         except TypeError:
             self.request.params = dict(args)  # make a copy
 
-        if self.request.db:
+        if self.request.db and self.request.registry:
             result = self.request.registry['ir.http']._dispatch(endpoint)
         else:
             result = endpoint(**self.request.params)
