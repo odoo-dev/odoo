@@ -323,6 +323,7 @@ class AccountMove(models.Model):
             'DiscountsAndRebates': [],
             'Charges': [],
             'GrossAmount': float_round(tax_details['raw_total_excluded_currency'], precision_digits=8),
+            'FileReference': invoice_ref,
         }
 
         if line.discount == 100.0:
@@ -409,6 +410,7 @@ class AccountMove(models.Model):
         legal_literals = legal_literals.split(";") if legal_literals else False
         invoice_values = {
             'invoice_record': self,
+            'invoice_file_reference': invoice_ref,
             'invoice_currency': inv_curr,
             'InvoiceDocumentType': 'FA' if self.l10n_es_is_simplified else 'FC',
             'InvoiceClass': 'OR' if self.move_type in ['out_refund', 'in_refund'] else 'OO',
