@@ -65,10 +65,10 @@ Request._serve_static
   :meth:``Request.send_file``
 
 Request._serve_nodb
-  Handle requests to ``@route(auth='none')`` endpoints when the user is
-  not connected to a database. It performs limited operations, just
-  matching the auth='none' endpoint using the request path and then it
-  delegates to Dispatcher.
+  Handle requests to ``@route(auth='none')`` and ``@route(auth='nodb')``
+  endpoints when the user is not connected to a database. It performs
+  limited operations, just matching the auth='none' and auth='nodb'
+  endpoints using the request path and then it delegates to Dispatcher.
 
 Request._serve_db
   Handle all requests that are not static when it is possible to connect
@@ -737,6 +737,9 @@ def route(route=None, **routing):
           database. Mainly used by the framework and authentication
           modules. The request code will not have any facilities to
           access the current user.
+        * ``'nodb'``: The method is also always active, but no registry
+          will be loaded at all. Must be used only in server-wide modules,
+          and dedicated for routes that need to be very reactive.
     :param Iterable[str] methods: A list of http methods (verbs) this
         route applies to. If not specified, all methods are allowed.
     :param str cors: The Access-Control-Allow-Origin cors directive value.
@@ -886,7 +889,7 @@ def _generate_routing_rules(modules, nodb_only, converters=None):
                 _logger.warning("%s is a controller endpoint without any route, skipping.", f'{cls.__module__}.{cls.__name__}.{method_name}')
                 continue
 
-            if nodb_only and merged_routing['auth'] != "none":
+            if nodb_only and merged_routing['auth'] not in ("none", "nodb"):
                 continue
 
             for url in merged_routing['routes']:
@@ -1737,7 +1740,7 @@ class FutureResponse:
         if expires == -1:  # not forced value -> default value -> 1 year
             expires = datetime.now() + timedelta(days=365)
 
-        if request.db and not request.env['ir.http']._is_allowed_cookie(cookie_type):
+        if request.db and request.env and not request.env['ir.http']._is_allowed_cookie(cookie_type):
             max_age = 0
         werkzeug.Response.set_cookie(self, key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
 
@@ -2055,7 +2058,7 @@ class Request:
             location = location.to_url()
         if local:
             location = '/' + url_parse(location).replace(scheme='', netloc='').to_url().lstrip('/\\')
-        if self.db:
+        if self.db and self.env:
             return self.env['ir.http']._redirect(location, code)
         return werkzeug.utils.redirect(location, code, Response=Response)
 
@@ -2214,6 +2217,17 @@ class Request:
         """ Load the ORM and use it to process the request. """
         # reuse the same cursor for building, checking the registry, for
         # matching the controller endpoint and serving the data
+
+        # Try to find if the route is auth='nodb' prior to any registry loaded
+        nodb_router = root.nodb_routing_map.bind_to_environ(self.httprequest.environ)
+        try:
+            rule, args = nodb_router.match(return_rule=True)
+        except NotFound:
+            pass
+        else:
+            if rule.endpoint.routing.get('auth') == 'nodb':
+                return request._serve_nodb()
+
         cr = None
         try:
             # get the registry and cursor (RO)
@@ -2448,7 +2462,7 @@ class HttpDispatcher(Dispatcher):
                     _logger.warning(MISSING_CSRF_WARNING, request.httprequest.path)
                 raise werkzeug.exceptions.BadRequest('Session expired (invalid CSRF token)')
 
-        if self.request.db:
+        if self.request.db and endpoint.routing.get('auth') != 'nodb':
             return self.request.registry['ir.http']._dispatch(endpoint)
         else:
             return endpoint(**self.request.params)
