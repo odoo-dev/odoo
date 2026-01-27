@@ -141,9 +141,13 @@ export class ImageShapeOptionPlugin extends Plugin {
     }
     async loadShape(img, newData = {}) {
         // todo: find a way to apply to carousel thumbnail after processImage
+        const newDataset = {
+            aspectRatio: 0.5,
+            ...newData,
+        }
         const updateImageAttributes = await this.dependencies.imagePostProcess.processImage({
             img,
-            newDataset: newData,
+            newDataset,
         });
         return () => {
             updateImageAttributes();
