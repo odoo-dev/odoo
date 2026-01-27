@@ -2,7 +2,7 @@
 <templates>
     <t t-name="spreadsheet_dashboard.DashboardSearchBarMenu">
         <div class="d-flex">
-            <div class="border-end">
+            <div class="o_dashboard_filter_list border-end ps-3">
                 <FilterValuesList
                     items="state.filtersAndValues"
                     searchableParentRelations="state.searchableParentRelations"

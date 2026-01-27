@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="spreadsheet.FilterValuesList">
-        <div class="d-flex flex-column o-filter-values w-100 ps-3">
+        <div class="d-flex flex-column o-filter-values w-100">
             <div t-foreach="props.items"
                     t-as="item"
                     t-key="item.globalFilter.id"
