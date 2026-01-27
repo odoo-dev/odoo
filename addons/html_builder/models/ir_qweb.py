@@ -2,7 +2,7 @@
 
 from markupsafe import Markup, escape_silent
 
-from odoo import models
+from odoo import models, _
 
 
 class IrQweb(models.AbstractModel):
@@ -61,7 +61,7 @@ class IrQweb(models.AbstractModel):
 
         el.set('t-options', f"{{'snippet-key': {key!r}}}")
         view = self.env['ir.ui.view']._get_template_view(key)
-        name = el.attrib.pop('string', view.name)
+        name = _(el.attrib.pop('string', view.name))
         thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")
         # If provided, this image is used as the placeholder in the snippet
         # dialog.
@@ -77,6 +77,8 @@ class IrQweb(models.AbstractModel):
         snippet_group = el.attrib.pop('snippet-group', None)
         group = el.attrib.pop('group', None)
         label = el.attrib.pop('label', None)
+        if label:
+            label = _(label)
         div = Markup('<div name="%s" data-oe-type="snippet" data-o-image-preview="%s" data-oe-thumbnail="%s" data-oe-snippet-id="%s" data-oe-snippet-key="%s" data-oe-keywords="%s" %s %s %s %s %s %s>') % (
             name,
             escape_silent(image_preview),
