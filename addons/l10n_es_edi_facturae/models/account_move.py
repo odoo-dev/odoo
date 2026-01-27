@@ -316,6 +316,7 @@ class AccountMove(models.Model):
         xml_values = {
             'ReceiverTransactionReference': receiver_transaction_reference,
             'ReceiverContractReference': invoice_ref,
+            'FileReference': invoice_ref,
             'FileDate': fields.Date.context_today(self),
             'ItemDescription': line.name,
             'Quantity': line.quantity,
@@ -419,6 +420,7 @@ class AccountMove(models.Model):
                 'ExchangeRate': f"{round(self.invoice_currency_rate, 4):.4f}",
                 'LanguageName': self.env.context.get('lang', 'en_US').split('_')[0],
                 'InvoicingPeriod': None,
+                'FileReference': invoice_ref,
                 'ReceiverTransactionReference': invoice_ref,
                 'ReceiverContractReference': invoice_ref,
             },
