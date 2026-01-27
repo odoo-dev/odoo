@@ -9,9 +9,17 @@
         </xpath>
     </t>
     <t t-name="website_crm_partner_assign.PartnersPageOption">
-        <BuilderRow t-if="this.state.has_google_maps_api_key" label.translate="World Map">
-            <BuilderCheckbox action="'websiteConfig'" actionParam="{views: ['website_crm_partner_assign.ref_country']}" />
+        <BuilderRow label.translate="World Map">
+            <BuilderCheckbox id="'partners_world_map'" action="'websiteConfig'" actionParam="{views: ['website_crm_partner_assign.ref_country']}" />
         </BuilderRow>
+        <BuilderContext t-if="isActiveItem('partners_world_map') and !this.state.has_google_maps_api_key">
+            <BuilderRow label.translate=" ">
+                Add Google Maps API key in below option.
+            </BuilderRow>
+            <BuilderRow label.translate="Google Map">
+                <BuilderButton title.translate="Custom Key" action="'configureApiKey'" preview="false">Custom Key</BuilderButton>
+            </BuilderRow>
+        </BuilderContext>
     </t>
 
     <t t-inherit="website.BuilderOptions" t-inherit-mode="extension">
