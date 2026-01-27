@@ -711,6 +711,7 @@ class Transaction:
         self.field_data_patches.clear()
         self.field_dirty.clear()
         self.tocompute.clear()
+        self.tocheck.clear()
         self.compactify_envs()
         for env in self.envs:
             env.cr.cache.clear()

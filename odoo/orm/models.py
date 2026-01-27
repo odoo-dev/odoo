@@ -1284,7 +1284,10 @@ class BaseModel(metaclass=MetaModel):
         for check in methods:
             if (not field_names.isdisjoint(check._constrains)
                     and excluded_names.isdisjoint(check._constrains)):
-                self.env.transaction.tocheck[self._name][(self.env, check)].update(records._ids)
+                if any(not((field := self._fields[field_name]).store and field.column_type) for field_name in check._constrains):
+                    check(records)
+                else:
+                    self.env.transaction.tocheck[self._name][(self.env, check)].update(records._ids)
 
     @api.model
     def default_get(self, fields: Sequence[str]) -> ValuesType:
