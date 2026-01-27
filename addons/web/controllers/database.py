@@ -56,19 +56,19 @@ class Database(http.Controller):
 
         return qweb_render('database_manager', d, load)
 
-    @http.route('/web/database/selector', type='http', auth="nodb")
+    @http.route('/web/database/selector', type='http', auth="none")
     def selector(self, **kw):
-        if request.db and request.env:
+        if request.db:
             request.env.cr.close()
         return self._render_template(manage=False)
 
-    @http.route('/web/database/manager', type='http', auth="nodb")
+    @http.route('/web/database/manager', type='http', auth="none")
     def manager(self, **kw):
-        if request.db and request.env:
+        if request.db:
             request.env.cr.close()
         return self._render_template()
 
-    @http.route('/web/database/create', type='http', auth="nodb", methods=['POST'], csrf=False)
+    @http.route('/web/database/create', type='http', auth="none", methods=['POST'], csrf=False)
     def create(self, master_pwd, name, lang, password, **post):
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
@@ -91,7 +91,7 @@ class Database(http.Controller):
             error = "Database creation error: %s" % (str(e) or repr(e))
         return self._render_template(error=error)
 
-    @http.route('/web/database/duplicate', type='http', auth="nodb", methods=['POST'], csrf=False)
+    @http.route('/web/database/duplicate', type='http', auth="none", methods=['POST'], csrf=False)
     def duplicate(self, master_pwd, name, new_name, neutralize_database=False):
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
@@ -100,7 +100,7 @@ class Database(http.Controller):
             if not re.match(DBNAME_PATTERN, new_name):
                 raise Exception(_('Houston, we have a database naming issue! Make sure you only use letters, numbers, underscores, hyphens, or dots in the database name, and you\'ll be golden.'))
             dispatch_rpc('db', 'duplicate_database', [master_pwd, name, new_name, neutralize_database])
-            if request.db == name and request.env:
+            if request.db == name:
                 request.env.cr.close()  # duplicating a database leads to an unusable cursor
             return request.redirect('/web/database/manager')
         except Exception as e:
@@ -108,7 +108,7 @@ class Database(http.Controller):
             error = "Database duplication error: %s" % (str(e) or repr(e))
             return self._render_template(error=error)
 
-    @http.route('/web/database/drop', type='http', auth="nodb", methods=['POST'], csrf=False)
+    @http.route('/web/database/drop', type='http', auth="none", methods=['POST'], csrf=False)
     def drop(self, master_pwd, name):
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
@@ -123,7 +123,7 @@ class Database(http.Controller):
             error = "Database deletion error: %s" % (str(e) or repr(e))
             return self._render_template(error=error)
 
-    @http.route('/web/database/backup', type='http', auth="nodb", methods=['POST'], csrf=False)
+    @http.route('/web/database/backup', type='http', auth="none", methods=['POST'], csrf=False)
     def backup(self, master_pwd, name, backup_format='zip', filestore=True):
         filestore = str2bool(filestore)
         insecure = odoo.tools.config.verify_admin_password('admin')
@@ -147,7 +147,7 @@ class Database(http.Controller):
             error = "Database backup error: %s" % (str(e) or repr(e))
             return self._render_template(error=error)
 
-    @http.route('/web/database/restore', type='http', auth="nodb", methods=['POST'], csrf=False, max_content_length=None)
+    @http.route('/web/database/restore', type='http', auth="none", methods=['POST'], csrf=False, max_content_length=None)
     def restore(self, master_pwd, backup_file, name, copy=False, neutralize_database=False):
         insecure = odoo.tools.config.verify_admin_password('admin')
         if insecure and master_pwd:
@@ -166,7 +166,7 @@ class Database(http.Controller):
             if data_file:
                 os.unlink(data_file.name)
 
-    @http.route('/web/database/change_password', type='http', auth="nodb", methods=['POST'], csrf=False)
+    @http.route('/web/database/change_password', type='http', auth="none", methods=['POST'], csrf=False)
     def change_password(self, master_pwd, master_pwd_new):
         try:
             dispatch_rpc('db', 'change_admin_password', [master_pwd, master_pwd_new])
@@ -175,7 +175,7 @@ class Database(http.Controller):
             error = "Master password update error: %s" % (str(e) or repr(e))
             return self._render_template(error=error)
 
-    @http.route('/web/database/list', type='jsonrpc', auth='nodb')
+    @http.route('/web/database/list', type='jsonrpc', auth='none')
     def list(self):
         """
         Used by Mobile application for listing database

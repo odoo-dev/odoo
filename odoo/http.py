@@ -23,7 +23,7 @@ Here be dragons:
         if path is like '/<module>/static/<path>':
             Request._serve_static
 
-        elif not request.db:
+        elif not request.db or @route(db=False):
             Request._serve_nodb
                 App.nodb_routing_map.match
                 Dispatcher.pre_dispatch
@@ -65,10 +65,9 @@ Request._serve_static
   :meth:``Request.send_file``
 
 Request._serve_nodb
-  Handle requests to ``@route(auth='none')`` and ``@route(auth='nodb')``
-  endpoints when the user is not connected to a database. It performs
-  limited operations, just matching the auth='none' and auth='nodb'
-  endpoints using the request path and then it delegates to Dispatcher.
+  Handle requests to ``@route(db=False)`` and ``@route(auth='none')``
+  but only when the user is not connected to a database. It performs
+  barely anything else than delegating to Dispatcher.
 
 Request._serve_db
   Handle all requests that are not static when it is possible to connect
@@ -720,6 +719,12 @@ def route(route=None, **routing):
     :param str type: The type of request, either ``'jsonrpc'`` or
         ``'http'``. It describes where to find the request parameters
         and how to serialize the response.
+    :param bool db: Whether the system should acquire a registry and an
+        environment prior to calling the endpoint. It affects
+        ``request.env`` which is forced ``None`` but not ``request.db``
+        which contains the database name on which the system would had
+        conneted to (or ``None``). It is ``True`` by default. Setting it
+        ``False`` implies ``auth='none'`` and ``csrf=False``.
     :param str auth: The authentication method, one of the following:
 
         * ``'user'``: The user must be authenticated and the current
@@ -736,16 +741,13 @@ def route(route=None, **routing):
         * ``'none'``: The method is always active, even if there is no
           database. Mainly used by the framework and authentication
           modules. The request code will not have any facilities to
-          access the current user.
-        * ``'nodb'``: The method is also always active, but no registry
-          will be loaded at all. Must be used only in server-wide modules,
-          and dedicated for routes that need to be very reactive.
+          access the current user. It is implied by db=False.
     :param Iterable[str] methods: A list of http methods (verbs) this
         route applies to. If not specified, all methods are allowed.
     :param str cors: The Access-Control-Allow-Origin cors directive value.
     :param bool csrf: Whether CSRF protection should be enabled for the
         route. Enabled by default for ``'http'``-type requests, disabled
-        by default for ``'jsonrpc'``-type requests.
+        by default for ``'jsonrpc'``-type and for db=False requests.
     :param Union[bool, Callable[[registry, request], bool]] readonly:
         Whether this endpoint should open a cursor on a read-only
         replica instead of (by default) the primary read/write database.
@@ -780,6 +782,15 @@ def route(route=None, **routing):
             routing['methods'] = wrong
         if routing.get('auth') == 'bearer':
             routing.setdefault('save_session', False)  # stateless
+
+        routing.setdefault('db', True)
+        if not routing['db']:
+            if not {'csrf', 'auth', 'readonly'}.isdisjoint(routing):
+                e = ("db=False implies auth='none', csrf=False and no "
+                     "readonly, do not set those parameters yourself.")
+                raise ValueError(e)
+            routing['auth'] = 'none'
+            routing['csrf'] = False
 
         @functools.wraps(endpoint)
         def route_wrapper(self, *args, **params):
@@ -889,7 +900,7 @@ def _generate_routing_rules(modules, nodb_only, converters=None):
                 _logger.warning("%s is a controller endpoint without any route, skipping.", f'{cls.__module__}.{cls.__name__}.{method_name}')
                 continue
 
-            if nodb_only and merged_routing['auth'] not in ("none", "nodb"):
+            if nodb_only and merged_routing['auth'] != "none":
                 continue
 
             for url in merged_routing['routes']:
@@ -1559,7 +1570,7 @@ class _Response(werkzeug.wrappers.Response):
         if expires == -1:  # not provided value -> default value -> 1 year
             expires = datetime.now() + timedelta(days=365)
 
-        if request.db and not request.env['ir.http']._is_allowed_cookie(cookie_type):
+        if request.env and not request.env['ir.http']._is_allowed_cookie(cookie_type):
             max_age = 0
         super().set_cookie(key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
 
@@ -1740,7 +1751,7 @@ class FutureResponse:
         if expires == -1:  # not forced value -> default value -> 1 year
             expires = datetime.now() + timedelta(days=365)
 
-        if request.db and request.env and not request.env['ir.http']._is_allowed_cookie(cookie_type):
+        if request.env and not request.env['ir.http']._is_allowed_cookie(cookie_type):
             max_age = 0
         werkzeug.Response.set_cookie(self, key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite)
 
@@ -2058,7 +2069,7 @@ class Request:
             location = location.to_url()
         if local:
             location = '/' + url_parse(location).replace(scheme='', netloc='').to_url().lstrip('/\\')
-        if self.db and self.env:
+        if self.env:
             return self.env['ir.http']._redirect(location, code)
         return werkzeug.utils.redirect(location, code, Response=Response)
 
@@ -2186,6 +2197,15 @@ class Request:
         except OSError:  # cover both missing file and invalid permissions
             raise NotFound(f'File "{path}" not found in module {module}.\n')
 
+    def _match_nodb(self):
+        nodb_router = root.nodb_routing_map.bind_to_environ(self.httprequest.environ)
+        try:
+            endpoint, _args = nodb_router.match()
+        except NotFound:
+            return False
+        else:
+            return not endpoint.routing['db']
+
     def _serve_nodb(self):
         """
         Dispatch the request to its matching controller in a
@@ -2217,17 +2237,6 @@ class Request:
         """ Load the ORM and use it to process the request. """
         # reuse the same cursor for building, checking the registry, for
         # matching the controller endpoint and serving the data
-
-        # Try to find if the route is auth='nodb' prior to any registry loaded
-        nodb_router = root.nodb_routing_map.bind_to_environ(self.httprequest.environ)
-        try:
-            rule, args = nodb_router.match(return_rule=True)
-        except NotFound:
-            pass
-        else:
-            if rule.endpoint.routing.get('auth') == 'nodb':
-                return request._serve_nodb()
-
         cr = None
         try:
             # get the registry and cursor (RO)
@@ -2451,7 +2460,7 @@ class HttpDispatcher(Dispatcher):
 
         # Check for CSRF token for relevant requests
         if self.request.httprequest.method not in SAFE_HTTP_METHODS and endpoint.routing.get('csrf', True):
-            if not self.request.db:
+            if not self.request.env:
                 return self.request.redirect('/web/database/selector')
 
             token = self.request.params.pop('csrf_token', None)
@@ -2462,7 +2471,7 @@ class HttpDispatcher(Dispatcher):
                     _logger.warning(MISSING_CSRF_WARNING, request.httprequest.path)
                 raise werkzeug.exceptions.BadRequest('Session expired (invalid CSRF token)')
 
-        if self.request.db and endpoint.routing.get('auth') != 'nodb':
+        if self.request.env:
             return self.request.registry['ir.http']._dispatch(endpoint)
         else:
             return endpoint(**self.request.params)
@@ -2555,7 +2564,7 @@ class JsonRPCDispatcher(Dispatcher):
 
         self.request.params = dict(self.jsonrequest.get('params', {}), **args)
 
-        if self.request.db:
+        if self.request.env:
             result = self.request.registry['ir.http']._dispatch(endpoint)
         else:
             result = endpoint(**self.request.params)
@@ -2620,7 +2629,7 @@ class Json2Dispatcher(Dispatcher):
         except TypeError:
             self.request.params = dict(args)  # make a copy
 
-        if self.request.db and self.request.registry:
+        if self.request.env:
             result = self.request.registry['ir.http']._dispatch(endpoint)
         else:
             result = endpoint(**self.request.params)
@@ -2810,26 +2819,30 @@ class Application:
 
                 if self.get_static_file(httprequest.path):
                     response = request._serve_static()
-                elif request.db:
-                    try:
-                        with request._get_profiler_context_manager():
-                            response = request._serve_db()
-                    except RegistryError as e:
-                        _logger.warning("Database or registry unusable, trying without", exc_info=e.__cause__)
-                        request.db = None
-                        request.session.logout()
-                        if (httprequest.path.startswith('/odoo/')
-                            or httprequest.path in (
-                                '/odoo', '/web', '/web/login', '/test_http/ensure_db',
-                            )):
-                            # ensure_db() protected routes, remove ?db= from the query string
-                            args_nodb = request.httprequest.args.copy()
-                            args_nodb.pop('db', None)
-                            request.reroute(httprequest.path, url_encode(args_nodb))
-                        response = request._serve_nodb()
-                else:
+                    return response(environ, start_response)
+
+                if not request.db or request._match_nodb():
                     response = request._serve_nodb()
-                return response(environ, start_response)
+                    return response(environ, start_response)
+
+                try:
+                    with request._get_profiler_context_manager():
+                        response = request._serve_db()
+                        return response(environ, start_response)
+                except RegistryError as e:
+                    _logger.warning("Database or registry unusable, trying without", exc_info=e.__cause__)
+                    request.db = None
+                    request.session.logout()
+                    if (httprequest.path.startswith('/odoo/')
+                        or httprequest.path in (
+                            '/odoo', '/web', '/web/login', '/test_http/ensure_db',
+                        )):
+                        # ensure_db() protected routes, remove ?db= from the query string
+                        args_nodb = request.httprequest.args.copy()
+                        args_nodb.pop('db', None)
+                        request.reroute(httprequest.path, url_encode(args_nodb))
+                    response = request._serve_nodb()
+                    return response(environ, start_response)
 
             except Exception as exc:
                 # Logs the error here so the traceback starts with ``__call__``.
