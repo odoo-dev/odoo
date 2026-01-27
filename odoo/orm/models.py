@@ -1284,7 +1284,7 @@ class BaseModel(metaclass=MetaModel):
         for check in methods:
             if (not field_names.isdisjoint(check._constrains)
                     and excluded_names.isdisjoint(check._constrains)):
-                check(records)
+                self.env.transaction.tocheck[self._name][(self.env, check)].update(records._ids)
 
     @api.model
     def default_get(self, fields: Sequence[str]) -> ValuesType:
@@ -5688,6 +5688,7 @@ class BaseModel(metaclass=MetaModel):
             self._flush()
 
     def _flush(self) -> None:
+        self.env.transaction.tocheck[self._name].clear()
         # pop dirty fields and their corresponding record ids from cache
         dirty_fields = self.env._field_dirty
         dirty_field_ids = {
@@ -5697,6 +5698,9 @@ class BaseModel(metaclass=MetaModel):
         }
         if not dirty_field_ids:
             return
+
+        for (env, check), ids in self.env.transaction.tocheck[self._name].items():
+            check(self.with_env(env).browse(ids))
 
         # for context-dependent fields, `get_column_update` contains the
         # logic to find which value to flush

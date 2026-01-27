@@ -26,7 +26,7 @@ from .query import Query
 from .utils import SUPERUSER_ID
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Collection, Iterable, Iterator, MutableMapping
+    from collections.abc import Collection, Iterable, Iterator, MutableMapping, Callable
     from datetime import tzinfo
     from weakref import ReferenceType
     from .identifiers import IdType
@@ -566,7 +566,7 @@ class Transaction:
         '_Transaction__file_open_tmp_paths', '_recent_envs', '_weak_envs',
         'access_read', 'cache', 'default_env',
         'field_data', 'field_data_patches', 'field_dirty',
-        'protected', 'registry', 'tocompute',
+        'protected', 'registry', 'tocompute', 'tocheck',
     )
 
     def __init__(self, registry: Registry):
@@ -593,6 +593,8 @@ class Transaction:
         self.protected = StackMap["Field", OrderedSet["IdType"]]()
         # pending computations {field: ids}
         self.tocompute = defaultdict["Field", OrderedSet["IdType"]](OrderedSet)
+        # pending checking {model_name: {(env, check_func): ids}}
+        self.tocheck = defaultdict[str, defaultdict[tuple["Environment", "Callable"], OrderedSet["IdType"]]](lambda: defaultdict(OrderedSet))
         # backward-compatible view of the cache
         self.cache = Cache(self)
 
