@@ -1,6 +1,6 @@
 "id","sequence","name","name@es","name@ca","auto_apply","vat_required","country_id","country_group_id","account_ids/account_src_id","account_ids/account_dest_id"
 "l10n_es_domestic_fiscal_position","10","ES Domestic","España Peninsula","Espanya Península","1","","base.es","l10n_es.mainland_es","",""
-"fp_intra_private","30","EU private","EU privado","EU privat","1","","","account.europe_vat","",""
+"fp_intra_private","30","Intra-community (EU Private)","Intracomunitario (EU Privado)","Intracomunitari (EU Privat)","1","","","account.europe_vat","",""
 "fp_intra","20","Intra-community","Régimen Intracomunitario","Règim intracomunitari","1","1","","account.europe_vat","",""
 "","","","","","","","","","account_common_7000","account_common_7001"
 "","","","","","","","","","account_common_7010","account_common_7011"
