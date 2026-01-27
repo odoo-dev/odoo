@@ -215,20 +215,31 @@ class AccountEdiUBL(models.AbstractModel):
     # EXPORT: Collecting data
     # -------------------------------------------------------------------------
 
-    def _ubl_add_values_company(self, vals, company):
+    def _ubl_add_values_company(self, vals, company, is_root_company_function=None):
         vals['company'] = company
         vals['root_company'] = company
+
+        if is_root_company_function:
+            for parent_company in company.parent_ids[::-1][1:]:
+                if is_root_company_function(parent_company):
+                    vals['root_company'] = parent_company
+                    break
+
+        vals['supplier'] = company.partner_id.commercial_partner_id
+        vals['root_supplier'] = vals['root_company'].partner_id.commercial_partner_id
 
     def _ubl_add_values_currency(self, vals, currency):
         vals['currency'] = currency
         # TODO: For retro-compatibility with previous code
         vals['currency_id'] = currency
 
-    def _ubl_add_values_customer(self, vals, customer):
+    def _ubl_add_values_customer(self, vals, customer, is_root_partner_function=None):
         vals['customer'] = customer
+        vals['root_customer'] = customer
 
-    def _ubl_add_values_supplier(self, vals, supplier=None):
-        vals['supplier'] = supplier or vals['company'].partner_id
+        # Determine if the customer is a branch of the commercial partner or not.
+        if is_root_partner_function and is_root_partner_function(customer.commercial_partner_id):
+            vals['root_customer'] = customer.commercial_partner_id
 
     def _ubl_add_values_delivery(self, vals, delivery):
         vals['delivery'] = delivery
@@ -969,7 +980,10 @@ class AccountEdiUBL(models.AbstractModel):
         party_node = node['cac:Party']
         sub_vals = {
             **vals,
-            'party_vals': {'partner': vals['supplier']},
+            'party_vals': {
+                'partner': vals['supplier'],
+                'root_partner': vals['root_supplier'],
+            },
             'party_node': party_node,
         }
         self._ubl_add_accounting_supplier_party_endpoint_id_node(sub_vals)
@@ -1006,7 +1020,10 @@ class AccountEdiUBL(models.AbstractModel):
         party_node = node['cac:Party']
         sub_vals = {
             **vals,
-            'party_vals': {'partner': vals['customer']},
+            'party_vals': {
+                'partner': vals['customer'],
+                'root_partner': vals['root_customer'],
+            },
             'party_node': party_node,
         }
         self._ubl_add_accounting_customer_party_endpoint_id_node(sub_vals)

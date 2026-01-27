@@ -499,17 +499,6 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
         self._generate_invoice_ubl_file(invoice)
         self._assert_invoice_ubl_file(invoice, test_file)
 
-    def test_invoice_customer_party_name_partner_be_invoice_address(self):
-        partner_be_invoice_address = self._create_partner_be(
-            name=False,
-            type='invoice',
-            parent_id=self.partner_be.id,
-        )
-        self._test_invoice_partner_party_identifiers(
-            partner=partner_be_invoice_address,
-            test_file='test_invoice_customer_party_name_partner_be_invoice_address',
-        )
-
     def test_invoice_customer_party_identifiers_partner_be(self):
         # VAT and company registry set.
         # PartyIdentification is filled using the company registry.
@@ -548,6 +537,38 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
             partner=self.partner_be,
             test_file='test_invoice_customer_party_identifiers_partner_be_only_eas_endpoint',
         )
+
+        # Invoice address without any name.
+        # PartyIdentification is not there.
+        # PartyTaxScheme is filled using EAS/Endpoint.
+        # PartyLegalEntity is filled using the Endpoint only.
+        self.partner_be.company_registry = '0477472701'
+        self.partner_be.vat = 'BE0477472701'
+        partner_be_invoice_address = self._create_partner_be(
+            name=False,
+            type='invoice',
+            parent_id=self.partner_be.id,
+        )
+        self._test_invoice_partner_party_identifiers(
+            partner=partner_be_invoice_address,
+            test_file='test_invoice_customer_party_identifiers_partner_be_invoice_address',
+        )
+
+        # # Contact having his own EAS/Endpoint.
+        # # PartyIdentification is not there.
+        # # PartyTaxScheme is filled using EAS/Endpoint.
+        # # PartyLegalEntity is filled using the Endpoint only.
+        # partner_be_contact = self.env['res.partner'].create({
+        #     'name': "partner_be_contact",
+        #     'type': 'contact',
+        #     'parent_id': self.partner_be.id,
+        #     'peppol_eas': '0088',
+        #     'peppol_endpoint': '222222222222',
+        # })
+        # self._test_invoice_partner_party_identifiers(
+        #     partner=partner_be_contact,
+        #     test_file='test_invoice_customer_party_identifiers_partner_be_contact_gln',
+        # )
 
     def test_invoice_customer_party_identifiers_partner_outside_eu(self):
         partner_il = self.env['res.partner'].create({

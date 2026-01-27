@@ -780,9 +780,38 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     # EXPORT: Gathering data
     # -------------------------------------------------------------------------
 
-    def _ubl_add_values_company(self, vals, company):
+    def _is_root_partner(self, current_partner, candidate_partner):
+        """ Method used to distinguish a partner being a branch from another in the hierarchy being the root partner.
+
+        :param current_partner:     The leaf res.partner in the hierarchy.
+        :param candidate_partner:   The candidate res.partner higher in the hierarchy.
+        :return:                    True if the candidate partner is considered as the root partner, False if we should not go higher in
+                                    the hierarchy.
+        """
+        return (
+            current_partner.peppol_eas
+            and current_partner.peppol_endpoint
+            and current_partner.peppol_eas == candidate_partner.peppol_eas
+            and current_partner.peppol_endpoint == candidate_partner.peppol_endpoint
+        ) or (
+            not current_partner.peppol_endpoint
+            and candidate_partner.peppol_eas
+            and candidate_partner.peppol_endpoint
+        )
+
+    def _ubl_add_values_company(self, vals, company, is_root_company_function=None):
         # EXTENDS account.edi.ubl
-        super()._ubl_add_values_company(vals, company)
+        def is_root_company(parent_company):
+            return self._is_root_partner(company.partner_id, parent_company.partner_id)
+
+        super()._ubl_add_values_company(vals, company, is_root_company_function=is_root_company)
+
+    def _ubl_add_values_customer(self, vals, customer, is_root_partner_function=None):
+        # EXTENDS account.edi.ubl
+        def is_root_partner(parent_customer):
+            return self._is_root_partner(customer, parent_customer)
+
+        super()._ubl_add_values_customer(vals, customer, is_root_partner_function=is_root_partner)
 
     def _add_invoice_config_vals(self, vals):
         # EXTENDS account.edi.ubl
@@ -939,10 +968,9 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     def _ubl_add_party_endpoint_id_node(self, vals):
         # EXTENDS account.edi.ubl
         super()._ubl_add_party_endpoint_id_node(vals)
-        partner = vals['party_vals']['partner']
-        commercial_partner = partner.commercial_partner_id
-        vals['party_node']['cbc:EndpointID']['_text'] = commercial_partner.peppol_endpoint
-        vals['party_node']['cbc:EndpointID']['schemeID'] = commercial_partner.peppol_eas
+        root_partner = vals['party_vals']['root_partner']
+        vals['party_node']['cbc:EndpointID']['_text'] = root_partner.peppol_endpoint
+        vals['party_node']['cbc:EndpointID']['schemeID'] = root_partner.peppol_eas
 
     def _ubl_add_party_identification_nodes(self, vals):
         # EXTENDS account.edi.ubl
