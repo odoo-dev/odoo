@@ -634,8 +634,8 @@ export class Message extends Record {
                 .concat(this.attachment_ids)
                 .map((attachment) => attachment.ownership_token),
             body: await generateEmojisOnHtml(body),
-            partner_ids: validMentions?.partners?.map((partner) => partner.id),
-            role_ids: validMentions?.roles?.map((role) => role.id),
+            partner_ids: Array.from(validMentions.partners.keys()).map((p) => p.id),
+            role_ids: Array.from(validMentions.roles.keys()).map((r) => r.id),
         };
         this.store.fillPartnersMentionToken(updateData);
         const data = await rpc("/mail/message/update_content", {

@@ -480,19 +480,20 @@ export class Store extends BaseStore {
         { mentionedChannels = [], mentionedPartners = [], mentionedRoles = [], thread } = {}
     ) {
         const validMentions = {};
-        validMentions.channels = mentionedChannels.filter((channel) => {
-            if (channel.parent_channel_id) {
-                return body.includes(`#${channel.parent_channel_id.fullNameWithParent}`);
-            }
-            return body.includes(`#${channel.displayName}`);
-        });
-        validMentions.partners = mentionedPartners.filter((partner) =>
-            body.includes(`@${thread?.getPersonaName(partner) ?? partner.name}`)
+        validMentions.channels = findMentions(body, mentionedChannels, (c) =>
+            c.parent_channel_id ? `#${c.parent_channel_id.fullNameWithParent}` : `#${c.displayName}`
         );
-        validMentions.roles = mentionedRoles.filter((role) => body.includes(`@${role.name}`));
-        validMentions.specialMentions = this.specialMentions
-            .filter((special) => body.includes(`@${special.label}`))
-            .map((special) => special.label);
+        validMentions.partners = findMentions(
+            body,
+            mentionedPartners,
+            (p) => `@${thread?.getPersonaName(p) ?? p.name}`
+        );
+        validMentions.roles = findMentions(body, mentionedRoles, (r) => `@${r.name}`);
+        validMentions.specialMentions = findMentions(
+            body,
+            this.specialMentions,
+            (s) => `@${s.name}`
+        );
         return validMentions;
     }
 
@@ -516,8 +517,8 @@ export class Store extends BaseStore {
             mentionedRoles,
             thread,
         });
-        const partner_ids = validMentions?.partners.map((partner) => partner.id) ?? [];
-        const role_ids = validMentions?.roles.map((role) => role.id) ?? [];
+        const partner_ids = Array.from(validMentions.partners.keys()).map((partner) => partner.id);
+        const role_ids = Array.from(validMentions.roles.keys()).map((role) => role.id) ?? [];
         const recipientEmails = [];
         if (!isNote) {
             const allRecipients = [...thread.suggestedRecipients, ...thread.additionalRecipients];
@@ -547,8 +548,8 @@ export class Store extends BaseStore {
         if (role_ids.length) {
             Object.assign(postData, { role_ids });
         }
-        if (thread.channel && validMentions?.specialMentions.length) {
-            postData.special_mentions = validMentions.specialMentions;
+        if (thread.channel && validMentions.specialMentions.size) {
+            postData.special_mentions = Array.from(validMentions.specialMentions.keys());
         }
         if (attachments.length) {
             postData.attachment_tokens = attachments.map(
@@ -721,3 +722,36 @@ export const storeService = {
 };
 
 registry.category("services").add("mail.store", storeService);
+
+function escapeRegExp(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function findMentions(text, items, getName) {
+    const itemToMentions = new Map();
+    const itemByName = new Map();
+    const names = items.map((item) => {
+        const name = getName(item);
+        itemByName.set(name, item);
+        return name;
+    });
+    const pattern = names
+        .sort((a, b) => b.length - a.length)
+        .map(escapeRegExp)
+        .join("|");
+    const regex = new RegExp(pattern, "g");
+    for (const match of text.matchAll(regex)) {
+        const name = match[0];
+        const start = match.index;
+        const end = start + name.length;
+        const item = itemByName.get(name);
+        if (!item) {
+            continue;
+        }
+        if (!itemToMentions.has(item)) {
+            itemToMentions.set(item, []);
+        }
+        itemToMentions.get(item).push({ start, end });
+    }
+    return itemToMentions;
+}

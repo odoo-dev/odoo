@@ -755,9 +755,12 @@ export class Composer extends Component {
             mentionedRoles: composer.mentionedRoles,
         });
         const hasEveryoneBigMention =
-            specialMentions.includes("everyone") &&
+            specialMentions.has("everyone") &&
             composer.thread.channel?.member_count > MENTION_AMOUNT_WARNING;
-        const rolesMentionAmount = roles.reduce((sum, role) => sum + (role.user_ids_count || 0), 0);
+        const rolesMentionAmount = Array.from(roles.keys()).reduce(
+            (sum, role) => sum + (role.user_ids_count || 0),
+            0
+        );
         if (hasEveryoneBigMention || rolesMentionAmount > MENTION_AMOUNT_WARNING) {
             const confirmDef = Promise.withResolvers();
             this.store.env.services.dialog.add(ConfirmationDialog, {

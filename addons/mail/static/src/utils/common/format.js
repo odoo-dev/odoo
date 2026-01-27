@@ -245,62 +245,36 @@ export function generateChannelMentionElement(channel) {
     });
 }
 
-/**
- * @param {string|ReturnType<markup>} body
- * @param {Object} param1
- * @param {import("models").ResPartner[]} param1.partners
- * @param {import("models").ResRole[]} param1.roles
- * @param {import("models").Thread[]} param1.threads
- * @param {string[]} param1.specialMentions
- * @param {import("models").Thread} param1.thread
- * @return {ReturnType<markup>}
- */
-function generateMentionsLinks(
-    body,
-    { channels = [], partners = [], roles = [], specialMentions = [], thread }
-) {
-    const mentions = [];
-    for (const partner of partners) {
-        const placeholder = `@-mention-partner-${partner.id}`;
-        const text = `@${thread?.getPersonaName(partner) ?? partner.name}`;
-        mentions.push({
-            link: generatePartnerMentionElement(partner, thread),
-            placeholder,
-        });
-        body = htmlReplace(body, text, placeholder);
+function generateMentionsLinks(body, allMentions, thread) {
+    const mentionRanges = [];
+    const addRanges = (map, generateElement) => {
+        for (const [item, ranges] of map) {
+            for (const { start, end } of ranges) {
+                mentionRanges.push({
+                    start,
+                    end,
+                    html: getOuterHtml(generateElement(item, thread)),
+                });
+            }
+        }
+    };
+    addRanges(allMentions.partners, generatePartnerMentionElement);
+    addRanges(allMentions.channels, generateChannelMentionElement);
+    addRanges(allMentions.roles, generateRoleMentionElement);
+    addRanges(allMentions.specialMentions, generateSpecialMentionElement);
+    mentionRanges.sort((a, b) => a.start - b.start);
+    const resultParts = [];
+    let cursor = 0;
+    for (const mention of mentionRanges) {
+        if (mention.start < cursor) {
+            continue;
+        }
+        resultParts.push(body.slice(cursor, mention.start));
+        resultParts.push(mention.html);
+        cursor = mention.end;
     }
-    for (const channel of channels) {
-        const placeholder = `#-mention-channel-${channel.id}`;
-        const text = `#${channel.fullNameWithParent}`;
-        mentions.push({
-            link: generateChannelMentionElement(channel),
-            placeholder,
-        });
-        body = htmlReplace(body, text, placeholder);
-    }
-    for (const special of specialMentions) {
-        const text = `@${special}`;
-        const placeholder = `@-mention-special-${special}`;
-        mentions.push({
-            link: generateSpecialMentionElement(special),
-            placeholder,
-        });
-        body = htmlReplace(body, text, placeholder);
-    }
-    for (const role of roles) {
-        const placeholder = `@-mention-role-${role.id}`;
-        const text = `@${role.name}`;
-        mentions.push({
-            link: generateRoleMentionElement(role),
-            placeholder,
-        });
-        body = htmlReplace(body, text, placeholder);
-    }
-    for (const mention of mentions) {
-        const link = mention.link;
-        body = htmlReplace(body, mention.placeholder, getOuterHtml(link));
-    }
-    return htmlEscape(body);
+    resultParts.push(body.slice(cursor));
+    return resultParts.join("");
 }
 
 /**
