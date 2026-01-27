@@ -3299,6 +3299,8 @@ class AccountMove(models.Model):
 
         to_delete = []
         to_create = []
+        grouped_tax_update = defaultdict(set)
+        grouped_update = defaultdict(set)
         for move in container['records']:
             if move.state != 'draft':
                 continue
@@ -3404,7 +3406,8 @@ class AccountMove(models.Model):
             for base_line, to_update in tax_results['base_lines_to_update']:
                 line = base_line['record']
                 if is_write_needed(line, to_update):
-                    line.write(to_update)
+                    to_update = self.clean_command(to_update)
+                    grouped_update[frozenset(to_update.items())].add(line.id)
 
             for tax_line_vals in tax_results['tax_lines_to_delete']:
                 to_delete.append(tax_line_vals['record'].id)
@@ -3419,12 +3422,30 @@ class AccountMove(models.Model):
             for tax_line_vals, _grouping_key, to_update in tax_results['tax_lines_to_update']:
                 line = tax_line_vals['record']
                 if is_write_needed(line, to_update):
-                    line.write(to_update)
+                    to_update = self.clean_command(to_update)
+                    grouped_tax_update[frozenset(to_update.items())].add(line.id)
+
+        for values, tax_lines in grouped_tax_update.items():
+            self.env['account.move.line'].browse(tax_lines).write(dict(values))
+
+        for values, lines in grouped_update.items():
+            self.env['account.move.line'].browse(lines).write(dict(values))
 
         if to_delete:
             self.env['account.move.line'].browse(to_delete).with_context(dynamic_unlink=True).unlink()
         if to_create:
             self.env['account.move.line'].create(to_create)
+
+    def clean_command(self, dict_to_clean):
+        clean_to_update = {}
+        for k, v in dict_to_clean.items():
+            if k == 'tax_tag_ids' and isinstance(v, list) and v:
+                # v[0] is the tuple (<Command.SET: 6>, 0, [ids])
+                # v[0][2] is the actual list of IDs
+                clean_to_update[k] = tuple(v[0][2])
+            else:
+                clean_to_update[k] = v
+        return clean_to_update
 
     @contextmanager
     def _sync_non_deductible_base_lines(self, container):
@@ -3636,9 +3657,13 @@ class AccountMove(models.Model):
         yield
         after = existing()
 
+        partner_id_to_update = defaultdict(set)
         for move in after:
             if changed('commercial_partner_id'):
-                move.line_ids.partner_id = after[move]['commercial_partner_id']
+                partner_id_to_update[after[move]['commercial_partner_id']].update(move.line_ids.ids)
+
+        for partner_id, line_ids in partner_id_to_update.items():
+            self.env['account.move.line'].browse(line_ids).partner_id = partner_id
 
     def _get_sync_stack(self, container):
         tax_container, invoice_container, misc_container = ({} for _ in range(3))

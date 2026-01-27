@@ -4,6 +4,8 @@ from odoo.fields import Domain
 from odoo.tools import format_amount
 from odoo.tools.misc import split_every
 
+from collections import defaultdict
+
 
 ACCOUNT_DOMAIN = "[('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card','off_balance'))]"
 
@@ -324,3 +326,65 @@ class ProductProduct(models.Model):
             if len(name) > 4:
                 sorted_domains.append((20, Domain('name', 'ilike', name)))
         return sorted_domains
+
+    def _retrieve_products_batched(self, list_of_product_vals, company=None, extra_domain=None):
+        '''Search all products and find one that matches one of the parameters.
+
+        :param company:         The company of the product.
+        :param extra_domain:    Any extra domain to add to the search.
+        :param product_vals:    Values the product should match.
+        :returns:               A product or an empty recordset if not found.
+        '''
+
+        full_domain = self._get_product_domain_search_order_batched(list_of_product_vals)
+
+        company = company or self.env.company
+        all_products = defaultdict(lambda: self.env['product.product'])
+        for company_domain in (
+            [*self.env['res.partner']._check_company_domain(company), ('company_id', '!=', False)],
+            [('company_id', '=', False)],
+        ):
+            if products := self.env['product.product']._read_group(
+                domain=Domain.AND([full_domain, company_domain, extra_domain or Domain.TRUE]),
+                aggregates=['id:recordset'],
+                groupby=['barcode', 'default_code', 'name'],
+            ):
+                for barcode, default_code, name, product in products:
+                    keys = [barcode, default_code, name]
+                    all_products.update({key: product for key in keys if key})
+        return all_products
+
+    def _get_product_domain_search_order_batched(self, list_of_vals):
+        """Gives the domain for all values linked to a product.
+
+        :param list_of_vals:            The list of barcode, default_code and name for each product.
+        :returns:               The full domain based on all the values in the parameter.
+        :rtype: Domain
+        """
+
+        barcode_list = []
+        default_code_list = []
+        name_list = []
+        name_ilike_list = []
+        for vals in list_of_vals:
+            if barcode := vals.get('barcode'):
+                barcode_list.append(barcode)
+            if default_code := vals.get('default_code'):
+                default_code_list.append(default_code)
+            if name := vals.get('name'):
+                name = name.split('\n', 1)[0]  # Cut sales description from the name
+                name_list.append(name)
+                # avoid matching unrelated products whose names merely contain that short string
+                if len(name) > 4:
+                    name_ilike_list.append(name)
+
+        full_domain = Domain([
+            '|', ('barcode', 'in', barcode_list),
+            '|', ('default_code', 'in', default_code_list),
+            ('name', 'in', name_list),
+        ])
+
+        for name in name_ilike_list:
+            full_domain |= Domain('name', 'ilike', name)
+
+        return full_domain

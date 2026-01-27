@@ -1618,21 +1618,31 @@ class AccountMoveLine(models.Model):
         before = existing()
         yield
         after = existing()
+        Lines = self.env['account.move.line']
+        amount_currencies_to_update = defaultdict(set)
+        balance_to_update = defaultdict(set)
         for line in after:
+            amount_currency = line.balance
             if (
                 (changed('balance') or changed('move_type'))
                  and not self.env.is_protected(self._fields['amount_currency'], line)
                  and (not changed('amount_currency') or (line not in before and not line.amount_currency))
                  and line.currency_id == line.company_id.currency_id
             ):
-                line.amount_currency = line.balance
+                amount_currencies_to_update[amount_currency].add(line.id)
             if (
                 (changed('amount_currency') or changed('currency_rate') or changed('move_type'))
                 and not self.env.is_protected(self._fields['balance'], line)
                 and (not changed('balance') or (line not in before and not line.balance))
             ):
-                balance = line.company_id.currency_id.round(line.amount_currency / line.currency_rate)
-                line.balance = balance
+                balance = line.company_id.currency_id.round(amount_currency / line.currency_rate)
+                balance_to_update[balance].add(line.id)
+
+        for amount, lines in amount_currencies_to_update.items():
+            Lines.browse(lines).amount_currency = amount
+
+        for balance, lines in balance_to_update.items():
+            Lines.browse(lines).balance = balance
 
         # Since this method is called during the sync, inside of `create`/`write`, these fields
         # already have been computed and marked as so. But this method should re-trigger it since
