@@ -75,6 +75,7 @@
         </Corrective>
       </InvoiceHeader>
       <InvoiceIssueData>
+        <FileReference>ABCD-2023-001</FileReference>
         <IssueDate>2023-01-01</IssueDate>
         <InvoiceCurrencyCode>EUR</InvoiceCurrencyCode>
         <TaxCurrencyCode>EUR</TaxCurrencyCode>
@@ -115,6 +116,7 @@
       </InvoiceTotals>
       <Items>
         <InvoiceLine>
+          <FileReference>ABCD-2023-001</FileReference>
           <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
           <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
           <FileDate>2023-01-01</FileDate>
@@ -138,6 +140,7 @@
           </TaxesOutputs>
         </InvoiceLine>
         <InvoiceLine>
+          <FileReference>ABCD-2023-001</FileReference>
           <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
           <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
           <FileDate>2023-01-01</FileDate>
