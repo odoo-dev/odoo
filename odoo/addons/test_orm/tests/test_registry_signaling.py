@@ -54,7 +54,7 @@ class TestOrmCache(TransactionCase):
         tx_miss = counter.tx_miss
 
         # clear the caches of ir.model.data, retrieve its key and
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         self.assertNotIn(key, cache)
 
         # lookup some reference
@@ -83,12 +83,12 @@ class TestOrmCache(TransactionCase):
 
     def test_invalidation(self):
         self.assertEqual(self.env.registry.cache_invalidated, set())
-        self.env.registry.clear_cache()
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache()
+        self.env.transaction.invalidate_ormcache('templates')
         self.assertEqual(self.env.registry.cache_invalidated, {'default', 'templates'})
         self.env.registry.reset_changes()
         self.assertEqual(self.env.registry.cache_invalidated, set())
-        self.env.registry.clear_cache('assets')
+        self.env.transaction.invalidate_ormcache('assets')
         self.assertEqual(self.env.registry.cache_invalidated, {'assets'})
         self.env.registry.reset_changes()
         self.assertEqual(self.env.registry.cache_invalidated, set())
@@ -108,7 +108,7 @@ class TestOrmCache(TransactionCase):
         def run(cache):
             self.assertEqual(self.env.registry.cache_invalidated, set())
 
-            self.env.registry.clear_cache(cache)
+            self.env.transaction.invalidate_ormcache(cache)
             operations.append('clear_cache')
             sync_clear_cache.wait()
 

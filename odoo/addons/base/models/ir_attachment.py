@@ -837,7 +837,7 @@ class IrAttachment(models.Model):
             ('res_id', '=', 0),
             ('create_uid', '=', api.SUPERUSER_ID),
         ]).unlink()
-        self.env.registry.clear_cache('assets')
+        self.env.transaction.invalidate_ormcache('assets')
 
     def _from_request_file(self, file, *, mimetype, **vals):
         """

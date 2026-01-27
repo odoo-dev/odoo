@@ -65,20 +65,17 @@ class TestDisableSnippetsAssets(TransactionCase):
             'mega_menu_content': MEGA_MENU_OUTDATED,
         })
         self.mega_menu.flush_recordset()
-        cache_clears = []
 
-        init_clear_cache = self.env.registry.clear_cache
+        def get_cache_invalidated():
+            return self.env.registry.cache_invalidated
 
-        def patched_clear_cache(cache_name):
-            cache_clears.append(cache_name)
-            init_clear_cache(cache_name)
-
-        with patch.object(self.env.registry, 'clear_cache', patched_clear_cache):
-            self.Website._disable_unused_snippets_assets()
-            self.assertIn('assets', cache_clears, 'Assets cache should have been invalidated when updating ir_assets')
-            cache_clears.clear()
-            self.Website._disable_unused_snippets_assets()
-            self.assertNotIn('assets', cache_clears, 'No update on ir_assets expected, no invalidation should be triggered')
+        self.addCleanup(self.env.registry.cache_invalidated.update, self.env.registry.cache_invalidated.copy())
+        self.env.registry.cache_invalidated.clear()
+        self.Website._disable_unused_snippets_assets()
+        self.assertIn('assets', get_cache_invalidated(), 'Assets cache should have been invalidated when updating ir_assets')
+        self.env.registry.cache_invalidated.clear()
+        self.Website._disable_unused_snippets_assets()
+        self.assertNotIn('assets', get_cache_invalidated(), 'No update on ir_assets expected, no invalidation should be triggered')
 
         s_website_form_000_scss = self._get_snippet_asset('s_website_form', '000', 'scss')
         s_website_form_001_scss = self._get_snippet_asset('s_website_form', '001', 'scss')

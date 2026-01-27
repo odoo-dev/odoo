@@ -701,6 +701,18 @@ class Transaction:
                 Environment(env.cr, public_user.id, {}).flush_all()
                 break
 
+    def will_change_registry(self) -> None:
+        """ Invaliate the current registry.
+
+        Note: registry changes are not thread-safe.
+        """
+        self.registry.registry_invalidated = True
+
+    def invalidate_ormcache(self, cache_name: str = 'default') -> None:
+        """ Clear the caches associated to methods decorated with
+        ``tools.ormcache``if cache is in `cache_name` subset. """
+        self.registry._clear_cache(cache_name)
+
     def clear_access_cache(self, model_name: str = '') -> None:
         """ Clear the access cache for record rule checks. """
         # clear each context separately because it is cached in Environment

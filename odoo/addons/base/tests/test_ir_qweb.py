@@ -1778,7 +1778,7 @@ class TestQWebBasic(TransactionCase):
             )
 
         # an error triggered on first render
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
 
         try:
             self.env['ir.qweb']._render(t.id, {'div': 0})
@@ -1831,7 +1831,7 @@ class TestQWebBasic(TransactionCase):
             self.assertIn("""'/section/t[2]', '<t t-call="base.view_test_error_9_callee" b="a"/>'""", error)
 
         # an error triggered on first render
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
 
         with self.assertRaises(QWebError):
             self.env['ir.qweb']._render(t.id, {'div': 0})
@@ -2170,7 +2170,7 @@ class TestQWebBasic(TransactionCase):
             QWeb.with_context(preserve_comments=False)._render(view.id),
             markupsafe.Markup('<p></p>'),
             "Should not have the comment")
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         self.assertEqual(
             QWeb.with_context(preserve_comments=True)._render(view.id),
             markupsafe.Markup(f'<p>{comment}</p>'),
@@ -2191,7 +2191,7 @@ class TestQWebBasic(TransactionCase):
             QWeb.with_context(preserve_comments=False)._render(view.id),
             markupsafe.Markup('<p></p>'),
             "Should not have the processing instruction")
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         self.assertEqual(
             QWeb.with_context(preserve_comments=True)._render(view.id),
             markupsafe.Markup(f'<p>{p_instruction}</p>'),
@@ -2549,7 +2549,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         OTHER_SEARCH_FETCH = 3  # "SELECT id + fields from xmlid"
         ARCH_COMBINE = 4  # SELECT RECURSIVE arch combine
 
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
 
         check('base.testing_content', 'test-cold-0', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
@@ -2561,20 +2561,20 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         check(view.id, 'test-hot-id', 0)
 
         # like 'test-cold-0'
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         check(view.id, 'test-cold-id-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
 
         # like 'test-cold-0' the first search query is replaced by a fetching
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
         check(view.id, 'test-cold-id-2', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
 
         # like 'test-cold-0'
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         check('base.testing_content', 'test-cold-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
 
         # like 'test-cold-0'
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         check(view.id, 'test-cold-id-3', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE - 1)  # 7
 
     def test_render_query_count_after_write(self):
@@ -2628,7 +2628,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
             self.assertEqual(next(counter) - counter_init, cachemiss, 'The template compilation function has been called too many times.')
             self.assertEqual(env.cr.sql_log_count - init, queries, f'Maximum queries: {queries}')
 
-        View.env.registry.clear_cache('templates')
+        View.env.transaction.invalidate_ormcache('templates')
         View.invalidate_model()
 
         # do not count those fetching queries

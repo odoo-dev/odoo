@@ -317,7 +317,7 @@ class TestHasGroup(TransactionCase):
             user_b.write({"group_ids": [Command.link(group_C.id)]})
 
     def test_has_group_cleared_cache_on_write(self):
-        self.env.registry.clear_cache()
+        self.env.transaction.invalidate_ormcache()
         self.assertFalse(self.registry._Registry__caches['default'], "Ensure ormcache is empty")
 
         def populate_cache():

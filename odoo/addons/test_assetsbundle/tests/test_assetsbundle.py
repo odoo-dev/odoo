@@ -1962,7 +1962,7 @@ class AssetsNodeOrmCacheUsage(TransactionCase):
         return asset_keys, qweb_keys
 
     def test_assets_node_orm_cache_usage_debug(self):
-        self.env.registry.clear_cache('assets')
+        self.env.transaction.invalidate_ormcache('assets')
 
         asset_keys, qweb_keys = self.cache_keys()
         self.assertEqual(len(asset_keys), 0)
@@ -1987,7 +1987,7 @@ class AssetsNodeOrmCacheUsage(TransactionCase):
         check_no_new_cache_entry(debug='assets')
 
     def test_assets_node_orm_cache_usage_file_type(self):
-        self.env.registry.clear_cache('assets')
+        self.env.transaction.invalidate_ormcache('assets')
 
         asset_keys, qweb_keys = self.cache_keys()
         self.assertEqual(len(asset_keys), 0)
@@ -2012,7 +2012,7 @@ class AssetsNodeOrmCacheUsage(TransactionCase):
         self.assertEqual(len(qweb_keys), 3)
 
     def test_assets_node_orm_cache_usage_lang(self):
-        self.env.registry.clear_cache('assets')
+        self.env.transaction.invalidate_ormcache('assets')
         self.env['res.lang']._activate_lang('ar_SY')
         self.env['res.lang']._activate_lang('fr_FR')
         self.env['res.lang']._activate_lang('en_US')
@@ -2041,7 +2041,7 @@ class AssetsNodeOrmCacheUsage(TransactionCase):
     def test_assets_node_orm_cache_usage_website(self):
         if self.env['ir.module.module'].search([('name', '=', 'website'), ('state', '=', 'uninstalled')]):
             return  # only makes sence if website is installed
-        self.env.registry.clear_cache('assets')
+        self.env.transaction.invalidate_ormcache('assets')
 
         asset_keys, qweb_keys = self.cache_keys()
         self.assertEqual(len(asset_keys), 0)
@@ -2062,7 +2062,7 @@ class AssetsNodeOrmCacheUsage(TransactionCase):
         self.assertEqual(len(qweb_keys), qweb_keys_length + 1)
 
     def test_assets_node_orm_cache_usage_node_flags(self):
-        self.env.registry.clear_cache('assets')
+        self.env.transaction.invalidate_ormcache('assets')
 
         asset_keys, qweb_keys = self.cache_keys()
         self.assertEqual(len(asset_keys), 0)

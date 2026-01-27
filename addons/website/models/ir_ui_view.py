@@ -234,7 +234,7 @@ class IrUiView(models.Model):
                 specific_views += view._get_specific_views()
 
         result = super(IrUiView, self + specific_views).unlink()
-        self.env.registry.clear_cache('templates')
+        self.env.transaction.invalidate_ormcache('templates')
         return result
 
     def _create_website_specific_pages_for_view(self, new_view, website):
