@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from freezegun import freeze_time
-from odoo.tests import tagged, TransactionCase
+from odoo.tests import Form, tagged, TransactionCase
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
@@ -25,7 +25,7 @@ class TestSandwichLeave(TransactionCase):
             'user_id': self.demo_user.id,
         })
 
-        self.leave_type_day, self.leave_type_half_day, self.leave_type_hours = self.env['hr.leave.type'].create([{
+        self.leave_type_day, self.leave_type_half_day, self.leave_type_hours, self.leave_type_day_without_sl = self.env['hr.leave.type'].create([{
             'name': 'Test Leave Type',
             'request_unit': 'day',
             'requires_allocation': 'no',
@@ -42,6 +42,11 @@ class TestSandwichLeave(TransactionCase):
             'request_unit': 'hour',
             'requires_allocation': 'no',
             'l10n_in_is_sandwich_leave': True,
+            'company_id': self.indian_company.id,
+        }, {
+            'name': 'Test leave type without sandwich leave',
+            'request_unit': 'day',
+            'requires_allocation': 'no',
             'company_id': self.indian_company.id,
         }])
         self.rahul_emp = self.env['hr.employee'].create({
@@ -67,6 +72,18 @@ class TestSandwichLeave(TransactionCase):
         })
         approved_leave.action_approve()
         self.assertIsNotNone(approved_leave.with_user(self.demo_user).leave_type_increases_duration)
+
+        approved_leave_without_sl = self.env['hr.leave'].create({
+            'name': 'Without sandwich leave',
+            'employee_id': self.demo_employee.id,
+            'holiday_status_id': self.leave_type_day_without_sl.id,
+            'request_date_from': '2025-12-15',
+            'request_date_to': '2025-12-15',
+            'state': 'confirm',
+        })
+        approved_leave_without_sl.action_approve()
+        with Form(approved_leave_without_sl) as leave:
+            self.assertEqual(leave.number_of_days, 1.0)
 
     def test_long_sandwich_leave(self):
         self.env['resource.calendar.leaves'].create({
