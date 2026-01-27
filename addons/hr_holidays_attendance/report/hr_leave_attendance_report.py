@@ -73,169 +73,196 @@ class HrLeaveAttendanceReport(models.Model):
     def _timestamped(self, date):
         return fields.Datetime.context_timestamp(self, date).date()
 
+    def _cte(self):
+        return """
+        WITH
+        -- 1) Active Employee x Daily Date Matrix
+        employee_dates AS (
+            SELECT
+                emp.id AS employee_id,
+                emp.company_id,
+                gs.day
+            FROM hr_employee emp
+            CROSS JOIN generate_series(
+                (date_trunc('month', CURRENT_DATE) - INTERVAL '1 year')::date,
+                (CURRENT_DATE - 1)::date,
+                INTERVAL '1 day'
+            ) AS gs(day)
+            WHERE emp.active = true
+        ),
+
+        -- 2) Effective Working Schedule Resolution (Per Day)
+        employee_calendars AS (
+            SELECT employee_id, company_id, day, resource_calendar_id
+            FROM (
+                SELECT
+                    ed.employee_id,
+                    ed.company_id,
+                    ed.day,
+                    v.resource_calendar_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY ed.employee_id, ed.day
+                        ORDER BY v.date_version DESC
+                    ) AS rn
+                FROM employee_dates ed
+                LEFT JOIN hr_version v
+                    ON v.employee_id = ed.employee_id
+                   AND v.contract_date_start IS NOT NULL
+                   AND v.contract_date_start <= ed.day
+                   AND (v.contract_date_end >= ed.day OR v.contract_date_end IS NULL)
+                   AND v.date_version <= ed.day
+                JOIN resource_calendar rc
+                    ON rc.id = v.resource_calendar_id
+                   AND rc.active = true
+            ) s
+            WHERE rn = 1
+        ),
+
+        -- 3) Aggregated Worked Hours per Employee per Day
+        daily_attendance AS (
+            SELECT
+                employee_id,
+                (check_in AT TIME ZONE 'UTC')::date AS check_date,
+                SUM(worked_hours) AS worked_hours
+            FROM hr_attendance
+            GROUP BY employee_id, check_date
+        ),
+
+        -- 4) Normalized Working Days per Calendar
+        calendar_attendance AS (
+            SELECT DISTINCT ON (calendar_id, dayofweek) *
+            FROM resource_calendar_attendance
+            ORDER BY calendar_id, dayofweek
+        ),
+
+        -- 5) Per-Day Approved Leave Allocation (Working-Day Aware)
+        daily_leaves AS (
+            SELECT
+                ed.employee_id,
+                ed.day,
+                SUM(lv.number_of_hours / NULLIF(wd.working_days, 0)) AS leave_hours
+            FROM employee_dates ed
+            JOIN hr_leave lv
+                ON lv.employee_id = ed.employee_id
+               AND lv.state = 'validate'
+               AND ed.day BETWEEN
+                   (lv.date_from AT TIME ZONE 'UTC')::date
+                   AND (lv.date_to AT TIME ZONE 'UTC')::date
+
+            JOIN LATERAL (
+                SELECT COUNT(*) AS working_days
+                FROM generate_series(
+                    (lv.date_from AT TIME ZONE 'UTC')::date,
+                    (lv.date_to AT TIME ZONE 'UTC')::date,
+                    INTERVAL '1 day'
+                ) AS d(day)
+
+                JOIN LATERAL (
+                    SELECT v.resource_calendar_id
+                    FROM hr_version v
+                    JOIN resource_calendar rc
+                        ON rc.id = v.resource_calendar_id
+                       AND rc.active = true
+                    WHERE v.employee_id = lv.employee_id
+                      AND v.contract_date_start <= d.day
+                      AND (v.contract_date_end >= d.day OR v.contract_date_end IS NULL)
+                      AND v.date_version <= d.day
+                    ORDER BY v.date_version DESC
+                    LIMIT 1
+                ) ver ON TRUE
+
+                JOIN calendar_attendance rca
+                    ON rca.calendar_id = ver.resource_calendar_id
+                   AND CAST(rca.dayofweek AS INTEGER) = (
+                       CASE
+                           WHEN EXTRACT(DOW FROM d.day) = 0 THEN 6
+                           ELSE EXTRACT(DOW FROM d.day) - 1
+                       END
+                   )
+
+                LEFT JOIN resource_calendar_leaves rcl
+                    ON (rcl.calendar_id = ver.resource_calendar_id OR rcl.calendar_id IS NULL)
+                   AND rcl.resource_id IS NULL
+                   AND rcl.company_id = lv.company_id
+                   AND d.day BETWEEN
+                       (rcl.date_from AT TIME ZONE 'UTC')::date
+                       AND (rcl.date_to AT TIME ZONE 'UTC')::date
+                WHERE rcl.id IS NULL
+            ) wd ON TRUE
+
+            GROUP BY ed.employee_id, ed.day
+        )
+        """
+
     def _select(self):
         return """
-         SELECT row_number() OVER (ORDER BY gs.day DESC, emp.id) AS id,
-                gs.day::date AS date,
-                emp.id AS employee_id,
+            SELECT
+                row_number() OVER (ORDER BY ec.day DESC, ec.employee_id) AS id,
+                ec.day::date AS date,
+                ec.employee_id,
                 rc.id AS schedule_id,
                 ROUND(COALESCE(att.worked_hours, 0.0)::numeric, 2) AS worked_hours,
                 ROUND(COALESCE(rc.hours_per_day, 0.0)::numeric, 2) AS expected_hours,
-                ROUND(COALESCE(dlh.leave_hours, 0.0)::numeric, 2) AS leave_hours,
+                ROUND(COALESCE(dl.leave_hours, 0.0)::numeric, 2) AS leave_hours,
                 (
                     ROUND(COALESCE(att.worked_hours, 0.0)::numeric, 2)
                     - ROUND(COALESCE(rc.hours_per_day, 0.0)::numeric, 2)
-                    + ROUND(COALESCE(dlh.leave_hours, 0.0)::numeric, 2)
+                    + ROUND(COALESCE(dl.leave_hours, 0.0)::numeric, 2)
                 ) AS difference_hours
         """
 
     def _from(self):
-        return """
-                FROM hr_employee AS emp
-          CROSS JOIN LATERAL generate_series(
-                        (date_trunc('month', CURRENT_DATE) - INTERVAL '1 year')::date,
-                        (CURRENT_DATE - 1)::date,
-                        INTERVAL '1 day'
-                     ) AS gs(day)
-           LEFT JOIN LATERAL (
-                        SELECT resource_calendar_id
-                          FROM hr_version AS v
-                         WHERE v.employee_id = emp.id
-                           AND v.contract_date_start IS NOT NULL
-                           AND v.contract_date_start <= gs.day
-                           AND (v.contract_date_end >= gs.day OR v.contract_date_end IS NULL)
-                           AND v.date_version <= gs.day
-                         ORDER BY v.date_version DESC
-                         LIMIT 1
-                     ) AS ver
-                  ON TRUE
-        """
-
-    def _join_attendance(self):
-        return """
-            LEFT JOIN (
-                       SELECT employee_id,
-                              (check_in AT TIME ZONE 'UTC')::date AS check_date,
-                              SUM(worked_hours) AS worked_hours
-                         FROM hr_attendance
-                        GROUP BY employee_id, check_date
-                      ) AS att
-                   ON att.employee_id = emp.id
-                  AND att.check_date = gs.day
-        """
+        return "FROM employee_calendars ec"
 
     def _join_calendar(self):
-        return """
-            JOIN resource_calendar AS rc
-              ON ver.resource_calendar_id = rc.id
-        """
+        return "JOIN resource_calendar rc ON rc.id = ec.resource_calendar_id AND rc.active = true"
 
-    def _join_calendar_leaves(self):
-        return """
-            LEFT JOIN resource_calendar_leaves AS rcl
-                   ON (
-                               (rc.id = rcl.calendar_id OR rcl.calendar_id IS NULL)
-                           AND rcl.resource_id IS NULL
-                           AND rcl.company_id = emp.company_id
-                           AND gs.day
-                       BETWEEN (rcl.date_from AT TIME ZONE 'UTC')::date
-                           AND (rcl.date_to AT TIME ZONE 'UTC')::date
-                      )
-        """
+    def _join_attendance(self):
+        return "LEFT JOIN daily_attendance att ON att.employee_id = ec.employee_id AND att.check_date = ec.day"
 
-    def _join_resource_calendar_attendance(self):
-        return """
-            LEFT JOIN (
-                        SELECT DISTINCT ON (calendar_id, dayofweek) *
-                          FROM resource_calendar_attendance
-                         ORDER BY calendar_id, dayofweek
-                      ) AS rca
-                   ON rc.id = rca.calendar_id
-                  AND CAST(rca.dayofweek AS INTEGER) = (
-                        CASE
-                             WHEN EXTRACT(DOW FROM gs.day) = 0 THEN 6
-                             ELSE EXTRACT(DOW FROM gs.day) - 1
-                        END
-                      )  -- to map days between Odoo (Monday = 0, Tuesday = 1, ...) and Postgres (Sunday = 0, Monday = 1, ...)
-        """
-
-    def _join_daily_leave_hours(self):
-        """ Generates a SQL join clause to calculate the total `leave_hours` taken for a specific day:
-            - Sums up `number_of_hours` for all validated time offs within the day.
-            - Excludes non-working days based on the employee's resource calendar and calendar leaves.
-            - Handles leaves spanning multiple days, ensuring only working days are counted.
-            - Converts all date fields to UTC to maintain consistency with Odoo's date storage.
-        """
-        return """
-            LEFT JOIN LATERAL (
-                        SELECT SUM(lv.number_of_hours / NULLIF(wd.working_days,0)) AS leave_hours
-                          FROM hr_leave AS lv
-                          JOIN LATERAL (
-                                           SELECT COUNT(*) AS working_days
-                                             FROM generate_series(
-                                                     (lv.date_from AT TIME ZONE 'UTC')::date,
-                                                     (lv.date_to AT TIME ZONE 'UTC')::date,
-                                                     INTERVAL '1 day'
-                                                  )
-                                               AS d(day)
-                                       INNER JOIN (
-                                                    SELECT DISTINCT ON (calendar_id, dayofweek) *
-                                                      FROM resource_calendar_attendance
-                                                     ORDER BY calendar_id, dayofweek
-                                                  ) AS rca2
-                                               ON rc.id = rca2.calendar_id
-                                              AND CAST(rca2.dayofweek AS INTEGER) = (
-                                                      CASE
-                                                           WHEN EXTRACT(DOW FROM d.day) = 0 THEN 6
-                                                           ELSE EXTRACT(DOW FROM d.day) - 1
-                                                       END
-                                                  )
-                                        LEFT JOIN resource_calendar_leaves rcl2
-                                               ON (
-                                                          (rc.id = rcl2.calendar_id OR rcl2.calendar_id IS NULL)
-                                                      AND rcl2.resource_id IS NULL
-                                                      AND rcl2.company_id = emp.company_id
-                                                      AND d.day
-                                                  BETWEEN (rcl2.date_from AT TIME ZONE 'UTC')::date
-                                                      AND (rcl2.date_to AT TIME ZONE 'UTC')::date
-                                                  )
-                                            WHERE rcl2.id IS NULL
-                                       ) AS wd ON TRUE
-                         WHERE lv.employee_id = emp.id
-                           AND gs.day
-                       BETWEEN (lv.date_from AT TIME ZONE 'UTC')::date
-                           AND (lv.date_to AT TIME ZONE 'UTC')::date
-                           AND lv.state = 'validate'
-                      ) AS dlh
-                   ON TRUE
-        """
+    def _join_leave_hours(self):
+        return "LEFT JOIN daily_leaves dl ON dl.employee_id = ec.employee_id AND dl.day = ec.day"
 
     def _where(self):
         return """
-            WHERE rca.id IS NOT NULL
-              AND rcl.id IS NULL
+            WHERE EXISTS (
+                SELECT 1 FROM calendar_attendance rca
+                WHERE rca.calendar_id = rc.id
+                  AND CAST(rca.dayofweek AS INTEGER) = (
+                      CASE WHEN EXTRACT(DOW FROM ec.day) = 0 THEN 6
+                           ELSE EXTRACT(DOW FROM ec.day) - 1 END
+                  )
+            )
+            AND NOT EXISTS (
+                SELECT 1 FROM resource_calendar_leaves rcl
+                WHERE (rcl.calendar_id = rc.id OR rcl.calendar_id IS NULL)
+                  AND rcl.resource_id IS NULL
+                  AND rcl.company_id = ec.company_id
+                  AND ec.day BETWEEN
+                      (rcl.date_from AT TIME ZONE 'UTC')::date
+                      AND (rcl.date_to AT TIME ZONE 'UTC')::date
+            )
         """
 
     def init(self):
         drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute(SQL("""
             CREATE OR REPLACE VIEW %s AS (
+                %s -- cte
                 %s -- select
                 %s -- from
-                %s -- join_attendance
-                %s -- join_calendar
-                %s -- join_calendar_leaves
-                %s -- join_resource_calendar_attendance
-                %s -- join_daily_leave_hours
+                %s -- join calendar
+                %s -- join attendance
+                %s -- join leave hours
                 %s -- where
             )""",
                 SQL.identifier(self._table),
+                SQL(self._cte()),
                 SQL(self._select()),
                 SQL(self._from()),
-                SQL(self._join_attendance()),
                 SQL(self._join_calendar()),
-                SQL(self._join_calendar_leaves()),
-                SQL(self._join_resource_calendar_attendance()),
-                SQL(self._join_daily_leave_hours()),
+                SQL(self._join_attendance()),
+                SQL(self._join_leave_hours()),
                 SQL(self._where()),
-            ))
+            ),
+        )
