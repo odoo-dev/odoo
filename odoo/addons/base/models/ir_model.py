@@ -1015,6 +1015,7 @@ class IrModelFields(models.Model):
                 pass
 
         # clean the registry from the fields to remove
+        assert self.env.registry is self.pool
         self.env.transaction.will_change_registry()
         self.pool._discard_fields(fields)
 
@@ -1055,7 +1056,7 @@ class IrModelFields(models.Model):
                 vals['model'] = IrModel.browse(vals['model_id']).model
 
         # for self._get_ids() in _update_selection()
-        self.env.registry.clear_cache('stable')
+        self.env.transaction.invalidate_ormcache('stable')
 
         res = super().create(vals_list)
         models = OrderedSet(res.mapped('model'))
@@ -2221,7 +2222,7 @@ class IrModelAccess(models.Model):
     def call_cache_clearing_methods(self):
         self.env.invalidate_all()
         # for this model caches and implies _get_allowed_models (default) too
-        self.env.registry.clear_cache('stable')
+        self.env.transaction.invalidate_ormcache('stable')
 
     #
     # Check rights on actions
@@ -2356,23 +2357,23 @@ class IrModelData(models.Model):
     def create(self, vals_list):
         res = super().create(vals_list)
         if any(vals.get('model') == 'res.groups' for vals in vals_list):
-            self.env.registry.clear_cache('groups')
+            self.env.transaction.invalidate_ormcache('groups')
         return res
 
     def write(self, vals):
-        self.env.registry.clear_cache()  # _xmlid_lookup
+        self.env.transaction.invalidate_ormcache()  # _xmlid_lookup
         res = super().write(vals)
         if vals.get('model') == 'res.groups' and any(self._ids):
-            self.env.registry.clear_cache('groups')
+            self.env.transaction.invalidate_ormcache('groups')
         return res
 
     def unlink(self):
         """ Regular unlink method, but make sure to clear the caches. """
         clear_groups = self and any(data.model == 'res.groups' for data in self.exists())
         res = super().unlink()
-        self.env.registry.clear_cache()  # _xmlid_lookup
+        self.env.transaction.invalidate_ormcache()  # _xmlid_lookup
         if clear_groups:
-            self.env.registry.clear_cache('groups')
+            self.env.transaction.invalidate_ormcache('groups')
         return res
 
     def _lookup_xmlids(self, xml_ids, model):
@@ -2436,7 +2437,7 @@ class IrModelData(models.Model):
                             # have the same value after an update if it was
                             # created in the same transaction, no need to invalidate other worker cache
                             # cache in this case.
-                            self.env.registry.cache_invalidated.add('default')
+                            self.env.transaction.invalidate_ormcache()
 
             except Exception:
                 _logger.error("Failed to insert ir_model_data\n%s", "\n".join(str(row) for row in sub_rows))
@@ -2447,7 +2448,7 @@ class IrModelData(models.Model):
             self.pool.loaded_xmlids.update("%s.%s" % row[:2] for row in rows)
 
         if any(row[2] == 'res.groups' for row in rows):
-            self.env.registry.clear_cache('groups')
+            self.env.transaction.invalidate_ormcache('groups')
 
     # NOTE: this method is overriden in web_studio; if you need to make another
     #  override, make sure it is compatible with the one that is there.

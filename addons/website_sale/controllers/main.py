@@ -1967,7 +1967,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         attribute = request.env["product.attribute"].browse(attribute_id)
         if "display_type" in options:
             attribute.write({"display_type": options["display_type"]})
-            request.env.registry.clear_cache("templates")
+            request.env.transaction.invalidate_ormcache("templates")
 
     @route(["/shop/config/website"], type="jsonrpc", auth="user")
     def _change_website_config(self, **options):

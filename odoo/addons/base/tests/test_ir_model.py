@@ -602,7 +602,7 @@ class TestCustomFields(TestCommonCustomFields):
         model_id = self.env['ir.model']._get_id('res.partner')
         query_count = 52
         with self.assertQueryCount(query_count):
-            self.env.registry.clear_cache()
+            self.env.transaction.invalidate_ormcache()
             self.env['ir.model.fields'].create({
                 'model_id': model_id,
                 'name': 'x_oh_box',
@@ -613,7 +613,7 @@ class TestCustomFields(TestCommonCustomFields):
 
         # same with a related field, it only takes 8 extra queries
         with self.assertQueryCount(query_count + 8):
-            self.env.registry.clear_cache()
+            self.env.transaction.invalidate_ormcache()
             self.env['ir.model.fields'].create({
                 'model_id': model_id,
                 'name': 'x_oh_boy',
