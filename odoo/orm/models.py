@@ -3694,7 +3694,7 @@ class BaseModel(metaclass=MetaModel):
         if ir_attachment_unlink:
             ir_attachment_unlink.unlink()
         if cache_name := self._clear_cache_name:
-            self.env.registry.clear_cache(cache_name)
+            self.env.transaction.invalidate_ormcache(cache_name)
 
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', self.env.uid, self._name, self.ids)
@@ -3885,7 +3885,7 @@ class BaseModel(metaclass=MetaModel):
                 self._clear_cache_on_fields is None
                 or not vals.keys().isdisjoint(self._clear_cache_on_fields)
             ):
-                self.env.registry.clear_cache(cache_name)
+                self.env.transaction.invalidate_ormcache(cache_name)
 
             # validate inversed fields
             real_recs._validate_fields(inverse_fields)
@@ -4121,7 +4121,7 @@ class BaseModel(metaclass=MetaModel):
 
         # invalidate the cache
         if cache_name := self._clear_cache_name:
-            self.env.registry.clear_cache(cache_name)
+            self.env.transaction.invalidate_ormcache(cache_name)
 
         # check Python constraints for non-stored inversed fields
         for data in data_list:
