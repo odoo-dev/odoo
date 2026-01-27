@@ -323,6 +323,7 @@ class AccountMove(models.Model):
             'DiscountsAndRebates': [],
             'Charges': [],
             'GrossAmount': float_round(tax_details['raw_total_excluded_currency'], precision_digits=8),
+            'FileReference': invoice_ref,
         }
 
         if line.discount == 100.0:
@@ -421,6 +422,7 @@ class AccountMove(models.Model):
                 'InvoicingPeriod': None,
                 'ReceiverTransactionReference': invoice_ref,
                 'ReceiverContractReference': invoice_ref,
+                'FileReference': invoice_ref,
             },
             'TaxOutputs': [],
             'TaxesWithheld': [],
@@ -657,6 +659,10 @@ class AccountMove(models.Model):
             else:
                 logs.append(_("Could not retrieve currency: %s. Did you enable the multicurrency option "
                               "and activate the currency?", invoice_currency_code))
+
+        # # ==== file reference ====
+        # if file_reference := find_xml_value('.//FileReference', tree):
+        #     invoice.file_reference = file_reference
 
         # ==== invoice date ====
         if issue_date := find_xml_value('.//IssueDate', tree):
