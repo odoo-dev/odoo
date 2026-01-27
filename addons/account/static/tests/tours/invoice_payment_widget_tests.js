@@ -29,11 +29,11 @@ registry.category("web_tour.tours").add('invoice_payments_widget_exchange_tour',
     },
     {
         content: "Check payment widget total exchange amount",
-        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span.oe_form_field:contains($ 150.00)',
+        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span.exchange_amount:contains($ 150.00)',
     },
     {
         content: "Check payment widget total exchange is loss",
-        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span:contains(Loss)',
+        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span.exchange_label:contains(Exchange Loss)',
     },
     {
         content: "Go to next invoice",
@@ -46,11 +46,11 @@ registry.category("web_tour.tours").add('invoice_payments_widget_exchange_tour',
     },
     {
         content: "Check payment widget total exchange amount",
-        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span.oe_form_field:contains($ 50.00)',
+        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span.exchange_amount:contains($ 50.00)',
     },
     {
         content: "Check payment widget total exchange is loss",
-        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span:contains(Profit)',
+        trigger: 'div.o_field_widget.o_field_payment[name="invoice_payments_widget"] tr:last > td:last > i.o_field_widget span.exchange_label:contains(Exchange Profit)',
     },
     {
         content: "Go to exchange line list view",

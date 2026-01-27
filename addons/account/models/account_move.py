@@ -1511,9 +1511,11 @@ class AccountMove(models.Model):
                 'title': _('Less Payment'),
                 'outstanding': False,
                 'content': [],
-                'company_currency_id': move.company_currency_id.id,
+                'exchange_info': {
+                    'line_ids': [],
+                }
             }
-
+            total_exchange_amount = 0.0
             if move.state in {'draft', 'posted'} and move.is_invoice(include_receipts=True):
                 reconciled_vals = []
                 reconciled_partials = move.sudo()._get_all_reconciled_invoice_partials(include_caba=True)
@@ -1522,6 +1524,9 @@ class AccountMove(models.Model):
 
                     if counterpart_line.move_id.tax_cash_basis_rec_id:
                         continue
+                    if reconciled_partial['is_exchange']:
+                        payments_widget_vals['exchange_info']['line_ids'].append(counterpart_line.id)
+                        total_exchange_amount += counterpart_line.balance
 
                     if counterpart_line.move_id.ref:
                         reconciliation_ref = '%s (%s)' % (counterpart_line.move_id.name, counterpart_line.move_id.ref)
@@ -1534,11 +1539,9 @@ class AccountMove(models.Model):
 
                     reconciled_vals.append({
                         'name': counterpart_line.name,
-                        'aml_id': counterpart_line.id,
                         'journal_name': counterpart_line.journal_id.name,
                         'company_name': counterpart_line.journal_id.company_id.name if counterpart_line.journal_id.company_id != move.company_id else False,
                         'amount': reconciled_partial['amount'],
-                        'balance': counterpart_line.balance,
                         'currency_id': move.company_id.currency_id.id if reconciled_partial['is_exchange'] else reconciled_partial['currency'].id,
                         'date': counterpart_line.date,
                         'partial_id': reconciled_partial['partial_id'],
@@ -1553,6 +1556,16 @@ class AccountMove(models.Model):
                         'amount_foreign_currency': foreign_currency and formatLang(self.env, abs(counterpart_line.amount_currency), currency_obj=foreign_currency)
                     })
                 payments_widget_vals['content'] = reconciled_vals
+                comparison = move.company_currency_id.compare_amounts(total_exchange_amount, 0)
+                if comparison == 0:
+                    exchange_label = _('See exchange information') if payments_widget_vals['exchange_info']['line_ids'] else ''
+                elif comparison == 1:
+                    exchange_label = _('Exchange Profit')
+                else:
+                    exchange_label = _('Exchange Loss')
+
+                payments_widget_vals['exchange_info']['label'] = exchange_label
+                payments_widget_vals['exchange_info']['exchange_amount_formatted'] = formatLang(self.env, abs(total_exchange_amount), currency_obj=move.company_currency_id)
 
             if payments_widget_vals['content']:
                 move.invoice_payments_widget = payments_widget_vals
