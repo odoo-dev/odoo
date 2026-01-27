@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="address_layout" inherit_id="web.address_layout">
+        <xpath expr="//div[@name='address']" position="before">
+            <div t-if="o._name == 'account.move' and o.delivery_date">
+                <strong>Delivery Date:</strong>
+                <span t-field="o.delivery_date"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>

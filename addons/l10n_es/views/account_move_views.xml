@@ -8,6 +8,10 @@
             <xpath expr="//page[@id='other_tab']//field[@name='delivery_date']" position="after">
                 <field name="l10n_es_is_simplified"/>
             </xpath>
+
+            <xpath expr="//group[@id='header_right_group']//field[@name='delivery_date']" position="attributes">
+                <attribute name="invisible"></attribute>
+            </xpath>
         </field>
     </record>
 </odoo>

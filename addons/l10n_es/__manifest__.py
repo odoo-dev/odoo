@@ -2,7 +2,7 @@
 {
     'name': 'Spain - Accounting (PGCE 2008)',
     'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/spain.html',
-    'version': '5.4',
+    'version': '5.5',
     'icon': '/account/static/description/l10n.png',
     'countries': ['es'],
     'author': 'Spanish Localization Team',
@@ -37,6 +37,7 @@ Spanish charts of accounts (PGCE 2008).
         'views/account_tax_views.xml',
         'data/product_data.xml',
         'views/report_invoice.xml',
+        'views/report_templates.xml',
         'views/res_config_settings_views.xml',
         'data/mod111.xml',
         'data/mod115.xml',
