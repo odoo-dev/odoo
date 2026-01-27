@@ -81,6 +81,7 @@
         <LanguageName>en</LanguageName>
         <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
         <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
+        <FileReference>ABCD-2023-001</FileReference>
       </InvoiceIssueData>
       <TaxesOutputs>
         <Tax>
@@ -118,6 +119,7 @@
           <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
           <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
           <FileDate>2023-01-01</FileDate>
+          <FileReference>ABCD-2023-001</FileReference>
           <ItemDescription>product_a</ItemDescription>
           <Quantity>1.0</Quantity>
           <UnitOfMeasure>01</UnitOfMeasure>
@@ -141,6 +143,7 @@
           <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
           <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
           <FileDate>2023-01-01</FileDate>
+          <FileReference>ABCD-2023-001</FileReference>
           <ItemDescription>product_a</ItemDescription>
           <Quantity>1.0</Quantity>
           <UnitOfMeasure>01</UnitOfMeasure>

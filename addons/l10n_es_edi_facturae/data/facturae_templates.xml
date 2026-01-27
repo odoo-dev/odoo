@@ -126,6 +126,7 @@
         <!-- Sub-template used for every instance of InvoiceLineType -->
         <template id="invoice_line_type">
             <InvoiceLine>
+                <FileReference t-out="line.get('FileReference')"/>
                 <ReceiverContractReference t-out="line.get('ReceiverContractReference')"/>
                 <ReceiverTransactionReference t-out="line.get('ReceiverTransactionReference')"/>
                 <FileDate t-out="line.get('FileDate')"/>
@@ -192,6 +193,7 @@
                     <t t-if="refund_multiplier == -1" t-call="l10n_es_edi_facturae.corrective_type"/>
                 </InvoiceHeader>
                 <InvoiceIssueData>
+                    <FileReference t-out="invoice['InvoiceIssueData'].get('FileReference')"/>
                     <IssueDate t-out="invoice['invoice_record'].invoice_date.isoformat()"/>
                     <OperationDate t-out="invoice['InvoiceIssueData'].get('OperationDate')"/>
                     <InvoicingPeriod t-if="invoice['InvoiceIssueData'].get('InvoicingPeriod')">

@@ -323,6 +323,7 @@ class AccountMove(models.Model):
             'DiscountsAndRebates': [],
             'Charges': [],
             'GrossAmount': float_round(tax_details['raw_total_excluded_currency'], precision_digits=8),
+            'FileReference': receiver_transaction_reference,
         }
 
         if line.discount == 100.0:
@@ -421,6 +422,7 @@ class AccountMove(models.Model):
                 'InvoicingPeriod': None,
                 'ReceiverTransactionReference': invoice_ref,
                 'ReceiverContractReference': invoice_ref,
+                'FileReference': invoice_ref,
             },
             'TaxOutputs': [],
             'TaxesWithheld': [],
