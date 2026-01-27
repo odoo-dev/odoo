@@ -660,10 +660,6 @@ class AccountMove(models.Model):
                 logs.append(_("Could not retrieve currency: %s. Did you enable the multicurrency option "
                               "and activate the currency?", invoice_currency_code))
 
-        # # ==== file reference ====
-        # if file_reference := find_xml_value('.//FileReference', tree):
-        #     invoice.file_reference = file_reference
-
         # ==== invoice date ====
         if issue_date := find_xml_value('.//IssueDate', tree):
             invoice.invoice_date = issue_date
