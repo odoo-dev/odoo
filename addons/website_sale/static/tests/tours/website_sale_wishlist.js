@@ -130,7 +130,6 @@ registry.category("web_tour.tours").add('website_sale.wishlist_updates', {
                 ).value = "Customizable Desk";
                 document.querySelector("form.o_wsale_products_searchbar_form button").click();
             },
-            expectUnloadPage: true,
         },
         {
             content: "The product is in the wishlist",
@@ -157,7 +156,6 @@ registry.category("web_tour.tours").add('website_sale.wishlist_updates', {
                 ).value = "Customizable Desk";
                 document.querySelector("form.o_wsale_products_searchbar_form button").click();
             },
-            expectUnloadPage: true,
         },
         {
             content: "The product is not in the wishlist",
