@@ -2146,9 +2146,7 @@ class Website(models.CachedModel):
             results = search_detail['results']
             icon = search_detail['icon']
             mapping = search_detail['mapping']
-            # Some fields are not available in public user group,
-            # require sudo to complete result
-            results_data = results.sudo()._search_render_results(fields, mapping, icon, limit)
+            results_data = results._search_render_results(fields, mapping, icon, limit)
             search_detail['results_data'] = results_data
         return search_details
 

@@ -5,8 +5,9 @@ import { markup } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { getTemplate } from "@web/core/templates";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { SIZES, MEDIAS_BREAKPOINTS, utils as ui } from "@web/core/ui/ui_service";
+import { utils as ui } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
+import { renderToElement } from "@web/core/utils/render";
 
 export class SearchBar extends Interaction {
     static selector = ".o_searchbar_form";
@@ -28,7 +29,7 @@ export class SearchBar extends Interaction {
         ".o_search_result_item a": {
             "t-on-keydown": this.onKeydown,
         },
-        ".o_search_input_group": {
+        ".o_search_input_group, a[title='Search']": {
             "t-on-click": this.switchInputToModal,
         },
     };
@@ -38,12 +39,10 @@ export class SearchBar extends Interaction {
         this.keepLast = new KeepLast();
         this.inputEl = this.el.querySelector(".search-query");
         this.buttonEl = this.el.querySelector(".oe_search_button");
-        this.actionEl = this.buttonEl.querySelector(".o_search_found_results_action");
         this.resultsEl = this.buttonEl.querySelector(".o_search_found_results");
         this.iconEl = this.buttonEl.querySelector(".oi-search");
         this.spinnerEl = this.buttonEl.querySelector(".o_search_spinner");
         this.searchInputGroup = this.el.querySelector(".o_search_input_group");
-        this.initialInputValue = this.inputEl.value;
         this.menuEl = null;
         this.searchType = this.inputEl.dataset.searchType;
         const orderByEl = this.el.querySelector(".o_search_order_by");
@@ -60,6 +59,7 @@ export class SearchBar extends Interaction {
             searchType: dataset.searchType,
             // Make it easy for customization to disable fuzzy matching on specific searchboxes
             allowFuzzy: !(dataset.noFuzzy && JSON.parse(dataset.noFuzzy)),
+            proportionateAllocation: true,
         };
         for (const fieldEl of form.querySelectorAll("input[type='hidden']")) {
             this.options[fieldEl.name] = fieldEl.value;
@@ -102,13 +102,6 @@ export class SearchBar extends Interaction {
         this.render(null);
     }
 
-    getDisplayType() {
-        if (this.el.clientWidth > MEDIAS_BREAKPOINTS[SIZES.SM].maxWidth) {
-            return "columns";
-        }
-        return "list";
-    }
-
     async fetch() {
         const res = await rpc("/website/snippet/autocomplete", {
             search_type: this.searchType,
@@ -116,24 +109,20 @@ export class SearchBar extends Interaction {
             order: this.order,
             limit: this.limit,
             max_nb_chars: Math.round(
-                Math.max(
-                    this.autocompleteMinWidth,
-                    parseInt(this.el.clientWidth / (this.getDisplayType() === "columns" ? 3 : 1))
-                ) * 0.22
+                Math.max(this.autocompleteMinWidth, this.el.clientWidth / 3) * 0.22
             ),
             options: this.options,
         });
 
         const field_set = new Set(this.getFieldsNames());
-        for (const group in res.results) {
-            const data = res.results[group].data;
-            data.forEach((record) => {
-                for (const key in record) {
-                    if (field_set.has(key) && record[key]) {
+        for (const group of Object.values(res.results)) {
+            for (const record of group.data) {
+                for (const key of field_set) {
+                    if (record[key]) {
                         record[key] = markup(record[key]);
                     }
                 }
-            });
+            }
         }
         return res;
     }
@@ -146,7 +135,6 @@ export class SearchBar extends Interaction {
             this.services["public.interactions"].stopInteractions(this.menuEl);
         }
         const prevMenuEl = this.menuEl;
-        this.resultEls = null;
         if (res && this.limit) {
             const results = res.results;
             let template = "website.s_searchbar.autocomplete";
@@ -163,84 +151,56 @@ export class SearchBar extends Interaction {
                     search: this.inputEl.value,
                     fuzzySearch: res["fuzzy_search"],
                     widget: this.options,
-                    displayType: this.getDisplayType(),
                 },
                 this.el
             )[0];
-            // TODO dev, the count doesn't always match search_count
-            this.updateSearchCount(res.results_count || 0);
-        } else {
-            this.clearButtonContent();
         }
         this.hasDropdown = !!res;
         prevMenuEl?.remove();
     }
 
-    clearButtonContent() {
-        this.hideLoadingSpinner();
-        const isEmpty = !this.inputEl.value.trim();
-        this.buttonEl.disabled = true;
-        this.actionEl?.classList.add("d-none");
-        // If empty, only show icon; otherwise show results
-        this.resultsEl?.classList.toggle("d-none", isEmpty);
-        this.iconEl?.classList.toggle("d-none", !isEmpty);
-    }
-
     /**
      * @param {number} count
      */
-    updateSearchCount(count) {
+    updateButtonContent(count) {
         this.hideLoadingSpinner();
         this.buttonEl.toggleAttribute("disabled", count === 0);
         const countText = count <= 1 ? _t("%s result", count) : _t("%s results", count);
-        for (const el of this.buttonEl.querySelectorAll(".o_search_count")) {
-            el.textContent = countText;
-        }
-
-        const hasLiveResults = count > 0 && this.inputEl.value !== this.initialInputValue;
-        this.actionEl?.classList.toggle("d-none", !hasLiveResults);
-        this.buttonEl.toggleAttribute("disabled", !hasLiveResults);
-        this.resultsEl?.classList.toggle("d-none", hasLiveResults);
-        this.iconEl?.classList.add("d-none");
+        this.resultsEl.querySelector(".o_search_count").textContent = countText;
     }
 
     hideLoadingSpinner() {
-        this.spinnerEl?.classList.add("d-none");
+        this.resultsEl.classList.toggle("d-none", !this.hasDropdown);
+        this.iconEl.classList.toggle("d-none", this.hasDropdown);
+        this.spinnerEl.classList.add("d-none");
     }
 
     showLoadingSpinner() {
-        this.actionEl?.classList.add("d-none");
-        this.resultsEl?.classList.add("d-none");
-        this.iconEl?.classList.add("d-none");
-        this.spinnerEl?.classList.remove("d-none");
+        this.resultsEl.classList.add("d-none");
+        this.iconEl.classList.add("d-none");
+        this.spinnerEl.classList.remove("d-none");
     }
 
     getFieldsNames() {
-        return [
-            "description",
-            "detail",
-            "detail_extra",
-            "detail_strike",
-            "extra_link",
-            "name",
-            "tags",
-        ];
+        return ["description", "name", "search_item_metadata", "tags"];
     }
 
     async onInput() {
         if (!this.limit) {
             return;
         }
-        if (this.searchType === "all" && !this.inputEl.value.trim().length) {
-            this.render();
-        } else {
+        // If the input is empty, we render the initial state
+        const value = this.inputEl.value.trim();
+        let res = null;
+        if (value.length) {
             this.showLoadingSpinner();
             if (!this.hasDropdown) {
                 this.renderLoading();
             }
-            const res = await this.keepLast.add(this.waitFor(this.fetch()));
-            this.render(res);
+            res = await this.keepLast.add(this.waitFor(this.fetch()));
         }
+        this.render(res);
+        this.updateButtonContent(res?.results_count || 0);
     }
 
     renderLoading() {
@@ -248,7 +208,11 @@ export class SearchBar extends Interaction {
             this.services["public.interactions"].stopInteractions(this.menuEl);
         }
         const prevMenuEl = this.menuEl;
-        this.menuEl = this.renderAt("website.s_searchbar.autocomplete.skeleton.loader", {}, this.el)[0];
+        this.menuEl = this.renderAt(
+            "website.s_searchbar.autocomplete.skeleton.loader",
+            {},
+            this.el
+        )[0];
         this.hasDropdown = true;
         prevMenuEl?.remove();
     }
@@ -272,27 +236,16 @@ export class SearchBar extends Interaction {
                 break;
             case "ArrowUp":
             case "ArrowDown":
-            case "ArrowLeft":
-            case "ArrowRight":
-                // Cache resultEls to avoid repeated DOM queries on each keypress
-                if (!this.resultEls && this.menuEl) {
-                    this.resultEls = [...this.menuEl.querySelectorAll(".o_search_result_item a")];
+                ev.preventDefault();
+                if (this.menuEl) {
+                    const focusableEls = [this.inputEl, ...this.menuEl.querySelectorAll("li > a")];
+                    const focusedEl = document.activeElement;
+                    const currentIndex = focusableEls.indexOf(focusedEl) || 0;
+                    const delta = ev.key === "ArrowUp" ? focusableEls.length - 1 : 1;
+                    const nextIndex = (currentIndex + delta) % focusableEls.length;
+                    const nextFocusedEl = focusableEls[nextIndex];
+                    nextFocusedEl.focus();
                 }
-                if (this.resultEls?.length) {
-                    if (document.activeElement === this.inputEl) {
-                        if (ev.key === "ArrowDown") {
-                            this.resultEls[0]?.focus();
-                        }
-                        return;
-                    }
-                    ev.preventDefault();
-                    const currentIndex = this.resultEls.indexOf(document.activeElement);
-                    const direction = ev.key.replace("Arrow", "").toLowerCase();
-                    this.navigateByDirection(currentIndex, direction);
-                }
-                break;
-            case "Enter":
-                this.limit = 0; // prevent autocomplete
                 break;
             case "Tab":
                 this.el.classList.add("o_keyboard_navigation");
@@ -304,97 +257,52 @@ export class SearchBar extends Interaction {
         this.el.classList.remove("o_keyboard_navigation");
     }
 
-    focusInput() {
-        this.inputEl.classList.remove("pe-none");
-        this.inputEl.focus();
-    }
-
     switchInputToModal(ev) {
-        if (ev.target.closest(".oe_search_button")) {
+        if (ev.target.closest(".modal")) {
             return;
         }
-        if (this.searchInputGroup.hasAttribute("data-search-modal-id")) {
-            const modalId = '#' + this.searchInputGroup.dataset.searchModalId;
-            const forceModalTrigger = this.searchInputGroup.hasAttribute('data-force-modal-trigger');
+        const isTooSmall =
+            ui.isSmall() || this.searchInputGroup.getBoundingClientRect().width < 280;
+        const forceModalTrigger = this.searchInputGroup.hasAttribute("data-force-modal-trigger");
 
-            if (ui.isSmall() || this.searchInputGroup.getBoundingClientRect().width < 280 || forceModalTrigger) {
-                this.searchInputGroup.setAttribute("data-bs-toggle", "modal");
-                this.searchInputGroup.setAttribute("data-bs-target", modalId);
-                this.inputEl.classList.add("pe-none");
-                this.searchInputGroup.click();
-            } else {
-                this.searchInputGroup.removeAttribute("data-bs-toggle");
-                this.searchInputGroup.removeAttribute("data-bs-target");
-                this.focusInput();
-            }
-        } else {
-            this.focusInput();
+        if (isTooSmall || forceModalTrigger) {
+            this.openSearchModal();
         }
     }
 
-    /**
-     * Move focus to the closest search result in the given direction based on
-     * visual (screen) position.
-     * @param {number} currentIndex
-     *  Index of the currently focused result in `this.resultEls`
-     * @param {"up"|"down"|"left"|"right"} direction"
-     *  Direction of navigation triggered by arrow keys.
-     */
-    navigateByDirection(currentIndex, direction) {
-        const resultEls = this.resultEls;
-        const currentRect = resultEls[currentIndex].getBoundingClientRect();
-        const currentCenterX = currentRect.left + currentRect.width / 2;
-        const currentCenterY = currentRect.top + currentRect.height / 2;
-        let nextIndex = -1;
-        let bestDistance = Infinity;
-
-        const scoreCandidate = (direction, dx, dy, height) => {
-            const AXIS_WEIGHT = 1000; // Prioritize row/column movement to avoid jumps
-            switch (direction) {
-                case "down":
-                    if (dy > 0) {
-                        return Math.abs(dy) * AXIS_WEIGHT + Math.abs(dx);
-                    }
-                    break;
-                case "up":
-                    if (dy < 0) {
-                        return Math.abs(dy) * AXIS_WEIGHT + Math.abs(dx);
-                    }
-                    break;
-                case "right":
-                    if (dx > 0 && Math.abs(dy) < height) {
-                        return Math.abs(dx) * AXIS_WEIGHT + Math.abs(dy);
-                    }
-                    break;
-                case "left":
-                    if (dx < 0 && Math.abs(dy) < height) {
-                        return Math.abs(dx) * AXIS_WEIGHT + Math.abs(dy);
-                    }
-                    break;
-            }
-            return Infinity;
+    openSearchModal() {
+        const values = {
+            action: this.el.getAttribute("action"),
+            placeholder: this.inputEl.getAttribute("placeholder"),
+            limit: this.inputEl.dataset.limit,
+            order: this.inputEl.dataset.orderBy,
+            autocomplete: this.inputEl.getAttribute("autocomplete"),
+            searchType: this.inputEl.dataset.searchType,
         };
-
-        resultEls.forEach((el, index) => {
-            if (index === currentIndex) {
-                return;
-            }
-            const rect = el.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const dx = centerX - currentCenterX;
-            const dy = centerY - currentCenterY;
-            const distance = scoreCandidate(direction, dx, dy, currentRect.height);
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                nextIndex = index;
-            }
+        const wrapperEl = renderToElement("website.s_searchbar.modal", values);
+        const hiddenInputEls = this.el.querySelectorAll("input[type=hidden]");
+        hiddenInputEls.forEach((el) => {
+            const clone = el.cloneNode(true);
+            wrapperEl.querySelector(".o_searchbar_form").appendChild(clone);
         });
-        if (nextIndex >= 0) {
-            resultEls[nextIndex].focus();
-        } else if (direction === "up") {
-            this.inputEl.focus();
-        }
+        this.insert(wrapperEl, document.body);
+        const modal = new Modal(wrapperEl);
+        wrapperEl.addEventListener(
+            "shown.bs.modal",
+            () => {
+                const modalInput = wrapperEl.querySelector(".search-query");
+                modalInput?.focus();
+            },
+            { once: true }
+        );
+        wrapperEl.addEventListener(
+            "hidden.bs.modal",
+            () => {
+                wrapperEl.remove();
+            },
+            { once: true }
+        );
+        modal.show();
     }
 
     /**

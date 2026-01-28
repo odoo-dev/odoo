@@ -6,6 +6,6 @@ patch(SearchBar.prototype, {
      * @override
      */
     getFieldsNames() {
-        return [...super.getFieldsNames(), "price", "list_price", "breadcrumb"];
+        return [...super.getFieldsNames(), 'attribute_value_ids'];
     },
-})
+});
