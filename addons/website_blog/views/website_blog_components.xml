@@ -84,8 +84,6 @@
             <t t-call="website.website_search_box_input"
                 search_type.f="blogs"
                 action="blog_url(tag=tag,search=search)"
-                display_description.f="true"
-                display_detail.f="false"
                 _modal_id.f="blogs"
                 _form_classes.f="#{not len(blogs) &gt; 1 and 'ms-auto'} flex-grow-1 flex-lg-grow-0 w-lg-50 w-xl-25">
                 <input type="hidden" name="tag" t-att-value="tag"/>

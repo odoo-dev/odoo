@@ -121,7 +121,6 @@ class BlogBlog(models.Model):
             'mapping': mapping,
             'icon': 'fa-rss-square',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
-            'template_key': 'website_blog.search_items_blog_blog',
             'group_name': self.env._("Blogs"),
             'sequence': 70,
         }
@@ -331,15 +330,14 @@ class BlogPost(models.Model):
         else:
             domain.append([("website_published", "=", True)])
         search_fields = ['name', 'author_name', 'tag_ids.name', 'content']
-        fetch_fields = ['name', 'website_url', 'tag_ids', 'author_name', 'published_date']
+        fetch_fields = ['name', 'website_url', 'author_name', 'content']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
-            'author_name': {'name': 'author_name', 'type': 'text', 'skip_markup': True},
-            'author_avatar_url': {'name': 'author_avatar_url', 'type': 'html', 'truncate': False},
-            'published_date': {'name': 'published_date', 'type': 'date'},
+            'search_item_metadata': {'name': 'author_name', 'type': 'text', 'match': True},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
+            'description': {'name': 'content', 'type': 'text', 'html': True, 'match': True},
         }
         return {
             'model': 'blog.post',
@@ -348,7 +346,6 @@ class BlogPost(models.Model):
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-rss',
-            'template_key': 'website_blog.search_items_blog_post',
             'group_name': self.env._("Blogs Articles"),
             'sequence': 60,
         }
@@ -357,6 +354,5 @@ class BlogPost(models.Model):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for post, data in zip(self, results_data):
             data['tag_ids'] = post.tag_ids.read(['name'])
-            data['author_avatar_url'] = '/web/image/blog.post/%s/author_avatar' % data['id']
             data['image_url'] = post._get_image_url()
         return results_data

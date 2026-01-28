@@ -35,6 +35,8 @@ class Website(models.Model):
 
     def _search_get_details(self, search_type, order, options):
         result = super()._search_get_details(search_type, order, options)
-        if search_type in ['blogs', 'blog_posts_only', 'blog_post', 'all']:
+        if search_type in ['blogs', 'website_blog', 'all']:
+            result.append(self.env['blog.blog']._search_get_detail(self, order, options))
+        if search_type in ['blogs', 'blog_post', 'all']:
             result.append(self.env['blog.post']._search_get_detail(self, order, options))
         return result
