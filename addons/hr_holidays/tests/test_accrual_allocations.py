@@ -1678,7 +1678,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
 
         with freeze_time("2024-04-27"):
             allocation._update_accrual()
-        self.assertAlmostEqual(allocation.number_of_days, 1, "Allocations lost, then 1 accrued.")
+        self.assertAlmostEqual(allocation.number_of_days, 1, 2, "Allocations lost, then 1 accrued.")
 
     def test_accrual_carryover_at_other(self):
         accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
@@ -4212,6 +4212,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                 'accrued_gain_time': 'start',
                 'level_ids': [Command.create({
                     'start_count': 0,
+                    'added_value': 1,
                     'frequency': 'monthly',
                     'action_with_unused_accruals': 'lost',
                 })],
@@ -4224,9 +4225,16 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                 'date_from': '2025-01-01',
                 'allocation_type': 'accrual',
                 'number_of_days': 0,
-                'already_accrued': False,
             })
             allocation.action_validate()
-        with freeze_time('2026-02-01'):
-            allocation._update_accrual()
-            self.assertEqual(allocation.number_of_days, 2)
+        assertions = (
+            # ('2025-12-01', 12),
+            # Do not run the update on 2026-01-01 otherwise the bug disappear
+            # ('2026-01-01', 1),
+            # ('2026-02-01', 2),
+            ('2026-05-01', 5),
+        )
+        for test_date, expected_remaining_leaves in assertions:
+            with freeze_time(test_date):
+                allocation._update_accrual()
+                self.assertEqual(allocation.number_of_days, expected_remaining_leaves)
