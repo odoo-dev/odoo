@@ -3,7 +3,7 @@
     <template id="l10n_es.external_layout_standard" inherit_id="web.external_layout_standard">
         <!-- And similar xpaths for the rest of the layouts -->
         <xpath expr="//div[@name='company_address']" position="after">
-            <div class="col-6" name="delivery_date" t-if="delivery_date">
+            <div class="col-6" name="delivery_date" t-if="show_delivery_date">
                 Delivery date: <t t-esc="delivery_date"/>
             </div>
         </xpath>

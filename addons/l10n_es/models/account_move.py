@@ -30,7 +30,9 @@ class AccountMove(models.Model):
         self.ensure_one()
         return any(t.l10n_es_type == 'dua' for t in self.invoice_line_ids.tax_ids.flatten_taxes_hierarchy())
 
-    def _post(self, soft=True):
-        posted = super()._post(soft=soft)
-        posted.filtered(lambda m: not m.delivery_date).delivery_date = fields.Date.context_today(self)
-        return posted
+    @api.depends('state')
+    def _compute_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_delivery_date()
+        for move in self.filtered(lambda m: not m.delivery_date and m.state == 'posted'):
+            move.delivery_date = move.invoice_date
