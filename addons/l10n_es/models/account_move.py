@@ -29,3 +29,18 @@ class AccountMove(models.Model):
     def _l10n_es_is_dua(self):
         self.ensure_one()
         return any(t.l10n_es_type == 'dua' for t in self.invoice_line_ids.tax_ids.flatten_taxes_hierarchy())
+
+    @api.depends('country_code', 'move_type')
+    def _compute_show_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_show_delivery_date()
+        for move in self:
+            if move.country_code == 'ES':
+                move.show_delivery_date = move.is_sale_document()
+
+    def _post(self, soft=True):
+        res = super()._post(soft=soft)
+        for move in self:
+            if move.country_code == 'ES' and not move.delivery_date:
+                move.delivery_date = move.invoice_date
+        return res
