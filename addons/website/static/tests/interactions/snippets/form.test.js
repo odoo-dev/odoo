@@ -151,7 +151,7 @@ const formWithRestrictedFieldsTemplate = /* html */ `
                                 </div>
                             </div>
                         </div>
-                        <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_model_required" data-type="email" data-translated-name="Your Email">
+                        <div data-name="Field" class="s_website_form_field mb-3 col-12 s_website_form_model_required" data-type="email" data-translated-name="Your Email" data-requirement-comparator="domain" data-requirement-condition="[{&quot;requirement_text&quot;:&quot;gmail.com&quot;,&quot;_id&quot;:&quot;0&quot;,&quot;id&quot;:&quot;gmail.com&quot;},{&quot;requirement_text&quot;:&quot;icloud.com&quot;,&quot;_id&quot;:&quot;1&quot;,&quot;id&quot;:&quot;icloud.com&quot;}]" data-error-message="This field must have one of these email domain(s): gmail.com and icloud.com.">
                             <div class="row s_col_no_resize s_col_no_bgcolor">
                                 <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px" for="odfcbsocir26">
                                     <span class="s_website_form_label_content">Your Email</span>
@@ -847,4 +847,10 @@ test("check multi-input field restrictions on email and text fields.", async () 
     // Fill subject with a value that meets the requirement.
     await fillAndSubmitForm(subjectEl, "This is a long enough subject");
     checkField(subjectEl, true, false);
+    // Fill email with a value that doesn't meet the requirement.
+    await fillAndSubmitForm(emailEl, "example@yahoo.com");
+    checkField(emailEl, true, true);
+    // Fill email with a value that meets the requirement.
+    await fillAndSubmitForm(emailEl, "example@icloUd.com"); // 'U' to check case insensitivity.
+    checkField(emailEl, true, false);
 });
