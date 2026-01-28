@@ -208,7 +208,7 @@
                     <LanguageName t-out="invoice['InvoiceIssueData']['LanguageName']"/>
                     <ReceiverTransactionReference t-out="invoice['InvoiceIssueData']['ReceiverTransactionReference']"/>
                     <ReceiverContractReference t-out="invoice['InvoiceIssueData']['ReceiverContractReference']"/>
-                    <FileReference t-out="invoice['InvoiceIssueData']['FileReference']"/>
+                    <FileReference t-out="invoice['InvoiceIssueData'].get('FileReference')"/>
                 </InvoiceIssueData>
                 <TaxesOutputs>
                     <t t-foreach="invoice['TaxOutputs']" t-as="tax"><t t-call="l10n_es_edi_facturae.tax_type"/></t>
