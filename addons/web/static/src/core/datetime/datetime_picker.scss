@@ -1,3 +1,8 @@
+// RTL chevron rotation
+.o_rtl ~ .o-main-components-container .oi {
+    transform: scaleX(-1);
+}
+
 .o_datetime_picker {
     --DateTimePicker__Cell-size-md: 3rem;
     --DateTimePicker__Cell-size-lg: 5rem;
