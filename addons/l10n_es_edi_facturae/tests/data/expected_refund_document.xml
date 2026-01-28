@@ -81,6 +81,7 @@
         <LanguageName>en</LanguageName>
         <ReceiverTransactionReference>ABCD-2023-001</ReceiverTransactionReference>
         <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
+        <FileReference>ABCD-2023-001</FileReference>
       </InvoiceIssueData>
       <TaxesOutputs>
         <Tax>
@@ -136,6 +137,7 @@
               </TaxAmount>
             </Tax>
           </TaxesOutputs>
+          <FileReference>ABCD-2023-001</FileReference>
         </InvoiceLine>
         <InvoiceLine>
           <ReceiverContractReference>ABCD-2023-001</ReceiverContractReference>
@@ -159,6 +161,7 @@
               </TaxAmount>
             </Tax>
           </TaxesOutputs>
+          <FileReference>ABCD-2023-001</FileReference>
         </InvoiceLine>
       </Items>
     </Invoice>
