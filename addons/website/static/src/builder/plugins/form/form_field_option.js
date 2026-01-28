@@ -167,8 +167,16 @@ export class FormFieldOption extends BaseOptionComponent {
      */
     get isMultipleTextConditionForRequirementOptionVisible() {
         const el = this.env.getEditingElement();
+        return el.dataset.requirementComparator && this.isTextLikeField;
+    }
+    /**
+     * Determines the visibility of the character limit checkbox used for
+     * validation.
+     *
+     * @returns {boolean} Whether the character limit option should be visible.
+     */
+    get isTextLikeField() {
         return (
-            el.dataset.requirementComparator &&
             !this.domStateCurrentFieldInput.hasDateTimePicker &&
             (this.domStateCurrentFieldInput.isTextArea ||
                 ["text", "email", "tel", "url", "search", "password"].includes(

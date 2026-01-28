@@ -173,6 +173,8 @@ export class FormOptionPlugin extends Plugin {
             SetDefaultErrorMessageAction,
             SetRequirementComparatorAction,
             SetMultipleFilesAction,
+            ToggleCharacterLimitAction,
+            SetCharacterLimitAction,
         },
         content_not_editable_selectors: ".s_website_form form",
         content_editable_selectors: [
@@ -1398,6 +1400,35 @@ export class SetDefaultErrorMessageAction extends BuilderAction {
             between,
             type
         );
+    }
+}
+/**
+ * Sets the character limit on input fields.
+ */
+export class SetCharacterLimitAction extends BuilderAction {
+    static id = "setCharacterLimit";
+    apply({ editingElement: inputEl }) {
+        const max = parseInt(inputEl.getAttribute("maxlength"));
+        const min = parseInt(inputEl.getAttribute("minlength"));
+        inputEl.setAttribute("maxlength", Math.max(max, min));
+        inputEl.setAttribute("minlength", Math.min(max, min));
+    }
+}
+/**
+ * Toggles the character limit on input fields.
+ */
+export class ToggleCharacterLimitAction extends BuilderAction {
+    static id = "toggleCharacterLimit";
+    apply({ editingElement: inputEl }) {
+        inputEl.setAttribute("maxlength", 100);
+        inputEl.setAttribute("minlength", 0);
+    }
+    clean({ editingElement: inputEl }) {
+        inputEl.removeAttribute("maxlength");
+        inputEl.removeAttribute("minlength");
+    }
+    isApplied({ editingElement: inputEl, params: { mainParam: activeValue } }) {
+        return inputEl.hasAttribute("maxlength") && inputEl.hasAttribute("minlength");
     }
 }
 
