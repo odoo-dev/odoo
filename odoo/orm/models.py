@@ -3787,10 +3787,6 @@ class BaseModel(metaclass=MetaModel):
             if self._parent_store and self._parent_name in vals:
                 self.flush_model([self._parent_name])
 
-            # validate non-inversed fields first
-            inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]
-            real_recs._validate_fields(vals, inverse_fields)
-
             for fields in determine_inverses.values():
                 # write again on non-stored fields that have been invalidated from cache
                 for field in fields:
@@ -3818,8 +3814,8 @@ class BaseModel(metaclass=MetaModel):
             ):
                 self.env.registry.clear_cache(cache_name)
 
-            # validate inversed fields
-            real_recs._validate_fields(inverse_fields)
+            # validate all fields
+            real_recs._validate_fields(vals)
 
         if self._check_company_auto:
             self._check_company(list(vals))
