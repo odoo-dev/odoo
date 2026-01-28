@@ -5,10 +5,14 @@ import { manuallyDispatchProgrammaticEvent, animationFrame } from "@odoo/hoot-do
  * @param {Node} node
  * @param {Object} options
  * @param {boolean} [options.sortAttrs]
+ * @param {boolean} [options.showSelection]
  * @returns {String}
  */
 export function getContent(node, options = {}) {
-    const selection = node.ownerDocument.getSelection();
+    options.showSelection = options.showSelection !== false;
+    const selection = options.showSelection
+        ? node.ownerDocument.getSelection()
+        : { focusNode: null, anchorNode: null };
     return _getElemContent(node, selection, options);
 }
 

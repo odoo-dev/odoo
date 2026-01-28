@@ -1,43 +1,51 @@
 import { setupEditor } from "../_helpers/editor";
 import { getContent } from "../_helpers/selection";
 import { CollaborationPlugin } from "@html_editor/others/collaboration/collaboration_plugin";
+import { HistoryPlugin } from "@html_editor/core/history_plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 
 class TestCollaborationEditor {
     verbose = false;
+    debugColor = "black";
 
-    constructor(parent) {
-        this.parent = parent;
+    constructor(verbose, debugColor) {
+        this.verbose = verbose;
+        this.debugColor = debugColor;
     }
-    async init(name, peerId, initialContent, debugColors = null) {
-        this.parent.log(`  Init Editor, name : ${name}, peerId: ${peerId}`);
+
+    async init(name, peerId, initialContent) {
         this.name = name;
         this.peerId = peerId;
+        this.log(`Init Editor with peerId: ${peerId}`);
 
+        let n = 0;
+        const originalGenerateId = HistoryPlugin.generateId;
+        HistoryPlugin.prototype.generateId = () => `colab_unit_test_node_id_${n++}`; // todo : do this differently / better
         const className = `${name}-test-editor`;
         const { el, editor } = await setupEditor(initialContent, {
             props: { iframe: true },
-            styleContent: this._getContainerCssStyle(className, debugColors),
+            styleContent: this._getContainerCssStyle(className, this.debugColor),
             config: {
                 Plugins: [...MAIN_PLUGINS, CollaborationPlugin],
                 collaboration: { peerId },
                 resources: {
                     collaboration_step_added_handlers: (step) => {
-                        this.parent.log(
-                            `[${this.name}] collaboration_step_added_handlers : `,
-                            step
-                        );
+                        // this.log(
+                        //     `collaboration_step_added_handlers : `,
+                        //     step
+                        // );
                     },
                     history_missing_parent_step_handlers: (params) => {
                         // historyMissingParentSteps(peerInfos, peerInfo, params);
-                        this.parent.log(
-                            `[${this.name}] history_missing_parent_step_handlers : `,
-                            params
-                        );
+                        // this.log(
+                        //     `history_missing_parent_step_handlers : `,
+                        //     params
+                        // );
                     },
                 },
             },
         });
+        HistoryPlugin.generateId = originalGenerateId;
 
         this.el = el;
         this.editor = editor;
@@ -45,7 +53,7 @@ class TestCollaborationEditor {
     }
 
     async edit(fn) {
-        this.parent.log(`[${this.name}] edit() : `, fn);
+        this.log(`edit() : ${fn}`);
         await fn(this.editor);
 
         const historyPlugin = this._getPluginInstance("history");
@@ -54,14 +62,25 @@ class TestCollaborationEditor {
     }
 
     receive(operation) {
-        this.parent.log(`[${this.name}] receive() : `, operation);
+        console.warn(`--- ${this.name} RECEIVES OPERATION ---`, operation);
+        this.log(`receive() | ${operation?.mutations.length} mutations`);
+        let index = 0;
+        for (const mutation of operation.mutations) {
+            this.log(` ┖> mutation[${index++}] : ${JSON.stringify(mutation)}`);
+        }
         const collaborationPlugin = this._getPluginInstance("collaboration");
         collaborationPlugin.onExternalHistorySteps([operation]);
     }
 
     get content() {
         const content = getContent(this.el);
-        this.parent.log(`[${this.name}] get content : `, content);
+        this.log(`get content : ${content}`);
+        return content;
+    }
+
+    get contentOnly() {
+        const content = getContent(this.el, { showSelection: false });
+        this.log(`get contentOnly : ${content}`);
         return content;
     }
 
@@ -89,12 +108,23 @@ class TestCollaborationEditor {
                     left: 0;
                 }\`;`;
     }
+
+    log(msg) {
+        if (this.verbose) {
+            //colorized log per editor
+            console.log(
+                `[%c${this.name}%c] ${msg}`,
+                `font-weight: bold; color: ${this.debugColor};`,
+                "font-weight: normal; color: black;"
+            );
+        }
+    }
 }
 
 export class TestCollaboration {
     editors = {};
     verbose = false;
-    debugColors = ["red", "green", "blue", "orange", "purple", "brown"];
+    debugColors = ["red", "blue", "green", "orange", "purple", "brown"];
 
     constructor(options = {}) {
         if (options.verbose) {
@@ -112,8 +142,11 @@ export class TestCollaboration {
 
         for (const name of Object.keys(initState)) {
             peerId += 1;
-            this.editors[name] = new TestCollaborationEditor(this);
-            await this.editors[name].init(name, peerId, initState[name], this.debugColors.shift());
+            this.editors[name] = new TestCollaborationEditor(
+                this.verbose,
+                this.debugColors.shift()
+            );
+            await this.editors[name].init(name, peerId, initState[name]);
         }
 
         return this.editors;

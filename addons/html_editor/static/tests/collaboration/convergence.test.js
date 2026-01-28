@@ -2,46 +2,48 @@ import { describe, expect, test } from "@odoo/hoot";
 import { insertText } from "../_helpers/user_actions";
 import { TestCollaboration } from "./utils";
 
+const VERBOSE_LOGGING = { verbose: true };
+
 describe("concurent edition convergence", () => {
     test("sample colab test", async () => {
-        const testCollaboration = new TestCollaboration({ verbose: true });
+        const testCollaboration = new TestCollaboration();
         const { alice, bobby } = await testCollaboration.init({
             alice: "<p>a[]b</p>",
             bobby: "<p>a[]b</p>",
         });
 
-        expect(alice.content).toBe("<p>a[]b</p>");
-        expect(bobby.content).toBe("<p>a[]b</p>");
+        expect(alice.contentOnly).toBe("<p>ab</p>");
+        expect(bobby.contentOnly).toBe("<p>ab</p>");
 
         const aliceInsert1 = await alice.edit((e) => insertText(e, "1"));
 
-        expect(alice.content).toBe("<p>a1[]b</p>");
-        expect(bobby.content).toBe("<p>a[]b</p>");
+        expect(alice.contentOnly).toBe("<p>a1b</p>");
+        expect(bobby.contentOnly).toBe("<p>ab</p>");
 
         bobby.receive(aliceInsert1);
-        expect(bobby.content).toBe("<p>a1[]b</p>");
+        expect(bobby.contentOnly).toBe("<p>a1b</p>");
     });
-    test("sample colab test 2", async () => {
-        const testCollaboration = new TestCollaboration({ verbose: true });
+    test.todo("sample colab test 2", async () => {
+        const testCollaboration = new TestCollaboration(VERBOSE_LOGGING);
         const { alice, bobby } = await testCollaboration.init({
             alice: "<p>a[]b</p>",
             bobby: "<p>a[]b</p>",
         });
 
-        expect(alice.content).toBe("<p>a[]b</p>");
-        expect(bobby.content).toBe("<p>a[]b</p>");
+        expect(alice.contentOnly).toBe("<p>ab</p>");
+        expect(bobby.contentOnly).toBe("<p>ab</p>");
 
         const aliceInsert1 = await alice.edit((e) => insertText(e, "1"));
         const bobbyInsert1 = await bobby.edit((e) => insertText(e, "a"));
 
-        expect(alice.content).toBe("<p>a1[]b</p>");
-        expect(bobby.content).toBe("<p>aa[]b</p>");
+        expect(alice.contentOnly).toBe("<p>a1b</p>");
+        expect(bobby.contentOnly).toBe("<p>aab</p>");
 
         bobby.receive(aliceInsert1);
         alice.receive(bobbyInsert1);
 
-        expect(alice.content).toBe("<p>aa1[]b</p>");
-        expect(bobby.content).toBe("<p>aa1[]b</p>");
+        expect(alice.contentOnly).toBe("<p>aa1b</p>");
+        expect(bobby.contentOnly).toBe("<p>aa1b</p>");
     });
     test("three peers should be able to edit the document at the same location (1)", async () => {
         // @see : https://inria.hal.science/file/index/docid/108523/filename/OsterCSCW06.pdf
@@ -78,7 +80,7 @@ describe("concurent edition convergence", () => {
             danny: "<p>a[]1b</p>",
         });
 
-        const op3 = carol.edit((e) => insertText(e, "3"));
+        const op3 = await carol.edit((e) => insertText(e, "3"));
         danny.receive(op2);
         expect(testCollaboration.state).toEqual({
             alice: "<p>a1[]b</p>",

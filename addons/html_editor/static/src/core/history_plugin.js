@@ -262,7 +262,7 @@ export class HistoryPlugin extends Plugin {
         this.observer = new MutationObserver((records) => this.handleNewRecords(records));
         this.enableObserverCallbacks = new Set();
         this._cleanups.push(() => this.observer.disconnect());
-        this.clean();
+        //this.clean(); // unnecessary, done in reset wich will be called on start_edition_handlers
     }
 
     getIsPreviewing() {
@@ -1070,6 +1070,12 @@ export class HistoryPlugin extends Plugin {
         batchingTimestamp = Date.now(),
         extraStepInfos,
     } = {}) {
+        // console.log(
+        //     `[${this.editable.classList
+        //         .toString()
+        //         .replace("odoo-editor-editable ", "")
+        //         .replace("-test-editor", "")}] history_plugin.js::addStep`
+        // );
         // @todo @phoenix should we allow to pause the making of a step?
         // if (!this.stepsActive) {
         //     return;
@@ -1104,6 +1110,7 @@ export class HistoryPlugin extends Plugin {
         }
 
         currentStep.previousStepId = this.steps.at(-1)?.id;
+        // console.log(` >> previousStepId (previousStepNodeID???): ${currentStep.previousStepId}`);
 
         currentStep.selectionAfter = this.serializeSelection(
             this.dependencies.selection.getEditableSelection()
@@ -1133,8 +1140,7 @@ export class HistoryPlugin extends Plugin {
             isPreviewing: this.isPreviewing,
         });
         this.config.onChange?.({ isPreviewing: this.isPreviewing });
-
-        console.log(`history_plugin.js::addStep: Inserting step with id ${this.currentStep.id}`);
+        // console.log(` >> step id ${this.currentStep.id}`);
         return currentStep;
     }
     canUndo() {
@@ -1359,7 +1365,15 @@ export class HistoryPlugin extends Plugin {
      * @param { number } index
      */
     addExternalStep(newStep, index) {
-        console.log(`history_plugin.js::addExternalStep: Inserting step at index ${index}`);
+        // console.log(
+        //     `[${this.editable.classList
+        //         .toString()
+        //         .replace("odoo-editor-editable ", "")
+        //         .replace(
+        //             "-test-editor",
+        //             ""
+        //         )}] history_plugin.js::addExternalStep: Inserting step at index (after nodeId ??) ${index}`
+        // );
         this.withObserverOff(() => {
             // The last step is an uncommited draft, revert it first
             this.revertMutations(this.currentStep.mutations);
