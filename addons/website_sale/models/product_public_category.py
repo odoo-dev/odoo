@@ -169,7 +169,7 @@ class ProductPublicCategory(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'url', 'type': 'text', 'truncate': False},
-            'breadcrumb': {'name': 'breadcrumb', 'type': 'text', 'truncate': False},
+            'search_item_metadata': {'name': 'breadcrumb', 'type': 'text', 'truncate': False},
             'image_url': {'name': 'image_url', 'type': 'html'},
         }
         return {
@@ -180,7 +180,6 @@ class ProductPublicCategory(models.Model):
             'mapping': mapping,
             'icon': 'fa-folder-o',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
-            'template_key': 'website_sale.search_items_product_category',
             'group_name': self.env._("Categories"),
             'sequence': 30,
         }

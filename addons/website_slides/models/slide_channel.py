@@ -1053,7 +1053,7 @@ class SlideChannel(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
-            'total_time': {'name': 'total_time', 'type': 'text'},
+            'search_item_metadata': {'name': 'total_time', 'type': 'text'},
             'rating_avg_stars': {'name': 'rating_avg_stars', 'type': 'float', 'precision': 1},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
@@ -1065,7 +1065,6 @@ class SlideChannel(models.Model):
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-graduation-cap',
-            'template_key': 'website_slides.search_items_slide_channels',
             'group_name': self.env._("Courses"),
             'sequence': 90,
         }
