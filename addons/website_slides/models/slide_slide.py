@@ -1297,7 +1297,6 @@ class SlideSlide(models.Model):
             'mapping': mapping,
             'icon': 'fa-shopping-cart',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
-            'template_key': 'website_slides.search_items_slide_slides',
             'group_name': self.env._("Course Slides"),
             'sequence': 80,
         }

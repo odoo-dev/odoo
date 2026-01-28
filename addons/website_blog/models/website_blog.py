@@ -121,7 +121,6 @@ class BlogBlog(models.Model):
             'mapping': mapping,
             'icon': 'fa-rss-square',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
-            'template_key': 'website_blog.search_items_blog_blog',
             'group_name': self.env._("Blogs"),
             'sequence': 70,
         }
@@ -335,7 +334,7 @@ class BlogPost(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
-            'author_name': {'name': 'author_name', 'type': 'text', 'skip_markup': True},
+            'search_item_metadata': {'name': 'author_name', 'type': 'text', 'skip_markup': True},
             'author_avatar_url': {'name': 'author_avatar_url', 'type': 'html', 'truncate': False},
             'published_date': {'name': 'published_date', 'type': 'date'},
             'image_url': {'name': 'image_url', 'type': 'html'},
@@ -348,7 +347,6 @@ class BlogPost(models.Model):
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-rss',
-            'template_key': 'website_blog.search_items_blog_post',
             'group_name': self.env._("Blogs Articles"),
             'sequence': 60,
         }

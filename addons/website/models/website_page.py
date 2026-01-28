@@ -239,7 +239,6 @@ class WebsitePage(models.Model):
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-file-o',
-            'template_key': 'website.search_items_page',
             'group_name': self.env._("Pages"),
             'sequence': 10,
         }

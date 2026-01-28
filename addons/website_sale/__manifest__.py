@@ -37,7 +37,6 @@
         'templates/shop_page_templates.xml',
         'templates/svg_templates.xml',
         'templates/website_templates.xml',
-        'templates/website_searchbar_templates.xml',
 
         # Qweb templates -> checkout
         'templates/checkout/checkout_templates.xml',  # Shared templates first
