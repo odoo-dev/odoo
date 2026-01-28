@@ -11,3 +11,13 @@ body:not(.o_touch_device) .o_field_phone {
     overflow-wrap: normal;
     word-break: normal;
 }
+
+/* On small screens, hide the text labels inside the phone buttons and prevent the input from being squeezed */
+@include media-breakpoint-down(md) {
+    .o_phone_content a small {
+        display: none !important;
+    }
+    .o_phone_content input {
+        flex-shrink: 0;
+    }
+}
