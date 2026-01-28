@@ -133,6 +133,17 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
         self._generate_invoice_ubl_file(invoice)
         self._assert_invoice_ubl_file(invoice, 'test_invoice_tax_reverse_charge')
 
+    def test_invoice_no_tax(self):
+        product = self._create_product(lst_price=1000.0, taxes_id=[])
+        invoice = self._create_invoice_one_line(
+            product_id=product,
+            partner_id=self.partner_be,
+            post=True,
+        )
+
+        self._generate_invoice_ubl_file(invoice)
+        self._assert_invoice_ubl_file(invoice, 'test_invoice_no_tax')
+
     def test_invoice_allowance_charge_fixed_tax_recycling_contribution(self):
         """ Ensure the recycling contribution taxes are turned into allowance/charges at the document line level. """
         tax_recupel = self.fixed_tax(1.0, name="RECUPEL", include_base_amount=True)
