@@ -44,14 +44,11 @@
                     <t t-call="website.website_search_box_input"
                         search_type.f="slides"
                         action.f="/slides"
-                        display_description.f="true"
-                        display_detail.f="false"
                         placeholder.translate="Search courses..."
                         search="search_term"
                         _input_group_classes.f="p-2 pe-0"
                         _input_classes.f="border-0 bg-black-25 text-white"
                         _submit_classes.f="border-0 bg-black-25 text-white"
-                        _modal_id.f="slides_courses"
                         _force_modal_trigger.f="True"/>
                 </div>
 
@@ -92,13 +89,10 @@
                             <t t-call="website.website_search_box_input"
                                 search_type.f="slides"
                                 action="'/slides/%s' % slug(channel)"
-                                display_description.f="true"
-                                display_detail.f="false"
                                 placeholder.translate="Search courses..."
                                 search="search_term"
                                 _simple_button_layout="True"
                                 _simple_button_classes.f="bg-black-25 text-white rounded-end"
-                                _modal_id.f="slides_dropdown"
                             />
                         </div>
                     </div>
