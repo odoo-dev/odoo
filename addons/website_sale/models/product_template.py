@@ -888,11 +888,11 @@ class ProductTemplate(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
+            'search_item_metadata': {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']},
             'rating': {'name': 'rating_avg', 'type': 'float', 'precision': 1},
             'extra_link': {'name': 'category', 'type': 'html'},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'price': {'name': 'price', 'type': 'html', 'display_currency': options['display_currency']},
-            'list_price': {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']}
         }
         return {
             'model': 'product.template',
@@ -901,7 +901,6 @@ class ProductTemplate(models.Model):
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-shopping-cart',
-            'template_key': 'website_sale.search_items_product',
             'group_name': self.env._("Products"),
             'sequence': 20,
         }

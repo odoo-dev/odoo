@@ -136,9 +136,9 @@ spirit. To be successful, you will have solid solving problem skills.''')
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
+            'search_item_metadata': {'name': 'address', 'type': 'text'},
             'department_name': {'name': 'department_name', 'type': 'text'},
             'no_of_recruitment': {'name': 'no_of_recruitment', 'type': 'integer'},
-            'address': {'name': 'address', 'type': 'text'},
         }
         return {
             'model': 'hr.job',
@@ -148,7 +148,6 @@ spirit. To be successful, you will have solid solving problem skills.''')
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-briefcase',
-            'template_key': 'website_hr_recruitment.search_items_jobs',
             'group_name': self.env._("Jobs"),
             'sequence': 100,
         }

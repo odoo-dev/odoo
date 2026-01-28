@@ -613,8 +613,8 @@ class EventEvent(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
+            'search_item_metadata': {'name': 'date_begin', 'type': 'date'},
             'address_name': {'name': 'address_name', 'type': 'text', 'match': True},
-            'date_begin': {'name': 'date_begin', 'type': 'date'},
             'lowest_ticket_price': {'name': 'lowest_ticket_price', 'type': 'html'},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
@@ -641,7 +641,6 @@ class EventEvent(models.Model):
             'search_tags': search_tags,
             'no_date_domain': no_date_domain,
             'no_country_domain': no_country_domain,
-            'template_key': 'website_event.search_items_event',
             'group_name': self.env._("Events"),
             'sequence': 40,
         }

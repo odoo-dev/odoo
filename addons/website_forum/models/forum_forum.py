@@ -337,7 +337,6 @@ class ForumForum(models.Model):
             'mapping': mapping,
             'icon': 'fa-comments-o',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
-            'template_key': 'website_forum.search_items_forum',
             'group_name': self.env._("Forum"),
             'sequence': 140,
         }
