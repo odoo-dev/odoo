@@ -65,7 +65,7 @@
                     <record id="tax_report_line_5_amount" model="account.report.expression">
                         <field name="label">balance</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">cy_4.balance - cy_3.balance</field>
+                        <field name="formula">cy_3.balance - cy_4.balance</field>
                         <field name="green_on_positive">False</field>
                     </record>
                 </field>
