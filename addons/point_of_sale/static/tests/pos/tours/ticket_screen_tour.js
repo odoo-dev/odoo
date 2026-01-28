@@ -254,6 +254,9 @@ registry.category("web_tour.tours").add("RefundFewQuantities", {
             FeedbackScreen.clickNextOrder(),
             ...ProductScreen.clickRefund(),
             TicketScreen.selectOrder("001"),
+            {
+                trigger: ".ticket-screen .btn-secondary.pay-order-button",
+            },
             ProductScreen.clickNumpad("0", "."),
             ProductScreen.clickNumpad("0", "2"),
             TicketScreen.toRefundTextContains("To Refund: 0.02"),

@@ -937,6 +937,13 @@ export class TicketScreen extends Component {
 
         await Promise.all(promises);
     }
+    get actionBtnClass() {
+        return Object.values(this._selectedSyncedOrder?.uiState?.lineToRefund || {}).some(
+            (line) => line.qty > 0
+        )
+            ? "btn-primary"
+            : "btn-secondary";
+    }
 }
 
 registry.category("pos_pages").add("TicketScreen", {
