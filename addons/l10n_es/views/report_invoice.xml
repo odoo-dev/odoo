@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <template id="report_header_invoice_document" inherit_id="web.external_layout_standard">
+        <xpath expr="//div[@name='company_address']" position="after">
+            <div class="col-6" name="delivery_date_company_header">
+                <t t-if="docs and docs._name == 'account.move' and docs.company_id.country_code == 'ES' and docs.delivery_date">
+                    <strong>Delivery Date:</strong>
+                    <span t-esc="docs.delivery_date"/>
+                </t>
+                <t t-else="">
+                    <strong>Invoice Date:</strong>
+                    <span t-esc="docs.invoice_date"/>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
+
     <template id="report_invoice_document" inherit_id="account.report_invoice_document">
         <!-- add company id -->
         <xpath expr="//div[@id='partner_vat_address_not_same_as_shipping']" position="after">

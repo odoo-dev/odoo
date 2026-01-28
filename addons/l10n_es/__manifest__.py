@@ -27,6 +27,7 @@ Spanish charts of accounts (PGCE 2008).
         'base_iban',
         'base_vat',
         'account_edi_ubl_cii',
+        'web'
     ],
     'auto_install': ['account'],
     'data': [
