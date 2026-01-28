@@ -499,7 +499,7 @@ class Base(models.AbstractModel):
                 'name': partner.name,
                 'partner_id': partner.id,
                 'create_values': {},
-            } for partner in partners]
+            } for partner in (followers | partners)]
             for email_input in email_to_lst:
                 name, email_normalized = parse_contact_from_email(email_input)
                 recipients.append({
