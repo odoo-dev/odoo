@@ -119,11 +119,9 @@ class ResUsers(models.Model):
 
     def _inverse_notification_type(self):
         inbox_group = self.env.ref('mail.group_mail_notification_type_inbox')
-        if inbox_users := self.filtered(lambda user: user.notification_type == 'inbox'):
-            inbox_users.write({"group_ids": [Command.link(inbox_group.id)]})
-        if notif_users := (self - inbox_users):
-            if to_update := notif_users.filtered(lambda u: inbox_group in u.group_ids):
-                to_update.write({"group_ids": [Command.unlink(inbox_group.id)]})
+        inbox_users = self.filtered(lambda user: user.notification_type == 'inbox')
+        inbox_users.write({"group_ids": [Command.link(inbox_group.id)]})
+        (self - inbox_users).write({"group_ids": [Command.unlink(inbox_group.id)]})
 
     @api.depends_context("uid")
     def _compute_can_edit_role(self):
