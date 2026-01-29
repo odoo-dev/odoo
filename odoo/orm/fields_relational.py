@@ -634,6 +634,9 @@ class _RelationalMulti(_Relational):
         raise ValueError("Wrong value for %s: %s" % (self, value))
 
     def convert_to_record(self, value, record):
+        Access = record.env['ir.model.access']
+        if not Access.check(self.comodel_name, 'read', raise_exception=False):
+            return record.env[self.comodel_name].browse()
         # use registry to avoid creating a recordset for the model
         prefetch_ids = PrefetchX2many(record, self)
         Comodel = record.pool[self.comodel_name]
@@ -646,6 +649,9 @@ class _RelationalMulti(_Relational):
         return corecords
 
     def convert_to_record_multi(self, values, records):
+        Access = records.env['ir.model.access']
+        if not Access.check(self.comodel_name, 'read', raise_exception=False):
+            return records.env[self.comodel_name].browse()
         # return the list of ids as a recordset without duplicates
         prefetch_ids = PrefetchX2many(records, self)
         Comodel = records.pool[self.comodel_name]
@@ -946,6 +952,8 @@ class One2many(_RelationalMulti):
         try:
             lines = comodel.search_fetch(domain, field_names)
         except AccessError as e:
+            self._insert_cache(records, itertools.repeat(()))
+            return
             raise AccessError(records.env._("Failed to read field %s", self) + '\n' + str(e)) from e
 
         # group lines by inverse field (without prefetching other fields)
@@ -1374,6 +1382,8 @@ class Many2many(_RelationalMulti):
         try:
             query = comodel._search(domain, order=comodel._order, bypass_access=filter_access)
         except AccessError as e:
+            self._insert_cache(records, itertools.repeat(()))
+            return
             raise AccessError(records.env._("Failed to read field %s", self) + '\n' + str(e)) from e
 
         # join with many2many relation table
