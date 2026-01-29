@@ -763,18 +763,12 @@ class Website(Home):
         """
         options = self._get_hybrid_search_options(**kwargs)
         max_nb_chars = kwargs.get('max_nb_chars')
-        row_classes = kwargs.get('row_classes', {})
         data = self.autocomplete(search_type=search_type, term=search, order='name asc', offset=offset, limit=limit, max_nb_chars=max_nb_chars, options=options)
 
         bucket = next(iter(data.get("results").values()), {})
-        template_name = f"{bucket.get('templateKey')}_view"
         has_more = bucket.get("searchCount") > offset + limit
 
-        values = {
-            'bucket': bucket,
-            'row_classes': row_classes,
-        }
-        html = self.env['ir.ui.view']._render_template(template_name, values)
+        html = self.env['ir.ui.view']._render_template('website.search_result_item', {'bucket': bucket})
         return html, has_more
 
     # ------------------------------------------------------
