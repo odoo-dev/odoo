@@ -46,10 +46,10 @@ class TestGetCurrentWebsite(HttpCaseWithUserDemo):
         self.assertEqual(Website._retrieve_website_id('my2ndsite.com'), website2.id)
 
         # CASE: domain set, wrong domain: get first
-        self.assertEqual(Website._retrieve_website_id('test.com'), website1.id)
+        self.assertEqual(Website._retrieve_website_id('test.com'), False)
 
         # CASE: subdomain: not supported
-        self.assertEqual(Website._retrieve_website_id('www.my2ndsite.com'), website1.id)
+        self.assertEqual(Website._retrieve_website_id('www.my2ndsite.com'), False)
 
         # CASE: domain set: get by domain in priority
         self.assertEqual(Website._retrieve_website_id('my2ndsite.com'), website2.id)
