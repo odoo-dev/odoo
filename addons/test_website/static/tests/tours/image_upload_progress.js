@@ -222,6 +222,9 @@ registerWebsitePreviewTour(
         {
             content: "check upload progress bar is correctly shown",
             trigger: `.o_we_progressbar:contains('icon.ico'):contains('${formatErrorMsg}')`,
+        },
+        {
+            trigger: "body",
             run() {
                 patchWithError = false;
             },

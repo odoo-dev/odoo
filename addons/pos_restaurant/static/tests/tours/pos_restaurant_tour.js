@@ -1271,6 +1271,7 @@ registry.category("web_tour.tours").add("test_guest_count_bank_payment", {
             Order.hasLine({ productName: "Coca-Cola" }),
             ProductScreen.clickPayButton(false),
             ProductScreen.confirmOrderWarningDialog(),
+            Chrome.closePrintingWarning(),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickBackToProductScreen(),
             ProductScreen.isShown(),
