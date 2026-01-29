@@ -63,6 +63,8 @@ class TestUsersHttp(HttpCase):
             'Portal API Key',
             datetime.now() + timedelta(days=1)
         )
+        # _generate create the apikey in sql.
+        portal_user.invalidate_recordset(['api_key_ids'])
         self.assertTrue(portal_user.api_key_ids)
 
         # Request the deactivation of the portal account as portal through the route meant for this purpose

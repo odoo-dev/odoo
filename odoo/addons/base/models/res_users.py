@@ -614,6 +614,10 @@ class ResUsers(models.Model):
                 # safe fields only, so we write as super-user to bypass access rights
                 self = self.sudo()
 
+        old_groups_ids = False
+        if vals.get('group_ids'):
+            old_groups_ids = self and len(self) == 1 and self.group_ids.ids or False
+
         res = super().write(vals)
 
         if 'company_id' in vals:
@@ -632,8 +636,13 @@ class ResUsers(models.Model):
                     reset_cached_properties(env)
 
         if 'group_ids' in vals and self.ids:
-            # clear caches linked to the users
-            self.env['ir.model.access'].call_cache_clearing_methods()
+            # only invalidate if self is multi, or that groups has been really updated
+            # Avoid an extra invalidation cache if groups have not changed
+            if not old_groups_ids or self.group_ids.ids != old_groups_ids:
+                # clear caches linked to the users
+                self.env['ir.model.access'].call_cache_clearing_methods()
+            else:
+                _logger.warning('Clear cache avoided', stack_info=True)
 
         # per-method / per-model caches have been removed so the various
         # clear_cache/clear_caches methods pretty much just end up calling
