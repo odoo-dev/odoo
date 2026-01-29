@@ -28,14 +28,12 @@ export class SearchResults extends Interaction {
         const searchType = ev.target.dataset.searchType;
         const offset = parseInt(ev.target.dataset.offset || this.limit);
         // We need displayType = 'columns' by default.
-        const row_classes = "o_search_result_item rounded-4";
         const [html, hasMore] = await this.keepLast.add(
             rpc("/website/load_more_search", {
                 search: this.inputEl.value,
                 search_type: searchType,
                 offset: offset,
                 limit: this.limit,
-                row_classes,
                 order: this.order,
                 max_nb_chars: Math.round(
                     Math.max(this.autocompleteMinWidth, parseInt(this.inputEl.clientWidth) / 3) *
