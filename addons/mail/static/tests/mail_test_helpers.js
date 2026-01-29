@@ -8,7 +8,7 @@ import {
     registerDebugInfo,
     test,
 } from "@odoo/hoot";
-import { hover as hootHover, queryFirst, resize } from "@odoo/hoot-dom";
+import { advanceTime, hover as hootHover, queryFirst, resize } from "@odoo/hoot-dom";
 import { Deferred, microTick } from "@odoo/hoot-mock";
 import {
     MockServer,
@@ -1056,4 +1056,16 @@ export function sendPresenceUpdate(modelName, id, newPresence) {
         im_status: newPresence,
     });
     env["bus.bus"]._sendone(serverState.partnerId, "mail.record/insert", store.get_result());
+}
+
+/**
+ * Simulate self speaking for given `duration`.
+ *
+ * @param {import("@mail/discuss/call/common/rtc_session_model").RtcSession} selfSession
+ * @param {Number} duration
+ */
+export async function simulateSelfSpeaking(selfSession, duration) {
+    selfSession.isTalking = true;
+    await advanceTime(duration);
+    selfSession.isTalking = false;
 }

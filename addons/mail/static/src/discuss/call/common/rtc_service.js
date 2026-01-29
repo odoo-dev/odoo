@@ -1,7 +1,9 @@
 import { reactive } from "@web/owl2/utils";
 import { fields, Record } from "@mail/model/export";
 import { BlurManager } from "@mail/discuss/call/common/blur_manager";
+import { setupMuteSuggestion } from "@mail/discuss/call/common/call_mute_suggestion";
 import { CallPermissionDialog } from "@mail/discuss/call/common/call_permission_dialog";
+import { CallSuggestionTooltip } from "@mail/discuss/call/common/call_suggestion_tooltip";
 import { CALL_PROMOTE_FULLSCREEN } from "@mail/discuss/call/common/discuss_channel_model_patch";
 import { monitorAudio } from "@mail/utils/common/media_monitoring";
 import { CallPermissionDeniedDialog } from "@mail/discuss/call/common/call_permission_denied_dialog";
@@ -316,8 +318,10 @@ export class Rtc extends Record {
     hadFullscreen = false;
     /** @type {RtcLog} */
     logs = {};
+    /** @type {Map<string, Function>} close callback by suggestion id */
+    callSuggestionClosers = new Map();
     notifications = reactive(new Map());
-    /** @type {Map<string, number>} timeoutId by notificationId for call notifications */
+    /** @type {Map<string, number>} timeoutId by call notification/suggestion id */
     timeouts = new Map();
     /** @type {Map<number, number>} timeoutId by sessionId for download pausing delay */
     downloadTimeouts = new Map();
@@ -353,7 +357,11 @@ export class Rtc extends Record {
                 this.store["discuss.channel.rtc.session"].get(this._remotelyHostedSessionId)
             );
         },
+        onAdd() {
+            this._muteSuggestionCleanup = setupMuteSuggestion(this);
+        },
         onDelete() {
+            this._muteSuggestionCleanup?.();
             if (this.channel) {
                 this.channel.promoteFullscreen = CALL_PROMOTE_FULLSCREEN.INACTIVE;
             }
@@ -683,6 +691,56 @@ export class Rtc extends Record {
         browser.clearTimeout(this.timeouts.get(id));
         this.notifications.delete(id);
         this.timeouts.delete(id);
+    }
+
+    /**
+     * @param {Object} param0
+     * @param {any} param0.id
+     * @param {string} param0.targetSelector
+     * @param {string} param0.text
+     * @param {string} [param0.fallbackText]
+     * @param {Function} [param0.onDismiss]
+     * @param {number} [param0.delay]
+     */
+    addCallSuggestion({
+        id,
+        targetSelector,
+        text,
+        fallbackText = text,
+        onDismiss,
+        delay = 3000,
+    }) {
+        this.removeCallSuggestion(id);
+        const target = this.isPipMode ? null : document.querySelector(targetSelector);
+        if (!target) {
+            this.addCallNotification({ id, text: fallbackText, delay });
+            return;
+        }
+        this.callSuggestionClosers.set(
+            id,
+            this.store.env.services.popover.add(
+                target,
+                CallSuggestionTooltip,
+                {
+                    text,
+                    onDismiss: () => {
+                        onDismiss?.();
+                        this.removeCallSuggestion(id);
+                    },
+                },
+                { position: "top-middle" }
+            )
+        );
+        this.timeouts.set(id, browser.setTimeout(() => this.removeCallSuggestion(id), delay));
+    }
+
+    /**
+     * @param {string} id
+     */
+    removeCallSuggestion(id) {
+        this.callSuggestionClosers.get(id)?.();
+        this.callSuggestionClosers.delete(id);
+        this.removeCallNotification(id);
     }
 
     /**
@@ -1732,6 +1790,9 @@ export class Rtc extends Record {
         this._remotelyHostedChannelId = undefined;
         browser.clearTimeout(this._crossTabTimeoutId);
         this.cleanups.splice(0).forEach((cleanup) => cleanup());
+        for (const id of [...this.callSuggestionClosers.keys()]) {
+            this.removeCallSuggestion(id);
+        }
         browser.clearTimeout(this.sfuTimeout);
         this.sfuClient = undefined;
         this.network = undefined;
