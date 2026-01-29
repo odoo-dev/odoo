@@ -1301,3 +1301,55 @@ class TestPoSBasicConfig(TestPoSCommon):
         })
 
         self.assertEqual(refund_order.refunded_order_id, orders[0])
+
+    def test_refund_with_topup_prepare_base_line_quantities(self):
+        """
+        When refunding a product and "paying" the refund with a top-up (e.g. eWallet),
+        the order total is 0. _prepare_base_line_for_taxes_computation must still
+        return positive quantity 1 for both the returned product line and the top-up
+        line so that the credit note (RINV) shows correct quantities and the tax
+        report does not double-count credits.
+        """
+        current_session = self.open_new_session()
+        orders = list(self._create_orders([
+            {'pos_order_lines_ui_args': [(self.product1, 1)]},
+        ]).values())
+        original_order = orders[0]
+        original_line = original_order.lines[0]
+        refund_amount = 20.0
+        # Refund order: one returned product (qty=-1) + one top-up line (qty=1), total=0.
+        refund_order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': current_session.id,
+            'partner_id': self.customer.id,
+            'lines': [
+                (0, 0, {
+                    'product_id': self.product1.id,
+                    'price_unit': refund_amount,
+                    'qty': -1,
+                    'tax_ids': [[6, False, []]],
+                    'price_subtotal': -refund_amount,
+                    'price_subtotal_incl': -refund_amount,
+                    'refunded_orderline_id': original_line.id,
+                }),
+                (0, 0, {
+                    'product_id': self.product2.id,
+                    'price_unit': refund_amount,
+                    'qty': 1,
+                    'tax_ids': [[6, False, []]],
+                    'price_subtotal': refund_amount,
+                    'price_subtotal_incl': refund_amount,
+                }),
+            ],
+            'amount_paid': 0.0,
+            'amount_total': 0.0,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+        })
+        self.assertTrue(refund_order.refunded_order_id, "Refund order should have refunded_order_id set")
+        base_lines = refund_order.lines._prepare_tax_base_line_values()
+        self.assertEqual(len(base_lines), 2, "Should have two base lines")
+        # Returned product line (qty=-1) should yield quantity 1 for the credit note.
+        self.assertEqual(base_lines[0]['quantity'], 1, "Returned product line should have quantity 1 in base line")
+        # Top-up line (qty=1) should yield quantity 1.
+        self.assertEqual(base_lines[1]['quantity'], 1, "Top-up line should have quantity 1 in base line")
