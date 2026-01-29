@@ -223,9 +223,9 @@ export class DomMutationPlugin extends Plugin {
             }
         },
         on_will_undo_handlers: this.discardDraft.bind(this),
-        on_undone_handlers: withSequence(0, (revertedStep) => {
-            // TODO AGE: This used to be done in history after undo and
-            // before dispatching on_undone_handlers. See if there is a
+        on_single_step_undone_handlers: withSequence(0, (revertedStep) => {
+            // TODO AGE: This used to be done in history after undo a single
+            // step and before dispatching on_undone_handlers. See if there is a
             // better way.
             // Consider the last position of the history as an undo.
             if (revertedStep) {
@@ -237,13 +237,17 @@ export class DomMutationPlugin extends Plugin {
                         this.update(key, value);
                     }
                 }
-                this.commit("undo");
+                this._commit({
+                    stepType: "undo",
+                    batchable: revertedStep.commit.batchable,
+                    batchingTimestamp: revertedStep.commit.batchingTimestamp,
+                });
             }
         }),
         on_will_redo_handlers: this.discardDraft.bind(this),
-        on_redone_handlers: withSequence(0, (revertedStep) => {
-            // TODO AGE: This used to be done in history after redo and
-            // before dispatching on_redone_handlers. See if there is a
+        on_single_step_redone_handlers: withSequence(0, (revertedStep) => {
+            // TODO AGE: This used to be done in history after redo a single
+            // step and before dispatching on_redone_handlers. See if there is a
             // better way.
             if (revertedStep) {
                 // Include any commit data stored in the reverted step and that
@@ -254,7 +258,11 @@ export class DomMutationPlugin extends Plugin {
                         this.update(key, value);
                     }
                 }
-                this.commit("redo");
+                this._commit({
+                    stepType: "redo",
+                    batchable: revertedStep.commit.batchable,
+                    batchingTimestamp: revertedStep.commit.batchingTimestamp,
+                });
             }
         }),
         node_by_id_providers: (nodeId) => this.getNodeById(nodeId),
@@ -278,7 +286,11 @@ export class DomMutationPlugin extends Plugin {
     }
 
     // TODO AGE: stepType should actually just be commit.type.
-    commit(stepType) {
+    commit({ batchable = false } = {}) {
+        return this._commit({ batchable });
+    }
+
+    _commit({ stepType = "original", batchable = false, batchingTimestamp = Date.now() } = {}) {
         const hasMutations = this.prepareForCommit(stepType || "original");
         if (!hasMutations) {
             // TODO: I isolated `prepareForCommit` for now for simplicity for me
@@ -289,7 +301,10 @@ export class DomMutationPlugin extends Plugin {
 
         // AGE TODO: rename
         this.trigger("on_will_commit_handlers", stepType); // making sure it updates the step we're adding
-        const commit = this.createCommit();
+        const commit = this.createCommit({ batchable, batchingTimestamp });
+        // Set the timestamp of the commit or keep the timestamp of the commit
+        // it reverts (see `on_single_step_(un|re)done_handlers`).
+        commit.data.commitTimestamp ??= Date.now();
         this.dependencies.history.write(commit, stepType);
 
         this.resetCurrentMutations();
@@ -592,7 +607,7 @@ export class DomMutationPlugin extends Plugin {
     /**
      * @returns {EditorMutationCommit}
      */
-    createCommit() {
+    createCommit({ batchable, batchingTimestamp }) {
         this.updateLocal(
             "selectionAfter",
             this.serializeSelection(this.dependencies.selection.getEditableSelection())
@@ -601,6 +616,8 @@ export class DomMutationPlugin extends Plugin {
         return {
             id: this.generateId(),
             data,
+            batchable,
+            batchingTimestamp,
             root: this.getNodeId(this.getMutationsRoot(data.mutations) || this.editable),
         };
     }
@@ -1620,7 +1637,7 @@ export class DomMutationPlugin extends Plugin {
             this.setSerializedSelection(lastRevertedChanges.selection);
             // Register resulting mutations as a new "restore" commit (prevent undo).
             this.dispatchContentUpdated();
-            this.commit("restore");
+            this._commit({ stepType: "restore" });
             // AGE: end oldHistory.restoreToStep
 
             if (lastRevertedChanges?.selection && !draftMutations.length) {

@@ -141,10 +141,10 @@ describe("redo", () => {
             stepFunction: async (editor) => {
                 deleteBackward(editor); // <p>ab[]cd</p>
                 deleteBackward(editor); // <p>a[]cd</p>
-                undo(editor); // <p>ab[]cd</p>
-                undo(editor); // <p>ab []cd</p>
-                redo(editor); // <p>ab[]cd</p>
-                redo(editor); // <p>a[]cd</p>
+                undo(editor); // <p>ab []cd</p> (grouped the two actions)
+                undo(editor); // <p>ab []cd</p> (nothing to undo)
+                redo(editor); // <p>a[]cd</p> (grouped the two actions)
+                redo(editor); // <p>a[]cd</p> (nothing to redo)
                 redo(editor); // <p>a[]cd</p> (nothing to redo)
             },
             contentAfter: "<p>a[]cd</p>",
