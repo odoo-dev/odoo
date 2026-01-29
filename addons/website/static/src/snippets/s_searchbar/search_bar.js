@@ -146,7 +146,6 @@ export class SearchBar extends Interaction {
             this.services["public.interactions"].stopInteractions(this.menuEl);
         }
         const prevMenuEl = this.menuEl;
-        this.resultEls = null;
         if (res && this.limit) {
             const results = res.results;
             let template = "website.s_searchbar.autocomplete";
@@ -248,7 +247,11 @@ export class SearchBar extends Interaction {
             this.services["public.interactions"].stopInteractions(this.menuEl);
         }
         const prevMenuEl = this.menuEl;
-        this.menuEl = this.renderAt("website.s_searchbar.autocomplete.skeleton.loader", {}, this.el)[0];
+        this.menuEl = this.renderAt(
+            "website.s_searchbar.autocomplete.skeleton.loader",
+            {},
+            this.el
+        )[0];
         this.hasDropdown = true;
         prevMenuEl?.remove();
     }
@@ -272,23 +275,15 @@ export class SearchBar extends Interaction {
                 break;
             case "ArrowUp":
             case "ArrowDown":
-            case "ArrowLeft":
-            case "ArrowRight":
-                // Cache resultEls to avoid repeated DOM queries on each keypress
-                if (!this.resultEls && this.menuEl) {
-                    this.resultEls = [...this.menuEl.querySelectorAll(".o_search_result_item a")];
-                }
-                if (this.resultEls?.length) {
-                    if (document.activeElement === this.inputEl) {
-                        if (ev.key === "ArrowDown") {
-                            this.resultEls[0]?.focus();
-                        }
-                        return;
-                    }
-                    ev.preventDefault();
-                    const currentIndex = this.resultEls.indexOf(document.activeElement);
-                    const direction = ev.key.replace("Arrow", "").toLowerCase();
-                    this.navigateByDirection(currentIndex, direction);
+                ev.preventDefault();
+                if (this.menuEl) {
+                    const focusableEls = [this.inputEl, ...this.menuEl.querySelectorAll("li > a")];
+                    const focusedEl = document.activeElement;
+                    const currentIndex = focusableEls.indexOf(focusedEl) || 0;
+                    const delta = ev.key === "ArrowUp" ? focusableEls.length - 1 : 1;
+                    const nextIndex = (currentIndex + delta) % focusableEls.length;
+                    const nextFocusedEl = focusableEls[nextIndex];
+                    nextFocusedEl.focus();
                 }
                 break;
             case "Enter":
@@ -314,10 +309,16 @@ export class SearchBar extends Interaction {
             return;
         }
         if (this.searchInputGroup.hasAttribute("data-search-modal-id")) {
-            const modalId = '#' + this.searchInputGroup.dataset.searchModalId;
-            const forceModalTrigger = this.searchInputGroup.hasAttribute('data-force-modal-trigger');
+            const modalId = "#" + this.searchInputGroup.dataset.searchModalId;
+            const forceModalTrigger = this.searchInputGroup.hasAttribute(
+                "data-force-modal-trigger"
+            );
 
-            if (ui.isSmall() || this.searchInputGroup.getBoundingClientRect().width < 280 || forceModalTrigger) {
+            if (
+                ui.isSmall() ||
+                this.searchInputGroup.getBoundingClientRect().width < 280 ||
+                forceModalTrigger
+            ) {
                 this.searchInputGroup.setAttribute("data-bs-toggle", "modal");
                 this.searchInputGroup.setAttribute("data-bs-target", modalId);
                 this.inputEl.classList.add("pe-none");
@@ -329,71 +330,6 @@ export class SearchBar extends Interaction {
             }
         } else {
             this.focusInput();
-        }
-    }
-
-    /**
-     * Move focus to the closest search result in the given direction based on
-     * visual (screen) position.
-     * @param {number} currentIndex
-     *  Index of the currently focused result in `this.resultEls`
-     * @param {"up"|"down"|"left"|"right"} direction"
-     *  Direction of navigation triggered by arrow keys.
-     */
-    navigateByDirection(currentIndex, direction) {
-        const resultEls = this.resultEls;
-        const currentRect = resultEls[currentIndex].getBoundingClientRect();
-        const currentCenterX = currentRect.left + currentRect.width / 2;
-        const currentCenterY = currentRect.top + currentRect.height / 2;
-        let nextIndex = -1;
-        let bestDistance = Infinity;
-
-        const scoreCandidate = (direction, dx, dy, height) => {
-            const AXIS_WEIGHT = 1000; // Prioritize row/column movement to avoid jumps
-            switch (direction) {
-                case "down":
-                    if (dy > 0) {
-                        return Math.abs(dy) * AXIS_WEIGHT + Math.abs(dx);
-                    }
-                    break;
-                case "up":
-                    if (dy < 0) {
-                        return Math.abs(dy) * AXIS_WEIGHT + Math.abs(dx);
-                    }
-                    break;
-                case "right":
-                    if (dx > 0 && Math.abs(dy) < height) {
-                        return Math.abs(dx) * AXIS_WEIGHT + Math.abs(dy);
-                    }
-                    break;
-                case "left":
-                    if (dx < 0 && Math.abs(dy) < height) {
-                        return Math.abs(dx) * AXIS_WEIGHT + Math.abs(dy);
-                    }
-                    break;
-            }
-            return Infinity;
-        };
-
-        resultEls.forEach((el, index) => {
-            if (index === currentIndex) {
-                return;
-            }
-            const rect = el.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const dx = centerX - currentCenterX;
-            const dy = centerY - currentCenterY;
-            const distance = scoreCandidate(direction, dx, dy, currentRect.height);
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                nextIndex = index;
-            }
-        });
-        if (nextIndex >= 0) {
-            resultEls[nextIndex].focus();
-        } else if (direction === "up") {
-            this.inputEl.focus();
         }
     }
 
