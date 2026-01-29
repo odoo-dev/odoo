@@ -117,35 +117,56 @@ class IrQweb(models.AbstractModel):
         # previous state (see the part related to cookies in
         # `_post_processing_att`).
         is_allowed_optional_cookies = request.env['ir.http']._is_allowed_cookie('optional')
-        irQweb = irQweb.with_context(cookies_allowed=is_allowed_optional_cookies)
+
+        request_website = ir_http.get_request_website()
+        context = self.env.context
+        irQweb = irQweb.with_context(
+            cookies_allowed=is_allowed_optional_cookies,
+            request_website=request_website,
+            skip_post_processing_att=(
+                not request_website or
+                context.get('inherit_branding') or context.get('rendering_bundle') or
+                context.get('edit_translations') or context.get('debug') or
+                (request and request.session.debug or '')
+            )
+        )
 
         return irQweb
 
     def _post_processing_att(self, tagName, atts):
+        """
+        The pos processing of the attributes is called for each tags at compile time
+        for the static node and at running time for every dynamic tags (t-att,
+        t-out...). This method is therefore called a considerable number of
+        times. It is imperative that it be fast.
+
+        :param self: ir.qweb
+        :param tagName: str
+        :param atts: dict
+        """
         if atts.get('data-no-post-process'):
             return atts
 
+        context = self.env.context
+
         atts = super()._post_processing_att(tagName, atts)
 
-        website = ir_http.get_request_website()
-        if not website and self.env.context.get('website_id'):
-            website = self.env['website'].browse(self.env.context['website_id'])
-        if website and tagName == 'img' and 'loading' not in atts:
-            atts['loading'] = 'lazy'  # default is auto
-
-        if self.env.context.get('inherit_branding') or self.env.context.get('rendering_bundle') or \
-           self.env.context.get('edit_translations') or self.env.context.get('debug') or (request and request.session.debug):
-            return atts
-
+        website = context.get('request_website')
         if not website:
             return atts
 
-        if (
-            website.cookies_bar
-            and website.block_third_party_domains
-            and not self.env.context.get('cookies_allowed')
-            and not request.env.user.has_group('website.group_website_restricted_editor')
-        ):
+        if tagName == 'img' and 'loading' not in atts:
+            atts['loading'] = 'lazy'  # default is auto
+
+        if not context.get('skip_post_processing_att'):
+            return atts
+
+        if ('src' in atts or 'href' in atts or tagName in ('iframe', 'script')) and (
+                not context.get('cookies_allowed')
+                and not self.env.user.has_group('website.group_website_restricted_editor')
+                and website.cookies_bar
+                and website.block_third_party_domains
+            ):
             # If the cookie banner is activated, 3rd-party embedded iframes and
             # scripts should be controlled. As such:
             # - 'domains' is a watchlist on the iframe/script's src itself,
