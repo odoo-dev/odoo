@@ -14,6 +14,8 @@ class StockRule(models.Model):
     action = fields.Selection(selection_add=[
         ('manufacture', 'Manufacture')
     ], ondelete={'manufacture': 'cascade'})
+    draft_production = fields.Boolean(string='Draft Production', default=False,
+        help='Check this option if you want to create a draft production order on replenishment, instead of a confirmed one.')
 
     def _get_message_dict(self):
         message_dict = super(StockRule, self)._get_message_dict()
@@ -100,6 +102,7 @@ class StockRule(models.Model):
                         **vals,
                         'product_qty': procurement.uom_id._compute_quantity(batch_size, bom.uom_id) if bom else procurement_qty,
                     })
+                    procurement.values['manufacturing_rule_id'] = rule
                     new_productions_values_by_company[procurement.company_id.id]['procurements'].append(procurement)
                     procurement_qty -= batch_size
             else:
@@ -111,12 +114,13 @@ class StockRule(models.Model):
 
         for company_id in new_productions_values_by_company:
             productions_vals_list = new_productions_values_by_company[company_id]['values']
+            productions_procurements = new_productions_values_by_company[company_id]['procurements']
             # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
             productions = self.env['mrp.production'].with_user(SUPERUSER_ID).sudo().with_company(company_id).create(productions_vals_list)
-            for mo in productions:
-                if self._should_auto_confirm_procurement_mo(mo):
+            for mo, procurement in zip(productions, productions_procurements):
+                if self._should_auto_confirm_procurement_mo(mo) and not procurement.values.get('manufacturing_rule_id').draft_production:
                     mo.action_confirm()
-            productions._post_run_manufacture(new_productions_values_by_company[company_id]['procurements'])
+            productions._post_run_manufacture(productions_procurements)
         return True
 
     def _get_stock_move_values(self, product_id, product_qty, product_uom, location_id, name, origin, company_id, values):
