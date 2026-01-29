@@ -978,8 +978,8 @@ export class PosStore extends WithLazyGetterTrap {
 
         if (values.product_id.tracking === "serial") {
             this.selectedOrder.getSelectedOrderline().setPackLotLines({
-                modifiedPackLotLines: pack_lot_ids.modifiedPackLotLines ?? [],
-                newPackLotLines: pack_lot_ids.newPackLotLines ?? [],
+                modifiedPackLotLines: pack_lot_ids?.modifiedPackLotLines ?? [],
+                newPackLotLines: pack_lot_ids?.newPackLotLines ?? [],
                 setQuantity: true,
             });
         }
