@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_restaurant.Navbar" t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
-        <xpath expr="//DropdownItem[contains(text(), 'Backend')]" position="before">
+        <xpath expr="//DropdownItem[contains(., 'Backend')]" position="before">
             <t t-if="pos.router.state.current == 'FloorScreen'">
                 <DropdownItem t-if="showEditPlanButton and this.pos.config.floor_ids.length" onSelected="() => this.pos.toggleEditMode()">
-                    Edit Plan
+                    <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit Plan
                 </DropdownItem>
             </t>
             <DropdownItem t-if="pos.router.state.current == 'FloorScreen'" onSelected="() => this.onSwitchButtonClick()">
-                Switch Floor View
+                <i class="fa fa-eye" aria-hidden="true"></i> Switch Floor View
             </DropdownItem>
         </xpath>
         <xpath expr="//div[hasclass('pos-leftheader')]//OrderTabs" position="attributes">

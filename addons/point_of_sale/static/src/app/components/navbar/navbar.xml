@@ -62,29 +62,29 @@
                             </div>
                             <div class="p-2 pos-burger-menu-items">
                                 <DropdownItem t-if="!isDisplayStandalone and this.pos.cashier._role != 'minimal'" onSelected="() => window.open(this.appUrl)">
-                                    Install App
+                                    <i class="fa fa-download" aria-hidden="true"></i> Install App
                                 </DropdownItem>
                                 <DropdownItem t-if="showCashMoveButton and this.pos.cashier._role != 'minimal'" onSelected="() => this.pos.cashMove()">
-                                    Cash In/Out
+                                    <i class="fa fa-money" aria-hidden="true"></i> Cash In/Out
                                 </DropdownItem>
                                 <DropdownItem t-if="!this.pos.data.network.offline" onSelected="() => this.reloadProducts()">
-                                    Reload Data
+                                    <i class="fa fa-refresh" aria-hidden="true"></i> Reload Data
                                 </DropdownItem>
                                 <DropdownItem t-if="showCreateProductButton" onSelected="() => this.pos.editProduct()">
-                                    Create Product
+                                    <i class="fa fa-plus" aria-hidden="true"></i> Create Product
                                 </DropdownItem>
                                 <DropdownItem t-if="isBarcodeScannerSupported() and this.pos.router.state.current == 'ProductScreen' and ui.isSmall and !pos.config.module_pos_restaurant" onSelected="() => this.onClickScan()">
                                     <span t-if="this.pos.scanning">Stop Barcode Scanner</span>
                                     <span t-else="">Barcode Scanner</span>
                                 </DropdownItem>
                                 <DropdownItem t-if="hardwareProxy.printer" onSelected="() => this.showSaleDetails()">
-                                    Print Report
+                                    <i class="fa fa-print" aria-hidden="true"></i> Print Report
                                 </DropdownItem>
                                 <DropdownItem onSelected="() => pos.closePos()">
-                                    Backend
+                                    <i class="fa fa-chevron-left" aria-hidden="true"></i> Backend
                                 </DropdownItem>
                                 <DropdownItem onSelected="() => this.pos.closeSession()">
-                                    Close Register
+                                    <i class="fa fa-key" aria-hidden="true"></i> Close Register
                                 </DropdownItem>
                             </div>
                             <div class="border-top p-2">
