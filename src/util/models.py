@@ -177,7 +177,11 @@ def remove_model(cr, model, drop_table=True, ignore_m2m=()):
             if column_exists(cr, tbl, "model_id"):
                 cr.execute("DELETE FROM {0} WHERE model_id=%s".format(tbl), [mod_id])
 
-        if not version_gte("17.0") and column_exists(cr, "base_automation", "action_server_id"):
+        if (
+            not version_gte("17.0")
+            and column_exists(cr, "base_automation", "action_server_id")
+            and column_exists(cr, "ir_act_server", "binding_model_id")
+        ):
             cr.execute(
                 """
                 DELETE FROM base_automation b_a
