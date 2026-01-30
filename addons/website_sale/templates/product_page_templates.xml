@@ -824,16 +824,15 @@
     >
         <xpath expr="//div[@t-field='product.website_description']" position="after">
             <div class="o_shop_discussion_rating border-top" data-anchor='true'>
-                <section id="o_product_page_reviews" class="container pt48 pb48" data-anchor='true'>
+                <section id="o_product_page_reviews" class="container pt-3 pb-3" data-anchor='true'>
                     <a class="o_product_page_reviews_title d-flex justify-content-between text-reset text-decoration-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#o_product_page_reviews_content" aria-expanded="false" aria-controls="o_product_page_reviews_content">
                         <h2 class="fs-4 mb-0">Customer Reviews</h2>
-                        <i class="oi align-self-center"/>
                     </a>
-                    <div id="o_product_page_reviews_content" class="collapse mt-3">
+                    <div id="o_product_page_reviews_content" class="collapse mt-1">
                         <t t-call="portal.message_thread"
                             object="product"
                             display_rating="True"
-                            message_per_page="5"
+                            message_per_page="3"
                             two_columns="true"/>
                     </div>
                 </section>

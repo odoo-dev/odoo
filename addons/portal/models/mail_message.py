@@ -147,13 +147,23 @@ class MailMessage(models.Model):
                     "reactions": reaction_groups,
                     "author_id": {
                         "id": message.author_id.id,
-                        "name": message.author_id.name,
+                        "name": self._pseudonymise_author_name(message.author_id.name),
                         "avatar_128_access_token": message.author_id._get_avatar_128_access_token(),
                     },
                     "thread": {"model": values["model"], "id": values["res_id"]},
                 }
             )
         return vals_list
+
+    @staticmethod
+    def _pseudonymise_author_name(name):
+        """Return pseudonymised name: 'First L.' from 'First Last'."""
+        if not name:
+            return name
+        parts = name.split()
+        if len(parts) >= 2:
+            return f"{parts[0]} {parts[-1][0]}."
+        return name
 
     def _portal_message_format_attachments(self, attachment_values):
         """ From 'attachment_values' get an updated version formatted for

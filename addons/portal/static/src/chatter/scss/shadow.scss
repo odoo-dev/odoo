@@ -23,3 +23,7 @@
 .o-portal-Chatter .o-mail-Chatter-top {
     background-color: var(--body-bg);
 }
+
+.o-mail-Composer-suggestionList:not(:has(.o-open)) {
+    display: none !important;
+}
