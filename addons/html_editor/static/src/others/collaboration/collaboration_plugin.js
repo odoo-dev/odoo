@@ -126,16 +126,16 @@ export class CollaborationPlugin extends Plugin {
      * @param {Object} newSteps External steps to be applied
      */
     onExternalHistorySteps(newSteps) {
-        // console.log(
-        //     `[${this.editable.classList
-        //         .toString()
-        //         .replace("odoo-editor-editable ", "")
-        //         .replace(
-        //             "-test-editor",
-        //             ""
-        //         )}] collaboration_plugin.js::onExternalHistorySteps() : `,
-        //     newSteps
-        // );
+        console.log(
+            `[${this.editable.classList
+                .toString()
+                .replace("odoo-editor-editable ", "")
+                .replace(
+                    "-test-editor",
+                    ""
+                )}] collaboration_plugin.js::onExternalHistorySteps() : `,
+            newSteps
+        );
         let stepIndex = 0;
         const selectionData = this.dependencies.selection.getSelectionData();
 
@@ -145,9 +145,10 @@ export class CollaborationPlugin extends Plugin {
             // are called in same stack.
             const insertIndex = this.getInsertStepIndex(steps, newStep);
             if (typeof insertIndex === "undefined") {
-                console.log("onExternalHistorySteps loop continue : ");
+                console.log("   >> onExternalHistorySteps loop continue : ");
                 continue;
             }
+            console.log("   >> onExternalHistorySteps CALL addExternalStep at index ", insertIndex);
             this.dependencies.history.addExternalStep(newStep, insertIndex);
             stepIndex++;
         }

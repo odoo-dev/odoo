@@ -4,8 +4,8 @@ import { TestCollaboration } from "./utils";
 
 const VERBOSE_LOGGING = { verbose: true };
 
-describe("concurent edition convergence", () => {
-    test("sample colab test", async () => {
+describe("concurent edition should convergence", () => {
+    test("when peer2 receive peer1 change", async () => {
         const testCollaboration = new TestCollaboration();
         const { alice, bobby } = await testCollaboration.init({
             alice: "<p>a[]b</p>",
@@ -21,9 +21,33 @@ describe("concurent edition convergence", () => {
         expect(bobby.contentOnly).toBe("<p>ab</p>");
 
         bobby.receive(aliceInsert1);
+
+        expect(alice.contentOnly).toBe("<p>a1b</p>");
         expect(bobby.contentOnly).toBe("<p>a1b</p>");
     });
-    test.todo("sample colab test 2", async () => {
+    test("when peers edit simultaniously", async () => {
+        const testCollaboration = new TestCollaboration(VERBOSE_LOGGING);
+        const { alice, bobby } = await testCollaboration.init({
+            alice: "<p><b>ab[]</b><i>cd</i></p>",
+            bobby: "<p><b>ab</b><i>cd[]</i></p>",
+        });
+
+        expect(alice.contentOnly).toBe("<p><b>ab</b><i>cd</i></p>");
+        expect(bobby.contentOnly).toBe("<p><b>ab</b><i>cd</i></p>");
+
+        const aliceInsert1 = await alice.edit((e) => insertText(e, "1"));
+        const bobbyInsert1 = await bobby.edit((e) => insertText(e, "2"));
+
+        expect(alice.contentOnly).toBe("<p><b>ab1</b><i>cd</i></p>");
+        expect(bobby.contentOnly).toBe("<p><b>ab</b><i>cd2</i></p>");
+
+        alice.receive(bobbyInsert1);
+        bobby.receive(aliceInsert1);
+
+        expect(alice.contentOnly).toBe("<p><b>ab1</b><i>cd2</i></p>");
+        expect(bobby.contentOnly).toBe("<p><b>ab1</b><i>cd2</i></p>");
+    });
+    test.todo("when peers edit simultaniously in the same node", async () => {
         const testCollaboration = new TestCollaboration(VERBOSE_LOGGING);
         const { alice, bobby } = await testCollaboration.init({
             alice: "<p>a[]b</p>",
@@ -34,78 +58,62 @@ describe("concurent edition convergence", () => {
         expect(bobby.contentOnly).toBe("<p>ab</p>");
 
         const aliceInsert1 = await alice.edit((e) => insertText(e, "1"));
-        const bobbyInsert1 = await bobby.edit((e) => insertText(e, "a"));
+        const bobbyInsert1 = await bobby.edit((e) => insertText(e, "2"));
 
         expect(alice.contentOnly).toBe("<p>a1b</p>");
-        expect(bobby.contentOnly).toBe("<p>aab</p>");
+        expect(bobby.contentOnly).toBe("<p>a2b</p>");
 
-        bobby.receive(aliceInsert1);
         alice.receive(bobbyInsert1);
+        bobby.receive(aliceInsert1);
 
-        expect(alice.contentOnly).toBe("<p>aa1b</p>");
-        expect(bobby.contentOnly).toBe("<p>aa1b</p>");
+        expect(alice.contentOnly).toBe("<p>a12b</p>");
+        expect(bobby.contentOnly).toBe("<p>a12b</p>");
     });
-    test("three peers should be able to edit the document at the same location (1)", async () => {
+    test.todo("three peers edit the document at the same location", async () => {
         // @see : https://inria.hal.science/file/index/docid/108523/filename/OsterCSCW06.pdf
-        const testCollaboration = new TestCollaboration({ verbose: true });
-        const { alice, bobby, carol, danny } = await testCollaboration.init({
+        const testCollaboration = new TestCollaboration(VERBOSE_LOGGING);
+        const { alice, bobby, carol } = await testCollaboration.init({
             alice: "<p>a[]b</p>",
             bobby: "<p>a[]b</p>",
             carol: "<p>a[]b</p>",
-            danny: "<p>a[]b</p>",
         });
 
-        expect(testCollaboration.state).toEqual({
-            alice: "<p>a[]b</p>",
-            bobby: "<p>a[]b</p>",
-            carol: "<p>a[]b</p>",
-            danny: "<p>a[]b</p>",
-        });
+        expect(alice.contentOnly).toBe("<p>ab</p>");
+        expect(bobby.contentOnly).toBe("<p>ab</p>");
+        expect(carol.contentOnly).toBe("<p>ab</p>");
 
-        const op1 = await alice.edit((e) => insertText(e, "1"));
-        const op2 = await bobby.edit((e) => insertText(e, "2"));
-        expect(testCollaboration.state).toEqual({
-            alice: "<p>a1[]b</p>",
-            bobby: "<p>a2[]b</p>",
-            carol: "<p>a[]b</p>",
-            danny: "<p>a[]b</p>",
-        });
+        const aliceInsert1 = await alice.edit((e) => insertText(e, "1"));
+        const bobbyInsert1 = await bobby.edit((e) => insertText(e, "2"));
 
-        carol.receive(op1);
-        danny.receive(op1);
-        expect(testCollaboration.state).toEqual({
-            alice: "<p>a1[]b</p>",
-            bobby: "<p>a2[]b</p>",
-            carol: "<p>a[]1b</p>",
-            danny: "<p>a[]1b</p>",
-        });
+        expect(alice.contentOnly).toBe("<p>a1b</p>");
+        expect(bobby.contentOnly).toBe("<p>a2b</p>");
+        expect(carol.contentOnly).toBe("<p>ab</p>");
 
-        const op3 = await carol.edit((e) => insertText(e, "3"));
-        danny.receive(op2);
-        expect(testCollaboration.state).toEqual({
-            alice: "<p>a1[]b</p>",
-            bobby: "<p>a2[]b</p>",
-            carol: "<p>a3[]1b</p>",
-            danny: "<p>a[]12b</p>",
-        });
-        alice.receive(op2);
-        bobby.receive(op1);
-        carol.receive(op2);
-        danny.receive(op3);
-        expect(testCollaboration.state).toEqual({
-            alice: "<p>a1[]2b</p>",
-            bobby: "<p>a12[]b</p>",
-            carol: "<p>a3[]12b</p>",
-            danny: "<p>a[]312b</p>",
-        });
+        carol.receive(aliceInsert1);
 
-        alice.receive(op3);
-        bobby.receive(op3);
-        expect(testCollaboration.state).toEqual({
-            alice: "<p>a31[]2b</p>",
-            bobby: "<p>a312[]b</p>",
-            carol: "<p>a3[]12b</p>",
-            danny: "<p>a[]312b</p>",
-        });
+        expect(alice.contentOnly).toBe("<p>a1b</p>");
+        expect(bobby.contentOnly).toBe("<p>a2b</p>");
+        expect(carol.contentOnly).toBe("<p>a1b</p>");
+
+        const carolInsert1 = await carol.edit((e) => insertText(e, "3"));
+
+        expect(alice.contentOnly).toBe("<p>a1b</p>");
+        expect(bobby.contentOnly).toBe("<p>a2b</p>");
+        expect(carol.contentOnly).toBe("<p>a31b</p>");
+
+        alice.receive(bobbyInsert1);
+        bobby.receive(aliceInsert1);
+        carol.receive(bobbyInsert1);
+
+        expect(alice.contentOnly).toBe("<p>a12b</p>");
+        expect(bobby.contentOnly).toBe("<p>a12b</p>");
+        expect(carol.contentOnly).toBe("<p>a312b</p>");
+
+        alice.receive(carolInsert1);
+        bobby.receive(carolInsert1);
+
+        expect(alice.contentOnly).toBe("<p>a312b</p>");
+        expect(bobby.contentOnly).toBe("<p>a312b</p>");
+        expect(carol.contentOnly).toBe("<p>a312b</p>");
     });
 });

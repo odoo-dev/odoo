@@ -20,7 +20,7 @@ class TestCollaborationEditor {
 
         let n = 0;
         const originalGenerateId = HistoryPlugin.generateId;
-        HistoryPlugin.prototype.generateId = () => `colab_unit_test_node_id_${n++}`; // todo : do this differently / better
+        HistoryPlugin.prototype.generateId = () => `utest_nodeid_${n++}`; // todo : do this differently / better ?
         const className = `${name}-test-editor`;
         const { el, editor } = await setupEditor(initialContent, {
             props: { iframe: true },
@@ -62,12 +62,12 @@ class TestCollaborationEditor {
     }
 
     receive(operation) {
-        console.warn(`--- ${this.name} RECEIVES OPERATION ---`, operation);
-        this.log(`receive() | ${operation?.mutations.length} mutations`);
+        let logMessage = `receive() | ${operation?.mutations.length} mutations`;
         let index = 0;
         for (const mutation of operation.mutations) {
-            this.log(` ┖> mutation[${index++}] : ${JSON.stringify(mutation)}`);
+            logMessage += `\n        ┖> mutation[${index++}] : ${JSON.stringify(mutation)}`;
         }
+        this.log(logMessage);
         const collaborationPlugin = this._getPluginInstance("collaboration");
         collaborationPlugin.onExternalHistorySteps([operation]);
     }
