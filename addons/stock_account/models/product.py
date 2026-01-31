@@ -167,6 +167,8 @@ class ProductProduct(models.Model):
             else:
                 product.total_value = product.with_context(warehouse_id=False)._run_fifo(qty_available, at_date=at_date) * qty_valued / qty_available
             product.avg_cost = product.total_value / qty_valued if not product.uom_id.is_zero(qty_valued) else 0
+            self.env['stock.move'].invalidate_model()
+            self.env['stock.move.line'].invalidate_model()
 
     @api.model_create_multi
     def create(self, vals_list):
