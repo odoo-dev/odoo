@@ -52,6 +52,7 @@ export class LinkPopover extends Component {
         allowTargetBlank: { type: Boolean, optional: true },
         allowStripDomain: { type: Boolean, optional: true },
         formatColor: { type: Function, optional: true },
+        editColorCombination: { type: Function, optional: true },
     };
     static defaultProps = {
         canEdit: true,
@@ -96,6 +97,9 @@ export class LinkPopover extends Component {
             linkElement.hash?.length && this.isAbsoluteURLInCurrentDomain(linkElement.href)
                 ? "_self"
                 : "_blank";
+
+        // Detect which color preset the parent snippet is using
+        this.parentPresetId = this.detectParentColorPreset(linkElement);
         this.state = useState({
             editing: this.props.LinkPopoverState.editing,
             // `.getAttribute("href")` instead of `.href` to keep relative url
@@ -263,6 +267,39 @@ export class LinkPopover extends Component {
     toggleRelAttr(attr) {
         const option = this.state.relAttributeOptions[attr];
         option.isChecked = !option.isChecked;
+    }
+
+    /**
+     * Detects the color preset used by the parent snippet/column.
+     * Looks for classes like o_cc1, o_cc2, o_cc3, o_cc4, o_cc5 on parent elements.
+     * Returns the preset number (1-5) or 1 as default if no preset is found.
+     */
+    detectParentColorPreset(linkElement) {
+        let currentElement = linkElement.parentElement;
+        while (currentElement && currentElement !== this.props.document.body) {
+            const classList = currentElement.classList;
+            for (let i = 1; i <= 5; i++) {
+                if (classList.contains(`o_cc${i}`)) {
+                    return i;
+                }
+            }
+            currentElement = currentElement.parentElement;
+        }
+        // Default to preset 1 if no preset found
+        return 1;
+    }
+
+    /**
+     * Gets the preset ID to open for editing based on the current button type.
+     * Returns the parent preset ID which is the actual preset being used by the snippet.
+     */
+    getPresetIdForType(type) {
+        // For Link, Primary, and Secondary, use the parent's preset
+        if (["link", "primary", "secondary"].includes(type)) {
+            return this.parentPresetId;
+        }
+        // For any other type, also use parent preset
+        return this.parentPresetId;
     }
 
     /**

@@ -669,6 +669,7 @@ export class LinkPlugin extends Plugin {
             allowCustomStyle: this.config.allowCustomStyle,
             allowTargetBlank: this.config.allowTargetBlank,
             allowStripDomain: this.config.allowStripDomain,
+            editColorCombination: this.config.editColorCombination,
         };
 
         const popover = this.getActivePopover(linkElement);

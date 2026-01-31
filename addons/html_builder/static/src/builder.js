@@ -97,6 +97,7 @@ export class Builder extends Component {
                 Plugins: this.props.Plugins,
                 ...this.props.config,
                 mobileBreakpoint,
+                editColorCombination: this.editColorCombination.bind(this),
                 isMobileView: (targetEl) => {
                     const mobileViewThreshold =
                         MEDIAS_BREAKPOINTS[SIZES[mobileBreakpoint.toUpperCase()]].minWidth;

@@ -85,9 +85,16 @@
                                             onSelected="() => this.onSelectedLinkType(colorData.type)"
                                             t-on-pointerdown.stop.prevent="() => {}"
                                         >
-                                            <span t-att-class="colorData.className"
-                                                t-att-style="colorData.style"
-                                                t-out="colorData.label"/>
+                                                <div class="d-flex align-items-center w-100 gap-2">
+                                                    <span t-att-class="colorData.className"
+                                                        t-att-style="colorData.style"
+                                                        t-out="colorData.label" />
+                                                    <button
+                                                        t-if="props.editColorCombination and ['link', 'primary', 'secondary'].includes(colorData.type)"
+                                                        t-on-click="() => this.props.editColorCombination(this.getPresetIdForType(colorData.type))"
+                                                        class="o-hb-edit-color-combination o_colorpicker_ignore fa fa-pencil btn px-1 ms-auto"
+                                                        title="Edit" />
+                                                </div>
                                         </DropdownItem>
                                     </div>
                                 </t>
