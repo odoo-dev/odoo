@@ -1,3 +1,5 @@
+from itertools import zip_longest
+
 from odoo import models, fields, api, _, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import SQL
@@ -974,13 +976,38 @@ class AccountPayment(models.Model):
                     'balance': sum(writeoff_lines.mapped('balance')),
                 })
             line_vals_list = pay._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)
-            line_ids_commands = [
-                Command.update(liquidity_lines.id, line_vals_list[0]) if liquidity_lines else Command.create(line_vals_list[0]),
-                Command.update(counterpart_lines.id, line_vals_list[1]) if counterpart_lines else Command.create(line_vals_list[1])
+            line_ids_commands = []
+
+            liquidity_lines_vals = [
+                val
+                for val in line_vals_list
+                if val["account_id"] == self.outstanding_account_id.id
             ]
+            for liquidity_line, newline_val in zip_longest(liquidity_lines, liquidity_lines_vals):
+                if liquidity_line and newline_val:
+                    line_ids_commands.append(Command.update(liquidity_line.id, newline_val))
+                elif not liquidity_line and newline_val:
+                    line_ids_commands.append(Command.create(newline_val))
+                elif liquidity_line and not newline_val:
+                    line_ids_commands.append(Command.delete(liquidity_line.id))
+
+            counterpart_lines_vals = [
+                val
+                for val in line_vals_list
+                if val["account_id"] == pay.company_id.transfer_account_id.id
+                or self.env["account.account"].browse(val["account_id"]).account_type
+                in self._get_valid_payment_account_types()
+            ]
+            line_ids_commands.append(
+                Command.update(counterpart_lines.id, counterpart_lines_vals[0])
+                if counterpart_lines
+                else Command.create(counterpart_lines_vals[0])
+            )
+
             for line in writeoff_lines:
                 line_ids_commands.append((2, line.id))
-            for extra_line_vals in line_vals_list[2:]:
+            extra_line_vals_index = len(liquidity_lines_vals) + 1
+            for extra_line_vals in line_vals_list[extra_line_vals_index:]:
                 line_ids_commands.append((0, 0, extra_line_vals))
             # Update the existing journal items.
             # If dealing with multiple write-off lines, they are dropped and a new one is generated.
