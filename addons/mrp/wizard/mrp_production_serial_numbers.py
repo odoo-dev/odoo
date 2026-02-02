@@ -23,8 +23,9 @@ class MrpProductionSerials(models.TransientModel):
             if wizard.lot_name:
                 continue
             wizard.lot_name = self.production_id.lot_producing_ids[:1].name
-            if not wizard.lot_name:
-                wizard.lot_name = self.production_id.product_id.serial_prefix_format + self.production_id.product_id.next_serial
+            sequence = self.production_id.product_id.lot_sequence_id
+            if not wizard.lot_name and sequence:
+                wizard.lot_name = sequence.get_next_char(sequence.number_next_actual)
 
     @api.depends('production_id')
     def _compute_lot_quantity(self):
@@ -59,9 +60,9 @@ class MrpProductionSerials(models.TransientModel):
         for lot_name in sorted(lots):
             if lot_name in existing_lot_names:
                 continue
-            if lot_name == self.production_id.product_id.serial_prefix_format + self.production_id.product_id.next_serial:
-                if self.production_id.product_id.lot_sequence_id:
-                    self.production_id.product_id.lot_sequence_id.number_next_actual += 1
+            sequence = self.production_id.product_id.lot_sequence_id
+            if sequence and lot_name == sequence.get_next_char(sequence.number_next_actual):
+                sequence.number_next_actual += 1
             new_lot_vals.append({
                 'name': lot_name,
                 'product_id': self.production_id.product_id.id
