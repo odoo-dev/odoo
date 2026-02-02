@@ -1,11 +1,18 @@
 .o_add_snippet_dialog {
     max-height: $modal-lg !important;
 
+    .btn-success-color-active {
+        --btn-active-color: #0dffa3;
+    }
+
     .modal-body {
         display: flex;
         padding: 0;
 
         aside {
+            .position-relative.p-2:not(.border-bottom) {
+                width: 90%;
+            }
             input[type="search"] {
                 // Chromium-based browsers render a "cancel" button by default.
                 // When visible, adapt its position in order to visually
@@ -39,6 +46,11 @@
     .o_add_snippet_dialog_search {
         background-color: var(--SearchBar-bg-color, #{$o-white});
     }
+}
+
+.o_is_mobile_preview .s_dialog_preview > div {
+    width: 100% !important;
+    margin-bottom: 28px;
 }
 .o_add_snippet_dialog_iframe_loader {
     // This loader will appear after a 1s delay, ensuring it doesn't disrupt the
