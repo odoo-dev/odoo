@@ -1,4 +1,5 @@
 import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
+import { delay } from "@web/core/utils/concurrency";
 
 export function clickPartner(name = "", { expectUnloadPage = false } = {}) {
     return {
@@ -132,6 +133,13 @@ export function searchCustomerValue(val, pressEnter = false) {
     ];
 
     if (pressEnter) {
+        steps.push({
+            content: "Wait some sec",
+            trigger: "body",
+            run: async () => {
+                await delay(100);
+            },
+        });
         steps.push({
             content: `Manually trigger keyup event`,
             trigger: ".modal-header .input-group input",
