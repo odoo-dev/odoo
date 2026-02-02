@@ -15,7 +15,9 @@
 // Form view rules to break the default table layout
 @mixin form-break-table() {
     grid-template-columns: minmax(0, 1fr);
-    margin-bottom: $o-form-spacing-unit * 4;
+    @include media-breakpoint-up(md) {
+        margin-bottom: $o-form-spacing-unit * 4;
+    }
 
     .o_cell {
         max-width: 100%;
@@ -527,8 +529,10 @@
             border-bottom: 1px solid $border-color;
 
             > .tab-pane {
-                padding: $o-horizontal-padding 0;
-
+                padding: $o-horizontal-padding 0 0 0;
+                @include media-breakpoint-up(md) {
+                    padding: $o-horizontal-padding 0;
+                }
                 > .o_field_html .note-editable {
                     min-height: 180px;
                     overflow-y: hidden;
@@ -949,6 +953,9 @@
             .o_inner_group {
                 &:last-child {
                     margin-bottom: map-get($spacers, 3) !important;
+                    &.o_property_group {
+                        margin-bottom: 0 !important;
+                    }
                 }
 
                 div[name="carrier_selection"] {
@@ -1119,6 +1126,9 @@
         .o_form_label {
             font-size: $o-label-font-size-factor * $o-font-size-base-touch;
         }
+    }
+    .tab-pane .o_group .o_inner_group {
+        margin-bottom: inherit;
     }
 }
 
