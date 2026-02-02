@@ -128,6 +128,8 @@ export class ListCoreViewPlugin extends OdooCoreViewPlugin {
     // -------------------------------------------------------------------------
 
     _setupListDataSource(listId, limit, definition) {
+        // TODORAR add a condition to determine when a list ds should be reloaded, see pivot stuff
+        // TODORAR this will be the most important and impactful change so focus
         const dataSourceId = this._getListDataSourceId(listId);
         definition = definition || this.getters.getListModelDefinition(listId);
         if (!(dataSourceId in this.lists)) {
