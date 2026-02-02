@@ -41,6 +41,9 @@ actions(Check in/Check out) performed by them.
             'hr_attendance/static/src/**/*.xml',
             'hr_attendance/static/src/scss/views/*.scss'
         ],
+        'web.assets_web_dark': [
+            'hr_attendance/static/src/**/*.dark.scss',
+        ],
         'web.assets_unit_tests': [
             'hr_attendance/static/tests/*.test.js',
         ],
@@ -69,7 +72,7 @@ actions(Check in/Check out) performed by them.
             # Public Kiosk app and its components
             "hr_attendance/static/src/public_kiosk/**/*",
             'hr_attendance/static/src/components/**/*',
-            ('remove', 'hr_attendance/static/src/components/attendance_menu/**/*'),
+            # ('remove', 'hr_attendance/static/src/components/attendance_menu/**/*'),
 
             'hr_attendance/static/src/scss/kiosk/hr_attendance.scss',
             "web/static/src/views/fields/formatters.js",
@@ -85,7 +88,7 @@ actions(Check in/Check out) performed by them.
             "barcodes/static/src/components/barcode_scanner.scss",
             "barcodes/static/src/barcode_service.js",
 
-        ]
+        ],
     },
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',

@@ -11,3 +11,7 @@
 .o_nocontent_help:has(.oe_view_nocontent_attendance_mobile) {
     position: relative;
 }
+
+.att_container {
+    font-variant-numeric: tabular-nums;
+}
