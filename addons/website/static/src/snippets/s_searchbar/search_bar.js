@@ -215,15 +215,7 @@ export class SearchBar extends Interaction {
     }
 
     getFieldsNames() {
-        return [
-            "description",
-            "detail",
-            "detail_extra",
-            "detail_strike",
-            "extra_link",
-            "name",
-            "tags",
-        ];
+        return ["description", "name", "tags", "search_item_metadata"];
     }
 
     async onInput() {
