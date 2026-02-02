@@ -132,13 +132,11 @@ spirit. To be successful, you will have solid solving problem skills.''')
             domain.append([('website_published', '=', True)])
 
         search_fields = ['name', 'description']
-        fetch_fields = ['name', 'website_url', 'no_of_recruitment']
+        fetch_fields = ['name', 'website_url']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'address', 'type': 'text'},
-            'department_name': {'name': 'department_name', 'type': 'text'},
-            'no_of_recruitment': {'name': 'no_of_recruitment', 'type': 'integer'},
         }
         return {
             'model': 'hr.job',
@@ -155,9 +153,8 @@ spirit. To be successful, you will have solid solving problem skills.''')
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for data in results_data:
-            job = self.browse(data['id'])
-            data['department_name'] = job.department_id.name or ''
+            job = self.browse(data['id']).sudo()
             # res.partner address_id is not available in public user group,
             # - require sudo
-            data['address'] = job.sudo().address_id.name or ''
+            data['address'] = job.address_id.name or ''
         return results_data

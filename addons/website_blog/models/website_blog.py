@@ -330,13 +330,11 @@ class BlogPost(models.Model):
         else:
             domain.append([("website_published", "=", True)])
         search_fields = ['name', 'author_name', 'tag_ids.name', 'content']
-        fetch_fields = ['name', 'website_url', 'tag_ids', 'author_name', 'published_date']
+        fetch_fields = ['name', 'website_url', 'tag_ids', 'author_name']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'author_name', 'type': 'text', 'skip_markup': True},
-            'author_avatar_url': {'name': 'author_avatar_url', 'type': 'html', 'truncate': False},
-            'published_date': {'name': 'published_date', 'type': 'date'},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
         }
@@ -355,6 +353,5 @@ class BlogPost(models.Model):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for post, data in zip(self, results_data):
             data['tag_ids'] = post.tag_ids.read(['name'])
-            data['author_avatar_url'] = '/web/image/blog.post/%s/author_avatar' % data['id']
             data['image_url'] = post._get_image_url()
         return results_data

@@ -884,15 +884,12 @@ class ProductTemplate(models.Model):
         if attribute_value_dict:
             domains.extend(self._get_attribute_value_domain(attribute_value_dict))
         search_fields = ['name', 'default_code', 'variants_default_code', 'description', 'description_sale']
-        fetch_fields = ['id', 'name', 'website_url', 'rating_avg', 'description_sale']
+        fetch_fields = ['id', 'name', 'website_url']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']},
-            'rating': {'name': 'rating_avg', 'type': 'float', 'precision': 1},
-            'extra_link': {'name': 'category', 'type': 'html'},
             'image_url': {'name': 'image_url', 'type': 'html'},
-            'price': {'name': 'price', 'type': 'html', 'display_currency': options['display_currency']},
         }
         return {
             'model': 'product.template',
@@ -906,42 +903,22 @@ class ProductTemplate(models.Model):
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
-        with_image = 'image_url' in mapping
-        with_category = 'extra_link' in mapping
-        with_price = 'price' in mapping
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
-        current_website = self.env['website'].get_current_website()
         for product, data in zip(self, results_data):
-            categ_ids = product.public_categ_ids.filtered(lambda c: not c.website_id or c.website_id == current_website)
-            if with_price:
-                combination_info = product._get_combination_info(only_template=True)
-                data['price'], list_price = self._search_render_results_prices(
-                    mapping, combination_info
-                )
-                if list_price:
-                    data['list_price'] = list_price
-
-            if with_image:
-                data['image_url'] = '/web/image/product.template/%s/image_128' % data['id']
-            if with_category and categ_ids:
-                data['category'] = self.env['ir.ui.view']._render_template(
-                    "website_sale.product_category_extra_link",
-                    {
-                        'categories': categ_ids,
-                        'slug': self.env['ir.http']._slug,
-                        'shop_path': SHOP_PATH,
-                    }
-                )
+            combination_info = product._get_combination_info(only_template=True)
+            list_price = self._search_render_results_prices(
+                mapping, combination_info
+            )
+            if list_price:
+                data['list_price'] = list_price
+            data['image_url'] = '/web/image/product.template/%s/image_128' % data['id']
         return results_data
 
     def _search_render_results_prices(self, mapping, combination_info):
         if combination_info.get('hide_price'):
             return None, None
 
-        monetary_options = {'display_currency': mapping['price']['display_currency']}
-        price = self.env['ir.qweb.field.monetary'].value_to_html(
-            combination_info['price'], monetary_options
-        )
+        monetary_options = {'display_currency': mapping['search_item_metadata']['display_currency']}
         list_price = None
         if combination_info['has_discounted_price']:
             list_price = self.env['ir.qweb.field.monetary'].value_to_html(
@@ -951,8 +928,12 @@ class ProductTemplate(models.Model):
             list_price = self.env['ir.qweb.field.monetary'].value_to_html(
                 combination_info['compare_list_price'], monetary_options
             )
-
-        return price, list_price
+        if list_price:
+            return list_price
+        price = self.env["ir.qweb.field.monetary"].value_to_html(
+            combination_info["price"], monetary_options
+        )
+        return price
 
     def _get_google_analytics_data(self, product, combination_info):
         self.ensure_one()

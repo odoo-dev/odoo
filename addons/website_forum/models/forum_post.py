@@ -852,14 +852,13 @@ class ForumPost(models.Model):
     @api.model
     def _search_get_detail(self, website, order, options):
         search_fields = ['name', 'tag_ids.name', 'content']
-        fetch_fields = ['id', 'name', 'tag_ids', 'website_url', 'content', 'write_date']
+        fetch_fields = ['id', 'name', 'tag_ids', 'website_url', 'content']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'created_by', 'type': 'text', 'truncate': False},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
             'description': {'name': 'content', 'type': 'text', 'html': True, 'match': True},
-            'date': {'name': 'write_date', 'type': 'date'},
             'image_url': {'name': 'image_url', 'type': 'html'},
         }
 
