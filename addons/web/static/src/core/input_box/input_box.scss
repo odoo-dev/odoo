@@ -2,12 +2,6 @@
     --inputbox-spacing-unit: 8px;
 }
 
-.o_input_box:not(.o_input_box .o_input_box) {
-    --inputbox-padding-around: 0px;
-    --inputbox-overlay-padding-toggler: 0px;
-    --inputbox-overlay-padding-suffix: 0px;
-}
-
 .o_input_box:has(.o_input_box_overlay) {
     --inputbox-overlay-padding-x: 0px;
     --inputbox-overlay-padding-y: 0px;
@@ -42,41 +36,63 @@
     }
 }
 
-.o_input_box:not(.o_input_box .o_input_box):has(.o_dropdown_button) {
-    --inputbox-overlay-padding-toggler: calc(var(--inputbox-overlay-padding-x) + (2 * var(--inputbox-spacing-unit)));
-}
+.o_input_box:not(.o_input_box .o_input_box) {
+    --inputbox-padding-around: 0px;
+    --inputbox-overlay-padding-toggler: 0px;
+    --inputbox-overlay-padding-prefix: 0px;
+    --inputbox-overlay-padding-suffix: 0px;
 
-// SUFFIX OVERLAY RULES
-.o_input_box:not(.o_input_box .o_input_box):has(.suffix) {
-    --inputbox-overlay-padding-suffix: calc(var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit));
-    
-    &:has(.suffix + .suffix) {
-    --inputbox-overlay-padding-suffix: calc(2 * (var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit)));
-
-        .o_input_box_overlay.suffix:not(.suffix + .suffix) {
-            right: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler) + var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit));
-        }
+    &:has(.o_dropdown_button) {
+        --inputbox-overlay-padding-toggler: calc(var(--inputbox-overlay-padding-x) + (2 * var(--inputbox-spacing-unit)));
     }
-}
 
-.o_input_box {
     .o_input {
         padding-right: calc((var(--inputbox-spacing-unit)) + var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler) + var(--inputbox-overlay-padding-suffix)) !important;
     }
-    .suffix {
-        width: var(--inputbox-overlay-width-end) !important;
-        right: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler));
-    }
-}
 
-// PREFIX OVERLAY RULES
-.o_input_box:has(.prefix) {
-    .o_input_box_overlay.prefix {
-        width: var(--inputbox-overlay-width-start) !important;
-        left: var(--inputbox-overlay-padding-x);
+    &:has(.suffix) {
+        --inputbox-overlay-padding-suffix: calc(var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit));
+        
+        .suffix {
+            width: var(--inputbox-overlay-width-end) !important;
+            right: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler));
+        }
+
+        &:has(.suffix + .suffix) {
+            //FIXME this is wrong if custom width for 1 element
+            --inputbox-overlay-padding-suffix: calc(2 * (var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit)));
+
+            .o_input_box_overlay.suffix:not(.suffix + .suffix) {
+                right: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler) + var(--inputbox-overlay-width-end) + var(--inputbox-spacing-unit));
+            }
+        }
     }
-    .o_input, .o_field_widget.o_readonly_modifier {
-        padding-left: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-width-start) + var(--inputbox-spacing-unit)) !important;
+
+    &:has(.prefix) {
+        --inputbox-overlay-padding-prefix: calc(var(--inputbox-overlay-width-start) + var(--inputbox-spacing-unit));
+
+        .prefix {
+            width: var(--inputbox-overlay-width-start) !important;
+            left: var(--inputbox-overlay-padding-x);
+        }
+
+        &:has(.prefix + .prefix) {
+            //FIXME this is wrong if custom width for 1 element
+            --inputbox-overlay-padding-prefix: calc(2 * (var(--inputbox-overlay-width-start) + var(--inputbox-spacing-unit)));
+
+            .o_input_box_overlay.prefix + .prefix {
+                left: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-width-start) + var(--inputbox-spacing-unit));
+            }
+        }
+
+        .o_input_box_overlay.prefix {
+            width: var(--inputbox-overlay-width-start) !important;
+            left: var(--inputbox-overlay-padding-x);
+        }
+
+        .o_input, .o_field_widget.o_readonly_modifier {
+            padding-left: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-prefix)) !important;
+        }
     }
 }
 
