@@ -723,7 +723,7 @@ class AccountReportExpression(models.Model):
     @api.constrains('engine', 'report_line_id')
     def _validate_engine(self):
         for expression in self:
-            if expression.engine in ('aggregation', 'external') and (expression.report_line_id.groupby or expression.report_line_id.user_groupby):
+            if expression.engine == 'external' and (expression.report_line_id.groupby or expression.report_line_id.user_groupby):
                 engine_description = dict(expression._fields['engine']._description_selection(self.env))
                 raise ValidationError(_(
                     "Groupby feature isn't supported by '%(engine)s' engine. Please remove the groupby value on '%(report_line)s'",
@@ -835,7 +835,7 @@ class AccountReportExpression(models.Model):
         for expr in self:
             expr.display_name = f'{expr.report_line_name} [{expr.label}]'
 
-    def _expand_aggregations(self):
+    def _expand_aggregations(self, no_cross_report_expansion=False):
         """Return self and its full aggregation expression dependency"""
         result = self
 
@@ -851,6 +851,8 @@ class AccountReportExpression(models.Model):
                     labels_by_code = candidate_expr._get_aggregation_terms_details()
 
                     if candidate_expr.subformula and candidate_expr.subformula.startswith('cross_report'):
+                        if no_cross_report_expansion:
+                            continue
                         subformula_match = CROSS_REPORT_REGEX.match(candidate_expr.subformula)
                         if not subformula_match:
                             raise UserError(_(
@@ -863,9 +865,9 @@ class AccountReportExpression(models.Model):
                                 label=candidate_expr.label,
                             ))
                         cross_report_value = subformula_match.groups()[0]
-                        try:
+                        if cross_report_value.isdigit():
                             report_id = int(cross_report_value)
-                        except ValueError:
+                        else:
                             report_id = report.id if (report := self.env.ref(cross_report_value, raise_if_not_found=False)) else None
 
                         if not report_id:
