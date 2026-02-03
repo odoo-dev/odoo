@@ -13,7 +13,7 @@
                 <attribute name="invisible" remove="1" separator="or"/>
             </field>
             <field name="service_tracking" position="after">
-                <div class="o_td_label d-inline-flex" invisible="service_tracking != 'task_global_project'">
+                <div class="o_td_label d-inline-flex" invisible="service_tracking != 'task_global_project'" style="border:2px solid black;">
                     <label for='project_id'/>
                 </div>
                 <field name="project_id" context="{'default_allow_billable': True}" invisible="service_tracking != 'task_global_project'" nolabel="1" placeholder="Defined on quotation"/>
