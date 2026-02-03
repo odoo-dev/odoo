@@ -856,10 +856,10 @@ class ForumPost(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
-            'search_item_metadata': {'name': 'created_by', 'type': 'text', 'truncate': False},
+            'search_item_metadata': {'name': 'created_by', 'type': 'text', 'truncate': False, 'match': True},
+            'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
             'description': {'name': 'content', 'type': 'text', 'html': True, 'match': True},
-            'image_url': {'name': 'image_url', 'type': 'html'},
         }
 
         domain = website.website_domain()

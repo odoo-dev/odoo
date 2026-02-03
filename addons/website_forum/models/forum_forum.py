@@ -327,7 +327,7 @@ class ForumForum(models.Model):
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
-            'description': {'name': 'description', 'type': 'text', 'truncate': True},
+            'description': {'name': 'description', 'type': 'text', 'truncate': True, 'match': True},
         }
         return {
             'model': 'forum.forum',

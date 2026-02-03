@@ -647,6 +647,7 @@ class Website(Home):
                 mapped = {
                     '_fa': record.get('_fa'),
                 }
+                skip_matching_area = False
                 for mapped_name, field_meta in mapping.items():
                     value = record.get(field_meta.get('name'))
                     if not value:
@@ -657,9 +658,13 @@ class Website(Home):
                         value = self._shorten_around_match(value, term, max_nb_chars)
 
                     if field_meta.get('match'):
+                        if skip_matching_area and mapped_name not in ['name', 'search_item_metadata']:
+                            continue
                         skip_field, value, field_type = model._search_highlight_field(field_meta, value, term)
                         if skip_field:
                             continue
+                        if field_type == 'html':
+                            skip_matching_area = True
 
                     if field_type not in ('image', 'binary') and ('ir.qweb.field.%s' % field_type) in request.env:
                         opt = {}
