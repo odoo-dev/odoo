@@ -1056,13 +1056,14 @@ class SlideChannel(models.Model):
         if slide_category and 'nbr_%s' % slide_category in self:
             domain.append([('nbr_%s' % slide_category, '>', 0)])
         search_fields = ['name', 'tag_ids.name', 'description_short']
-        fetch_fields = ['name', 'website_url', 'tag_ids', 'total_time']
+        fetch_fields = ['name', 'website_url', 'tag_ids', 'total_time', 'description_short']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'total_time', 'type': 'text'},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
+            'description': {'name': 'description_short', 'type': 'text', 'html': True, 'match': True},
         }
         return {
             'model': 'slide.channel',

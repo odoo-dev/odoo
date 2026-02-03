@@ -883,13 +883,14 @@ class ProductTemplate(models.Model):
             domains.append([('list_price', '<=', max_price)])
         if attribute_value_dict:
             domains.extend(self._get_attribute_value_domain(attribute_value_dict))
-        search_fields = ['name', 'default_code', 'variants_default_code', 'description', 'description_sale']
-        fetch_fields = ['id', 'name', 'website_url']
+        search_fields = ['name', 'default_code', 'variants_default_code', 'description_ecommerce']
+        fetch_fields = ['id', 'name', 'website_url', 'description_ecommerce']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']},
             'image_url': {'name': 'image_url', 'type': 'html'},
+            'description': {'name': 'description_ecommerce', 'type': 'text', 'html': True, 'match': True},
         }
         return {
             'model': 'product.template',

@@ -132,11 +132,12 @@ spirit. To be successful, you will have solid solving problem skills.''')
             domain.append([('website_published', '=', True)])
 
         search_fields = ['name', 'description']
-        fetch_fields = ['name', 'website_url']
+        fetch_fields = ['name', 'website_url', 'description']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'address', 'type': 'text'},
+            'description': {'name': 'description', 'type': 'text', 'html': True, 'match': True},
         }
         return {
             'model': 'hr.job',
