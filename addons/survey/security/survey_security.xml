@@ -9,14 +9,14 @@
 
         <!-- Survey users -->
         <record model="res.groups" id="group_survey_user">
-            <field name="name">User</field>
+            <field name="name">Analyst</field>
             <field name="sequence">10</field>
             <field name="privilege_id" ref="res_groups_privilege_surveys"/>
         </record>
 
         <!-- Survey managers -->
         <record model="res.groups" id="group_survey_manager">
-            <field name="name">Administrator</field>
+            <field name="name">Manager</field>
             <field name="sequence">20</field>
             <field name="privilege_id" ref="res_groups_privilege_surveys"/>
             <field name="implied_ids" eval="[(4, ref('group_survey_user'))]"/>

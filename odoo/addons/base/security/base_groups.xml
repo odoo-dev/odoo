@@ -16,6 +16,7 @@
         <record model="res.groups.privilege" id="res_groups_privilege_contact">
             <field name="name">Contact</field>
             <field name="category_id" ref="module_category_master_data"/>
+            <field name="placeholder">No</field>
         </record>
 
         <!--
@@ -65,9 +66,14 @@
             <field name="privilege_id" ref="res_groups_privilege_export"/>
         </record>
 
+        <record model="res.groups" id="group_partner_viewer">
+            <field name="name">Viewer</field>
+        </record>
+
         <record model="res.groups" id="group_partner_manager">
-            <field name="name">Creation</field>
+            <field name="name">Manager</field>
             <field name="user_ids" eval="[Command.link(ref('base.user_root'))]"/>
+            <field name="implied_ids" eval="[Command.link(ref('group_partner_viewer'))]"/>
             <field name="implied_by_ids" eval="[Command.link(ref('base.group_erp_manager'))]"/>
             <field name="privilege_id" ref="res_groups_privilege_contact"/>
         </record>

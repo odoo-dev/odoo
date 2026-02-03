@@ -8,7 +8,7 @@
         </record>
 
         <record model="ir.module.category" id="module_category_accounting">
-            <field name="name">Accounting</field>
+            <field name="name">Finance</field>
             <field name="sequence">20</field>
         </record>
 
