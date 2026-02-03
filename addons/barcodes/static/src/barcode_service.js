@@ -19,10 +19,6 @@ export const barcodeService = {
     // but some scanners can use an intercharacter delay (we support <= 50 ms)
     maxTimeBetweenKeysInMs: session.max_time_between_keys_in_ms || 150,
 
-    cleanBarcode: function(barcode) {
-        return barcode;
-    },
-
     start() {
         const bus = new EventBus();
         let timeout = null;
@@ -33,8 +29,7 @@ export const barcodeService = {
          * check if we have a barcode, and trigger appropriate events
          */
         function checkBarcode() {
-            let str = barcodeService.cleanBarcode(barcodeInput.value);
-            for (let barcode of str.split(RegExp(REGEX_END_CHARACTER)).filter(Boolean)) {
+            for (let barcode of barcodeInput.value.split(RegExp(REGEX_END_CHARACTER)).filter(Boolean)) {
                 bus.trigger('barcode_scanned', {barcode});
             }
             barcodeInput.value = "";

@@ -189,7 +189,6 @@
             'barcodes/static/src/barcode_service.js',
             'barcodes/static/src/js/barcode_parser.js',
             'barcodes_gs1_nomenclature/static/src/js/barcode_parser.js',
-            'barcodes_gs1_nomenclature/static/src/js/barcode_service.js',
             'barcodes_gs1_nomenclature/static/src/js/epc_model.js',
             'barcodes_gs1_nomenclature/static/src/js/epc_utils.js',
             # report download utils
