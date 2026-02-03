@@ -55,7 +55,7 @@ class PrinterDriver(PrinterDriverBase):
                         usb_device.serial_number == device['usb_serial_number']
                     )
 
-                self.escpos_device = printer.Usb(usb_args={"custom_match": usb_matcher})
+                self.escpos_device = printer.Usb(usb_args={"custom_match": usb_matcher},timeout=5)
             elif device.get('ip'):
                 self.escpos_device = printer.Network(device['ip'], timeout=5)
             else:
@@ -159,6 +159,7 @@ class PrinterDriver(PrinterDriverBase):
         commands = self.RECEIPT_PRINTER_COMMANDS[self.receipt_protocol]
         if self.escpos_device:
             try:
+                _logger.crtical("BEFORE EscposIO")
                 with EscposIO(self.escpos_device) as dev:
                     if not self._check_status_escpos(dev.printer, action_unique_id=None):
                         return

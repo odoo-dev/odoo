@@ -23,7 +23,7 @@ _logger = logging.getLogger(__name__)
 
 class PrinterInterface(Interface):
     connection_type = 'printer'
-    _loop_delay = 20  # Default delay between calls to get_devices
+    _loop_delay = 10  # Default delay between calls to get_devices
 
     def __init__(self):
         super().__init__()
@@ -68,7 +68,7 @@ class PrinterInterface(Interface):
         # takes between 4 and 15 seconds) but increase the delay to 2 minutes if it has been
         # running for more than 1 hour
         if self.start_time and time.time() - self.start_time > 3600:
-            self._loop_delay = 120
+            self._loop_delay = 10
             self.start_time = None  # Reset start_time to avoid changing the loop delay again
 
         self.printer_devices.update(self.deduplicate_printers(discovered_devices))

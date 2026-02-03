@@ -256,10 +256,18 @@ class PrinterDriverBase(Driver, ABC):
                 esc.printer.open()
                 if not self._check_status_escpos(esc.printer, action_unique_id):
                     return False
+
+
+                start = time.time()
+                _logger.critical("\n\n\nBEFORE ESCPOS.printer._raw()")
                 esc.printer._raw(data)
+                end = time.time()
+
+                _logger.critical("AFTER.printer._raw(), took: %f seconds\n\n\n", end - start)
             self.send_status(status='success')
             return True
         except (escpos.exceptions.Error, OSError, AssertionError, TypeError):
+            _logger.critical("Escpos printer %s not available during print", self.device_name)
             self.escpos_device = None
             raise EscposNotAvailableError
 
