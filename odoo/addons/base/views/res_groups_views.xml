@@ -23,7 +23,7 @@
                             <group>
                                 <field name="sequence" groups="base.group_no_one"/>
                                 <field name="category_id" invisible="'default_category_id' in context"/>
-                                <field name="placeholder"/>
+                                <field name="placeholder" placeholder="No"/>
                             </group>
                         </group>
                         <notebook>
