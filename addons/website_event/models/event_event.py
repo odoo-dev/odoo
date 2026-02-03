@@ -609,13 +609,14 @@ class EventEvent(models.Model):
                     current_date = date_details[1]
 
         search_fields = ['name', 'tag_ids.name', 'subtitle', 'tag_ids.name']
-        fetch_fields = ['name', 'website_url', 'date_begin', 'tag_ids']
+        fetch_fields = ['name', 'website_url', 'date_begin', 'tag_ids', 'subtitle']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
             'search_item_metadata': {'name': 'date_begin', 'type': 'date'},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
+            'description': {'name': 'subtitle', 'type': 'text', 'html': True, 'match': True},
         }
 
         # Bypassing the access rigths of partner to search the address.

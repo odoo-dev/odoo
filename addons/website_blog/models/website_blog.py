@@ -330,13 +330,14 @@ class BlogPost(models.Model):
         else:
             domain.append([("website_published", "=", True)])
         search_fields = ['name', 'author_name', 'tag_ids.name', 'content']
-        fetch_fields = ['name', 'website_url', 'tag_ids', 'author_name']
+        fetch_fields = ['name', 'website_url', 'tag_ids', 'author_name', 'content']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
-            'search_item_metadata': {'name': 'author_name', 'type': 'text', 'skip_markup': True},
+            'search_item_metadata': {'name': 'author_name', 'type': 'text', 'match': True},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
+            'description': {'name': 'content', 'type': 'text', 'html': True, 'match': True},
         }
         return {
             'model': 'blog.post',
