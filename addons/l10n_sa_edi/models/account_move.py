@@ -1,13 +1,7 @@
-import base64
 import uuid
-from base64 import b64decode, b64encode
-from datetime import datetime
-
-from lxml import etree
 
 from odoo import _, api, models
 from odoo.exceptions import UserError
-from odoo.tools import float_repr
 
 
 class AccountMove(models.Model):
@@ -26,8 +20,8 @@ class AccountMove(models.Model):
                 'company_id.vat', 'journal_id', 'journal_id.l10n_sa_production_csid_json', 'l10n_sa_edi_document_id',
                 'l10n_sa_invoice_signature', 'l10n_sa_chain_index', 'state']
 
-    def _get_l10n_sa_qr_code_str(self):
-        return ""
+    def _l10n_sa_is_applicable(self):
+        return super()._l10n_sa_is_applicable() and self.move_type in ('out_invoice', 'out_refund') and self.l10n_sa_edi_document_id and self.state != 'draft'
 
     @api.ondelete(at_uninstall=False)
     def _prevent_zatca_rejected_invoice_deletion(self):
@@ -39,39 +33,30 @@ class AccountMove(models.Model):
                move.attachment_ids.filtered(lambda a: a.description == descr and a.res_model == 'account.move'):
                 raise UserError(_("The Invoice(s) are linked to a validated EDI document and cannot be modified according to ZATCA rules"))
 
-    def _compute_qr_code_str(self):
-        """ Override to update QR code generation in accordance with ZATCA Phase 2"""
-        phase_one_moves = self.env['account.move']
-        for move in self:
-            zatca_document = move.l10n_sa_edi_document_id
-            if move.country_code == 'SA' and move.move_type in ('out_invoice', 'out_refund') and zatca_document and move.state != 'draft':
-                qr_code_str = ''
-                if move._l10n_sa_is_simplified():
-                    x509_cert = move.journal_id.l10n_sa_production_csid_certificate_id
-                    xml_content = self.l10n_sa_edi_document_id._l10n_sa_generate_zatca_template()
-                    qr_code_str = move._l10n_sa_get_qr_code(move.company_id, xml_content, x509_cert,
-                                                            move.l10n_sa_invoice_signature, True)
-                    qr_code_str = b64encode(qr_code_str).decode()
-                elif zatca_document.state == 'accepted' and zatca_document.attachment_id.datas:
-                    document_xml = zatca_document.attachment_id.with_context(bin_size=False).datas.decode()
-                    root = etree.fromstring(b64decode(document_xml))
-                    qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
-                    qr_code_str = qr_node.text
-                move.l10n_sa_qr_code_str = qr_code_str
-            else:
-                # In the case where the Invoice is not a ZATCA invoice, or is Phase 1, or is not confirmed,
-                # we call super to trigger the initial QR code generation for Phase 1
-                phase_one_moves |= move
-        super(AccountMove, phase_one_moves)._compute_qr_code_str()
-
-
-    def _l10n_sa_get_qr_code_encoding(self, tag, field, int_length=1):
-        """
-        Helper function to encode strings for the QR code generation according to ZATCA specs
-        """
-        company_name_tag_encoding = tag.to_bytes(length=1, byteorder='big')
-        company_name_length_encoding = len(field).to_bytes(length=int_length, byteorder='big')
-        return company_name_tag_encoding + company_name_length_encoding + field
+    # def _compute_qr_code_str(self):
+    #     """ Override to update QR code generation in accordance with ZATCA Phase 2"""
+    #     phase_one_moves = self.env['account.move']
+    #     for move in self:
+    #         zatca_document = move.l10n_sa_edi_document_id
+    #         if move.country_code == 'SA' and move.move_type in ('out_invoice', 'out_refund') and zatca_document and move.state != 'draft':
+    #             qr_code_str = ''
+    #             if move._l10n_sa_is_simplified():
+    #                 x509_cert = move.journal_id.l10n_sa_production_csid_certificate_id
+    #                 xml_content = self.l10n_sa_edi_document_id._l10n_sa_generate_zatca_template()
+    #                 qr_code_str = move._l10n_sa_get_qr_code(move.company_id, xml_content, x509_cert,
+    #                                                         move.l10n_sa_invoice_signature, True)
+    #                 qr_code_str = b64encode(qr_code_str).decode()
+    #             elif zatca_document.state == 'accepted' and zatca_document.attachment_id.datas:
+    #                 document_xml = zatca_document.attachment_id.with_context(bin_size=False).datas.decode()
+    #                 root = etree.fromstring(b64decode(document_xml))
+    #                 qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
+    #                 qr_code_str = qr_node.text
+    #             move.l10n_sa_qr_code_str = qr_code_str
+    #         else:
+    #             # In the case where the Invoice is not a ZATCA invoice, or is Phase 1, or is not confirmed,
+    #             # we call super to trigger the initial QR code generation for Phase 1
+    #             phase_one_moves |= move
+    #     super(AccountMove, phase_one_moves)._compute_qr_code_str()
 
     def _l10n_sa_check_billing_reference(self):
         """
@@ -79,53 +64,6 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         return self.debit_origin_id or self.reversed_entry_id or self.ref
-
-    @api.model
-    def _l10n_sa_get_qr_code(self, company_id, unsigned_xml, certificate, signature, is_b2c=False):
-        """
-        Generate QR code string based on XML content of the Invoice UBL file, X509 Production Certificate
-        and company info.
-
-        :return b64 encoded QR code string
-        """
-
-        def xpath_ns(expr):
-            return root.xpath(expr, namespaces=edi_format._l10n_sa_get_namespaces())[0].text.strip()
-
-        qr_code_str = b''
-        root = etree.fromstring(unsigned_xml)
-        edi_format = self.env['account.edi.xml.ubl_21.zatca']
-
-        # Indent XML content to avoid indentation mismatches
-        etree.indent(root, space='    ')
-
-        invoice_date = xpath_ns('//cbc:IssueDate')
-        invoice_time = xpath_ns('//cbc:IssueTime')
-        invoice_datetime = datetime.strptime(invoice_date + ' ' + invoice_time, '%Y-%m-%d %H:%M:%S')
-
-        if invoice_datetime and company_id.vat and certificate and signature:
-            prehash_content = etree.tostring(root)
-            invoice_hash = edi_format._l10n_sa_generate_invoice_xml_hash(prehash_content, 'digest')
-
-            amount_total = float(xpath_ns('//cbc:PayableAmount'))
-            amount_tax = float(xpath_ns('//cac:TaxTotal/cbc:TaxAmount'))
-            seller_name_enc = self._l10n_sa_get_qr_code_encoding(1, company_id.display_name.encode())
-            seller_vat_enc = self._l10n_sa_get_qr_code_encoding(2, company_id.vat.encode())
-            timestamp_enc = self._l10n_sa_get_qr_code_encoding(3,
-                                                               invoice_datetime.strftime("%Y-%m-%dT%H:%M:%S").encode())
-            amount_total_enc = self._l10n_sa_get_qr_code_encoding(4, float_repr(abs(amount_total), 2).encode())
-            amount_tax_enc = self._l10n_sa_get_qr_code_encoding(5, float_repr(abs(amount_tax), 2).encode())
-            invoice_hash_enc = self._l10n_sa_get_qr_code_encoding(6, invoice_hash)
-            signature_enc = self._l10n_sa_get_qr_code_encoding(7, signature.encode())
-            public_key_enc = self._l10n_sa_get_qr_code_encoding(8, base64.b64decode(certificate._get_public_key_bytes(formatting='base64')))
-
-            qr_code_str = (seller_name_enc + seller_vat_enc + timestamp_enc + amount_total_enc +
-                           amount_tax_enc + invoice_hash_enc + signature_enc + public_key_enc)
-
-            if is_b2c:
-                qr_code_str += self._l10n_sa_get_qr_code_encoding(9, base64.b64decode(certificate._get_signature_bytes(formatting='base64')))
-
-        return qr_code_str
 
     @api.depends('state', 'l10n_sa_edi_document_id.state')
     def _compute_edi_show_cancel_button(self):

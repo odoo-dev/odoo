@@ -1,3 +1,4 @@
+import base64
 from base64 import b64decode, b64encode
 from datetime import datetime
 from hashlib import sha256
@@ -7,6 +8,7 @@ from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_repr
 
 L10N_SA_DOCUMENT_STATES = [
     ('to_send', 'To Send'),
@@ -17,14 +19,15 @@ L10N_SA_DOCUMENT_STATES = [
     ('unknown', 'Unknown'),
 ]
 
+
 class L10nSaEdiDocument(models.Model):
     _name = 'l10n_sa_edi.document'
     _description = 'ZATCA Document'
 
     name = fields.Char(related='attachment_id.name')
     res_model = fields.Selection([
-        ('account.move', "Standard"),
-        ('pos.order', "Simplified"),
+        ('account.move', "Journal Entry"),
+        ('pos.order', "POS Order"),
     ], string="Invoice Type", readonly=True, required=True)
     res_id = fields.Many2oneReference("Invoice", model_field="res_model", readonly=True, required=True)
     attachment_id = fields.Many2one(comodel_name='ir.attachment', readonly=True)
@@ -32,7 +35,8 @@ class L10nSaEdiDocument(models.Model):
     message = fields.Text("ZATCA Errors/Warnings", translate=True)
     error_message = fields.Char("ZATCA Error Message")
     content = fields.Binary()
-    journal_id = fields.Many2one(comodel_name="account.journal" ,compute="_compute_journal_id", store=True)
+    journal_id = fields.Many2one(comodel_name="account.journal", compute="_compute_related_fields", store=True)
+    company_id = fields.Many2one(comodel_name="res.company", compute="_compute_related_fields")
     l10n_sa_edi_chain_head_id = fields.Many2one(
       'l10n_sa_edi.document',
       string="ZATCA chain stopping document",
@@ -62,9 +66,10 @@ class L10nSaEdiDocument(models.Model):
     """
 
     @api.depends('res_model', 'res_id')
-    def _compute_journal_id(self):
+    def _compute_related_fields(self):
         for doc in self:
             record = self.env[doc.res_model].browse(doc.res_id)
+            doc.company_id = record.company_id
             if doc.res_model == 'account.move':
                 doc.journal_id = record.journal_id
             elif doc.res_model == 'pos.order':
@@ -161,7 +166,7 @@ class L10nSaEdiDocument(models.Model):
         mode = 'reporting' if record._l10n_sa_is_simplified() else 'clearance'
         if mode == 'clearance' and clearance_data.get('clearanceStatus', '') != 'CLEARED':
             return {'error': _("Invoice could not be cleared:\n%s", clearance_data), 'blocking_level': 'error'}
-        elif mode == 'reporting' and clearance_data.get('reportingStatus', '') != 'REPORTED':
+        if mode == 'reporting' and clearance_data.get('reportingStatus', '') != 'REPORTED':
             return {'error': _("Invoice could not be reported:\n%s", clearance_data), 'blocking_level': 'error'}
         return clearance_data
 
@@ -351,7 +356,6 @@ class L10nSaEdiDocument(models.Model):
         qr_node.text = qr_code
         return etree.tostring(root, with_tail=False)
 
-    @api.model
     def _l10n_sa_get_signed_xml(self, unsigned_xml, certificate):
         """
         Helper method to sign the provided XML, apply the QR code in the case if Simplified invoices (B2C), then
@@ -528,3 +532,71 @@ class L10nSaEdiDocument(models.Model):
         """Return contents of the submitted UBL file or generate it if the invoice has not been submitted yet"""
         doc = invoice.l10n_sa_edi_document_id.filtered(lambda d: d.state == 'accepted')
         return doc.attachment_id.raw or self._l10n_sa_generate_zatca_template(invoice).encode()
+
+    @api.model
+    def _l10n_sa_get_qr_code_encoding(self, tag, field, int_length=1):
+        """
+        Helper function to encode strings for the QR code generation according to ZATCA specs
+        """
+        company_name_tag_encoding = tag.to_bytes(length=1, byteorder='big')
+        company_name_length_encoding = len(field).to_bytes(length=int_length, byteorder='big')
+        return company_name_tag_encoding + company_name_length_encoding + field
+
+    @api.model
+    def _build_simplified_phase_2_qr(self, company_id, unsigned_xml, certificate, signature):
+        """
+        Generate QR code string based on XML content of the Invoice UBL file, X509 Production Certificate
+        and company info.
+
+        :return b64 encoded QR code string
+        """
+
+        def xpath_ns(expr):
+            return root.xpath(expr, namespaces=edi_format._l10n_sa_get_namespaces())[0].text.strip()
+
+        qr_code_str = b''
+        root = etree.fromstring(unsigned_xml)
+        edi_format = self.env['account.edi.xml.ubl_21.zatca']
+
+        # Indent XML content to avoid indentation mismatches
+        etree.indent(root, space='    ')
+
+        invoice_date = xpath_ns('//cbc:IssueDate')
+        invoice_time = xpath_ns('//cbc:IssueTime')
+        invoice_datetime = datetime.strptime(invoice_date + ' ' + invoice_time, '%Y-%m-%d %H:%M:%S')
+
+        if invoice_datetime and company_id.vat and certificate and signature:
+            prehash_content = etree.tostring(root)
+            invoice_hash = edi_format._l10n_sa_generate_invoice_xml_hash(prehash_content, 'digest')
+
+            amount_total = float(xpath_ns('//cbc:PayableAmount'))
+            amount_tax = float(xpath_ns('//cac:TaxTotal/cbc:TaxAmount'))
+            seller_name_enc = self._l10n_sa_get_qr_code_encoding(1, company_id.display_name.encode())
+            seller_vat_enc = self._l10n_sa_get_qr_code_encoding(2, company_id.vat.encode())
+            timestamp_enc = self._l10n_sa_get_qr_code_encoding(3,
+                                                               invoice_datetime.strftime("%Y-%m-%dT%H:%M:%S").encode())
+            amount_total_enc = self._l10n_sa_get_qr_code_encoding(4, float_repr(abs(amount_total), 2).encode())
+            amount_tax_enc = self._l10n_sa_get_qr_code_encoding(5, float_repr(abs(amount_tax), 2).encode())
+            invoice_hash_enc = self._l10n_sa_get_qr_code_encoding(6, invoice_hash)
+            signature_enc = self._l10n_sa_get_qr_code_encoding(7, signature.encode())
+            public_key_enc = self._l10n_sa_get_qr_code_encoding(8, base64.b64decode(certificate._get_public_key_bytes(formatting='base64')))
+
+            qr_code_str = (seller_name_enc + seller_vat_enc + timestamp_enc + amount_total_enc +
+                           amount_tax_enc + invoice_hash_enc + signature_enc + public_key_enc)
+
+            qr_code_str += self._l10n_sa_get_qr_code_encoding(9, base64.b64decode(certificate._get_signature_bytes(formatting='base64')))
+
+        return b64encode(qr_code_str).decode()
+
+    def _build_standard_phase_2_qr_for_account_move(self):
+        return ""
+
+    def _get_phase_2_qr(self, simplified=False):
+        if simplified:
+            return self._build_simplified_phase_2_qr(
+                self.company_id,
+                self._l10n_sa_generate_zatca_template(),
+                self.journal_id.l10n_sa_production_csid_certificate_id,
+                self.env[self.res_model].browse(self.res_id).l10n_sa_invoice_signature,
+            )
+        return ""
