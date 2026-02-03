@@ -68,6 +68,11 @@ class PosSelfOrderController(http.Controller):
 
         return self._generate_return_values(order_ids, pos_config)
 
+    @http.route("/pos-self-order/process-requests/<device_type>/", auth="public", type="jsonrpc", website=True)
+    def process_customer_requests(self, order, access_token, table_identifier, requested_service, device_type):
+        pos_config, table = self._verify_authorization(access_token, table_identifier, order)
+        pos_config._notify("UPDATE_CUSTOMER_REQUESTS", { "table_id": table.id, "service": requested_service})
+
     def _generate_return_values(self, order, config):
         return {
             'pos.order': self.env['pos.order']._load_pos_self_data_read(order, config),

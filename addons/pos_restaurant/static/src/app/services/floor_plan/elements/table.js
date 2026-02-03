@@ -3,14 +3,13 @@ import { FloorElement } from "./floor_element";
 import { calculateBoundsFromTransform } from "@pos_restaurant/app/services/floor_plan/utils/bounds_calculator";
 import { markRaw } from "@odoo/owl";
 import { normDeg } from "../utils/utils";
-const TABLE_FREE_OPACITY = 0.3;
 
 export class FloorTable extends FloorElement {
     constructor(data) {
         super(data);
         if (this.roundedCorner == null && (this.shape === "rect" || this.shape === "square")) {
             const minSide = Math.max(this.width || 0, this.height || 0);
-            this.roundedCorner = Math.round(Math.max(6, minSide * 0.05));
+            this.roundedCorner = Math.round(Math.max(6, minSide * 0.12));
         }
         this.unwatched = markRaw({});
     }
@@ -155,12 +154,29 @@ export class FloorTable extends FloorElement {
     set table_number(number) {
         this.tableNumber = number;
     }
+    getCssColorStyle(changes) {
+        // Table free
+        let color = "grey";
+        const tableOrders = this.record?.getOrders();
+        const isOccupied = this.isOccupied();
+        const hasPrepLines = isOccupied
+            ? Object.keys(tableOrders[0]?.last_order_preparation_change.lines).length > 0
+            : false;
 
-    getCssColorStyle() {
-        if (!this.color) {
-            return "";
+        if (isOccupied) {
+            if (!hasPrepLines && tableOrders[0]) {
+                // New order (never sent to kitchen)
+                color = "purple";
+            } else if (hasPrepLines && changes) {
+                // Updated order (already sent but modified again)
+                color = "yellow";
+            } else if (hasPrepLines && !changes) {
+                // Sent to kitchen (no new changes)
+                color = "green";
+            }
         }
-        const colorInfo = getColorInfo(this.color, this.isOccupied() ? 1 : TABLE_FREE_OPACITY);
+
+        const colorInfo = getColorInfo(color, 0.45);
         const textColor = colorInfo.isDark ? ";color:#fff" : "";
         return (
             "border-color:" +
@@ -176,15 +192,15 @@ export class FloorTable extends FloorElement {
         return this.record?.getOrders().length > 0;
     }
 
-    getTableViewCssStyle() {
+    getTableViewCssStyle(changes) {
         if (this.linkedPosition) {
-            return this.getCssStyle(this.linkedPosition.left, this.linkedPosition.top);
+            return this.getCssStyle(changes, this.linkedPosition.left, this.linkedPosition.top);
         }
-        return this.getCssStyle();
+        return this.getCssStyle(changes);
     }
 
-    getCssStyle(...args) {
-        let style = super.getCssStyle(...args) + this.getCssColorStyle();
+    getCssStyle(changes, ...args) {
+        let style = super.getCssStyle(...args) + this.getCssColorStyle(changes);
         if (this.roundedCorner && (this.shape === "rect" || this.shape === "square")) {
             style += `border-radius: ${this.roundedCorner}px;`;
         }

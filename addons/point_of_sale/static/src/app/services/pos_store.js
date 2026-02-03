@@ -360,7 +360,10 @@ export class PosStore extends WithLazyGetterTrap {
     _resetConnectedCashier() {
         sessionStorage.removeItem(`connected_cashier_${this.config.id}`);
     }
-
+    _resetCustomerRequests() {
+        this.customerRequests = [];
+        sessionStorage.removeItem(`customer_requests`);
+    }
     async initServerData() {
         await this.processServerData();
         await this.handleUrlParams();
@@ -2223,6 +2226,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
     async closePos() {
         this._resetConnectedCashier();
+        this._resetCustomerRequests();
         // If pos is not properly loaded, we just go back to /web without
         // doing anything in the order data.
         if (!this) {

@@ -2,6 +2,51 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_restaurant.floor_plan">
         <div t-ref="container" class="o_fp_canvas floor-map w-100 h-100 overflow-auto position-relative" t-attf-style="{{getContainerStyle()}}">
+            <!-- legend -->
+            <div class="position-absolute top-0 end-0 m-3 d-flex align-items-stretch"
+                style="z-index:1050;">
+                <div t-att-class="'me-2 d-flex align-items-center fs-5 bg-view gap-4 px-3 rounded shadow-sm ' +
+                                (this.state.showLegend ? '' : 'd-none')"
+                    style="
+                        min-height:38px;
+                        backdrop-filter: blur(10px);
+                        -webkit-backdrop-filter: blur(10px);
+                    ">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-circle"
+                            style="width:10px;height:10px;background-color:rgb(120,130,140);"></span>
+                        <small>Blank</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-circle"
+                            style="width:10px;height:10px;background-color:rgb(150,100,220);"></span>
+                        <small>New</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-circle"
+                            style="width:10px;height:10px;background-color:rgb(255,211,70);"></span>
+                        <small>Updated</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-circle"
+                            style="width:10px;height:10px;background-color:rgb(70,180,80);"></span>
+                        <small>In Kitchen</small>
+                    </div>
+                </div>
+
+                <!-- Legend Button -->
+                <button class="btn btn-sm shadow-sm d-flex bg-view align-items-center justify-content-center px-3"
+                        t-on-click="toggleLegend"
+                        style="
+                            min-height:38px;
+                            backdrop-filter: blur(10px);
+                            -webkit-backdrop-filter: blur(10px);
+                            border: none;
+                        ">
+                    <i class="fa fa-info-circle"/>
+                </button>
+            </div>
+
             <t t-if="floorPlanStore.isEmpty()">
                 <div  class="empty-floor d-flex align-items-center justify-content-center h-100" >
                     <div class="text-center">
@@ -32,16 +77,55 @@
     </t>
     <t t-name="pos_restaurant.floor_screen_element">
         <t t-if="element.isTable">
-            <t t-set="table" t-value="element.record"/>
+             <t t-set="table" t-value="element.record"/>
+             <t t-set="data" t-value="getChangeCount(element.id)"/>
+             <t t-set="request" t-value="pos.customerRequests?.find(r => r.table_id === element.id)"/>
              <div t-attf-class="o_fp_table table floor-table {{ kanbanMode ? 'd-flex align-items-center justify-content-center' : 'o_fp_shape ' + element.shape}} "
                   t-on-click="(ev) => this.onClickTable(table, ev)"
-                  t-att-style="kanbanMode ? element.getCssColorStyle() : element.getTableViewCssStyle()"
+                  t-att-style="kanbanMode ? element.getCssColorStyle(data.changes) : element.getTableViewCssStyle(data.changes)"
                   t-attf-id="fpe-{{element.uuid}}" t-attf-data-table_id="{{element.id}}" >
                  <t t-set="tableContentStyle" t-value="kanbanMode ? '' : element.getTableContentStyle()"/>
-                 <div t-out="element.table_number" class="o_fp_table_number label fs-4 fw-bolder" t-att-class="{'opacity-50': element.parent_id}" t-att-style="tableContentStyle"/>
-                 <t t-set="tableContentStyle" t-value="kanbanMode ? '' : element.getTableContentStyle()"/>
-                 <t t-set="data" t-value="getChangeCount(element.id)"/>
-                 <div t-if="data.changes > 0" t-esc="this.env.utils.formatProductQty(data.changes, false)" t-att-style="tableContentStyle" class="order-count text-bg-danger d-flex align-items-center justify-content-center position-absolute top-0 end-0 rounded-3 smaller fw-bolder z-2 badge"/>
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 position-relative">
+                    <!-- Table Number -->
+                    <div t-out="element.table_number"
+                        class="o_fp_table_number label fs-4 fw-bolder text-center"
+                        t-att-class="{'opacity-50': element.parent_id}"
+                        t-att-style="tableContentStyle"/>
+                    <!-- Request Icons -->
+                    <div class="table-actions d-flex gap-1 mt-1"
+                        t-if="request and request.requested_services?.length"
+                        t-att-style="tableContentStyle">
+                        <t t-if="request.requested_services.includes('water')">
+                            <div class="table-request-btn">
+                                <i class="fa fa-glass"/>
+                            </div>
+                        </t>
+                        <t t-if="request.requested_services.includes('bill')">
+                            <div class="table-request-btn">
+                                <i class="fa fa-file-text"/>
+                            </div>
+                        </t>
+                        <t t-if="request.requested_services.includes('assistance')">
+                            <div class="table-request-btn">
+                                <i class="fa fa-user"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+                <!-- Changes Count -->
+                <div t-if="data.changes > 0"
+                    t-att-style="tableContentStyle"
+                    class="order-count position-absolute top-0 end-0 z-2">
+                    <div class="position-relative d-flex align-items-center justify-content-center"
+                        style="width:27px;height:27px;color:red;">
+                        <i class="fa fa-bell fs-2"/>
+                        <!-- Number Overlay -->
+                        <span class="position-absolute fw-bold text-light"
+                            style="font-size:12px;">
+                            <t t-esc="this.env.utils.formatProductQty(data.changes, false)"/>
+                        </span>
+                    </div>
+                 </div>
              </div>
         </t>
         <t t-else="">

@@ -5,6 +5,7 @@ import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { useService } from "@web/core/utils/hooks";
 import { LanguagePopup } from "@pos_self_order/app/components/language_popup/language_popup";
 import { session } from "@web/session";
+import { rpc } from "@web/core/network/rpc";
 
 export class LandingPage extends Component {
     static template = "pos_self_order.LandingPage";
@@ -121,5 +122,23 @@ export class LandingPage extends Component {
     showMyOrderBtn() {
         const ordersNotDraft = this.selfOrder.models["pos.order"].find((o) => o.access_token);
         return this.selfOrder.ordering && ordersNotDraft;
+    }
+    async handleCustomerRequests(service) {
+        await rpc(`/pos-self-order/process-requests/${this.selfOrder.config.self_ordering_mode}`, {
+            order: this.selfOrder.currentOrder.serializeForORM(),
+            access_token: this.selfOrder.access_token,
+            table_identifier: this.router.getTableIdentifier(), // Always trust URL one, is the one user scanned
+            requested_service: service,
+        });
+        this.env.services.notification.add(`${service} requested.`, { type: "info" });
+    }
+    async callWater() {
+        await this.handleCustomerRequests("water");
+    }
+    async callBill() {
+        await this.handleCustomerRequests("bill");
+    }
+    async callAssistance() {
+        await this.handleCustomerRequests("assistance");
     }
 }

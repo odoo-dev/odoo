@@ -2,6 +2,30 @@ import { PosStore } from "@point_of_sale/app/services/pos_store";
 import { patch } from "@web/core/utils/patch";
 
 patch(PosStore.prototype, {
+    setup() {
+        super.setup(...arguments);
+        this.customerRequests = this.getCustomerRequests() || [];
+        this.data.connectWebSocket(`UPDATE_CUSTOMER_REQUESTS`, (data) => {
+            this.setCustomerRequests(data);
+        });
+    },
+    setCustomerRequests(data) {
+        const table_requests = this.customerRequests.find((r) => r.table_id == data.table_id);
+        if (table_requests) {
+            if (!table_requests.requested_services.includes(data.service)) {
+                table_requests.requested_services.push(data.service);
+            }
+        } else {
+            this.customerRequests.push({
+                table_id: data.table_id,
+                requested_services: [data.service],
+            });
+        }
+        sessionStorage.setItem("customer_requests", JSON.stringify(this.customerRequests));
+    },
+    getCustomerRequests() {
+        return JSON.parse(sessionStorage.getItem("customer_requests"));
+    },
     async getServerOrders() {
         if (this.session._self_ordering) {
             await this.data.loadServerOrders([

@@ -1,5 +1,5 @@
 import { FloorPlanBase } from "@pos_restaurant/app/screens/floor_screen/floor_plan_base";
-import { markRaw, onWillUnmount, useEffect, useExternalListener } from "@odoo/owl";
+import { markRaw, onWillUnmount, useEffect, useState, useExternalListener } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { setElementTransform } from "@pos_restaurant/app/services/floor_plan/utils/utils";
@@ -27,10 +27,15 @@ export class FloorPlan extends FloorPlanBase {
             },
             () => [this.floorPlanStore.selectedFloor, this.floorPlanStore.isKanban()]
         );
+        this.state = useState({ showLegend: false });
         this.initTableLinkDND();
         onWillUnmount(() => {
             this.saveScrollPosition();
         });
+    }
+
+    toggleLegend() {
+        this.state.showLegend = !this.state.showLegend;
     }
 
     onFloorChange(selectedFloor, isKanban) {

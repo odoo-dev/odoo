@@ -52,5 +52,22 @@
                 </div>
             </div>
         </div>
+       <div t-if="selfOrder.config.self_ordering_mode === 'mobile' and draftOrder.length > 0" class="position-fixed top-50 end-0 translate-middle-y me-3 d-flex flex-column gap-3">
+            <button t-on-click="callWater" class="btn btn-light shadow d-flex flex-column align-items-center justify-content-center rounded-3 p-2">
+                <i class="fa fa-tint text-primary fs-5"/>
+                <small class="fw-semibold mt-1" style="font-size:10px;">Water</small>
+            </button>
+
+            <button t-on-click="callBill" class="btn btn-light shadow d-flex flex-column align-items-center justify-content-center rounded-3 p-2">
+                <i class="fa fa-file text-dark fs-5"/>
+                <small class="fw-semibold mt-1" style="font-size:10px;">Bill</small>
+            </button>
+
+            <button t-on-click="callAssistance" class="btn btn-light shadow d-flex flex-column align-items-center justify-content-center rounded-3 p-2">
+                <i class="fa fa-bell text-warning fs-5"/>
+                <small class="fw-semibold mt-1" style="font-size:10px;">Waiter</small>
+            </button>
+        </div>
+
     </t>
 </templates>
