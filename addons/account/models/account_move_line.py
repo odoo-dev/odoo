@@ -1,6 +1,7 @@
 from collections import defaultdict
 from contextlib import contextmanager, ExitStack
 from datetime import date
+from itertools import groupby
 import logging
 import re
 
@@ -2106,8 +2107,47 @@ class AccountMoveLine(models.Model):
         }
 
     # -------------------------------------------------------------------------
-    # RECONCILIATION
+    # RECONCILIATION: Virtual lines
     # -------------------------------------------------------------------------
+
+    @api.model
+    def _prepare_reconciliation_line(
+        self,
+        company,
+        currency,
+        account,
+        amount_residual,
+        amount_residual_currency,
+        accounting_date,
+        balance=None,
+        amount_currency=None,
+        partner=None,
+        business_date=None,
+        is_payment=False,
+        is_exchange_diff=False,
+        **kwargs,
+    ):
+        return {
+            **kwargs,
+            'company': company,
+            'currency': currency,
+            'partner': partner or self.env['res.partner'],
+            'account': account,
+            'amount_residual': amount_residual,
+            'amount_residual_currency': amount_residual_currency,
+            'balance': balance or amount_residual,
+            'amount_currency': amount_currency or amount_residual_currency,
+            'accounting_date': accounting_date,
+            'business_date': business_date or accounting_date,
+            'is_payment': is_payment,
+            'is_exchange_diff': is_exchange_diff,
+        }
+
+    def _update_reconcile_aml_values(self, aml_values):
+        aml_values['reconciled'] = (
+            aml_values['company'].currency_id.is_zero(aml_values['amount_residual'])
+            and aml_values['currency'].is_zero(aml_values['amount_residual_currency'])
+        )
 
     def _get_reconciliation_aml_field_value(self, field, shadowed_aml_values):
         self.ensure_one()
@@ -2116,128 +2156,86 @@ class AccountMoveLine(models.Model):
         else:
             return self[field]
 
-    @api.model
-    def _prepare_move_line_residual_amounts(self, aml_values, counterpart_currency, shadowed_aml_values=None, other_aml_values=None):
-        """ Prepare the available residual amounts for each currency.
-        :param aml_values: The values of account.move.line to consider.
-        :param counterpart_currency: The currency of the opposite line this line will be reconciled with.
-        :param shadowed_aml_values: A mapping aml -> dictionary to replace some original aml values to something else.
-                                    This is usefull if you want to preview the reconciliation before doing some changes
-                                    on amls like changing a date or an account.
-        :param other_aml_values:    The other aml values to be reconciled with the current one.
-        :return: A mapping currency -> dictionary containing:
-            * residual: The residual amount left for this currency.
-            * rate:     The rate applied regarding the company's currency.
-        """
+    def _prepare_reconciliation_aml_line(self, shadowed_aml_values=None, **kwargs):
+        self.ensure_one()
 
-        def is_payment(aml):
-            return aml.move_id.origin_payment_id or aml.move_id.statement_line_id
+        is_invoice = self.move_id.is_invoice(include_receipts=True)
+        business_date = self._get_reconciliation_aml_field_value('date_maturity', shadowed_aml_values)
+        if is_invoice and not business_date and self.move_id.invoice_date:
+            business_date = self.move_id.invoice_date
 
-        def get_odoo_rate(aml, other_aml, currency):
-            if forced_rate := self.env.context.get('forced_rate_from_register_payment'):
-                return forced_rate
-            if other_aml and not is_payment(aml) and is_payment(other_aml):
-                return get_accounting_rate(other_aml, currency)
-            if aml.move_id.is_invoice(include_receipts=True):
-                exchange_rate_date = aml.move_id.invoice_date
-            else:
-                exchange_rate_date = aml._get_reconciliation_aml_field_value('date', shadowed_aml_values)
-            return currency._get_conversion_rate(aml.company_currency_id, currency, aml.company_id, exchange_rate_date)
-
-        def get_accounting_rate(aml, currency):
-            balance = aml._get_reconciliation_aml_field_value('balance', shadowed_aml_values)
-            amount_currency = aml._get_reconciliation_aml_field_value('amount_currency', shadowed_aml_values)
-            if not aml.company_currency_id.is_zero(balance) and not currency.is_zero(amount_currency):
-                return abs(amount_currency / balance)
-
-        aml = aml_values['aml']
-        other_aml = (other_aml_values or {}).get('aml')
-        remaining_amount_curr = aml_values['amount_residual_currency']
-        remaining_amount = aml_values['amount_residual']
-        company_currency = aml.company_currency_id
-        currency = aml._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values)
-        account = aml._get_reconciliation_aml_field_value('account_id', shadowed_aml_values)
-        has_zero_residual = company_currency.is_zero(remaining_amount)
-        has_zero_residual_currency = currency.is_zero(remaining_amount_curr)
-        is_rec_pay_account = account.account_type in ('asset_receivable', 'liability_payable')
-
-        available_residual_per_currency = {}
-
-        if not has_zero_residual:
-            available_residual_per_currency[company_currency] = {
-                'residual': remaining_amount,
-                'rate': 1,
-            }
-        if currency != company_currency and not has_zero_residual_currency:
-            available_residual_per_currency[currency] = {
-                'residual': remaining_amount_curr,
-                'rate': get_accounting_rate(aml, currency),
-            }
-
-        if currency == company_currency \
-            and is_rec_pay_account \
-            and not has_zero_residual \
-            and counterpart_currency != company_currency:
-            rate = get_odoo_rate(aml, other_aml, counterpart_currency)
-            residual_in_foreign_curr = counterpart_currency.round(remaining_amount * rate)
-            if not counterpart_currency.is_zero(residual_in_foreign_curr):
-                available_residual_per_currency[counterpart_currency] = {
-                    'residual': residual_in_foreign_curr,
-                    'rate': rate,
-                }
-        elif currency == counterpart_currency \
-            and currency != company_currency \
-            and not has_zero_residual_currency:
-            available_residual_per_currency[counterpart_currency] = {
-                'residual': remaining_amount_curr,
-                'rate': get_accounting_rate(aml, currency),
-            }
-        return available_residual_per_currency
+        return self._prepare_reconciliation_line(
+            company=self.company_id,
+            currency=self._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values),
+            partner=self._get_reconciliation_aml_field_value('partner_id', shadowed_aml_values),
+            account=self._get_reconciliation_aml_field_value('account_id', shadowed_aml_values),
+            amount_residual=self._get_reconciliation_aml_field_value('amount_residual', shadowed_aml_values),
+            amount_residual_currency=self._get_reconciliation_aml_field_value('amount_residual_currency', shadowed_aml_values),
+            accounting_date=self._get_reconciliation_aml_field_value('date', shadowed_aml_values),
+            business_date=business_date,
+            is_payment=self.payment_id or self.statement_line_id,
+            is_invoice=is_invoice,
+            _aml=self,
+            **kwargs,
+        )
 
     @api.model
-    def _prepare_reconciliation_single_partial(self, debit_values, credit_values, shadowed_aml_values=None):
+    def _prepare_reconciliation_exchange_diff_line(self, aml_values, amount_residual, amount_residual_currency, **kwargs):
+        return self._prepare_reconciliation_line(**{
+            **aml_values,
+            **kwargs,
+            'amount_residual': amount_residual,
+            'amount_residual_currency': amount_residual_currency,
+            'balance': amount_residual,
+            'amount_currency': amount_residual_currency,
+            'business_date': None,
+            'is_payment': False,
+            'is_invoice': False,
+            'is_exchange_diff': True,
+            '_originator_aml_values': aml_values,
+        })
+
+    # -------------------------------------------------------------------------
+    # RECONCILIATION: Collect values to create initial partials + exchange diff
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _add_reconciliation_partial(self, plan_data, debit_aml_values, credit_aml_values):
         """ Prepare the values to create an account.partial.reconcile later when reconciling the dictionaries passed
         as parameters, each one representing an account.move.line.
-        :param debit_values:  The values of account.move.line to consider for a debit line.
-        :param credit_values: The values of account.move.line to consider for a credit line.
-        :param shadowed_aml_values: A mapping aml -> dictionary to replace some original aml values to something else.
-                                    This is usefull if you want to preview the reconciliation before doing some changes
-                                    on amls like changing a date or an account.
-        :return: A dictionary:
-            * debit_values:     None if the line has nothing left to reconcile.
-            * credit_values:    None if the line has nothing left to reconcile.
-            * partial_values:   The newly computed values for the partial.
-            * exchange_values:  The values to create an exchange difference linked to this partial.
+
+        :param plan_data:           The big reconciliation plan computed by '_optimize_reconciliation_plan'.
+        :param debit_aml_values:    The values of account.move.line to consider for a debit line.
+        :param credit_aml_values:   The values of account.move.line to consider for a credit line.
         """
         # ==== Determine the currency in which the reconciliation will be done ====
         # In this part, we retrieve the residual amounts, check if they are zero or not and determine in which
         # currency and at which rate the reconciliation will be done.
-        res = {
-            'debit_values': debit_values,
-            'credit_values': credit_values,
+        results = {
+            'debit_aml_values': debit_aml_values,
+            'credit_aml_values': credit_aml_values,
         }
-        debit_aml = debit_values['aml']
-        credit_aml = credit_values['aml']
-        debit_currency = debit_aml._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values)
-        credit_currency = credit_aml._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values)
-        company_currency = debit_aml.company_currency_id
 
-        remaining_debit_amount_curr = debit_values['amount_residual_currency']
-        remaining_credit_amount_curr = credit_values['amount_residual_currency']
-        remaining_debit_amount = debit_values['amount_residual']
-        remaining_credit_amount = credit_values['amount_residual']
+        debit_aml = debit_aml_values['_aml']
+        credit_aml = credit_aml_values['_aml']
+        debit_currency = debit_aml_values['currency']
+        credit_currency = credit_aml_values['currency']
+        company_currency = debit_aml_values['company'].currency_id
+
+        remaining_debit_amount_curr = debit_aml_values['amount_residual_currency']
+        remaining_credit_amount_curr = credit_aml_values['amount_residual_currency']
+        remaining_debit_amount = debit_aml_values['amount_residual']
+        remaining_credit_amount = credit_aml_values['amount_residual']
 
         debit_available_residual_amounts = self._prepare_move_line_residual_amounts(
-            debit_values,
+            debit_aml_values,
             credit_currency,
-            shadowed_aml_values=shadowed_aml_values,
-            other_aml_values=credit_values,
+            other_aml_values=credit_aml_values,
         )
         credit_available_residual_amounts = self._prepare_move_line_residual_amounts(
-            credit_values,
+            credit_aml_values,
             debit_currency,
-            shadowed_aml_values=shadowed_aml_values,
-            other_aml_values=debit_values,
+            other_aml_values=debit_aml_values,
         )
 
         if debit_currency != company_currency \
@@ -2257,13 +2255,13 @@ class AccountMoveLine(models.Model):
         # Check if there is something left to reconcile. Move to the next loop iteration if not.
         skip_reconciliation = False
         if not debit_recon_values:
-            res['debit_values'] = None
+            results['debit_aml_values'] = None
             skip_reconciliation = True
         if not credit_recon_values:
-            res['credit_values'] = None
+            results['credit_aml_values'] = None
             skip_reconciliation = True
         if skip_reconciliation:
-            return res
+            return results
 
         recon_debit_amount = debit_recon_values['residual']
         recon_credit_amount = -credit_recon_values['residual']
@@ -2313,6 +2311,8 @@ class AccountMoveLine(models.Model):
 
             # Compute the partial amount expressed in company currency.
             partial_amount = min_recon_amount
+            partial_debit_amount = partial_amount
+            partial_credit_amount = partial_amount
 
             # Compute the partial amount expressed in foreign currency.
             if debit_rate:
@@ -2399,142 +2399,170 @@ class AccountMoveLine(models.Model):
             else:
                 partial_credit_amount_currency = min_recon_amount
 
-        # Computation of the partial exchange difference. You can skip this part using the
-        # `no_exchange_difference` context key (when reconciling an exchange difference for example).
-        if not self.env.context.get('no_exchange_difference') and not self.env.context.get('no_exchange_difference_no_recursive'):
-            exchange_lines_to_fix = self.env['account.move.line']
-            amounts_list = []
-            if recon_currency == company_currency:
-                if debit_fully_matched:
-                    debit_exchange_amount = remaining_debit_amount_curr - partial_debit_amount_currency
-                    if not debit_currency.is_zero(debit_exchange_amount):
-                        exchange_lines_to_fix += debit_aml
-                        amounts_list.append({'amount_residual_currency': debit_exchange_amount})
-                        remaining_debit_amount_curr -= debit_exchange_amount
-                if credit_fully_matched:
-                    credit_exchange_amount = remaining_credit_amount_curr + partial_credit_amount_currency
-                    if not credit_currency.is_zero(credit_exchange_amount):
-                        exchange_lines_to_fix += credit_aml
-                        amounts_list.append({'amount_residual_currency': credit_exchange_amount})
-                        remaining_credit_amount_curr += credit_exchange_amount
-
-            else:
-                if debit_fully_matched:
-                    # Create an exchange difference on the remaining amount expressed in company's currency.
-                    debit_exchange_amount = remaining_debit_amount - partial_amount
-                    if not company_currency.is_zero(debit_exchange_amount):
-                        exchange_lines_to_fix += debit_aml
-                        amounts_list.append({'amount_residual': debit_exchange_amount})
-                        remaining_debit_amount -= debit_exchange_amount
-                        if debit_currency == company_currency:
-                            remaining_debit_amount_curr -= debit_exchange_amount
-                else:
-                    # Create an exchange difference ensuring the rate between the residual amounts expressed in
-                    # both foreign and company's currency is still consistent regarding the rate between
-                    # 'amount_currency' & 'balance'.
-                    debit_exchange_amount = partial_debit_amount - partial_amount
-                    if company_currency.compare_amounts(debit_exchange_amount, 0.0) > 0:
-                        exchange_lines_to_fix += debit_aml
-                        amounts_list.append({'amount_residual': debit_exchange_amount})
-                        remaining_debit_amount -= debit_exchange_amount
-                        if debit_currency == company_currency:
-                            remaining_debit_amount_curr -= debit_exchange_amount
-
-                if credit_fully_matched:
-                    # Create an exchange difference on the remaining amount expressed in company's currency.
-                    credit_exchange_amount = remaining_credit_amount + partial_amount
-                    if not company_currency.is_zero(credit_exchange_amount):
-                        exchange_lines_to_fix += credit_aml
-                        amounts_list.append({'amount_residual': credit_exchange_amount})
-                        remaining_credit_amount -= credit_exchange_amount
-                        if credit_currency == company_currency:
-                            remaining_credit_amount_curr -= credit_exchange_amount
-                else:
-                    # Create an exchange difference ensuring the rate between the residual amounts expressed in
-                    # both foreign and company's currency is still consistent regarding the rate between
-                    # 'amount_currency' & 'balance'.
-                    credit_exchange_amount = partial_amount - partial_credit_amount
-                    if company_currency.compare_amounts(credit_exchange_amount, 0.0) < 0:
-                        exchange_lines_to_fix += credit_aml
-                        amounts_list.append({'amount_residual': credit_exchange_amount})
-                        remaining_credit_amount -= credit_exchange_amount
-                        if credit_currency == company_currency:
-                            remaining_credit_amount_curr -= credit_exchange_amount
-
-            if exchange_lines_to_fix:
-                res['exchange_values'] = exchange_lines_to_fix._prepare_exchange_difference_move_vals(
-                    amounts_list,
-                    exchange_date=max(
-                        debit_aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
-                        credit_aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
-                    ),
-                )
-                res['exchange_values']['to_post'] = debit_aml.parent_state == 'posted' and credit_aml.parent_state == 'posted'
-
-        # ==== Create partials ====
+        # ==== Create partial ====
 
         remaining_debit_amount -= partial_amount
         remaining_credit_amount += partial_amount
         remaining_debit_amount_curr -= partial_debit_amount_currency
         remaining_credit_amount_curr += partial_credit_amount_currency
 
-        res['partial_values'] = {
+        results['partial_values'] = {
             'amount': partial_amount,
             'debit_amount_currency': partial_debit_amount_currency,
             'credit_amount_currency': partial_credit_amount_currency,
             'debit_move_id': debit_aml.id,
             'credit_move_id': credit_aml.id,
+
+            '_reconciliation_currency': recon_currency,
+            '_debit_fully_matched': debit_fully_matched,
+            '_credit_fully_matched': credit_fully_matched,
+            '_debit_amount': partial_debit_amount,
+            '_credit_amount': -partial_credit_amount,
+            '_debit_aml_values': debit_aml_values,
+            '_credit_aml_values': credit_aml_values,
         }
-        res['debit_aml'] = debit_aml
-        res['credit_aml'] = credit_aml
 
-        debit_values['amount_residual'] = remaining_debit_amount
-        debit_values['amount_residual_currency'] = remaining_debit_amount_curr
-        credit_values['amount_residual'] = remaining_credit_amount
-        credit_values['amount_residual_currency'] = remaining_credit_amount_curr
+        debit_aml_values['amount_residual'] = remaining_debit_amount
+        debit_aml_values['amount_residual_currency'] = remaining_debit_amount_curr
+        credit_aml_values['amount_residual'] = remaining_credit_amount
+        credit_aml_values['amount_residual_currency'] = remaining_credit_amount_curr
 
-        if (
-            debit_currency.is_zero(debit_values['amount_residual_currency'])
-            and company_currency.is_zero(debit_values['amount_residual'])
-        ):
-            res['debit_values'] = None
-        if (
-            credit_currency.is_zero(credit_values['amount_residual_currency'])
-            and company_currency.is_zero(credit_values['amount_residual'])
-        ):
-            res['credit_values'] = None
-        return res
+        self._update_reconcile_aml_values(debit_aml_values)
+        self._update_reconcile_aml_values(credit_aml_values)
+
+        if debit_aml_values['reconciled']:
+            results['debit_aml_values'] = None
+        if credit_aml_values['reconciled']:
+            results['credit_aml_values'] = None
+        return results
 
     @api.model
-    def _prepare_reconciliation_amls(self, values_list, shadowed_aml_values=None):
+    def _add_reconciliation_partial_exchange_diff(self, plan_data, partial_values):
+        # Computation of the partial exchange difference. You can skip this part using the
+        # `no_exchange_difference` context key (when reconciling an exchange difference for example).
+        if self.env.context.get('no_exchange_difference') or self.env.context.get('no_exchange_difference_no_recursive'):
+            return
+
+        debit_aml_values = partial_values['_debit_aml_values']
+        credit_aml_values = partial_values['_credit_aml_values']
+        debit_fully_matched = partial_values['_debit_fully_matched']
+        credit_fully_matched = partial_values['_credit_fully_matched']
+        recon_currency = partial_values['_reconciliation_currency']
+        company_currency = debit_aml_values['company'].currency_id
+
+        exchange_diff_aml_values = None
+        if recon_currency == company_currency:
+            # Reconciliation has been made in company currency.
+            # An exchange difference might need to be created expressed in foreign currency.
+            for is_fully_matched, aml_values in ((debit_fully_matched, debit_aml_values), (credit_fully_matched, credit_aml_values)):
+                residual = aml_values['amount_residual_currency']
+                if is_fully_matched or aml_values['currency'].is_zero(residual):
+                    continue
+
+                exchange_diff_aml_values = self._prepare_reconciliation_exchange_diff_line(
+                    aml_values=aml_values,
+                    amount_residual=0.0,
+                    amount_residual_currency=residual,
+                )
+        else:
+            # Reconciliation has been made in foreign currency.
+            # An exchange difference might need to be created expressed in company currency.
+            for is_fully_matched, aml_values, aml_values_partial_amount in (
+                (debit_fully_matched, debit_aml_values, partial_values['_debit_amount']),
+                (credit_fully_matched, credit_aml_values, partial_values['_credit_amount']),
+            ):
+                if is_fully_matched:
+                    residual = aml_values['amount_residual']
+                    if company_currency.is_zero(residual):
+                        continue
+
+                    exchange_diff_aml_values = self._prepare_reconciliation_exchange_diff_line(
+                        aml_values=aml_values,
+                        amount_residual=-residual,
+                        amount_residual_currency=-residual if company_currency == aml_values['currency'] else 0.0,
+                    )
+                else:
+                    if company_currency.compare_amounts(aml_values_partial_amount, 0.0) > 0:
+                        exchange_diff_aml_values = self._prepare_reconciliation_exchange_diff_line(
+                            aml_values=aml_values,
+                            amount_residual=-aml_values_partial_amount,
+                            amount_residual_currency=-aml_values_partial_amount if company_currency == aml_values['currency'] else 0.0,
+                        )
+
+        if not exchange_diff_aml_values:
+            return
+
+        company = debit_aml_values['company']
+        journal = company.currency_exchange_journal_id
+        if not journal:
+            raise UserError(_(
+                "You have to configure the 'Exchange Gain or Loss Journal' in your company settings, to manage"
+                " automatically the booking of accounting entries related to differences between exchange rates."
+            ))
+        if not journal.company_id.expense_currency_exchange_account_id:
+            raise UserError(_(
+                "You should configure the 'Loss Exchange Rate Account' in your company settings, to manage"
+                " automatically the booking of accounting entries related to differences between exchange rates."
+            ))
+        if not journal.company_id.income_currency_exchange_account_id.id:
+            raise UserError(_(
+                "You should configure the 'Gain Exchange Rate Account' in your company settings, to manage"
+                " automatically the booking of accounting entries related to differences between exchange rates."
+            ))
+
+        # Update the aml affected by this exchange line.
+        originator_aml_values = exchange_diff_aml_values['_originator_aml_values']
+        originator_aml_values['amount_residual'] += exchange_diff_aml_values['amount_residual']
+        originator_aml_values['amount_residual_currency'] += exchange_diff_aml_values['amount_residual_currency']
+        self._update_reconcile_aml_values(originator_aml_values)
+
+        # Create the counterpart exchange line.
+
+        if (exchange_diff_aml_values['amount_residual'] or exchange_diff_aml_values['amount_residual_currency']) > 0.0:
+            exchange_account = company.income_currency_exchange_account_id
+        else:
+            exchange_account = company.expense_currency_exchange_account_id
+
+        counterpart_exchange_diff_aml_values = self._prepare_reconciliation_line(**{
+            **exchange_diff_aml_values,
+            'amount_residual': -exchange_diff_aml_values['amount_residual'],
+            'amount_residual_currency': -exchange_diff_aml_values['amount_residual_currency'],
+            'balance': -exchange_diff_aml_values['balance'],
+            'amount_currency': -exchange_diff_aml_values['amount_currency'],
+            'account': exchange_account,
+        })
+
+        partial_values['_exchange_diff_values'] = {
+            'exchange_diff_aml_values': exchange_diff_aml_values,
+            'counterpart_exchange_diff_aml_values': counterpart_exchange_diff_aml_values,
+        }
+
+    @api.model
+    def _add_reconciliation_partials_amls(self, plan_data, plan_node):
         """ Prepare the partials on the current journal items to perform the reconciliation.
         Note: The order of records in self is important because the journal items will be reconciled using this order.
 
-        :param values_list: A list of dictionaries, one for each aml.
-        :param shadowed_aml_values: A mapping aml -> dictionary to replace some original aml values to something else.
-                                    This is usefull if you want to preview the reconciliation before doing some changes
-                                    on amls like changing a date or an account.
+        :param plan_data:       The big reconciliation plan computed by '_optimize_reconciliation_plan'.
+        :param plan_node:       The current node to be processed in the reconciliation plan.
+
         :return: a tuple of
             1) list of vals for partial reconciliation creation,
             2) the list of vals for the exchange difference entries to be created
         """
-        debit_values_list = iter([
-            x
-            for x in values_list
-            if x['aml']._get_reconciliation_aml_field_value('balance', shadowed_aml_values) > 0.0
-               or x['aml']._get_reconciliation_aml_field_value('amount_currency', shadowed_aml_values) > 0.0
+        aml_values_list = plan_node['aml_values_list']
+        debit_aml_values_list = iter([
+            aml_values
+            for aml_values in aml_values_list
+            if aml_values['amount_residual'] > 0.0 or aml_values['amount_residual_currency'] > 0.0
         ])
-        credit_values_list = iter([
-            x
-            for x in values_list
-            if x['aml']._get_reconciliation_aml_field_value('balance', shadowed_aml_values) < 0.0
-               or x['aml']._get_reconciliation_aml_field_value('amount_currency', shadowed_aml_values) < 0.0
+        credit_aml_values_list = iter([
+            aml_values
+            for aml_values in aml_values_list
+            if aml_values['amount_residual'] < 0.0 or aml_values['amount_residual_currency'] < 0.0
         ])
-        debit_values = None
-        credit_values = None
-        fully_reconciled_aml_ids = set()
 
-        all_results = []
+        debit_aml_values = None
+        credit_aml_values = None
         while True:
 
             # ==== Find the next available lines ====
@@ -2543,63 +2571,50 @@ class AccountMoveLine(models.Model):
             # and reduced "manually" every time we append a dictionary to 'partials_values_list'.
 
             # Move to the next available debit line.
-            if not debit_values:
-                debit_values = next(debit_values_list, None)
-                if not debit_values:
+            if not debit_aml_values:
+                debit_aml_values = next(debit_aml_values_list, None)
+                if not debit_aml_values:
                     break
 
             # Move to the next available credit line.
-            if not credit_values:
-                credit_values = next(credit_values_list, None)
-                if not credit_values:
+            if not credit_aml_values:
+                credit_aml_values = next(credit_aml_values_list, None)
+                if not credit_aml_values:
                     break
 
             # ==== Compute the amounts to reconcile ====
 
-            results = self._prepare_reconciliation_single_partial(
-                debit_values,
-                credit_values,
-                shadowed_aml_values=shadowed_aml_values,
+            reconciliation_results = self._add_reconciliation_partial(
+                plan_data=plan_data,
+                debit_aml_values=debit_aml_values,
+                credit_aml_values=credit_aml_values,
             )
-            if results.get('partial_values'):
-                all_results.append(results)
-            if results['debit_values'] is None:
-                fully_reconciled_aml_ids.add(debit_values['aml'].id)
-                debit_values = None
-            if results['credit_values'] is None:
-                fully_reconciled_aml_ids.add(credit_values['aml'].id)
-                credit_values = None
+            if reconciliation_results['debit_aml_values'] is None:
+                debit_aml_values = None
+            if reconciliation_results['credit_aml_values'] is None:
+                credit_aml_values = None
 
-        return all_results, fully_reconciled_aml_ids
+            partial_values = reconciliation_results.get('partial_values')
+            if partial_values:
+                plan_data['partial_values_list'].append(partial_values)
+
+                self._add_reconciliation_partial_exchange_diff(
+                    plan_data=plan_data,
+                    partial_values=partial_values,
+                )
 
     @api.model
-    def _prepare_reconciliation_plan(self, plan, amls_values_map, shadowed_aml_values=None):
+    def _add_reconciliation_partials(self, plan_data):
         """ Perform virtually the reconciliation of the plan passed as parameter.
 
-        :param plan: The plan to know which lines to reconcile in which order.
-        :param amls_values_map: A mapping aml => amount_residual/amount_residual_currency
-        :param shadowed_aml_values: A mapping aml -> dictionary to replace some original aml values to something else.
-                                    This is usefull if you want to preview the reconciliation before doing some changes
-                                    on amls like changing a date or an account.
-        :return: A list of all results returned by the '_prepare_reconciliation_amls' method.
+        :param plan_data:       The big reconciliation plan computed by '_optimize_reconciliation_plan'.
+        :param plan_node:       The current node to be processed in the reconciliation plan.
         """
-        all_fully_reconciled_aml_ids = set()
-        all_results = []
-
-        def process_amls(amls):
-            remaining_amls = amls.filtered(lambda aml: aml.id not in all_fully_reconciled_aml_ids)
-            if len(remaining_amls.mapped('partner_id')) > 1:
-                remaining_amls = remaining_amls.sorted(lambda aml: (aml.partner_id and aml.partner_id.id) or False)
-            amls_results, fully_reconciled_aml_ids = self._prepare_reconciliation_amls(
-                [
-                    amls_values_map[aml]
-                    for aml in remaining_amls
-                ],
-                shadowed_aml_values=shadowed_aml_values,
-            )
-            all_fully_reconciled_aml_ids.update(fully_reconciled_aml_ids)
-            for amls_result in amls_results:
-                all_results.append(amls_result)
+        self_ctx = self.with_context(
+            no_exchange_difference=self.env.context.get('no_exchange_difference'),
+            # TODO: remove this other key
+            no_exchange_difference_no_recursive=self.env.context.get('no_exchange_difference_no_recursive', False),
+        )
 
         def process_leaf(plan_node):
             # Sub plan to evaluate.
@@ -2607,10 +2622,221 @@ class AccountMoveLine(models.Model):
                 process_leaf(child_node)
 
             # Group of amls to evaluate.
-            process_amls(plan_node['amls'])
+            self_ctx._add_reconciliation_partials_amls(plan_data, plan_node)
 
-        process_leaf(plan)
-        return all_results
+        plan_data['partial_values_list'] = []
+        for plan_node in plan_data['plan_list']:
+            process_leaf(plan_node)
+
+    # -------------------------------------------------------------------------
+    # RECONCILIATION: Collect values about cash basis
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _add_reconciliation_cash_basis_values(self, plan_data):
+        """
+
+        :param plan_data:       The big reconciliation plan computed by '_optimize_reconciliation_plan'.
+        :return:                A list of all results returned by the '_prepare_reconciliation_amls' method.
+        """
+        # cash_basis_values = plan_data['cash_basis_values'] = defaultdict(lambda: {
+        #     'amls': defaultdict(lambda: {
+        #         'partial_values_list': [],
+        #     }),
+        # })
+
+        potential_caba_partial_values_list = []
+        potential_caba_move_ids = set()
+        for partial_values in plan_data['partial_values_list']:
+            debit_aml_values = partial_values['_debit_aml_values']
+            credit_aml_values = partial_values['_credit_aml_values']
+            account = debit_aml_values['account']
+            company = debit_aml_values['company']
+
+            if (
+                not company.tax_exigibility
+                or account.account_type not in ('asset_receivable', 'liability_payable')
+                or self.env.context.get('move_reverse_cancel')
+                or self.env.context.get('no_cash_basis')
+            ):
+                continue
+
+            potential_caba_partial_values_list.append(partial_values)
+            potential_caba_move_ids.add(debit_aml_values['_aml'].move_id.id)
+            potential_caba_move_ids.add(credit_aml_values['_aml'].move_id.id)
+            # cash_basis_values = partial_values['_cash_basis_values'] = {}
+
+        if not potential_caba_partial_values_list:
+            return
+
+        rows = self.env.execute_query_dict(SQL(
+            """
+                SELECT
+                    aml.id,
+                    aml.move_id,
+                    aml.currency_id,
+                    'receivable_payable' AS aml_type
+                FROM account_move_line aml
+                WHERE
+                    aml.move_id IN %(move_ids)s
+                    AND aml.account_type IN ('asset_receivable', 'liability_payable')
+                    AND aml.tax_line_id IS NULL
+
+                UNION ALL
+
+                SELECT
+                    aml.id,
+                    aml.move_id,
+                    aml.currency_id,
+                    'tax' AS aml_type
+                FROM account_move_line aml
+                JOIN account_tax tax ON tax.id = aml.tax_line_id
+                WHERE
+                    aml.move_id IN %(move_ids)s
+                    AND tax.tax_exigibility = 'on_payment'
+
+                UNION ALL
+
+                SELECT
+                    aml.id,
+                    aml.move_id,
+                    aml.currency_id,
+                    'base' AS aml_type
+                FROM account_tax_account_move_line_rel tax_rel
+                JOIN account_move_line aml ON aml.id = tax_rel.account_move_line_id
+                WHERE
+                    aml.move_id IN %(move_ids)s
+                    AND aml.tax_line_id IS NULL
+            """,
+            move_ids=tuple(potential_caba_move_ids),
+        ))
+
+        cash_basis_values = defaultdict(lambda: {
+            'currency_ids': set(),
+            'receivable_payable': [],
+            'tax': [],
+            'base': [],
+        })
+        for row in rows:
+            move_cash_basis_values = cash_basis_values[row['move_id']]
+            move_cash_basis_values['currency_ids'].add(row['currency_id'])
+            move_cash_basis_values[row['aml_type']].append(row['id'])
+
+
+
+    # -------------------------------------------------------------------------
+    # RECONCILIATION: Exchange diff to accounting entries
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _turn_partial_values_exchange_diff_lines_to_move_values(self, plan_data, partial_values):
+        exchange_diff_values = partial_values.get('_exchange_diff_values')
+        if not exchange_diff_values:
+            return
+
+        debit_aml_values = partial_values['_debit_aml_values']
+        credit_aml_values = partial_values['_credit_aml_values']
+        company = debit_aml_values['company']
+        journal = company.currency_exchange_journal_id
+        max_exchange_date = max(debit_aml_values['accounting_date'], credit_aml_values['accounting_date'])
+        exchange_date = max(
+            journal.with_context(move_date=max_exchange_date).accounting_date,
+            max_exchange_date,
+        )
+
+        amls = debit_aml_values['_aml'] + credit_aml_values['_aml']
+        ref = ','.join(amls.move_id.mapped('name'))
+
+        exchange_diff_aml_values = exchange_diff_values['exchange_diff_aml_values']
+        counterpart_exchange_diff_aml_values = exchange_diff_values['counterpart_exchange_diff_aml_values']
+        partial_values['_exchange_diff_move_values'] = {
+            'move_type': 'entry',
+            'name': '/', # do not trigger the compute name before posting as it will most likely be posted immediately after
+            'ref': ref,
+            'date': exchange_date,
+            'journal_id': journal.id,
+            'line_ids': [
+                Command.create({
+                    'name': _('Currency exchange rate difference'),
+                    'balance': exchange_diff_aml_values['amount_residual'],
+                    'amount_currency': exchange_diff_aml_values['amount_residual_currency'],
+                    'account_id': exchange_diff_aml_values['account'].id,
+                    'currency_id': exchange_diff_aml_values['currency'].id,
+                    'partner_id': exchange_diff_aml_values['partner'].id,
+                }),
+                Command.create({
+                    'name': _('Currency exchange rate difference'),
+                    'balance': counterpart_exchange_diff_aml_values['amount_residual'],
+                    'amount_currency': counterpart_exchange_diff_aml_values['amount_residual_currency'],
+                    'account_id': counterpart_exchange_diff_aml_values['account'].id,
+                    'currency_id': counterpart_exchange_diff_aml_values['currency'].id,
+                    'partner_id': counterpart_exchange_diff_aml_values['partner'].id,
+                }),
+            ],
+            'always_tax_exigible': True,
+            '_to_post': set(amls.mapped('parent_state')) == {'posted'},
+        }
+
+    @api.model
+    def _turn_partial_values_list_exchange_diff_lines_to_move_values(self, plan_data):
+        partial_values_list = plan_data['partial_values_list']
+        for partial_values in partial_values_list:
+            self._turn_partial_values_exchange_diff_lines_to_move_values(plan_data, partial_values)
+
+        exchange_diff_move_values_list = [
+            {
+                **exchange_move_values,
+                '_partial_values': partial_values,
+            }
+            for partial_values in partial_values_list
+            if (exchange_move_values := partial_values.get('_exchange_diff_move_values'))
+        ]
+        if not exchange_diff_move_values_list:
+            return
+
+        exchange_moves = self.env['account.move'].create([
+            plan_data['clear_values'](exchange_diff_move_values)
+            for exchange_diff_move_values in exchange_diff_move_values_list
+        ])
+        exchange_moves_to_post = self.env['account.move']
+        for exchange_move, exchange_move_values in zip(exchange_moves, exchange_diff_move_values_list):
+            # Posting.
+            if exchange_move_values['_to_post']:
+                exchange_moves_to_post += exchange_move
+
+            # Link the exchange move to the partial.
+            partial_values = exchange_move_values['_partial_values']
+            partial_values['exchange_move_id'] = exchange_move.id
+
+            # Creation of sub-partials.
+            exchange_diff_aml_values = partial_values['_exchange_diff_values']['exchange_diff_aml_values']
+            originator_aml_values = exchange_diff_aml_values['_originator_aml_values']
+            exchange_diff_aml_values['_aml'] = exchange_move.line_ids[0]
+
+            if originator_aml_values['amount_currency'] > 0.0 or originator_aml_values['balance'] > 0.0:
+                debit_aml_values = originator_aml_values
+                credit_aml_values = exchange_diff_aml_values
+            else:
+                debit_aml_values = exchange_diff_aml_values
+                credit_aml_values = originator_aml_values
+
+            plan_data['partial_values_list'].append({
+                'amount': abs(exchange_diff_aml_values['amount_residual']),
+                'debit_amount_currency': abs(exchange_diff_aml_values['amount_residual_currency']),
+                'credit_amount_currency': abs(exchange_diff_aml_values['amount_residual_currency']),
+                'debit_move_id': debit_aml_values['_aml'].id,
+                'credit_move_id': credit_aml_values['_aml'].id,
+
+                '_debit_aml_values': debit_aml_values,
+                '_credit_aml_values': credit_aml_values,
+            })
+
+        if exchange_moves_to_post:
+            exchange_moves_to_post._post(soft=False)
+
+    # -------------------------------------------------------------------------
+    # RECONCILIATION: Core
+    # -------------------------------------------------------------------------
 
     def _check_amls_exigibility_for_reconciliation(self, shadowed_aml_values=None):
         """ Ensure the current journal items are eligible to be reconciled together.
@@ -2673,50 +2899,75 @@ class AccountMoveLine(models.Model):
             * nodes: A list of sub-nodes.
         """
 
-        def process_amls(amls):
-            if self.env.context.get('reduced_line_sorting'):
-                sorted_amls = amls.sorted(key=lambda aml: (
-                    aml._get_reconciliation_aml_field_value('date_maturity', shadowed_aml_values)
-                        or aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
-                    aml._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values),
-                ))
-            else:
-                sorted_amls = amls.sorted(key=lambda aml: (
-                    aml._get_reconciliation_aml_field_value('date_maturity', shadowed_aml_values)
-                        or aml._get_reconciliation_aml_field_value('date', shadowed_aml_values),
-                    aml._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values),
-                    aml._get_reconciliation_aml_field_value('amount_currency', shadowed_aml_values),
-                    aml._get_reconciliation_aml_field_value('balance', shadowed_aml_values),
-                ))
-            currencies = sorted_amls.mapped(lambda x: x._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values))
-            results = {
-                'amls': sorted_amls,
-                'aml_ids': set(sorted_amls.ids),
-            }
+        # 1) Collect all involved account.move.line.
+        # For performances reason, we ensure all of them are part of the same recordset
+        # for the prefetching.
+        aml_ids = set()
 
-            if len(currencies) != 1:
-                nodes = results['nodes'] = []
-                for currency in currencies:
-                    amls_in_currency = sorted_amls\
-                        .filtered(lambda x: x._get_reconciliation_aml_field_value('currency_id', shadowed_aml_values) == currency)
-                    nodes.append({
-                        'amls': amls_in_currency,
-                        'aml_ids': set(amls_in_currency.ids),
-                    })
-            return results
+        def collect_aml_ids(plan_item):
+            if not plan_item:
+                return
+
+            if isinstance(plan_item, models.BaseModel):
+                # Group of amls to evaluate.
+                for aml in plan_item:
+                    aml_ids.add(aml.id)
+            else:
+                for sub_plan_item in plan_item:
+                    collect_aml_ids(sub_plan_item)
+
+        for plan_item in reconciliation_plan:
+            collect_aml_ids(plan_item)
+
+        # 2) Turn them into dict.
+        amls = self.browse(aml_ids)
+        aml_values_list = [
+            aml._prepare_reconciliation_aml_line(shadowed_aml_values=shadowed_aml_values)
+            for aml in amls
+        ]
+        amls_values_per_aml = {
+            aml_values['_aml']: aml_values
+            for aml_values in aml_values_list
+        }
+
+        # 3) Prepare for the reconciliation.
+        def process_amls(amls):
+            # Sorting.
+            plan_item_aml_values_list = sorted(
+                [amls_values_per_aml[aml] for aml in amls],
+                key=lambda aml_values: (
+                    aml_values['business_date'],
+                    aml_values['accounting_date'],
+                    aml_values['currency'],
+                    aml_values['partner'],
+                    aml_values['amount_currency'],
+                    aml_values['balance'],
+                )
+            )
+            plan_node = {'aml_values_list': plan_item_aml_values_list}
+
+            # Split per currency.
+            plan_item_aml_values_list_per_currency = groupby(
+                plan_item_aml_values_list,
+                lambda aml_values: aml_values['currency'],
+            )
+            if len(plan_item_aml_values_list_per_currency) == 1:
+                return plan_node
+
+            plan_node['nodes'] = [
+                {'aml_values_list': currency_aml_values_list}
+                for currency, currency_aml_values_list in plan_item_aml_values_list_per_currency
+            ]
+            return plan_node
 
         def process_children(children):
-            node = {
-                'nodes': [],
-                'aml_ids': set(),
+            return {
+                'nodes': [
+                    sub_node
+                    for child in children
+                    if (sub_node := process_leaf(child))
+                ],
             }
-            for child in children:
-                results = process_leaf(child)
-                if results:
-                    node['nodes'].append(results)
-                    node['aml_ids'].update(results['aml_ids'])
-            node['amls'] = self.browse(node['aml_ids'])
-            return node
 
         def process_leaf(item):
             if not item:
@@ -2730,19 +2981,99 @@ class AccountMoveLine(models.Model):
                 return process_children(item)
 
         plan_list = []
-        all_aml_ids = set()
-        for item in reconciliation_plan:
-            plan_node = process_leaf(item)
-            if not plan_node or not plan_node.get('amls'):
+        all_amls = self.browse()
+        for plan_item in reconciliation_plan:
+            plan_node = process_leaf(plan_item)
+            if not plan_node or not plan_node.get('aml_values_list'):
                 continue
 
             # Check the amls to be reconciled all together.
-            amls = plan_node['amls']
+            aml_ids = [
+                aml_values['_aml'].id
+                for aml_values in plan_node['aml_values_list']
+            ]
+            amls = self.browse(aml_ids)
+            all_amls |= amls
             amls._check_amls_exigibility_for_reconciliation(shadowed_aml_values=shadowed_aml_values)
             plan_list.append(plan_node)
-            all_aml_ids.update(plan_node['aml_ids'])
 
-        return plan_list, self.browse(all_aml_ids)
+        return {
+            'plan_list': plan_list,
+            'all_amls': all_amls,
+            'amls_values_per_aml': amls_values_per_aml,
+        }
+
+    @api.model
+    def _prepare_move_line_residual_amounts(self, aml_values, counterpart_currency, other_aml_values=None):
+        """ Prepare the available residual amounts for each currency.
+        :param aml_values: The values of account.move.line to consider.
+        :param counterpart_currency: The currency of the opposite line this line will be reconciled with.
+        :param other_aml_values:    The other aml values to be reconciled with the current one.
+
+        :return: A mapping currency -> dictionary containing:
+            * residual: The residual amount left for this currency.
+            * rate:     The rate applied regarding the company's currency.
+        """
+        def get_odoo_rate(aml_values, currency):
+            if forced_rate := self.env.context.get('forced_rate_from_register_payment'):
+                return forced_rate
+            if other_aml_values and not aml_values['is_payment'] and other_aml_values['is_payment']:
+                return get_accounting_rate(other_aml_values)
+
+            company = aml_values['company']
+            return currency._get_conversion_rate(
+                from_currency=company.currency_id,
+                to_currency=currency,
+                company=company,
+                date=aml_values['business_date'],
+            )
+
+        def get_accounting_rate(aml_values):
+            balance = aml_values['balance']
+            amount_currency = aml_values['amount_currency']
+            return abs(amount_currency / balance) if balance else 0.0
+
+        remaining_amount_curr = aml_values['amount_residual_currency']
+        remaining_amount = aml_values['amount_residual']
+        company_currency = aml_values['company'].currency_id
+        currency = aml_values['currency']
+        account = aml_values['account']
+        has_zero_residual = company_currency.is_zero(remaining_amount)
+        has_zero_residual_currency = currency.is_zero(remaining_amount_curr)
+        is_rec_pay_account = account.account_type in ('asset_receivable', 'liability_payable')
+
+        available_residual_per_currency = {}
+
+        if not has_zero_residual:
+            available_residual_per_currency[company_currency] = {
+                'residual': remaining_amount,
+                'rate': 1,
+            }
+        if currency != company_currency and not has_zero_residual_currency:
+            available_residual_per_currency[currency] = {
+                'residual': remaining_amount_curr,
+                'rate': get_accounting_rate(aml_values),
+            }
+
+        if currency == company_currency \
+            and is_rec_pay_account \
+            and not has_zero_residual \
+            and counterpart_currency != company_currency:
+            rate = get_odoo_rate(aml_values, counterpart_currency)
+            residual_in_foreign_curr = counterpart_currency.round(remaining_amount * rate)
+            if not counterpart_currency.is_zero(residual_in_foreign_curr):
+                available_residual_per_currency[counterpart_currency] = {
+                    'residual': residual_in_foreign_curr,
+                    'rate': rate,
+                }
+        elif currency == counterpart_currency \
+            and currency != company_currency \
+            and not has_zero_residual_currency:
+            available_residual_per_currency[counterpart_currency] = {
+                'residual': remaining_amount_curr,
+                'rate': get_accounting_rate(aml_values),
+            }
+        return available_residual_per_currency
 
     def _reconcile_pre_hook(self):
         invoices = self.move_id.filtered(lambda move: move.is_invoice(include_receipts=True))
@@ -2776,294 +3107,139 @@ class AccountMoveLine(models.Model):
         """
         # ==== Prepare the reconciliation ====
         # Batch the amls all together to know what should be reconciled and when.
-        plan_list, all_amls = self._optimize_reconciliation_plan(reconciliation_plan)
+        plan_data = self._optimize_reconciliation_plan(reconciliation_plan)
+        all_amls = plan_data['all_amls']
         move_container = {'records': all_amls.move_id}
         with all_amls.move_id._check_balanced(move_container),\
              all_amls.move_id._sync_dynamic_lines(move_container):
-            self._reconcile_plan_with_sync(plan_list, all_amls)
+            self._reconcile_plan_with_sync(plan_data)
 
-    def _reconcile_plan_with_sync(self, plan_list, all_amls):
-        # ==== Prefetch the fields all at once to speedup the reconciliation ====
-        # All of those fields will be cached by the orm. Since the amls are split into multiple batches, the orm is not
-        # able to prefetch the data for all of them at once. For that reason, we force the orm to populate the cache
-        # before doing anything.
-        all_amls.move_id
-        all_amls.matched_debit_ids
-        all_amls.matched_credit_ids
+    @api.model
+    def _reconcile_plan_with_sync(self, plan_data):
+        def clear_values(values):
+            return {k: v for k, v in values.items() if not k.startswith('_')}
+        plan_data['clear_values'] = clear_values
 
         # ==== Track the invoice's state to call the hook when they become paid ====
+        all_amls = plan_data['all_amls']
         pre_hook_data = all_amls._reconcile_pre_hook()
 
-        # ==== Collect amls data ====
-        # All residual amounts are collected and updated until the creation of partials in batch.
-        # This is done that way to minimize the orm time for fields invalidation/mark as recompute and
-        # recomputation.
-        aml_values_map = {
-            aml: {
-                'aml': aml,
-                'amount_residual': aml.amount_residual,
-                'amount_residual_currency': aml.amount_residual_currency,
-                'parent_state': aml.parent_state,
-            }
-            for aml in all_amls
-        }
-
         # ==== Prepare the partials ====
-        partials_values_list = []
-        exchange_diff_values_list = []
-        all_plan_results = []
-        exchange_account_per_move = {}
-        for plan in plan_list:
-            plan_results = self\
-                .with_context(
-                    no_exchange_difference=self.env.context.get('no_exchange_difference'),
-                    no_exchange_difference_no_recursive=self.env.context.get('no_exchange_difference_no_recursive', False),
-                )\
-                ._prepare_reconciliation_plan(plan, aml_values_map)
-            all_plan_results.append(plan_results)
-            for results in plan_results:
-                partials_values_list.append(results['partial_values'])
-                exchange_values = results.get('exchange_values')
-                if exchange_values and exchange_values['move_values']['line_ids']:
-                    exchange_diff_values_list.append(exchange_values)
-                    exchange_account_id = exchange_values['move_values']['line_ids'][1][2]['account_id']
-                    for move in (results['debit_aml'] + results['credit_aml']).move_id:
-                        exchange_account_per_move[move] = exchange_account_id
+        self._add_reconciliation_partials(plan_data)
+
+        # ==== Prepare CABA values ====
+        self._add_reconciliation_cash_basis_values(plan_data)
+
+        # ==== Create the partial exchange journal entries ====
+        self._turn_partial_values_list_exchange_diff_lines_to_move_values(plan_data)
 
         # ==== Create the partials ====
         # Link the newly created partials to the plan. There are needed later for caba exchange entries.
-        partials = self.env['account.partial.reconcile'].create(partials_values_list)
+        partials_create_values_list = [
+            clear_values(partial_values)
+            for partial_values in plan_data['partial_values_list']
+        ]
+        partials = self.env['account.partial.reconcile'].create(partials_create_values_list)
         if self.env.context.get('add_caba_vals'):
             partials._set_draft_caba_move_vals()
-        start_range = 0
-        for plan_results, plan in zip(all_plan_results, plan_list):
-            size = len(plan_results)
-            plan['partials'] = partials[start_range:start_range + size]
-            start_range += size
 
-        # ==== Create the partial exchange journal entries ====
-        exchange_moves = self._create_exchange_difference_moves(exchange_diff_values_list)
-        used_exchange_moves = set()
-        used_partials = set()
-
-        for partial in partials:
-            for exchange_move in exchange_moves:
-                linked_move_lines = exchange_move.line_ids.reconciled_lines_ids
-
-                if (
-                    any(line == partial.debit_move_id or line == partial.credit_move_id for line in linked_move_lines)
-                    and exchange_move not in used_exchange_moves
-                    and partial not in used_partials
-                ):
-                    partial.exchange_move_id = exchange_move
-                    used_exchange_moves.add(exchange_move)
-                    used_partials.add(partial)
-
-        # ==== Create entries for cash basis taxes ====
-        def is_cash_basis_needed(amls):
-            return any(amls.company_id.mapped('tax_exigibility')) \
-                and amls.account_id.account_type in ('asset_receivable', 'liability_payable')
-
-        if not self.env.context.get('move_reverse_cancel') and not self.env.context.get('no_cash_basis'):
-            for plan in plan_list:
-                if is_cash_basis_needed(plan['amls']):
-                    plan['partials']\
-                        .with_context(no_exchange_difference_no_recursive=False, exchange_account_per_move=exchange_account_per_move)\
-                        ._create_tax_cash_basis_moves()
-                    plan['partials']._set_draft_caba_move_vals()
-
-        # ==== Prepare full reconcile creation ====
-        # First, we need to find all sub-set of amls that are candidates for a full.
-
-        def is_line_reconciled(aml, has_multiple_currencies):
-            # Check if the journal item passed as parameter is now fully reconciled.
-            if aml.reconciled:
-                return True
-            if not aml.matched_debit_ids and not aml.matched_credit_ids:
-                # Suppose a journal item having balance = 0 but an amount_currency like an exchange difference.
-                return False
-            if has_multiple_currencies:
-                return aml.company_currency_id.is_zero(aml.amount_residual)
-            else:
-                return aml.currency_id.is_zero(aml.amount_residual_currency)
-
-        full_batches = []
-        all_aml_ids = set()
-        number2lines = all_amls._reconciled_by_number()
-        for plan in plan_list:
-            for aml in plan['amls']:
-                if 'full_batch_index' in aml_values_map[aml]:
-                    continue
-
-                involved_amls = plan['amls']._filter_reconciled_by_number(number2lines)
-                all_aml_ids.update(involved_amls.ids)
-                full_batch_index = len(full_batches)
-                has_multiple_currencies = len(involved_amls.currency_id) > 1
-                is_fully_reconciled = all(
-                    is_line_reconciled(involved_aml, has_multiple_currencies)
-                    for involved_aml in involved_amls
-                )
-                full_batches.append({
-                    'amls': involved_amls,
-                    'is_fully_reconciled': is_fully_reconciled,
-                })
-                for involved_aml in involved_amls:
-                    if aml_values_map.get(involved_aml):
-                        aml_values_map[involved_aml]['full_batch_index'] = full_batch_index
-
-        # ==== Prefetch the fields all at once to speedup the reconciliation ====
-        # Again, we do the same optimization for the prefetching. We need to do it again since most of the values have
-        # been invalidated with the creation of the account.partial.reconcile records.
-        all_amls = self.browse(list(all_aml_ids))
-        all_amls.move_id
-        all_amls.matched_debit_ids
-        all_amls.matched_credit_ids
-
-        # ==== Create the full reconcile ====
-        # Note we are using Command.link and not Command.set because Command.set is triggering an unlink that is
-        # slowing down the assignation of the co-fields. Indeed, unlink is forcing a flush.
-        full_reconcile_values_list = []
-        full_reconcile_full_batch_index = []
-        for full_batch_index, full_batch in enumerate(full_batches):
-            amls = full_batch['amls']
-            involved_partials = amls.matched_debit_ids + amls.matched_credit_ids
-            if full_batch['is_fully_reconciled']:
-                full_reconcile_values_list.append({
-                    'partial_reconcile_ids': [Command.link(partial.id) for partial in involved_partials],
-                    'reconciled_line_ids': [Command.link(aml.id) for aml in amls],
-                })
-                full_reconcile_full_batch_index.append(full_batch_index)
-
-        self.env['account.full.reconcile'].create(full_reconcile_values_list)
-
-        # === Cash basis rounding autoreconciliation ===
-        # In case a cash basis rounding difference line got created for the transition account, we reconcile it with the corresponding lines
-        # on the cash basis moves (so that it reaches full reconciliation and creates an exchange difference entry for this account as well)
-        for full_batch in full_batches:
-            if not full_batch.get('caba_lines_to_reconcile'):
-                continue
-
-            caba_lines_to_reconcile = full_batch['caba_lines_to_reconcile']
-            exchange_move = full_batch['exchange_move']
-            for (_dummy, account, repartition_line), amls_to_reconcile in caba_lines_to_reconcile.items():
-                if not account.reconcile:
-                    continue
-
-                exchange_line = exchange_move.line_ids.filtered(
-                    lambda l: l.account_id == account and l.tax_repartition_line_id == repartition_line
-                )
-
-                (exchange_line + amls_to_reconcile)\
-                    .filtered(lambda l: not l.reconciled)\
-                    .reconcile()
+        # # ==== Create entries for cash basis taxes ====
+        # def is_cash_basis_needed(amls):
+        #     return any(amls.company_id.mapped('tax_exigibility')) \
+        #         and amls.account_id.account_type in ('asset_receivable', 'liability_payable')
+        #
+        # if not self.env.context.get('move_reverse_cancel') and not self.env.context.get('no_cash_basis'):
+        #     for plan in plan_list:
+        #         if is_cash_basis_needed(plan['amls']):
+        #             plan['partials'].with_context(no_exchange_difference_no_recursive=False)._create_tax_cash_basis_moves()
+        #             plan['partials']._set_draft_caba_move_vals()
+        #
+        # # ==== Prepare full reconcile creation ====
+        # # First, we need to find all sub-set of amls that are candidates for a full.
+        #
+        # def is_line_reconciled(aml, has_multiple_currencies):
+        #     # Check if the journal item passed as parameter is now fully reconciled.
+        #     if aml.reconciled:
+        #         return True
+        #     if not aml.matched_debit_ids and not aml.matched_credit_ids:
+        #         # Suppose a journal item having balance = 0 but an amount_currency like an exchange difference.
+        #         return False
+        #     if has_multiple_currencies:
+        #         return aml.company_currency_id.is_zero(aml.amount_residual)
+        #     else:
+        #         return aml.currency_id.is_zero(aml.amount_residual_currency)
+        #
+        # full_batches = []
+        # all_aml_ids = set()
+        # number2lines = all_amls._reconciled_by_number()
+        # for plan in plan_list:
+        #     for aml in plan['amls']:
+        #         if 'full_batch_index' in aml_values_map[aml]:
+        #             continue
+        #
+        #         involved_amls = plan['amls']._filter_reconciled_by_number(number2lines)
+        #         all_aml_ids.update(involved_amls.ids)
+        #         full_batch_index = len(full_batches)
+        #         has_multiple_currencies = len(involved_amls.currency_id) > 1
+        #         is_fully_reconciled = all(
+        #             is_line_reconciled(involved_aml, has_multiple_currencies)
+        #             for involved_aml in involved_amls
+        #         )
+        #         full_batches.append({
+        #             'amls': involved_amls,
+        #             'is_fully_reconciled': is_fully_reconciled,
+        #         })
+        #         for involved_aml in involved_amls:
+        #             if aml_values_map.get(involved_aml):
+        #                 aml_values_map[involved_aml]['full_batch_index'] = full_batch_index
+        #
+        # # ==== Prefetch the fields all at once to speedup the reconciliation ====
+        # # Again, we do the same optimization for the prefetching. We need to do it again since most of the values have
+        # # been invalidated with the creation of the account.partial.reconcile records.
+        # all_amls = self.browse(list(all_aml_ids))
+        # all_amls.move_id
+        # all_amls.matched_debit_ids
+        # all_amls.matched_credit_ids
+        #
+        # # ==== Create the full reconcile ====
+        # # Note we are using Command.link and not Command.set because Command.set is triggering an unlink that is
+        # # slowing down the assignation of the co-fields. Indeed, unlink is forcing a flush.
+        # full_reconcile_values_list = []
+        # full_reconcile_full_batch_index = []
+        # for full_batch_index, full_batch in enumerate(full_batches):
+        #     amls = full_batch['amls']
+        #     involved_partials = amls.matched_debit_ids + amls.matched_credit_ids
+        #     if full_batch['is_fully_reconciled']:
+        #         full_reconcile_values_list.append({
+        #             'partial_reconcile_ids': [Command.link(partial.id) for partial in involved_partials],
+        #             'reconciled_line_ids': [Command.link(aml.id) for aml in amls],
+        #         })
+        #         full_reconcile_full_batch_index.append(full_batch_index)
+        #
+        # self.env['account.full.reconcile'].create(full_reconcile_values_list)
+        #
+        # # === Cash basis rounding autoreconciliation ===
+        # # In case a cash basis rounding difference line got created for the transition account, we reconcile it with the corresponding lines
+        # # on the cash basis moves (so that it reaches full reconciliation and creates an exchange difference entry for this account as well)
+        # for full_batch in full_batches:
+        #     if not full_batch.get('caba_lines_to_reconcile'):
+        #         continue
+        #
+        #     caba_lines_to_reconcile = full_batch['caba_lines_to_reconcile']
+        #     exchange_move = full_batch['exchange_move']
+        #     for (_dummy, account, repartition_line), amls_to_reconcile in caba_lines_to_reconcile.items():
+        #         if not account.reconcile:
+        #             continue
+        #
+        #         exchange_line = exchange_move.line_ids.filtered(
+        #             lambda l: l.account_id == account and l.tax_repartition_line_id == repartition_line
+        #         )
+        #
+        #         (exchange_line + amls_to_reconcile)\
+        #             .filtered(lambda l: not l.reconciled)\
+        #             .reconcile()
 
         all_amls._reconcile_post_hook(pre_hook_data)
-
-    def _get_exchange_journal(self, company):
-        return company.currency_exchange_journal_id
-
-    def _get_exchange_account(self, company, amount):
-        if amount > 0.0:
-            return company.expense_currency_exchange_account_id
-        return company.income_currency_exchange_account_id
-
-    def _prepare_exchange_difference_move_vals(self, amounts_list, company=None, exchange_date=None, **kwargs):
-        """ Prepare values to create later the exchange difference journal entry.
-        The exchange difference journal entry is there to fix the debit/credit of lines when the journal items are
-        fully reconciled in foreign currency.
-        :param amounts_list:    A list of dict, one for each aml.
-        :param company:         The company in case there is no aml in self.
-        :param exchange_date:   Optional date object providing the date to consider for the exchange difference.
-        :return:                A python dictionary containing:
-            * move_vals:    A dictionary to be passed to the account.move.create method.
-            * to_reconcile: A list of tuple <move_line, sequence> in order to perform the reconciliation after the move
-                            creation.
-        """
-        company = (
-            (self.move_id.filtered(lambda m: m.is_invoice(True)) or self.move_id).company_id
-            or company
-        )[:1]
-        if not company:
-            return
-
-        journal = self._get_exchange_journal(company)
-        accounting_exchange_date = journal.with_context(move_date=exchange_date).accounting_date if journal else date.min
-
-        move_vals = {
-            'move_type': 'entry',
-            'name': '/', # do not trigger the compute name before posting as it will most likely be posted immediately after
-            'date': accounting_exchange_date,
-            'journal_id': journal.id,
-            'line_ids': [],
-            'always_tax_exigible': True,
-        }
-
-        exchange_account_per_move = self.env.context.get('exchange_account_per_move', {})
-        to_reconcile = []
-        refs = set()
-        for line, amounts in zip(self, amounts_list):
-            if line.move_id.name:
-                refs.add(line.move_id.name)
-
-            move_vals['date'] = max(move_vals['date'], line.date)
-
-            if 'amount_residual' in amounts:
-                amount_residual = amounts['amount_residual']
-                amount_residual_currency = 0.0
-                if line.currency_id == line.company_id.currency_id:
-                    amount_residual_currency = amount_residual
-                amount_residual_to_fix = amount_residual
-                if line.company_currency_id.is_zero(amount_residual):
-                    continue
-            elif 'amount_residual_currency' in amounts:
-                amount_residual = 0.0
-                amount_residual_currency = amounts['amount_residual_currency']
-                amount_residual_to_fix = amount_residual_currency
-                if line.currency_id.is_zero(amount_residual_currency):
-                    continue
-            else:
-                continue
-
-            exchange_line_account_id = (
-                exchange_account_per_move.get(line.move_id)
-                or self._get_exchange_account(company, amount_residual_to_fix).id
-            )
-
-            sequence = len(move_vals['line_ids'])
-            line_vals = [
-                {
-                    'name': _('Currency exchange rate difference'),
-                    'debit': -amount_residual if amount_residual < 0.0 else 0.0,
-                    'credit': amount_residual if amount_residual > 0.0 else 0.0,
-                    'amount_currency': -amount_residual_currency,
-                    'full_reconcile_id': line.full_reconcile_id.id,
-                    'account_id': line.account_id.id,
-                    'currency_id': line.currency_id.id,
-                    'partner_id': line.partner_id.id,
-                    'sequence': sequence,
-                    'reconciled_lines_ids': [Command.set(line.ids)],
-                },
-                {
-                    'name': _('Currency exchange rate difference'),
-                    'debit': amount_residual if amount_residual > 0.0 else 0.0,
-                    'credit': -amount_residual if amount_residual < 0.0 else 0.0,
-                    'amount_currency': amount_residual_currency,
-                    'account_id': exchange_line_account_id,
-                    'currency_id': line.currency_id.id,
-                    'partner_id': line.partner_id.id,
-                    'sequence': sequence + 1,
-                },
-            ]
-
-            if kwargs.get('exchange_analytic_distribution'):
-                line_vals[1].update({'analytic_distribution': kwargs['exchange_analytic_distribution']})
-
-            move_vals['line_ids'] += [Command.create(vals) for vals in line_vals]
-            to_reconcile.append((line, sequence))
-
-        move_vals['ref'] = ','.join(refs) or None
-
-        return {'move_values': move_vals, 'to_reconcile': to_reconcile}
 
     @api.model
     def _create_exchange_difference_moves(self, exchange_diff_values_list):
@@ -3107,7 +3283,6 @@ class AccountMoveLine(models.Model):
 
         # ==== Create the moves ====
         exchange_moves = self.env['account.move'].with_context(no_exchange_difference=True).create(exchange_move_values_list)
-        # The reconciliation of exchange moves is now dealt thanks to the reconciled_lines_ids field
 
         # ==== See if the exchange moves need to be posted or not ====
         exchange_moves_to_post = self.env['account.move']
