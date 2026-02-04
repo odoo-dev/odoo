@@ -1059,6 +1059,9 @@ class TestReports(TestReportsCommon):
         self.assertEqual(line_2['document_in']['id'], receipt_2.id)
         self.assertEqual(line_2['document_out']['id'], delivery.id)
 
+        report_values, docs, lines = self.get_report_forecast(product_template_ids=product_template.ids)
+        _, docs, lines = self.get_report_forecast(product_template_ids=product_template.ids)
+
     def test_report_forecast_8_delivery_to_receipt_link(self):
         """
         Create 2 deliveries, and 1 receipt tied to the second delivery.
