@@ -636,10 +636,9 @@ class Website(Home):
         for search_result in search_results:
             if not len(search_result['results_data']):
                 continue
-            search_result['results_data'].sort(key=lambda r: r.get('name', ''), reverse='name desc' in order)
             mappings.append(search_result['mapping'])
-            group_name = search_result.get("group_name")
-            group_key = search_result.get("model").replace('.', '_')
+            group_name = search_result.get('group_name')
+            group_key = search_result.get('model').replace('.', '_')
             result_data = []
             for record in search_result['results_data']:
                 model = request.env[search_result['model']]
@@ -666,21 +665,22 @@ class Website(Home):
                         if field_type == 'html':
                             skip_matching_area = True
 
-                    if field_type not in ('image', 'binary') and ('ir.qweb.field.%s' % field_type) in request.env:
+                    qweb_field = f'''ir.qweb.field.{field_type}'''
+                    if field_type not in ('image', 'binary') and qweb_field in request.env:
                         opt = {}
                         if field_type == 'monetary':
                             opt['display_currency'] = options['display_currency']
                         elif field_type == 'float':
                             opt['precision'] = field_meta.get('precision', 2)
-                        value = request.env[('ir.qweb.field.%s' % field_type)].value_to_html(value, opt)
+                        value = request.env[qweb_field].value_to_html(value, opt)
                     mapped[mapped_name] = escape(value)
                 result_data.append(mapped)
 
             result[group_key] = {
-                "groupName": group_name,
-                "templateKey": search_result.get("template_key"),
-                "searchCount": search_result.get('count'),
-                "data": result_data,
+                'groupName': group_name,
+                'templateKey': search_result.get('template_key'),
+                'searchCount': search_result.get('count'),
+                'data': result_data,
             }
 
         return {
@@ -734,7 +734,7 @@ class Website(Home):
     ], type='http', auth="public", website=True, sitemap=False, readonly=True)
     def hybrid_list(self, search='', limit=24, search_type='all', **kw):
         if not search:
-            return request.render("website.list_hybrid")
+            return request.render('website.list_hybrid')
 
         options = self._get_hybrid_search_options(**kw)
         data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=limit, offset=0, max_nb_chars=200, options=options)
@@ -751,7 +751,7 @@ class Website(Home):
             'fuzzy_search': data.get('fuzzy_search'),
             'search_count': search_count,
         }
-        return request.render("website.list_hybrid", values)
+        return request.render('website.list_hybrid', values)
 
     @http.route('/website/load_more_search', type='jsonrpc', auth="public", website=True, readonly=True)
     def load_more_search(self, search='', search_type='all', offset=0, limit=24, **kwargs):
