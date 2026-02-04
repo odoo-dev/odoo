@@ -333,7 +333,7 @@ class AccountJournal(models.Model):
         xml_content = self._l10n_sa_prepare_invoice_xml(xml_raw)
         signed_xml = self.env['l10n_sa_edi.document']._l10n_sa_sign_xml(xml_content, certificate, signature)
         if xml_name.startswith('simplified'):
-            qr_code_str = self.env['l10n_sa_edi.document']._build_simplified_phase_2_qr(self.company_id, signed_xml, certificate, signature)
+            qr_code_str = self.env['l10n_sa_edi.document']._l10n_sa_build_simplified_phase_2_qr(self.company_id, signed_xml, certificate, signature)
             root = etree.fromstring(signed_xml)
             qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
             qr_node.text = qr_code_str

@@ -39,11 +39,7 @@ class ZatcaMixin(models.AbstractModel):
     def _get_l10n_sa_totals(self):
         return {}
 
-    def _l10n_sa_is_applicable(self):
-        self.ensure_one()
-        return self.country_code == 'SA' and self.l10n_sa_confirmation_datetime and self.company_id.vat
-
-    def _get_l10n_sa_qr_code_str(self):
+    def _l10n_sa_build_phase_1_qr(self):
         """
         Generate the qr code (Phase 1) for Saudi e-invoicing. Specs are available at the following link at page 23
         https://zatca.gov.sa/ar/E-Invoicing/SystemsDevelopers/Documents/20210528_ZATCA_Electronic_Invoice_Security_Features_Implementation_Standards_vShared.pdf
@@ -68,6 +64,9 @@ class ZatcaMixin(models.AbstractModel):
 
         return base64.b64encode(str_to_encode).decode()
 
+    def _l10n_sa_build_phase_2_qr(self):
+        return ""
+
     def _l10n_sa_is_simplified(self):
         """
             Returns True if the customer is an individual, i.e: The invoice is B2C
@@ -76,17 +75,26 @@ class ZatcaMixin(models.AbstractModel):
         self.ensure_one()
         return not self.partner_id.vat
 
-    @api.depends(lambda self: self._get_qr_code_str_dependencies())
     def _compute_qr_code_str(self):
-        for record in self.filtered(lambda rec: rec._l10n_sa_is_applicable()):
-            # depends on whether it's simplified or not
-            record.l10n_sa_qr_code_str = record._get_l10n_sa_qr_code_str()
+        phase_1_records = self.filtered(lambda rec: rec._l10n_sa_is_phase_1_applicable())
+        phase_2_records = self.filtered(lambda rec: rec._l10n_sa_is_phase_2_applicable())
+        for record in phase_1_records:
+            record.l10n_sa_qr_code_str = record._l10n_sa_build_phase_1_qr()
+        for record in phase_2_records:
+            record.l10n_sa_qr_code_str = record._l10n_sa_build_phase_2_qr()
 
     @api.depends(lambda self: self._get_show_l10n_sa_reason_dependencies())
     def _compute_show_l10n_sa_reason(self):
         for record in self:
             record.l10n_sa_show_reason = record._get_show_l10n_sa_reason()
             # record.l10n_sa_show_reason = record.country_code == 'SA' and (record.move_type == 'out_refund' or (record.move_type == 'out_invoice' and record.debit_origin_id))
+
+    def _l10n_sa_is_phase_1_applicable(self):
+        self.ensure_one()
+        return self.country_code == 'SA' and self.l10n_sa_confirmation_datetime and self.company_id.vat
+
+    def _l10n_sa_is_phase_2_applicable(self):
+        return False
 
     def _get_iso_format_asia_riyadh_date(self, separator=' '):
         return f'%Y-%m-%d{separator}%H:%M:%S'

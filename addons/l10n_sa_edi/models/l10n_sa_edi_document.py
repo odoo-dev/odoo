@@ -543,7 +543,7 @@ class L10nSaEdiDocument(models.Model):
         return company_name_tag_encoding + company_name_length_encoding + field
 
     @api.model
-    def _build_simplified_phase_2_qr(self, company_id, unsigned_xml, certificate, signature):
+    def _l10n_sa_build_simplified_phase_2_qr(self, company_id, unsigned_xml, certificate, signature):
         """
         Generate QR code string based on XML content of the Invoice UBL file, X509 Production Certificate
         and company info.
@@ -588,15 +588,19 @@ class L10nSaEdiDocument(models.Model):
 
         return b64encode(qr_code_str).decode()
 
-    def _build_standard_phase_2_qr_for_account_move(self):
+    def _l10n_sa_build_standard_phase_2_qr(self):
+        if self.state == 'accepted' and self.attachment_id.datas:
+            document_xml = self.attachment_id.with_context(bin_size=False).datas.decode()
+            qr_node = etree.fromstring(b64decode(document_xml)).xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
+            return qr_node.text
         return ""
 
-    def _get_phase_2_qr(self, simplified=False):
+    def _l10n_sa_get_phase_2_qr(self, simplified=False):
         if simplified:
-            return self._build_simplified_phase_2_qr(
+            return self._l10n_sa_build_simplified_phase_2_qr(
                 self.company_id,
                 self._l10n_sa_generate_zatca_template(),
                 self.journal_id.l10n_sa_production_csid_certificate_id,
                 self.env[self.res_model].browse(self.res_id).l10n_sa_invoice_signature,
             )
-        return ""
+        return self._l10n_sa_build_standard_phase_2_qr()

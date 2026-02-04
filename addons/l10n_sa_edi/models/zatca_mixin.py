@@ -15,7 +15,6 @@ class ZatcaMixin(models.AbstractModel):
     l10n_sa_chain_index = fields.Integer(related="l10n_sa_edi_document_id.l10n_sa_chain_index")
     l10n_sa_edi_error_message = fields.Char(related="l10n_sa_edi_document_id.error_message")
 
-    @api.depends()
     def _compute_l10n_sa_edi_log_ids(self):
         data = dict(self.env['l10n_sa_edi.log']._read_group([('res_id', 'in', self.ids), ('res_model', '=', self._name)],
                                                      groupby=['res_id'],
@@ -29,10 +28,9 @@ class ZatcaMixin(models.AbstractModel):
         readable_zatca_reason = dict(self._fields['l10n_sa_reason'].selection).get(self.l10n_sa_reason)
         return readable_zatca_reason if self.l10n_sa_show_reason else self.ref
 
-    def _get_l10n_sa_qr_code_str(self):
-        # todo: there could still be some phase 1 moves, call super on them, refer previous impl
+    def _l10n_sa_build_phase_2_qr(self):
         self.ensure_one()
-        return self.l10n_sa_edi_document_id._get_phase_2_qr(self._l10n_sa_is_simplified())
+        return self.l10n_sa_edi_document_id._l10n_sa_get_phase_2_qr(self._l10n_sa_is_simplified())
 
     def _l10n_sa_get_payment_means_code(self):
         """
@@ -45,3 +43,10 @@ class ZatcaMixin(models.AbstractModel):
         """
         # Default implementation - should be overridden
         return 'unknown'
+
+    def _l10n_sa_edi_create_document(self):
+        self.l10n_sa_edi_document_id = self.env['l10n_sa_edi.document'].create([{
+            'res_id': record.id,
+            'res_model': record._name,
+            'state': 'to_send',
+        } for record in self])

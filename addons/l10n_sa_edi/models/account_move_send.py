@@ -129,19 +129,16 @@ class AccountMoveSend(models.AbstractModel):
         return res
 
     @api.model
-    def _is_sa_edi_applicable(self, move):
-        return (
-            move.country_code == 'SA' and move.move_type in ('out_invoice', 'out_refund') and move.state != 'draft'
-            and move.l10n_sa_edi_state != 'accepted'
-        )
+    def _is_sa_edi_send_applicable(self, move):
+        return move._l10n_sa_is_phase_2_applicable() and move.l10n_sa_edi_state not in ('accepted', 'warning')
 
     @api.model
     def _is_sa_edi_testing_applicable(self, move):
-        return self._is_sa_edi_applicable(move) and move.company_id.l10n_sa_api_mode != 'prod'
+        return self._is_sa_edi_send_applicable(move) and move.company_id.l10n_sa_api_mode != 'prod'
 
     @api.model
     def _is_sa_edi_production_applicable(self, move):
-        return self._is_sa_edi_applicable(move) and move.company_id.l10n_sa_api_mode == 'prod'
+        return self._is_sa_edi_send_applicable(move) and move.company_id.l10n_sa_api_mode == 'prod'
 
     def _get_all_extra_edis(self) -> dict:
         # EXTENDS 'account'

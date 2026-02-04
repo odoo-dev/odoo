@@ -7,21 +7,13 @@ from odoo.exceptions import UserError
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    def _l10n_sa_edi_create_document(self):
-        self.ensure_one()
-        self.l10n_sa_edi_document_id = self.env['l10n_sa_edi.document'].create({
-            'res_id': self.id,
-            'res_model': 'account.move',
-            'state': 'to_send',
-        })
-
     def _get_qr_code_str_dependencies(self):
         return ['amount_total_signed', 'amount_tax_signed', 'l10n_sa_confirmation_datetime', 'company_id',
                 'company_id.vat', 'journal_id', 'journal_id.l10n_sa_production_csid_json', 'l10n_sa_edi_document_id',
                 'l10n_sa_invoice_signature', 'l10n_sa_chain_index', 'state']
 
-    def _l10n_sa_is_applicable(self):
-        return super()._l10n_sa_is_applicable() and self.move_type in ('out_invoice', 'out_refund') and self.l10n_sa_edi_document_id and self.state != 'draft'
+    def _l10n_sa_is_phase_2_applicable(self):
+        return self._l10n_sa_is_phase_1_applicable() and self.move_type in ('out_invoice', 'out_refund') and self.l10n_sa_edi_document_id and self.state != 'draft'
 
     @api.ondelete(at_uninstall=False)
     def _prevent_zatca_rejected_invoice_deletion(self):
