@@ -15,6 +15,7 @@ import {
 
 import { mockBrowserFactory } from "./mock_browser.hoot";
 import { mockCurrencyFactory } from "./mock_currency.hoot";
+import { mockFunctionsFactory } from "./mock_functions.hoot";
 import { mockIndexedDB } from "./mock_indexed_db.hoot";
 import { mockSessionFactory } from "./mock_session.hoot";
 import { makeTemplateFactory } from "./mock_templates.hoot";
@@ -515,10 +516,11 @@ const MODULE_MOCKS_BY_NAME = new Map([
     ["@web/core/template_inheritance", makeFixedFactory],
     // Other mocks
     ["@web/core/browser/browser", mockBrowserFactory],
-    ["@web/core/utils/indexed_db", mockIndexedDB],
     ["@web/core/currency", mockCurrencyFactory],
     ["@web/core/templates", makeTemplateFactory],
     ["@web/core/user", mockUserFactory],
+    ["@web/core/utils/functions", mockFunctionsFactory],
+    ["@web/core/utils/indexed_db", mockIndexedDB],
     ["@web/session", mockSessionFactory],
 ]);
 const MODULE_MOCKS_BY_REGEX = new Map([
