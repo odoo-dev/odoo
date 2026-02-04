@@ -23,6 +23,7 @@ def pre_init_hook(env):
 def post_init_hook(env):
     _assign_default_mail_template_picking_id(env)
     _create_inventory_adjustment(env)
+    _assign_default_lot_sequence_for_tracked_products(env)
 
 
 def uninstall_hook(env):
@@ -63,6 +64,22 @@ def _create_inventory_adjustment(env):
                 'location_id': location.id,
             })
         env['stock.quant'].create(inventory_quant_vals)._apply_inventory()
+
+
+def _assign_default_lot_sequence_for_tracked_products(env):
+    lot_sequence = env.ref('stock.sequence_production_lots', raise_if_not_found=False)
+
+    if not lot_sequence:
+        return
+
+    tracked_products = env['product.product'].search([
+        ('tracking', '!=', 'none'),
+        ('lot_sequence_id', '=', False),
+    ])
+    if tracked_products:
+        tracked_products.write({
+            'lot_sequence_id': lot_sequence.id,
+        })
 
 
 def _save_current_inventory(env):
