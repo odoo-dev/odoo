@@ -193,6 +193,7 @@ class TestCreateRecurrentEvents(TestRecurrentEvents):
         ])
 
     def test_yearly_count(self):
+        self.env['ir.config_parameter'].sudo().set_int('calendar.max_recurrence_years', 3)
         self.event._apply_recurrence_values({
             'interval': 2,
             'rrule_type': 'yearly',

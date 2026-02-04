@@ -53,3 +53,17 @@ class TestRecurrentEvent(common.TransactionCase):
             ('start', '>=', '2011-03-13'), ('stop', '<=', '2011-05-13')
         ])
         self.assertEqual(meetings_count, 10, 'Recurrent weekly meetings are not created!')
+
+    def test_recurrent_meeting3(self):
+        # Test that the recurrence is limited to a certain number of years (default 2).
+        self.CalendarEvent.create({
+            'count': 50,
+            'start': '2026-04-20 05:00:00',
+            'stop': '2026-04-20 06:00:00',
+            'duration': 1.0,
+            'name': 'Yearly Meeting',
+            'recurrency': True,
+            'rrule_type': 'yearly',
+        })
+        meetings_count = self.CalendarEvent.search_count([('name', '=', 'Yearly Meeting')])
+        self.assertEqual(meetings_count, 2, 'Recurrent yearly meetings should be created and not exceed 2!')

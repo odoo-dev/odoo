@@ -520,8 +520,16 @@ class CalendarRecurrence(models.Model):
         """
         self.ensure_one()
         dtstart = self._get_start_of_period(dtstart)
+
+        # Limit the number of years to avoid creating recurrent events for up to hundreds of years
+        limit_years = self.env['ir.config_parameter'].sudo().get_int('calendar.max_recurrence_years', 2)
+        limit_date = dtstart + relativedelta(years=limit_years)
+
         if self._is_allday():
-            yield from self._get_rrule(dtstart=dtstart)
+            for occurence in self._get_rrule(dtstart=dtstart):
+                if occurence >= limit_date:
+                    break
+                yield occurence
             return
 
         timezone = self._get_timezone()
@@ -547,6 +555,8 @@ class CalendarRecurrence(models.Model):
         # 2019/02/01 11:00 - 2019/03/01 11:00 - 2019/04/01 10:00 - 2019/05/01 10:00 (UTC)
         #                                                  *****              *****
         for occurence in occurences:
+            if occurence >= limit_date:
+                break
             # emulate pytz's `is_dst=False` semantics on std
             yield min(
                 occurence.replace(tzinfo=timezone, fold=0),
