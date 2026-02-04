@@ -795,6 +795,9 @@ class AccountMoveLine(models.Model):
                 tax = record.tax_repartition_line_id.tax_id or record.tax_ids[:1]
                 is_refund = record.is_refund
                 tax_type = tax.type_tax_use
+                if tax_type == 'none':
+                    parent_tax_ids = origin_move_id.line_ids.tax_ids.filtered(lambda t: tax.id in t.children_tax_ids.ids)
+                    tax_type = parent_tax_ids[0].type_tax_use if parent_tax_ids else 'none'
                 if record.display_type == 'epd':  # In case of early payment, tax_tag_invert is independent of the balance of the line
                     record.tax_tag_invert = tax_type == 'purchase'
                 else:

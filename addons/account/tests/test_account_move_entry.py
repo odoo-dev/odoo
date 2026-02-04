@@ -1346,3 +1346,49 @@ class TestAccountMove(AccountTestInvoicingCommon):
         }])
         move.line_ids.account_id = shared_account
         move.action_post()
+
+    def test_tax_tag_invert_on_refund_for_purchase_group_tax_with_none_child(self):
+        """
+        Verify that `tax_tag_invert` is correctly computed on refund entries when applying a purchase tax
+        with amount_type's 'group' that contains a child tax with type_tax_use's 'none'
+
+        On a refund move, the automatically generated child tax line should have `tax_tag_invert=True`
+        """
+        child_tax = self.env['account.tax'].create({
+            'name': 'Child Tax',
+            'type_tax_use': 'none',
+            'amount_type': 'percent',
+            'amount': 10,
+        })
+        # Create a sale tax group, to be sure the right one will be used
+        self.env['account.tax'].create({
+            'name': "tax_group Sale",
+            'amount_type': 'group',
+            'type_tax_use': 'sale',
+            'children_tax_ids': [
+                Command.set(child_tax.ids),
+            ],
+        })
+        tax_group_purchase = self.env['account.tax'].create({
+            'name': "tax_group Purchase",
+            'amount_type': 'group',
+            'type_tax_use': 'purchase',
+            'children_tax_ids': [
+                Command.set(child_tax.ids),
+            ],
+        })
+
+        move_form = Form(self.env['account.move'])
+        with move_form.line_ids.new() as line_form:
+            line_form.name = 'credit_line'
+            line_form.account_id = self.company_data['default_account_revenue']
+            line_form.credit = 200.0
+            line_form.debit = 0.0
+            line_form.tax_ids = tax_group_purchase
+        move = move_form.save()
+
+        self.assertRecordValues(move.line_ids, [
+            {'name': 'credit_line',                 'is_refund': True,  'tax_tag_invert': True},
+            {'name': 'Child Tax',                   'is_refund': True,  'tax_tag_invert': True},
+            {'name': 'Automatic Balancing Line',    'is_refund': False, 'tax_tag_invert': False},
+        ])
