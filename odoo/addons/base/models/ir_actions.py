@@ -1177,9 +1177,11 @@ class IrActionsServer(models.Model):
                 if not active_id:  # onchange on new record
                     res = runner(self, eval_context=eval_context)
             active_ids = self.env.context.get('active_ids', [active_id] if active_id else [])
+            initial_context = eval_context['env'].context
             for active_id in active_ids:
                 # run context dedicated to a particular active_id
-                run_self = self.with_context(active_ids=[active_id], active_id=active_id)
+                context = {**initial_context, 'active_ids': [active_id], 'active_id': active_id}
+                run_self = self.with_context(context)
                 eval_context['env'] = eval_context['env'](context=run_self.env.context)
                 eval_context['records'] = eval_context['record'] = records.browse(active_id)
                 res = runner(run_self, eval_context=eval_context)
