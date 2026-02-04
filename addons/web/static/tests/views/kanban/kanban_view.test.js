@@ -9925,3 +9925,70 @@ test(`[Offline] use offline searchbar`, async () => {
         "/web/dataset/call_kw/partner/web_read_group",
     ]);
 });
+
+test.tags("desktop");
+test.debug(`[Offline] aaaa`, async () => {
+    expect.errors(2);
+    const setOffline = mockOffline();
+    await mountView({
+        resModel: "partner",
+        type: "kanban",
+        arch: `
+            <kanban>
+                <templates>
+                    <t t-name="card">
+                        <field name="foo"/>
+                    </t>
+                </templates>
+            </kanban>`,
+        searchViewArch: `
+            <search>
+                <filter string="Filter Blip" name="blip" domain="[['foo', '=', 'blip']]"/>
+                <filter string="GroupBy Blip" name="groupby_blip" context="{'group_by': 'foo'}"/>
+            </search>`,
+        config: { actionId: 234 },
+    });
+
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(4);
+
+    // Visit filters to put feed the cache
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Filter Blip");
+    await toggleMenuItem("GroupBy Blip");
+    expect(".o_kanban_group").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+
+    // Switch offline and visit available filters
+    await setOffline(true);
+    await toggleSearchBarMenu();
+    await contains(".o_search_bar_menu_offline .o-dropdown-item:eq(1)").click();
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+    await toggleSearchBarMenu();
+    await contains(".o_search_bar_menu_offline .o-dropdown-item:eq(0)").click();
+    expect(".o_kanban_group").toHaveCount(1);
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+
+    // Switch back online
+    await setOffline(false);
+    expect(queryAllTexts(".o_searchview .o_facet_values")).toEqual([
+        "Custom filter",
+        "GroupBy Blip",
+    ]);
+
+    await removeFacet("GroupBy Blip");
+    expect(".o_kanban_group").toHaveCount(0);
+    expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(2);
+
+    // Switch offline again and check the name of available filters
+    await setOffline(true);
+    await toggleSearchBarMenu();
+    expect(queryAllTexts(".o_search_bar_menu_offline .o-dropdown-item")).toEqual([
+        "Filter Blip",
+        "Filter Blip\nGroupBy Blip",
+    ]);
+
+    expect.verifyErrors([
+        "/web/dataset/call_kw/partner/web_search_read",
+        "/web/dataset/call_kw/partner/web_read_group",
+    ]);
+});

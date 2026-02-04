@@ -530,8 +530,41 @@ export class SearchModel extends EventBus {
         this._appliedSearch = search;
         const { domain, groupBys } = search;
         if (domain !== "[]") {
-            const description = _t("Custom filter");
-            this.createNewFilters([{ description, domain, name: "custom filter", invisible: "True" }]);
+            search.facets.forEach((facet) => {
+                if (facet.type === "groupBy") {
+                    return;
+                }
+                let description = facet.values.join(` ${facet.separator} `);
+                if (facet.type === "field") {
+                    description = `${facet.title} ${description}`;
+                }
+                const filter = {
+                    groupId: this.nextGroupId,
+                    groupNumber: this.nextGroupNumber,
+                    id: this.nextId,
+                    type: facet.type === "favorite" ? "favorite" : "filter",
+                    domain: facet.domain,
+                    description,
+                    name: `offline filter ${this.nextId}`,
+                    invisible: "True",
+                };
+                this.searchItems[this.nextId] = filter;
+                this.query.push({ searchItemId: this.nextId });
+                this.nextId++;
+                this.nextGroupId++;
+                this.nextGroupNumber++;
+            });
+            //     const description = search.facets
+            //         .map((facet) => {
+            //             if (facet.type === "favorite" || facet.type === "filter") {
+            //                 return facet.values.join(` ${facet.separator} `);
+            //             }
+            //             return "Something else";
+            //         })
+            //         .join(` ${_t("and")} `);
+            //     this.createNewFilters([
+            //         { description, domain, name: "offline filter", invisible: "True" },
+            //     ]);
         }
         this._toggleGroupBys(groupBys);
         this._notify();
