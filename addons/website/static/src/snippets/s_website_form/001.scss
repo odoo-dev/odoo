@@ -88,6 +88,62 @@
             caret-color: transparent;
         }
     }
+
+    .o_field_badge {
+        $color: $primary;
+
+        position: relative;
+        display: block;
+        width: fit-content;
+        margin-top: 5px;
+        margin-left: auto;
+        z-index: 0;
+
+        padding: 3px 18px;
+        border: 1px solid tint-color($color, 80%);
+        border-radius: 20px;
+        overflow: hidden;
+
+        font-size: $o-font-size-base-smaller;
+        color: tint-color($color, 10%);
+        background-color: tint-color($color, 90%);
+
+        cursor: pointer;
+        transition: all 0.5s ease;
+
+        &:hover {
+            color: $color;
+            background-color: tint-color($color, 85%);
+            border-color: tint-color($color, 75%);
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -100%;
+            width: 60px;
+            height: 200%;
+            z-index: -1;
+
+            background-image: linear-gradient(
+                90deg,
+                transparent 0%,
+                tint-color($color, 70%) 50%,
+                transparent 100%
+            );
+
+            opacity: 0.3;
+            transform: rotate(25deg) translateY(-50%);
+            animation: identifier 1.5s ease-in-out infinite;
+        }
+
+        @keyframes identifier {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    }
+
 }
 
 .o_datetime_picker .o_day_of_week_cell,

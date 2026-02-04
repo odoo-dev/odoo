@@ -116,6 +116,9 @@
             </t>
         </BuilderSelect>
     </BuilderRow>
+    <BuilderRow label.translate="Field Badge">
+        <BuilderCheckbox dataAttributeAction="'fieldBadge'" dataAttributeActionValue="'true'" preview="false"/>
+    </BuilderRow>
     <BuilderRow label.translate="Input Type">
         <BuilderSelect t-if="!domState.elClassList.includes('s_website_form_custom') and ['char', 'email', 'tel', 'url'].includes(domState.elDataset.type) and !domState.elClassList.includes('s_website_form_model_required')"
             id="'char_input_type_opt'" preview="false" action="'selectType'"
