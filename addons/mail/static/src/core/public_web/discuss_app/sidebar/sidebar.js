@@ -15,7 +15,6 @@ export const discussSidebarItemsRegistry = registry.category("mail.discuss_sideb
  */
 export class DiscussSidebar extends Component {
     static template = "mail.DiscussSidebar";
-    static props = {};
     static components = { ActionList, DiscussSearch, ResizablePanel };
 
     setup() {

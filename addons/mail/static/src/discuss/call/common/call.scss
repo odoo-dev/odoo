@@ -3,6 +3,7 @@
 // ------------------------------------------------------------------
 
 .o-discuss-Call {
+    --o-discuss-Call-bgColor: #15161a;
     height: 50%; // ensures that the view returns to the right height when resized
     min-height: 50%;
     background-color: inherit;
@@ -13,7 +14,7 @@
         background-color: var(--o-discuss-Call-bgColor, #{$dark});
 
         .o-discuss-Call-main {
-            background-color: rgba(0, 0, 0, 0.5);
+            // background-color: rgba(0, 0, 0, 0.5);
         }
     }
 

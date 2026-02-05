@@ -1,11 +1,9 @@
 .o-discuss-CallParticipantCard {
+    --o-discuss-CallParticipantCard-avatarBgColor: #1B1D26;
     color: white;
     aspect-ratio: 16/9;
 
     &.o-isTalking {
-        outline: 4px solid var(--discuss-talkingColor, $o-discuss-talkingColor);
-        outline-offset: -4px;
-
         &.o-inset {
             box-shadow: inset 0 0 0 map-get($spacers, 1)/2 var(--discuss-talkingColor, $o-discuss-talkingColor);
         }
@@ -37,7 +35,15 @@
 }
 
 .o-discuss-CallParticipantCard-avatar:not(.o-minimized) {
-    background-color: var(--o-discuss-CallParticipantCard-avatarBgColor, #{$o-gray-800});
+    background-color: var(--o-discuss-CallParticipantCard-avatarBgColor, #{$o-gray-900});
+    border: 1px solid rgba(white, 0.2);
+    transition: border 0.3s ease, background-color 0.3s ease;
+
+    &.o-isTalking {
+        border: 1px solid var(--discuss-talkingColor, $o-discuss-talkingColor);
+        background-color: rgba($success, 0.1);
+    }
+
     &.o-isRemoteVideo {
         background: linear-gradient(180deg, #144173 0%, #082647 30%, #133c68 60%, #082647 90%);
         background-size: 200% 200%;
