@@ -93,7 +93,7 @@ class ZatcaMixin(models.AbstractModel):
         self.ensure_one()
         return self.country_code == 'SA' and self.l10n_sa_confirmation_datetime and self.company_id.vat
 
-    def _l10n_sa_is_phase_2_applicable(self):
+    def _l10n_sa_is_phase_2_applicable(self, check_document=True):
         return False
 
     def _get_iso_format_asia_riyadh_date(self, separator=' '):

@@ -19,6 +19,11 @@ L10N_SA_DOCUMENT_STATES = [
     ('unknown', 'Unknown'),
 ]
 
+L10N_SA_MODEL_FIELD_MAPPING = {
+    'account.move': 'account_move_id',
+    'pos.order': 'pos_order_id',
+}
+
 
 class L10nSaEdiDocument(models.Model):
     _name = 'l10n_sa_edi.document'
@@ -29,14 +34,12 @@ class L10nSaEdiDocument(models.Model):
         ('account.move', "Journal Entry"),
         ('pos.order', "POS Order"),
     ], string="Invoice Type", readonly=True, required=True)
-    res_id = fields.Many2oneReference("Invoice", model_field="res_model", readonly=True, required=True)
+    res_id = fields.Many2oneReference(model_field="res_model", readonly=True, required=True)
     attachment_id = fields.Many2one(comodel_name='ir.attachment', readonly=True)
     state = fields.Selection(string="ZATCA State", selection=L10N_SA_DOCUMENT_STATES)
     message = fields.Text("ZATCA Errors/Warnings", translate=True)
     error_message = fields.Char("ZATCA Error Message")
     content = fields.Binary()
-    journal_id = fields.Many2one(comodel_name="account.journal", compute="_compute_related_fields", store=True)
-    company_id = fields.Many2one(comodel_name="res.company", compute="_compute_related_fields")
     l10n_sa_edi_chain_head_id = fields.Many2one(
       'l10n_sa_edi.document',
       string="ZATCA chain stopping document",
@@ -48,34 +51,28 @@ class L10nSaEdiDocument(models.Model):
         string="ZATCA chain index", copy=False, readonly=True,
         help="Invoice index in chain, set if and only if an in-chain XML was submitted and did not error",
     )
+    company_id = fields.Many2one(comodel_name="res.company", required=True)
+    journal_id = fields.Many2one(comodel_name="account.journal", required=True)
+    account_move_id = fields.Many2one('account.move', compute='_compute_resource')
+    pos_order_id = fields.Many2one('pos.order', compute='_compute_resource')
 
     _unique_record = models.Constraint(
         'unique(res_model, res_id)',
         "Only one ZATCA document can be linked to a record!",
     )
 
-    """
-        Once the journal has been successfully onboarded, we can clear/report invoices through the ZATCA API:
-            A) STANDARD Invoice:
-                Make a call to the Clearance API '/invoices/clearance/single'.
-                This will validate the invoice, sign it and apply a QR code then return the result.
-            B) SIMPLIFIED Invoice:
-                Make a call to the Reporting API '/invoices/reporting/single'.
-                This will validate the invoice then return the result.
-        The X509 Certificate and password from the PCSID API need to be provided in the request headers.
-    """
+    @api.depends('res_id', 'res_model')
+    def _compute_resource(self):
+        for record in self:
+            field = L10N_SA_MODEL_FIELD_MAPPING[record.res_model]
+            other_fields = set(L10N_SA_MODEL_FIELD_MAPPING.values()) - {field}
+            record[field] = record.res_id
+            for field in other_fields:
+                record[field] = False
 
-    @api.depends('res_model', 'res_id')
-    def _compute_related_fields(self):
-        for doc in self:
-            record = self.env[doc.res_model].browse(doc.res_id)
-            doc.company_id = record.company_id
-            if doc.res_model == 'account.move':
-                doc.journal_id = record.journal_id
-            elif doc.res_model == 'pos.order':
-                doc.journal_id = record.session_id.config_id.journal_id
-            else:
-                doc.journal_id = False
+    @property
+    def resource(self):
+        return self[L10N_SA_MODEL_FIELD_MAPPING[self.res_model]]
 
     # ====== Helper Functions =======
 
@@ -162,8 +159,7 @@ class L10nSaEdiDocument(models.Model):
     def _l10n_sa_assert_clearance_status(self, clearance_data):
         """Assert Clearance status. To be overridden in case there are any other cases to be accounted for"""
         self.ensure_one()
-        record = self.env[self.res_model].browse(self.res_id)
-        mode = 'reporting' if record._l10n_sa_is_simplified() else 'clearance'
+        mode = 'reporting' if self.resource._l10n_sa_is_simplified() else 'clearance'
         if mode == 'clearance' and clearance_data.get('clearanceStatus', '') != 'CLEARED':
             return {'error': _("Invoice could not be cleared:\n%s", clearance_data), 'blocking_level': 'error'}
         if mode == 'reporting' and clearance_data.get('reportingStatus', '') != 'REPORTED':
@@ -175,14 +171,13 @@ class L10nSaEdiDocument(models.Model):
     def _l10n_sa_create_log(self, notify, attachment=False):
         self.ensure_one()
         attachment = attachment or self.attachment_id
-        record = self.env[self.res_model].browse(self.res_id)
         vals_list = [{
             'l10n_sa_edi_document_id': self.id,
             'state': self.state,
             'res_model': self.res_model,
             'res_id': self.res_id,
             'attachment_name': attachment.name,
-            'is_test': record.company_id.l10n_sa_api_mode != 'production',
+            'is_test': self.resource.company_id.l10n_sa_api_mode != 'production',
             'message': self.message,
             }]
 
@@ -213,9 +208,8 @@ class L10nSaEdiDocument(models.Model):
         bootstrap_cls, title, subtitle, content = ("success", _("Success: Invoice accepted by ZATCA"), "", "" if (not error or not response_data) else response_data)
         status_code = response_data.get('status_code')
         attachment = False
-        record = self.env[self.res_model].browse(self.res_id)
         if error:
-            xml_filename = self.env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(record)
+            xml_filename = self.env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(self.resource)
             xml_filename = xml_filename[:-4] + '-rejected.xml'
             attachment = self.env['ir.attachment'].create({
                 'raw': xml_content,
@@ -289,12 +283,12 @@ class L10nSaEdiDocument(models.Model):
 
         return etree.tostring(root, with_tail=False).decode()
 
+    # todo: refactor
     def _l10n_sa_generate_zatca_template(self):
         """Render the ZATCA UBL file"""
         self.ensure_one()
-        record = self.env[self.res_model].browse(self.res_id)
         if self.res_model == 'account.move':
-            xml_content, errors = self.env['account.edi.xml.ubl_21.zatca']._export_invoice(record)
+            xml_content, errors = self.env['account.edi.xml.ubl_21.zatca']._export_invoice(self.resource)
             if errors:
                 return {
                     'error': _("Could not generate Invoice UBL content: %s", ", \n".join(errors)),
@@ -310,8 +304,7 @@ class L10nSaEdiDocument(models.Model):
             -   A. Clearance API: Submit a standard Invoice to ZATCA for validation, returns signed UBL
             -   B. Reporting API: Submit a simplified Invoice to ZATCA for validation
         """
-        record = self.env[self.res_model].browse(self.res_id)
-        clearance_data = self.journal_id._l10n_sa_api_clearance(record, signed_xml.decode(), PCSID_data)
+        clearance_data = self.journal_id._l10n_sa_api_clearance(self.resource, signed_xml.decode(), PCSID_data)
         if error := clearance_data.get('json_errors'):
             error_msg = ''
             if status_code := error.get('status_code'):
@@ -340,8 +333,7 @@ class L10nSaEdiDocument(models.Model):
         Once an invoice has been successfully submitted, it is returned as a Cleared invoice, on which data
         from ZATCA was applied. To be overridden to account for other cases, such as Reporting.
         """
-        record = self.env[self.res_model].browse(self.res_id)
-        if record._l10n_sa_is_simplified():
+        if self.resource._l10n_sa_is_simplified():
             # if invoice is B2C, it is a SIMPLIFIED invoice, and thus it is only reported and returns
             # no signed invoice. In this case, we just return the original content
             return signed_xml.decode()
@@ -350,8 +342,7 @@ class L10nSaEdiDocument(models.Model):
     def _l10n_sa_apply_qr_code(self, xml_content):
         """Apply QR code on Invoice UBL content"""
         root = etree.fromstring(xml_content)
-        record = self.env[self.res_model].browse(self.res_id)
-        qr_code = record.l10n_sa_qr_code_str
+        qr_code = self.resource.l10n_sa_qr_code_str
         qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
         qr_node.text = qr_code
         return etree.tostring(root, with_tail=False)
@@ -361,12 +352,11 @@ class L10nSaEdiDocument(models.Model):
         Helper method to sign the provided XML, apply the QR code in the case if Simplified invoices (B2C), then
         return the signed XML
         """
-        record = self.env[self.res_model].browse(self.res_id)
-        signed_xml = self._l10n_sa_sign_xml(unsigned_xml, certificate, record.l10n_sa_invoice_signature)
-        if record._l10n_sa_is_simplified():
+        signed_xml = self._l10n_sa_sign_xml(unsigned_xml, certificate, self.resource.l10n_sa_invoice_signature)
+        if self.resource._l10n_sa_is_simplified():
             # Applying with_prefetch() to set the _prefetch_ids = _ids,
             # preventing premature QR code computation for other invoices.
-            record = record.with_prefetch()
+            self.resource.with_prefetch()
             return self._l10n_sa_apply_qr_code(signed_xml)
         return signed_xml
 
@@ -448,7 +438,7 @@ class L10nSaEdiDocument(models.Model):
         # According to ZATCA, if we end up submitting the same invoice more than once, they will directly reach out
         # to the taxpayer for clarifications
         self.ensure_one()
-        record = self.env[self.res_model].browse(self.res_id)
+        record = self.resource
         chain_head = self._l10n_sa_get_chain_head()
         if chain_head and chain_head != record and not chain_head._l10n_sa_is_in_chain():
             self.l10n_sa_edi_chain_head_id = chain_head
@@ -516,9 +506,7 @@ class L10nSaEdiDocument(models.Model):
 
     def _l10n_sa_get_chain_head(self):
         self.ensure_one()
-        if self.res_model == 'account.move':
-            record = self.env[self.res_model].browse(self.res_id)
-            return record.journal_id._l10n_sa_get_last_posted_doc()
+        return self.journal_id._l10n_sa_get_last_posted_doc()
 
     def _l10n_sa_is_in_chain(self):
         """
@@ -601,6 +589,6 @@ class L10nSaEdiDocument(models.Model):
                 self.company_id,
                 self._l10n_sa_generate_zatca_template(),
                 self.journal_id.l10n_sa_production_csid_certificate_id,
-                self.env[self.res_model].browse(self.res_id).l10n_sa_invoice_signature,
+                self.resource.l10n_sa_invoice_signature,
             )
         return self._l10n_sa_build_standard_phase_2_qr()

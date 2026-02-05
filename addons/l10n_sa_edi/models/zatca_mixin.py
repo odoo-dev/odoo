@@ -44,9 +44,17 @@ class ZatcaMixin(models.AbstractModel):
         # Default implementation - should be overridden
         return 'unknown'
 
+    def _get_l10n_sa_journal(self):
+        return self.env['account.journal']
+
     def _l10n_sa_edi_create_document(self):
-        self.l10n_sa_edi_document_id = self.env['l10n_sa_edi.document'].create([{
-            'res_id': record.id,
-            'res_model': record._name,
+        self.ensure_one()
+        if self.l10n_sa_edi_document_id:
+            return
+        self.l10n_sa_edi_document_id = self.env['l10n_sa_edi.document'].create({
+            'res_id': self.id,
+            'res_model': self._name,
+            'company_id': self.company_id.id,
+            'journal_id': self._get_l10n_sa_journal().id,
             'state': 'to_send',
-        } for record in self])
+        })

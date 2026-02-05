@@ -490,7 +490,7 @@ class AccountJournal(models.Model):
         """
         return ZATCA_API_URLS['apis']['reporting' if invoice._l10n_sa_is_simplified() else 'clearance']
 
-    def _l10n_sa_api_clearance(self, invoice, xml_content, PCSID_data):
+    def _l10n_sa_api_clearance(self, record, xml_content, PCSID_data):
         """
             API call to the CLEARANCE/REPORTING endpoint to sign an invoice
                 - If SIMPLIFIED invoice: Reporting
@@ -502,7 +502,7 @@ class AccountJournal(models.Model):
         request_data = {
             'body': json.dumps({
                 "invoiceHash": invoice_hash,
-                "uuid": invoice.l10n_sa_uuid,
+                "uuid": record.l10n_sa_uuid,
                 "invoice": b64encode(xml_content.encode()).decode()
             }),
             'header': {
@@ -510,7 +510,7 @@ class AccountJournal(models.Model):
                 'Clearance-Status': '1'
             }
         }
-        url_string = self._l10n_sa_get_api_clearance_url(invoice)
+        url_string = self._l10n_sa_get_api_clearance_url(record)
         return self._l10n_sa_call_api(request_data, url_string, 'POST')
 
     # ====== Certificate Methods =======

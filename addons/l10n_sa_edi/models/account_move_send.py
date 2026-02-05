@@ -14,7 +14,7 @@ class AccountMoveSend(models.AbstractModel):
     def _get_alerts(self, moves, moves_data):
         res = super()._get_alerts(moves, moves_data)
 
-        edi_moves = moves.filtered(lambda move: self._is_sa_edi_applicable(move))
+        edi_moves = moves.filtered(lambda move: self._is_sa_edi_send_applicable(move))
         if invalid_moves := edi_moves.filtered(lambda move: move.commercial_partner_id == move.company_id.partner_id.commercial_partner_id):
             res['l10n_sa_edi_invalid_partner'] = {
                 'message': _("Invoice cannot be posted as the Supplier and Buyer are the same."),
@@ -153,8 +153,6 @@ class AccountMoveSend(models.AbstractModel):
 
         for invoice, invoice_data in invoices_data.items():
             if 'sa_edi' in invoice_data['extra_edis']:
-                if not invoice.l10n_sa_edi_document_id:
-                    invoice._l10n_sa_edi_create_document()
                 invoice.l10n_sa_edi_document_id._l10n_sa_post_zatca_edi(len(invoices_data.keys()) == 1)
 
     def _hook_invoice_document_after_pdf_report_render(self, invoice, invoice_data):

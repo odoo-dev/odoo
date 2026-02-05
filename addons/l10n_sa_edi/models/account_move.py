@@ -12,8 +12,8 @@ class AccountMove(models.Model):
                 'company_id.vat', 'journal_id', 'journal_id.l10n_sa_production_csid_json', 'l10n_sa_edi_document_id',
                 'l10n_sa_invoice_signature', 'l10n_sa_chain_index', 'state']
 
-    def _l10n_sa_is_phase_2_applicable(self):
-        return self._l10n_sa_is_phase_1_applicable() and self.move_type in ('out_invoice', 'out_refund') and self.l10n_sa_edi_document_id and self.state != 'draft'
+    def _l10n_sa_is_phase_2_applicable(self, check_document=True):
+        return self._l10n_sa_is_phase_1_applicable() and self.move_type in ('out_invoice', 'out_refund') and self.state != 'draft' and (self.l10n_sa_edi_document_id or not check_document)
 
     @api.ondelete(at_uninstall=False)
     def _prevent_zatca_rejected_invoice_deletion(self):
@@ -24,31 +24,6 @@ class AccountMove(models.Model):
                move.company_id.l10n_sa_edi_is_production and \
                move.attachment_ids.filtered(lambda a: a.description == descr and a.res_model == 'account.move'):
                 raise UserError(_("The Invoice(s) are linked to a validated EDI document and cannot be modified according to ZATCA rules"))
-
-    # def _compute_qr_code_str(self):
-    #     """ Override to update QR code generation in accordance with ZATCA Phase 2"""
-    #     phase_one_moves = self.env['account.move']
-    #     for move in self:
-    #         zatca_document = move.l10n_sa_edi_document_id
-    #         if move.country_code == 'SA' and move.move_type in ('out_invoice', 'out_refund') and zatca_document and move.state != 'draft':
-    #             qr_code_str = ''
-    #             if move._l10n_sa_is_simplified():
-    #                 x509_cert = move.journal_id.l10n_sa_production_csid_certificate_id
-    #                 xml_content = self.l10n_sa_edi_document_id._l10n_sa_generate_zatca_template()
-    #                 qr_code_str = move._l10n_sa_get_qr_code(move.company_id, xml_content, x509_cert,
-    #                                                         move.l10n_sa_invoice_signature, True)
-    #                 qr_code_str = b64encode(qr_code_str).decode()
-    #             elif zatca_document.state == 'accepted' and zatca_document.attachment_id.datas:
-    #                 document_xml = zatca_document.attachment_id.with_context(bin_size=False).datas.decode()
-    #                 root = etree.fromstring(b64decode(document_xml))
-    #                 qr_node = root.xpath('//*[local-name()="ID"][text()="QR"]/following-sibling::*/*')[0]
-    #                 qr_code_str = qr_node.text
-    #             move.l10n_sa_qr_code_str = qr_code_str
-    #         else:
-    #             # In the case where the Invoice is not a ZATCA invoice, or is Phase 1, or is not confirmed,
-    #             # we call super to trigger the initial QR code generation for Phase 1
-    #             phase_one_moves |= move
-    #     super(AccountMove, phase_one_moves)._compute_qr_code_str()
 
     def _l10n_sa_check_billing_reference(self):
         """
@@ -79,6 +54,12 @@ class AccountMove(models.Model):
             # - The invoice submission encountered a timed out, regardless of the API mode.
             if move.l10n_sa_chain_index and (move.company_id.l10n_sa_edi_is_production or not move.l10n_sa_edi_document_id._l10n_sa_is_in_chain()):
                 move.show_reset_to_draft_button = False
+
+    def _post(self, soft=True):
+        res = super()._post(soft)
+        for record in self.filtered(lambda rec: rec._l10n_sa_is_phase_2_applicable(check_document=False)):
+            record._l10n_sa_edi_create_document()
+        return res
 
     def button_draft(self):
         # OVERRIDE
@@ -156,6 +137,10 @@ class AccountMove(models.Model):
             'total_amount': invoice_node['cac:LegalMonetaryTotal']['cbc:TaxInclusiveAmount']['_text'],
             'total_tax': invoice_node['cac:TaxTotal'][-1]['cbc:TaxAmount']['_text'],
         }
+
+    def _get_l10n_sa_journal(self):
+        self.ensure_one()
+        return self.journal_id
 
     def action_show_chain_head(self):
         """

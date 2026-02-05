@@ -7,6 +7,10 @@ class PosOrder(models.Model):
     l10n_sa_invoice_qr_code_str = fields.Char(related="account_move.l10n_sa_qr_code_str", string="ZATCA QR Code")
     l10n_sa_invoice_edi_state = fields.Selection(related="account_move.l10n_sa_edi_state", string="Electronic invoicing")
 
-    def _l10n_sa_is_phase_2_applicable(self):
+    def _l10n_sa_is_phase_2_applicable(self, check_document=True):
         self.ensure_one()
-        return self._l10n_sa_is_phase_1_applicable() and self.state in ('done', 'paid') and self.l10n_sa_edi_document_id
+        return self._l10n_sa_is_phase_1_applicable() and self.state in ('done', 'paid') and (self.l10n_sa_edi_document_id or not check_document)
+
+    def _get_l10n_sa_journal(self):
+        self.ensure_one()
+        return self.session_id.config_id.journal_id
