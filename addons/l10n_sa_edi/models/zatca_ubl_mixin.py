@@ -42,10 +42,287 @@ class ZatcaUblMixin(models.AbstractModel):
     _description = 'ZATCA UBL Mixin'
 
     # -------------------------------------------------------------------------
+    # EXPORT
+    # todo: clean up later
+    # Methods here take a dict, vals
+    # -------------------------------------------------------------------------
+
+    def _add_invoice_config_vals(self, vals):
+        # CHECK DONE
+        """
+            Only use Invoice in ZATCA, even for credit and debit notes because we want the root
+            tag of the document to be <Invoice>
+        """
+        super()._add_invoice_config_vals(vals)
+        vals['document_type'] = 'invoice'
+
+    def _add_document_tax_grouping_function_vals(self, vals):
+        # CHECK DONE
+        # OVERRIDE account.edi.xml.ubl_21
+
+        # Always ignore withholding taxes in the UBL
+        def total_grouping_function(base_line, tax_data):
+            if tax_data and tax_data['tax'].l10n_sa_is_retention:
+                return None
+            return True
+
+        def tax_grouping_function(base_line, tax_data):
+            tax = tax_data and tax_data['tax']
+
+            # Ignore withholding taxes
+            if tax and tax.l10n_sa_is_retention:
+                return None
+            return {
+                'tax_category_code': self._get_tax_category_code(vals['customer'].commercial_partner_id, vals['supplier'], tax),
+                **self._get_tax_exemption_reason(vals['customer'].commercial_partner_id, vals['supplier'], tax),
+                'amount': tax.amount if tax else 0.0,
+                'amount_type': tax.amount_type if tax else 'percent',
+            }
+
+        vals['total_grouping_function'] = total_grouping_function
+        vals['tax_grouping_function'] = tax_grouping_function
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document header nodes
+    # -------------------------------------------------------------------------
+
+    def _get_party_node(self, vals):
+        # CHECK DONE
+        partner = vals['partner']
+        role = vals['role']
+        commercial_partner = partner.commercial_partner_id
+
+        party_node = {}
+
+        if identification_number := self._get_partner_party_identification_number(commercial_partner):
+            party_node['cac:PartyIdentification'] = {
+                'cbc:ID': {
+                    '_text': identification_number,
+                    'schemeID': commercial_partner.l10n_sa_edi_additional_identification_scheme,
+                },
+            }
+
+        party_node.update({
+            'cac:PartyName': {
+                'cbc:Name': {'_text': partner.display_name},
+            },
+            'cac:PostalAddress': self._get_address_node(vals),
+            'cac:PartyTaxScheme': {
+                'cbc:RegistrationName': {'_text': commercial_partner.name},
+                'cbc:CompanyID': {'_text': commercial_partner.vat},
+                'cac:RegistrationAddress': self._get_address_node({'partner': commercial_partner}),
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'VAT'}
+                }
+            } if (role != 'customer' or partner.country_id.code == 'SA') and commercial_partner.vat and commercial_partner.vat != '/' else None,  # BR-KSA-46
+            'cac:PartyLegalEntity': {
+                'cbc:RegistrationName': {'_text': commercial_partner.name},
+                'cbc:CompanyID': {'_text': commercial_partner.vat} if commercial_partner.country_code == 'SA' else None,
+                'cac:RegistrationAddress': self._get_address_node({'partner': commercial_partner}),
+            },
+            'cac:Contact': {
+                'cbc:ID': {'_text': partner.id},
+                'cbc:Name': {'_text': partner.name},
+                'cbc:Telephone': {
+                    '_text': re.sub(r"[^+\d]", '', partner.phone) if partner.phone else None,
+                },
+                'cbc:ElectronicMail': {'_text': partner.email},
+            },
+        })
+        return party_node
+
+    def _get_address_node(self, vals):
+        # CHECK DONE
+        partner = vals['partner']
+        building_number = partner.l10n_sa_edi_building_number if partner._name == 'res.partner' else ''
+        edi_plot_identification = partner.l10n_sa_edi_plot_identification if partner._name == 'res.partner' else ''
+
+        return {
+            'cbc:StreetName': {'_text': partner.street},
+            'cbc:BuildingNumber': {'_text': building_number},
+            'cbc:PlotIdentification': {'_text': edi_plot_identification},
+            'cbc:CitySubdivisionName': {'_text': partner.street2},
+            'cbc:CityName': {'_text': partner.city},
+            'cbc:PostalZone': {'_text': partner.zip},
+            'cbc:CountrySubentity': {'_text': partner.state_id.name},
+            'cbc:CountrySubentityCode': {'_text': partner.state_id.code},
+            'cac:AddressLine': None,
+            'cac:Country': {
+                'cbc:IdentificationCode': {'_text': partner.country_id.code},
+                'cbc:Name': {'_text': partner.country_id.name},
+            },
+        }
+
+    def _get_partner_party_identification_number(self, partner):
+        # CHECK DONE
+        """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
+        identification_number = partner.l10n_sa_edi_additional_identification_number
+        vat = re.sub(r'[^a-zA-Z0-9]', '', partner.vat or "")
+        if partner.country_code != "SA":
+            identification_number = vat
+        elif partner.l10n_sa_edi_additional_identification_scheme == 'TIN':
+            # according to ZATCA, the TIN number is always the first 10 digits of the VAT number
+            identification_number = vat[:10]
+        return identification_number
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document amount nodes
+    # -------------------------------------------------------------------------
+
+    def _add_document_tax_total_nodes(self, document_node, vals):
+        # CHECK DONE
+        super()._add_document_tax_total_nodes(document_node, vals)
+
+        document_node['cac:TaxTotal'] = [document_node['cac:TaxTotal']]
+
+        self._add_tax_total_node_in_company_currency(document_node, vals)
+        document_node['cac:TaxTotal'][1]['cac:TaxSubtotal'] = None
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document line nodes
+    # -------------------------------------------------------------------------
+
+    def _add_document_line_tax_total_nodes(self, line_node, vals):
+        # CHECK DONE
+        base_line = vals['base_line']
+        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+
+        total_tax_amount = sum(
+            values['tax_amount_currency']
+            for grouping_key, values in aggregated_tax_details.items()
+            if grouping_key
+        )
+        total_base_amount = sum(
+            values['base_amount_currency']
+            for grouping_key, values in aggregated_tax_details.items()
+            if grouping_key
+        )
+        total_amount = total_base_amount + total_tax_amount
+
+        line_node['cac:TaxTotal'] = {
+            'cbc:TaxAmount': {
+                '_text': self.format_float(total_tax_amount, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
+            'cbc:RoundingAmount': {
+                # This should simply contain the net (base + tax) amount for the line.
+                '_text': self.format_float(total_amount, vals['currency_dp']),
+                'currencyID': vals['currency_name'],
+            },
+            # No TaxSubtotal: BR-KSA-80: only downpayment lines should have a tax subtotal breakdown.
+        }
+
+    def _add_document_line_item_nodes(self, line_node, vals):
+        # CHECK DONE
+        super()._add_document_line_item_nodes(line_node, vals)
+        product = vals['base_line']['product_id']
+        line_node['cac:Item']['cac:SellersItemIdentification'] = {
+            'cbc:ID': {'_text': product.code or product.default_code},
+        }
+
+    def _add_document_line_tax_category_nodes(self, line_node, vals):
+        # CHECK DONE
+        base_line = vals['base_line']
+        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+
+        line_node['cac:Item']['cac:ClassifiedTaxCategory'] = [
+            self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
+            for grouping_key in aggregated_tax_details
+            if grouping_key
+        ]
+
+    def _add_document_line_price_nodes(self, line_node, vals):
+        # CHECK DONE
+        """
+        Use 10 decimal places for PriceAmount to satisfy ZATCA validation BR-KSA-EN16931-11
+        """
+        currency_suffix = vals['currency_suffix']
+        line_node['cac:Price'] = {
+            'cbc:PriceAmount': {
+                '_text': round(vals[f'gross_price_unit{currency_suffix}'], 10),
+                'currencyID': vals['currency_name'],
+            },
+        }
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Helpers for hash generation
+    # -------------------------------------------------------------------------
+
+    def _l10n_sa_get_namespaces(self):
+        # CHECK DONE
+        """
+        Namespaces used in the final UBL declaration, required to canonalize the finalized XML document of the Invoice
+        """
+        return {
+            'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2',
+            'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
+            'ext': 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2',
+            'sig': 'urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2',
+            'sac': 'urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2',
+            'sbc': 'urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2',
+            'ds': 'http://www.w3.org/2000/09/xmldsig#',
+            'xades': 'http://uri.etsi.org/01903/v1.3.2#',
+        }
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document allowance charge nodes
+    # -------------------------------------------------------------------------
+
+    def _get_document_allowance_charge_node(self, vals):
+        # CHECK DONE
+        """
+        Charge Reasons & Codes (As per ZATCA):
+        https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred5189.htm
+        As far as ZATCA is concerned, we calculate Allowance/Charge vals for global discounts as
+        a document level allowance, and we do not include any other charges or allowances.
+        """
+        base_line = vals['base_line']
+        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+
+        base_amount_currency = base_line['tax_details']['total_excluded_currency']
+        if base_line['special_type'] == 'early_payment':
+            return super()._get_document_allowance_charge_node(vals)
+        if base_amount_currency < 0:
+            return {
+                'cbc:ChargeIndicator': {'_text': 'false'},
+                'cbc:AllowanceChargeReasonCode': {'_text': '95'},
+                'cbc:AllowanceChargeReason': {'_text': 'Discount'},
+                'cbc:Amount': {
+                    '_text': self.format_float(abs(base_amount_currency), 2),
+                    'currencyID': vals['currency_id'].name,
+                },
+                'cac:TaxCategory': [
+                    self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
+                    for grouping_key in aggregated_tax_details
+                    if grouping_key
+                ],
+            }
+
+        return {}
+    # -------------------------------------------------------------------------
+    # EXPORT: Templates for document header nodes helpers
+    # -------------------------------------------------------------------------
+
+    def _set_delivery_nodes(self, document_node, record):
+        # CHECK DONE
+        if 'cac:Delivery' in document_node:
+            # todo refactor
+            issue_date = fields.Datetime.context_timestamp(
+                self.with_context(tz='Asia/Riyadh'),
+                record.l10n_sa_confirmation_datetime,
+            )
+            if document_node['cac:Delivery']['cac:DeliveryLocation']:
+                document_node['cac:Delivery']['cac:DeliveryLocation'] = None
+
+            if not document_node['cac:Delivery']['cbc:ActualDeliveryDate']['_text']:
+                document_node['cac:Delivery']['cbc:ActualDeliveryDate'] = {'_text': issue_date}
+
+    # -------------------------------------------------------------------------
     # Tax Category and Exemption
     # -------------------------------------------------------------------------
 
     def _get_tax_category_code(self, customer, supplier, tax):
+        # CHECK DONE
         """
         Get ZATCA tax category code based on tax configuration.
 
@@ -60,22 +337,19 @@ class ZatcaUblMixin(models.AbstractModel):
         :param tax: account.tax - Tax record
         :return: str - Tax category code
         """
-        if supplier.country_id.code != 'SA':
-            # For non-SA suppliers, delegate to parent or return default
-            if hasattr(super(), '_get_tax_category_code'):
-                return super()._get_tax_category_code(customer, supplier, tax)
-            return 'O'
+        if supplier.country_id.code == 'SA':
+            if tax and tax.amount != 0:
+                return 'S'
+            if tax and tax.l10n_sa_exemption_reason_code in TAX_EXEMPTION_CODES:
+                return 'E'
+            if tax and tax.l10n_sa_exemption_reason_code in TAX_ZERO_RATE_CODES:
+                return 'Z'
 
-        if tax and tax.amount != 0:
-            return 'S'  # Standard rated
-        elif tax and tax.l10n_sa_exemption_reason_code in TAX_EXEMPTION_CODES:
-            return 'E'  # Exempted
-        elif tax and tax.l10n_sa_exemption_reason_code in TAX_ZERO_RATE_CODES:
-            return 'Z'  # Zero rated
-        else:
-            return 'O'  # Not subject to VAT
+            return 'O'
+        return super()._get_tax_category_code(customer, supplier, tax)
 
     def _get_tax_exemption_reason(self, customer, supplier, tax):
+        # CHECK DONE
         """
         Get tax exemption reason code and description for ZATCA.
 
@@ -84,160 +358,31 @@ class ZatcaUblMixin(models.AbstractModel):
         :param tax: account.tax - Tax record
         :return: dict - Contains tax_exemption_reason_code and tax_exemption_reason
         """
-        if supplier.country_id.code != 'SA':
-            # For non-SA suppliers, delegate to parent or return empty
-            if hasattr(super(), '_get_tax_exemption_reason'):
-                return super()._get_tax_exemption_reason(customer, supplier, tax)
-            return {'tax_exemption_reason_code': None, 'tax_exemption_reason': None}
+        if supplier.country_id.code == 'SA':
+            if tax and tax.amount == 0:
+                exemption_reason_by_code = dict(tax._fields["l10n_sa_exemption_reason_code"]._description_selection(self.env))
+                code = tax.l10n_sa_exemption_reason_code
+                return {
+                    'tax_exemption_reason_code': code or "VATEX-SA-OOS",
+                    'tax_exemption_reason': (
+                        exemption_reason_by_code[code].split(code)[1].lstrip()
+                        if code else "Not subject to VAT"
+                    ),
+                }
 
-        if tax and tax.amount == 0:
-            exemption_reason_by_code = dict(
-                tax._fields["l10n_sa_exemption_reason_code"]._description_selection(self.env),
-            )
-            code = tax.l10n_sa_exemption_reason_code
-            return {
-                'tax_exemption_reason_code': code or "VATEX-SA-OOS",
-                'tax_exemption_reason': (
-                    exemption_reason_by_code[code].split(code)[1].lstrip()
-                    if code else "Not subject to VAT"
-                ),
-            }
-        else:
             return {
                 'tax_exemption_reason_code': None,
                 'tax_exemption_reason': None,
             }
 
-    # -------------------------------------------------------------------------
-    # Partner and Address Helpers
-    # -------------------------------------------------------------------------
-
-    def _get_partner_party_identification_number(self, partner):
-        """
-        Get partner's party identification number for ZATCA compliance.
-
-        For Saudi partners:
-        - Uses l10n_sa_edi_additional_identification_number
-        - For TIN scheme: extracts first 10 digits of VAT
-
-        For non-Saudi partners:
-        - Uses VAT number
-
-        :param partner: res.partner - Partner record
-        :return: str - Identification number
-        """
-        identification_number = partner.l10n_sa_edi_additional_identification_number
-        vat = re.sub(r'[^a-zA-Z0-9]', '', partner.vat or "")
-
-        if partner.country_code != "SA":
-            identification_number = vat
-        elif partner.l10n_sa_edi_additional_identification_scheme == 'TIN':
-            # According to ZATCA, TIN is always first 10 digits of VAT
-            identification_number = vat[:10]
-
-        return identification_number
-
-    def _get_address_node(self, vals):
-        """
-        Generate ZATCA-compliant address node for UBL.
-
-        Includes ZATCA-specific fields:
-        - BuildingNumber: Saudi-specific building number
-        - PlotIdentification: Saudi-specific plot ID
-        - CountrySubentityCode: State/region code
-
-        :param vals: dict - Contains 'partner' (res.partner or res.bank)
-        :return: dict - UBL address node structure
-        """
-        partner = vals['partner']
-        country = partner['country' if partner._name == 'res.bank' else 'country_id']
-        state = partner['state' if partner._name == 'res.bank' else 'state_id']
-
-        # ZATCA-specific address fields (only for res.partner)
-        building_number = partner.l10n_sa_edi_building_number if partner._name == 'res.partner' else ''
-        plot_identification = partner.l10n_sa_edi_plot_identification if partner._name == 'res.partner' else ''
-
-        return {
-            'cbc:StreetName': {'_text': partner.street},
-            'cbc:BuildingNumber': {'_text': building_number},
-            'cbc:PlotIdentification': {'_text': plot_identification},
-            'cbc:CitySubdivisionName': {'_text': partner.street2},
-            'cbc:CityName': {'_text': partner.city},
-            'cbc:PostalZone': {'_text': partner.zip},
-            'cbc:CountrySubentity': {'_text': state.name},
-            'cbc:CountrySubentityCode': {'_text': state.code},
-            'cac:AddressLine': None,  # Not used in ZATCA
-            'cac:Country': {
-                'cbc:IdentificationCode': {'_text': country.code},
-                'cbc:Name': {'_text': country.name},
-            },
-        }
-
-    def _get_party_node(self, vals):
-        """
-        Generate ZATCA-compliant party node for UBL.
-
-        Includes:
-        - PartyIdentification with scheme ID (CRN, TIN, etc.)
-        - PartyTaxScheme (not for foreign customers per BR-KSA-46)
-        - PartyLegalEntity with CompanyID for SA entities
-        - Contact information with formatted phone number
-
-        :param vals: dict - Contains 'partner' and 'role' (customer/supplier)
-        :return: dict - UBL party node structure
-        """
-        partner = vals['partner']
-        role = vals['role']
-        commercial_partner = partner.commercial_partner_id
-
-        party_node = {}
-
-        # Add party identification with scheme ID
-        if identification_number := self._get_partner_party_identification_number(commercial_partner):
-            party_node['cac:PartyIdentification'] = {
-                'cbc:ID': {
-                    '_text': identification_number,
-                    'schemeID': commercial_partner.l10n_sa_edi_additional_identification_scheme,
-                },
-            }
-
-        party_node.update({
-            'cac:PartyName': {
-                'cbc:Name': {'_text': partner.display_name},
-            },
-            'cac:PostalAddress': self._get_address_node(vals),
-            # BR-KSA-46: PartyTaxScheme not required for foreign customers
-            'cac:PartyTaxScheme': {
-                'cbc:RegistrationName': {'_text': commercial_partner.name},
-                'cbc:CompanyID': {'_text': commercial_partner.vat},
-                'cac:RegistrationAddress': self._get_address_node({'partner': commercial_partner}),
-                'cac:TaxScheme': {
-                    'cbc:ID': {'_text': 'VAT'},
-                },
-            } if role != 'customer' or partner.country_id.code == 'SA' else None,
-            'cac:PartyLegalEntity': {
-                'cbc:RegistrationName': {'_text': commercial_partner.name},
-                # CompanyID only for Saudi entities
-                'cbc:CompanyID': {'_text': commercial_partner.vat} if commercial_partner.country_code == 'SA' else None,
-                'cac:RegistrationAddress': self._get_address_node({'partner': commercial_partner}),
-            },
-            'cac:Contact': {
-                'cbc:ID': {'_text': partner.id},
-                'cbc:Name': {'_text': partner.name},
-                'cbc:Telephone': {
-                    '_text': re.sub(r"[^+\d]", '', partner.phone) if partner.phone else None,
-                },
-                'cbc:ElectronicMail': {'_text': partner.email},
-            },
-        })
-
-        return party_node
+        return super()._get_tax_exemption_reason(customer, supplier, tax)
 
     # -------------------------------------------------------------------------
     # Payment Means
     # -------------------------------------------------------------------------
 
     def _add_invoice_payment_means_nodes(self, document_node, vals):
+        # CHECK DONE
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
         super()._add_invoice_payment_means_nodes(document_node, vals)
         payment_means_node = document_node['cac:PaymentMeans']
@@ -256,68 +401,37 @@ class ZatcaUblMixin(models.AbstractModel):
     # Document Identification Helpers
     # -------------------------------------------------------------------------
 
-    def _is_simplified_document(self, record):
-        """
-        Check if document should be treated as simplified (B2C).
+    # def _get_invoice_type_code_name(self, record):
+    # todo remove
+    #     """
+    #     Get ZATCA invoice type code name.
 
-        Template method to be implemented by specific modules.
+    #     Format: 0TSNNNNN where:
+    #     - T: Transaction type (1=Standard/B2B, 2=Simplified/B2C)
+    #     - S: Simplified tax invoice indicator (always 0)
+    #     - NNNNN: Transaction sub-types (all 0 for basic transactions)
 
-        :param record: account.move or pos.order
-        :return: bool - True if simplified invoice
-        """
-        # For invoices: check using invoice._l10n_sa_is_simplified()
-        # For POS: always simplified
-        if hasattr(record, '_l10n_sa_is_simplified'):
-            return record._l10n_sa_is_simplified()
-        # POS orders are always simplified
-        return record._name == 'pos.order'
+    #     :param record: account.move or pos.order
+    #     :return: str - Invoice type code name
+    #     """
+    #     is_simplified = record._l10n_sa_is_simplified()
+    #     is_export = False
 
-    def _get_invoice_type_code_name(self, record):
-        """
-        Get ZATCA invoice type code name.
+    #     # Check if it's an export transaction (only for non-simplified)
+    #     if not is_simplified and hasattr(record, 'commercial_partner_id'):
+    #         is_export = (record.commercial_partner_id.country_id != record.company_id.country_id)
 
-        Format: 0TSNNNNN where:
-        - T: Transaction type (1=Standard/B2B, 2=Simplified/B2C)
-        - S: Simplified tax invoice indicator (always 0)
-        - NNNNN: Transaction sub-types (all 0 for basic transactions)
-
-        :param record: account.move or pos.order
-        :return: str - Invoice type code name
-        """
-        is_simplified = self._is_simplified_document(record)
-        is_export = False
-
-        # Check if it's an export transaction (only for non-simplified)
-        if not is_simplified and hasattr(record, 'commercial_partner_id'):
-            is_export = (record.commercial_partner_id.country_id != record.company_id.country_id)
-
-        return '0%s00%s00' % (
-            '2' if is_simplified else '1',
-            '1' if is_export else '0',
-        )
+    #     return '0%s00%s00' % (
+    #         '2' if is_simplified else '1',
+    #         '1' if is_export else '0',
+    #     )
 
     # -------------------------------------------------------------------------
     # XML Hash Generation
     # -------------------------------------------------------------------------
 
-    def _l10n_sa_get_namespaces(self):
-        """
-        Get XML namespaces required for ZATCA UBL documents.
-
-        :return: dict - Namespace prefix to URI mapping
-        """
-        return {
-            'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2',
-            'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
-            'ext': 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2',
-            'sig': 'urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2',
-            'sac': 'urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2',
-            'sbc': 'urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2',
-            'ds': 'http://www.w3.org/2000/09/xmldsig#',
-            'xades': 'http://uri.etsi.org/01903/v1.3.2#',
-        }
-
     def _l10n_sa_generate_invoice_xml_sha(self, xml_content):
+        # CHECK DONE
         """
         Generate SHA256 hash of transformed and canonicalized invoice XML.
 
@@ -351,143 +465,119 @@ class ZatcaUblMixin(models.AbstractModel):
         return sha256(transformed_xml)
 
     def _l10n_sa_generate_invoice_xml_hash(self, xml_content, mode='hexdigest'):
+        # CHECK DONE
         """
-        Generate base64-encoded SHA256 hash of invoice XML.
-
-        :param xml_content: bytes or str - XML content
-        :param mode: str - 'hexdigest' or 'digest' for hash format
-        :return: bytes - Base64-encoded hash
+        Generate the b64 encoded sha256 hash of a given xml string:
+            - First: Transform the xml content using a pre-hash_invoice.xsl file
+            - Second: Canonicalize the transformed xml content using the c14n method
+            - Third: hash the canonicalized content using the sha256 algorithm then encode it into b64 format
         """
         xml_sha = self._l10n_sa_generate_invoice_xml_sha(xml_content)
-
         if mode == 'hexdigest':
             xml_hash = xml_sha.hexdigest().encode()
         elif mode == 'digest':
             xml_hash = xml_sha.digest()
-        else:
-            raise ValueError(f"Invalid mode: {mode}")
-
         return b64encode(xml_hash)
 
     # -------------------------------------------------------------------------
     # Common Header Elements
     # -------------------------------------------------------------------------
 
-    def _get_zatca_additional_document_references(self, record):
-        """
-        Get ZATCA-specific additional document references.
+    # def _get_zatca_additional_document_references(self, record):
+    # todo remove
+    #     """
+    #     Get ZATCA-specific additional document references.
 
-        These are common to both standard and simplified invoices:
-        - PIH: Previous Invoice Hash
-        - ICV: Invoice Counter Value
+    #     These are common to both standard and simplified invoices:
+    #     - PIH: Previous Invoice Hash
+    #     - ICV: Invoice Counter Value
 
-        Simplified invoices additionally have:
-        - QR: QR code placeholder
+    #     Simplified invoices additionally have:
+    #     - QR: QR code placeholder
 
-        :param record: account.move or pos.order
-        :return: list - Additional document reference nodes
-        """
-        references = []
-        is_simplified = self._is_simplified_document(record)
+    #     :param record: account.move or pos.order
+    #     :return: list - Additional document reference nodes
+    #     """
+    #     references = []
+    #     is_simplified = record._l10n_sa_is_simplified()
 
-        # QR code for simplified invoices (B2C)
-        if is_simplified:
-            references.append({
-                'cbc:ID': {'_text': 'QR'},
-                'cac:Attachment': {
-                    'cbc:EmbeddedDocumentBinaryObject': {
-                        '_text': 'N/A',  # Placeholder, replaced after signing
-                        'mimeCode': 'text/plain',
-                    },
-                },
-            })
+    #     # QR code for simplified invoices (B2C)
+    #     if is_simplified:
+    #         references.append({
+    #             'cbc:ID': {'_text': 'QR'},
+    #             'cac:Attachment': {
+    #                 'cbc:EmbeddedDocumentBinaryObject': {
+    #                     '_text': 'N/A',  # Placeholder, replaced after signing
+    #                     'mimeCode': 'text/plain',
+    #                 },
+    #             },
+    #         })
 
-        # PIH: Previous Invoice Hash
-        # Determine the journal to check for latest hash
-        journal = None
-        if hasattr(record, 'journal_id'):
-            journal = record.journal_id
-        elif hasattr(record, 'session_id') and hasattr(record.session_id, 'config_id'):
-            journal = record.session_id.config_id.journal_id
+    #     # PIH: Previous Invoice Hash
+    #     # Determine the journal to check for latest hash
+    #     journal = None
+    #     if hasattr(record, 'journal_id'):
+    #         journal = record.journal_id
+    #     elif hasattr(record, 'session_id') and hasattr(record.session_id, 'config_id'):
+    #         journal = record.session_id.config_id.journal_id
 
-        previous_hash = (
-            "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
-            if record.company_id.l10n_sa_api_mode == 'sandbox' or not journal or not journal.l10n_sa_latest_submission_hash
-            else journal.l10n_sa_latest_submission_hash
-        )
+    #     previous_hash = (
+    #         "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ=="
+    #         if record.company_id.l10n_sa_api_mode == 'sandbox' or not journal or not journal.l10n_sa_latest_submission_hash
+    #         else journal.l10n_sa_latest_submission_hash
+    #     )
 
-        references.append({
-            'cbc:ID': {'_text': 'PIH'},
-            'cac:Attachment': {
-                'cbc:EmbeddedDocumentBinaryObject': {
-                    '_text': previous_hash,
-                    'mimeCode': 'text/plain',
-                },
-            },
-        })
+    #     references.append({
+    #         'cbc:ID': {'_text': 'PIH'},
+    #         'cac:Attachment': {
+    #             'cbc:EmbeddedDocumentBinaryObject': {
+    #                 '_text': previous_hash,
+    #                 'mimeCode': 'text/plain',
+    #             },
+    #         },
+    #     })
 
-        # ICV: Invoice Counter Value
-        references.append({
-            'cbc:ID': {'_text': 'ICV'},
-            'cbc:UUID': {'_text': record.l10n_sa_chain_index},
-        })
+    #     # ICV: Invoice Counter Value
+    #     references.append({
+    #         'cbc:ID': {'_text': 'ICV'},
+    #         'cbc:UUID': {'_text': record.l10n_sa_chain_index},
+    #     })
 
-        return references
+    #     return references
 
-    def _get_zatca_signature_node(self, record):
-        """
-        Get ZATCA signature node for simplified invoices.
+    # def _get_zatca_signature_node(self, record):
+    # todo remove
+    #     """
+    #     Get ZATCA signature node for simplified invoices.
 
-        Only required for simplified (B2C) invoices.
+    #     Only required for simplified (B2C) invoices.
 
-        :param record: account.move or pos.order
-        :return: dict or None - Signature node if simplified, None otherwise
-        """
-        if self._is_simplified_document(record):
-            return {
-                'cbc:ID': {'_text': "urn:oasis:names:specification:ubl:signature:Invoice"},
-                'cbc:SignatureMethod': {'_text': "urn:oasis:names:specification:ubl:dsig:enveloped:xades"},
-            }
-        return None
+    #     :param record: account.move or pos.order
+    #     :return: dict or None - Signature node if simplified, None otherwise
+    #     """
+    #     if record._l10n_sa_is_simplified():
+    #         return {
+    #             'cbc:ID': {'_text': "urn:oasis:names:specification:ubl:signature:Invoice"},
+    #             'cbc:SignatureMethod': {'_text': "urn:oasis:names:specification:ubl:dsig:enveloped:xades"},
+    #         }
+    #     return None
 
     # -------------------------------------------------------------------------
     # Common Filename Generation
     # -------------------------------------------------------------------------
 
     def _export_invoice_filename(self, record):
+        # CHECK DONE
         """
-        Generate ZATCA-compliant filename for invoice XML.
-
-        Format: SellerVAT_DateTime_InvoiceNumber.xml
-
-        :param record: account.move or pos.order
-        :return: str - Filename
+            Generate the name of the invoice XML file according to ZATCA business rules:
+            Seller Vat Number (BT-31), Date (BT-2), Time (KSA-25), Invoice Number (BT-1)
         """
-        vat = record.company_id.partner_id.commercial_partner_id.vat or 'NOVAT'
-
-        # Get the confirmation datetime
-        if hasattr(record, 'l10n_sa_confirmation_datetime'):
-            confirmation_dt = record.l10n_sa_confirmation_datetime
-        else:
-            confirmation_dt = fields.Datetime.now()
-
-        # Convert to Riyadh timezone
-        issue_date = fields.Datetime.context_timestamp(
-            self.with_context(tz='Asia/Riyadh'),
-            confirmation_dt,
-        )
-
-        # Get record name/number
-        if hasattr(record, 'name'):
-            record_number = re.sub(r'[^a-zA-Z0-9 -]+', '-', record.name)
-        else:
-            record_number = str(record.id)
-
-        file_name = f"{vat}_{issue_date.strftime('%Y%m%dT%H%M%S')}_{record_number}"
-
-        # Check for file format in context
+        vat = record.company_id.partner_id.commercial_partner_id.vat
+        record_number = re.sub(r'[^a-zA-Z0-9 -]+', '-', record.name)
+        # todo: refactor this method
+        record_date = fields.Datetime.context_timestamp(self.with_context(tz='Asia/Riyadh'), record.l10n_sa_confirmation_datetime)
+        file_name = f"{vat}_{record_date.strftime('%Y%m%dT%H%M%S')}_{record_number}"
         file_format = self.env.context.get('l10n_sa_file_format', 'xml')
         if file_format:
             file_name = f'{file_name}.{file_format}'
-
         return file_name
