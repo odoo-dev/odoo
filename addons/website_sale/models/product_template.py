@@ -883,7 +883,7 @@ class ProductTemplate(models.Model):
             domains.append([('list_price', '<=', max_price)])
         if attribute_value_dict:
             domains.extend(self._get_attribute_value_domain(attribute_value_dict))
-        search_fields = ['name', 'default_code', 'variants_default_code', 'description_ecommerce']
+        search_fields = ['name', 'default_code', 'variants_default_code', 'description_ecommerce', 'attribute_line_ids.value_ids.name']
         fetch_fields = ['id', 'name', 'website_url', 'description_ecommerce']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
@@ -891,6 +891,7 @@ class ProductTemplate(models.Model):
             'search_item_metadata': {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'description': {'name': 'description_ecommerce', 'type': 'text', 'html': True, 'match': True},
+            'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
         }
         return {
             'model': 'product.template',
@@ -907,6 +908,8 @@ class ProductTemplate(models.Model):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for product, data in zip(self, results_data):
             combination_info = product._get_combination_info(only_template=True)
+            values = product.mapped('attribute_line_ids.value_ids')
+            data['tag_ids'] = values.read(['id', 'name'])
             list_price = self._search_render_results_prices(
                 mapping, combination_info
             )

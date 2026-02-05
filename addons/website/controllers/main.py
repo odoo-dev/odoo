@@ -607,7 +607,6 @@ class Website(Home):
                     - 'group_key' (str): the key of the group of results
                      (usually the model name with '.' replaced by '_')
                     - 'groupName' (str): the name of the group of results
-                    - 'templateKey' (str): the template key to use to render the results
                     - 'searchCount' (int): the number of results in this group
                     - 'data' (list of dict): the actual results (only their needed field values)
                     note: the monetary fields will be strings properly formatted and
@@ -678,7 +677,6 @@ class Website(Home):
 
             result[group_key] = {
                 'groupName': group_name,
-                'templateKey': search_result.get('template_key'),
                 'searchCount': search_result.get('count'),
                 'data': result_data,
             }

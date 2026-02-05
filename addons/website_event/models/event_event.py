@@ -609,7 +609,7 @@ class EventEvent(models.Model):
                     current_date = date_details[1]
 
         search_fields = ['name', 'tag_ids.name', 'subtitle', 'tag_ids.name']
-        fetch_fields = ['name', 'website_url', 'date_begin', 'tag_ids', 'subtitle']
+        fetch_fields = ['name', 'website_url', 'date_begin', 'subtitle']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},

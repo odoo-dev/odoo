@@ -5,7 +5,7 @@ import { markup } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { getTemplate } from "@web/core/templates";
 import { KeepLast } from "@web/core/utils/concurrency";
-import { SIZES, MEDIAS_BREAKPOINTS, utils as ui } from "@web/core/ui/ui_service";
+import { utils as ui } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
 
 export class SearchBar extends Interaction {
@@ -102,13 +102,6 @@ export class SearchBar extends Interaction {
         this.render(null);
     }
 
-    getDisplayType() {
-        if (this.el.clientWidth > MEDIAS_BREAKPOINTS[SIZES.SM].maxWidth) {
-            return "columns";
-        }
-        return "list";
-    }
-
     async fetch() {
         const res = await rpc("/website/snippet/autocomplete", {
             search_type: this.searchType,
@@ -116,10 +109,7 @@ export class SearchBar extends Interaction {
             order: this.order,
             limit: this.limit,
             max_nb_chars: Math.round(
-                Math.max(
-                    this.autocompleteMinWidth,
-                    parseInt(this.el.clientWidth / (this.getDisplayType() === "columns" ? 3 : 1))
-                ) * 0.22
+                Math.max(this.autocompleteMinWidth, parseInt(this.el.clientWidth) / 3) * 0.22
             ),
             options: this.options,
         });
@@ -162,7 +152,6 @@ export class SearchBar extends Interaction {
                     search: this.inputEl.value,
                     fuzzySearch: res["fuzzy_search"],
                     widget: this.options,
-                    displayType: this.getDisplayType(),
                 },
                 this.el
             )[0];
@@ -215,7 +204,7 @@ export class SearchBar extends Interaction {
     }
 
     getFieldsNames() {
-        return ["description", "name", "tags", "search_item_metadata"];
+        return ["body", "description", "name", "search_item_metadata", "tags"];
     }
 
     async onInput() {
