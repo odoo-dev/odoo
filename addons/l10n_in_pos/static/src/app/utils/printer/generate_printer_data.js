@@ -15,4 +15,14 @@ patch(GeneratePrinterData.prototype, {
 
         return data;
     },
+    getQrPaymentData(order) {
+        const data = super.getQrPaymentData(order);
+        if (data && order.isInCompany) {
+            const paymentMethod =
+                order.getSelectedPaymentline()?.qrPaymentData?.paymentMethod || {};
+            const { upi_identifier = "", _qr_payment_icon_urls = [] } = paymentMethod;
+            data.paymentMethod = { upi_identifier, _qr_payment_icon_urls };
+        }
+        return data;
+    },
 });

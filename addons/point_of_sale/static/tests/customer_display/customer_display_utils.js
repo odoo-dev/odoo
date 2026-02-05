@@ -27,28 +27,27 @@ export function addProduct(product, description = "") {
 }
 
 export const ADD_PRODUCT =
-    '{"lines":[{"productName":"Letter Tray","price":"$ 2,972.75","qty":"1.00","unit":"Units","unitPrice":"$ 2,972.75","customerNote":"","internalNote":"[]","comboParent":"","packLotLines":[],"price_without_discount":"$ 2,972.75","isSelected":false,"imageSrc":"/web/image/product.product/855/image_128"}],"finalized":false,"amount":"2,972.75","paymentLines":[],"change":0,"onlinePaymentData":{}}';
+    '{"lines":[{"full_product_name":"Letter Tray","price_subtotal_incl":"$ 2,972.75","qty":"1.00","product_uom_name":"Units","unit_price":"$ 2,972.75","customer_note":"","note":"[]","combo_parent_id":"","lot_names":[],"price_without_discount":"$ 2,972.75","isSelected":false}],"finalized":false,"extra_data": {"prices": {"total_amount": "2,972.75"}},"payments":[],"change":0,"onlinePaymentData":{}}';
 
 export const ADD_PRODUCT_SELECTED =
-    '{"lines":[{"productName":"Letter Tray","price":"$ 2,972.75","qty":"1.00","unit":"Units","unitPrice":"$ 2,972.75","customerNote":"","internalNote":"[]","comboParent":"","packLotLines":[],"price_without_discount":"$ 2,972.75","isSelected":true,"imageSrc":"/web/image/product.product/855/image_128"}],"finalized":false,"amount":"2,972.75","paymentLines":[],"change":0,"onlinePaymentData":{}}';
+    '{"lines":[{"full_product_name":"Letter Tray","price_subtotal_incl":"$ 2,972.75","qty":"1.00","product_uom_name":"Units","unit_price":"$ 2,972.75","customer_note":"","note":"[]","combo_parent_id":"","lot_names":[],"price_without_discount":"$ 2,972.75","isSelected":true}],"finalized":false,"extra_data": {"prices": {"total_amount": "2,972.75"}},"payments":[],"change":0,"onlinePaymentData":{}}';
 
 export const ADD_MULTI_PRODUCTS = (() => {
     const count = 20;
     const lines = range(1, count + 1).map((i) => {
         const price = (Math.random() * 100 + 1).toFixed(2);
         return {
-            productName: `Product ${i}`,
+            full_product_name: `Product ${i}`,
             price: `$${price}`,
             qty: "1.00",
             unit: "Units",
-            unitPrice: `$${price}`,
-            customerNote: "",
-            internalNote: "[]",
-            comboParent: "",
-            packLotLines: [],
+            unit_price: `$${price}`,
+            customer_note: "",
+            note: "[]",
+            combo_parent_id: "",
+            lot_names: [],
             price_without_discount: `$${price}`,
             isSelected: i === count,
-            imageSrc: "/web/image/product.product/855/image_128",
         };
     });
     const amount = lines
@@ -56,22 +55,22 @@ export const ADD_MULTI_PRODUCTS = (() => {
         .toFixed(2);
     return JSON.stringify({
         lines,
-        finalized: false,
+        order: { finalized: false },
         amount,
-        paymentLines: [],
+        payments: [],
         change: 0,
         onlinePaymentData: {},
     });
 })();
 
 export const PAY_WITH_CASH =
-    '{"lines":[{"productName":"Letter Tray","price":"$ 2,972.75","qty":"1.00","unit":"Units","unitPrice":"$ 2,972.75","customerNote":"","internalNote":"[]","comboParent":"","packLotLines":[],"price_without_discount":"$ 2,972.75","isSelected":true,"imageSrc":"/web/image/product.product/855/image_128"}],"finalized":false,"amount":"2,972.75","paymentLines":[{"name":"Cash","amount":"2,972.75"}],"change":0,"onlinePaymentData":{}}';
+    '{"lines":[{"full_product_name":"Letter Tray","price_subtotal_incl":"$ 2,972.75","qty":"1.00","product_uom_name":"Units","unit_price":"$ 2,972.75","customer_note":"","note":"[]","combo_parent_id":"","lot_names":[],"price_without_discount":"$ 2,972.75","isSelected":true}], "order": {"finalized":false},"amount":"2,972.75","payments":[{"payment_method_data":{"name": "Cash"},"amount":"2,972.75"}],"change":0,"onlinePaymentData":{}}';
 
 export const ORDER_IS_FINALIZED =
-    '{"lines":[{"productName":"Letter Tray","price":"$ 2,972.75","qty":"1.00","unit":"Units","unitPrice":"$ 2,972.75","customerNote":"","internalNote":"[]","comboParent":"","packLotLines":[],"price_without_discount":"$ 2,972.75","isSelected":false,"imageSrc":"/web/image/product.product/855/image_128"}],"finalized":true,"amount":"2,972.75","paymentLines":[{"name":"Cash","amount":"2,972.75"}],"change":0,"onlinePaymentData":{}}';
+    '{"lines":[{"full_product_name":"Letter Tray","price_subtotal_incl":"$ 2,972.75","qty":"1.00","product_uom_name":"Units","unit_price":"$ 2,972.75","customer_note":"","note":"[]","combo_parent_id":"","lot_names":[],"price_without_discount":"$ 2,972.75","isSelected":false}], "order": {"finalized":true},"amount":"2,972.75","payments":[{"payment_method_data":{"name": "Cash"},"amount":"2,972.75"}],"change":0,"onlinePaymentData":{}}';
 
 export const NEW_ORDER =
-    '{"lines":[],"finalized":false,"amount":"0.00","paymentLines":[],"change":0,"onlinePaymentData":{}}';
+    '{"lines":[], "order": {"finalized":false}, "extra_data": {"prices": {"total_amount": "0.00"}},"payments":[],"change":0,"onlinePaymentData":{}}';
 
 export const QR_URL =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==";
@@ -79,24 +78,23 @@ export const QR_URL =
 export const PAY_WITH_CARD = {
     lines: [
         {
-            productName: "Letter Tray",
+            full_product_name: "Letter Tray",
             price: "$ 2,972.75",
             qty: "1.00",
             unit: "Units",
-            unitPrice: "$ 2,972.75",
-            oldUnitPrice: "",
-            customerNote: "",
-            internalNote: "",
-            comboParent: "",
-            packLotLines: [],
+            unit_price: "$ 2,972.75",
+            oldunit_price: "",
+            customer_note: "",
+            note: "",
+            combo_parent_id: "",
+            lot_names: [],
             price_without_discount: "$ 2,972.75",
             isSelected: true,
-            imageSrc: "/web/image/product.product/855/image_128",
         },
     ],
-    finalized: false,
+    order: { finalized: false },
     amount: "2,972.75",
-    paymentLines: [{ name: "CARD", amount: "2,972.75" }],
+    payments: [{ payment_method_data: { name: "Cash" }, amount: "2,972.75" }],
     change: 0,
     onlinePaymentData: {},
     qrPaymentData: null,
@@ -105,24 +103,23 @@ export const PAY_WITH_CARD = {
 export const SEND_QR = {
     lines: [
         {
-            productName: "Letter Tray",
+            full_product_name: "Letter Tray",
             price: "$ 2,972.75",
             qty: "1.00",
             unit: "Units",
-            unitPrice: "$ 2,972.75",
-            oldUnitPrice: "",
-            customerNote: "",
-            internalNote: "",
-            comboParent: "",
-            packLotLines: [],
+            unit_price: "$ 2,972.75",
+            oldunit_price: "",
+            customer_note: "",
+            note: "",
+            combo_parent_id: "",
+            lot_names: [],
             price_without_discount: "$ 2,972.75",
             isSelected: true,
-            imageSrc: "/web/image/product.product/855/image_128",
         },
     ],
-    finalized: false,
+    order: { finalized: false },
     amount: "2,972.75",
-    paymentLines: [{ name: "CARD", amount: "2,972.75" }],
+    payments: [{ payment_method_data: { name: "CARD" }, amount: "2,972.75" }],
     change: 0,
     onlinePaymentData: {},
     qrPaymentData: {
@@ -134,24 +131,23 @@ export const SEND_QR = {
 export const PAY_ONLINE = {
     lines: [
         {
-            productName: "Letter Tray",
+            full_product_name: "Letter Tray",
             price: "$ 2,972.75",
             qty: "1.00",
             unit: "Units",
-            unitPrice: "$ 2,972.75",
-            oldUnitPrice: "",
-            customerNote: "",
-            internalNote: "",
-            comboParent: "",
-            packLotLines: [],
+            unit_price: "$ 2,972.75",
+            oldunit_price: "",
+            customer_note: "",
+            note: "",
+            combo_parent_id: "",
+            lot_names: [],
             price_without_discount: "$ 2,972.75",
             isSelected: true,
-            imageSrc: "/web/image/product.product/855/image_128",
         },
     ],
-    finalized: false,
+    order: { finalized: false },
     amount: "2,972.75",
-    paymentLines: [{ name: "ONLINE", amount: "2,972.75" }],
+    payments: [{ payment_method_data: { name: "ONLINE" }, amount: "2,972.75" }],
     change: 0,
     onlinePaymentData: {
         formattedAmount: "$ 2,972.75",
@@ -163,24 +159,23 @@ export const PAY_ONLINE = {
 export const PAID = {
     lines: [
         {
-            productName: "Letter Tray",
+            full_product_name: "Letter Tray",
             price: "$ 2,972.75",
             qty: "1.00",
             unit: "Units",
-            unitPrice: "$ 2,972.75",
-            oldUnitPrice: "",
-            customerNote: "",
-            internalNote: "",
-            comboParent: "",
-            packLotLines: [],
+            unit_price: "$ 2,972.75",
+            oldunit_price: "",
+            customer_note: "",
+            note: "",
+            combo_parent_id: "",
+            lot_names: [],
             price_without_discount: "$ 2,972.75",
             isSelected: true,
-            imageSrc: "/web/image/product.product/855/image_128",
         },
     ],
-    finalized: false,
+    order: { finalized: false },
     amount: "2,972.75",
-    paymentLines: [{ name: "ONLINE", amount: "2,972.75" }],
+    payments: [{ payment_method_data: { name: "ONLINE" }, amount: "2,972.75" }],
     change: 0,
     onlinePaymentData: {},
 };

@@ -1,7 +1,7 @@
 import { test, expect } from "@odoo/hoot";
 import { getFilledOrder, setupPosEnv, expectFormattedPrice } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
-import { CustomerDisplayPosAdapter } from "@point_of_sale/app/customer_display/customer_display_adapter";
+import { GeneratePrinterData } from "@point_of_sale/app/utils/generate_printer_data";
 
 definePosModels();
 
@@ -9,28 +9,24 @@ test("getOrderlineData", async () => {
     const store = await setupPosEnv();
     const order = await getFilledOrder(store);
 
-    const adapter = new CustomerDisplayPosAdapter();
-    adapter.formatOrderData(order);
+    const adapter = new GeneratePrinterData(order);
+    const data = adapter.generateData();
 
-    expect(adapter.data.lines).toHaveLength(2);
-    expect(adapter.data.lines[0].isSelected).toBe(false);
-    expect(adapter.data.lines[1].isSelected).toBe(true);
+    expect(data.lines).toHaveLength(2);
+    expect(data.lines[0].isSelected).toBe(false);
+    expect(data.lines[1].isSelected).toBe(true);
 });
 
 test("order amounts summary", async () => {
     const store = await setupPosEnv();
     const order = await getFilledOrder(store);
 
-    const adapter = new CustomerDisplayPosAdapter();
+    const adapter = new GeneratePrinterData(order);
+    const data = adapter.generateData();
+    const taxes_data = data.extra_data?.prices;
 
-    adapter.formatOrderData(order);
-    expectFormattedPrice(adapter.data.amount, "$ 17.85");
-    expectFormattedPrice(adapter.data.amountTaxes, "$ 2.85");
-    expect(adapter.data.subtotal).toBe(false);
-
-    store.config.iface_tax_included = "subtotal";
-    adapter.formatOrderData(order);
-    expectFormattedPrice(adapter.data.amount, "$ 17.85");
-    expectFormattedPrice(adapter.data.amountTaxes, "$ 2.85");
-    expectFormattedPrice(adapter.data.subtotal, "$ 15.00");
+    // update this before there was condition but now as we show subtotal in receipt so subtotal is always received
+    expectFormattedPrice(taxes_data?.total_amount, "$ 17.85");
+    expectFormattedPrice(taxes_data?.tax_amount, "$ 2.85");
+    expectFormattedPrice(taxes_data?.subtotal_amount, "$ 15.00");
 });

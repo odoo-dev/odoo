@@ -1,3 +1,5 @@
+import json
+
 from odoo import http
 from odoo.http import request
 
@@ -16,6 +18,11 @@ class PosCustomerDisplay(http.Controller):
                     **request.env["ir.http"].get_frontend_session_info(),
                     **pos_config_sudo._get_customer_display_data(),
                     'device_uuid': device_uuid,
+                    'access_token': pos_config_sudo.access_token,
                 },
+                'pos_session_id': pos_config_sudo.current_session_id,
+                'pos_config_id': pos_config_sudo.id,
+                'urls_to_cache': json.dumps(pos_config_sudo._get_url_to_cache(request.session.debug)),
+                'from_customer_display': 1,
             },
         )

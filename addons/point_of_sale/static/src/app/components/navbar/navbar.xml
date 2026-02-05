@@ -54,7 +54,7 @@
                         </button>
                         <t t-set-slot="content">
                             <div class="d-flex gap-2 p-2 border-bottom">
-                                <span t-on-click="openCustomerDisplay" class="d-flex align-items-center justify-content-center py-3 btn btn-secondary btn-lg w-100 text-center" title="Customer Display">
+                                <span t-on-click="() => customer_display_data.openCustomerDisplay()" class="d-flex align-items-center justify-content-center py-3 btn btn-secondary btn-lg w-100 text-center" title="Customer Display">
                                     <i class="fa fa-fw fa-desktop"/>
                                 </span>
                             </div>

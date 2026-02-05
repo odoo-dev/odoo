@@ -16,6 +16,10 @@
                     <t t-out="json.dumps({
                         'csrf_token': request.csrf_token(None),
                         '__session_info__': session_info,
+                        'pos_session_id': pos_session_id.id,
+                        'pos_config_id': pos_config_id,
+                        'from_customer_display': from_customer_display,
+                        'urls_to_cache': urls_to_cache,
                         'debug': debug,
                     })" />;
                 </script>

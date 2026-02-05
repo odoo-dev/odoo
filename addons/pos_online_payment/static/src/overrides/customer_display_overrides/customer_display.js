@@ -16,7 +16,7 @@ patch(CustomerDisplay.prototype, {
                     singleDialog.close();
                 }
             },
-            () => [this.order.onlinePaymentData]
+            () => [this.order?.onlinePaymentData]
         );
     },
 });

@@ -14,9 +14,9 @@
                                     <t t-if="loyalty.get('barcode_base64')">
                                         <img t-att-src="loyalty['barcode_base64']" class="img-fluid" style="transform: translateX(13%);"/>
                                     </t>
-                                    <div>
-                                        <t t-out="loyalty['type']"/> <t t-out="loyalty['points']"/>
-                                    </div>
+                                    <div t-if="loyalty.points.won">Won: <t t-out="loyalty.points.won"/></div>
+                                    <div t-if="loyalty.points.spent">Spent: <t t-out="loyalty.points.spent"/></div>
+                                    <div t-if="loyalty.points.balance">Balance: <t t-out="loyalty.points.balance"/></div>
                                 </td>
                             </tr>
                         </t>

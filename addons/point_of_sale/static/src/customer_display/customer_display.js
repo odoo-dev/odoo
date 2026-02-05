@@ -18,7 +18,7 @@ export class CustomerDisplay extends Component {
     setup() {
         this.session = session;
         this.dialog = useService("dialog");
-        this.order = useService("customer_display_data");
+        this.customer_display_data = useService("customer_display_data");
         this.time = useTime();
         const singleDialog = useSingleDialog();
 
@@ -37,12 +37,12 @@ export class CustomerDisplay extends Component {
                     singleDialog.close();
                 }
             },
-            () => [this.order.qrPaymentData]
+            () => [this.customer_display_data.data.qrPaymentData]
         );
     }
 
     getInternalNotes() {
-        return JSON.parse(this.line.internalNote || "[]");
+        return JSON.parse(this.line.note || "[]");
     }
 }
 

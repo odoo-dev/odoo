@@ -201,6 +201,7 @@
             ('remove', 'point_of_sale/static/src/backend/**/*'),
             ('remove', 'point_of_sale/static/src/customer_display/**/*'),
             'point_of_sale/static/src/customer_display/utils.js',
+            'point_of_sale/static/src/customer_display/customer_display_data_service.js',
             ('include', 'point_of_sale.payment_terminals'),
             # main.js boots the pos app, it is only included in the prod bundle as tests mount the app themselves
             ('remove', 'point_of_sale/static/src/app/main.js'),
@@ -237,18 +238,9 @@
             ('include', 'point_of_sale.assets_prod'),
         ],
         'point_of_sale.customer_display_assets': [
-            ('include', 'point_of_sale.base_app'),
-            "point_of_sale/static/src/app/components/odoo_logo/*",
-            "point_of_sale/static/src/app/components/orderline/*",
-            "point_of_sale/static/src/app/components/centered_icon/*",
-            "point_of_sale/static/src/app/utils/use_timed_press.js",
-            "point_of_sale/static/src/app/components/popups/qr_code_popup/*",
-            "point_of_sale/static/src/utils.js",
-            "point_of_sale/static/src/scss/pos_variables_extra.scss",
+            ('include', 'point_of_sale._assets_pos'),
+            "point_of_sale/static/src/app/customer_display/**/*",
             "point_of_sale/static/src/customer_display/**/*",
-            "point_of_sale/static/src/app/hooks/time_hook.js",
-            "point_of_sale/static/src/app/pos_app.scss",
-            "point_of_sale/static/src/app/screens/login_screen/login_screen.scss",
         ],
         'point_of_sale.customer_display_assets_test': [
             ('include', 'point_of_sale.base_tests'),

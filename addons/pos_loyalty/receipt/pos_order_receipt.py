@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
 
-from odoo import models, _
+from odoo import models
 
 
 class PosOrderReceipt(models.AbstractModel):
@@ -18,8 +18,12 @@ class PosOrderReceipt(models.AbstractModel):
         if len(histories) > 0:
             issued = [{
                 'name': history.card_id.program_id.name,
-                'type': _('Won:') if history.issued > 0 else _('Spent:'),
-                'points': history.issued or history.used,
+                'points': {
+                    "won": history.issued,
+                    "spent": history.used,
+                    "balance": history.issued - history.card_id.points,
+                    "total": history.card_id.points,
+                },
             } for history in histories if history.card_id.program_id.program_type == 'loyalty']
             new_coupon = [{
                 'name': history.card_id.program_id.name,

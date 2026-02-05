@@ -234,15 +234,17 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     navigate(routeName, routeParams = {}) {
-        const pageParams = registry.category("pos_pages").get(routeName);
-        const component = pageParams.component;
+        if (!odoo.from_customer_display) {
+            const pageParams = registry.category("pos_pages").get(routeName);
+            const component = pageParams.component;
 
-        if (component.storeOnOrder ?? true) {
-            this.getOrder()?.setScreenData({ name: routeName, props: routeParams });
+            if (component.storeOnOrder ?? true) {
+                this.getOrder()?.setScreenData({ name: routeName, props: routeParams });
+            }
+
+            this.router.navigate(routeName, routeParams);
+            return true;
         }
-
-        this.router.navigate(routeName, routeParams);
-        return true;
     }
 
     navigateToFirstPage() {
@@ -282,7 +284,6 @@ export class PosStore extends WithLazyGetterTrap {
         } else {
             this.resetCashier();
         }
-
         return !this.cashier ? { page: "LoginScreen", params: {} } : this.defaultPage;
     }
 
@@ -1685,13 +1686,11 @@ export class PosStore extends WithLazyGetterTrap {
     async getClosePosInfo() {
         return await this.data.call("pos.session", "get_closing_control_data", [[this.session.id]]);
     }
-    // return the current order
     getOrder() {
         if (!this.selectedOrderUuid) {
             return undefined;
         }
-
-        return this.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
+        return this.data.models["pos.order"].getBy("uuid", this.selectedOrderUuid);
     }
     get selectedOrder() {
         return this.getOrder();
@@ -2304,29 +2303,31 @@ export class PosStore extends WithLazyGetterTrap {
      */
     closeOtherTabs() {
         localStorage["message"] = "";
-        localStorage["message"] = JSON.stringify({
-            message: "close_tabs",
-            session: this.session.id,
-        });
+        if (!odoo.from_customer_display) {
+            localStorage["message"] = JSON.stringify({
+                message: "close_tabs",
+                session: this.session.id,
+            });
 
-        window.addEventListener(
-            "storage",
-            (event) => {
-                if (event.key === "message" && event.newValue) {
-                    const msg = JSON.parse(event.newValue);
-                    if (msg.message === "close_tabs" && msg.session == this.session.id) {
-                        logPosMessage(
-                            "Store",
-                            "editLots",
-                            "POS / Session opened in another window. EXITING POS",
-                            CONSOLE_COLOR
-                        );
-                        this.closePos();
+            window.addEventListener(
+                "storage",
+                (event) => {
+                    if (event.key === "message" && event.newValue) {
+                        const msg = JSON.parse(event.newValue);
+                        if (msg.message === "close_tabs" && msg.session == this.session.id) {
+                            logPosMessage(
+                                "Store",
+                                "editLots",
+                                "POS / Session opened in another window. EXITING POS",
+                                CONSOLE_COLOR
+                            );
+                            this.closePos();
+                        }
                     }
-                }
-            },
-            false
-        );
+                },
+                false
+            );
+        }
     }
 
     showBackButton() {

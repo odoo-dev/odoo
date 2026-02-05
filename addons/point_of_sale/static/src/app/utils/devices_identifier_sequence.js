@@ -1,3 +1,5 @@
+import { uuidv4 } from "@point_of_sale/utils";
+
 export default class DeviceIdentifierSequence {
     static uniqueDeviceIdentifierKey = `${odoo.access_token}-unique_device_identifier`;
 
@@ -14,6 +16,15 @@ export default class DeviceIdentifierSequence {
     get identifier() {
         const data = this.data;
         return data.device_identifier;
+    }
+
+    get deviceUuid() {
+        let deviceUuid = localStorage.getItem("device_uuid");
+        if (!deviceUuid) {
+            deviceUuid = uuidv4();
+            localStorage.setItem("device_uuid", deviceUuid);
+        }
+        return deviceUuid;
     }
 
     get unsyncedNumberStack() {

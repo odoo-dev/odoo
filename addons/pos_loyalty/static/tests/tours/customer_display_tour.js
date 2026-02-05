@@ -2,21 +2,21 @@ import { registry } from "@web/core/registry";
 import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
 import * as CustomerDisplay from "@point_of_sale/../tests/customer_display/customer_display_utils";
 
-const ADD_PRODUCT = JSON.stringify({
-    ...JSON.parse(CustomerDisplay.ADD_PRODUCT),
-    loyaltyData: [
+const ADD_PRODUCT = JSON.parse(CustomerDisplay.ADD_PRODUCT);
+ADD_PRODUCT.extra_data = {
+    ...ADD_PRODUCT.extra_data,
+    loyalties: [
         {
-            couponId: 101,
+            name: "Loyalty Points",
             points: {
                 won: 25,
                 spent: 10,
                 total: 65,
                 balance: 50,
-                name: "Loyalty Points",
             },
         },
     ],
-});
+};
 
 registry.category("web_tour.tours").add("test_customer_display_loyalty_points", {
     steps: () =>

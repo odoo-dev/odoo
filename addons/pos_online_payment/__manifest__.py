@@ -18,7 +18,7 @@
         'point_of_sale.assets_prod': [
             'pos_online_payment/static/src/app/**/*',
             'pos_online_payment/static/src/overrides/pos_overrides/**/*',
-            'pos_online_payment/static/src/overrides/customer_display_overrides/customer_display_adapter.js',
+            'pos_online_payment/static/src/app/utils/generate_printer_data.js',
         ],
         'point_of_sale.customer_display_assets': [
             'pos_online_payment/static/src/app/components/popups/online_payment_popup/**/*',
