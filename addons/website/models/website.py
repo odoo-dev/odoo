@@ -2067,7 +2067,7 @@ class Website(models.CachedModel):
         :return: list of search details obtained from the `website.searchable.mixin`'s `_search_get_detail()`
         """
         result = []
-        if search_type in ['pages', 'all']:
+        if search_type in ['pages', 'website_page', 'all']:
             result.append(self.env['website.page']._search_get_detail(self, order, options))
         return result
 

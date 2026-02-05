@@ -162,7 +162,7 @@
                     display_detail.f="true"
                     _modal_id.f="forum_questions"
                     _form_classes.f="flex-grow-1"
-                    search_type="'forums' if _page_name != 'tags' else 'forum_tags_only'"
+                    search_type="'forums' if _page_name != 'tags' else 'forum_forum'"
                     action="'/forum/%s' % (_forum_slug)">
                     <input t-if="filters" type="hidden" name="filters" t-att-value="filters"/>
                     <input t-if="my" type="hidden" name="my" t-att-value="my"/>

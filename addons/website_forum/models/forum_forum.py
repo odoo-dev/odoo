@@ -321,7 +321,7 @@ class ForumForum(models.Model):
     @api.model
     def _search_get_detail(self, website, order, options):
         search_fields = ['name', 'tag_ids.name', 'description']
-        fetch_fields = ['id', 'name', 'tag_ids', 'description']
+        fetch_fields = ['id', 'name', 'description']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},

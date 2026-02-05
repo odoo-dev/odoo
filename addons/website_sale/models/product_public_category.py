@@ -169,7 +169,7 @@ class ProductPublicCategory(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'url', 'type': 'text', 'truncate': False},
-            'search_item_metadata': {'name': 'breadcrumb', 'type': 'text', 'truncate': False},
+            'search_item_metadata': {'name': 'breadcrumb', 'type': 'text', 'truncate': False, 'match': True},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'description': {'name': 'website_description', 'type': 'text', 'html': True, 'match': True},
         }
