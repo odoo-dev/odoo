@@ -115,7 +115,6 @@ class TestAutoComplete(TransactionCase):
         cls.options = {}
         cls.expectedParts = {
             'name': True,
-            'description': True,
             'website_url': True,
         }
         texts = [
@@ -153,7 +152,7 @@ class TestAutoComplete(TransactionCase):
             for result in suggestions['results'].get("website_page", {}).get('data', []):
                 self.assertEqual("fa-file-o", result['_fa'], "Expect an fa icon")
                 for field in suggestions['parts'].keys():
-                    value = result[field]
+                    value = result.get(field)
                     if value:
                         self.assertTrue(
                             isinstance(value, Markup),
@@ -222,7 +221,6 @@ class TestAutoComplete(TransactionCase):
         self.assertFalse(suggestions['fuzzy_search'], "Expects an exact match")
         for result in results:
             self._check_highlight("few", result['name'])
-            self._check_highlight("few", result['description'])
 
     def test_02_many_results(self):
         """ Tests an autocomplete with exact match and more than the maximum number of results """
@@ -233,7 +231,6 @@ class TestAutoComplete(TransactionCase):
         self.assertFalse(suggestions['fuzzy_search'], "Expects an exact match")
         for result in results:
             self._check_highlight("many", result['name'])
-            self._check_highlight("many", result['description'])
 
     def test_03_no_result(self):
         """ Tests an autocomplete without matching results """
@@ -251,7 +248,6 @@ class TestAutoComplete(TransactionCase):
         self.assertEqual(1, len(results), "Single result must be present")
         for result in results:
             self._check_highlight("approximately", result['name'])
-            self._check_highlight("approximately", result['description'])
 
     def test_05_long_url(self):
         """ Ensures that long URL do not get truncated """
@@ -274,7 +270,6 @@ class TestAutoComplete(TransactionCase):
         self.assertFalse(suggestions['fuzzy_search'], "Expects an exact match")
         for result in results:
             self._check_highlight("many", result['name'])
-            self._check_highlight("many", result['description'])
 
     def test_07_no_fuzzy_for_mostly_number(self):
         """ Ensures exact match is used when search contains mostly numbers. """
@@ -288,7 +283,9 @@ class TestAutoComplete(TransactionCase):
         suggestions = self._autocomplete("P79354")
         self.assertEqual(1, suggestions['results_count'], "Test data contains one exact match")
         self.assertFalse(suggestions['fuzzy_search'], "Expects an exact match")
+        self.expectedParts['description'] = True
         suggestions = self._autocomplete("kangroo") # must contain a typo
+        del self.expectedParts['description']
         self.assertEqual(1, suggestions['results_count'], "Test data contains one fuzzy match")
         self.assertTrue(suggestions['fuzzy_search'], "Expects a fuzzy match")
 
