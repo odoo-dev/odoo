@@ -1353,6 +1353,9 @@ class AccountMove(models.Model):
 
     @api.depends('reconciled_payment_ids')
     def _compute_payment_count(self):
+        if not self.env['account.payment'].has_access('read'):
+            self.payment_count = 0
+            return
         for invoice in self:
             invoice.payment_count = len(invoice.reconciled_payment_ids)
 
