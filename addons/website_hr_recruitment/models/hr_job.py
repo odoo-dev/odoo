@@ -154,8 +154,14 @@ spirit. To be successful, you will have solid solving problem skills.''')
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for data in results_data:
-            job = self.browse(data['id']).sudo()
+            job_address = self.browse(data['id']).sudo().address_id
             # res.partner address_id is not available in public user group,
             # - require sudo
-            data['address'] = job.address_id.name or ''
+            if job_address:
+                data['address'] = ", ".join(filter(None, [
+                    job_address.city,
+                    job_address.state_id.name,
+                    job_address.country_id.name,
+                ]))
+
         return results_data
