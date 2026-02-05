@@ -646,7 +646,7 @@ class Website(Home):
                     '_fa': record.get('_fa'),
                 }
                 skip_matching_area = False
-                for mapped_name, field_meta in mapping.items():
+                for mapped_name, field_meta in list(mapping.items()):
                     value = record.get(field_meta.get('name'))
                     if not value:
                         mapped[mapped_name] = ''
@@ -657,6 +657,7 @@ class Website(Home):
 
                     if field_meta.get('match'):
                         if skip_matching_area and mapped_name not in ['name', 'search_item_metadata']:
+                            del mapping[mapped_name]
                             continue
                         skip_field, value, field_type = model._search_highlight_field(field_meta, value, term)
                         if skip_field:
