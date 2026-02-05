@@ -3486,7 +3486,10 @@ class BaseModel(metaclass=MetaModel):
             fields = list(self.fields_get(attributes=()))
         elif not self and not self.env.su:  # check field access, otherwise done during fetch()
             self._determine_fields_to_fetch(fields)
-        self._origin.fetch(fields)
+        # Skip fetching x2m fields on which we may have errors; in `_read_format`
+        # these are returned as an empty list.
+        fetch_fields = [name for name in fields if not self._fields[name].type.endswith('2many')]
+        self._origin.fetch(fetch_fields)
         return self._read_format(fnames=fields, load=load)
 
     def update_field_translations(
@@ -3747,6 +3750,12 @@ class BaseModel(metaclass=MetaModel):
                     vals[name] = convert(record[name], record, use_display_name)
                 except MissingError:
                     vals.clear()
+                except AccessError:
+                    # for inaccessible x2m fields, return an empty list
+                    if field.type.endswith('2many'):
+                        vals[name] = []
+                    else:
+                        raise
         result = [vals for record, vals in data if vals]
 
         return result
