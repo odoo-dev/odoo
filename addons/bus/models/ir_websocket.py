@@ -3,7 +3,7 @@
 from odoo import models
 from odoo.http import request
 from odoo.tools.misc import OrderedSet
-from ..models.bus import dispatch
+from ..models.bus import broker
 from ..websocket import wsrequest
 
 
@@ -64,7 +64,7 @@ class IrWebsocket(models.AbstractModel):
 
     def _subscribe(self, og_data):
         data = self._prepare_subscribe_data(og_data["channels"], og_data["last"])
-        dispatch.subscribe(data["channels"], data["last"], self.env.registry.db_name, wsrequest.ws)
+        broker.subscribe(data["channels"], data["last"], self.env.registry.db_name, wsrequest.ws)
         self._after_subscribe_data(data)
 
     def _on_websocket_closed(self, cookies):

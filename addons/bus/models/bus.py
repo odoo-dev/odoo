@@ -1,18 +1,21 @@
-import contextlib
+import bisect
 import datetime
 import json
 import logging
 import math
 import os
+import queue
 import selectors
 import threading
 import time
+
 from psycopg2 import InterfaceError
 
 import odoo
 from odoo import api, fields, models
+from odoo.modules.registry import Registry
 from odoo.service.server import CommonServer
-from odoo.tools import config, json_default, SQL
+from odoo.tools import SQL, config, json_default
 from odoo.tools.misc import OrderedSet
 
 _logger = logging.getLogger(__name__)
@@ -107,12 +110,12 @@ def get_notify_payloads(channels):
 
 
 class BusBus(models.Model):
-    _name = 'bus.bus'
+    _name = "bus.bus"
 
-    _description = 'Communication Bus'
+    _description = "Communication Bus"
 
-    channel = fields.Char('Channel')
-    message = fields.Char('Message')
+    channel = fields.Char("Channel")
+    message = fields.Char("Message")
 
     @api.autovacuum
     def _gc_messages(self):
@@ -194,78 +197,190 @@ class BusBus(models.Model):
         return last.id if last else 0
 
 
-# ---------------------------------------------------------
-# Dispatcher
-# ---------------------------------------------------------
-
-class ImDispatch(threading.Thread):
-    def __init__(self):
-        super().__init__(daemon=True, name=f'{__name__}.Bus')
-        self._channels_to_ws = {}
-
-    def subscribe(self, channels, last, db, websocket):
-        """
-        Subcribe to bus notifications. Every notification related to the
-        given channels will be sent through the websocket. If a subscription
-        is already present, overwrite it.
-        """
-        channels = {hashable(channel_with_db(db, c)) for c in channels}
-        for channel in channels:
-            self._channels_to_ws.setdefault(channel, set()).add(websocket)
-        outdated_channels = websocket._channels - channels
-        self._clear_outdated_channels(websocket, outdated_channels)
-        websocket.subscribe(channels, last)
-        with contextlib.suppress(RuntimeError):
-            if not self.is_alive():
-                self.start()
-
-    def unsubscribe(self, websocket):
-        self._clear_outdated_channels(websocket, websocket._channels)
-
-    def _clear_outdated_channels(self, websocket, outdated_channels):
-        """ Remove channels from channel to websocket map. """
-        for channel in outdated_channels:
-            self._channels_to_ws[channel].remove(websocket)
-            if not self._channels_to_ws[channel]:
-                self._channels_to_ws.pop(channel)
-
-    def loop(self):
-        """ Dispatch postgres notifications to the relevant websockets """
-        db_system = config['db_system']
-        _logger.info("Bus.loop listen imbus on db %s", db_system)
-        with odoo.sql_db.db_connect(db_system).cursor() as cr, \
-             selectors.DefaultSelector() as sel:
-            cr.execute("listen imbus")
-            cr.commit()
-            conn = cr._cnx
-            sel.register(conn, selectors.EVENT_READ)
-            while not stop_event.is_set():
-                if sel.select(TIMEOUT):
-                    conn.poll()
-                    channels = []
-                    while conn.notifies:
-                        channels.extend(json.loads(conn.notifies.pop().payload))
-                    # relay notifications to websockets that have
-                    # subscribed to the corresponding channels.
-                    websockets = set()
-                    for channel in channels:
-                        websockets.update(self._channels_to_ws.get(hashable(channel), []))
-                    for websocket in websockets:
-                        websocket.trigger_notification_dispatching()
-
-    def run(self):
-        while not stop_event.is_set():
-            try:
-                self.loop()
-            except Exception as exc:
-                if isinstance(exc, InterfaceError) and stop_event.is_set():
-                    continue
-                _logger.exception("Bus.loop error, sleep and retry")
-                time.sleep(TIMEOUT)
-
-# Partially undo a2ed3d3d5bdb6025a1ba14ad557a115a86413e65
-# IMDispatch has a lazy start, so we could initialize it anyway
-# And this avoids the Bus unavailable error messages
-dispatch = ImDispatch()
 stop_event = threading.Event()
 CommonServer.on_stop(stop_event.set)
+
+_logger = logging.getLogger(__name__)
+
+
+class Topic:
+    # How much time (in second) the history of last dispatched notifications is
+    # kept in memory for each topic.
+    # To avoid duplicate notifications, we fetch them based on their ids.
+    # However during parallel transactions, ids are assigned immediately (when
+    # they are requested), but the notifications are dispatched at the time of
+    # the commit. This means lower id notifications might be dispatched after
+    # higher id notifications.
+    # Simply incrementing the last id is sufficient to guarantee no duplicates,
+    # but it is not sufficient to guarantee all notifications are dispatched,
+    # and in particular not sufficient for those with a lower id coming after a
+    # higher id was dispatched.
+    # To solve the issue of missed notifications, the lowest id, stored in
+    # ``_last_fetched_id``, is held back by a few seconds to give time for
+    # concurrent transactions to finish. To avoid dispatching duplicate
+    # notifications, the history of already dispatched notifications during this
+    # period is kept in memory in ``history`` and the corresponding
+    # notifications are discarded from subsequent dispatching even if their id
+    # is higher than ``_last_fetched_id``.
+    # In practice, what is important functionally is the time between the create
+    # of the notification and the commit of the transaction in business code.
+    # If this time exceeds this threshold, the notification will never be
+    # dispatched if the target user receive any other notification in the
+    # meantime.
+    MAX_NOTIFICATION_HISTORY_SEC = 10
+
+    def __init__(self, key, initial_id=0):
+        self.key = key
+        self.dbname = key[0]
+        self._subscribers = set()
+        self.state_lock = threading.Lock()
+        # Whether a worker is currently processing this topic. Used to
+        # prevent concurrent DB fetches for the same channel.
+        self.busy = False
+        # Whether publish request arrives while busy. Signals the
+        # current worker to re-enqueue the topic once done to avoid
+        # missed messages.
+        self.dirty = False
+        # For ``_last_fetched_id and ``_notification_history``, see
+        # ``MAX_NOTIFICATION_HISTORY_SEC`` for more details.
+        self._last_fetched_id = initial_id
+        self._notification_history = []
+
+    def get_fetch_params(self):
+        return {
+            "channels": [self.key],
+            "last": self._last_fetched_id,
+            "ignore_ids": [h[0] for h in self._notification_history],
+        }
+
+    def subscribe(self, websocket):
+        self._subscribers.add(websocket)
+
+    def unsubscribe(self, websocket):
+        self._subscribers.discard(websocket)
+        return len(self._subscribers) == 0
+
+    def broadcast(self, notifications):
+        self._update_history(notifications)
+        targets = list(self._subscribers)
+        for websocket in targets:
+            websocket.send(notifications)
+
+    def _update_history(self, notifications):
+        now = time.monotonic()
+        for notif in notifications:
+            bisect.insort(self._notification_history, (notif["id"], now), key=lambda x: x[0])
+        cutoff = now - self.MAX_NOTIFICATION_HISTORY_SEC
+        idx = bisect.bisect_left(self._notification_history, cutoff, key=lambda x: x[1])
+        if idx > 0:
+            self._last_fetched_id = self._notification_history[idx - 1][0]
+            self._notification_history = self._notification_history[idx:]
+
+
+class MessageBroker:
+    def __init__(self, pool_size=200):
+        self._is_alive = False
+        self._pending_topics = queue.Queue()
+        self._start_lock = threading.Lock()
+        self._topic_by_key = {}
+        self.pool_size = pool_size
+
+    def _ensure_started(self):
+        # Short path, already initialized: don't bother with the lock.
+        if self._is_alive:
+            return
+        # Get the lock to prevent double thread spawn.
+        with self._start_lock:
+            if self._is_alive:
+                return
+            self._is_alive = True
+        _logger.info("Bus broker started, pools_size=%d", self.pool_size)
+        for i in range(self.pool_size):
+            name = f"Bus dispatcher {i}"
+            threading.Thread(target=self._dispatcher_loop, name=name, daemon=True).start()
+        threading.Thread(
+            target=self._database_listener_loop, name="Bus postgres listener", daemon=True
+        ).start()
+
+    # ----------------------------------------------------
+    # PUB/SUB INTERFACE
+    # ----------------------------------------------------
+
+    def subscribe(self, topic_keys, last_id, dbname, websocket):
+        self._ensure_started()
+        formatted_topic_keys = [hashable(channel_with_db(dbname, c)) for c in topic_keys]
+        for name in formatted_topic_keys:
+            topic = self._topic_by_key.setdefault(name, Topic(name, last_id))
+            topic.subscribe(websocket)
+
+    def unsubscribe(self, websocket):
+        topics_snapshot = list(self._topic_by_key.values())
+        for topic in topics_snapshot:
+            if topic.unsubscribe(websocket):
+                self._topic_by_key.pop(topic.key, None)
+
+    def publish(self, topic_keys):
+        topics = [self._topic_by_key[k] for k in topic_keys if k in self._topic_by_key]
+        for topic in topics:
+            with topic.state_lock:
+                if not topic.busy:
+                    topic.busy = True
+                    self._pending_topics.put(topic.key)
+                    continue
+                topic.dirty = True
+
+    def _dispatcher_loop(self):
+        while not stop_event.is_set():
+            topic_name = self._pending_topics.get()
+            topic = self._topic_by_key.get(topic_name)
+            if not topic:
+                continue
+            try:
+                with Registry(topic.dbname).cursor() as cr:
+                    notifications = fetch_bus_notifications(cr, **topic.get_fetch_params())
+                if notifications:
+                    topic.broadcast(notifications)
+            finally:
+                with topic.state_lock:
+                    if topic.dirty:
+                        topic.dirty = False
+                        self._pending_topics.put(topic_name)  # Still busy as we are re-enqueuing.
+                    else:
+                        topic.busy = False
+
+    # ----------------------------------------------------
+    # DATABASE SIGNALING
+    # ----------------------------------------------------
+
+    def _database_listener_loop(self):
+        db_system = config["db_system"]
+        _logger.info("Bus broker listening on %s", db_system)
+        while not stop_event.is_set():
+            try:
+                with (
+                    odoo.sql_db.db_connect(db_system).cursor() as cr,
+                    selectors.DefaultSelector() as sel,
+                ):
+                    cr.execute("listen imbus")
+                    cr.commit()
+                    conn = cr._cnx
+                    sel.register(conn, selectors.EVENT_READ)
+                    while not stop_event.is_set():
+                        if sel.select(TIMEOUT):
+                            conn.poll()
+                            to_publish = set()
+                            while conn.notifies:
+                                notify = conn.notifies.pop()
+                                payload = json.loads(notify.payload)
+                                for c in payload:
+                                    to_publish.add(hashable(c))
+                            if to_publish:
+                                self.publish(to_publish)
+            except Exception:
+                _logger.exception("Bus broker listener error, retrying...")
+                time.sleep(TIMEOUT)
+
+
+is_evented = hasattr(odoo, "evented") and odoo.evented
+pool_size = (config["db_maxconn_gevent"] or config["db_maxconn"]) if is_evented else 10
+broker = MessageBroker(pool_size)

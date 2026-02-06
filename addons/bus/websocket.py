@@ -39,8 +39,8 @@ from odoo.modules.registry import Registry
 from odoo.service.server import CommonServer
 from odoo.tools import config
 
-from .models.bus import dispatch, fetch_bus_notifications
 from .session_helpers import check_session, new_env
+from .models.bus import broker
 
 _logger = logging.getLogger(__name__)
 
@@ -151,6 +151,7 @@ class PollablePriorityQueue(PriorityQueue):
         return super().get(*args, **kwargs)
 
 
+
 # ------------------------------------------------------
 # WEBSOCKET LIFECYCLE
 # ------------------------------------------------------
@@ -207,7 +208,8 @@ _command_uid = count(0)
 
 class ControlCommand(IntEnum):
     CLOSE = 0
-    DISPATCH = 1
+    SEND = 1
+    DISPATCH = 2
 
 
 DATA_OP = {Opcode.TEXT, Opcode.BINARY}
@@ -260,32 +262,6 @@ class Websocket:
     # Maximum size for a message in bytes, whether it is sent as one
     # frame or many fragmented ones.
     MESSAGE_MAX_SIZE = 2 ** 20
-    # How much time (in second) the history of last dispatched notifications is
-    # kept in memory for each websocket.
-    # To avoid duplicate notifications, we fetch them based on their ids.
-    # However during parallel transactions, ids are assigned immediately (when
-    # they are requested), but the notifications are dispatched at the time of
-    # the commit. This means lower id notifications might be dispatched after
-    # higher id notifications.
-    # Simply incrementing the last id is sufficient to guarantee no duplicates,
-    # but it is not sufficient to guarantee all notifications are dispatched,
-    # and in particular not sufficient for those with a lower id coming after a
-    # higher id was dispatched.
-    # To solve the issue of missed notifications, the lowest id, stored in
-    # ``_last_notif_sent_id``, is held back by a few seconds to give time for
-    # concurrent transactions to finish. To avoid dispatching duplicate
-    # notifications, the history of already dispatched notifications during this
-    # period is kept in memory in ``_notif_history`` and the corresponding
-    # notifications are discarded from subsequent dispatching even if their id
-    # is higher than ``_last_notif_sent_id``.
-    # In practice, what is important functionally is the time between the create
-    # of the notification and the commit of the transaction in business code.
-    # If this time exceeds this threshold, the notification will never be
-    # dispatched if the target user receive any other notification in the
-    # meantime.
-    # Transactions known to be long should therefore create their notifications
-    # at the end, as close as possible to their commit.
-    MAX_NOTIFICATION_HISTORY_SEC = 10
     # How many requests can be made in excess of the given rate.
     RL_BURST = int(config['websocket_rate_limit_burst'])
     # How many seconds between each request.
@@ -306,15 +282,6 @@ class Websocket:
         # Command queue used to manage the websocket instance externally, such
         # as triggering notification dispatching or terminating the connection.
         self.__cmd_queue = PollablePriorityQueue()
-        self._waiting_for_dispatch = False
-        self._channels = set()
-        # For ``_last_notif_sent_id and ``_notif_history``, see
-        # ``MAX_NOTIFICATION_HISTORY_SEC`` for more details.
-        # id of the last sent notification that is no longer in _notif_history
-        self._last_notif_sent_id = 0
-        # history of last sent notifications in the format (notif_id, send_time)
-        # always sorted by notif_id ASC
-        self._notif_history = []
         # Websocket start up
         self.__selector = (
             selectors.PollSelector()
@@ -368,6 +335,9 @@ class Websocket:
         """
         self._send_control_command(ControlCommand.CLOSE, {'code': code, 'reason': reason})
 
+    def send(self, payload):
+        self._send_control_command(ControlCommand.SEND, payload)
+
     @classmethod
     def onopen(cls, func):
         cls.__event_callbacks[LifecycleEvent.OPEN].add(func)
@@ -377,27 +347,6 @@ class Websocket:
     def onclose(cls, func):
         cls.__event_callbacks[LifecycleEvent.CLOSE].add(func)
         return func
-
-    def subscribe(self, channels, last):
-        """ Subscribe to bus channels. """
-        self._channels = channels
-        # Only assign the last id according to the client once: the server is
-        # more reliable later on, see ``MAX_NOTIFICATION_HISTORY_SEC``.
-        if self._last_notif_sent_id == 0:
-            self._last_notif_sent_id = last
-        # Dispatch past notifications if there are any.
-        self.trigger_notification_dispatching()
-
-    def trigger_notification_dispatching(self):
-        """
-        Warn the socket that notifications are available. Ignore if a
-        dispatch is already planned or if the socket is already in the
-        closing state.
-        """
-        if self.state is not ConnectionState.OPEN or self._waiting_for_dispatch:
-            return
-        self._waiting_for_dispatch = True
-        self._send_control_command(ControlCommand.DISPATCH)
 
     # ------------------------------------------------------
     # PRIVATE METHODS
@@ -530,7 +479,7 @@ class Websocket:
             raise InvalidStateException(
                 "Trying to send a frame on a closed socket"
             )
-        opcode = Opcode.BINARY
+        opcode = Opcode.TEXT
         if not isinstance(message, (bytes, bytearray)):
             opcode = Opcode.TEXT
         self._send_frame(Frame(opcode, message))
@@ -623,8 +572,8 @@ class Websocket:
             self.__selector.unregister(self.__socket)
         self.__selector.close()
         self.__socket.close()
+        broker.unsubscribe(self)
         self.state = ConnectionState.CLOSED
-        dispatch.unsubscribe(self)
         self._trigger_lifecycle_event(LifecycleEvent.CLOSE)
         with acquire_cursor(self._db) as cr:
             env = new_env(cr, self._session)
@@ -751,43 +700,12 @@ class Websocket:
         :param dict | None data: An optional dictionary of parameters.
         """
         match command:
-            case ControlCommand.DISPATCH:
-                self._assert_session_validity()
-                self._dispatch_bus_notifications()
+            case ControlCommand.SEND:
+                # TODO - should be done in batch
+                # self._assert_session_validity()
+                self._send(data)
             case ControlCommand.CLOSE:
                 self._disconnect(data['code'], data.get('reason'))
-
-    def _dispatch_bus_notifications(self):
-        self._waiting_for_dispatch = False
-        with acquire_cursor(self._session.db) as cr:
-            notifications = fetch_bus_notifications(
-                cr, self._channels, self._last_notif_sent_id, [n[0] for n in self._notif_history]
-            )
-        if not notifications:
-            return
-        for notif in notifications:
-            bisect.insort(self._notif_history, (notif['id'], time.time()), key=lambda x: x[0])
-        # Discard all the smallest notification ids that have expired and
-        # increment the last id accordingly. History can only be trimmed of ids
-        # that are below the new last id otherwise some notifications might be
-        # dispatched again.
-        # For example, if the theshold is 10s, and the state is:
-        # last id 2, history [(3, 8s), (6, 10s), (7, 7s)]
-        # If 6 is removed because it is above the threshold, the next query will
-        # be (id > 2 AND id NOT IN (3, 7)) which will fetch 6 again.
-        # 6 can only be removed after 3 reaches the threshold and is removed as
-        # well, and if 4 appears in the meantime, 3 can be removed but 6 will
-        # have to wait for 4 to reach the threshold as well.
-        last_index = -1
-        for i, notif in enumerate(self._notif_history):
-            if time.time() - notif[1] > self.MAX_NOTIFICATION_HISTORY_SEC:
-                last_index = i
-            else:
-                break
-        if last_index != -1:
-            self._last_notif_sent_id = self._notif_history[last_index][0]
-            self._notif_history = self._notif_history[last_index + 1 :]
-        self._send(notifications)
 
 
 class TimeoutManager:
