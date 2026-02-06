@@ -8,4 +8,9 @@
     'installable': True,
     'license': 'LGPL-3',
     'post_init_hook': 'post_init_hook',
+    'assets': {
+        'web.assets_tests': [
+            'l10n_be_pos_restaurant/static/tests/tours/**/*',
+        ],
+    }
 }
