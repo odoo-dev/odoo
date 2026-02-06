@@ -4396,7 +4396,7 @@ class AccountMove(models.Model):
 
                         if success or file_data['type'] == 'pdf' or file_data['attachment'].mimetype in ALLOWED_MIMETYPES:
                             (invoice.invoice_line_ids - existing_lines).is_imported = True
-                            if not extend_with_existing_lines:
+                            if not extend_with_existing_lines and not (self.env.context.get('from_upload', False) and invoice.move_type == 'in_invoice'):
                                 try:
                                     invoice.with_context(default_move_type=invoice.move_type)._link_bill_origin_to_purchase_orders(timeout=4)
                                 except (UserError, ValueError):
