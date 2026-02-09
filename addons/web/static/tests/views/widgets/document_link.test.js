@@ -75,7 +75,7 @@ test("documentation_link: given icon", async () => {
         arch: /* xml */ `
         <form>
             <field name="bar"/>
-            <widget name="documentation_link" path="/this_is_a_test.html" icon="fa-question-circle"/>
+            <widget name="documentation_link" path="/this_is_a_test.html" icon="help"/>
         </form>`,
     });
     expect(".o_doc_link").toHaveText("");
@@ -89,7 +89,7 @@ test("documentation_link: given label and icon", async () => {
         arch: /* xml */ `
         <form>
             <field name="bar"/>
-            <widget name="documentation_link" path="/this_is_a_test.html" label="docdoc" icon="fa-question-circle"/>
+            <widget name="documentation_link" path="/this_is_a_test.html" label="docdoc" icon="help"/>
         </form>`,
     });
     expect(".o_doc_link").toHaveText("docdoc");

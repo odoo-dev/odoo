@@ -69,7 +69,7 @@
                                 <span><t t-out="template.label"/></span>
                             </a>
                         </div>
-                        <DocumentationLink path="'/applications/general/export_import_data.html'" label.translate="Documentation" icon="'fa-question-circle'"/>
+                        <DocumentationLink path="'/applications/general/export_import_data.html'" label.translate="Documentation" icon="'help'"/>
                     </div>
                 </div>
             </Layout>
