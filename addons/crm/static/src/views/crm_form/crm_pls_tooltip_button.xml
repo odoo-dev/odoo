@@ -46,7 +46,8 @@
                     <span t-if="isSampleData" class="text-primary fw-normal ms-2">(sample data)</span>
                 </h5>
                 <t t-call="crm.PlsTooltipSectionContent">
-                    <t t-set="iconClasses" t-value="'oi oi-arrow-up-right text-success'"/>
+                    <t t-set="icon_class" t-value="'oi text-success'"/>
+                    <t t-set="iconName" t-value="'north_east'"/>
                     <t t-set="sectionEntries" t-value="props.top3Data"/>
                     <t t-set="teamName" t-value="props.teamName"/>
                     <t t-set="useDefault" t-value="positiveDefault"/>
@@ -59,7 +60,8 @@
                     <span t-if="isSampleData" class="text-primary fw-normal ms-2">(sample data)</span>
                 </h5>
                 <t t-call="crm.PlsTooltipSectionContent">
-                    <t t-set="iconClasses" t-value="'oi oi-arrow-down-right text-danger'"/>
+                    <t t-set="icon_class" t-value="'oi text-danger'"/>
+                    <t t-set="iconName" t-value="'south_east'"/>
                     <t t-set="sectionEntries" t-value="props.low3Data"/>
                     <t t-set="teamName" t-value="props.teamName"/>
                     <t t-set="useDefault" t-value="negativeDefault"/>
@@ -79,7 +81,7 @@
     <t t-name="crm.PlsTooltipSectionContent">
         <div t-foreach="sectionEntries" t-as="group" t-key="group_index"
             t-attf-class="px-2 py-1 {{group.field === 'tag_id' ? 'd-flex align-items-center' : ''}}">
-            <span t-attf-class="{{iconClasses}} o_crm_pls_tooltip_icon me-1"/>
+            <span t-attf-class="{{icon_class}} o_crm_pls_tooltip_icon me-1" t-attf-data-icon="{{iconName}}"/>
             <t t-if="group.field === 'stage_id'">
                 <span class="fw-bolder"><t t-out="group.value"/></span>
                 <span class="mx-1">stage</span>
@@ -136,7 +138,7 @@
             </t>
         </div>
         <div t-if="useDefault" class="px-2 py-1">
-            <span t-attf-class="{{iconClasses}} o_crm_pls_tooltip_icon me-1"/>
+            <span t-attf-class="{{icon_class}} o_crm_pls_tooltip_icon me-1"/>
             <span class="">Historic win rate</span>
             <span t-if="teamName" class="fw-bolder">
                 (<span class="me-1" t-out="teamName"/><span>team</span>)
