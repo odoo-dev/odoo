@@ -491,7 +491,8 @@
                                         <widget name="documentation_link"
                                                 path="/developer/reference/backend/orm.html"
                                                 label="ORM API Documentation"
-                                                icon="oi oi-fw oi-arrow-right me-1"/>
+                                                icon="east"
+                                                icon_class="oi-fw"/>
                                     </p>
                                     <div >
                                         <p>Example of Python code:</p>
