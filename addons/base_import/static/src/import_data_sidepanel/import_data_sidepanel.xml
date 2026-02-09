@@ -146,7 +146,7 @@
                         <i class="oi oi-fw" data-icon="download"/> <span><t t-esc="template.label"/></span>
                     </a>
                 </t>
-                <DocumentationLink path="'/applications/general/export_import_data.html'" icon="'fa-external-link'" label.translate="Go to Import FAQ"/>
+                <DocumentationLink path="'/applications/general/export_import_data.html'" icon="'open_in_new'" label.translate="Go to Import FAQ"/>
             </div>
         </div>
     </t>

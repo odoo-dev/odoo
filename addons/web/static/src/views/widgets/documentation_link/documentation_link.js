@@ -13,6 +13,7 @@ export class DocumentationLink extends Component {
         path: { type: String },
         label: { type: String, optional: 1 },
         icon: { type: String, optional: 1 },
+        icon_class: { type: String, optional: 1 },
         alertLink: { type: Boolean, optional: 1 },
     };
 
@@ -31,7 +32,7 @@ export class DocumentationLink extends Component {
     }
 
     get classes() {
-        let classes = "o_doc_link me-2";
+        let classes = "o_doc_link d-inline-flex align-items-center gap-2 me-2";
         if (this.props.alertLink){
             classes += " alert-link";
         }
@@ -42,11 +43,12 @@ export class DocumentationLink extends Component {
 export const documentationLink = {
     component: DocumentationLink,
     extractProps: ({ attrs }) => {
-        const { path, label, icon, alert_link } = attrs;
+        const { path, label, icon, icon_class, alert_link } = attrs;
         return {
             path,
             label,
             icon,
+            icon_class,
             alertLink: Boolean(alert_link),
         };
     },
