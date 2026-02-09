@@ -15,9 +15,9 @@
 
     <BuilderRow label.translate="Alignment">
         <BuilderButtonGroup>
-            <BuilderButton className="'fa fa-fw fa-align-left'" title.translate="Left" classAction="''"/>
-            <BuilderButton className="'fa fa-fw fa-align-center'" title.translate="Center" classAction="'o_avatars_center'"/>
-            <BuilderButton className="'fa fa-fw fa-align-right'" title.translate="Right" classAction="'o_avatars_end'"/>
+            <BuilderButton icon="'format_align_left'" icon_class="'oi-fw'" title.translate="Left" classAction="''"/>
+            <BuilderButton icon="'format_align_center'" icon_class="'oi-fw'" title.translate="Center" classAction="'o_avatars_center'"/>
+            <BuilderButton icon="'format_align_right'" icon_class="'oi-fw'" title.translate="Right" classAction="'o_avatars_end'"/>
         </BuilderButtonGroup>
     </BuilderRow>
 
@@ -34,8 +34,8 @@
 
     <BuilderRow label.translate="Direction" t-if="isActiveItem('avatars_label_opt')" level="1">
         <BuilderButtonGroup>
-            <BuilderButton className="'fa fa-fw fa-long-arrow-right'" title.translate="Row" classAction="'flex-row'"/>
-            <BuilderButton className="'fa fa-fw fa-long-arrow-down'" title.translate="Column" classAction="'flex-column'"/>
+            <BuilderButton icon="'east'" icon_class="'oi-fw'" title.translate="Row" classAction="'flex-row'"/>
+            <BuilderButton icon="'south'" icon_class="'oi-fw'" title.translate="Column" classAction="'flex-column'"/>
         </BuilderButtonGroup>
     </BuilderRow>
 

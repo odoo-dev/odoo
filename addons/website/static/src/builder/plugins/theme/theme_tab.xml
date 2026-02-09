@@ -41,9 +41,9 @@
                 action="'customizeWebsiteColor'"
                 actionParam="'body'"/>
             <BuilderButtonGroup action="'customizeBodyBgType'">
-                <BuilderButton title.translate="Image" actionValue="'image'" className="'fa fa-fw fa-camera'"/>
-                <BuilderButton title.translate="Pattern" actionValue="'pattern'" className="'fa fa-fw fa-th'"/>
-                <BuilderButton title.translate="None" actionValue="'NONE'" className="'fa fa-fw fa-ban'"/>
+                <BuilderButton title.translate="Image" actionValue="'image'" icon="'photo_camera'" icon_class="'oi-fw'"/>
+                <BuilderButton title.translate="Pattern" actionValue="'pattern'" icon="'grid_view'" icon_class="'oi-fw'"/>
+                <BuilderButton title.translate="None" actionValue="'NONE'" icon="'block'" icon_class="'oi-fw'"/>
             </BuilderButtonGroup>
         </BuilderRow>
     </BuilderContext>

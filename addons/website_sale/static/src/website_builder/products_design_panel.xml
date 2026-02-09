@@ -566,7 +566,7 @@
             >
                 <BuilderButton
                     title.translate="Add to Cart"
-                    icon="'fa-shopping-cart'"
+                    icon="'shopping_cart'"
                     classAction="'o_wsale_products_opt_has_cta'"
                     id="'wsale_products_opt_add_to_cart'"
                 />

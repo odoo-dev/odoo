@@ -4,7 +4,7 @@
 <t t-name="website.CardImagePositionOption">
     <BuilderRow label="props.label" level="props.level" t-if="state.show">
         <BuilderButton
-            icon="'fa-crosshairs'"
+            icon="'my_location'"
             preview="false"
             action="'coverImagePositionOverlay'"/>
     </BuilderRow>

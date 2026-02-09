@@ -14,7 +14,8 @@
         >
             <BuilderButton
                 title.translate="Wishlist"
-                icon="'fa-heart'"
+                icon="'favorite'"
+                icon_class="'oi-filled'"
                 classAction="'o_wsale_products_opt_has_wishlist'"
             />
             <BuilderSelect t-if="isOnHoverAvailable">

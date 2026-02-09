@@ -60,13 +60,4 @@ export class BuilderButton extends Component {
         }
         return className;
     }
-
-    get iconClassName() {
-        if (this.props.icon.startsWith("fa-")) {
-            return `fa ${this.props.icon}`;
-        } else if (this.props.icon.startsWith("oi-")) {
-            return `oi ${this.props.icon}`;
-        }
-        return "";
-    }
 }
