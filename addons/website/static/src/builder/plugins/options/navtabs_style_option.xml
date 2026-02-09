@@ -42,11 +42,11 @@
     </t>
     <BuilderRow label.translate="Slide">
         <BuilderButtonGroup applyTo="'.s_tabs_content'">
-            <BuilderButton className="'fa fa-fw fa-long-arrow-left'" title.translate="Slide to left" classAction="'s_tabs_slide_right'"/>
-            <BuilderButton className="'fa fa-fw fa-long-arrow-up'" title.translate="Slide up" classAction="'s_tabs_slide_down'"/>
-            <BuilderButton className="'fa fa-fw fa-long-arrow-down'" title.translate="Slide down" classAction="'s_tabs_slide_up'"/>
-            <BuilderButton className="'fa fa-fw fa-long-arrow-right'" title.translate="Slide to right" classAction="'s_tabs_slide_left'"/>
-            <BuilderButton className="'fa fa-fw fa-ban'" title.translate="No Slide Effect" classAction="''"/>
+            <BuilderButton icon="'west'" icon_class="'oi-fw'" title.translate="Slide to left" classAction="'s_tabs_slide_right'"/>
+            <BuilderButton icon="'north'" icon_class="'oi-fw'" title.translate="Slide up" classAction="'s_tabs_slide_down'"/>
+            <BuilderButton icon="'south'" icon_class="'oi-fw'" title.translate="Slide down" classAction="'s_tabs_slide_up'"/>
+            <BuilderButton icon="'east'" icon_class="'oi-fw'" title.translate="Slide to right" classAction="'s_tabs_slide_left'"/>
+            <BuilderButton icon="'block'" icon_class="'oi-fw'" title.translate="No Slide Effect" classAction="''"/>
         </BuilderButtonGroup>
     </BuilderRow>
 </t>

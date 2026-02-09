@@ -20,10 +20,10 @@
         </div>
         <BuilderRow label.translate="Re-order" t-if="this.displayReOrder">
             <BuilderButtonGroup action="'changeSequence'">
-                <BuilderButton actionValue="'top'" title.translate="Push to top" className="'fa fa-fw fa-angle-double-left'" />
-                <BuilderButton actionValue="'up'" title.translate="Push up" className="'fa fa-fw fa-angle-left ms-1'" />
-                <BuilderButton actionValue="'down'" title.translate="Push down" className="'fa fa-fw fa-angle-right mx-1'" />
-                <BuilderButton actionValue="'bottom'" title.translate="Push to bottom" className="'fa fa-fw fa-angle-double-right'" />
+                <BuilderButton actionValue="'top'" title.translate="Push to top" icon="'keyboard_double_arrow_left'" icon_class="'oi-fw'" />
+                <BuilderButton actionValue="'up'" title.translate="Push up" icon="'keyboard_arrow_left'" icon_class="'oi-fw'" />
+                <BuilderButton actionValue="'down'" title.translate="Push down" icon="'keyboard_arrow_right'" icon_class="'oi-fw'" />
+                <BuilderButton actionValue="'bottom'" title.translate="Push to bottom" icon="'keyboard_double_arrow_right'" icon_class="'oi-fw'" />
             </BuilderButtonGroup>
         </BuilderRow>
     </t>
