@@ -34,7 +34,7 @@
             <BuilderButton
                 action="'removeCoverImage'"
                 preview="false"
-                icon="'oi-close'"
+                icon="'close_small'"
                 className="'o_we_bg_danger'"
                 title.translate="Remove Cover"/>
         </t>

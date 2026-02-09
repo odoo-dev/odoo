@@ -45,14 +45,14 @@
         <BuilderButtonGroup action="'websiteConfig'" t-if="this.hasSomeViews(['website.template_header_hamburger', 'website.template_header_sidebar'])">
             <BuilderButton ltrRtlMapping="'position'"
                 title.translate="Left"
-                icon="'fa-long-arrow-left'"
+                icon="'west'"
                 actionParam="{
                     views: [],
                     vars: { 'hamburger-position': 'left' }
                 }"/>
             <BuilderButton ltrRtlMapping="'position'"
                 title.translate="Right"
-                icon="'fa-long-arrow-right'"
+                icon="'east'"
                 actionParam="{
                     views: ['website.template_header_hamburger_align_right', 'website.template_header_sidebar_position_right'],
                     vars: { 'hamburger-position': 'right' }
@@ -85,14 +85,14 @@
         <BuilderButtonGroup action="'websiteConfig'">
             <BuilderButton ltrRtlMapping="'position'"
                 title.translate="Left"
-                icon="'fa-long-arrow-left'"
+                icon="'west'"
                 actionParam="{
                     views: ['website.template_header_mobile_position_left'],
                     vars: { 'hamburger-position-mobile': 'left' }
                 }"/>
             <BuilderButton ltrRtlMapping="'position'"
                 title.translate="Right"
-                icon="'fa-long-arrow-right'"
+                icon="'east'"
                 actionParam="{ views: [], vars: { 'hamburger-position-mobile': 'right' } }"/>
         </BuilderButtonGroup>
 

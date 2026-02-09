@@ -35,7 +35,9 @@
                         />
                         <div t-else="">
                             <BuilderButton
-                                className="'fa fa-fw fa-minus text-danger bg-transparent border-0'"
+                                className="'text-danger bg-transparent border-0'"
+                                icon="'remove'"
+                                iconClass="'oi-fw'"
                                 title.translate="Remove link"
                                 action="'deleteSocialMediaLink'"
                                 applyTo="`a:nth-of-type(${item.domPosition})`"

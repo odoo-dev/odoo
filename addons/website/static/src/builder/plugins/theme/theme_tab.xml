@@ -57,7 +57,7 @@
                 preview="false"
                 className="'ms-auto px-2'"
                 icon="'photo_camera'"
-                icon_class="'oi-fw'"
+                iconClass="'oi-fw'"
             />
         </BuilderRow>
         <BuilderRow label.translate="Background" level="1" t-if="!this.isActiveItem('layout_full_opt')">
@@ -69,7 +69,7 @@
             <BuilderButton action="'replaceBodyBgImage'" title.translate="Replace Image" preview="false" type="'global'">
                 Replace
             </BuilderButton>
-            <BuilderButton action="'removeBodyBgImage'" preview="false" icon="'oi-close'" className="'btn-danger-color-hover'"/>
+            <BuilderButton action="'removeBodyBgImage'" preview="false" icon="'close_small'" className="'btn-danger-color-hover'"/>
             <ImageSize/>
         </BuilderRow>
         <BuilderRow label.translate="Position" level="1" t-if="this.isActiveItem('body_bg_image_opt')">

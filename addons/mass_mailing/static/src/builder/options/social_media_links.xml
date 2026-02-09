@@ -18,7 +18,7 @@
             <BuilderTextInput action="'updateSocialMediaLinks'" actionParam="media" placeholder.translate="www.example.com"/>
             <BuilderButton t-if="media_value.custom"
                         action="'removeCustomMediaLink'" preview="false" actionParam="{ platform: media }"
-                        icon="'remove'" icon_class="'oi-fw'"
+                        icon="'remove'" iconClass="'oi-fw'"
                         className="'text-danger bg-transparent border-0'"
             />
             <BuilderCheckbox t-else="" action="'toggleSocialMediaLink'"

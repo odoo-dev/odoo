@@ -153,13 +153,15 @@
                 <t t-set="right">Right</t>
                 <BuilderButton t-if="isSameLangDir"
                     title="this.env.langDir.builder === 'ltr' ? left : right"
-                    icon="'fa-fw fa-long-arrow-left'"
+                    iconClass="'oi-fw'"
+                    icon="'west'"
                     actionParam="{ views: ['website_sale.carousel_product_indicators_left'] }"
                 />
-                <BuilderButton icon="'fa-fw fa-long-arrow-down'" actionParam="{ views: ['website_sale.carousel_product_indicators_bottom'] }" title.translate="Bottom"/>
+                <BuilderButton icon="'south'" iconClass="'oi-fw'" actionParam="{ views: ['website_sale.carousel_product_indicators_bottom'] }" title.translate="Bottom"/>
                 <BuilderButton t-if="!isSameLangDir"
                     title="this.env.langDir.builder === 'ltr' ? right : left"
-                    icon="'fa-fw fa-long-arrow-right'"
+                    icon="'east'"
+                    iconClass="'oi-fw'"
                     actionParam="{ views: ['website_sale.carousel_product_indicators_left'] }"
                 />
 	        </BuilderButtonGroup>

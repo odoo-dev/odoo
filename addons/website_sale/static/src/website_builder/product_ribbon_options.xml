@@ -32,13 +32,15 @@
                 t-if="!this.isActiveItem('no_ribbon_opt')"
                 t-on-click="() => this.state.ribbonEditMode = !this.state.ribbonEditMode"
                 title.translate="Edit"
-                className="'fa fa-edit'"
+                icon="'edit'"
+                iconClass="'oi-filled'"
             />
             <BuilderButton
                 t-if="!this.state.ribbonEditMode"
                 title.translate="Create"
                 action="'createRibbon'"
-                className="'fa fa-plus text-success border-0'"
+                icon="'add'"
+                className="'text-success border-0'"
                 style="'background-color: transparent !important;'"
                 preview="false"
                 t-on-click="() => this.state.ribbonEditMode = true"
