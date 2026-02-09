@@ -1079,6 +1079,11 @@ class TransactionCase(BaseCase):
             gc_env = api.Environment(cr, api.SUPERUSER_ID, {})
             gc_env['ir.attachment']._gc_file_store_unsafe()
 
+    @staticmethod
+    def forbidden_cursor(*args, **kwars):
+        traceback.print_stack()
+        raise AssertionError('Cannot create, commit or rollback a cursor from inside a test, this will lead to a broken cursor when trying to rollback the test. Please rollback to a specific savepoint instead or enter test mode')
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -1118,6 +1123,8 @@ class TransactionCase(BaseCase):
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(typing.cast('Cursor', cls.cr).close)
+        cls._cursor_patcher = patch.object(cls.registry, 'cursor', cls.forbidden_cursor)
+        cls.startClassPatcher(cls._cursor_patcher)
 
         def check_cursor_stack():
             for cursor in test_cursor.TestCursor._cursors_stack:
@@ -1130,15 +1137,11 @@ class TransactionCase(BaseCase):
         if cls.freeze_time:
             cls.startClassPatcher(cls.freeze_time)
 
-        def forbidden(*args, **kwars):
-            traceback.print_stack()
-            raise AssertionError('Cannot commit or rollback a cursor from inside a test, this will lead to a broken cursor when trying to rollback the test. Please rollback to a specific savepoint instead or open another cursor if really necessary')
-
-        cls.commit_patcher = patch.object(cls.cr, 'commit', forbidden)
+        cls.commit_patcher = patch.object(cls.cr, 'commit', cls.forbidden_cursor)
         cls.startClassPatcher(cls.commit_patcher)
-        cls.rollback_patcher = patch.object(cls.cr, 'rollback', forbidden)
+        cls.rollback_patcher = patch.object(cls.cr, 'rollback', cls.forbidden_cursor)
         cls.startClassPatcher(cls.rollback_patcher)
-        cls.close_patcher = patch.object(cls.cr, 'close', forbidden)
+        cls.close_patcher = patch.object(cls.cr, 'close', cls.forbidden_cursor)
         cls.startClassPatcher(cls.close_patcher)
 
         cls.env = api.Environment(cls.cr, api.SUPERUSER_ID, {})
