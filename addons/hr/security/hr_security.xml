@@ -92,11 +92,12 @@
         <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
     </record>
 
-    <record id="ir_rule_res_partner_bank_internal_users" model="ir.rule">
-        <field name="name">HR: Prevent non HR officers from accessing employee bank accounts</field>
-        <field name="model_id" ref="base.model_res_partner_bank"/>
+    <record id="base.res_partner_bank_rule_user" model="ir.rule">
         <field name="domain_force">[('partner_id.employee_ids', '=', False)]</field>
-        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="base.res_partner_bank_rule_partner_manager" model="ir.rule">
+        <field name="domain_force">[('partner_id.employee_ids', '=', False)]</field>
     </record>
 
     <record id="ir_rule_res_partner_bank_employees" model="ir.rule">
