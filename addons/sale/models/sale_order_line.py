@@ -1477,8 +1477,9 @@ class SaleOrderLine(models.Model):
                 and not line.display_type
                 and not (
                     self.env.context.get('from_services_and_material')
-                    and line.product_id.expense_policy == 'cost'
                     and not line.product_uom_qty
+                    and len(line.analytic_line_ids) == 1
+                    and line.analytic_line_ids.unit_amount == line.qty_delivered
                 )
         )
 

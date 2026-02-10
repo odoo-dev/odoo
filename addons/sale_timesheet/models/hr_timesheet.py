@@ -38,13 +38,9 @@ class AccountAnalyticLine(models.Model):
             compute='_compute_timesheet_invoice_type', compute_sudo=True, store=True, readonly=True)
     commercial_partner_id = fields.Many2one('res.partner', compute="_compute_commercial_partner")
     so_line = fields.Many2one(
-        compute="_compute_so_line",
-        store=True,
-        readonly=False,
         falsy_value_label="Non-billable",
         help="Sales order item to which the time spent will be added in order to be invoiced to your customer. Remove the sales order item for the timesheet entry to be non-billable."
     )
-    order_id = fields.Many2one(compute='_compute_order_id', store=True, readonly=False, index=True)
     is_so_line_edited = fields.Boolean("Is Sales Order Item Manually Edited")
     allow_billable = fields.Boolean(related="project_id.allow_billable")
     sale_order_state = fields.Selection(related='order_id.state')
@@ -82,13 +78,17 @@ class AccountAnalyticLine(models.Model):
 
     @api.depends('task_id.sale_line_id', 'project_id.sale_line_id', 'employee_id', 'project_id.allow_billable')
     def _compute_so_line(self):
-        for timesheet in self.filtered(lambda t: not t.is_so_line_edited and t._is_not_billed()):  # Get only the timesheets are not yet invoiced
+        super()._compute_so_line()
+        # Get only the timesheets that are not yet invoiced
+        for timesheet in self.filtered(lambda t: t.project_id and not t.is_so_line_edited and t._is_not_billed()):
             timesheet.so_line = timesheet.project_id.allow_billable and timesheet._timesheet_determine_sale_line()
 
     @api.depends('so_line')
     def _compute_order_id(self):
-        for timesheet in self:
-            timesheet.order_id = timesheet.so_line.order_id if timesheet.so_line else False
+        super()._compute_order_id()
+        # compute only for timesheets
+        for timesheet in self.filtered('project_id'):
+            timesheet.order_id = timesheet.so_line.order_id
 
     @api.depends('reinvoice_move_id.state')
     def _compute_partner_id(self):

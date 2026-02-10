@@ -13,33 +13,54 @@ class AccountAnalyticLine(models.Model):
         return [('qty_delivered_method', '=', 'analytic')]
 
     reinvoice_move_id = fields.Many2one(
-        'account.move',
         string="Invoice",
+        comodel_name='account.move',
         readonly=True,
         copy=False,
         help="Invoice created from related SO line",
         index='btree_not_null',
     )
     so_line = fields.Many2one(
-        'sale.order.line',
         string='Sales Order Item',
+        comodel_name='sale.order.line',
+        compute='_compute_so_line',
+        store=True,
+        readonly=False,
         index='btree_not_null',
         domain=lambda self: self._domain_so_line(),
     )
-    order_id = fields.Many2one('sale.order', string="Customer Order", index=True)
+    order_id = fields.Many2one(
+        string="Customer Order",
+        comodel_name='sale.order',
+        compute='_compute_order_id',
+        store=True,
+        readonly=False,
+        index=True,
+    )
+
+    def _compute_so_line(self):
+        for line in self:
+            if not line.so_line:
+                line.so_line = False
+
+    def _compute_order_id(self):
+        for line in self:
+            if not line.order_id:
+                line.order_id = False
 
     @api.model_create_multi
     def create(self, vals_list):
         if self.env.context.get('from_services_and_material'):
-
             plan_id = self.env.ref('sale.analytic_plan_sale_orders', raise_if_not_found=False)
             # If user deleted plan then fallback on project plan
             if not plan_id:
                 plan_id, _other_plans = self.env['account.analytic.plan']._get_all_plans()
 
+            column_name = plan_id._column_name()
+
             for vals in vals_list:
                 order_id = self.env['sale.order'].browse(vals['order_id'])
-                vals[plan_id._column_name()] = order_id._get_or_create_analytic_account(plan_id).id
+                vals[column_name] = order_id._get_or_create_analytic_account(plan_id).id
 
             lines = super().create(vals_list)
             lines._sync_so_lines()
@@ -72,14 +93,12 @@ class AccountAnalyticLine(models.Model):
         return res
 
     def _check_can_write(self, vals):
-        if (
-            self.sudo().filtered(lambda aal: aal.so_line.product_id.invoice_policy == 'delivery')
-            and self.filtered(lambda aal: aal.reinvoice_move_id and aal.reinvoice_move_id.state != 'cancel')
+        if self.sudo().filtered(
+            lambda aal: aal.so_line.product_id.invoice_policy == 'delivery'
+        ) and self.filtered(
+            lambda aal: aal.reinvoice_move_id and aal.reinvoice_move_id.state != 'cancel'
         ):
-            if any(
-                field_name in vals
-                for field_name in self._restricted_fields_when_invoiced()
-            ):
+            if any(field_name in vals for field_name in self._restricted_fields_when_invoiced()):
                 raise UserError(self._get_invoiced_line_write_error())
 
         if (
@@ -107,7 +126,9 @@ class AccountAnalyticLine(models.Model):
         delivery method is manual. Lines originating from timesheets or
         expenses are left unchanged.
         """
-        if any(line.reinvoice_move_id and line.reinvoice_move_id.state == 'posted' for line in self):
+        if any(
+            line.reinvoice_move_id and line.reinvoice_move_id.state == 'posted' for line in self
+        ):
             raise UserError(self._get_invoiced_line_delete_error())
         self._unsync_so_lines()
 
@@ -187,10 +208,11 @@ class AccountAnalyticLine(models.Model):
         :rtype: sale.order.line
         :return: The newly created sale order line record.
         """
+        self.ensure_one()
         values = {
             'order_id': self.order_id.id,
             'product_id': self.product_id.id,
-            'product_uom_id': self.product_id.uom_id.id,
+            'product_uom_id': self.product_uom_id.id,
             'product_uom_qty': 0,
             'qty_delivered': self.unit_amount,
         }

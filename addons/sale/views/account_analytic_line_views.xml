@@ -34,7 +34,7 @@
                     name="order_id"
                     string="Customer Order"
                     context="{'sale_show_partner_name': True}"
-                    domain="[('company_id', '=', company_id)]"
+                    domain="[('company_id', '=', company_id), ('locked', '=', False)]"
                     required="True"
                 />
                 <field
@@ -44,7 +44,12 @@
                 />
                 <field name="name" string="Description"/>
                 <field name="unit_amount" string="Quantity" optional="show"/>
-                <field name="product_uom_id" widget="many2one_uom"/>
+                <field
+                    name="product_uom_id"
+                    widget="many2one_uom"
+                    domain="[('id', 'in', allowed_uom_ids)]"
+                    groups="uom.group_uom"
+                />
                 <field name="so_line" string="Sales Order Line" optional="hide"/>
                 <field name="ref" optional="hide"/>
                 <field name="partner_id" optional="hide"/>
@@ -66,7 +71,7 @@
             'from_services_and_material': 1,
             'default_unit_amount': 1,
         }</field>
-        <field name="domain"> [('product_id.expense_policy', '!=', 'no'), ('order_id', '!=', False)]</field>
+        <field name="domain">[('product_id.expense_policy', '!=', 'no'), ('order_id', '!=', False)]</field>
     </record>
 
 </odoo>

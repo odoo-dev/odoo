@@ -179,6 +179,9 @@ class AccountAnalyticLine(models.Model):
     product_uom_id = fields.Many2one(
         'uom.uom',
         string='Unit',
+        compute='_compute_product_uom_id',
+        store=True,
+        readonly=False,
     )
     partner_id = fields.Many2one(
         'res.partner',
@@ -259,6 +262,10 @@ class AccountAnalyticLine(models.Model):
                 'type': 'success',
                 'message': self.env._("%s analytic lines created", len(to_create_vals)),
             })
+
+    def _compute_product_uom_id(self):
+        for line in self:
+            line.product_uom_id = False
 
     def _split_amount_fname(self):
         return 'amount'
