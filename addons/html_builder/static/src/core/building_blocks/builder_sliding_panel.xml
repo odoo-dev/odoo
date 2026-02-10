@@ -6,6 +6,7 @@
         class="o-hb-btn btn"
         t-on-click="this.showSlidingPanel"
         t-att-class="this.props.extraClasses"
+        t-att-data-icon="this.props.icon"
     >
         <t t-slot="default"/>
     </button>
