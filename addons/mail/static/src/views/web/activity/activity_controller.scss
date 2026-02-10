@@ -73,7 +73,7 @@
             width: 32px;
             justify-content: center;
 
-            i.fa-pencil {
+            i[data-icon="edit"] {
                 font-size: x-large;
             }
         }

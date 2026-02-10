@@ -2,7 +2,7 @@
     color: $input-placeholder-color;
     background: transparent;
 
-    .btn.fa-upload.o_input_box_overlay_end {
+    .btn[data-icon="upload"] .o_input_box_overlay_end {
         top: 0 !important;
         right: 0 !important;
     }

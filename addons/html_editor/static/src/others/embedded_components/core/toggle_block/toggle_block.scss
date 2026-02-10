@@ -2,7 +2,7 @@
     [data-embedded-editable] > p {
         margin: 0;
     }
-    button:has(i.fa-caret-down, i.fa-caret-right){
+    button:has(i[data-icon="arrow_drop_down"], i[data-icon="arrow_right"]){
         cursor: pointer !important;
         width: 1.5rem; // Equivalent to ps-4
         aspect-ratio: 1 / 1;

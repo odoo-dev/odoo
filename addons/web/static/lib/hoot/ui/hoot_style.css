@@ -98,10 +98,10 @@ ul {
 }
 
 /*---------------------------------------------------------------------------*/
-/* Font awesome default size                                                 */
+/* Icon default size                                                         */
 /*---------------------------------------------------------------------------*/
 
-.fa {
+.oi {
     display: flex;
     justify-content: center;
     align-items: center;
