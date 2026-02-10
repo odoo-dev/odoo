@@ -74,7 +74,7 @@
                 float:right;
                 margin-top: .5em;
             }
-            .fa {
+            .oi {
                 margin-right: .4em;
             }
         }
@@ -97,7 +97,7 @@
             background-color: transparent;
             white-space: normal;
             text-align: left;
-            i.fa-times {
+            i[data-icon="close"] {
                 cursor: pointer;
             }
         }
@@ -116,10 +116,10 @@
         .nav .btn:active {
             box-shadow: none;
         }
-        div[aria-expanded="true"] i.fa-caret-right {
+        div[aria-expanded="true"] i[data-icon="arrow_right"] {
             display: none;
         }
-        div[aria-expanded="false"] i.fa-caret-down {
+        div[aria-expanded="false"] i[data-icon="arrow_drop_down"] {
             display: none;
         }
     }

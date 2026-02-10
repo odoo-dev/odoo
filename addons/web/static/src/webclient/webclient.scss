@@ -149,11 +149,11 @@ kbd {
         }
       }
 
-      &:has(.fa-fw:only-child, .oi-fw:only-child) {
+      &:has(.oi-fw:only-child, .oi-fw:only-child) {
           padding: $o-touch-btn-with-icon-padding;
       }
 
-      &.fa {
+      &.oi {
           font-size: 1.3em;
           padding: 2px 10px;
       }

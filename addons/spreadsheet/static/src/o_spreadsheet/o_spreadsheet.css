@@ -2619,15 +2619,15 @@
   .sorting-icon {
     margin: 1px;
 
-    .fa-sort-desc {
+    [data-icon="arrow_downward"] {
       transform: translateY(-2px);
     }
-    .fa-sort-asc {
+    [data-icon="arrow_upward"] {
       transform: translateY(4px);
     }
   }
 
-  div:not(:hover) > .sorting-icon:has(> .fa-sort) {
+  div:not(:hover) > .sorting-icon:has(> [data-icon="swap_vert"]) {
     display: none;
   }
 }
@@ -2826,7 +2826,7 @@
       pointer-events: none;
     }
 
-    .fa-stack {
+    .oi-stack {
       /* reset stack size which is doubled by default */
       width: 18px;
       height: 18px;
@@ -2837,7 +2837,7 @@
       left: -1px;
       top: -1px;
 
-      .fa-question-circle {
+      [data-icon="help"] {
         color: var(--os-primary-button-bg);
       }
     }
@@ -2854,7 +2854,7 @@
     }
 
     .o-composer-assistant-container {
-      .fa-times-circle {
+      [data-icon="cancel"] {
         color: var(--os-primary-button-bg);
       }
     }

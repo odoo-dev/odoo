@@ -5,7 +5,7 @@
         padding-left: 1px;
         padding-right: 1px;
 
-        &.fa-heart {
+        &[data-icon="favorite"] {
             transform: scale(.8); // Deviation: handle icon inconsistent size
         }
     }

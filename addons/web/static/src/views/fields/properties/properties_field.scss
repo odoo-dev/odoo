@@ -55,8 +55,8 @@
 .o_field_property_label {
     width: 180px;
 
-    .fa-caret-down,
-    .fa-caret-right {
+    [data-icon="arrow_drop_down"],
+    [data-icon="arrow_right"] {
         width: 8px;
     }
     .o_field_property_open_popover,
