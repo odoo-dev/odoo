@@ -633,10 +633,6 @@ export class SelfOrder extends Reactive {
         }
     }
 
-    shouldUpdateLastOrderChange() {
-        return true;
-    }
-
     async sendDraftOrderToServer() {
         if (
             Object.keys(this.currentOrder.changes).length === 0 ||
@@ -649,9 +645,6 @@ export class SelfOrder extends Reactive {
             const tableIdentifier = this.router.getTableIdentifier([]);
             let uuid = this.selectedOrderUuid;
             this.currentOrder.recomputeOrderData();
-            if (this.shouldUpdateLastOrderChange()) {
-                this.currentOrder.updateLastOrderChange();
-            }
             const data = await rpc(
                 `/pos-self-order/process-order/${this.config.self_ordering_mode}`,
                 {
