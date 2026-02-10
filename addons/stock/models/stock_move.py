@@ -1080,6 +1080,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             lot_qties = [1] * len(lot_names)
 
         vals_list = []
+        product = self.env['product.product']
         for lot, qty in zip(lot_names, lot_qties):
             if not lot.get('quantity'):
                 lot['quantity'] = qty
@@ -1105,6 +1106,9 @@ Please change the quantity done or the rounding precision in your settings.""",
                         'id': value,
                         'display_name': self.env['stock.move.line'][key].browse(value).display_name
                     }
+        if not (product or product.lot_sequence_id):
+            return vals_list
+
         first_number = product.lot_sequence_id.number_next_actual - product.lot_sequence_id.number_increment
         if (first_lot and first_lot == product.lot_sequence_id.get_next_char(first_number)):
             product.lot_sequence_id.sudo().write({'number_next_actual': first_number + len(lot_qties)})
