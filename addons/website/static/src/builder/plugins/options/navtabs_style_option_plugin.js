@@ -73,7 +73,8 @@ class NavTabsStyleOptionPlugin extends Plugin {
         if (previousNavItemEl) {
             const direction = isVertical ? "up" : reverseButtons ? "right" : "left";
             buttons.push({
-                class: `fa fa-fw fa-angle-${direction}`,
+                class: "oi oi-fw",
+                icon: `keyboard_arrow_${direction}`,
                 title: isVertical
                     ? _t("Move up")
                     : this.isEditableRTL
@@ -86,7 +87,8 @@ class NavTabsStyleOptionPlugin extends Plugin {
         if (nextNavItemEl) {
             const direction = isVertical ? "down" : reverseButtons ? "left" : "right";
             buttons.push({
-                class: `fa fa-fw fa-angle-${direction}`,
+                class: "oi oi-fw",
+                icon: `keyboard_arrow_${direction}`,
                 title: isVertical
                     ? _t("Move down")
                     : this.isEditableRTL

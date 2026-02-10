@@ -21,7 +21,7 @@ export class BuilderSlidingPanel extends Component {
     };
     static defaultProps = {
         class: "btn-secondary",
-        icon: "fa-paint-brush",
+        icon: "design_services",
         textContent: "",
         fullHeight: false,
         darkBackground: false,

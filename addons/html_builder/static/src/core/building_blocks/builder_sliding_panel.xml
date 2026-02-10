@@ -5,7 +5,8 @@
     <button t-ref="openButton"
         class="o-hb-btn btn"
         t-on-click="showSlidingPanel"
-        t-att-class="props.class + (props.textContent ? '' : ' fa ' + props.icon)"
+        t-att-class="props.class + (props.textContent ? '' : ' oi')"
+        t-att-data-icon="props.icon"
     >
         <t t-out="props.textContent"/>
     </button>
