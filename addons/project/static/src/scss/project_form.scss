@@ -34,7 +34,7 @@
     &.o_field_subtasks_one2many, &.o_field_many2many_tags_email, &.o_field_CopyClipboardChar {
         width: 100%;
     }
-    &.o_field_CopyClipboardChar span:not(.fa-clipboard) {
+    &.o_field_CopyClipboardChar span:not([data-icon="assignment"]) {
         white-space: unset;
         width: calc(100% - var(--inputbox-overlay-end-size));
         display: block;
