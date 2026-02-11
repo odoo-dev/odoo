@@ -124,3 +124,46 @@ class TestHrLeaveType(TestHrHolidaysCommon):
             ).search([('has_valid_allocation', '=', True)], limit=1)
 
         self.assertFalse(leave_types, "Got valid leaves outside vaild period")
+
+    def test_search_virtual_remaining_leaves(self):
+        """Test the search implementation for virtual remaining leaves.
+            Verify that the search correctly identifies:
+            1. Allocated leave type with available balance as valid.
+            2. Allocated leave type with zero balance as invalid.
+            3. Unallocated leave type as valid.
+        """
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+
+        type_allocated_available = self.env['hr.leave.type'].create({
+            'name': 'Allocated Time Off - Days Available',
+            'unit_of_measure': 'day',
+            'requires_allocation': True,
+        })
+
+        type_allocated_unavailable = self.env['hr.leave.type'].create({
+            'name': 'Allocated Time Off - Days Unavailable',
+            'unit_of_measure': 'day',
+            'requires_allocation': True,
+        })
+
+        type_unallocated_available = self.env['hr.leave.type'].create({
+            'name': 'Unallocated Time Off',
+            'unit_of_measure': 'day',
+            'requires_allocation': False,
+        })
+
+        self.env['hr.leave.allocation'].sudo().create({
+            'name': 'Test Allocation',
+            'state': 'confirm',
+            'holiday_status_id': type_allocated_available.id,
+            'employee_id': employee.id,
+            'number_of_days': 10,
+        }).action_approve()
+
+        available_leave_types = self.env['hr.leave.type'].with_context(
+            employee_id=employee.id
+            ).search([('virtual_remaining_leaves', '>', 1)])
+
+        self.assertIn(type_allocated_available, available_leave_types, "Leave type with sufficient allocation was incorrectly excluded from search results.")
+        self.assertNotIn(type_allocated_unavailable, available_leave_types, "Leave type with zero remaining leaves should not be present in the search results.")
+        self.assertIn(type_unallocated_available, available_leave_types, "Leave types that don't require allocation should always be visible.")
