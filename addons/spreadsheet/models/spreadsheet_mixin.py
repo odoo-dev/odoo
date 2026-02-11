@@ -119,6 +119,25 @@ class SpreadsheetMixin(models.AbstractModel):
             for arg in args
         ]
 
+    def _get_spreadsheet_metadata(self, access_token=None):
+        date_filters = self.env['spreadsheet.date.filter'].web_search_read([], {
+            'name': {},
+            'category': {},
+            'from_pattern': {},
+            'to_pattern': {},
+            'offset_previous': {},
+            'offset_next': {},
+            'next_from_pattern': {},
+            'next_to_pattern': {},
+            'previous_from_pattern': {},
+            'previous_to_pattern': {},
+            'navigation_mode': {},
+            'sequence': {},
+        })
+        return {
+            'date_filters': date_filters['records'],
+        }
+
     def _empty_spreadsheet_data_bin(self):
         """Create an empty spreadsheet workbook."""
         return json.dumps(self._empty_spreadsheet_data()).encode()

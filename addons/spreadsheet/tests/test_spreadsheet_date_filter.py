@@ -64,13 +64,14 @@ class TestSpreadsheetDateFilter(TransactionCase):
             "previous_to_pattern": "today",
         })
         
-        # Today is DATE.
         # User TZ Brussels (UTC+1).
-        # Today -> 2020-02-11.
-        # Implies 2020-02-11 00:00 Brussels.
-        # UTC: 2020-02-10 23:00.
+        # We want 00:00 Brussels.
+        # This corresponds to 23:00 UTC previous day.
         
-        # Test "today" logic
-        filter.write({"from_pattern": "today"})
+        # Test "now" logic
+        filter.write({"from_pattern": "now =0H =0M =0S"})
+        # 2020-02-11 08:30 UTC -> 09:30 Brussels.
+        # =0H -> 00:00 Brussels.
+        # -> 23:00 UTC (2020-02-10).
         self.assertEqual(str(filter.from_preview), "2020-02-10 23:00:00")
 

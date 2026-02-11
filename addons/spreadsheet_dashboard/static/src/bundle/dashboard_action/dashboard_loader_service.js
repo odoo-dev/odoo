@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 import { createDefaultCurrency } from "@spreadsheet/currency/helpers";
 import { _t } from "@web/core/l10n/translation";
+import { registerDateFilters } from "@spreadsheet/global_filters/helpers";
 
 /**
  * @type {{
@@ -144,9 +145,9 @@ export class DashboardLoader {
 
         return favoriteDashboards.length
             ? [
-                  { id: "favorites", name: _t("FAVORITES"), dashboards: favoriteDashboards },
-                  ...dashboardGroups,
-              ]
+                { id: "favorites", name: _t("FAVORITES"), dashboards: favoriteDashboards },
+                ...dashboardGroups,
+            ]
             : dashboardGroups;
     }
 
@@ -216,12 +217,13 @@ export class DashboardLoader {
             const result = await this.env.services.http.get(
                 `/spreadsheet/dashboard/data/${dashboardId}`
             );
-            const { snapshot, revisions, is_sample, translation_namespace } = result;
+            const { snapshot, revisions, is_sample, translation_namespace, date_filters } = result;
             dashboard.translationNamespace = translation_namespace;
             const config = this.getModelConfig(result);
             dashboard.model = this._createSpreadsheetModel(snapshot, revisions, config);
             dashboard.status = Status.Loaded;
             dashboard.isSample = is_sample;
+            registerDateFilters(date_filters);
         } catch (error) {
             dashboard.error = error;
             dashboard.status = Status.Error;

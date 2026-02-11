@@ -9,6 +9,7 @@
     'license': 'LGPL-3',
     'data': [
         'security/ir.model.access.csv',
+        'data/spreadsheet_date_filter_data.xml',
         'views/public_readonly_spreadsheet_templates.xml',
         'views/spreadsheet_date_filter_views.xml',
     ],

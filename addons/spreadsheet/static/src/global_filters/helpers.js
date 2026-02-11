@@ -4,7 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { Domain } from "@web/core/domain";
 import { getOperatorLabel as getDomainOperatorLabel } from "@web/core/tree_editor/tree_editor_operator_editor";
-import {parseSmartDateInput} from "@web/core/l10n/dates";
+import { parseSmartDateInput } from "@web/core/l10n/dates";
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 
 import { Registry } from "@spreadsheet/o_spreadsheet/o_spreadsheet";
@@ -76,7 +76,7 @@ export function getDateGlobalFilterRegistryItem(value) {
 }
 
 export function getDateGlobalFilterValueFromDefault(value) {
-    if (!value || typeof value !== "string") {
+    if (!value || typeof value !== "string" || !globalFilterDateRegistry.contains(value)) {
         return undefined;
     }
     const now = DateTime.local();
@@ -405,6 +405,147 @@ export function checkFilterFieldMatching(fieldMatchings) {
     return CommandResult.Success;
 }
 
+export function registerDateFilters(dateFilters) {
+    globalFilterDateRegistry.content = {};
+    for (const dateFilter of dateFilters) {
+        globalFilterDateRegistry.add(dateFilter.id, {
+            sequence: dateFilter.sequence,
+            label: dateFilter.name,
+            getDateRange: (now, value, offset) => {
+                let from = parseSmartDateInput(dateFilter.from_pattern, now);
+                let to = parseSmartDateInput(dateFilter.to_pattern, now);
+                while (offset > 0) {
+                    from = parseSmartDateInput(dateFilter.offset_next, from);
+                    to = parseSmartDateInput(dateFilter.offset_next, to);
+                    offset--;
+                }
+                while (offset < 0) {
+                    from = parseSmartDateInput(dateFilter.offset_previous, from);
+                    to = parseSmartDateInput(dateFilter.offset_previous, to);
+                    offset++;
+                }
+                return { from, to };
+            },
+            getNextDateFilterValue(value) {
+                const now = DateTime.local();
+                if (dateFilter.navigation_mode === "relative") {
+                    const { from, to } = this.getDateRange(now, value, + 1);
+                    return { type: "range", from: from.toISODate(), to: to.toISODate() };
+                }
+                const handler = globalFilterDateRegistry.get(dateFilter.navigation_mode)
+                const currentPeriod = handler.getCurrentFixedPeriod(now);
+                return handler.getNextDateFilterValue(currentPeriod)
+            },
+            getPreviousDateFilterValue(value) {
+                const now = DateTime.local();
+                if (dateFilter.navigation_mode === "relative") {
+                    const { from, to } = this.getDateRange(now, value, - 1);
+                    return { type: "range", from: from.toISODate(), to: to.toISODate() };
+                }
+                const handler = globalFilterDateRegistry.get(dateFilter.navigation_mode)
+                const currentPeriod = handler.getCurrentFixedPeriod(now);
+                return handler.getPreviousDateFilterValue(currentPeriod)
+            },
+            isValueValid: (value) => true,
+            getValueString: (value) => dateFilter.name,
+            isFixedPeriod: false,
+            category: dateFilter.category,
+        });
+    }
+    globalFilterDateRegistry.add("month", monthHandler);
+    globalFilterDateRegistry.add("quarter", quarterHandler);
+    globalFilterDateRegistry.add("year", yearHandler);
+    globalFilterDateRegistry.add("range", rangeHandler);
+}
+
+const monthHandler = {
+    sequence: 90,
+    label: _t("Month"),
+    getDateRange: (now, value, offset) => getFixedPeriodFromTo(now, offset, value),
+    getNextDateFilterValue: (value) => getNextFixedDateFilterValue(value),
+    getPreviousDateFilterValue: (value) => getPreviousFixedDateFilterValue(value),
+    isValueValid: (value) =>
+        typeof value.year === "number" &&
+        typeof value.month === "number" &&
+        value.month >= 1 &&
+        value.month <= 12,
+    getValueString: (value) =>
+        DateTime.local().set({ year: value.year, month: value.month }).toFormat("LLLL yyyy"),
+    isFixedPeriod: true,
+    getCurrentFixedPeriod: (now) => ({ type: "month", year: now.year, month: now.month }),
+    category: "month",
+}
+
+const quarterHandler = {
+    sequence: 110,
+    label: _t("Quarter"),
+    getDateRange: (now, value, offset) => getFixedPeriodFromTo(now, offset, value),
+    getNextDateFilterValue: (value) => getNextFixedDateFilterValue(value),
+    getPreviousDateFilterValue: (value) => getPreviousFixedDateFilterValue(value),
+    isValueValid: (value) =>
+        typeof value.year === "number" &&
+        typeof value.quarter === "number" &&
+        value.quarter >= 1 &&
+        value.quarter <= 4,
+    getValueString: (value) =>
+        _t("Q%(quarter)s %(year)s", { quarter: value.quarter, year: value.year }),
+    isFixedPeriod: true,
+    getCurrentFixedPeriod: (now) => ({
+        type: "quarter",
+        year: now.year,
+        quarter: Math.floor((now.month - 1) / 3) + 1,
+    }),
+    category: "month",
+}
+
+const yearHandler = {
+    sequence: 150,
+    label: _t("Year"),
+    getDateRange: (now, value, offset) => getFixedPeriodFromTo(now, offset, value),
+    getNextDateFilterValue: (value) => getNextFixedDateFilterValue(value),
+    getPreviousDateFilterValue: (value) => getPreviousFixedDateFilterValue(value),
+    isValueValid: (value) => typeof value.year === "number",
+    getValueString: (value) => String(value.year),
+    isFixedPeriod: true,
+    getCurrentFixedPeriod: (now) => ({ type: "year", year: now.year }),
+    category: "year",
+}
+
+const rangeHandler = {
+    sequence: 160,
+    label: _t("Custom Range"),
+    getDateRange: (now, value, offset) => ({
+        from: value.from && DateTime.fromISO(value.from).startOf("day"),
+        to: value.to && DateTime.fromISO(value.to).endOf("day"),
+    }),
+    getNextDateFilterValue: (value) => getNextRangeDateFilterValue(value),
+    getPreviousDateFilterValue: (value) => getPreviousRangeDateFilterValue(value),
+    isValueValid: (value) =>
+        (value.from === undefined || typeof value.from === "string") &&
+        (value.to === undefined || typeof value.to === "string"),
+    getValueString: (value) => {
+        if (value.from && value.to) {
+            const interval = Interval.fromDateTimes(
+                DateTime.fromISO(value.from).startOf("day"),
+                DateTime.fromISO(value.to).endOf("day")
+            );
+            return interval.toLocaleString(DateTime.DATE_FULL);
+        } else if (value.from) {
+            return _t("Since %(from)s", {
+                from: DateTime.fromISO(value.from).toLocaleString(DateTime.DATE_FULL),
+            });
+        } else if (value.to) {
+            return _t("Until %(to)s", {
+                to: DateTime.fromISO(value.to).toLocaleString(DateTime.DATE_FULL),
+            });
+        }
+        return _t("All time");
+    },
+    isFixedPeriod: true,
+    getCurrentFixedPeriod: () => ({ from: "", to: "", type: "range" }),
+    category: "misc",
+}
+
 globalFilterDateRegistry
     .add("today", {
         sequence: 10,
@@ -490,23 +631,7 @@ globalFilterDateRegistry
         getDefaultValue: (now) => ({ type: "month", year: now.year, month: now.month }),
         category: "month",
     })
-    .add("month", {
-        sequence: 90,
-        label: _t("Month"),
-        getDateRange: (now, value, offset) => getFixedPeriodFromTo(now, offset, value),
-        getNextDateFilterValue: (value) => getNextFixedDateFilterValue(value),
-        getPreviousDateFilterValue: (value) => getPreviousFixedDateFilterValue(value),
-        isValueValid: (value) =>
-            typeof value.year === "number" &&
-            typeof value.month === "number" &&
-            value.month >= 1 &&
-            value.month <= 12,
-        getValueString: (value) =>
-            DateTime.local().set({ year: value.year, month: value.month }).toFormat("LLLL yyyy"),
-        isFixedPeriod: true,
-        getCurrentFixedPeriod: (now) => ({ type: "month", year: now.year, month: now.month }),
-        category: "month",
-    })
+    // .add("month", )
     .add("this_quarter", {
         sequence: 100,
         label: _t("Current Quarter"),
@@ -518,27 +643,7 @@ globalFilterDateRegistry
         }),
         category: "month",
     })
-    .add("quarter", {
-        sequence: 110,
-        label: _t("Quarter"),
-        getDateRange: (now, value, offset) => getFixedPeriodFromTo(now, offset, value),
-        getNextDateFilterValue: (value) => getNextFixedDateFilterValue(value),
-        getPreviousDateFilterValue: (value) => getPreviousFixedDateFilterValue(value),
-        isValueValid: (value) =>
-            typeof value.year === "number" &&
-            typeof value.quarter === "number" &&
-            value.quarter >= 1 &&
-            value.quarter <= 4,
-        getValueString: (value) =>
-            _t("Q%(quarter)s %(year)s", { quarter: value.quarter, year: value.year }),
-        isFixedPeriod: true,
-        getCurrentFixedPeriod: (now) => ({
-            type: "quarter",
-            year: now.year,
-            quarter: Math.floor((now.month - 1) / 3) + 1,
-        }),
-        category: "month",
-    })
+    // .add("quarter", )
     .add("year_to_date", {
         sequence: 120,
         label: _t("Year to Date"),
@@ -568,52 +673,8 @@ globalFilterDateRegistry
         getDefaultValue: (now) => ({ type: "year", year: now.year }),
         category: "year",
     })
-    .add("year", {
-        sequence: 150,
-        label: _t("Year"),
-        getDateRange: (now, value, offset) => getFixedPeriodFromTo(now, offset, value),
-        getNextDateFilterValue: (value) => getNextFixedDateFilterValue(value),
-        getPreviousDateFilterValue: (value) => getPreviousFixedDateFilterValue(value),
-        isValueValid: (value) => typeof value.year === "number",
-        getValueString: (value) => String(value.year),
-        isFixedPeriod: true,
-        getCurrentFixedPeriod: (now) => ({ type: "year", year: now.year }),
-        category: "year",
-    })
-    .add("range", {
-        sequence: 160,
-        label: _t("Custom Range"),
-        getDateRange: (now, value, offset) => ({
-            from: value.from && DateTime.fromISO(value.from).startOf("day"),
-            to: value.to && DateTime.fromISO(value.to).endOf("day"),
-        }),
-        getNextDateFilterValue: (value) => getNextRangeDateFilterValue(value),
-        getPreviousDateFilterValue: (value) => getPreviousRangeDateFilterValue(value),
-        isValueValid: (value) =>
-            (value.from === undefined || typeof value.from === "string") &&
-            (value.to === undefined || typeof value.to === "string"),
-        getValueString: (value) => {
-            if (value.from && value.to) {
-                const interval = Interval.fromDateTimes(
-                    DateTime.fromISO(value.from).startOf("day"),
-                    DateTime.fromISO(value.to).endOf("day")
-                );
-                return interval.toLocaleString(DateTime.DATE_FULL);
-            } else if (value.from) {
-                return _t("Since %(from)s", {
-                    from: DateTime.fromISO(value.from).toLocaleString(DateTime.DATE_FULL),
-                });
-            } else if (value.to) {
-                return _t("Until %(to)s", {
-                    to: DateTime.fromISO(value.to).toLocaleString(DateTime.DATE_FULL),
-                });
-            }
-            return _t("All time");
-        },
-        isFixedPeriod: true,
-        getCurrentFixedPeriod: () => ({ from: "", to: "", type: "range" }),
-        category: "misc",
-    });
+    .add("year",)
+    .add("range",);
 
 /**
  * The from-to date range from a date filter value.
@@ -791,12 +852,19 @@ function getRelativeDateFromTo(now, offset, period) {
         default:
             return undefined;
     }
-    const dslRule = getNextValueForRelativeDatePeriodDSL(period);
-    const nextTo = applyRuleRepeatedly(dslRule, offset,now.endOf("day")) ;
-    if (offset  > 0) {
-        console.log("Computed from-to using DSL rule", { period, dslRule, from: nextTo.from.toISO(), to: nextTo.to.toISO() });
-        console.log("Computed from-to using explicit logic", { period, from: from.toISO(), to: to.toISO() });
-    }
+    // const dslRule = getNextValueForRelativeDatePeriodDSL(period);
+    // const nextTo = applyRuleRepeatedly(dslRule, offset, now.endOf("day")) ;
+    console.log(from.toISO());
+    console.log(to.toISO());
+    console.log(parseSmartDateInput("now -1y =1m =1d =0H =0M =0S", from).toISO());
+    console.log(parseSmartDateInput("now -1y =23H =59M =59S", to).toISO());
+    console.log(parseSmartDateInput("now -1y =1m =1d =0H =0M =0S", parseSmartDateInput("now -1y =1m =1d =0H =0M =0S", from)).toISO());
+    console.log(parseSmartDateInput("now -1y =23H =59M =59S", parseSmartDateInput("now -1y =23H =59M =59S", to)).toISO());
+    // const nextFrom = now.endOf("day")
+    // if (offset  > 0) {
+    //     console.log("Computed from-to using DSL rule", { period, dslRule, from: nextTo.from.toISO(), to: nextTo.to.toISO() });
+    //     console.log("Computed from-to using explicit logic", { period, from: from.toISO(), to: to.toISO() });
+    // }
     return { from, to };
 }
 

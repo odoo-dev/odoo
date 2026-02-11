@@ -16,32 +16,76 @@
                         <group>
                             <field name="category"/>
                             <field name="sequence"/>
+                            <field name="navigation_mode" />
                             <field name="active" widget="boolean_toggle"/>
                         </group>
-                        <group string="Patterns">
-                            <field name="from_pattern"/>
-                            <field name="to_pattern"/>
-                            <field
-                                name="from_preview"
-                                widget="daterange"
-                                options="{'end_date_field': 'to_preview', 'always_range': 1}"/>
-                            <field name="to_preview" invisible="1"/> <!-- for date range widget -->
-                            <field name="next_from_pattern"/>
-                            <field name="next_to_pattern"/>
-                            <field
-                                name="next_from_preview"
-                                widget="daterange"
-                                options="{'end_date_field': 'next_to_preview', 'always_range': 1}"/>
-                            <field name="next_to_preview" invisible="1"/> <!-- for date range widget -->
-                            <field name="previous_from_pattern"/>
-                            <field name="previous_to_pattern"/>
-                            <field
-                                name="previous_from_preview"
-                                widget="daterange"
-                                options="{'end_date_field': 'previous_to_preview', 'always_range': 1}"/>
-                            <field name="previous_to_preview" invisible="1"/> <!-- for date range widget -->
+                    </group>
+                    <group>
+                        <group string="Main period">
+                            <label for="from_pattern" string="Patterns"/>
+                            <div class="o_row">
+                                <field name="from_pattern" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="to_pattern" nolabel="1"/>
+                            </div>
+                            <label for="from_preview" string="Preview"/>
+                            <div class="o_row">
+                                <field name="from_preview" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="to_preview" nolabel="1"/>
+                            </div>
                         </group>
                     </group>
+                    <group>
+                        <group string="Previous comparison period">
+                            <field name="offset_previous" />
+                            <label for="offset_previous_from_preview" string="Preview"/>
+                            <div class="o_row">
+                                <field name="offset_previous_from_preview" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="offset_previous_to_preview" nolabel="1"/>
+                            </div>
+                        </group>
+                        <group string="Next comparison period">
+                            <field name="offset_next" />
+                            <label for="offset_next_from_preview" string="Preview"/>
+                            <div class="o_row">
+                                <field name="offset_next_from_preview" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="offset_next_to_preview" nolabel="1"/>
+                            </div>
+                        </group>
+                    </group>
+                    <!-- <group>
+                        <group string="Previous period">
+                            <label for="previous_from_pattern" string="Patterns"/>
+                            <div class="o_row">
+                                <field name="previous_from_pattern" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="previous_to_pattern" nolabel="1"/>
+                            </div>
+                            <label for="previous_from_preview" string="Preview"/>
+                            <div class="o_row">
+                                <field name="previous_from_preview" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="previous_to_preview" nolabel="1"/>
+                            </div>
+                        </group>
+                        <group string="Next period">
+                            <label for="next_from_pattern" string="Patterns"/>
+                            <div class="o_row">
+                                <field name="next_from_pattern" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="next_to_pattern" nolabel="1"/>
+                            </div>
+                            <label for="next_from_preview" string="Preview"/>
+                            <div class="o_row">
+                                <field name="next_from_preview" nolabel="1"/>
+                                <i class="fa fa-long-arrow-right mx-2"/>
+                                <field name="next_to_preview" nolabel="1"/>
+                            </div>
+                        </group>
+                    </group> -->
                 </sheet>
             </form>
         </field>

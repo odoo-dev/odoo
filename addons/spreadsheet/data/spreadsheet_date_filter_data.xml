@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="spreadsheet_date_filter_today" model="spreadsheet.date.filter">
+            <field name="name">Today</field>
+            <field name="category">day</field>
+            <field name="sequence">10</field>
+            <field name="from_pattern">now =0H =0M =0S</field>
+            <field name="to_pattern">now =23H =59M =59S</field>
+            <field name="offset_next">+1d</field>
+            <field name="offset_previous">-1d</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_yesterday" model="spreadsheet.date.filter">
+            <field name="name">Yesterday</field>
+            <field name="category">day</field>
+            <field name="sequence">20</field>
+            <field name="from_pattern">now -1d =0H =0M =0S</field>
+            <field name="to_pattern">now -1d =23H =59M =59S</field>
+            <field name="offset_next">+1d</field>
+            <field name="offset_previous">-1d</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_last_7_days" model="spreadsheet.date.filter">
+            <field name="name">Last 7 Days</field>
+            <field name="category">day</field>
+            <field name="sequence">30</field>
+            <field name="from_pattern">now -7d =0H =0M =0S</field>
+            <field name="to_pattern">now -1d =23H =59M =59S</field>
+            <field name="offset_next">+7d</field>
+            <field name="offset_previous">-7d</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_last_30_days" model="spreadsheet.date.filter">
+            <field name="name">Last 30 Days</field>
+            <field name="category">day</field>
+            <field name="sequence">40</field>
+            <field name="from_pattern">now -29d =0H =0M =0S</field>
+            <field name="to_pattern">now =23H =59M =59S</field>
+            <field name="offset_next">+30d</field>
+            <field name="offset_previous">-30d</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_last_90_days" model="spreadsheet.date.filter">
+            <field name="name">Last 90 Days</field>
+            <field name="category">day</field>
+            <field name="sequence">50</field>
+            <field name="from_pattern">now -89d =0H =0M =0S</field>
+            <field name="to_pattern">now =23H =59M =59S</field>
+            <field name="offset_next">+90d</field>
+            <field name="offset_previous">-90d</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_month_to_date" model="spreadsheet.date.filter">
+            <field name="name">Month to Date</field>
+            <field name="category">month</field>
+            <field name="sequence">60</field>
+            <field name="from_pattern">now =1d =0H =0M =0S</field>
+            <field name="to_pattern">now =23H =59M =59S</field>
+            <field name="navigation_mode">month</field>
+            <field name="offset_next">+1m</field>
+            <field name="offset_previous">-1m</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_last_month" model="spreadsheet.date.filter">
+            <field name="name">Last Month</field>
+            <field name="category">month</field>
+            <field name="sequence">70</field>
+            <field name="from_pattern">now -1m =1d =0H =0M =0S</field>
+            <field name="to_pattern">now =1d =0H =0M =0S -1S</field>
+            <field name="offset_next">+1m</field>
+            <field name="offset_previous">-1m</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_year_to_date" model="spreadsheet.date.filter">
+            <field name="name">Year to Date</field>
+            <field name="category">year</field>
+            <field name="sequence">120</field>
+            <field name="from_pattern">now =1m =1d =0H =0M =0S</field>
+            <field name="to_pattern">now =23H =59M =59S</field>
+            <field name="navigation_mode">year</field>
+            <field name="offset_next">+1y</field>
+            <field name="offset_previous">-1y</field>
+        </record>
+
+        <record id="spreadsheet_date_filter_last_12_months" model="spreadsheet.date.filter">
+            <field name="name">Last 12 Months</field>
+            <field name="category">year</field>
+            <field name="sequence">130</field>
+            <field name="from_pattern">now -12m =1d =0H =0M =0S</field>
+            <field name="to_pattern">now =1d =0H =0M =0S -1S</field>
+            <field name="offset_next">+12m</field>
+            <field name="offset_previous">-12m</field>
+        </record>
+    </data>
+</odoo>
