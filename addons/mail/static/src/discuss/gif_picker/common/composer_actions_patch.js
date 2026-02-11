@@ -15,7 +15,7 @@ registerComposerAction("add-gif", {
         !composer.message,
     isPicker: true,
     pickerName: _t("GIF"),
-    icon: "oi oi-gif-picker",
+    icon: "gif_box",
     name: _t("Send GIF"),
     onSelected({ owner }, ev) {
         pickerOnClick(owner, this, ev);

@@ -8,7 +8,7 @@ registerComposerAction("voice-start", {
         owner.voiceRecorder &&
         !owner.voiceRecorder?.recording &&
         !composer.voiceAttachment,
-    icon: "fa fa-microphone",
+    icon: "mic",
     name: _t("Voice Message"),
     onSelected: ({ owner }) => owner.voiceRecorder.onClick(),
     sequence: 10,
@@ -16,7 +16,8 @@ registerComposerAction("voice-start", {
 registerComposerAction("voice-stop", {
     condition: ({ composer, owner }) =>
         composer.targetThread?.channel && owner.voiceRecorder?.recording,
-    icon: "fa fa-circle text-danger o-mail-VoiceRecorder-dot",
+    icon: "circle",
+    iconClass: "oi-filled text-danger o-mail-VoiceRecorder-dot",
     name: _t("Stop Recording"),
     onSelected: ({ owner }) => owner.voiceRecorder.onClick(),
     sequence: 10,
