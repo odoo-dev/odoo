@@ -1,5 +1,5 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+import zoneinfo
+from datetime import date, datetime, time
 from odoo import api, fields, models
 from odoo.tools import date_utils
 
@@ -21,7 +21,6 @@ class SpreadsheetDateFilter(models.Model):
         ("week", "Week"),
         ("month", "Month"),
         ("year", "Year"),
-        ("other", "Other"),
         ("other", "Other"),
     ], required=True)
 
@@ -50,6 +49,7 @@ class SpreadsheetDateFilter(models.Model):
         if not pattern:
             return False
         try:
-            return date_utils.parse_date(pattern, self.env)
+            value = date_utils.parse_date(pattern, self.env)
+            return value
         except ValueError:
             return False

@@ -20,17 +20,26 @@
                         </group>
                         <group string="Patterns">
                             <field name="from_pattern"/>
-                            <field name="from_preview" readonly="1" force_save="1"/>
                             <field name="to_pattern"/>
-                            <field name="to_preview" readonly="1" force_save="1"/>
+                            <field
+                                name="from_preview"
+                                widget="daterange"
+                                options="{'end_date_field': 'to_preview', 'always_range': 1}"/>
+                            <field name="to_preview" invisible="1"/> <!-- for date range widget -->
                             <field name="next_from_pattern"/>
-                            <field name="next_from_preview" readonly="1" force_save="1"/>
                             <field name="next_to_pattern"/>
-                            <field name="next_to_preview" readonly="1" force_save="1"/>
+                            <field
+                                name="next_from_preview"
+                                widget="daterange"
+                                options="{'end_date_field': 'next_to_preview', 'always_range': 1}"/>
+                            <field name="next_to_preview" invisible="1"/> <!-- for date range widget -->
                             <field name="previous_from_pattern"/>
-                            <field name="previous_from_preview" readonly="1" force_save="1"/>
                             <field name="previous_to_pattern"/>
-                            <field name="previous_to_preview" readonly="1" force_save="1"/>
+                            <field
+                                name="previous_from_preview"
+                                widget="daterange"
+                                options="{'end_date_field': 'previous_to_preview', 'always_range': 1}"/>
+                            <field name="previous_to_preview" invisible="1"/> <!-- for date range widget -->
                         </group>
                     </group>
                 </sheet>
