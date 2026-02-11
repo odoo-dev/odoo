@@ -40,6 +40,10 @@
 .o_spreadsheet_dashboard_action {
     background-color: white;
 
+    .o_mobile_dashboard {
+        overflow: hidden !important;
+    }
+
     .o_renderer {
         height: 100%;
 
