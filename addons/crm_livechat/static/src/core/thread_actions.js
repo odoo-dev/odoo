@@ -15,7 +15,7 @@ registerThreadAction("create-lead", {
         placeholderText: _t("e.g. Product pricing"),
         thread,
         title: _t("Create Lead"),
-        icon: "fa fa-handshake-o",
+        icon: "handshake",
     }),
     actionPanelOpen({ owner, thread }) {
         this.popover?.open(
@@ -25,7 +25,7 @@ registerThreadAction("create-lead", {
     },
     actionPanelOuterClass: "bg-100",
     condition: false, // managed by ThreadAction patch
-    icon: "fa fa-handshake-o",
+    icon: "handshake",
     name: _t("Create Lead"),
     sequence: 10,
     sequenceGroup: 25,

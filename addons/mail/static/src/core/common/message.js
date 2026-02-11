@@ -383,7 +383,7 @@ export class Message extends Component {
                 action: () => this.message.setDone(),
                 bgColor: "bg-success",
                 icon: "check_circle",
-                icon_class: "oi-filled",
+                iconClass: "oi-filled",
             };
         }
         if (

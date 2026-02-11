@@ -12,7 +12,7 @@ registerMessageAction("set-new-message-separator", {
         thread.eq(message.thread) &&
         !message.hasNewMessageSeparator &&
         message.persistent,
-    icon: "fa fa-eye-slash",
+    icon: "visibility_off",
     name: _t("Mark as Unread"),
     onSelected: ({ message: msg }) => {
         const message = toRaw(msg);

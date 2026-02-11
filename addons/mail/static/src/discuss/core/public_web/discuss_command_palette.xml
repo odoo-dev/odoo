@@ -15,7 +15,7 @@
                 <t t-slot="name" />
             </span>
             <span t-if="props.persona and props.persona.email" class="text-truncate text-muted smaller opacity-75" t-out="'- ' + props.persona.email" t-att-title="props.persona.email"/>
-            <i t-if="props.action?.icon" class="o-mail-DiscussCommand-actionIcon fa fa-fw opacity-75 o-action" t-attf-class="{{ props.action.icon }}"/>
+            <i t-if="props.action?.icon" class="o-mail-DiscussCommand-actionIcon oi oi-fw opacity-75 o-action" t-attf-data-icon="{{ props.action.icon }}"/>
             <span t-if="props.action?.searchValueSuffix" class="o-action fw-bold" t-esc="props.searchValue"/>
             <span class="flex-grow-1"/>
             <div t-if="props.counter > 0">

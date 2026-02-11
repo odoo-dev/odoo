@@ -19,7 +19,7 @@
 
     <t t-name="mail.QuickReactionMenu.toggler">
         <button class="btn border-0 o-p-0_5 o-inline o-mail-QuickReactionMenu-toggler" t-att-class="attClass" t-att-title="props.action.name" t-att-aria-label="props.action.name" t-on-click="onClick">
-            <i t-att-class="props.action.icon"/>
+            <i class="oi" t-att-data-icon="props.action.icon"/>
         </button>
     </t>
 </templates>

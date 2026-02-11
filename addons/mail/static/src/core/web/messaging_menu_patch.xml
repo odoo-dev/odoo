@@ -43,7 +43,7 @@
                     isActive="state.activeIndex === itemIndex"
                     iconSrc="installationRequest.iconSrc"
                     onClick="installationRequest.onClick"
-                    onSwipeRight="hasTouch() ? { action: () => this.pwa.decline(), icon: 'fa-times-circle', bgColor: 'bg-warning' } : undefined"
+                    onSwipeRight="hasTouch() ? { action: () => this.pwa.decline(), icon: 'check_circle', iconClass: 'oi-filled', bgColor: 'bg-warning' } : undefined"
                 >
                     <t t-set-slot="body" t-esc="installationRequest.body"/>
                     <t t-set-slot="name"><t  t-esc="installationRequest.displayName"/></t>
@@ -96,7 +96,7 @@
                         iconSrc="failure.iconSrc"
                         hasMarkAsReadButton="true"
                         onClick="(isMarkAsRead) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure)"
-                        onSwipeRight="hasTouch() ? { action: () => this.cancelNotifications(failure), icon: 'fa-times-circle', bgColor: 'bg-warning' } : undefined"
+                        onSwipeRight="hasTouch() ? { action: () => this.cancelNotifications(failure), icon: 'check_circle', iconClass: 'oi-filled', bgColor: 'bg-warning' } : undefined"
                     >
                         <t t-set-slot="body" t-esc="failure.body"/>
                         <t t-set-slot="name"><t t-esc="getFailureNotificationName(failure)"/></t>

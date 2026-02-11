@@ -29,7 +29,7 @@ export function messageActionOpenFullComposer(title, context, component) {
 
 registerMessageAction("reply-all", {
     condition: ({ message, thread }) => message.canReplyAll(thread),
-    icon: "fa fa-reply",
+    icon: "reply",
     name: _t("Reply All"),
     onSelected: async ({ message, owner, thread }) => {
         const recipients = await rpc("/mail/thread/recipients", {
@@ -63,7 +63,7 @@ registerMessageAction("reply-all", {
 });
 registerMessageAction("forward", {
     condition: ({ message, thread }) => message.canForward(thread),
-    icon: "fa fa-share",
+    icon: "share",
     name: _t("Forward"),
     onSelected: async ({ message, owner, store }) => {
         const emailFrom = message.author_id?.email || message.email_from;
@@ -102,7 +102,7 @@ registerMessageAction("forward", {
 registerMessageAction("pin", {
     condition: ({ message, store, thread }) =>
         !message.pinned_at && store.self_user && message.thread && thread?.model !== "mail.box",
-    icon: "fa fa-thumb-tack",
+    icon: "push_pin",
     name: _t("Pin"),
     onSelected: ({ message }) => (message.channel_id || message.thread).messagePin(message),
     sequence: 110,
@@ -111,7 +111,7 @@ registerMessageAction("pin", {
 registerMessageAction("unpin", {
     condition: ({ message, store, thread }) =>
         message.pinned_at && store.self_user && message.thread && thread?.model !== "mail.box",
-    icon: "fa fa-thumb-tack",
+    icon: "push_pin",
     name: _t("Unpin"),
     onSelected: ({ message }) => (message.channel_id || message.thread).messageUnpin(message),
     sequence: 110,

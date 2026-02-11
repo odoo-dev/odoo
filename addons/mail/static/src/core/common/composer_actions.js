@@ -67,7 +67,7 @@ registerComposerAction("send-message", {
     condition: ({ composer, owner, store }) =>
         (store.env.isSmall && composer.message) || (!owner.env.inChatter && !composer.message),
     disabledCondition: ({ owner }) => owner.isSendButtonDisabled,
-    icon: "fa fa-paper-plane-o",
+    icon: "send",
     isActive: ({ owner }) => owner.sendMessageState.active,
     name: ({ composer, owner }) =>
         composer.message
@@ -91,7 +91,7 @@ registerComposerAction("send-message", {
 });
 registerComposerAction("add-emoji", {
     disabledCondition: ({ owner }) => owner.areAllActionsDisabled,
-    icon: "fa fa-smile-o",
+    icon: "sentiment_satisfied",
     isPicker: true,
     pickerName: _t("Emoji"),
     name: _t("Add Emojis"),
@@ -116,7 +116,7 @@ registerComposerAction("add-emoji", {
 registerComposerAction("upload-files", {
     disabledCondition: ({ owner }) => owner.areAllActionsDisabled,
     condition: ({ owner }) => owner.allowUpload,
-    icon: "fa fa-paperclip",
+    icon: "attach_file",
     name: _t("Attach Files"),
     onSelected: ({ composer: comp, owner }, ev) => {
         owner.fileUploaderRef.el?.click();
@@ -135,7 +135,7 @@ registerComposerAction("open-full-composer", {
         composer.targetThread.model !== "discuss.channel" &&
         !owner.env.inFrontendPortalChatter,
     hotkey: "shift+c",
-    icon: "fa fa-expand",
+    icon: "expand_content",
     name: _t("Open Full Composer"),
     onSelected: ({ owner }) => owner.onClickFullComposer(),
     sequence: 30,
@@ -147,14 +147,14 @@ registerComposerAction("add-canned-response", {
         store.env.services["mail.suggestion"]
             .getSupportedDelimiters(composer.targetThread)
             .find(([delimiter]) => delimiter === "::"),
-    icon: "fa fa-file-text-o",
+    icon: "article",
     name: _t("Insert a Canned response"),
     onSelected: ({ owner }, ev) => owner.onClickInsertCannedResponse(ev),
     sequence: 5,
 });
 registerComposerAction("start-poll", {
     name: _t("Start a poll"),
-    icon: "oi oi-view-cohort",
+    icon: "oi_view-cohort",
     condition: ({ composer, store }) => {
         if (!store.self_user) {
             return false;

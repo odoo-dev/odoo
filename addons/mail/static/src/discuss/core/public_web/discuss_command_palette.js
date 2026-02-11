@@ -279,7 +279,7 @@ export class DiscussCommandPalette {
                 },
                 name: _t("Create Channel"),
                 className: "o-mail-DiscussCommand-createChannel d-flex",
-                props: { action: { icon: "fa fa-fw fa-hashtag", searchValueSuffix: true } },
+                props: { action: { icon: "tag", searchValueSuffix: true } },
             };
         }
         if (channelOrPersona === NEW_GROUP_CHAT) {
@@ -291,7 +291,7 @@ export class DiscussCommandPalette {
                 },
                 name: _t("Create Chat"),
                 className: "d-flex",
-                props: { action: { icon: "oi fa-fw oi-users" } },
+                props: { action: { icon: "group" } },
             };
         }
         throw new Error(`Unsupported use of makeDiscussCommand("${channelOrPersona}")`);

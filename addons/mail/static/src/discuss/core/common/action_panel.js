@@ -15,6 +15,7 @@ export class ActionPanel extends Component {
     static props = [
         "contentRef?",
         "icon?",
+        "icon_class?",
         "title?",
         "resizable?",
         "slots?",
