@@ -211,7 +211,7 @@ export class SearchBar extends Interaction {
         if (!this.limit) {
             return;
         }
-        if (this.searchType === "all" && !this.inputEl.value.trim().length) {
+        if (!this.inputEl.value.trim().length) {
             this.render();
         } else {
             this.showLoadingSpinner();
