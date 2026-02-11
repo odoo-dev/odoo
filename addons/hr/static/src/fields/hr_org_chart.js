@@ -82,7 +82,7 @@ export class HrOrgChart extends Component {
                     new_parent_id: newParentId,
                     new_job_title: newJobTitle,
                     context: {
-                        ...user.context,
+                        ...user.cont ext,
                     max_level: this.max_level,
                 },
             });
