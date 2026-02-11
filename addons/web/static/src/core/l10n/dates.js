@@ -277,12 +277,11 @@ function isValidDate(date) {
  * @param {string} value
  * @returns {NullableDateTime} Luxon datetime object (in the user's local timezone)
  */
-function parseSmartDateInput(value) {
+export function parseSmartDateInput(value, now = DateTime.local().startOf("second")) {
     const terms = value.split(/\s+/);
     if (!terms.length) {
         return false;
     }
-    var now = DateTime.local().startOf("second");
     if (terms[0] == "today") {
         terms.shift();
         now = now.startOf("day");

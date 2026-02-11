@@ -4,7 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { Domain } from "@web/core/domain";
 import { getOperatorLabel as getDomainOperatorLabel } from "@web/core/tree_editor/tree_editor_operator_editor";
-
+import {parseSmartDateInput} from "@web/core/l10n/dates";
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 
 import { Registry } from "@spreadsheet/o_spreadsheet/o_spreadsheet";
@@ -666,6 +666,69 @@ function getFixedPeriodFromTo(now, offset, value) {
     };
 }
 
+function applyRuleRepeatedly(rule, offset, referenceDate = luxon.DateTime.local().startOf("day")) {
+    let from = referenceDate;
+    let to = referenceDate;
+    for (let i = 0; i < Math.abs(offset); i++) {
+        // Use parseSmartDateInput or equivalent to apply the rule to 'from'
+        from = parseSmartDateInput(rule, from);
+        to = from;
+    }
+    return { from, to };
+}
+
+function getNextValueForRelativeDatePeriodDSL(period) {
+    switch (period) {
+        case "today":
+            return "+1d";
+        case "yesterday":
+            return "+1d"; // Move to (yesterday + 1d = today)
+        case "last_7_days":
+            return "+7d";
+        case "last_30_days":
+            return "+30d";
+        case "last_90_days":
+            return "+90d";
+        case "last_12_months":
+            return "+12m";
+        case "last_month":
+            return "+1m";
+        case "month_to_date":
+            return "+1m";
+        case "year_to_date":
+            return "+1y";
+        default:
+            return undefined;
+    }
+}
+
+
+function getPreviousValueForRelativeDatePeriodDSL(period) {
+    switch (period) {
+        case "today":
+            return "-1d";
+        case "yesterday":
+            return "-1d"; // Move to two days ago (yesterday - 1d)
+        case "last_7_days":
+            return "-7d";
+        case "last_30_days":
+            return "-30d";
+        case "last_90_days":
+            return "-90d";
+        case "last_12_months":
+            return "-12m";
+        case "last_month":
+            return "-1m";
+        case "month_to_date":
+            return "-1m";
+        case "year_to_date":
+            return "-1y";
+        default:
+            return undefined;
+    }
+}
+
+
 function getRelativeDateFromTo(now, offset, period) {
     const startOfNextDay = now.plus({ days: 1 }).startOf("day");
     let to = now.endOf("day");
@@ -727,6 +790,12 @@ function getRelativeDateFromTo(now, offset, period) {
         }
         default:
             return undefined;
+    }
+    const dslRule = getNextValueForRelativeDatePeriodDSL(period);
+    const nextTo = applyRuleRepeatedly(dslRule, offset,now.endOf("day")) ;
+    if (offset  > 0) {
+        console.log("Computed from-to using DSL rule", { period, dslRule, from: nextTo.from.toISO(), to: nextTo.to.toISO() });
+        console.log("Computed from-to using explicit logic", { period, from: from.toISO(), to: to.toISO() });
     }
     return { from, to };
 }
