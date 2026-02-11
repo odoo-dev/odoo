@@ -83,11 +83,11 @@ registerWebsitePreviewTour(
         },
         {
             content: "Type a search query into the searchbar input",
-            trigger: ":iframe #wrapwrap main .o_searchbar_form input.search-query",
+            trigger: ":iframe #o_search_modal_block .o_searchbar_form input.search-query",
             run: "edit a",
         },
         checkIfVisibleOnScreen(
-            ":iframe #wrapwrap main .o_searchbar_form.show .o_dropdown_menu.show"
+            ":iframe #o_search_modal_block .o_searchbar_form.show .o_dropdown_menu.show"
         ),
     ]
 );

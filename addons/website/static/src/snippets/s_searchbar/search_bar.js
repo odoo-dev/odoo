@@ -294,22 +294,24 @@ export class SearchBar extends Interaction {
             const forceModalTrigger = this.searchInputGroup.hasAttribute(
                 "data-force-modal-trigger"
             );
-            // [DTDA] maybe we can change this, when multiple custom inputs are
-            // added below search input, it will not be present in the modal and
-            // the search will be broken.
-            // we can introduce new data attribute which do not allow model
-            // attribute to set
-            const canBeModel = this.el.querySelectorAll("input").length <= 2;
-
             if (
-                (ui.isSmall() ||
-                    this.searchInputGroup.getBoundingClientRect().width < 280 ||
-                    forceModalTrigger) &&
-                canBeModel
+                ui.isSmall() ||
+                this.searchInputGroup.getBoundingClientRect().width < 280 ||
+                forceModalTrigger
             ) {
                 this.searchInputGroup.setAttribute("data-bs-toggle", "modal");
                 this.searchInputGroup.setAttribute("data-bs-target", modalId);
                 this.inputEl.classList.add("pe-none");
+
+                // Add hidden inputs to modal
+                const modelEl = document.querySelector(modalId + " form");
+                modelEl.querySelectorAll("input[type=hidden]").forEach((el) => el.remove());
+                const hiddenInputEls = this.el.querySelectorAll("input[type=hidden]");
+                hiddenInputEls.forEach((el) => {
+                    const clone = el.cloneNode(true);
+                    modelEl.appendChild(clone);
+                });
+
                 this.searchInputGroup.click();
             } else {
                 this.searchInputGroup.removeAttribute("data-bs-toggle");
