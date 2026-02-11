@@ -883,15 +883,16 @@ class ProductTemplate(models.Model):
             domains.append([('list_price', '<=', max_price)])
         if attribute_value_dict:
             domains.extend(self._get_attribute_value_domain(attribute_value_dict))
-        search_fields = ['name', 'default_code', 'variants_default_code', 'description_ecommerce', 'attribute_line_ids.value_ids.name']
+        search_fields = ['name', 'default_code', 'variants_default_code', 'description_ecommerce', 'attribute_line_ids.value_ids.name', 'product_tag_ids.name']
         fetch_fields = ['id', 'name', 'website_url', 'description_ecommerce']
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'website_url', 'type': 'text', 'truncate': False},
-            'search_item_metadata': {'name': 'list_price', 'type': 'html', 'display_currency': options['display_currency']},
+            'search_item_metadata': {'name': 'price', 'type': 'html', 'display_currency': options['display_currency']},
             'image_url': {'name': 'image_url', 'type': 'html'},
             'description': {'name': 'description_ecommerce', 'type': 'text', 'html': True, 'match': True},
-            'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
+            'tags': {'name': 'product_tag_ids', 'type': 'tags', 'match': True},
+            'body': {'name': 'tag_ids', 'type': 'tags', 'match': True},
         }
         return {
             'model': 'product.template',
@@ -910,30 +911,20 @@ class ProductTemplate(models.Model):
             combination_info = product._get_combination_info(only_template=True)
             values = product.mapped('attribute_line_ids.value_ids')
             data['tag_ids'] = values.read(['id', 'name'])
-            list_price = self._search_render_results_prices(
+            data['product_tag_ids'] = product.product_tag_ids.read(['name'])
+            price = self._search_render_results_prices(
                 mapping, combination_info
             )
-            if list_price:
-                data['list_price'] = list_price
+            if price:
+                data['price'] = price
             data['image_url'] = '/web/image/product.template/%s/image_128' % data['id']
         return results_data
 
     def _search_render_results_prices(self, mapping, combination_info):
         if combination_info.get('hide_price'):
-            return None, None
+            return None
 
         monetary_options = {'display_currency': mapping['search_item_metadata']['display_currency']}
-        list_price = None
-        if combination_info['has_discounted_price']:
-            list_price = self.env['ir.qweb.field.monetary'].value_to_html(
-                combination_info['list_price'], monetary_options
-            )
-        if combination_info.get('compare_list_price'):
-            list_price = self.env['ir.qweb.field.monetary'].value_to_html(
-                combination_info['compare_list_price'], monetary_options
-            )
-        if list_price:
-            return list_price
         price = self.env["ir.qweb.field.monetary"].value_to_html(
             combination_info["price"], monetary_options
         )

@@ -116,6 +116,7 @@ class TestAutoComplete(TransactionCase):
         cls.expectedParts = {
             'name': True,
             'website_url': True,
+            'description': True,
         }
         texts = [
             "This page only matches few",
@@ -283,9 +284,7 @@ class TestAutoComplete(TransactionCase):
         suggestions = self._autocomplete("P79354")
         self.assertEqual(1, suggestions['results_count'], "Test data contains one exact match")
         self.assertFalse(suggestions['fuzzy_search'], "Expects an exact match")
-        self.expectedParts['description'] = True
         suggestions = self._autocomplete("kangroo") # must contain a typo
-        del self.expectedParts['description']
         self.assertEqual(1, suggestions['results_count'], "Test data contains one fuzzy match")
         self.assertTrue(suggestions['fuzzy_search'], "Expects a fuzzy match")
 

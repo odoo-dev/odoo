@@ -109,7 +109,7 @@ export class SearchBar extends Interaction {
             order: this.order,
             limit: this.limit,
             max_nb_chars: Math.round(
-                Math.max(this.autocompleteMinWidth, parseInt(this.el.clientWidth) / 3) * 0.22
+                Math.max(this.autocompleteMinWidth, this.el.clientWidth / 3) * 0.22
             ),
             options: this.options,
         });
@@ -211,7 +211,9 @@ export class SearchBar extends Interaction {
         if (!this.limit) {
             return;
         }
-        if (!this.inputEl.value.trim().length) {
+        // If the input is empty, we render the initial state
+        const value = this.inputEl.value.trim();
+        if (!value.length) {
             this.render();
         } else {
             this.showLoadingSpinner();

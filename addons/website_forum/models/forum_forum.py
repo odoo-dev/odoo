@@ -346,5 +346,5 @@ class ForumForum(models.Model):
         for forum, data in zip(self, results_data):
             data['website_url'] = forum.website_url
             data['tag_ids'] = forum.tag_ids.read(['name'])
-            data['image_url'] = 'web/image/forum.forum/%s/image_128' % data['id']
+            data['image_url'] = '/web/image/forum.forum/%s/image_128' % data['id']
         return results_data

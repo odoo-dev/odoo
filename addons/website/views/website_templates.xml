@@ -3209,7 +3209,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
 </template>
 
 <template id="website.search_result_item">
-    <t t-foreach="bucket['data']" t-as="result">
+    <t t-foreach="results['data']" t-as="result">
         <li class="o_search_result_item rounded mx-n2">
             <a t-att-href="result['website_url']" class="o_search_result_link d-flex gap-2 p-2 text-decoration-none text-muted">
                 <t t-call="website.search_image_item_view"/>
@@ -3221,7 +3221,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
                             <t t-out="result.get('search_item_metadata')"/>
                         </span>
                     </div>
-                    <div class="o_search_result_description d-empty-none">
+                    <div class="o_search_result_description d-empty-none w-50">
                         <t t-if="result.get('tags')" t-out="result['tags']"/>
                         <p
                             t-elif="result.get('description')"
@@ -3284,7 +3284,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
                                     </h2>
                                     <!-- Items -->
                                     <ul class="list-unstyled mb-0">
-                                        <t t-call="website.search_result_item"/>
+                                        <t t-call="website.search_result_item" results="bucket"/>
                                     </ul>
                                     <t t-set="has_more" t-value="(bucket.get('searchCount') &gt; limit)"/>
                                     <div t-if="has_more" class="d-flex justify-content-center py-2">
@@ -3326,10 +3326,6 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
     <xpath expr="//input[@name='search']" position="attributes">
         <attribute name="t-att-data-search-type">search_type</attribute>
         <attribute name="t-att-data-limit">limit or '6'</attribute>
-        <attribute name="t-att-data-display-image">display_image or 'true'</attribute>
-        <attribute name="t-att-data-display-description">display_description or 'true'</attribute>
-        <attribute name="t-att-data-display-extra-link">display_extra_link or 'true'</attribute>
-        <attribute name="t-att-data-display-detail">display_detail or 'true'</attribute>
         <attribute name="t-att-data-order-by">order_by or 'name asc'</attribute>
     </xpath>
     <xpath expr="//div[@role='search']" position="attributes">
@@ -3459,11 +3455,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
     <t t-call="website.website_search_box_input"
         search_type.f="all"
         action.f="/website/search"
-        limit="limit or '6'"
-        display_image.f="true"
-        display_description.f="true"
-        display_extra_link.f="true"
-        display_detail.f="true"/>
+        limit="limit or '6'"/>
 </template>
 
 <!-- Extra element : Search -->

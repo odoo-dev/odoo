@@ -7,7 +7,7 @@
 </t>
 
 <t t-name="website.search_result_item">
-    <t t-foreach="bucket.data" t-as="result" t-key="result_index">
+    <t t-foreach="results.data" t-as="result" t-key="result_index">
         <li class="o_search_result_item">
             <a t-att-href="result['website_url']" class="o_search_result_link d-flex gap-2 py-2 px-3 text-decoration-none text-muted">
                 <t t-call="website.search_image_item"/>
@@ -70,9 +70,9 @@
     <!-- Render results -->
     <ul class="list-unstyled mb-0">
         <t t-foreach="Object.values(results)" t-as="group_result" t-key="group_result_index">
-            <t t-set="bucket" t-value="group_result"/>
+            <t t-set="results" t-value="group_result"/>
             <!-- Items -->
-            <t t-call="website.search_result_item"/>
+            <t t-call="website.search_result_item" results="results"/>
         </t>
     </ul>
 </div>

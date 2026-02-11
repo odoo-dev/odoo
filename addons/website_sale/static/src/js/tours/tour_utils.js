@@ -364,10 +364,6 @@ export function searchProduct(productName, { select = false, willOpenModel = fal
             run: "click",
         },
         {
-            content: "Check if the Search bar is available",
-            trigger: searchInputTrigger,
-        },
-        {
             content: "Search for the product",
             trigger: searchInputTrigger,
             run: `edit ${productName}`,

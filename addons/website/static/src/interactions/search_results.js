@@ -22,12 +22,14 @@ export class SearchResults extends Interaction {
     }
 
     /**
-     * Lazy Loading
+     * Load more search results (Lazy Loading).
+     *
+     * @param {Event} ev
      */
     async loadMore(ev) {
-        const searchType = ev.target.dataset.searchType;
-        const offset = parseInt(ev.target.dataset.offset || this.limit);
-        // We need displayType = 'columns' by default.
+        const buttonEl = ev.target;
+        const searchType = buttonEl.dataset.searchType;
+        const offset = parseInt(buttonEl.dataset.offset || this.limit);
         const [html, hasMore] = await this.keepLast.add(
             rpc("/website/load_more_search", {
                 search: this.inputEl.value,
@@ -36,17 +38,17 @@ export class SearchResults extends Interaction {
                 limit: this.limit,
                 order: this.order,
                 max_nb_chars: Math.round(
-                    Math.max(this.autocompleteMinWidth, parseInt(this.inputEl.clientWidth) / 3) *
-                        0.22
+                    Math.max(this.autocompleteMinWidth, this.inputEl.clientWidth / 3) * 0.22
                 ),
             })
         );
-        ev.target.classList.add("d-none", !hasMore);
         const doc = parseHTML(document, html);
-        const ulEl = ev.target.parentNode.previousElementSibling;
+        const ulEl = buttonEl.parentNode.previousElementSibling;
         ulEl.appendChild(doc);
+
         // Set offset for next loadMore
-        ev.target.dataset.offset = offset + this.limit;
+        buttonEl.dataset.offset = offset + this.limit;
+        buttonEl.classList.toggle("d-none", !hasMore);
     }
 }
 

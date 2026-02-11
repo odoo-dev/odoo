@@ -16,10 +16,6 @@ const searchTemplate = /* html */ `
             <input type="search" name="search" class="search-query form-control oe_search_box o_translatable_attribute" placeholder="Search..."
                     data-search-type="test"
                     data-limit="3"
-                    data-display-image="false"
-                    data-display-description="false"
-                    data-display-extra-link="true"
-                    data-display-detail="false"
                     data-order-by="name asc"
                     autocomplete="off"/>
             <button type="submit" aria-label="Search" title="Search" class="btn oe_search_button border border-start-0 px-4 bg-o-color-4">

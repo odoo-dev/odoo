@@ -158,8 +158,6 @@
                 </div>
                 <!-- 'Search Box' -->
                 <t t-if="question_count or tags" t-call="website.website_search_box_input"
-                    display_description.f="false"
-                    display_detail.f="true"
                     _modal_id.f="forum_questions"
                     _form_classes.f="flex-grow-1"
                     search_type="'forums' if _page_name != 'tags' else 'forum_forum'"

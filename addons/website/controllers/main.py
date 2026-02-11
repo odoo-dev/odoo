@@ -604,8 +604,6 @@ class Website(Home):
 
         :returns: dict (or False if no result) containing
             - 'results' (dict): contain multiple groups of results, each group is a dict with:
-                    - 'group_key' (str): the key of the group of results
-                     (usually the model name with '.' replaced by '_')
                     - 'groupName' (str): the name of the group of results
                     - 'searchCount' (int): the number of results in this group
                     - 'data' (list of dict): the actual results (only their needed field values)
@@ -656,8 +654,8 @@ class Website(Home):
                         value = self._shorten_around_match(value, term, max_nb_chars)
 
                     if field_meta.get('match'):
+                        # If one field matches, we skip matching areas.
                         if skip_matching_area and mapped_name not in ['name', 'search_item_metadata']:
-                            del mapping[mapped_name]
                             continue
                         skip_field, value, field_type = model._search_highlight_field(field_meta, value, term)
                         if skip_field:
@@ -760,6 +758,7 @@ class Website(Home):
             :param str search: search term written by the user
             :param str search_type: indicates what to search within, 'all' matches all available types
             :param int offset: number of results to skip, defaults to 0
+            :param int limit: number of results to consider, defaults to 24
 
             :returns: tuple (html, has_more):
                 - html (str): rendered HTML of next search results
@@ -769,10 +768,9 @@ class Website(Home):
         max_nb_chars = kwargs.get('max_nb_chars')
         data = self.autocomplete(search_type=search_type, term=search, order='name asc', offset=offset, limit=limit, max_nb_chars=max_nb_chars, options=options)
 
-        bucket = next(iter(data.get("results").values()), {})
-        has_more = bucket.get("searchCount") > offset + limit
-
-        html = self.env['ir.ui.view']._render_template('website.search_result_item', {'bucket': bucket})
+        values = next(iter(data.get("results").values()), {})
+        has_more = values.get("searchCount") > offset + limit
+        html = self.env['ir.ui.view']._render_template('website.search_result_item', {'bucket': values})
         return html, has_more
 
     # ------------------------------------------------------
