@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+  <t t-name="devtools.Event" owl="1">
+    <div class="event-container" t-att-class="{ 'event-last': props.event.isLast }">
+      <div class="my-0 p-0 object-line" t-on-click.stop="toggleDisplay">
+        <div class="ps-2 text-nowrap">
+          <i class="fa px-1 pointer-icon caret"
+            t-att-class="{'fa-caret-right': !props.event.toggled, 'fa-caret-down': props.event.toggled}"
+            t-attf-style="visibility: {{props.event.origin ? '' : 'hidden'}};"
+          />
+          <t t-esc="props.event.type"/>:
+          &lt;<span style="cursor:pointer; color: var(--component-color);"
+                t-on-click.stop="() => this.store.selectComponent(props.event.path)"
+                t-on-mouseover.stop="() => this.store.highlightComponent(props.event.path)"
+                t-on-contextmenu="openMenu"
+                t-esc="props.event.component"
+              />
+          <t t-if="minimizedKey.length > 0">
+            <span t-if="minimizedKey.length > 0" style="color: var(--key-name);"> key</span>=<span style="color: var(--key-content);">
+              <t t-esc="minimizedKey"/>
+            </span>
+          </t>&gt;
+          <span>
+            (<t t-esc="renderTime"/>ms)
+          </span>
+        </div>
+      </div>
+      <t t-if="props.event.toggled">
+        <div class="my-0 pt-1 object-line">
+          <i class="fa fa-caret-right mx-1 pe-2" style="visibility: hidden;"></i>
+          <span>
+            origin:
+            &lt;<span style="cursor:pointer; color: var(--component-color);"
+                  t-on-click.stop="() => this.store.selectComponent(props.event.origin.path)"
+                  t-on-mouseover.stop="() => this.store.highlightComponent(props.event.origin.path)"
+                  t-esc="props.event.origin.component"
+                />
+            <t t-if="originMinimizedKey.length > 0">
+              <span style="color: var(--key-name);"> key</span>=<span style="color: var(--key-content);">
+                <t t-esc="originMinimizedKey"/>
+              </span>
+            </t>&gt;
+          </span>
+        </div>
+      </t>
+    </div>
+  </t>
+</templates>

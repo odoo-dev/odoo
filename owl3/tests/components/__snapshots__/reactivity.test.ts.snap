@@ -1,0 +1,228 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`components and computed Child is not rerender when reactive is computed 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  const comp1 = app.createComponent(\`Child\`, true, false, false, []);
+  
+  return function template(ctx, node, key = "") {
+    const b2 = safeOutput(ctx['this'].c());
+    const b3 = comp1({}, key + \`__1\`, node, this, null);
+    return multi([b2, b3]);
+  }
+}"
+`;
+
+exports[`components and computed Child is not rerender when reactive is computed 2`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  
+  return function template(ctx, node, key = "") {
+    return text(\`\`);
+  }
+}"
+`;
+
+exports[`components and computed simple component and computed value 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  
+  return function template(ctx, node, key = "") {
+    const b2 = safeOutput(ctx['this'].value++);
+    const b3 = safeOutput(ctx['this'].c());
+    return multi([b2, b3]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle Child component doesn't render when state they depend on changes but their parent is about to unmount them 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  const comp1 = app.createComponent(\`Child\`, true, false, false, ["state"]);
+  
+  return function template(ctx, node, key = "") {
+    let b2;
+    if (ctx['this'].state.renderChild) {
+      b2 = comp1({state: ctx['this'].state}, key + \`__1\`, node, this, null);
+    }
+    return multi([b2]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle Child component doesn't render when state they depend on changes but their parent is about to unmount them 2`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  
+  return function template(ctx, node, key = "") {
+    return safeOutput(ctx['this'].props.state.content.a);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle an external proxy object should be tracked 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  const comp1 = app.createComponent(\`TestSubComponent\`, true, false, false, []);
+  
+  let block1 = createBlock(\`<div><block-child-0/><block-child-1/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    const b2 = safeOutput(ctx['this'].obj1.value);
+    const b3 = comp1({}, key + \`__1\`, node, this, null);
+    return block1([], [b2, b3]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle an external proxy object should be tracked 2`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    const b2 = safeOutput(ctx['this'].obj2.value);
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle can use a state hook 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    const b2 = safeOutput(ctx['this'].counter.value);
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle can use a state hook 2 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { isBoundary, withDefault, setContextValue, safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    ctx = Object.create(ctx);
+    ctx[isBoundary] = 1
+    setContextValue(ctx, "noop", ctx['this'].notify());
+    const b2 = safeOutput(ctx['this'].state.a);
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle can use a state hook on Map 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    const b2 = safeOutput(ctx['this'].counter.get('value'));
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle change state while mounting component 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { isBoundary, withDefault, setContextValue, safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    ctx = Object.create(ctx);
+    ctx[isBoundary] = 1
+    setContextValue(ctx, "noop", ctx['this'].notify());
+    const b2 = safeOutput(ctx['this'].state.val);
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle state changes in willUnmount do not trigger rerender 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  const comp1 = app.createComponent(\`Child\`, true, false, false, ["val"]);
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    let b2;
+    if (ctx['this'].state.flag) {
+      b2 = comp1({val: ctx['this'].state.val}, key + \`__1\`, node, this, null);
+    }
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`reactivity in lifecycle state changes in willUnmount do not trigger rerender 2`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { isBoundary, withDefault, setContextValue, safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<span><block-child-0/><block-child-1/></span>\`);
+  
+  return function template(ctx, node, key = "") {
+    ctx = Object.create(ctx);
+    ctx[isBoundary] = 1
+    setContextValue(ctx, "noop", ctx['this'].notify());
+    const b2 = safeOutput(ctx['this'].props.val);
+    const b3 = safeOutput(ctx['this'].state.n);
+    return block1([], [b2, b3]);
+  }
+}"
+`;
+
+exports[`reading reactive state in setup should work as expected 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  const comp1 = app.createComponent(\`B\`, true, false, false, []);
+  
+  return function template(ctx, node, key = "") {
+    return comp1({}, key + \`__1\`, node, this, null);
+  }
+}"
+`;
+
+exports[`reading reactive state in setup should work as expected 2`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler, comment } = bdom;
+  let { safeOutput } = helpers;
+  
+  return function template(ctx, node, key = "") {
+    return safeOutput(ctx['this'].c());
+  }
+}"
+`;
