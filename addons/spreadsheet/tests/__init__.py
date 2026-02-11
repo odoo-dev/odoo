@@ -7,3 +7,4 @@ from . import test_ir_model
 from . import test_locale
 from . import test_session_info
 from . import test_utils
+from . import test_spreadsheet_date_filter

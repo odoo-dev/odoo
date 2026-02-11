@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_spreadsheet_date_filter_user,spreadsheet.date.filter.user,model_spreadsheet_date_filter,base.group_user,1,0,0,0
+access_spreadsheet_date_filter_manager,spreadsheet.date.filter.manager,model_spreadsheet_date_filter,base.group_system,1,1,1,1

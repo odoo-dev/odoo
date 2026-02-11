@@ -8,7 +8,9 @@
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
     'data': [
+        'security/ir.model.access.csv',
         'views/public_readonly_spreadsheet_templates.xml',
+        'views/spreadsheet_date_filter_views.xml',
     ],
     'assets': {
         'web.chartjs_lib' : [
