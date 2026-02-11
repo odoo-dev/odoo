@@ -67,7 +67,7 @@ const discussAppPatch = {
             addTitle: _t("Start a conversation"),
             canView: false,
             extraClass: "o-mail-DiscussSidebarCategory-chat",
-            icon: "oi oi-users",
+            icon: "group",
             id: "chats",
             name: _t("Direct Messages"),
             sequence: 30,

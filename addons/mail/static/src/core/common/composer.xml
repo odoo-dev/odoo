@@ -166,7 +166,7 @@
             <t t-set="moreName">More Actions</t>
             <ActionList inline="true" actions="[{
                 'disabledCondition': this.areAllActionsDisabled,
-                'icon': 'fa fa-plus-circle',
+                'icon': 'add_circle',
                 'id': 'more-actions',
                 'name': moreName,
                 'tags': [],

@@ -11,7 +11,7 @@ registerMessageAction("set-new-message-separator", {
         channel.eq(message.channel_id) &&
         !message.hasNewMessageSeparator &&
         message.persistent,
-    icon: "fa fa-eye-slash",
+    icon: "visibility_off",
     name: _t("Mark as Unread"),
     onSelected: ({ message: msg }) => {
         const message = toRaw(msg);
