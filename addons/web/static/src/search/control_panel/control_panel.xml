@@ -119,7 +119,7 @@
                                     t-custom-click="(ev, isMiddleClick) => this.switchView(view.type, isMiddleClick)"
                                     t-att-aria-label="view.name + ' View'"
                                 >
-                                    <i class="" t-att-class="view.icon" t-attf-class="{{view.type === 'list' ? 'oi-filled' : 'oi-outlined'}}" />
+                                    <i class="oi" t-att-class="view.icon_class"  t-att-data-icon="view.icon"/>
                                 </button>
                             </t>
                         </nav>
