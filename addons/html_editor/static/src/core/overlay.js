@@ -182,7 +182,12 @@ export class EditorOverlay extends Component {
             return true;
         }
         const scrollContainerRect = scrollContainer.getBoundingClientRect();
-        const top = Math.max(scrollContainerRect.top, 0);
+        let scrollContainerTop = scrollContainerRect.top;
+        if (scrollContainer.ownerDocument !== overlayElement.ownerDocument) {
+            scrollContainerTop +=
+                scrollContainer.ownerDocument.defaultView.frameElement.getBoundingClientRect().top;
+        }
+        const top = Math.max(scrollContainerTop, 0);
         const bottom = top + scrollContainerRect.height;
         const overflowsTop = solution.top < top;
         const overflowsBottom = solution.top + overlayElement.offsetHeight > bottom;
