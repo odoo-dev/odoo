@@ -376,13 +376,15 @@ class StockLot(models.Model):
         # This loop processes lots whose delivery sets have just been updated,
         # ensuring the new results are merged upward through the parent graph until
         # all deliveries are propagated
+        CHUNK_SIZE = 1000
         while lots_to_propagate:
             lot_id = lots_to_propagate.pop()
 
             parent_ids = parent_map[lot_id]
             for parent_id in parent_ids:
                 if not delivery_by_lot[lot_id].issubset(delivery_by_lot[parent_id]):
-                    delivery_by_lot[parent_id].update(delivery_by_lot[lot_id])
-                    lots_to_propagate.add(parent_id)
+                    lot_list = list(delivery_by_lot[lot_id])
+                    for i in range(0, len(lot_list), CHUNK_SIZE):
+                        delivery_by_lot[parent_id].update(lot_list[i:i+CHUNK_SIZE])
 
         return {lot_id: list(delivery_by_lot[lot_id]) for lot_id in delivery_by_lot}
