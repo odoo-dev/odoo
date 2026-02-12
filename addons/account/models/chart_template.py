@@ -772,6 +772,7 @@ class AccountChartTemplate(models.AbstractModel):
         bank_fees = self.ref('bank_fees_reco', raise_if_not_found=False)
         if bank_fees:
             bank_fees.line_ids.sudo().write({'account_id': self._get_bank_fees_reco_account(company).id})
+        company._initiate_account_onboardings()
 
     def _get_bank_fees_reco_account(self, company):
         # We want a bank fees account if possible and the first expense account as a fallback.
