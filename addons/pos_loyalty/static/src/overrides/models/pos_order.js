@@ -587,6 +587,7 @@ patch(PosOrder.prototype, {
                     continue;
                 }
                 let totalProductQty = 0;
+                let totalProductQtyForMinimum = 0;
                 // Only count points for paid lines.
                 const qtyPerProduct = {};
                 let orderedProductPaid = 0;
@@ -609,9 +610,8 @@ patch(PosOrder.prototype, {
                                 continue;
                             }
                         }
-                        const lineQty = line._reward_product_id
-                            ? -line.get_quantity()
-                            : line.get_quantity();
+                        const qty = line.get_quantity();
+                        const lineQty = line._reward_product_id ? -qty : qty;
                         if (qtyPerProduct[line._reward_product_id || line.get_product().id]) {
                             qtyPerProduct[line._reward_product_id || line.get_product().id] +=
                                 lineQty;
@@ -625,12 +625,14 @@ patch(PosOrder.prototype, {
                                 : line.get_price_with_tax();
                         if (!line.is_reward_line) {
                             totalProductQty += lineQty;
+                            totalProductQtyForMinimum += Math.abs(qty);
                         }
                     }
                 }
-                if (totalProductQty < rule.minimum_qty) {
-                    // Should also count the points from negative quantities.
-                    // For example, when refunding an ewallet payment. See TicketScreen override in this addon.
+                if (totalProductQtyForMinimum < rule.minimum_qty) {
+                    // Negative quantities should still count towards the quantity condition
+                    // (e.g. refunding on the same ticket), but should not grant extra free units.
+                    // We base the minimum quantity check on the absolute quantities.
                     continue;
                 }
                 if (!(program.id in pointsForProgramsCountedRules)) {
