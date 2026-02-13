@@ -25,6 +25,7 @@ export class Settings extends Record {
         },
     });
     messageSound = fields.Attr(true, { localStorage: true });
+    hide_mute_channels;
     useCallAutoFocus = fields.Attr(true, { localStorage: true });
 
     // Voice settings
@@ -274,6 +275,10 @@ export class Settings extends Record {
         this.use_push_to_talk = value;
         this._saveSettings();
     }
+    toggleHideMutedChannel() {
+        this.hide_mute_channels = !this.hide_mute_channels;
+        this._saveSettings();
+    }
     /**
      * @private
      */
@@ -288,6 +293,7 @@ export class Settings extends Record {
                     push_to_talk_key: this.push_to_talk_key,
                     use_push_to_talk: this.use_push_to_talk,
                     voice_active_duration: this.voice_active_duration,
+                    hide_mute_channels: this.hide_mute_channels,
                 },
             }
         );

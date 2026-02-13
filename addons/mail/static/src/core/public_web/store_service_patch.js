@@ -34,6 +34,10 @@ patch(Store.prototype, {
                     threads = threads.filter((thread) =>
                         this.tabToThreadType(tab).includes(thread.channel?.channel_type)
                     );
+                } else if (this.settings.hide_mute_channels) {
+                    threads = threads.filter(
+                        (thread) => !thread.channel.self_member_id.mute_until_dt
+                    );
                 }
                 return threads;
             },

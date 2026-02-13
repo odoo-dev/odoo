@@ -65,12 +65,19 @@ const discussChannelPatch = {
         }
     },
     _computeIsDisplayInSidebar() {
-        return (
+        let base1 =
             this.discussAppAsThread ||
             this.self_member_id?.is_pinned ||
             this.isLocallyPinned ||
-            this.sub_channel_ids.some((channel) => channel.isDisplayInSidebar)
-        );
+            this.sub_channel_ids.some((channel) => channel.isDisplayInSidebar);
+        if (
+            base1 &&
+            this.self_member_id.mute_until_dt !== false &&
+            this.store.settings.hide_mute_channels
+        ) {
+            base1 = false;
+        }
+        return base1;
     },
     delete() {
         this.store.env.services.bus_service.deleteChannel(this.busChannel);

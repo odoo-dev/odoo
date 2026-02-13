@@ -23,6 +23,13 @@
                     <input class="form-check-input" type="checkbox" role="switch" t-att-checked="store.settings.messageSound" t-on-change="onChangeMessageSound"/>
                 </div>
             </label>
+            <label class="cursor-pointer d-flex align-items-center my-1">
+                <h5>Hide muted conversations</h5>
+                <div class="flex-grow-1"/>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" t-att-checked="store.settings.hide_mute_channels" t-on-change="onChangeHideMutedChannel"/>
+                </div>
+            </label>
         </div>
     </t>
 </templates>

@@ -11,6 +11,7 @@ class ResUsersSettings(models.Model):
     use_push_to_talk = fields.Boolean(string="Use the push to talk feature", default=False)
     voice_active_duration = fields.Integer(string="Duration of voice activity in ms", default=200, help="How long the audio broadcast will remain active after passing the volume threshold")
     volume_settings_ids = fields.One2many('res.users.settings.volumes', 'user_setting_id', string="Volumes of other partners")
+    hide_mute_channels = fields.Boolean(string="Hide muted channels", default=False, help="If true, hide muted channels for the current user and restrict its visibility for the client until this option is reversed")
 
     # Notifications
     channel_notifications = fields.Selection(

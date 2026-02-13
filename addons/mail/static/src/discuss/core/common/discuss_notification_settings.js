@@ -15,4 +15,8 @@ export class DiscussNotificationSettings extends Component {
     onChangeMessageSound() {
         this.store.settings.messageSound = !this.store.settings.messageSound;
     }
+
+    onChangeHideMutedChannel() {
+        this.store.settings.toggleHideMutedChannel();
+    }
 }
