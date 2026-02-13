@@ -969,7 +969,8 @@ export class PosStore extends WithLazyGetterTrap {
         this.tryMergeOrderline(order, line, merge, selectedOrderline);
 
         selectedOrderline = order.getSelectedOrderline();
-        if (values.product_id.tracking === "lot") {
+        if (values.product_id.tracking === "lot" && values.price_type === "original") {
+            // Only recalculate prices for related lines if this is not a manual/SO price change, to avoid unexpected price changes for the user
             const productTemplate = values.product_id.product_tmpl_id;
             const related_lines = [];
             const price = productTemplate.getPrice(
