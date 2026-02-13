@@ -22,7 +22,7 @@ declare module "plugins" {
     import { lower_panel_entries, on_mobile_preview_clicked, on_dom_updated_handlers } from "@html_builder/builder";
     import { on_reveal_target_handlers } from "@html_builder/sidebar/invisible_elements_panel";
     import { on_snippet_dragged_handlers, on_snippet_dropped_handlers, on_snippet_dropped_near_handlers, on_snippet_dropped_over_handlers, on_snippet_move_handlers, on_snippet_out_dropzone_handlers, on_snippet_over_dropzone_handlers } from "@html_builder/sidebar/block_tab";
-    import { snippet_preview_dialog_bundles, on_snippet_preview_dialog_stylesheets_handlers } from "@html_builder/snippets/add_snippet_dialog";
+    import { snippet_preview_dialog_bundles, snippet_preview_dialog_stylesheets_processors } from "@html_builder/snippets/add_snippet_dialog";
     import { background_shape_groups_providers, background_shape_target_providers } from "@html_builder/plugins/background_option/background_shape_option_plugin";
     import { mark_color_level_selector_params } from "@html_builder/plugins/background_option/background_option_plugin";
     import { is_movable_selector, on_element_arrow_moved_handlers } from "@html_builder/core/move_plugin";
@@ -89,7 +89,7 @@ declare module "plugins" {
         on_will_clone_handlers: on_will_clone_handlers;
         on_will_remove_handlers: on_will_remove_handlers;
         on_after_compute_shape_handlers: on_post_compute_shape_handlers;
-        on_snippet_preview_dialog_stylesheets_handlers: on_snippet_preview_dialog_stylesheets_handlers;
+        snippet_preview_dialog_stylesheets_processors: snippet_preview_dialog_stylesheets_processors;
         target_hide: target_hide;
         target_show: target_show;
         on_dom_updated_handlers: on_dom_updated_handlers;

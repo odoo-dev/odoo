@@ -16,7 +16,7 @@ declare module "plugins" {
     import { DynamicSnippetCarouselOptionShared } from "@website/builder/plugins/options/dynamic_snippet_carousel_option_plugin";
     import { on_dynamic_snippet_template_updated_handlers, DynamicSnippetOptionShared } from "@website/builder/plugins/options/dynamic_snippet_option_plugin";
     import { footer_templates_providers, FooterOptionShared } from "@website/builder/plugins/options/footer_option_plugin";
-    import { get_gallery_items_providers, on_reorder_items_handlers } from "@website/builder/plugins/options/gallery_element_option_plugin";
+    import { get_gallery_items_providers, reorder_items_processors } from "@website/builder/plugins/options/gallery_element_option_plugin";
     import { GoogleMapsOptionShared } from "@website/builder/plugins/options/google_maps_option/google_maps_option_plugin";
     import { ImageGalleryOptionShared } from "@website/builder/plugins/options/image_gallery_option_plugin";
     import { InstagramOptionShared } from "@website/builder/plugins/options/instagram_option_plugin";
@@ -78,7 +78,7 @@ declare module "plugins" {
         get_gallery_items_providers: get_gallery_items_providers;
         on_mark_translatable_nodes_handlers: on_mark_translatable_nodes_handlers;
         on_visibility_toggled_handlers: on_visibility_toggled_handlers;
-        on_reorder_items_handlers: on_reorder_items_handlers;
+        reorder_items_processors: reorder_items_processors;
         on_hover_animation_mode_cleaned_sequential_async_handlers: on_hover_animation_mode_cleaned_sequential_async_handlers;
         on_hover_animation_mode_applied_sequential_async_handlers: on_hover_animation_mode_applied_sequential_async_handlers;
 
