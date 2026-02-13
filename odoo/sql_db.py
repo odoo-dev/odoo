@@ -263,7 +263,8 @@ class Cursor(BaseCursor):
 
         self.__pool = pool
         self.dbname = dbname
-
+        if pool._cursor_semaphore:
+            pool._cursor_semaphore.acquire(timeout=10)
         self._cnx = pool.borrow(dsn)
         self._obj = self._cnx.cursor()
         if _logger.isEnabledFor(logging.DEBUG):
@@ -624,12 +625,13 @@ class ConnectionPool(object):
         to open cursors for all transactions.
 
         The connections are *not* automatically closed. Only a close_db()
-        can trigger that.
+        can trigger that.   
     """
     def __init__(self, maxconn=64):
         self._connections = []
         self._maxconn = max(maxconn, 1)
         self._lock = threading.Lock()
+        self._cursor_semaphore = threading.Semaphore(self._maxconn) if odoo.evented else None
 
     def __repr__(self):
         used = len([1 for c, u, _ in self._connections[:] if u])
@@ -719,6 +721,8 @@ class ConnectionPool(object):
                 break
         else:
             raise PoolError('This connection does not belong to the pool')
+        if self._cursor_semaphore:
+            self._cursor_semaphore.release()
 
     @locked
     def close_all(self, dsn=None):

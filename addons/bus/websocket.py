@@ -35,30 +35,19 @@ from odoo.tools import config
 _logger = logging.getLogger(__name__)
 
 
-MAX_TRY_ON_POOL_ERROR = 10
-DELAY_ON_POOL_ERROR = 0.15
-JITTER_ON_POOL_ERROR = 0.3
-
-
 @contextmanager
 def acquire_cursor(db):
-    """ Try to acquire a cursor up to `MAX_TRY_ON_POOL_ERROR` """
-    delay = DELAY_ON_POOL_ERROR
+    # Yield before trying to acquire the cursor to let other
+    # greenlets release their cursor.
+    time.sleep(0)
     try:
-        for _ in range(MAX_TRY_ON_POOL_ERROR):
-            # Yield before trying to acquire the cursor to let other
-            # greenlets release their cursor.
-            time.sleep(0)
-            with suppress(PoolError), odoo.registry(db).cursor() as cr:
-                yield cr
-                return
-            time.sleep(delay + random.uniform(0, JITTER_ON_POOL_ERROR))
-            delay *= 1.5
-        raise PoolError('Failed to acquire cursor after %s retries' % MAX_TRY_ON_POOL_ERROR)
+        with odoo.registry(db).cursor() as cr:
+            yield cr
     finally:
         # Yield after releasing the cursor to let waiting greenlets
         # immediately pick up the freed connection.
         time.sleep(0)
+
 
 # ------------------------------------------------------
 # EXCEPTIONS
