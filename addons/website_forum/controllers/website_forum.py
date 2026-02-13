@@ -147,7 +147,7 @@ class WebsiteForum(WebsiteProfile):
 
         slug = request.env['ir.http']._slug
         question_count, details, fuzzy_search_term = request.website._search_with_fuzzy(
-            "forum_post", search, offset=0, limit=page * self._post_per_page, order=sorting, options=options)
+            'forum_post', search, offset=0, limit=page * self._post_per_page, order=sorting, options=options)
         question_ids = details[0].get('results', Post)
         question_ids = question_ids[(page - 1) * self._post_per_page:page * self._post_per_page]
 

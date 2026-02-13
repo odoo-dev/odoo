@@ -354,8 +354,8 @@ export function payWithTransfer({
 
 export function searchProduct(productName, { select = false, willOpenModel = false } = {}) {
     const searchInputTrigger = willOpenModel
-        ? '.modal_shown form input[name="search"]'
-        : 'form input[name="search"]';
+        ? ".modal_shown form input[name='search']"
+        : "form input[name='search']";
 
     const steps = [
         {

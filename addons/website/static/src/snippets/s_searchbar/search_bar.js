@@ -155,7 +155,6 @@ export class SearchBar extends Interaction {
                 },
                 this.el
             )[0];
-            // TODO dev, the count doesn't always match search_count
             this.updateSearchCount(res.results_count || 0);
         } else {
             this.clearButtonContent();

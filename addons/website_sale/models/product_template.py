@@ -925,8 +925,8 @@ class ProductTemplate(models.Model):
             return None
 
         monetary_options = {'display_currency': mapping['search_item_metadata']['display_currency']}
-        price = self.env["ir.qweb.field.monetary"].value_to_html(
-            combination_info["price"], monetary_options
+        price = self.env['ir.qweb.field.monetary'].value_to_html(
+            combination_info['price'], monetary_options
         )
         return price
 

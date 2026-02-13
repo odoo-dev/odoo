@@ -20,7 +20,7 @@
                         </span>
                     </div>
                     <div class="o_search_result_description d-empty-none">
-                        <!-- Add a <t t-if="module_speficic_matching_area"/> -->
+                        <!-- TODO in result priority: Add a <t t-if="module_speficic_matching_area"/> -->
                         <t t-if="result['tags']" t-out="result['tags']"/>
                         <p
                             t-elif="result['description'] || result['body']"

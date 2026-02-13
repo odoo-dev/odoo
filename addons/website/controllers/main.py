@@ -768,8 +768,8 @@ class Website(Home):
         max_nb_chars = kwargs.get('max_nb_chars')
         data = self.autocomplete(search_type=search_type, term=search, order='name asc', offset=offset, limit=limit, max_nb_chars=max_nb_chars, options=options)
 
-        values = next(iter(data.get("results").values()), {})
-        has_more = values.get("searchCount") > offset + limit
+        values = next(iter(data.get('results', {}).values()), {})
+        has_more = values.get('searchCount') > offset + limit
         html = self.env['ir.ui.view']._render_template('website.search_result_item', {'bucket': values})
         return html, has_more
 
