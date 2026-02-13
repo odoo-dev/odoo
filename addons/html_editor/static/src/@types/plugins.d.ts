@@ -44,7 +44,7 @@ declare module "plugins" {
     import { on_layout_geometry_change_handlers } from "@html_editor/main/position_plugin";
     import { power_buttons, power_buttons_visibility_predicates } from "@html_editor/main/power_buttons_plugin";
     import { powerbox_blacklist_selectors, powerbox_categories, powerbox_items, PowerboxShared } from "@html_editor/main/powerbox/powerbox_plugin";
-    import { on_deselect_custom_selected_nodes_handlers, TableShared } from "@html_editor/main/table/table_plugin";
+    import { deselect_custom_selected_nodes_processors, TableShared } from "@html_editor/main/table/table_plugin";
     import { shift_tab_overrides, tab_overrides, TabulationShared } from "@html_editor/main/tabulation_plugin";
     import { can_display_toolbar, collapsed_selection_toolbar_predicate, toolbar_groups, toolbar_items, toolbar_namespaces, ToolbarShared } from "@html_editor/main/toolbar/toolbar_plugin";
 
@@ -142,7 +142,7 @@ declare module "plugins" {
         on_create_link_handlers: on_create_link_handlers;
         on_content_updated_handlers: on_content_updated_handlers;
         on_delete_handlers: on_delete_handlers;
-        on_deselect_custom_selected_nodes_handlers: on_deselect_custom_selected_nodes_handlers;
+        deselect_custom_selected_nodes_processors: deselect_custom_selected_nodes_processors;
         on_external_history_step_handlers: on_external_history_step_handlers;
         on_external_step_added_handlers: on_external_step_added_handlers;
         on_format_selection_handlers: on_format_selection_handlers;

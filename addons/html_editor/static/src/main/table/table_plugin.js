@@ -62,7 +62,7 @@ function isUnremovableTableComponent(node, root) {
  */
 
 /**
- * @typedef {((el: HTMLElement) => void)[]} on_deselect_custom_selected_nodes_handlers
+ * @typedef {((el: HTMLElement) => void)[]} deselect_custom_selected_nodes_processors
  */
 
 /**
@@ -1063,7 +1063,7 @@ export class TablePlugin extends Plugin {
                     table.classList.toggle("o_selected_table", true);
                     for (const td of getTableCells(table)) {
                         td.classList.toggle("o_selected_td", true);
-                        this.trigger("on_deselect_custom_selected_nodes_handlers", td);
+                        this.processThrough("deselect_custom_selected_nodes_processors", td);
                     }
                 }
             }
@@ -1268,7 +1268,7 @@ export class TablePlugin extends Plugin {
                 (_, index) => index >= minColIndex && index <= maxColIndex
             )) {
                 td.classList.toggle("o_selected_td", true);
-                this.trigger("on_deselect_custom_selected_nodes_handlers", td);
+                this.processThrough("deselect_custom_selected_nodes_processors", td);
             }
         }
     }
