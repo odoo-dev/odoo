@@ -160,7 +160,7 @@
                 <t t-if="question_count or tags" t-call="website.website_search_box_input"
                     _modal_id.f="forum_questions"
                     _form_classes.f="flex-grow-1"
-                    search_type="'forums' if _page_name != 'tags' else 'forum_forum'"
+                    search_type="'forums' if _page_name != 'tags' else 'forum_tag'"
                     action="'/forum/%s' % (_forum_slug)">
                     <input t-if="filters" type="hidden" name="filters" t-att-value="filters"/>
                     <input t-if="my" type="hidden" name="my" t-att-value="my"/>

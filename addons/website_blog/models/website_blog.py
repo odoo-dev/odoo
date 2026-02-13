@@ -104,33 +104,6 @@ class BlogBlog(models.Model):
 
         return tag_by_blog
 
-    @api.model
-    def _search_get_detail(self, website, order, options):
-        search_fields = ['name', 'subtitle']
-        fetch_fields = ['id', 'name', 'subtitle']
-        mapping = {
-            'name': {'name': 'name', 'type': 'text', 'match': True},
-            'website_url': {'name': 'url', 'type': 'text', 'truncate': False},
-            'description': {'name': 'subtitle', 'type': 'text', 'match': True}
-        }
-        return {
-            'model': 'blog.blog',
-            'base_domain': [website.website_domain()],
-            'search_fields': search_fields,
-            'fetch_fields': fetch_fields,
-            'mapping': mapping,
-            'icon': 'fa-rss-square',
-            'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
-            'group_name': self.env._("Blogs"),
-            'sequence': 70,
-        }
-
-    def _search_render_results(self, fetch_fields, mapping, icon, limit):
-        results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
-        for data in results_data:
-            data['url'] = '/blog/%s' % data['id']
-        return results_data
-
 
 class BlogTagCategory(models.Model):
     _name = 'blog.tag.category'
