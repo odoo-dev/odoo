@@ -5,7 +5,7 @@ class AlertOptionPlugin extends Plugin {
     static id = "mass_mailing.MailBlockquotePlugin";
 
     resources = {
-        clean_for_save_handlers: this.cleanForSave.bind(this),
+        clean_for_save_processors: this.cleanForSave.bind(this),
     };
 
     cleanForSave({ root }) {

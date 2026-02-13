@@ -16,7 +16,7 @@ class MailingListSubscribeOptionPlugin extends Plugin {
             ToggleThanksMessageAction,
         },
         on_snippet_dropped_handlers: this.onSnippetDropped.bind(this),
-        clean_for_save_handlers: this.cleanForSave.bind(this),
+        clean_for_save_processors: this.cleanForSave.bind(this),
     };
 
     setup() {

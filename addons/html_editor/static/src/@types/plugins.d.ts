@@ -1,5 +1,5 @@
 declare module "plugins" {
-    import { clean_for_save_handlers, normalize_handlers, start_edition_handlers } from "@html_editor/editor";
+    import { clean_for_save_processors, normalize_handlers, start_edition_handlers } from "@html_editor/editor";
     import { Plugin } from "@html_editor/plugin";
     import { ResourceWithSequence } from "@html_editor/utils/resource";
 
@@ -138,7 +138,7 @@ declare module "plugins" {
         before_paste_handlers: before_paste_handlers;
         before_split_block_handlers: before_split_block_handlers;
         before_set_tag_handlers: before_set_tag_handlers;
-        clean_for_save_handlers: clean_for_save_handlers;
+        clean_for_save_processors: clean_for_save_processors;
         create_link_handlers: create_link_handlers;
         content_updated_handlers: content_updated_handlers;
         delete_handlers: delete_handlers;

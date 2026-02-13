@@ -69,13 +69,13 @@ export class SaveSnippetPlugin extends Plugin {
                 el = childBlockquote;
             }
         }
-        const cleanForSaveHandlers = [
-            ...this.getResource("clean_for_save_handlers"),
+        const cleanForSaveProcessors = [
+            ...this.getResource("clean_for_save_processors"),
             ({ root }) => escapeTextNodes(root),
         ];
         const savedName = await this.config.saveSnippet(
             el,
-            cleanForSaveHandlers,
+            cleanForSaveProcessors,
             this.wrapWithBeforeAfterSaveHandlers.bind(this)
         );
         if (savedName) {

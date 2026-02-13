@@ -36,7 +36,7 @@ export class SavePlugin extends Plugin {
         handleNewRecords: this.handleMutations.bind(this),
         start_edition_handlers: this.startObserving.bind(this),
         // Resource definitions:
-        clean_for_save_handlers: [
+        clean_for_save_processors: [
             // ({root}) => {
             //     clean DOM before save (leaving edit mode)
             //     root is the clone of a node that was o_dirty
@@ -89,7 +89,7 @@ export class SavePlugin extends Plugin {
             const cleanedEls = dirtyEls.map((dirtyEl) => {
                 dirtyEl.classList.remove("o_dirty");
                 const cleanedEl = dirtyEl.cloneNode(true);
-                this.dispatchTo("clean_for_save_handlers", { root: cleanedEl });
+                this.processThrough("clean_for_save_processors", { root: cleanedEl });
                 return cleanedEl;
             });
             for (const saveElementsOverride of this.getResource("save_elements_overrides")) {

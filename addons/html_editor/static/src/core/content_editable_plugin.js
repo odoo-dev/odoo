@@ -28,7 +28,7 @@ export class ContentEditablePlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         normalize_handlers: withSequence(5, this.normalize.bind(this)),
-        clean_for_save_handlers: withSequence(Infinity, this.cleanForSave.bind(this)),
+        clean_for_save_processors: withSequence(Infinity, this.cleanForSave.bind(this)),
     };
 
     normalize(root) {

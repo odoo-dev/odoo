@@ -10,7 +10,7 @@ export class MassMailingSetupPlugin extends Plugin {
             "mass_mailing.assets_iframe_style",
             "mass_mailing.iframe_add_dialog",
         ],
-        clean_for_save_handlers: this.cleanForSave.bind(this),
+        clean_for_save_processors: this.cleanForSave.bind(this),
         powerbox_blacklist_selectors: ".o_mail_wrapper_td",
     };
 

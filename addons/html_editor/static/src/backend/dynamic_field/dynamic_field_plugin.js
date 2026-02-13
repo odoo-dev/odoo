@@ -58,7 +58,7 @@ export class DynamicFieldPlugin extends Plugin {
         dynamic_model_change_handlers: this.updateDynamicModel.bind(this),
         normalize_handlers: withSequence(11, this.normalizeQwebPlaceholders.bind(this)),
         clipboard_content_processors: withSequence(11, this.cleanQwebExpressionsForCopy.bind(this)),
-        clean_for_save_handlers: withSequence(11, this.cleanQwebExpressionsForSave.bind(this)),
+        clean_for_save_processors: withSequence(11, this.cleanQwebExpressionsForSave.bind(this)),
     };
 
     fieldTagName = "T";

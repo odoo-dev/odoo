@@ -52,7 +52,7 @@ export class TranslationPlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        clean_for_save_handlers: this.cleanForSave.bind(this),
+        clean_for_save_processors: this.cleanForSave.bind(this),
         get_dirty_els: this.getDirtyTranslations.bind(this),
         after_setup_editor_overrides: () => {
             const translationSavableEls = getTranslationAttributeEls(

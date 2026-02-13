@@ -20,7 +20,7 @@ export class SetupEditorPlugin extends Plugin {
     static shared = ["getSavableAreas"];
     /** @type {import("plugins").BuilderResources} */
     resources = {
-        clean_for_save_handlers: this.cleanForSave.bind(this),
+        clean_for_save_processors: this.cleanForSave.bind(this),
         closest_savable_providers: withSequence(10, (el) => el.closest(".o_savable")),
         savable_selectors: "[data-oe-model]",
         unremovable_node_predicates: (node) => node.classList?.contains("o_savable"),

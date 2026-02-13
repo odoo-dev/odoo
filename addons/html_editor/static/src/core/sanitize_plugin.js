@@ -11,7 +11,7 @@ export class SanitizePlugin extends Plugin {
     static shared = ["sanitize"];
     /** @type {import("plugins").EditorResources} */
     resources = {
-        clean_for_save_handlers: this.cleanForSave.bind(this),
+        clean_for_save_processors: this.cleanForSave.bind(this),
         normalize_handlers: this.normalize.bind(this),
     };
 
