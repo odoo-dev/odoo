@@ -1,9 +1,9 @@
 export const FACET_ICONS = {
-    filter: "fa fa-filter",
-    groupBy: "oi oi-group",
-    groupByAsc: "fa fa-sort-numeric-asc",
-    groupByDesc: "fa fa-sort-numeric-desc",
-    favorite: "fa fa-star",
+    filter: "filter_alt",
+    groupBy: "stacks",
+    groupByAsc: "sort",
+    groupByDesc: "sort",
+    favorite: "star",
 };
 
 export const FACET_COLORS = {
