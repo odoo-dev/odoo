@@ -69,7 +69,8 @@ class SaleOrder(models.Model):
         string="Status",
         readonly=True, copy=False, index=True,
         tracking=3,
-        default='draft')
+        default='draft',
+        group_expand=True)
     locked = fields.Boolean(default=False, copy=False, help="Locked orders cannot be modified.")
 
     client_order_ref = fields.Char(string="Customer Reference", copy=False)
