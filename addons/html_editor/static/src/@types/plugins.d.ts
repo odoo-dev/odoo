@@ -29,7 +29,7 @@ declare module "plugins" {
     import { ColorUIShared } from "@html_editor/main/font/color_ui_plugin";
     import { before_insert_within_pre_processors, font_items } from "@html_editor/main/font/font_plugin";
     import { hint_targets_providers, hints } from "@html_editor/main/hint_plugin";
-    import { on_to_inline_code_handlers } from "@html_editor/main/inline_code";
+    import { to_inline_code_processors } from "@html_editor/main/inline_code";
     import { paste_url_overrides } from "@html_editor/main/link/link_paste_plugin";
     import { on_create_link_handlers, immutable_link_selectors, is_link_editable_predicates, legit_empty_link_predicates, link_compatible_selection_predicates, link_popovers, LinkShared } from "@html_editor/main/link/link_plugin";
     import { eligible_link_for_selection_indication_predicates, eligible_link_for_zwnbsp_predicates, LinkSelectionShared } from "@html_editor/main/link/link_selection_plugin";
@@ -168,7 +168,7 @@ declare module "plugins" {
         on_set_movable_element_handlers: on_set_movable_element_handlers;
         on_start_edition_handlers: on_start_edition_handlers;
         on_step_added_handlers: on_step_added_handlers;
-        on_to_inline_code_handlers: on_to_inline_code_handlers;
+        to_inline_code_processors: to_inline_code_processors;
         on_unset_movable_element_handlers: on_unset_movable_element_handlers;
 
         // Handlers

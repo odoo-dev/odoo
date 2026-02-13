@@ -5,7 +5,7 @@ import { isElement, isTextNode, isZwnbsp } from "@html_editor/utils/dom_info";
 import { closestElement, selectElements, findFurthest } from "@html_editor/utils/dom_traversal";
 import { DIRECTIONS, nodeSize } from "@html_editor/utils/position";
 
-/** @typedef {((codeElement: HTMLElement) => void)[]} on_to_inline_code_handlers */
+/** @typedef {((codeElement: HTMLElement) => void)[]} to_inline_code_processors */
 
 export class InlineCodePlugin extends Plugin {
     static id = "inlineCode";
@@ -103,7 +103,7 @@ export class InlineCodePlugin extends Plugin {
                 }
                 start = next;
             }
-            this.trigger("on_to_inline_code_handlers", codeElement);
+            codeElement = this.processThrough("to_inline_code_processors", codeElement);
             this.dependencies.selection.setSelection({
                 anchorNode: codeElement,
                 anchorOffset: nodeSize(codeElement),

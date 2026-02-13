@@ -307,7 +307,7 @@ export class LinkPlugin extends Plugin {
         on_selectionchange_handlers: this.handleSelectionChange.bind(this),
         on_after_insert_handlers: this.handleAfterInsert.bind(this),
         on_will_remove_handlers: () => this.closeLinkTools(),
-        on_to_inline_code_handlers: (node) => {
+        to_inline_code_processors: (node) => {
             this.removeEmptyLinks(node);
             for (const btn of selectElements(node, "a.btn")) {
                 // Remove all attributes from the button link except "href"
