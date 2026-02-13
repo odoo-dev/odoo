@@ -61,7 +61,7 @@ export class AnimateOptionPlugin extends Plugin {
             ForceAnimationAction,
             SetAnimationEffectAction,
         },
-        on_normalize_handlers: this.normalize.bind(this),
+        normalize_processors: this.normalize.bind(this),
         clean_for_save_processors: this.cleanForSave.bind(this),
         splittable_node_predicates: (node) => {
             if (node.classList?.contains("o_animated_text")) {

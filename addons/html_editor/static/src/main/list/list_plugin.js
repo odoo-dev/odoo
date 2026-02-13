@@ -179,7 +179,7 @@ export class ListPlugin extends Plugin {
         hints: [{ selector: `LI, LI > ${baseContainerGlobalSelector}`, text: _t("List") }],
 
         /** Handlers */
-        on_normalize_handlers: this.normalize.bind(this),
+        normalize_processors: this.normalize.bind(this),
         on_step_added_handlers: this.updateToolbarButtons.bind(this),
         on_delete_handlers: this.adjustListPaddingOnDelete.bind(this),
 

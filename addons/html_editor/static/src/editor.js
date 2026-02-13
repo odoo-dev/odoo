@@ -63,7 +63,7 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
 /**
  * Clean up DOM before taking into account for next history step remaining in
  * edit mode
- * @typedef {((root: EditorContext["editable"] | HTMLElement, stepState: "original"|"undo"|"redo"|"restore") => void)[]} on_normalize_handlers
+ * @typedef {((root: EditorContext["editable"] | HTMLElement, stepState: "original"|"undo"|"redo"|"restore") => void)[]} normalize_processors
  */
 
 /**
@@ -206,7 +206,7 @@ export class Editor {
         for (const plugin of this.plugins) {
             plugin.setup();
         }
-        this.trigger("on_normalize_handlers", this.editable);
+        this.processThrough("normalize_processors", this.editable);
         this.trigger("on_start_edition_handlers");
     }
 

@@ -80,7 +80,7 @@ export class ColorPlugin extends Plugin {
                 return true;
             }
         },
-        on_normalize_handlers: this.normalize.bind(this),
+        normalize_processors: this.normalize.bind(this),
     };
 
     normalize(root) {

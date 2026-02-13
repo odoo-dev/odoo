@@ -25,7 +25,6 @@ export class EmbeddedComponentPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
-        on_normalize_handlers: withSequence(0, this.normalize.bind(this)),
         on_attribute_change_handlers: this.onChangeAttribute.bind(this),
         on_restore_savepoint_handlers: () => this.handleComponents(this.editable),
         on_history_reset_handlers: () => this.handleComponents(this.editable),
@@ -36,6 +35,7 @@ export class EmbeddedComponentPlugin extends Plugin {
 
         /** Processors */
         clean_for_save_processors: ({ root }) => this.cleanForSave(root),
+        normalize_processors: withSequence(0, this.normalize.bind(this)),
         serializable_descendants_processors: this.processDescendantsToSerialize.bind(this),
         attribute_change_processors: this.onChangeAttribute.bind(this),
 

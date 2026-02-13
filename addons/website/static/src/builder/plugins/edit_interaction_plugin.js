@@ -19,7 +19,7 @@ export class EditInteractionPlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        on_normalize_handlers: this.refreshInteractions.bind(this),
+        normalize_processors: this.refreshInteractions.bind(this),
         on_content_manually_updated_handlers: this.refreshInteractions.bind(this),
         on_before_save_handlers: withSequence(5, this.stopInteractions.bind(this)),
         on_after_save_handlers: this.restartInteractions.bind(this),

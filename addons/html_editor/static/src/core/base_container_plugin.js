@@ -43,7 +43,7 @@ export class BaseContainerPlugin extends Plugin {
         // `baseContainer` normalization should occur after every other normalization
         // because a `div` may only have the baseContainer identity if it does not
         // already have another incompatible identity given by another plugin.
-        on_normalize_handlers: withSequence(Infinity, this.normalizeDivBaseContainers.bind(this)),
+        normalize_processors: withSequence(Infinity, this.normalizeDivBaseContainers.bind(this)),
         on_delete_handlers: () => {
             if (this.config.cleanEmptyStructuralContainers === false) {
                 return;

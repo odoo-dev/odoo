@@ -13,7 +13,7 @@ export class FieldChangeReplicationPlugin extends Plugin {
     /** @type {import("plugins").BuilderResources} */
     resources = {
         on_handle_new_records_handlers: this.handleMutations.bind(this),
-        on_normalize_handlers: withSequence(9000, this.normalizeHandler.bind(this)),
+        normalize_processors: withSequence(9000, this.normalizeHandler.bind(this)),
     };
 
     setup() {
@@ -114,7 +114,7 @@ export class FieldChangeReplicationPlugin extends Plugin {
             }
         }
         for (const touchedEl of touchedEls) {
-            this.trigger("on_normalize_handlers", touchedEl);
+            this.processThrough("normalize_processors", touchedEl);
         }
     }
 }

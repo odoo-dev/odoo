@@ -122,10 +122,10 @@ export class TablePlugin extends Plugin {
         on_selectionchange_handlers: this.updateSelectionTable.bind(this),
         on_before_line_break_handlers: this.resetTableSelection.bind(this),
         on_before_split_block_handlers: this.resetTableSelection.bind(this),
-        on_normalize_handlers: this.distributeTableColorsToAllCells.bind(this),
 
         /** Processors */
         clean_for_save_processors: ({ root }) => this.deselectTable(root),
+        normalize_processors: this.distributeTableColorsToAllCells.bind(this),
         clipboard_content_processors: this.processContentForClipboard.bind(this),
         targeted_nodes_processors: this.adjustTargetedNodes.bind(this),
 

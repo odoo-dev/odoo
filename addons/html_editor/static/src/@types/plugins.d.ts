@@ -1,5 +1,5 @@
 declare module "plugins" {
-    import { clean_for_save_processors, on_normalize_handlers, on_start_edition_handlers } from "@html_editor/editor";
+    import { clean_for_save_processors, normalize_processors, on_start_edition_handlers } from "@html_editor/editor";
     import { Plugin } from "@html_editor/plugin";
     import { ResourceWithSequence } from "@html_editor/utils/resource";
 
@@ -153,7 +153,7 @@ declare module "plugins" {
         on_input_handlers: on_input_handlers;
         on_layout_geometry_change_handlers: on_layout_geometry_change_handlers;
         on_mount_component_handlers: on_mount_component_handlers;
-        on_normalize_handlers: on_normalize_handlers;
+        normalize_processors: normalize_processors;
         on_added_media_handlers: on_added_media_handlers;
         on_image_saved_handlers: on_image_saved_handlers;
         on_image_updated_handlers: on_image_updated_handlers;

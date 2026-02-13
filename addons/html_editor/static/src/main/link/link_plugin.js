@@ -305,7 +305,6 @@ export class LinkPlugin extends Plugin {
         on_before_paste_handlers: this.updateCurrentLinkSyncState.bind(this),
         on_after_paste_handlers: this.onPasteNormalizeLink.bind(this),
         on_selectionchange_handlers: this.handleSelectionChange.bind(this),
-        on_normalize_handlers: this.normalizeLink.bind(this),
         on_after_insert_handlers: this.handleAfterInsert.bind(this),
         on_will_remove_handlers: () => this.closeLinkTools(),
         on_to_inline_code_handlers: (node) => {
@@ -320,6 +319,7 @@ export class LinkPlugin extends Plugin {
 
         /** Processors */
         clean_for_save_processors: ({ root }) => this.removeEmptyLinks(root),
+        normalize_processors: this.normalizeLink.bind(this),
 
         /** Overrides */
         split_element_block_overrides: this.handleSplitBlock.bind(this),

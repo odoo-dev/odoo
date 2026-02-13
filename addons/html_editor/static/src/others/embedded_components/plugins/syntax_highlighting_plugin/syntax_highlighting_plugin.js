@@ -33,7 +33,7 @@ export class SyntaxHighlightingPlugin extends Plugin {
 
         /** Handlers */
         on_mount_component_handlers: this.setupNewCodeBlock.bind(this),
-        on_normalize_handlers: (root) => this.addCodeBlocks(root, true),
+        normalize_processors: (root) => this.addCodeBlocks(root, true),
         on_after_undo_handlers: () => this.addCodeBlocks(this.editable, true),
         on_after_redo_handlers: () => this.addCodeBlocks(this.editable, true),
         on_before_set_tag_handlers: (el, newTagName, cursors) => {

@@ -1,9 +1,5 @@
 import { removeClass } from "@html_editor/utils/dom";
 
-function trigger(editor, resourceId, ...args) {
-    (editor.resources[resourceId] || []).forEach((fn) => fn(...args));
-}
-
 function processThrough(editor, resourceId, item, ...args) {
     editor.getResource(resourceId).forEach((processor) => {
         item = processor(item, ...args) || item;
@@ -11,8 +7,8 @@ function processThrough(editor, resourceId, item, ...args) {
     return item;
 }
 
-export function triggerNormalize(editor) {
-    trigger(editor, "on_normalize_handlers", editor.editable);
+export function processThroughNormalize(editor) {
+    processThrough(editor, "normalize_processors", editor.editable);
 }
 
 export function cleanHints(editor) {
