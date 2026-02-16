@@ -61,19 +61,10 @@ class MailBot(models.AbstractModel):
             source = _("Thanks")
             description = _("This is a temporary canned response to see how canned responses work.")
             if odoobot_state == 'onboarding_emoji' and self._body_contains_emoji(body):
-                self.env.user.odoobot_state = "onboarding_command"
-                self.env.user.odoobot_failed = False
-                return self.env._(
-                    "Great! 👍%(new_line)sTo access special commands, %(bold_start)sstart your "
-                    "sentence with%(bold_end)s %(command_start)s/%(command_end)s. Try getting "
-                    "help.",
-                    **self._get_style_dict()
-                )
-            elif odoobot_state == 'onboarding_command' and command == 'help':
                 self.env.user.odoobot_state = "onboarding_ping"
                 self.env.user.odoobot_failed = False
                 return self.env._(
-                    "Wow you are a natural!%(new_line)sPing someone with @username to grab their "
+                    "Great! 👍%(new_line)sPing someone with @username to grab their "
                     "attention. %(bold_start)sTry to ping me using%(bold_end)s "
                     "%(command_start)s@OdooBot%(command_end)s in a sentence.",
                     **self._get_style_dict()
@@ -104,10 +95,18 @@ class MailBot(models.AbstractModel):
                     ("source", "=", source),
                 ]).unlink()
                 self.env.user.odoobot_failed = False
+                self.env.user.odoobot_state = "onboarding_command"
+                return self.env._(
+                    "Great! You can customize %(bold_start)scanned responses%(bold_end)s in the Discuss app."
+                    "%(new_line)sTo access special commands, %(bold_start)sstart your sentence with%(bold_end)s "
+                    "%(command_start)s/%(command_end)s. Try getting help.",
+                    **self._get_style_dict(),
+                )
+            elif odoobot_state == 'onboarding_command' and command == 'help':
                 self.env.user.odoobot_state = "idle"
                 return [
                     self.env._(
-                        "Great! You can customize %(bold_start)scanned responses%(bold_end)s in the Discuss app.",
+                        "Wow you are a natural!",
                         **self._get_style_dict(),
                     ),
                     self.env._(
