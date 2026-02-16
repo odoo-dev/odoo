@@ -1274,6 +1274,8 @@ class ChromeBrowser:
                 with port_file.open('r', encoding='utf-8') as f:
                     return proc, int(f.readline())
 
+        self._logger.warning('Time to investigate !')
+        time.sleep(600)
         if proc.poll() is None:
             proc.terminate()
             try:
