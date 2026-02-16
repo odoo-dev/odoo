@@ -35,9 +35,6 @@ class TestReports(odoo.tests.TransactionCase):
         Report = self.env['ir.actions.report']
         for report in Report.search([('report_type', 'like', 'qweb')]):
             report_model = 'report.%s' % report.report_name
-            if report.report_name == 'stock.report_location_barcode':
-                _logger.info("SKIPPING report %s", report.report_name)
-                continue
             try:
                 self.env[report_model]
             except KeyError:

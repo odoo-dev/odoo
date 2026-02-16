@@ -1298,6 +1298,7 @@ class ChromeBrowser:
         headless_switches = {
             '--headless': '',
             '--disable-extensions': '',
+            '--disable-component-extensions-with-background-pages': '',
             '--disable-background-networking' : '',
             '--disable-background-timer-throttling' : '',
             '--disable-backgrounding-occluded-windows': '',
@@ -1312,6 +1313,12 @@ class ChromeBrowser:
             '--disable-gpu': '',
             '--enable-unsafe-swiftshader': '',
             '--mute-audio': '',
+            '--disable-component-update': '',
+            '--disable-ipc-flooding-protection': '',
+            '--enable-automation': '',
+            '--hide-scrollbars': '',
+            '--propagate-iph-for-testing': '',
+            '--js-flags=--random-seed': '1122334455',
         }
         switches = {
             # required for tours that use Youtube autoplay conditions (namely website_slides' "course_tour")
@@ -1322,6 +1329,7 @@ class ChromeBrowser:
             '--remote-debugging-address': HOST,
             '--remote-debugging-port': str(self.remote_debugging_port),
             '--user-data-dir': user_data_dir,
+            '--temp-profile': '',
             '--no-first-run': '',
             # FIXME: these next 2 flags are temporarily uncommented to allow client
             # code to manually run garbage collection. This is done as currently
