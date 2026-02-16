@@ -63,7 +63,7 @@
         >
             <span t-if="record.startHour"><t t-out="record.startHour" /></span>
             <span>
-                <i area-hidden="true" t-if="record.titleIcon" t-attf-class="me-2 {{record.titleIcon}}"/>
+                <i area-hidden="true" t-if="record.titleIcon" class="oi me-2" t-att-data-icon="record.titleIcon"/>
                 <t t-out="record.title"/>
             </span>
         </a>
