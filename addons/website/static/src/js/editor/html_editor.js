@@ -62,6 +62,33 @@ patch(LinkPopover, {
 patch(LinkPopover.prototype, {
     setup() {
         super.setup();
+        if (this.env.services.website.currentWebsiteId) {
+            this.currentRelValues = this.props.linkElement.rel.split(" ");
+            this.state.relAttributeOptions = {
+                nofollow: {
+                    label: "nofollow",
+                    description: _t("Tells search engines not to follow this link"),
+                    isChecked: this.currentRelValues.includes("nofollow"),
+                },
+                noreferrer: {
+                    label: "noreferrer",
+                    description: _t("Removes referrer information sent to the target site"),
+                    isChecked: this.currentRelValues.includes("noreferrer"),
+                },
+                sponsored: {
+                    label: "sponsored",
+                    description: _t("Indicates the link is sponsored or paid content"),
+                    isChecked: this.currentRelValues.includes("sponsored"),
+                },
+                noopener: {
+                    label: "noopener",
+                    description: _t(
+                        "Prevents the new page from accessing the original window (security)"
+                    ),
+                    isChecked: this.currentRelValues.includes("noopener"),
+                },
+            };
+        }
         this.urlRef = useChildRef();
         useEffect(
             (el) => {

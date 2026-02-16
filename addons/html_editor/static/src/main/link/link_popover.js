@@ -67,7 +67,6 @@ export class LinkPopover extends Component {
             textContent === linkElement.getAttribute("href") ||
             textContent + "/" === linkElement.getAttribute("href");
 
-        const currentRelValues = linkElement.rel.split(" ");
         this.linkPreviewTarget =
             linkElement.hash?.length && this.isAbsoluteURLInCurrentDomain(linkElement.href)
                 ? "_self"
@@ -97,30 +96,7 @@ export class LinkPopover extends Component {
             showLabel: !linkElement.childElementCount,
             stripDomain: true,
             showAdvancedOptions: false,
-            relAttributeOptions: {
-                nofollow: {
-                    label: "nofollow",
-                    description: _t("Tells search engines not to follow this link"),
-                    isChecked: currentRelValues.includes("nofollow"),
-                },
-                noreferrer: {
-                    label: "noreferrer",
-                    description: _t("Removes referrer information sent to the target site"),
-                    isChecked: currentRelValues.includes("noreferrer"),
-                },
-                sponsored: {
-                    label: "sponsored",
-                    description: _t("Indicates the link is sponsored or paid content"),
-                    isChecked: currentRelValues.includes("sponsored"),
-                },
-                noopener: {
-                    label: "noopener",
-                    description: _t(
-                        "Prevents the new page from accessing the original window (security)"
-                    ),
-                    isChecked: currentRelValues.includes("noopener"),
-                },
-            },
+            relAttributeOptions: {},
         });
 
         this.updateDocumentState();
