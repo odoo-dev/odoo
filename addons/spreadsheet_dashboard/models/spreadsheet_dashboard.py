@@ -54,6 +54,7 @@ class SpreadsheetDashboard(models.Model):
             'revisions': [],
             'default_currency': default_currency,
             'translation_namespace': self._get_dashboard_translation_namespace(),
+            **self._get_spreadsheet_metadata()
         })
 
     def _get_sample_dashboard(self):

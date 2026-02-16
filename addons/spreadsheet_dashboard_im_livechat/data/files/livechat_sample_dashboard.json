@@ -951,7 +951,7 @@
       "id": "4db3e2d2-5471-44a4-80ca-7c2fa4f1a5ac",
       "type": "date",
       "label": "Period",
-      "defaultValue": "last_30_days"
+      "defaultValue": "spreadsheet.spreadsheet_date_filter_last_30_days"
     },
     {
       "id": "5124b7b1-aa17-46cc-b574-2309708de75b",

@@ -787,7 +787,7 @@
       "id": "f849aaa6-4c1a-43f6-9c0b-7a5ea9c83eae",
       "type": "date",
       "label": "Date",
-      "defaultValue": "last_12_months"
+      "defaultValue": "spreadsheet.spreadsheet_date_filter_last_12_months"
     },
     {
       "id": "62e15eb2-9410-4803-b189-5fa789a7e94f",

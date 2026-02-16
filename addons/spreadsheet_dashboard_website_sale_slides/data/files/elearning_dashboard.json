@@ -513,7 +513,7 @@
       "id": "46b74887-ff98-4c97-9629-4a5a14084321",
       "type": "date",
       "label": "Period",
-      "defaultValue": "last_12_months"
+      "defaultValue": "spreadsheet.spreadsheet_date_filter_last_12_months"
     }
   ],
   "lists": {},

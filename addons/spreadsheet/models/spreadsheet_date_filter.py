@@ -13,6 +13,7 @@ class SpreadsheetDateFilter(models.Model):
         ("week", "Week"),
         ("month", "Month"),
         ("year", "Year"),
+        ("custom", "Custom period"),
     ], required=True)
 
     from_pattern = fields.Char(required=True)

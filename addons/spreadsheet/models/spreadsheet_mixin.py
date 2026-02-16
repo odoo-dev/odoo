@@ -120,22 +120,24 @@ class SpreadsheetMixin(models.AbstractModel):
         ]
 
     def _get_spreadsheet_metadata(self, access_token=None):
-        date_filters = self.env['spreadsheet.date.filter'].web_search_read([], {
-            'name': {},
-            'category': {},
-            'from_pattern': {},
-            'to_pattern': {},
-            'offset_previous': {},
-            'offset_next': {},
-            'next_from_pattern': {},
-            'next_to_pattern': {},
-            'previous_from_pattern': {},
-            'previous_to_pattern': {},
-            'navigation_mode': {},
-            'sequence': {},
-        })
+        date_filters = self.env['spreadsheet.date.filter'].search([])
+        xml_ids = date_filters.get_external_id()
         return {
-            'date_filters': date_filters['records'],
+            'date_filters': [{
+                'name': f.name,
+                'category': f.category,
+                'from_pattern': f.from_pattern,
+                'to_pattern': f.to_pattern,
+                'offset_previous': f.offset_previous,
+                'offset_next': f.offset_next,
+                'next_from_pattern': f.next_from_pattern,
+                'next_to_pattern': f.next_to_pattern,
+                'previous_from_pattern': f.previous_from_pattern,
+                'previous_to_pattern': f.previous_to_pattern,
+                'navigation_mode': f.navigation_mode,
+                'sequence': f.sequence,
+                'xml_id': xml_ids[f.id] or False,
+            } for f in date_filters],
         }
 
     def _empty_spreadsheet_data_bin(self):

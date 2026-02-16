@@ -405,10 +405,10 @@ export function checkFilterFieldMatching(fieldMatchings) {
     return CommandResult.Success;
 }
 
-export function registerDateFilters(dateFilters) {
+export function registerDateFilters(dateFilters = []) {
     globalFilterDateRegistry.content = {};
     for (const dateFilter of dateFilters) {
-        globalFilterDateRegistry.add(dateFilter.id, {
+        globalFilterDateRegistry.add(dateFilter.xml_id || dateFilter.id, {
             sequence: dateFilter.sequence,
             label: dateFilter.name,
             getDateRange: (now, value, offset) => {
@@ -452,10 +452,14 @@ export function registerDateFilters(dateFilters) {
             category: dateFilter.category,
         });
     }
+    // Register built-in date filters
     globalFilterDateRegistry.add("month", monthHandler);
     globalFilterDateRegistry.add("quarter", quarterHandler);
     globalFilterDateRegistry.add("year", yearHandler);
     globalFilterDateRegistry.add("range", rangeHandler);
+    globalFilterDateRegistry.add("this_month", thisMonthHandler);
+    globalFilterDateRegistry.add("this_quarter", thisQuarterHandler);
+    globalFilterDateRegistry.add("this_year", thisYearHandler);
 }
 
 const monthHandler = {
@@ -546,6 +550,34 @@ const rangeHandler = {
     category: "misc",
 }
 
+const thisMonthHandler = {
+    sequence: 80,
+    label: _t("Current Month"),
+    canOnlyBeDefault: true,
+    getDefaultValue: (now) => ({ type: "month", year: now.year, month: now.month }),
+    category: "month",
+}
+
+const thisQuarterHandler = {
+        sequence: 100,
+        label: _t("Current Quarter"),
+        canOnlyBeDefault: true,
+        getDefaultValue: (now) => ({
+            type: "quarter",
+            year: now.year,
+            quarter: Math.floor((now.month - 1) / 3) + 1,
+        }),
+        category: "month",
+    }
+
+const thisYearHandler = {
+    sequence: 140,
+    label: _t("Current Year"),
+    canOnlyBeDefault: true,
+    getDefaultValue: (now) => ({ type: "year", year: now.year }),
+    category: "year",
+}
+
 globalFilterDateRegistry
     .add("today", {
         sequence: 10,
@@ -624,25 +656,9 @@ globalFilterDateRegistry
         isFixedPeriod: false,
         category: "month",
     })
-    .add("this_month", {
-        sequence: 80,
-        label: _t("Current Month"),
-        canOnlyBeDefault: true,
-        getDefaultValue: (now) => ({ type: "month", year: now.year, month: now.month }),
-        category: "month",
-    })
+    // .add("this_month", )
     // .add("month", )
-    .add("this_quarter", {
-        sequence: 100,
-        label: _t("Current Quarter"),
-        canOnlyBeDefault: true,
-        getDefaultValue: (now) => ({
-            type: "quarter",
-            year: now.year,
-            quarter: Math.floor((now.month - 1) / 3) + 1,
-        }),
-        category: "month",
-    })
+    .add("this_quarter", )
     // .add("quarter", )
     .add("year_to_date", {
         sequence: 120,
@@ -666,15 +682,9 @@ globalFilterDateRegistry
         isFixedPeriod: false,
         category: "year",
     })
-    .add("this_year", {
-        sequence: 140,
-        label: _t("Current Year"),
-        canOnlyBeDefault: true,
-        getDefaultValue: (now) => ({ type: "year", year: now.year }),
-        category: "year",
-    })
-    .add("year",)
-    .add("range",);
+    // .add("this_year", )
+    // .add("year",)
+    // .add("range",);
 
 /**
  * The from-to date range from a date filter value.

@@ -832,7 +832,7 @@
       "id": "ff0e1a26-3d4c-48b6-85a6-2777b522bb52",
       "type": "date",
       "label": "Period",
-      "defaultValue": "last_90_days"
+      "defaultValue": "spreadsheet.spreadsheet_date_filter_last_90_days"
     },
     {
       "id": "b2ea6617-2767-4a88-bb69-ca205c8d8ff8",

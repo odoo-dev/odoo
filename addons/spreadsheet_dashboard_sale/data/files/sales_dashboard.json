@@ -1418,7 +1418,7 @@
       "id": "13d30fda-b14d-4a56-b186-25468af3b1e9",
       "type": "date",
       "label": "Period",
-      "defaultValue": "last_90_days"
+      "defaultValue": "spreadsheet.spreadsheet_date_filter_last_90_days"
     },
     {
       "id": "e6db018b-19ec-42c3-b29e-11b1e3910916",

@@ -1027,7 +1027,7 @@
       "id": "757a1b4b-e339-4879-beb6-9851050387cf",
       "type": "date",
       "label": "Period",
-      "defaultValue": "last_90_days"
+      "defaultValue": "spreadsheet.spreadsheet_date_filter_last_90_days"
     },
     {
       "id": "8051befe-619f-4fe7-b788-d34584297bad",

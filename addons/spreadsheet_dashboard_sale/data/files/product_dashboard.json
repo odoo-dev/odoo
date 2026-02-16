@@ -512,7 +512,7 @@
       "id": "a6c3274b-e53c-4c6b-90a8-bc3e3d109f52",
       "type": "date",
       "label": "Period",
-      "defaultValue": "last_30_days"
+      "defaultValue": "spreadsheet.spreadsheet_date_filter_last_30_days"
     },
     {
       "id": "36814ad9-adac-4aba-a5ad-df595a306ef7",
