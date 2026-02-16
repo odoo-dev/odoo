@@ -617,6 +617,41 @@ class Website(Home):
         order = self._get_search_order(order)
         options = options or {}
         results_count, search_results, fuzzy_term = request.website._search_with_fuzzy(search_type, term, offset, limit, order, options)
+
+        if not options.get("not_autocomplete") and results_count > limit:
+            """
+            TODO: Remove once priority system for search is implemented.
+
+            Distribute a global result limit proportionally across groups
+            based on their contribution to the total results.
+
+            Example:
+                Total results across 5 models = 50
+                    - M1: 5   (10%)
+                    - M2: 10  (20%)
+                    - M3: 20  (40%)
+                    ...
+
+                With limit = 30:
+                    - M1 → 10% of 30 = 3
+                    - M2 → 20% of 30 = 6
+                    - M3 → 40% of 30 = 12
+                    ...
+
+            Each group receives:
+                (group_count / total_count) * limit
+            """
+            for model in search_results:
+                results_data = model.get("results")
+                if results_data:
+                    # Calculate proportional allocation for this group
+                    allocated_count = round(
+                        (len(results_data) / results_count) * limit
+                    )
+                    # Ensure at least 1 result per group to maintain visibility
+                    allocated_count = max(allocated_count, 1)
+                    model["results"] = results_data[:allocated_count]
+
         # Sort result based in sequence for ordered results.
         search_results.sort(key=lambda d: d.get('sequence', float('inf')))
         if not results_count:
@@ -723,6 +758,7 @@ class Website(Home):
     def _get_hybrid_search_options(self, **post):
         return {
             'allowFuzzy': not post.get('noFuzzy'),
+            'not_autocomplete': True
         }
 
     @http.route([

@@ -3463,7 +3463,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
     <t t-call="website.website_search_box_input"
         search_type.f="all"
         action.f="/website/search"
-        limit="limit or '6'"/>
+        limit="limit or '30'"/>
 </template>
 
 <!-- Extra element : Search -->
