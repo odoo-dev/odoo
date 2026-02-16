@@ -268,9 +268,6 @@ export class SearchBar extends Interaction {
                     nextFocusedEl.focus();
                 }
                 break;
-            case "Enter":
-                this.limit = 0; // prevent autocomplete
-                break;
             case "Tab":
                 this.el.classList.add("o_keyboard_navigation");
                 break;
