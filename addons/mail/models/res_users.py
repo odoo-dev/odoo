@@ -464,12 +464,21 @@ class ResUsers(models.Model):
                 else:
                     model_activity_states[model_key]['planned_count'] += 1
 
+        menu_root_id_by_model_name = {
+            model_name: menu_root_ids[0]
+            for model_name, _ in activities_model_groups.items()
+            if (menu_root_ids := self.env[model_name]._get_backend_root_menu_ids())
+        }
+        menu_root_by_id = self.env['ir.ui.menu'].browse(list(menu_root_id_by_model_name.values())).grouped('id')
         model_ids = [self.env["ir.model"]._get_id(name) for name in activities_model_groups]
         user_activities = {}
         for model_name, activities in activities_model_groups.items():
             Model = self.env[model_name]
-            module = Model._original_module
-            icon = module and modules.module.get_module_icon(module)
+            if (menu_root_id := menu_root_id_by_model_name.get(model_name)) and menu_root_by_id[menu_root_id].web_icon:
+                icon = f'/web/image/ir.ui.menu/{menu_root_id}/web_icon_data'
+            else:
+                module = Model._original_module
+                icon = module and modules.module.get_module_icon(module)
             model = self.env["ir.model"]._get(model_name).with_prefetch(model_ids)
             user_activities[model_name] = {
                 "id": model.id,
