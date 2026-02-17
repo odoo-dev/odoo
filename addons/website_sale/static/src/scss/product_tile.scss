@@ -258,6 +258,11 @@
         max-width: 66ch;
         font-size: var(--o-wsale-card-info-description-font-size, CLAMP(12px, 0.86em, 0.86rem));
 
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        line-height: 1.2;
         // Hide empty product description in not-edition mode
         body:not(.editor_enable) &:empty {
             display: none;
