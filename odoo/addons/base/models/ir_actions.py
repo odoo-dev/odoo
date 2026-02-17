@@ -1187,12 +1187,14 @@ class IrActionsServer(models.Model):
         # Update the environment and context to run the single method for each record.
         active_ids = self.env.context.get('active_ids', [active_id] if active_id else [])
         initial_context = eval_context['env'].context
+        model_name = eval_context['model']._name
         for active_id in active_ids:
             # run context dedicated to a particular active_id
             context = {**initial_context, 'active_ids': [active_id], 'active_id': active_id}
             run_self = self.with_context(context)
-            eval_context['env'] = eval_context['env'](context=run_self.env.context)
-            eval_context['records'] = eval_context['record'] = records.browse(active_id)
+            eval_context['env'] = eval_context['env'].with_context(run_self.env.context)
+            eval_context['model'] = eval_context['env'][model_name]
+            eval_context['records'] = eval_context['record'] = eval_context['model'].browse(active_id)
             res = runner(run_self, eval_context=eval_context)
 
         return res or False
