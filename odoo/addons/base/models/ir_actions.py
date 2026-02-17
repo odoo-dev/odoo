@@ -1183,6 +1183,8 @@ class IrActionsServer(models.Model):
                 res = runner(self, eval_context=eval_context)
                 return res or False
 
+        # We need to run a method "single" on multiple records.
+        # Update the environment and context to run the single method for each record.
         active_ids = self.env.context.get('active_ids', [active_id] if active_id else [])
         initial_context = eval_context['env'].context
         for active_id in active_ids:
