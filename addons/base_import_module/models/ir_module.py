@@ -41,6 +41,7 @@ class IrModuleModule(models.Model):
         ('official', 'Official Apps'),
         ('industries', 'Industries'),
     ], default='official')
+    lines_of_code = fields.Integer(string="Extra lines of code")
 
     @api.model
     @ormcache(cache='stable')
@@ -441,6 +442,8 @@ class IrModuleModule(models.Model):
     def _get_modules_from_apps(self, fields, module_type, module_name, domain=None, limit=None, offset=None):
         if 'name' not in fields:
             fields = fields + ['name']
+        if 'lines_of_code' not in fields:
+            fields = fields + ['lines_of_code']
         payload = {
             'params': {
                 'series': major_version,
