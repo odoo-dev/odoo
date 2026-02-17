@@ -1167,28 +1167,34 @@ class IrActionsServer(models.Model):
             # call the multi method
             run_self = self.with_context(eval_context['env'].context)
             res = runner(run_self, eval_context=eval_context)
-        elif runner:
-            active_id = self.env.context.get('active_id')
-            if not active_id and self.env.context.get('onchange_self'):
-                active_id = self.env.context['onchange_self']._origin.id
-                if not active_id:  # onchange on new record
-                    res = runner(self, eval_context=eval_context)
-            active_ids = self.env.context.get('active_ids', [active_id] if active_id else [])
-            initial_context = eval_context['env'].context
-            for active_id in active_ids:
-                # run context dedicated to a particular active_id
-                context = {**initial_context, 'active_ids': [active_id], 'active_id': active_id}
-                run_self = self.with_context(context)
-                eval_context['env'] = eval_context['env'](context=run_self.env.context)
-                eval_context['records'] = eval_context['record'] = records.browse(active_id)
-                res = runner(run_self, eval_context=eval_context)
-        else:
+            return res or False
+
+        if not runner:
             _logger.warning(
                 "Found no way to execute server action %r of type %r, ignoring it. "
                 "Verify that the type is correct or add a method called "
                 "`_run_action_<type>` or `_run_action_<type>_multi`.",
-                self.name, self.state
+                self.name, self.state,
             )
+            return False
+
+        active_id = self.env.context.get('active_id')
+        if not active_id and self.env.context.get('onchange_self'):
+            active_id = self.env.context['onchange_self']._origin.id
+            if not active_id:  # onchange on new record
+                res = runner(self, eval_context=eval_context)
+                return res or False
+
+        active_ids = self.env.context.get('active_ids', [active_id] if active_id else [])
+        initial_context = eval_context['env'].context
+        for active_id in active_ids:
+            # run context dedicated to a particular active_id
+            context = {**initial_context, 'active_ids': [active_id], 'active_id': active_id}
+            run_self = self.with_context(context)
+            eval_context['env'] = eval_context['env'](context=run_self.env.context)
+            eval_context['records'] = eval_context['record'] = records.browse(active_id)
+            res = runner(run_self, eval_context=eval_context)
+
         return res or False
 
     def _can_execute_action_on_records(self, records):
