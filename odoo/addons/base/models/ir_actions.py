@@ -1155,19 +1155,17 @@ class IrActionsServer(models.Model):
         if self.warning:
             raise ServerActionWithWarningsError(_("Server action %(action_name)s has one or more warnings, address them first.", action_name=self.name))
 
-        multi = True
-        t = self.env.registry[self._name]
-        runner = getattr(t, f'_run_action_{self.state}_multi', None)
-        if not runner:
-            multi = False
-            runner = getattr(t, f'_run_action_{self.state}', None)
+        model = self.env.registry[self._name]
+        runner = getattr(model, f'_run_action_{self.state}_multi', None)
 
-        res = False
-        if runner and multi:
+        if runner:
             # call the multi method
             run_self = self.with_context(eval_context['env'].context)
             res = runner(run_self, eval_context=eval_context)
             return res or False
+
+        if not runner:
+            runner = getattr(model, f'_run_action_{self.state}', None)
 
         if not runner:
             _logger.warning(
