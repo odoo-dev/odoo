@@ -8,6 +8,9 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="source_pos_order_id" readonly="1" invisible="not source_pos_order_id"/>
             </xpath>
+            <xpath expr="//field[@name='history_ids']/list" position="inside">
+                <field name="balance"/>
+            </xpath>
         </field>
     </record>    
 </odoo>

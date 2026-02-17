@@ -146,8 +146,8 @@ class PosOrder(models.Model):
             {
                 'order_id': self.id,
                 'card_id': coupon_id,
-                'spent': -coupon_vals['points'] if coupon_vals['points'] < 0 else 0,
-                'won': coupon_vals['points'] if coupon_vals['points'] > 0 else 0,
+                'spent': coupon_vals.get('spent', 0),
+                'won': coupon_vals.get('won', 0),
             }
             for coupon_id, coupon_vals in coupon_data.items()
         ]

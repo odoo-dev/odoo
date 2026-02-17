@@ -11,17 +11,22 @@ patch(GeneratePrinterData.prototype, {
         const points = this.order.getLoyaltyPoints();
         data.extra_data.loyalties = [];
 
+        const entries = [
+            { key: "won", label: "Won:" },
+            { key: "spent", label: "Spent:" },
+            { key: "balance", label: "Balance:" },
+        ];
+
         for (const coupon of points) {
-            data.extra_data.loyalties.push({
-                name: coupon.program.name,
-                type: coupon.points.won >= 0 ? _t("Won:") : _t("Spent:"),
-                points: coupon.points.won || coupon.points.spent,
-            });
-            data.extra_data.loyalties.push({
-                name: coupon.program.name,
-                type: _t("Balance:"),
-                points: coupon.points.balance,
-            });
+            for (const { key, label } of entries) {
+                if (coupon.points[key]) {
+                    data.extra_data.loyalties.push({
+                        name: coupon.program.portal_point_name,
+                        type: _t(label),
+                        points: coupon.points[key],
+                    });
+                }
+            }
         }
 
         if (this.order.new_coupon_info) {
