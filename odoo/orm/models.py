@@ -5903,6 +5903,22 @@ class BaseModel(metaclass=MetaModel):
         """
         return self.union(other)
 
+    def __ior__(self, other) -> Self:
+        warnings.warn("Dont use |=")
+        return self.union(other)
+
+    def __iand__(self, other):
+        warnings.warn("Dont use &=")
+        return self & other
+
+    def __iadd__(self, other):
+        warnings.warn("Dont use +=")
+        return self.concat(other)
+
+    def __isub__(self, other):
+        warnings.warn("Dont use -=")
+        return self - other
+
     @api.private
     def union(self, *args: Self) -> Self:
         """ Return the union of ``self`` with all the arguments (in linear time
