@@ -957,15 +957,6 @@ class IrActionsServer(models.Model):
             "group_ids", "model_name",
         }
 
-    def _get_runner(self):
-        multi = True
-        t = self.env.registry[self._name]
-        fn = getattr(t, f'_run_action_{self.state}_multi', None)
-        if not fn:
-            multi = False
-            fn = getattr(t, f'_run_action_{self.state}', None)
-        return fn, multi
-
     def create_action(self):
         """ Create a contextual action for each server action. """
         for action in self:
@@ -1164,7 +1155,13 @@ class IrActionsServer(models.Model):
         if self.warning:
             raise ServerActionWithWarningsError(_("Server action %(action_name)s has one or more warnings, address them first.", action_name=self.name))
 
-        runner, multi = self._get_runner()
+        multi = True
+        t = self.env.registry[self._name]
+        runner = getattr(t, f'_run_action_{self.state}_multi', None)
+        if not runner:
+            multi = False
+            runner = getattr(t, f'_run_action_{self.state}', None)
+
         res = False
         if runner and multi:
             # call the multi method
