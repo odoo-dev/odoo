@@ -30,13 +30,8 @@ registry.category("web_tour.tours").add("test_website_event_search", {
             run: 'edit Event 0',
         },
         {
-            trigger: 'body',
-            async run() {
-                await delay(2000);
-            }
-        },
-        {
-            trigger: 'body',
+            content: 'Wait for the search results to be updated & close the search modal',
+            trigger: '.o_searchbar_form .o_dropdown_menu:not(:has(.o_search_result_item_placeholder))',
             run: 'press Escape',
         },
         {

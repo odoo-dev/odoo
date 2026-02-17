@@ -2,6 +2,7 @@
 import base64
 import datetime
 import logging
+import math
 import os
 import re
 import urllib.parse
@@ -617,11 +618,17 @@ class Website(Home):
         order = self._get_search_order(order)
         options = options or {}
         results_count, search_results, fuzzy_term = request.website._search_with_fuzzy(search_type, term, offset, limit, order, options)
+        # Sort result based in sequence for ordered results.
+        search_results.sort(key=lambda d: d.get('sequence', float('inf')))
+        if not results_count:
+            return {
+                'results': {},
+                'results_count': 0,
+                'parts': {},
+            }
 
-        if not options.get("not_autocomplete") and results_count > limit:
+        if options.get("proportionate_allocation") and results_count > limit:
             """
-            TODO: Remove once priority system for search is implemented.
-
             Distribute a global result limit proportionally across groups
             based on their contribution to the total results.
 
@@ -641,25 +648,18 @@ class Website(Home):
             Each group receives:
                 (group_count / total_count) * limit
             """
+            total_obtained_results = sum(len(m.get("results", [])) for m in search_results)
             for model in search_results:
                 results_data = model.get("results")
                 if results_data:
                     # Calculate proportional allocation for this group
-                    allocated_count = round(
-                        (len(results_data) / results_count) * limit
+                    allocated_count = math.ceil(
+                        (len(results_data) / total_obtained_results) * limit
                     )
                     # Ensure at least 1 result per group to maintain visibility
                     allocated_count = max(allocated_count, 1)
                     model["results"] = results_data[:allocated_count]
 
-        # Sort result based in sequence for ordered results.
-        search_results.sort(key=lambda d: d.get('sequence', float('inf')))
-        if not results_count:
-            return {
-                'results': {},
-                'results_count': 0,
-                'parts': {},
-            }
         term = fuzzy_term or term
         search_results = request.website._search_render_results(search_results, limit)
 
@@ -758,7 +758,6 @@ class Website(Home):
     def _get_hybrid_search_options(self, **post):
         return {
             'allowFuzzy': not post.get('noFuzzy'),
-            'not_autocomplete': True
         }
 
     @http.route([
@@ -806,7 +805,7 @@ class Website(Home):
 
         values = next(iter(data.get('results', {}).values()), {})
         has_more = values.get('searchCount') > offset + limit
-        html = self.env['ir.ui.view']._render_template('website.search_result_item', {'bucket': values})
+        html = self.env['ir.ui.view']._render_template('website.search_result_item', {'results': values})
         return html, has_more
 
     # ------------------------------------------------------

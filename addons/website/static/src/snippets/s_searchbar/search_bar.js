@@ -60,6 +60,7 @@ export class SearchBar extends Interaction {
             searchType: dataset.searchType,
             // Make it easy for customization to disable fuzzy matching on specific searchboxes
             allowFuzzy: !(dataset.noFuzzy && JSON.parse(dataset.noFuzzy)),
+            proportionate_allocation: true,
         };
         for (const fieldEl of form.querySelectorAll("input[type='hidden']")) {
             this.options[fieldEl.name] = fieldEl.value;
