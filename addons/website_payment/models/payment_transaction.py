@@ -9,13 +9,14 @@ class PaymentTransaction(models.Model):
     _inherit = "payment.transaction"
 
     is_donation = fields.Boolean(string="Is donation")
+    donation_comment = fields.Char(string="Donation Comment")
 
     def _post_process(self):
         super()._post_process()
         for donation_tx in self.filtered(lambda tx: tx.state == 'done' and tx.is_donation):
             donation_tx._send_donation_email()
             msg = [_('Payment received from donation with following details:')]
-            for field in ['company_id', 'partner_id', 'partner_name', 'partner_country_id', 'partner_email']:
+            for field in ['company_id', 'partner_id', 'partner_name', 'partner_country_id', 'partner_email', 'donation_comment']:
                 field_name = donation_tx._fields[field].string
                 value = donation_tx[field]
                 if value:

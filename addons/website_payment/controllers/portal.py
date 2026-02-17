@@ -73,6 +73,8 @@ class PaymentPortal(payment_portal.PaymentPortal):
             })
         elif not tx_sudo.partner_country_id:
             tx_sudo.partner_country_id = int(kwargs['partner_details']['country_id'])
+        if kwargs.get('donation_comment'):
+            tx_sudo.donation_comment = kwargs.get('donation_comment')
         # the user can change the donation amount on the payment page,
         # therefor we need to recompute the access_token
         access_token = payment_utils.generate_access_token(
