@@ -34,7 +34,7 @@
     </t>
 </t>
 
-<div t-name="website.s_searchbar.autocomplete.skeleton.loader" class="o_dropdown_menu show w-100">
+<div t-name="website.s_searchbar.autocomplete.skeleton.loader" class="o_dropdown_menu o_cc o_cc1 show w-100">
     <ul class="list-unstyled mb-0">
         <li class="o_search_result_item o_search_result_item_placeholder" t-foreach="[1, 2, 3]" t-as="i" t-key="i">
             <div class="d-flex align-items-center justify-content-between gap-3 py-2 px-3">
@@ -51,7 +51,7 @@
 </div>
 
 <!-- Search Bar autocomplete item -->
-<div t-name="website.s_searchbar.autocomplete" class="o_dropdown_menu show position-absolute w-100">
+<div t-name="website.s_searchbar.autocomplete" class="o_dropdown_menu o_cc o_cc1 show position-absolute w-100">
     <!-- Fuzzy search fallback -->
     <t t-if="fuzzySearch and Object.keys(results).length !== 0">
         <span class="dropdown-item-text px-3">
