@@ -87,11 +87,10 @@ export class Notification extends Record {
         return ["exception", "bounce"].includes(this.notification_status);
     }
 
-    get icon() {
+    get iconClass() {
         if (this.isFailure) {
-            return "fa fa-envelope";
+            return "oi-filled";
         }
-        return "fa fa-envelope-o";
     }
 
     get label() {

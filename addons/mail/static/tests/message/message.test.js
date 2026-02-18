@@ -197,7 +197,7 @@ test("Edit message (mobile)", async () => {
     await click(".o-mail-Message [title='Expand']");
     await click(".o-dropdown-item:contains('Edit')");
     await insertText(".o-mail-Message .o-mail-Composer-input", "edited message", { replace: true });
-    await click(".o-mail-Message .fa-paper-plane-o");
+    await click(".o-mail-Message [data-icon='send']");
     await contains(".o-mail-Message-content:text('edited message (edited)')");
 });
 
@@ -1113,18 +1113,18 @@ test("toggle_star message", async () => {
     await openDiscuss(channelId);
     await contains(".o-mail-Message");
     await contains(".o-mail-Message [title='Add Star']");
-    await contains(".o-mail-Message [title='Add Star']" + " i.fa-star-o");
+    await contains(".o-mail-Message [title='Add Star']" + " i[data-icon='star']");
     await contains("button:has(:text('Starred messages'))", { contains: [".badge", { count: 0 }] });
     await click(".o-mail-Message [title='Add Star']");
     await contains("button:has(:text('Starred messages'))", { contains: [".badge:text('1')"] });
     await expect.waitForSteps(["rpc:toggle_message_starred"]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Remove Star']" + " i.fa-star");
+    await contains(".o-mail-Message [title='Remove Star']" + " i[data-icon='star'].oi-filled");
     await click(".o-mail-Message [title='Remove Star']");
     await contains("button:has(:text('Starred messages'))", { contains: [".badge", { count: 0 }] });
     await expect.waitForSteps(["rpc:toggle_message_starred"]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Add Star']" + " i.fa-star-o");
+    await contains(".o-mail-Message [title='Add Star']" + " i[data-icon='star']");
 });
 
 test("Name of message author is only displayed in chat window for partners others than the current user", async () => {
@@ -1245,7 +1245,7 @@ test("Notification Error", async () => {
     expect(".o-mail-Message-notification i:first").toHaveAttribute("data-icon", "mail");
     await click(".o-mail-Message-notification").then(() => {});
     await contains(".o-mail-MessageNotificationPopover");
-    expect(".o-mail-MessageNotificationPopover i.fa-times.text-danger").toHaveCount(1);
+    expect(".o-mail-MessageNotificationPopover i[data-icon='close'].text-danger").toHaveCount(1);
 });
 
 test("click on notification icon opens recipients list when no recipient", async () => {
@@ -2276,7 +2276,7 @@ test("Prettify message links", async () => {
     );
     await press("Enter");
     await contains(".o-mail-Message:has(:text('TestPartner'))");
-    await contains(".o-mail-Message .fa.fa-comment");
+    await contains(".o-mail-Message .oi[data-icon='chat_bubble']");
     await contains(".o-mail-Message:has(:text('" + url(`/mail/message/100`) + "'))");
 });
 

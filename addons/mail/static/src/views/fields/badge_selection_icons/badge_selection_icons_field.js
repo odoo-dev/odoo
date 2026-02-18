@@ -21,13 +21,13 @@ export class BadgeSelectionWithIconsField extends BadgeSelectionField {
         // --- Many2one ---
         relatedIconField: { type: String, optional: true },
         // --- Selection ---
-        // Static mapping from XML options: { 'selection_key': 'fa-icon' }
+        // Static mapping from XML options: { 'selection_key': 'icon' }
         iconMapping: { type: Object, optional: true },
         // Field name used to filter the visible selection options
         allowedSelectionField: { type: String, optional: true },
     };
     static defaultProps = {
-        defaultIcon: "fa-check",
+        defaultIcon: "check",
         iconMapping: {},
     };
     static template = "mail.BadgeSelectionIconsField";

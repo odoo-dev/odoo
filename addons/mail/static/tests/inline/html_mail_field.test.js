@@ -121,7 +121,7 @@ test("HtmlMail don't have access to column commands", async function () {
 test("HtmlMail add icon and save inline html", async function () {
     enableTransitions();
     useCustomStyleRules(
-        `.test-icon-inline .note-editable .fa {
+        `.test-icon-inline .note-editable .oi {
             color: rgb(55,65,81) !important;
             background-color: rgb(249,250,251) !important;
         }
@@ -150,7 +150,7 @@ test("HtmlMail add icon and save inline html", async function () {
     await press("enter");
 
     await contains("a.nav-link:contains('Icons')").click();
-    await contains("span.fa-glass").click();
+    await contains("span[data-icon='local_bar']").click();
 
     await clickSave();
     await expect.waitForSteps(["web_save"]);

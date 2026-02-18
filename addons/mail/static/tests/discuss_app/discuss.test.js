@@ -351,7 +351,7 @@ test("sidebar: chat im_status rendering", async () => {
         contains: [".o-mail-ThreadIcon [title='Offline']"],
     });
     await contains(".o-mail-DiscussSidebarChannel:has(:text('Partner2'))", {
-        contains: [".fa-circle.text-success"],
+        contains: ["[data-icon='circle'].text-success"],
     });
     await contains(".o-mail-DiscussSidebarChannel:has(:text('Partner3'))", {
         contains: [".o-mail-ThreadIcon [title='Idle']"],
@@ -626,7 +626,7 @@ test("sidebar: Inbox should have icon", async () => {
     pyEnv["res.users"].write(serverState.userId, { notification_type: "inbox" });
     await start();
     await openDiscuss("mail.box_inbox");
-    await contains("button:has(:text('Inbox'))", { contains: [".fa-inbox"] });
+    await contains("button:has(:text('Inbox'))", { contains: ["[data-icon='inbox']"] });
 });
 
 test("last discuss conversation is remembered", async () => {
@@ -1836,10 +1836,10 @@ test("Thread avatar is not editable in DM chat", async () => {
     await start();
     await openDiscuss(groupChatId);
     await contains(".o-mail-DiscussContent-threadName[title='GroupChat']");
-    await contains(".o-mail-DiscussContent-threadAvatar .fa-pencil");
+    await contains(".o-mail-DiscussContent-threadAvatar [data-icon='edit']");
     await click(".o-mail-DiscussSidebar-item:contains('Demo')");
     await contains(".o-mail-DiscussContent-threadName[title='Demo']");
-    await contains(".o-mail-DiscussContent-threadAvatar .fa-pencil", { count: 0 });
+    await contains(".o-mail-DiscussContent-threadAvatar [data-icon='edit']", { count: 0 });
 });
 
 test("Do not trigger chat name server update when it is unchanged", async () => {
@@ -1993,7 +1993,7 @@ test("warning on send with shortcut when attempting to post message with still-u
     await insertText(".o-mail-Composer-input", "Dummy Message");
     await editInput(document.body, ".o-mail-Composer input[type=file]", [file]);
     await contains(
-        ".o-mail-AttachmentContainer.o-isUploading:contains(text.txt) .fa.fa-circle-o-notch"
+        ".o-mail-AttachmentContainer.o-isUploading:contains(text.txt) [data-icon='autorenew']"
     );
     await contains(".o-mail-Composer button[title='Send']:disabled");
     await press("Enter"); // Try to send message
@@ -2010,7 +2010,7 @@ test("[text composer] Can post message with only attachment", async () => {
     const file = new File(["hello, world"], "text.txt", { type: "text/plain" });
     await editInput(document.body, ".o-mail-Composer input[type=file]", [file]);
     await contains(
-        ".o-mail-AttachmentContainer:not(.o-isUploading):contains('text.txt'):not(:has(.fa.fa-circle-o-notch))"
+        ".o-mail-AttachmentContainer:not(.o-isUploading):contains('text.txt'):not(:has([data-icon='autorenew']))"
     );
     await press("Enter");
     await contains(".o-mail-Message");
@@ -2031,7 +2031,7 @@ test("Can post message with only attachment", async () => {
     const file = new File(["hello, world"], "text.txt", { type: "text/plain" });
     await editInput(document.body, ".o-mail-Composer input[type=file]", [file]);
     await contains(
-        ".o-mail-AttachmentContainer:not(.o-isUploading):contains('text.txt'):not(:has(.fa.fa-circle-o-notch))"
+        ".o-mail-AttachmentContainer:not(.o-isUploading):contains('text.txt'):not(:has([data-icon='autorenew']))"
     );
     await press("Enter");
     await contains(".o-mail-Message");

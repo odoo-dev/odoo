@@ -476,19 +476,19 @@ test("Systray icon shows latest action", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Start Call']");
-    await contains(".o-discuss-CallMenu-buttonContent .fa-microphone");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='mic']");
     await click("[title='Mute']");
-    await contains(".o-discuss-CallMenu-buttonContent .fa-microphone-slash");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='mic_off']");
     await click("[title='Voice Settings']");
     await click(".dropdown-menu button:contains('Deafen')");
-    await contains(".o-discuss-CallMenu-buttonContent .fa-deaf");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='hearing_disabled']");
     await click("[title='Turn camera on']");
-    await contains(".o-discuss-CallMenu-buttonContent .fa-video-camera");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='videocam']");
     await click("[title='Share Screen']");
-    await contains(".o-discuss-CallMenu-buttonContent .fa-desktop");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='desktop_windows']");
     await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
     await click("[title='Raise Hand']");
-    await contains(".o-discuss-CallMenu-buttonContent .fa-hand-paper-o");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='back_hand']");
 });
 
 test("Systray icon keeps track of earlier actions", async () => {
@@ -497,23 +497,23 @@ test("Systray icon keeps track of earlier actions", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Start Call']");
-    await contains(".o-discuss-CallMenu-buttonContent .fa-microphone");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='mic']");
     await click("[title='Share Screen']");
     // stack: ["share-screen"]
-    await contains(".o-discuss-CallMenu-buttonContent .fa-desktop");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='desktop_windows']");
     await triggerEvents(".o-discuss-Call-mainCards", ["mousemove"]); // show overlay
     await click("[title='Turn camera on']");
     // stack: ["video", "share-screen"]
-    await contains(".o-discuss-CallMenu-buttonContent .fa-video-camera");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='videocam']");
     await click("[title='Mute']");
     // stack: ["mute", "video", "share-screen"]
-    await contains(".o-discuss-CallMenu-buttonContent .fa-microphone-slash");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='mic_off']");
     await click("[title='Unmute']");
     // stack: ["video", "share-screen"]
-    await contains(".o-discuss-CallMenu-buttonContent .fa-video-camera");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='videocam']");
     await click("[title='Stop camera']");
     // stack: ["share-screen"]
-    await contains(".o-discuss-CallMenu-buttonContent .fa-desktop");
+    await contains(".o-discuss-CallMenu-buttonContent [data-icon='desktop_windows']");
 });
 
 test("show call participants in discuss sidebar", async () => {
@@ -839,9 +839,9 @@ test("shows warning on infinite mirror effect (screen-sharing then fullscreen)",
     await contains(
         ".o-discuss-CallInfiniteMirroringWarning:contains('To avoid the infinite mirror effect, please share a specific window or tab or another monitor.')"
     );
-    await contains("button:contains('Stream paused') i.fa-pause-circle-o");
+    await contains("button:contains('Stream paused') i[data-icon='pause_circle']");
     await hover(queryFirst("button:contains('Stream paused')"));
-    await contains("button:contains('Resume stream') i.fa-play-circle-o");
+    await contains("button:contains('Resume stream') i[data-icon='play_circle']");
 });
 
 test("single 'join' (without camera) button when last call was audio-only", async () => {
@@ -868,7 +868,7 @@ test("single 'join' (without camera) button when last call was audio-only", asyn
     await click("button[title='Join Call']");
     await contains(".o-discuss-Call.o-selfInCall");
     await click("button[title='Disconnect']");
-    await click("button[title='Join Call']:text('Join')", { contains: [".fa-phone"] });
+    await click("button[title='Join Call']:text('Join')", { contains: ["[data-icon='phone']"] });
 });
 
 test("single 'join' (with camera) button when last call had camera on", async () => {
@@ -896,7 +896,7 @@ test("single 'join' (with camera) button when last call had camera on", async ()
     await contains(".o-discuss-CallParticipantCard[title='Mitchell Admin'] video");
     await click("button[title='Disconnect']");
     await click("button[title='Join Video Call']:text('Join')", {
-        contains: [".fa-video-camera"],
+        contains: ["[data-icon='videocam']"],
     });
 });
 
@@ -1069,7 +1069,7 @@ test("Show connecting state on cards", async () => {
     await click("[title='Join Call']");
     await contains(".o-discuss-CallParticipantCard[title='Bob']");
     await bobRemote.updateConnectionState("connecting");
-    await contains(".o-discuss-CallParticipantCard[title='Bob'] .fa-exclamation-triangle");
+    await contains(".o-discuss-CallParticipantCard[title='Bob'] [data-icon='warning']");
     await bobRemote.updateConnectionState("connected");
     await contains("span[data-connection-state='connected']");
 });
@@ -1089,7 +1089,7 @@ test("Can see raised hands from other call participants", async () => {
     await contains(".o-discuss-CallParticipantCard[title='Bob']");
     await bobRemote.updateConnectionState("connected");
     await bobRemote.updateInfo({ isRaisingHand: true });
-    await contains(".o-discuss-CallParticipantCard[title='Bob'] .fa-hand-paper-o");
+    await contains(".o-discuss-CallParticipantCard[title='Bob'] [data-icon='back_hand']");
     await contains(".o-discuss-Call-notification:contains('Bob raised their hand')");
 });
 
@@ -1151,24 +1151,24 @@ test("discuss sidebar call participant shows appropriate status icon", async () 
     await contains(".o-discuss-Call");
     await click("button[title='Mute']");
     await contains(
-        ".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') .fa-microphone-slash"
+        ".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') [data-icon='mic_off']"
     );
     await contains("button[title='Unmute']");
     await click("button[title='Voice Settings']");
     await click(".dropdown-menu button:contains('Deafen')");
-    await contains(".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') .fa-deaf");
+    await contains(".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') [data-icon='hearing_disabled']");
     await contains(
-        ".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') .fa-microphone-slash",
+        ".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') [data-icon='mic_off']",
         { count: 0 }
     );
     await click("button[title='Undeafen']");
-    await contains(".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') .fa-deaf", {
+    await contains(".o-mail-DiscussSidebarCallParticipants:contains('Mitchell Admin') [data-icon='hearing_disabled']", {
         count: 0,
     });
     await bobRemote.updateInfo({ is_muted: true });
-    await contains(".o-mail-DiscussSidebarCallParticipants:contains('bob') .fa-microphone-slash");
+    await contains(".o-mail-DiscussSidebarCallParticipants:contains('bob') [data-icon='mic_off']");
     await bobRemote.updateInfo({ is_deaf: true });
-    await contains(".o-mail-DiscussSidebarCallParticipants:contains('bob') .fa-deaf");
+    await contains(".o-mail-DiscussSidebarCallParticipants:contains('bob') [data-icon='hearing_disabled']");
 });
 
 test("auto-focus participant video in one-to-one call in chat window", async () => {
