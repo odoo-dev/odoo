@@ -47,7 +47,7 @@ export class HootDropdown extends Component {
         });
 
         useAutofocus(this.rootRef);
-        useHootKey(["Escape"], this.close);
+        useHootKey(["Escape"], this.close.bind(this));
         useWindowListener(
             "click",
             (ev) => {

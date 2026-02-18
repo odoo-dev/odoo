@@ -443,9 +443,9 @@ export class HootSearch extends Component {
         });
         this.runnerState = proxy(runner.state);
 
-        useHootKey(["Alt", "r"], this.toggleRegExp);
-        useHootKey(["Alt", "x"], this.toggleExact);
-        useHootKey(["Escape"], this.closeDropdown);
+        useHootKey(["Alt", "r"], this.toggleRegExp.bind(this));
+        useHootKey(["Alt", "x"], this.toggleExact.bind(this));
+        useHootKey(["Escape"], this.closeDropdown.bind(this));
 
         useWindowListener(
             "click",

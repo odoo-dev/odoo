@@ -129,11 +129,11 @@ export class HootMain extends Component {
 
         useWindowListener("resize", (ev) => this.onWindowResize(ev));
         useWindowListener("keydown", callHootKey, { capture: true });
-        useHootKey(["Enter"], this.manualStart);
-        useHootKey(["Escape"], this.abort);
+        useHootKey(["Enter"], this.manualStart.bind(this));
+        useHootKey(["Escape"], this.abort.bind(this));
 
         if (!runner.config.headless) {
-            useHootKey(["Alt", "d"], this.toggleDebug);
+            useHootKey(["Alt", "d"], this.toggleDebug.bind(this));
         }
     }
 

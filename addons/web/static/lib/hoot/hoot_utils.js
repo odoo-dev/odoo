@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { on, queryAll } from "@odoo/hoot-dom";
-import { reactive, useComponent, useEffect, useExternalListener } from "@odoo/owl";
+import { reactive, useEffect, useExternalListener } from "@odoo/owl";
 import { isNode } from "@web/../lib/hoot-dom/helpers/dom";
 import {
     isInstanceOf,
@@ -1608,9 +1608,8 @@ export function useAutofocus(ref) {
  * @param {(ev: KeyboardEvent) => any} callback
  */
 export function useHootKey(keyStroke, callback) {
-    const component = useComponent();
     /** @type {KeyboardEventInit} */
-    const params = { callback: callback.bind(component) };
+    const params = { callback };
     for (const key of keyStroke) {
         switch (key) {
             case "Alt": {
