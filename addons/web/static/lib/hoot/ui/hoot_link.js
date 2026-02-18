@@ -1,22 +1,9 @@
 /** @odoo-module */
 
-import { Component, proxy, xml } from "@odoo/owl";
+import { Component, props, proxy, types as t, xml } from "@odoo/owl";
 import { FILTER_SCHEMA } from "../core/config";
 import { createUrlFromId } from "../core/url";
 import { ensureArray, INCLUDE_LEVEL } from "../hoot_utils";
-
-/**
- * @typedef {{
- *  class?: string;
- *  ids?: Record<import("../core/config").SearchFilter, string[]>;
- *  onClick?: (event: PointerEvent) => any;
- *  options?: import("../core/url").CreateUrlFromIdOptions;
- *  slots: { default: any };
- *  style?: string;
- *  target?: string;
- *  title?: string;
- * }} HootLinkProps
- */
 
 //-----------------------------------------------------------------------------
 // Global
@@ -32,8 +19,6 @@ const {
 
 /**
  * Link component which computes its href lazily (i.e. on focus or pointerenter).
- *
- * @extends {Component<HootLinkProps, import("../hoot").Environment>}
  */
 export class HootLink extends Component {
     static template = xml`
@@ -50,31 +35,20 @@ export class HootLink extends Component {
             <t t-slot="default" />
         </a>
     `;
-    static props = {
-        class: { type: String, optional: true },
-        ids: {
-            type: Object,
-            values: [String, { type: Array, element: String }],
-            optional: true,
-        },
-        options: {
-            type: Object,
-            shape: {
-                debug: { type: Boolean, optional: true },
-                ignore: { type: Boolean, optional: true },
-            },
-            optional: true,
-        },
-        slots: {
-            type: Object,
-            shape: {
-                default: { type: Object, optional: true },
-            },
-        },
-        style: { type: String, optional: true },
-        target: { type: String, optional: true },
-        title: { type: String, optional: true },
-    };
+
+    props = props({
+        "class?": t.string,
+        "ids?": t.record(t.or([t.string, t.array(t.string)])),
+        "onClick?": t.function([t.instanceOf(PointerEvent)]),
+        "options?": t.object({
+            "debug?": t.boolean,
+            "ignore?": t.boolean,
+        }),
+        slots: t.object(["default"]),
+        "style?": t.string,
+        "target?": t.string,
+        "title?": t.string,
+    });
 
     setup() {
         this.state = proxy({ href: "#" });

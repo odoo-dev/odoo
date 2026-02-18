@@ -18,7 +18,6 @@ const mountTechnicalValue = async (defaultValue) => {
 
     class TechnicalValueParent extends Component {
         static components = { HootTechnicalValue };
-        static props = {};
         static template = xml`<HootTechnicalValue value="this.state.value" />`;
 
         setup() {

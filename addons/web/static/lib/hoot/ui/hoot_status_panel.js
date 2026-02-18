@@ -10,9 +10,6 @@ import { HootTestPath } from "./hoot_test_path";
 
 /**
  * @typedef {import("../core/runner").Runner} Runner
- *
- * @typedef {{
- * }} HootStatusPanelProps
  */
 
 //-----------------------------------------------------------------------------
@@ -108,12 +105,8 @@ const TITLE_PREFIX = {
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<HootStatusPanelProps, import("../hoot").Environment>} */
 export class HootStatusPanel extends Component {
     static components = { HootTestPath };
-
-    static props = {};
-
     static template = xml`
         <div
             class="${HootStatusPanel.name} flex items-center justify-between gap-3 px-3 py-1 min-h-10 bg-gray-300 dark:bg-gray-700"

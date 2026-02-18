@@ -11,9 +11,6 @@ import { HootCopyButton } from "./hoot_copy_button";
 
 /**
  * @typedef {"dark" | "light"} ColorScheme
- *
- * @typedef {{
- * }} HootConfigMenuProps
  */
 
 //-----------------------------------------------------------------------------
@@ -28,10 +25,8 @@ const {
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<HootConfigMenuProps, import("../hoot").Environment>} */
 export class HootConfigMenu extends Component {
     static components = { HootCopyButton };
-    static props = {};
     static template = xml`
         <form class="contents" t-on-submit.prevent="this.refresh">
             <h3 class="pb-1 border-b text-gray border-gray">Behavior</h3>

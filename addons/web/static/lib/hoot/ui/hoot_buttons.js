@@ -5,11 +5,6 @@ import { refresh, subscribeToURLParams } from "../core/url";
 import { STORAGE, storageSet } from "../hoot_utils";
 import { HootLink } from "./hoot_link";
 
-/**
- * @typedef {{
- * }} HootButtonsProps
- */
-
 //-----------------------------------------------------------------------------
 // Global
 //-----------------------------------------------------------------------------
@@ -30,12 +25,8 @@ const DISABLE_TIMEOUT = 500;
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<HootButtonsProps, import("../hoot").Environment>} */
 export class HootButtons extends Component {
     static components = { HootLink };
-
-    static props = {};
-
     static template = xml`
         <t t-set="isRunning" t-value="this.runnerState.status === 'running'" />
         <t t-set="showAll" t-value="this.env.runner.hasRemovableFilter" />

@@ -1,21 +1,12 @@
 /** @odoo-module */
 
-import { Component, useRef, proxy, xml } from "@odoo/owl";
+import { Component, useRef, proxy, xml, props, types as t } from "@odoo/owl";
 import { useAutofocus, useHootKey, useWindowListener } from "../hoot_utils";
-
-/**
- * @typedef {{
- *  buttonClassName?: string:
- *  className?: string:
- *  slots: Record<string, any>;
- * }} HootDropdownProps
- */
 
 //-----------------------------------------------------------------------------
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<HootDropdownProps, import("../hoot").Environment>} */
 export class HootDropdown extends Component {
     static template = xml`
         <div class="${HootDropdown.name} relative" t-att-class="this.props.className" t-ref="root">
@@ -41,17 +32,12 @@ export class HootDropdown extends Component {
             </t>
         </div>
     `;
-    static props = {
-        buttonClassName: { type: String, optional: true },
-        className: { type: String, optional: true },
-        slots: {
-            type: Object,
-            shape: {
-                toggler: Object,
-                menu: Object,
-            },
-        },
-    };
+
+    props = props({
+        "buttonClassName?": t.string,
+        "className?": t.string,
+        slots: t.object(["toggler", "menu"]),
+    });
 
     setup() {
         this.rootRef = useRef("root");

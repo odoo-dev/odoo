@@ -12,11 +12,6 @@ import { HootSearch } from "./hoot_search";
 import { HootSideBar } from "./hoot_side_bar";
 import { HootStatusPanel } from "./hoot_status_panel";
 
-/**
- * @typedef {{
- * }} HootMainProps
- */
-
 //-----------------------------------------------------------------------------
 // Global
 //-----------------------------------------------------------------------------
@@ -52,7 +47,6 @@ const HEADLESS_LINK_STYLE = ["color: #714b67", "text-decoration: underline"].joi
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<HootMainProps, import("../hoot").Environment>} */
 export class HootMain extends Component {
     static components = {
         HootButtons,
@@ -64,9 +58,6 @@ export class HootMain extends Component {
         HootSideBar,
         HootStatusPanel,
     };
-
-    static props = {};
-
     static template = xml`
         <t t-if="this.env.runner.headless">
             <div style="${HEADLESS_CONTAINER_STYLE}">

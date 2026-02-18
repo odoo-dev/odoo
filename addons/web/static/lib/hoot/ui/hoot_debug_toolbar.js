@@ -1,6 +1,15 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, proxy, xml } from "@odoo/owl";
+import {
+    Component,
+    onWillRender,
+    useEffect,
+    useRef,
+    proxy,
+    xml,
+    props,
+    types as t,
+} from "@odoo/owl";
 import { Test } from "../core/test";
 import { refresh } from "../core/url";
 import { formatTime, throttle } from "../hoot_utils";
@@ -139,21 +148,11 @@ function useMovable(containerRefName, handleRefName, allowDrag) {
 /**
  * @typedef {import("../core/expect").Assertion} Assertion
  *
- * @typedef {{
- *  test: Test;
- * }} HootDebugToolBarProps
- *
  * @typedef {import("../core/expect").CaseResult} CaseResult
  */
 
-/** @extends {Component<HootDebugToolBarProps, import("../hoot").Environment>} */
 export class HootDebugToolBar extends Component {
     static components = { HootConfigMenu, HootTestPath, HootTestResult };
-
-    static props = {
-        test: Test,
-    };
-
     static template = xml`
         <div
             class="${HootDebugToolBar.name} absolute start-0 bottom-0 max-w-full max-h-full flex p-4 z-4"
@@ -236,6 +235,10 @@ export class HootDebugToolBar extends Component {
             </div>
         </div>
     `;
+
+    props = props({
+        test: t.instanceOf(Test),
+    });
 
     formatTime = formatTime;
     refresh = refresh;

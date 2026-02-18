@@ -15,7 +15,6 @@ export async function mountForTest(ComponentClass, config) {
     if (typeof ComponentClass === "string") {
         ComponentClass = class extends Component {
             static name = "anonymous component";
-            static props = {};
             static template = xml`${ComponentClass}`;
         };
     }

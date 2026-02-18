@@ -10,9 +10,6 @@ import { HootTestResult } from "./hoot_test_result";
 
 /**
  * @typedef {import("../core/test").Test} Test
- *
- * @typedef {{
- * }} HootReportingProps
  */
 
 //-----------------------------------------------------------------------------
@@ -81,7 +78,6 @@ const COLORS = {
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<HootReportingProps, import("../hoot").Environment>} */
 export class HootReporting extends Component {
     static components = {
         HootLogCounters,
@@ -89,9 +85,6 @@ export class HootReporting extends Component {
         HootTestPath,
         HootTestResult,
     };
-
-    static props = {};
-
     static template = xml`
         <div class="${HootReporting.name} flex-1 overflow-y-auto">
             <!-- Errors -->

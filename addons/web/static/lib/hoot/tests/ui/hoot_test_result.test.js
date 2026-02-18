@@ -4,7 +4,7 @@ import { describe, expect, makeExpect, test } from "@odoo/hoot";
 import { mountForTest, parseUrl } from "../local_helpers";
 
 import { animationFrame, click } from "@odoo/hoot-dom";
-import { Component, xml } from "@odoo/owl";
+import { Component, props as defineProps, types as t, xml } from "@odoo/owl";
 import { Runner } from "../../core/runner";
 import { Test } from "../../core/test";
 import { HootTestResult } from "../../ui/hoot_test_result";
@@ -21,12 +21,16 @@ const mountTestResults = async (testFn, props) => {
 
     class Parent extends Component {
         static components = { HootTestResult };
-        static props = { test: Test, open: [Boolean, { value: "always" }] };
         static template = xml`
             <HootTestResult test="this.props.test" open="this.props.open">
                 Toggle
             </HootTestResult>
         `;
+
+        props = defineProps({
+            test: t.instanceOf(Test),
+            open: t.or([t.boolean, t.literal("always")]),
+        });
 
         mockTest = mockTest;
     }

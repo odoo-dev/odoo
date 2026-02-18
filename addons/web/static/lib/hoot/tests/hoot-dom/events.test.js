@@ -2095,7 +2095,6 @@ describe(parseUrl(import.meta.url), () => {
     test("can trigger synthetic event handlers", async () => {
         await mountForTest(
             class extends Component {
-                static props = {};
                 static template = xml`
                     <button t-on-click.synthetic="this.onClick">Click me</button>
                 `;
@@ -2114,7 +2113,6 @@ describe(parseUrl(import.meta.url), () => {
     test("synthetic event handlers are not cleaned up between tests", async () => {
         await mountForTest(
             class extends Component {
-                static props = {};
                 static template = xml`
                     <button t-on-click.synthetic="this.onClick">Click me</button>
                 `;

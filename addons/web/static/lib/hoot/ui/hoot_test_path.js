@@ -1,33 +1,13 @@
 /** @odoo-module */
 
-import { Component, proxy, xml } from "@odoo/owl";
+import { Component, props, proxy, types as t, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { HootCopyButton } from "./hoot_copy_button";
 import { HootLink } from "./hoot_link";
 import { HootTagButton } from "./hoot_tag_button";
 
-/**
- * @typedef {{
- *  canCopy?: boolean;
- *  full?: boolean;
- *  inert?: boolean;
- *  showStatus?: boolean;
- *  test: Test;
- * }} HootTestPathProps
- */
-
-/** @extends {Component<HootTestPathProps, import("../hoot").Environment>} */
 export class HootTestPath extends Component {
     static components = { HootCopyButton, HootLink, HootTagButton };
-
-    static props = {
-        canCopy: { type: Boolean, optional: true },
-        full: { type: Boolean, optional: true },
-        inert: { type: Boolean, optional: true },
-        showStatus: { type: Boolean, optional: true },
-        test: Test,
-    };
-
     static template = xml`
         <t t-set="statusInfo" t-value="this.getStatusInfo()" />
         <div class="flex items-center gap-1 whitespace-nowrap overflow-hidden">
@@ -90,6 +70,14 @@ export class HootTestPath extends Component {
             </t>
         </div>
     `;
+
+    props = props({
+        "canCopy?": t.boolean,
+        "full?": t.boolean,
+        "inert?": t.boolean,
+        "showStatus?": t.boolean,
+        test: t.instanceOf(Test),
+    });
 
     setup() {
         this.results = proxy(this.props.test.results);

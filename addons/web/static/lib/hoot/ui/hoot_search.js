@@ -25,9 +25,6 @@ import {
 import { HootTagButton } from "./hoot_tag_button";
 
 /**
- * @typedef {{
- * }} HootSearchProps
- *
  * @typedef {import("../core/config").SearchFilter} SearchFilter
  *
  * @typedef {import("../core/tag").Tag} Tag
@@ -307,12 +304,8 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<HootSearchProps, import("../hoot").Environment>} */
 export class HootSearch extends Component {
     static components = { HootTagButton };
-
-    static props = {};
-
     static template = xml`
         <t t-set="hasIncludeValue" t-value="this.getHasIncludeValue()" />
         <t t-set="isRunning" t-value="this.runnerState.status === 'running'" />

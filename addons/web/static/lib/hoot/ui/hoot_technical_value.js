@@ -1,6 +1,15 @@
 /** @odoo-module */
 
-import { Component, onWillRender, onWillUpdateProps, xml as owlXml, toRaw, proxy } from "@odoo/owl";
+import {
+    Component,
+    onWillRender,
+    onWillUpdateProps,
+    xml as owlXml,
+    toRaw,
+    proxy,
+    props,
+    types as t,
+} from "@odoo/owl";
 import { isNode, toSelector } from "@web/../lib/hoot-dom/helpers/dom";
 import { isInstanceOf, isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { logger } from "../core/logger";
@@ -14,12 +23,6 @@ import {
     stringify,
     toExplicitString,
 } from "../hoot_utils";
-
-/**
- * @typedef {{
- *  value?: any;
- * }} TechnicalValueProps
- */
 
 //-----------------------------------------------------------------------------
 // Global
@@ -52,14 +55,8 @@ const INVARIABLE_OBJECTS = [Promise, RegExp];
 // Exports
 //-----------------------------------------------------------------------------
 
-/** @extends {Component<TechnicalValueProps, import("../hoot").Environment>} */
 export class HootTechnicalValue extends Component {
     static components = { HootTechnicalValue };
-
-    static props = {
-        value: { optional: true },
-    };
-
     static template = xml`
         <t t-if="this.isMarkup">
             <t t-if="this.value.type === 'technical'">
@@ -162,6 +159,10 @@ export class HootTechnicalValue extends Component {
             </span>
         </t>
     `;
+
+    props = props({
+        "value?": t.any,
+    });
 
     getTypeOf = getTypeOf;
     isIterable = isIterable;

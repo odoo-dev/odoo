@@ -1,22 +1,9 @@
 /** @odoo-module */
 
-import { Component, proxy, xml } from "@odoo/owl";
+import { Component, props, proxy, types as t, xml } from "@odoo/owl";
 import { copy, hasClipboard } from "../hoot_utils";
 
-/**
- * @typedef {{
- *  altText?: string;
- *  text: string;
- * }} HootCopyButtonProps
- */
-
-/** @extends {Component<HootCopyButtonProps, import("../hoot").Environment>} */
 export class HootCopyButton extends Component {
-    static props = {
-        altText: { type: String, optional: true },
-        text: String,
-    };
-
     static template = xml`
         <t t-if="this.hasClipboard()">
             <button
@@ -30,6 +17,11 @@ export class HootCopyButton extends Component {
             </button>
         </t>
     `;
+
+    props = props({
+        "altText?": t.string,
+        text: t.string,
+    });
 
     hasClipboard = hasClipboard;
 

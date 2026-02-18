@@ -1,35 +1,25 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, proxy, xml } from "@odoo/owl";
+import {
+    Component,
+    onWillRender,
+    useEffect,
+    useRef,
+    proxy,
+    xml,
+    props,
+    types as t,
+} from "@odoo/owl";
 import { Suite } from "../core/suite";
 import { createUrlFromId } from "../core/url";
 import { lookup, parseQuery } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
 
-/**
- * @typedef {{
- *  multi?: number;
- *  name: string;
- *  hasSuites: boolean;
- *  reporting: import("../hoot_utils").Reporting;
- *  selected: boolean;
- *  unfolded: boolean;
- * }} HootSideBarSuiteProps
- *
- * @typedef {{
- *  reporting: import("../hoot_utils").Reporting;
- *  statusFilter: import("./setup_hoot_ui").StatusFilter | null;
- * }} HootSideBarCounterProps
- *
- * @typedef {{
- * }} HootSideBarProps
- */
-
 //-----------------------------------------------------------------------------
 // Global
 //-----------------------------------------------------------------------------
 
-const { Boolean, location: actualLocation, Object, String } = globalThis;
+const { location: actualLocation } = globalThis;
 
 //-----------------------------------------------------------------------------
 // Internal
@@ -41,19 +31,7 @@ const SUITE_CLASSNAME = "hoot-sidebar-suite";
 // Exports
 //-----------------------------------------------------------------------------
 
-/**
- * @extends {Component<HootSideBarSuiteProps, import("../hoot").Environment>}
- */
 export class HootSideBarSuite extends Component {
-    static props = {
-        multi: { type: Number, optional: true },
-        name: String,
-        hasSuites: Boolean,
-        reporting: Object,
-        selected: Boolean,
-        unfolded: Boolean,
-    };
-
     static template = xml`
         <t t-if="this.props.hasSuites">
             <i
@@ -71,6 +49,15 @@ export class HootSideBarSuite extends Component {
             </strong>
         </t>
     `;
+
+    props = props({
+        "multi?": t.number,
+        name: t.string,
+        hasSuites: t.boolean,
+        reporting: t.object(),
+        selected: t.boolean,
+        unfolded: t.boolean,
+    });
 
     setup() {
         const rootRef = useRef("root");
@@ -104,13 +91,7 @@ export class HootSideBarSuite extends Component {
     }
 }
 
-/** @extends {Component<HootSideBarCounterProps, import("../hoot").Environment>} */
 export class HootSideBarCounter extends Component {
-    static props = {
-        reporting: Object,
-        statusFilter: [String, { value: null }],
-    };
-
     static template = xml`
         <t t-set="info" t-value="this.getCounterInfo()" />
         <span
@@ -118,6 +99,11 @@ export class HootSideBarCounter extends Component {
             t-esc="info[1]"
         />
     `;
+
+    props = props({
+        reporting: t.object(),
+        statusFilter: t.or([t.string, t.literal(null)]),
+    });
 
     getCounterInfo() {
         const { reporting, statusFilter } = this.props;
@@ -136,14 +122,8 @@ export class HootSideBarCounter extends Component {
     }
 }
 
-/**
- * @extends {Component<HootSideBarProps, import("../hoot").Environment>}
- */
 export class HootSideBar extends Component {
     static components = { HootJobButtons, HootSideBarSuite, HootSideBarCounter };
-
-    static props = {};
-
     static template = xml`
         <div
             class="${HootSideBar.name} flex-col w-64 h-full resize-x shadow bg-gray-200 dark:bg-gray-800 z-1 hidden md:flex"

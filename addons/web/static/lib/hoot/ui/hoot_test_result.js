@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, proxy, xml } from "@odoo/owl";
+import { Component, onWillRender, props, proxy, types as t, xml } from "@odoo/owl";
 import { isFirefox } from "../../hoot-dom/hoot_dom_utils";
 import { Tag } from "../core/tag";
 import { Test } from "../core/test";
@@ -210,29 +210,8 @@ const R_STACK_LINE_START = isFirefox()
 // Exports
 //-----------------------------------------------------------------------------
 
-/**
- * @typedef {{
- *  open?: boolean | "always";
- *  slots: any;
- *  test: Test;
- * }} TestResultProps
- */
-
-/** @extends {Component<TestResultProps, import("../hoot").Environment>} */
 export class HootTestResult extends Component {
     static components = { HootCopyButton, HootLink, HootTechnicalValue };
-
-    static props = {
-        open: [{ type: Boolean }, { value: "always" }],
-        slots: {
-            type: Object,
-            shape: {
-                default: Object,
-            },
-        },
-        test: Test,
-    };
-
     static template = xml`
         <div
             class="${HootTestResult.name}
@@ -310,6 +289,12 @@ export class HootTestResult extends Component {
             </t>
         </div>
     `;
+
+    props = props({
+        open: t.or([t.boolean, t.literal("always")]),
+        slots: t.object(["default"]),
+        test: t.instanceOf(Test),
+    });
 
     CASE_EVENT_TYPES = CASE_EVENT_TYPES;
     DOC_URL = DOC_URL;
