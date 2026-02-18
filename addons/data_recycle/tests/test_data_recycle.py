@@ -17,9 +17,15 @@ class TestDataRecycle(TransactionCase):
 
         cls.server_model = cls.env['ir.model']._get('fetchmail.server')
 
-        cls.recycle_model = cls.env['data_recycle.model'].create({
+        cls.DCBase = cls.env['data_cleaning.base']
+        cls.base_model = cls.DCBase.create({
             'name': 'Recycle Test Server',
             'res_model_id': cls.server_model.id,
+        })
+
+        cls.recycle_model = cls.env['data_recycle.model'].create({
+            'name': 'Recycle Test Server',
+            'base_id': cls.base_model.id,
             'time_field_id': cls.env['ir.model.fields'].search([('name', '=', 'date'), ('model_id', '=', cls.server_model.id)], limit=1).id,
             'time_field_delta': 1,
             'time_field_delta_unit': 'years',
@@ -58,9 +64,10 @@ class TestDataRecycle(TransactionCase):
         self.env.ref('base.user_admin').write({
             'email': 'mitchell.admin@example.com',
         })
-        self.recycle_model.notify_user_ids = [(4, self.env.ref('base.user_admin').id)]
+        self.base_model.notify_user_ids = [(4, self.env.ref('base.user_admin').id)]
         old_notif_count = self.env['mail.notification'].search_count([])
-        self.recycle_model._cron_recycle_records()
+        self.DCBase._clean_records(self.base_model)
+        self.base_model._notify_records()
         new_notif_count = self.env['mail.notification'].search_count([])
         self.assertEqual(new_notif_count, old_notif_count + 1)
 
