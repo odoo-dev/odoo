@@ -26,14 +26,14 @@ export class BomOverviewComponentsBlock extends Component {
         const childFoldstate = this.childIds.reduce((prev, curr) => ({ ...prev, [curr]: !this.props.unfoldAll}), {});
         this.state = useState({
             ...childFoldstate,
-            unfoldAll: this.props.unfoldAll || false,
+            allExpanded: this.props.unfoldAll || false,
         });
         if (this.props.unfoldAll) {
             this.props.changeFolded({ ids: this.childIds, isFolded: false });
         }
 
         if (this.hasComponents) {
-            useBus(this.env.overviewBus, "toggle-fold-all", () => this._toggleFoldAll());
+            useBus(this.env.overviewBus, "fold-all", (ev) => this._onFoldAll(ev.detail.isFolded));
         }
 
         onWillUpdateProps(newProps => {
@@ -41,7 +41,7 @@ export class BomOverviewComponentsBlock extends Component {
                 this.childIds.forEach(id => delete this.state[id]);
                 const newChildIds = this.getHasComponents(newProps.data) ? newProps.data.components.map(c => this.getIdentifier(c)) : [];
                 newChildIds.forEach(id => this.state[id] = true);
-                this.state.unfoldAll = false;
+                this.state.allExpanded = false;
             }
         });
 
@@ -56,16 +56,15 @@ export class BomOverviewComponentsBlock extends Component {
     onToggleFolded(foldId) {
         const newState = !this.state[foldId];
         this.state[foldId] = newState;
-        this.state.unfoldAll = false;
+        this.state.allExpanded = false;
         this.props.changeFolded({ ids: [foldId], isFolded: newState });
     }
 
-    _toggleFoldAll() {
+    _onFoldAll(isFolded) {
         const allChildIds = this.childIds;
-
-        this.state.unfoldAll = !this.state.unfoldAll;
-        allChildIds.forEach(id => this.state[id] = !this.state.unfoldAll);
-        this.props.changeFolded({ ids: allChildIds, isFolded: !this.state.unfoldAll });
+        this.state.allExpanded = !isFolded;
+        allChildIds.forEach(id => this.state[id] = isFolded);
+        this.props.changeFolded({ ids: allChildIds, isFolded });
     }
 
     //---- Getters ----
