@@ -90,8 +90,8 @@ function removeRegExp(query) {
  */
 const templateIncludeWidget = (tagName) => /* xml */ `
     <t t-set="type" t-value="category === 'tag' ? category : 'id'" />
-    <t t-set="includeStatus" t-value="runnerState.includeSpecs[type][job.id] or 0" />
-    <t t-set="readonly" t-value="isReadonly(includeStatus)" />
+    <t t-set="includeStatus" t-value="this.runnerState.includeSpecs[type][job.id] or 0" />
+    <t t-set="readonly" t-value="this.isReadonly(includeStatus)" />
 
     <${tagName}
         class="flex items-center gap-1 cursor-pointer select-none"
@@ -105,7 +105,7 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                 'opacity-50': readonly,
             }"
             t-att-title="readonly and 'Cannot change because it depends on a tag modifier in the code'"
-            t-on-pointerup="focusSearchInput"
+            t-on-pointerup="this.focusSearchInput"
             t-on-change="(ev) => this.onIncludeChange(type, job.id, ev.target.value)"
         >
             <input
@@ -132,7 +132,7 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                 t-att-checked="includeStatus gt 0"
             />
         </div>
-        <t t-if="isTag(job)">
+        <t t-if="this.isTag(job)">
             <HootTagButton tag="job" inert="true" />
         </t>
         <t t-else="">
@@ -140,11 +140,11 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                 class="flex items-center font-bold whitespace-nowrap overflow-hidden"
                 t-att-title="job.fullName"
             >
-                <t t-foreach="getShortPath(job.path)" t-as="suite" t-key="suite.id">
+                <t t-foreach="this.getShortPath(job.path)" t-as="suite" t-key="suite.id">
                     <span class="text-gray px-1" t-esc="suite.name" />
                     <span class="font-normal">/</span>
                 </t>
-                <t t-set="isSet" t-value="job.id in runnerState.includeSpecs.id" />
+                <t t-set="isSet" t-value="job.id in this.runnerState.includeSpecs.id" />
                 <span
                     class="truncate px-1"
                     t-att-class="{
@@ -204,23 +204,23 @@ const RESULT_LIMIT = 5;
 
 const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
     <div class="flex mb-2">
-        <t t-if="trimmedQuery">
+        <t t-if="this.trimmedQuery">
             <button
                 class="flex items-center gap-1"
                 type="submit"
                 title="Run this filter"
-                t-on-pointerdown="updateFilterParam"
+                t-on-pointerdown="this.updateFilterParam"
             >
                 <h4 class="text-primary m-0">
                     Filter using
-                    <t t-if="hasRegExpFilter()">
+                    <t t-if="this.hasRegExpFilter()">
                         regular expression
                     </t>
                     <t t-else="">
                         text
                     </t>
                 </h4>
-                <t t-esc="wrappedQuery()" />
+                <t t-esc="this.wrappedQuery()" />
             </button>
         </t>
         <t t-else="">
@@ -229,14 +229,14 @@ const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
             </em>
         </t>
     </div>
-    <t t-foreach="categories" t-as="category" t-key="category">
-        <t t-set="jobs" t-value="state.categories[category][0]" />
-        <t t-set="remainingCount" t-value="state.categories[category][1]" />
+    <t t-foreach="this.categories" t-as="category" t-key="category">
+        <t t-set="jobs" t-value="this.state.categories[category][0]" />
+        <t t-set="remainingCount" t-value="this.state.categories[category][1]" />
         <t t-if="jobs?.length">
             <div class="flex flex-col mb-2 max-h-48 overflow-hidden">
                 <h4
                     class="text-primary font-bold flex items-center mb-2"
-                    t-esc="title(category)"
+                    t-esc="this.title(category)"
                 />
                 <ul class="flex flex-col overflow-y-auto gap-1">
                     <t t-foreach="jobs" t-as="job" t-key="job.id">
@@ -262,7 +262,7 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
                 </span>
             </h4>
             <ul class="flex flex-col overflow-y-auto gap-1">
-                <t t-foreach="getLatestSearches()" t-as="text" t-key="text_index">
+                <t t-foreach="this.getLatestSearches()" t-as="text" t-key="text_index">
                     <li>
                         <button
                             class="w-full px-2 hover:bg-gray-300 dark:hover:bg-gray-700"
@@ -281,7 +281,7 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
                 </span>
             </h4>
             <ul class="flex flex-col overflow-y-auto gap-1">
-                <t t-foreach="getTop(env.runner.rootSuites)" t-as="job" t-key="job.id">
+                <t t-foreach="this.getTop(this.env.runner.rootSuites)" t-as="job" t-key="job.id">
                     <t t-set="category" t-value="'suite'" />
                     ${templateIncludeWidget("li")}
                 </t>
@@ -294,7 +294,7 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
                 </span>
             </h4>
             <ul class="flex flex-col overflow-y-auto gap-1">
-                <t t-foreach="getTop(env.runner.tags.values())" t-as="job" t-key="job.id">
+                <t t-foreach="this.getTop(this.env.runner.tags.values())" t-as="job" t-key="job.id">
                     <t t-set="category" t-value="'tag'" />
                     ${templateIncludeWidget("li")}
                 </t>
@@ -314,12 +314,12 @@ export class HootSearch extends Component {
     static props = {};
 
     static template = xml`
-        <t t-set="hasIncludeValue" t-value="getHasIncludeValue()" />
-        <t t-set="isRunning" t-value="runnerState.status === 'running'" />
-        <search class="${HootSearch.name} flex-1" t-ref="root" t-on-keydown="onKeyDown">
-            <form class="relative" t-on-submit.prevent="refresh">
+        <t t-set="hasIncludeValue" t-value="this.getHasIncludeValue()" />
+        <t t-set="isRunning" t-value="this.runnerState.status === 'running'" />
+        <search class="${HootSearch.name} flex-1" t-ref="root" t-on-keydown="this.onKeyDown">
+            <form class="relative" t-on-submit.prevent="this.refresh">
                 <div class="hoot-search-bar flex border rounded items-center bg-base px-1 gap-1 w-full transition-colors">
-                    <t t-foreach="getCategoryCounts()" t-as="count" t-key="count.category">
+                    <t t-foreach="this.getCategoryCounts()" t-as="count" t-key="count.category">
                         <button
                             type="button"
                             class="flex border border-primary rounded"
@@ -339,28 +339,28 @@ export class HootSearch extends Component {
                     <input
                         type="search"
                         class="w-full rounded p-1 outline-none"
-                        t-att-autofocus="!config.manual"
+                        t-att-autofocus="!this.config.manual"
                         placeholder="Filter suites, tests or tags"
                         t-ref="search-input"
-                        t-att-class="{ 'text-gray': !config.filter }"
+                        t-att-class="{ 'text-gray': !this.config.filter }"
                         t-att-disabled="isRunning"
-                        t-att-value="state.query"
-                        t-on-change="onSearchInputChange"
-                        t-on-input="onSearchInputInput"
-                        t-on-keydown="onSearchInputKeyDown"
+                        t-att-value="this.state.query"
+                        t-on-change="this.onSearchInputChange"
+                        t-on-input="this.onSearchInputInput"
+                        t-on-keydown="this.onSearchInputKeyDown"
                     />
                     <label
                         class="hoot-search-icon cursor-pointer p-1"
                         title="Use exact match (Alt + X)"
                         tabindex="0"
-                        t-on-keydown="onExactKeyDown"
+                        t-on-keydown="this.onExactKeyDown"
                     >
                         <input
                             type="checkbox"
                             class="hidden"
-                            t-att-checked="hasExactFilter()"
+                            t-att-checked="this.hasExactFilter()"
                             t-att-disabled="isRunning"
-                            t-on-change="toggleExact"
+                            t-on-change="this.toggleExact"
                         />
                         <i class="fa fa-quote-right text-gray transition-colors" />
                     </label>
@@ -368,35 +368,35 @@ export class HootSearch extends Component {
                         class="hoot-search-icon cursor-pointer p-1"
                         title="Use regular expression (Alt + R)"
                         tabindex="0"
-                        t-on-keydown="onRegExpKeyDown"
+                        t-on-keydown="this.onRegExpKeyDown"
                     >
                         <input
                             type="checkbox"
                             class="hidden"
                             t-att-checked="hasRegExpFilter()"
                             t-att-disabled="isRunning"
-                            t-on-change="toggleRegExp"
+                            t-on-change="this.toggleRegExp"
                         />
                         <i class="fa fa-asterisk text-gray transition-colors" />
                     </label>
                     <label
                         class="hoot-search-icon cursor-pointer p-1"
                         title="Debug mode (Alt + D)"
-                        t-on-keydown="onDebugKeyDown"
+                        t-on-keydown="this.onDebugKeyDown"
                     >
                         <input
                             type="checkbox"
                             class="hidden"
-                            t-att-checked="config.debugTest"
+                            t-att-checked="this.config.debugTest"
                             t-att-disabled="isRunning"
-                            t-on-change="toggleDebug"
+                            t-on-change="this.toggleDebug"
                         />
                         <i class="fa fa-bug text-gray transition-colors" />
                     </label>
                 </div>
-                <t t-if="state.showDropdown">
+                <t t-if="this.state.showDropdown">
                     <div class="hoot-dropdown-lg flex flex-col animate-slide-down bg-base text-base absolute mt-1 p-3 shadow rounded z-2">
-                        <t t-if="state.empty">
+                        <t t-if="this.state.empty">
                             ${TEMPLATE_SEARCH_DASHBOARD}
                         </t>
                         <t t-else="">
