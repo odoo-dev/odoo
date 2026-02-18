@@ -6,7 +6,7 @@
             <SyncWithNavBtn/>
         </xpath>
     </t>
-    
+
     <t t-name="l10n_hu_edi_receive.SyncWithNavBtn">
         <t t-if="this.showButton">
             <button class="btn btn-secondary" t-on-click="openWizard">Sync with NAV</button>

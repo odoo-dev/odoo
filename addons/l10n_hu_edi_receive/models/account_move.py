@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from base64 import b64decode
+from base64 import b64decode, b64encode
+import gzip
 from datetime import datetime
 from lxml import etree
 
@@ -10,7 +11,7 @@ from odoo.addons.l10n_hu_edi.models.l10n_hu_edi_connection import XML_NAMESPACES
 
 
 def boolean(value):
-    return value.lower() in ('true', '1') if value else False
+    return value == 'true'
 
 
 def parse_vat(tax_number_xml):
@@ -28,11 +29,6 @@ def parse_vat(tax_number_xml):
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    l10n_hu_edi_state = fields.Selection(selection_add=[
-        ('digested', "Digested"),
-        ('received', "Received"),
-        ('parsed', "Parsed"),
-    ])
     l10n_hu_edi_batch_index = fields.Integer(
         string='Index of invoice within a batch modification',
         copy=False,
@@ -40,31 +36,22 @@ class AccountMove(models.Model):
 
     @api.depends('name', 'ref')
     def _compute_l10n_hu_edi_attachment_filename(self):
-        nav_receiving_moves = self.filtered(lambda m: m.l10n_hu_edi_state in ('digested', 'received', 'parsed'))
+        nav_receiving_moves = self.filtered(lambda m: m.move_type in self.env['account.move'].get_purchase_types() and m.ref)
         for move in nav_receiving_moves:
             move.l10n_hu_edi_attachment_filename = f'{move.ref.replace("/", "_")}.xml'
         super(AccountMove, self - nav_receiving_moves)._compute_l10n_hu_edi_attachment_filename()
 
     @api.model
-    def _l10n_hu_edi_get_moves_vals_from_digest(self, response_xml):
-        moves_vals = []
+    def _l10n_hu_edi_parse_digest_response(self, response_xml):
+        digests = []
         for digest in response_xml.iterfind('api:invoiceDigestResult/api:invoiceDigest', namespaces=XML_NAMESPACES):
-            invoice_operation = digest.findtext('api:invoiceOperation', namespaces=XML_NAMESPACES)
-            if invoice_operation == 'CREATE':
-                move_type = 'in_invoice'
-            elif invoice_operation == 'STORNO':
-                move_type = 'in_refund'
-            elif invoice_operation == 'MODIFY':
-                invoice_net_amount = digest.findtext('api:invoiceNetAmount', namespaces=XML_NAMESPACES)
-                move_type = 'in_refund' if invoice_net_amount and float(invoice_net_amount) < 0 else 'in_invoice'
-
             l10n_hu_edi_transaction_code = digest.findtext('api:transactionId', namespaces=XML_NAMESPACES)
             l10n_hu_edi_batch_upload_index = int(digest.findtext('api:index', namespaces=XML_NAMESPACES))
             move_domain = [
+                *self.env['account.move']._check_company_domain(self.env.company),
+                ('move_type', 'in', self.env['account.move'].get_purchase_types()),
                 ('l10n_hu_edi_transaction_code', '=', l10n_hu_edi_transaction_code),
                 ('l10n_hu_edi_batch_upload_index', '=', l10n_hu_edi_batch_upload_index),
-                ('company_id', '=', self.env.company.id),
-                ('move_type', '=', move_type),
             ]
             if l10n_hu_edi_batch_index := digest.findtext('api:batchIndex', namespaces=XML_NAMESPACES):
                 move_domain.append(('l10n_hu_edi_batch_index', '=', int(l10n_hu_edi_batch_index)))
@@ -72,108 +59,145 @@ class AccountMove(models.Model):
             if move:
                 continue
 
-            supplier_name = digest.findtext('api:supplierName', namespaces=XML_NAMESPACES)
-            supplier_tax_number = digest.findtext('api:supplierTaxNumber', namespaces=XML_NAMESPACES)
-            supplier_group_member_tax_number = digest.findtext('api:supplierGroupMemberTaxNumber', namespaces=XML_NAMESPACES)
-            partner_domain = [('vat', '=ilike', (supplier_group_member_tax_number or supplier_tax_number) + '%')]
-            if supplier_group_member_tax_number:
-                partner_domain.append(('l10n_hu_group_vat', '=ilike', supplier_tax_number + '%'))
-            partner = self.env['res.partner'].search(partner_domain, limit=1)
-            if not partner:
-                partner_vals = {
-                    'name': supplier_name,
-                    'vat': supplier_group_member_tax_number or supplier_tax_number,
-                }
-                if supplier_group_member_tax_number:
-                    partner_vals['l10n_hu_group_vat'] = supplier_tax_number
-                partner = self.env['res.partner'].create(partner_vals)
-
-            move_vals = {
-                'ref': digest.findtext('api:invoiceNumber', namespaces=XML_NAMESPACES),
-                'move_type': move_type,
-                'l10n_hu_edi_state': 'digested',
-                'invoice_date': fields.Date.from_string(digest.findtext('api:invoiceIssueDate', namespaces=XML_NAMESPACES)),
-                'partner_id': partner.id,
-                'l10n_hu_edi_transaction_code': l10n_hu_edi_transaction_code,
-                'l10n_hu_edi_send_time': datetime.fromisoformat(digest.findtext('api:insDate', namespaces=XML_NAMESPACES).replace('Z', '')),
-                'l10n_hu_invoice_chain_index': -1 if invoice_operation == 'CREATE' else int(digest.findtext('api:modificationIndex', namespaces=XML_NAMESPACES)),
-                'l10n_hu_edi_batch_upload_index': l10n_hu_edi_batch_upload_index,
+            query_invoice_data_params = {
+                'invoiceNumber': digest.findtext('api:invoiceNumber', namespaces=XML_NAMESPACES),
+                'invoiceDirection': 'INBOUND',
+                'supplierTaxNumber': digest.findtext('api:supplierTaxNumber', namespaces=XML_NAMESPACES),
             }
             if l10n_hu_edi_batch_index:
-                move_vals['l10n_hu_edi_batch_index'] = l10n_hu_edi_batch_index
-            if l10n_hu_payment_mode := digest.findtext('api:paymentMethod', namespaces=XML_NAMESPACES):
-                move_vals['l10n_hu_payment_mode'] = l10n_hu_payment_mode
-            if invoice_date_due := digest.findtext('api:paymentDate', namespaces=XML_NAMESPACES):
-                move_vals['invoice_date_due'] = fields.Date.from_string(invoice_date_due)
-            if delivery_date := digest.findtext('api:invoiceDeliveryDate', namespaces=XML_NAMESPACES):
-                move_vals['delivery_date'] = fields.Date.from_string(delivery_date)
+                query_invoice_data_params['batchIndex'] = l10n_hu_edi_batch_index
 
-            currency_name = digest.findtext('api:currency', namespaces=XML_NAMESPACES)
-            currency = self.env['res.currency'].with_context(active_test=False).search([('name', '=', currency_name)], limit=1) if currency_name else None
-            if currency:
-                move_vals['currency_id'] = currency.id
+            digests.append(query_invoice_data_params)
 
-            moves_vals.append(move_vals)
+        return digests
+
+    @api.model
+    def _l10n_hu_edi_parse_query_invoice_data_response(self, response_xml):
+        invoice_data_b64 = response_xml.findtext('api:invoiceDataResult/api:invoiceData', namespaces=XML_NAMESPACES)
+        if boolean(response_xml.findtext('api:invoiceDataResult/api:compressedContentIndicator', namespaces=XML_NAMESPACES)):
+            invoice_data_b64 = b64encode(gzip.decompress(b64decode(invoice_data_b64)))
+
+        audit_data = response_xml.find('api:invoiceDataResult/api:auditData', namespaces=XML_NAMESPACES)
+        move_vals = {
+            'l10n_hu_edi_transaction_code': audit_data.findtext('api:transactionId', namespaces=XML_NAMESPACES),
+            'l10n_hu_edi_batch_upload_index': int(audit_data.findtext('api:index', namespaces=XML_NAMESPACES)),
+            'l10n_hu_edi_send_time': datetime.fromisoformat(audit_data.findtext('api:insdate', namespaces=XML_NAMESPACES).replace('Z', '')),
+            'l10n_hu_edi_attachment': invoice_data_b64,
+        }
+
+        return self._l10n_hu_edi_parse_invoice_data_xml(etree.fromstring(b64decode(invoice_data_b64)), move_vals)
+
+    @api.model
+    def _l10n_hu_edi_parse_invoice_data_xml(self, invoice_data_xml, move_vals={}):
+        moves_vals = []
+        move_vals.update({
+            'ref': invoice_data_xml.findtext('data:invoiceNumber', namespaces=XML_NAMESPACES),
+            'invoice_date': fields.Date.from_string(invoice_data_xml.findtext('api:invoiceIssueDate', namespaces=XML_NAMESPACES)),
+        })
+        if (invoice_xml := invoice_data_xml.find('data:invoiceMain/data:invoice', namespaces=XML_NAMESPACES)) is not None:
+            moves_vals.append({
+                **move_vals,
+                **self._l10n_hu_edi_parse_invoice_xml(invoice_xml),
+            })
+        else:
+            for batch_invoice in invoice_data_xml.iterfind('data:invoiceMain/data:batchInvoice', namespaces=XML_NAMESPACES):
+                moves_vals.append({
+                    **move_vals,
+                    **self._l10n_hu_edi_parse_invoice_xml(batch_invoice.find('data:invoice', namespaces=XML_NAMESPACES)),
+                    'l10n_hu_edi_batch_index': int(batch_invoice.findtext('data:batchIndex', namespaces=XML_NAMESPACES)),
+                })
 
         return moves_vals
 
     @api.model
-    def _l10n_hu_edi_cron_parse_invoice_data(self):
-        for move in self.search([('l10n_hu_edi_state', '=', 'received')]):
-            move._l10n_hu_edi_parse_invoice_data()
+    def _l10n_hu_edi_parse_invoice_xml(self, invoice_xml):
+        invoice_head = invoice_xml.find('data:invoiceHead', namespaces=XML_NAMESPACES)
+        invoice_detail = invoice_head.find('data:invoiceDetail', namespaces=XML_NAMESPACES)
+        invoice_category = invoice_detail.findtext('data:invoiceCategory', namespaces=XML_NAMESPACES)
+        simplified = invoice_category == 'SIMPLIFIED'
 
-    def _l10n_hu_edi_parse_invoice_data(self):
-        self.ensure_one()
+        invoice_reference = invoice_xml.find('data:invoiceReference', namespaces=XML_NAMESPACES)
+        base_invoice = invoice_reference is None
 
-        move_vals = {'l10n_hu_edi_state': 'parsed'}
-        invoice_tree = etree.fromstring(b64decode(self.l10n_hu_edi_attachment))
-        invoice_path = 'data:invoiceMain/data:batchInvoice/data:invoice' if self.l10n_hu_edi_batch_index else 'data:invoiceMain/data:invoice'
-        invoice = invoice_tree.find(invoice_path, namespaces=XML_NAMESPACES)
+        if base_invoice:
+            move_type = 'in_invoice'
+        else:
+            total_path = 'data:invoiceSummary/data:summaryGrossData/data:invoiceGrossAmount' if simplified else 'data:invoiceSummary/data:summaryNormal/data:invoiceNetAmount'
+            total = float(invoice_xml.findtext(total_path, namespaces=XML_NAMESPACES))
+            move_type = 'in_refund' if total < 0 else 'in_invoice'
 
-        invoice_head = invoice.find('data:invoiceHead', namespaces=XML_NAMESPACES)
         supplier_info = invoice_head.find('data:supplierInfo', namespaces=XML_NAMESPACES)
-        if supplier_bank_account_number := supplier_info.findtext('data:supplierBankAccountNumber', namespaces=XML_NAMESPACES):
-            partner_bank = self.env['res.partner.bank'].search([('sanitized_acc_number', '=', sanitize_account_number(supplier_bank_account_number)), ('partner_id', '=', self.partner_id.id)], limit=1)
+        partner_vat = (
+            supplier_info.findtext('data:groupMemberTaxNumber/base:taxpayerId', namespaces=XML_NAMESPACES) or
+            supplier_info.findtext('data:supplierTaxNumber/base:taxpayerId', namespaces=XML_NAMESPACES)
+        )
+        partner = self.env['res.partner'].search([('vat', '=ilike', partner_vat + '%')], limit=1)
+        if not partner:
+            supplier_tax_number = parse_vat(supplier_info.find('data:supplierTaxNumber', namespaces=XML_NAMESPACES))
+            supplier_group_member_tax_number = parse_vat(supplier_info.find('data:groupMemberTaxNumber', namespaces=XML_NAMESPACES))
+            supplier_address = supplier_info.find('data:supplierAddress/bsae:simpleAddress', namespaces=XML_NAMESPACES)
+            partner_vals = {
+                'name': supplier_info.findtext('data:supplierName', namespaces=XML_NAMESPACES),
+                'vat': supplier_group_member_tax_number or supplier_tax_number,
+                'country_id': self.env['res.country'].search([('code', '=', supplier_address.findtext('base:countryCode', namespaces=XML_NAMESPACES))], limit=1).id,
+                'zip': supplier_address.findtext('base:postalCode', namespaces=XML_NAMESPACES),
+                'city': supplier_address.findtext('base:city', namespaces=XML_NAMESPACES),
+                'street': supplier_address.findtext('base:additionalAddressDetail', namespaces=XML_NAMESPACES),
+            }
+            if supplier_group_member_tax_number:
+                partner_vals['l10n_hu_group_vat'] = supplier_tax_number
+
+            partner = self.env['res.partner'].create(partner_vals)
+
+            if supplier_bank_account_number := supplier_info.findtext('data:supplierBankAccountNumber', namespaces=XML_NAMESPACES):
+                partner.bank_ids = [Command.create({
+                    'acc_number': supplier_bank_account_number,
+                    'partner_id': partner.id,
+                })]
+
+        move_vals = {
+            'l10n_hu_invoice_chain_index': -1 if base_invoice else int(invoice_reference.findtext('data:modificationIndex', namespaces=XML_NAMESPACES)),
+            'delivery_date': invoice_detail.findtext('data:invoiceDeliveryDate', namespaces=XML_NAMESPACES),
+            'currency_id': self.env['res.currency'].with_context(active_test=False).search([('name', '=', invoice_detail.findtext('data:currencyCode', namespaces=XML_NAMESPACES))], limit=1).id,
+            'invoice_currency_rate': float(invoice_detail.findtext('data:exchangeRate', namespaces=XML_NAMESPACES)),
+            'move_type': move_type,
+            'partner_id': partner.id,
+        }
+
+        if l10n_hu_payment_mode := invoice_detail.findtext('data:paymentMethod', namespaces=XML_NAMESPACES):
+            move_vals['l10n_hu_payment_mode'] = l10n_hu_payment_mode
+        if invoice_date_due := invoice_detail.findtext('data:paymentDate', namespaces=XML_NAMESPACES):
+            move_vals['invoice_date_due'] = fields.Date.from_string(invoice_date_due)
+
+        if (
+            not base_invoice
+            and boolean(invoice_reference.findtext('data:modifyWithoutMaster', namespaces=XML_NAMESPACES))
+            and (original_invoice := self.search([('ref', '=', invoice_reference.findtext('data:originalInvoiceNumber', namespaces=XML_NAMESPACES)), ('partner_id', '=', partner.id)], limit=1))
+        ):
+            if move_type == 'in_refund':
+                move_vals['reversed_entry_id'] = original_invoice.id
+            elif move_type == 'in_invoice':
+                move_vals['debit_origin_id'] = original_invoice.id
+
+        if move_type == 'in_invoice' and (supplier_bank_account_number := supplier_info.findtext('data:supplierBankAccountNumber', namespaces=XML_NAMESPACES)):
+            partner_bank = self.env['res.partner.bank'].search([('sanitized_acc_number', '=', sanitize_account_number(supplier_bank_account_number)), ('partner_id', '=', partner.id)], limit=1)
             if not partner_bank:
                 partner_bank = self.env['res.partner.bank'].create({
                     'acc_number': supplier_bank_account_number,
-                    'partner_id': self.partner_id.id,
+                    'partner_id': partner.id,
+                })
+            move_vals['partner_bank_id'] = partner_bank.id
+        elif move_type == 'in_refund' and (customer_bank_account_number := invoice_head.findtext('data:customerInfo/data:customerBankAccountNumber', namespaces=XML_NAMESPACES)):
+            partner_bank = self.env['res.partner.bank'].search([('sanitized_acc_number', '=', sanitize_account_number(customer_bank_account_number)), ('partner_id', '=', self.env.company.partner_id.id)], limit=1)
+            if not partner_bank:
+                partner_bank = self.env['res.partner.bank'].create({
+                    'acc_number': customer_bank_account_number,
+                    'partner_id': self.env.company.partner_id.id,
                 })
             move_vals['partner_bank_id'] = partner_bank.id
 
-        invoice_detail = invoice_head.find('data:invoiceDetail', namespaces=XML_NAMESPACES)
-        if invoice_currency_rate := invoice_detail.findtext('data:exchangeRate', namespaces=XML_NAMESPACES):
-            move_vals['invoice_currency_rate'] = float(invoice_currency_rate)
-
-        invoice_category = invoice_detail.findtext('data:invoiceCategory', namespaces=XML_NAMESPACES)
-        if invoice_category == 'AGGREGATE':
-            self.message_post(body=_(
-                "This is an aggregate invoice covering time period from %(start)s to %(end)s.",
-                start=invoice_detail.findtext('data:invoiceDeliveryPeriodStart', namespaces=XML_NAMESPACES),
-                end=invoice_detail.findtext('data:invoiceDeliveryPeriodEnd', namespaces=XML_NAMESPACES),
-            ))
-
-        invoice_reference = invoice.find('data:invoiceReference', namespaces=XML_NAMESPACES)
-        invoice_summary = invoice.find('data:invoiceSummary', namespaces=XML_NAMESPACES)
-        simplified = invoice_category == 'SIMPLIFIED'
-        gross_total = float(invoice_summary.findtext('data:summaryGrossData/data:invoiceGrossAmount', namespaces=XML_NAMESPACES)) if simplified else False
-        if (
-            simplified
-            and invoice_reference is not None
-            and self.move_type == 'in_invoice'
-            and gross_total < 0
-        ):
-            self.move_type = 'in_refund'
-
-        if (invoice_reference is not None) and not boolean(invoice_reference.findtext('data:modifyWithoutMaster', namespaces=XML_NAMESPACES)):
-            original_invoice = self.search([('ref', '=', invoice_reference.findtext('data:originalInvoiceNumber', namespaces=XML_NAMESPACES)), ('partner_id', '=', self.partner_id.id)], limit=1)
-            if self.move_type == 'in_refund':
-                move_vals['reversed_entry_id'] = original_invoice.id
-            elif self.move_type == 'in_invoice':
-                move_vals['debit_origin_id'] = original_invoice.id
-
         lines_vals = []
-        for line in invoice.iterfind('data:invoiceLines/data:line', namespaces=XML_NAMESPACES):
+        for line in invoice_xml.iterfind('data:invoiceLines/data:line', namespaces=XML_NAMESPACES):
             line_vals = {'display_type': 'product'}
 
             if boolean(line.findtext('data:advanceData/data:advanceIndicator', namespaces=XML_NAMESPACES)) and 'is_downpayment' in self.env['account.move.line']:
@@ -184,10 +208,7 @@ class AccountMove(models.Model):
 
             if (product_codes := line.find('data:productCodes', namespaces=XML_NAMESPACES)) is not None:
                 for product_code in product_codes.iterfind('data:productCode', namespaces=XML_NAMESPACES):
-                    product_info = {
-                        'name': line_vals.get('name'),
-                        'company': self.company_id,
-                    }
+                    product_info = {'name': line_vals.get('name')}
                     if product_code_own_value := product_code.findtext('data:productCodeOwnValue', namespaces=XML_NAMESPACES):
                         product_info['default_code'] = product_code_own_value
                     else:
@@ -209,16 +230,7 @@ class AccountMove(models.Model):
             if discount_rate := line.findtext('data:lineDiscountData/data:discountRate', namespaces=XML_NAMESPACES):
                 line_vals['discount'] = float(discount_rate) * 100
 
-            if invoice_category == 'SIMPLIFIED':
-                amounts_path = 'lineAmountsSimplified'
-                price_include = True
-            else:
-                amounts_path = 'lineAmountsNormal'
-                price_include = False
-
-            amounts = line.find(f'data:{amounts_path}', namespaces=XML_NAMESPACES)
-
-            sign = -1 if self.move_type == 'in_refund' else 1
+            sign = -1 if move_type == 'in_refund' else 1
             if quantity := line.findtext('data:quantity', namespaces=XML_NAMESPACES):
                 quantity = float(quantity)
                 if quantity < 0:
@@ -228,10 +240,11 @@ class AccountMove(models.Model):
                 quantity = 1
             line_vals['quantity'] = quantity
 
+            amounts = line.find(f'data:{'lineAmountsSimplified' if simplified else 'lineAmountsNormal'}', namespaces=XML_NAMESPACES)
             if price_unit := line.findtext('data:unitPrice', namespaces=XML_NAMESPACES):
                 line_vals['price_unit'] = sign * float(price_unit)
             else:
-                total_path = 'data:lineGrossAmountSimplified' if price_include else 'data:lineNetAmountData/data:lineNetAmount'
+                total_path = 'data:lineGrossAmountSimplified' if simplified else 'data:lineNetAmountData/data:lineNetAmount'
                 total = amounts.findtext(total_path, namespaces=XML_NAMESPACES)
                 line_vals['price_unit'] = sign * float(total) / quantity
 
@@ -257,9 +270,9 @@ class AccountMove(models.Model):
                 pass
 
             tax_domain = [
-                *self.env['account.tax']._check_company_domain(self.company_id),
+                *self.env['account.tax']._check_company_domain(self.env.company),
                 ('type_tax_use', '=', 'purchase'),
-                ('price_include', '=', price_include),
+                ('price_include', '=', simplified),
             ]
             if l10n_hu_tax_type:
                 tax_domain.append(('l10n_hu_tax_type', '=', l10n_hu_tax_type))
@@ -272,21 +285,28 @@ class AccountMove(models.Model):
 
         move_vals['invoice_line_ids'] = lines_vals
 
-        self.write(move_vals)
-        self._l10n_hu_edi_check_amounts_mismatch(invoice_summary, simplified, gross_total)
+        return move_vals
 
-    def _l10n_hu_edi_check_amounts_mismatch(self, invoice_summary, simplified, gross_total):
-        self.ensure_one()
+# TODO
+        # if invoice_category == 'AGGREGATE':
+        #     self.message_post(body=_(
+        #         "This is an aggregate invoice covering time period from %(start)s to %(end)s.",
+        #         start=invoice_detail.findtext('data:invoiceDeliveryPeriodStart', namespaces=XML_NAMESPACES),
+        #         end=invoice_detail.findtext('data:invoiceDeliveryPeriodEnd', namespaces=XML_NAMESPACES),
+        #     ))
 
-        if not simplified:
-            net_amount = float(invoice_summary.findtext('data:summaryNormal/data:invoiceNetAmount', namespaces=XML_NAMESPACES))
-            vat_amount = float(invoice_summary.findtext('data:summaryNormal/data:invoiceVatAmount', namespaces=XML_NAMESPACES))
-            gross_total = net_amount + vat_amount
+    # def _l10n_hu_edi_check_amounts_mismatch(self, invoice_summary, simplified, gross_total):
+    #     self.ensure_one()
 
-        currency = self.currency_id or self.company_id.currency_id
-        if currency.compare_amounts(gross_total, -self.amount_total_in_currency_signed) != 0:
-            self.l10n_hu_edi_messages = {
-                'error_title': _("Amount mismatch detected."),
-                'errors': [_("The gross total on the bill received from NAV and computed is not the same. Please check XML file in 'NAV 3.0' tab.")],
-                'blocking_level': 'warning',
-            }
+    #     if not simplified:
+    #         net_amount = float(invoice_summary.findtext('data:summaryNormal/data:invoiceNetAmount', namespaces=XML_NAMESPACES))
+    #         vat_amount = float(invoice_summary.findtext('data:summaryNormal/data:invoiceVatAmount', namespaces=XML_NAMESPACES))
+    #         gross_total = net_amount + vat_amount
+
+    #     currency = self.currency_id or self.company_id.currency_id
+    #     if currency.compare_amounts(gross_total, -self.amount_total_in_currency_signed) != 0:
+    #         self.l10n_hu_edi_messages = {
+    #             'error_title': _("Amount mismatch detected."),
+    #             'errors': [_("The gross total on the bill received from NAV and computed is not the same. Please check XML file in 'NAV 3.0' tab.")],
+    #             'blocking_level': 'warning',
+    #         }

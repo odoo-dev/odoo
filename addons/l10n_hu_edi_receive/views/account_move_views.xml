@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="l10n_hu_edi_view_in_invoice_bill_tree" model="ir.ui.view">
-        <field name="name">l10n_hu_edi.view_in_invoice_bill_tree</field>
+    <record id="l10n_hu_edi_receive_view_in_invoice_bill_tree" model="ir.ui.view">
+        <field name="name">l10n_hu_edi_receive.view_in_invoice_bill_tree</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_in_invoice_bill_tree"/>
         <field name="arch" type="xml">
             <list position="attributes">
                 <attribute name="js_class">l10n_hu_edi_account_move_tree</attribute>
             </list>
+        </field>
+    </record>
+
+    <record id="l10n_hu_edi_receive_view_move_form" model="ir.ui.view">
+        <field name="name">l10n_hu_edi_receive.view_move_form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="l10n_hu_edi.view_move_form_inherit_l10n_hu_edi"/>
+        <field name="arch" type="xml">
+            <page id="l10n_hu_edi" position="attributes">
+                <attribute name="invisible">not l10n_hu_edi_attachment</attribute>
+            </page>
         </field>
     </record>
 
