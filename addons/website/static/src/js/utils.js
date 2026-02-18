@@ -6,6 +6,7 @@ import { renderToElement } from "@web/core/utils/render";
 import { App, Component } from "@odoo/owl";
 import { templates } from "@web/core/assets";
 import { UrlAutoComplete } from "@website/components/autocomplete_with_pages/url_autocomplete";
+import { GpsAutoComplete } from "@website/components/gps_autocomplete/gps_autocomplete";
 
 /**
  * Allows to load anchors from a page.
@@ -71,6 +72,38 @@ function autocompleteWithPages(input, options= {}) {
         owlApp.destroy();
         container.remove();
     }
+}
+
+/**
+ * Allows the given input to propose Google Maps place suggestions.
+ *
+ * @param {HTMLInputElement} input
+ * @param {Object} options
+ * @returns {Function} cleanup function
+ */
+function autocompleteWithGps(input, options = {}) {
+    const owlApp = new App(GpsAutoComplete, {
+        env: Component.env,
+        dev: Component.env.debug,
+        templates,
+        props: {
+            contentWindow: options.contentWindow,
+            targetDropdown: input,
+            onPlaceSelected: options.onPlaceSelected,
+            onError: options.onError,
+        },
+        translatableAttributes: ["data-tooltip"],
+        translateFn: _t,
+    });
+
+    const container = document.createElement("div");
+    container.classList.add("ui-widget", "ui-autocomplete", "ui-widget-content", "border-0");
+    document.body.appendChild(container);
+    owlApp.mount(container);
+    return () => {
+        owlApp.destroy();
+        container.remove();
+    };
 }
 
 /**
@@ -464,6 +497,7 @@ export function cloneContentEls(content, keepScripts = false) {
 export default {
     loadAnchors: loadAnchors,
     autocompleteWithPages: autocompleteWithPages,
+    autocompleteWithGps: autocompleteWithGps,
     onceAllImagesLoaded: onceAllImagesLoaded,
     prompt: prompt,
     sendRequest: sendRequest,

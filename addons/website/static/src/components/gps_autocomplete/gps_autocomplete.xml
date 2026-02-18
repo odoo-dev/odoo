@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="website.GpsAutoComplete">
+        <AutoCompleteWithPages
+            onInput.bind="onInput"
+            onSelect.bind="onSelect"
+            dropdownClass="dropdownClass"
+            sources="sources"
+            targetDropdown="props.targetDropdown"/>
+    </t>
+
+    <t t-name="website.GpsAutoCompleteItem">
+        <div class="d-flex align-items-center">
+            <i class="fa fa-map-marker me-2"/>
+            <t t-esc="option.label"/>
+        </div>
+    </t>
+</templates>
