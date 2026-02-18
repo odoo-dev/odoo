@@ -42,14 +42,14 @@ export class MoOverviewComponentsBlock extends Component {
     setup() {
         this.state = useState({
             fold: this.getIndexStates(this.props),
-            unfoldAll: this.props.unfoldAll || false,
+            allExpanded: this.props.unfoldAll || false,
         });
 
         if (this.props.unfoldAll) {
             this.env.overviewBus.trigger("update-folded", { indexes: Object.keys(this.state.fold), isFolded: false });
         }
 
-        useBus(this.env.overviewBus, "unfold-all", () => this.unfoldAll());
+        useBus(this.env.overviewBus, "fold-all", (ev) => this._onFoldAll(ev.detail.isFolded));
 
         onWillUpdateProps(newProps => {
             // Update the fold indexes so it matches the newly added lines.
@@ -60,7 +60,7 @@ export class MoOverviewComponentsBlock extends Component {
     //---- Handlers ----
 
     onToggleFolded(foldIndex) {
-        this.state.unfoldAll = false;
+        this.state.allExpanded = false;
         const newState = !this.state.fold[foldIndex];
         if (newState) {
             // If a line is folded, its children lines must be folded as well
@@ -72,11 +72,11 @@ export class MoOverviewComponentsBlock extends Component {
         this.env.overviewBus.trigger("update-folded", { indexes: [foldIndex], isFolded: newState });
     }
 
-    unfoldAll() {
-        this.state.unfoldAll = true;
+    _onFoldAll(isFolded) {
+        this.state.allExpanded = !isFolded;
         const foldIndexes = Object.keys(this.state.fold);
-        foldIndexes.forEach(index => this.state.fold[index] = false);
-        this.env.overviewBus.trigger("update-folded", { indexes: foldIndexes, isFolded: false });
+        foldIndexes.forEach(index => this.state.fold[index] = isFolded);
+        this.env.overviewBus.trigger("update-folded", { indexes: foldIndexes, isFolded });
     }
 
     //---- Helpers ----
