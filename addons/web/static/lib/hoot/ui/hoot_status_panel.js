@@ -1,12 +1,13 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, proxy, xml } from "@odoo/owl";
+import { Component, onWillRender, useEffect, useRef, proxy, xml, plugin } from "@odoo/owl";
 import { getColorHex } from "../../hoot-dom/hoot_dom_utils";
 import { Test } from "../core/test";
 import { formatTime } from "../hoot_utils";
 import { getTitle, setTitle } from "../mock/window";
 import { onColorSchemeChange } from "./hoot_colors";
 import { HootTestPath } from "./hoot_test_path";
+import { UiPlugin } from "./ui_plugin";
 
 /**
  * @typedef {import("../core/runner").Runner} Runner
@@ -147,10 +148,10 @@ export class HootStatusPanel extends Component {
             </div>
             <div class="flex items-center gap-1">
                 <t t-if="this.runnerReporting.passed">
-                    <t t-set="color" t-value="!this.uiState.statusFilter or this.uiState.statusFilter === 'passed' ? 'emerald' : 'gray'" />
+                    <t t-set="color" t-value="!this.ui.statusFilter() or this.ui.statusFilter() === 'passed' ? 'emerald' : 'gray'" />
                     <button
                         t-attf-class="text-{{ color }} transition-colors flex items-center gap-1 p-1 font-bold"
-                        t-on-click.stop="() => this.filterResults('passed')"
+                        t-on-click.stop="() => this.ui.statusFilter.set('passed')"
                         t-attf-title="Show {{ this.runnerReporting.passed }} passed tests"
                     >
                         <i class="fa fa-check-circle" />
@@ -158,10 +159,10 @@ export class HootStatusPanel extends Component {
                     </button>
                 </t>
                 <t t-if="this.runnerReporting.failed">
-                    <t t-set="color" t-value="!this.uiState.statusFilter or this.uiState.statusFilter === 'failed' ? 'rose' : 'gray'" />
+                    <t t-set="color" t-value="!this.ui.statusFilter() or this.ui.statusFilter() === 'failed' ? 'rose' : 'gray'" />
                     <button
                         t-attf-class="text-{{ color }} transition-colors flex items-center gap-1 p-1 font-bold"
-                        t-on-click.stop="() => this.filterResults('failed')"
+                        t-on-click.stop="() => this.ui.statusFilter.set('failed')"
                         t-attf-title="Show {{ this.runnerReporting.failed }} failed tests"
                     >
                         <i class="fa fa-times-circle" />
@@ -169,10 +170,10 @@ export class HootStatusPanel extends Component {
                     </button>
                 </t>
                 <t t-if="this.runnerReporting.skipped">
-                    <t t-set="color" t-value="!this.uiState.statusFilter or this.uiState.statusFilter === 'skipped' ? 'cyan' : 'gray'" />
+                    <t t-set="color" t-value="!this.ui.statusFilter() or this.ui.statusFilter() === 'skipped' ? 'cyan' : 'gray'" />
                     <button
                         t-attf-class="text-{{ color }} transition-colors flex items-center gap-1 p-1 font-bold"
-                        t-on-click.stop="() => this.filterResults('skipped')"
+                        t-on-click.stop="() => this.ui.statusFilter.set('skipped')"
                         t-attf-title="Show {{ this.runnerReporting.skipped }} skipped tests"
                     >
                         <i class="fa fa-pause-circle" />
@@ -180,34 +181,34 @@ export class HootStatusPanel extends Component {
                     </button>
                 </t>
                 <t t-if="this.runnerReporting.todo">
-                    <t t-set="color" t-value="!this.uiState.statusFilter or this.uiState.statusFilter === 'todo' ? 'purple' : 'gray'" />
+                    <t t-set="color" t-value="!this.ui.statusFilter() or this.ui.statusFilter() === 'todo' ? 'purple' : 'gray'" />
                     <button
                         t-attf-class="text-{{ color }} transition-colors flex items-center gap-1 p-1 font-bold"
-                        t-on-click.stop="() => this.filterResults('todo')"
+                        t-on-click.stop="() => this.ui.statusFilter.set('todo')"
                         t-attf-title="Show {{ this.runnerReporting.todo }} tests to do"
                     >
                         <i class="fa fa-exclamation-circle" />
                         <t t-esc="this.runnerReporting.todo" />
                     </button>
                 </t>
-                <t t-if="this.uiState.totalResults gt this.uiState.resultsPerPage">
+                <t t-if="this.ui.totalResults() gt this.ui.resultsPerPage()">
                     <t t-set="lastPage" t-value="this.getLastPage()" />
                     <div class="flex gap-1 animate-slide-left">
                         <button
                             class="px-1 transition-color"
                             title="Previous page"
-                            t-att-disabled="this.uiState.resultsPage === 0"
+                            t-att-disabled="this.ui.resultsPage() === 0"
                             t-on-click.stop="this.previousPage"
                         >
                             <i class="fa fa-chevron-left" />
                         </button>
-                        <strong class="text-primary" t-esc="this.uiState.resultsPage + 1" />
+                        <strong class="text-primary" t-esc="this.ui.resultsPage() + 1" />
                         <span class="text-gray">/</span>
                         <t t-esc="lastPage + 1" />
                         <button
                             class="px-1 transition-color"
                             title="Next page"
-                            t-att-disabled="this.uiState.resultsPage === lastPage"
+                            t-att-disabled="this.ui.resultsPage() === lastPage"
                             t-on-click.stop="this.nextPage"
                         >
                             <i class="fa fa-chevron-right" />
@@ -219,12 +220,14 @@ export class HootStatusPanel extends Component {
         <canvas t-ref="progress-canvas" class="flex h-1 w-full" />
     `;
 
+    ui = plugin(UiPlugin);
+
     currentTestStart;
     formatTime = formatTime;
     intervalId = 0;
 
     setup() {
-        const { runner, ui } = this.env;
+        const { runner } = this.env;
         this.canvasRef = useRef("progress-canvas");
         this.runnerReporting = proxy(runner.reporting);
         this.runnerState = proxy(runner.state);
@@ -232,7 +235,6 @@ export class HootStatusPanel extends Component {
             className: "",
             timer: null,
         });
-        this.uiState = proxy(ui);
         this.progressBarIndex = 0;
 
         runner.beforeAll(this.globalSetup.bind(this));
@@ -248,21 +250,9 @@ export class HootStatusPanel extends Component {
         onWillRender(this.updateProgressBar.bind(this));
     }
 
-    /**
-     * @param {typeof this.uiState.statusFilter} status
-     */
-    filterResults(status) {
-        this.uiState.resultsPage = 0;
-        if (this.uiState.statusFilter === status) {
-            this.uiState.statusFilter = null;
-        } else {
-            this.uiState.statusFilter = status;
-        }
-    }
-
     getLastPage() {
-        const { resultsPerPage, totalResults } = this.uiState;
-        return $max($floor((totalResults - 1) / resultsPerPage), 0);
+        const { resultsPerPage, totalResults } = this.ui;
+        return $max($floor((totalResults() - 1) / resultsPerPage()), 0);
     }
 
     /**
@@ -292,7 +282,7 @@ export class HootStatusPanel extends Component {
     }
 
     nextPage() {
-        this.uiState.resultsPage = $min(this.uiState.resultsPage + 1, this.getLastPage());
+        this.ui.resultsPage.set($min(this.ui.resultsPage() + 1, this.getLastPage()));
     }
 
     onColorSchemeChange() {
@@ -301,7 +291,7 @@ export class HootStatusPanel extends Component {
     }
 
     previousPage() {
-        this.uiState.resultsPage = $max(this.uiState.resultsPage - 1, 0);
+        this.ui.resultsPage.set($max(this.ui.resultsPage() - 1, 0));
     }
 
     startTimer() {

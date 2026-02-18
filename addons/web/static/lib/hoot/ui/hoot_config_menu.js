@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, proxy, xml } from "@odoo/owl";
+import { Component, plugin, proxy, xml } from "@odoo/owl";
 import { CONFIG_KEYS } from "../core/config";
 import { LOG_LEVELS } from "../core/logger";
 import { refresh } from "../core/url";
@@ -8,6 +8,7 @@ import { CASE_EVENT_TYPES, strictEqual } from "../hoot_utils";
 import { generateSeed, internalRandom } from "../mock/math";
 import { toggleColorScheme, useColorScheme } from "./hoot_colors";
 import { HootCopyButton } from "./hoot_copy_button";
+import { UiPlugin } from "./ui_plugin";
 
 /**
  * @typedef {"dark" | "light"} ColorScheme
@@ -207,18 +208,18 @@ export class HootConfigMenu extends Component {
                 <span class="me-auto">Sort by duration</span>
                 <span
                     class="flex items-center gap-1 transition-colors"
-                    t-att-class="{ 'text-primary': this.uiState.sortResults }"
+                    t-att-class="{ 'text-primary': this.ui.sortResults() }"
                 >
-                    <t t-if="this.uiState.sortResults === 'asc'">
+                    <t t-if="this.ui.sortResults() === 'asc'">
                         ascending
                     </t>
-                    <t t-elif="this.uiState.sortResults === 'desc'">
+                    <t t-elif="this.ui.sortResults() === 'desc'">
                         descending
                     </t>
                     <t t-else="">
                         none
                     </t>
-                    <i t-attf-class="fa fa-sort-numeric-{{ this.uiState.sortResults or 'desc' }}" />
+                    <i t-attf-class="fa fa-sort-numeric-{{ this.ui.sortResults() or 'desc' }}" />
                 </span>
             </button>
             <label
@@ -263,6 +264,8 @@ export class HootConfigMenu extends Component {
         </form>
     `;
 
+    ui = plugin(UiPlugin);
+
     CASE_EVENT_TYPES = CASE_EVENT_TYPES;
 
     executionOrders = [
@@ -278,10 +281,9 @@ export class HootConfigMenu extends Component {
     toggleColorScheme = toggleColorScheme;
 
     setup() {
-        const { runner, ui } = this.env;
+        const { runner } = this.env;
         this.color = useColorScheme();
         this.config = proxy(runner.config);
-        this.uiState = proxy(ui);
     }
 
     doesNotNeedRefresh() {
@@ -364,13 +366,13 @@ export class HootConfigMenu extends Component {
     }
 
     toggleSortResults() {
-        this.uiState.resultsPage = 0;
-        if (!this.uiState.sortResults) {
-            this.uiState.sortResults = "desc";
-        } else if (this.uiState.sortResults === "desc") {
-            this.uiState.sortResults = "asc";
+        this.ui.resultsPage.set(0);
+        if (!this.ui.sortResults()) {
+            this.ui.sortResults.set("desc");
+        } else if (this.ui.sortResults() === "desc") {
+            this.ui.sortResults.set("asc");
         } else {
-            this.uiState.sortResults = false;
+            this.ui.sortResults.set(false);
         }
     }
 }

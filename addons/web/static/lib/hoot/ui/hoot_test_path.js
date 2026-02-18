@@ -1,10 +1,11 @@
 /** @odoo-module */
 
-import { Component, props, proxy, types as t, xml } from "@odoo/owl";
+import { Component, plugin, props, proxy, types as t, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { HootCopyButton } from "./hoot_copy_button";
 import { HootLink } from "./hoot_link";
 import { HootTagButton } from "./hoot_tag_button";
+import { UiPlugin } from "./ui_plugin";
 
 export class HootTestPath extends Component {
     static components = { HootCopyButton, HootLink, HootTagButton };
@@ -18,7 +19,7 @@ export class HootTestPath extends Component {
                 />
             </t>
             <span class="flex items-center overflow-hidden">
-                <t t-if="this.uiState.selectedSuiteId and !this.props.full">
+                <t t-if="this.ui.selectedSuiteId() and !this.props.full">
                     <span class="text-gray font-bold p-1 select-none hidden md:inline">...</span>
                     <span class="select-none hidden md:inline">/</span>
                 </t>
@@ -79,9 +80,10 @@ export class HootTestPath extends Component {
         test: t.instanceOf(Test),
     });
 
+    ui = plugin(UiPlugin);
+
     setup() {
         this.results = proxy(this.props.test.results);
-        this.uiState = proxy(this.env.ui);
     }
 
     getStatusInfo() {
@@ -135,7 +137,7 @@ export class HootTestPath extends Component {
     }
 
     getTestPath() {
-        const { selectedSuiteId } = this.uiState;
+        const selectedSuiteId = this.ui.selectedSuiteId();
         const { test } = this.props;
         const path = test.path.slice(0, -1);
         if (this.props.full || !selectedSuiteId) {

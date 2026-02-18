@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { mount, reactive } from "@odoo/owl";
+import { mount } from "@odoo/owl";
 import { HootFixtureElement } from "../core/fixture";
 import { waitForDocument } from "../hoot_utils";
 import { getRunner } from "../main_runner";
@@ -12,11 +12,10 @@ import {
     setColorRoot,
 } from "./hoot_colors";
 import { HootMain } from "./hoot_main";
+import { UiPlugin } from "./ui_plugin";
 
 /**
  * @typedef {"failed" | "passed" | "skipped" | "todo"} StatusFilter
- *
- * @typedef {ReturnType<typeof makeUiState>} UiState
  */
 
 //-----------------------------------------------------------------------------
@@ -113,20 +112,6 @@ customElements.define("hoot-container", HootContainer);
 // Exports
 //-----------------------------------------------------------------------------
 
-export function makeUiState() {
-    return reactive({
-        resultsPage: 0,
-        resultsPerPage: 40,
-        /** @type {string | null} */
-        selectedSuiteId: null,
-        /** @type {"asc" | "desc" | false} */
-        sortResults: false,
-        /** @type {StatusFilter | null} */
-        statusFilter: null,
-        totalResults: 0,
-    });
-}
-
 /**
  * Appends the main Hoot UI components in a container, which itself will be appended
  * on the current document body.
@@ -152,9 +137,9 @@ export async function setupHootUI() {
         mount(HootMain, container.shadowRoot, {
             env: {
                 runner,
-                ui: makeUiState(),
             },
             name: "HOOT",
+            plugins: [UiPlugin],
         }),
     ];
 

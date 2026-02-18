@@ -8,14 +8,13 @@ import { Component, props as defineProps, types as t, xml } from "@odoo/owl";
 import { Runner } from "../../core/runner";
 import { Test } from "../../core/test";
 import { HootTestResult } from "../../ui/hoot_test_result";
-import { makeUiState } from "../../ui/setup_hoot_ui";
+import { UiPlugin } from "../../ui/ui_plugin";
 
 /**
  * @param {(mockExpect: typeof expect) => any} callback
  */
 const mountTestResults = async (testFn, props) => {
     const runner = new Runner();
-    const ui = makeUiState();
     const mockTest = new Test(null, "test", {});
     const [mockExpect, { after, before }] = makeExpect({});
 
@@ -40,7 +39,8 @@ const mountTestResults = async (testFn, props) => {
     after(runner);
 
     await mountForTest(Parent, {
-        env: { runner, ui },
+        env: { runner },
+        plugins: [UiPlugin],
         props: {
             test: mockTest,
             open: "always",

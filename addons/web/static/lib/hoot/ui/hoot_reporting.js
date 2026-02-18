@@ -1,12 +1,13 @@
 /** @odoo-module */
 
-import { Component, onWillRender, proxy, xml } from "@odoo/owl";
+import { Component, onWillRender, plugin, proxy, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { formatTime, parseQuery } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
 import { HootLogCounters } from "./hoot_log_counters";
 import { HootTestPath } from "./hoot_test_path";
 import { HootTestResult } from "./hoot_test_result";
+import { UiPlugin } from "./ui_plugin";
 
 /**
  * @typedef {import("../core/test").Test} Test
@@ -94,8 +95,8 @@ export class HootReporting extends Component {
             ${issueTemplate("globalWarnings", "amber")}
 
             <!-- Test results -->
-            <t t-set="resultStart" t-value="this.uiState.resultsPage * this.uiState.resultsPerPage" />
-            <t t-foreach="this.filteredResults.slice(resultStart, resultStart + this.uiState.resultsPerPage)" t-as="result" t-key="result.id">
+            <t t-set="resultStart" t-value="this.ui.resultsPage() * this.ui.resultsPerPage()" />
+            <t t-foreach="this.filteredResults.slice(resultStart, resultStart + this.ui.resultsPerPage())" t-as="result" t-key="result.id">
                 <HootTestResult
                     open="this.state.openTests.includes(result.test.id)"
                     test="result.test"
@@ -188,7 +189,7 @@ export class HootReporting extends Component {
                                     <li class="flex gap-1">
                                         <button
                                             class="flex items-center gap-1 text-emerald"
-                                            t-on-click.stop="() => this.filterResults('passed')"
+                                            t-on-click.stop="() => this.ui.statusFilter.set('passed')"
                                         >
                                             <i class="fa fa-check-circle" />
                                             <strong t-esc="this.runnerReporting.passed" />
@@ -200,7 +201,7 @@ export class HootReporting extends Component {
                                     <li class="flex gap-1">
                                         <button
                                             class="flex items-center gap-1 text-rose"
-                                            t-on-click.stop="() => this.filterResults('failed')"
+                                            t-on-click.stop="() => this.ui.statusFilter.set('failed')"
                                         >
                                             <i class="fa fa-times-circle" />
                                             <strong t-esc="this.runnerReporting.failed" />
@@ -212,7 +213,7 @@ export class HootReporting extends Component {
                                     <li class="flex gap-1">
                                         <button
                                             class="flex items-center gap-1 text-cyan"
-                                            t-on-click.stop="() => this.filterResults('skipped')"
+                                            t-on-click.stop="() => this.ui.statusFilter.set('skipped')"
                                         >
                                             <i class="fa fa-pause-circle" />
                                             <strong t-esc="this.runnerReporting.skipped" />
@@ -224,7 +225,7 @@ export class HootReporting extends Component {
                                     <li class="flex gap-1">
                                         <button
                                             class="flex items-center gap-1 text-purple"
-                                            t-on-click.stop="() => this.filterResults('todo')"
+                                            t-on-click.stop="() => this.ui.statusFilter.set('todo')"
                                         >
                                             <i class="fa fa-exclamation-circle" />
                                             <strong t-esc="this.runnerReporting.todo" />
@@ -240,11 +241,13 @@ export class HootReporting extends Component {
         </div>
     `;
 
+    ui = plugin(UiPlugin);
+
     Test = Test;
     formatTime = formatTime;
 
     setup() {
-        const { runner, ui } = this.env;
+        const { runner } = this.env;
 
         this.config = proxy(runner.config);
         this.runnerReporting = proxy(runner.reporting);
@@ -255,7 +258,6 @@ export class HootReporting extends Component {
             /** @type {string[]} */
             openTests: [],
         });
-        this.uiState = proxy(ui);
 
         const { showdetail } = this.config;
 
@@ -273,12 +275,14 @@ export class HootReporting extends Component {
 
         onWillRender(() => {
             this.filteredResults = this.computeFilteredResults();
-            this.uiState.totalResults = this.filteredResults.length;
+            this.ui.totalResults.set(this.filteredResults.length);
         });
     }
 
     computeFilteredResults() {
-        const { selectedSuiteId, sortResults, statusFilter } = this.uiState;
+        const selectedSuiteId = this.ui.selectedSuiteId();
+        const sortResults = this.ui.sortResults();
+        const statusFilter = this.ui.statusFilter();
 
         const queryFilter = this.getQueryFilter();
 
@@ -334,20 +338,9 @@ export class HootReporting extends Component {
         );
     }
 
-    /**
-     * @param {typeof this.uiState.statusFilter} status
-     */
-    filterResults(status) {
-        this.uiState.resultsPage = 0;
-        if (this.uiState.statusFilter === status) {
-            this.uiState.statusFilter = null;
-        } else {
-            this.uiState.statusFilter = status;
-        }
-    }
-
     getEmptyMessage() {
-        const { selectedSuiteId, statusFilter } = this.uiState;
+        const selectedSuiteId = this.ui.selectedSuiteId();
+        const statusFilter = this.ui.statusFilter();
         if (!statusFilter && !selectedSuiteId) {
             return null;
         }

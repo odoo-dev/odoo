@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onPatched, onWillPatch, useRef, proxy, xml } from "@odoo/owl";
+import { Component, onPatched, onWillPatch, useRef, proxy, xml, plugin } from "@odoo/owl";
 import { getActiveElement } from "@web/../lib/hoot-dom/helpers/dom";
 import { R_REGEX, REGEX_MARKER } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { Suite } from "../core/suite";
@@ -23,6 +23,7 @@ import {
     useWindowListener,
 } from "../hoot_utils";
 import { HootTagButton } from "./hoot_tag_button";
+import { UiPlugin } from "./ui_plugin";
 
 /**
  * @typedef {import("../core/config").SearchFilter} SearchFilter
@@ -401,6 +402,8 @@ export class HootSearch extends Component {
         </search>
     `;
 
+    ui = plugin(UiPlugin);
+
     categories = ["suite", "test", "tag"];
     debouncedUpdateSuggestions = debounce(this.updateSuggestions.bind(this), 16);
     refresh = refresh;
@@ -699,7 +702,7 @@ export class HootSearch extends Component {
     onSearchInputInput(ev) {
         this.state.query = ev.currentTarget.value;
 
-        this.env.ui.resultsPage = 0;
+        this.ui.resultsPage.set(0);
 
         this.updateFilterParam();
         this.debouncedUpdateSuggestions();

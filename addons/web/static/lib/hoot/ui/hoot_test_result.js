@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, props, proxy, types as t, xml } from "@odoo/owl";
+import { Component, computed, plugin, props, proxy, types as t, xml } from "@odoo/owl";
 import { isFirefox } from "../../hoot-dom/hoot_dom_utils";
 import { Tag } from "../core/tag";
 import { Test } from "../core/test";
@@ -17,6 +17,7 @@ import {
 import { HootCopyButton } from "./hoot_copy_button";
 import { HootLink } from "./hoot_link";
 import { HootTechnicalValue } from "./hoot_technical_value";
+import { UiPlugin } from "./ui_plugin";
 
 /**
  * @typedef {import("../core/expect").CaseEvent} CaseEvent
@@ -56,6 +57,7 @@ function filterEvents(indexedResults, events) {
  * @param {StatusFilter} statusFilter
  */
 function filterResults(results, statusFilter) {
+    /** @type {[number, CaseEvent][]} */
     const ordinalResults = [];
     const hasFailed = results.some((r) => !r.pass);
     const shouldPass = statusFilter === "passed";
@@ -227,7 +229,7 @@ export class HootTestResult extends Component {
                 <t t-slot="default" />
             </button>
             <t t-if="this.state.showDetails and !this.props.test.config.skip">
-                <t t-foreach="this.filteredResults" t-as="indexedResult" t-key="indexedResult[0]">
+                <t t-foreach="this.filteredResults()" t-as="indexedResult" t-key="indexedResult[0]">
                     <t t-set="index" t-value="indexedResult[0]" />
                     <t t-set="result" t-value="indexedResult[1]" />
                     <t t-if="results.length > 1">
@@ -242,10 +244,10 @@ export class HootTestResult extends Component {
                         </div>
                     </t>
                     <div class="hoot-result-detail grid gap-1 rounded overflow-x-auto p-1 mx-2 animate-slide-down">
-                        <t t-if="!this.filteredEvents[index].length">
+                        <t t-if="!this.filteredEvents()[index].length">
                             <em class="text-gray px-2 py-1">No test event to show</em>
                         </t>
-                        <t t-foreach="this.filteredEvents[index]" t-as="event" t-key="event_index">
+                        <t t-foreach="this.filteredEvents()[index]" t-as="event" t-key="event_index">
                             <t t-set="sType" t-value="this.getTypeName(event.type)" />
                             <t t-set="eventIcon" t-value="this.CASE_EVENT_TYPES[sType].icon" />
                             <t t-set="eventColor" t-value="
@@ -296,6 +298,8 @@ export class HootTestResult extends Component {
         test: t.instanceOf(Test),
     });
 
+    ui = plugin(UiPlugin);
+
     CASE_EVENT_TYPES = CASE_EVENT_TYPES;
     DOC_URL = DOC_URL;
 
@@ -307,15 +311,15 @@ export class HootTestResult extends Component {
     isMarkup = Markup.isMarkup;
     ordinal = ordinal;
 
-    /** @type {ReturnType<typeof filterEvents>} */
-    filteredEvents;
-    /** @type {[number, CaseEvent][]} */
-    filteredResults;
+    /** @type {import("@odoo/owl").ReactiveValue<ReturnType<typeof filterEvents>>} */
+    filteredEvents = computed(() => filterEvents(this.filteredResults(), this.config.events));
+    /** @type {import("@odoo/owl").ReactiveValue<[number, CaseEvent][]>} */
+    filteredResults = computed(() => filterResults(this.results, this.ui.statusFilter()));
 
     setup() {
         subscribeToURLParams("*");
 
-        const { runner, ui } = this.env;
+        const { runner } = this.env;
         this.config = proxy(runner.config);
         this.logs = proxy(this.props.test.logs);
         this.results = proxy(this.props.test.results);
@@ -323,9 +327,6 @@ export class HootTestResult extends Component {
             showCode: false,
             showDetails: Boolean(this.props.open),
         });
-        this.uiState = proxy(ui);
-
-        onWillRender(this.onWillRender.bind(this));
     }
 
     getClassName() {
@@ -363,11 +364,6 @@ export class HootTestResult extends Component {
      */
     getTypeName(nType) {
         return CASE_EVENT_TYPES_INVERSE[nType];
-    }
-
-    onWillRender() {
-        this.filteredResults = filterResults(this.results, this.uiState.statusFilter);
-        this.filteredEvents = filterEvents(this.filteredResults, this.config.events);
     }
 
     /**

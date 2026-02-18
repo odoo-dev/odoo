@@ -9,11 +9,13 @@ import {
     xml,
     props,
     types as t,
+    plugin,
 } from "@odoo/owl";
 import { Suite } from "../core/suite";
 import { createUrlFromId } from "../core/url";
 import { lookup, parseQuery } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
+import { UiPlugin } from "./ui_plugin";
 
 //-----------------------------------------------------------------------------
 // Global
@@ -165,7 +167,7 @@ export class HootSideBar extends Component {
                     <li class="flex items-center h-7 animate-slide-down">
                         <button
                             class="${SUITE_CLASSNAME} flex items-center w-full h-full gap-1 px-2 overflow-hidden hover:bg-gray-300 dark:hover:bg-gray-700"
-                            t-att-class="{ 'bg-gray-300 dark:bg-gray-700': this.uiState.selectedSuiteId === suite.id }"
+                            t-att-class="{ 'bg-gray-300 dark:bg-gray-700': this.ui.selectedSuiteId() === suite.id }"
                             t-attf-style="margin-left: {{ (suite.path.length - 1) + 'rem' }};"
                             t-attf-title="{{ suite.fullName }}\n- {{ suite.totalTestCount }} tests\n- {{ suite.totalSuiteCount }} suites"
                             t-on-click.stop="(ev) => this.toggleItem(suite)"
@@ -177,7 +179,7 @@ export class HootSideBar extends Component {
                                     name="suite.name"
                                     hasSuites="this.hasSuites(suite)"
                                     reporting="suite.reporting"
-                                    selected="this.uiState.selectedSuiteId === suite.id"
+                                    selected="this.ui.selectedSuiteId() === suite.id"
                                     unfolded="this.unfoldedIds.has(suite.id)"
                                 />
                                 <span class="text-gray">
@@ -188,7 +190,7 @@ export class HootSideBar extends Component {
                             <t t-if="this.env.runner.state.suites.includes(suite)">
                                 <HootSideBarCounter
                                     reporting="suite.reporting"
-                                    statusFilter="this.uiState.statusFilter"
+                                    statusFilter="this.ui.statusFilter()"
                                 />
                             </t>
                         </button>
@@ -198,16 +200,17 @@ export class HootSideBar extends Component {
         </div>
     `;
 
+    ui = plugin(UiPlugin);
+
     filteredSuites = [];
     runningSuites = new Set();
     unfoldedIds = new Set();
 
     setup() {
-        const { runner, ui } = this.env;
+        const { runner } = this.env;
 
         this.searchInputRef = useRef("search-input");
         this.suitesListRef = useRef("suites-list");
-        this.uiState = proxy(ui);
         this.state = proxy({
             filter: "",
             hideEmpty: false,
@@ -313,8 +316,8 @@ export class HootSideBar extends Component {
 
     onClick() {
         // Unselect suite when clicking outside of a suite & in the side bar
-        this.uiState.selectedSuiteId = null;
-        this.uiState.resultsPage = 0;
+        this.ui.selectedSuiteId.set(null);
+        this.ui.resultsPage.set(0);
     }
 
     /**
@@ -403,9 +406,9 @@ export class HootSideBar extends Component {
      * @param {boolean} [forceAdd]
      */
     toggleItem(suite, forceAdd) {
-        if (this.uiState.selectedSuiteId !== suite.id) {
-            this.uiState.selectedSuiteId = suite.id;
-            this.uiState.resultsPage = 0;
+        if (this.ui.selectedSuiteId() !== suite.id) {
+            this.ui.selectedSuiteId.set(suite.id);
+            this.ui.resultsPage.set(0);
 
             if (this.state.unfoldedIds.has(suite.id)) {
                 return;
@@ -431,8 +434,8 @@ export class HootSideBar extends Component {
                 break;
             }
             this.state.unfoldedIds.add(suite.id);
-            this.uiState.selectedSuiteId = suite.id;
-            this.uiState.resultsPage = 0;
+            this.ui.selectedSuiteId.set(suite.id);
+            this.ui.resultsPage.set(0);
         }
     }
 }
