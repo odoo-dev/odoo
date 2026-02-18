@@ -857,8 +857,10 @@ class DiscussChannel(models.Model):
     def _types_allowing_unfollow(self):
         return super()._types_allowing_unfollow() + ["livechat"]
 
-    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True):
-        super()._action_unfollow(partner, guest, post_leave_message)
+    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True, user=None):
+        super()._action_unfollow(
+            partner=partner, guest=guest, post_leave_message=post_leave_message, user=user
+        )
         # sudo - discuss.channel: user just left but we need to close the live
         # chat if the last operator left.
         channel_sudo = self.sudo()

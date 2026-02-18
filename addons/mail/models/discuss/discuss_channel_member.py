@@ -248,7 +248,11 @@ class DiscussChannelMember(models.Model):
         # kept in sync.
         for member in res:
             if parent := member.channel_id.parent_channel_id:
-                parent._add_members(partners=member.partner_id, guests=member.guest_id)
+                parent._add_members(
+                    users=member.partner_id.user_ids,
+                    partners=member.partner_id.filtered(lambda p: not p.user_ids),
+                    guests=member.guest_id,
+                )
         for channel, members in name_members_by_channel.items():
             if channel.channel_name_member_ids == members:
                 continue

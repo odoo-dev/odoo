@@ -597,14 +597,19 @@ class DiscussChannel(models.Model):
                 for channel in self
             )
 
-    def action_unfollow(self):
+    def action_unfollow(self, user_id=None):
+        user = self.env["res.users"].browse(user_id).exists() if user_id else self.env.user
         if self.channel_type in self._types_allowing_unfollow():
-            self._action_unfollow(self.env.user.partner_id)
+            self._action_unfollow(user=user)
         else:
             self.self_member_id.unpin_dt = fields.Datetime.now()
 
-    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True):
+    def _action_unfollow(self, partner=None, guest=None, post_leave_message=True, user=None):
         self.ensure_one()
+        if user is None:
+            user = self.env["res.users"]
+        if partner is None:
+            partner = user.partner_id
         if partner is None:
             partner = self.env["res.partner"]
         if guest is None:
@@ -631,11 +636,16 @@ class DiscussChannel(models.Model):
         member.unlink()
 
     def add_members(
-        self, partner_ids=None, guest_ids=None, invite_to_rtc_call=False, post_joined_message=True
+        self, partner_ids=None, guest_ids=None, invite_to_rtc_call=False, post_joined_message=True, user_ids=None
     ):
-        """ Adds the given partner_ids and guest_ids as member of self channels. """
+        """ Adds the given user_ids, partner_ids and guest_ids as member of self channels. """
+        users = self.env["res.users"].browse(user_ids or []).exists()
+        partners = self.env["res.partner"].browse(partner_ids or []).exists()
+        users |= partners.user_ids
+        partners -= users.partner_id
         return self._add_members(
-            partners=self.env["res.partner"].browse(partner_ids or []).exists(),
+            users=users,
+            partners=partners,
             guests=self.env["mail.guest"].browse(guest_ids or []).exists(),
             invite_to_rtc_call=invite_to_rtc_call,
             post_joined_message=post_joined_message,
@@ -645,8 +655,8 @@ class DiscussChannel(models.Model):
         self,
         *,
         guests=None,
-        partners=None,
         users=None,
+        partners=None,
         create_member_params=None,
         invite_to_rtc_call=False,
         post_joined_message=True,
@@ -654,9 +664,8 @@ class DiscussChannel(models.Model):
     ):
         stores = lazymapping(lambda bus_channel: Store(bus_channel=bus_channel))
         inviting_partner = inviting_partner or self.env["res.partner"]
-        partners = partners or self.env["res.partner"]
-        if users:
-            partners |= users.partner_id
+        users = users or self.env["res.users"]
+        partners = (partners or self.env["res.partner"]) | users.partner_id
         guests = guests or self.env["mail.guest"]
         current_user, current_guest = self.env["res.users"]._get_current_persona()
         all_new_members = self.env["discuss.channel.member"]
@@ -1082,7 +1091,7 @@ class DiscussChannel(models.Model):
                 to_invite |= (message.partner_ids - members.partner_id).filtered(lambda p:
                     p.user_ids.res_users_settings_id.channel_notifications != "no_notif"
                 )
-            self._add_members(partners=to_invite)
+            self._add_members(users=to_invite.user_ids, partners=to_invite.filtered(lambda p: not p.user_ids))
         return super()._message_post_after_hook(message, msg_vals)
 
     def _message_update_content(self, message, /, *, partner_ids=None, **kwargs):
@@ -1538,7 +1547,11 @@ class DiscussChannel(models.Model):
                 "parent_channel_id": self.id,
             }
         )
-        sub_channel.add_members(partner_ids=(self.env.user.partner_id | message.author_id).ids, post_joined_message=False)
+        sub_channel.add_members(
+            user_ids=(self.env.user | message.author_id.user_ids).ids,
+            partner_ids=(message.author_id - message.author_id.user_ids.partner_id).ids,
+            post_joined_message=False,
+        )
         notification = (
             Markup('<div class="o_mail_notification">%s</div>')
             % _(

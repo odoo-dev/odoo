@@ -36,7 +36,7 @@ class TestDiscussResRole(TestResRole):
                     self.env, login=f"user_{user_grp}_{idx}", role_ids=role.ids, groups=user_grp
                 )
                 if is_member:
-                    channel.add_members(partner_ids=user.partner_id.ids)
+                    channel.add_members(user_ids=user.ids)
                 data = self.make_jsonrpc_request(
                     "/mail/message/post",
                     {

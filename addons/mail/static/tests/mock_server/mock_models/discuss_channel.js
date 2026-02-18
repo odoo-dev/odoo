@@ -60,10 +60,12 @@ export class DiscussChannel extends models.ServerModel {
     }
 
     /** @param {number[]} ids */
-    action_unfollow(ids) {
-        const kwargs = getKwArgs(arguments, "ids");
+    action_unfollow(ids, user_id) {
+        const kwargs = getKwArgs(arguments, "ids", "user_id");
         ids = kwargs.ids;
         delete kwargs.ids;
+        user_id = kwargs.user_id;
+        delete kwargs.user_id;
 
         /** @type {import("mock_models").BusBus} */
         const BusBus = this.env["bus.bus"];
@@ -84,10 +86,12 @@ export class DiscussChannel extends models.ServerModel {
             close_chat_window: true,
             isLocallyPinned: false,
         });
-        const [partner] = ResPartner.read(this.env.user.partner_id);
+        const user = user_id ? this.env["res.users"].browse(user_id)[0] : undefined;
+        const userPartnerId = user ? user.partner_id : this.env.user.partner_id;
+        const [partner] = ResPartner.read(userPartnerId);
         const [channelMember] = DiscussChannelMember._filter([
             ["channel_id", "in", ids],
-            ["partner_id", "=", this.env.user.partner_id],
+            ["partner_id", "=", userPartnerId],
         ]);
         BusBus._sendone(partner, "mail.record/insert", custom_store.get_result());
         if (!channelMember) {
@@ -119,13 +123,23 @@ export class DiscussChannel extends models.ServerModel {
     /**
      * @param {number[]} ids
      * @param {number[]} partner_ids
+     * @param {number[]} user_ids
      * @param {boolean} [invite_to_rtc_call=undefined]
      */
-    add_members(ids, partner_ids, invite_to_rtc_call) {
-        const kwargs = getKwArgs(arguments, "ids", "partner_ids", "invite_to_rtc_call");
+    add_members(ids, partner_ids, invite_to_rtc_call, post_joined_message, user_ids) {
+        const kwargs = getKwArgs(
+            arguments,
+            "ids",
+            "partner_ids",
+            "invite_to_rtc_call",
+            "post_joined_message",
+            "user_ids"
+        );
         ids = kwargs.ids;
         delete kwargs.ids;
         partner_ids = kwargs.partner_ids || [];
+        const users = this.env["res.users"].browse(kwargs.user_ids || []);
+        partner_ids = [...new Set([...partner_ids, ...users.map((user) => user.partner_id)])];
 
         /** @type {import("mock_models").BusBus} */
         const BusBus = this.env["bus.bus"];

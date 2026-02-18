@@ -191,7 +191,7 @@ class TestChannelInternals(MailCommon, HttpCase):
             )
 
         with self.assertBus(get_params=get_add_member_bus):
-            test_group._add_members(partners=self.test_partner)
+            test_group._add_members(users=self.test_user)
 
         def get_add_member_again_bus():
             member = self.env["discuss.channel.member"].search([], order="id desc", limit=1)
@@ -239,7 +239,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                 ],
             )
         with self.assertBus(get_params=get_add_member_again_bus):
-            test_group._add_members(partners=self.test_partner)
+            test_group._add_members(users=self.test_user)
         self.assertEqual(test_group.message_partner_ids, self.env["res.partner"])
         self.assertEqual(test_group.channel_partner_ids, self.test_partner + self.partner_employee)
 
@@ -268,7 +268,7 @@ class TestChannelInternals(MailCommon, HttpCase):
         """ Posting a message on a channel should not send emails """
         channel = self.env['discuss.channel'].browse(self.test_channel.ids)
         # sudo: discuss.channel.member - adding members in non-accessible channel in a test file
-        channel.sudo()._add_members(users=self.user_employee | self.user_admin, partners=self.test_partner)
+        channel.sudo()._add_members(users=self.user_employee | self.user_admin | self.test_user)
         with self.mock_mail_gateway():
             new_msg = channel.message_post(body="Test", message_type='comment', subtype_xmlid='mail.mt_comment')
         self.assertNotSentEmail()
@@ -590,7 +590,7 @@ class TestChannelInternals(MailCommon, HttpCase):
             'name': 'Private Channel',
             'channel_type': 'group',
         })
-        test_group._add_members(partners=self.test_partner)
+        test_group._add_members(users=self.test_user)
 
         # no message should be posted under test_partner's name
         messages_0 = self.env['mail.message'].search([
@@ -601,7 +601,7 @@ class TestChannelInternals(MailCommon, HttpCase):
         self.assertFalse(messages_0)
 
         # a message should be posted to notify others when a partner is about to leave
-        test_group._action_unfollow(self.test_partner)
+        test_group._action_unfollow(user=self.test_user)
         messages_1 = self.env['mail.message'].search([
             ('model', '=', 'discuss.channel'),
             ('res_id', '=', test_group.id),
@@ -610,7 +610,7 @@ class TestChannelInternals(MailCommon, HttpCase):
         self.assertEqual(len(messages_1), 1)
 
         # no more messages should be posted if the partner has been removed before.
-        test_group._action_unfollow(self.test_partner)
+        test_group._action_unfollow(user=self.test_user)
         messages_2 = self.env['mail.message'].search([
             ('model', '=', 'discuss.channel'),
             ('res_id', '=', test_group.id),
@@ -621,10 +621,10 @@ class TestChannelInternals(MailCommon, HttpCase):
 
     def test_channel_join_unfollow_should_not_post_message(self):
         channel = self.env['discuss.channel'].browse(self.test_channel.id)
-        channel.with_user(self.test_user)._add_members(partners=self.test_partner)
+        channel.with_user(self.test_user)._add_members(users=self.test_user)
 
         # no message should be posted to notify others when a partner is joined and left
-        channel._action_unfollow(self.test_partner)
+        channel._action_unfollow(user=self.test_user)
         messages = self.env['mail.message'].search([
             ('model', '=', 'discuss.channel'),
             ('res_id', '=', channel.id),
