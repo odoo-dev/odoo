@@ -430,7 +430,7 @@ class AccountTax(models.Model):
                         [Markup("""
                             <li>
                                 <span class='o-mail-Message-trackingOld me-1 px-1 text-muted fw-bold'>{old}</span>
-                                <i class='o-mail-Message-trackingSeparator fa fa-long-arrow-right mx-1 text-600'/>
+                                <i class='o-mail-Message-trackingSeparator oi mx-1 text-600' data-icon='east'/>
                                 <span class='o-mail-Message-trackingNew me-1 fw-bold text-info'>{new}</span>
                                 <span class='o-mail-Message-trackingField ms-1 fst-italic text-muted'>({diff})</span>
                             </li>
