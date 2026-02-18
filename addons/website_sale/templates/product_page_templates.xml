@@ -78,7 +78,6 @@
                                     search_type.f="products"
                                     placeholder="placeholder"
                                     _simple_button_layout.f="True"
-                                    _modal_id.f="wsale_product_search"
                                     _simple_button_classes.f="o_wsale_product_search_mobile_btn d-none btn-{{navClass}}"/>
                             </div>
                         </div>

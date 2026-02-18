@@ -22,15 +22,15 @@ registry.category("web_tour.tours").add("blog_autocomplete_with_date", {
         },
         {
             content: "Enter search term",
-            trigger: "#o_search_modal_blogs input.search-query ",
+            trigger: "#o_search_modal_block input.search-query ",
             run: "edit a",
         },
         {
-            trigger: "#o_search_modal_blogs .o_dropdown_menu .o_search_result_item",
+            trigger: "#o_search_modal_block .o_dropdown_menu .o_search_result_item",
         },
         {
             content: "Wait for suggestions then click on search icon",
-            trigger: "#o_search_modal_blogs button.oe_search_button",
+            trigger: "#o_search_modal_block button.oe_search_button",
             run: "click",
             expectUnloadPage: true,
         },
