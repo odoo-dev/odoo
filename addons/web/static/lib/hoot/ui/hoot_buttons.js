@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { refresh, subscribeToURLParams } from "../core/url";
 import { STORAGE, storageSet } from "../hoot_utils";
 import { HootLink } from "./hoot_link";
@@ -106,11 +106,11 @@ export class HootButtons extends Component {
 
     setup() {
         const { runner } = this.env;
-        this.state = useState({
+        this.state = proxy({
             disable: false,
             open: false,
         });
-        this.runnerState = useState(runner.state);
+        this.runnerState = proxy(runner.state);
         this.disableTimeout = 0;
 
         subscribeToURLParams(...$keys(runner.config));

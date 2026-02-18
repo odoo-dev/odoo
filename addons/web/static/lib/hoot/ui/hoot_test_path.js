@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { HootCopyButton } from "./hoot_copy_button";
 import { HootLink } from "./hoot_link";
@@ -92,8 +92,8 @@ export class HootTestPath extends Component {
     `;
 
     setup() {
-        this.results = useState(this.props.test.results);
-        this.uiState = useState(this.env.ui);
+        this.results = proxy(this.props.test.results);
+        this.uiState = proxy(this.env.ui);
     }
 
     getStatusInfo() {

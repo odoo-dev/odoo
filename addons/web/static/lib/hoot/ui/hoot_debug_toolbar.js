@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
+import { Component, onWillRender, useEffect, useRef, proxy, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { refresh } from "../core/url";
 import { formatTime, throttle } from "../hoot_utils";
@@ -245,8 +245,8 @@ export class HootDebugToolBar extends Component {
     }
 
     setup() {
-        this.runnerState = useState(this.env.runner.state);
-        this.state = useState({
+        this.runnerState = proxy(this.env.runner.state);
+        this.state = proxy({
             configOpen: false,
             open: false,
         });

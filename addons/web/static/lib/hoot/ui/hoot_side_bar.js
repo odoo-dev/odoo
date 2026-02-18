@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
+import { Component, onWillRender, useEffect, useRef, proxy, xml } from "@odoo/owl";
 import { Suite } from "../core/suite";
 import { createUrlFromId } from "../core/url";
 import { lookup, parseQuery } from "../hoot_utils";
@@ -227,8 +227,8 @@ export class HootSideBar extends Component {
 
         this.searchInputRef = useRef("search-input");
         this.suitesListRef = useRef("suites-list");
-        this.uiState = useState(ui);
-        this.state = useState({
+        this.uiState = proxy(ui);
+        this.state = proxy({
             filter: "",
             hideEmpty: false,
             suites: [],

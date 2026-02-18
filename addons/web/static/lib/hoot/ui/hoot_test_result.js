@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useState, xml } from "@odoo/owl";
+import { Component, onWillRender, proxy, xml } from "@odoo/owl";
 import { isFirefox } from "../../hoot-dom/hoot_dom_utils";
 import { Tag } from "../core/tag";
 import { Test } from "../core/test";
@@ -331,14 +331,14 @@ export class HootTestResult extends Component {
         subscribeToURLParams("*");
 
         const { runner, ui } = this.env;
-        this.config = useState(runner.config);
-        this.logs = useState(this.props.test.logs);
-        this.results = useState(this.props.test.results);
-        this.state = useState({
+        this.config = proxy(runner.config);
+        this.logs = proxy(this.props.test.logs);
+        this.results = proxy(this.props.test.results);
+        this.state = proxy({
             showCode: false,
             showDetails: Boolean(this.props.open),
         });
-        this.uiState = useState(ui);
+        this.uiState = proxy(ui);
 
         onWillRender(this.onWillRender.bind(this));
     }

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useState, xml } from "@odoo/owl";
+import { Component, onWillRender, proxy, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { formatTime, parseQuery } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
@@ -253,16 +253,16 @@ export class HootReporting extends Component {
     setup() {
         const { runner, ui } = this.env;
 
-        this.config = useState(runner.config);
-        this.runnerReporting = useState(runner.reporting);
-        this.runnerState = useState(runner.state);
-        this.state = useState({
+        this.config = proxy(runner.config);
+        this.runnerReporting = proxy(runner.reporting);
+        this.runnerState = proxy(runner.state);
+        this.state = proxy({
             /** @type {string[]} */
             openGroups: [],
             /** @type {string[]} */
             openTests: [],
         });
-        this.uiState = useState(ui);
+        this.uiState = proxy(ui);
 
         const { showdetail } = this.config;
 

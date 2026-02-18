@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { onWillRender, reactive, useState } from "@odoo/owl";
+import { onWillRender, reactive, proxy } from "@odoo/owl";
 import { isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { debounce, ensureArray, isNil } from "../hoot_utils";
 import { CONFIG_KEYS, CONFIG_SCHEMA, FILTER_KEYS, FILTER_SCHEMA } from "./config";
@@ -163,7 +163,7 @@ export function setParams(params) {
  * @param {...(keyof DEFAULT_CONFIG | keyof DEFAULT_FILTERS | "*")} keys
  */
 export function subscribeToURLParams(...keys) {
-    const state = useState(urlParams);
+    const state = proxy(urlParams);
     if (keys.length) {
         const observedKeys = keys.includes("*") ? [...CONFIG_KEYS, ...FILTER_KEYS] : keys;
         onWillRender(() => observedKeys.forEach((key) => state[key]));

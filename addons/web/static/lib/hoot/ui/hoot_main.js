@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { createUrl, refresh } from "../core/url";
 import { callHootKey, useHootKey, useWindowListener } from "../hoot_utils";
 import { HootButtons } from "./hoot_buttons";
@@ -118,7 +118,7 @@ export class HootMain extends Component {
 
     setup() {
         const { runner } = this.env;
-        this.state = useState({
+        this.state = proxy({
             debugTest: null,
         });
 

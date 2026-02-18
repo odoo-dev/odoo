@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { copy, hasClipboard } from "../hoot_utils";
 
 /**
@@ -34,7 +34,7 @@ export class HootCopyButton extends Component {
     hasClipboard = hasClipboard;
 
     setup() {
-        this.state = useState({ copied: false });
+        this.state = proxy({ copied: false });
     }
 
     /**

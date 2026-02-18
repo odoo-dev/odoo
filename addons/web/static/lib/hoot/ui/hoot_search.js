@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onPatched, onWillPatch, useRef, useState, xml } from "@odoo/owl";
+import { Component, onPatched, onWillPatch, useRef, proxy, xml } from "@odoo/owl";
 import { getActiveElement } from "@web/../lib/hoot-dom/helpers/dom";
 import { R_REGEX, REGEX_MARKER } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { Suite } from "../core/suite";
@@ -429,9 +429,9 @@ export class HootSearch extends Component {
         this.rootRef = useRef("root");
         this.searchInputRef = useRef("search-input");
 
-        this.config = useState(runner.config);
+        this.config = proxy(runner.config);
         const query = this.config.filter || "";
-        this.state = useState({
+        this.state = proxy({
             categories: {
                 /** @type {Suite[]} */
                 suite: [],
@@ -445,7 +445,7 @@ export class HootSearch extends Component {
             query,
             showDropdown: false,
         });
-        this.runnerState = useState(runner.state);
+        this.runnerState = proxy(runner.state);
 
         useHootKey(["Alt", "r"], this.toggleRegExp);
         useHootKey(["Alt", "x"], this.toggleExact);

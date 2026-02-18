@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { CONFIG_KEYS } from "../core/config";
 import { LOG_LEVELS } from "../core/logger";
 import { refresh } from "../core/url";
@@ -285,8 +285,8 @@ export class HootConfigMenu extends Component {
     setup() {
         const { runner, ui } = this.env;
         this.color = useColorScheme();
-        this.config = useState(runner.config);
-        this.uiState = useState(ui);
+        this.config = proxy(runner.config);
+        this.uiState = proxy(ui);
     }
 
     doesNotNeedRefresh() {

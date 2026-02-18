@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { reactive, useState } from "@odoo/owl";
+import { reactive, proxy } from "@odoo/owl";
 import { getAllColors, getPreferredColorScheme } from "../../hoot-dom/hoot_dom_utils";
 import { STORAGE, storageGet, storageSet } from "../hoot_utils";
 
@@ -95,5 +95,5 @@ export function toggleColorScheme() {
 }
 
 export function useColorScheme() {
-    return useState(current);
+    return proxy(current);
 }

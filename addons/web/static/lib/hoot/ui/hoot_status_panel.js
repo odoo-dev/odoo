@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
+import { Component, onWillRender, useEffect, useRef, proxy, xml } from "@odoo/owl";
 import { getColorHex } from "../../hoot-dom/hoot_dom_utils";
 import { Test } from "../core/test";
 import { formatTime } from "../hoot_utils";
@@ -233,13 +233,13 @@ export class HootStatusPanel extends Component {
     setup() {
         const { runner, ui } = this.env;
         this.canvasRef = useRef("progress-canvas");
-        this.runnerReporting = useState(runner.reporting);
-        this.runnerState = useState(runner.state);
-        this.state = useState({
+        this.runnerReporting = proxy(runner.reporting);
+        this.runnerState = proxy(runner.state);
+        this.state = proxy({
             className: "",
             timer: null,
         });
-        this.uiState = useState(ui);
+        this.uiState = proxy(ui);
         this.progressBarIndex = 0;
 
         runner.beforeAll(this.globalSetup.bind(this));

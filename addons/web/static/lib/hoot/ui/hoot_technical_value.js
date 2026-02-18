@@ -1,13 +1,6 @@
 /** @odoo-module */
 
-import {
-    Component,
-    onWillRender,
-    onWillUpdateProps,
-    xml as owlXml,
-    toRaw,
-    useState,
-} from "@odoo/owl";
+import { Component, onWillRender, onWillUpdateProps, xml as owlXml, toRaw, proxy } from "@odoo/owl";
 import { isNode, toSelector } from "@web/../lib/hoot-dom/helpers/dom";
 import { isInstanceOf, isIterable } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { logger } from "../core/logger";
@@ -184,7 +177,7 @@ export class HootTechnicalValue extends Component {
 
     setup() {
         this.logged = false;
-        this.state = useState({
+        this.state = proxy({
             open: false,
             promiseState: null,
         });

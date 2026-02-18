@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useRef, useState, xml } from "@odoo/owl";
+import { Component, useRef, proxy, xml } from "@odoo/owl";
 import { useAutofocus, useHootKey, useWindowListener } from "../hoot_utils";
 
 /**
@@ -56,7 +56,7 @@ export class HootDropdown extends Component {
     setup() {
         this.rootRef = useRef("root");
         this.togglerRef = useRef("toggler");
-        this.state = useState({
+        this.state = proxy({
             open: false,
         });
 

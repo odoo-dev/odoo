@@ -2,7 +2,7 @@
 
 import { after, describe, expect, test } from "@odoo/hoot";
 import { animationFrame, click, Deferred } from "@odoo/hoot-dom";
-import { Component, reactive, useState, xml } from "@odoo/owl";
+import { Component, reactive, proxy, xml } from "@odoo/owl";
 import { mountForTest, parseUrl } from "../local_helpers";
 
 import { logger } from "../../core/logger";
@@ -22,7 +22,7 @@ const mountTechnicalValue = async (defaultValue) => {
         static template = xml`<HootTechnicalValue value="state.value" />`;
 
         setup() {
-            this.state = useState(state);
+            this.state = proxy(state);
         }
     }
 
