@@ -152,7 +152,7 @@ test("attachment counter while loading attachments", async () => {
     await openFormView("res.partner", partnerId);
     await contains("button[aria-label='Attach files']");
     await advanceTime(DELAY_FOR_SPINNER);
-    await contains("button[aria-label='Attach files'] .fa-spin");
+    await contains("button[aria-label='Attach files'] .oi-spin");
     await contains("button[aria-label='Attach files']:text('0')", { count: 0 });
     await expect.waitForSteps(["before mail.thread"]);
     def.resolve();
@@ -173,11 +173,11 @@ test("attachment counter transition when attachments become loaded", async () =>
     await openFormView("res.partner", partnerId);
     await contains("button[aria-label='Attach files']");
     await advanceTime(DELAY_FOR_SPINNER);
-    await contains("button[aria-label='Attach files'] .fa-spin");
+    await contains("button[aria-label='Attach files'] .oi-spin");
     await expect.waitForSteps(["before mail.thread"]);
     def.resolve();
     await waitStoreFetch("mail.thread");
-    await contains("button[aria-label='Attach files'] .fa-spin", { count: 0 });
+    await contains("button[aria-label='Attach files'] .oi-spin", { count: 0 });
 });
 
 test("attachment icon open directly the file uploader if there is no attachment yet", async () => {

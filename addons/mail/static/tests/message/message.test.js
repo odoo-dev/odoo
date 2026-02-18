@@ -199,7 +199,7 @@ test("Edit message (mobile)", async () => {
     await click(".o-mail-Message [title='Expand']");
     await click(".o-dropdown-item:contains('Edit')");
     await insertText(".o-mail-Message .o-mail-Composer-input", "edited message", { replace: true });
-    await click(".o-mail-Message .fa-paper-plane-o");
+    await click(".o-mail-Message [data-icon='send']");
     await contains(".o-mail-Message-content:text('edited message (edited)')");
 });
 
@@ -1139,18 +1139,18 @@ test("add and remove bookmark from message", async () => {
     await openDiscuss(channelId);
     await contains(".o-mail-Message");
     await contains(".o-mail-Message [title='Bookmark']");
-    await contains(".o-mail-Message [title='Bookmark']" + " i.fa-bookmark-o");
+    await contains(".o-mail-Message [title='Bookmark']" + " i[data-icon='bookmark']");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge", { count: 0 }] });
     await click(".o-mail-Message [title='Bookmark']");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge:text('1')"] });
     await waitStoreFetch([["add_bookmark", { message_id: messageId }]]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Remove from Bookmarks']" + " i.fa-bookmark");
+    await contains(".o-mail-Message [title='Remove from Bookmarks']" + " i[data-icon='bookmark'].oi-filled");
     await click(".o-mail-Message [title='Remove from Bookmarks']");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge", { count: 0 }] });
     await waitStoreFetch([["remove_bookmark", { message_id: messageId }]]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Bookmark']" + " i.fa-bookmark-o");
+    await contains(".o-mail-Message [title='Bookmark']" + " i[data-icon='bookmark']");
 });
 
 test("can bookmark a persistent message without thread", async () => {
@@ -1291,7 +1291,7 @@ test("Notification Error", async () => {
     expect(".o-mail-Message-notification i:first").toHaveAttribute("data-icon", "mail");
     await click(".o-mail-Message-notification").then(() => {});
     await contains(".o-mail-MessageNotificationPopover");
-    expect(".o-mail-MessageNotificationPopover i.fa-times.text-danger").toHaveCount(1);
+    expect(".o-mail-MessageNotificationPopover i[data-icon='close'].text-danger").toHaveCount(1);
 });
 
 test("click on notification icon opens recipients list when no recipient", async () => {
@@ -2324,7 +2324,7 @@ test("Prettify message links", async () => {
     );
     await press("Enter");
     await contains(".o-mail-Message:has(:text('TestPartner'))");
-    await contains(".o-mail-Message .fa.fa-comment");
+    await contains(".o-mail-Message .oi[data-icon='chat_bubble']");
     await contains(".o-mail-Message:has(:text('" + url(`/mail/message/100`) + "'))");
 });
 

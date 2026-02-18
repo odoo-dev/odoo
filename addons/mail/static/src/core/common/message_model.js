@@ -491,9 +491,16 @@ export class Message extends Record {
     get notificationIcon() {
         switch (this.notificationType) {
             case "pin":
-                return "fa fa-thumb-tack";
+                return "push_pin";
             case "call":
-                return "fa fa-phone";
+                return "phone";
+        }
+        return null;
+    }
+
+    get notificationIconClass() {
+        if(this.notificationType === "call") {
+            return "oi-filled";
         }
         return null;
     }

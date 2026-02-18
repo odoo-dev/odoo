@@ -84,7 +84,7 @@
                 <templates>
                     <t t-name="card">
                         <div class="fw-bold fs-5">
-                            <i t-if="record.icon.value" t-attf-class="fa #{record.icon.value} fa-fw"
+                            <i t-if="record.icon.value" class="oi oi-fw" data-icon="record.icon.value"
                                role="img" aria-label="Activity Type Name" title="Activity Type Name"/>
                             <field name="name"/>
                         </div>
@@ -336,7 +336,7 @@
                                 </span>
                                 <field name="summary" class="text-truncate" invisible="res_name"/>
                                 <span class="badge rounded-pill text-bg-300">
-                                    <i t-if="record.icon" t-attf-class="fa {{record.icon.raw_value}} me-1"/>
+                                    <i t-if="record.icon" t-att-title="record.activity_type_id.value" t-attf-class="oi me-1" t-att-data-icon="record.icon.raw_value"/>
                                     <field name="activity_type_id"/>
                                 </span>
                             </div>
