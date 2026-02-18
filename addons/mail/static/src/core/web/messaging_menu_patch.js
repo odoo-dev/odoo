@@ -95,8 +95,7 @@ patch(MessagingMenu.prototype, {
     get _tabs() {
         return [
             {
-                icon: "fa fa-bell-o",
-                activeIcon: "fa fa-bell",
+                icon: "notifications",
                 id: "notification",
                 label: _t("Notifications"),
                 sequence: 10,
@@ -108,9 +107,8 @@ patch(MessagingMenu.prototype, {
                         : this.store.starred.counter,
                 icon:
                     this.store.self_user?.notification_type === "inbox"
-                        ? "fa fa-inbox"
-                        : "fa fa-star-o",
-                activeIcon: this.store.self_user?.notification_type !== "inbox" && "fa fa-star",
+                        ? "inbox"
+                        : "star",
                 id: this.store.self_user?.notification_type === "inbox" ? "inbox" : "starred",
                 label:
                     this.store.self_user?.notification_type === "inbox"
