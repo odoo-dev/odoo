@@ -323,7 +323,7 @@ test("More than 7 actually folded chat windows shows a 'hidden' chat bubble menu
     await click(".o-mail-ChatWindow-header [title='Fold']");
     // Can open hidden chat from messaging menu
     await click("i[aria-label='Messages']");
-    await click(".o-mail-NotificationItem:text('2')");
+    await click(".o-mail-NotificationItem-name:text('2')");
     await contains(".o-mail-ChatHub-hiddenItem", { count: 0 });
     await contains(".o-mail-ChatHub-hiddenBtn", { count: 0 });
     await contains(".o-mail-ChatWindow");
@@ -574,7 +574,7 @@ test("Open chat window from messaging menu with chat hub compact", async () => {
     await click(".o-dropdown-item:text('Hide all conversations')");
     await contains(".o-mail-ChatHub-compact");
     await click(".o_menu_systray i[aria-label='Messages']");
-    await click(".o-mail-NotificationItem:text('John')");
+    await click(".o-mail-NotificationItem-name:text('John')");
     await waitStoreFetch("/discuss/channel/messages"); // ensure messages are loaded before doing message post
     await contains(".o-mail-ChatWindow:text('John')");
     await triggerEvents(".o-mail-Composer-input", ["blur", "focusout"]); // FIXME: click fold doesn't focusout/blur the composer, thus marks as read

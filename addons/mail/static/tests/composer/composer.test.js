@@ -465,7 +465,7 @@ test("Show send button in mobile", async () => {
     await openDiscuss();
     await contains("button.active:text('Notifications')");
     await click("button:text('Channels')");
-    await click(".o-mail-NotificationItem:text('minecraft-wii-u')");
+    await click(".o-mail-NotificationItem-name:text('minecraft-wii-u')");
     await contains(".o-mail-Composer button[title='Send']");
     await contains(".o-mail-Composer button[title='Send'] i.fa-paper-plane-o");
 });
@@ -1818,7 +1818,9 @@ test("mentions can be correctly cut with ctrl+A and ctrl+X", async () => {
     await click(".o-mail-NavigableList-item:text('Mitchell Admin')");
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello @Mitchell Admin')");
     await htmlInsertText(editor, "nice to meet you!");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello @Mitchell Admin nice to meet you!')");
+    await contains(
+        ".o-mail-Composer-html.odoo-editor-editable:text('Hello @Mitchell Admin nice to meet you!')"
+    );
     await focus(editor.editable);
     await press("Control+a");
     cut(editor);
@@ -1830,7 +1832,9 @@ test("mentions can be correctly cut with ctrl+A and ctrl+X", async () => {
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello General')");
     await contains(editor.editable.querySelector("i.fa-hashtag"));
     await htmlInsertText(editor, "nice to meet you!");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello General nice to meet you!')");
+    await contains(
+        ".o-mail-Composer-html.odoo-editor-editable:text('Hello General nice to meet you!')"
+    );
     await focus(editor.editable);
     await press("Control+a");
     cut(editor);

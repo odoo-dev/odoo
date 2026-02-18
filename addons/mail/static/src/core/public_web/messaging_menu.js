@@ -188,6 +188,10 @@ export class MessagingMenu extends Component {
         return this._tabs.sort((t1, t2) => t1.sequence - t2.sequence);
     }
 
+    get emptyPreviewText() {
+        return _t("This is the start of your conversation");
+    }
+
     onClickNavTab(tabId) {
         if (this.store.discuss.activeTab === tabId) {
             return;
