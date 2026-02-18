@@ -9,7 +9,7 @@ import { App, Component, xml } from "@odoo/owl";
 
 /**
  * @param {import("@odoo/owl").ComponentConstructor} ComponentClass
- * @param {ConstructorParameters<typeof App>[1]} [config]
+ * @param {Parameters<import("@odoo/owl").mount>[2]} [config]
  */
 export async function mountForTest(ComponentClass, config) {
     if (typeof ComponentClass === "string") {
@@ -19,10 +19,9 @@ export async function mountForTest(ComponentClass, config) {
         };
     }
 
-    const app = new App(ComponentClass, {
+    const app = new App({
         name: "TEST",
         test: true,
-        warnIfNoStaticProps: true,
         ...config,
     });
     const fixture = getFixture();
@@ -30,7 +29,7 @@ export async function mountForTest(ComponentClass, config) {
     after(() => destroy(app));
 
     fixture.style.backgroundColor = "#fff";
-    await app.mount(fixture);
+    await app.createRoot(ComponentClass).mount(fixture);
     if (fixture.hasIframes) {
         await fixture.waitForIframes();
     }
