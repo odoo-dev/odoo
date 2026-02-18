@@ -64,3 +64,27 @@ class StockMove(models.Model):
             if kit_bom:
                 return line._compute_kit_quantities_from_moves(line.move_ids - self, kit_bom)
         return super()._get_qty_received_without_self()
+
+    def _get_in_svl_vals(self, forced_quantity):
+        if any(move.purchase_line_id and move.purchase_line_id.product_id != move.product_id for move in self):
+            purchase_valuation_groups = { pol: {'move_ids': set(moves.ids), 'total_value': 0.0, 'total_rounded_value': 0.0} for pol, moves in self.grouped('purchase_line_id').items()}
+            return super(StockMove, self.with_context(purchase_valuation_groups=purchase_valuation_groups))._get_in_svl_vals(forced_quantity)
+        else:
+            return super()._get_in_svl_vals(forced_quantity)
+
+    def _round_last_in_svl_value(self, vals):
+        """
+        Override handling kit rounding issues
+        """
+        res = super()._round_last_in_svl_value(vals)
+        if self.purchase_line_id and self.product_id != self.purchase_line_id.product_id:
+            valuation_group = self.env.context.get('purchase_valuation_groups').get(self.purchase_line_id)
+            if valuation_group:
+                valuation_group['move_ids'].remove(self.id)
+                for val in vals:
+                    valuation_group['total_value'] += val['unit_cost'] * val['quantity']
+                    valuation_group['total_rounded_value'] += val['value']
+                if not valuation_group['move_ids']:
+                    new_value = self.env['res.company'].browse(vals[-1]['company_id']).currency_id.round(vals[-1]['value'] + valuation_group['total_value'] - valuation_group['total_rounded_value'])
+                    res['value'] = new_value
+        return res

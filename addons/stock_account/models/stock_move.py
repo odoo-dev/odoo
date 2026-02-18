@@ -525,8 +525,13 @@ class StockMove(models.Model):
                 val.update(move._prepare_common_svl_vals())
                 if forced_quantity:
                     val['description'] = _('Correction of %s (modification of past move)', move.picking_id.name or move.name)
+            if vals:
+                vals[-1].update(move._round_last_in_svl_value(vals))
             svl_vals_list += vals
         return svl_vals_list
+
+    def _round_last_in_svl_value(self, vals):
+        return {}
 
     def _get_src_account(self, accounts_data):
         return self.location_id.valuation_out_account_id.id or accounts_data['stock_input'].id
