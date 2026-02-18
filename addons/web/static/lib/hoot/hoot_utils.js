@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { on, queryAll } from "@odoo/hoot-dom";
-import { reactive, useEffect, useExternalListener } from "@odoo/owl";
+import { reactive, useEffect, useListener } from "@odoo/owl";
 import { isNode } from "@web/../lib/hoot-dom/helpers/dom";
 import {
     isInstanceOf,
@@ -1639,7 +1639,7 @@ export function useHootKey(keyStroke, callback) {
 
 /** @type {EventTarget["addEventListener"]} */
 export function useWindowListener(type, callback, options) {
-    return useExternalListener(windowTarget, type, (ev) => ev.isTrusted && callback(ev), options);
+    return useListener(windowTarget, type, (ev) => ev.isTrusted && callback(ev), options);
 }
 
 /**
