@@ -85,7 +85,7 @@
                 </group>
                 <searchpanel>
                     <field name="state" string="Status"/>
-                    <field name="department_id" string="Department" icon="fa-users"/>
+                    <field name="department_id" string="Department" icon="group" icon_class="oi-filled"/>
                 </searchpanel>
             </search>
         </field>
