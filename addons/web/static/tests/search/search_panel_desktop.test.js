@@ -587,8 +587,8 @@ test("sections with custom icon and color", async () => {
         search: /* xml */ `
             <search>
                 <searchpanel view_types="toy">
-                    <field name="company_id" icon="fa-car" color="blue" enable_counters="1"/>
-                    <field name="state" select="multi" icon="fa-star" color="#000" enable_counters="1"/>
+                    <field name="company_id" icon="directions_car" color="blue" enable_counters="1"/>
+                    <field name="state" select="multi" icon="star" icon_class="oi-filled" color="#000" enable_counters="1"/>
                 </searchpanel>
             </search>
         `,

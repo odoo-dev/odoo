@@ -813,10 +813,10 @@ action = {
                 <searchpanel>
                     <field name="categ_id"
                            string="Categories"
-                           icon="fa-th-list"/>
+                           icon="view_list"/>
                     <field name="product_tag_ids"
                            string="Tags"
-                           icon="fa-th-list"
+                           icon="view_list"
                            enable_counters="1"
                            select="multi"/>
                 </searchpanel>

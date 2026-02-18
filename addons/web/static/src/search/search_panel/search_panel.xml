@@ -27,7 +27,9 @@
                     <t t-foreach="categories" t-as="category" t-key="category_index">
                         <span class="o_search_panel_category mb-2">
                             <i t-if="category.icon"
-                                t-attf-class="o_search_panel_section_icon fa {{ category.icon }} mb-2"
+                                class="o_search_panel_section_icon oi mb-2"
+                                t-att-class="category.icon_class"
+                                t-att-data-icon="category.icon"
                                 t-att-style="category.color and ('color: ' + category.color)"
                             />
                             <t t-out="category.values.join(' / ')" />
@@ -36,7 +38,9 @@
                     <t t-foreach="filters" t-as="filter" t-key="filter_index">
                         <span class="o_search_panel_filter mb-2">
                             <i t-if="filter.icon"
-                                t-attf-class="o_search_panel_section_icon fa {{ filter.icon }} mb-2"
+                                class="o_search_panel_section_icon oi mb-2"
+                                t-att-class="filter.icon_class"
+                                t-att-data-icon="filter.icon"
                                 t-att-style="filter.color and ('color: ' + filter.color)"
                             />
                             <t t-out="filter.values.join(', ')" />
@@ -68,7 +72,7 @@
             <header
                 class="o_search_panel_section_header ps-2 pb-2 text-uppercase cursor-default"
                 t-attf-class="{{section_first ? 'pt-2' : 'pt-3'}}">
-                <i t-attf-class="fa {{ section.icon }} o_search_panel_section_icon {{!section.color &amp;&amp; section.type == 'filter' ? 'text-warning' : !section.color ? 'text-primary': ''}} me-2"
+                <i t-attf-class="oi o_search_panel_section_icon {{!section.color &amp;&amp; section.type == 'filter' ? 'text-warning' : !section.color ? 'text-primary': ''}} me-2" t-att-class="section.icon_class" t-att-data-icon="section.icon"
                     t-att-style="section.color and ('color: ' + section.color)"
                 />
                 <b t-out="section.description"/>
@@ -160,7 +164,7 @@
             </div>
             <Dropdown t-foreach="this.sections" t-as="section" t-key="section.id" state="this.getDropdownState(section.id)" menuClass="'my-2 mx-1'" onOpened.bind="this.updateGroupHeadersChecked">
                 <span class="btn btn-secondary my-2 mx-1 o-dropdown-caret">
-                    <i t-attf-class="fa {{ section.icon }} o_search_panel_section_icon {{!section.color &amp;&amp; section.type == 'filter' ? 'text-warning' : !section.color ? 'text-primary': ''}} me-2"
+                    <i t-attf-class="oi o_search_panel_section_icon {{!section.color &amp;&amp; section.type == 'filter' ? 'text-warning' : !section.color ? 'text-primary': ''}} me-2" t-att-class="section.icon_class" t-att-data-icon="section.icon"
                         t-att-style="section.color and ('color: ' + section.color)"
                     />
                     <b class="pe-2" t-if="section.type !== 'category' || !this.state.active[section.id]" t-out="section.description"/>
@@ -202,11 +206,10 @@
                     <button class="o_toggle_fold btn border-0 p-0 px-1 flex-shrink-0 lh-sm text-center">
                         <i
                             t-if="value.childrenIds.length"
-                            class="fa"
-                            t-att-class="{
-                                'fa-caret-down' : this.state.expanded[section.id][valueId],
-                                'fa-caret-right':  !this.state.expanded[section.id][valueId]
-                            }"
+                            class="oi"
+                            t-attf-data-icon="{{
+                                this.state.expanded[section.id][valueId] ? 'arrow_drop_down' : 'arrow_right'
+                            }}"
                             />
                     </button>
                     <span
