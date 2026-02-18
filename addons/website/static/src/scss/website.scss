@@ -2407,6 +2407,14 @@ $ribbon-padding: 100px;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
     }
+    .oe_search_box {
+        padding: 1rem;
+    }
+    .oe_search_button {
+        border-left: $border-width solid $primary;
+        padding: 1rem;
+    }
+
 }
 
 

@@ -43,7 +43,6 @@
                 action="'/event/%s/exhibitors' % (slug(event))"
                 search="search or searches and searches['search']"
                 placeholder.translate="Search an exhibitor..."
-                _modal_id.f="event_exhibitors"
                 _form_classes.f="flex-grow-1">
                 <t t-foreach="searches" t-as="item">
                     <input t-if="item != 'search' and item_value != 'all'" type="hidden"

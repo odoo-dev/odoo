@@ -208,8 +208,7 @@
                     search_type.f="slides"
                     placeholder.translate="Search courses..."
                     search="original_search or search_term"
-                    _form_classes.f="d-none d-md-flex"
-                    _modal_id.f="wslides_homepage_desktop">
+                    _form_classes.f="d-none d-md-flex">
                     <!-- No action: remain on same URL -->
                     <input type="hidden" name="my" t-attf-value="#{1 if search_my else 0}"/>
                     <input t-if="search_slide_category" type="hidden" name="slide_category" t-att-value="search_slide_category" />
@@ -221,8 +220,7 @@
                     placeholder.translate="Search courses..."
                     search="original_search or search_term"
                     _simple_button_layout.f="True"
-                    _simple_button_classes.f="d-md-none btn-light"
-                    _modal_id.f="wslides_homepage_mobile">
+                    _simple_button_classes.f="d-md-none btn-light">
                     <input type="hidden" name="my" t-attf-value="#{1 if search_my else 0}"/>
                     <input t-if="search_slide_category" type="hidden" name="slide_category" t-att-value="search_slide_category" />
                     <input type="hidden" name="prevent_redirect" value="True"/>

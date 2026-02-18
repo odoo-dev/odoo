@@ -181,7 +181,6 @@
                                 search_type.f="forums"
                                 action="'/forum/%s%s' % (forum_id or 'all', '/tag/%s/questions' % slug(tag) if tag else '')"
                                 placeholder.f="Search Posts..."
-                                _modal_id.f="forum_votes"
                             >
                                 <input type="hidden" name="my" value="upvoted"/>
                                 <input t-if="filters" type="hidden" name="filters" t-att-value="filters"/>

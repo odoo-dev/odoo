@@ -2,7 +2,6 @@
 <odoo>
 
 <template id="s_searchbar_input" name="Search">
-    <!-- TODO we can't use _modal_id because it won't be unique -->
     <t t-call="website.website_search_box_input"
         search_type.f="all"
         action.f="/website/search"
