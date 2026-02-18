@@ -28,7 +28,7 @@ export class SearchBar extends Interaction {
         ".o_search_result_item a": {
             "t-on-keydown": this.onKeydown,
         },
-        ".o_search_input_group": {
+        ".o_search_input_group, a[title='Search']": {
             "t-on-click": this.switchInputToModal,
         },
     };
@@ -285,41 +285,45 @@ export class SearchBar extends Interaction {
     }
 
     switchInputToModal(ev) {
-        if (ev.target.closest(".oe_search_button")) {
+        if (ev.target.closest(".oe_search_button, .modal")) {
             return;
         }
-        if (this.searchInputGroup.hasAttribute("data-search-modal-id")) {
-            const modalId = "#" + this.searchInputGroup.dataset.searchModalId;
-            const forceModalTrigger = this.searchInputGroup.hasAttribute(
-                "data-force-modal-trigger"
-            );
-            if (
-                ui.isSmall() ||
-                this.searchInputGroup.getBoundingClientRect().width < 280 ||
-                forceModalTrigger
-            ) {
-                this.searchInputGroup.setAttribute("data-bs-toggle", "modal");
-                this.searchInputGroup.setAttribute("data-bs-target", modalId);
-                this.inputEl.classList.add("pe-none");
+        const isTooSmall =
+            ui.isSmall() || this.searchInputGroup.getBoundingClientRect().width < 280;
+        const forceModalTrigger = this.searchInputGroup.hasAttribute("data-force-modal-trigger");
 
-                // Add hidden inputs to modal
-                const modelEl = document.querySelector(modalId + " form");
-                modelEl.querySelectorAll("input[type=hidden]").forEach((el) => el.remove());
-                const hiddenInputEls = this.el.querySelectorAll("input[type=hidden]");
-                hiddenInputEls.forEach((el) => {
-                    const clone = el.cloneNode(true);
-                    modelEl.appendChild(clone);
-                });
-
-                this.searchInputGroup.click();
-            } else {
-                this.searchInputGroup.removeAttribute("data-bs-toggle");
-                this.searchInputGroup.removeAttribute("data-bs-target");
-                this.focusInput();
-            }
-        } else {
-            this.focusInput();
+        if (isTooSmall || forceModalTrigger) {
+            this.openSearchModal();
         }
+        this.focusInput();
+    }
+
+    openSearchModal() {
+        const wrapperEl = document.createElement("div");
+        wrapperEl.id = "o_search_modal_block";
+        wrapperEl.innerHTML = `
+            <div id="o_search_modal" class="modal fade css_editable_mode_hidden" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg pt-5">
+                    <div class="modal-content mt-lg-5">
+                        <!-- Add website searchbar form here -->
+                    </div>
+                </div>
+            </div>
+        `;
+        const cloneEl = this.el.cloneNode(true);
+        cloneEl.querySelector(".o_search_input_group")?.classList.remove("d-none");
+        cloneEl.querySelector("a[title='Search']")?.remove();
+        wrapperEl.querySelector(".modal-content").appendChild(cloneEl);
+        this.insert(wrapperEl, document.body);
+        const modal = new Modal(wrapperEl.firstElementChild);
+        wrapperEl.addEventListener(
+            "hidden.bs.modal",
+            (el) => {
+                wrapperEl.remove();
+            },
+            { once: true }
+        );
+        modal.show();
     }
 
     /**
