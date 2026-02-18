@@ -63873,7 +63873,8 @@ class ChartDashboardMenu extends Component {
         return {
             id: "fullScreenChart",
             label: isFullScreen ? _t("Exit Full Screen") : _t("Full Screen"),
-            class: `text-muted fa ${isFullScreen ? "fa-compress" : "fa-expand"}`,
+            class: "oi text-muted",
+            icon: isFullScreen ? "close_fullscreen" : "expand_content",
             onClick: () => {
                 this.fullScreenFigureStore.toggleFullScreenFigure(figureId);
             },

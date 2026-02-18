@@ -7152,12 +7152,11 @@
         <div
           t-if="env.isDashboard()"
           t-att-title="fullScreenButtonTitle"
-          class="o-carousel-full-screen-button fa o-carousel-button rounded p-1 ms-1"
+          class="o-carousel-full-screen-button oi o-carousel-button rounded p-1 ms-1"
           t-att-class="{
-            'fa-compress': props.isFullScreen,
-            'fa-expand': !props.isFullScreen,
             'invisible': selectedCarouselItem?.type !== 'chart',
           }"
+          t-attf-data-icon="{{ props.isFullScreen ? 'close_fullscreen' : 'expand_content'}}"
           t-on-click="toggleFullScreen"
         />
         <div
@@ -7330,6 +7329,7 @@
           <div
             t-attf-class=" {{item.class}}"
             class="o-chart-dashboard-item btn border-0 lh-1 p-1 d-flex align-items-center justify-content-center"
+            t-attf-data-icon=" {{item.icon}}"
             t-att-title="item.label"
             t-on-click="item.onClick"
             t-att-data-id="item.id">
