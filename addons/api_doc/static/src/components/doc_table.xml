@@ -15,7 +15,8 @@
                 >
                     <span class="me-2" t-out="header"></span>
                     <i
-                        t-att-class="this.getSortIcon(header_index)"
+                        class="oi"
+                        t-att-data-icon="this.getSortIcon(header_index)"
                         aria-hidden="true"
                     ></i>
                 </th>
