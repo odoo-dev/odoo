@@ -614,7 +614,7 @@
                 </filter>
                 <filter name="real_stock_negative" position="after">
                     <searchpanel>
-                        <field name="categ_id" icon="fa-filter" string="Category" enable_counters="1"/>
+                        <field name="categ_id" icon="filter_alt" icon_class="oi-filled" string="Category" enable_counters="1"/>
                     </searchpanel>
                 </filter>
             </field>

@@ -24,7 +24,7 @@
                 <search string="Records">
                     <filter name="active" string="Discarded" domain="[('active', '=', False)]" />
                     <searchpanel>
-                        <field name="recycle_model_id" icon="fa-bars" string="Recycle Rules" />
+                        <field name="recycle_model_id" icon="menu" string="Recycle Rules" />
                     </searchpanel>
                 </search>
             </field>
