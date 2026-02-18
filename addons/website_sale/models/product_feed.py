@@ -11,7 +11,6 @@ from werkzeug.urls import url_encode, url_parse
 from odoo import SUPERUSER_ID, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
-from odoo.http import request
 from odoo.tools import float_is_zero, float_round, urls
 
 from odoo.addons.website_sale import const, utils
@@ -162,8 +161,7 @@ class ProductFeed(models.Model):
 
         # Override the pricelist of the request to localize the currency and prices, otherwise, uses
         # the website default pricelist.
-        if self.pricelist_id:
-            request.pricelist = self.pricelist_id
+        pricelist_id = self.pricelist_id.id or self.env['website'].get_current_website().current_session_pricelist_id.id
 
         homepage_url = self.website_id.homepage_url or '/'
         website_homepage = self.website_id._get_website_pages(
@@ -177,7 +175,7 @@ class ProductFeed(models.Model):
                 self.env['ir.http']._url_lang(homepage_url, lang_code=self.lang_id.code),
             ),
             'description': website_homepage.website_meta_description or self.website_id,
-            'items': self._prepare_gmc_items(),
+            'items': self.with_context(pricelist_id=pricelist_id)._prepare_gmc_items(),
         }
 
         return self.env['ir.ui.view'].sudo()._render_template(

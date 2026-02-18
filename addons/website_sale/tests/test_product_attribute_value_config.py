@@ -113,6 +113,8 @@ class TestWebsiteSaleProductAttributeValueConfig(AccountTestInvoicingCommon, Htt
         # Enable tax included
         website.show_line_subtotals_tax_selection = 'tax_included'
 
+        # MockRequest simulates another transaction; the cache must be invalidated.
+        website.invalidate_recordset()
         with MockRequest(product.env, website=website):
             combination_info = product._get_combination_info()
         self.assertEqual(combination_info['price'], 575, "500$ + 15% tax")
@@ -129,6 +131,8 @@ class TestWebsiteSaleProductAttributeValueConfig(AccountTestInvoicingCommon, Htt
 
         # Now with fiscal position, taxes should be mapped
         self.env.user.partner_id.country_id = jp_country
+        # MockRequest simulates another transaction; the cache must be invalidated.
+        website.invalidate_recordset()
         with MockRequest(product.env, website=website):
             combination_info = product._get_combination_info()
         self.assertEqual(combination_info['price'], 500, "500% + 0% tax (mapped from fp 15% -> 0%)")
@@ -139,6 +143,8 @@ class TestWebsiteSaleProductAttributeValueConfig(AccountTestInvoicingCommon, Htt
 
         # Reset / Safety check
         self.env.user.partner_id.country_id = None
+        # MockRequest simulates another transaction; the cache must be invalidated.
+        website.invalidate_recordset()
         with MockRequest(product.env, website=website):
             combination_info = product._get_combination_info()
         self.assertEqual(combination_info['price'], 500, "434.78$ + 15% tax")
@@ -146,6 +152,8 @@ class TestWebsiteSaleProductAttributeValueConfig(AccountTestInvoicingCommon, Htt
 
         # Now with fiscal position, taxes should be mapped
         self.env.user.partner_id.country_id = jp_country.id
+        # MockRequest simulates another transaction; the cache must be invalidated.
+        website.invalidate_recordset()
         with MockRequest(product.env, website=website):
             combination_info = product._get_combination_info()
         self.assertEqual(round(combination_info['price'], 2), 434.78, "434.78$ + 0% tax (mapped from fp 15% -> 0%)")
@@ -153,6 +161,7 @@ class TestWebsiteSaleProductAttributeValueConfig(AccountTestInvoicingCommon, Htt
 
         # Try same flow with tax included for apply tax
         tax0.write({'name': "Test tax 5", 'amount': 5, 'price_include_override': 'tax_included'})
+        website.invalidate_recordset()
         with MockRequest(product.env, website=website):
             combination_info = product._get_combination_info()
         self.assertEqual(round(combination_info['price'], 2), 456.52, "434.78$ + 5% tax (mapped from fp 15% -> 5% for BE)")
