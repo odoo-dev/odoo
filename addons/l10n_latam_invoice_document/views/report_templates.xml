@@ -17,10 +17,10 @@
 
     <template id="external_layout_standard" inherit_id="web.external_layout_standard" >
         <!-- support for custom header -->
-        <xpath expr="//img/../.." position="attributes">
+        <xpath expr="//img/../../.." position="attributes">
             <attribute name="t-if">not custom_header</attribute>
         </xpath>
-        <xpath expr="//img/../.." position="after">
+        <xpath expr="//img/../../.." position="after">
             <div t-attf-class="header o_company_#{company.id}_layout"
                  t-if="custom_header and company._localization_use_documents()">
                 <t t-call="#{custom_header}"/>
