@@ -776,27 +776,11 @@ class SaleOrder(models.Model):
     def _onchange_partner_id_warning(self):
         if not self.partner_id:
             return
-
-        partner = self.partner_id
-
-        # If partner has no warning, check its company
-        if partner.sale_warn == 'no-message' and partner.parent_id:
-            partner = partner.parent_id
-
-        if partner.sale_warn and partner.sale_warn != 'no-message':
-            # Block if partner only has warning but parent company is blocked
-            if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
-                partner = partner.parent_id
-
+        partner = self._get_partner_sale_warn()
+        if partner:
             if partner.sale_warn == 'block':
                 self.partner_id = False
-
-            return {
-                'warning': {
-                    'title': _("Warning for %s", partner.name),
-                    'message': partner.sale_warn_msg,
-                }
-            }
+            return {'warning': {'title': _("Warning for %s", partner.name), 'message': partner.sale_warn_msg}}
 
     @api.onchange('pricelist_id')
     def _onchange_pricelist_id_show_update_prices(self):
@@ -832,6 +816,12 @@ class SaleOrder(models.Model):
                 for line in self.order_line.filtered(lambda l: not l.is_downpayment)
             ]
         return super().copy_data(default)
+
+    def copy(self, default=None):
+        partner = self._get_partner_sale_warn()
+        if partner and partner.sale_warn == 'block':
+            raise UserError(_("Warning for %s\n\n%s", partner.name, partner.sale_warn_msg))
+        return super().copy(default)
 
     def write(self, values):
         if 'pricelist_id' in values and any(so.state == 'sale' for so in self):
@@ -1739,6 +1729,17 @@ class SaleOrder(models.Model):
         upselling_orders._create_upsell_activity()
 
     #=== BUSINESS METHODS ===#
+
+    def _get_partner_sale_warn(self):
+        """ Return the partner (or its parent) that carries a sales warning, or None. """
+        partner = self.partner_id
+        if partner.sale_warn == 'no-message' and partner.parent_id:
+            partner = partner.parent_id
+        if partner.sale_warn and partner.sale_warn != 'no-message':
+            if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
+                partner = partner.parent_id
+            return partner
+        return None
 
     def _create_upsell_activity(self):
         if not self:
