@@ -784,3 +784,81 @@ class TestAngloSaxonValuationPurchaseMRP(AccountTestInvoicingCommon):
             {'product_id': c4.id, 'unit_cost':  500.0},
             {'product_id': c5.id, 'unit_cost':  500.0},
         ])
+
+    def test_kit_components_cost_distribution(self):
+        """
+        22
+            35
+            7
+            27
+                5
+            13
+        """
+        main_kit, kit_01, kit_02, kit_03, kit_04, sub_kit, *components = self.env['product.product'].create([{
+            'name': 'Product %s' % i,
+            'is_storable': True,
+            'categ_id': self.avco_category.id,
+        } for i in range(110)])
+
+        self.env['mrp.bom'].create([{
+            'product_tmpl_id': main_kit.product_tmpl_id.id,
+            'type': 'phantom',
+            'bom_line_ids': [
+                Command.create({'product_id': kit_01.id}),
+                Command.create({'product_id': kit_02.id}),
+                Command.create({'product_id': kit_03.id}),
+                Command.create({'product_id': kit_04.id}),
+                *[Command.create({'product_id': p.id}) for p in components[:18]],
+            ],
+        }, {
+            'product_tmpl_id': kit_01.product_tmpl_id.id,
+            'type': 'phantom',
+            'bom_line_ids': [Command.create({'product_id': p.id}) for p in components[18:53]],
+        }, {
+            'product_tmpl_id': kit_02.product_tmpl_id.id,
+            'type': 'phantom',
+            'bom_line_ids': [Command.create({'product_id': p.id}) for p in components[53:60]],
+        }, {
+            'product_tmpl_id': kit_03.product_tmpl_id.id,
+            'type': 'phantom',
+            'bom_line_ids': [
+                Command.create({'product_id': sub_kit.id}),
+                *[Command.create({'product_id': p.id}) for p in components[60:86]],
+            ],
+        }, {
+            'product_tmpl_id': kit_04.product_tmpl_id.id,
+            'type': 'phantom',
+            'bom_line_ids': [Command.create({'product_id': p.id}) for p in components[86:99]],
+        }, {
+            'product_tmpl_id': sub_kit.product_tmpl_id.id,
+            'type': 'phantom',
+            'bom_line_ids': [Command.create({'product_id': p.id}) for p in components[99:]],
+        }])
+
+        kit_price = 18709.27
+        purchase_order = self.env['purchase.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'product_id': main_kit.id,
+                'product_qty': 1,
+                'price_unit': kit_price,
+            })],
+        })
+        purchase_order.button_confirm()
+
+        receipt = purchase_order.picking_ids
+        receipt.button_validate()
+
+        layers_values = receipt.move_ids.stock_valuation_layer_ids.mapped('value')
+        layers_values.sort()
+        expected_values = [
+            *[kit_price / (22 * 27 * 5)] * 5,
+            *[kit_price / (22 * 35)] * 35,
+            *[kit_price / (22 * 27)] * 26,
+            *[kit_price / (22 * 13)] * 13,
+            *[kit_price / (22 * 7)] * 7,
+            *[kit_price / 22] * 18,
+        ]
+        self.assertEqual(sum(layers_values), sum(expected_values))
+        for actual, expected in zip(layers_values, expected_values):
+            self.assertAlmostEqual(actual, expected, delta=0.01)
