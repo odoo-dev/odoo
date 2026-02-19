@@ -1181,3 +1181,40 @@ class TestProcurement(TestMrpCommon):
         update_quantity_wizard.change_prod_qty()
 
         self.assertEqual(mo_child.product_qty, 1.0)
+
+    def test_procurement_respects_draft_production(self):
+        """Ensure that manufacturing orders created from procurement remain in draft state
+        when Draft Production boolean(allow_draft_production) is enabled on the manufacturing rule.
+        """
+        # Configure two manufacture routes with different draft production settings
+        confirm_route = self.warehouse_1.manufacture_pull_id.route_id
+        draft_route = confirm_route.copy()
+        draft_route.rule_ids.allow_draft_production = True
+
+        # Trigger procurement for two products with different routes
+        self.env['stock.rule'].run([
+            self.env['stock.rule'].Procurement(
+                product,
+                5.0,
+                product.uom_id,
+                self.warehouse_1.lot_stock_id,
+                product.name,
+                'MO State Test',
+                self.warehouse_1.company_id,
+                {
+                    'warehouse_id': self.warehouse_1,
+                    'route_ids': route,
+                },
+            )
+            for product, route in [
+                (self.product_4, draft_route),
+                (self.product_6, confirm_route),
+            ]
+        ])
+
+        # Verify that each MO has the correct state based on its route configuration
+        mo_draft = self.env['mrp.production'].search([('product_id', '=', self.product_4.id)], limit=1)
+        self.assertEqual(mo_draft.state, 'draft', "MO should be draft when draft production is enabled on the rule.")
+
+        mo_confirm = self.env['mrp.production'].search([('product_id', '=', self.product_6.id)], limit=1)
+        self.assertEqual(mo_confirm.state, 'confirmed', "MO should be confirmed when draft production is disabled on the rule.")

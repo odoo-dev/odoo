@@ -181,12 +181,9 @@ class StockWarehouseOrderpoint(models.Model):
             product_qty = min(ratios_total or [0]) - min(ratios_qty_available or [0])
             res[orderpoint.id] = orderpoint.product_id.uom_id._compute_quantity(product_qty, orderpoint.uom_id, round=False)
 
-        bom_manufacture = self.env['mrp.bom']._bom_find(orderpoints_without_kit.product_id, bom_type='normal')
-        bom_manufacture = self.env['mrp.bom'].concat(bom_manufacture.values())
         # add quantities coming from draft MOs
         productions_group = self.env['mrp.production']._read_group(
             [
-                ('bom_id', 'in', bom_manufacture.ids),
                 ('state', '=', 'draft'),
                 ('orderpoint_id', 'in', orderpoints_without_kit.ids),
                 ('id', 'not in', self.env.context.get('ignore_mo_ids', [])),
@@ -200,7 +197,6 @@ class StockWarehouseOrderpoint(models.Model):
         # add quantities coming from confirmed MO to be started but not finished
         # by the end of the stock forecast
         in_progress_productions = self.env['mrp.production'].search([
-            ('bom_id', 'in', bom_manufacture.ids),
             ('state', '=', 'confirmed'),
             ('orderpoint_id', 'in', orderpoints_without_kit.ids),
             ('id', 'not in', self.env.context.get('ignore_mo_ids', [])),
@@ -220,11 +216,18 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _post_process_scheduler(self):
         """ Confirm the productions only after all the orderpoints have run their
-        procurement to avoid the new procurement created from the production conflict
-        with them. """
-        self.env['mrp.production'].sudo().search([
-            ('orderpoint_id', 'in', self.ids),
-            ('move_raw_ids', '!=', False),
-            ('state', '=', 'draft'),
-        ]).action_confirm()
+        procurement and when Draft Production (allow_draft_production) is disabled,
+        to avoid the new procurement created from the production conflict with them.
+        """
+        orderpoints = self.filtered(
+            lambda op: any(
+                rule.action == 'manufacture' and not rule.allow_draft_production
+                for rule in op.rule_ids
+            ),
+        )
+        if orderpoints:
+            self.env['mrp.production'].sudo().search([
+                ('orderpoint_id', 'in', orderpoints.ids),
+                ('state', '=', 'draft'),
+            ]).action_confirm()
         return super()._post_process_scheduler()
