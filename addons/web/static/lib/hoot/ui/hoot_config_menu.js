@@ -266,6 +266,9 @@ export class HootConfigMenu extends Component {
 
     ui = plugin(UiPlugin);
 
+    color = useColorScheme();
+    config = proxy(this.env.runner.config);
+
     CASE_EVENT_TYPES = CASE_EVENT_TYPES;
 
     executionOrders = [
@@ -279,12 +282,6 @@ export class HootConfigMenu extends Component {
 
     refresh = refresh;
     toggleColorScheme = toggleColorScheme;
-
-    setup() {
-        const { runner } = this.env;
-        this.color = useColorScheme();
-        this.config = proxy(runner.config);
-    }
 
     doesNotNeedRefresh() {
         return CONFIG_KEYS.every((key) =>

@@ -222,26 +222,27 @@ export class HootStatusPanel extends Component {
 
     ui = plugin(UiPlugin);
 
+    canvasRef = useRef("progress-canvas");
+
+    runnerReporting = proxy(this.env.runner.reporting);
+    runnerState = proxy(this.env.runner.state);
+    state = proxy({
+        className: "",
+        timer: null,
+    });
+
+    progressBarIndex = 0;
+
     currentTestStart;
     formatTime = formatTime;
     intervalId = 0;
 
     setup() {
-        const { runner } = this.env;
-        this.canvasRef = useRef("progress-canvas");
-        this.runnerReporting = proxy(runner.reporting);
-        this.runnerState = proxy(runner.state);
-        this.state = proxy({
-            className: "",
-            timer: null,
-        });
-        this.progressBarIndex = 0;
-
-        runner.beforeAll(this.globalSetup.bind(this));
-        runner.afterAll(this.globalCleanup.bind(this));
-        if (!runner.headless) {
-            runner.beforeEach(this.startTimer.bind(this));
-            runner.afterPostTest(this.stopTimer.bind(this));
+        this.env.runner.beforeAll(this.globalSetup.bind(this));
+        this.env.runner.afterAll(this.globalCleanup.bind(this));
+        if (!this.env.runner.headless) {
+            this.env.runner.beforeEach(this.startTimer.bind(this));
+            this.env.runner.afterPostTest(this.stopTimer.bind(this));
         }
 
         useEffect(setupCanvas, () => [this.canvasRef.el]);

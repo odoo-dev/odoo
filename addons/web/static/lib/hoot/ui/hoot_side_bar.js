@@ -202,25 +202,26 @@ export class HootSideBar extends Component {
 
     ui = plugin(UiPlugin);
 
+    searchInputRef = useRef("search-input");
+    suitesListRef = useRef("suites-list");
+
+    state = proxy({
+        filter: "",
+        hideEmpty: false,
+        suites: [],
+        /** @type {Set<string>} */
+        unfoldedIds: new Set(),
+    });
+
     filteredSuites = [];
     runningSuites = new Set();
     unfoldedIds = new Set();
 
     setup() {
-        const { runner } = this.env;
-
-        this.searchInputRef = useRef("search-input");
-        this.suitesListRef = useRef("suites-list");
-        this.state = proxy({
-            filter: "",
-            hideEmpty: false,
-            suites: [],
-            /** @type {Set<string>} */
-            unfoldedIds: new Set(),
-        });
-
-        runner.beforeAll(() => {
-            const singleRootSuite = runner.rootSuites.filter((suite) => suite.currentJobs.length);
+        this.env.runner.beforeAll(() => {
+            const singleRootSuite = this.env.runner.rootSuites.filter(
+                (suite) => suite.currentJobs.length
+            );
             if (singleRootSuite.length === 1) {
                 // Unfolds only root suite containing jobs
                 this.unfoldAndSelect(singleRootSuite[0]);
@@ -243,9 +244,8 @@ export class HootSideBar extends Component {
      * Filters
      */
     getFilteredVisibleSuites() {
-        const { runner } = this.env;
         const { hideEmpty } = this.state;
-        const allSuites = runner.suites.values();
+        const allSuites = this.env.runner.suites.values();
         let allowedIds;
         let unfoldedIds;
         let rootSuites;
@@ -268,7 +268,7 @@ export class HootSideBar extends Component {
             }
         } else {
             unfoldedIds = this.state.unfoldedIds;
-            rootSuites = runner.rootSuites;
+            rootSuites = this.env.runner.rootSuites;
         }
 
         // Computing unfolded suites

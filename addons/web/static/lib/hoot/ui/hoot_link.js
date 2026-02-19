@@ -50,9 +50,7 @@ export class HootLink extends Component {
         "title?": t.string,
     });
 
-    setup() {
-        this.state = proxy({ href: "#" });
-    }
+    state = proxy({ href: "#" });
 
     /**
      * @param {PointerEvent} ev

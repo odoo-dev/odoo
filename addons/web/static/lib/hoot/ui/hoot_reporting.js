@@ -243,26 +243,24 @@ export class HootReporting extends Component {
 
     ui = plugin(UiPlugin);
 
+    config = proxy(this.env.runner.config);
+    runnerReporting = proxy(this.env.runner.reporting);
+    runnerState = proxy(this.env.runner.state);
+    state = proxy({
+        /** @type {string[]} */
+        openGroups: [],
+        /** @type {string[]} */
+        openTests: [],
+    });
+
     Test = Test;
     formatTime = formatTime;
 
     setup() {
-        const { runner } = this.env;
-
-        this.config = proxy(runner.config);
-        this.runnerReporting = proxy(runner.reporting);
-        this.runnerState = proxy(runner.state);
-        this.state = proxy({
-            /** @type {string[]} */
-            openGroups: [],
-            /** @type {string[]} */
-            openTests: [],
-        });
-
         const { showdetail } = this.config;
 
         let didShowDetail = false;
-        runner.afterPostTest((test) => {
+        this.env.runner.afterPostTest((test) => {
             if (
                 showdetail &&
                 !(showdetail === "first-fail" && didShowDetail) &&

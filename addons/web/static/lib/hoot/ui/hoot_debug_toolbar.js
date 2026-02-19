@@ -240,6 +240,14 @@ export class HootDebugToolBar extends Component {
         test: t.instanceOf(Test),
     });
 
+    runnerState = proxy(this.env.runner.state);
+    state = proxy({
+        configOpen: false,
+        open: false,
+    });
+
+    movable = useMovable("root", "handle", this.allowDrag.bind(this));
+
     formatTime = formatTime;
     refresh = refresh;
 
@@ -248,15 +256,7 @@ export class HootDebugToolBar extends Component {
     }
 
     setup() {
-        this.runnerState = proxy(this.env.runner.state);
-        this.state = proxy({
-            configOpen: false,
-            open: false,
-        });
-
         onWillRender(this.onWillRender.bind(this));
-
-        this.movable = useMovable("root", "handle", this.allowDrag.bind(this));
     }
 
     allowDrag() {
@@ -264,9 +264,8 @@ export class HootDebugToolBar extends Component {
     }
 
     exitDebugMode() {
-        const { runner } = this.env;
-        runner.config.debugTest = false;
-        runner.stop();
+        this.env.runner.config.debugTest = false;
+        this.env.runner.stop();
     }
 
     getInfo() {

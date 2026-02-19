@@ -82,9 +82,7 @@ export class HootTestPath extends Component {
 
     ui = plugin(UiPlugin);
 
-    setup() {
-        this.results = proxy(this.props.test.results);
-    }
+    results = proxy(this.props.test.results);
 
     getStatusInfo() {
         switch (this.props.test.status) {

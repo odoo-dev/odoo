@@ -39,13 +39,14 @@ export class HootDropdown extends Component {
         slots: t.object(["toggler", "menu"]),
     });
 
-    setup() {
-        this.rootRef = useRef("root");
-        this.togglerRef = useRef("toggler");
-        this.state = proxy({
-            open: false,
-        });
+    rootRef = useRef("root");
+    togglerRef = useRef("toggler");
 
+    state = proxy({
+        open: false,
+    });
+
+    setup() {
         useAutofocus(this.rootRef);
         useHootKey(["Escape"], this.close.bind(this));
         useWindowListener(

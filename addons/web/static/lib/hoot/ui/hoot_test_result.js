@@ -300,6 +300,14 @@ export class HootTestResult extends Component {
 
     ui = plugin(UiPlugin);
 
+    config = proxy(this.env.runner.config);
+    logs = proxy(this.props.test.logs);
+    results = proxy(this.props.test.results);
+    state = proxy({
+        showCode: false,
+        showDetails: Boolean(this.props.open),
+    });
+
     CASE_EVENT_TYPES = CASE_EVENT_TYPES;
     DOC_URL = DOC_URL;
 
@@ -318,15 +326,6 @@ export class HootTestResult extends Component {
 
     setup() {
         subscribeToURLParams("*");
-
-        const { runner } = this.env;
-        this.config = proxy(runner.config);
-        this.logs = proxy(this.props.test.logs);
-        this.results = proxy(this.props.test.results);
-        this.state = proxy({
-            showCode: false,
-            showDetails: Boolean(this.props.open),
-        });
     }
 
     getClassName() {

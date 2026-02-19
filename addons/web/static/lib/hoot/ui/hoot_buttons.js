@@ -95,16 +95,16 @@ export class HootButtons extends Component {
         </div>
     `;
 
-    setup() {
-        const { runner } = this.env;
-        this.state = proxy({
-            disable: false,
-            open: false,
-        });
-        this.runnerState = proxy(runner.state);
-        this.disableTimeout = 0;
+    runnerState = proxy(this.env.runner.state);
+    state = proxy({
+        disable: false,
+        open: false,
+    });
 
-        subscribeToURLParams(...$keys(runner.config));
+    disableTimeout = 0;
+
+    setup() {
+        subscribeToURLParams(...$keys(this.env.runner.config));
     }
 
     getFailedSuiteIds() {
@@ -142,22 +142,21 @@ export class HootButtons extends Component {
     }
 
     onRunClick() {
-        const { runner } = this.env;
-        switch (runner.state.status) {
+        switch (this.env.runner.state.status) {
             case "done": {
                 refresh();
                 break;
             }
             case "ready": {
-                if (runner.config.manual) {
-                    runner.manualStart();
+                if (this.env.runner.config.manual) {
+                    this.env.runner.manualStart();
                 } else {
                     refresh();
                 }
                 break;
             }
             case "running": {
-                runner.stop();
+                this.env.runner.stop();
                 if (this.disableTimeout) {
                     clearTimeout(this.disableTimeout);
                 }

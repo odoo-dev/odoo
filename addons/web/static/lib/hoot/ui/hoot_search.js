@@ -404,6 +404,28 @@ export class HootSearch extends Component {
 
     ui = plugin(UiPlugin);
 
+    rootRef = useRef("root");
+    searchInputRef = useRef("search-input");
+
+    config = proxy(this.env.runner.config);
+    state = proxy({
+        categories: {
+            /** @type {Suite[]} */
+            suite: [],
+            /** @type {Tag[]} */
+            tag: [],
+            /** @type {Test[]} */
+            test: [],
+        },
+        disabled: false,
+        empty: !(this.config.filter || "").trim(),
+        query: this.config.filter || "",
+        showDropdown: false,
+    });
+    runnerState = proxy(this.env.runner.state);
+
+    keepSelection = useKeepSelection(this.searchInputRef);
+
     categories = ["suite", "test", "tag"];
     debouncedUpdateSuggestions = debounce(this.updateSuggestions.bind(this), 16);
     refresh = refresh;
@@ -414,34 +436,11 @@ export class HootSearch extends Component {
     }
 
     setup() {
-        const { runner } = this.env;
-
-        runner.beforeAll(() => {
+        this.env.runner.beforeAll(() => {
             this.state.categories = this.findSuggestions();
             this.state.empty = this.isEmpty();
         });
-        runner.afterAll(() => this.focusSearchInput());
-
-        this.rootRef = useRef("root");
-        this.searchInputRef = useRef("search-input");
-
-        this.config = proxy(runner.config);
-        const query = this.config.filter || "";
-        this.state = proxy({
-            categories: {
-                /** @type {Suite[]} */
-                suite: [],
-                /** @type {Tag[]} */
-                tag: [],
-                /** @type {Test[]} */
-                test: [],
-            },
-            disabled: false,
-            empty: !query.trim(),
-            query,
-            showDropdown: false,
-        });
-        this.runnerState = proxy(runner.state);
+        this.env.runner.afterAll(() => this.focusSearchInput());
 
         useHootKey(["Alt", "r"], this.toggleRegExp.bind(this));
         useHootKey(["Alt", "x"], this.toggleExact.bind(this));
@@ -460,8 +459,6 @@ export class HootSearch extends Component {
             },
             { capture: true }
         );
-
-        this.keepSelection = useKeepSelection(this.searchInputRef);
     }
 
     /**
@@ -852,19 +849,18 @@ export class HootSearch extends Component {
         if (this.secretSequence === SECRET_SEQUENCE.length) {
             this.secretSequence = 0;
 
-            const { runner } = this.env;
-            runner.stop();
-            runner.reporting.passed += runner.reporting.failed;
-            runner.reporting.passed += runner.reporting.todo;
-            runner.reporting.failed = 0;
-            runner.reporting.todo = 0;
-            for (const [, suite] of runner.suites) {
+            this.env.runner.stop();
+            this.env.runner.reporting.passed += this.env.runner.reporting.failed;
+            this.env.runner.reporting.passed += this.env.runner.reporting.todo;
+            this.env.runner.reporting.failed = 0;
+            this.env.runner.reporting.todo = 0;
+            for (const [, suite] of this.env.runner.suites) {
                 suite.reporting.passed += suite.reporting.failed;
                 suite.reporting.passed += suite.reporting.todo;
                 suite.reporting.failed = 0;
                 suite.reporting.todo = 0;
             }
-            for (const [, test] of runner.tests) {
+            for (const [, test] of this.env.runner.tests) {
                 test.config.todo = false;
                 test.status = Test.PASSED;
                 for (const result of test.results) {

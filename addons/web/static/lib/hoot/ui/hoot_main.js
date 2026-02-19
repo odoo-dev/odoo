@@ -104,26 +104,25 @@ export class HootMain extends Component {
         </t>
     `;
 
+    state = proxy({
+        debugTest: null,
+    });
+
     createUrl = createUrl;
     escapeKeyPresses = 0;
 
     setup() {
-        const { runner } = this.env;
-        this.state = proxy({
-            debugTest: null,
-        });
-
-        runner.beforeAll(() => {
-            if (!runner.debug) {
+        this.env.runner.beforeAll(() => {
+            if (!this.env.runner.debug) {
                 return;
             }
-            if (runner.debug === true) {
-                this.state.debugTest = runner.state.tests[0];
+            if (this.env.runner.debug === true) {
+                this.state.debugTest = this.env.runner.state.tests[0];
             } else {
-                this.state.debugTest = runner.debug;
+                this.state.debugTest = this.env.runner.debug;
             }
         });
-        runner.afterAll(() => {
+        this.env.runner.afterAll(() => {
             this.state.debugTest = null;
         });
 
@@ -132,7 +131,7 @@ export class HootMain extends Component {
         useHootKey(["Enter"], this.manualStart.bind(this));
         useHootKey(["Escape"], this.abort.bind(this));
 
-        if (!runner.config.headless) {
+        if (!this.env.runner.config.headless) {
             useHootKey(["Alt", "d"], this.toggleDebug.bind(this));
         }
     }
@@ -141,13 +140,12 @@ export class HootMain extends Component {
      * @param {KeyboardEvent} ev
      */
     abort(ev) {
-        const { runner } = this.env;
         this.escapeKeyPresses++;
         setTimeout(() => this.escapeKeyPresses--, 500);
 
-        if (runner.state.status === "running" && this.escapeKeyPresses >= 2) {
+        if (this.env.runner.state.status === "running" && this.escapeKeyPresses >= 2) {
             ev.preventDefault();
-            runner.stop();
+            this.env.runner.stop();
         }
     }
 
@@ -155,15 +153,14 @@ export class HootMain extends Component {
      * @param {KeyboardEvent} ev
      */
     manualStart(ev) {
-        const { runner } = this.env;
-        if (runner.state.status !== "ready") {
+        if (this.env.runner.state.status !== "ready") {
             return;
         }
 
         ev.preventDefault();
 
-        if (runner.config.manual) {
-            runner.manualStart();
+        if (this.env.runner.config.manual) {
+            this.env.runner.manualStart();
         } else {
             refresh();
         }
@@ -179,7 +176,6 @@ export class HootMain extends Component {
     toggleDebug(ev) {
         ev.preventDefault();
 
-        const { runner } = this.env;
-        runner.config.debugTest = !runner.config.debugTest;
+        this.env.runner.config.debugTest = !this.env.runner.config.debugTest;
     }
 }

@@ -23,11 +23,9 @@ export class HootCopyButton extends Component {
         text: t.string,
     });
 
-    hasClipboard = hasClipboard;
+    state = proxy({ copied: false });
 
-    setup() {
-        this.state = proxy({ copied: false });
-    }
+    hasClipboard = hasClipboard;
 
     /**
      * @param {PointerEvent} ev

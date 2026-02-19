@@ -164,6 +164,13 @@ export class HootTechnicalValue extends Component {
         "value?": t.any,
     });
 
+    state = proxy({
+        open: false,
+        promiseState: null,
+    });
+
+    logged = false;
+
     getTypeOf = getTypeOf;
     isIterable = isIterable;
     isNode = isNode;
@@ -177,11 +184,6 @@ export class HootTechnicalValue extends Component {
     }
 
     setup() {
-        this.logged = false;
-        this.state = proxy({
-            open: false,
-            promiseState: null,
-        });
         this.wrapPromiseValue(this.props.value);
 
         onWillRender(() => {
