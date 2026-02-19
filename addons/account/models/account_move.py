@@ -173,6 +173,7 @@ class AccountMove(models.Model):
         required=True,
         check_company=True,
         domain="[('id', 'in', suitable_journal_ids)]",
+        index=True,
     )
     journal_group_id = fields.Many2one(
         'account.journal.group',
