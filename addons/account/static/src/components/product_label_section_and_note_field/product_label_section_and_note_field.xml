@@ -13,6 +13,9 @@
                     t-att-value="label"
                     t-ref="labelNodeRef"
                     t-key="props.readonly"
+                    autocorrect="off"
+                    autocomplete="off"
+                    autocapitalize="off"
                 />
             </t>
             <t t-elif="isSectionOrSubSection">
