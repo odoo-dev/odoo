@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onWillRender, plugin, proxy, xml } from "@odoo/owl";
+import { Component, computed, plugin, proxy, useEffect, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { formatTime, parseQuery } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
@@ -253,6 +253,8 @@ export class HootReporting extends Component {
         openTests: [],
     });
 
+    filteredResults = computed(() => this.computeFilteredResults());
+
     Test = Test;
     formatTime = formatTime;
 
@@ -271,8 +273,7 @@ export class HootReporting extends Component {
             }
         });
 
-        onWillRender(() => {
-            this.filteredResults = this.computeFilteredResults();
+        useEffect(() => {
             this.ui.totalResults.set(this.filteredResults.length);
         });
     }

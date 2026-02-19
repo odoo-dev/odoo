@@ -2,7 +2,6 @@
 
 import {
     Component,
-    onWillRender,
     useEffect,
     useRef,
     proxy,
@@ -10,6 +9,7 @@ import {
     props,
     types as t,
     plugin,
+    computed,
 } from "@odoo/owl";
 import { Suite } from "../core/suite";
 import { createUrlFromId } from "../core/url";
@@ -152,7 +152,7 @@ export class HootSideBar extends Component {
                         <i t-attf-class="fa fa-{{ this.state.hideEmpty ? 'eye' : 'eye-slash' }}" />
                     </button>
                 </t>
-                <t t-set="expanded" t-value="this.unfoldedIds.size === this.env.runner.suites.size" />
+                <t t-set="expanded" t-value="this.unfoldedSuiteIds().size === this.env.runner.suites.size" />
                 <button
                     type="button"
                     class="text-primary p-1 transition-colors"
@@ -163,7 +163,7 @@ export class HootSideBar extends Component {
                 </button>
             </form>
             <ul class="overflow-x-hidden overflow-y-auto" t-ref="suites-list">
-                <t t-foreach="this.filteredSuites" t-as="suite" t-key="suite.id">
+                <t t-foreach="this.unfoldedSuites()" t-as="suite" t-key="suite.id">
                     <li class="flex items-center h-7 animate-slide-down">
                         <button
                             class="${SUITE_CLASSNAME} flex items-center w-full h-full gap-1 px-2 overflow-hidden hover:bg-gray-300 dark:hover:bg-gray-700"
@@ -180,7 +180,7 @@ export class HootSideBar extends Component {
                                     hasSuites="this.hasSuites(suite)"
                                     reporting="suite.reporting"
                                     selected="this.ui.selectedSuiteId() === suite.id"
-                                    unfolded="this.unfoldedIds.has(suite.id)"
+                                    unfolded="this.unfoldedSuiteIds().has(suite.id)"
                                 />
                                 <span class="text-gray">
                                     (<t t-esc="suite.totalTestCount" />)
@@ -213,9 +213,8 @@ export class HootSideBar extends Component {
         unfoldedIds: new Set(),
     });
 
-    filteredSuites = [];
-    runningSuites = new Set();
-    unfoldedIds = new Set();
+    unfoldedSuites = computed(() => this.getFilteredVisibleSuites());
+    unfoldedSuiteIds = computed(() => this.unfoldedSuites().map((s) => s.id));
 
     setup() {
         this.env.runner.beforeAll(() => {
@@ -233,10 +232,6 @@ export class HootSideBar extends Component {
                 // before starting the run.
                 this.render();
             }
-        });
-
-        onWillRender(() => {
-            [this.filteredSuites, this.unfoldedIds] = this.getFilteredVisibleSuites();
         });
     }
 
@@ -298,7 +293,7 @@ export class HootSideBar extends Component {
             addSuite(suite);
         }
 
-        return [unfoldedSuites, unfoldedIds];
+        return unfoldedSuites;
     }
 
     getSuiteElements() {

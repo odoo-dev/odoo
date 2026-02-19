@@ -5,18 +5,19 @@ const StatusFilter = t.or([
     t.literal("passed"),
     t.literal("skipped"),
     t.literal("todo"),
+    t.literal(null),
 ]);
+
+const SortOrder = t.or([t.literal(false), t.literal("asc"), t.literal("desc")]);
 
 export class UiPlugin extends Plugin {
     /** @private */
-    _statusFilter = signal(null, { type: t.or([StatusFilter, t.literal(null)]) });
+    _statusFilter = signal(null, { type: StatusFilter });
 
     resultsPage = signal(0);
     resultsPerPage = signal(40);
     selectedSuiteId = signal(null, { type: t.or([t.string, t.literal(null)]) });
-    sortResults = signal(false, {
-        type: t.or([t.literal(false), t.literal("asc"), t.literal("desc")]),
-    });
+    sortResults = signal(false, { type: SortOrder });
     totalResults = signal(0);
 
     statusFilter = computed(this._statusFilter, {

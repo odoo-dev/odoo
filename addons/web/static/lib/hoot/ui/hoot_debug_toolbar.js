@@ -1,15 +1,6 @@
 /** @odoo-module */
 
-import {
-    Component,
-    onWillRender,
-    useEffect,
-    useRef,
-    proxy,
-    xml,
-    props,
-    types as t,
-} from "@odoo/owl";
+import { Component, useEffect, useRef, proxy, xml, props, types as t, computed } from "@odoo/owl";
 import { Test } from "../core/test";
 import { refresh } from "../core/url";
 import { formatTime, throttle } from "../hoot_utils";
@@ -191,20 +182,20 @@ export class HootDebugToolBar extends Component {
                     >
                         status:
                         <strong
-                            t-attf-class="text-{{ this.info.className }}"
-                            t-esc="this.info.status"
+                            t-attf-class="text-{{ this.info().className }}"
+                            t-esc="this.info().status"
                         />
                         <span class="hidden sm:flex items-center gap-1">
                             <span class="text-gray">-</span>
                             assertions:
                             <span class="contents text-emerald">
-                                <strong t-esc="this.info.passed" />
+                                <strong t-esc="this.info().passed" />
                                 passed
                             </span>
-                            <t t-if="this.info.failed">
+                            <t t-if="this.info().failed">
                                 <span class="text-gray">/</span>
                                 <span class="contents text-rose">
-                                    <strong t-esc="this.info.failed" />
+                                    <strong t-esc="this.info().failed" />
                                     failed
                                 </span>
                             </t>
@@ -246,29 +237,7 @@ export class HootDebugToolBar extends Component {
         open: false,
     });
 
-    movable = useMovable("root", "handle", this.allowDrag.bind(this));
-
-    formatTime = formatTime;
-    refresh = refresh;
-
-    get done() {
-        return Boolean(this.runnerState.done.size); // subscribe to test being added as done
-    }
-
-    setup() {
-        onWillRender(this.onWillRender.bind(this));
-    }
-
-    allowDrag() {
-        return !this.state.open;
-    }
-
-    exitDebugMode() {
-        this.env.runner.config.debugTest = false;
-        this.env.runner.stop();
-    }
-
-    getInfo() {
+    info = computed(() => {
         const [status, className] = this.getStatus();
         const [assertPassed, assertFailed] = this.groupAssertions(
             this.props.test.lastResults?.getEvents("assertion")
@@ -279,6 +248,24 @@ export class HootDebugToolBar extends Component {
             passed: assertPassed,
             failed: assertFailed,
         };
+    });
+
+    movable = useMovable("root", "handle", this.allowDrag.bind(this));
+
+    formatTime = formatTime;
+    refresh = refresh;
+
+    get done() {
+        return Boolean(this.runnerState.done.size); // subscribe to test being added as done
+    }
+
+    allowDrag() {
+        return !this.state.open;
+    }
+
+    exitDebugMode() {
+        this.env.runner.config.debugTest = false;
+        this.env.runner.stop();
     }
 
     getStatus() {
@@ -309,10 +296,6 @@ export class HootDebugToolBar extends Component {
             }
         }
         return [passed, failed];
-    }
-
-    onWillRender() {
-        this.info = this.getInfo();
     }
 
     toggleConfig() {

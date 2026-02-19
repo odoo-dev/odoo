@@ -169,7 +169,7 @@ const EVENT_TEMPLATE = /* xml */ `
             </t>
         </span>
     </div>
-    <t t-set="timestamp" t-value="formatTime(event.ts - (result.ts || 0), 'ms')" />
+    <t t-set="timestamp" t-value="this.formatTime(event.ts - (result.ts || 0), 'ms')" />
     <small class="flex items-center text-gray" t-att-title="timestamp">
         <t t-esc="'@' + timestamp" />
     </small>
@@ -183,7 +183,7 @@ const EVENT_TEMPLATE = /* xml */ `
         <t t-if="event.failedDetails">
             <div class="hoot-info grid col-span-2 gap-x-2 px-2">
                 <t t-foreach="event.failedDetails" t-as="details" t-key="details_index">
-                    <t t-if="isMarkup(details, 'group')">
+                    <t t-if="this.isMarkup(details, 'group')">
                         <div class="col-span-2 flex gap-2 ps-2 mt-1" t-att-class="details.className">
                             <t t-esc="details.groupIndex" />.
                             <HootTechnicalValue value="details.content" />
