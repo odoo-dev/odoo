@@ -3,6 +3,18 @@
 
 
 <t t-name="html_builder.SnippetViewer">
+    <t t-if="props.state.isMobilePreviewSnippet">
+        <div t-ref="content" class="d-flex gap-3 h-100 o_mobile_iframe_wrapper">
+            <t t-foreach="this.getSnippetColumns()" t-as="snippetsColumn" t-key="snippetsColumn_index">
+                <iframe
+                    class="o_add_snippet_iframe_mobile"
+                    t-att-data-index="snippetsColumn_index"
+                    width="40%"
+                    src="about:blank"/>
+            </t>
+        </div>
+    </t>
+    <t t-else="">
     <div t-ref="content" class="row g-0 o_snippets_preview_row" t-att-dir="this.props.frontendDirection">
         <div class="col-lg-6 col-sm-4" t-foreach="this.getSnippetColumns()" t-as="snippetsColumn" t-key="snippetsColumn_index">
             <t t-foreach="snippetsColumn" t-as="snippet" t-key="snippet.id">
@@ -36,6 +48,7 @@
             </t>
         </div>
     </div>
+    </t>
 </t>
 
 </templates>

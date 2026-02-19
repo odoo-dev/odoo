@@ -147,8 +147,7 @@ export class AddSnippetDialog extends Component {
         htmlContent.classList.toggle("o_is_mobile_preview");
         iframeContent.width = this.state.isMobilePreviewSnippet ? "100%" : "333%";
         const body = iframeContent.contentDocument.body;
-        body.style.width = this.state.isMobilePreviewSnippet ? "50%" : "30%";
-        body.style.height = this.state.isMobilePreviewSnippet ? "15%" : "100%";
+        body.style.width = this.state.isMobilePreviewSnippet ? "100%" : "30%";
     }
 
     selectGroup(snippetGroup) {

@@ -49,11 +49,11 @@
 }
 
 .o_is_mobile_preview {
-    transform: scale(2);
-    transform-origin: top left;
-    > body {
-        scrollbar-width: thin;
-    }
+    // transform: scale(2);
+    // transform-origin: top left;
+    // > body {
+    //     scrollbar-width: thin;
+    // }
     .o_snippets_preview_row .o_snippet_preview_wrap[data-label]:not([data-label=""])::before {
         transform: scale(1.5);
     }

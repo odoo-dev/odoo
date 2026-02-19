@@ -1,4 +1,4 @@
-import { Component, markup, useRef } from "@odoo/owl";
+import { Component, markup, useRef, useEffect } from "@odoo/owl";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
@@ -20,6 +20,31 @@ export class SnippetViewer extends Component {
     setup() {
         this.dialog = useService("dialog");
         this.content = useRef("content");
+        useEffect(
+            () => {
+                if (this.props.state.isMobilePreviewSnippet) {
+                    setTimeout(() => this.renderMobileIframes(), 0);
+                }
+            },
+            () => [this.props.state.isMobilePreviewSnippet]
+        );
+    }
+
+    renderMobileIframes() {
+        const columns = this.getSnippetColumns();
+
+        const iframes = Array.from(
+            this.content.el.querySelectorAll(".o_add_snippet_iframe_mobile")
+        );
+
+        iframes.forEach((iframe, index) => {
+            const snippets = columns[index];
+            const doc = iframe.contentDocument;
+            snippets.forEach((snippet) => {
+                const node = snippet.content;
+                doc.body.appendChild(node);
+            });
+        });
     }
 
     getRenameBtnLabel(snippetName) {
