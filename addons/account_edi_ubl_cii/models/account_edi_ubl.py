@@ -1,5 +1,6 @@
 import io
 import logging
+from functools import wraps
 
 from markupsafe import Markup
 
@@ -7,6 +8,7 @@ from odoo import _, fields, models, Command
 from odoo.exceptions import UserError
 from odoo.tools import formatLang, frozendict, html2plaintext, html_escape, pdf, str2bool
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import (
+    dispatch_by_document,
     FloatFmt,
     GST_COUNTRY_CODES,
     UOM_TO_UNECE_CODE,
@@ -804,12 +806,15 @@ class AccountEdiUBL(models.AbstractModel):
     # EXPORT: Building nodes
     # -------------------------------------------------------------------------
 
+    @dispatch_by_document
     def _ubl_add_line_id_node(self, vals):
         vals['line_node']['cbc:ID'] = {'_text': vals['line_vals']['index']}
 
+    @dispatch_by_document
     def _ubl_add_line_note_nodes(self, vals):
         vals['line_node']['cbc:Note'] = []
 
+    @dispatch_by_document
     def _ubl_add_line_invoiced_quantity_node(self, vals):
         base_line = vals['line_vals']['base_line']
         vals['line_node']['cbc:InvoicedQuantity'] = {
@@ -817,6 +822,7 @@ class AccountEdiUBL(models.AbstractModel):
             'unitCode': self._get_uom_unece_code(base_line['product_uom_id']),
         }
 
+    @dispatch_by_document
     def _ubl_add_line_credited_quantity_node(self, vals):
         base_line = vals['line_vals']['base_line']
         vals['line_node']['cbc:CreditedQuantity'] = {
@@ -824,6 +830,7 @@ class AccountEdiUBL(models.AbstractModel):
             'unitCode': self._get_uom_unece_code(base_line['product_uom_id']),
         }
 
+    @dispatch_by_document
     def _ubl_add_line_debited_quantity_node(self, vals):
         base_line = vals['line_vals']['base_line']
         vals['line_node']['cbc:DebitedQuantity'] = {
@@ -831,6 +838,7 @@ class AccountEdiUBL(models.AbstractModel):
             'unitCode': self._get_uom_unece_code(base_line['product_uom_id']),
         }
 
+    @dispatch_by_document
     def _ubl_add_line_item_name_description_nodes(self, vals):
         item_node = vals['item_node']
         base_line = vals['line_vals']['base_line']
@@ -860,6 +868,7 @@ class AccountEdiUBL(models.AbstractModel):
         else:
             item_node['cbc:Name'] = None
 
+    @dispatch_by_document
     def _ubl_add_line_item_identification_nodes(self, vals):
         item_node = vals['item_node']
         base_line = vals['line_vals']['base_line']
@@ -881,6 +890,7 @@ class AccountEdiUBL(models.AbstractModel):
         else:
             item_node['cac:StandardItemIdentification'] = None
 
+    @dispatch_by_document
     def _ubl_add_line_item_additional_item_property_nodes(self, vals):
         item_node = vals['item_node']
         base_line = vals['line_vals']['base_line']
@@ -894,6 +904,7 @@ class AccountEdiUBL(models.AbstractModel):
             for value in product.product_template_attribute_value_ids
         ]
 
+    @dispatch_by_document
     def _ubl_get_line_item_commodity_classification_node_from_intrastat_code(self, vals, intrastat_code):
         return {
             'cbc:ItemClassificationCode': {
@@ -903,6 +914,7 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_get_line_item_commodity_classification_node_from_unspsc_code(self, vals, unspsc_code):
         return {
             'cbc:ItemClassificationCode': {
@@ -912,6 +924,7 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_get_line_item_commodity_classification_node_from_cpv_code(self, vals, cpv_code):
         return {
             'cbc:ItemClassificationCode': {
@@ -921,6 +934,7 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_get_line_item_commodity_classification_node_from_cg_code(self, vals, cg_code):
         return {
             'cbc:ItemClassificationCode': {
@@ -930,6 +944,7 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_add_line_item_commodity_classification_nodes(self, vals):
         item_node = vals['item_node']
         base_line = vals['line_vals']['base_line']
@@ -958,6 +973,7 @@ class AccountEdiUBL(models.AbstractModel):
 
         return nodes
 
+    @dispatch_by_document
     def _ubl_get_line_item_node_classified_tax_category_node(self, vals, tax_category):
         """ Generate the node 'cac:ClassifiedTaxCategory' in 'cac:Item'.
 
@@ -978,6 +994,7 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_add_line_item_classified_tax_category_nodes(self, vals, in_foreign_currency=True):
         AccountTax = self.env['account.tax']
         item_node = vals['item_node']
@@ -1005,6 +1022,7 @@ class AccountEdiUBL(models.AbstractModel):
                 'tax_amount': values[f'tax_amount{suffix}'],
             }))
 
+    @dispatch_by_document
     def _ubl_add_line_item_node(self, vals):
         node = vals['line_node']['cac:Item'] = {}
         sub_vals = {**vals, 'item_node': node}
@@ -1014,6 +1032,7 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_line_item_commodity_classification_nodes(sub_vals)
         self._ubl_add_line_item_classified_tax_category_nodes(sub_vals)
 
+    @dispatch_by_document
     def _ubl_add_line_price_node(self, vals, in_foreign_currency=True):
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
@@ -1038,6 +1057,7 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
+    @dispatch_by_document
     def _ubl_get_line_item_node(self, vals, item_values):
         # DEPRECATED: TO BE REMOVED IN MASTER
         item_node = {}
@@ -1097,6 +1117,7 @@ class AccountEdiUBL(models.AbstractModel):
         ]
         return item_node
 
+    @dispatch_by_document
     def _ubl_get_line_allowance_charge_recycling_contribution_node(self, vals, recycling_contribution_values):
         currency = recycling_contribution_values['currency']
         amount = recycling_contribution_values['amount']
@@ -1117,6 +1138,7 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
+    @dispatch_by_document
     def _ubl_get_line_allowance_charge_excise_node(self, vals, excise_values):
         currency = excise_values['currency']
         amount = excise_values['amount']
@@ -1132,6 +1154,7 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
+    @dispatch_by_document
     def _ubl_get_line_allowance_charge_discount_node(self, vals, discount_values):
         currency = discount_values['currency']
         amount = discount_values['amount']
@@ -1154,6 +1177,7 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
+    @dispatch_by_document
     def _ubl_add_line_allowance_charge_nodes_for_discount(self, vals, in_foreign_currency=True):
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
@@ -1174,6 +1198,7 @@ class AccountEdiUBL(models.AbstractModel):
             'base_amount': tax_details[f'gross_total_excluded{suffix}'],
         }))
 
+    @dispatch_by_document
     def _ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(self, vals, in_foreign_currency=True):
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
@@ -1192,6 +1217,7 @@ class AccountEdiUBL(models.AbstractModel):
                 'currency': currency,
             }))
 
+    @dispatch_by_document
     def _ubl_add_line_allowance_charge_nodes_for_excise_taxes(self, vals, in_foreign_currency=True):
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
@@ -1210,9 +1236,11 @@ class AccountEdiUBL(models.AbstractModel):
                 'currency': currency,
             }))
 
+    @dispatch_by_document
     def _ubl_add_line_allowance_charge_nodes(self, vals):
         vals['line_node']['cac:AllowanceCharge'] = []
 
+    @dispatch_by_document
     def _ubl_add_line_extension_amount_node(self, vals, in_foreign_currency=True):
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
@@ -1230,15 +1258,19 @@ class AccountEdiUBL(models.AbstractModel):
             'currencyID': currency.name,
         }
 
+    @dispatch_by_document
     def _ubl_add_line_period_nodes(self, vals):
         vals['line_node']['cac:InvoicePeriod'] = []
 
+    @dispatch_by_document
     def _ubl_add_line_pricing_reference_node(self, vals):
         vals['line_node']['cac:PricingReference'] = {}
 
+    @dispatch_by_document
     def _ubl_add_line_tax_totals_nodes(self, vals):
         vals['line_node']['cac:TaxTotal'] = []
 
+    @dispatch_by_document
     def _line_nodes_filter_base_lines(self, vals, filter_function=None):
         index = 1
         for base_line in vals['base_lines']:
@@ -1248,15 +1280,18 @@ class AccountEdiUBL(models.AbstractModel):
                 index += 1
                 yield {**vals, 'line_vals': line_vals, 'line_node': line_node}
 
+    @dispatch_by_document
     def _ubl_add_party_endpoint_id_node(self, vals):
         vals['party_node']['cbc:EndpointID'] = {
             '_text': None,
             'schemeID': None,
         }
 
+    @dispatch_by_document
     def _ubl_add_party_identification_nodes(self, vals):
         vals['party_node']['cac:PartyIdentification'] = []
 
+    @dispatch_by_document
     def _ubl_add_party_name_node(self, vals):
         partner = vals['party_vals']['partner']
 
@@ -1271,6 +1306,7 @@ class AccountEdiUBL(models.AbstractModel):
             'cbc:Name': {'_text': name},
         }
 
+    @dispatch_by_document
     def _ubl_get_partner_address_node(self, vals, partner):
         return {
             'cbc:StreetName': {'_text': partner.street},
@@ -1285,16 +1321,20 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
+    @dispatch_by_document
     def _ubl_add_party_postal_address_node(self, vals):
         partner = vals['party_vals']['partner']
         vals['party_node']['cac:PostalAddress'] = self._ubl_get_partner_address_node(vals, partner)
 
+    @dispatch_by_document
     def _ubl_add_party_tax_scheme_nodes(self, vals):
         vals['party_node']['cac:PartyTaxScheme'] = []
 
+    @dispatch_by_document
     def _ubl_add_party_legal_entity_nodes(self, vals):
         vals['party_node']['cac:PartyLegalEntity'] = []
 
+    @dispatch_by_document
     def _ubl_add_party_contact_node(self, vals):
         partner = vals['party_vals']['partner']
         vals['party_node']['cac:Contact'] = {
@@ -1304,27 +1344,35 @@ class AccountEdiUBL(models.AbstractModel):
             'cbc:ElectronicMail': {'_text': partner.email},
         }
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_endpoint_id_node(self, vals):
         self._ubl_add_party_endpoint_id_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_identification_nodes(self, vals):
         self._ubl_add_party_identification_nodes(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_name_node(self, vals):
         self._ubl_add_party_name_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_postal_address_node(self, vals):
         self._ubl_add_party_postal_address_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
         self._ubl_add_party_tax_scheme_nodes(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_legal_entity_nodes(self, vals):
         self._ubl_add_party_legal_entity_nodes(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_contact_node(self, vals):
         self._ubl_add_party_contact_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_supplier_party_node(self, vals):
         node = vals['document_node']['cac:AccountingSupplierParty'] = {'cac:Party': {}}
         party_node = node['cac:Party']
@@ -1341,27 +1389,35 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_accounting_supplier_party_legal_entity_nodes(sub_vals)
         self._ubl_add_accounting_supplier_party_contact_node(sub_vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_endpoint_id_node(self, vals):
         self._ubl_add_party_endpoint_id_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_identification_nodes(self, vals):
         self._ubl_add_party_identification_nodes(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_name_node(self, vals):
         self._ubl_add_party_name_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_postal_address_node(self, vals):
         self._ubl_add_party_postal_address_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_tax_scheme_nodes(self, vals):
         self._ubl_add_party_tax_scheme_nodes(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_legal_entity_nodes(self, vals):
         self._ubl_add_party_legal_entity_nodes(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_contact_node(self, vals):
         self._ubl_add_party_contact_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_accounting_customer_party_node(self, vals):
         node = vals['document_node']['cac:AccountingCustomerParty'] = {'cac:Party': {}}
         party_node = node['cac:Party']
@@ -1378,6 +1434,7 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_accounting_customer_party_legal_entity_nodes(sub_vals)
         self._ubl_add_accounting_customer_party_contact_node(sub_vals)
 
+    @dispatch_by_document
     def _ubl_get_delivery_node_from_delivery_address(self, vals):
         delivery_partner = vals['delivery']
         node = {
@@ -1402,12 +1459,14 @@ class AccountEdiUBL(models.AbstractModel):
 
         return node
 
+    @dispatch_by_document
     def _ubl_add_invoice_delivery_nodes(self, vals):
         nodes = vals['document_node']['cac:Delivery'] = []
 
         if vals.get('delivery'):
             nodes.append(self._ubl_get_delivery_node_from_delivery_address(vals))
 
+    @dispatch_by_document
     def _ubl_add_invoice_line_node(self, vals):
         self._ubl_add_line_id_node(vals)
         self._ubl_add_line_note_nodes(vals)
@@ -1420,12 +1479,14 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_line_item_node(vals)
         self._ubl_add_line_price_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_invoice_line_nodes(self, vals, filter_function=None):
         nodes = vals['document_node']['cac:InvoiceLine'] = []
         for sub_vals in self._line_nodes_filter_base_lines(vals, filter_function=filter_function):
             self._ubl_add_invoice_line_node(sub_vals)
             nodes.append(sub_vals['line_node'])
 
+    @dispatch_by_document
     def _ubl_add_credit_note_line_node(self, vals):
         self._ubl_add_line_id_node(vals)
         self._ubl_add_line_note_nodes(vals)
@@ -1438,12 +1499,14 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_line_item_node(vals)
         self._ubl_add_line_price_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_credit_note_line_nodes(self, vals, filter_function=None):
         nodes = vals['document_node']['cac:CreditNoteLine'] = []
         for sub_vals in self._line_nodes_filter_base_lines(vals, filter_function=filter_function):
             self._ubl_add_credit_note_line_node(sub_vals)
             nodes.append(sub_vals['line_node'])
 
+    @dispatch_by_document
     def _ubl_add_debit_note_line_node(self, vals):
         self._ubl_add_line_id_node(vals)
         self._ubl_add_line_note_nodes(vals)
@@ -1456,72 +1519,93 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_line_item_node(vals)
         self._ubl_add_line_price_node(vals)
 
+    @dispatch_by_document
     def _ubl_add_debit_note_line_nodes(self, vals, filter_function=None):
         nodes = vals['document_node']['cac:DebitNoteLine'] = []
         for sub_vals in self._line_nodes_filter_base_lines(vals, filter_function=filter_function):
             self._ubl_add_debit_note_line_node(sub_vals)
             nodes.append(sub_vals['line_node'])
 
+    @dispatch_by_document
     def _ubl_add_version_id_node(self, vals):
         vals['document_node']['cbc:UBLVersionID'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_customization_id_node(self, vals):
         vals['document_node']['cbc:CustomizationID'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_profile_id_node(self, vals):
         vals['document_node']['cbc:ProfileID'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_id_node(self, vals):
         vals['document_node']['cbc:ID'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_copy_indicator_node(self, vals):
         vals['document_node']['cbc:CopyIndicator'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_issue_date_node(self, vals):
         vals['document_node']['cbc:IssueDate'] = {'_text': None}
         vals['document_node']['cbc:IssueTime'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_due_date_node(self, vals):
         vals['document_node']['cbc:DueDate'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_invoice_type_code_node(self, vals):
         vals['document_node']['cbc:InvoiceTypeCode'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_credit_note_type_code_node(self, vals):
         vals['document_node']['cbc:CreditNoteTypeCode'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_order_type_code_node(self, vals):
         vals['document_node']['cbc:OrderTypeCode'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_notes_nodes(self, vals):
         vals['document_node']['cbc:Note'] = []
 
+    @dispatch_by_document
     def _ubl_add_document_currency_code_node_foreign_currency(self, vals):
         vals['document_node']['cbc:DocumentCurrencyCode'] = {'_text': vals['currency'].name}
 
+    @dispatch_by_document
     def _ubl_add_document_currency_code_node_company_currency(self, vals):
         vals['document_node']['cbc:DocumentCurrencyCode'] = {'_text': vals['company'].currency_id.name}
 
+    @dispatch_by_document
     def _ubl_add_document_currency_code_node(self, vals):
         vals['document_node']['cbc:DocumentCurrencyCode'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_tax_currency_code_node_company_currency_if_foreign_currency(self, vals):
         company = vals['company']
         currency = vals['currency_id']
         vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': None if currency == company.currency_id else company.currency_id.name}
 
+    @dispatch_by_document
     def _ubl_add_tax_currency_code_node_company_currency(self, vals):
         vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': vals['company'].currency_id.name}
 
+    @dispatch_by_document
     def _ubl_add_tax_currency_code_node_empty(self, vals):
         vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_tax_currency_code_node(self, vals):
         vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_buyer_reference_node(self, vals):
         vals['document_node']['cbc:BuyerReference'] = {'_text': None}
 
+    @dispatch_by_document
     def _ubl_add_order_reference_node(self, vals):
         vals['document_node']['cac:OrderReference'] = {
             'cbc:ID': {'_text': None},
@@ -1530,9 +1614,11 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
+    @dispatch_by_document
     def _ubl_add_billing_reference_nodes(self, vals):
         vals['document_node']['cac:BillingReference'] = []
 
+    @dispatch_by_document
     def _ubl_get_partner_bank_address_node(self, vals, bank):
         return {
             'cbc:StreetName': {'_text': bank.street},
@@ -1547,6 +1633,7 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
+    @dispatch_by_document
     def _ubl_get_payment_means_payee_financial_account_institution_branch_node_from_partner_bank(self, vals, partner_bank):
         bank = partner_bank.bank_id
         if not bank:
@@ -1567,15 +1654,18 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_get_payment_means_payee_financial_account_node_from_partner_bank(self, vals, partner_bank):
         return {
             'cbc:ID': {'_text': partner_bank.sanitized_acc_number},
             'cac:FinancialInstitutionBranch': self._ubl_get_payment_means_payee_financial_account_institution_branch_node_from_partner_bank(vals, partner_bank),
         }
 
+    @dispatch_by_document
     def _ubl_add_payment_means_nodes(self, vals):
         vals['document_node']['cac:PaymentMeans'] = []
 
+    @dispatch_by_document
     def _ubl_get_payment_terms_node_from_payment_term(self, vals, payment_term):
         note = payment_term.note and html2plaintext(payment_term.note) or None
         if not note:
@@ -1585,9 +1675,11 @@ class AccountEdiUBL(models.AbstractModel):
             'cbc:Note': {'_text': note}
         }
 
+    @dispatch_by_document
     def _ubl_add_payment_terms_nodes(self, vals):
         vals['document_node']['cac:PaymentTerms'] = []
 
+    @dispatch_by_document
     def _ubl_get_allowance_charge_early_payment_tax_category_node(self, vals, tax_category):
         return {
             '_currency': tax_category['currency'],
@@ -1598,6 +1690,7 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_get_allowance_charge_early_payment_node(self, vals, early_payment_values):
         currency = early_payment_values['currency']
         amount = early_payment_values['amount']
@@ -1617,10 +1710,12 @@ class AccountEdiUBL(models.AbstractModel):
             ],
         }
 
+    @dispatch_by_document
     def _ubl_get_allowance_charge_early_payment(self, vals, early_payment_values):
         # DEPRECATED: TO BE REMOVED IN MASTER
         return self._ubl_get_allowance_charge_early_payment_node(vals, early_payment_values)
 
+    @dispatch_by_document
     def _ubl_add_allowance_charge_nodes_early_payment_discount(self, vals, in_foreign_currency=True):
         AccountTax = self.env['account.tax']
         suffix = '_currency' if in_foreign_currency else ''
@@ -1654,9 +1749,11 @@ class AccountEdiUBL(models.AbstractModel):
                 },
             }))
 
+    @dispatch_by_document
     def _ubl_add_allowance_charge_nodes(self, vals):
         vals['document_node']['cac:AllowanceCharge'] = []
 
+    @dispatch_by_document
     def _ubl_get_tax_category_node(self, vals, tax_category):
         """ Generate the node 'cac:TaxCategory' in 'cac:SubTotal'.
 
@@ -1677,6 +1774,7 @@ class AccountEdiUBL(models.AbstractModel):
             }
         }
 
+    @dispatch_by_document
     def _ubl_get_tax_subtotal_node(self, vals, tax_subtotal):
         """ Generate the node 'cac:SubTotal' in 'cac:TaxTotal'/'cac:WithholdingTaxTotal'.
 
@@ -1704,6 +1802,7 @@ class AccountEdiUBL(models.AbstractModel):
             ],
         }
 
+    @dispatch_by_document
     def _ubl_get_tax_total_node(self, vals, tax_total):
         """ Generate the node 'cac:TaxTotal'.
 
@@ -1726,6 +1825,7 @@ class AccountEdiUBL(models.AbstractModel):
             ],
         }
 
+    @dispatch_by_document
     def _ubl_get_withholding_tax_total_node(self, vals, tax_total):
         """ Generate the node 'cac:WithholdingTaxTotal'.
 
@@ -1737,6 +1837,7 @@ class AccountEdiUBL(models.AbstractModel):
         """
         return self._ubl_get_tax_total_node(vals, tax_total)
 
+    @dispatch_by_document
     def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
         tax_category_key = self._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
         tax_subtotal_key = {
@@ -1759,6 +1860,7 @@ class AccountEdiUBL(models.AbstractModel):
             'tax_total_key': tax_total_key
         }
 
+    @dispatch_by_document
     def _ubl_add_tax_totals_nodes(self, vals):
         AccountTax = self.env['account.tax']
         base_lines = vals['base_lines']
@@ -1885,6 +1987,7 @@ class AccountEdiUBL(models.AbstractModel):
                 tax_total_node = self._ubl_get_tax_total_node(vals, tax_total_values)
                 nodes.append(tax_total_node)
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_line_extension_amount_node(self, vals, in_foreign_currency=True):
         currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
 
@@ -1898,6 +2001,7 @@ class AccountEdiUBL(models.AbstractModel):
             'currencyID': currency.name,
         }
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_tax_exclusive_amount_node(self, vals, in_foreign_currency=True):
         currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
@@ -1907,6 +2011,7 @@ class AccountEdiUBL(models.AbstractModel):
             'currencyID': currency.name,
         }
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_tax_inclusive_amount_node(self, vals, in_foreign_currency=True):
         currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
         document_node = vals['document_node']
@@ -1930,6 +2035,7 @@ class AccountEdiUBL(models.AbstractModel):
             'currencyID': currency.name,
         }
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_allowance_charge_total_amount_node(self, vals, in_foreign_currency=True):
         currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
@@ -1956,6 +2062,7 @@ class AccountEdiUBL(models.AbstractModel):
             } if total_charge else None,
         })
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_prepaid_payable_amount_node(self, vals, in_foreign_currency=True):
         currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
@@ -1974,10 +2081,12 @@ class AccountEdiUBL(models.AbstractModel):
             'currencyID': currency.name,
         }
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_payable_rounding_amount_node_from_cash_rounding(self, vals, in_foreign_currency=True):
         # DEPRECATED: TO BE REMOVED
         pass
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_payable_rounding_amount_node(self, vals):
         AccountTax = self.env['account.tax']
         base_lines = vals['base_lines']
@@ -2007,6 +2116,7 @@ class AccountEdiUBL(models.AbstractModel):
                 'currencyID': currency.name,
             }
 
+    @dispatch_by_document
     def _ubl_add_legal_monetary_total_node(self, vals):
         node = vals['document_node']['cac:LegalMonetaryTotal'] = {}
         sub_vals = {**vals, 'legal_monetary_total_node': node}
@@ -2017,6 +2127,7 @@ class AccountEdiUBL(models.AbstractModel):
         self._ubl_add_legal_monetary_total_payable_rounding_amount_node(sub_vals)
         self._ubl_add_legal_monetary_total_prepaid_payable_amount_node(sub_vals)
 
+    @dispatch_by_document
     def _ubl_add_requested_monetary_total_node(self, vals):
         node = vals['document_node']['cac:RequestedMonetaryTotal'] = {}
         sub_vals = {**vals, 'legal_monetary_total_node': node}

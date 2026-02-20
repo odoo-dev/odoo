@@ -1,4 +1,5 @@
 from . import account_chart_template
+from . import account_edi_ubl_pint_eu_hr
 from . import account_edi_xml_ubl_hr
 from . import account_journal
 from . import account_move

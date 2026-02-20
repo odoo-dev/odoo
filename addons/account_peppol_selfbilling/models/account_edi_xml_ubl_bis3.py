@@ -8,16 +8,11 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         # At the moment, self-billing is only supported for BIS3.
         return self._name == 'account.edi.xml.ubl_bis3'
 
-    def _add_invoice_header_nodes(self, document_node, vals):
-        super()._add_invoice_header_nodes(document_node, vals)
-        if vals['invoice'].journal_id.is_self_billing:
-            document_node['cbc:CustomizationID'] = {'_text': self._get_selfbilling_customization_ids()['ubl_bis3']}
-            document_node['cbc:ProfileID'] = {'_text': 'urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0'}
-
-            if vals['document_type'] == 'invoice':
-                document_node['cbc:InvoiceTypeCode'] = {'_text': 389}
-            elif vals['document_type'] == 'credit_note':
-                document_node['cbc:CreditNoteTypeCode'] = {'_text': 261}
+    def _pint_add_values(self, vals, invoice):
+        super()._pint_add_values(vals, invoice)
+        if vals['process_type'] == 'selfbilling' and vals['document_type'] in ('invoice', 'credit_note'):
+            vals['_pint_values']['doc_types'] = [f"self_{vals['document_type']}", vals['document_type']]  # ['self_invoice', 'invoice'] or ['self_credit_note', 'credit_note']
+            vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_selfbilling']
 
     def _add_invoice_config_vals(self, vals):
         # EXTENDS account.edi.ubl_bis3
@@ -26,6 +21,8 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         if vals['process_type'] != 'selfbilling':
             return
 
+        # TODO: when should it be `pint_credit_note`? (CreditNoteTypeCode = 261)
+        # vals['pint_key'] = 'pint_invoice'
         customer = vals['customer']
         supplier = vals['supplier']
         vals['supplier'] = customer

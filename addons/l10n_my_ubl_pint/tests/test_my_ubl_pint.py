@@ -1,10 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from datetime import datetime
-
 from freezegun import freeze_time
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.tools import file_open
 from odoo.tests import tagged
 
 
@@ -49,14 +47,7 @@ class TestMyUBLPint(AccountTestInvoicingCommon):
 
         actual_xml, errors = self.env['account.edi.xml.pint_my']._export_invoice(invoice)
         self.assertFalse(errors)
-
-        with file_open('l10n_my_ubl_pint/tests/expected_xmls/invoice_no_taxes.xml', 'rb') as f:
-            expected_xml = f.read()
-
-        self.assertXmlTreeEqual(
-            self.get_xml_tree_from_string(actual_xml),
-            self.get_xml_tree_from_string(expected_xml),
-        )
+        self.assert_xml(actual_xml, 'invoice_no_taxes')
 
     def test_invoice_no_taxes_new(self):
         self.env['ir.config_parameter'].set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', 'True')
@@ -66,14 +57,7 @@ class TestMyUBLPint(AccountTestInvoicingCommon):
 
         actual_xml, errors = self.env['account.edi.xml.pint_my']._export_invoice(invoice)
         self.assertFalse(errors)
-
-        with file_open('l10n_my_ubl_pint/tests/expected_xmls/invoice_no_taxes_new.xml', 'rb') as f:
-            expected_xml = f.read()
-
-        self.assertXmlTreeEqual(
-            self.get_xml_tree_from_string(actual_xml),
-            self.get_xml_tree_from_string(expected_xml),
-        )
+        self.assert_xml(actual_xml, 'invoice_no_taxes_new')
 
     def test_invoice_with_sst(self):
         self.env['ir.config_parameter'].set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', 'True')
@@ -93,11 +77,4 @@ class TestMyUBLPint(AccountTestInvoicingCommon):
 
         actual_xml, errors = self.env['account.edi.xml.pint_my']._export_invoice(invoice)
         self.assertFalse(errors)
-
-        with file_open('l10n_my_ubl_pint/tests/expected_xmls/invoice_with_sst.xml', 'rb') as f:
-            expected_xml = f.read()
-
-        self.assertXmlTreeEqual(
-            self.get_xml_tree_from_string(actual_xml),
-            self.get_xml_tree_from_string(expected_xml),
-        )
+        self.assert_xml(actual_xml, 'invoice_with_sst')

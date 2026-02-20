@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import wraps
 from markupsafe import Markup
 
 from odoo import _, api, models
@@ -142,6 +143,53 @@ SUPPORTED_FILE_TYPES = {
     'image/png': '.png',
     'text/csv': '.csv',
 }
+
+# -------------------------------------------------------------------------
+# UBL/PINT LAYER SYSTEM DECORATORS
+# -------------------------------------------------------------------------
+
+def dispatch_by_document(func):
+    @wraps(func)
+    def wrapper(self, vals, *args, **kwargs):
+        if (pint_vals := vals.get('_pint_values')) and pint_vals.get('current_method') != func.__name__:
+            doc_types = pint_vals['doc_types']
+            layer_model = pint_vals['model']
+            eligible_methods = []
+
+            for attr_name in dir(layer_model):
+                if not attr_name.startswith('_ubl_'):
+                    continue
+                method = getattr(layer_model, attr_name)
+                if (
+                        callable(method) and
+                        any(doc_type in getattr(method, '_pint_doc_types', []) for doc_type in doc_types) and
+                        getattr(method, '_pint_method', None) == func.__name__
+                ):
+                    eligible_methods.append(method)
+
+            for doc_type in doc_types:
+                for method in eligible_methods:
+                    if doc_type in getattr(method, '_pint_doc_types'):
+                        pint_vals['current_method'] = func.__name__
+                        return method(vals, *args, **kwargs)
+
+        return func(self, vals, *args, **kwargs)
+    return wrapper
+
+def documents(doc_types: list[str]):
+    """
+    Method name should have the following format: `{base_method}__{document_type}`.
+    e.g. `_ubl_add_notes_nodes__base` overrides the `_ubl_add_notes_nodes` when the vals['document_type']
+    """
+    def decorator(func):
+        func._pint_doc_types = doc_types
+        func._pint_method = func.__name__.split('__')[0]
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 class FloatFmt(float):
