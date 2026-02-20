@@ -1405,7 +1405,10 @@
                                                    readonly="state != 'draft' or (move_type not in ('in_invoice', 'in_refund', 'in_receipt') and not quick_edit_mode)"/>
 
                                             <field name="invoice_payments_widget" colspan="2" nolabel="1" widget="payment" invisible="not invoice_payments_widget"/>
-                                            <field name="amount_residual" class="oe_subtotal_footer_separator"/>
+                                            <div>
+                                                <label for="amount_residual"/>
+                                                <field name="amount_residual" class="oe_subtotal_footer_separator"/>
+                                            </div>
                                         </group>
                                         <group
                                             class="oe_subtotal_footer px-4"
