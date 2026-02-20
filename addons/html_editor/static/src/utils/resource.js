@@ -24,6 +24,14 @@ export function withSequence(sequenceNumber, object) {
     };
 }
 
+export const FUNCTION_SUFFIX_PAIRS = [
+    ["triggerAsync", "sequential_async_handlers"],
+    ["trigger", "handlers"],
+    ["delegateTo", "overrides"],
+    ["processThrough", "processors"],
+    ["checkPredicates", "predicates"],
+];
+
 export function warnOfNamingConvention(
     functionName,
     resourceId,

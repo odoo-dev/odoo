@@ -2,7 +2,12 @@ import { MAIN_PLUGINS, MOBILE_OS_EXCLUDED_PLUGINS } from "./plugin_sets";
 import { createBaseContainer, SUPPORTED_BASE_CONTAINER_NAMES } from "./utils/base_container";
 import { fillShrunkPhrasingParent, removeClass } from "./utils/dom";
 import { isEmpty } from "./utils/dom_info";
-import { resourceSequenceSymbol, warnOfNamingConvention, withSequence } from "./utils/resource";
+import {
+    FUNCTION_SUFFIX_PAIRS,
+    resourceSequenceSymbol,
+    warnOfNamingConvention,
+    withSequence,
+} from "./utils/resource";
 import { fixInvalidHTML, initElementForEdition } from "./utils/sanitize";
 import { setElementContent } from "@web/core/utils/html";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -284,6 +289,24 @@ export class Editor {
      * @returns {GlobalResources[R]}
      */
     getResource(resourceId) {
+        const targetFunction = FUNCTION_SUFFIX_PAIRS.find((pair) =>
+            resourceId.endsWith(pair[1])
+        )?.[0];
+        if (targetFunction) {
+            warnOfNamingConvention("getResource", resourceId, { targetFunction });
+        }
+        return this.resources[resourceId] || [];
+    }
+
+    /**
+     * Private version of `getResource` to call locally without enforcing naming
+     * conventions.
+     *
+     * @template {GlobalResourcesId} R
+     * @param {R} resourceId
+     * @returns {GlobalResources[R]}
+     */
+    _getResource(resourceId) {
         return this.resources[resourceId] || [];
     }
 
@@ -312,7 +335,7 @@ export class Editor {
                 suffix: "handlers",
             });
         }
-        return this.getResource(resourceId).map((handler) => handler(...args));
+        return this._getResource(resourceId).map((handler) => handler(...args));
     }
 
     /**
@@ -340,7 +363,7 @@ export class Editor {
                 suffix: "handlers",
             });
         }
-        for (const handler of this.getResource(resourceId)) {
+        for (const handler of this._getResource(resourceId)) {
             await handler(...args);
         }
     }
@@ -373,7 +396,7 @@ export class Editor {
         if (!resourceId.endsWith("_overrides")) {
             warnOfNamingConvention("delegateTo", resourceId, { suffix: "overrides" });
         }
-        return this.getResource(resourceId).some((fn) => fn(...args));
+        return this._getResource(resourceId).some((fn) => fn(...args));
     }
 
     /**
@@ -402,7 +425,7 @@ export class Editor {
         if (!resourceId.endsWith("_processors")) {
             warnOfNamingConvention("processThrough", resourceId, { suffix: "processors" });
         }
-        this.getResource(resourceId).forEach((processor) => {
+        this._getResource(resourceId).forEach((processor) => {
             item = processor(item, ...args) || item;
         });
         return item;
@@ -433,7 +456,7 @@ export class Editor {
         if (!resourceId.endsWith("_predicates")) {
             warnOfNamingConvention("checkPredicates", resourceId, { suffix: "predicates" });
         }
-        const results = this.getResource(resourceId)
+        const results = this._getResource(resourceId)
             .map((predicate) => predicate(...args))
             .filter((result) => result !== undefined);
         return results.length ? results.every(Boolean) : undefined;
