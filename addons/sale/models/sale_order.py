@@ -1001,6 +1001,39 @@ class SaleOrder(models.Model):
                 ]
         return vals_list
 
+    def copy(self, default=None):
+        """Block duplication when the partner or any order line product has a 'block' sales warning.
+
+        For 'warning' type partners/products, the soft warning dialog is shown when the
+        duplicated form opens, via the JS patch and onchange() override above.
+        """
+        partner = self.partner_id
+        if partner.sale_warn == 'no-message' and partner.parent_id:
+            partner = partner.parent_id
+        # Check if parent company overrides with block
+        if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
+            partner = partner.parent_id
+        if partner.sale_warn == 'block':
+            raise UserError(
+                _("Warning for %(name)s\n%(message)s",
+                name=partner.name,
+                message=partner.sale_warn_msg,
+                ),
+            )
+
+        # Block duplication if any order line product has a 'block' sales warning.
+        for line in self._get_copiable_order_lines():
+            product = line.product_id
+            if product and product.sale_line_warn == 'block':
+                raise UserError(
+                    _("Warning for %(name)s\n%(message)s",
+                    name=product.name,
+                    message=product.sale_line_warn_msg,
+                    ),
+                )
+
+        return super().copy(default=default)
+
     @api.ondelete(at_uninstall=False)
     def _unlink_except_draft_or_cancel(self):
         for order in self:
