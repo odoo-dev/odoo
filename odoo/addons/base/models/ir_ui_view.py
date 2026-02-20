@@ -878,19 +878,28 @@ actual arch.
         return locate_node(arch, spec)
 
     def inherit_branding(self, specs_tree):
-        for node in specs_tree.iterchildren(tag=etree.Element):
+        for node in self._iter_all_branding_node(specs_tree):
             xpath = node.getroottree().getpath(node)
             if node.tag == 'data' or node.tag == 'xpath' or node.get('position'):
-                self.inherit_branding(node)
-            elif node.get('t-field'):
+                continue
+            if node.get('t-field'):
                 node.set('data-oe-xpath', xpath)
-                self.inherit_branding(node)
             else:
                 node.set('data-oe-id', str(self.id))
                 node.set('data-oe-xpath', xpath)
                 node.set('data-oe-model', 'ir.ui.view')
                 node.set('data-oe-field', 'arch')
         return specs_tree
+
+    def _iter_all_branding_node(self, specs_tree):
+        for node in specs_tree.iterchildren(tag=etree.Element):
+            if node.tag == 'data' or node.tag == 'xpath' or node.get('position'):
+                yield from self._iter_all_branding_node(node)
+            elif node.get('t-field'):
+                yield node
+                yield from self._iter_all_branding_node(node)
+            else:
+                yield node
 
     def _add_validation_flag(self, combined_arch, view=None, arch=None):
         """ Add a validation flag on elements in ``combined_arch`` or ``arch``.
