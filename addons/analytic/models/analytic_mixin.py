@@ -27,6 +27,7 @@ class AnalyticMixin(models.AbstractModel):
         comodel_name='account.analytic.account',
         compute='_compute_distribution_analytic_account_ids',
         search='_search_distribution_analytic_account_ids',
+        compute_sudo=True,
     )
 
     def init(self):
