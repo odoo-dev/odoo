@@ -82,12 +82,12 @@
                             <field name="company_id" groups="base.group_multi_company" placeholder="Visible to all"/>
                             <field name="address_id" context="{'show_address': 1}" placeholder="Online if not set"/>
                             <field name="event_url" invisible="address_id" widget="url" placeholder='e.g. "https://www.odoo.com"'/>
-                            <label for="seats_limited" string="Limit Registrations"/>
-                            <div>
-                                <field name="seats_limited"/>
-                                <span invisible="not seats_limited" required="not seats_limited">
-                                    to <field name="seats_max" class="oe_inline o_input_9ch"/> Attendees
-                                    <span invisible="not is_multi_slots"> per slot</span>
+                            <field name="seats_limited" string="Limit Registrations"/>
+                            <div class="o_input_box" colspan="2" invisible="not seats_limited" required="not seats_limited">
+                                <span class="o_input_box_overlay prefix">to</span>
+                                <field name="seats_max"/>
+                                <span class="o_input_box_overlay suffix">Attendees
+                                    <span class="ps-1" invisible="not is_multi_slots"> per slot</span>
                                 </span>
                             </div>
                         </group>
