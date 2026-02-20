@@ -842,7 +842,7 @@
                                    'supervised': {'decoration': 'success', 'can_edit': 'account.group_account_manager'},
                                    'anomaly': {'decoration': 'danger'},
                                }"
-                               class="ms-auto me-2 align-self-center"
+                               class="ms-auto me-3 align-self-center"
                                invisible="state != 'posted'"
                                groups="account.group_account_user"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,posted"
