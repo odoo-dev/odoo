@@ -159,18 +159,27 @@ class StockMove(models.Model):
         aml_quantity = 0
         value = 0
         aml_ids = set()
+        is_kit_component = (
+            'bom_line_id' in self._fields
+            and self.bom_line_id
+            and self.bom_line_id.bom_id.type == 'phantom'
+            and 'cost_share' in self._fields
+        )
         for aml in self.purchase_line_id.invoice_lines:
             if at_date and aml.date > at_date:
                 continue
             if aml.move_id.state != 'posted':
                 continue
             aml_ids.add(aml.id)
+            aml_value = aml.company_id.currency_id.round(aml.price_subtotal / aml.currency_rate)
+            if is_kit_component:
+                aml_value *= self.cost_share / 100
             if aml.move_type == 'in_invoice':
                 aml_quantity += aml.product_uom_id._compute_quantity(aml.quantity, self.product_id.uom_id)
-                value += aml.company_id.currency_id.round(aml.price_subtotal / aml.currency_rate)
+                value += aml_value
             elif aml.move_type == 'in_refund':
                 aml_quantity -= aml.product_uom_id._compute_quantity(aml.quantity, self.product_id.uom_id)
-                value -= aml.company_id.currency_id.round(aml.price_subtotal / aml.currency_rate)
+                value -= aml_value
 
         if aml_quantity <= 0:
             return valuation_data
