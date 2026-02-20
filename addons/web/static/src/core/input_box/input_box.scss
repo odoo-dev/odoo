@@ -13,6 +13,7 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    opacity: 0;
 
     &:not(.btn-link) {
         color: $text-muted;
@@ -64,8 +65,6 @@
     }
 
     &:is(.o_touch_device *) .o_input_box_overlay {
-        opacity: 0;
-
         &:not(.o_field_widget, :has(.o_field_widget)) {
             &.btn-link, .btn-link {
                 color: var(--secondary-color);
@@ -75,9 +74,9 @@
     }
 
     &:has(.o_input, textarea, select, [contenteditable]) {
-        .o_input_box_overlay:not(.o_field_widget, :has(.o_field_widget)) {
-            &.btn-link, .btn-link {
-                &:not(.o_touch_device *):is(:not(:focus-within, :hover) *) {
+        &:not(.o_touch_device *):is(:not(:focus-within, :hover) *) {
+            .o_input_box_overlay:not(.o_field_widget, :has(.o_field_widget)) {
+                &.btn-link, .btn-link {
                     visibility: hidden;
                 }
             }
