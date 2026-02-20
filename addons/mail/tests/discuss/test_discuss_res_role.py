@@ -51,7 +51,7 @@ class TestDiscussResRole(TestResRole):
                     },
                 )
                 formatted_partner = user.partner_id.id
-                message = next(filter(lambda m: m["id"] == data["message_id"], data["store_data"]["mail.message"]))
+                message = next(filter(lambda m: m["id"] == data["DataResponse"][0]["message"], data["store_data"]["mail.message"]))
                 if mentionned:
                     self.assertIn(formatted_partner, message["partner_ids"])
                 else:

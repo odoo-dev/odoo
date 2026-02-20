@@ -283,9 +283,9 @@ class TestRatingRoutes(TestRatingCommon):
             },
         )
         message = next(
-            m for m in res["store_data"]["mail.message"] if m["id"] == res["message_id"]
+            m for m in res["mail.message"] if m["id"] == res["DataResponse"][0]["message"]
         )
         rating = next(
-            r for r in res["store_data"]["rating.rating"] if r["id"] == message["rating_id"]
+            r for r in res["rating.rating"] if r["id"] == message["rating_id"]
         )
         self.assertEqual(rating["rating"], 5)

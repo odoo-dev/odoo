@@ -150,7 +150,7 @@ class TestMessageController(MailControllerThreadCommon):
                 "body": "A great message",
             }
         })
-        message = next(filter(lambda m: m["id"] == data["message_id"], data["store_data"]["mail.message"]))
+        message = next(filter(lambda m: m["id"] == data["DataResponse"][0]["message"], data["mail.message"]))
         self.assertEqual(["markup", "<p>A great message</p>"], message["body"])
 
         # 2. attach a file

@@ -208,7 +208,7 @@ export class Thread extends Record {
     suggestedRecipients = fields.Attr([]);
     /** @type {Boolean|undefined} */
     showSubjectInSmallComposer;
-    /** 
+    /**
      * similar to suggested recipients, except for the subject and optional per model.
     @type {String|undefined} */
     suggestedSubject;
@@ -768,13 +768,10 @@ export class Thread extends Record {
             this.messages.push(tmpMsg);
             this.onNewSelfMessage(tmpMsg);
         }
-        const data = await this.store.doMessagePost(params, tmpMsg);
-        if (!data) {
+        const message = await this.store.doMessagePost(params, tmpMsg);
+        if (!message) {
             return;
         }
-        this.store.insert(data.store_data);
-        /** @type {import("models").Message} */
-        const message = this.store["mail.message"].get(data.message_id);
         this.addOrReplaceMessage(message, tmpMsg);
         this.onNewSelfMessage(message);
         // Only delete the temporary message now that seen_message_id is updated

@@ -134,10 +134,12 @@ export class Store extends BaseStore {
      * @param {import("models").Message} tmpMessage the associated temporary message
      */
     async doMessagePost(params, tmpMessage) {
+        const dataRequest = this.store.DataResponse.createRequest();
+        params["data_id"] = dataRequest.id;
         return this.messagePostMutex.exec(async () => {
-            let res;
             try {
-                res = await rpc("/mail/message/post", params, { silent: true });
+                const storeData = await rpc("/mail/message/post", params, { silent: true });
+                this.insert(storeData);
             } catch (err) {
                 if (!tmpMessage) {
                     throw err;
@@ -148,8 +150,10 @@ export class Store extends BaseStore {
                     tmpMessage.thread.messages.add(tmpMessage);
                     this.doMessagePost(params, tmpMessage);
                 };
+                return false;
             }
-            return res;
+            const result = await dataRequest._resultResolvers.promise;
+            return result.message;
         });
     }
 

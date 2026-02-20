@@ -188,6 +188,7 @@ class ThreadController(http.Controller):
     @add_guest_to_context
     def mail_message_post(self, thread_model, thread_id, post_data, context=None, **kwargs):
         store = Store()
+        store.data_id = kwargs.pop("data_id", None)
         request.update_context(message_post_store=store)
         if context:
             request.update_context(**context)
@@ -214,8 +215,8 @@ class ThreadController(http.Controller):
         message = thread.sudo().message_post(
             **self._prepare_message_data(post_data, thread=thread, from_create=True, **kwargs),
         )
-        store.add(message, "_store_message_fields")
-        return {"store_data": store.get_result(), "message_id": message.id}
+        store.resolve_data_request({"message": store.One(message, "_store_message_fields")})
+        return store.get_result()
 
     @http.route("/mail/message/update_content", methods=["POST"], type="jsonrpc", auth="public")
     @add_guest_to_context

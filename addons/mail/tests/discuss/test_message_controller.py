@@ -96,7 +96,7 @@ class TestMessageController(HttpCaseWithUserDemo):
         self.assertEqual(res2.status_code, 200)
         data1 = res2.json()["result"]
         self.assertEqual(
-            data1["store_data"]["ir.attachment"],
+            data1["ir.attachment"],
             [
                 {
                     "checksum": False,
