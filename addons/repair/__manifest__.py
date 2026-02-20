@@ -25,6 +25,7 @@ The following topics are covered by this module:
         'views/product_views.xml',
         'views/stock_move_views.xml',
         'views/repair_views.xml',
+        'views/res_partner_views.xml',
         'views/sale_order_views.xml',
         'views/stock_lot_views.xml',
         'views/stock_picking_views.xml',
