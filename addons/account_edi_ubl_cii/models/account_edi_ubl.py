@@ -1219,7 +1219,7 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_line_tax_totals_nodes(self, vals):
         vals['line_node']['cac:TaxTotal'] = []
 
-    def _ubl_line_nodes_filter_base_lines(self, vals, filter_function=None):
+    def _line_nodes_filter_base_lines(self, vals, filter_function=None):
         index = 1
         for base_line in vals['base_lines']:
             if not filter_function or filter_function(base_line):
@@ -1402,7 +1402,7 @@ class AccountEdiUBL(models.AbstractModel):
 
     def _ubl_add_invoice_line_nodes(self, vals, filter_function=None):
         nodes = vals['document_node']['cac:InvoiceLine'] = []
-        for sub_vals in self._ubl_line_nodes_filter_base_lines(vals, filter_function=filter_function):
+        for sub_vals in self._line_nodes_filter_base_lines(vals, filter_function=filter_function):
             self._ubl_add_invoice_line_node(sub_vals)
             nodes.append(sub_vals['line_node'])
 
@@ -1420,7 +1420,7 @@ class AccountEdiUBL(models.AbstractModel):
 
     def _ubl_add_credit_note_line_nodes(self, vals, filter_function=None):
         nodes = vals['document_node']['cac:CreditNoteLine'] = []
-        for sub_vals in self._ubl_line_nodes_filter_base_lines(vals, filter_function=filter_function):
+        for sub_vals in self._line_nodes_filter_base_lines(vals, filter_function=filter_function):
             self._ubl_add_credit_note_line_node(sub_vals)
             nodes.append(sub_vals['line_node'])
 
@@ -1438,7 +1438,7 @@ class AccountEdiUBL(models.AbstractModel):
 
     def _ubl_add_debit_note_line_nodes(self, vals, filter_function=None):
         nodes = vals['document_node']['cac:DebitNoteLine'] = []
-        for sub_vals in self._ubl_line_nodes_filter_base_lines(vals, filter_function=filter_function):
+        for sub_vals in self._line_nodes_filter_base_lines(vals, filter_function=filter_function):
             self._ubl_add_debit_note_line_node(sub_vals)
             nodes.append(sub_vals['line_node'])
 
