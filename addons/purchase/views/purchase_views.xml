@@ -230,7 +230,7 @@
                                     <field name="receipt_reminder_email" />
                                     <span>Ask confirmation</span>
                                 </div>
-                                <div class="o_row o_input_box" invisible="not receipt_reminder_email">
+                                <div class="o_input_box" invisible="not receipt_reminder_email">
                                     <label for="reminder_date_before_receipt" string="Number of days before confirmation"/>
                                     <field name="reminder_date_before_receipt" />
                                     <widget name="toaster_button" button_name="send_reminder_preview"
