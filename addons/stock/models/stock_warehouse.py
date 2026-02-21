@@ -49,8 +49,7 @@ class StockWarehouse(models.Model):
         required=True, check_company=True)
     code = fields.Char('Short Name', required=True, size=5, help="Short name used to identify your warehouse")
     route_ids = fields.Many2many(
-        'stock.route', 'stock_route_warehouse', 'warehouse_id', 'route_id',
-        'Routes',
+        'stock.route', 'Routes', compute='_compute_route_ids', store=True,
         domain="[('warehouse_selectable', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help='Defaults routes through the warehouse', check_company=True, copy=False)
     reception_steps = fields.Selection([
@@ -1134,3 +1133,17 @@ class StockWarehouse(models.Model):
 
     def get_current_warehouses(self):
         return self.env['stock.warehouse'].search_read(fields=['id', 'name', 'code'])
+
+    @api.depends('route_ids.warehouse_ids')
+    def _compute_route_ids(self):
+        routes = self.env['stock.route'].search([
+            ('rule_ids.warehouse_id', 'in', self.ids),
+            ('warehouse_selectable', '=', True),
+            '|',
+            ('company_id', '=', False),
+            ('company_id', '=', warehouse.company_id.id),
+        ])
+        for warehouse in self:
+            warehouse.route_ids = routes.filtered(
+                lambda r: not r.warehouse_ids
+            )
