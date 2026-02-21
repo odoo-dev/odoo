@@ -380,6 +380,7 @@ export class Field extends Component {
             if (!fieldEl) {
                 return;
             }
+            positionInputBoxOverlay(fieldEl);
             if (hasTouch() && this.props.fieldInfo?.viewType === "form") {
                 const focusIn = () => this.onFieldFocus(true);
                 const focusOut = () => this.onFieldFocus(false);
@@ -390,7 +391,6 @@ export class Field extends Component {
                     fieldEl.removeEventListener("focusout", focusOut);
                 }
             }
-            positionInputBoxOverlay(this.fieldRef.el);
         }, () => [this.fieldRef.el]);
     }
 

@@ -6,7 +6,7 @@ import { useComponent, useEffect, useRef } from "@odoo/owl";
 function _positionInputBoxOverlay(target) {
     const closestInputBox =
         target.closest(".o_input_box:not(.o_input_box .o_input_box)") ||
-        target.querySelector(".o_input_box:not(.o_input_box .o_input_box)");
+        target.querySelector(".o_input_box");
     if (!closestInputBox) {
         return;
     }

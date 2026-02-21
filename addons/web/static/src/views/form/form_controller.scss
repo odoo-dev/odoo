@@ -692,7 +692,6 @@
     }
 
     iframe.wysiwyg_iframe + .o_field_translate {
-        right: $o-field-translate-padding !important;
         top: 7px !important;
     }
 
@@ -725,6 +724,7 @@
     }
 
     .o_field_float_time, .o_field_percentage {
+        //FIXME TODO remove this?
         &.oe_inline {
             &, input {
                 max-width: 7ch;

@@ -2684,7 +2684,6 @@ describe("translatable", () => {
         });
 
         expect(".o_field_html .btn.o_field_translate").not.toBeVisible();
-
         // Focus on the editable to make the translate button visible
         await contains(".odoo-editor-editable").click();
         expect(".o_field_html .btn.o_field_translate").toBeVisible();
