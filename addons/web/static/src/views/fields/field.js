@@ -390,7 +390,7 @@ export class Field extends Component {
                     fieldEl.removeEventListener("focusout", focusOut);
                 }
             }
-            this.debouncedOverlayPositioning();
+            positionInputBoxOverlay(this.fieldRef.el);
         }, () => [this.fieldRef.el]);
     }
 

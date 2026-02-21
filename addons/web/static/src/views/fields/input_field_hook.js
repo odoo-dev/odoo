@@ -55,10 +55,8 @@ function _positionInputBoxOverlay(target) {
 }
 
 export function positionInputBoxOverlay(target) {
-        if (target) {
-            setTimeout(
-            () => requestAnimationFrame(() => _positionInputBoxOverlay(target))
-        );
+    if (target) {
+        requestAnimationFrame(() => _positionInputBoxOverlay(target));
     }
 }
 
