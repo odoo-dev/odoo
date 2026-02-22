@@ -1162,21 +1162,24 @@
 
 // General InputBox rules
 .o_form_view {
-    .o_field_widget:not(.o_list_view .o_field_widget):not(.o_field_one2many), .o_input_box:has(.o_field_widget) {
-        &:has(.o_input, textarea, select, [contenteditable]) {
+    .o_group, .o_inner_group {
+        .o_field_widget:not(.o_list_view .o_field_widget):not(.o_field_one2many):not(.o_input_box_overlay), .o_input_box:has(.o_field_widget) {
             width: 100%;
-            position: relative;
 
-            .o_input_dropdown {
-                position: static;
+            &:has(.o_input, textarea, select, [contenteditable]) {
+                position: relative;
+
+                .o_input_dropdown {
+                    position: static;
+                }
             }
         }
-    }
-    .o_input_box:has(.o_field_widget):not(.o_input_box .o_input_box):not(.o_field_widget .o_input_box) {
-        margin-bottom: var(--fieldWidget-margin-bottom);
-    }
-    .o_input_box .o_field_widget {
-        --fieldWidget-margin-bottom: 0;
+        .o_input_box:has(.o_field_widget):not(.o_input_box .o_input_box):not(.o_field_widget .o_input_box) {
+            margin-bottom: var(--fieldWidget-margin-bottom);
+        }
+        .o_input_box .o_field_widget {
+            --fieldWidget-margin-bottom: 0;
+        }
     }
 }
 
