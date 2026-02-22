@@ -779,6 +779,10 @@ class MrpWorkorder(models.Model):
         self.env['mrp.workcenter.productivity'].search(domain, limit=None if doall else 1)._close()
         return True
 
+    def action_scrap(self):
+        self.ensure_one()
+        return self.production_id.action_scrap()
+
     def end_all(self):
         return self.end_previous(doall=True)
 
