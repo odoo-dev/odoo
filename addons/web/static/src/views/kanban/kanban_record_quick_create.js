@@ -121,10 +121,12 @@ export class KanbanQuickCreateController extends Component {
             this.uiActiveElement = this.uiService.activeElement;
             if (hasTouch()) {
                 const label = this.rootRef.el.querySelector(".o_form_label:first-of-type");
-                const computedStyle = getComputedStyle(label);
-                const height = computedStyle.getPropertyValue("--fieldWidget-label-height");
-                const width = computedStyle.getPropertyValue("--border-width");
-                this.state.paddingTop = `calc((0.5 * ${height} - ${width}) + 8px)`;
+                if (label) {
+                    const computedStyle = getComputedStyle(label);
+                    const height = computedStyle.getPropertyValue("--fieldWidget-label-height");
+                    const width = computedStyle.getPropertyValue("--border-width");
+                    this.state.paddingTop = `calc((0.5 * ${height} - ${width}) + 8px)`;
+                }
             }
         });
         // Close on outside click
