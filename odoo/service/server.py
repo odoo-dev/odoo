@@ -1,16 +1,22 @@
 #-----------------------------------------------------------
 # Threaded, Gevent and Prefork Servers
 #-----------------------------------------------------------
+import array
 import datetime
 import errno
+import functools
+import io
+import json
 import logging
 import os
 import os.path
 import platform
 import random
 import select
+import selectors
 import signal
 import socket
+import struct
 import subprocess
 import sys
 import threading
@@ -64,8 +70,31 @@ from odoo.release import nt_service_name
 from odoo.tools import config
 from odoo.tools import stripped_sys_argv, dumpstacks, log_ormcache_stats
 
+if odoo.evented:
+    import gevent
+    import gevent.socket
+
+    try:
+        from gevent.pywsgi import WSGIServer, WSGIHandler
+    except ImportError:
+        from gevent.wsgi import WSGIServer, WSGIHandler
+else:
+    # This allow us to define gevent specialized mixins at the top level even when gevent is not used
+    class WSGIServer:
+        pass
+
+    class WSGIHandler:
+        pass
+
 _logger = logging.getLogger(__name__)
 
+try:
+    LISTEN_FDS = int(os.getenv('LISTEN_FDS', '0'))
+    if os.getenv('LISTEN_PID') != str(os.getpid()):
+        LISTEN_FDS = 0
+except (ValueError, TypeError):
+    LISTEN_FDS = 0
+SD_LISTEN_FDS_START = 3
 SLEEP_INTERVAL = 60     # 1 min
 
 def memory_info(process):
@@ -93,6 +122,231 @@ def empty_pipe(fd):
     except OSError as e:
         if e.errno not in [errno.EAGAIN]:
             raise
+
+
+# ----------------------------------------------------------
+# Proxy handoff classes
+# ----------------------------------------------------------
+class PrebufferedStream(io.RawIOBase):
+    def __init__(self, sock):
+        self._pre_buffer = memoryview(sock._pre_buffer)
+        self._rfile = sock._sock.makefile('rb', buffering=0)
+
+    def readable(self):
+        return True
+
+    def readinto(self, b):
+        if self._pre_buffer:
+            n = min(len(b), len(self._pre_buffer))
+            b[:n] = self._pre_buffer[:n]
+            self._pre_buffer = self._pre_buffer[n:]
+            return n
+        return self._rfile.readinto(b)
+
+    def close(self):
+        try:
+            self._rfile.close()
+        finally:
+            super().close()
+
+
+class PrebufferedSocket:
+    def __init__(self, sock, pre_buffer=b'', on_finish=None):
+        self._sock = sock
+        self._pre_buffer = pre_buffer
+        self._on_finish = on_finish
+        self._socket_time = time.time()
+
+    def __getattr__(self, name):
+        return getattr(self._sock, name)
+
+    def makefile(self, mode='r', buffering=None, encoding=None, errors=None, newline=None):
+        if 'w' in mode:
+            # We only care about the read part for proxy handoff
+            return self._sock.makefile(mode, buffering=buffering, encoding=encoding, errors=errors, newline=newline)
+
+        stream = PrebufferedStream(self)
+
+        if buffering is None:
+            buffering = -1
+        if buffering < 0:
+            buffering = io.DEFAULT_BUFFER_SIZE
+        if buffering == 0:
+            if "b" not in mode:
+                raise ValueError("Unbuffered streams must be binary")
+            return stream
+
+        rfile = io.BufferedReader(stream, buffering)
+
+        if 'b' in mode:
+            return rfile
+
+        text = io.TextIOWrapper(rfile, encoding, errors, newline)
+        text.mode = mode
+        return text
+
+    def on_finish(self):
+        if self._on_finish:
+            on_finish = self._on_finish
+            self._on_finish = None
+            close_kw = {}
+            current_thread = threading.current_thread()
+            if hasattr(current_thread, "query_count"):
+                close_kw['query_count'] = current_thread.query_count
+                close_kw['query_time'] = current_thread.query_time
+                close_kw['perf_t0'] = current_thread.perf_t0
+                close_kw['status'] = current_thread.status
+            close_kw['socket_time'] = self._socket_time
+            on_finish(**close_kw)
+
+    def close(self):
+        try:
+            self.on_finish()
+        finally:
+            return self._sock.close()
+
+
+class ProxyHandoffMixin:
+    PAYLOAD_LEN = struct.Struct('!I')
+    MAX_MSG_LEN = 32 * 1024  # This is the theoretical maximum header size for most web servers using default settings.
+    MAX_FDS = 1              # Only one file descriptor expected for now
+    default_address = ('127.0.0.1', 0)
+    handoff_socket = None
+
+    def init_handoff_socket(self, handoff_socket):
+        self.handoff_socket = handoff_socket
+
+    def recv_handoff_msg(self):
+        fds = array.array('i')
+        msg, ancdata, _, _ = self.handoff_socket.recvmsg(
+            self.MAX_MSG_LEN,
+            socket.CMSG_LEN(self.MAX_FDS * fds.itemsize),
+        )
+        for cmsg_level, cmsg_type, cmsg_data in ancdata:
+            if cmsg_level == socket.SOL_SOCKET and cmsg_type == socket.SCM_RIGHTS:
+                fds.frombytes(cmsg_data[:len(cmsg_data) - (len(cmsg_data) % fds.itemsize)])
+
+        # Handoff message format: [4 bytes for payload length, payload, socket buffer]
+        if len(msg) < self.PAYLOAD_LEN.size:
+            # In this case we don't even have the minimum message length of 4 bytes that would correspond
+            # to 4 zero bytes for a payload of 0 bytes and a buffer of 0 bytes. Such a message would be
+            # useless but it's the minimum to be valid.
+            raise ValueError("Invalid handoff proxy message: the message should be minimum 4 bytes")
+
+        (json_payload_size, ) = self.PAYLOAD_LEN.unpack_from(msg, 0)
+        start_offset = self.PAYLOAD_LEN.size
+        end = start_offset + json_payload_size
+        if end > len(msg):
+            raise ValueError("Invalid handoff proxy message: the provided json payload length is invalid")
+
+        payload = None
+        if json_payload_size:
+            json_msg = msg[start_offset:end].decode('utf-8')
+            payload = json.loads(json_msg)
+        buffer = msg[end:]
+        return payload, buffer, fds
+
+    def send_handoff_msg(self, **payload):
+        payload = json.dumps(payload, separators=(',', ':')).encode('utf-8')
+        self.handoff_socket.sendmsg([payload])
+
+    def get_prebuffered_socket(self, sock_constructor):
+        payload, buffer, fds = self.recv_handoff_msg()
+        # TODO: discuss this
+        sfamily, stype = (socket.AF_INET, socket.SOCK_STREAM)
+        address = None
+        on_finish = None
+        if payload:
+            if 'default_address' in payload:
+                self.default_address = payload['default_address']
+            address = payload.get('address')
+            sfamily = payload.get('sfamily', sfamily)
+            stype = payload.get('stype', stype)
+            if 'roundtrip' in payload:
+                on_finish = functools.partial(self.send_handoff_msg, roundtrip=payload['roundtrip'])
+
+        sock = sock_constructor(sfamily, stype, fileno=fds[0])
+        if not odoo. evented:
+            sock.setblocking(True)
+        buf_sock = PrebufferedSocket(sock, buffer, on_finish=on_finish)
+        return buf_sock, address or self.default_address
+
+
+class ThreadedWSGIServer(ProxyHandoffMixin):
+    SEL_ACCEPT = object()
+    SEL_HANDOFF = object()
+
+    def init_handoff_socket(self, handoff_socket):
+        super().init_handoff_socket(handoff_socket)
+        self._selector = selectors.DefaultSelector()
+        self._selector.register(self.socket, selectors.EVENT_READ, self.SEL_ACCEPT)
+        self._selector.register(self.handoff_socket, selectors.EVENT_READ, self.SEL_HANDOFF)
+
+    def wait_msg_or_accept(self, timeout=None):
+        events = self._selector.select(timeout)
+        if not events:
+            return None  # timeout
+        key, _ = events[0]
+        return key.data
+
+    def serve_forever(self, poll_interval=0.5):
+        if self.handoff_socket is None:
+            return super().serve_forever()
+
+        self._BaseServer__is_shut_down.clear()
+        try:
+            while not self._BaseServer__shutdown_request:
+                event = self.wait_msg_or_accept(timeout=poll_interval)
+                if self._BaseServer__shutdown_request:
+                    break
+                if event is not None:
+                    self._handle_request_noblock()
+                self.service_actions()
+        finally:
+            self._BaseServer__shutdown_request = False
+            self._BaseServer__is_shut_down.set()
+
+    def get_request(self):
+        if self.handoff_socket is None or self.wait_msg_or_accept() is self.SEL_ACCEPT:
+            return super().get_request()
+        return self.get_prebuffered_socket(socket.socket)
+
+
+class GeventedWSGIServer(WSGIServer, ProxyHandoffMixin):  # noqa: OLS01003
+    handoff_waiting = False
+
+    def init_handoff_socket(self, handoff_socket):
+        handoff_socket.setblocking(0)
+        super().init_handoff_socket(handoff_socket)
+
+    def start_accepting(self):
+        if self._watcher is None:
+            super().start_accepting()
+            self._watcher_handoff = self.loop.io(self.handoff_socket.fileno(), 1)
+            self._watcher_handoff.start(self._do_read_handoff)
+
+    def _do_read(self, handoff=False):
+        self.handoff_waiting = handoff
+        super()._do_read()
+
+    def _do_read_handoff(self):
+        self._do_read(True)
+
+    def stop_accepting(self):
+        super().stop_accepting()
+        if self._watcher_handoff is not None:
+            self._watcher_handoff.stop()
+            self._watcher_handoff.close()
+            self._watcher_handoff = None
+
+    def do_read(self):
+        if self.handoff_socket is None or self.handoff_waiting is False:
+            return super().do_read()
+        try:
+            return self.get_prebuffered_socket(gevent.socket.socket)
+        except BlockingIOError:
+            return
+
 
 #----------------------------------------------------------
 # Werkzeug WSGI servers patched
@@ -193,13 +447,21 @@ class RequestHandler(werkzeug.serving.WSGIRequestHandler):
             self.rfile = BytesIO()
             self.wfile = BytesIO()
 
+    def run_wsgi(self):
+        try:
+            super().run_wsgi()
+        finally:
+            if isinstance(self.connection, PrebufferedSocket):
+                self.connection.on_finish()
+
     def log_error(self, format, *args):
         if format == "Request timed out: %r" and config['test_enable']:
             _logger.info(format, *args)
         else:
             super().log_error(format, *args)
 
-class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, werkzeug.serving.ThreadedWSGIServer):
+
+class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, ThreadedWSGIServer, werkzeug.serving.ThreadedWSGIServer):
     """ werkzeug Threaded WSGI Server patched to allow reusing a listen socket
     given by the environment, this is used by autoreload to keep the listen
     socket open when a reload happens.
@@ -227,11 +489,15 @@ class ThreadedWSGIServerReloadable(LoggingBaseWSGIServerMixIn, werkzeug.serving.
         self.daemon_threads = False
 
     def server_bind(self):
-        SD_LISTEN_FDS_START = 3
-        if os.environ.get('LISTEN_FDS') == '1' and os.environ.get('LISTEN_PID') == str(os.getpid()):
+        if LISTEN_FDS >= 1:
             self.reload_socket = True
             self.socket = socket.fromfd(SD_LISTEN_FDS_START, socket.AF_INET, socket.SOCK_STREAM)
-            _logger.info('HTTP service (werkzeug) running through socket activation')
+            listen_msg = "HTTP service (werkzeug) running through socket activation"
+            if LISTEN_FDS >= 2:
+                handoff_socket = socket.socket(fileno=SD_LISTEN_FDS_START + 1)
+                self.init_handoff_socket(handoff_socket)
+                listen_msg += " with proxy handoff activated"
+            _logger.info(listen_msg)
         else:
             self.reload_socket = False
             super(ThreadedWSGIServerReloadable, self).server_bind()
@@ -710,18 +976,12 @@ class GeventServer(CommonServer):
             os.kill(self.pid, signal.SIGTERM)
 
     def watchdog(self, beat=4):
-        import gevent
         self.ppid = os.getppid()
         while True:
             self.process_limits()
             gevent.sleep(beat)
 
     def start(self):
-        import gevent
-        try:
-            from gevent.pywsgi import WSGIServer, WSGIHandler
-        except ImportError:
-            from gevent.wsgi import WSGIServer, WSGIHandler
 
         class ProxyHandler(WSGIHandler):
             """ When logging requests, try to get the client address from
@@ -783,13 +1043,26 @@ class GeventServer(CommonServer):
             signal.signal(signal.SIGUSR1, log_ormcache_stats)
             gevent.spawn(self.watchdog)
 
-        self.httpd = WSGIServer(
-            (self.interface, self.port), self.app,
+        if LISTEN_FDS >= 1:
+            listener = gevent.socket.socket(fileno=SD_LISTEN_FDS_START)
+            listen_msg = "Evented Service (longpolling) running through socket activation"
+        else:
+            listener = (self.interface, self.port)
+            listen_msg = "Evented Service (longpolling) running on %s:%s" % (self.interface, self.port)
+
+        self.httpd = GeventedWSGIServer(
+            listener, self.app,
             log=logging.getLogger('longpolling'),
             error_log=logging.getLogger('longpolling'),
             handler_class=ProxyHandler,
         )
-        _logger.info('Evented Service (longpolling) running on %s:%s', self.interface, self.port)
+
+        if LISTEN_FDS >= 2:
+            handoff_socket = gevent.socket.socket(fileno=SD_LISTEN_FDS_START + 1)
+            self.httpd.init_handoff_socket(handoff_socket)
+            listen_msg += " with proxy handoff activated"
+        _logger.info(listen_msg)
+
         try:
             self.httpd.serve_forever()
         except:
@@ -797,7 +1070,6 @@ class GeventServer(CommonServer):
             raise
 
     def stop(self):
-        import gevent
         self.httpd.stop()
         super().stop()
         gevent.shutdown()

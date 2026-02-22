@@ -115,13 +115,13 @@ class PerfFilter(logging.Filter):
         return ("%d" % query_count, "%.3f" % query_time, "%.3f" % remaining_time)
 
     def filter(self, record):
-        if hasattr(threading.current_thread(), "query_count"):
+        if not getattr(threading.current_thread(), "perf_info_done", False):
             query_count = threading.current_thread().query_count
             query_time = threading.current_thread().query_time
             perf_t0 = threading.current_thread().perf_t0
             remaining_time = time.time() - perf_t0 - query_time
             record.perf_info = '%s %s %s' % self.format_perf(query_count, query_time, remaining_time)
-            delattr(threading.current_thread(), "query_count")
+            threading.current_thread().perf_info_done = True
         else:
             record.perf_info = "- - -"
         return True
