@@ -13,7 +13,6 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
-    opacity: 0;
 
     &:not(.btn-link) {
         color: $text-muted;
@@ -31,6 +30,13 @@
     }
     &.fa, &:has(i.fa) {
         font-size: calc(2 * var(--inputbox-spacing-unit));
+    }
+    // prefix and suffix have a default value, but it can change when positionInputBoxOverlay is called since an InputBox can have multiple prefix/suffixes
+    &.prefix {
+        left: calc(1.5 * var(--inputbox-overlay-padding-x));
+    }
+    &.suffix {
+        right: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-padding-toggler));
     }
 }
 

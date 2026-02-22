@@ -35,7 +35,6 @@ function _positionInputBoxOverlay(target) {
             overlay.style.left = `calc((1.5 * var(--inputbox-overlay-padding-x)) ${offset})`;
             width.start += toAdd;
         }
-        overlay.style.opacity = 1;
     });
     closestInputBox.style.setProperty("--inputbox-overlay-padding-prefix", width.start + "px");
     closestInputBox.style.setProperty("--inputbox-overlay-padding-suffix", width.end + "px");
