@@ -768,6 +768,12 @@ class GeventServer(CommonServer):
                 if self._connection_upgrade_requested():
                     environ['wsgi.input'] = self.rfile
                     environ['wsgi.input_terminated'] = False
+                if 'REQUEST_URI' not in environ:
+                    REQUEST_URI = environ['PATH_INFO']
+                    QUERY_STRING = environ.get('QUERY_STRING')
+                    if QUERY_STRING:
+                        REQUEST_URI += '?' + QUERY_STRING
+                    environ['REQUEST_URI'] = REQUEST_URI
                 return environ
 
         set_limit_memory_hard()
