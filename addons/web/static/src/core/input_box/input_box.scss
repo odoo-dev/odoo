@@ -9,7 +9,7 @@
     min-width: var(--inputbox-overlay-size);
     padding: 0 !important;
     z-index: 1;
-    display: inline-flex !important;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;

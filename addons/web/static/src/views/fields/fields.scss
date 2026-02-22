@@ -108,6 +108,10 @@
     text-align: inherit;
     display: var(--fieldWidget-display, inline-block);
 
+    &.o_input_box_overlay {
+        --fieldWidget-display: inline-flex;
+    }
+
     &:not(.o_form_label .o_field_widget.o_readonly_modifier) {
         margin-bottom: var(--fieldWidget-margin-bottom);
     }

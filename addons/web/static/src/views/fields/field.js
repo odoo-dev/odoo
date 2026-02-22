@@ -7,7 +7,7 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { debounce } from "@web/core/utils/timing";
 import { getFieldContext } from "@web/model/relational_model/utils";
 import { X2M_TYPES, getClassNameFromDecoration } from "@web/views/utils";
-import { positionInputBoxOverlay } from "@web/views/fields/input_field_hook";
+import { positionInputBoxOverlay } from "@web/core/input_box/input_box";
 import { getTooltipInfo } from "./field_tooltip";
 
 import { Component, xml, useEffect, useRef } from "@odoo/owl";

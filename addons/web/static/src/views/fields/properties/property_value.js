@@ -27,7 +27,7 @@ import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relat
 import { PropertyTags } from "./property_tags";
 import { PropertyText } from "./property_text";
 import { fileTypeMagicWordMap } from "@web/views/fields/image/image_field";
-import { positionInputBoxOverlay } from "@web/views/fields/input_field_hook";
+import { positionInputBoxOverlay } from "@web/core/input_box/input_box";
 
 class PropertyValueTag extends Component {
     static template = "web.PropertyValueTag";

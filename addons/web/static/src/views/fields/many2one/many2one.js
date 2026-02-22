@@ -10,7 +10,7 @@ import { useService } from "@web/core/utils/hooks";
 import { getFieldDomain } from "@web/model/relational_model/utils";
 import { InternalLinkButton } from "@web/views/view_components/internal_link_button";
 import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
-import { positionInputBoxOverlay } from "@web/views/fields/input_field_hook";
+import { positionInputBoxOverlay } from "@web/core/input_box/input_box";
 
 ///////////////////////////////////////////////////////////////////////////////
 // UTILS

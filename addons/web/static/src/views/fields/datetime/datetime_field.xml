@@ -3,12 +3,12 @@
     <t t-name="web.DateTimeField">
         <t t-set="showSeparator" t-value="shouldShowSeparator()" />
         <div class="o_input_box" t-att-class="{'d-flex gap-2 align-items-center position-relative' : showSeparator}" t-ref="root">
-            <i class="o_input_box_overlay prefix fa fa-calendar d-none d-touch-block" />
+            <i class="o_input_box_overlay prefix fa fa-calendar d-none d-touch-inline-flex" />
             <!-- Start date -->
             <t t-if="props.readonly">
                 <span t-if="!isEmpty(startDateField)" class="text-truncate" t-esc="getFormattedValue(0)" t-att-data-tooltip="getFormattedValue(0, true)"/>
             </t>
-            <div t-elif="isRange(values) or isRequired(startDateField) or !isEmpty(startDateField) or startDateField === props.name">
+            <t t-elif="isRange(values) or isRequired(startDateField) or !isEmpty(startDateField) or startDateField === props.name">
                 <t t-if="picker.activeInput !== startDateField and values[0]">
                     <button 
                         t-ref="start-date" 
@@ -35,7 +35,7 @@
                         t-att-title="props.warnFuture and isDateInTheFuture(0) ? futureWarningMsg : ''"
                     />
                 </t>
-            </div>
+            </t>
 
             <!-- Separator -->
             <t t-if="showSeparator">
@@ -47,7 +47,7 @@
                 <t t-if="props.readonly">
                     <span class="text-truncate" t-esc="getFormattedValue(1)" t-att-data-tooltip="getFormattedValue(1, true)"/>
                 </t>
-                <div t-elif="isRange(values) or isRequired(endDateField) or !isEmpty(endDateField) or (isEmpty(startDateField) and endDateField === props.name)">
+                <t t-elif="isRange(values) or isRequired(endDateField) or !isEmpty(endDateField) or (isEmpty(startDateField) and endDateField === props.name)">
                     <t t-if="picker.activeInput !== endDateField and values[1]">
                         <button 
                             t-ref="end-date" 
@@ -74,7 +74,7 @@
                             t-att-title="props.warnFuture and isDateInTheFuture(1) ? futureWarningMsg : ''"
                         />
                     </t>
-                </div>
+                </t>
             </t>
         </div>
     </t>
