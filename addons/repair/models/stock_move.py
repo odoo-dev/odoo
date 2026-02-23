@@ -70,6 +70,25 @@ class StockMove(models.Model):
                 moves_with_reference.add(move.id)
         super(StockMove, self - self.env['stock.move'].browse(moves_with_reference))._compute_reference()
 
+    @api.depends('repair_id', 'repair_line_type')
+    def _compute_show_info(self):
+        super()._compute_show_info()
+        for move in self:
+            if move.has_tracking not in ('serial', 'lot') or not move.repair_id:
+                continue
+            if move.picking_type_id.use_create_lots and not move.picking_type_id.use_existing_lots:
+                move.show_quant = False
+                move.show_lots_text = True
+                move.show_lots_m2o = False
+            if move.repair_line_type in ('remove', 'recycle'):
+                move.show_quant = False
+                if move.picking_type_id.use_create_lots:
+                    move.show_lots_text = True
+                    move.show_lots_m2o = False
+                else:
+                    move.show_lots_text = False
+                    move.show_lots_m2o = False
+
     def copy_data(self, default=None):
         default = dict(default or {})
         vals_list = super().copy_data(default=default)
