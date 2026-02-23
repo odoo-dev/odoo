@@ -3284,7 +3284,8 @@ $custom_oi_icons: (
 }
 
 .fa-trophy {
-    @include icon-content("emoji_events");
+    @include icon-content("trophy");
+    --o-mi-fill: 1;
 }
 
 .fa-truck {

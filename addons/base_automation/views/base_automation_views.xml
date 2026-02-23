@@ -14,7 +14,7 @@
                                 name="action_view_webhook_logs"
                                 string="Logs"
                                 class="oe_stat_button"
-                                icon="fa-list"
+                                icon="format_list_bulleted"
                             />
                         </div>
                         <field name="active" invisible="1" />
@@ -65,7 +65,7 @@
                                         type="object"
                                         name="action_rotate_webhook_uuid"
                                         class="oe_inline btn btn-link flex-shrink-0 px-1 py-0"
-                                        icon="fa-refresh"
+                                        icon="refresh"
                                         string="Renew"
                                         help="If renewed, update the secret URL in the third-party app that calls this webhook."
                                     />
@@ -80,7 +80,7 @@
                                         type="object"
                                         name="action_open_scheduled_action"
                                         string="Scheduled action"
-                                        icon="oi-arrow-right"
+                                        icon="east"
                                         class="oe_inline btn-link mt-n1"
                                         groups="base.group_no_one"
                                     />

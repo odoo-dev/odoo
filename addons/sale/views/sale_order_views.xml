@@ -468,7 +468,7 @@
                     <button name="action_view_invoice"
                         type="object"
                         class="oe_stat_button"
-                        icon="fa-pencil-square-o"
+                        icon="edit_square"
                         invisible="invoice_count == 0">
                         <field name="invoice_count" widget="statinfo" string="Invoices"/>
                     </button>
@@ -532,7 +532,7 @@
                             <button name="action_update_prices" type="object"
                                 string="Update Prices"
                                 help="Recompute all prices based on this pricelist"
-                                class="btn-link mb-1 px-0" icon="fa-refresh"
+                                class="btn-link mb-1 px-0" icon="refresh"
                                 confirm="This will update the unit price of all products based on the new pricelist."
                                 invisible="not show_update_pricelist or state in ['sale', 'cancel']"/>
                         </div>
@@ -943,7 +943,7 @@
                                         type="object"
                                         help="Recompute all taxes based on this fiscal position"
                                         class="btn-link mb-1 px-0"
-                                        icon="fa-refresh"
+                                        icon="refresh"
                                         confirm="This will update all taxes based on the currently selected fiscal position."
                                         invisible="not show_update_fpos or state in ['sale', 'cancel']"/>
                                 </div>

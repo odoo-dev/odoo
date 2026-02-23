@@ -34,11 +34,11 @@
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" name="action_get_stock_picking"
                                     string="Stock Operation" type="object"
-                                    invisible="not picking_id" icon="fa-cogs"/>
+                                    invisible="not picking_id" icon="settings_applications"/>
                             <field name="picking_id" invisible="1" readonly="state == 'done'"/>
                             <button class="oe_stat_button" name="action_get_stock_move_lines"
                                     type="object"
-                                    invisible="not move_ids" icon="fa-exchange">
+                                    invisible="not move_ids" icon="swap_horiz">
                                     <div class="o_stat_info">
                                         <span class="o_stat_text">Product Moves</span>
                                     </div>

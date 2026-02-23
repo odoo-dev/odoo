@@ -13,7 +13,7 @@
                                 <field name="group_project_stages"/>
                                 <div class="content-group" invisible="not group_project_stages">
                                     <div class="mt8">
-                                        <button name="%(project.project_project_stage_configure)d" icon="oi-arrow-right" type="action" string="Configure Stages" class="btn-link"/>
+                                        <button name="%(project.project_project_stage_configure)d" icon="east" type="action" string="Configure Stages" class="btn-link"/>
                                     </div>
                                 </div>
                             </setting>

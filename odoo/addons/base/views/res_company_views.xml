@@ -12,7 +12,7 @@
                                 name="action_all_company_branches"
                                 type="object"
                                 invisible="not all_child_ids"
-                                icon="fa-sitemap"
+                                icon="account_tree"
                                 string="Branches"/>
                     </div>
                     <div class="d-flex gap-2">

@@ -58,7 +58,7 @@
                              invisible="peppol_use_parent_company or account_peppol_proxy_state not in ('sender', 'smp_registration', 'receiver')">
                             <!-- Deprecated button for advanced configuration -->
                             <button string="Advanced Configuration"
-                                icon="oi-arrow-right"
+                                icon="east"
                                 name="button_open_peppol_config_wizard"
                                 type="object"
                                 class="btn-link"
@@ -117,12 +117,12 @@
                                     type="object"
                                     string="Reconnect this database"
                                     class="btn btn-primary"
-                                    icon="fa-refresh"/>
+                                    icon="refresh"/>
                                 <button name="button_disconnect_this_database"
                                     type="object"
                                     string="Disconnect this database"
                                     class="btn btn-danger"
-                                    icon="fa-unlink"/>
+                                    icon="link_off"/>
                             </div>
                         </div>
                     </div>

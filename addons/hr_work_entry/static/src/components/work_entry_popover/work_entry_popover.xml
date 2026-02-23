@@ -64,7 +64,8 @@
                             <i class="oi" data-icon="warning" t-if="currentRecord.record.isDirty"></i>
                             <ViewButton t-if="!state.isSplit" className="'btn btn-sm ms-0 btn-danger'"
                                         clickParams="{type: 'object', name: 'unlink'}"
-                                        icon="'fa-trash'"
+                                        icon="'delete'"
+                                        icon_class="'oi-filled'"
                                         record="currentRecord.record"
                                         string.translate="Delete"/>
                         </div>
