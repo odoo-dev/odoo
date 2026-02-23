@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 
 import pytz
 
@@ -129,4 +129,12 @@ class HrLeave(models.Model):
                 leave.sudo().timesheet_ids.holiday_id = False
                 timesheet_ids_to_remove.extend(leave.timesheet_ids)
         self.env['account.analytic.line'].browse(set(timesheet_ids_to_remove)).sudo().unlink()
+        return res
+
+    @api.multi
+    def unlink(self):
+        timesheets = self.timesheet_ids
+        res = super().unlink()
+        timesheets.unlink()
+        self._check_missing_global_leave_timesheets()
         return res
