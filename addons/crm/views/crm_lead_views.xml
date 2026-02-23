@@ -31,7 +31,7 @@
                         <field name="is_automated_probability" invisible="1"/>
                         <div class="oe_button_box" name="button_box">
                             <button name="action_schedule_meeting" type="object"
-                                class="oe_stat_button" icon="fa-calendar"
+                                class="oe_stat_button" icon="calendar_today"
                                 context="{'partner_id': partner_id}"
                                 invisible="not id or type == 'lead'">
                                 <div class="o_stat_info">
@@ -40,7 +40,7 @@
                                 </div>
                             </button>
                             <button name="action_show_potential_duplicates" type="object"
-                                class="oe_stat_button" icon="fa-star"
+                                class="oe_stat_button" icon="star" icon_class="oi-filled"
                                 invisible="duplicate_lead_count &lt; 1">
                                 <div class="o_stat_info">
                                     <field name="duplicate_lead_count" class="o_stat_value"/>
@@ -739,7 +739,7 @@
                     <field name="is_rotting" column_invisible="True"/>
                     <field name="rotting_days" column_invisible="True"/>
                     <widget name="mail_activity_mixin_list_reschedule_dropdown"/>
-                    <button name="%(crm.action_lead_mail_compose)d" type="action" string="Email" icon="fa-envelope" invisible="won_status == 'lost'"/>
+                    <button name="%(crm.action_lead_mail_compose)d" type="action" string="Email" icon="mail" icon_class="oi-filled" invisible="won_status == 'lost'"/>
                 </list>
             </field>
         </record>

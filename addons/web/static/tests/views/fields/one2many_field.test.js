@@ -5967,7 +5967,7 @@ test("one2many list with action button", async () => {
                 <field name="p">
                     <list>
                         <field name="foo"/>
-                        <button name="method_name" type="object" icon="fa-plus"/>
+                        <button name="method_name" type="object" icon="add"/>
                     </list>
                 </field>
             </form>`,

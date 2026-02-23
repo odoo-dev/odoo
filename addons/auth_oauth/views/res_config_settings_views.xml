@@ -8,7 +8,7 @@
                 <div id="msg_module_auth_oauth" position="replace">
                     <div class="content-group" invisible="not module_auth_oauth">
                         <div class="mt8">
-                            <button type="action" name="%(auth_oauth.action_oauth_provider)d" string="OAuth Providers" icon="oi-arrow-right" class="btn-link"/>
+                            <button type="action" name="%(auth_oauth.action_oauth_provider)d" string="OAuth Providers" icon="east" class="btn-link"/>
                         </div>
                     </div>
                 </div>

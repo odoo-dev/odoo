@@ -49,7 +49,7 @@
                         <i class="fa fa-fw o_button_icon fa-clock-o text-danger" title="Over Due" invisible="not stat_success_rate or stat_success_rate &lt;= 100"/>
                         <field string="Timesheets" name="stat_timesheet_value" widget="statinfo"/>
                     </button>
-                    <button class="oe_stat_button" type="object" name="action_project_timesheets" icon="fa-warning text-danger"
+                    <button class="oe_stat_button" type="object" name="action_project_timesheets" icon="warning" icon_class="text-danger"
                         groups="hr_timesheet.group_hr_timesheet_user" invisible="not allow_timesheets or stat_success_rate &lt;= 100">
                         <field string="Extra Time" name="stat_extra_time_value" widget="statinfo"/>
                     </button>

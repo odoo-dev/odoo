@@ -193,7 +193,7 @@
                                         </span>
                                     </span>
                                     <div name="send_buttons" class="d-flex gap-2 mb-auto ms-4" invisible="not attendees_count">
-                                        <button name="action_open_composer" help="Send Email to attendees" type="object" string=" EMAIL" icon="fa-envelope" invisible="not user_can_edit"/>
+                                        <button name="action_open_composer" help="Send Email to attendees" type="object" string=" EMAIL" icon="mail" icon_class="oi-filled" invisible="not user_can_edit"/>
                                     </div>
                                 </div>
                                 <label for="partner_ids" class="d-none d-touch-block" invisible="not accepted_count and not tentative_count and not declined_count and not awaiting_count"/>
@@ -269,16 +269,16 @@
                             </group>
                         </page>
                         <page name="page_invitations" string="Invitations" groups="base.group_no_one" invisible="not user_can_edit">
-                            <button name="action_sendmail" type="object" string="Send Invitations" icon="fa-envelope" class="oe_link"/>
+                            <button name="action_sendmail" type="object" string="Send Invitations" icon="mail" icon_class="oi-filled" class="oe_link"/>
                             <field name="attendee_ids" widget="one2many" mode="list,kanban" readonly="1">
                                 <list string="Invitation details" editable="top" create="false" delete="false">
                                     <field name="partner_id" />
                                     <field name="email" widget="email"/>
                                     <field name="phone" widget="phone"/>
                                     <field name="state" />
-                                    <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" icon="fa-asterisk"/>
-                                    <button name="do_accept" string="Accept" invisible="state not in ('needsAction', 'tentative', 'declined')" type="object" icon="fa-check text-success"/>
-                                    <button name="do_decline" string="Decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" type="object" icon="fa-times-circle text-danger"/>
+                                    <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" icon="emergency"/>
+                                    <button name="do_accept" string="Accept" invisible="state not in ('needsAction', 'tentative', 'declined')" type="object" icon="check" icon_class="text-success"/>
+                                    <button name="do_decline" string="Decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" type="object" icon="cancel" icon_class="oi-filled text-danger"/>
                                 </list>
                                 <kanban class="o_kanban_mobile" create="false" delete="false">
 
@@ -290,7 +290,7 @@
                                             <footer class="justify-content-end">
                                                 <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" icon="emergency"/>
                                                 <button name="do_accept" invisible="state not in ('needsAction', 'tentative', 'declined')" string="Accept" type="object" class="text-success" icon="check"/>
-                                                <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="Decline" type="object" class="text-danger" icon="cancel"/>
+                                                <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="Decline" type="object" class="text-danger" icon="cancel" icon_class="oi-filled"/>
                                             </footer>
                                         </t>
                                     </templates>
@@ -413,20 +413,19 @@
                 <!-- For recurrence update Dialog -->
                 <field name="recurrency" invisible="1"/>
                 <field name="recurrence_update" invisible="1"/>
-
-                <field name="location" invisible="not location" options="{'icon': 'fa fa-map-marker'}"/>
-                <field name="partner_ids" options="{'block': True, 'icon': 'fa fa-users'}"
+                <field name="location" invisible="not location" options="{'icon': 'location_on'}"/>
+                <field name="partner_ids" options="{'block': True, 'icon': 'group', 'icon_class': 'oi-filled'}"
                        filters="1" widget="many2manyattendeeexpandable" write_model="calendar.filters"
                        write_field="partner_id" filter_field="partner_checked" avatar_field="avatar_128"
                 />
                 <field name="videocall_location" widget="CopyClipboardURL" text="Join Video Call"
-                       options="{'icon': 'fa fa-lg fa-video-camera'}" invisible="not videocall_location"/>
+                       options="{'icon': 'videocam', 'icon_class': 'oi-filled'}" invisible="not videocall_location"/>
                 <field name="res_model_name" invisible="not res_model_name"
-                       options="{'icon': 'fa fa-link', 'shouldOpenRecord': true}"/>
-                <field name="alarm_ids" invisible="not alarm_ids" options="{'icon': 'fa fa-bell-o'}"/>
-                <field name="categ_ids" invisible="not categ_ids" options="{'icon': 'fa fa-tag', 'color_field': 'color', 'on_tag_click': 'edit_color'}"/>
-                <field name="partner_id" string="Organizer" options="{'icon': 'fa fa-user-o'}"/>
-                <field name="description" class="text-wrap" invisible="not display_description" options="{'icon': 'fa fa-sticky-note'}"/>
+                       options="{'icon': 'link', 'shouldOpenRecord': true}"/>
+                <field name="alarm_ids" invisible="not alarm_ids" options="{'icon': 'notifications'}"/>
+                <field name="categ_ids" invisible="not categ_ids" options="{'icon': 'label', 'color_field': 'color', 'on_tag_click': 'edit_color'}"/>
+                <field name="partner_id" string="Organizer" options="{'icon': 'person'}"/>
+                <field name="description" class="text-wrap" invisible="not display_description" options="{'icon': 'sticky_note_2'}"/>
             </calendar>
         </field>
     </record>

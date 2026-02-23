@@ -581,13 +581,13 @@
                     <button type="object"
                         name="action_approve"
                         string="Approve"
-                        icon="fa-thumbs-up"
+                        icon="thumb_up" icon_class="oi-filled"
                         class="btn btn-outline-success"
                     />
                     <button type="object"
                         name="action_refuse"
                         string="Refuse"
-                        icon="fa-times"
+                        icon="close"
                         class="btn btn-outline-danger"
                     />
                 </header>
@@ -603,13 +603,13 @@
                 <field name="user_id" column_invisible="True"/>
                 <field name="message_needaction" column_invisible="True"/>
                 <button string="Approve" name="action_approve" type="object"
-                    icon="fa-thumbs-up"
+                    icon="thumb_up" icon_class="oi-filled"
                     invisible="not can_approve"/>
                 <button string="Validate" name="action_approve" type="object"
-                    icon="fa-check"
+                    icon="check"
                     invisible="not can_validate or can_approve"/>
                 <button string="Refuse" name="action_refuse" type="object"
-                    icon="fa-times"
+                    icon="close"
                     invisible="not can_refuse"/>
                 <field name="company_id" optional="hidden" groups="base.group_multi_company"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>

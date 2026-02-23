@@ -110,7 +110,7 @@
                         <div name="button_box" class="oe_button_box">
                             <button name="action_open_versions"
                                 class="oe_stat_button"
-                                icon="fa-address-book"
+                                icon="contact_page" icon_class="oi-filled"
                                 type="object"
                                 groups="hr.group_hr_user">
                                 <div class="o_stat_info">
@@ -254,14 +254,16 @@
                                                 <button
                                                     title="Trust Bank Account"
                                                     class="pt-0" 
-                                                    icon="fa-toggle-off fa-lg"  
+                                                    icon="toggle_off"
+                                                    icon_class="oi-lg"
                                                     type="object" 
                                                     name="action_toggle_primary_bank_account_trust" 
                                                     invisible="is_trusted_bank_account"/>
                                                 <button 
                                                     title="Untrust Bank Account"
                                                     class="button-on pt-0" 
-                                                    icon="fa-toggle-on fa-lg"   
+                                                    icon="toggle_on"
+                                                    icon_class="oi-lg"
                                                     type="object" 
                                                     name="action_toggle_primary_bank_account_trust" 
                                                     invisible="not is_trusted_bank_account"/>
@@ -764,7 +766,7 @@
                 <button name="action_open_versions" position="before">
                     <button name="action_related_contacts"
                         class="oe_stat_button"
-                        icon="fa-address-card-o"
+                        icon="contact_mail"
                         type="object"
                         help="Related Contacts"
                         groups="base.group_no_one">

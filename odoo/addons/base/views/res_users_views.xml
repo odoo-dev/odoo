@@ -107,13 +107,13 @@
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
-                            <button name="action_show_groups" type="object" groups="base.group_no_one" class="oe_stat_button" icon="fa-users" help="Groups that apply to the current user">
+                            <button name="action_show_groups" type="object" groups="base.group_no_one" class="oe_stat_button" icon="group" icon_class="oi-filled" help="Groups that apply to the current user">
                                 <field string="Groups" name="groups_count" widget="statinfo"/>
                             </button>
-                            <button name="action_show_accesses" type="object" groups="base.group_no_one" class="oe_stat_button" icon="fa-lock">
+                            <button name="action_show_accesses" type="object" groups="base.group_no_one" class="oe_stat_button" icon="lock">
                                 <field string="Access Rights" name="accesses_count" widget="statinfo"/>
                             </button>
-                            <button name="action_show_rules" type="object" groups="base.group_no_one" class="oe_stat_button" icon="fa-lock">
+                            <button name="action_show_rules" type="object" groups="base.group_no_one" class="oe_stat_button" icon="lock">
                                 <field string="Record Rules" name="rules_count" widget="statinfo"/>
                             </button>
                         </div>
@@ -544,7 +544,7 @@
                     <field name="name"/>
                     <field name="scope"/>
                     <field name="create_date"/>
-                    <button type="object" name="remove" title="Delete API key." icon="fa-trash"/>
+                    <button type="object" name="remove" title="Delete API key." icon="delete" icon_class="oi-filled"/>
                 </list>
             </field>
         </record>

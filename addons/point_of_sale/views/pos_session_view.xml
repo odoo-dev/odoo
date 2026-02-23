@@ -18,11 +18,11 @@
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_order"
                             class="oe_stat_button"
-                            icon="fa-shopping-basket"
+                            icon="shopping_basket"
                             type="object">
                             <field name="order_count" widget="statinfo" string="Orders"/>
                         </button>
-                        <button class="oe_stat_button" name="action_stock_picking" type="object" icon="fa-truck" invisible="picking_count == 0">
+                        <button class="oe_stat_button" name="action_stock_picking" type="object" icon="local_shipping" invisible="picking_count == 0">
                             <field name="picking_count" widget="statinfo" string="Pickings" invisible="failed_pickings"/>
                             <field name="picking_count" widget="statinfo" string="Pickings" class="text-danger" invisible="not failed_pickings"/>
                         </button>
@@ -30,7 +30,7 @@
                             name="action_show_payments_list"
                             type="object"
                             class="oe_stat_button"
-                            icon="fa-dollar"
+                            icon="attach_money"
                             >
                             <field name="total_payments_amount" widget="statinfo" string="Payments"/>
                         </button>
@@ -38,7 +38,7 @@
                             name="show_journal_items"
                             type="object"
                             class="oe_stat_button"
-                            icon="fa-bars"
+                            icon="menu"
                             groups="account.group_account_readonly"
                             >
                             <div class="o_stat_info">
@@ -49,7 +49,7 @@
                             name="show_cash_register"
                             type="object"
                             class="oe_stat_button"
-                            icon="fa-bars"
+                            icon="menu"
                             invisible="not cash_control"
                             groups="account.group_account_readonly">
                             <div class="o_stat_info">

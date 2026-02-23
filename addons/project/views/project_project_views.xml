@@ -41,7 +41,7 @@
                     </header>
                 <sheet string="Project">
                     <div class="oe_button_box" name="button_box" groups="base.group_user">
-                        <button class="oe_stat_button" type="object" name="action_view_tasks" icon="fa-check">
+                        <button class="oe_stat_button" type="object" name="action_view_tasks" icon="check">
                             <div class="o_field_widget o_stat_info">
                                 <field class="o_stat_text" name="label_tasks" readonly="1"/>
                                 <span class="o_stat_value">
@@ -73,7 +73,7 @@
                             <span class="o_field_widget ps-2">)</span>
                         </button>
                         <button class="oe_stat_button" type="object" name="action_project_task_burndown_chart_report"
-                            icon="fa-area-chart" groups="project.group_project_user">
+                            icon="area_chart" groups="project.group_project_user">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">Burndown<br/> Chart</span>
                             </div>

@@ -128,7 +128,7 @@
                 <sheet string="Activity">
                     <div class="oe_button_box" name="button_box" invisible="1">
                         <button name="action_open_document"
-                                type="object" class="oe_link" icon="fa-file-text-o"
+                                type="object" class="oe_link" icon="article"
                                 invisible="not res_model or res_id == 0">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Open Document</span>
@@ -161,7 +161,7 @@
                             type="object" class="btn-secondary" data-hotkey="w"
                             context="{'mail_activity_quick_update': True}"/>
                         <button class="btn-secondary" special="cancel" data-hotkey="x"/>
-                        <button string="Delete" type="object" name="unlink" icon="fa-trash" class="btn-danger ms-auto" invisible="not id"/>
+                        <button string="Delete" type="object" name="unlink" icon="delete" icon_class="oi-filled" class="btn-danger ms-auto" invisible="not id"/>
                     </footer>
                 </sheet>
             </form>
@@ -265,10 +265,10 @@
                     decoration-muted="(not active)"
                     default_order="date_deadline" create="true">
                 <header>
-                    <button name="action_done" type="object" string="Done" icon="fa-check"/>
-                    <button name="action_reschedule_today" type="object" string="Today" icon="fa-arrow-down"/>
-                    <button name="action_reschedule_tomorrow" type="object" string="Tomorrow" icon="fa-calendar-plus-o"/>
-                    <button name="action_reschedule_nextweek" type="object" string="Next Week" icon="fa-calendar-o"/>
+                    <button name="action_done" type="object" string="Done" icon="check"/>
+                    <button name="action_reschedule_today" type="object" string="Today" icon="arrow_downward"/>
+                    <button name="action_reschedule_tomorrow" type="object" string="Tomorrow" icon="calendar_add_on"/>
+                    <button name="action_reschedule_nextweek" type="object" string="Next Week" icon="calendar_today"/>
                 </header>
                 <field name="summary" string="Summary"/>
                 <field name="res_name" string="Linked to"/>
@@ -278,7 +278,7 @@
                 <field name="date_done" string="Done Date" optional="hide"/>
                 <field name="feedback" optional="hide"/>
                 <widget name="mail_activity_list_reschedule_dropdown"/>
-                <button name="action_done" type="object" string="Done" icon="fa-check" invisible="active == False"/>
+                <button name="action_done" type="object" string="Done" icon="check" invisible="active == False"/>
             </list>
         </field>
     </record>

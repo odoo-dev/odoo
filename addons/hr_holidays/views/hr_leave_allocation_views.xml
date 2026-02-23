@@ -297,13 +297,13 @@
                     <button type="object"
                         name="action_approve"
                         string="Approve"
-                        icon="fa-thumbs-up"
+                        icon="thumb_up" icon_class="oi-filled"
                         class="btn btn-outline-success"
                     />
                     <button type="object"
                         name="action_refuse"
                         string="Refuse"
-                        icon="fa-times"
+                        icon="close"
                         class="btn btn-outline-danger"
                     />
                 </header>
@@ -321,13 +321,13 @@
                 <field name="active_employee" column_invisible="True"/>
                 <field name="state" widget="badge" decoration-warning="state in ['confirm', 'validate1']" decoration-success="state == 'validate'" decoration-danger="state == 'refuse'"/>
                 <button string="Approve" name="action_approve" type="object" class="text-success"
-                    icon="fa-thumbs-up"
+                    icon="thumb_up" icon_class="oi-filled"
                     invisible="not can_approve"/>
                 <button string="Validate" name="action_approve" type="object" class="text-success"
-                    icon="fa-check"
+                    icon="check"
                     invisible="not can_validate or can_approve"/>
                 <button string="Refuse" name="action_refuse" type="object" class="text-danger"
-                    icon="fa-times"
+                    icon="close"
                     invisible="not can_refuse"/>
                 <field name="activity_exception_decoration" widget="activity_exception"/>
             </list>

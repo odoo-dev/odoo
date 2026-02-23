@@ -3318,7 +3318,7 @@ test(`buttons in form view`, async () => {
                 </header>
                 <sheet>
                     <group>
-                        <button string="Geolocate" name="geo_localize" icon="oi-check" type="object"/>
+                        <button string="Geolocate" name="geo_localize" icon="check" type="object"/>
                     </group>
                 </sheet>
             </form>
@@ -3518,7 +3518,7 @@ test(`buttons in form view, new record`, async () => {
                 </header>
                 <sheet>
                     <group>
-                        <button string="Geolocate" name="geo_localize" icon="oi-check" type="object"/>
+                        <button string="Geolocate" name="geo_localize" icon="check" type="object"/>
                     </group>
                 </sheet>
             </form>
@@ -8022,7 +8022,7 @@ test(`render stat button with string inline on desktop`, async () => {
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button string="Inventory Moves" class="oe_stat_button" icon="oi-arrows-v"/>
+                        <button string="Inventory Moves" class="oe_stat_button" icon="height"/>
                     </div>
                 </sheet>
             </form>
@@ -8041,7 +8041,7 @@ test(`render stat button with string inline on mobile`, async () => {
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button string="Inventory Moves" class="oe_stat_button" icon="oi-arrows-v"/>
+                        <button string="Inventory Moves" class="oe_stat_button" icon="height"/>
                     </div>
                 </sheet>
             </form>
@@ -11814,7 +11814,7 @@ test(`setting : boolean field`, async () => {
             <form>
                 <setting help="this is bar" documentation="/applications/technical/web/settings/this_is_a_test.html">
                     <field name="bar"/>
-                    <button name="buttonName" icon="oi-arrow-right" type="action" string="Manage Users" class="btn-link"/>
+                    <button name="buttonName" icon="east" type="action" string="Manage Users" class="btn-link"/>
                 </setting>
             </form>
         `,
@@ -11887,7 +11887,7 @@ test(`action button in x2many should display a notification if the record is vir
                 <field name="child_ids">
                     <list editable="bottom">
                         <field name="foo"/>
-                        <button class="oe_stat_button" name="test_action" type="object" icon="oi-check">MyButton</button>
+                        <button class="oe_stat_button" name="test_action" type="object" icon="check">MyButton</button>
                     </list>
                 </field>
             </form>

@@ -49,7 +49,7 @@
                 <field name="date"/>
                 <field name="start_hour" string="From" widget="float_time"/>
                 <button name="durationArrow" width="20px" title="Until"
-                    class="oi text-center text-secondary pe-none" data-icon="east"/>
+                    class="oi text-center text-secondary pe-none" icon="east"/>
                 <field name="end_hour" string="To" widget="float_time"/>
                 <field name="color" widget="color_picker"/>
             </list>

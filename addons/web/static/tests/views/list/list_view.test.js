@@ -1076,11 +1076,11 @@ test(`list view with adjacent buttons`, async () => {
         type: "list",
         arch: `
             <list>
-                <button name="a" type="object" icon="fa-car"/>
+                <button name="a" type="object" icon="directions_car"/>
                 <field name="foo"/>
-                <button name="x" type="object" icon="fa-star"/>
-                <button name="y" type="object" icon="fa-refresh"/>
-                <button name="z" type="object" icon="fa-exclamation"/>
+                <button name="x" type="object" icon="star" icon_class="oi-filled"/>
+                <button name="y" type="object" icon="refresh"/>
+                <button name="z" type="object" icon="priority_high"/>
             </list>
         `,
     });
@@ -1096,14 +1096,14 @@ test(`list view with adjacent buttons and invisible field and button`, async () 
         resModel: "foo",
         arch: `
             <list>
-                <button name="a" type="object" icon="fa-car"/>
+                <button name="a" type="object" icon="directions_car"/>
                 <field name="foo" column_invisible="1"/>
                 <!--Here the column_invisible=1 is used to simulate a group on the case that the user
                     don't have the rights to see the button.-->
-                <button name="b" type="object" icon="fa-car" column_invisible="1"/>
-                <button name="x" type="object" icon="fa-star"/>
-                <button name="y" type="object" icon="fa-refresh"/>
-                <button name="z" type="object" icon="fa-exclamation"/>
+                <button name="b" type="object" icon="directions_car" column_invisible="1"/>
+                <button name="x" type="object" icon="star" icon_class="oi-filled"/>
+                <button name="y" type="object" icon="refresh"/>
+                <button name="z" type="object" icon="priority_high"/>
             </list>
         `,
     });
@@ -1120,11 +1120,11 @@ test(`list view with adjacent buttons and invisible field (modifier)`, async () 
         type: "list",
         arch: `
             <list>
-                <button name="a" type="object" icon="fa-car"/>
+                <button name="a" type="object" icon="directions_car"/>
                 <field name="foo" invisible="foo == 'blip'"/>
-                <button name="x" type="object" icon="fa-star"/>
-                <button name="y" type="object" icon="fa-refresh"/>
-                <button name="z" type="object" icon="fa-exclamation"/>
+                <button name="x" type="object" icon="star" icon_class="oi-filled"/>
+                <button name="y" type="object" icon="refresh"/>
+                <button name="z" type="object" icon="priority_high"/>
             </list>
         `,
     });
@@ -1140,11 +1140,11 @@ test(`list view with adjacent buttons and optional field`, async () => {
         type: "list",
         arch: `
             <list>
-                <button name="a" type="object" icon="fa-car"/>
+                <button name="a" type="object" icon="directions_car"/>
                 <field name="foo" optional="hide"/>
-                <button name="x" type="object" icon="fa-star"/>
-                <button name="y" type="object" icon="fa-refresh"/>
-                <button name="z" type="object" icon="fa-exclamation"/>
+                <button name="x" type="object" icon="star" icon_class="oi-filled"/>
+                <button name="y" type="object" icon="refresh"/>
+                <button name="z" type="object" icon="priority_high"/>
             </list>
         `,
     });
@@ -1176,7 +1176,7 @@ test(`wait the view reload before closing the dialog (save)`, async () => {
         arch: `
             <list editable="bottom">
                 <field name="foo"/>
-                <button name="a" type="object" icon="fa-car"/>
+                <button name="a" type="object" icon="directions_car"/>
             </list>
         `,
     });
@@ -1217,7 +1217,7 @@ test(`wait the view reload before closing the dialog (cancel)`, async () => {
         arch: `
             <list editable="bottom">
                 <field name="foo"/>
-                <button name="a" type="object" icon="fa-car"/>
+                <button name="a" type="object" icon="directions_car"/>
             </list>
         `,
     });
@@ -1243,9 +1243,9 @@ test(`list view with adjacent buttons with invisible modifier`, async () => {
         arch: `
             <list>
                 <field name="foo"/>
-                <button name="x" type="object" icon="fa-star" invisible="foo == 'blip'"/>
-                <button name="y" type="object" icon="fa-refresh" invisible="foo == 'yop'"/>
-                <button name="z" type="object" icon="fa-exclamation" invisible="foo == 'gnap'"/>
+                <button name="x" type="object" icon="star" icon_class="oi-filled" invisible="foo == 'blip'"/>
+                <button name="y" type="object" icon="refresh" invisible="foo == 'yop'"/>
+                <button name="z" type="object" icon="priority_high" invisible="foo == 'gnap'"/>
             </list>
         `,
     });
@@ -1267,10 +1267,10 @@ test(`list view with adjacent buttons with width attribute`, async () => {
         arch: `
             <list>
                 <field name="foo"/>
-                <button icon="fa-play"/>
-                <button icon="fa-heart" width="25px"/>
-                <button icon="fa-cog"/>
-                <button icon="fa-list"/>
+                <button icon="play_arrow"/>
+                <button icon="favorite" icon_class="oi-filled" width="25px"/>
+                <button icon="settings" icon_class="oi-filled"/>
+                <button icon="format_list_bulleted"/>
             </list>
         `,
     });
@@ -1291,10 +1291,10 @@ test(`list view with icon buttons`, async () => {
         type: "list",
         arch: `
             <list>
-                <button name="x" type="object" icon="fa-asterisk"/>
-                <button name="x" type="object" icon="fa-star" class="o_yeah"/>
-                <button name="x" type="object" icon="fa-refresh" string="Refresh" class="o_yeah"/>
-                <button name="x" type="object" icon="fa-exclamation" string="Danger" class="o_yeah btn-danger"/>
+                <button name="x" type="object" icon="emergency"/>
+                <button name="x" type="object" icon="star" icon_class="oi-filled" class="o_yeah"/>
+                <button name="x" type="object" icon="refresh" string="Refresh" class="o_yeah"/>
+                <button name="x" type="object" icon="priority_high" string="Danger" class="o_yeah btn-danger"/>
             </list>
         `,
     });
@@ -1311,8 +1311,8 @@ test(`list view with disabled button`, async () => {
         type: "list",
         arch: `
             <list>
-                <button name="a" icon="fa-coffee"/>
-                <button name="b" icon="fa-car" disabled="disabled"/>
+                <button name="a" icon="coffee"/>
+                <button name="b" icon="directions_car" disabled="disabled"/>
             </list>
         `,
     });
@@ -7364,7 +7364,7 @@ test(`can display button in edit mode`, async () => {
         arch: `
             <list editable="top">
                 <field name="foo"/>
-                <button name="notafield" type="object" icon="fa-asterisk" class="o_yeah"/>
+                <button name="notafield" type="object" icon="emergency" class="o_yeah"/>
             </list>
         `,
     });
@@ -8380,7 +8380,7 @@ test(`edit button does not trigger fold group`, async () => {
             <list>
                 <field name="foo"/>
                 <groupby name="currency_id">
-                    <button name="edit" type="edit" icon="fa-edit" title="Edit"/>
+                    <button name="edit" type="edit" icon="edit" icon_class="oi-filled" title="Edit"/>
                 </groupby>
             </list>
         `,
@@ -8525,7 +8525,7 @@ test(`list view, editable, without data`, async () => {
                 <field name="foo"/>
                 <field name="date"/>
                 <field name="m2o"/>
-                <button type="object" icon="fa-plus-square" name="method"/>
+                <button type="object" icon="add_box" icon_class="oi-filled" name="method"/>
             </list>
         `,
         noContentHelp: "click to add a partner",
@@ -8583,7 +8583,7 @@ test(`list view, editable, with a button`, async () => {
         arch: `
             <list editable="top">
                 <field name="foo"/>
-                <button string="abc" icon="fa-phone" type="object" name="schedule_another_phonecall"/>
+                <button string="abc" icon="phone" type="object" name="schedule_another_phonecall"/>
             </list>
         `,
     });
@@ -8784,7 +8784,7 @@ test(`click on a button in a list view`, async () => {
         arch: `
             <list>
                 <field name="foo"/>
-                <button string="a button" name="button_action" icon="fa-car" type="object"/>
+                <button string="a button" name="button_action" icon="directions_car" type="object"/>
             </list>
         `,
     });
@@ -8822,7 +8822,7 @@ test("click on a button in a list view on second page", async () => {
         arch: `
             <list limit="3">
                 <field name="foo"/>
-                <button string="a button" name="button_action" icon="fa-car" type="object"/>
+                <button string="a button" name="button_action" icon="directions_car" type="object"/>
             </list>
         `,
     });
@@ -8850,7 +8850,7 @@ test(`invisible attrs in readonly and editable list`, async () => {
         type: "list",
         arch: `
             <list editable="top">
-                <button string="a button" name="button_action" icon="fa-car" type="object" invisible="id == 1"/>
+                <button string="a button" name="button_action" icon="directions_car" type="object" invisible="id == 1"/>
                 <field name="int_field"/>
                 <field name="qux"/>
                 <field name="foo" invisible="id == 1"/>
@@ -17126,7 +17126,7 @@ test(`list view does not crash when clicked button cell`, async () => {
     await mountView({
         resModel: "foo",
         type: "list",
-        arch: `<list><button name="a" type="object" icon="fa-car"/></list>`,
+        arch: `<list><button name="a" type="object" icon="directions_car"/></list>`,
     });
     expect(`.o_data_row:eq(0) td.o_list_button`).toHaveCount(1);
     await contains(`.o_data_row:eq(0) td.o_list_button`).click();

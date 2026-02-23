@@ -395,15 +395,15 @@
                         </button>
                         <!-- Dummy tag used to organize buttons -->
                         <span id="end_rating_buttons" invisible="1"/>
-                        <button name="action_open_parent_task" type="object" class="oe_stat_button" icon="fa-check" invisible="not parent_id">
+                        <button name="action_open_parent_task" type="object" class="oe_stat_button" icon="check" invisible="not parent_id">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">Parent Task</span>
                             </div>
                         </button>
-                        <button name="action_recurring_tasks" type="object" invisible="not active or not recurrence_id or not allow_recurring_tasks" class="oe_stat_button" icon="fa-repeat" groups="project.group_project_recurring_tasks">
+                        <button name="action_recurring_tasks" type="object" invisible="not active or not recurrence_id or not allow_recurring_tasks" class="oe_stat_button" icon="redo" groups="project.group_project_recurring_tasks">
                             <field name="recurring_count" widget="statinfo" string="Recurring Tasks"/>
                         </button>
-                        <button name="%(project_task_action_sub_task)d" type="action" class="oe_stat_button" icon="fa-check"
+                        <button name="%(project_task_action_sub_task)d" type="action" class="oe_stat_button" icon="check"
                             invisible="not id or subtask_count == 0"
                             context="{
                                 'default_project_id': project_id,
@@ -421,7 +421,7 @@
                                 </span>
                             </div>
                         </button>
-                        <button name="action_dependent_tasks" type="object" invisible="dependent_tasks_count == 0 or not allow_task_dependencies" class="oe_stat_button" icon="fa-check" groups="project.group_project_task_dependencies">
+                        <button name="action_dependent_tasks" type="object" invisible="dependent_tasks_count == 0 or not allow_task_dependencies" class="oe_stat_button" icon="check" groups="project.group_project_task_dependencies">
                             <field name="dependent_tasks_count" widget="statinfo" string="Blocked Tasks" />
                         </button>
                         <!-- Dummy tag used to organize buttons -->

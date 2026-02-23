@@ -3448,8 +3448,8 @@ class TestViews(ViewCase):
             'A <span> with fa class (fa fa-warning) must have title in its tag, parents, descendants or have text'
         )
         self.assertWarning(
-            '<form><button icon="fa-warning"/></form>',
-            'A button with icon attribute (fa-warning) must have title in its tag, parents, descendants or have text'
+            '<form><button icon="warning"/></form>',
+            'A button with icon attribute (warning) must have title in its tag, parents, descendants or have text'
         )
         self.assertWarning(
             '<form><span class="fa fa-warning"/><label for="key"/><field name="key"/></form>',

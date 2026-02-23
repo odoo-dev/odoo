@@ -47,11 +47,11 @@
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="display_reorder_button" column_invisible="True"/>
                 <field name="notified" column_invisible="True"/>
-                <button name="action_reorder" string="Re-order" type="object" icon="fa-history" invisible="not display_reorder_button or not display_add_button" groups="lunch.group_lunch_user"/>
-                <button name="action_confirm" string="Confirm" type="object" icon="fa-check" invisible="state != 'sent'" groups="lunch.group_lunch_manager"/>
-                <button name="action_cancel" string="Cancel" type="object" icon="fa-times" invisible="state in ['cancelled', 'confirmed']" groups="lunch.group_lunch_manager"/>
-                <button name="action_reset" string="Reset" type="object" icon="fa-undo" invisible="state != 'cancelled'" groups="lunch.group_lunch_manager"/>
-                <button name="action_notify" string="Send Notification" type="object" icon="fa-envelope" invisible="state != 'confirmed' or notified" groups="lunch.group_lunch_manager"/>
+                <button name="action_reorder" string="Re-order" type="object" icon="history" invisible="not display_reorder_button or not display_add_button" groups="lunch.group_lunch_user"/>
+                <button name="action_confirm" string="Confirm" type="object" icon="check" invisible="state != 'sent'" groups="lunch.group_lunch_manager"/>
+                <button name="action_cancel" string="Cancel" type="object" icon="close" invisible="state in ['cancelled', 'confirmed']" groups="lunch.group_lunch_manager"/>
+                <button name="action_reset" string="Reset" type="object" icon="undo" invisible="state != 'cancelled'" groups="lunch.group_lunch_manager"/>
+                <button name="action_notify" string="Send Notification" type="object" icon="mail" icon_class="oi-filled" invisible="state != 'confirmed' or notified" groups="lunch.group_lunch_manager"/>
                 <groupby name="supplier_id">
                     <field name="show_order_button" invisible="1" />
                     <field name="show_confirm_button" invisible="1" />

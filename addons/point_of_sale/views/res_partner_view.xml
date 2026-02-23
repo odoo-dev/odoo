@@ -11,7 +11,7 @@
                         groups="point_of_sale.group_pos_user"
                         context="{'default_partner_id': id}"
                         invisible="pos_order_count == 0"
-                        icon="fa-shopping-bag">
+                        icon="shopping_bag">
                         <field string="PoS Orders" name="pos_order_count" widget="statinfo"/>
                     </button>
                 </div>

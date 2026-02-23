@@ -15,7 +15,7 @@
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
-                            <button class="oe_stat_button" name="action_view_pickings" icon="fa-truck"
+                            <button class="oe_stat_button" name="action_view_pickings" icon="local_shipping"
                                 type="object" invisible="pickings_count == 0">
                                 <field name="pickings_count" string="Transfers" widget="statinfo"/>
                             </button>

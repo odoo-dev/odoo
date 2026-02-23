@@ -345,7 +345,8 @@
             <div name="button_box" position="inside">
                 <button class="oe_stat_button"
                     groups="hr_recruitment.group_hr_recruitment_interviewer"
-                    icon="fa-pencil"
+                    icon="edit"
+                    icon_class="oi-filled"
                     name="%(action_hr_job_applications)d"
                     context="{'default_recruiter': recruiter_id, 'active_test': False}"
                     type="action">
@@ -353,7 +354,7 @@
                 </button>
                 <button class="oe_stat_button"
                     groups="hr_recruitment.group_hr_recruitment_interviewer"
-                    icon="fa-file-text-o"
+                    icon="article"
                     name="action_open_attachments"
                     type="object"
                     invisible="documents_count == 0">
@@ -362,7 +363,8 @@
                 <button name="action_open_employees"
                     groups="hr_recruitment.group_hr_recruitment_interviewer"
                     class="oe_stat_button"
-                    icon="fa-users"
+                    icon="group"
+                    icon_class="oi-filled"
                     invisible="not employee_count"
                     type="object">
                     <field name="employee_count" widget="statinfo" string="Employees"/>

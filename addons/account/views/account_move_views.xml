@@ -201,7 +201,7 @@
                     <field name="parent_state" column_invisible="True"/>
                     <field name="deductible_amount" optional="hide"/>
                     <groupby name="partner_id">
-                        <button name="edit" type="edit" icon="fa-edit"/>
+                        <button name="edit" type="edit" icon="edit" icon_class="oi-filled"/>
                     </groupby>
                     <groupby name="move_id">
                         <button name="action_post" type="object" string="Post" class="btn-primary" invisible="state != 'draft'" groups="account.group_account_user"/>
@@ -907,7 +907,7 @@
                         <div name="button_box" class="oe_button_box">
                             <button name="action_open_business_doc"
                                     class="oe_stat_button"
-                                    icon="fa-bars"
+                                    icon="menu"
                                     type="object"
                                     invisible="move_type != 'entry' or not id or not origin_payment_id">
                                     <div class="o_stat_info">
@@ -917,14 +917,14 @@
                             <button name="open_payments"
                                     groups="account.group_account_invoice,account.group_account_readonly"
                                     class="oe_stat_button"
-                                    icon="fa-bars"
+                                    icon="menu"
                                     type="object"
                                     invisible="not payment_count">
                                     <field name="payment_count" string="Payments" widget="statinfo"/>
                             </button>
                             <button name="open_reconcile_view"
                                     class="oe_stat_button"
-                                    icon="fa-bars"
+                                    icon="menu"
                                     type="object"
                                     invisible="move_type != 'entry' or not id or not has_reconciled_entries">
                                     <div class="o_stat_info">
@@ -933,7 +933,7 @@
                             </button>
                             <button name="open_created_caba_entries"
                                     class="oe_stat_button"
-                                    icon="fa-usd"
+                                    icon="attach_money"
                                     type="object"
                                     invisible="not tax_cash_basis_created_move_ids">
                                     <div class="o_stat_info">
@@ -942,14 +942,14 @@
                             </button>
                             <button name="open_adjusting_entries"
                                     class="oe_stat_button"
-                                    icon="fa-bars"
+                                    icon="menu"
                                     type="object"
                                     invisible="not adjusting_entries_move_ids">
                                     <field name="adjusting_entries_count" string="Adjusting Entries" widget="statinfo"/>
                             </button>
                             <button name="open_adjusting_entry_origin_moves"
                                     class="oe_stat_button"
-                                    icon="fa-bars"
+                                    icon="menu"
                                     type="object"
                                     invisible="not adjusting_entry_origin_move_ids">
                                     <div invisible="adjusting_entry_origin_moves_count != 1" class="o_stat_info">
@@ -1070,7 +1070,7 @@
                                     <button name="action_update_fpos_values" type="object"
                                             string="Update Taxes and Accounts"
                                             help="Recompute all taxes and accounts based on this fiscal position"
-                                            class="btn-link mb-1 px-0" icon="fa-refresh"
+                                            class="btn-link mb-1 px-0" icon="refresh"
                                             invisible="not show_update_fpos or state in ['cancel', 'posted']"/>
                                 </div>
 
@@ -1154,7 +1154,7 @@
                                              invisible="state != 'draft' or invoice_currency_rate == expected_currency_rate">
                                             <button type="object"
                                                     name="refresh_invoice_currency_rate"
-                                                    icon="fa-refresh"
+                                                    icon="refresh"
                                                     title="Reset the currency rate to the default accordingly to the invoice date"
                                                     class="btn btn-link p-0"/>
                                         </div>
@@ -1182,7 +1182,7 @@
                                              invisible="show_journal or state != 'draft' or invoice_currency_rate == expected_currency_rate">
                                             <button type="object"
                                                     name="refresh_invoice_currency_rate"
-                                                    icon="fa-refresh"
+                                                    icon="refresh"
                                                     title="Reset the currency rate to the default accordingly to the invoice date"
                                                     class="btn btn-link p-0"/>
                                         </div>
