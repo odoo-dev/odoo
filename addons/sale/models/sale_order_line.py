@@ -768,13 +768,13 @@ class SaleOrderLine(models.Model):
                 line.discount = line._get_linked_line().discount
                 continue
 
-            line.discount = 0.0
-
             if not line.pricelist_item_id._show_discount():
                 # No pricelist rule was found for the product
                 # therefore, the pricelist didn't apply any discount/change
                 # to the existing sales price.
                 continue
+
+            line.discount = 0.0
 
             line = line.with_company(line.company_id)
             pricelist_price = line._get_pricelist_price()
