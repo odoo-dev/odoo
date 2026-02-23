@@ -21,12 +21,10 @@ const odooToBootstrapClasses = {
 
 function iconFromString(iconString) {
     const icon = {};
-    if (iconString.startsWith("fa-")) {
+    if (iconString.startsWith("oi-")) {
         icon.tag = "i";
-        icon.class = `o_button_icon fa fa-fw ${iconString}`;
-    } else if (iconString.startsWith("oi-")) {
-        icon.tag = "i";
-        icon.class = `o_button_icon oi oi-fw ${iconString}`;
+        icon.class = `o_button_icon oi`;
+        icon.name = iconString.replace(/^oi-/, "");
     } else {
         icon.tag = "img";
         icon.src = iconString;
@@ -45,6 +43,7 @@ export class ViewButton extends Component {
         "context?",
         "clickParams?",
         "icon?",
+        "iconClasses?",
         "defaultRank?",
         "disabled?",
         "size?",
@@ -60,6 +59,7 @@ export class ViewButton extends Component {
         className: "",
         clickParams: {},
         attrs: {},
+        iconClasses: "",
     };
 
     setup() {
@@ -144,7 +144,7 @@ export class ViewButton extends Component {
     }
 
     getClassName() {
-        const classNames = [];
+        const classNames = ["d-flex", "align-items-center", "gap-2"];
         let hasExplicitRank = false;
         if (this.props.className) {
             for (let cls of this.props.className.split(" ")) {
