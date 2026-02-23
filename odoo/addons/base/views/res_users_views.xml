@@ -535,7 +535,7 @@
                     <field name="name"/>
                     <field name="scope"/>
                     <field name="create_date"/>
-                    <button type="object" name="remove" title="Delete API key." icon="fa-trash"/>
+                    <button type="object" name="remove" title="Delete API key." icon="oi-trash" iconClasses="oi-filled"/>
                 </list>
             </field>
         </record>
