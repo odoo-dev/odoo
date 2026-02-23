@@ -521,6 +521,7 @@ class IrAttachment(models.Model):
         """Check access for attachments.
 
         Rules:
+
         - If we have `res_model and res_id`, the attachment is accessible if the
           referenced model is accessible. Also, when `res_field != False` and
           the user is not an administrator, we check the access on the field.

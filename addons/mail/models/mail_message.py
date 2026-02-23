@@ -11,9 +11,10 @@ from lxml import html
 from typing import Self
 
 from odoo import _, api, fields, models, modules, tools
-from odoo.exceptions import AccessError, MissingError
-from odoo.fields import Command, Domain
+from odoo.exceptions import AccessError, MissingError, UserError
+from odoo.fields import Domain
 from odoo.tools import clean_context, groupby, SQL
+from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.misc import OrderedSet
 from odoo.addons.base.models.ir_attachment import condition_values
 from odoo.addons.mail.tools.discuss import Store
@@ -22,6 +23,7 @@ _logger = logging.getLogger(__name__)
 _image_dataurl = re.compile(r'(data:image/[a-z]+?);base64,([a-z0-9+/\n]{3,}=*)\n*([\'"])(?: data-filename="([^"]*)")?', re.I)
 
 MAX_COMODELS_FOR_DOMAIN = 5
+MAX_SEARCH_LIMIT = PREFETCH_MAX * 10
 
 
 def exists_in_cache(records, *, hint_field=''):
@@ -168,6 +170,10 @@ class MailMessage(models.Model):
     # related document
     model = fields.Char('Related Document Model')
     res_id = fields.Many2oneReference('Related Document ID', model_field='model')
+    res_access_read = fields.Boolean(groups=fields.NO_ACCESS, compute=lambda s: s._compute_res_access('res_access_read'), search=lambda s, operator, value: s._search_res_access('read', operator), compute_sudo=True, depends_context=('uid',))
+    res_access_write = fields.Boolean(groups=fields.NO_ACCESS, compute=lambda s: s._compute_res_access('res_access_write'), search=lambda s, operator, value: s._search_res_access('write', operator), compute_sudo=True, depends_context=('uid',))
+    res_access_create = fields.Boolean(groups=fields.NO_ACCESS, compute=lambda s: s._compute_res_access('res_access_create'), search=lambda s, operator, value: s._search_res_access('create', operator), compute_sudo=True, depends_context=('uid',))
+    res_access_unlink = fields.Boolean(groups=fields.NO_ACCESS, compute=lambda s: s._compute_res_access('res_access_unlink'), search=lambda s, operator, value: s._search_res_access('unlink', operator), compute_sudo=True, depends_context=('uid',))
     record_name = fields.Char('Message Record Name', compute='_compute_record_name', store=False)
     record_alias_domain_id = fields.Many2one('mail.alias.domain', 'Alias Domain', ondelete='set null')
     record_company_id = fields.Many2one('res.company', 'Company', ondelete='set null')
@@ -396,26 +402,38 @@ class MailMessage(models.Model):
         if self.env.context.get('_generating_sql_for_fields'):
             raise ValueError("Cannot generate SQL for whole mail.message")
 
+        return super()._search(domain, offset, limit, order, bypass_access=bypass_access, **kwargs)
+
+    def _compute_res_access(self, field_name: str):
+        _, _, operation = field_name.rpartition('_')
+        assert self.env.su
+        if not self or not self.browse().sudo(False).has_access(operation):
+            self[field_name] = False
+            return
+
+        # Non-employee see only messages with a subtype and not internal
+        query = self.sudo()._search(self._get_search_domain_share() & Domain('id', 'in', self.ids))
+        accessible_messages = self.sudo(False)._filter_accessible_from_query(query, operation)
+        accessible_messages[field_name] = True
+        (self - accessible_messages)[field_name] = False
+
+    def _search_res_access(self, operation, domain_operator):
+        assert self.env.su
+        if domain_operator != 'in':
+            return NotImplemented
+        domain = self.env.context.get('search_domain')
+        if not isinstance(domain, Domain):
+            domain = Domain.TRUE
         # Non-employee see only messages with a subtype and not internal
         domain = self._get_search_domain_share() & domain
-        domain = domain.optimize_dynamic(self)
-
-        # search by ids
-        if condition_values(self, 'id', domain) is not None:
-            query = super()._search(domain, order=order, **kwargs)
-            records = self.browse()._filter_accessible_from_query(query, 'read')
-            if offset > 0:
-                records = records[offset:]
-            if limit is not None:
-                records = records[:limit]
-            return records._as_query(ordered=bool(order))
+        self = self.sudo(False)  # noqa: PLW0642
 
         # searching for all messages or a subset of models
         res_model_names = condition_values(self, 'model', domain) or ()
-        if not (0 < len(res_model_names) <= MAX_COMODELS_FOR_DOMAIN):
-            query = super()._search(domain, offset, limit, order, **kwargs)
-            records = self.browse()._filter_accessible_from_query(query, 'read')
-            return records._as_query(ordered=bool(order))
+        if operation != 'read' or not (0 < len(res_model_names) <= MAX_COMODELS_FOR_DOMAIN):
+            query = super(MailMessage, self.sudo())._search(domain, order='id')
+            records = self.browse()._filter_accessible_from_query(query, operation)
+            return Domain('id', 'any!', records._as_query(ordered=False))
 
         # search by model and res_id
         model_codomains = Domain.FALSE  # (model = a & res_id in ...) | (model = b & ...)
@@ -437,7 +455,7 @@ class MailMessage(models.Model):
             # (because the rules are applied with sudo permissions) and search.
             comodel_domain = Domain.FALSE
             comodel_domain_remaining = Domain.TRUE
-            for domain_operation, doc_operation in comodel._mail_get_operation_for_mail_message_operation('read'):
+            for domain_operation, doc_operation in comodel._mail_get_operation_for_mail_message_operation(operation):
                 domain_operation, comodel_domain_remaining = (
                     comodel_domain_remaining & domain_operation,
                     comodel_domain_remaining & ~domain_operation,
@@ -472,15 +490,18 @@ class MailMessage(models.Model):
             model_codomains & Domain('message_type', '!=', 'user_notification'),
         ))
 
-        return super()._search(domain, offset, limit, order, **kwargs)
+        return domain
 
     def _get_search_domain_share(self):
         if self.env.user._is_internal():
             return Domain.TRUE
         return Domain('is_internal', '=', False) & Domain('subtype_id.internal', '=', False)
 
-    def _check_access(self, operation: str) -> tuple | None:
-        """ Access rules of mail.message:
+    def _filter_accessible_from_query(self, query: models.Query, operation: str) -> Self:
+        """ Return the subset of ``self`` that satisfies the specific conditions
+        for messages. Flush current recordset or the model on empty self.
+
+        Access rules of mail.message:
             - read: if any
                 - author_id == pid, uid is the author
                 - create_uid == uid, uid is the creator
@@ -506,27 +527,6 @@ class MailMessage(models.Model):
         Global restriction: non employee users cannot see internal messages (aka logs):
         'is_internal' flag on message, 'internal' flag on subtype.
         """
-        result = super()._check_access(operation)
-        if not self:
-            return result
-
-        # discard forbidden records, and check remaining ones
-        messages = self - result[0] if result else self
-
-        query = self.sudo()._search(self._get_search_domain_share() & Domain('id', 'in', messages.ids), active_test=False)
-        accessible_messages = messages._filter_accessible_from_query(query, operation)
-        if messages != accessible_messages:
-            forbidden = messages - accessible_messages
-            if result:
-                result = (result[0] + forbidden, result[1])
-            else:
-                result = (forbidden, lambda: forbidden._make_access_error(operation))
-        return result
-
-    def _filter_accessible_from_query(self, query: models.Query, operation: str) -> Self:
-        """ Return the subset of ``self`` that satisfies the specific conditions
-        for messages. Flush current recordset or the model on empty self.
-        """
         assert query._model._name == self._name
         if query.is_empty():
             return self.browse()
@@ -544,6 +544,8 @@ class MailMessage(models.Model):
 
         # Non internal users see only non-private messages
         table = query.table
+        if query.limit is None:
+            query.limit = MAX_SEARCH_LIMIT
         if operation in ('read', 'write'):
             id_sql = table.id
             query.groupby = id_sql
@@ -569,6 +571,8 @@ class MailMessage(models.Model):
             values['id']: values
             for values in self.env.cr.dictfetchall()
         }
+        if len(messages_to_check) == MAX_SEARCH_LIMIT:  # avoid out of memory
+            raise UserError(self.env._("Cannot search, too many messages"))
         accessible = self.browse(messages_to_check)
         if not messages_to_check:
             return accessible
@@ -651,17 +655,23 @@ class MailMessage(models.Model):
 
         return accessible - self.browse(messages_to_check)
 
-    def _make_access_error(self, operation: str) -> AccessError:
-        return AccessError(_(
-            "The requested operation cannot be completed due to security restrictions. "
-            "Please contact your system administrator.\n\n"
-            "(Document type: %(type)s, Operation: %(operation)s)\n\n"
-            "Records: %(records)s, User: %(user)s",
-            type=self._description,
-            operation=operation,
-            records=self.ids[:6],
-            user=self.env.uid,
-        ))
+    def _check_access(self, operation):
+        res = super()._check_access(operation)
+        if not res:
+            return None
+        forbidden = res[0]
+        return forbidden, lambda: (
+            AccessError(self.env._(
+                "The requested operation cannot be completed due to security restrictions. "
+                "Please contact your system administrator.\n\n"
+                "(Document type: %(type)s, Operation: %(operation)s)\n\n"
+                "Records: %(records)s, User: %(user)s",
+                type=self._description,
+                operation=operation,
+                records=forbidden.ids[:6],
+                user=self.env.uid,
+            ))
+        )
 
     def _get_with_access(self, mode="read", **kwargs):
         if not self:
