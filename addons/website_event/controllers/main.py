@@ -223,7 +223,7 @@ class WebsiteEventController(http.Controller):
             # Every event page view should have its own SEO.
             page = view.key if view else page
             website = request.env['website'].get_current_website()
-            values['seo_object'] = website.get_template(page)
+            values['seo_object'] = self.env['ir.ui.view'].with_context(website_id=website.id)._get_template_view(page).sudo()
             values['main_object'] = event
         except ValueError:
             # page not found
