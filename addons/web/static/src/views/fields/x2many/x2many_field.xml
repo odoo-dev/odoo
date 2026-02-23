@@ -21,6 +21,7 @@
                                 className="`${control.className}`"
                                 clickParams="control.clickParams"
                                 icon="control.icon"
+                                icon_class="control.icon_class"
                                 record="props.record.data[props.name]"
                                 string="control.string"
                                 title="control.title"
