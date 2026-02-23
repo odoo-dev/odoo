@@ -18,7 +18,7 @@
         t-att-tabindex="props.tabindex"
         t-custom-click.stop="onClick"
     >
-      <t t-if="icon" t-tag="icon.tag" t-att-class="icon.class + (buttonLabel ? ' me-1' : '')" t-att-src="icon.src"/>
+      <t t-if="icon" t-tag="icon.tag" t-att-class="icon.class + (buttonLabel ? ' me-1' : '') + ' ' + props.icon_class" t-att-src="icon.src" t-att-data-icon="icon.name"/>
       <t t-slot="contents"><span t-if="buttonLabel" t-out="buttonLabel"/></t>
     </t>
   </t>
