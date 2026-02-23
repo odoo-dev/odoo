@@ -327,7 +327,7 @@ class TestPermissions(TransactionCaseWithUserDemo):
             """
             SELECT "ir_attachment"."id"
             FROM "ir_attachment"
-            WHERE ("ir_attachment"."res_field" IN %s AND "ir_attachment"."res_id" IN %s AND "ir_attachment"."res_model" IN %s AND (
+            WHERE ("ir_attachment"."res_field" IN %s AND "ir_attachment"."res_id" IN %s AND "ir_attachment"."res_model" IN %s) AND (
                 "ir_attachment"."public" IS TRUE
                 OR (
                     ("ir_attachment"."res_field" IN %s OR "ir_attachment"."res_field" IS NULL)
@@ -341,7 +341,7 @@ class TestPermissions(TransactionCaseWithUserDemo):
                     )
                     AND "ir_attachment"."res_model" IN %s
                 )
-            ))
+            )
             ORDER BY "ir_attachment"."id" DESC
             """
         ]):
