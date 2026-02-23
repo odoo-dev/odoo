@@ -57,7 +57,7 @@
                     class="oe_stat_button"
                     type="object"
                     name="action_view_sos"
-                    icon="fa-dollar"
+                    icon="attach_money"
                     invisible="not display_sales_stat_buttons or sale_order_count == 0 or is_template"
                     groups="sales_team.group_sale_salesman_all_leads"
                     context="{
@@ -78,7 +78,7 @@
                     class="oe_stat_button"
                     type="object"
                     name="action_view_sos"
-                    icon="fa-dollar"
+                    icon="attach_money"
                     invisible="not display_sales_stat_buttons or sale_order_count != 0 or is_template"
                     groups="sales_team.group_sale_salesman_all_leads"
                     context="{
@@ -187,7 +187,7 @@
         <field name="arch" type="xml">
             <xpath expr="//span[@id='start_rating_buttons']" position="before">
                 <button class="oe_stat_button"
-                        type="object" name="action_view_so" icon="fa-dollar"
+                        type="object" name="action_view_so" icon="attach_money"
                         invisible="not sale_order_id or has_template_ancestor or has_project_template"
                         groups="sales_team.group_sale_salesman">
                         <div class="o_stat_info">
@@ -342,7 +342,7 @@
                 </group>
             </xpath>
             <xpath expr="//button[@name='%(project.action_view_task_from_milestone)d']" position="before">
-                <button name="action_view_sale_order" type="object" class="oe_stat_button" icon="fa-dollar" invisible="not sale_line_id">
+                <button name="action_view_sale_order" type="object" class="oe_stat_button" icon="attach_money" invisible="not sale_line_id">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Sales Order</span>
                     </div>

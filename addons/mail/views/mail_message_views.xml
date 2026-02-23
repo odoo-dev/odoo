@@ -27,7 +27,7 @@
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button name="action_open_document"
-                                type="object" class="oe_link" icon="fa-file-text-o"
+                                type="object" class="oe_link" icon="article"
                                 invisible="not model or res_id == 0">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Open Document</span>

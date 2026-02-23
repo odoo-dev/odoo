@@ -8,7 +8,7 @@
         <form string="Forum Post">
             <sheet>
                 <div class="oe_button_box" name="button_box">
-                    <button type="object" class="oe_stat_button" icon="fa-globe" name="go_to_website">
+                    <button type="object" class="oe_stat_button" icon="public" name="go_to_website">
                         <div class="o_form_field o_stat_info">
                             <span class="o_stat_text">Go to <br/>Website</span>
                         </div>

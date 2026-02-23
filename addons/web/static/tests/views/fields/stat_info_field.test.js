@@ -23,10 +23,11 @@ test("StatInfoField formats decimal precision", async () => {
         resId: 1,
         arch: /* xml */ `
             <form>
-                <button class="oe_stat_button" name="items" icon="fa-gear">
+            <!-- // TODO: add oi-filled -->
+                <button class="oe_stat_button" name="items" icon="settings">
                     <field name="qux" widget="statinfo" />
                 </button>
-                <button class="oe_stat_button" name="money" icon="fa-money">
+                <button class="oe_stat_button" name="money" icon="payments">
                     <field name="monetary" widget="statinfo" />
                 </button>
             </form>
@@ -49,7 +50,8 @@ test("StatInfoField with 'hide_trailing_zeros' option", async () => {
         resId: 1,
         arch: /* xml */ `
             <form>
-                <button class="oe_stat_button" name="items" icon="fa-gear">
+            <!-- // TODO: add oi-filled -->
+                <button class="oe_stat_button" name="items" icon="settings">
                     <field name="bar" widget="statinfo" options="{'hide_trailing_zeros': true}" />
                 </button>
             </form>
@@ -68,7 +70,8 @@ test("StatInfoField widget on a chart fields", async () => {
         resId: 1,
         arch: /* xml */ `
             <form>
-                <button class="oe_stat_button" name="items" icon="fa-gear">
+            <!-- // TODO: add oi-filled -->
+                <button class="oe_stat_button" name="items" icon="settings">
                     <field name="foo" widget="statinfo" />
                 </button>
             </form>
@@ -86,7 +89,8 @@ test("StatInfoField widget on a char field (unset value)", async () => {
         resId: 1,
         arch: /* xml */ `
             <form>
-                <button class="oe_stat_button" name="items" icon="fa-gear">
+            <!-- // TODO: add oi-filled -->
+                <button class="oe_stat_button" name="items" icon="settings">
                     <field name="foo" widget="statinfo" />
                 </button>
             </form>
@@ -105,7 +109,8 @@ test("StatInfoField widget on a one2many field (one record)", async () => {
         resId: 2,
         arch: /* xml */ `
             <form>
-                <button class="oe_stat_button" name="items" icon="fa-gear">
+            <!-- // TODO: add oi-filled -->
+                <button class="oe_stat_button" name="items" icon="settings">
                     <field name="child_ids" widget="statinfo" />
                 </button>
             </form>
@@ -126,7 +131,8 @@ test("StatInfoField widget on a one2many field (multiple records)", async () => 
         resId: 2,
         arch: /* xml */ `
             <form>
-                <button class="oe_stat_button" name="items" icon="fa-gear">
+            <!-- // TODO: add oi-filled -->
+                <button class="oe_stat_button" name="items" icon="settings">
                     <field name="child_ids" widget="statinfo" />
                 </button>
             </form>
@@ -147,7 +153,8 @@ test("StatInfoField widget on a many2one field", async () => {
         resId: 2,
         arch: /* xml */ `
             <form>
-                <button class="oe_stat_button" name="items" icon="fa-gear">
+            <!-- // TODO: add oi-filled -->
+                <button class="oe_stat_button" name="items" icon="settings">
                     <field name="parent_id" widget="statinfo" />
                 </button>
             </form>
@@ -166,7 +173,8 @@ test("StatInfoField in form view on desktop", async () => {
         arch: /* xml */ `
             <form>
                 <div class="oe_button_box" name="button_box">
-                    <button class="oe_stat_button" name="items" type="object" icon="fa-gear">
+                <!-- // TODO: add oi-filled -->
+                    <button class="oe_stat_button" name="items" type="object" icon="settings">
                         <field name="int_field" widget="statinfo" />
                     </button>
                 </div>
@@ -194,7 +202,8 @@ test("StatInfoField in form view on mobile", async () => {
         arch: /* xml */ `
             <form>
                 <div class="oe_button_box" name="button_box">
-                    <button class="oe_stat_button" name="items" type="object" icon="fa-gear">
+                <!-- // TODO: add oi-filled -->
+                    <button class="oe_stat_button" name="items" type="object" icon="settings">
                         <field name="int_field" widget="statinfo" />
                     </button>
                 </div>
@@ -224,7 +233,8 @@ test("StatInfoField in form view with specific label_field on desktop", async ()
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="items" type="object" icon="fa-gear">
+                    <!-- // TODO: add oi-filled -->
+                        <button class="oe_stat_button" name="items" type="object" icon="settings">
                             <field string="Useful stat button" name="int_field" widget="statinfo" options="{'label_field': 'foo'}" />
                         </button>
                     </div>
@@ -257,7 +267,8 @@ test("StatInfoField in form view with specific label_field on mobile", async () 
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="items" type="object" icon="fa-gear">
+                    <!-- // TODO: add oi-filled -->
+                        <button class="oe_stat_button" name="items" type="object" icon="settings">
                             <field string="Useful stat button" name="int_field" widget="statinfo" options="{'label_field': 'foo'}" />
                         </button>
                     </div>
@@ -291,7 +302,8 @@ test("StatInfoField in form view with no label on desktop", async () => {
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="items" type="object" icon="fa-gear">
+                    <!-- // TODO: add oi-filled -->
+                        <button class="oe_stat_button" name="items" type="object" icon="settings">
                             <field string="Useful stat button" name="int_field" widget="statinfo" nolabel="1" />
                         </button>
                     </div>
@@ -320,7 +332,8 @@ test("StatInfoField in form view with no label on mobile", async () => {
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="items" type="object" icon="fa-gear">
+                    <!-- // TODO: add oi-filled -->
+                        <button class="oe_stat_button" name="items" type="object" icon="settings">
                             <field string="Useful stat button" name="int_field" widget="statinfo" nolabel="1" />
                         </button>
                     </div>

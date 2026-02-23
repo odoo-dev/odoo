@@ -49,23 +49,23 @@
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button name="%(slide_slide_partner_action_from_slide)d"
-                                    class="oe_stat_button" type="action" icon="fa-graduation-cap"
+                                    class="oe_stat_button" type="action" icon="school"
                                     invisible="slide_views == 0">
                                 <field name="slide_views" widget="statinfo" string="Attendees"/>
                             </button>
-                            <button disabled="1" icon="fa-thumbs-up" class="oe_stat_button"
+                            <button disabled="1" icon="thumb_up" icon_class="oi-filled" class="oe_stat_button"
                                 invisible="channel_type == 'training' or likes == 0">
                                 <field class="ms-1" name="likes" widget="statinfo" string="Likes"/>
                              </button>
-                             <button disabled="1" icon="fa-thumbs-down" class="oe_stat_button"
+                             <button disabled="1" icon="thumb_down" icon_class="oi-filled" class="oe_stat_button"
                                 invisible="channel_type == 'training' or dislikes == 0">
                                 <field class="ms-1" name="dislikes" widget="statinfo" string="Dislikes"/>
                              </button>
-                             <button disabled="1" icon="fa-comments" class="oe_stat_button"
+                             <button disabled="1" icon="forum" icon_class="oi-filled" class="oe_stat_button"
                                  invisible="not channel_allow_comment or comments_count == 0">
                                 <field class="ms-1" name="comments_count" widget="statinfo" string="Comments"/>
                             </button>
-                            <button name="action_view_embeds" class="oe_stat_button" type="object" icon="fa-share-alt"
+                            <button name="action_view_embeds" class="oe_stat_button" type="object" icon="family_history"
                                 invisible="embed_count == 0">
                                 <div class="o_stat_info">
                                     <span class="o_stat_value"><field name="embed_count"/></span>

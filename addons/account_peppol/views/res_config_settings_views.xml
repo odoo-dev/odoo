@@ -102,12 +102,12 @@
                                     type="object"
                                     string="Reconnect this database"
                                     class="btn btn-primary"
-                                    icon="fa-refresh"/>
+                                    icon="refresh"/>
                                 <button name="button_disconnect_this_database"
                                     type="object"
                                     string="Disconnect this database"
                                     class="btn btn-danger"
-                                    icon="fa-unlink"/>
+                                    icon="link_off"/>
                             </div>
                         </div>
                     </div>

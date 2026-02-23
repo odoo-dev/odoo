@@ -662,7 +662,7 @@ describe("fullscreen", () => {
             </form>`;
         Partner._views["form,666"] = `
             <form>
-                <button type="action" name="15" icon="fa-star" context="{'default_partner': id}" class="oe_stat_button"/>
+                <button type="action" name="15" icon="star" icon_class="oi-filled" context="{'default_partner': id}" class="oe_stat_button"/>
             </form>`;
 
         await mountWithCleanup(WebClient);

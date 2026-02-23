@@ -12,7 +12,7 @@
                         <button name="%(delivery.action_delivery_carrier_form)d"
                                 type="action"
                                 class="btn-link"
-                                icon="oi-arrow-right"
+                                icon="east"
                                 string="Delivery Methods"/>
                     </div>
                  </div>

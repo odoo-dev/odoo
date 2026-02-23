@@ -11,7 +11,7 @@
             </xpath>
             <xpath expr="//sheet/div[hasclass('oe_button_box')]" position="inside">
                 <button name="action_view_attendee_list" type="object"
-                    class="oe_stat_button" icon="fa-users" invisible="attendee_count == 0">
+                    class="oe_stat_button" icon="group" icon_class="oi-filled" invisible="attendee_count == 0">
                     <field name="attendee_count" widget="statinfo" string="Attendees"/>
                 </button>
             </xpath>

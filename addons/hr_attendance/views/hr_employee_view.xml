@@ -18,7 +18,7 @@
                 <field name="hours_last_month" groups="hr_attendance.group_hr_attendance_officer" invisible="1"/>
                 <button name="action_open_last_month_attendances"
                         class="oe_stat_button"
-                        icon="fa-clock-o"
+                        icon="schedule"
                         type="object"
                         groups="hr_attendance.group_hr_attendance_officer"
                         help="Worked hours this month">

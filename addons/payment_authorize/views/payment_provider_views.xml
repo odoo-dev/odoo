@@ -14,7 +14,7 @@
                     <label for="authorize_client_key"/>
                     <div class="o_row" col="2">
                         <field name="authorize_client_key"/>
-                        <button class="oe_link" icon="fa-refresh" type="object"
+                        <button class="oe_link" icon="refresh" type="object"
                                 name="action_update_merchant_details"
                                 string="Generate Client Key"/>
                     </div>
@@ -26,7 +26,7 @@
                         type="object"
                         name="action_update_merchant_details"
                         invisible="code != 'authorize'"
-                        icon="fa-refresh"
+                        icon="refresh"
                         class="oe_link"/>
             </div>
         </field>

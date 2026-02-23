@@ -141,7 +141,8 @@
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_employees"
                             class="oe_stat_button"
-                            icon="fa-users"
+                            icon="group"
+                            icon_class="oi-filled"
                             invisible="employee_count == 0"
                             context="{'active_test': False}"
                             type="object">
@@ -199,7 +200,8 @@
                 <xpath expr="//div[@name='button_box']" position="inside">
                     <button name="action_open_employees"
                         class="oe_stat_button"
-                        icon="fa-users"
+                        icon="group"
+                        icon_class="oi-filled"
                         invisible="employee_count == 0"
                         context="{'active_test': False}"
                         type="object">
@@ -207,7 +209,7 @@
                     </button>
                     <button name="action_related_contact"
                         class="oe_stat_button"
-                        icon="fa-address-card-o"
+                        icon="contact_mail"
                         type="object"
                         help="Related Contact">
                         <div class="o_stat_info">

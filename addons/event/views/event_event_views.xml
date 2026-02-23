@@ -25,7 +25,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box" groups="base.group_user">
                         <button name="%(event.event_registration_action_stats_from_event)d"
-                                type="action" class="oe_stat_button" icon="fa-line-chart">
+                                type="action" class="oe_stat_button" icon="show_chart">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">
                                     Registration
@@ -36,14 +36,15 @@
                                 type="action"
                                 context="{'search_default_expected': True}"
                                 class="oe_stat_button"
-                                icon="fa-users"
+                                icon="group"
+                                icon_class="oi-filled"
                                 help="Total Registrations for this Event">
                             <field name="seats_taken" widget="statinfo" string="Attendees"/>
                         </button>
                         <button name="action_open_slot_calendar"
                                 type="object"
                                 class="oe_stat_button"
-                                icon="fa-calendar"
+                                icon="calendar_today"
                                 invisible="not is_multi_slots">
                             <field name="event_slot_count" widget="statinfo" string="Slots"/>
                         </button>
@@ -137,7 +138,7 @@
                                     <button name="action_view_question_answers"
                                         type="object"
                                         class="p-0"
-                                        icon="fa-bar-chart pe-1"
+                                        icon="bar_chart"
                                         string="Stats"
                                         title="Answer Breakdown"
                                         context="{'search_default_event_id': parent.id}"
