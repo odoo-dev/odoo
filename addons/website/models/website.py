@@ -1442,7 +1442,7 @@ class Website(models.CachedModel):
             # TODO: check if we can remove it
             website_id = self.sudo().search([], limit=1).id
 
-        return self.browse(website_id)
+        return self.browse(website_id).with_context(website_id=website_id)
 
     @api.model
     @tools.ormcache('website_id')
@@ -1554,12 +1554,6 @@ class Website(models.CachedModel):
             Return True if active, False if not active, None if not found
         """
         return self.env['ir.ui.view'].with_context(active_test=False)._get_cached_template_info(key).get('active')
-
-    @api.model
-    def get_template(self, template):
-        if isinstance(template, str) and '.' not in template:
-            template = 'website.%s' % template
-        return self.env['ir.ui.view']._get_template_view(template).sudo()
 
     @api.model
     def pager(self, url, total, page=1, step=30, scope=5, url_args=None):
