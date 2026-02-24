@@ -627,6 +627,18 @@ class AccountMove(models.Model):
         string="Amount total in words",
         compute="_compute_amount_total_words",
     )
+    document_tax_mode = fields.Selection(
+        selection=[
+            ('tax_excluded', "Tax Excl."),
+            ('tax_included', "Tax Incl."),
+        ],
+        compute='_compute_document_tax_mode',
+        precompute=True,
+        store=True,
+        readonly=False,
+        required=True,
+    )
+    disable_tax_mode_selection = fields.Boolean(compute='_compute_disable_tax_mode_selection')
 
     # === Reverse feature fields === #
     reversed_entry_id = fields.Many2one(
@@ -2501,6 +2513,20 @@ class AccountMove(models.Model):
                     lambda line: line.account_type in ('asset_receivable', 'liability_payable'),
                 ).no_followup = move.no_followup
 
+    @api.depends('company_id')
+    def _compute_document_tax_mode(self):
+        for move in self:
+            company = move.company_id or self.env.company
+            move.document_tax_mode = company.account_price_include
+
+    @api.depends('state')
+    def _compute_disable_tax_mode_selection(self):
+        for move in self:
+            if move.state != 'draft' or any(line.sale_line_ids if 'sale_line_ids' in line._fields else False for line in move.invoice_line_ids):
+                move.disable_tax_mode_selection = True
+            else:
+                move.disable_tax_mode_selection = False
+
     # -------------------------------------------------------------------------
     # ALERTS
     # -------------------------------------------------------------------------
@@ -2813,6 +2839,17 @@ class AccountMove(models.Model):
                     'title': _("Warning for Cash Rounding Method: %s", move.invoice_cash_rounding_id.name),
                     'message': _("You must specify the Profit Account (company dependent)")
                 }}
+
+    @api.onchange('document_tax_mode')
+    def _onchange_document_tax_mode(self):
+        for move in self:
+            for line in move.invoice_line_ids:
+                line.document_tax_mode = move.document_tax_mode
+                if not line.product_id:
+                    continue
+                product_taxes = line.product_id.taxes_id if not move.fiscal_position_id else move.fiscal_position_id.map_tax(line.product_id.taxes_id) 
+                if line.tax_ids.ids != product_taxes.ids:
+                    line.tax_ids = line.product_id.taxes_id
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
@@ -3343,7 +3380,8 @@ class AccountMove(models.Model):
         moves_values_before = {
             move: {
                 field: get_value(move, field)
-                for field in ('currency_id', 'partner_id', 'move_type', 'invoice_currency_rate', 'invoice_date')
+                # for field in ('currency_id', 'partner_id', 'move_type', 'invoice_currency_rate', 'invoice_date')
+                for field in ('currency_id', 'partner_id', 'move_type', 'invoice_currency_rate', 'invoice_date', 'document_tax_mode')
             }
             for move in container['records']
             if move.state == 'draft'
@@ -3386,6 +3424,7 @@ class AccountMove(models.Model):
                 and (
                     field_has_changed(moves_values_before, move, 'currency_id')
                     or field_has_changed(moves_values_before, move, 'move_type')
+                    or field_has_changed(moves_values_before, move, 'document_tax_mode')
                 )
             ):
                 # Changing the type of an invoice using 'switch to refund' feature or just changing the currency.

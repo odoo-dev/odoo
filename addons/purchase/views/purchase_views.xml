@@ -238,9 +238,15 @@
                                     </div>
                                 </div>
                         </group>
+                        <div>
+                            <field name="document_tax_mode" class="d-md-none" widget="badges_selection" nolabel="True" readonly="disable_tax_mode_selection"/>
+                        </div>
                     </group>
                     <notebook>
                         <page string="Products" name="products">
+                            <div class="position-relative document_tax_mode">
+                                <field name="document_tax_mode" class="overlap_badge_tab d-none d-md-block" widget="badges_selection" nolabel="True"  readonly="disable_tax_mode_selection"/>
+                            </div>
                             <field name="tax_country_id" invisible="1"/>
                             <field name="order_line"
                                 widget="product_label_section_and_note_field_o2m"
@@ -264,7 +270,7 @@
                                     <field name="state" column_invisible="True"/>
                                     <field name="product_type" column_invisible="True"/>
                                     <field name="invoice_lines" column_invisible="True"/>
-                                    <field name="technical_price_unit" column_invisible="True"/>
+                                    <field name="price_unit_last_computed_vals" column_invisible="True"/>
                                     <field name="sequence" widget="handle"/>
                                     <!-- optional="show" allows name (description) to be editable -->
                                     <field
@@ -295,7 +301,8 @@
                                     <field name="price_unit" readonly="qty_invoiced != 0"/>
                                     <field name="tax_ids" widget="many2many_tax_tags" domain="[('type_tax_use', '=', 'purchase'), ('company_id', 'parent_of', parent.company_id), ('country_id', '=', parent.tax_country_id), ('active', '=', True)]" context="{'default_type_tax_use': 'purchase', 'search_view_ref': 'account.account_tax_view_search'}" options="{'no_create': True}" optional="show" readonly="is_downpayment"/>
                                     <field name="discount" string="Disc.%" width="50px" readonly="qty_invoiced != 0" optional="hide"/>
-                                    <field name="price_subtotal" string="Amount"/>
+                                    <field name="price_subtotal" string="Amount" column_invisible="parent.document_tax_mode == 'tax_included'"/>
+                                    <field name="price_total" string="Amount" column_invisible="parent.document_tax_mode == 'tax_excluded'"/>
                                 </list>
                                 <form string="Purchase Order Line">
                                         <field name="tax_calculation_rounding_method" invisible="1"/>
