@@ -1076,7 +1076,7 @@ class SlideChannel(models.Model):
             'mapping': mapping,
             'icon': 'fa-graduation-cap',
             'group_name': self.env._("Courses"),
-            'sequence': 90,
+            'sequence': 80,
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):

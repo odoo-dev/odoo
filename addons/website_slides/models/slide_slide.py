@@ -1285,8 +1285,6 @@ class SlideSlide(models.Model):
         mapping = {
             'name': {'name': 'name', 'type': 'text', 'match': True},
             'website_url': {'name': 'url', 'type': 'text', 'truncate': False},
-            'extra_link': {'name': 'course', 'type': 'text'},
-            'extra_link_url': {'name': 'course_url', 'type': 'text', 'truncate': False},
             'tags': {'name': 'tag_ids', 'type': 'tags', 'match': True},
             'description': {'name': 'description', 'type': 'text', 'html': True, 'match': True},
         }
@@ -1299,7 +1297,7 @@ class SlideSlide(models.Model):
             'icon': 'fa-shopping-cart',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
             'group_name': self.env._("Course Slides"),
-            'sequence': 80,
+            'sequence': 70,
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):

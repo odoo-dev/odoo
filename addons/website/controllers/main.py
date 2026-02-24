@@ -47,6 +47,7 @@ LOC_PER_SITEMAP = 45000
 SITEMAP_CACHE_TIME = datetime.timedelta(hours=12)
 MAX_FONT_FILE_SIZE = 10 * 1024 * 1024
 SUPPORTED_FONT_EXTENSIONS = ['ttf', 'woff', 'woff2', 'otf']
+FORCE_SHOW_FIELDS = ['name', 'search_item_metadata', 'tags']
 
 
 class QueryURL:
@@ -627,26 +628,25 @@ class Website(Home):
                 'parts': {},
             }
 
-        if options.get("proportionate_allocation") and results_count > limit:
+        if options.get("proportionateAllocation") and results_count > limit:
             """
             Distribute a global result limit proportionally across groups
             based on their contribution to the total results.
 
             Example:
-                Total results across 5 models = 50
+                Total retrieved results across 3 models = 50
                     - M1: 5   (10%)
                     - M2: 10  (20%)
-                    - M3: 20  (40%)
-                    ...
+                    - M3: 35  (70%)
 
                 With limit = 30:
-                    - M1 → 10% of 30 = 3
-                    - M2 → 20% of 30 = 6
-                    - M3 → 40% of 30 = 12
-                    ...
+                    - M1 → 10% of 30 ≈ 3
+                    - M2 → 20% of 30 ≈ 6
+                    - M3 → 70% of 30 ≈ 21
 
-            Each group receives:
-                (group_count / total_count) * limit
+            Note:
+                Due to rounding and minimum allocation guarantees,
+                the total number of allocated results may slightly exceed `limit`.
             """
             total_obtained_results = sum(len(m.get("results", [])) for m in search_results)
             for model in search_results:
@@ -666,20 +666,20 @@ class Website(Home):
         mappings = []
         result = {}
         for search_result in search_results:
-            if not len(search_result['results_data']):
+            if not search_result['results_data']:
                 continue
             mappings.append(search_result['mapping'])
             group_name = search_result.get('group_name')
             group_key = search_result.get('model').replace('.', '_')
             result_data = []
+            model = request.env[search_result['model']]
             for record in search_result['results_data']:
-                model = request.env[search_result['model']]
                 mapping = record['_mapping']
                 mapped = {
                     '_fa': record.get('_fa'),
                 }
                 skip_matching_area = False
-                for mapped_name, field_meta in list(mapping.items()):
+                for mapped_name, field_meta in mapping.items():
                     value = record.get(field_meta.get('name'))
                     if not value:
                         mapped[mapped_name] = ''
@@ -690,7 +690,7 @@ class Website(Home):
 
                     if field_meta.get('match'):
                         # If one field matches, we skip matching areas.
-                        if skip_matching_area and mapped_name not in ['name', 'search_item_metadata', 'tags'] and not field_meta.get('force_show'):
+                        if skip_matching_area and mapped_name not in FORCE_SHOW_FIELDS and not field_meta.get('force_show'):
                             continue
                         skip_field, value, field_type = model._search_highlight_field(field_meta, value, term)
                         if skip_field:
@@ -702,7 +702,7 @@ class Website(Home):
                     if field_type not in ('image', 'binary') and qweb_field in request.env:
                         opt = {}
                         if field_type == 'monetary':
-                            opt['display_currency'] = options['display_currency']
+                            opt['display_currency'] = options.get('display_currency')
                         elif field_type == 'float':
                             opt['precision'] = field_meta.get('precision', 2)
                         value = request.env[qweb_field].value_to_html(value, opt)
@@ -788,16 +788,16 @@ class Website(Home):
     @http.route('/website/load_more_search', type='jsonrpc', auth="public", website=True, readonly=True)
     def load_more_search(self, search='', search_type='all', offset=0, limit=24, **kwargs):
         """
-            Returns rendered HTML of next search results in website.list_hybrid
+        Load the next batch of search results for the hybrid website search view.
 
-            :param str search: search term written by the user
-            :param str search_type: indicates what to search within, 'all' matches all available types
-            :param int offset: number of results to skip, defaults to 0
-            :param int limit: number of results to consider, defaults to 24
+        :param str search: Search term entered by the user.
+        :param str search_type: Scope of the search. 'all' searches across all models.
+        :param int offset: Number of records to skip.
+        :param int limit: Maximum number of records to fetch in this batch.
 
-            :returns: tuple (html, has_more):
-                - html (str): rendered HTML of next search results
-                - has_more (bool): indicates if there are more results to load for offset
+        :returns: tuple (html, has_more)
+            - html (str): Rendered HTML for the next batch of results.
+            - has_more (bool): Whether more results remain beyond the current batch.
         """
         options = self._get_hybrid_search_options(**kwargs)
         max_nb_chars = kwargs.get('max_nb_chars')

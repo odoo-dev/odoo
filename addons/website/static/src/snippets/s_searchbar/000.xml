@@ -20,12 +20,10 @@
                         </span>
                     </div>
                     <div class="o_search_result_description d-empty-none">
-                        <!-- TODO in result priority: Add a <t t-if="module_speficic_matching_area"/> -->
+                        <!-- Add a <t t-if="module_speficic_matching_area"/> -->
                         <t t-if="result['tags']" t-out="result['tags']"/>
-                        <p
-                            t-elif="result['description'] || result['body']"
-                            class="mb-0 small"
-                            t-out="result['description'] || result['body']"
+                        <p t-elif="result['description']" class="mb-0 small"
+                            t-out="result['description']"
                         />
                     </div>
                 </div>
@@ -85,9 +83,7 @@
                       class="o_searchbar_form s_searchbar_input"
                       t-att-action="action"
                       data-snippet="s_searchbar_input">
-                    <div role="search"
-                         class="o_search_input_group input-group cursor-pointer"
-                         data-force-modal-trigger="True">
+                    <div role="search" class="o_search_input_group input-group cursor-pointer">
                         <input
                             type="search"
                             name="search"
@@ -98,18 +94,15 @@
                             t-att-data-search-type="searchType"
                             t-att-autocomplete="autocomplete"/>
                         <button type="submit"
+                                class="bg-light btn btn-link oe_search_button opacity-100"
                                 aria-label="Search"
                                 title="Search"
-                                disable="true"
-                                class="bg-light btn btn-link oe_search_button opacity-100">
+                                disable="true">
                             <span class="o_search_spinner d-none spinner-border spinner-border-sm text-500"
                                   style="--spinner-border-width: 0.1em;"
                                   role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </span>
-                            <small class="o_search_found_results_action d-none text-primary">
-                                <span class="o_search_count"></span>
-                            </small>
                             <small class="o_search_found_results d-none text-muted">
                                 <span class="o_search_count"></span>
                             </small>

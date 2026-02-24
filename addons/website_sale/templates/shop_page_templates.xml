@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Search render results display -->
-    <template id="website_sale.product_category_extra_link" name="Product Category Extra Link">
-        <t t-foreach="categories" t-as="category">
-            <button
-                class="btn btn-link btn-sm p-0 text-wrap smaller"
-                t-out="category.name"
-                t-attf-onclick="location.href='#{shop_path}/category/#{slug(category)}';return false;"
-            />
-        </t>
-    </template>
-
     <!-- Search Bar input-group template -->
     <template id="website_sale.search" name="Search Box" active="True">
         <t t-call="website.website_search_box_input"
@@ -537,7 +526,6 @@
                 </div>
                 <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_website_sale_products_2"/>
             </div>
-            <t t-if="category" t-set="placeholder" t-valuef.translate="Search in {{category.name}}"/>
         </t>
     </template>
 

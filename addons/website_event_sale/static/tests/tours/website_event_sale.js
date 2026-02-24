@@ -20,7 +20,7 @@ registry.category("web_tour.tours").add("event_buy_tickets", {
         },
         {
             content: "Try reaching maximum `Standard` ticket orderable",
-            trigger: ".modal div[name='Standard'] input",
+            trigger: ".modal input:eq(1)",
             run: "edit 1234",
         },
         {
@@ -29,7 +29,7 @@ registry.category("web_tour.tours").add("event_buy_tickets", {
         },
         {
             content: "Reset to 0",
-            trigger: ".modal div[name='Standard'] input",
+            trigger: ".modal input:eq(1)",
             run: "edit 0"
         },
         {
@@ -39,7 +39,7 @@ registry.category("web_tour.tours").add("event_buy_tickets", {
         },
         {
             content: "Try reaching maximum `VIP` ticket orderable",
-            trigger: ".modal div[name='VIP'] input",
+            trigger: ".modal input:eq(2)",
             run: "edit 2002",
         },
         {
@@ -48,7 +48,7 @@ registry.category("web_tour.tours").add("event_buy_tickets", {
         },
         {
             content: "Edit 2 units of `VIP` ticket type",
-            trigger: ".modal div[name='VIP'] input",
+            trigger: ".modal input:eq(2)",
             run: "edit 2",
         },
         {

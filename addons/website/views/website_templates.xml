@@ -3129,9 +3129,6 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
                 role="status">
                 <span class="visually-hidden">Loading...</span>
             </span>
-            <small class="o_search_found_results_action d-none text-primary">
-                <span class="o_search_count" t-out="search_count_string"/>
-            </small>
             <small t-attf-class="o_search_found_results {{'d-none' if not search else ''}} text-muted">
                 <span class="o_search_count" t-out="search_count_string"/>
             </small>
@@ -3221,12 +3218,6 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
                             style="--lines-clamp: 1;"
                             t-out="result['description']"
                         />
-                        <p
-                            t-elif="result.get('body')"
-                            class="o_line_clamp mb-0 small"
-                            style="--lines-clamp: 1;"
-                            t-out="result['body']"
-                        />
                     </div>
                 </div>
             </a>
@@ -3299,6 +3290,9 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
     <!--
         By default the search_input will be displayed and triggers a dialog on
         small viewports or if the input is under a certain width.
+        For every search, a form is always present in the DOM. The search modal
+        is then prepared dynamically based on that form.
+
             - '_simple_button_layout': renders a "simple" button to trigger the
                 dialog instead of rendering the search_input.
     -->
@@ -3402,23 +3396,16 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
     </xpath>
 </template>
 
-<!--
-    This template allows to use the website_search_box_input many times keeping
-    the same parameters (eg. header desktop + header mobile)
--->
-<template id="header_search_box_input" name="Header Search Box Input">
-    <t t-call="website.website_search_box_input"
-        search_type.f="all"
-        action.f="/website/search"
-        limit="limit or '30'"/>
-</template>
 
 <!-- Extra element : Search -->
 <template id="website.placeholder_header_search_box" name="Placeholder Header Search Bar"/>
 <template id="website.header_search_box" inherit_id="website.placeholder_header_search_box" name="Header Search Bar" active="True">
     <xpath expr="." position="inside">
         <li t-attf-class="#{_item_class}">
-            <t t-call="website.header_search_box_input"/>
+            <t t-call="website.website_search_box_input"
+                search_type.f="all"
+                action.f="/website/search"
+                limit="limit or '30'"/>
         </li>
     </xpath>
 </template>
