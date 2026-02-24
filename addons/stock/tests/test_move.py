@@ -5707,13 +5707,13 @@ class TestStockMove(TestStockCommon):
         aggregate_val_2 = aggregate_values[f'{product2.id}_{product2.name}_Description2_{sml2.uom_id.id}_{sml2.move_id.packaging_uom_id.id}']
         aggregate_val_3 = aggregate_values[f'{product3.id}_{product3.name}_Description3_{sml3.uom_id.id}_{sml3.move_id.packaging_uom_id.id}']
         aggregate_val_4 = aggregate_values[f'{product4.id}_{product4.name}__{sml4.uom_id.id}_{sml4.move_id.packaging_uom_id.id}']
-        self.assertEqual(aggregate_val_1['qty_ordered'], 4)
+        self.assertEqual(aggregate_val_1['qty_ordered'], 10)
         self.assertEqual(aggregate_val_1['quantity'], 4)
-        self.assertEqual(aggregate_val_2['qty_ordered'], 8)
+        self.assertEqual(aggregate_val_2['qty_ordered'], 10)
         self.assertEqual(aggregate_val_2['quantity'], 6)
         self.assertEqual(aggregate_val_3['qty_ordered'], 10)
         self.assertEqual(aggregate_val_3['quantity'], 7)
-        self.assertEqual(aggregate_val_4['qty_ordered'], 8)
+        self.assertEqual(aggregate_val_4['qty_ordered'], 10)
         self.assertEqual(aggregate_val_4['quantity'], 8)
         # Check line descriptions
         self.assertFalse(aggregate_val_1['description'])
@@ -5754,13 +5754,13 @@ class TestStockMove(TestStockCommon):
         aggregate_val_2 = aggregate_values[f'{product2.id}_{product2.name}_Description2_{sml2.uom_id.id}_{sml2.move_id.packaging_uom_id.id}']
         aggregate_val_3 = aggregate_values[f'{product3.id}_{product3.name}_Description3_{sml3.uom_id.id}_{sml3.move_id.packaging_uom_id.id}']
         aggregate_val_4 = aggregate_values[f'{product4.id}_{product4.name}__{sml4.uom_id.id}_{sml4.move_id.packaging_uom_id.id}']
-        self.assertEqual(aggregate_val_1['qty_ordered'], 4)
+        self.assertEqual(aggregate_val_1['qty_ordered'], 10)
         self.assertEqual(aggregate_val_1['quantity'], 4)
-        self.assertEqual(aggregate_val_2['qty_ordered'], 8)
+        self.assertEqual(aggregate_val_2['qty_ordered'], 10)
         self.assertEqual(aggregate_val_2['quantity'], 6)
         self.assertEqual(aggregate_val_3['qty_ordered'], 10)
         self.assertEqual(aggregate_val_3['quantity'], 7)
-        self.assertEqual(aggregate_val_4['qty_ordered'], 8)
+        self.assertEqual(aggregate_val_4['qty_ordered'], 10)
         self.assertEqual(aggregate_val_4['quantity'], 8)
         # Checks the values for the second back order.
         aggregate_values = second_backorder.move_line_ids._get_aggregated_product_quantities()
@@ -5769,7 +5769,7 @@ class TestStockMove(TestStockCommon):
         sm2 = second_backorder.move_ids.filtered(lambda ml: ml.product_id == product2)
         aggregate_val_1 = aggregate_values[f'{product3.id}_{product3.name}_Description3_{sml1.uom_id.id}_{sml1.move_id.packaging_uom_id.id}']
         aggregate_val_2 = aggregate_values[f'{product2.id}_{product2.name}_Description2_{sm2.uom_id.id}_{sml2.move_id.packaging_uom_id.id}']
-        self.assertEqual(aggregate_val_1['qty_ordered'], 3)
+        self.assertEqual(aggregate_val_1['qty_ordered'], 10)
         self.assertEqual(aggregate_val_1['quantity'], 3)
         self.assertEqual(aggregate_val_2['qty_ordered'], 2)
         self.assertEqual(aggregate_val_2['quantity'], 0)
