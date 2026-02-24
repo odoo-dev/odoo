@@ -691,7 +691,7 @@ class Website(Home):
 
                     if field_meta.get('match'):
                         # If one field matches, we skip matching areas.
-                        if skip_matching_area and mapped_name not in ['name', 'search_item_metadata']:
+                        if skip_matching_area and mapped_name not in ['name', 'search_item_metadata', 'tags'] and not field_meta.get('force_show'):
                             continue
                         skip_field, value, field_type = model._search_highlight_field(field_meta, value, term)
                         if skip_field:
