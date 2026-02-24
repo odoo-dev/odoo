@@ -11,8 +11,6 @@ export function scan_barcode(barcode) {
             content: `PoS model scan barcode '${barcode}'`,
             trigger: "body", // The element here does not really matter as long as it is present
             run: async ({ press }) => {
-                //To remove after HOOT input event fix.
-                await press("");
                 for (const char of barcode) {
                     await press(char, { shiftKey: /^[A-Z]$/.test(char) });
                 }
