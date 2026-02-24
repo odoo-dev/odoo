@@ -1389,7 +1389,7 @@ class PosOrderLine(models.Model):
         string="Custom Values",
         store=True, readonly=False)
     price_unit = fields.Float(string='Unit Price', digits=0)
-    qty = fields.Float('Quantity', digits='Product Unit of Measure', default=1)
+    qty = fields.Float('Quantity', min_display_digits='Product Unit of Measure', default=1)
     price_subtotal = fields.Monetary(string='Tax Excl.',
         readonly=True, required=True)
     price_subtotal_incl = fields.Monetary(string='Tax Incl.',

@@ -55,17 +55,17 @@ class StockWarehouseOrderpoint(models.Model):
         'uom.uom', 'Unit of Measure', related='product_id.uom_id')
     product_uom_name = fields.Char(string='Product unit of measure label', related='product_uom.display_name', readonly=True)
     product_min_qty = fields.Float(
-        'Min Quantity', digits='Product Unit of Measure', required=True, default=0.0,
+        'Min Quantity', min_display_digits='Product Unit of Measure', required=True, default=0.0,
         compute='_compute_product_min_qty', readonly=False, store=True,
         help="When the virtual stock goes below the Min Quantity specified for this field, Odoo generates "
              "a procurement to bring the forecasted quantity above of this Min Quantity.")
     product_max_qty = fields.Float(
-        'Max Quantity', digits='Product Unit of Measure', required=True, default=0.0,
+        'Max Quantity', min_display_digits='Product Unit of Measure', required=True, default=0.0,
         compute='_compute_product_max_qty', readonly=False, store=True,
         help="When the virtual stock goes below the Min Quantity, Odoo generates "
              "a procurement to bring the forecasted quantity up to (or near to) the Max Quantity specified for this field (or to Min Quantity, whichever is bigger).")
     qty_multiple = fields.Float(
-        'Multiple Quantity', digits='Product Unit of Measure',
+        'Multiple Quantity', min_display_digits='Product Unit of Measure',
         default=1, required=True,
         help="The procurement quantity will be rounded up to a multiple of this field quantity. If it is 0, it is not rounded.")
     group_id = fields.Many2one(
@@ -80,11 +80,11 @@ class StockWarehouseOrderpoint(models.Model):
     lead_days_date = fields.Date(compute='_compute_lead_days')
     route_id = fields.Many2one(
         'stock.route', string='Route', domain="[('product_selectable', '=', True)]")
-    qty_on_hand = fields.Float('On Hand', readonly=True, compute='_compute_qty', digits='Product Unit of Measure')
-    qty_forecast = fields.Float('Forecast', readonly=True, compute='_compute_qty', digits='Product Unit of Measure')
-    qty_to_order = fields.Float('To Order', compute='_compute_qty_to_order', inverse='_inverse_qty_to_order', search='_search_qty_to_order', digits='Product Unit of Measure')
-    qty_to_order_computed = fields.Float('To Order Computed', compute='_compute_qty_to_order_computed', digits='Product Unit of Measure')
-    qty_to_order_manual = fields.Float('To Order Manual', digits='Product Unit of Measure')
+    qty_on_hand = fields.Float('On Hand', readonly=True, compute='_compute_qty', min_display_digits='Product Unit of Measure')
+    qty_forecast = fields.Float('Forecast', readonly=True, compute='_compute_qty', min_display_digits='Product Unit of Measure')
+    qty_to_order = fields.Float('To Order', compute='_compute_qty_to_order', inverse='_inverse_qty_to_order', search='_search_qty_to_order', min_display_digits='Product Unit of Measure')
+    qty_to_order_computed = fields.Float('To Order Computed', compute='_compute_qty_to_order_computed', min_display_digits='Product Unit of Measure')
+    qty_to_order_manual = fields.Float('To Order Manual', min_display_digits='Product Unit of Measure')
 
     days_to_order = fields.Float(compute='_compute_days_to_order', help="Numbers of days  in advance that replenishments demands are created.")
     visibility_days = fields.Float(

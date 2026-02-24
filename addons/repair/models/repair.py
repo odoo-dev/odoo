@@ -87,7 +87,7 @@ class Repair(models.Model):
         check_company=True)
     product_qty = fields.Float(
         'Product Quantity', compute='_compute_product_qty', readonly=False, store=True,
-        default=1.0, digits='Product Unit of Measure')
+        default=1.0, min_display_digits='Product Unit of Measure')
     product_uom = fields.Many2one(
         'uom.uom', 'Product Unit of Measure',
         compute='compute_product_uom', store=True, precompute=True,

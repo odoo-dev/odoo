@@ -79,16 +79,16 @@ class StockQuant(models.Model):
     quantity = fields.Float(
         'Quantity',
         help='Quantity of products in this quant, in the default unit of measure of the product',
-        readonly=True, digits='Product Unit of Measure')
+        readonly=True, min_display_digits='Product Unit of Measure')
     reserved_quantity = fields.Float(
         'Reserved Quantity',
         default=0.0,
         help='Quantity of reserved products in this quant, in the default unit of measure of the product',
-        readonly=True, required=True, digits='Product Unit of Measure')
+        readonly=True, required=True, min_display_digits='Product Unit of Measure')
     available_quantity = fields.Float(
         'Available Quantity',
         help="On hand quantity which hasn't been reserved on a transfer, in the default unit of measure of the product",
-        compute='_compute_available_quantity', digits='Product Unit of Measure')
+        compute='_compute_available_quantity', min_display_digits='Product Unit of Measure')
     in_date = fields.Datetime('Incoming Date', readonly=True, required=True, default=fields.Datetime.now)
     tracking = fields.Selection(related='product_id.tracking', readonly=True)
     on_hand = fields.Boolean('On Hand', store=False, search='_search_on_hand')
@@ -96,17 +96,17 @@ class StockQuant(models.Model):
 
     # Inventory Fields
     inventory_quantity = fields.Float(
-        'Counted Quantity', digits='Product Unit of Measure',
+        'Counted Quantity', min_display_digits='Product Unit of Measure',
         help="The product's counted quantity.")
     inventory_quantity_auto_apply = fields.Float(
-        'Inventoried Quantity', digits='Product Unit of Measure',
+        'Inventoried Quantity', min_display_digits='Product Unit of Measure',
         compute='_compute_inventory_quantity_auto_apply',
         inverse='_set_inventory_quantity', groups='stock.group_stock_manager'
     )
     inventory_diff_quantity = fields.Float(
         'Difference', compute='_compute_inventory_diff_quantity', store=True,
         help="Indicates the gap between the product's theoretical quantity and its counted quantity.",
-        readonly=True, digits='Product Unit of Measure')
+        readonly=True, min_display_digits='Product Unit of Measure')
     inventory_date = fields.Date(
         'Scheduled Date', compute='_compute_inventory_date', store=True, readonly=False,
         help="Next date the On Hand Quantity should be counted.")

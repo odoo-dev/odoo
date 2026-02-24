@@ -126,7 +126,7 @@ class SaleOrderLine(models.Model):
     product_uom_qty = fields.Float(
         string="Quantity",
         compute='_compute_product_uom_qty',
-        digits='Product Unit of Measure', default=1.0,
+        min_display_digits='Product Unit of Measure', default=1.0,
         store=True, readonly=False, required=True, precompute=True)
     product_uom = fields.Many2one(
         comodel_name='uom.uom',
@@ -239,23 +239,23 @@ class SaleOrderLine(models.Model):
         string="Delivery Quantity",
         compute='_compute_qty_delivered',
         default=0.0,
-        digits='Product Unit of Measure',
+        min_display_digits='Product Unit of Measure',
         store=True, readonly=False, copy=False)
 
     # Analytic & Invoicing fields
     qty_invoiced = fields.Float(
         string="Invoiced Quantity",
         compute='_compute_qty_invoiced',
-        digits='Product Unit of Measure',
+        min_display_digits='Product Unit of Measure',
         store=True)
     qty_invoiced_posted = fields.Float(
         string="Invoiced Quantity (posted)",
         compute='_compute_qty_invoiced_posted',
-        digits='Product Unit of Measure')
+        min_display_digits='Product Unit of Measure')
     qty_to_invoice = fields.Float(
         string="Quantity To Invoice",
         compute='_compute_qty_to_invoice',
-        digits='Product Unit of Measure',
+        min_display_digits='Product Unit of Measure',
         store=True)
 
     analytic_line_ids = fields.One2many(

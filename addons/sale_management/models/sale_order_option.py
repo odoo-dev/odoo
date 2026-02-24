@@ -31,7 +31,7 @@ class SaleOrderOption(models.Model):
     quantity = fields.Float(
         string="Quantity",
         required=True,
-        digits='Product Unit of Measure',
+        min_display_digits='Product Unit of Measure',
         default=1)
     uom_id = fields.Many2one(
         comodel_name='uom.uom',

@@ -33,10 +33,10 @@ class StockMoveLine(models.Model):
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     product_category_name = fields.Char(related="product_id.categ_id.complete_name", string="Product Category")
     quantity = fields.Float(
-        'Quantity', digits='Product Unit of Measure', copy=False, store=True,
+        'Quantity', min_display_digits='Product Unit of Measure', copy=False, store=True,
         compute='_compute_quantity', readonly=False)
     quantity_product_uom = fields.Float(
-        'Quantity in Product UoM', digits='Product Unit of Measure',
+        'Quantity in Product UoM', min_display_digits='Product Unit of Measure',
         copy=False, compute='_compute_quantity_product_uom', store=True)
     picked = fields.Boolean('Picked', compute='_compute_picked', store=True, readonly=False, copy=False)
     package_id = fields.Many2one(

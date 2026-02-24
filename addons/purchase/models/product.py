@@ -12,7 +12,7 @@ class ProductTemplate(models.Model):
     _name = 'product.template'
     _inherit = 'product.template'
 
-    purchased_product_qty = fields.Float(compute='_compute_purchased_product_qty', string='Purchased', digits='Product Unit of Measure')
+    purchased_product_qty = fields.Float(compute='_compute_purchased_product_qty', string='Purchased', min_display_digits='Product Unit of Measure')
     purchase_method = fields.Selection([
         ('purchase', 'On ordered quantities'),
         ('receive', 'On received quantities'),
@@ -65,7 +65,7 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     purchased_product_qty = fields.Float(compute='_compute_purchased_product_qty', string='Purchased',
-        digits='Product Unit of Measure')
+        min_display_digits='Product Unit of Measure')
 
     is_in_purchase_order = fields.Boolean(
         compute='_compute_is_in_purchase_order',

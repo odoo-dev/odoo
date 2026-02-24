@@ -52,7 +52,7 @@ class SaleOrderTemplateLine(models.Model):
     product_uom_qty = fields.Float(
         string='Quantity',
         required=True,
-        digits='Product Unit of Measure',
+        min_display_digits='Product Unit of Measure',
         default=1)
 
     display_type = fields.Selection([
