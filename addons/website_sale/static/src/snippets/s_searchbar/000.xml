@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="website.search_result_item" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_search_result_description')]" position="inside">
+            <t t-if="result['attribute_value_ids']" t-out="result['attribute_value_ids']"/>
+        </xpath>
+    </t>
+</templates>

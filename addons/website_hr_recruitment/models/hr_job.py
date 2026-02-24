@@ -148,20 +148,19 @@ spirit. To be successful, you will have solid solving problem skills.''')
             'mapping': mapping,
             'icon': 'fa-briefcase',
             'group_name': self.env._("Jobs"),
-            'sequence': 100,
+            'sequence': 90,
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for data in results_data:
             job_address = self.browse(data['id']).sudo().address_id
-            # res.partner address_id is not available in public user group,
-            # - require sudo
+            # sudo() to bypass access rights, since address_id is not available
+            # to users in the public group.
             if job_address:
                 data['address'] = ", ".join(filter(None, [
                     job_address.city,
                     job_address.state_id.name,
                     job_address.country_id.name,
                 ]))
-
         return results_data

@@ -908,7 +908,7 @@ class ForumPost(models.Model):
             'icon': 'fa-comment-o',
             'order': order,
             'group_name': self.env._("Forum Post"),
-            'sequence': 130,
+            'sequence': 110,
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):

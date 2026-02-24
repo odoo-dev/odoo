@@ -892,7 +892,7 @@ class ProductTemplate(models.Model):
             'image_url': {'name': 'image_url', 'type': 'html'},
             'description': {'name': 'description_ecommerce', 'type': 'text', 'html': True, 'match': True},
             'tags': {'name': 'product_tag_ids', 'type': 'tags', 'match': True},
-            'body': {'name': 'tag_ids', 'type': 'tags', 'match': True, 'force_show': True},
+            'attribute_value_ids': {'name': 'attribute_value_ids', 'type': 'tags', 'match': True, 'force_show': True},
         }
         return {
             'model': 'product.template',
@@ -910,7 +910,7 @@ class ProductTemplate(models.Model):
         for product, data in zip(self, results_data):
             combination_info = product._get_combination_info(only_template=True)
             values = product.mapped('attribute_line_ids.value_ids')
-            data['tag_ids'] = values.read(['id', 'name'])
+            data['attribute_value_ids'] = values.read(['id', 'name'])
             data['product_tag_ids'] = product.product_tag_ids.read(['name'])
             price = self._search_render_results_prices(
                 mapping, combination_info

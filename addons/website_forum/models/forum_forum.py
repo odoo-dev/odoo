@@ -338,7 +338,7 @@ class ForumForum(models.Model):
             'icon': 'fa-comments-o',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
             'group_name': self.env._("Forum"),
-            'sequence': 140,
+            'sequence': 120,
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):

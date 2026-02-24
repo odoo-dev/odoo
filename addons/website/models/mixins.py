@@ -864,7 +864,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
             if tag_highlight:
                 highlighted_tags.append(tag)
 
-        if len(highlighted_tags) > 0:
+        if highlighted_tags:
             value = self.env['ir.ui.view'].sudo()._render_template(
                 "website.search_tags_highlight",
                 {'tags': highlighted_tags}

@@ -6,7 +6,6 @@
         search_type.f="all"
         action.f="/website/search"
         limit.f="6"
-        default_style="True"
         _input_classes.f="o_cc o_cc1 border"
         _submit_classes.f="o_cc o_cc1 border"/>
 </template>
