@@ -186,6 +186,18 @@ class SaleOrder(models.Model):
         help="If set, the SO will invoice in this journal; "
         "otherwise the sales journal with the lowest sequence is used.",
     )
+    document_tax_mode = fields.Selection(
+        selection=[
+            ('tax_excluded', "Tax Excl."),
+            ('tax_included', "Tax Incl."),
+        ],
+        compute='_compute_document_tax_mode',
+        precompute=True,
+        store=True,
+        readonly=False,
+        required=True,
+    )
+    disable_tax_mode_selection = fields.Boolean(compute='_compute_disable_tax_mode_selection')
 
     # Partner-based computes
     note = fields.Html(
@@ -1177,6 +1189,16 @@ class SaleOrder(models.Model):
     def _compute_has_overages(self):
         for order in self:
             order.has_overages = any(line.qty_overage for line in order.order_line)
+    @api.depends('company_id')
+    def _compute_document_tax_mode(self):
+        for order in self:
+            company = order.company_id or self.env.company
+            order.document_tax_mode = company.account_price_include
+
+    @api.depends('state')
+    def _compute_disable_tax_mode_selection(self):
+        for order in self:
+            order.disable_tax_mode_selection = order.state != 'draft'
 
     # === CONSTRAINT METHODS ===#
 
@@ -1361,6 +1383,13 @@ class SaleOrder(models.Model):
                     "product_uom_qty": line.product_uom_qty,
                     "discount": line.discount,
                 })
+
+    @api.onchange('document_tax_mode')
+    def _onchange_document_tax_mode(self):
+        for move in self:
+            for line in move.order_line:
+                if line.tax_ids.ids != line.product_id.taxes_id.ids:
+                    line.tax_ids = line.product_id.taxes_id
 
     # === CRUD METHODS ===#
 
@@ -1822,6 +1851,7 @@ class SaleOrder(models.Model):
             "user_id": self.user_id.id,
             "invoice_incoterm_id": self.incoterm.id,
             "incoterm_location": self.incoterm_location,
+            "document_tax_mode": self.document_tax_mode,
         }
         if self.journal_id:
             values["journal_id"] = self.journal_id.id

@@ -78,7 +78,7 @@ class SaleOrderLine(models.Model):
 
         Returns self
         """
-        vals = {"points_cost": 0, "price_unit": 0, "technical_price_unit": 0}
+        vals = {"points_cost": 0, "price_unit": 0, "price_unit_last_computed_vals": {}}
         if complete:
             vals.update({"coupon_id": False, "reward_id": False})
         self.write(vals)

@@ -224,7 +224,7 @@ class ProductProduct(models.Model):
 
     def _get_tax_included_unit_price(self, company, currency, document_date, document_type,
         is_refund_document=False, product_uom=None, product_currency=None,
-        product_price_unit=None, product_taxes=None, fiscal_position=None
+        product_price_unit=None, product_taxes=None, fiscal_position=None, document_tax_mode=None,
     ):
         """ Helper to get the price unit from different models.
             This is needed to compute the same unit price in different models (sale order, account move, etc.) with same parameters.
@@ -267,6 +267,7 @@ class ProductProduct(models.Model):
                 product_price_unit,
                 product_taxes,
                 fiscal_position=fiscal_position,
+                document_tax_mode=document_tax_mode,
             )
 
         # Apply currency rate.
@@ -279,6 +280,7 @@ class ProductProduct(models.Model):
         self, product_price_unit, product_taxes,
         fiscal_position=None,
         product_taxes_after_fp=None,
+        document_tax_mode=None,
     ):
         if not product_taxes:
             return product_price_unit
@@ -294,6 +296,7 @@ class ProductProduct(models.Model):
             product=self,
             original_taxes=product_taxes,
             new_taxes=product_taxes_after_fp,
+            document_tax_mode=document_tax_mode,
         )
 
     @api.depends('lst_price', 'product_tmpl_id', 'taxes_id')
@@ -301,6 +304,33 @@ class ProductProduct(models.Model):
     def _compute_tax_string(self):
         for record in self:
             record.tax_string = record.product_tmpl_id._construct_tax_string(record.lst_price)
+
+    def _get_opposite_tax_mode_price(self, line, price_from_product):
+        '''Helper to get the opposite tax mode price_unit when switching between tax included and excluded
+        for different models: account_move, sale_order and purchase_order.
+
+        :param line:                 Either an account_move_line, sale_order_line or purchase_order_line.
+        :param price_from_product:   Price normally computed from _get_tax_included_unit_price that has already
+                                     dealt with currency, fiscal position and unit of measure.
+
+        :return:                     The price calculated using the opposite tax mode set on the product which
+                                     follows the tax mode set on the company.
+        '''
+        self.ensure_one()
+        product = self
+        total_price_mapping = {
+            'tax_included': 'total_excluded',
+            'tax_excluded': 'total_included',
+        }
+        product_tax_mode = line.company_id.account_price_include
+        return line.tax_ids._filter_taxes_by_company(line.company_id)._get_tax_details(
+            price_from_product,
+            1.0,
+            rounding_method='round_globally',
+            product=product,
+            product_uom=line.product_uom_id if 'product_uom_id' in line._fields else line.uom_id,
+            document_tax_mode=product_tax_mode,
+        )[total_price_mapping[product_tax_mode]]
 
     # -------------------------------------------------------------------------
     # EDI

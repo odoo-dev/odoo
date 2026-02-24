@@ -31,6 +31,7 @@ class PurchaseOrderLine(models.Model):
         digits='Discount',
         store=True, readonly=False)
     tax_ids = fields.Many2many('account.tax', string='Taxes', context={'active_test': False, 'hide_original_tax_ids': True})
+    document_tax_mode = fields.Selection(related='order_id.document_tax_mode')
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     uom_id = fields.Many2one('uom.uom', string='Unit', domain="[('id', 'in', allowed_uom_ids)]", ondelete='restrict')
     product_id = fields.Many2one('product.product', string='Product', domain=[('purchase_ok', '=', True)], change_default=True, index='btree_not_null', ondelete='restrict')
@@ -111,8 +112,13 @@ class PurchaseOrderLine(models.Model):
         string="Parent Section Line",
         compute='_compute_parent_id',
     )
-    technical_price_unit = fields.Float(help="Technical field for price computation", readonly=False, store=True,
-                                        compute='_compute_price_unit_and_date_planned_and_name')
+    price_unit_last_computed_vals = fields.Json(
+        help="Technical field storing last computed values for price_unit computation",
+        compute='_compute_price_unit_and_date_planned_and_name',
+        readonly=False,
+        store=True,
+        default={},
+    )
 
     @api.depends('product_qty', 'price_unit', 'tax_ids', 'discount')
     def _compute_amount(self):
@@ -297,8 +303,6 @@ class PurchaseOrderLine(models.Model):
                 values.update(product_id=False, price_unit=0, product_uom_qty=0, uom_id=False, date_planned=False)
             else:
                 values.update(self._prepare_add_missing_fields(values))
-            if values.get('price_unit') and not values.get('technical_price_unit'):
-                values['technical_price_unit'] = values['price_unit']
 
         lines = super().create(vals_list)
         for line in lines:
@@ -396,7 +400,7 @@ class PurchaseOrderLine(models.Model):
             return
 
         # Reset date, price and quantity since _onchange_quantity will provide default values
-        self.price_unit = self.product_qty = self.technical_price_unit = 0.0
+        self.price_unit = self.product_qty = self.price_unit_last_computed_vals['price_unit'] = 0.0
 
         self._product_id_change()
 
@@ -424,10 +428,10 @@ class PurchaseOrderLine(models.Model):
             ).uom_id
             line.allowed_uom_ids = line.product_id._get_available_uoms() | seller_uom
 
-    @api.depends('product_qty', 'uom_id', 'company_id', 'order_id.partner_id')
+    @api.depends('product_qty', 'uom_id', 'company_id', 'order_id.partner_id', 'document_tax_mode')
     def _compute_price_unit_and_date_planned_and_name(self):
         for line in self:
-            if not line.product_id or line.invoice_lines or not line.company_id or self.env.context.get('skip_uom_conversion') or (line.technical_price_unit != line.price_unit):
+            if not line.product_id or line.invoice_lines or not line.company_id or self.env.context.get('skip_uom_conversion'):
                 continue
             params = line._get_select_sellers_params()
 
@@ -460,12 +464,6 @@ class PurchaseOrderLine(models.Model):
 
             # If not seller, use the standard price. It needs a proper currency conversion.
             if not line.selected_seller_id:
-                unavailable_seller = line.product_id.seller_ids.filtered(
-                    lambda s: s.partner_id == line.order_id.partner_id)
-                if not unavailable_seller and line.price_unit and line.uom_id == line._origin.uom_id:
-                    # Avoid to modify the price unit if there is no price list for this partner and
-                    # the line has already one to avoid to override unit price set manually.
-                    continue
                 line.discount = 0
                 po_line_uom = line.uom_id or line.product_id.uom_id
                 price_unit = line.env['account.tax']._fix_tax_included_price_company(
@@ -473,6 +471,7 @@ class PurchaseOrderLine(models.Model):
                     line.product_id.supplier_taxes_id,
                     line.tax_ids,
                     line.company_id,
+                    line.document_tax_mode,
                 )
                 price_unit = line.product_id.cost_currency_id._convert(
                     price_unit,
@@ -481,13 +480,37 @@ class PurchaseOrderLine(models.Model):
                     line.date_order or fields.Date.context_today(line),
                     False
                 )
-                line.price_unit = line.technical_price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
+                price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
 
             elif line.selected_seller_id:
-                price_unit = line.env['account.tax']._fix_tax_included_price_company(line.selected_seller_id.price, line.product_id.supplier_taxes_id, line.tax_ids, line.company_id) if line.selected_seller_id else 0.0
+                price_unit = line.env['account.tax']._fix_tax_included_price_company(line.selected_seller_id.price, line.product_id.supplier_taxes_id, line.tax_ids, line.company_id, line.document_tax_mode) if line.selected_seller_id else 0.0
                 price_unit = line.selected_seller_id.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
-                line.price_unit = line.technical_price_unit = line.selected_seller_id.uom_id._compute_price(price_unit, line.uom_id)
+                price_unit = line.selected_seller_id.uom_id._compute_price(price_unit, line.uom_id)
                 line.discount = line.selected_seller_id.discount or 0.0
+
+            # No recomputation needed when price_unit has been manually changed, unless the uom or product changes
+            if line.price_unit and (
+                line.price_unit != (line.price_unit_last_computed_vals or {}).get('price_unit')
+            ) and (
+                line.uom_id.id == (line.price_unit_last_computed_vals or {}).get('uom_id')
+            ) and (
+                line.product_id.id == (line.price_unit_last_computed_vals or {}).get('product_id')
+            ):
+                continue
+
+            price_from_product_opposite_tax_mode = line.product_id._get_opposite_tax_mode_price(line, price_unit)
+            product_tax_mode = line.company_id.account_price_include
+            if product_tax_mode == line.document_tax_mode:
+                line.price_unit = price_unit
+            else:
+                line.price_unit = price_from_product_opposite_tax_mode
+
+            line.price_unit_last_computed_vals = {
+                    'price_unit': line.price_unit,
+                    'product_id': line.product_id.id,
+                    'uom_id': line.uom_id.id,
+                    'document_tax_mode': line.document_tax_mode,
+                }
 
     @api.depends('product_id')
     def _compute_translated_product_name(self):
@@ -680,7 +703,7 @@ class PurchaseOrderLine(models.Model):
         if seller:
             price_unit = (seller.uom_id._compute_price(seller.price, product_uom) if product_uom else seller.price)
             price_unit = self.env['account.tax']._fix_tax_included_price_company(
-            price_unit, product_taxes, taxes, company_id)
+            price_unit, product_taxes, taxes, company_id, self.document_tax_mode)
         else:
             price_unit = 0
         if price_unit and seller and po.currency_id and seller.currency_id != po.currency_id:
