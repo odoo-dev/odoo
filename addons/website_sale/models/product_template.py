@@ -892,7 +892,7 @@ class ProductTemplate(models.Model):
             'image_url': {'name': 'image_url', 'type': 'html'},
             'description': {'name': 'description_ecommerce', 'type': 'text', 'html': True, 'match': True},
             'tags': {'name': 'product_tag_ids', 'type': 'tags', 'match': True},
-            'body': {'name': 'tag_ids', 'type': 'tags', 'match': True},
+            'body': {'name': 'tag_ids', 'type': 'tags', 'match': True, 'force_show': True},
         }
         return {
             'model': 'product.template',
