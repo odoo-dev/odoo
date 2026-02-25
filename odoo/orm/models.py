@@ -504,6 +504,13 @@ class BaseModel(metaclass=MetaModel):
         """ Return whether the given parameter name is valid for the field. """
         return name == 'related_sudo'
 
+    @classmethod
+    def _reset_class_properties__(cls):
+        # reset properties memoized on model_cls
+        cls._constraint_methods = BaseModel._constraint_methods
+        cls._ondelete_methods = BaseModel._ondelete_methods
+        cls._onchange_methods = BaseModel._onchange_methods
+
     @api.model
     def _post_model_setup__(self):
         """ Method called after the model has been setup. """

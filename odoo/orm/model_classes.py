@@ -340,10 +340,7 @@ def _prepare_setup(model_cls: type[BaseModel]):
     for attr in ('_rec_name', '_active_name'):
         discardattr(model_cls, attr)
 
-    # reset properties memoized on model_cls
-    model_cls._constraint_methods = models.BaseModel._constraint_methods
-    model_cls._ondelete_methods = models.BaseModel._ondelete_methods
-    model_cls._onchange_methods = models.BaseModel._onchange_methods
+    model_cls._reset_class_properties__()
 
 
 def _setup(model_cls: type[BaseModel], env: Environment):

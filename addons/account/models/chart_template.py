@@ -94,10 +94,10 @@ class AccountChartTemplate(models.AbstractModel):
         cls._template_register = template_register
         return template_register
 
-    def _post_model_setup__(self):
-        super()._post_model_setup__()
-        self.env.registry[self._name]._template_register = AccountChartTemplate._template_register
-
+    @classmethod
+    def _reset_class_properties__(cls):
+        super()._reset_class_properties__()
+        cls._template_register = AccountChartTemplate._template_register
 
     # --------------------------------------------------------------------------------
     # Template selection
