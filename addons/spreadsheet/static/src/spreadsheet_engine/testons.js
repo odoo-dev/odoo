@@ -44,4 +44,3 @@ await sendStdStreamRequest({
     message_type: "done",
 });
 // await close();
-console.log(process)

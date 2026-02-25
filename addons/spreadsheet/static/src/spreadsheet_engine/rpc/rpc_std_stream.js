@@ -12,9 +12,7 @@ const reader = lines.getReader();
 async function waitNextStdinLine() {
     const { value, done } = await reader.read();
     if (done) {
-        // not sure.
         reader.releaseLock();
-        throw new Error("No more input");
     }
     return value;
 }
@@ -32,7 +30,10 @@ export async function sendStdStreamRequest(req) {
     return mutex.exec(async() => {
         Deno.stdout.write(new TextEncoder().encode(JSON.stringify(req) + "\n"));
         const response = await waitNextStdinLine();
-        if (response.error) {
+        if (response === undefined) {
+            // EOF reached, the parent process has closed the stdin stream.
+            return;
+        } if (response.error) {
             console.error("RPC error", JSON.stringify(req), response.error);
         }
         return JSON.parse(response);
