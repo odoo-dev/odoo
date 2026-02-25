@@ -29,7 +29,7 @@ import {
     findFurthest,
 } from "../utils/dom_traversal";
 import { FONT_SIZE_CLASSES, formatsSpecs } from "../utils/formatting";
-import { boundariesIn, boundariesOut, DIRECTIONS, leftPos, rightPos } from "../utils/position";
+import { boundariesIn, boundariesOut, leftPos, rightPos } from "../utils/position";
 import { prepareUpdate } from "@html_editor/utils/dom_state";
 import { _t } from "@web/core/l10n/translation";
 import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
@@ -260,6 +260,7 @@ export class FormatPlugin extends Plugin {
         }
         // note: does it work if selection is in opposite direction?
         const selection = this.dependencies.split.splitSelection();
+        const cursors = this.dependencies.selection.preserveSelection();
         if (typeof applyStyle === "undefined") {
             applyStyle = !this.isSelectionFormat(formatName);
         }
@@ -342,18 +343,20 @@ export class FormatPlugin extends Plugin {
                     parentNode.getAttributeNames().length === 1;
 
                 if (isUselessZws) {
+                    cursors.update(callbacksForCursorUpdate.unwrap(parentNode));
                     unwrapContents(parentNode);
                 } else {
-                    const cursors = this.dependencies.selection.preserveSelection();
                     this.dispatchTo("clean_handlers", parentNode);
                     // Remove empty text nodes (replaced FEFFs) before splitting,
                     // to prevent creating empty elements in the DOM.
                     removeEmptyTextNodes(parentNode, cursors);
-                    cursors.restore();
                     const newLastAncestorInlineFormat = this.dependencies.split.splitAroundUntil(
                         currentNode,
                         parentNode
                     );
+                    if (newLastAncestorInlineFormat !== parentNode) {
+                        cursors.remapNode(parentNode, newLastAncestorInlineFormat);
+                    }
                     removeFormat(newLastAncestorInlineFormat, formatSpec);
                     if (newLastAncestorInlineFormat.isConnected) {
                         inlineAncestors.push(newLastAncestorInlineFormat);
@@ -409,37 +412,39 @@ export class FormatPlugin extends Plugin {
                 span.setAttribute("data-oe-zws-empty-inline", "");
                 zws.before(span);
                 span.append(zws);
+                cursors.remapNode(zws, zws);
             }
         }
 
-        if (
-            unformattedTextNodes.length === 1 &&
-            unformattedTextNodes[0] &&
-            unformattedTextNodes[0].textContent === "\u200B"
-        ) {
-            this.dependencies.selection.setCursorStart(unformattedTextNodes[0]);
-        } else if (selectedTextNodes.length) {
-            const firstNode = selectedTextNodes[0];
-            const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
-            let newSelection;
-            if (selection.direction === DIRECTIONS.RIGHT) {
-                newSelection = {
-                    anchorNode: firstNode,
-                    anchorOffset: 0,
-                    focusNode: lastNode,
-                    focusOffset: lastNode.length,
-                };
-            } else {
-                newSelection = {
-                    anchorNode: lastNode,
-                    anchorOffset: lastNode.length,
-                    focusNode: firstNode,
-                    focusOffset: 0,
-                };
-            }
-            this.dependencies.selection.setSelection(newSelection, { normalize: false });
-            return true;
-        }
+        cursors.restore();
+        // if (
+        //     unformattedTextNodes.length === 1 &&
+        //     unformattedTextNodes[0] &&
+        //     unformattedTextNodes[0].textContent === "\u200B"
+        // ) {
+        //     this.dependencies.selection.setCursorStart(unformattedTextNodes[0]);
+        // } else if (selectedTextNodes.length) {
+        //     const firstNode = selectedTextNodes[0];
+        //     const lastNode = selectedTextNodes[selectedTextNodes.length - 1];
+        //     let newSelection;
+        //     if (selection.direction === DIRECTIONS.RIGHT) {
+        //         newSelection = {
+        //             anchorNode: firstNode,
+        //             anchorOffset: 0,
+        //             focusNode: lastNode,
+        //             focusOffset: lastNode.length,
+        //         };
+        //     } else {
+        //         newSelection = {
+        //             anchorNode: lastNode,
+        //             anchorOffset: lastNode.length,
+        //             focusNode: firstNode,
+        //             focusOffset: 0,
+        //         };
+        //     }
+        //     this.dependencies.selection.setSelection(newSelection, { normalize: false });
+        //     return true;
+        // }
         if (tagetedFieldNodes.size > 0) {
             return true;
         }
