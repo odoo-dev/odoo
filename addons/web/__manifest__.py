@@ -553,7 +553,6 @@ This module provides the core of the Odoo Web Client.
         ],
         'web.icons_fonts': [
             ('include', 'web.odoo_ui_icons'),
-            'web/static/src/scss/fontawesome_overridden.scss',  # some are fa classes... but using odoo_ui_icons font,
             'web/static/src/libs/materialsymbols/*.css',
             'web/static/src/webclient/icons.scss',
         ],
