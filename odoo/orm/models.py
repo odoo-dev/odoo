@@ -511,11 +511,6 @@ class BaseModel(metaclass=MetaModel):
         cls._ondelete_methods = BaseModel._ondelete_methods
         cls._onchange_methods = BaseModel._onchange_methods
 
-    @api.model
-    def _post_model_setup__(self):
-        """ Method called after the model has been setup. """
-        pass
-
     @property
     def _table_sql(self) -> SQL:
         """ Return an :class:`SQL` object that represents SQL table identifier

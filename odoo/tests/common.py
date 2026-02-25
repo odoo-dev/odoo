@@ -2636,7 +2636,7 @@ class HttpCase(TransactionCase):
             Users.tour_enabled = False
 
         with patch.object(Users, 'tour_enabled', False),\
-                patch.object(Users, '_post_model_setup__', setup),\
+                patch.object(Users, '_register_hook', setup),\
                 patch.object(Users, '_compute_tour_enabled', lambda _: None):
             self.browser_js(url_path=url_path, code=code, ready=ready, timeout=timeout, success_signal="tour succeeded", **kwargs)
 

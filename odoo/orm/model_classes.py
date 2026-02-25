@@ -322,9 +322,6 @@ def setup_model_classes(env: Environment):
     for model_cls in models_classes:
         _setup_fields(model_cls, env)
 
-    for model_cls in models_classes:
-        model_cls(env, (), ())._post_model_setup__()
-
 
 def _prepare_setup(model_cls: type[BaseModel]):
     """ Prepare the setup of the model. """
