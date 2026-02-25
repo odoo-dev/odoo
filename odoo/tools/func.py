@@ -106,6 +106,7 @@ class classproperty[T]:
 class lazy_classproperty[T](classproperty[T]):
     """ Similar to ``functools.cached_property``, but for classes. """
     def __get__(self, cls, owner: type | None = None, /) -> T:
+        setattr(owner, self.fget.__name__, None)
         val = super().__get__(cls, owner)
         setattr(owner, self.fget.__name__, val)
         return val
