@@ -490,6 +490,7 @@ class ResPartner(models.Model):
             if (
                 not self.account_peppol_is_endpoint_valid
                 and self.peppol_eas in ('0208', '9925')
+                and self.id not in self.env['res.company']._get_company_partner_ids()
             ):
                 inverse_eas = '9925' if self.peppol_eas == '0208' else '0208'
                 inverse_endpoint = f'BE{self.peppol_endpoint}' if self.peppol_eas == '0208' else self.peppol_endpoint[2:]
