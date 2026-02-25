@@ -26,7 +26,7 @@
           <div class=" px-3 o_field_widget o_readonly_modifier o_field_CopyClipboardChar">
             <div t-if="this.state.url" class="d-grid rounded-2 overflow-hidden">
               <span t-out="this.state.url"/>
-              <CopyButton className="'o_btn_char_copy btn-sm'" content="this.state.url" successText="this.copiedText" icon="'fa-clipboard'"/>
+              <CopyButton className="'o_btn_char_copy btn-sm'" content="this.state.url" successText="this.copiedText" icon="'assignment'"/>
             </div>
             <div t-else="" class="o_loading_state d-flex align-items-center justify-content-center">
               <i class="oi oi-spin px-2" data-icon="autorenew"/><span>Generating sharing link</span>
