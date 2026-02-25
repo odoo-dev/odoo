@@ -22,7 +22,7 @@
 "eg_exempt_purchase","0% EXEMPT","purchase","0.0","percent","","Exempt","t1_v003","eg_tax_group_other","base","invoice","7. Exempt Expenses (Base)","","","معفاة","","account_fiscal_position_egypt",""
 "","","","","","","","","","tax","invoice","7. Exempt Expenses (Tax)","False","","","","",""
 "","","","","","","","","","base","refund","7. Exempt Expenses (Base)","","","","","",""
-"","","","","","","","","","tax","refund","7. Exempt Expenses (Tax)","False","","","","",""
+"","","","","","","","","","tax","refund","7. Exempt Expenses (Tax)","False","","","","","" 
 "eg_stamp_tax_20_sale","20%","sale","20.0","percent","","Stamp","t5_st01","eg_tax_group_stamp","base","invoice","Stamp Tax Sales 20% (Base)","","","الدمغة","","account_fiscal_position_egypt",""
 "","","","","","","","","","tax","invoice","Stamp Tax Sales 20% (Tax)","egy_account_201025","False","","","",""
 "","","","","","","","","","base","refund","Stamp Tax Sales 20% (Base)","","","","","",""
