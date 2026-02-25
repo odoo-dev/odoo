@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import ast
 import csv
 from collections import defaultdict
@@ -14,6 +12,7 @@ from odoo import Command, api, models
 from odoo.exceptions import AccessError, UserError
 from odoo.modules import get_resource_from_path
 from odoo.tools import file_open, float_compare, get_lang, groupby, SQL
+from odoo.tools.func import lazy_classproperty
 from odoo.tools.translate import _, code_translations, TranslationImporter
 
 _logger = logging.getLogger(__name__)
@@ -72,12 +71,11 @@ class AccountChartTemplate(models.AbstractModel):
     _name = 'account.chart.template'
     _description = "Account Chart Template"
 
-    @property
-    def _template_register(self):
+    @lazy_classproperty
+    def _template_register(cls):
         def is_template(func):
             return callable(func) and hasattr(func, '_l10n_template')
         template_register = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))  # {demo: template: {model: [function, ...]}}
-        cls = self.env.registry[self._name]
         # remember the first decorator of the function in the MRO
         template_funcs = {
             attr: func
@@ -91,7 +89,6 @@ class AccountChartTemplate(models.AbstractModel):
                 template, model, demo = decorated_func._l10n_template
                 func._module = decorated_func._module
                 template_register[demo][template][model].append(func)
-        cls._template_register = template_register
         return template_register
 
     @classmethod

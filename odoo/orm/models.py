@@ -50,7 +50,7 @@ from odoo.tools import (
     SQL, sql, groupby,
 )
 from odoo.tools.constants import PREFETCH_MAX
-from odoo.tools.func import deprecated
+from odoo.tools.func import deprecated, lazy_classproperty
 from odoo.tools.lru import LRU
 from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
 from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES
@@ -543,8 +543,8 @@ class BaseModel(metaclass=MetaModel):
 
         return SQL("%s", table_sql, to_flush=fields_to_flush)
 
-    @property
-    def _constraint_methods(self):
+    @lazy_classproperty
+    def _constraint_methods(cls):
         """ Return a list of methods implementing Python constraints. """
         def is_constraint(func):
             return callable(func) and hasattr(func, '_constrains')
@@ -556,11 +556,10 @@ class BaseModel(metaclass=MetaModel):
                 return func(self)
             return wrapper
 
-        cls = self.env.registry[self._name]
         methods = []
         for attr, func in getmembers(cls, is_constraint):
             if callable(func._constrains):
-                func = wrap(func, func._constrains(self.sudo()))
+                func = wrap(func, func._constrains(self.sudo()))  # XXX
             for name in func._constrains:
                 field = cls._fields.get(name)
                 if not field:
@@ -569,30 +568,23 @@ class BaseModel(metaclass=MetaModel):
                     _logger.warning("method %s.%s: @constrains parameter %r is not writeable", cls._name, attr, name)
             methods.append(func)
 
-        # optimization: memoize result on cls, it will not be recomputed
-        cls._constraint_methods = methods
-        return methods
+        return tuple(methods)
 
-    @property
-    def _ondelete_methods(self):
+    @lazy_classproperty
+    def _ondelete_methods(cls):
         """ Return a list of methods implementing checks before unlinking. """
         def is_ondelete(func):
             return callable(func) and hasattr(func, '_ondelete')
 
-        cls = self.env.registry[self._name]
-        methods = [func for _, func in getmembers(cls, is_ondelete)]
-        # optimization: memoize results on cls, it will not be recomputed
-        cls._ondelete_methods = methods
-        return methods
+        return [func for _, func in getmembers(cls, is_ondelete)]
 
-    @property
-    def _onchange_methods(self):
+    @lazy_classproperty
+    def _onchange_methods(cls):
         """ Return a dictionary mapping field names to onchange methods. """
         def is_onchange(func):
             return callable(func) and hasattr(func, '_onchange')
 
         # collect onchange methods on the model's class
-        cls = self.env.registry[self._name]
         methods = defaultdict(list)
         for _attr, func in getmembers(cls, is_onchange):
             missing = []
@@ -617,9 +609,7 @@ class BaseModel(metaclass=MetaModel):
             if field.change_default:
                 methods[name].append(functools.partial(onchange_default, field))
 
-        # optimization: memoize result on cls, it will not be recomputed
-        cls._onchange_methods = methods
-        return methods
+        return frozendict((name, tuple(funcs)) for name, funcs in methods.items())
 
     def _is_an_ordinary_table(self):
         return self.pool.is_an_ordinary_table(self)
