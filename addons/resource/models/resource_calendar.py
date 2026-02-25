@@ -350,7 +350,6 @@ class ResourceCalendar(models.Model):
                 else:
                     base_result.append((day_from, day_to, attendance))
 
-
         # Copy the result localized once per necessary timezone
         # Strictly speaking comparing start_dt < time or start_dt.astimezone(tz) < time
         # should always yield the same result. however while working with dates it is easier
@@ -472,7 +471,6 @@ class ResourceCalendar(models.Model):
             The returned intervals are expressed in specified tz or in the calendar's timezone.
         """
         assert start_dt.tzinfo and end_dt.tzinfo
-        self.ensure_one()
 
         if not resources:
             resources = self.env['resource.resource']
@@ -492,7 +490,7 @@ class ResourceCalendar(models.Model):
         ]
 
         # retrieve leave intervals in (start_dt, end_dt)
-        result = defaultdict(lambda: [])
+        result = defaultdict(list)
         tz_dates = {}
         all_leaves = self.env['resource.calendar.leaves'].search(domain)
         for leave in all_leaves:
@@ -503,17 +501,17 @@ class ResourceCalendar(models.Model):
             for resource in resources_list:
                 if leave_resource.id not in [False, resource.id] or (not leave_resource and resource and resource.company_id != leave_company):
                     continue
-                tz = tz if tz else timezone((resource or self).tz)
+                tz = tz if tz else timezone((resource or self[0]).tz)
                 if (tz, start_dt) in tz_dates:
-                    start = tz_dates[(tz, start_dt)]
+                    start = tz_dates[tz, start_dt]
                 else:
                     start = start_dt.astimezone(tz)
-                    tz_dates[(tz, start_dt)] = start
+                    tz_dates[tz, start_dt] = start
                 if (tz, end_dt) in tz_dates:
-                    end = tz_dates[(tz, end_dt)]
+                    end = tz_dates[tz, end_dt]
                 else:
                     end = end_dt.astimezone(tz)
-                    tz_dates[(tz, end_dt)] = end
+                    tz_dates[tz, end_dt] = end
                 dt0 = string_to_datetime(leave_date_from).astimezone(tz)
                 dt1 = string_to_datetime(leave_date_to).astimezone(tz)
                 if leave_resource and leave_resource._is_fully_flexible():
@@ -530,16 +528,21 @@ class ResourceCalendar(models.Model):
         else:
             resources_list = list(resources) + [self.env['resource.resource']]
 
-        attendance_intervals = self._attendance_intervals_batch(start_dt, end_dt, resources, tz=tz or self.env.context.get("employee_timezone"))
+        if not self:  # called with an empty recordset for fully flexible, so everything is "attendance"
+            attendance_intervals = {
+                r.id: Intervals([(start_dt, end_dt, self.env['resource.calendar.attendance'])])
+                for r in resources_list
+            }
+        else:
+            attendance_intervals = self._attendance_intervals_batch(start_dt, end_dt, resources, tz=tz or self.env.context.get("employee_timezone"))
         if compute_leaves:
             leave_intervals = self._leave_intervals_batch(start_dt, end_dt, resources, domain, tz=tz)
             return {
                 r.id: (attendance_intervals[r.id] - leave_intervals[r.id]) for r in resources_list
             }
-        else:
-            return {
-                r.id: attendance_intervals[r.id] for r in resources_list
-            }
+        return {
+            r.id: attendance_intervals[r.id] for r in resources_list
+        }
 
     def _unavailable_intervals(self, start_dt, end_dt, resource=None, domain=None, tz=None):
         if resource is None:
@@ -556,16 +559,25 @@ class ResourceCalendar(models.Model):
         else:
             resources_list = list(resources)
 
-        resources_work_intervals = self._work_intervals_batch(start_dt, end_dt, resources, domain, tz)
+        if not self or self.flexible_hours:
+            resources_attendance_intervals = {r.id: Intervals([(start_dt, end_dt, self.env['resource.calendar.attendance'])]) for r in resources}
+        else:
+            resources_attendance_intervals = self._attendance_intervals_batch(start_dt, end_dt, resources, domain, tz)
+        resources_leave_intervals = self._leave_intervals_batch(start_dt, end_dt, resources, domain, tz)
+        resources_work_intervals = {
+            r.id: (resources_attendance_intervals[r.id] - resources_leave_intervals[r.id]) for r in resources_list
+        }
         result = {}
         for resource in resources_list:
-            if resource and resource._is_fully_flexible():
-                continue
+            if resource and resource._is_flexible():
+                leaves = self._leave_intervals_batch(start_dt, end_dt, resource, domain, tz=tz)
+                if res_leaves := leaves.get(resource.id, []):
+                    result[resource.id] = [(i[0], i[1]) for i in res_leaves]
             work_intervals = [(start, stop) for start, stop, meta in resources_work_intervals[resource.id]]
             # start + flatten(intervals) + end
             work_intervals = [start_dt] + list(chain.from_iterable(work_intervals)) + [end_dt]
             # put it back to UTC
-            work_intervals = list(map(lambda dt: dt.astimezone(utc), work_intervals))
+            work_intervals = [dt.astimezone(utc) for dt in work_intervals]
             # pick groups of two
             work_intervals = list(zip(work_intervals[0::2], work_intervals[1::2]))
             result[resource.id] = work_intervals

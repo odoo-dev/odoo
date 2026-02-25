@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.osv import expression
-from odoo.addons.resource.models.utils import Intervals
+from odoo.addons.resource.models.utils import Intervals, make_aware
 from odoo.exceptions import UserError
 
 
@@ -184,6 +184,48 @@ class Employee(models.Model):
                     (max(date_start, start), min(date_end, stop), contract.resource_calendar_id)
                 )
         return calendar_periods_by_employee
+
+    def _unavailability_intervals(self, dt_start, dt_stop):
+        calendar_periods_by_employee = self._get_calendar_periods(dt_start, dt_stop)
+
+        resources_per_calendar = defaultdict(lambda: self.env['resource.resource'])
+        for employee, periods in calendar_periods_by_employee.items():
+            for p_start, p_stop, cal in periods:
+                resources_per_calendar[cal] += employee.resource_id
+
+        calendar_unavailabilities = {}
+        for calendar, resources in resources_per_calendar.items():
+            calendar_unavailabilities[calendar] = calendar._unavailable_intervals_batch(dt_start, dt_stop, resources)
+
+        unavailable_intervals_per_employee = defaultdict(Intervals)
+        for employee in self:
+            # employees are considered unavailable during out of contract periods
+            if employee not in calendar_periods_by_employee:
+                unavailable_intervals_per_employee[employee] = Intervals([(dt_start, dt_stop, self.env['resource.calendar.leaves'])])
+                continue
+            first_in_contract_date = calendar_periods_by_employee[employee][0][0]
+            if first_in_contract_date > dt_start:
+                unavailable_intervals_per_employee[employee] |= Intervals([
+                    (dt_start, first_in_contract_date, self.env['resource.calendar.leaves']),
+                ])
+            last_in_contract_date = calendar_periods_by_employee[employee][-1][1]
+            if last_in_contract_date < dt_stop:
+                unavailable_intervals_per_employee[employee] |= Intervals([
+                    (last_in_contract_date, dt_stop, self.env['resource.calendar.leaves']),
+                ])
+
+            for p_start, p_stop, cal in calendar_periods_by_employee[employee]:
+                cal_period = Intervals([(
+                    datetime.combine(p_start, time.min).replace(tzinfo=UTC),
+                    datetime.combine(p_stop, time.max).replace(tzinfo=UTC),
+                    self.env['resource.calendar.leaves'],
+                )])
+                cal_unavailabilities = Intervals([
+                    (p[0], p[1], self.env['resource.calendar.leaves'])
+                    for p in calendar_unavailabilities[cal][employee.resource_id.id]
+                ])
+                unavailable_intervals_per_employee[employee] |= cal_period & cal_unavailabilities
+        return unavailable_intervals_per_employee
 
     @api.model
     def _get_all_contracts(self, date_from, date_to, states=['open']):

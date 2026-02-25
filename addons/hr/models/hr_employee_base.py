@@ -309,3 +309,9 @@ class HrEmployeeBase(models.AbstractModel):
 
     def get_avatar_card_data(self, fields):
         return self._read_format(fields)
+
+    def _unavailability_intervals(self, dt_start, dt_stop):
+        return {
+            self.env['resource.resource'].browse(resource_id).employee_id: intervals
+            for resource_id, intervals in self.resource_id._get_unavailable_intervals(dt_start, dt_stop).items()
+        }
