@@ -64,6 +64,7 @@ export class OdooPivotLoader {
             this.loadPromise = this.concurrency
                 .add(this.loadFn())
                 .catch((e) => {
+                    console.error("Error while loading data for pivot", e);
                     this._isValid = false;
                     if (e instanceof ModelNotFoundError) {
                         this._isModelValid = false;
@@ -133,6 +134,7 @@ export class OdooPivotLoader {
             if (throwOnError) {
                 throw this.loadError;
             }
+            console.log(this.isFullyLoaded, this._isValid);
             console.log(this.loadError);
             return { value: CellErrorType.GenericError, message: this.loadError.message };
         }

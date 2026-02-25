@@ -38073,6 +38073,7 @@ let PivotCorePlugin$1 = class PivotCorePlugin extends CorePlugin$1 {
         if (!pivot) {
             throw new Error(`Pivot with id ${pivotId} not found`);
         }
+        console.log("getPivotCore", pivot)
         return pivot;
     }
     compileMeasureFormula(sheetId, formulaString) {
@@ -109945,6 +109946,7 @@ class PivotCorePlugin extends CorePlugin {
         if (!pivot) {
             throw new Error(`Pivot with id ${pivotId} not found`);
         }
+        console.log("getPivotCore", pivot)
         return pivot;
     }
     compileMeasureFormula(sheetId, formulaString) {

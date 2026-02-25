@@ -31551,8 +31551,10 @@ class PivotCorePlugin extends CorePlugin {
      * Import the pivots
      */
     import(data) {
+        console.log(JSON.stringify(data))
         if (data.pivots) {
             for (const [id, pivot] of Object.entries(data.pivots)) {
+                debugger;
                 this.addPivot(id, pivot, pivot.formulaId);
             }
         }
@@ -40948,7 +40950,7 @@ class Session extends EventBus {
         this.revisions = revisions;
         this.transportService = transportService;
         this.serverRevisionId = serverRevisionId;
-        this.debouncedMove = debounce(this._move.bind(this), DEBOUNCE_TIME);
+        this.debouncedMove = this._move.bind(this);
     }
     canApplyOptimisticUpdate() {
         return !this.waitingUndoRedoAck;

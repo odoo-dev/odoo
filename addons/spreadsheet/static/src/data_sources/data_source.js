@@ -162,6 +162,7 @@ export class ModelNotFoundError extends Error {}
  */
 export async function getFields(fieldService, model) {
     try {
+        debugger;
         return await fieldService.loadFields(model);
     } catch (e) {
         if (e instanceof RPCError && e.code === 404) {
