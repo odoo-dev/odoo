@@ -7,6 +7,7 @@ import { getTemplate } from "@web/core/templates";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { utils as ui } from "@web/core/ui/ui_service";
 import { _t } from "@web/core/l10n/translation";
+import { renderToElement } from "@web/core/utils/render";
 
 export class SearchBar extends Interaction {
     static selector = ".o_searchbar_form";
@@ -299,23 +300,29 @@ export class SearchBar extends Interaction {
     }
 
     openSearchModal() {
-        const wrapperEl = document.createElement("div");
-        wrapperEl.id = "o_search_modal_block";
-        wrapperEl.innerHTML = `
-            <div id="o_search_modal" class="modal fade css_editable_mode_hidden" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg pt-5">
-                    <div class="modal-content mt-lg-5">
-                        <!-- Add website searchbar form here -->
-                    </div>
-                </div>
-            </div>
-        `;
-        const cloneEl = this.el.cloneNode(true);
-        cloneEl.querySelector(".o_search_input_group")?.classList.remove("d-none");
-        cloneEl.querySelector("a[title='Search']")?.remove();
-        wrapperEl.querySelector(".modal-content").appendChild(cloneEl);
+        const action = this.el.getAttribute("action");
+        const placeholder = this.inputEl.getAttribute("placeholder");
+        const limit = this.inputEl.dataset.limit;
+        const order = this.inputEl.dataset.orderBy;
+        const autocomplete = this.inputEl.getAttribute("autocomplete");
+        const searchType = this.inputEl.dataset.searchType;
+
+        const wrapperEl = renderToElement("website.s_searchbar.modal", {
+            action,
+            placeholder,
+            limit,
+            order,
+            autocomplete,
+            searchType,
+        });
+
+        const hiddenInputEls = this.el.querySelectorAll("input[type=hidden]");
+        hiddenInputEls.forEach((el) => {
+            const clone = el.cloneNode(true);
+            wrapperEl.querySelector(".o_searchbar_form").appendChild(clone);
+        });
         this.insert(wrapperEl, document.body);
-        const modal = new Modal(wrapperEl.firstElementChild);
+        const modal = new Modal(wrapperEl);
         wrapperEl.addEventListener(
             "hidden.bs.modal",
             (el) => {

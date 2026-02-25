@@ -25,7 +25,7 @@ registry.category("web_tour.tours").add("test_website_event_search", {
             run: 'click',
         },
         {
-            trigger: '#o_search_modal_block .input-group .search-query.form-control',
+            trigger: '#o_search_modal .input-group .search-query.form-control',
             run: 'edit Event 0',
         },
         {
