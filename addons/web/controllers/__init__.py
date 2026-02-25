@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from . import tracking_report
 from . import utils
 from . import action
 from . import binary
