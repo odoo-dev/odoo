@@ -33,7 +33,7 @@
                         />
                         <t t-if="this.thread.channel?.allowDescription and (this.thread.channel?.allowEditDescription or this.thread.description)">
                             <div class="flex-shrink-0 mx-1 py-2 border-start"/>
-                            <t t-set="autogrowDescriptionPlaceholder">Add a description</t>
+                            <t t-set="autogrowDescriptionPlaceholder">Add a hello</t>
                             <AutoresizeInput
                                 className="this.attClassObjectToString(this.threadDescriptionAttClass)"
                                 enabled="this.thread.channel?.allowEditDescription"
