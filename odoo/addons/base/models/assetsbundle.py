@@ -162,6 +162,7 @@ class AssetsBundle(object):
             elif asset_type == 'js':
                 assets = self.javascripts + self.templates
             elif self.has_binary:
+                assets = []
                 for binary in self.binaries:
                     if binary.extension == asset_type:
                         assets = [binary]
