@@ -32,7 +32,7 @@
         </div>
     </t>
     <t t-name="point_of_sale.inputIcon">
-        <i t-if="this.props.icon.type === 'fa'" t-attf-class="fa {{this.props.icon.value}} {{this.margin}}"/>
+        <i t-if="this.props.icon.type === 'oi'" t-attf-class="oi {{this.props.icon.class}} {{this.margin}}" t-att-data-icon="this.props.icon.value"/>
         <span t-if="this.props.icon.type === 'string'" t-attf-class="{{this.margin}}" t-out="this.props.icon.value"/>
     </t>
 
