@@ -1505,10 +1505,10 @@
 <!-- "Rounded box" template -->
 <template id="template_header_boxed" inherit_id="website.layout" name="Template Header Rounded Box" active="False">
     <xpath expr="//header//nav" position="replace">
-        <div t-attf-class="#{header_content_width} py-3 px-0">
+        <div t-attf-class="#{header_content_width} py-3" data-name="navbarWrapper">
             <t t-call="website.navbar"
                     _navbar_classes.f="o_full_border d-none d-lg-block rounded-pill px-4">
-                <div id="o_main_nav" t-attf-class="#{header_content_width} o_main_nav">
+                <div id="o_main_nav" t-attf-class="container-fluid o_main_nav">
                     <!-- Brand -->
                     <t t-call="website.placeholder_header_brand"
                         _link_class.f="me-4"/>

@@ -237,7 +237,7 @@
             'header_sales_four_opt',
         ]"/>
         <BuilderRow t-if="!isActiveItem('header_sidebar_opt')" label.translate="Content Width" level="1">
-            <BuilderButtonGroup applyTo="'#o_main_nav'"
+            <BuilderButtonGroup applyTo="!isActiveItem('header_boxed_opt') ? '#o_main_nav' : '[data-name=\'navbarWrapper\']'"
                     action="hasSomeOptions(noPreviewOptionsContentWidth) and 'websiteConfig' or 'previewableWebsiteConfig'">
                 <BuilderButton
                     title.translate="Small"
