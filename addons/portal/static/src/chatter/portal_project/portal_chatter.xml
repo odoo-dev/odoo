@@ -2,12 +2,74 @@
 <templates xml:space="preserve">
 
 <t t-name="portal.Chatter">
-    <div t-if="this.state.thread" class="o-mail-Chatter o-portal-Chatter w-100 h-100 flex-grow-1 d-flex pt-2" t-att-class="{ 'row':this.props.twoColumns, 'flex-column':!this.props.twoColumns }" t-on-scroll="this.onScrollDebounced" t-custom-ref="root">
-        <div class="o-mail-Chatter-top top-0" t-att-class="{ 'col-lg-5':this.props.twoColumns, 'position-sticky':this.props.composer }" t-att-style="(!this.props.twoColumns and this.env.inFrontendPortalChatter and !this.env.projectSharingId) and 'top: -1px !important; margin-top:-15px; padding-top: 20px'" t-custom-ref="top">
-            <Composer t-if="this.props.composer" composer="this.state.thread.composer" mode="'extended'" onPostCallback.bind="this.onPostCallback" dropzoneRef="this.rootRef" t-key="this.props.threadId" type="'message'"/>
+    <div
+        class="o-mail-Chatter o-portal-Chatter w-100 h-100 flex-grow-1 d-flex pt-2"
+        t-att-class="{ 'row':props.twoColumns, 'flex-column':!props.twoColumns, 'o-review-Chatter': props.twoColumns and env.displayRating }"
+        t-on-scroll="onScrollDebounced" t-ref="root"
+    >
+        <div
+            class="o-mail-Chatter-top top-0"
+            t-att-class="{ 'col-lg-5':props.twoColumns, 'position-sticky':props.composer and !props.twoColumns }"
+            t-att-style="(!props.twoColumns and env.inFrontendPortalChatter and !env.projectSharingId) and 'top: -1px !important; margin-top:-15px; padding-top: 20px'"
+            t-ref="top"
+        >
+            <Composer
+                t-if="state.thread and props.composer and !props.twoColumns"
+                composer="state.thread.composer"
+                mode="'extended'"
+                onPostCallback.bind="onPostCallback"
+                dropzoneRef="rootRef"
+                t-key="props.threadId"
+                type="'message'"
+            />
+            <div class="o-mail-Chatter-topAnchor"/>
+            <div
+                t-if="state.thread and props.composer and props.twoColumns and env.displayRating and state.thread.isLoaded and state.thread.isEmpty"
+                class="o-mail-Thread-empty d-flex flex-column h-100 p-4 align-items-center justify-content-center opacity-75"
+            >
+                <div class="d-flex flex-column align-items-center text-center">
+                    <span class="fs-1" style="filter: grayscale(1);">😶</span>
+                    <span>The conversation is empty.</span>
+                </div>
+            </div>
         </div>
-        <div class="o-mail-Chatter-content" t-att-class="{ 'col-lg-6 offset-lg-1':this.props.twoColumns }">
-            <Thread thread="this.state.thread" t-key="this.state.thread.localId" order="'desc'" scrollRef="this.rootRef" jumpPresent="this.state.jumpThreadPresent"/>
+        <div
+            class="o-mail-Chatter-content"
+            t-att-class="{ 'col-lg-6 offset-lg-1':props.twoColumns }"
+        >
+            <Composer
+                t-if="state.thread and props.composer and props.twoColumns"
+                composer="state.thread.composer"
+                mode="'extended'"
+                onPostCallback.bind="onPostCallback"
+                dropzoneRef="rootRef"
+                t-key="props.threadId"
+                type="'message'"
+            />
+            <div
+                t-if="!props.composer and env.inFrontendPortalChatter and env.displayRating"
+                class="alert alert-dark d-flex align-items-center gap-2 mb-1 py-2"
+            >
+                <a
+                    class="btn btn-primary btn-sm"
+                    t-attf-href="/web/login?redirect=#{window.encodeURIComponent(window.location.pathname + '#discussion')}"
+                >
+                    Log in
+                </a>
+                <span>To post a review</span>
+            </div>
+            <div
+                t-if="state.thread"
+                t-att-class="{ 'd-none': props.composer and props.twoColumns and env.displayRating and state.thread.isLoaded and state.thread.isEmpty }"
+            >
+                <Thread
+                    thread="state.thread"
+                    t-key="state.thread.localId"
+                    order="'desc'"
+                    scrollRef="rootRef"
+                    jumpPresent="state.jumpThreadPresent"
+                />
+            </div>
         </div>
     </div>
 </t>

@@ -15,7 +15,7 @@ class MailMessage(models.Model):
           conditionally include rating information;
         """
         properties_names = super()._portal_get_default_format_properties_names()
-        if options and options.get('rating_include'):
+        if options and options.get("rating_include"):
             properties_names |= {
                 'rating',
                 'rating_value',
@@ -64,5 +64,5 @@ class MailMessage(models.Model):
         rating_values['publisher_comment'] = rating_values['publisher_comment'] or ''
         rating_values['publisher_datetime'] = format_datetime(self.env, rating_values['publisher_datetime'])
         rating_values['publisher_id'] = publisher_id
-        rating_values['publisher_name'] = publisher_name
+        rating_values['publisher_name'] = self._pseudonymize_name(publisher_name)
         return rating_values

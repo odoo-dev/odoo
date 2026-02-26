@@ -56,6 +56,43 @@ $o-w-rating-star-color: #FACC2E;
     }
 }
 
+.o-portal-Chatter {
+    &.o-review-Chatter .o-mail-Thread {
+        padding-top: 0;
+    }
+
+    .o-portal-review-load-more {
+        width: 100%;
+        margin: 0.4rem 0 1rem;
+    }
+
+    .o-portal-review-load-more-line {
+        height: 1px;
+        background-color: rgba(33, 37, 41, 0.6);
+    }
+
+    .o-portal-review-load-more-btn {
+        border-radius: 0.4rem;
+        background-color: #212529;
+        color: #fff;
+        opacity: 1 !important;
+        padding: 0.35rem 0.9rem;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover,
+        &:focus-visible {
+            background-color: #111417;
+            color: #fff;
+        }
+    }
+
+    /* Hide suggestion dropdown in product review mode */
+    &.o-review-Chatter .o-mail-Composer-suggestionList {
+        display: none !important;
+    }
+}
+
 /* Star Widget */
 .o-mail-Composer-starCard{
     width: max-content;

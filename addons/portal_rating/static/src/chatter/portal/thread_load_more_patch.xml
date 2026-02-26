@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="mail.Thread.loadOlder" t-inherit-mode="extension">
+        <xpath expr="//button" position="replace">
+            <t t-if="env.displayRating">
+                <div class="o-portal-review-load-more d-flex align-items-center gap-3">
+                    <span class="o-portal-review-load-more-line flex-grow-1"/>
+                    <button
+                        class="btn btn-link o-portal-review-load-more-btn"
+                        t-att-class="{ 'opacity-0': !mountedAndLoaded }"
+                        t-on-click="onClickLoadOlder"
+                        t-ref="load-older"
+                    >
+                        Load More
+                    </button>
+                    <span class="o-portal-review-load-more-line flex-grow-1"/>
+                </div>
+            </t>
+            <button
+                t-else=""
+                class="btn btn-link"
+                t-att-class="{ 'opacity-0': !mountedAndLoaded }"
+                t-on-click="onClickLoadOlder"
+                t-ref="load-older"
+            >
+                Load More
+            </button>
+        </xpath>
+    </t>
+</templates>

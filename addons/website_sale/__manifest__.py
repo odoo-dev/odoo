@@ -195,6 +195,7 @@
             "web/static/lib/bootstrap/scss/_variables.scss",
             "website_sale/static/src/website_builder/**/*.edit.*",
         ],
+        "portal.assets_chatter": ["website_sale/static/src/js/portal_chatter_store_patch.js"],
         "web.assets_tests": [
             "website_sale/static/tests/tours/**/*",
             "website_sale/static/src/js/tours/product_configurator_tour_utils.js",

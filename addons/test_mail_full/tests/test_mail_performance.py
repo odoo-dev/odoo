@@ -266,7 +266,10 @@ class TestPortalFormatPerformance(FullBaseMailPerformance):
                 ]
             )
             self.assertEqual(format_res["author_id"]["id"], record.customer_id.id)
-            self.assertEqual(format_res["author_id"]["name"], record.customer_id.display_name)
+            self.assertEqual(
+                format_res["author_id"]["name"],
+                f"{record.customer_id.display_name.split()[0]} {record.customer_id.display_name.split()[-1][0]}.",
+            )
             self.assertEqual(format_res["author_id"]["avatar_128_access_token"], record.customer_id._get_avatar_128_access_token())
             self.assertEqual(format_res['date'], datetime(2023, 5, 15, 10, 30, 5))
             self.assertEqual(' '.join(format_res['published_date_str'].split()), '05/15/2023 10:30:05 AM')
@@ -294,7 +297,10 @@ class TestPortalFormatPerformance(FullBaseMailPerformance):
             self.assertEqual(format_res['rating_id']['publisher_comment'], 'Comment')
             self.assertEqual(format_res['rating_id']['publisher_id'], self.partner_admin.id)
             self.assertEqual(" ".join(format_res['rating_id']['publisher_datetime'].split()), '05/13/2023 10:30:05 AM')
-            self.assertEqual(format_res['rating_id']['publisher_name'], self.partner_admin.display_name)
+            self.assertEqual(
+                format_res['rating_id']['publisher_name'],
+                f"{self.partner_admin.display_name.split()[0]} {self.partner_admin.display_name.split()[-1][0]}.",
+            )
             self.assertDictEqual(
                 format_res['rating_stats'],
                 {'avg': 4.0, 'total': 4, 'percent': {1: 0.0, 2: 0.0, 3: 0.0, 4: 100.0, 5: 0.0}}
@@ -318,7 +324,7 @@ class TestPortalFormatPerformance(FullBaseMailPerformance):
     def test_portal_attachment_as_author(self):
         message = self.env["mail.message"].create(
             {
-                "attachment_ids": [Command.create({"name": "test attachment"})],
+                "attachment_ids": [Command.create({"name": 'test attachment'})],
                 "author_id": self.user_employee.partner_id.id,
             }
         )
