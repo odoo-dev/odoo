@@ -163,12 +163,6 @@ export class HistoryPlugin extends Plugin {
         this.steps.push(currentStep);
         // @todo @phoenix add this in the linkzws plugin.
         // this._setLinkZws();
-        // TODO AGE: find a better way? This is just because before my changes
-        // reset caused a step without calling addStep but by using steps.push
-        // directly.
-        if (type !== "reset") {
-            this.trigger("on_step_added_handlers", currentStep);
-        }
         return currentStep;
     }
 

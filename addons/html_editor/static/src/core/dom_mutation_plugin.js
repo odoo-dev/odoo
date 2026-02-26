@@ -182,9 +182,7 @@ export class DomMutationPlugin extends Plugin {
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {
-        on_editor_started_handlers: () => {
-            this.enableObserver();
-        },
+        on_editor_started_handlers: withSequence(0, this.enableObserver.bind(this)),
         on_will_reset_history_from_steps_handlers: () => {
             // TODO AGE: this is only to replace the `withObserverOff` call in
             // `history.resetFromSteps` but it's not useful for `history.reset`,
@@ -305,11 +303,18 @@ export class DomMutationPlugin extends Plugin {
         // Set the timestamp of the commit or keep the timestamp of the commit
         // it reverts (see `on_single_step_(un|re)done_handlers`).
         commit.data.commitTimestamp ??= Date.now();
-        this.dependencies.history.write(commit, stepType);
+        const step = this.dependencies.history.write(commit, stepType);
 
         this.resetCurrentMutations();
 
         this.stageSelection();
+
+        // TODO AGE: rename (step => commit)? Note: will not trigger for a reset
+        // step (it calls history.write directly). That's like it used to be
+        // before my changes: reset caused a step without calling addStep but by
+        // using steps.push directly.
+        this.trigger("on_step_added_handlers", step);
+
         this.config.onChange?.({ isPreviewing: this.isPreviewing });
         return commit;
     }
