@@ -2421,26 +2421,36 @@ $ribbon-padding: 100px;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
     }
-    .oe_search_box {
-        padding: 1rem;
-    }
-    .oe_search_button {
-        border-left: $border-width solid $primary;
-        padding: 1rem;
-    }
-
 }
 
 
 .o_searchbar_form {
+    $o-searchbar-muted-color: color-mix(in srgb, color-contrast($light) 60%, transparent);
+
+    .form-control {
+        &::placeholder {
+            color: $o-searchbar-muted-color;
+        }
+    }
+
     .oe_search_button {
         padding-right: $input-padding-x;
         padding-left: $input-padding-x;
+
+        &:where(:not(:hover, :disabled)) {
+            text-decoration: underline;
+            text-decoration-color: var(--btn-color);
+        }
+
+        &:disabled {
+            --btn-disabled-opacity: 1;
+            --btn-disabled-bg: var(--btn-bg);
+            --btn-disabled-color:#{$o-searchbar-muted-color};
+        }
     }
 
     .oe_search_box:focus, .oe_search_button:focus {
         z-index: 1;
-        background-color: var(--o-color-4);
         box-shadow: none !important;
     }
 
@@ -2480,6 +2490,7 @@ $ribbon-padding: 100px;
         width: 32px;
         height: 32px;
         object-fit: cover;
+        background-color: color-mix(in srgb, $text-muted 12%, transparent);
     }
 
     .o_search_result_content {
@@ -2493,7 +2504,7 @@ $ribbon-padding: 100px;
 
     &:not(.o_search_result_item_placeholder):hover,
     & .o_search_result_link:focus-visible {
-        background-color: $gray-200;
+        background-color: var(--dropdown-link-hover-bg);
     }
 
     .o_search_result_link:focus-visible {
