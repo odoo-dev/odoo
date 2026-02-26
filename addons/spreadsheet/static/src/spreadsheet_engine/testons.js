@@ -2,7 +2,7 @@
 
 const { Model } = odoo.loader.modules.get("@spreadsheet/spreadsheet_engine/o-spreadsheet-engine");
 
-const { sendStdStreamRequest, close } = odoo.loader.modules.get("@spreadsheet/spreadsheet_engine/rpc/rpc_std_stream");
+const { sendStdStreamRequest, outputResult } = odoo.loader.modules.get("@spreadsheet/spreadsheet_engine/rpc/std_streams");
 const { ORM } = odoo.loader.modules.get("@web/core/orm_service");
 const { fieldService } = odoo.loader.modules.get("@web/core/field_service");
 const { OdooDataProvider } = odoo.loader.modules.get("@spreadsheet/data_sources/odoo_data_provider");
@@ -40,7 +40,4 @@ console.log(model.getters.getEvaluatedCell(A1));
 console.log(model.getters.getEvaluatedCell(A1));
 console.log(model.getters.getEvaluatedCell(A1));
 
-await sendStdStreamRequest({
-    message_type: "done",
-});
-// await close();
+await outputResult(model.getters.getEvaluatedCell(A1));

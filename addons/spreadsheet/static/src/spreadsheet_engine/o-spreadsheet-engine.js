@@ -31551,7 +31551,6 @@ class PivotCorePlugin extends CorePlugin {
      * Import the pivots
      */
     import(data) {
-        console.log(JSON.stringify(data))
         if (data.pivots) {
             for (const [id, pivot] of Object.entries(data.pivots)) {
                 debugger;
@@ -50901,7 +50900,6 @@ const constants = {
     GRID_ICON_EDGE_LENGTH,
     GRID_ICON_MARGIN,
 };
-console.log("coucou2");
 const helpers = {
     arg,
     isEvaluationError,

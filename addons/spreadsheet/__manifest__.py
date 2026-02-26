@@ -19,6 +19,8 @@
             'spreadsheet/static/lib/chart_js_treemap.js',
         ],
         'spreadsheet.o_spreadsheet_engine': [
+            # ('include', 'web.assets_backend'),
+            # ('include', 'spreadsheet.o_spreadsheet'),
             'web/static/src/module_loader.js',
             'web/static/lib/luxon/luxon.js',
             'spreadsheet/static/src/spreadsheet_engine/o-spreadsheet-engine.js',

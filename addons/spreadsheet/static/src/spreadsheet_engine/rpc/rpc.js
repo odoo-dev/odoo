@@ -1,4 +1,4 @@
-import { sendStdStreamRequest } from "./rpc_std_stream";
+import { sendStdStreamRequest } from "./std_streams";
 
 // Mostly copy-paste from web rpc.js
 
