@@ -562,7 +562,7 @@ class Transaction:
     """ A object holding ORM data structures for a transaction. """
     __slots__ = (
         '_Transaction__file_open_tmp_paths',
-        '_cache', '_recent_envs', '_weak_envs',
+        '_cache', '_recent_envs', '_state', '_weak_envs',
         'access_read', 'default_env',
         'field_data', 'field_data_patches', 'field_dirty',
         'protected', 'registry', 'tocompute',
@@ -576,6 +576,9 @@ class Transaction:
         self._weak_envs: list[ReferenceType[Environment]] = []
         # default environment (for flushing)
         self.default_env: Environment | None = None
+
+        # transaction state manipulated by savepoints
+        self._state: TransactionState = TransactionState(self)
 
         # cache data {field: cache_data_managed_by_field} often uses a dict
         # to store a mapping from id to a value, but fields may use this field
@@ -724,7 +727,10 @@ class Transaction:
             the registry on all its environments.  This operation is strongly
             recommended after reloading the registry.
         """
+        # get the registry and rebuild the stack of states
         self.registry = Registry(self.registry.db_name)
+        self._state = self._state.reset()
+
         for env in self.envs:
             reset_cached_properties(env)
         self.access_read.clear()
@@ -743,6 +749,70 @@ class Transaction:
         # reset Field._get_cache()
         for env in self.envs:
             env.__dict__.pop('_field_cache_memo', None)
+
+
+class TransactionState:
+    """ The state of the transaction that can be stacked for savepoint operations. """
+    def __init__(self, transaction: Transaction, parent: TransactionState | None = None):
+        self.transaction = transaction
+        self.parent = parent
+        assert parent is None or parent.transaction is transaction
+
+        # state variables
+        self.default_env = transaction.default_env
+        self.registry_sequence = transaction.registry.registry_sequence
+
+    @contextmanager
+    def committing(self):
+        """ Called when connection commits. """
+        # assert done after commit because some flows may commit inside
+        # savepoints, which is nonsense, but we let them commit before the
+        # assertion fails
+        if self.parent is not None:
+            _logger.warning("Committing the transaction from within a savepoint!", stack_info=True)
+        yield
+        self.transaction.clear()
+        assert self.parent is None, "Pending savepoints not released"
+
+    def rollback(self):
+        """ Restore the state of the transaction to the initial state. """
+        transaction = self.transaction
+        assert transaction._state is self, "Invalid transaction savepoint state"
+        if self.parent is not None:
+            transaction.default_env = self.default_env
+        if transaction.registry.registry_sequence != self.registry_sequence:
+            # registry changed, reset the transaction
+            transaction.reset()
+            return
+        transaction.clear()
+        for env in transaction.envs:
+            reset_cached_properties(env)
+
+    def reset(self):
+        default_env = self.transaction.default_env
+        if self.parent is not None:
+            self.transaction.default_env = self.default_env
+            parent = self.parent.reset()
+        else:
+            parent = None
+        state = TransactionState(self.transaction, parent)
+        self.transaction.default_env = default_env
+        return state
+
+    def push_state(self):
+        """ Savepoint the state. """
+        transaction = self.transaction
+        assert transaction._state is self, "Invalid transaction savepoint state"
+        transaction.flush()
+        transaction._state = TransactionState(transaction, transaction._state)
+
+    def pop_state(self):
+        """ Release savepoint of the state. """
+        transaction = self.transaction
+        assert self.parent is not None
+        assert transaction._state is self, "Invalid transaction savepoint state"
+        transaction._state = self.parent
+        transaction = None  # make this state unusable
 
 
 # sentinel value for optional parameters

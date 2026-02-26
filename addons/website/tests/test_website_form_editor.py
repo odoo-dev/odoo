@@ -102,14 +102,15 @@ class TestWebsiteForm(TransactionCase):
         self.env['ir.model.fields'].formbuilder_whitelist('res.partner', ['name'])
         WebsiteFormController = WebsiteForm()
         original_insert_record = WebsiteFormController.insert_record
-        test_sp = self.env.cr.savepoint()
-        def dummy_insert_record(*args, **kwargs):
-            res = original_insert_record(*args, **kwargs)
-            # delete website_form savepoint by rollbacking to test savepoint
-            self.env.cr.execute('ROLLBACK TO SAVEPOINT "%s"' % test_sp.name)
-            return res
-        WebsiteFormController.insert_record = dummy_insert_record
-        with MockRequest(self.env):
+
+        with self.env.cr.savepoint() as test_sp, MockRequest(self.env):
+            def dummy_insert_record(*args, **kwargs):
+                res = original_insert_record(*args, **kwargs)
+                # delete website_form savepoint by rollbacking to test savepoint
+                # this simulates a commit() in the business code
+                test_sp.rollback()
+                return res
+            WebsiteFormController.insert_record = dummy_insert_record
             request.params = {
                 'model_name': 'res.partner',
                 'name': 'test partner',
@@ -120,7 +121,7 @@ class TestWebsiteForm(TransactionCase):
                 )
             self.assertEqual(response.status_code, 200)
             self.assertTrue(response.data.startswith(b'{"id":'))
-        test_sp.close(rollback=True)
+            test_sp.close(rollback=True)
 
     def test_cannot_delete_field_used_in_website_form(self):
         """

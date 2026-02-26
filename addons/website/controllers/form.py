@@ -48,11 +48,13 @@ class WebsiteForm(http.Controller):
                 kwargs = dict(request.params)
                 kwargs.pop('model_name')
                 res = self._handle_website_form(model_name, **kwargs)
+                # HACK because of commit in model code
                 # ignore savepoint closing error if the transaction was committed
                 try:
                     sp.close(rollback=False)
                 except psycopg2.errors.InvalidSavepointSpecification:
                     sp.closed = True
+                    request.env.transaction._state.pop_state()
                 return res
         except (ValidationError, UserError) as e:
             return json.dumps({
