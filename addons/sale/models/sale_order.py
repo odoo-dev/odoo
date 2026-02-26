@@ -834,6 +834,30 @@ class SaleOrder(models.Model):
             ]
         return super().copy_data(default)
 
+    def copy(self, default=None):
+        # if partner is blocked, raise error
+        if self.partner_id.sale_warn == 'block':
+            # or we can also use bus to send a notification like did in warning
+            raise UserError(self.partner_id.sale_warn_msg)
+        # copy the order
+        new_order = super().copy(default)
+        # check partner warning
+        partner_warning = new_order._onchange_partner_id_warning()
+        if partner_warning and partner_warning.get('warning'):
+            title = partner_warning['warning'].get('title')
+            message = partner_warning['warning'].get('message')
+            new_order.env['bus.bus']._sendone(
+                new_order.env.user.partner_id,
+                'simple_notification',
+                {
+                    'title': title,
+                    'message': message,
+                    'type': 'warning',
+                    'sticky': False,
+                },
+            )
+        return new_order
+
     def write(self, values):
         if 'pricelist_id' in values and any(so.state == 'sale' for so in self):
             raise UserError(_("You cannot change the pricelist of a confirmed order !"))
