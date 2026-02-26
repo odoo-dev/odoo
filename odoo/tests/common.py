@@ -1065,6 +1065,13 @@ class BaseCase(case.TestCase):
             return BinaryBytes(f.read())
 
     @classmethod
+    def drop_ormcaches(cls) -> None:
+        """ Remove all data in ORM caches without signaling, just like in a new Registry. """
+        _logger.debug("Clearing all ORM caches")
+        for lru in cls.registry._Registry__caches.values():
+            lru.clear()
+
+    @classmethod
     def _registry_test_mode_patches(cls, *, cr: Cursor, registry: Registry):
         """
         Returns the patches required for entering registry test mode.
@@ -1340,7 +1347,7 @@ class TransactionCase(BaseCase):
             cls.registry.registry_invalidated = cls.registry_start_invalidated
             cls.registry.registry_sequence = cls.registry_start_sequence
             with cls.muted_registry_logger:
-                cls.registry.clear_all_caches()
+                cls.drop_ormcaches()
             cls.registry.cache_invalidated.clear()
             cls.registry.cache_sequences = cls.registry_cache_sequences
         cls.addClassCleanup(reset_changes)
@@ -1410,7 +1417,7 @@ class TransactionCase(BaseCase):
 
         self.addCleanup(_check_registry_lock)
 
-        self.addCleanup(self.muted_registry_logger(self.registry.clear_all_caches))
+        self.addCleanup(self.drop_ormcaches)
 
         # flush everything in setUpClass before introducing a savepoint
         cr = self.cr
