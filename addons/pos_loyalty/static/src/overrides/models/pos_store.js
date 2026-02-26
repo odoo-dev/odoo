@@ -100,6 +100,7 @@ patch(PosStore.prototype, {
                 // Try auto claiming rewards
                 const claimableRewards = order.getClaimableRewards(false, false, true);
                 let changed = false;
+                const nbr_lines = order.lines.length;
                 for (const { coupon_id, reward } of claimableRewards) {
                     if (
                         reward.program_id.reward_ids.length === 1 &&
@@ -116,6 +117,9 @@ patch(PosStore.prototype, {
                     await this.orderUpdateLoyaltyPrograms();
                 }
                 order._updateRewardLines();
+                if (order.lines.length != nbr_lines) {
+                    this.updateRewards();
+                }
             });
         });
     },
