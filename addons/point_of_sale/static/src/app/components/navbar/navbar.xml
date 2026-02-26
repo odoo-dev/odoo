@@ -38,7 +38,7 @@
                     class="ui.isSmall ? 'p-0' : 'w-100 w-xl-50 me-0 me-lg-2'"
                     isSmall="ui.isSmall"
                     placeholder.translate="Search products..."
-                    icon="{type: 'fa', value: 'fa-search fa-lg fa-fw'}"
+                    icon="{type: 'icon', value: 'search', class: 'oi-lg oi-fw'}"
                     debounceMillis="500"
                     getRef="(ref) => this.inputRef = ref"
                     t-if="pos.showSearchButton()"
