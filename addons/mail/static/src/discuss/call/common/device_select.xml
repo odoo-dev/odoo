@@ -13,7 +13,7 @@
                 t-att-data-kind="props.kind"
                 t-attf-class="{{ props.roundedType === 'pill' ? 'rounded-pill' : 'rounded' }}"
              >
-                <i t-if="props.icon" t-att-class="props.icon"/>
+                <i t-if="props.icon" class="oi" t-att-class="props.icon_class" t-att-data-icon="props.icon"/>
                 <span
                     class="pe-2 d-inline-block text-truncate flex-grow-1 min-w-0"
                     t-attf-class="{{ props.icon ? 'ps-2' : '' }}"
@@ -28,7 +28,7 @@
                 t-on-pointerdown.prevent="() => this.showPermissionDialog(props.kind)"
                 t-on-keydown.prevent="() => this.showPermissionDialog(props.kind)"
             >
-                <i t-if="props.icon" t-att-class="props.icon"/>
+                <i t-if="props.icon" class="oi" t-att-class="props.icon_class" t-att-data-icon="props.icon"/>
                 <span
                     class="d-inline-block text-truncate flex-grow-1 min-w-0"
                     t-attf-class="{{ props.icon ? 'ps-2' : '' }}"

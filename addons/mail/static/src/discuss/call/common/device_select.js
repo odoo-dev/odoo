@@ -19,6 +19,10 @@ export class DeviceSelect extends Component {
             type: String,
             optional: true,
         },
+        icon_class: {
+            type: String,
+            optional: true,
+        },
         roundedType: {
             type: String,
             optional: true,
