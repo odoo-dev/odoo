@@ -15,7 +15,7 @@
             </t>
         </xpath>
         <xpath expr="//t[@name='no_package_move_lines']" position="inside">
-            <t t-call="mrp.stock_report_delivery_kit_sections"/>
+            <t t-if="has_serial_number" t-call="mrp.stock_report_delivery_kit_sections"/>
         </xpath>
         <xpath expr="//t[@name='has_packages']" position="after">
             <!-- Additional use case: group by kits when no packages exist and then apply use case 1. (serial/lot numbers used/printed) -->
