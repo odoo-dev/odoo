@@ -20,6 +20,7 @@ from odoo.addons.website_sale.models.website import (
 
 @contextmanager
 def MockRequest(
+    env,
     *args,
     website=None,
     sale_order_id=None,
@@ -28,7 +29,15 @@ def MockRequest(
     website_sale_selected_pl_id=None,
     **kwargs,
 ):
-    with websiteMockRequest(*args, website=website, **kwargs) as request:
+    if sale_order_id is not None:
+        website = website.with_context(sale_order_id=sale_order_id)
+    if website_sale_current_pl is not None:
+        website = website.with_context(pricelist_id=website_sale_current_pl)
+    if fiscal_position_id is not None:
+        website = website.with_context(fiscal_position_id=fiscal_position_id)
+    env = env(context=website.env.context)
+
+    with websiteMockRequest(env, *args, context=env.context, website=website, **kwargs) as request:
         if website:
             # MockRequest simulates another transaction; the cache must be invalidated
             # because some information come from the session
