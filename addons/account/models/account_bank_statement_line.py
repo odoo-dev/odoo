@@ -456,6 +456,8 @@ class AccountBankStatementLine(models.Model):
         """ Undo the reconciliation made on the statement line and reset their journal items
         to their original states.
         """
+        if not self:
+            return
         self.line_ids.remove_move_reconcile()
         self.payment_ids.unlink()
 

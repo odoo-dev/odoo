@@ -337,9 +337,10 @@ class ResCompany(models.Model):
             return False
         return closing.closing_datetime
 
-    def _set_category_defaults(self):
-        for company in self:
-            self.env['ir.default'].set('product.category', 'property_valuation', company.inventory_valuation, company_id=company.id)
-            self.env['ir.default'].set('product.category', 'property_cost_method', company.cost_method, company_id=company.id)
-            self.env['ir.default'].set('product.category', 'property_stock_journal', company.account_stock_journal_id.id, company_id=company.id)
-            self.env['ir.default'].set('product.category', 'property_stock_valuation_account_id', company.account_stock_valuation_id.id, company_id=company.id)
+    def _get_ir_default_mapping(self):
+        return super()._get_ir_default_mapping() | {
+            'inventory_valuation': ('product.category', 'property_valuation'),
+            'cost_method': ('product.category', 'property_cost_method'),
+            'account_stock_journal_id': ('product.category', 'property_stock_journal'),
+            'account_stock_valuation_id': ('product.category', 'property_stock_valuation_account_id'),
+        }

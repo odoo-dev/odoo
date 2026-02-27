@@ -3849,6 +3849,7 @@ class AccountMove(models.Model):
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
         self._check_user_access(vals_list)
+        self = self.with_context(skip_is_manually_modified=True)  # noqa: PLW0642
         container = {'records': self}
         with self._check_balanced(container):
             with ExitStack() as exit_stack, self._sync_dynamic_lines(container):
@@ -3861,7 +3862,6 @@ class AccountMove(models.Model):
             for move, vals in zip(moves, vals_list):
                 if 'tax_totals' in vals:
                     move.tax_totals = vals['tax_totals']
-            moves.is_manually_modified = False
         return moves
 
     def write(self, vals):
@@ -7186,7 +7186,7 @@ class AccountMove(models.Model):
             invoices = self
             if len(file_data_groups) > 1:
                 create_vals = (len(file_data_groups) - 1) * self.copy_data()
-                invoices |= self.with_context(skip_is_manually_modified=True).create(create_vals)
+                invoices |= self.create(create_vals)
 
             for invoice, file_data_group in zip(invoices, file_data_groups):
                 attachment_records = self._from_files_data(file_data_group)

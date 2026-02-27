@@ -27,6 +27,8 @@ class IrDefault(models.Model):
     condition = fields.Char('Condition', help="If set, applies the default upon condition.")
     json_value = fields.Char('Default Value (JSON format)', required=True)
 
+    _unique_default = models.UniqueIndex("(field_id, company_id, user_id) NULLS NOT DISTINCT WHERE condition IS NULL")
+
     @api.constrains('json_value', 'field_id')
     def _check_json_format(self):
         for record in self:
@@ -86,20 +88,7 @@ class IrDefault(models.Model):
         if company_id is True:
             company_id = self.env.company.id
 
-        # check consistency of model_name, field_name, and value
-        try:
-            model = self.env[model_name]
-            field = model._fields[field_name]
-            parsed = field.convert_to_cache(value, model)
-            if field.type in ('date', 'datetime') and isinstance(value, date):
-                value = field.to_string(value)
-            json_value = json.dumps(value, ensure_ascii=False)
-        except KeyError:
-            raise ValidationError(self.env._("Invalid field %(model)s.%(field)s", model=model_name, field=field_name))
-        except Exception:
-            raise ValidationError(self.env._("Invalid value for %(model)s.%(field)s: %(value)s", model=model_name, field=field_name, value=value))
-        if field.type == 'integer' and not (-2**31 < parsed < 2**31-1):
-            raise ValidationError(self.env._("Invalid value for %(model)s.%(field)s: %(value)s is out of bounds (integers should be between -2,147,483,648 and 2,147,483,647)", model=model_name, field=field_name, value=value))
+        json_value = self._format_json_value(model_name, field_name, value)
 
         # update existing default for the same scope, or create one
         field = self.env['ir.model.fields']._get(model_name, field_name)
@@ -122,6 +111,54 @@ class IrDefault(models.Model):
                 'json_value': json_value,
             })
         return True
+
+    def set_default_multi(self, defaults):
+        """Set multiple company defaults at the same time.
+
+        :param defaults: list of tuples (model_name, field_name, company_id, default_value)
+        """
+        if not defaults:
+            return
+        self.check_access('write')
+        # invalidate all company dependent fields since their fallback value in cache may be changed
+        self.env.invalidate_all()
+        self.env.registry.clear_cache(self._clear_cache_name)
+        values = [
+            (
+                self.env['ir.model.fields']._get(model_name, field_name).id,
+                company_id,
+                self._format_json_value(model_name, field_name, default_value),
+                None,  # user_id
+                None,  # condition
+            )
+            for model_name, field_name, company_id, default_value in defaults
+        ]
+        self.env.cr.execute_values(
+            """
+            INSERT INTO ir_default (field_id, company_id, json_value, user_id, condition)
+                 VALUES %s
+            ON CONFLICT (field_id, company_id, user_id) WHERE condition IS NULL
+          DO UPDATE SET json_value = EXCLUDED.json_value
+            """,
+            values,
+        )
+
+    def _format_json_value(self, model_name, field_name, value):
+        # check consistency of model_name, field_name, and value
+        try:
+            model = self.env[model_name]
+            field = model._fields[field_name]
+            parsed = field.convert_to_cache(value, model)
+            if field.type in ('date', 'datetime') and isinstance(value, date):
+                value = field.to_string(value)
+            json_value = json.dumps(value, ensure_ascii=False)
+        except KeyError:
+            raise ValidationError(self.env._("Invalid field %(model)s.%(field)s", model=model_name, field=field_name))
+        except Exception:
+            raise ValidationError(self.env._("Invalid value for %(model)s.%(field)s: %(value)s", model=model_name, field=field_name, value=value))
+        if field.type == 'integer' and not (-2**31 < parsed < 2**31-1):
+            raise ValidationError(self.env._("Invalid value for %(model)s.%(field)s: %(value)s is out of bounds (integers should be between -2,147,483,648 and 2,147,483,647)", model=model_name, field=field_name, value=value))
+        return json_value
 
     @api.model
     def _get(self, model_name, field_name, user_id=False, company_id=False, condition=False):

@@ -761,7 +761,8 @@ class ResCompany(models.Model):
 
         companies = super().write(vals)
 
-        self._set_category_defaults()
+        if set(vals) & set(self._get_ir_default_mapping()):
+            self._set_category_defaults()
         # We revoke all active exceptions affecting the changed lock dates and recreate them (with the updated lock dates)
         changed_soft_lock_fields = [field for field in SOFT_LOCK_DATE_FIELDS if field in vals]
         for company in self:
@@ -1136,9 +1137,17 @@ class ResCompany(models.Model):
             company.company_vat_placeholder = placeholder
 
     def _set_category_defaults(self):
-        for company in self:
-            self.env['ir.default'].set('product.category', 'property_account_expense_categ_id', company.expense_account_id.id, company_id=company.id)
-            self.env['ir.default'].set('product.category', 'property_account_income_categ_id', company.income_account_id.id, company_id=company.id)
+        self.env['ir.default'].set_default_multi([
+            (model_name, fname, company.id, company._fields[cfname].convert_to_write(company[cfname], company))
+            for company in self
+            for cfname, (model_name, fname) in company._get_ir_default_mapping().items()
+        ])
+
+    def _get_ir_default_mapping(self):
+        return {
+            'expense_account_id': ('product.category', 'property_account_expense_categ_id'),
+            'income_account_id': ('product.category', 'property_account_income_categ_id'),
+        }
 
     def _check_tax_return_configuration(self):
         """

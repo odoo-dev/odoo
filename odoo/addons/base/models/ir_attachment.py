@@ -209,7 +209,7 @@ class IrAttachment(models.Model):
         # prevent all concurrent updates on ir_attachment while collecting,
         # but only attempt to grab the lock for a little bit, otherwise it'd
         # start blocking other transactions. (will be retried later anyway)
-        cr.execute("SET LOCAL lock_timeout TO '10s'")
+        cr.execute("SET LOCAL lock_timeout TO '1000s'")
         try:
             cr.execute("LOCK ir_attachment IN SHARE MODE")
         except psycopg2.errors.LockNotAvailable:

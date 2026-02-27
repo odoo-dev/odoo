@@ -11,6 +11,15 @@ class TestFiscal(L10nInTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.outside_in_company = cls.env['res.company'].create({
+            'name': 'Outside India Company',
+            'country_id': cls.country_us.id,
+        })
+
+        cls.user.write({
+            'company_ids': [cls.default_company.id, cls.outside_in_company.id],
+            'company_id': cls.default_company.id,
+        })
 
         # Remove fiscal position 'fiscal_pos_a' so it does not show up on invoice
         cls.partner_b.property_account_position_id = None

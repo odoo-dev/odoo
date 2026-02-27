@@ -1,6 +1,7 @@
 from datetime import date
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.tools import classproperty
 from odoo import Command
 
 
@@ -35,16 +36,6 @@ class L10nInTestInvoicingCommon(AccountTestInvoicingCommon):
             'l10n_in_is_gst_registered': True,
             'l10n_in_tds_feature': True,
             'l10n_in_tcs_feature': True,
-        })
-
-        cls.outside_in_company = cls.env['res.company'].create({
-            'name': 'Outside India Company',
-            'country_id': cls.country_us.id,
-        })
-
-        cls.user.write({
-            'company_ids': [cls.default_company.id, cls.outside_in_company.id],
-            'company_id': cls.default_company.id,
         })
 
         cls.user_internal = cls._create_new_internal_user()
@@ -145,75 +136,119 @@ class L10nInTestInvoicingCommon(AccountTestInvoicingCommon):
         cls.fp_in_inter_state = cls.env["account.chart.template"].ref('fiscal_position_in_inter_state')
         cls.fp_in_export = cls.env["account.chart.template"].ref('fiscal_position_in_export')
 
-        # === Invoices === #
+    @classproperty
+    def outside_in_company(cls):
+        cls.outside_in_company = cls.env['res.company'].create({
+            'name': 'Outside India Company',
+            'country_id': cls.country_us.id,
+        })
+        cls.user.write({
+            'company_ids': [cls.default_company.id, cls.outside_in_company.id],
+            'company_id': cls.default_company.id,
+        })
+        return cls.outside_in_company
+
+    # === Invoices === #
+    @classproperty
+    def invoice_a(cls):
         cls.invoice_a = cls.init_invoice(
             move_type='out_invoice',
             partner=cls.partner_a,
             amounts=[110, 500],
             taxes=cls.igst_sale_18,
         )
+        return cls.invoice_a
 
+    @classproperty
+    def invoice_b(cls):
         cls.invoice_b = cls.init_invoice(
             move_type='out_invoice',
             partner=cls.partner_b,
             amounts=[250, 600],
             taxes=cls.igst_sale_18,
         )
+        return cls.invoice_b
 
+    @classproperty
+    def invoice_c(cls):
         cls.invoice_c = cls.init_invoice(
             move_type='out_invoice',
             partner=cls.partner_foreign,
             amounts=[300, 740],
             taxes=cls.igst_sale_18,
         )
+        return cls.invoice_c
 
+    @classproperty
+    def invoice_d(cls):
         cls.invoice_d = cls.init_invoice(
             move_type='out_invoice',
             partner=cls.partner_foreign_no_state,
             amounts=[100, 200],
             taxes=cls.igst_sale_18,
         )
+        return cls.invoice_d
 
+    @classproperty
+    def invoice_with_rcm(cls):
         cls.invoice_with_rcm = cls.init_invoice(
             "out_invoice",
             partner=cls.partner_b,
             products=cls.product_a,
             taxes=cls.igst_sale_18_rcm,
         )
+        return cls.invoice_with_rcm
 
+    @classproperty
+    def invoice_with_sez_lut(cls):
         cls.invoice_with_sez_lut = cls.init_invoice(
             "out_invoice",
             partner=cls.sez_partner,
             products=cls.product_a,
             taxes=cls.igst_sale_18_sez_lut,
         )
+        return cls.invoice_with_sez_lut
 
+    @classproperty
+    def invoice_with_sez_without_lut(cls):
         cls.invoice_with_sez_without_lut = cls.init_invoice(
             "out_invoice",
             partner=cls.sez_partner,
             products=cls.product_a,
             taxes=cls.igst_sale_18,
         )
+        return cls.invoice_with_sez_without_lut
 
+    @classproperty
+    def invoice_with_export_lut(cls):
         cls.invoice_with_export_lut = cls.init_invoice(
             "out_invoice",
             partner=cls.partner_foreign,
             products=cls.product_a,
             taxes=cls.igst_sale_18_exp_lut,
         )
+        return cls.invoice_with_export_lut
 
+    @classproperty
+    def invoice_with_export_without_lut(cls):
         cls.invoice_with_export_without_lut = cls.init_invoice(
             "out_invoice",
             partner=cls.partner_foreign,
             products=cls.product_a,
             taxes=cls.igst_sale_18_exp,
         )
+        return cls.invoice_with_export_without_lut
+
+    @classproperty
+    def invoice_with_export_without_lut_inc(cls):
         cls.invoice_with_export_without_lut_inc = cls.init_invoice(
             "out_invoice",
             partner=cls.partner_foreign,
             products=cls.product_a,
             taxes=cls.igst_sale_18_exp_inc,
         )
+        return cls.invoice_with_export_without_lut_inc
+
 
     @classmethod
     def _set_vals_and_post(cls, move, ref=None, line_vals=None, post=True, irn=None):
