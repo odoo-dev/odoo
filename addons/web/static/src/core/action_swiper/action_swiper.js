@@ -29,6 +29,7 @@ export class ActionSwiper extends Component {
             args: {
                 action: Function,
                 icon: String,
+                icon_class: String,
                 bgColor: String,
                 slot: Object,
             },
@@ -39,6 +40,7 @@ export class ActionSwiper extends Component {
             args: {
                 action: Function,
                 icon: String,
+                icon_class: String,
                 bgColor: String,
                 slot: Object,
             },
