@@ -3118,11 +3118,8 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
 </template>
 
 <template id="website_search_box" name="Website Searchbox">
-    <t t-set="search_count_string">
-        <t t-if="(search_count or 0) == 1"><t t-out="search_count or 0"/> result</t>
-        <t t-else=""><t t-out="search_count or 0"/> results</t>
-    </t>
-
+    <t t-set="search_count" t-value="search_count or 0"/>
+    <t t-set="search_count_string" t-value="str(search_count) + ' result' + ('s' if search_count &gt; 1 else '')"/>
     <div
         t-attf-class="{{_input_group_classes}} o_search_input_group input-group {{'d-none' if _simple_button_layout else ''}}" role="search"
         t-att-data-force-modal-trigger="_force_modal_trigger or _simple_button_layout">

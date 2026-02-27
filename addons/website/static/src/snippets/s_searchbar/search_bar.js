@@ -166,22 +166,19 @@ export class SearchBar extends Interaction {
         this.hideLoadingSpinner();
         this.buttonEl.toggleAttribute("disabled", count === 0);
         const countText = count <= 1 ? _t("%s result", count) : _t("%s results", count);
-        for (const el of this.buttonEl.querySelectorAll(".o_search_count")) {
-            el.textContent = countText;
-        }
-        const isEmpty = !this.inputEl.value.trim();
-        this.resultsEl?.classList.toggle("d-none", isEmpty);
-        this.iconEl?.classList.toggle("d-none", !isEmpty);
+        this.resultsEl.querySelector(".o_search_count").textContent = countText;
     }
 
     hideLoadingSpinner() {
-        this.spinnerEl?.classList.add("d-none");
+        this.resultsEl.classList.toggle("d-none", !this.hasDropdown);
+        this.iconEl.classList.toggle("d-none", this.hasDropdown);
+        this.spinnerEl.classList.add("d-none");
     }
 
     showLoadingSpinner() {
-        this.resultsEl?.classList.add("d-none");
-        this.iconEl?.classList.add("d-none");
-        this.spinnerEl?.classList.remove("d-none");
+        this.resultsEl.classList.add("d-none");
+        this.iconEl.classList.add("d-none");
+        this.spinnerEl.classList.remove("d-none");
     }
 
     getFieldsNames() {

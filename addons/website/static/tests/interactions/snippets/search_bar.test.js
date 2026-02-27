@@ -19,6 +19,14 @@ const searchTemplate = /* html */ `
                     data-order-by="name asc"
                     autocomplete="off"/>
             <button type="submit" aria-label="Search" title="Search" class="btn oe_search_button border border-start-0 px-4 bg-o-color-4">
+                <span class="o_search_spinner d-none spinner-border spinner-border-sm text-500"
+                      style="--spinner-border-width: 0.1em;"
+                      role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </span>
+                <small class="o_search_found_results d-none">
+                    <span class="o_search_count"></span>
+                </small>
                 <i class="oi oi-search"></i>
             </button>
         </div>
