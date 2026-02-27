@@ -66,7 +66,7 @@ registry.category("web_tour.tours").add("hr_employee_multiple_bank_accounts_tour
         },
         {
             content: "save employee form",
-            trigger: ".fa-cloud-upload",
+            trigger: "[data-icon='cloud_upload']",
             run: "click",
         },
         {
