@@ -23,18 +23,6 @@ export class WebsiteEventTrackReminder extends Interaction {
                 }
             },
         },
-        ".o_form_button_cancel": {
-            "t-on-click": this.modalEmailReminderCancel,
-        },
-        "#o_wetrack_email_reminder_form": {
-            "t-on-submit.prevent": this.modalEmailReminderSubmit,
-        },
-        ".o_form_button_dont_ask_again": {
-            "t-on-click": () => {
-                sessionStorage.setItem("website_event_track.email_reminder_off", "true");
-                this.modalEmailReminderCancel();
-            },
-        }
     };
 
     setup() {
@@ -100,15 +88,9 @@ export class WebsiteEventTrackReminder extends Interaction {
         else if (!sessionStorage.getItem("website_event_track.email_reminder_off")) {
             this.opacityManagerElement.style.opacity = 1;
             this.insert(renderToElement("website_event_track.email_reminder_modal", {"track_id": this.trackId}));
+//            this.renderAt("website_event_track.email_reminder_modal", {"track_id": this.trackId}, document.body);
         }
         else if (this.favoriteAddedConfirmation) {
-            this.notification.add(this.favoriteAddedConfirmation, {type: "info"});
-        }
-    }
-
-    modalEmailReminderCancel() {
-        this._modalEmailReminderRemove();
-        if (this.favoriteAddedConfirmation) {
             this.notification.add(this.favoriteAddedConfirmation, {type: "info"});
         }
     }
