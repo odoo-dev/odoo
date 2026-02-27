@@ -34,7 +34,7 @@
             t-on-click="() => this.selectAll()"
         >
             <span class="btn border-0 pt-2 px-2" t-att-class="this.selectAllClass">
-                <i class="fa fa-fw" t-att-class="this.selectAllIcon"/>
+                <i class="oi oi-fw" t-att-class="this.selectAllIconClass" t-att-data-icon="this.selectAllIcon"/>
             </span>
         </div>
         <div
