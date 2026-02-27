@@ -10,7 +10,7 @@ export class HierarchyArchParser {
             activeActions: getActiveActions(xmlDoc),
             defaultOrder: stringToOrderBy(xmlDoc.getAttribute("default_order") || null),
             draggable: false,
-            icon: "fa-share-alt fa-rotate-90 align-text-top",
+            icon: "family_history",
             parentFieldName: "parent_id",
             fieldNodes: {},
             templateDocs: {},
