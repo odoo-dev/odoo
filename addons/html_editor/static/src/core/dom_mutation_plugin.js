@@ -305,7 +305,8 @@ export class DomMutationPlugin extends Plugin {
         commit.data.commitTimestamp ??= Date.now();
         const step = this.dependencies.history.write(commit, stepType);
 
-        this.resetCurrentMutations();
+        this.updateLocal("mutations", []);
+        this.updateLocal("authorTimestamp", Date.now());
 
         this.stageSelection();
 
@@ -411,11 +412,6 @@ export class DomMutationPlugin extends Plugin {
      */
     updateLocal(key, value) {
         this.currentChanges[key] = value;
-    }
-
-    resetCurrentMutations() {
-        this.updateLocal("mutations", []);
-        this.updateLocal("authorTimestamp", Date.now());
     }
 
     // DOM Map
@@ -605,7 +601,7 @@ export class DomMutationPlugin extends Plugin {
         this.handleObserverRecords();
         this.revertMutations(this.currentChanges.mutations);
         this.observer.takeRecords();
-        this.resetCurrentMutations();
+        this.updateLocal("mutations", []);
         return changes;
     }
 
