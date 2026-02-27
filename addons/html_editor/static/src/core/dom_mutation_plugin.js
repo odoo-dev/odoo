@@ -1588,6 +1588,57 @@ export class DomMutationPlugin extends Plugin {
     // Preview stuff
 
     /**
+     * TODO AGE: review link with history and steps.
+     * Restores the editable to the state of a previous step.
+     * It does so by discarding the current draft and reverting reversible steps
+     * until the specified step index, while ensuring that irreversible steps
+     * are maintained. This will add a new "restore" step and set the reverted
+     * steps's state to "discarded".
+     *
+     * @param {HistoryStep} step
+     * @returns {CommitData | undefined}
+     */
+    restoreToStep(step) {
+        this.discardDraft();
+        if (step === this.dependencies.history.getHistorySteps().at(-1)) {
+            return;
+        }
+        let lastRevertedChanges = { ...this.currentChanges };
+        const commitsToRestore = this.dependencies.history.getCommitsUntil(step.id);
+        const irreversibleCommits = [];
+        for (const commitToRestore of commitsToRestore) {
+            this.revertMutations(commitToRestore.data.mutations, {
+                ensureNewMutations: true,
+            });
+            // Process (filter, handle and stage) mutations so that the
+            // attribute comparison for the state change is done with the
+            // intermediate attribute value and not with the final value in the
+            // DOM after all commits were reverted then applied again.
+            this.processNewRecords(this.observer.takeRecords());
+            if (commitToRestore.discard) {
+                commitToRestore.discard();
+                lastRevertedChanges = commitToRestore.data;
+            } else {
+                irreversibleCommits.unshift(commitToRestore);
+            }
+        }
+        // Re-apply every non reversible commit (typically collaborators commits).
+        for (const irreversibleCommit of irreversibleCommits) {
+            this.applyMutations(irreversibleCommit.data.mutations, {
+                ensureNewMutations: true,
+            });
+            this.processNewRecords(this.observer.takeRecords());
+        }
+        // TODO ABD TODO @phoenix: review selections, this selection could be obsolete
+        // depending on the non-reversible commits that were applied.
+        this.setSerializedSelection(lastRevertedChanges.selection);
+        // Register resulting mutations as a new "restore" commit (prevent undo).
+        this.dispatchContentUpdated();
+        this._commit({ stepType: "restore" });
+        return lastRevertedChanges;
+    }
+
+    /**
      * Returns a function that can be later called to revert history to the
      * current state.
      * @returns {Function}
@@ -1611,39 +1662,7 @@ export class DomMutationPlugin extends Plugin {
                 return;
             }
             hasBeenRestored = true;
-            // AGE: start oldHistory.restoreToStep
-            this.discardDraft();
-            let lastRevertedChanges = { ...this.currentChanges };
-            const commitsToRestore = this.dependencies.history.getCommitsUntil(step.id);
-            const irreversibleCommits = [];
-            for (const commitToRestore of commitsToRestore) {
-                this.revertMutations(commitToRestore.data.mutations, { ensureNewMutations: true });
-                // Process (filter, handle and stage) mutations so that the
-                // attribute comparison for the state change is done with the
-                // intermediate attribute value and not with the final value in the
-                // DOM after all commits were reverted then applied again.
-                this.processNewRecords(this.observer.takeRecords());
-                if (commitToRestore.discard) {
-                    commitToRestore.discard();
-                    lastRevertedChanges = commitToRestore.data;
-                } else {
-                    irreversibleCommits.unshift(commitToRestore);
-                }
-            }
-            // Re-apply every non reversible commit (typically collaborators commits).
-            for (const irreversibleCommit of irreversibleCommits) {
-                this.applyMutations(irreversibleCommit.data.mutations, {
-                    ensureNewMutations: true,
-                });
-                this.processNewRecords(this.observer.takeRecords());
-            }
-            // TODO ABD TODO @phoenix: review selections, this selection could be obsolete
-            // depending on the non-reversible commits that were applied.
-            this.setSerializedSelection(lastRevertedChanges.selection);
-            // Register resulting mutations as a new "restore" commit (prevent undo).
-            this.dispatchContentUpdated();
-            this._commit({ stepType: "restore" });
-            // AGE: end oldHistory.restoreToStep
+            const lastRevertedChanges = this.restoreToStep(step);
 
             if (lastRevertedChanges?.selection && !draftMutations.length) {
                 selectionToRestore.setCursor((cursor) => {
