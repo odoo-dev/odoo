@@ -125,9 +125,11 @@ class ReportBomStructure(models.AbstractModel):
         if self.env.context.get('warehouse_id'):
             warehouse = self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id'))
         else:
-            warehouse = self.env['stock.warehouse'].browse(self.get_warehouses()[0]['id'])
+            warehouses = self.get_warehouses()
+            warehouse = self.env['stock.warehouse'].browse(warehouses[0]['id']) if warehouses else None
 
-        lines = self._get_bom_data(bom, warehouse, product=product, line_qty=bom_quantity, level=0)
+        ignore_stock = not warehouse
+        lines = self._get_bom_data(bom, warehouse, product=product, line_qty=bom_quantity, level=0, ignore_stock=ignore_stock)
         try:
             production_capacities = self._compute_production_capacities(bom_quantity, lines)
         except UserError as e:
@@ -430,9 +432,9 @@ class ReportBomStructure(models.AbstractModel):
         key = product.id
         if key not in product_info:
             product_info[key] = {'consumptions': {'in_stock': 0}}
-        if not product_info[key].get(bom_key):
+        if warehouse and not product_info[key].get(bom_key):
             product_info[key][bom_key] = self._get_resupply_route_info(warehouse, product, quantity, product_info, bom, parent_bom, parent_product)
-        elif product_info[key][bom_key].get('route_alert'):
+        elif warehouse and product_info[key][bom_key].get('route_alert') and warehouse:
             # Need more quantity than a single line, might change with additional quantity
             product_info[key][bom_key] = self._get_resupply_route_info(
                 warehouse, product, quantity + product_info[key][bom_key].get('qty_checked'), product_info, bom, parent_bom, parent_product)
@@ -537,10 +539,12 @@ class ReportBomStructure(models.AbstractModel):
         if self.env.context.get('warehouse_id'):
             warehouse = self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id'))
         else:
-            warehouse = self.env['stock.warehouse'].browse(self.get_warehouses()[0]['id'])
+            warehouses = self.get_warehouses()
+            warehouse = self.env['stock.warehouse'].browse(warehouses[0]['id']) if warehouses else None
 
         level = 1
-        data = self._get_bom_data(bom, warehouse, product=product, line_qty=qty, level=0)
+        ignore_stock = not warehouse
+        data = self._get_bom_data(bom, warehouse, product=product, line_qty=qty, level=0, ignore_stock=ignore_stock)
         pdf_lines = self._get_bom_array_lines(data, level, unfolded_ids, unfolded, True)
 
         data['lines'] = pdf_lines
