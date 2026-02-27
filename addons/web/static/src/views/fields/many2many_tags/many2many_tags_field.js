@@ -159,7 +159,7 @@ export class Many2ManyTagsField extends Component {
     }
 
     get tagsListProps() {
-        const limit = this.state.expanded ? 0 : this.props.tagLimit;
+        const limit = this.state?.expanded ? 0 : this.props.tagLimit;
         return {
             tags: this.tags,
             tagLimit: limit === 0 ? Number.POSITIVE_INFINITY : limit,

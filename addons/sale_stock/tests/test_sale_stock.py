@@ -1286,11 +1286,11 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         moves = so.picking_ids.move_ids.sorted('id')
         pick_sm, pack_sm, ship_sm, ret_pick_sm, ret_pack_sm = moves
         self.assertRecordValues(moves, [
-            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': pack_sm.ids},
-            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': ship_sm.ids},
+            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': (pack_sm | ret_pick_sm).ids},
+            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': (ship_sm | ret_pack_sm).ids},
             {'product_uom_qty': 3, 'location_id': out_location.id, 'location_dest_id': custo_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': []},
-            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': ret_pack_sm.ids, 'move_dest_ids': []},
-            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': ret_pick_sm.ids},
+            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': (ret_pack_sm | pick_sm).ids, 'move_dest_ids': []},
+            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': ret_pick_sm.ids},
         ])
 
         # Make sure the total outgoing qty per step is correct
@@ -1310,11 +1310,11 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
 
         moves = so.picking_ids.move_ids.sorted('id')
         self.assertRecordValues(moves, [
-            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': pack_sm.ids},
-            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': ship_sm.ids},
+            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': (pack_sm | ret_pick_sm).ids},
+            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': (ship_sm | ret_pack_sm).ids},
             {'product_uom_qty': 3, 'location_id': out_location.id, 'location_dest_id': custo_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': []},
-            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': ret_pack_sm.ids, 'move_dest_ids': []},
-            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': ret_pick_sm.ids},
+            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': (ret_pack_sm | pick_sm).ids, 'move_dest_ids': []},
+            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': ret_pick_sm.ids},
             {'product_uom_qty': 2, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': []},
         ])
 
@@ -1363,10 +1363,10 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         ship_sm, pack_sm, pick_sm, ret_pack_sm, ret_pick_sm = moves
         self.assertRecordValues(moves, [
             {'product_uom_qty': 3, 'location_id': out_location.id, 'location_dest_id': custo_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': []},
-            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': ship_sm.ids},
-            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': pack_sm.ids},
-            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': ret_pick_sm.ids},
-            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': ret_pack_sm.ids, 'move_dest_ids': []},
+            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': (ship_sm | ret_pack_sm).ids},
+            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': (pack_sm | ret_pick_sm).ids},
+            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': ret_pick_sm.ids},
+            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': (pick_sm | ret_pack_sm).ids, 'move_dest_ids': []},
         ])
 
         # Make sure the total outgoing qty per step is correct
@@ -1388,10 +1388,10 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         ship_sm, pack_sm, pick_sm, ret_pack_sm, ret_pick_sm, new_pack_sm, new_pick_sm = moves
         self.assertRecordValues(moves, [
             {'product_uom_qty': 5, 'location_id': out_location.id, 'location_dest_id': custo_location.id, 'move_orig_ids': (pack_sm | new_pack_sm).ids, 'move_dest_ids': []},
-            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': ship_sm.ids},
-            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': pack_sm.ids},
-            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': ret_pick_sm.ids},
-            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': ret_pack_sm.ids, 'move_dest_ids': []},
+            {'product_uom_qty': 5, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': pick_sm.ids, 'move_dest_ids': (ship_sm | ret_pack_sm).ids},
+            {'product_uom_qty': 5, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': (pack_sm | ret_pick_sm).ids},
+            {'product_uom_qty': 2, 'location_id': out_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': pack_sm.ids, 'move_dest_ids': ret_pick_sm.ids},
+            {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': stock_location.id, 'move_orig_ids': (pick_sm | ret_pack_sm).ids, 'move_dest_ids': []},
             {'product_uom_qty': 2, 'location_id': pack_location.id, 'location_dest_id': out_location.id, 'move_orig_ids': new_pick_sm.ids, 'move_dest_ids': ship_sm.ids},
             {'product_uom_qty': 2, 'location_id': stock_location.id, 'location_dest_id': pack_location.id, 'move_orig_ids': [], 'move_dest_ids': new_pack_sm.ids},
         ])
@@ -2733,3 +2733,36 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         self.assertRecordValues(sale_order.order_line, [
             {'product_id': self.new_product.id, 'product_uom_qty': 0, 'qty_delivered': 3}
         ])
+
+    def test_sale_order_cancel_with_internal_transfers(self):
+        """ Ensure that any undelivered quantities remaining in internal locations are moved back into stock
+        by creating the appropriate reverse pickings when a Sale Order is cancelled.
+        Steps:
+        1. Create a Sale Order with quantity 10 and confirm it.
+        2. Validate the Pick and Pack.
+        3. Deliver 5 units and generate a backorder for the remaining 5.
+        4. Cancel the Sale Order.
+        5. Validate the reverse picking.
+        6. Verify that the stock quantity is restored in WH/Stock.
+        """
+        warehouse = self.company_data['default_warehouse']
+        warehouse.delivery_steps = 'pick_pack_ship'
+        stock_location = warehouse.lot_stock_id
+        self.env['stock.quant']._update_available_quantity(self.test_product_delivery, stock_location, 10)
+
+        sale_order = self._get_new_sale_order(amount=10, product=self.test_product_delivery)
+        sale_order.action_confirm()
+        pick = sale_order.picking_ids
+        pick.button_validate()
+        pack = sale_order.picking_ids - pick
+        pack.button_validate()
+        delivery = sale_order.picking_ids - pick - pack
+        delivery.move_ids.quantity = 5
+        Form.from_action(self.env, delivery.button_validate()).save().process()
+        sale_order.action_cancel()
+        self.assertEqual(delivery.backorder_ids.state, 'cancel')
+        reverse_pack_picking = sale_order.picking_ids.filtered(lambda p: p.state == 'assigned')
+        reverse_pick_picking = sale_order.picking_ids.filtered(lambda p: p.state == 'waiting')
+        reverse_pack_picking.button_validate()
+        reverse_pick_picking.button_validate()
+        self.assertEqual(self.env['stock.quant']._get_available_quantity(self.test_product_delivery, stock_location), 5)
