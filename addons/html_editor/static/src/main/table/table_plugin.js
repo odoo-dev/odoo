@@ -124,7 +124,6 @@ export class TablePlugin extends Plugin {
         on_will_split_block_handlers: this.resetTableSelection.bind(this),
 
         /** Processors */
-        before_insert_processors: this.handleTableInsert.bind(this),
         clean_for_save_processors: (root) => {
             this.deselectTable(root);
         },
@@ -1347,27 +1346,6 @@ export class TablePlugin extends Plugin {
             focusNode: anchorTD.lastChild,
             focusOffset: nodeSize(anchorTD.lastChild),
         });
-    }
-
-    handleTableInsert(insertContainer) {
-        const thead = insertContainer.querySelector("THEAD");
-        if (thead) {
-            const tbody = thead.nextElementSibling;
-            if (tbody) {
-                const thChildren = thead.querySelectorAll("TH");
-                thChildren.forEach((element) => {
-                    element.classList.add("o_table_header");
-                });
-                // If a <tbody> already exists, move all rows from
-                // <thead> into the start of <tbody>.
-                tbody.prepend(...thead.children);
-                thead.remove();
-            } else {
-                // Otherwise, replace the <thead> with <tbody>
-                this.dependencies.dom.setTagName(thead, "TBODY");
-            }
-        }
-        return insertContainer;
     }
 
     /**

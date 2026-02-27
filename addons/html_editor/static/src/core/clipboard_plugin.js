@@ -132,6 +132,10 @@ export class ClipboardPlugin extends Plugin {
         "lineBreak",
     ];
     static shared = ["pasteText"];
+    /** @type {import("plugins").EditorResources} */
+    resources = {
+        before_insert_processors: this.cleanForPaste.bind(this),
+    };
 
     setup() {
         this.addDomListener(this.editable, "copy", this.onCopy);
