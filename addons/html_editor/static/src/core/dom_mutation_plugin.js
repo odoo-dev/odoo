@@ -194,10 +194,10 @@ export class DomMutationPlugin extends Plugin {
             this.lastEnableObserverCallback?.();
             this.lastEnableObserverCallback = undefined;
         },
-        on_history_reset_handlers: () => {
+        on_history_reset_handlers: withSequence(0, () => {
             this.dependencies.history.write(this.createSnapshotCommit(), "reset");
             this.stageSelection();
-        },
+        }),
         on_prepare_drag_handlers: this.disableHasStagedMutationsWarning.bind(this),
         on_history_cleaned_handlers: this.clean.bind(this),
         on_will_add_external_step_handlers: () => {
