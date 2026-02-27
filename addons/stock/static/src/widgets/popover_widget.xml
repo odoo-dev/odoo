@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="stock.popoverButton">
-        <a tabindex="0" t-on-click.stop="showPopup" t-attf-class="p-1 fa #{ icon || 'fa-info-circle'} #{ color || 'text-primary'}"/>
+        <a tabindex="0" t-on-click.stop="showPopup" class="oi p-1" t-attf-class="#{ color || 'text-primary'}" t-attf-data-icon="#{ icon || 'info'}"/>
     </t>
 
     <div t-name="stock.popoverContent" class="m-3">
