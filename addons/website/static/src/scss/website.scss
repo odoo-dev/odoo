@@ -1814,65 +1814,69 @@ header {
     }
 }
 
+@mixin o-make-sidebar-header-template {
+    // Two different website options might add padding:
+    // - The sidebar header template
+    // - The website layout template when different than 'full'
+    // We need to combine both using `calc`. The `border` solution does
+    // not work on Safari.
+    $padding-size: o-website-value('sidebar-width');
+    $-hamburger-right: o-website-value("hamburger-position") == "right";
+    @if o-website-value('layout') != 'full' {
+        $padding-size: calc(#{$grid-gutter-width} * 2 + #{$padding-size});
+    }
+    @if $-hamburger-right {
+        padding-right: $padding-size;
+    } @else {
+        padding-left: $padding-size;
+    }
+
+    > header {
+        --Offcanvas-horizontal-width: #{o-website-value('sidebar-width')};
+
+        @if $-hamburger-right {
+            --Header-inset: 0 0 0 auto;
+        }
+        inset: var(--Header-inset, 0 auto 0 0);
+        position: fixed;
+        z-index: $zindex-fixed;
+        display: flex;
+        width: o-website-value('sidebar-width');
+        transform: none !important;
+
+        .navbar {
+            width: 100%;
+            align-items: start;
+            padding: $spacer;
+
+            .navbar-brand {
+                max-width: 100%;
+                padding: 0 0 $spacer 0;
+            }
+            .o_main_nav {
+                flex-direction: column;
+                align-items: start;
+                padding: 0;
+            }
+            .navbar-nav {
+                flex-direction: column;
+            }
+            .nav-link,
+            .dropdown-item {
+                white-space: initial;
+            }
+            .dropdown-menu {
+                position: static;
+            }
+        }
+    }
+}
+
 @if o-website-value('header-template') == 'sidebar' {
     @include media-breakpoint-up(lg) {
-        #wrapwrap:has(> header) {
-            // Two different website options might add padding:
-            // - The sidebar header template
-            // - The website layout template when different than 'full'
-            // We need to combine both using `calc`. The `border` solution does
-            // not work on Safari.
-            $padding-size: o-website-value('sidebar-width');
-            $-hamburger-right: o-website-value("hamburger-position") == "right";
-            @if o-website-value('layout') != 'full' {
-                $padding-size: calc(#{$grid-gutter-width} * 2 + #{$padding-size});
-            }
-            @if $-hamburger-right {
-                padding-right: $padding-size;
-            } @else {
-                padding-left: $padding-size;
-            }
-
-            > header {
-                --Offcanvas-horizontal-width: #{o-website-value('sidebar-width')};
-
-                @if $-hamburger-right {
-                    inset: 0 0 0 auto;
-                } @else {
-                    inset: 0 auto 0 0;
-                }
-                position: fixed;
-                z-index: $zindex-fixed;
-                display: flex;
-                width: o-website-value('sidebar-width');
-                transform: none !important;
-
-                .navbar {
-                    width: 100%;
-                    align-items: start;
-                    padding: $spacer;
-
-                    .navbar-brand {
-                        max-width: 100%;
-                        padding: 0 0 $spacer 0;
-                    }
-                    .o_main_nav {
-                        flex-direction: column;
-                        align-items: start;
-                        padding: 0;
-                    }
-                    .navbar-nav {
-                        flex-direction: column;
-                    }
-                    .nav-link,
-                    .dropdown-item {
-                        white-space: initial;
-                    }
-                    .dropdown-menu {
-                        position: static;
-                    }
-                }
-            }
+        // Do not apply the sidebar logic when previewing other header layouts
+        #wrapwrap:has(> header):where(:not(.o_isPreviewingHeaderTemplate)) {
+            @include o-make-sidebar-header-template;
         }
     }
 } @else if o-website-value('header-template') == 'stretch' {
@@ -3377,4 +3381,30 @@ input[value*="data-oe-translation-source-sha"] {
 // Cursor pointer for image's that open in lightbox popup
 img.o_image_popup {
     cursor: pointer;
+}
+
+// Header Previews
+
+// The User can edit but it's not in edit-mode just yet
+html[data-editable="1"] {
+    header#top {
+        .o_header_template_hidden {
+            display: none !important;
+
+            @include media-breakpoint-up(lg) {
+                display: none !important;
+            }
+        }
+    }
+}
+
+// Edit-mode
+body.editor_enable {
+    > #wrapwrap.o_isPreviewingHeaderTemplate {
+        &.o_isPreviewing_header_template_sidebar {
+            @include media-breakpoint-up(lg) {
+                @include o-make-sidebar-header-template;
+            }
+        }
+    }
 }

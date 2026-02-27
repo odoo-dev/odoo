@@ -11,6 +11,7 @@ import { HeaderFontOption } from "./header_font_option";
 import { HeaderTemplateOption } from "./header_template_option";
 import { HeaderIconBackgroundOption } from "./header_icon_background_option";
 import { HeaderTopOptions } from "./header_top_options";
+import "./header_template_preview_action";
 
 const [
     HEADER_TEMPLATE,

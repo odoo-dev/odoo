@@ -5,7 +5,7 @@ import { basicHeaderOptionSettings } from "./basicHeaderOptionSettings";
 
 export class HeaderBoxOption extends BaseOptionComponent {
     static template = "website.HeaderBoxOption";
-    static applyTo = ".navbar:not(.d-none)";
+    static applyTo = ".o_header_template_active.navbar:not(.d-none)";
 
     static components = { BorderConfigurator, ShadowOption };
 

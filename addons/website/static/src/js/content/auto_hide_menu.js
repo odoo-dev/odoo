@@ -337,17 +337,18 @@ async function autoHideMenu(el, options) {
  */
 document.addEventListener("DOMContentLoaded", async () => {
     const header = document.querySelector("header#top");
-    if (header) {
-        const topMenu = header.querySelector(".top_menu");
-        const unfoldable = ".divider, .divider ~ li, .o_no_autohide_item, .js_language_selector";
-        if (
-            !topMenu.querySelector(`:scope > :not(${unfoldable})`) ||
-            header.classList.contains("o_no_autohide_menu")
-        ) {
-            topMenu.classList.remove("o_menu_loading");
-            return;
-        }
-        const excludedImagesSelector = ".o_mega_menu, .o_offcanvas_logo_container, .o_lang_flag";
+    if (!header) {
+        return;
+    }
+
+    const unfoldable = ".divider, .divider ~ li, .o_no_autohide_item, .js_language_selector";
+    const excludedImagesSelector = ".o_mega_menu, .o_offcanvas_logo_container, .o_lang_flag";
+
+    // Guard against calling autoHideMenu twice on the same element (e.g. if
+    // the user rapidly hovers the same preview item more than once).
+    const initializedMenus = new Set();
+
+    function initMenusInScope(scope) {
         const excludedImages = [...header.querySelectorAll(excludedImagesSelector)];
         const images = [...header.querySelectorAll("img")].filter((img) => {
             excludedImages.forEach((node) => {
@@ -357,15 +358,61 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
             return img.matches && !img.matches(excludedImagesSelector);
         });
-        autoHideMenu(topMenu, {
-            unfoldable: unfoldable,
-            images: images,
-            loadingStyleClasses: ["o_menu_loading"],
-            // The "auto-hide" menu is closed when clicking inside the extra
-            // menu items. The goal here is to prevent this default behaviour
-            // on "edit" mode to allow correct editing of extra menu items, mega
-            // menu content...
-            autoClose: () => !document.body.classList.contains("editor_enable"),
+
+        scope.querySelectorAll(".top_menu").forEach((topMenu) => {
+            if (initializedMenus.has(topMenu)) {
+                return;
+            }
+            initializedMenus.add(topMenu);
+            if (
+                !topMenu.querySelector(`:scope > :not(${unfoldable})`) ||
+                header.classList.contains("o_no_autohide_menu")
+            ) {
+                topMenu.classList.remove("o_menu_loading");
+                return;
+            }
+            autoHideMenu(topMenu, {
+                unfoldable: unfoldable,
+                images: images,
+                loadingStyleClasses: ["o_menu_loading"],
+                // The "auto-hide" menu is closed when clicking inside the extra
+                // menu items. The goal here is to prevent this default behaviour
+                // on "edit" mode to allow correct editing of extra menu items, mega
+                // menu content...
+                autoClose: () => !document.body.classList.contains("editor_enable"),
+            });
+        });
+    }
+
+    // Initial run scoped to the active template only. In editor mode every
+    // template wrapper carries o_header_template_active on the currently
+    // selected one; in non-editor mode no such class exists so we fall back
+    // to the full header (which renders a single template with no wrapper class).
+    initMenusInScope(header.querySelector(".o_header_template_active") ?? header);
+
+    // Editor mode: the preview plugin toggles o_header_template_preview_active
+    // on each .o_header_navs_wrapper when the user hovers a template choice.
+    // We watch those attribute changes and lazily initialize the hovered
+    // template's menus on first preview — subsequent hovers are no-ops thanks
+    // to the initializedMenus guard above.
+    if (header.querySelector(".o_header_template_active")) {
+        const mutationObs = new MutationObserver((mutations) => {
+            for (const { type, attributeName, target } of mutations) {
+                if (
+                    type === "attributes" &&
+                    attributeName === "class" &&
+                    target.classList.contains("o_header_template_preview_active")
+                ) {
+                    initMenusInScope(target);
+                    break;
+                }
+            }
+        });
+        header.querySelectorAll(".o_header_navs_wrapper").forEach((wrapper) => {
+            mutationObs.observe(wrapper, {
+                attributes: true,
+                attributeFilter: ["class"],
+            });
         });
     }
 });
