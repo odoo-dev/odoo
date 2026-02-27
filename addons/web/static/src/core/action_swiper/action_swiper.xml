@@ -12,7 +12,7 @@
                                     <t t-if="localizedProps.onRightSwipe.slot" t-component="localizedProps.onRightSwipe.slot.component" t-props="localizedProps.onRightSwipe.slot.props" />
                                 </t>
                                 <div t-else="" class="h-100 w-100 d-flex align-items-center justify-content-center rounded-end" t-att-class="localizedProps.onRightSwipe.bgColor">
-                                    <i class="fa fa-2x" t-att-class="localizedProps.onRightSwipe.icon"/>
+                                    <i class="oi oi-2x" t-att-class="localizedProps.onRightSwipe.icon_class" t-att-data-icon="localizedProps.onRightSwipe.icon"/>
                                 </div>
                             </div>
                         </t>
@@ -22,7 +22,7 @@
                                     <t t-if="localizedProps.onLeftSwipe.slot" t-component="localizedProps.onLeftSwipe.slot.component" t-props="localizedProps.onLeftSwipe.slot.props" />
                                 </t>
                                 <div t-else="" class="h-100 w-100 d-flex align-items-center justify-content-center rounded-start" t-att-class="localizedProps.onLeftSwipe.bgColor">
-                                    <i class="fa fa-2x" t-att-class="localizedProps.onLeftSwipe.icon"/>
+                                    <i class="oi oi-2x" t-att-class="localizedProps.onLeftSwipe.icon_class" t-att-data-icon="localizedProps.onLeftSwipe.icon"/>
                                 </div>
                             </div>
                         </t>
