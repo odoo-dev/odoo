@@ -1415,12 +1415,12 @@ class Website(models.CachedModel):
         """
         is_frontend_request = request and getattr(request, 'is_frontend', False)
         if request and request.session.get('force_website_id'):
-            website_id = self.browse(request.session['force_website_id']).exists()
+            website_id = self._website_id_exists(request.session['force_website_id'])
             if not website_id:
                 # Don't crash is session website got deleted
                 request.session.pop('force_website_id')
             else:
-                return website_id
+                return self.browse(website_id)
 
         website_id = self.env.context.get('website_id')
         if website_id:
@@ -1447,6 +1447,12 @@ class Website(models.CachedModel):
             or '')
         website_id = self.sudo()._get_current_website_id(domain_name, fallback=fallback)
         return self.browse(website_id)
+
+    @api.model
+    @tools.ormcache('website_id')
+    def _website_id_exists(self, website_id):
+        if website_id and self.browse(website_id).exists():
+            return website_id
 
     @api.model
     @tools.ormcache('domain_name', 'fallback')
