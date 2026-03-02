@@ -736,7 +736,7 @@ font[class*='bg-'] {
     object-fit: cover;
 }
 // Icons
-.fa, .social_media_img {
+.fa, .oi, .social_media_img {
     $-size: map-get($spacers, 5);
 
     &.rounded-circle,
@@ -748,12 +748,12 @@ font[class*='bg-'] {
         display: inline-block;
         vertical-align: middle;
         text-align: center;
-        // fa-1x is not ouput
+        // oi-1x is not ouput
         width: $-size;
         height: $-size;
         line-height: $-size;
         @for $i from 2 through 5 {
-            &.fa-#{$i}x {
+            &.fa-#{$i}x, &.oi-#{$i}x {
                 width: $-size + $i;
                 height: $-size + $i;
                 line-height: $-size + $i;
@@ -3374,7 +3374,7 @@ input[value*="data-oe-translation-source-sha"] {
         font-size: 0.875em;
     }
     a {
-        .fa-stack{
+        .fa-stack, .oi-stack {
             /*
             Ensures consistent size and padding around icons when the
             layout is set to "none" and the size is "huge" or "large".
@@ -3383,7 +3383,7 @@ input[value*="data-oe-translation-source-sha"] {
             s_social_media/000.scss and s_share/000.scss).
             */
             @for $i from 2 through 3 {
-                &.fa-#{$i}x {
+                &.fa-#{$i}x, &.oi-#{$i}x {
                     width: $-size + $i;
                     height: $-size + $i;
                     line-height: $-size + $i;
