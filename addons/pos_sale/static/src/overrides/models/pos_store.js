@@ -111,8 +111,6 @@ patch(PosStore.prototype, {
             }
 
             const taxes = getTaxesAfterFiscalPosition(line.tax_id, orderFiscalPos, this.models);
-            const converted_line = converted_lines.find((l) => l.id === line.id);
-            const ptavModel = this.models["product.template.attribute.value"];
             const newLineValues = {
                 product_id: line.product_id,
                 qty: line.product_uom_qty,
@@ -124,17 +122,16 @@ patch(PosStore.prototype, {
                 customer_note: line.customer_note,
                 description: line.name,
                 order_id: this.get_order(),
-                attribute_value_ids: (converted_line?.product_no_variant_attribute_value_ids ?? [])
-                    .map((id) => ["link", ptavModel.get(id)])
-                    .filter(([, ptav]) => ptav),
-                custom_attribute_value_ids: (converted_line?.attribute_custom_values ?? []).map(
-                    ({ custom_product_template_attribute_value_id, custom_value }) => [
+                attribute_value_ids: (line.product_no_variant_attribute_value_ids ?? []).map(
+                    (ptav) => ["link", ptav]
+                ),
+                custom_attribute_value_ids: (line.product_custom_attribute_value_ids ?? []).map(
+                    (cav) => [
                         "create",
                         {
-                            custom_product_template_attribute_value_id: ptavModel.get(
-                                custom_product_template_attribute_value_id
-                            ),
-                            custom_value,
+                            custom_product_template_attribute_value_id:
+                                cav.custom_product_template_attribute_value_id,
+                            custom_value: cav.custom_value,
                         },
                     ]
                 ),
@@ -144,6 +141,8 @@ patch(PosStore.prototype, {
             }
             const newLine = await this.addLineToCurrentOrder(newLineValues, {}, false);
             previousProductLine = newLine;
+
+            const converted_line = converted_lines.find((l) => l.id === line.id);
             if (
                 newLine.get_product().tracking !== "none" &&
                 (this.pickingType.use_create_lots || this.pickingType.use_existing_lots) &&

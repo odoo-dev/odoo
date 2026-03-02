@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.osv import expression
 from odoo.tools import float_compare, float_is_zero, format_date
 
 
@@ -251,3 +252,19 @@ class PosOrderLine(models.Model):
         for order in orders:
             self.env['stock.move'].browse(order.lines.sale_order_line_id.move_ids._rollup_move_origs()).filtered(lambda ml: ml.state not in ['cancel', 'done'])._action_cancel()
         return super()._launch_stock_rule_from_pos_order_lines()
+
+
+class ProductAttributeCustomValue(models.Model):
+    _inherit = 'product.attribute.custom.value'
+
+    @api.model
+    def _load_pos_data_domain(self, data):
+        domain = super()._load_pos_data_domain(data)
+        sale_line_ids = [line['id'] for line in data.get('sale.order.line', {}).get('data', [])]
+        if sale_line_ids:
+            return expression.OR([domain, [('sale_order_line_id', 'in', sale_line_ids)]])
+        return domain
+
+    @api.model
+    def _load_pos_data_fields(self, config_id):
+        return super()._load_pos_data_fields(config_id) + ['sale_order_line_id']
