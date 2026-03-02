@@ -122,6 +122,37 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                 })
             ],
         })
+        cls.accrual_plan_one_lvl_monthly_validity_10days = cls.env['hr.leave.accrual.plan'].create({
+            'name': 'Test Accrual Plan - expiring_leaves 1',
+            'is_based_on_worked_time': False,
+            'accrued_gain_time': 'start',
+            'carryover_date': 'other',
+            'carryover_day': '15',
+            'carryover_month': 'feb',
+            'level_ids': [Command.create({
+                'added_value': 3,
+                'added_value_type': 'day',
+                'frequency': 'monthly',
+                'action_with_unused_accruals': 'all',
+                'accrual_validity': True,
+                'accrual_validity_count': 10,
+            })],
+        })
+        cls.accrual_plan_one_lvl_monthly_maxcarryover_10days = cls.env['hr.leave.accrual.plan'].create({
+            'name': 'Test Accrual Plan - expiring_leaves 2',
+            'is_based_on_worked_time': False,
+            'accrued_gain_time': 'start',
+            'carryover_date': 'other',
+            'carryover_day': '15',
+            'carryover_month': 'oct',
+            'level_ids': [Command.create({
+                'added_value': 3,
+                'added_value_type': 'day',
+                'frequency': 'monthly',
+                'action_with_unused_accruals': 'maximum',
+                'postpone_max_days': 10,
+            })],
+        })
 
     def setAllocationCreateDate(self, allocation_id, date):
         """ This method is a hack in order to be able to define/redefine the create_date
@@ -2814,22 +2845,20 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                      II. Accrues 10 day yearly.
                     III. Carryover policy is None (no days are carried over).
                 b. Second level:
-                      I. Starts 30 Months after allocation start date.
+                      I. Starts 32 Months after allocation start date.
                      II. Accrues 12 days yearly on January 1st (01/01).
                     III. Carryover policy is all (all days carry over).
 
         Create an allocation that starts 01/01/2024 and uses the above accrual plan.
 
-        1. On 01/01/2024: The employee is accrued 10 days.
-        2. On 01/01/2025: The employee is accrued 10 days.
-        3. On 01/06/2025: All the days are lost due to carryover policy.
-        4. On 01/01/2026: The employee is accrued 10 days.
-        5. On 01/06/2026: All the days are lost due to carryover policy.
-        6. On 01/09/2026: Level transition occurrs. 6.67 days are accrued.
-        7. On 01/01/2027:
-            - 4 days are accrued for the period from 01/09/2026 until 31/12/2026.
-            - 12 days are accrued for the new period (becase days are accrue at the start of the accrual period)
-            - Total number of days is 6.67 + 4 + 12 = 22.67 days.
+        - On 01/01/2024: The employee is accrued 10 days.
+        - On 01/06/2024: All the days are lost due to carryover policy.
+        - On 01/01/2025: The employee is accrued 10 days.
+        - On 01/06/2025: All the days are lost due to carryover policy.
+        - On 01/01/2026: The employee is accrued 10 days.
+        - On 01/06/2026: All the days are lost due to carryover policy.
+        - On 01/09/2026: Level transition occurs, 4 days are accrued from 01/09/2026 until 31/12/2026.
+        - On 01/01/2027: The employee is accrued 12 days
         """
         accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
                 'name': 'Accrual Plan For Test',
@@ -2888,7 +2917,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
 
         with freeze_time('2026-9-01'):
             allocation._update_accrual()
-        self.assertAlmostEqual(allocation.number_of_days, 10.7, 1)
+        self.assertAlmostEqual(allocation.number_of_days, 4.010958, 1)
 
         with freeze_time('2027-1-01'):
             allocation._update_accrual()
@@ -4568,3 +4597,50 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         self.assertEqual(len(children_allocations), 2)
         self.assertEqual(children_allocations[0].number_of_days, 21.0)
         self.assertEqual(children_allocations[1].number_of_days, 21.0)
+
+    def _test_accrual_plan_start_carryover_expiring_second_period(self, update_accrual):
+        """ Check that the carryover is applied correctly when the accrued gain time is set to "start"
+            and the policy is set to "all", but there is a validity of 10 days """
+        accrual_plan = self.accrual_plan_one_lvl_monthly_validity_10days
+        added_value = accrual_plan.level_ids[0].added_value
+        self.assertEqual(added_value, 3)
+        leave_type_day = self.leave_type_day
+        with freeze_time('2025-01-23'):
+            allocation = self._create_form_test_accrual_allocation(leave_type_day, '2025-01-01', self.employee_emp,
+                accrual_plan=accrual_plan, date_to='2025-06-30')
+            allocation.action_approve()
+
+        assertions = (
+            # First accrual happens on 2025-01-01
+            # ('2025-01-23', remaining_leaves := added_value * 29 / 30),
+            # Second accrual happens on 2025-02-01
+            # ('2025-02-01', remaining_leaves := remaining_leaves + added_value),
+            # Carryover date do not change the number_of_days
+            ('2025-02-15', remaining_leaves := added_value * 29 / 30 + added_value),
+            # Last day before the carry-over expiration
+            # ('2025-02-24', remaining_leaves),
+            # Expiration happens on 2025-02-25
+            ('2025-02-25', 0),
+            # Third accrual happens on 2025-03-01
+            ('2025-03-01', added_value),
+            ('2025-04-01', added_value * 2),
+        )
+
+        if update_accrual:
+            for test_date, remaining_leaves in assertions:
+                with freeze_time(test_date):
+                    allocation._update_accrual()
+                    self.assert_virtual_leaves_equal(leave_type_day, remaining_leaves, self.employee_emp, test_date, digits=3)
+        else:
+            with freeze_time('2025-01-23'):
+                for test_date, remaining_leaves in assertions:
+                    self.assert_virtual_leaves_equal(leave_type_day, remaining_leaves, self.employee_emp, test_date, digits=3)
+
+    def test_accrual_plan_start_carryover_expiring_second_period_update(self):
+        self._test_accrual_plan_start_carryover_expiring_second_period(True)
+
+    def test_accrual_plan_start_carryover_expiring_second_period_no_update(self):
+        self._test_accrual_plan_start_carryover_expiring_second_period(False)
+
+    def test_accrual_maximum_accrued_gain_time_start(self):
+        pass
