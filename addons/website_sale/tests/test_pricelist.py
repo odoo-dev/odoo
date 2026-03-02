@@ -112,8 +112,8 @@ class TestWebsitePriceList(WebsiteSaleCommon):
 
     def setUp(self):
         super().setUp()
-        patcher = patch('odoo.addons.website_sale.models.website.Website.get_pricelist_available', wraps=self._get_pricelist_available)
-        self.startPatcher(patcher)
+        # patcher = patch('odoo.addons.website_sale.models.website.Website.get_pricelist_available', wraps=self._get_pricelist_available)
+        # self.startPatcher(patcher)
 
     # Mock nedded because request.session doesn't exist during test
     def _get_pricelist_available(self, show_visible=False):

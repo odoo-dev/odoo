@@ -714,12 +714,10 @@ class Website(models.Model):
             partner_pricelist_id = False
         website_pricelists = website.sudo().pricelist_ids
 
-        current_pricelist_id = request and request.session.get(PRICELIST_SESSION_CACHE_KEY) or None
-
         pricelist_ids = website._get_pl_partner_order(
             country_code,
             show_visible,
-            current_pl_id=current_pricelist_id,
+            current_pl_id=self.env.context.get('pricelist_id'),
             website_pricelist_ids=tuple(website_pricelists.ids),
             partner_pl_id=partner_pricelist_id,
         )
@@ -750,25 +748,6 @@ class Website(models.Model):
 
     def _product_domain(self):
         return [('sale_ok', '=', True)]
-
-    def _create_cart(self):
-        self.ensure_one()
-
-        partner_sudo = self.env.user.partner_id
-
-        so_data = self._prepare_sale_order_values(partner_sudo)
-        sale_order_sudo = self.env['sale.order'].with_user(
-            SUPERUSER_ID
-        ).with_company(self.company_id).create(so_data)
-
-        # The order was created with SUPERUSER_ID, revert back to request user.
-        sale_order_sudo = sale_order_sudo.with_user(self.env.user).sudo()
-
-        request.session[CART_SESSION_CACHE_KEY] = sale_order_sudo.id
-        request.session['website_sale_cart_quantity'] = sale_order_sudo.cart_quantity
-        self.invalidate_model(['current_session_sale_order_id'])
-
-        return sale_order_sudo
 
     def _prepare_sale_order_values(self, partner_sudo):
         self.ensure_one()
@@ -888,7 +867,7 @@ class Website(models.Model):
                 # avoids a query with the use of exists()
                 sale_order_sudo and sale_order_sudo.state
             except MissingError:
-                self.sale_reset()
+                Cart._sale_reset()
                 sale_order_sudo = SaleOrderSudo
 
             if sale_order_sudo and (
@@ -898,7 +877,7 @@ class Website(models.Model):
                 )
                 or sale_order_sudo.website_id != self
             ):
-                self.sale_reset()
+                Cart._sale_reset()
                 sale_order_sudo = SaleOrderSudo
 
             # If customer logs in, the cart must be recomputed based on his information (in the
@@ -937,7 +916,7 @@ class Website(models.Model):
         if (
             (sale_order_sudo or not self.env.user._is_public())
             and request
-            and sale_order_sudo.id != request.session.get(CART_SESSION_CACHE_KEY)
+            and sale_order_sudo.id != self.env.context.get('sale_order_id')
         ):
             # Store the id of the cart if there is one, or False if the user is logged in, to avoid
             # searching for an abandoned cart again for that user.
@@ -946,13 +925,6 @@ class Website(models.Model):
                 request.session['website_sale_cart_quantity'] = sale_order_sudo.cart_quantity
         return sale_order_sudo
 
-    def sale_reset(self):
-        if request:
-            request.session.pop(CART_SESSION_CACHE_KEY, None)
-            request.session.pop('website_sale_cart_quantity', None)
-            request.session.pop(PRICELIST_SESSION_CACHE_KEY, None)
-            request.session.pop(FISCAL_POSITION_SESSION_CACHE_KEY, None)
-            request.session.pop(PRICELIST_SELECTED_SESSION_CACHE_KEY, None)
 
     @api.model
     def action_dashboard_redirect(self):

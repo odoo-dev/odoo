@@ -2,7 +2,7 @@
 
 from werkzeug.exceptions import NotFound
 
-from odoo import fields
+from odoo import fields, SUPERUSER_ID
 from odoo.exceptions import UserError
 from odoo.http import request, route
 from odoo.tools import consteq
@@ -14,8 +14,40 @@ from odoo.addons.payment.controllers.portal import PaymentPortal
 from odoo.addons.sale.controllers.portal import CustomerPortal
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
+from odoo.addons.website_sale.models.website import (
+    CART_SESSION_CACHE_KEY,
+)
+
 
 class Cart(PaymentPortal):
+
+    @classmethod
+    def _create_cart(cls, website):
+        partner_sudo = website.env.user.partner_id
+
+        so_data = website._prepare_sale_order_values(partner_sudo)
+        sale_order_sudo = website.env['sale.order'].with_user(
+            SUPERUSER_ID
+        ).with_company(website.company_id).create(so_data)
+
+        # The order was created with SUPERUSER_ID, revert back to request user.
+        sale_order_sudo = sale_order_sudo.with_user(website.env.user).sudo()
+
+        request.session[CART_SESSION_CACHE_KEY] = sale_order_sudo.id
+        request.session['website_sale_cart_quantity'] = sale_order_sudo.cart_quantity
+
+        return sale_order_sudo.with_context(
+            sale_order_id=sale_order_sudo.id,
+            website_sale_cart_quantity=sale_order_sudo.cart_quantity,
+        )
+
+    def _sale_reset():
+        if request:
+            request.session.pop(CART_SESSION_CACHE_KEY, None)
+            request.session.pop('website_sale_cart_quantity', None)
+            request.session.pop(PRICELIST_SESSION_CACHE_KEY, None)
+            request.session.pop(FISCAL_POSITION_SESSION_CACHE_KEY, None)
+            request.session.pop(PRICELIST_SELECTED_SESSION_CACHE_KEY, None)
 
     @route(route='/shop/cart', type='http', auth='public', website=True, sitemap=False)
     def cart(self, id=None, access_token=None, revive_method='', **post):
@@ -113,7 +145,11 @@ class Cart(PaymentPortal):
         :rtype: dict
         """
         website = self.env['website'].get_current_website()
-        order_sudo = website.current_session_sale_order_id.sudo() or website._create_cart()
+        order_sudo = website.current_session_sale_order_id.sudo()
+        if not order_sudo:
+            order_sudo = Cart._create_cart(website)
+            website = website.with_context(sale_order_id=order_sudo.id)
+            website.invalidate_model(['current_session_sale_order_id'])
         # Do not allow float values in ecommerce by default
         quantity = (quantity and int(quantity)) or 1
 

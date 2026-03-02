@@ -123,7 +123,10 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon):
             self.mock_request() as request,
         ):
             website = request.env['website'].get_current_website()
-            website._create_cart()
+            order_sudo = Cart._create_cart(website)
+            website = website.with_context(sale_order_id=order_sudo.id)
+            website.invalidate_model(['current_session_sale_order_id'])
+
             order = website.current_session_sale_order_id.sudo()
 
             # service_tracking 'no' should not raise error
@@ -487,7 +490,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon):
         # Arrange
         with self.mock_request() as request:
             website = request.env['website'].get_current_website()
-            order = website._create_cart()
+            order = Cart._create_cart(website)
             order.order_line = [
                 Command.create({
                     "name": "Note",
@@ -521,7 +524,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon):
             )
         ):
             website = request.env['website'].get_current_website()
-            order = website._create_cart()
+            order = Cart._create_cart(website)
             order.order_line = [
                 Command.create({
                     'product_id': self.product.id,

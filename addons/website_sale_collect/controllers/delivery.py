@@ -3,6 +3,7 @@
 from odoo.http import request, route
 
 from odoo.addons.website_sale.controllers.delivery import Delivery
+from odoo.addons.website_sale.controllers.cart import Cart
 
 
 class InStoreDelivery(Delivery):
@@ -38,7 +39,13 @@ class InStoreDelivery(Delivery):
         :return: None
         """
         website = self.env['website'].get_current_website()
-        order_sudo = website.current_session_sale_order_id.sudo() or website._create_cart()
+
+        order_sudo = website.current_session_sale_order_id.sudo()
+        if not order_sudo:
+            order_sudo = Cart._create_cart(website)
+            website = website.with_context(sale_order_id=order_sudo.id)
+            website.invalidate_model(['current_session_sale_order_id'])
+
         if order_sudo.carrier_id.delivery_type != 'in_store':
             in_store_dm = website.sudo().in_store_dm_id
             order_sudo.set_delivery_line(in_store_dm, in_store_dm.product_id.list_price)
