@@ -122,7 +122,6 @@ const DOM_MUTATION_COMMIT_DATA_KEYS = [
  * @typedef { Object } EditorCommit
  * @property { CommitId } id
  * @property { CommitData } data
- * @property { Element } root the root of the changes in the commit
  */
 /**
  * @typedef { Object } DomMutationShared
@@ -263,7 +262,8 @@ export class DomMutationPlugin extends Plugin {
                 });
             }
         }),
-        node_by_id_providers: (nodeId) => this.getNodeById(nodeId),
+        commit_root_providers: (commit) =>
+            this.getMutationsRoot(commit.data.mutations || []) || this.editable,
     };
 
     setup() {
@@ -619,7 +619,6 @@ export class DomMutationPlugin extends Plugin {
             data,
             batchable,
             batchingTimestamp,
-            root: this.getNodeId(this.getMutationsRoot(data.mutations) || this.editable),
         };
     }
 
@@ -650,7 +649,6 @@ export class DomMutationPlugin extends Plugin {
                 },
                 selectionAfter: null,
             },
-            root: this.getNodeId(this.editable),
         };
     }
 

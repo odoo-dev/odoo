@@ -31,7 +31,12 @@ export class EmbeddedComponentPlugin extends Plugin {
         on_history_reset_handlers: () => this.handleComponents(this.editable),
         on_history_reset_from_steps_handlers: () => this.handleComponents(this.editable),
         on_step_added_handlers: (step) => {
-            this.handleComponents(this.dependencies.domMutation.getNodeById(step.commit.root));
+            let root;
+            this.getResource("commit_root_providers").find((p) => {
+                root = p(step.commit);
+                return root;
+            });
+            this.handleComponents(root);
         },
         on_external_step_added_handlers: () => this.handleComponents(this.editable),
 

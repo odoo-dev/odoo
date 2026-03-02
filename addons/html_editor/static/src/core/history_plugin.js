@@ -260,10 +260,9 @@ export class HistoryPlugin extends Plugin {
             this.revertStep(stepToRevert);
         }
         this.applyStep(newStep);
-        // TODO AGE: could we avoid this?
         let root;
-        this.getResource("node_by_id_providers").find((p) => {
-            root = p(newStep.commit.root);
+        this.getResource("commit_root_providers").find((p) => {
+            root = p(newStep.commit);
             return root;
         });
         this.processThrough("normalize_processors", root);

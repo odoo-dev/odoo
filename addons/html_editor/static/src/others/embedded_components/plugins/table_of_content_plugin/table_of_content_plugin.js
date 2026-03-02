@@ -34,10 +34,16 @@ export class TableOfContentPlugin extends Plugin {
         on_history_reset_handlers: () => this.delayedUpdateTableOfContents(this.editable),
         on_history_reset_from_steps_handlers: () =>
             this.delayedUpdateTableOfContents(this.editable),
-        on_step_added_handlers: (step) =>
-            this.delayedUpdateTableOfContents(
-                this.dependencies.domMutation.getNodeById(step.commit.root)
-            ),
+        on_step_added_handlers: (step) => {
+            let root;
+            this.getResource("commit_root_providers").find((p) => {
+                root = p(step.commit);
+                return root;
+            });
+            return this.delayedUpdateTableOfContents(
+                this.dependencies.domMutation.getNodeById(root)
+            );
+        },
         on_external_step_added_handlers: this.delayedUpdateTableOfContents.bind(
             this,
             this.editable
