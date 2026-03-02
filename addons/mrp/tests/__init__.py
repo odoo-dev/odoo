@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from . import test_bom
+from . import test_bom_cost
 from . import test_byproduct
 from . import test_cancel_mo
 from . import test_order

@@ -3,9 +3,9 @@
 from datetime import timedelta
 
 from odoo.addons.mrp_account.tests.common import TestBomPriceCommon, TestBomPriceOperationCommon
-from odoo.tests import Form, tagged
+
+from odoo.tests import Form
 from odoo.tests.common import new_test_user
-from odoo.tools import float_compare, float_round
 from odoo import fields
 
 
@@ -58,6 +58,7 @@ class TestMrpAccount(TestBomPriceCommon):
         """ Unbuild orders, when supplied with a specific MO record, should restrict their value
         consumption to moves originating from that MO record.
         """
+        breakpoint()
         mo_1 = self._create_mo(self.bom_1, 1)
         mo_1.action_confirm()
         mo_1.action_assign()
@@ -178,6 +179,7 @@ class TestMrpAccount(TestBomPriceCommon):
 
 class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
 
+<<<<<<< Updated upstream
     def test_01_compute_price_operation_cost(self):
         self.assertEqual(self.dining_table.standard_price, 1000, "Initial price of the Product should be 1000")
         self.dining_table.button_bom_cost()
@@ -189,6 +191,8 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         # byproduct have 1%+12% of cost share so the final cost is 927
         self.assertEqual(float_compare(self.dining_table.standard_price, 927, precision_digits=2), 0)
 
+=======
+>>>>>>> Stashed changes
     def test_labor_cost_posting_is_not_rounded_incorrectly(self):
         """ Test to ensure that labor costs are posted accurately without rounding errors."""
         # Build

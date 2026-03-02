@@ -1,9 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import Command, fields
+from odoo import Command
 from odoo.tests import Form, tagged
-from odoo.tools.float_utils import float_round, float_compare
 
-from odoo.addons.mrp_account.tests.common import TestBomPriceCommon
 from odoo.addons.mrp_subcontracting.tests.common import TestMrpSubcontractingCommon
 from odoo.addons.stock_account.tests.common import TestStockValuationCommon
 
@@ -262,6 +260,7 @@ class TestAccountSubcontractingFlows(TestMrpSubcontractingCommon, TestStockValua
         amls = self.env['account.move.line'].search([('id', 'not in', all_amls_ids)])
         # Check that no account move line are created if there is no production account
         self.assertFalse(amls)
+<<<<<<< Updated upstream
 
 
 class TestSubcontractingBOMCost(TestBomPriceCommon):
@@ -344,3 +343,5 @@ class TestSubcontractingBOMCost(TestBomPriceCommon):
         self.assertEqual(self.dining_table.standard_price, 1000)
         self.dining_table.button_bom_cost()
         self.assertEqual(self.dining_table.standard_price, 790)
+=======
+>>>>>>> Stashed changes
