@@ -233,7 +233,8 @@
                     <t t-call="website_forum.link_button"
                         url="'/forum/' + slug(forum) + '/question/' + slug(question) + '/reopen'"
                         label.translate="Reopen"
-                        icon.f="fa-folder-open"
+                        icon.f="folder_open"
+                        icon_class.f="oi-filled"
                         karma="question.karma_close if not question.can_close else 0"
                         classes.f="btn-info"/>
                 </div>
@@ -449,52 +450,55 @@
                 url="'/forum/' + slug(forum) +'/question/' + slug(post_id) + '/reopen'"
                 label.translate="Reopen"
                 inDropdown="True"
-                icon.f="fa-undo fa-fw"
+                icon.f="undo"
                 karma="post_id.karma_close if not post_id.can_close else 0"/>
         </t>
         <t t-call="website_forum.link_button"
             url="'/forum/' + slug(forum) +'/post/' + slug(post_id) + '/edit'"
             label.translate="Edit"
             inDropdown="True"
-            icon.f="fa-pencil fa-fw"
+            icon.f="edit"
+            icon_class.f="oi-fw"
             karma="post_id.karma_edit if not post_id.can_edit else 0"/>
         <t t-if="post_id == question">
             <t t-if="post_id.state != 'close'" t-call="website_forum.link_button"
                 url="'/forum/' + slug(forum) +'/question/' + slug(post_id) + '/ask_for_close'"
                 label.translate="Close"
                 inDropdown="True"
-                icon.f="fa-times fa-fw"
+                icon.f="close"
                 karma="post_id.karma_close if not post_id.can_close else 0"/>
             <t t-if="not post_id.active and post_id.state != 'offensive'" t-call="website_forum.link_button"
                 url="'/forum/' + slug(forum) +'/question/' + slug(post_id) + '/undelete'"
                 label.translate="Undelete"
                 inDropdown="True"
-                icon.f="fa-upload fa-fw"
+                icon.f="upload"
                 karma="post_id.karma_unlink if not post_id.can_unlink else 0"/>
             <t t-if="not post_id.active and post_id.state == 'offensive'" t-call="website_forum.link_button"
                 url="'/forum/' + slug(forum) +'/post/' + slug(post_id) + '/validate'"
                 label.translate="Validate"
                 inDropdown="True"
-                icon.f="fa-check fa-fw"
+                icon.f="check"
                 karma="post_id.forum_id.karma_moderate if not post_id.can_moderate else 0"/>
         </t>
         <t t-else="" t-call="website_forum.link_button"
             url.f="/forum/#{slug(forum)}/post/#{slug(post_id)}/convert_to_comment"
             label.translate="Convert to Comment"
             inDropdown="True"
-            icon.f="fa-comment fa-fw"
+            icon.f="chat_bubble"
+            icon_class.f="oi-filled"
             karma="post_id.karma_comment_convert if not post_id.can_comment_convert else 0"/>
         <t t-if="post_id.active" t-call="website_forum.link_button"
             url="'/forum/' + slug(forum) +'/question/' + slug(post_id) + '/delete'"
             label.translate="Delete"
             inDropdown="True"
-            icon.f="fa-trash-o fa-fw"
+            icon.f="delete"
             karma="post_id.karma_unlink if not post_id.can_unlink else 0"/>
         <t t-if="post_id.active and post_id.state != 'flagged'" t-call="website_forum.link_button"
             url="'/forum/' + slug(forum) +'/post/' + slug(post_id) + '/flag'"
             label.translate="Flag"
             inDropdown="True"
-            icon="'fa-flag-o' if not post_id.can_flag else 'fa-flag'"
+            icon.f="flag"
+            icon_class="'' if not post_id.can_flag else 'oi-filled'"
             karma="post_id.forum_id.karma_flag if not post_id.can_flag else 0"
             classes.f="o_wforum_flag "
             object="post_id"/>
@@ -555,7 +559,8 @@
                             label.translate="Delete"
                             title.translate="Delete"
                             inDropdown="True"
-                            icon.f="fa-trash-o text-muted"
+                            icon.f="delete"
+                            icon_class.f="text-muted"
                             classes.f="comment_delete"
                             karma="unlink_comment_required_karma if not can_unlink_comment and unlink_comment_required_karma else 0"/>
                         <t t-if="message.create_uid.id not in question.child_ids.create_uid.ids">
@@ -563,7 +568,8 @@
                                 url.f="#{ comment_url }/convert_to_answer"
                                 label.translate="Convert to answer"
                                 inDropdown="True"
-                                icon.f="fa-magic text-muted"
+                                icon.f="wand_stars"
+                                icon_class.f="text-muted"
                                 karma="object.karma_comment_convert if not object.can_comment_convert else 0"/>
                         </t>
                     </div>
