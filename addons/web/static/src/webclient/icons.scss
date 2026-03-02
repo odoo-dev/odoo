@@ -367,8 +367,8 @@ $custom_oi_icons: (
     "cc-mastercard": ('value': '\e8ca'),
     "cc-discover": ('value': '\e8cb'),
     // Views
-    "view-pivot": ('value': '\e800'),
-    "view-cohort": ('value': '\e816'),
+    "view-pivot": ('value': '\e800','rtl': true),
+    "view-cohort": ('value': '\e816', 'rtl': true),
     "studio": ('value': '\e813'),
     // Misc
     "odoo": ('value': '\e806'),
@@ -389,7 +389,26 @@ $custom_oi_icons: (
             &:before {
                 content: '#{map-get($icon-content, 'value')}';
             }
+
+            @if index($icon-content, 'rtl') {
+                .o_rtl & {
+                    transform: rotateY(180deg);
+                }
+            }
         }
+    }
+}
+
+/* RTL adaptations - Flip directional icons by 180 degree. */
+/* ---------------------------------------------------------------------------- */
+
+// TODO: create a map and a loop and add all MS icons that need to be flipped in RTL (eg. directional icons)
+.o_rtl {
+    [data-icon="redo"],
+    [data-icon="undo"],
+    [data-icon="oi_view-pivot"],
+    [data-icon="oi_view-cohort"] {
+        transform: rotateY(180deg);
     }
 }
 
