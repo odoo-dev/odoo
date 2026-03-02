@@ -107,7 +107,7 @@ class SaleOrderLine(models.Model):
             sale_line.qty_invoiced += sum([self._convert_qty(sale_line, pos_line.qty, 'p2s') for pos_line in pos_lines], 0)
 
     def _get_sale_order_fields(self):
-        return ["product_id", "display_name", "price_unit", "product_uom_qty", "tax_id", "qty_delivered", "qty_invoiced", "discount", "qty_to_invoice", "price_total", "is_downpayment"]
+        return ["product_id", "display_name", "price_unit", "product_uom_qty", "tax_id", "qty_delivered", "qty_invoiced", "discount", "qty_to_invoice", "price_total", "is_downpayment", "product_no_variant_attribute_value_ids"]
 
     def read_converted(self):
         field_names = self._get_sale_order_fields()
@@ -117,6 +117,13 @@ class SaleOrderLine(models.Model):
                 product_uom = sale_line.product_id.uom_id
                 sale_line_uom = sale_line.product_uom
                 item = sale_line.read(field_names, load=False)[0]
+                item['attribute_custom_values'] = [
+                    {
+                        'custom_product_template_attribute_value_id': cav.custom_product_template_attribute_value_id.id,
+                        'custom_value': cav.custom_value,
+                    }
+                    for cav in sale_line.product_custom_attribute_value_ids
+                ]
                 if sale_line.product_id.tracking != 'none':
                     move_lines = sale_line.move_ids.move_line_ids.filtered(lambda ml: ml.product_id.id == sale_line.product_id.id)
                     item['lot_names'] = move_lines.lot_id.mapped('name')
