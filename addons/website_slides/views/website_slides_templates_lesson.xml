@@ -211,7 +211,7 @@
         <div class="col-12 col-md order-2 order-md-1 d-flex">
             <div class="d-flex align-items-start overflow-hidden">
                 <h1 class="h4 my-0 d-flex flex_row overflow-hidden">
-                    <i t-attf-class="fa #{slide.slide_icon_class} me-2"/>
+                    <i class="oi me-2" t-attf-data-icon="#{slide.slide_icon_class}"/>
                     <span class="text-truncate" t-field="slide.name"/>
                 </h1>
             </div>

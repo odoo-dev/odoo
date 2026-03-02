@@ -137,14 +137,14 @@
                         <a t-if="can_access" class="d-block" href="#">
                             <div class="d-flex">
                                 <t t-if="is_member" t-call="website_slides.slide_sidebar_done_button"/>
-                                <i t-else="" t-attf-class="fa #{slide.slide_icon_class} me-2"/>
+                                <i t-else="" class="oi me-2" t-attf-data-icon="#{slide.slide_icon_class}"/>
                                 <div class="o_wslides_fs_slide_name text-truncate" t-out="slide.name"/>
                             </div>
                         </a>
                         <span t-else="" class="d-block" href="#">
                             <div class="d-flex">
                                 <t t-if="is_member" t-call="website_slides.slide_sidebar_done_button"/>
-                                <i t-else="" t-attf-class="fa #{slide.slide_icon_class} me-2 text-600"/>
+                                <i t-else="" class="oi me-2 text-600" t-attf-data-icon="#{slide.slide_icon_class}"/>
                                 <div class="o_wslides_fs_slide_name text-600 text-truncate" t-out="slide.name"/>
                             </div>
                         </span>
