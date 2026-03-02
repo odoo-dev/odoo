@@ -181,7 +181,7 @@ export class DomMutationPlugin extends Plugin {
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {
-        on_editor_started_handlers: withSequence(0, this.enableObserver.bind(this)),
+        on_editor_started_handlers: withSequence(9, this.enableObserver.bind(this)),
         on_will_reset_history_from_steps_handlers: () => {
             // TODO AGE: this is only to replace the `withObserverOff` call in
             // `history.resetFromSteps` but it's not useful for `history.reset`,
