@@ -17,8 +17,8 @@
 <template id="link_button">
     <form t-attf-method="#{form_method or 'POST'}" t-att-action="url" t-attf-class="#{form_classes}">
         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-        <button t-if="label" t-attf-class="#{('fa ' + icon) if icon and not label else ''} #{ 'dropdown-item ps-3' if inDropdown else 'btn'} #{classes}#{ ' karma_required text-muted' if karma > 0 else ''}" t-attf-data-karma="#{karma}" t-att-title="title">
-            <i t-if="icon and label" t-attf-class="fa fa-fw #{icon} #{ 'me-1' if inDropdown else ''}"/>
+        <button t-if="label" t-attf-class="#{('oi ' + icon + icon_class) if icon and not label else ''} #{ 'dropdown-item ps-3' if inDropdown else 'btn'} #{classes}#{ ' karma_required text-muted' if karma > 0 else ''}" t-attf-data-karma="#{karma}" t-att-title="title">
+            <i t-if="icon and label" t-attf-class="oi oi-fw #{icon} #{icon_class} #{ 'me-1' if inDropdown else ''}"/>
             <t t-out="label"/>
         </button>
         <t t-if="flag_validator" t-call="website_forum.show_flag_validator"/>
