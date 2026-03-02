@@ -589,7 +589,7 @@
         <div t-if="channel.can_publish" class=" o_wslides_slides_list_drag m-2 o_not_editable">
             <i class="oi" data-icon="swap_vert"></i>
         </div>
-        <i t-attf-class="fa #{slide.slide_icon_class} py-2 mx-2"/>
+        <i class="oi py-2 mx-2" t-attf-data-icon="#{slide.slide_icon_class}"/>
         <div class="text-truncate me-auto">
             <a t-if="not invite_preview and (slide.is_preview or channel.is_member or channel.can_publish)" class="o_wslides_js_slides_list_slide_link" t-attf-href="/slides/slide/#{slug(slide)}">
                 <span t-field="slide.name"/>
