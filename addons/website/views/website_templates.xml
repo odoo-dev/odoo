@@ -487,7 +487,7 @@
                     <ul class="navbar-nav">
                         <!-- Search bar -->
                         <t t-call="website.placeholder_header_search_box"
-                            _classes.f="mb-3"
+                            _input_group_classes.f="mb-3"
                             _force_modal_trigger="True"
                             _input_classes.f="border-0 rounded-start-pill text-bg-light ps-3"
                             _submit_classes.f="rounded-end-pill bg-o-color-3 pe-3"/>
