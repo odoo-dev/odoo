@@ -106,3 +106,11 @@ class TestTaskTemplates(TestProjectCommon, MailCase):
         task = self.env["project.task"].browse(task_id)
         self.assertEqual(task.message_ids[0].subtype_id, self.env.ref('project.mt_task_new'))
         self.assertEqual(task.message_ids[0].notified_partner_ids, self.user_projectuser.partner_id)
+
+    def test_subtask_count_excludes_templates(self):
+        self.env['project.task'].create({
+            'name': 'Template Subtask',
+            'parent_id': self.template_task.id,
+            'is_template': True,
+        })
+        self.assertEqual(self.template_task.subtask_count, 1, "Template subtasks should not be included in subtask_count.")
