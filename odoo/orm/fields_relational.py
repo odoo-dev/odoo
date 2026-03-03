@@ -968,7 +968,7 @@ class One2many(_RelationalMulti):
 
     def read(self, records):
         # retrieve the lines in the comodel
-        context = {'active_test': False}
+        context = {'active_test': False, 'search_from_field': self}
         context.update(self.context)
         comodel = records.env[self.comodel_name].with_context(**context)
         inverse = self.inverse_name
@@ -1417,7 +1417,7 @@ class Many2many(_RelationalMulti):
             )
 
     def read(self, records):
-        context = {'active_test': False}
+        context = {'active_test': False, 'search_from_field': self}
         context.update(self.context)
         comodel = records.env[self.comodel_name].with_context(**context)
 
