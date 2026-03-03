@@ -115,8 +115,8 @@ class TestAutoComplete(TransactionCase):
         cls.options = {}
         cls.expectedParts = {
             'name': True,
-            'website_url': True,
             'description': True,
+            'website_url': True,
         }
         texts = [
             "This page only matches few",
