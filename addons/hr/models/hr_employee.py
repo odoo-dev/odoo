@@ -368,12 +368,13 @@ class HrEmployeePrivate(models.Model):
         """ Remove work_contact_id for previous employee if the user is assigned to a new employee """
         employee_company = employee_company or self.company_id.id
         # For employees with a user_id, the constraint (user can't be linked to multiple employees) is triggered
-        old_partner_employee_ids = user.partner_id.employee_ids.filtered(lambda e:
+        old_partner_employee_ids = user.partner_id.with_context(active_test=False).employee_ids
+        filtered_employee_ids = old_partner_employee_ids.filtered(lambda e:
             not e.user_id
             and e.company_id.id == employee_company
             and e != self
         )
-        old_partner_employee_ids.work_contact_id = None
+        filtered_employee_ids.work_contact_id = None
 
     def _sync_user(self, user, employee_has_image=False):
         vals = dict(

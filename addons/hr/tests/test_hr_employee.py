@@ -329,10 +329,13 @@ class TestHrEmployee(TestHrCommon):
         self.assertEqual(partner.employees_count, 2)
         # Remove user from employee in one company does not affect link user-employee in the other company
         employee_A.user_id = None
+        employee_A.active = False
         self.assertEqual(user.with_company(company_A).employee_id.ids, [])
         self.assertEqual(user.with_company(company_B).employee_id, employee_B)
         # Partner still linked to both employees
-        partner.with_company(company_A).with_company(company_B)._compute_employees_count()
+        partner.with_context(
+            allowed_company_ids=[company_A.id, company_B.id], active_test=False,
+        )._compute_employees_count()
         self.assertEqual(partner.employees_count, 2)
         # Creating a new employee for a user in company A does not affect link user-employee in the other company
         new_employee_A = self.env['hr.employee'].create({
@@ -349,7 +352,10 @@ class TestHrEmployee(TestHrCommon):
             })
         self.assertEqual(user.with_company(company_A).employee_id, new_employee_A)
         self.assertEqual(user.with_company(company_B).employee_id, employee_B)
-        self.assertEqual(partner.employee_ids, employee_B + new_employee_A)
+        self.assertEqual(
+            partner.with_context(active_test=False).employee_ids,
+            employee_B + new_employee_A,
+        )
 
     def test_avatar(self):
         # Check simple employee has a generated image (initials)
