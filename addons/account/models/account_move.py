@@ -924,8 +924,9 @@ class AccountMove(models.Model):
 
     @api.depends('posted_before', 'state', 'journal_id', 'date', 'move_type', 'origin_payment_id')
     def _compute_name(self):
-        self = self.sorted(lambda m: (m.date, m.ref or '', m._origin.id))
+        self = self.sorted(lambda m: (m.move_type, m.date, m.ref or '', m._origin.id))
 
+        previous_move = self.env['account.move']
         for move in self:
             if move.state == 'cancel':
                 continue
@@ -937,7 +938,9 @@ class AccountMove(models.Model):
                 move.name = False
                 continue
             if move.date and not move_has_name and move.state != 'draft':
-                move._set_next_sequence()
+                move_type_changed = (not previous_move or previous_move.move_type != move.move_type)
+                move.with_context(move_type_changed=move_type_changed)._set_next_sequence()
+                previous_move = move
 
         self._inverse_name()
 

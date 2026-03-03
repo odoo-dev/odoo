@@ -370,7 +370,8 @@ class SequenceMixin(models.AbstractModel):
         seq = format_values.pop('seq')
         # cache key unique to a sequence: its format string + its sequence index
         cache_key = (format_string.format(**format_values, seq=0), self._sequence_index and self[self._sequence_index])
-        if cache_key in cache:
+        move_type_changed = self.env.context.get('move_type_changed')
+        if cache_key in cache and not (move_type_changed and cache_key[0].isdigit()):
             cache[cache_key] += 1
             return format_string.format(**format_values, seq=cache[cache_key])
 

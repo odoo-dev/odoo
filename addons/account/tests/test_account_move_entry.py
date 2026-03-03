@@ -1002,6 +1002,87 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertEqual(test_move_2.sequence_number, 1)
         self.assertEqual(test_move_2.journal_id, journal)
 
+    def test_numerical_sequences_distinction_per_move_type(self):
+        """ Ensure that purely numerical sequences are correctly incremented independently
+        per move_type (e.g. Invoice and Credit Note on the same journal)
+        preventing any sequence overlap or cross-contamination
+        """
+        moves = self.env['account.move'].create([{
+            'name': name,
+            'move_type': move_type,
+            'partner_id': self.partner.id,
+            'invoice_date': '2025-01-01',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product.id,
+            })]
+        } for name, move_type in (
+            ('2025100001', 'out_invoice'), ('2025200001', 'out_refund'),
+            ('/', 'out_invoice'), ('/', 'out_refund')
+        )])
+        moves.action_post()
+        self.assertRecordValues(moves.sorted('name'), [
+            {'name': '2025100001', 'move_type': 'out_invoice'},
+            {'name': '2025100002', 'move_type': 'out_invoice'},
+            {'name': '2025200001', 'move_type': 'out_refund'},
+            {'name': '2025200002', 'move_type': 'out_refund'},
+        ])
+        moves = self.env['account.move'].create([{
+            'name': name,
+            'move_type': move_type,
+            'partner_id': self.partner.id,
+            'invoice_date': '2025-01-01',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product.id,
+            })]
+        } for name, move_type in (
+            ('/', 'out_refund'), ('/', 'out_refund')
+        )])
+        moves.action_post()
+        self.assertRecordValues(moves.sorted('name'), [
+            {'name': '2025200003', 'move_type': 'out_refund'},
+            {'name': '2025200004', 'move_type': 'out_refund'},
+        ])
+        moves = self.env['account.move'].create([{
+            'name': name,
+            'move_type': move_type,
+            'partner_id': self.partner.id,
+            'invoice_date': '2025-01-01',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product.id,
+            })]
+        } for name, move_type in (
+            ('/', 'out_refund'), ('/', 'out_invoice')
+        )])
+        moves.action_post()
+        self.assertRecordValues(moves.sorted('name'), [
+            {'name': '2025100003', 'move_type': 'out_invoice'},
+            {'name': '2025200005', 'move_type': 'out_refund'},
+        ])
+        moves = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'invoice_date': '2025-01-01',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product.id,
+            })]
+        })
+        moves.action_post()
+        self.assertRecordValues(moves.sorted('name'), [
+            {'name': '2025100004', 'move_type': 'out_invoice'},
+        ])
+        moves = self.env['account.move'].create({
+            'move_type': 'out_refund',
+            'partner_id': self.partner.id,
+            'invoice_date': '2025-01-01',
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product.id,
+            })]
+        })
+        moves.action_post()
+        self.assertRecordValues(moves.sorted('name'), [
+            {'name': '2025200006', 'move_type': 'out_refund'},
+        ])
+
     def test_manually_modifying_taxes(self):
         """Manually modifying taxes on a move should not automatically recompute them"""
         move = self.env['account.move'].create({
