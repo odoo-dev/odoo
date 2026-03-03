@@ -24,6 +24,7 @@ class MrpWorkorder(models.Model):
         workcenter_ids = self.env.context.get('default_workcenter_id')
         if not workcenter_ids:
             # bypass ir.model.access checks, but search with ir.rules
+            # FIXME won't work soon
             search_domain = self.env['ir.rule']._compute_domain(workcenters._name)
             workcenter_ids = workcenters.sudo()._search(search_domain, order=workcenters._order)
         return workcenters.browse(workcenter_ids)

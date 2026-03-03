@@ -220,6 +220,7 @@ class MaintenanceEquipment(models.Model):
             the kanban view, even if they are empty.
         """
         # bypass ir.model.access checks, but search with ir.rules
+        # FIXME won't work soon
         search_domain = self.env['ir.rule']._compute_domain(categories._name)
         category_ids = categories.sudo()._search(search_domain, order=categories._order)
         return categories.browse(category_ids)

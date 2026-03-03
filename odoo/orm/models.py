@@ -3063,7 +3063,7 @@ class BaseModel(metaclass=MetaModel):
         if not env.su and fetched != self:
             forbidden = (self - fetched).exists()
             if forbidden:
-                raise env['ir.rule']._make_access_error('read', forbidden)
+                raise forbidden._access_error_message('read')
 
     def _determine_fields_to_fetch(
             self,
@@ -3346,6 +3346,7 @@ class BaseModel(metaclass=MetaModel):
             raise UserError("\n".join(lines))
 
     @api.private  # use has_access
+    @typing.final
     def check_access(self, operation: str) -> None:
         """ Verify that the current user is allowed to perform ``operation`` on
         all the records in ``self``. The method raises an :class:`AccessError`
@@ -3381,6 +3382,7 @@ class BaseModel(metaclass=MetaModel):
         assert result is not None, "_check_access is non-deterministic or issue with fill cache"
         raise result[1]()
 
+    @typing.final
     def has_access(self, operation: str) -> bool:
         """ Return whether the current user is allowed to perform ``operation``
         on all the records in ``self``. The method is fully consistent with
@@ -3399,6 +3401,7 @@ class BaseModel(metaclass=MetaModel):
         self.__check_access_fill_cache(access, operation)
         return all(map(access.__getitem__, self._ids))
 
+    @typing.final
     def _filtered_access(self, operation: str) -> typing.Self:
         """ Return the subset of ``self`` for which the current user is allowed
         to perform ``operation``. The method is fully equivalent to::
@@ -3472,19 +3475,40 @@ class BaseModel(metaclass=MetaModel):
         and :meth:`_filtered_access`. The method may be overridden in order to
         restrict the access to ``self``.
         """
-        Access = self.env['ir.model.access']
-        if not Access.check(self._name, operation, raise_exception=False):
-            return self, functools.partial(Access._make_access_error, self._name, operation)
+        # TODO move all overwrites logic to _access_domain and deprecate this
+        domain = self._access_domain(operation)
+        if domain.is_false():
+            return self, functools.partial(self._access_error_message, operation, domain)
 
         # we only check access rules on real records, which should not be mixed
         # with new records
-        if any(self._ids):
-            Rule = self.env['ir.rule']
-            domain = Rule._compute_domain(self._name, operation)
-            if domain and (forbidden := self - self.sudo().with_context(active_test=False).filtered_domain(domain)):
-                return forbidden, functools.partial(Rule._make_access_error, operation, forbidden)
+        if domain and any(self._ids):
+            if forbidden := self - self.sudo().with_context(active_test=False).filtered_domain(domain):
+                return forbidden, functools.partial(forbidden._access_error_message, operation, domain)
 
         return None
+
+    @api.model
+    def _access_domain(self, operation: str) -> Domain:
+        """Get the security domain for the given operation.
+
+        If the user has no model access, return the false domain, otherwise the
+        access rules domain.
+        """
+        if not self.env['ir.model.access'].check(self._name, operation, raise_exception=False):
+            return Domain.FALSE
+        return self.env['ir.rule']._compute_domain(self._name, operation)
+
+    def _access_error_message(self, operation: str, domain: Domain = Domain.TRUE) -> AccessError:
+        """Create the access error for the given operation.
+        :param operation: operation performed
+        :param domain: security domain from :meth:`_access_domain`
+        """
+        Access = self.env['ir.model.access']
+        if domain.is_false() and not Access.check(self._name, operation, raise_exception=False):
+            return Access._make_access_error(self._name, operation)
+
+        return self.env['ir.rule']._make_access_error(operation, self)
 
     def unlink(self) -> typing.Literal[True]:
         """ Delete the records in ``self``.
@@ -4671,7 +4695,11 @@ class BaseModel(metaclass=MetaModel):
         """
         check_access = not (self.env.su or bypass_access)
         if check_access:
-            self.browse().check_access('read')
+            sec_domain = self._access_domain('read')
+            if sec_domain.is_false():
+                # calling check_access in case we have overwrite of _check_access
+                self.browse().check_access('read')
+                return self.browse()._as_query()
 
         domain = Domain(domain)
         # inactive records unless they were explicitly asked for
@@ -4696,7 +4724,6 @@ class BaseModel(metaclass=MetaModel):
         # security access domain
         if check_access:
             self_sudo = self.sudo().with_context(active_test=False)
-            sec_domain = self.env['ir.rule']._compute_domain(self._name, 'read')
             sec_domain = sec_domain.optimize_full(self_sudo)
             if sec_domain.is_false():
                 return self.browse()._as_query()

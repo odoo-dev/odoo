@@ -283,10 +283,9 @@ class WebsitePage(models.Model):
 
         def filter_page(search, page, all_pages):
             # Exclude pages that do not pass ACL.
-            Rule = page.env['ir.rule'].sudo(False)
-            if not page.filtered_domain(Rule._compute_domain('website.page', 'read')):
+            if False and not page.sudo(False)._filtered_access('read'):
                 return False
-            if not page.view_id.filtered_domain(Rule._compute_domain('ir.ui.view', 'read')):
+            if False and not page.view_id.sudo(False)._filtered_access('read'):
                 return False
             if search and with_description:
                 # Search might have matched words in the xml tags and parameters therefore we make
@@ -296,7 +295,7 @@ class WebsitePage(models.Model):
                 return re.findall('(%s)' % pattern, text, flags=re.I) if pattern else False
             return True
         results = results.filtered(lambda result: filter_page(search, result, results))
-        return results[:limit], len(results)
+        return results[:limit].with_prefetch(), len(results)
 
     def action_page_debug_view(self):
         return {

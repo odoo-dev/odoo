@@ -241,12 +241,14 @@ class MailActivity(models.Model):
             if result:
                 result = (result[0] + forbidden, result[1])
             else:
-                result = (forbidden, lambda: forbidden._make_access_error(operation))
+                result = (forbidden, lambda: forbidden._access_error_message(operation))
             forbidden.invalidate_recordset()  # avoid cache pollution
 
         return result
 
-    def _make_access_error(self, operation: str) -> AccessError:
+    def _access_error_message(self, operation, domain=Domain.TRUE):
+        if domain.is_false():
+            return super()._access_error_message(operation, domain)
         return AccessError(_(
             "The requested operation cannot be completed due to security restrictions. "
             "Please contact your system administrator.\n\n"
@@ -432,7 +434,7 @@ class MailActivity(models.Model):
                 if doc_operation == 'read':
                     comodel_rule = Domain.TRUE  # covered by the search below
                 else:
-                    comodel_rule = self.env['ir.rule']._compute_domain(comodel._name, doc_operation)
+                    comodel_rule = comodel._access_domain(doc_operation)
                 comodel_domain |= (domain_operation & comodel_rule)
             if comodel_res_ids is not None:
                 comodel_domain &= Domain('id', 'in', comodel_res_ids)
