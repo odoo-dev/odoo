@@ -347,15 +347,18 @@ class Cart(PaymentPortal):
                 'date': fields.Date.today(),
                 'suggested_products': order_sudo._cart_accessories()
             }
+                'is_view_active': website.is_view_active,
         )
         values['website_sale.total'] = IrUiView._render_template(
             'website_sale.total', {
                 'website_sale_order': order_sudo,
+                'is_view_active': website.is_view_active,
             }
         )
         values['website_sale.quick_reorder_history'] = IrUiView._render_template(
             'website_sale.quick_reorder_history', {
                 'website_sale_order': order_sudo,
+                'is_view_active': website.is_view_active,
                 **self._prepare_order_history(),
             }
         )
