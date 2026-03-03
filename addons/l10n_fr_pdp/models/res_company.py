@@ -49,6 +49,11 @@ class ResCompany(models.Model):
         inverse='_inverse_pdp_purchase_journal_id',
     )
 
+    @api.model
+    def _check_phonenumbers_import(self):
+        if not phonenumbers:
+            raise ValidationError(_("Please install the phonenumbers library."))
+
     @api.depends('email')
     def _compute_pdp_contact_email(self):
         for company in self:

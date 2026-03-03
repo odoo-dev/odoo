@@ -1,7 +1,6 @@
 import contextlib
 
-from addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
-from addons.iap.tools import iap_tools
+from odoo.addons.iap.tools import iap_tools
 
 try:
     import phonenumbers
@@ -45,7 +44,36 @@ class PdpRegistration(models.TransientModel):
         compute="_compute_warnings",
     )
     siren_number = fields.Char(compute='_compute_siren_number', store=True, readonly=False)
-    kyb_done = fields.Boolean()
+    kyb_status = fields.Selection(
+        selection=[
+            ('none', "None"),
+            ('processing', "Processing"),
+            ('queuing', "Queuing"),
+            ('done', "Done"),
+        ],
+        default='none',
+    )
+    kyc_status = fields.Selection(
+        selection=[
+            ('none', "None"),
+            ('processing', "Processing"),
+            ('done', "Done"),
+        ],
+        default='none',
+    )
+
+    control_id = fields.Char()
+    folder_link = fields.Char()
+    available_partner_ids = fields.Many2many('res.partner')
+    selected_representative_id = fields.Many2one(
+        'res.partner',
+        string="Legal Representative",
+        domain="[('id', 'in', available_partner_ids)]"
+    )
+    birth_date = fields.Date(
+        compute='_compute_birth_date',
+        readonly=False,
+    )
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -76,6 +104,11 @@ class PdpRegistration(models.TransientModel):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+    @api.depends('selected_representative_id')
+    def _compute_birth_date(self):
+        for wizard in self:
+            wizard.birth_date = wizard.selected_representative_id.birth_date or fields.Date.context_today(self)
+
     @api.depends('company_id.siret')
     def _compute_siren_number(self):
         for wizard in self:
@@ -146,15 +179,107 @@ class PdpRegistration(models.TransientModel):
 
     def button_trigger_kyb_flow(self):
         self.ensure_one()
-
-        endpoint = self.env['ir.config_parameter'].sudo().get_param('iap.l10n_fr_pdp', 'https://localhost:8469')
+        endpoint = self.env['ir.config_parameter'].sudo().get_param('iap.l10n_fr_pdp', 'http://localhost:8469')
         response = iap_tools.iap_jsonrpc(f'{endpoint}/api/pdp/1/kyb_flow', params={
-            'dbuuid': self.env['ir.config_parameter'].get_param('database.uuid'),
+            'siren': self.siren_number,
         })
-        if error_message := response.get('error'):
-            raise UserError(error_message)
-        self.kyb_done = True
-        return self.env['pdp.registration'].create({'company_id': self.company_id.id})
+        if response.get('status') == 'failed':
+            raise UserError(self.env._("The siren number couldn't be validated"))
+
+        result = self._get_kyb_wizard_data(response)
+        wizard = self.env['pdp.registration'].create([result])
+        return wizard._action_open_pdp_form()
+
+    def button_refresh_kyb_flow(self):
+        self.ensure_one()
+        endpoint = self.env['ir.config_parameter'].sudo().get_param('iap.l10n_fr_pdp', 'http://localhost:8469')
+        response = iap_tools.iap_jsonrpc(f'{endpoint}/api/pdp/1/kyb_refresh', params={
+            'control_id': self.control_id,
+        })
+        if response.get('status') == 'FAILED':
+            raise UserError(self.env._("The siren number couldn't be validated"))
+
+        result = self._get_kyb_wizard_data(response)
+        wizard = self.env['pdp.registration'].create([result])
+        return wizard._action_open_pdp_form()
+
+    def _get_kyb_wizard_data(self, response):
+        result = {
+            'company_id': self.company_id.id,
+            'kyb_status': response['status'].lower(),
+            'siren_number': self.siren_number,
+            'control_id': response.get('control_id'),
+        }
+        if response.get('status') != 'DONE':
+            return result
+
+        if not response.get('legal_entities'):
+            raise UserError(self.env._("No legal entities found."))
+
+        legal_entities = []
+        for legal_entity in response['legal_entities']:
+            legal_entities.append({
+                'name': f"{legal_entity.get('firstName').title()},{legal_entity.get('lastName').title()}",
+                'birth_date': fields.Date.from_string(legal_entity.get('birthDate')),
+                'company_type': 'person',
+                'parent_id': self.company_id.partner_id.id,
+            })
+        partners = self.env['res.partner'].create(legal_entities)
+        result['available_partner_ids'] = partners.ids
+        result['selected_representative_id'] = partners[0].id
+        return result
+
+    def button_trigger_kyc_flow(self):
+        self.ensure_one()
+        endpoint = self.env['ir.config_parameter'].sudo().get_param('iap.l10n_fr_pdp', 'http://localhost:8469')
+        name = self.selected_representative_id.name.split(',')
+        response = iap_tools.iap_jsonrpc(f'{endpoint}/api/pdp/1/kyc_flow', params={
+            'first_name': name[0],
+            'last_name': name[1],
+            'birth_date': fields.Date.to_string(self.selected_representative_id.birth_date),
+            'phone_number': self.phone_number,
+        })
+
+        self.kyc_status = 'processing'
+        self.folder_link = response.get('folder_link')
+
+        if link := response.get('link'):
+            return {
+                'type': 'ir.actions.act_url',
+                'url': link,
+                'target': 'new',
+            }
+
+    def button_refresh_kyc_flow(self):
+        self.ensure_one()
+        endpoint = self.env['ir.config_parameter'].sudo().get_param('iap.l10n_fr_pdp', 'http://localhost:8469')
+        response = iap_tools.iap_jsonrpc(f'{endpoint}/api/pdp/1/kyc_refresh', params={
+            'folder_link': self.folder_link or '',
+        })
+
+        result = self._get_kyc_wizard_data(response)
+        wizard = self.env['pdp.registration'].create([result])
+        return wizard._action_open_pdp_form()
+
+    def _get_kyc_wizard_data(self, response):
+        # https://app.vialink.biz/horizon/redoc/horizon#tag/Folder-Participants/operation/listFolderParticipants
+        response_status = response.get('status')
+        if response_status in {'FAIL', 'ERROR', 'DECLINED', 'REJECTED'}:
+            raise UserError(self.env._("The KYC flow failed."))
+        elif response_status in {'CREATED', 'IN_PROGRESS'}:
+            kyc_status = 'processing'
+        elif response_status == 'PASS':
+            kyc_status = 'done'
+        else:
+            kyc_status = 'none'
+
+        result = {
+            'company_id': self.company_id.id,
+            'kyb_status': self.kyb_status,
+            'folder_link': response.get('folder_link'),
+            'kyc_status': kyc_status,
+        }
+        return result
 
     def button_register_pdp_participant(self):
         self.ensure_one()

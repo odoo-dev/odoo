@@ -52,6 +52,10 @@ class ResPartner(models.Model):
         tracking=True,
     )
     is_using_pdp = fields.Boolean(compute='_compute_is_using_pdp')
+    birth_date = fields.Date(
+        string='Birth Date',
+        readonly=False,
+    )
 
     @api.onchange('invoice_edi_format', 'peppol_endpoint', 'peppol_eas', 'pdp_identifier')
     def _onchange_verify_pdp_status(self):
