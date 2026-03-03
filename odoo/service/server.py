@@ -75,6 +75,7 @@ thread_local = threading.local()
 thread_local.rpc_model_method = ''
 
 
+
 def memory_info(process):
     """
     :return: the relevant memory usage according to the OS in bytes.
@@ -604,7 +605,11 @@ class ThreadedServer(CommonServer):
             signal.signal(signal.SIGHUP, self.signal_handler)
             signal.signal(signal.SIGXCPU, self.signal_handler)
             signal.signal(signal.SIGQUIT, dumpstacks)
+            print("coucoucoucoucoucoucoucou")
             signal.signal(signal.SIGUSR1, log_ormcache_stats)
+            # def coudou(*args, **kwargs):
+            #     print("coudou")
+            # signal.signal(signal.SIGABRT, coudou)
             signal.signal(signal.SIGUSR2, log_ormcache_stats)
         elif os.name == 'nt':
             import win32api
@@ -812,6 +817,7 @@ class GeventServer(CommonServer):
         if os.name == 'posix':
             # Set process memory limit as an extra safeguard
             signal.signal(signal.SIGQUIT, dumpstacks)
+            
             signal.signal(signal.SIGUSR1, log_ormcache_stats)
             signal.signal(signal.SIGUSR2, log_ormcache_stats)
             gevent.spawn(self.watchdog)
@@ -945,7 +951,8 @@ class PreforkServer(CommonServer):
                 dumpstacks()
             elif sig in [signal.SIGUSR1, signal.SIGUSR2]:
                 # log ormcache stats on kill -SIGUSR1 or kill -SIGUSR2
-                log_ormcache_stats(sig)
+                # log_ormcache_stats(sig)
+                pass
             elif sig == signal.SIGTTIN:
                 # increase number of workers
                 self.population += 1
@@ -1305,7 +1312,7 @@ class Worker(object):
         signal.pthread_sigmask(signal.SIG_BLOCK, {
             signal.SIGXCPU,
             signal.SIGINT, signal.SIGQUIT,
-            signal.SIGUSR1, signal.SIGUSR2,
+            signal.SIGUSR2,
         })
         try:
             while self.alive:
