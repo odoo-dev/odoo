@@ -251,7 +251,9 @@ export class ImageTransformation extends Component {
         } else if (target.classList.contains("transfo-scaler-mr")) {
             type = "mr";
         }
-
+        if (!type) {
+            return;
+        }
         const { pageX, pageY } = this.normalizeCoordinates(ev);
         this.transfo.active = {
             type: type,
