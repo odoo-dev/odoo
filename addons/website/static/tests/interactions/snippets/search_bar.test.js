@@ -45,9 +45,7 @@ function supportAutocomplete() {
             results: {
                 pages: {
                     groupName: "Pages",
-                    templateKey: "website.search_items_page",
-                    search_count: 3,
-                    limit: 3,
+                    searchCount: 3,
                     data: [
                         {
                             _fa: "fa-file-o",
@@ -67,6 +65,7 @@ function supportAutocomplete() {
                     ],
                 },
             },
+            results_count: 3,
         };
     });
 }
@@ -128,4 +127,15 @@ test("searchbar removes results on escape", async () => {
     expect(queryAll("form a.o_search_result_link")).toHaveLength(3);
     await press("escape");
     expect(queryAll("form a.o_search_result_link")).toHaveLength(0);
+});
+
+test("searchbar updates the result count", async () => {
+    supportAutocomplete();
+    await startInteractions(searchTemplate);
+    await click("form input[type=search]");
+    await press("x");
+    await press("y");
+    await press("z");
+    await advanceTime(400);
+    expect(queryAll("form .o_search_count")).toHaveText('3 results');
 });
