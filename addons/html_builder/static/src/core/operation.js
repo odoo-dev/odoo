@@ -48,9 +48,10 @@ export class OperationMutex extends Mutex {
 }
 
 export class Operation {
-    constructor(editableDocument = document) {
+    constructor(editableDocument = document, getExtraPreviewDocument = () => null) {
         this.mutex = new OperationMutex();
         this.editableDocument = editableDocument;
+        this.getExtraPreviewDocument = getExtraPreviewDocument;
         this.loadingRequests = new Set();
     }
 
@@ -168,19 +169,23 @@ export class Operation {
      *   if it was the last one
      */
     addLoadingElement(withLoadingEffect, loadingEffectDelay, shouldInterceptClick) {
+        const loadingDocument =
+            this.loadingScreenEl?.ownerDocument ||
+            this.getExtraPreviewDocument() ||
+            this.editableDocument;
         if (!this.loadingScreenEl) {
-            this.loadingScreenEl = document.createElement("div");
+            this.loadingScreenEl = loadingDocument.createElement("div");
             this.loadingScreenEl.classList.add(
                 "o_loading_screen",
                 "d-flex",
                 "justify-content-center",
                 "align-items-center"
             );
-            const spinnerEl = document.createElement("img");
+            const spinnerEl = loadingDocument.createElement("img");
             spinnerEl.setAttribute("src", "/web/static/img/spin.svg");
             this.loadingScreenEl.appendChild(spinnerEl);
             this.loadingScreenEl.classList.toggle("d-none", !!this.isUIBlocked);
-            this.editableDocument.body.appendChild(this.loadingScreenEl);
+            loadingDocument.body.appendChild(this.loadingScreenEl);
         }
 
         const request = { loadingEffectActive: false };
@@ -191,10 +196,7 @@ export class Operation {
 
         if (shouldInterceptClick) {
             const onClick = (ev) => {
-                const trueTargetEls = this.editableDocument.elementsFromPoint(
-                    ev.clientX,
-                    ev.clientY
-                );
+                const trueTargetEls = loadingDocument.elementsFromPoint(ev.clientX, ev.clientY);
                 this.next(() => {
                     for (const trueTargetEl of trueTargetEls) {
                         if (trueTargetEl.isConnected) {
@@ -204,9 +206,9 @@ export class Operation {
                     }
                 });
             };
-            this.editableDocument.addEventListener("click", onClick);
+            loadingDocument.addEventListener("click", onClick);
             removeClickListener = () => {
-                this.editableDocument.removeEventListener("click", onClick);
+                loadingDocument.removeEventListener("click", onClick);
             };
         }
 
