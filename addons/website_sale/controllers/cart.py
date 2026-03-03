@@ -345,9 +345,9 @@ class Cart(PaymentPortal):
             'website_sale.cart_lines', {
                 'website_sale_order': order_sudo,
                 'date': fields.Date.today(),
-                'suggested_products': order_sudo._cart_accessories()
-            }
+                'suggested_products': order_sudo._cart_accessories(),
                 'is_view_active': website.is_view_active,
+            }
         )
         values['website_sale.total'] = IrUiView._render_template(
             'website_sale.total', {
