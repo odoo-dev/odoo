@@ -24,6 +24,7 @@
             'web/static/src/module_loader.js',
             'web/static/lib/luxon/luxon.js',
             'spreadsheet/static/src/spreadsheet_engine/o-spreadsheet-engine.js',
+            'spreadsheet/static/src/spreadsheet_engine/python_bridge.js',
             'spreadsheet/static/src/spreadsheet_engine/rpc/*.js',
             'spreadsheet/static/src/spreadsheet_engine/rpc/**/*.js',
             'spreadsheet/static/src/spreadsheet_engine/rpc_overwrite.js',
