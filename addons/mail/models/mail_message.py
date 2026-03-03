@@ -410,6 +410,10 @@ class MailMessage(models.Model):
         if not self or not self.browse().sudo(False).has_access(operation):
             self[field_name] = False
             return
+        if self.env.context.get('search_from_field') is self.env.registry['mail.mail']._fields['mail_message_id']:
+            # allow when coming from mail.mail
+            self[field_name] = True
+            return
 
         # Non-employee see only messages with a subtype and not internal
         query = self.sudo()._search(self._get_search_domain_share() & Domain('id', 'in', self.ids))
@@ -421,6 +425,8 @@ class MailMessage(models.Model):
         assert self.env.su
         if domain_operator != 'in':
             return NotImplemented
+        if self.env.context.get('search_from_field') is self.env.registry['mail.mail']._fields['mail_message_id']:
+            return Domain.TRUE
         domain = self.env.context.get('search_domain')
         if not isinstance(domain, Domain):
             domain = Domain.TRUE

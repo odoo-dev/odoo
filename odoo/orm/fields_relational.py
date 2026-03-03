@@ -188,7 +188,7 @@ class _Relational(Field[BaseModel]):
             assert isinstance(value, Domain)
             if operator == 'any' and records.env.context.get('filter_function_reset_sudo'):
                 corecords = corecords.sudo(False)._filtered_access('read')
-            corecords = corecords.filtered_domain(value)
+            corecords = corecords.with_context(search_from_field=self).filtered_domain(value)
         elif operator == 'in' and isinstance(value, COLLECTION_TYPES):
             value = set(value)
             if False in value:
