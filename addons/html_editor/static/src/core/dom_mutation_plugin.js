@@ -305,8 +305,7 @@ export class DomMutationPlugin extends Plugin {
         commit.data.commitTimestamp ??= Date.now();
         const step = this.dependencies.history.write(commit, stepType);
 
-        this.updateLocal("mutations", []);
-        this.updateLocal("authorTimestamp", Date.now());
+        this.resetCurrentChanges();
 
         this.stageSelection();
 
@@ -386,7 +385,7 @@ export class DomMutationPlugin extends Plugin {
 
     // Private
 
-    clean() {
+    resetCurrentChanges() {
         /** @type { CommitData } */
         this.currentChanges = {
             authorTimestamp: Date.now(),
@@ -395,6 +394,10 @@ export class DomMutationPlugin extends Plugin {
             selection: {},
             selectionAfter: null,
         };
+    }
+
+    clean() {
+        this.resetCurrentChanges();
         /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean>, characterData: Map<string, string> }> } */
         this.lastObservedState = new WeakMap();
         this.nodeMap = new NodeMap();
