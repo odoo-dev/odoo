@@ -13,7 +13,7 @@ import subprocess
 
 from odoo import tools
 from odoo.modules import Manifest
-from odoo.tests import tagged, TransactionCase
+from odoo.tests import tagged, TransactionCase, no_retry
 from odoo.tools.which import which
 
 HERE = os.path.dirname(os.path.realpath(__file__))
@@ -27,7 +27,7 @@ class TestPyLint(TransactionCase):
         _logger.warning(reason)
         self.skipTest(reason)
 
-    def test_pylint(self):
+    def _test_pylint(self, plugins, checkers, additional_options=None):
         if pylint is None:
             self._skip_test('please install pylint')
         required_pylint_version = tools.parse_version('1.7.0')
@@ -42,41 +42,18 @@ class TestPyLint(TransactionCase):
             if module_path.startswith(join(tools.config.root_path, 'addons')):
                 continue
             paths.add(module_path)
+        additional_options = additional_options or []
+
+        plugins = plugins + ['_pylint_path_setup']
 
         options = [
             '--rcfile=%s' % os.devnull,
-            '--disable=all,useless-option-value',
-            '--enable=' + ','.join([
-                'used-before-assignment',
-                'undefined-variable',
-                'eval-used',
-                'unreachable',
-                'function-redefined',
-
-                # custom checkers
-                'sql-injection',
-        'missing-gettext',
-                'gettext-variable',
-                'gettext-placeholders',
-                'gettext-repr',
-                'raise-unlink-override',
-            ]),
+            '--disable=all,useless-option-value,unknown-option-value',
+            '--enable=' + ','.join(checkers),
             '--reports=n',
             "--msg-template='{msg} ({msg_id}) at {path}:{line}'",
-            '--load-plugins=' + ','.join([
-                "_pylint_path_setup",
-                "pylint.extensions.bad_builtin",
-                "_odoo_checker_sql_injection",
-                "_odoo_checker_gettext",
-                "_odoo_checker_unlink_override",
-            ]),
-            '--bad-functions=input',
-            '--deprecated-modules=' + ','.join([
-                'csv',
-                'urllib',
-                'cgi',
-                *tools.constants.SUPPORTED_DEBUGGER,
-            ]),
+            '--load-plugins=' + ','.join(plugins),
+            *additional_options,
         ]
 
         stdlib_prefixes = tuple({sys.prefix, sys.base_prefix, sys.exec_prefix, sys.base_exec_prefix})
@@ -109,3 +86,50 @@ class TestPyLint(TransactionCase):
                 self.fail(f"pylint test failed:\n\n{r.stdout}\n{r.stderr}".strip())
             else:
                 _logger.debug("%s", r.stdout)
+
+    @no_retry
+    def test_pylint(self):
+        plugins = ["pylint.extensions.bad_builtin"]
+        checkers = [
+            'used-before-assignment',
+            'undefined-variable',
+            'eval-used',
+            'unreachable',
+            'function-redefined',
+        ]
+
+        additional_options = ['--bad-functions=input',
+            '--deprecated-modules=' + ','.join([
+                'csv',
+                'urllib',
+                'cgi',
+                *tools.constants.SUPPORTED_DEBUGGER,
+            ])
+        ]
+
+        self._test_pylint(plugins, checkers, additional_options)
+
+    @no_retry
+    def test_pylint_sql_injection(self):
+        self._test_pylint(
+            ['_odoo_checker_sql_injection'],
+            ['sql-injection'])
+
+    @no_retry
+    def test_pylint_gettext(self):
+        self._test_pylint(
+            ['_odoo_checker_gettext'],
+            [
+                'missing-gettext',
+                'gettext-variable',
+                'gettext-placeholders',
+                'gettext-repr',
+            ])
+
+    @no_retry
+    def test_pylint_unlink_override(self):
+        self._test_pylint(
+            ['_odoo_checker_unlink_override'], 
+            [
+                'raise-unlink-override',
+            ])
