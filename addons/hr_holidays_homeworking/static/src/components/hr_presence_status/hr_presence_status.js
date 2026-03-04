@@ -20,18 +20,24 @@ const patchHrPresenceStatus = () => ({
 
     get icon() {
         if (this.value?.includes("holiday")) {
-            return "fa-plane";
+            return "travel";
         } else if (this.location) {
             switch (this.location) {
                 case "home":
-                    return "fa-home";
+                    return "home";
                 case "office":
-                    return "fa-building";
+                    return "business";
                 case "other":
-                    return "fa-map-marker";
+                    return "location_on";
             }
         }
         return super.icon;
+    },
+
+    get iconClass() {
+        if(this.location === "office") {
+            return "oi-filled";
+        }
     },
 
     get label() {

@@ -15,10 +15,10 @@ export class HrPresenceStatus extends Component {
     };
 
     get classNames() {
-        const classNames = ["fa"];
+        const classNames = ["oi"];
         classNames.push(
-            this.icon,
-            "fa-fw",
+            this.iconClass,
+            "oi-fw",
             "o_button_icon",
             "hr_presence",
             "align-middle",
@@ -42,7 +42,10 @@ export class HrPresenceStatus extends Component {
     }
 
     get icon() {
-        return `fa-circle${this.value.startsWith("presence_archive") ? "-o" : ""}`;
+        return "circle";
+    }
+    get iconClass() {
+        return this.value.startsWith("presence_archive") ? "" : "oi-filled";
     }
 
     get label() {
