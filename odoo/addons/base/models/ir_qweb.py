@@ -2891,8 +2891,6 @@ class IrQweb(models.AbstractModel):
         return (files, external_asset)
 
     def _get_asset_bundle(self, bundle_name, css=True, js=True, binary=False, debug_assets=False, rtl=False, assets_params=None, autoprefix=False):
-        if assets_params is None:
-            assets_params = self.env['ir.asset']._get_asset_params()
         files, external_assets = self._get_asset_content(bundle_name, assets_params)
         return AssetsBundle(bundle_name, files, external_assets, env=self.env, css=css, js=js, binary=binary, debug_assets=debug_assets, rtl=rtl, assets_params=assets_params, autoprefix=autoprefix)
 

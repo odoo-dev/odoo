@@ -51,6 +51,12 @@ class IrQweb(models.AbstractModel):
         """ Return the list of context keys to use for caching ``_compile``. """
         return super()._get_template_cache_keys() + ['website_id', 'cookies_allowed']
 
+    def _get_asset_bundle(self, bundle_name, css=True, js=True, binary=False, debug_assets=False, rtl=False, assets_params=None, autoprefix=False):
+        irQweb = self
+        if assets_params and 'website_id' in assets_params:
+            irQweb = irQweb.with_context(website_id=assets_params.get('website_id'))
+        return super(IrQweb, irQweb)._get_asset_bundle(bundle_name, css=css, js=js, binary=binary, debug_assets=debug_assets, rtl=rtl, assets_params=assets_params, autoprefix=autoprefix)
+
     def _post_processing_att(self, tagName, atts):
         if atts.get('data-no-post-process'):
             return atts
