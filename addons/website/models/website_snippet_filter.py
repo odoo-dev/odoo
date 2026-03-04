@@ -78,6 +78,7 @@ class WebsiteSnippetFilter(models.Model):
             records = self._prepare_sample(limit, res_model=res_model)
         content = self.env['ir.qweb'].with_context(inherit_branding=False)._render(template_key, dict(
             records=records,
+            website=self.website_id,
             is_sample=is_sample,
             is_view_active=self.website_id.is_view_active,
             **custom_template_data,
