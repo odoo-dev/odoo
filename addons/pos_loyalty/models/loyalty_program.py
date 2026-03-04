@@ -42,32 +42,33 @@ class LoyaltyProgram(models.Model):
             program.pos_report_print_id = program.communication_plan_ids.pos_report_print_id[:1]
 
     def _inverse_pos_report_print_id(self):
+        to_create = []
         for program in self:
-            if program.program_type not in ("gift_card", "ewallet"):
+            if program.program_type not in ("gift_card", "ewallet") or not program.pos_report_print_id:
                 continue
 
-            if program.pos_report_print_id:
-                if not program.mail_template_id:
-                    mail_template_label = program._fields.get('mail_template_id').get_description(self.env)['string']
-                    pos_report_print_label = program._fields.get('pos_report_print_id').get_description(self.env)['string']
-                    raise UserError(_(
-                        "You must set '%(mail_template)s' before setting '%(report)s'.",
-                        mail_template=mail_template_label,
-                        report=pos_report_print_label,
-                    ))
-                else:
-                    if not program.communication_plan_ids:
-                        program.communication_plan_ids = self.env['loyalty.mail'].create({
-                            'program_id': program.id,
-                            'trigger': 'create',
-                            'mail_template_id': program.mail_template_id.id,
-                            'pos_report_print_id': program.pos_report_print_id.id,
-                        })
-                    else:
-                        program.communication_plan_ids.write({
-                            'trigger': 'create',
-                            'pos_report_print_id': program.pos_report_print_id.id,
-                        })
+            if not program.mail_template_id:
+                mail_template_label = program._fields.get('mail_template_id').get_description(self.env)['string']
+                pos_report_print_label = program._fields.get('pos_report_print_id').get_description(self.env)['string']
+                raise UserError(_(
+                    "You must set '%(mail_template)s' before setting '%(report)s'.",
+                    mail_template=mail_template_label,
+                    report=pos_report_print_label,
+                ))
+            if not program.communication_plan_ids:
+                to_create.append({
+                    'program_id': program.id,
+                    'trigger': 'create',
+                    'mail_template_id': program.mail_template_id.id,
+                    'pos_report_print_id': program.pos_report_print_id.id,
+                })
+            else:
+                program.communication_plan_ids.write({
+                    'trigger': 'create',
+                    'pos_report_print_id': program.pos_report_print_id.id,
+                })
+        if to_create:
+            self.env['loyalty.mail'].create(to_create)
 
     @api.depends('pos_ok')
     def _compute_pos_config_ids(self):
@@ -77,24 +78,17 @@ class LoyaltyProgram(models.Model):
 
     def _compute_pos_order_count(self):
         query = """
-            SELECT program.id, SUM(orders_count)
-            FROM loyalty_program program
-                JOIN loyalty_reward reward ON reward.program_id = program.id
-                JOIN LATERAL (
-                    SELECT COUNT(DISTINCT orders.id) AS orders_count
-                    FROM pos_order orders
-                        JOIN pos_order_line order_lines ON order_lines.order_id = orders.id
-                        WHERE order_lines.reward_id = reward.id
-                ) agg ON TRUE
-                WHERE program.id = ANY(%s)
-                    GROUP BY program.id
-                """
+            SELECT reward.program_id, COUNT(DISTINCT line.order_id)
+            FROM pos_order_line line
+            JOIN loyalty_reward reward ON reward.id = line.reward_id
+            WHERE reward.program_id = ANY(%s)
+            GROUP BY reward.program_id
+        """
         self.env.cr.execute(query, (self.ids,))
-        res = self.env.cr.dictfetchall()
-        res = {k['id']: k['sum'] for k in res}
+        res = {row[0]: row[1] for row in self.env.cr.fetchall()}
 
         for rec in self:
-            rec.pos_order_count = res.get(rec.id) or 0
+            rec.pos_order_count = res.get(rec.id, 0)
 
     def _compute_total_order_count(self):
         super()._compute_total_order_count()

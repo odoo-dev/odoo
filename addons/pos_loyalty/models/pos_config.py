@@ -24,43 +24,44 @@ class PosConfig(models.Model):
     def _check_before_creating_new_session(self):
         self.ensure_one()
         # Check validity of programs before opening a new session
-        invalid_reward_products_msg = ''
-        for reward in self._get_program_ids().reward_ids:
+        invalid_reward_products = []
+        programs = self._get_program_ids()
+        for reward in programs.reward_ids:
             if reward.reward_type == 'product':
                 for product in reward.reward_product_ids:
-                    if product.available_in_pos:
-                        continue
-                    invalid_reward_products_msg += "\n\t"
-                    invalid_reward_products_msg += _(
-                        "Program: %(name)s, Reward Product: `%(reward_product)s`",
-                        name=reward.program_id.name,
-                        reward_product=product.name,
-                    )
-        gift_card_programs = self._get_program_ids().filtered(lambda p: p.program_type == 'gift_card')
+                    if not product.available_in_pos:
+                        invalid_reward_products.append(_(
+                            "Program: %(name)s, Reward Product: `%(reward_product)s`",
+                            name=reward.program_id.name,
+                            reward_product=product.name,
+                        ))
+        gift_card_programs = programs.filtered(lambda p: p.program_type == 'gift_card')
         for product in gift_card_programs.mapped('rule_ids.valid_product_ids'):
-            if product.available_in_pos:
-                continue
-            invalid_reward_products_msg += "\n\t"
-            invalid_reward_products_msg += _(
-                "Program: %(name)s, Rule Product: `%(rule_product)s`",
-                name=reward.program_id.name,
-                rule_product=product.name,
-            )
+            if not product.available_in_pos:
+                # We need the program name here, which is available via the first rule's program
+                # (since gift card programs are expected to have a simple structure)
+                programs_with_product = gift_card_programs.filtered(lambda p: product in p.rule_ids.valid_product_ids)
+                for p in programs_with_product:
+                    invalid_reward_products.append(_(
+                        "Program: %(name)s, Rule Product: `%(rule_product)s`",
+                        name=p.name,
+                        rule_product=product.name,
+                    ))
 
-        if invalid_reward_products_msg:
+        if invalid_reward_products:
             prefix_error_msg = _("To continue, make the following reward products available in Point of Sale.")
-            raise UserError(f"{prefix_error_msg}\n{invalid_reward_products_msg}")  # pylint: disable=missing-gettext
+            raise UserError(f"{prefix_error_msg}\n\t" + "\n\t".join(invalid_reward_products))
         if gift_card_programs:
             for gc_program in gift_card_programs:
                 # Do not allow a gift card program with more than one rule or reward, and check that they make sense
-                if len(gc_program.reward_ids) > 1:
-                    raise UserError(_('Invalid gift card program. More than one reward.'))
-                elif len(gc_program.rule_ids) > 1:
-                    raise UserError(_('Invalid gift card program. More than one rule.'))
                 rule = gc_program.rule_ids
+                reward = gc_program.reward_ids
+                if len(reward) > 1:
+                    raise UserError(_('Invalid gift card program. More than one reward.'))
+                elif len(rule) > 1:
+                    raise UserError(_('Invalid gift card program. More than one rule.'))
                 if rule.reward_point_amount != 1 or rule.reward_point_mode != 'money':
                     raise UserError(_('Invalid gift card program rule. Use 1 point per currency spent.'))
-                reward = gc_program.reward_ids
                 if reward.reward_type != 'discount' or reward.discount_mode != 'per_point' or reward.discount != 1:
                     raise UserError(_('Invalid gift card program reward. Use 1 currency per point discount.'))
                 if not gc_program.mail_template_id:
@@ -73,8 +74,9 @@ class PosConfig(models.Model):
     def use_coupon_code(self, code, creation_date, partner_id, pricelist_id):
         self.ensure_one()
         # Points desc so that in coupon mode one could use a coupon multiple times
+        programs = self._get_program_ids()
         coupon = self.env['loyalty.card'].search(
-            [('program_id', 'in', self._get_program_ids().ids),
+            [('program_id', 'in', programs.ids),
              '|', ('partner_id', 'in', (False, partner_id)), ('program_type', '=', 'gift_card'),
              ('code', '=', code)],
             order='partner_id, points desc', limit=1)

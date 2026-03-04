@@ -16,20 +16,17 @@ patch(OrderPaymentValidation.prototype, {
             }
         }
         for (const line of this.order._get_reward_lines()) {
-            if (line.coupon_id.id < 1) {
+            const couponId = line.coupon_id.id;
+            if (couponId <= 0) {
                 continue;
             }
-            if (!pointChanges[line.coupon_id.id]) {
-                pointChanges[line.coupon_id.id] = -line.points_cost;
-            } else {
-                pointChanges[line.coupon_id.id] -= line.points_cost;
-            }
+            pointChanges[couponId] = (pointChanges[couponId] || 0) - line.points_cost;
         }
         if (!(await this.isOrderValid(isForceValidate))) {
             return;
         }
         // No need to do an rpc if no existing coupon is being used.
-        if (Object.keys(pointChanges || {}).length > 0 || newCodes.length) {
+        if (Object.keys(pointChanges).length > 0 || newCodes.length) {
             try {
                 const { successful, payload } = await this.pos.data.call(
                     "pos.order",
@@ -37,18 +34,17 @@ patch(OrderPaymentValidation.prototype, {
                     [[], pointChanges, newCodes]
                 );
                 // Payload may contain the points of the concerned coupons to be updated in case of error. (So that rewards can be corrected)
-                if (payload && payload.updated_points) {
-                    for (const pointChange of Object.entries(payload.updated_points)) {
-                        const coupon = this.pos.models["loyalty.card"].get(pointChange[0]);
+                if (payload?.updated_points) {
+                    for (const [id, points] of Object.entries(payload.updated_points)) {
+                        const coupon = this.pos.models["loyalty.card"].get(id);
                         if (coupon) {
-                            coupon.points = pointChange[1];
+                            coupon.points = points;
                         }
                     }
                 }
-                if (payload && payload.removed_coupons) {
+                if (payload?.removed_coupons) {
                     for (const couponId of payload.removed_coupons) {
-                        const coupon = this.pos.models["loyalty.card"].get(couponId);
-                        coupon && coupon.delete();
+                        this.pos.models["loyalty.card"].get(couponId)?.delete();
                     }
                 }
                 if (!successful) {

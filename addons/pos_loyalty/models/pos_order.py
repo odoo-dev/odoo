@@ -99,9 +99,8 @@ class PosOrder(models.Model):
             'partner_id': get_partner_id(p.get('partner_id', self.partner_id.id)),
             'code': p.get('code') or p.get('barcode') or self.env['loyalty.card']._generate_code(),
             'points': 0,
-            'expiration_date': p.get('date_to', False),
+            'expiration_date': p.get('expiration_date') or p.get('date_to', False),
             'source_pos_order_id': self.id,
-            'expiration_date': p.get('expiration_date')
         } for p in coupons_to_create.values()]
 
         # Pos users don't have the create permission
@@ -183,60 +182,69 @@ class PosOrder(models.Model):
         }
 
     def _process_existing_gift_cards(self, coupon_data):
+        # Batch search all gift cards by code or ID
+        gift_card_codes = [v['code'] for v in coupon_data.values() if v.get('code')]
+        gift_card_ids = [v['coupon_id'] for v in coupon_data.values() if v.get('coupon_id')]
+        existing_cards = self.env['loyalty.card'].search([
+            '|', ('code', 'in', gift_card_codes), ('id', 'in', gift_card_ids)
+        ])
+        card_by_code = {card.code: card for card in existing_cards}
+        card_by_id = {card.id: card for card in existing_cards}
+
+        history_vals = []
         updated_gift_cards = self.env['loyalty.card']
         coupon_key_to_remove = []
+
         for coupon_id, coupon_vals in coupon_data.items():
-            program_id = self.env['loyalty.program'].browse(coupon_vals['program_id'])
-            if program_id.program_type == 'gift_card':
-                updated = False
-                gift_card = self.env['loyalty.card'].search([
-                    ('|'),
-                    ('code', '=', coupon_vals.get('code', '')),
-                    ('id', '=', coupon_vals.get('coupon_id', False))
-                ])
-                if not gift_card.exists():
-                    continue
+            program = self.env['loyalty.program'].browse(coupon_vals['program_id'])
+            if program.program_type != 'gift_card':
+                continue
 
-                if not gift_card.partner_id and self.partner_id:
-                    updated = True
-                    gift_card.partner_id = self.partner_id
-                    gift_card.history_ids.create({
-                        'card_id': gift_card.id,
-                        'description': _('Assigning partner %s', self.partner_id.name),
-                        'used': 0,
-                        'issued': gift_card.points,
-                    })
+            gift_card = card_by_id.get(coupon_vals.get('coupon_id')) or card_by_code.get(coupon_vals.get('code'))
+            if not gift_card or not gift_card.exists():
+                continue
 
-                if len([id for id in gift_card.history_ids.mapped('order_id') if id != 0]) == 0:
-                    updated = True
-                    gift_card.source_pos_order_id = self.id
-                    gift_card.history_ids.create({
-                        'card_id': gift_card.id,
-                        'order_model': self._name,
-                        'order_id': self.id,
-                        'description': _('Assigning order %s', self.display_name),
-                        'used': 0,
-                        'issued': gift_card.points,
-                    })
+            updated = False
+            if not gift_card.partner_id and self.partner_id:
+                updated = True
+                gift_card.partner_id = self.partner_id
+                history_vals.append({
+                    'card_id': gift_card.id,
+                    'description': _('Assigning partner %s', self.partner_id.name),
+                    'used': 0,
+                    'issued': gift_card.points,
+                })
 
-                if coupon_vals.get('points') != gift_card.points:
-                    # Coupon vals contains negative points
-                    updated = True
-                    new_value = gift_card.points + coupon_vals['points']
-                    gift_card.points = new_value
-                    gift_card.history_ids.create({
-                        'card_id': gift_card.id,
-                        'order_model': self._name,
-                        'order_id': self.id,
-                        'description': _('Onsite %s', self.display_name),
-                        'used': -coupon_vals['points'] if coupon_vals['points'] < 0 else 0,
-                        'issued': coupon_vals['points'] if coupon_vals['points'] > 0 else 0,
-                    })
+            if not any(h.order_id for h in gift_card.history_ids if h.order_id):
+                updated = True
+                gift_card.source_pos_order_id = self.id
+                history_vals.append({
+                    'card_id': gift_card.id,
+                    'order_model': self._name,
+                    'order_id': self.id,
+                    'description': _('Assigning order %s', self.display_name),
+                    'used': 0,
+                    'issued': gift_card.points,
+                })
 
-                if updated:
-                    updated_gift_cards |= gift_card
+            if coupon_vals.get('points') != gift_card.points:
+                updated = True
+                gift_card.points += coupon_vals['points']
+                history_vals.append({
+                    'card_id': gift_card.id,
+                    'order_model': self._name,
+                    'order_id': self.id,
+                    'description': _('Onsite %s', self.display_name),
+                    'used': -coupon_vals['points'] if coupon_vals['points'] < 0 else 0,
+                    'issued': coupon_vals['points'] if coupon_vals['points'] > 0 else 0,
+                })
 
-                coupon_key_to_remove.append(coupon_id)
+            if updated:
+                updated_gift_cards |= gift_card
+            coupon_key_to_remove.append(coupon_id)
+
+        if history_vals:
+            self.env['loyalty.history'].create(history_vals)
 
         for key in coupon_key_to_remove:
             coupon_data.pop(key, None)
@@ -244,29 +252,59 @@ class PosOrder(models.Model):
         return updated_gift_cards
 
     def _check_existing_loyalty_cards(self, coupon_data):
-        coupon_key_to_modify = []
+        # Batch search for existing loyalty/ewallet cards to avoid N+1 queries
+        partner_program_pairs = []
+        candidate_entries = []
         for coupon_id, coupon_vals in coupon_data.items():
             partner_id = coupon_vals.get('partner_id', False)
             if partner_id:
-                existing_coupon_for_program = self.env['loyalty.card'].search(
-                    [('partner_id', '=', partner_id), ('program_type', 'in', ['loyalty', 'ewallet']), ('program_id', '=', coupon_vals['program_id'])])
-                if existing_coupon_for_program:
-                    coupon_vals['coupon_id'] = existing_coupon_for_program[0].id
-                    coupon_key_to_modify.append([coupon_id, existing_coupon_for_program[0].id])
+                partner_program_pairs.append((partner_id, coupon_vals['program_id']))
+                candidate_entries.append((coupon_id, coupon_vals))
+
+        if not candidate_entries:
+            return
+
+        # Single search for all relevant loyalty/ewallet cards
+        partner_ids = list({p for p, _ in partner_program_pairs})
+        program_ids = list({prog for _, prog in partner_program_pairs})
+        existing_cards = self.env['loyalty.card'].search([
+            ('partner_id', 'in', partner_ids),
+            ('program_type', 'in', ['loyalty', 'ewallet']),
+            ('program_id', 'in', program_ids),
+        ])
+
+        # Index cards by (partner_id, program_id) for O(1) lookup
+        card_index = {}
+        for card in existing_cards:
+            key = (card.partner_id.id, card.program_id.id)
+            if key not in card_index:
+                card_index[key] = card
+
+        coupon_key_to_modify = []
+        for (coupon_id, coupon_vals), (partner_id, program_id) in zip(candidate_entries, partner_program_pairs):
+            card = card_index.get((partner_id, program_id))
+            if card:
+                coupon_vals['coupon_id'] = card.id
+                coupon_key_to_modify.append((coupon_id, card.id))
+
         for old_key, new_key in coupon_key_to_modify:
             coupon_data[new_key] = coupon_data.pop(old_key)
 
     def _remove_duplicate_coupon_data(self, coupon_data):
-        # to prevent duplicates, it is necessary to check if the history line already exists
-        items_to_remove = []
-        for coupon_id, coupon_vals in coupon_data.items():
-            existing_history = self.env['loyalty.history'].search_count([
-                ('card_id.program_id', '=', coupon_vals['program_id']),
-                ('order_model', '=', self._name),
-                ('order_id', '=', self.id),
-            ])
-            if existing_history:
-                items_to_remove.append(coupon_id)
+        # Batch check for existing history lines to avoid N+1 queries
+        if not coupon_data:
+            return
+        program_ids = [v['program_id'] for v in coupon_data.values()]
+        existing_history = self.env['loyalty.history'].sudo().search([
+            ('card_id.program_id', 'in', program_ids),
+            ('order_model', '=', self._name),
+            ('order_id', '=', self.id),
+        ])
+        programs_with_history = set(existing_history.mapped('card_id.program_id.id'))
+        items_to_remove = [
+            coupon_id for coupon_id, coupon_vals in coupon_data.items()
+            if coupon_vals['program_id'] in programs_with_history
+        ]
         for item in items_to_remove:
             coupon_data.pop(item)
 
@@ -277,27 +315,33 @@ class PosOrder(models.Model):
 
     def _add_mail_attachment(self, name, ticket, basic_receipt):
         attachment = super()._add_mail_attachment(name, ticket, basic_receipt)
-        gift_card_programs = self.config_id._get_program_ids().filtered(lambda p: p.program_type == 'gift_card' and
-                                                                                  p.pos_report_print_id)
-        if gift_card_programs:
-            gift_cards = self.env['loyalty.card'].search([('source_pos_order_id', '=', self.id),
-                                                          ('program_id', 'in', gift_card_programs.ids)])
-            if gift_cards:
-                for program in gift_card_programs:
-                    filtered_gift_cards = gift_cards.filtered(lambda gc: gc.program_id == program)
-                    if filtered_gift_cards:
-                        action_report = program.pos_report_print_id
-                        report = action_report._render_qweb_pdf(action_report.report_name, filtered_gift_cards.ids)
-                        filename = name + '.pdf'
-                        gift_card_pdf = self.env['ir.attachment'].create({
-                            'name': filename,
-                            'type': 'binary',
-                            'datas': base64.b64encode(report[0]),
-                            'store_fname': filename,
-                            'res_model': 'pos.order',
-                            'res_id': self.ids[0],
-                            'mimetype': 'application/x-pdf'
-                        })
-                        attachment += [(4, gift_card_pdf.id)]
+        gift_card_programs = self.config_id._get_program_ids().filtered(lambda p: p.program_type == 'gift_card' and p.pos_report_print_id)
+        if not gift_card_programs:
+            return attachment
+
+        gift_cards = self.env['loyalty.card'].search([('source_pos_order_id', '=', self.id), ('program_id', 'in', gift_card_programs.ids)])
+        if not gift_cards:
+            return attachment
+
+        attachments_to_create = []
+        for program in gift_card_programs:
+            filtered_gift_cards = gift_cards.filtered(lambda gc: gc.program_id == program)
+            if filtered_gift_cards:
+                action_report = program.pos_report_print_id
+                report, _ = action_report._render_qweb_pdf(action_report.report_name, filtered_gift_cards.ids)
+                filename = f"{name}.pdf"
+                attachments_to_create.append({
+                    'name': filename,
+                    'type': 'binary',
+                    'datas': base64.b64encode(report),
+                    'store_fname': filename,
+                    'res_model': 'pos.order',
+                    'res_id': self.id,
+                    'mimetype': 'application/x-pdf'
+                })
+
+        if attachments_to_create:
+            created_attachments = self.env['ir.attachment'].create(attachments_to_create)
+            attachment += [(4, att.id) for att in created_attachments]
 
         return attachment

@@ -31,19 +31,33 @@ class LoyaltyRule(models.Model):
 
     @api.depends('product_ids', 'product_category_id', 'product_tag_id', 'product_domain')  # TODO later: product tags
     def _compute_valid_product_ids(self):
-        for key, rules in self.grouped(lambda rule: (
-            tuple(rule.product_ids.ids),
-            rule.product_category_id.id,
-            rule.product_tag_id.id,
-            '' if rule.product_domain in ('[]', "[['sale_ok', '=', True]]") else rule.product_domain,
-        )).items():
-            if any(key):
-                domain = Domain.AND([[('available_in_pos', '=', True)], rules[:1]._get_valid_product_domain()])
-                rules.valid_product_ids = self.env['product.product'].search(domain, order="id")
-                rules.any_product = False
-            else:
-                rules.valid_product_ids = self.env['product.product']
-                rules.any_product = True
+        # Prefetch Many2many relations to avoid N+1 queries during grouping
+        self.mapped('product_ids')
+
+        # Define a helper to generate a unique key based on the rule's product filters
+        def get_filter_key(rule):
+            # Normalizing the domain to avoid redundant searches for equivalent empty domains
+            normalized_domain = rule.product_domain if rule.product_domain not in ('[]', "[['sale_ok', '=', True]]") else False
+            return (
+                tuple(rule.product_ids.ids),
+                rule.product_category_id.id,
+                rule.product_tag_id.id,
+                normalized_domain,
+            )
+
+        for key, rules in self.grouped(get_filter_key).items():
+            if not any(key):
+                # No filters defined: the rule applies to any product
+                rules.update({'valid_product_ids': [(5, 0, 0)], 'any_product': True})
+                continue
+
+            # At least one filter is defined: search for matching products available in POS
+            domain = Domain.AND([[('available_in_pos', '=', True)], rules[0]._get_valid_product_domain()])
+            valid_products = self.env['product.product'].search(domain, order="id")
+            rules.update({
+                'valid_product_ids': [(6, 0, valid_products.ids)],
+                'any_product': False,
+            })
 
     @api.depends('code')
     def _compute_promo_barcode(self):

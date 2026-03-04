@@ -53,11 +53,14 @@ class LoyaltyReward(models.Model):
         fields = set()
         search_domain = [('program_id', 'in', config._get_program_ids().ids)]
         domains = self.search_read(search_domain, fields=['reward_product_domain'], load=False)
-        for domain in filter(lambda d: d['reward_product_domain'] != "null", domains):
-            domain = json.loads(domain['reward_product_domain'])
-            for condition in self._parse_domain(domain).values():
-                field_name, _, _ = condition
-                fields.add(field_name)
+        for domain in domains:
+            domain_str = domain['reward_product_domain']
+            if domain_str == "null":
+                continue
+            domain_data = json.loads(domain_str)
+            for condition in domain_data:
+                if isinstance(condition, (list, tuple)) and len(condition) == 3:
+                    fields.add(condition[0])
         return fields
 
     def _replace_ilike_with_in(self, domain_str):
@@ -88,6 +91,10 @@ class LoyaltyReward(models.Model):
         return parsed_domain
 
     def unlink(self):
-        if len(self) == 1 and self.env['pos.order.line'].sudo().search_count([('reward_id', 'in', self.ids)], limit=1):
-            return self.action_archive()
-        return super().unlink()
+        used_reward_ids = self.env['pos.order.line'].sudo()._read_group(
+            [('reward_id', 'in', self.ids)], ['reward_id'], ['__count']
+        )
+        used_reward_ids = {r[0].id for r in used_reward_ids}
+        to_archive = self.filtered(lambda r: r.id in used_reward_ids)
+        to_archive.action_archive()
+        return super(LoyaltyReward, self - to_archive).unlink()
