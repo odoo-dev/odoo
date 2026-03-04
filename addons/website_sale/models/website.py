@@ -19,12 +19,7 @@ from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.translate import _
 
 from odoo.addons.website_sale import const
-from odoo.addons.website_sale.controllers.cart import (
-    Cart,
-    CART_SESSION_CACHE_KEY,
-    PRICELIST_SESSION_CACHE_KEY,
-    FISCAL_POSITION_SESSION_CACHE_KEY,
-)
+
 
 logger = logging.getLogger(__name__)
 
@@ -772,6 +767,7 @@ class Website(models.Model):
         if not self.env['res.groups']._is_feature_enabled('product.group_product_pricelist'):
             return ProductPricelistSudo  # Skip pricelist computation if pricelists are disabled.
 
+        from odoo.addons.website_sale.controllers.cart import PRICELIST_SESSION_CACHE_KEY
         if pricelist_id := (
                 self.env.context.get('pricelist_id')
                 or (request and request.session.get(PRICELIST_SESSION_CACHE_KEY))
@@ -809,6 +805,7 @@ class Website(models.Model):
         :rtype: account.fiscal.position
         """
         AccountFiscalPositionSudo = self.env['account.fiscal.position'].sudo()
+        from odoo.addons.website_sale.controllers.cart import FISCAL_POSITION_SESSION_CACHE_KEY
 
         if fiscal_position_id := (
                 self.env.context.get('fiscal_position_id')
@@ -849,6 +846,8 @@ class Website(models.Model):
         SaleOrderSudo = self.env['sale.order'].sudo()
         sale_order_sudo = SaleOrderSudo
 
+        from odoo.addons.website_sale.controllers.cart import CART_SESSION_CACHE_KEY
+
         sale_order_id = (
             self.env.context.get('sale_order_id')
             or (request and request.session.get(CART_SESSION_CACHE_KEY))
@@ -860,6 +859,7 @@ class Website(models.Model):
 
         if sale_order_id:
             sale_order_sudo = SaleOrderSudo.browse(sale_order_id)
+            from odoo.addons.website_sale.controllers.cart import Cart
 
             try:
                 # fetch the record field or raise a missingError
