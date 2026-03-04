@@ -284,9 +284,6 @@ class AccountChartTemplate(models.AbstractModel):
         configuration, like:
         - tax tags
         """
-        for prop in list(template_data):
-            if prop.startswith('property_'):
-                template_data.pop(prop)
         if not force_update:
             data.pop('account.reconcile.model', None)
         if 'res.company' in data and not force_update:
@@ -513,15 +510,8 @@ class AccountChartTemplate(models.AbstractModel):
         else:
             fiscal_country = company.account_fiscal_country_id
 
-        # Apply template data to the company
-        filter_properties = lambda key: (
-            (not key.startswith("property_") or key.startswith("property_stock_") or key == "additional_properties")
-            and key != 'name'
-            and key in company._fields
-        )
-
         # Set the currency to the fiscal country's currency
-        vals = {key: val for key, val in template_data.items() if filter_properties(key)}
+        vals = {}
         if not company.root_id._existing_accounting():
             if company.parent_id:
                 vals['currency_id'] = company.parent_id.currency_id.id
@@ -737,7 +727,6 @@ class AccountChartTemplate(models.AbstractModel):
 
     def _post_load_data(self, template_code, company, template_data):
         company = (company or self.env.company)
-        additional_properties = template_data.pop('additional_properties', {})
 
         self._setup_utility_bank_accounts(template_code, company, template_data)
 
@@ -792,25 +781,6 @@ class AccountChartTemplate(models.AbstractModel):
         if not company.parent_id and self.env['account.tax'].search_count([('tax_exigibility', '=', 'on_payment')], limit=1):
             company.tax_exigibility = True
 
-        for field, model in self._get_property_accounts(additional_properties).items():
-            value = template_data.get(field)
-            if value and field in self.env[model]._fields:
-                self.env['ir.default'].set(model, field, self.ref(value).id, company_id=company.id)
-
-        # Set default Income/Expense Accounts on Product Category Property from Company
-        self.env['ir.default'].set(
-            'product.category',
-            'property_account_income_categ_id',
-            company.income_account_id.id,
-            company_id=company.id,
-        )
-        self.env['ir.default'].set(
-            'product.category',
-            'property_account_expense_categ_id',
-            company.expense_account_id.id,
-            company_id=company.id,
-        )
-
         # Set default transfer account on the internal transfer reconciliation model
         reco = self.ref('internal_transfer_reco', raise_if_not_found=False)
         if reco:
@@ -827,14 +797,6 @@ class AccountChartTemplate(models.AbstractModel):
         AccountAccount = self.env['account.account'].with_company(company)
         domain = [*self.env['account.account']._check_company_domain(company.id)]
         return AccountAccount.search([*domain, ('name', 'like', 'Bank Fees')], limit=1) or AccountAccount.search([*domain, ('account_type', '=', 'expense')], limit=1)
-
-    def _get_property_accounts(self, additional_properties):
-        return {
-            **additional_properties,
-            'property_account_receivable_id': 'res.partner',
-            'property_account_payable_id': 'res.partner',
-            'property_stock_journal': 'product.category',
-        }
 
     def _get_chart_template_model_data(self, template_code, model, demo=False):
         """Lightweight version of `_get_chart_template_data` targeting only one model."""

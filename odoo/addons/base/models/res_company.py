@@ -182,6 +182,16 @@ class ResCompany(models.CachedModel):
         for company in self:
             company.root_id.partner_id.color = company.color
 
+    def _compute_from_ir_default(self, fname, default_model, default_fname, condition=None):
+        for company in self:
+            company[fname] = self.env['ir.default'].with_company(company)._get_model_defaults(default_model, condition=condition).get(default_fname)
+
+    def _inverse_to_ir_default(self, fname, default_model, default_fname, condition=None):
+        field = self._fields[fname]
+        for company in self:
+            value = field.convert_to_cache(company[fname], company)
+            self.env['ir.default'].set(default_model, default_fname, value, company_id=company.id, condition=condition)
+
     @api.onchange('state_id')
     def _onchange_state(self):
         if self.state_id.country_id:
