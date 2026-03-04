@@ -11,7 +11,7 @@ export class HrPresenceStatus extends Component {
     };
 
     get classNames() {
-        return `o_employee_availability fa ${this.icon} fa-fw o_button_icon hr_presence align-middle ${this.color}`;
+        return `o_employee_availability oi ${this.iconClass} oi-fw o_button_icon hr_presence align-middle ${this.color}`;
     }
 
     get color() {
@@ -39,14 +39,22 @@ export class HrPresenceStatus extends Component {
         if (this.location) {
             switch (this.location) {
                 case "home":
-                    return "fa-home";
+                    return "home";
                 case "office":
-                    return "fa-building";
+                    return "business";
                 case "other":
-                    return "fa-map-marker";
+                    return "location_on";
             }
         }
-        return `fa-circle${this.value.startsWith("presence_archive") ? "-o" : ""}`;
+        return "circle";
+    }
+
+    get iconClass() {
+        if (this.this.location === "office") {
+            return "oi-filled";
+        } else {
+            return this.value.startsWith("presence_archive") ? "" : "oi-filled";
+        }
     }
 
     get location() {
