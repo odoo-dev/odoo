@@ -6,13 +6,6 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
-    @template('co')
-    def _get_co_template_data(self):
-        return {
-            'property_account_receivable_id': 'co_puc_130500',
-            'property_account_payable_id': 'co_puc_220500',
-        }
-
     @template('co', 'res.company')
     def _get_co_res_company(self):
         return {
@@ -33,6 +26,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'default_cash_difference_expense_account_id': 'co_puc_532000',
                 'expense_account_id': 'co_puc_610000',
                 'income_account_id': 'co_puc_417500',
+                'receivable_account_id': 'co_puc_130500',
+                'payable_account_id': 'co_puc_220500',
                 'account_stock_valuation_id': 'co_puc_140500',
             },
         }

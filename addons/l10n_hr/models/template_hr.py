@@ -10,15 +10,13 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_hr_template_data(self):
         return {
             'code_digits': '6',
-            'use_storno_accounting': True,
-            'property_account_receivable_id': 'hr_120000',
-            'property_account_payable_id': 'hr_220000',
         }
 
     @template('hr', 'res.company')
     def _get_hr_res_company(self):
         return {
             self.env.company.id: {
+                'use_storno_accounting': True,
                 'account_fiscal_country_id': 'base.hr',
                 'bank_account_code_prefix': '100',
                 'cash_account_code_prefix': '102',
@@ -30,5 +28,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'VAT_P_IN_ROC_25',
                 'expense_account_id': 'hr_400000',
                 'income_account_id': 'hr_750000',
+                'receivable_account_id': 'hr_120000',
+                'payable_account_id': 'hr_220000',
             },
         }

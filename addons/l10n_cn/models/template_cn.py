@@ -11,8 +11,6 @@ class AccountChartTemplate(models.AbstractModel):
         return {
             'name': _('Accounting Standards for Small Business Enterprises'),
             'parent': 'cn_common',
-            'property_account_expense_categ_id': 'l10n_cn_account_5401',
-            'property_account_income_categ_id': 'l10n_cn_account_5001',
         }
 
     @template('cn', 'res.company')

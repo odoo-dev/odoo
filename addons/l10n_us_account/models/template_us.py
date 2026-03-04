@@ -6,13 +6,6 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
-    @template('us')
-    def _get_us_template_data(self):
-        return {
-            'property_account_receivable_id': 'account_account_us_receivable',
-            'property_account_payable_id': 'account_account_us_payable',
-        }
-
     @template('us', 'res.company')
     def _get_us_res_company(self):
         # Default to the right state taxes. If the company doesn't have their state
@@ -87,6 +80,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_journal_early_pay_discount_gain_account_id': 'account_account_us_cash_discount_gain',
                 'expense_account_id': 'account_account_us_expense',
                 'income_account_id': 'account_account_us_income',
+                'receivable_account_id': 'account_account_us_receivable',
+                'payable_account_id': 'account_account_us_payable',
                 'account_sale_tax_id': default_sales_tax,
                 'account_purchase_tax_id': default_purchase_tax,
                 'account_stock_valuation_id': 'account_account_us_inventory_valuation',

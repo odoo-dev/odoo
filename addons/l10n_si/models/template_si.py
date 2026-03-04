@@ -9,16 +9,14 @@ class AccountChartTemplate(models.AbstractModel):
     @template('si')
     def _get_si_template_data(self):
         return {
-            'property_account_receivable_id': 'gd_acc_120000',
-            'property_account_payable_id': 'gd_acc_220000',
             'code_digits': '6',
-            'use_storno_accounting': True,
         }
 
     @template('si', 'res.company')
     def _get_si_res_company(self):
         return {
             self.env.company.id: {
+                'use_storno_accounting': True,
                 'account_fiscal_country_id': 'base.si',
                 'bank_account_code_prefix': '110',
                 'cash_account_code_prefix': '100',
@@ -30,5 +28,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'gd_taxp_3',
                 'expense_account_id': 'gd_acc_702000',
                 'income_account_id': 'gd_acc_762000',
+                'receivable_account_id': 'gd_acc_120000',
+                'payable_account_id': 'gd_acc_220000',
             },
         }

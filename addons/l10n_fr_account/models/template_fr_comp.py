@@ -12,9 +12,6 @@ class AccountChartTemplate(models.AbstractModel):
             'parent': 'fr',
             'sequence': 0,
             'code_digits': 6,
-            'property_account_receivable_id': 'fr_pcg_recv',
-            'property_account_payable_id': 'fr_pcg_pay',
-            'property_account_downpayment_categ_id': 'pcg_4191',
         }
 
     @template('fr_comp', 'res.company')
@@ -39,6 +36,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'tva_acq_normale',
                 'expense_account_id': 'pcg_607_account',
                 'income_account_id': 'pcg_707_account',
+                'receivable_account_id': 'fr_pcg_recv',
+                'payable_account_id': 'fr_pcg_pay',
                 'downpayment_account_id': 'pcg_4191',
                 'account_stock_valuation_id': 'pcg_31_account',
             },

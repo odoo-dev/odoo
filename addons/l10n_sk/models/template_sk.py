@@ -10,16 +10,13 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_sk_template_data(self):
         return {
             'code_digits': '6',
-            'use_storno_accounting': True,
-            'property_account_receivable_id': 'chart_sk_311000',
-            'property_account_payable_id': 'chart_sk_321000',
-            'property_stock_valuation_account_id': 'chart_sk_132000',
         }
 
     @template('sk', 'res.company')
     def _get_sk_res_company(self):
         return {
             self.env.company.id: {
+                'use_storno_accounting': True,
                 'account_fiscal_country_id': 'base.sk',
                 'bank_account_code_prefix': '221',
                 'cash_account_code_prefix': '211',
@@ -35,6 +32,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'vs_tuz_23',
                 'expense_account_id': 'chart_sk_504000',
                 'income_account_id': 'chart_sk_604000',
+                'receivable_account_id': 'chart_sk_311000',
+                'payable_account_id': 'chart_sk_321000',
                 'account_stock_valuation_id': 'chart_sk_112000',
             },
         }

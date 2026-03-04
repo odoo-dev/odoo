@@ -9,16 +9,14 @@ class AccountChartTemplate(models.AbstractModel):
     @template('pl')
     def _get_pl_template_data(self):
         return {
-            'property_account_receivable_id': 'chart20000100',
-            'property_account_payable_id': 'chart21000100',
             'code_digits': '8',
-            'use_storno_accounting': True,
         }
 
     @template('pl', 'res.company')
     def _get_pl_res_company(self):
         return {
             self.env.company.id: {
+                'use_storno_accounting': True,
                 'account_fiscal_country_id': 'base.pl',
                 'bank_account_code_prefix': '11.000.00',
                 'cash_account_code_prefix': '12.000.00',
@@ -32,6 +30,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'default_cash_difference_expense_account_id': 'chart75010500',
                 'expense_account_id': 'chart70010100',
                 'income_account_id': 'chart73000100',
+                'receivable_account_id': 'chart20000100',
+                'payable_account_id': 'chart21000100',
                 'account_stock_valuation_id': 'chart33000400',
             },
         }

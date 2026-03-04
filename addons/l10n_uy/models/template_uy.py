@@ -9,8 +9,6 @@ class AccountChartTemplate(models.AbstractModel):
     @template('uy')
     def _get_uy_template_data(self):
         return {
-            'property_account_receivable_id': 'uy_code_11300',
-            'property_account_payable_id': 'uy_code_21100',
             'code_digits': '6',
             'name': _('Uruguayan Generic Chart of Accounts'),
         }
@@ -34,6 +32,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'deferred_revenue_account_id': 'uy_code_21321',
                 'income_account_id': 'uy_code_4102',
                 'expense_account_id': 'uy_code_5100',
+                'receivable_account_id': 'uy_code_11300',
+                'payable_account_id': 'uy_code_21100',
                 'account_stock_valuation_id': 'uy_code_11704',
             },
         }

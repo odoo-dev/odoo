@@ -6,13 +6,6 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
-    @template('it')
-    def _get_it_template_data(self):
-        return {
-            'property_account_receivable_id': '1501',
-            'property_account_payable_id': '2501',
-        }
-
     @template('it', 'res.company')
     def _get_it_res_company(self):
         return {
@@ -30,6 +23,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': '22am',
                 'expense_account_id': '4101',
                 'income_account_id': '3101',
+                'receivable_account_id': '1501',
+                'payable_account_id': '2501',
                 'account_stock_valuation_id': '1404',
             },
         }

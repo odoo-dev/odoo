@@ -9,16 +9,14 @@ class AccountChartTemplate(models.AbstractModel):
     @template('ro')
     def _get_ro_template_data(self):
         return {
-            'property_account_receivable_id': 'ro_pcg_recv',
-            'property_account_payable_id': 'pcg_4011',
             'code_digits': '6',
-            'use_storno_accounting': True,
         }
 
     @template('ro', 'res.company')
     def _get_ro_res_company(self):
         return {
             self.env.company.id: {
+                'use_storno_accounting': True,
                 'account_fiscal_country_id': 'base.ro',
                 'bank_account_code_prefix': '5121',
                 'cash_account_code_prefix': '5311',
@@ -33,6 +31,8 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'tvad_21',
                 'expense_account_id': 'ro_pcg_expense',
                 'income_account_id': 'ro_pcg_sale',
+                'receivable_account_id': 'ro_pcg_recv',
+                'payable_account_id': 'pcg_4011',
                 'account_stock_valuation_id': 'pcg_301',
             },
         }
