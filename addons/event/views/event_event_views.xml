@@ -114,11 +114,11 @@
                                     <field name="mail_count_done"/>
                                     <field name="mail_state" widget="event_icon_selection" string=" " nolabel="1"
                                         options="{
-                                            'error': 'fa fa-exclamation-triangle',
-                                            'sent': 'fa fa-check',
-                                            'scheduled': 'fa fa-hourglass-half',
-                                            'running': 'fa fa-cogs',
-                                            'cancelled': 'fa fa-times-circle'
+                                            'error': ['warning', ''],
+                                            'sent': ['check', ''],
+                                            'scheduled': ['hourglass_bottom', ''],
+                                            'running': ['settings_applications', ''],
+                                            'cancelled': ['cancel', 'oi-filled'],
                                         }"/>
                                 </list>
                             </field>
