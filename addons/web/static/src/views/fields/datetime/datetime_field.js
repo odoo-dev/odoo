@@ -6,20 +6,12 @@ import { _t } from "@web/core/l10n/translation";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 import { ensureArray } from "@web/core/utils/arrays";
-import { exprToBoolean } from "@web/core/utils/strings";
 import { FIELD_WIDTHS } from "@web/views/list/column_width_hook";
 import { formatDate, formatDateTime } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
 import { DateTimeOperation } from "@web/model/relational_model/operation";
 
 const { DateTime } = luxon;
-
-function getFormattedPlaceholder(value, type, options) {
-    if (value instanceof luxon.DateTime) {
-        return type === "date" ? formatDate(value, options) : formatDateTime(value, options);
-    }
-    return value || "";
-}
 
 /**
  * @typedef {luxon.DateTime} DateTime
@@ -442,17 +434,17 @@ export const dateField = {
         },
     ],
     supportedTypes: ["date"],
-    extractProps: ({ options, placeholder, type }, dynamicInfo) => ({
+    extractProps: ({ options, placeholder }, dynamicInfo) => ({
         endDateField: options[END_DATE_FIELD_OPTION],
         maxDate: options.max_date,
         minDate: options.min_date,
-        alwaysRange: exprToBoolean(options.always_range),
-        placeholder: getFormattedPlaceholder(placeholder, type, { numeric: options.numeric }),
+        alwaysRange: Boolean(options.always_range),
+        placeholder,
         required: dynamicInfo.required,
         rounding: options.rounding && parseInt(options.rounding, 10),
         startDateField: options[START_DATE_FIELD_OPTION],
         numeric: options.numeric,
-        warnFuture: exprToBoolean(options.warn_future),
+        warnFuture: Boolean(options.warn_future),
         minPrecision: options.min_precision,
         maxPrecision: options.max_precision,
     }),
@@ -519,25 +511,18 @@ export const dateTimeField = {
             availableTypes: ["datetime", "char"],
         },
     ],
-    extractProps: ({ attrs, options, placeholder, type }, dynamicInfo) => {
-        const showSeconds = exprToBoolean(options.show_seconds ?? false);
-        const showTime = exprToBoolean(options.show_time ?? true);
-        const numeric = exprToBoolean(options.numeric ?? false);
+    extractProps: (fieldInfo, dynamicInfo) => {
+        const showSeconds = fieldInfo.options.show_seconds ?? false;
+        const showTime = fieldInfo.options.show_time ?? true;
         return {
-            ...dateField.extractProps({ attrs, options, placeholder, type }, dynamicInfo),
-            placeholder: getFormattedPlaceholder(placeholder, type, {
-                numeric,
-                showSeconds,
-                showTime,
-            }),
-            numeric,
+            ...dateField.extractProps(fieldInfo, dynamicInfo),
             showSeconds,
             showTime,
         };
     },
     supportedTypes: ["datetime"],
     listViewWidth: ({ options }) => {
-        if (!exprToBoolean(options.show_time ?? true)) {
+        if (!(options.show_time ?? true)) {
             return dateField.listViewWidth({ options });
         }
         return options.numeric ? FIELD_WIDTHS.numeric_datetime : FIELD_WIDTHS.datetime;
