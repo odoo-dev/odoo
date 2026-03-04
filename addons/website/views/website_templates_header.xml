@@ -308,6 +308,19 @@
     </div>
 </template>
 
+<!-- Default - Options -->
+<template id="template_header_default_align_center" inherit_id="website.header_default_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">mx-auto</attribute>
+    </xpath>
+</template>
+<template id="template_header_default_align_right" inherit_id="website.header_default_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">ms-auto</attribute>
+    </xpath>
+</template>
+
+
 <!-- Hamburger -->
 <template id="header_hamburger_content" name="Header Hamburger Content">
     <div t-attf-class="o_header_navs_wrapper d-contents #{_header_template_preview_classes or ''}">
@@ -378,6 +391,59 @@
     </div>
 </template>
 
+<!-- Hamburger - Options -->
+<template id="template_header_hamburger_align_right" inherit_id="website.header_hamburger_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_toggler']" position="attributes">
+        <attribute name="_toggler_class.f">btn order-2 ms-auto p-2</attribute>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_hamburger_right_col')]" position="attributes">
+        <attribute name="class" add="order-0 me-auto" remove="ms-auto" separator=" "/>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_brand']" position="attributes" >
+        <attribute name="_link_class.f">order-1 mx-auto mw-100</attribute>
+    </xpath>
+    <xpath expr="//div[@id='top_menu_collapse']" position="attributes" >
+        <attribute name="class" add="offcanvas-end" remove="offcanvas-start" separator=" "/>
+    </xpath>
+    <xpath expr="//t[@t-set='offcanvas_is_leftside']" position="attributes">
+        <attribute name="t-valuef"/>
+    </xpath>
+    <xpath expr="//t[@t-call='portal.user_dropdown']" position="attributes">
+        <attribute name="_dropdown_menu_class.f"/>
+    </xpath>
+</template>
+<template id="template_header_hamburger_mobile_align_center" inherit_id="website.header_hamburger_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">mt-3 text-center</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_text_element']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-center</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_social_links']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-center</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.submenu']" position="attributes">
+        <attribute name="dropdown_toggler_classes.f"/>
+        <attribute name="dropdown_menu_classes.f" add="text-center" separator=" "/>
+    </xpath>
+</template>
+<template id="template_header_hamburger_mobile_align_right" inherit_id="website.header_hamburger_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">mt-3 text-end</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_text_element']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-end</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_social_links']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-end</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.submenu']" position="attributes">
+        <attribute name="dropdown_toggler_classes.f"/>
+        <attribute name="dropdown_menu_classes.f" add="text-end" separator=" "/>
+    </xpath>
+</template>
+
+
 <!-- Stretch -->
 <template id="header_stretch_content" name="Header Stretch Content">
     <div t-attf-class="o_header_navs_wrapper d-contents #{_header_template_preview_classes or ''}">
@@ -429,6 +495,28 @@
     </div>
 </template>
 
+<!-- Stretch - Options -->
+<template id="template_header_stretch_align_center" inherit_id="website.header_stretch_content" active="False">
+    <xpath expr="//t[@t-call='website.placeholder_header_social_links']" position="inside">
+        <attribute name="_div_class.f">mt-2 border-top pt-2 text-end o_border_contrast</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">d-flex align-items-center mx-auto border-end o_border_contrast</attribute>
+    </xpath>
+</template>
+<template id="template_header_stretch_align_right" inherit_id="website.header_stretch_content" active="False">
+    <xpath expr="//t[@t-call='website.placeholder_header_social_links']" position="inside">
+        <attribute name="_div_class.f">d-flex align-items-center ms-auto o_border_contrast</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">d-flex align-items-center ms-auto border-end o_border_contrast</attribute>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_stretch_elts')]" position="attributes">
+        <attribute name="class" remove="ps-2" separator=" "/>
+    </xpath>
+</template>
+
+
 <!-- Vertical -->
 <template id="header_vertical_content" name="Header Vertical Content">
     <div t-attf-class="o_header_navs_wrapper d-contents #{_header_template_preview_classes or ''}">
@@ -478,6 +566,19 @@
         />
     </div>
 </template>
+
+<!-- Vertical - Options -->
+<template id="template_header_vertical_align_center" inherit_id="website.header_vertical_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav_wrapper']" position="attributes">
+        <attribute name="_wrapper_class.f">justify-content-center</attribute>
+    </xpath>
+</template>
+<template id="template_header_vertical_align_right" inherit_id="website.header_vertical_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav_wrapper']" position="attributes">
+        <attribute name="_wrapper_class.f">justify-content-end</attribute>
+    </xpath>
+</template>
+
 
 <!-- Search -->
 <template id="header_search_content" name="Header Search Content">
@@ -534,6 +635,31 @@
         />
     </div>
 </template>
+
+<!-- Sales Search - Options  -->
+<template id="template_header_search_align_center" inherit_id="website.header_search_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">order-1 justify-content-center mx-auto w-100 px-4</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_brand']" position="attributes">
+        <attribute name="_link_class.f">order-0 me-auto mw-100</attribute>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_search_right_col')]" position="attributes">
+        <attribute name="class" add="order-2" remove="" separator=" "/>
+    </xpath>
+</template>
+<template id="template_header_search_align_right" inherit_id="website.header_search_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">order-2 justify-content-end ms-auto w-100 ps-4</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_brand']" position="inside" >
+        <attribute name="_link_class.f">order-1 mx-auto mw-100</attribute>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_search_right_col')]" position="attributes">
+        <attribute name="class" add="order-0 me-4" remove="ps-3 ms-auto" separator=" "/>
+    </xpath>
+</template>
+
 
 <!-- Sales One -->
 <template id="header_sales_one_content" name="Header Sales One Content">
@@ -595,6 +721,23 @@
         />
     </div>
 </template>
+
+<!-- Sales One - Options -->
+<template id="template_header_sales_one_align_center" inherit_id="website.header_sales_one_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">flex-grow-1 justify-content-end pe-2</attribute>
+    </xpath>
+</template>
+
+<template id="template_header_sales_one_align_right" inherit_id="website.header_sales_one_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">flex-grow-1 justify-content-end pe-2</attribute>
+    </xpath>
+    <xpath expr="//ul[hasclass('o_header_sales_one_right_col')]" position="attributes">
+        <attribute name="class" remove="flex-grow-1" separator=" "/>
+    </xpath>
+</template>
+
 
 <!-- Sales Two -->
 <template id="header_sales_two_content" name="Header Sales Two Content">
@@ -671,6 +814,19 @@
     </div>
 </template>
 
+<!-- Sales Two Options -->
+<template id="template_header_sales_two_align_center" inherit_id="website.header_sales_two_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">mx-auto p-2</attribute>
+    </xpath>
+</template>
+<template id="template_header_sales_two_align_right" inherit_id="website.header_sales_two_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">ms-auto py-2 pe-2</attribute>
+    </xpath>
+</template>
+
+
 <!-- Sales Three -->
 <template id="header_sales_three_content" name="Header Sales Three Content">
     <div t-attf-class="o_header_navs_wrapper d-contents #{_header_template_preview_classes or ''}">
@@ -737,6 +893,20 @@
         />
     </div>
 </template>
+
+<!-- Sales Three - Options -->
+<template id="template_header_sales_three_align_center" inherit_id="website.header_sales_three_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">justify-content-center</attribute>
+    </xpath>
+</template>
+
+<template id="template_header_sales_three_align_right" inherit_id="website.header_sales_three_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">justify-content-end</attribute>
+    </xpath>
+</template>
+
 
 <!-- Sales Four -->
 <template id="header_sales_four_content" name="Header Sales Four Content">
@@ -809,6 +979,20 @@
     </div>
 </template>
 
+<!-- Sales Four Options -->
+<template id="template_header_sales_four_align_center" inherit_id="website.header_sales_four_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">align-items-center mx-auto px-3</attribute>
+    </xpath>
+</template>
+
+<template id="template_header_sales_four_align_right" inherit_id="website.header_sales_four_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">align-items-center ms-auto pe-3</attribute>
+    </xpath>
+</template>
+
+
 <!-- Boxed -->
 <template id="header_boxed_content" name="Header Boxed Content">
     <div t-attf-class="o_header_navs_wrapper #{header_content_width} py-3 px-0 #{_header_template_preview_classes or ''}">
@@ -856,6 +1040,19 @@
         />
     </div>
 </template>
+
+<!-- Boxed Options -->
+<template id="template_header_boxed_align_center" inherit_id="website.header_boxed_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">mx-auto</attribute>
+    </xpath>
+</template>
+<template id="template_header_boxed_align_right" inherit_id="website.header_boxed_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">ms-auto</attribute>
+    </xpath>
+</template>
+
 
 <!-- Sidebar -->
 <template id="header_sidebar_content" name="Header Sidebar Content">
@@ -927,6 +1124,43 @@
            _navbar_classes="_header_template_preview_classes or ''"
         />
     </div>
+</template>
+
+<!-- Sidebar Options -->
+<template id="template_header_sidebar_position_right" inherit_id="website.header_sidebar_content" active="False">
+    <xpath expr="//t[@t-set='offcanvas_is_leftside']" position="attributes">
+        <attribute name="t-valuef"/>
+    </xpath>
+</template>
+<template id="template_header_sidebar_align_center" inherit_id="website.header_sidebar_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">text-center</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_text_element']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-center</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_social_links']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-center</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.submenu']" position="attributes">
+        <attribute name="dropdown_toggler_classes.f"/>
+        <attribute name="dropdown_menu_classes.f" add="text-center" separator=" "/>
+    </xpath>
+</template>
+<template id="template_header_sidebar_align_right" inherit_id="website.header_sidebar_content" active="False">
+    <xpath expr="//t[@t-call='website.navbar_nav']" position="attributes">
+        <attribute name="_nav_class.f">text-end</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_text_element']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-end</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.placeholder_header_social_links']" position="attributes">
+        <attribute name="_div_class.f">mt-2 text-end</attribute>
+    </xpath>
+    <xpath expr="//t[@t-call='website.submenu']" position="attributes">
+        <attribute name="dropdown_toggler_classes.f"/>
+        <attribute name="dropdown_menu_classes.f" add="text-end" separator=" "/>
+    </xpath>
 </template>
 
 
@@ -1195,6 +1429,18 @@
      OPTIONS DESKTOP (Aesthetic/Design)
      ============================================================ -->
 
+<!-- Additional colors option -->
+<template id="template_header_additional_color_primary" inherit_id="website.layout" active="False">
+    <xpath expr="//t[@t-set='primary_additional_colors']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+<template id="template_header_additional_color_secondary" inherit_id="website.layout" active="False">
+    <xpath expr="//t[@t-set='secondary_additional_colors']" position="attributes">
+        <attribute name="t-value">True</attribute>
+    </xpath>
+</template>
+
 <!-- Enforce no-background -->
 <template id="template_header_navlink_no_background" inherit_id="website.layout" active="False">
     <xpath expr="//header" position="attributes">
@@ -1202,12 +1448,14 @@
     </xpath>
 </template>
 
+<!-- Pill Style -->
 <template id="header_navbar_pills_style" inherit_id="website.navbar_nav" name="Navbar Links Style" active="False">
     <xpath expr="//ul[contains(@t-attf-class, 'top_menu')]" position="before">
         <t t-set="_navbar_pills" t-value="True"/>
     </xpath>
 </template>
 
+<!-- Hoverable Dropdown -->
 <template id="header_hoverable_dropdown" inherit_id="website.layout" name="Header Hoverable Dropdown" active="False">
     <xpath expr="//header" position="attributes">
         <attribute name="t-attf-class" add="o_hoverable_dropdown" separator=" "/>
@@ -1215,7 +1463,7 @@
 </template>
 
 <!-- ============================================================
-     OPTIONS MOBILE (Aesthetic/Design)
+     OPTIONS MOBILE
      ============================================================ -->
 <template id="template_header_mobile_position_left" inherit_id="website.template_header_mobile" active="False">
     <xpath expr="//div[@id='top_menu_collapse_mobile']" position="before">
