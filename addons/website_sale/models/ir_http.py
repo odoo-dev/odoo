@@ -2,13 +2,11 @@
 
 from odoo import api, models
 from odoo.http import request
-from odoo.addons.website_sale.models.website import (
+from odoo.addons.website_sale.controllers.cart import (
     CART_SESSION_CACHE_KEY,
     FISCAL_POSITION_SESSION_CACHE_KEY,
     PRICELIST_SESSION_CACHE_KEY,
 )
-
-
 
 
 class IrHttp(models.AbstractModel):

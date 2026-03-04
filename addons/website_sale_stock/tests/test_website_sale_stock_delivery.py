@@ -5,10 +5,9 @@ from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 
 from odoo.addons.payment.tests.common import PaymentCommon
-from odoo.addons.website_sale.controllers.cart import Cart
+from odoo.addons.website_sale.controllers.cart import Cart, CART_SESSION_CACHE_KEY
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
-from odoo.addons.website_sale.models.website import CART_SESSION_CACHE_KEY
 
 
 @tagged('post_install', '-at_install')

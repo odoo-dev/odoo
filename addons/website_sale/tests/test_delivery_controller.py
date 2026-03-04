@@ -5,9 +5,9 @@ from odoo.fields import Command
 from odoo.tests import tagged
 
 from odoo.addons.payment.tests.common import PaymentCommon
+from odoo.addons.website_sale.controllers.cart import CART_SESSION_CACHE_KEY
 from odoo.addons.website_sale.controllers.delivery import Delivery
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
-from odoo.addons.website_sale.models.website import CART_SESSION_CACHE_KEY
 
 
 @tagged('post_install', '-at_install')

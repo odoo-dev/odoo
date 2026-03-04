@@ -11,7 +11,7 @@ from odoo.fields import Command, Domain
 from odoo.http import request
 from odoo.tools import SQL, float_is_zero, float_round
 
-from odoo.addons.website_sale.models.website import (
+from odoo.addons.website_sale.controllers.cart import (
     FISCAL_POSITION_SESSION_CACHE_KEY,
     PRICELIST_SELECTED_SESSION_CACHE_KEY,
     PRICELIST_SESSION_CACHE_KEY,

@@ -25,11 +25,11 @@ from odoo.addons.sale.controllers import portal as sale_portal
 from odoo.addons.website.controllers.main import QueryURL
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website_sale.const import SHOP_PATH
-from odoo.addons.website_sale.models.website import (
+from odoo.addons.website_sale.controllers.cart import (
+    Cart,
     PRICELIST_SELECTED_SESSION_CACHE_KEY,
     CART_SESSION_CACHE_KEY,
     PRICELIST_SESSION_CACHE_KEY,
-    FISCAL_POSITION_SESSION_CACHE_KEY,
 )
 
 _lt = LazyTranslate(__name__)

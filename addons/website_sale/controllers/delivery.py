@@ -6,7 +6,7 @@ from odoo.http import request, route
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.website_sale.controllers.main import WebsiteSale
-from odoo.addons.website_sale.models.website import CART_SESSION_CACHE_KEY
+from odoo.addons.website_sale.controllers.cart import CART_SESSION_CACHE_KEY
 
 
 class Delivery(WebsiteSale):

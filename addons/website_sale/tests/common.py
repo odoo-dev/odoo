@@ -10,7 +10,7 @@ from odoo.fields import Command
 
 from odoo.addons.delivery.tests.common import DeliveryCommon
 from odoo.addons.http_routing.tests.common import MockRequest as websiteMockRequest
-from odoo.addons.website_sale.models.website import (
+from odoo.addons.website_sale.controllers.cart import (
     CART_SESSION_CACHE_KEY,
     FISCAL_POSITION_SESSION_CACHE_KEY,
     PRICELIST_SELECTED_SESSION_CACHE_KEY,

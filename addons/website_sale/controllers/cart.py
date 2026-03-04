@@ -14,9 +14,10 @@ from odoo.addons.payment.controllers.portal import PaymentPortal
 from odoo.addons.sale.controllers.portal import CustomerPortal
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 
-from odoo.addons.website_sale.models.website import (
-    CART_SESSION_CACHE_KEY,
-)
+CART_SESSION_CACHE_KEY = 'sale_order_id'
+FISCAL_POSITION_SESSION_CACHE_KEY = 'fiscal_position_id'
+PRICELIST_SESSION_CACHE_KEY = 'website_sale_current_pl'
+PRICELIST_SELECTED_SESSION_CACHE_KEY = 'website_sale_selected_pl_id'
 
 
 class Cart(PaymentPortal):
@@ -41,7 +42,7 @@ class Cart(PaymentPortal):
             website_sale_cart_quantity=sale_order_sudo.cart_quantity,
         )
 
-    def _sale_reset():
+    def _sale_reset(cls):
         if request:
             request.session.pop(CART_SESSION_CACHE_KEY, None)
             request.session.pop('website_sale_cart_quantity', None)

@@ -10,24 +10,23 @@ from lxml import etree
 from werkzeug import urls
 from werkzeug.exceptions import NotFound
 
-from odoo import SUPERUSER_ID, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import AccessError, MissingError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools import file_open, ormcache
 from odoo.tools.json import scriptsafe as json_scriptsafe
-from odoo.tools.translate import LazyTranslate, _
+from odoo.tools.translate import _
 
 from odoo.addons.website_sale import const
+from odoo.addons.website_sale.controllers.cart import (
+    Cart,
+    CART_SESSION_CACHE_KEY,
+    PRICELIST_SESSION_CACHE_KEY,
+    FISCAL_POSITION_SESSION_CACHE_KEY,
+)
 
 logger = logging.getLogger(__name__)
-_lt = LazyTranslate(__name__)
-
-
-CART_SESSION_CACHE_KEY = 'sale_order_id'
-FISCAL_POSITION_SESSION_CACHE_KEY = 'fiscal_position_id'
-PRICELIST_SESSION_CACHE_KEY = 'website_sale_current_pl'
-PRICELIST_SELECTED_SESSION_CACHE_KEY = 'website_sale_selected_pl_id'
 
 
 class Website(models.Model):
