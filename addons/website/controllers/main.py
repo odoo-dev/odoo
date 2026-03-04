@@ -499,11 +499,11 @@ class Website(Home):
 
     @http.route('/website/get_current_currency', type='jsonrpc', auth="public", website=True, readonly=True)
     def get_current_currency(self, **kwargs):
-        website = request.env['website'].get_current_website()
+        currency_id = request.env['website'].get_current_website().company_id.currency_id
         return {
-            'id': website.company_id.currency_id.id,
-            'symbol': website.company_id.currency_id.symbol,
-            'position': website.company_id.currency_id.position,
+            'id': currency_id.id,
+            'symbol': currency_id.symbol,
+            'position': currency_id.position,
         }
 
     @http.route("/website/get_new_pages", type="jsonrpc", auth="user")
@@ -790,9 +790,9 @@ class Website(Home):
 
         template = template and dict(template=template) or {}
         if website_id:
-            Website = request.env['website'].with_context(website_id=self._force_website(website_id))
+            website = request.env['website'].with_context(website_id=self._force_website(website_id))
 
-        page = Website.new_page(
+        page = website.new_page(
             path,
             add_menu=add_menu,
             sections_arch=kwargs.get('sections_arch'),
