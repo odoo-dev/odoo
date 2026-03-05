@@ -249,6 +249,7 @@ class Cart(PaymentPortal):
         order_sudo = website.current_session_sale_order_id.sudo()
         values['website_sale.cart_lines'] = IrUiView._render_template(
             'website_sale.cart_lines', {
+                'website': website,
                 'website_sale_order': order_sudo,
                 'date': fields.Date.today(),
                 'suggested_products': order_sudo._cart_accessories(),
@@ -256,6 +257,7 @@ class Cart(PaymentPortal):
         )
         values['website_sale.shorter_cart_summary'] = website._render_template(
             'website_sale.shorter_cart_summary', {
+                'website': website,
                 'website_sale_order': order_sudo,
                 'show_shorter_cart_summary': True,
                 **self._get_express_shop_payment_values(order_sudo),
@@ -264,6 +266,7 @@ class Cart(PaymentPortal):
         )
         values['website_sale.quick_reorder_history'] = website._render_template(
             'website_sale.quick_reorder_history', {
+                'website': website,
                 'website_sale_order': order_sudo,
                 **self._prepare_order_history(),
             }
@@ -343,6 +346,7 @@ class Cart(PaymentPortal):
         ) or 0.0
         values['website_sale.cart_lines'] = IrUiView._render_template(
             'website_sale.cart_lines', {
+                'website': website,
                 'website_sale_order': order_sudo,
                 'date': fields.Date.today(),
                 'suggested_products': order_sudo._cart_accessories(),
@@ -351,12 +355,14 @@ class Cart(PaymentPortal):
         )
         values['website_sale.total'] = IrUiView._render_template(
             'website_sale.total', {
+                'website': website,
                 'website_sale_order': order_sudo,
                 'is_view_active': website.is_view_active,
             }
         )
         values['website_sale.quick_reorder_history'] = IrUiView._render_template(
             'website_sale.quick_reorder_history', {
+                'website': website,
                 'website_sale_order': order_sudo,
                 'is_view_active': website.is_view_active,
                 **self._prepare_order_history(),
