@@ -1397,6 +1397,11 @@ def preload_registries(dbnames):
                     with registry.cursor() as cr:
                         env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
                         env['ir.qweb']._pregenerate_assets_bundles()
+                        if os.environ.get('ODOO_LOG_SLOW_QUERIES'):
+                            # disable autovacuum for all tables to avoid random execution times during tests
+                            cr.execute("SELECT tablename FROM pg_tables WHERE schemaname='public'")
+                            for tablename, in cr.fetchall():
+                                cr.execute("ALTER TABLE %s SET (autovacuum_enabled = false)" % tablename)
                 result = loader.run_suite(post_install_suite, global_report=registry._assertion_report)
                 registry._assertion_report.update(result)
                 _logger.info("%d post-tests in %.2fs, %s queries",

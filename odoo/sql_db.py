@@ -348,7 +348,10 @@ class Cursor(BaseCursor):
             delay = real_time() - start
             if _logger.isEnabledFor(logging.DEBUG):
                 _logger.debug("[%.3f ms] query: %s", 1000 * delay, self._format(query, params))
-
+            elif os.environ.get('ODOO_LOG_SLOW_QUERIES'):
+                log_delay = float(os.environ.get('ODOO_LOG_SLOW_QUERIES'))
+                if delay >= log_delay:
+                    _logger.warning("[%.3f ms] SLOW QUERY: %s", 1000 * delay, self._format(query, params))
         # simple query count is always computed
         self.sql_log_count += 1
         sql_counter += 1
