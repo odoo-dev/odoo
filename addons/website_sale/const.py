@@ -436,3 +436,8 @@ GMC_SUPPORTED_UOM = {
 GMC_BASE_MEASURE = re.compile(r'(?P<base_count>\d+)?\s*(?P<base_unit>[a-z]+)')
 
 SHOP_PATH = '/shop'
+
+CART_SESSION_CACHE_KEY = 'sale_order_id'
+FISCAL_POSITION_SESSION_CACHE_KEY = 'fiscal_position_id'
+PRICELIST_SESSION_CACHE_KEY = 'website_sale_current_pl'
+PRICELIST_SELECTED_SESSION_CACHE_KEY = 'website_sale_selected_pl_id'

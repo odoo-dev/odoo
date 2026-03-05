@@ -25,12 +25,11 @@ from odoo.addons.sale.controllers import portal as sale_portal
 from odoo.addons.website.controllers.main import QueryURL
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo.addons.website_sale.const import SHOP_PATH
-from odoo.addons.website_sale.controllers.cart import (
-    Cart,
-    PRICELIST_SELECTED_SESSION_CACHE_KEY,
-    CART_SESSION_CACHE_KEY,
-    PRICELIST_SESSION_CACHE_KEY,
-)
+
+CART_SESSION_CACHE_KEY = 'sale_order_id'
+FISCAL_POSITION_SESSION_CACHE_KEY = 'fiscal_position_id'
+PRICELIST_SESSION_CACHE_KEY = 'website_sale_current_pl'
+PRICELIST_SELECTED_SESSION_CACHE_KEY = 'website_sale_selected_pl_id'
 
 _lt = LazyTranslate(__name__)
 
@@ -1665,6 +1664,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             order_sudo._validate_order()
 
         # clean context and session, then redirect to the confirmation page
+        from .cart import Cart
         Cart._sale_reset()
         if tx_sudo and tx_sudo.state == 'draft':
             return request.redirect(self._get_shop_path())

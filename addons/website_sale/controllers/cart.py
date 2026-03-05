@@ -12,13 +12,13 @@ from odoo.tools.translate import _
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.controllers.portal import PaymentPortal
 from odoo.addons.sale.controllers.portal import CustomerPortal
-from odoo.addons.website_sale.controllers.main import WebsiteSale
-
-CART_SESSION_CACHE_KEY = 'sale_order_id'
-FISCAL_POSITION_SESSION_CACHE_KEY = 'fiscal_position_id'
-PRICELIST_SESSION_CACHE_KEY = 'website_sale_current_pl'
-PRICELIST_SELECTED_SESSION_CACHE_KEY = 'website_sale_selected_pl_id'
-
+from odoo.addons.website_sale.controllers.main import (
+    WebsiteSale,
+    CART_SESSION_CACHE_KEY,
+    FISCAL_POSITION_SESSION_CACHE_KEY,
+    PRICELIST_SESSION_CACHE_KEY,
+    PRICELIST_SELECTED_SESSION_CACHE_KEY,
+)
 
 class Cart(PaymentPortal):
 

@@ -8,7 +8,7 @@ from odoo.http import request, route
 from odoo.addons.base.models.ir_qweb_fields import nl2br_enclose
 from odoo.addons.website.controllers import main
 from odoo.addons.website.controllers.form import WebsiteForm
-from odoo.addons.website_sale.controllers.cart import (
+from .main import (
     FISCAL_POSITION_SESSION_CACHE_KEY,
     PRICELIST_SELECTED_SESSION_CACHE_KEY,
     PRICELIST_SESSION_CACHE_KEY,

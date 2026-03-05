@@ -4,7 +4,7 @@ from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.http import request, route
 
 from odoo.addons.sale.controllers import portal as sale_portal
-from odoo.addons.website_sale.controllers.cart import Cart
+from .cart import Cart
 
 
 class CustomerPortal(sale_portal.CustomerPortal):

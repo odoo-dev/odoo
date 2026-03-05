@@ -2,7 +2,7 @@
 
 from odoo import api, models
 from odoo.http import request
-from odoo.addons.website_sale.controllers.cart import (
+from odoo.addons.website_sale.controllers.main import (
     CART_SESSION_CACHE_KEY,
     FISCAL_POSITION_SESSION_CACHE_KEY,
     PRICELIST_SESSION_CACHE_KEY,

@@ -11,12 +11,6 @@ from odoo.fields import Command, Domain
 from odoo.http import request
 from odoo.tools import SQL, float_is_zero, float_round
 
-from odoo.addons.website_sale.controllers.cart import (
-    FISCAL_POSITION_SESSION_CACHE_KEY,
-    PRICELIST_SELECTED_SESSION_CACHE_KEY,
-    PRICELIST_SESSION_CACHE_KEY,
-)
-
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -312,11 +306,13 @@ class SaleOrder(models.Model):
             self._recompute_taxes()
 
             new_fpos = self.fiscal_position_id
+            from odoo.addons.website_sale.controllers.main import FISCAL_POSITION_SESSION_CACHE_KEY
             request.session[FISCAL_POSITION_SESSION_CACHE_KEY] = new_fpos.id
             website = self.env['website'].get_current_website()
             website.invalidate_model(['current_session_fiscal_position_id'])
 
         #If user explicitely selected a valid pricelist, we don't want to change it
+        from odoo.addons.website_sale.controllers.main import PRICELIST_SELECTED_SESSION_CACHE_KEY
         if selected_pricelist_id := request.session.get(PRICELIST_SELECTED_SESSION_CACHE_KEY):
             selected_pricelist = (
                 self.env['product.pricelist'].browse(selected_pricelist_id).exists()
@@ -338,6 +334,7 @@ class SaleOrder(models.Model):
             self._recompute_prices()
 
             new_pricelist = self.pricelist_id
+            from odoo.addons.website_sale.controllers.main import PRICELIST_SESSION_CACHE_KEY
             request.session[PRICELIST_SESSION_CACHE_KEY] = new_pricelist.id
             website = self.env['website'].get_current_website()
             website.invalidate_model(['current_session_pricelist_id'])
