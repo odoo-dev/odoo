@@ -53,3 +53,20 @@ class TestAccountMoveDE(AccountTestInvoicingCommon):
         self.assertRecordValues(move.line_ids, expected_lines_vals)
         move.action_post()
         self.assertRecordValues(move.line_ids, expected_lines_vals)
+
+    def test_product_standard_price_multicompany_with_taxes(self):
+        """Test updating standard price on storable product with taxes from multiple companies."""
+        product = self.env['product.product'].create({
+            'name': 'Test Product',
+            'type': 'consu',
+            'is_storable': True,
+            'categ_id': self.env.ref('product.product_category_all').id,
+            'taxes_id': [(6, 0, [self.company_data['default_tax_sale'].id])],
+        })
+        product.quantity_svl = 10.0
+        product.standard_price = 100
+        specification = {
+            'standard_price': {},
+            'taxes_id': {'fields': {'name': {}}},
+        }
+        product.web_read(specification)
