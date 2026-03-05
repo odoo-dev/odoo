@@ -127,7 +127,7 @@ def iap_jsonrpc(url, method='call', params=None, timeout=15):
                 credit_error.data = response['error']['data']
                 raise credit_error
             else:
-                raise IAPServerError("An error occurred on the IAP server")
+                raise IAPServerError(f"An error occurred on the IAP server: message: {response['error']['data'].get('message')}")
         return response.get('result')
     except requests.exceptions.Timeout:
         _logger.warning("iap jsonrpc %s timed out", url)
@@ -137,5 +137,5 @@ def iap_jsonrpc(url, method='call', params=None, timeout=15):
     except (requests.exceptions.RequestException, IAPServerError) as e:
         _logger.warning("iap jsonrpc %s failed, %s: %s", url, e.__class__.__name__, exception_to_unicode(e))
         raise exceptions.AccessError(
-            _("An error occurred while reaching %s. Please contact Odoo support if this error persists.", url)
+            _(f"An error occurred while reaching {url}. Please contact Odoo support if this error persists.\n{e.args[0]}")
         )
