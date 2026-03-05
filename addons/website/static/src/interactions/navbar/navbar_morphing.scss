@@ -1,0 +1,73 @@
+
+.dropdown-toggle.o_enforced_active {
+    // Enforce active color regardless by the actual state
+    color: var(--navbar-active-color) !important;
+}
+
+.o_navbar_morphing_container {
+    position: fixed;
+    z-index: 1050;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 50px 100px -20px rgba(50,50,93,.25), 0 30px 60px -30px rgba(0,0,0,.3);
+    overflow: hidden;
+    pointer-events: auto;
+    top: 0;
+    left: 0;
+
+    /* Ensure it starts at 0 if you want the grow effect on first open */
+    width: 0;
+    height: 0;
+    transform: translateX(-50%) translate3d(
+        var(--NavBarMorphing-left),
+        var(--NavBarMorphing-top),
+        0
+    );
+
+    &.o_navbar_morphing_container_animated {
+        transition:
+                transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+                width 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+                height 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .o_navbar_morphing_content_wrapper {
+        transition: opacity 0.2s ease-in-out;
+        /* Prevent content from squishing during width transition */
+        width: max-content;
+        /* Suppress any max-height / overflow the website CSS may apply to
+           .dropdown-menu — the outer container owns clipping and scrolling. */
+        max-height: none !important;
+        overflow: hidden !important;
+
+        &.dropdown-menu {
+            background: none;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            margin: 0 !important;
+
+            &.o_mega_menu {
+                padding-top: var(--dropdown-padding-y);
+            }
+        }
+    }
+
+    /* IMPORTANT: Ensure original menu items are still display: block
+       inside our shared container even if hidden in the navbar */
+    .o_navbar_morphing_content_wrapper .dropdown-item {
+        display: block;
+        width: 100%;
+    }
+
+    /* Back header shown when navigating into a nested submenu */
+    .o_navbar_morphing_back_header {
+        padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+        color: var(--dropdown-link-color);
+    }
+
+    .o_navbar_morphing_back_btn:hover .oi {
+        transform: translatex(-.15em);
+    }
+}
+

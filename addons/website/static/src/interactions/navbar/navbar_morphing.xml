@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website.navbar_morphing.wrapper">
+    <div class="o_navbar_morphing_container d-none"/>
+</t>
+
+<t t-name="website.navbar_morphing.submenu">
+    <div class="o_navbar_morphing_content_wrapper dropdown-menu show"/>
+</t>
+
+<!--
+    Rendered at the top of a content wrapper when navigating into a nested submenu.
+    Contains a back button (chevron-left) and the submenu title.
+-->
+<t t-name="website.navbar_morphing.submenu_back_header">
+    <div class="o_navbar_morphing_back_header">
+        <button
+            class="o_navbar_morphing_back_btn btn p-0 opacity-trigger-hover d-flex align-items-center gap-1"
+            role="button"
+            aria-label="Go back"
+        >
+            <i class="oi oi-chevron-left opacity-25 opacity-100-hover transition-base ms-n1"/>
+            <span class="o_navbar_morphing_back_title fw-semibold small"/>
+        </button>
+    </div>
+</t>
+
+<t t-name="website.navbar_morphing.submenu_divider">
+    <div class="dropdown-divider"/>
+</t>
+
+</templates>

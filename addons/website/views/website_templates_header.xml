@@ -139,7 +139,7 @@
                 t-att-data-bs-display="'static' if submenu.is_mega_menu else None"
                 data-bs-auto-close="outside"
                 role="menuitem"
-        >
+                >
             <span t-field="submenu.name"/>
         </a>
         <!-- Avoid rendering the mega menu element twice (Desktop + Mobile) -->
@@ -438,6 +438,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_default"
            _navbar_classes="_header_template_preview_classes or ''"
         />
     </div>
@@ -520,6 +521,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_hamburger"
            _txt_elt_content.f="phone_mail"
            _navbar_classes="_header_template_preview_classes or ''"
         />
@@ -625,6 +627,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_stretch"
            _navbar_classes="_header_template_preview_classes or ''"
         />
     </div>
@@ -697,6 +700,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_vertical"
            _navbar_classes="_header_template_preview_classes or ''"
         />
     </div>
@@ -765,6 +769,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_search"
            _txt_elt_content.f="sentence"
            _navbar_classes="_header_template_preview_classes or ''"
         />
@@ -850,6 +855,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_sales_one"
            _txt_elt_content.f="list"
            _extra_navbar_classes.f="o_header_force_no_radius"
            _navbar_classes="_header_template_preview_classes or ''"
@@ -942,6 +948,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_sales_two"
            _txt_elt_content.f="sentence"
            _extra_navbar_classes.f="o_header_force_no_radius"
            _navbar_classes="_header_template_preview_classes or ''"
@@ -1022,6 +1029,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_sales_three"
            _txt_elt_content.f="list"
            _extra_navbar_classes.f="o_header_force_no_radius"
            _navbar_classes="_header_template_preview_classes or ''"
@@ -1107,6 +1115,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_sales_four"
            _txt_elt_content.f="mail"
            _extra_navbar_classes.f="o_header_force_no_radius"
            _navbar_classes="_header_template_preview_classes or ''"
@@ -1170,6 +1179,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_boxed"
            _extra_navbar_classes.f="o_full_border mx-1 rounded-pill px-3"
            _navbar_classes="_header_template_preview_classes or ''"
         />
@@ -1255,6 +1265,7 @@
             </div>
         </t>
         <t t-call="website.template_header_mobile"
+           _offcanvas_target_id.f="o_top_menu_mobile_sidebar"
            _txt_elt_content.f="phone_mail"
            _navbar_classes="_header_template_preview_classes or ''"
         />
@@ -1436,14 +1447,14 @@
                     class="nav-link btn p-2 o_not_editable"
                     type="button"
                     data-bs-toggle="offcanvas"
-                    data-bs-target="#top_menu_collapse_mobile"
+                    t-attf-data-bs-target="##{_offcanvas_target_id}"
                     aria-controls="top_menu_collapse_mobile"
                     aria-expanded="false"
                     aria-label="Toggle navigation"
             >
                 <span class="navbar-toggler-icon"/>
             </button>
-            <div t-attf-class="offcanvas #{_side or 'offcanvas-end'} o_navbar_mobile" id="top_menu_collapse_mobile">
+            <div t-attf-class="offcanvas #{_side or 'offcanvas-end'} o_navbar_mobile" t-att-id="_offcanvas_target_id">
                 <div class="offcanvas-header justify-content-end o_not_editable">
                     <button type="button" class="nav-link btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
                 </div>
