@@ -2,13 +2,46 @@
 <templates xml:space="preserve">
     <t t-inherit="portal.Chatter" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('o-mail-Chatter-top')]/*[1]" position="before">
-            <div t-if="env.displayRating and ratingStats and ratingStats.total" class="mt-0 mb-2">
+            <div t-if="env.displayRating" class="mt-0 mb-3">
                 <t t-call="portal_rating.rating_card">
                     <t t-set="two_columns" t-value="this.props.twoColumns"/>
                     <t t-set="rating_stats" t-value="this.ratingStats"/>
                     <t t-set="selected_rating" t-value="this.state.thread?.selectedRating"/>
                 </t>
             </div>
+            <div t-if="env.displayRating" class="mb-4 mb-lg-0">
+                <t t-call="portal_rating.actions"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o-mail-Chatter')]" position="inside">
+            <div t-if="env.displayRating and state.showReviewComposer"
+                 class="o_review_composer_modal"
+                 t-on-click="onCloseReviewComposer">
+                <div class="modal-backdrop show"/>
+                <div class="modal d-block" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" t-on-click.stop="">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Write a review</h5>
+                                <button type="button" class="btn-close" aria-label="Close" t-on-click="onCloseReviewComposer"/>
+                            </div>
+                            <div class="modal-body">
+                                <Composer
+                                    t-if="state.thread"
+                                    composer="state.thread.composer"
+                                    mode="'extended'"
+                                    onPostCallback.bind="onReviewPostCallback"
+                                    t-key="'review-' + props.threadId"
+                                    type="'message'"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o-mail-Chatter-content')]/*[1]" position="before">
+            <p t-if="!ratingStats" class="fs-4 text-muted text-center align-content-center h-100">No reviews yet</p>
         </xpath>
     </t>
 </templates>

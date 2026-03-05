@@ -26,6 +26,7 @@
             <div id="wrap" class="o_wsale_product_page">
                 <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_website_sale_product_1" data-editor-message.translate="DROP BUILDING BLOCKS HERE TO MAKE THEM AVAILABLE ACROSS ALL PRODUCTS"/>
                 <section id="product_detail"
+                data-anchor="true"
                          t-attf-class="oe_website_sale mt-1 mt-lg-2 mb-5 #{'discount'
                             if combination_info['has_discounted_price'] else ''}
                             {{website._get_product_page_container() == 'regular' and 'o_wsale_container_lg container-lg' or (website._get_product_page_container() == 'fluid' and 'o_wsale_container_fluid container-fluid' or false)}}
@@ -801,10 +802,10 @@
                     class="container pt48 pb48"
                     data-anchor='true'
                 >
-                    <div class="o_product_page_reviews_title">
-                        <h2 class="fs-4 mb-0">Customer Reviews</h2>
+                    <div class="o_product_page_reviews_title mb-4">
+                        <h3>Reviews</h3>
                     </div>
-                    <div id="o_product_page_reviews_content" class="mt-2">
+                    <div id="o_product_page_reviews_content">
                         <t t-call="portal.message_thread"
                             object="product"
                             display_rating="True"
@@ -813,6 +814,23 @@
                     </div>
                 </section>
             </div>
+            <!-- <article t-if="is_add_to_cart_possible" class="card o_wsale_sticky_object sticky-top ">
+                <div class="card-body">
+                    <h4 t-field="product.name"/>
+                    <div
+                        t-if="not is_view_active('website_sale.cta_wrapper_boxed')"
+                        class="o_wsale_product_details_content_section o_wsale_product_details_content_section_price mb-4"
+                    >
+                        <t t-call="website_sale.product_price"/>
+                        <small t-if="combination_info.get('base_unit_price')"
+                            class="ms-1 text-muted o_base_unit_price_wrapper d-none">
+                            <t t-call="website_sale.base_unit_price"
+                                base_unit_price="combination_info['base_unit_price']"/>
+                        </small>
+                    </div>
+                    <a href="#product_detail" class="btn btn-primary w-100">Back to product</a>
+                </div>
+            </article> -->
         </xpath>
     </template>
 

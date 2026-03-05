@@ -2,6 +2,24 @@ import { Chatter } from "@mail/chatter/web_portal_project/chatter";
 import { patch } from "@web/core/utils/patch";
 
 const chatterPatch = {
+    setup() {
+        super.setup(...arguments);
+        this.state.showReviewComposer = false;
+    },
+
+    onClickWriteReview() {
+        this.state.showReviewComposer = true;
+    },
+
+    onCloseReviewComposer() {
+        this.state.showReviewComposer = false;
+    },
+
+    onReviewPostCallback() {
+        this.state.showReviewComposer = false;
+        this.onPostCallback();
+    },
+
     async onClickStarDomain(star) {
         const { thread } = this.state;
         Object.assign(thread, {

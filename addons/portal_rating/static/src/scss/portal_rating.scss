@@ -3,12 +3,7 @@
 $o-w-rating-star-color: #FACC2E;
 
 .o_website_rating_static {
-    color: var(--WebsiteRating__star-color,  #{$o-w-rating-star-color});
-}
-
-// website_sale
-#product_details {
-    --WebsiteRating__star-color: currentColor;
+    color: var(--WebsiteRating__star-color, currentColor);
 }
 
 .o_website_rating_card_container {
@@ -18,77 +13,102 @@ $o-w-rating-star-color: #FACC2E;
     }
 
     /* progress bars */
-    table.o_website_rating_table {
-        width: 100%;
-        overflow: visible;
-
-        .o_website_rating_table_star_num {
-            min-width: 50px;
-            white-space: nowrap;
-        }
-        .o_website_rating_table_progress{
-            min-width: 120px;
-            > .progress {
-                margin-bottom: 2px;
-                margin-left: 5px;
-                margin-right: 5px;
-            }
-            .o_rating_progressbar{
-                background-color: $o-w-rating-star-color;
-            }
-        }
+    .o_website_rating_table {
         .o_website_rating_table_percent {
-            text-align: right;
-            padding-left: 5px;
-            @include font-size($font-size-sm);
+            font-variant-numeric: tabular-nums;
         }
-        .o_website_rating_table_reset {
-            .o_website_rating_selection_reset {
-                color: $red;
+
+        .o_website_rating_table_progress {
+            .o_rating_progressbar {
+                background-color: $body-color;
             }
         }
-        .o_website_rating_table_row:not(.o_website_rating_table_row_selected) {
-            cursor: pointer;
-        }
-        .o_website_rating_table_row td {
-            padding-bottom: 0.4rem;
+
+        .progress {
+            --progress-height: .4rem;
+
+            @include media-breakpoint-down(lg) {
+                --progress-height: .8rem;
+            }
         }
     }
 }
 
-.o-portal-Chatter {
-    &.o-review-Chatter .o-mail-Thread {
+.o-portal-Chatter.o-review-Chatter {
+    .o-mail-Chatter-content {
+        padding-left: var(--Chatter-default-padding-x);
+
+        > div > .o-mail-Composer {
+            display: none !important;
+        }
+    }
+
+    .o-mail-Message-core {
+        display: grid !important;
+        grid-template-columns: max-content 1fr;
+
+        > .o-min-width-0 {
+            display: contents;
+
+            > *:not(.o-mail-Message-header) {
+                grid-column: span 2;
+            }
+        }
+    }
+
+    .o-mail-Thread {
         padding-top: 0;
-    }
 
-    .o-portal-review-load-more {
-        width: 100%;
-        margin: 0.4rem 0 1rem;
-    }
+        .o-mail-Thread-content {
+            gap: map-get($spacers, 4);
 
-    .o-portal-review-load-more-line {
-        height: 1px;
-        background-color: rgba(33, 37, 41, 0.6);
-    }
+            > span.pt-1:empty,
+            > .o-mail-DateSection {
+                display: none !important;
+            }
+        }
 
-    .o-portal-review-load-more-btn {
-        border-radius: 0.4rem;
-        background-color: #212529;
-        color: #fff;
-        opacity: 1 !important;
-        padding: 0.35rem 0.9rem;
-        text-decoration: none;
-        white-space: nowrap;
+        .o-mail-Message {
+            height: 100%;
+            margin-top: 0 !important;
 
-        &:hover,
-        &:focus-visible {
-            background-color: #111417;
-            color: #fff;
+            .o-mail-Message-sidebar {
+                flex-basis: auto;
+                margin-right: map-get($spacers, 2);
+            }
+
+            .o_wrating_publisher_container button {
+                margin-bottom: 0 !important;
+            }
+
+            @include media-breakpoint-down(md) {
+                .o-mail-Message-header {
+                    position: relative;
+
+                    .o-mail-Message-actions {
+                        position: absolute;
+                        right: 0;
+                    }
+                }
+            }
+        }
+
+        // TODO DEV - Display a "show more" button when the message is too long
+        .o-mail-Message-richBody {
+            display: -webkit-box;
+            -webkit-line-clamp: 5;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .o-mail-Message-body {
+            max-width: 74ch;
+            padding: map-get($spacers, 1) 0 !important; // remove bubble padding
         }
     }
 
     /* Hide suggestion dropdown in product review mode */
-    &.o-review-Chatter .o-mail-Composer-suggestionList {
+    .o-mail-Composer-suggestionList {
         display: none !important;
     }
 }

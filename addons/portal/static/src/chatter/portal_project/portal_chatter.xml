@@ -3,72 +3,50 @@
 
 <t t-name="portal.Chatter">
     <div
-        class="o-mail-Chatter o-portal-Chatter w-100 h-100 flex-grow-1 d-flex pt-2"
-        t-att-class="{ 'row':props.twoColumns, 'flex-column':!props.twoColumns, 'o-review-Chatter': props.twoColumns and env.displayRating }"
+        class="o-mail-Chatter o-portal-Chatter container-fluid px-0"
+        t-att-class="{'o-review-Chatter': env.displayRating }"
         t-on-scroll="onScrollDebounced" t-ref="root"
     >
-        <div
-            class="o-mail-Chatter-top top-0"
-            t-att-class="{ 'col-lg-5':props.twoColumns, 'position-sticky':props.composer and !props.twoColumns }"
-            t-att-style="(!props.twoColumns and env.inFrontendPortalChatter and !env.projectSharingId) and 'top: -1px !important; margin-top:-15px; padding-top: 20px'"
-            t-ref="top"
-        >
-            <Composer
-                t-if="state.thread and props.composer and !props.twoColumns"
-                composer="state.thread.composer"
-                mode="'extended'"
-                onPostCallback.bind="onPostCallback"
-                dropzoneRef="rootRef"
-                t-key="props.threadId"
-                type="'message'"
-            />
-            <div class="o-mail-Chatter-topAnchor"/>
+        <div class="row">
             <div
-                t-if="state.thread and props.composer and props.twoColumns and env.displayRating and state.thread.isLoaded and state.thread.isEmpty"
-                class="o-mail-Thread-empty d-flex flex-column h-100 p-4 align-items-center justify-content-center opacity-75"
+                class="o-mail-Chatter-top col-12"
+                t-attf-class="{{ env.displayRating ? 'col-lg-4' + (props.twoColumns ? ' col-xl-3' : '') : '' }}"
+                t-ref="top"
             >
-                <div class="d-flex flex-column align-items-center text-center">
-                    <span class="fs-1" style="filter: grayscale(1);">😶</span>
-                    <span>The conversation is empty.</span>
-                </div>
-            </div>
-        </div>
-        <div
-            class="o-mail-Chatter-content"
-            t-att-class="{ 'col-lg-6 offset-lg-1':props.twoColumns }"
-        >
-            <Composer
-                t-if="state.thread and props.composer and props.twoColumns"
-                composer="state.thread.composer"
-                mode="'extended'"
-                onPostCallback.bind="onPostCallback"
-                dropzoneRef="rootRef"
-                t-key="props.threadId"
-                type="'message'"
-            />
-            <div
-                t-if="!props.composer and env.inFrontendPortalChatter and env.displayRating"
-                class="alert alert-dark d-flex align-items-center gap-2 mb-1 py-2"
-            >
-                <a
-                    class="btn btn-primary btn-sm"
-                    t-attf-href="/web/login?redirect=#{window.encodeURIComponent(window.location.pathname + '#discussion')}"
-                >
-                    Log in
-                </a>
-                <span>To post a review</span>
-            </div>
-            <div
-                t-if="state.thread"
-                t-att-class="{ 'd-none': props.composer and props.twoColumns and env.displayRating and state.thread.isLoaded and state.thread.isEmpty }"
-            >
-                <Thread
-                    thread="state.thread"
-                    t-key="state.thread.localId"
-                    order="'desc'"
-                    scrollRef="rootRef"
-                    jumpPresent="state.jumpThreadPresent"
+                <Composer
+                    t-if="state.thread and props.composer and !props.twoColumns"
+                    composer="state.thread.composer"
+                    mode="'extended'"
+                    onPostCallback.bind="onPostCallback"
+                    dropzoneRef="rootRef"
+                    t-key="props.threadId"
+                    type="'message'"
                 />
+            </div>
+            <div class="o-mail-Chatter-content col-12"
+                t-attf-class="{{ env.displayRating ? 'col-lg-8 col-xl-8' + (props.twoColumns ? ' offset-xl-1' : '') : '' }}">
+                <Composer
+                    t-if="state.thread and props.composer and props.twoColumns"
+                    composer="state.thread.composer"
+                    mode="'extended'"
+                    onPostCallback.bind="onPostCallback"
+                    dropzoneRef="rootRef"
+                    t-key="props.threadId"
+                    type="'message'"
+                />
+                <div
+                    t-if="state.thread"
+                    t-att-class="{ 'd-none': props.composer and props.twoColumns and env.displayRating and state.thread.isLoaded and state.thread.isEmpty }"
+                >
+                <!-- TODO Dev in website_slides it's still rendered which display the "This conversation is empty" state; also when logged out sometimes the thread is still rendered even if the thread.isEmpty -->
+                    <Thread
+                        thread="state.thread"
+                        t-key="state.thread.localId"
+                        order="'desc'"
+                        scrollRef="rootRef"
+                        jumpPresent="state.jumpThreadPresent"
+                    />
+                </div>
             </div>
         </div>
     </div>
