@@ -1514,7 +1514,7 @@ class SaleOrder(models.Model):
         """Small method to allow overriding the behavior right after an invoice is created."""
         # Manage the creation of invoices in sudo because a salesperson must be able to generate an invoice from a
         # sale order without "billing" access rights. However, he should not be able to create an invoice from scratch.
-        return self.env['account.move'].sudo().with_context(default_move_type='out_invoice').create(invoice_vals_list)
+        return self.env['account.move'].sudo().with_context(default_move_type='out_invoice', from_website_order=True).create(invoice_vals_list)
 
     def _create_invoices(self, grouped=False, final=False, date=None):
         """ Create invoice(s) for the given Sales Order(s).
