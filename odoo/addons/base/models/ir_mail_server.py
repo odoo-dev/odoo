@@ -741,16 +741,33 @@ class IrMail_Server(models.Model):
         # that do not impact SMTP To
         elif x_msg_add_to := message['X-Msg-To-Add']:
             to = message['To'] or ''
-            to_normalized = tools.mail.email_normalize_all(to)
-            message.replace_header(
-                'To', ', '.join([
-                    to,
-                    ', '.join(
-                        address for address in tools.mail.email_split_and_format(x_msg_add_to)
-                        if tools.mail.email_normalize(address, strict=False) not in to_normalized
-                    ),
-                ]
-                ))
+            to_normalized = set(tools.mail.email_normalize_all(to))
+            x_msg_add_cc = message.get('X-Msg-Cc-Add', '')
+            x_cc_normalized = set(tools.mail.email_normalize_all(x_msg_add_cc))
+            exclude_to_add = to_normalized
+            if common_emails := x_cc_normalized.intersection(to_normalized):
+                # remove from To, the email meant to be sent in cc
+                to = ', '.join(
+                    address for address in tools.mail.email_split_and_format(to)
+                    if tools.mail.email_normalize(address, strict=False) not in common_emails
+                )
+
+            new_to = ', '.join(
+                ([to] if to else []) +
+                [address for address in tools.mail.email_split_and_format(x_msg_add_to)
+                 if tools.mail.email_normalize(address, strict=False) not in exclude_to_add])
+            message.replace_header('To', new_to)
+            # Add cc
+            cc = message.get('Cc') or ''
+            exclude_cc_add = set(tools.mail.email_normalize_all(cc)) | set(tools.mail.email_normalize_all(new_to))
+            cc_value = ', '.join(
+                ([cc] if cc else []) +
+                [address for address in tools.mail.email_split_and_format(x_msg_add_cc)
+                 if tools.mail.email_normalize(address, strict=False) not in exclude_cc_add])
+            try:
+                message.replace_header('Cc', cc_value)
+            except KeyError:
+                message.add_header('Cc', cc_value)
 
         if message['From'] != smtp_from:
             message.replace_header('From', smtp_from)
@@ -759,6 +776,7 @@ class IrMail_Server(models.Model):
         del message['Bcc']                   # see odoo/odoo@2445f9e3c22db810d61996afde883e4ca608f15b
         del message['X-Forge-To']
         del message['X-Msg-To-Add']
+        del message['X-Msg-Cc-Add']
         del message['X-Msg-To-Consolidate']
 
     @api.model

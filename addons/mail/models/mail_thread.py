@@ -3109,6 +3109,8 @@ class MailThread(models.AbstractModel):
             'outgoing_email_to',
             'parent_id',
             'partner_ids',
+            'partner_to_ids',
+            'partner_cc_ids',
             'record_alias_domain_id',
             'record_company_id',
             'reply_to',
@@ -3898,22 +3900,28 @@ class MailThread(models.AbstractModel):
         # including external people (aka share partners to notify + emails
         # notified by incoming email (incoming_email_cc and incoming_email_to)
         # that were not transformed into partners to notify
-        external_emails = [
-            formataddr((r['name'], r['email_normalized']))
+        external_emails = {
+            formataddr((r['name'], r['email_normalized'])): r['recipient_type']
             for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
-        ]
-        external_emails_normalized = [
-            r['email_normalized']
+        }
+        external_emails_normalized = {
+            r['email_normalized']: r['recipient_type']
             for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
-        ]
-        external_emails += list({
-            email for email in email_split_and_format_normalize(
-                f"{message_sudo.incoming_email_to or ''},{message_sudo.incoming_email_cc or ''}"
-            )
+        }
+        external_emails |= {
+            email: 'to' for email in email_split_and_format_normalize(message_sudo.incoming_email_to or '')
             if email_normalize(email) not in external_emails_normalized
-        })
+        }
+        external_emails |= {
+            email: 'cc' for email in email_split_and_format_normalize(message_sudo.incoming_email_cc or '')
+            if email_normalize(email) not in external_emails_normalized
+        }
         if external_emails and len(external_emails) < self._CUSTOMER_HEADERS_LIMIT_COUNT:  # more than threshold = considered as public record (slide, forum, ...) -> do not leak
-            headers['X-Msg-To-Add'] = ','.join(external_emails)
+            headers['X-Msg-To-Add'] = ','.join([
+                email for email, recipient_type in external_emails.items() if recipient_type == 'to'])
+            cc_emails = [email for email, recipient_type in external_emails.items() if recipient_type == 'cc']
+            if cc_emails:
+                headers['X-Msg-Cc-Add'] = ','.join(cc_emails)
         # sudo: access to mail.alias.domain, restricted
         if message_sudo.record_alias_domain_id.bounce_email:
             headers['Return-Path'] = message_sudo.record_alias_domain_id.bounce_email
@@ -4140,6 +4148,7 @@ class MailThread(models.AbstractModel):
 
         # get values from msg_vals or from message if msg_vals doen't exists
         pids = msg_vals['partner_ids'] if 'partner_ids' in msg_vals else msg_sudo.partner_ids.ids
+        pids_cc = msg_vals['partner_cc_ids'] if 'partner_cc_ids' in msg_vals else msg_sudo.partner_cc_ids.ids  # noqa: SIM401 (avoid reading msg_sudo if msg_vals is available)
         if kwargs.get('notify_skip_followers'):
             # when skipping followers, message acts like user notification, which means
             # relying on required recipients (pids) only
@@ -4148,17 +4157,17 @@ class MailThread(models.AbstractModel):
             message_type = msg_vals['message_type'] if 'message_type' in msg_vals else msg_sudo.message_type
         subtype_id = msg_vals['subtype_id'] if 'subtype_id' in msg_vals else msg_sudo.subtype_id.id
 
-        # is it possible to have record but no subtype_id ?
-        recipients_data = []
-        # compute partner-based recipients data: followers, mentionned partner ids
+        # compute partner-based recipients data: followers, mentioned partner ids
         res = self.env['mail.followers']._get_recipient_data(self, message_type, subtype_id, pids)[self.id if self else 0]
         # include optional additional emails
         outgoing_email_to_lst = email_split_and_normalize(
             msg_vals['outgoing_email_to'] if 'outgoing_email_to' in msg_vals else msg_sudo.outgoing_email_to
         )
         if not res and not outgoing_email_to_lst:
-            return recipients_data
+            return []
 
+        # is it possible to have record but no subtype_id ?
+        recipients_data = []
         # notify author of its own messages, False by default
         skip_author_id = False
         notify_author = kwargs.get('notify_author') or self.env.context.get('mail_notify_author')
@@ -4177,6 +4186,8 @@ class MailThread(models.AbstractModel):
         )]
 
         for pid, pdata in res.items():
+            # determine the recipient type based on pids_cc
+            pdata['recipient_type'] = 'cc' if pid in pids_cc else 'to'
             if pid and pid == skip_author_id:
                 continue
             if pdata['active'] is False:
@@ -4196,6 +4207,7 @@ class MailThread(models.AbstractModel):
                 'lang': False,
                 'groups': [],
                 'notif': 'email',
+                'recipient_type': 'to',
                 'share': True,
                 'type': 'customer',
                 'uid': False,

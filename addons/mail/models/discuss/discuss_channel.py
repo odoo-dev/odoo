@@ -906,6 +906,7 @@ class DiscussChannel(models.Model):
                     'type': 'user' if not partner_share else 'customer',
                     'uid': uid,
                     'ushare': ushare,
+                    'recipient_type': 'to',
                 })
 
         domain = Domain.AND([
@@ -954,6 +955,7 @@ class DiscussChannel(models.Model):
                 "type": "customer",
                 "uid": False,
                 "ushare": False,
+                'recipient_type': 'to',
             })
         return recipients_data
 

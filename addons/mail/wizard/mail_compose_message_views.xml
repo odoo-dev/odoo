@@ -52,6 +52,11 @@
                                 options="{'on_tag_click': 'open_form'}"
                                 context="{'force_email': True, 'show_email': True, 'form_view_ref': 'base.view_partner_simple_form', 'forward_mode': True}"/>
                         </div>
+                        <label groups="base.group_user" for="partner_cc_ids" string="Cc" invisible="composition_mode != 'comment' or subtype_is_log"/>
+                        <div groups="base.group_user" invisible="composition_mode != 'comment' or subtype_is_log" class="d-flex gap-3">
+                            <field name="partner_cc_ids" widget="many2many_tags_email" placeholder="Add recipients..." class="w-auto flex-grow-1"
+                                invisible="composition_mode != 'comment' or subtype_is_log"/>
+                        </div>
                         <field name="subject" placeholder="e.g. Welcome to MyCompany!" required="True"/>
                         <field name="reply_to" placeholder="e.g. info@company.com"
                             invisible="reply_to_mode == 'update'"

@@ -1085,7 +1085,8 @@ class TestComposerInternals(TestMailComposer):
                 # values come from template
                 if composition_mode == 'comment' and not batch:
                     self.assertEqual(len(new_partners), 2)
-                    self.assertEqual(composer.partner_ids, self.partner_1 + new_partners, 'Template took customer_id as set on record')
+                    self.assertEqual(composer.partner_ids, self.partner_1, 'Template took customer_id as set on record')
+                    self.assertEqual(composer.partner_cc_ids, new_partners)
                     self.assertEqual(composer.reply_to, 'info@test.example.com', 'Template was rendered')
                     self.assertTrue(composer.reply_to_force_new)
                 else:
@@ -1119,7 +1120,8 @@ class TestComposerInternals(TestMailComposer):
 
                 # values come from template
                 if composition_mode == 'comment' and not batch:
-                    self.assertEqual(composer.partner_ids, self.partner_1 + new_partners)
+                    self.assertEqual(composer.partner_ids, self.partner_1)
+                    self.assertEqual(composer.partner_cc_ids, new_partners)
                 else:
                     self.assertFalse(composer.partner_ids)
                 if composition_mode == 'comment' and not batch:
@@ -1137,7 +1139,8 @@ class TestComposerInternals(TestMailComposer):
 
                 # values come from template
                 if composition_mode == 'comment' and not batch:
-                    self.assertEqual(composer.partner_ids, self.partner_1 + new_partners)
+                    self.assertEqual(composer.partner_ids, self.partner_1)
+                    self.assertEqual(composer.partner_cc_ids, new_partners)
                 else:
                     self.assertFalse(composer.partner_ids)
                 if composition_mode == 'comment' and not batch:

@@ -204,9 +204,15 @@ class MailMessage(models.Model):
     author_avatar = fields.Binary("Author's avatar", related='author_id.avatar_128', depends=['author_id'], readonly=False)
     author_guest_id = fields.Many2one(string="Guest", comodel_name='mail.guest')
     is_current_user_or_guest_author = fields.Boolean(compute='_compute_is_current_user_or_guest_author')
-    # recipients: include inactive partners (they may have been archived after
-    # the message was sent, but they should remain visible in the relation)
-    partner_ids = fields.Many2many('res.partner', string='Recipients', context={'active_test': False})
+    partner_rel = fields.One2many(comodel_name='mail.message.partner', inverse_name='mail_message_id')
+    partner_ids = fields.Many2many('res.partner', string='Recipients',
+                                   compute='_compute_partners_recipient_type',
+                                   inverse='_inverse_partner_ids', store=False, readonly=False,
+                                   search='_search_partner_ids')
+    partner_to_ids = fields.Many2many('res.partner', compute='_compute_partners_recipient_type',
+                                      inverse='_inverse_partner_to_ids', store=False, readonly=False)
+    partner_cc_ids = fields.Many2many('res.partner', compute='_compute_partners_recipient_type',
+                                      inverse='_inverse_partner_cc_ids', store=False, readonly=False)
     # email recipients of incoming emails: comma separated list of emails (not necessarily normalized)
     incoming_email_to = fields.Text('Emails To')
     incoming_email_cc = fields.Char('Emails Cc')
@@ -267,6 +273,54 @@ class MailMessage(models.Model):
 
     _model_res_id_idx = models.Index("(model, res_id)")
     _model_res_id_id_idx = models.Index("(model, res_id, id)")
+
+    def _search_partner_ids(self, operator, value):
+        return [('partner_rel.res_partner_id', operator, value)]
+
+    def _inverse_partner_rel(self, field_name, recipient_type):
+        to_remove = self.env['mail.message.partner']
+        to_update = self.env['mail.message.partner']
+        to_add = []
+        for record in self:
+            field_value = record[field_name]
+            if not field_value:
+                to_remove = record.partner_rel.filtered(
+                    lambda r: (not recipient_type or r.recipient_type == recipient_type))
+                continue
+            to_remove |= record.partner_rel.filtered(
+                lambda r: ((not recipient_type or r.recipient_type == recipient_type)
+                           and r.res_partner_id not in field_value))
+            to_update |= record.partner_rel.filtered(
+                lambda r: ((not recipient_type or r.recipient_type != recipient_type)
+                           and r.res_partner_id in field_value))
+            to_add.extend([
+                {
+                    'mail_message_id': record._origin.id,
+                    'res_partner_id': partner._origin.id,
+                    'recipient_type': recipient_type or 'to',
+                }
+                for partner in field_value - record.partner_rel.res_partner_id
+            ])
+        to_remove.unlink()
+        if recipient_type:
+            to_update.recipient_type = recipient_type
+        self.env['mail.message.partner'].create(to_add)
+
+    @api.depends('partner_rel', 'partner_ids', 'partner_to_ids', 'partner_cc_ids')
+    def _compute_partners_recipient_type(self):
+        for record in self:
+            record.partner_ids = record.partner_rel.res_partner_id
+            record.partner_to_ids = record.partner_rel.filtered(lambda r: r.recipient_type == 'to').res_partner_id
+            record.partner_cc_ids = record.partner_rel.filtered(lambda r: r.recipient_type == 'cc').res_partner_id
+
+    def _inverse_partner_ids(self):
+        self._inverse_partner_rel('partner_ids', False)
+
+    def _inverse_partner_to_ids(self):
+        self._inverse_partner_rel('partner_to_ids', 'to')
+
+    def _inverse_partner_cc_ids(self):
+        self._inverse_partner_rel('partner_cc_ids', 'cc')
 
     @api.depends('body')
     def _compute_preview(self):

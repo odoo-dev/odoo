@@ -161,6 +161,10 @@ class MailComposeMessage(models.TransientModel):
         'res.partner', 'mail_compose_message_res_partner_rel',
         'wizard_id', 'partner_id', 'Additional Contacts',
         compute='_compute_partner_ids', readonly=False, store=True)
+    partner_cc_ids = fields.Many2many(
+        'res.partner', 'mail_compose_message_res_partner_cc_rel',
+        'wizard_id', 'partner_id', 'Additional Cc contacts',
+        compute='_compute_partner_ids', readonly=False, store=True)
     partner_ids_all_have_email = fields.Boolean(compute="_compute_partner_ids_all_have_email")
     notified_bcc_contains_share = fields.Boolean(
         'Is an external partner follower of the document?',
@@ -530,6 +534,10 @@ class MailComposeMessage(models.TransientModel):
                 )[res_ids[0]]
                 if rendered_values.get('partner_ids'):
                     composer.partner_ids = rendered_values['partner_ids']
+                if rendered_values.get('partner_cc_ids'):
+                    composer.partner_cc_ids = rendered_values['partner_cc_ids']
+                    if composer.partner_ids:
+                        composer.partner_ids = composer.partner_ids - composer.partner_cc_ids
             elif composer.parent_id and composer.composition_mode == 'comment':
                 composer.partner_ids = composer.parent_id.partner_ids
             elif not composer.template_id:
@@ -538,7 +546,8 @@ class MailComposeMessage(models.TransientModel):
     @api.depends('partner_ids')
     def _compute_partner_ids_all_have_email(self):
         for record in self:
-            record.partner_ids_all_have_email = all(record.partner_ids.mapped('email'))
+            record.partner_ids_all_have_email = (
+                    all(record.partner_ids.mapped('email')) and all(record.partner_cc_ids.mapped('email')))
 
     @api.depends('composition_batch', 'composition_mode', 'message_type',
                  'model', 'res_ids', 'subtype_id')
@@ -1326,7 +1335,9 @@ class MailComposeMessage(models.TransientModel):
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
                 'body': self.body or '',
                 'email_from': self.email_from,
-                'partner_ids': self.partner_ids.ids,
+                'partner_ids': (self.partner_ids | self.partner_cc_ids).ids,
+                'partner_to_ids': self.partner_ids.ids,
+                'partner_cc_ids': self.partner_cc_ids.ids,
                 'scheduled_date': self.scheduled_date,
                 'subject': self.subject or '',
                 **(
@@ -1436,6 +1447,8 @@ class MailComposeMessage(models.TransientModel):
             'body': 'body_html',
             'partner_ids': 'partner_to',
         }
+        if find_or_create_partners:
+            mapping['partner_cc_ids'] = 'email_cc'
         template_fields = {mapping.get(fname, fname) for fname in render_fields}
         template_values = self.template_id._generate_template(
             res_ids,

@@ -6,7 +6,7 @@ from ast import literal_eval
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Domain
-from odoo.tools import BinaryBytes
+from odoo.tools import BinaryBytes, email_normalize
 from odoo.tools.safe_eval import safe_eval, time
 
 _logger = logging.getLogger(__name__)
@@ -477,19 +477,24 @@ class MailTemplate(models.Model):
         if find_or_create_partners:
             email_to_res_ids = {}
             records_emails = {}
+            emails_cc_by_res_id = {}
             for record in Model.browse(res_ids):
                 record_values = render_results.setdefault(record.id, {})
-                mails = tools.email_split(record_values.pop('email_to', '')) + \
-                        tools.email_split(record_values.pop('email_cc', ''))
+                emails_cc = tools.email_split(record_values.pop('email_cc', ''))
+                mails = tools.email_split(record_values.pop('email_to', '')) + emails_cc
                 records_emails[record] = mails
                 for mail in mails:
                     email_to_res_ids.setdefault(mail, []).append(record.id)
+                emails_cc_by_res_id[record.id] = [email_normalize(e) for e in emails_cc]
 
             if hasattr(Model, '_partner_find_from_emails'):
                 records_partners = Model.browse(res_ids)._partner_find_from_emails(records_emails)
             else:
                 records_partners = self.env['mail.thread']._partner_find_from_emails(records_emails)
             for res_id, partners in records_partners.items():
+                emails_cc = emails_cc_by_res_id[res_id]
+                partners_cc = partners.filtered(lambda p: email_normalize(p.email) in emails_cc)
+                render_results[res_id].setdefault('partner_cc_ids', []).extend(partners_cc.ids)
                 render_results[res_id].setdefault('partner_ids', []).extend(partners.ids)
 
         # update 'partner_to' rendered value to 'partner_ids'
@@ -506,6 +511,9 @@ class MailTemplate(models.Model):
             if partner_to:
                 tpl_partner_ids = set(self._parse_partner_to(partner_to)) & existing_pids
                 record_values.setdefault('partner_ids', []).extend(tpl_partner_ids)
+                # Ensure that a recipient is not set both as cc and to
+                record_values['partner_cc_ids'] = [
+                    pid for pid in record_values.get('partner_cc_ids', []) if pid not in tpl_partner_ids]
 
         return render_results
 
