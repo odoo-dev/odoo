@@ -890,14 +890,14 @@ class StockMoveLine(models.Model):
         # Loops to get backorders, backorders' backorders, and so and so...
         backorders = self.env['stock.picking']
         orig_picking = self.picking_id
-        if not strict and self.picking_id.move_ids.move_orig_ids:
+        if orig_picking.move_ids.move_orig_ids:
             while orig_picking.move_ids.move_orig_ids:
                 orig_picking = orig_picking.move_ids.move_orig_ids.picking_id
         pickings = orig_picking
         while pickings.backorder_ids:
             backorders |= pickings.backorder_ids
             pickings = pickings.backorder_ids
-        if not strict and pickings.backorder_id:
+        if pickings.backorder_id:
             pickings = orig_picking
             while pickings.backorder_id:
                 backorders |= pickings.backorder_id
@@ -913,7 +913,7 @@ class StockMoveLine(models.Model):
             quantity = move_line.uom_id._compute_quantity(move_line.quantity, uom)
             packaging_quantity = move_line.uom_id._compute_quantity(quantity, move_line.move_id.packaging_uom_id)
             if line_key not in aggregated_move_lines:
-                qty_ordered = 0 if strict or backorders else move_line.move_id.product_uom_qty
+                qty_ordered = 0 if strict else move_line.move_id.product_uom_qty
                 packaging_qty_ordered = None
                 if backorders and not strict:
                     qty_ordered = move_line.move_id.product_uom_qty if not orig_picking else 0
