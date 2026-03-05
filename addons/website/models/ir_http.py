@@ -212,8 +212,13 @@ class IrHttp(models.AbstractModel):
         super()._pre_dispatch(rule, arguments)
 
         env = request.env
-        if not env.context.get('website_id') and not env.context.get('fallback_website_id'):
-            if website_id := env['ir.http'].get_current_website_fallback():
+        website_id = env.context.get('website_id') or env.context.get('fallback_website_id')
+        if not website_id:
+            website_id = env['ir.http'].get_current_website_fallback()
+        if website_id and not env.context.get('website_id'):
+            if request.is_frontend:
+                request.update_context(website_id=website_id)
+            else:
                 request.update_context(fallback_website_id=website_id)
 
         for record in arguments.values():
