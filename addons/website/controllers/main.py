@@ -791,6 +791,8 @@ class Website(Home):
         template = template and dict(template=template) or {}
         if website_id:
             website = request.env['website'].with_context(website_id=self._force_website(website_id))
+        else:
+            website = request.env['website'].get_current_website()
 
         page = website.new_page(
             path,
