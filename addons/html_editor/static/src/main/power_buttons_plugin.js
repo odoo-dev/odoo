@@ -14,6 +14,7 @@ import { omit, pick } from "@web/core/utils/objects";
  * @property {Object} [commandParams]
  * @property {string} [description] Can be inferred from the user command
  * @property {string} [icon] Can be inferred from the user command
+ * @property {string} [icon_class] Can be inferred from the user command
  * @property {string} [text] Mandatory if `icon` is not provided
  * @property {string} [isAvailable] Can be inferred from the user command
  */
@@ -35,7 +36,8 @@ import { omit, pick } from "@web/core/utils/objects";
  *                  id: myCommand,
  *                  run: myCommandFunction,
  *                  description: _t("Apply my command"),
- *                  icon: "fa-bug",
+ *                  icon: "bug_report",
+ *                  icon_class: "oi-filled",
  *              },
  *          ],
  *          power_buttons: [
@@ -78,7 +80,7 @@ export class PowerButtonsPlugin extends Plugin {
         const composePowerButton = (/**@type {PowerButton} */ item) => {
             const command = this.dependencies.userCommand.getCommand(item.commandId);
             return {
-                ...pick(command, "description", "icon"),
+                ...pick(command, "description", "icon", "icon_class"),
                 ...omit(item, "commandId", "commandParams"),
                 run: () => command.run(item.commandParams),
                 isAvailable: (selection) =>
@@ -87,12 +89,12 @@ export class PowerButtonsPlugin extends Plugin {
                         .every((predicate) => predicate(selection)),
             };
         };
-        const renderButton = ({ description, icon, text, run }) => {
+        const renderButton = ({ description, icon, icon_class, text, run }) => {
             const btn = this.document.createElement("button");
             let className = "power_button btn px-2 py-1 cursor-pointer";
             if (icon) {
-                const iconLibrary = icon.includes("fa-") ? "fa" : "oi";
-                className += ` ${iconLibrary} ${icon}`;
+                className += ` oi ${icon_class ? icon_class : ""}`;
+                btn.dataset.icon = icon;
             } else {
                 const span = this.document.createElement("span");
                 span.textContent = text;

@@ -23,7 +23,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
  * @property {Object} [commandParams] Passed to the command's `run` function - optional
  * @property {TranslatedString} [title] Inheritable
  * @property {TranslatedString} [description] Inheritable
- * @property {string} [icon] fa-class - Inheritable
+ * @property {string} [icon] oi class - Inheritable
  * @property {TranslatedString[]} [keywords]
  * @property {(selection: EditorSelection) => boolean} [isAvailable] Optional and inheritable
  */
@@ -72,7 +72,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
  *                  run: myCommandFunction,
  *                  title: _t("My Command"),
  *                  description: _t("My command's description"),
- *                  icon: "fa-bug",
+ *                  icon: "bug_report",
  *              },
  *          ],
  *          powerbox_categories: [
@@ -118,7 +118,7 @@ export class PowerboxPlugin extends Plugin {
         power_buttons: withSequence(100, {
             commandId: "openPowerbox",
             description: _t("More options"),
-            icon: "oi-ellipsis-v",
+            icon: "more_vert",
         }),
         hints: withSequence(30, {
             selector: baseContainerGlobalSelector,

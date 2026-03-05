@@ -33,7 +33,7 @@ export class BannerPlugin extends Plugin {
                 id: "banner_info",
                 title: _t("Banner Info"),
                 description: _t("Insert an info banner"),
-                icon: "fa-info-circle",
+                icon: "info",
                 isAvailable,
                 run: () => {
                     this.insertBanner(_t("Banner Info"), "💡", "info");
@@ -43,7 +43,8 @@ export class BannerPlugin extends Plugin {
                 id: "banner_success",
                 title: _t("Banner Success"),
                 description: _t("Insert a success banner"),
-                icon: "fa-check-circle",
+                icon: "check_circle",
+                icon_class: "oi-filled",
                 isAvailable,
                 run: () => {
                     this.insertBanner(_t("Banner Success"), "✅", "success");
@@ -53,7 +54,7 @@ export class BannerPlugin extends Plugin {
                 id: "banner_warning",
                 title: _t("Banner Warning"),
                 description: _t("Insert a warning banner"),
-                icon: "fa-exclamation-triangle",
+                icon: "warning",
                 isAvailable,
                 run: () => {
                     this.insertBanner(_t("Banner Warning"), "⚠️", "warning");
@@ -63,7 +64,7 @@ export class BannerPlugin extends Plugin {
                 id: "banner_danger",
                 title: _t("Banner Danger"),
                 description: _t("Insert a danger banner"),
-                icon: "fa-exclamation-circle",
+                icon: "error",
                 isAvailable,
                 run: () => {
                     this.insertBanner(_t("Banner Danger"), "❌", "danger");
@@ -73,7 +74,7 @@ export class BannerPlugin extends Plugin {
                 id: "banner_monospace",
                 title: _t("Monospace"),
                 description: _t("Insert a monospace banner"),
-                icon: "fa-laptop",
+                icon: "laptop",
                 isAvailable,
                 run: () => {
                     this.insertBanner(
