@@ -58,42 +58,43 @@ export class ImagePlugin extends Plugin {
             {
                 id: "deleteImage",
                 description: _t("Remove (DELETE) image"),
-                icon: "fa-trash text-danger",
+                icon: "delete",
+                icon_class: "oi-filled text-danger",
                 run: this.deleteImage.bind(this),
                 isAvailable: isHtmlContentSupported,
             },
             {
                 id: "previewImage",
                 description: _t("Preview image"),
-                icon: "fa-search-plus",
+                icon: "zoom_in",
                 run: this.previewImage.bind(this),
                 isAvailable: isHtmlContentSupported,
             },
             {
                 id: "setImageShapeRounded",
                 description: _t("Set shape: Rounded"),
-                icon: "fa-square",
+                icon: "square",
                 run: () => this.setImageShape("rounded", { excludeClasses: ["rounded-circle"] }),
                 isAvailable: isHtmlContentSupported,
             },
             {
                 id: "setImageShapeCircle",
                 description: _t("Set shape: Circle"),
-                icon: "fa-circle-o",
+                icon: "circle",
                 run: () => this.setImageShape("rounded-circle", { excludeClasses: ["rounded"] }),
                 isAvailable: isHtmlContentSupported,
             },
             {
                 id: "setImageShapeShadow",
                 description: _t("Set shape: Shadow"),
-                icon: "fa-sun-o",
+                icon: "light_mode",
                 run: () => this.setImageShape("shadow"),
                 isAvailable: isHtmlContentSupported,
             },
             {
                 id: "setImageShapeThumbnail",
                 description: _t("Set shape: Thumbnail"),
-                icon: "fa-picture-o",
+                icon: "image",
                 run: () => this.setImageShape("img-thumbnail"),
                 isAvailable: isHtmlContentSupported,
             },
@@ -362,7 +363,7 @@ export class ImagePlugin extends Plugin {
             return {
                 title: _t("Embed Image"),
                 description: _t("Embed the image in the document."),
-                icon: "fa-image",
+                icon: "image",
                 run: () => {
                     this.trigger(
                         "on_will_paste_handlers",
@@ -407,7 +408,7 @@ export class ImagePlugin extends Plugin {
     getImageTransformProps() {
         return {
             id: "image_transform",
-            icon: "fa-object-ungroup",
+            icon: "deselect",
             title: _t("Transform the picture (click twice to reset transformation)"),
             getTargetedImage: this.getTargetedImage.bind(this),
             resetImageTransformation: this.resetImageTransformation.bind(this),

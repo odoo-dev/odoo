@@ -341,7 +341,7 @@ describe("individual button availability", () => {
                 user_commands: {
                     id: "test",
                     title: "TestButton",
-                    icon: "fa-bug",
+                    icon: "bug_report",
                     isAvailable: ({ anchorNode }) =>
                         !closestElement(anchorNode, ".hide_test_button"),
                     run: () => {},

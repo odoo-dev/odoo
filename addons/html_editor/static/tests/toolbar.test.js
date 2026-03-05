@@ -1065,7 +1065,8 @@ test("toolbar correctly show namespace button group and stop showing when namesp
                     groupId: "test_group",
                     commandId: "test_cmd",
                     description: "Test Button",
-                    icon: "fa-square",
+                    icon: "square",
+                    icon_class: "oi-filled",
                 },
             ],
         };
@@ -1091,7 +1092,8 @@ test("toolbar does not evaluate isActive when namespace does not match", async (
                     groupId: "test_group",
                     commandId: "test_cmd",
                     description: "Test Button",
-                    icon: "fa-square",
+                    icon: "square",
+                    icon_class: "oi-filled",
                     isActive: () => {
                         expect.step("image format evaluated");
                         resolveIsActive();
@@ -1145,7 +1147,8 @@ describe("compact toolbar", () => {
         groupId: "test_group",
         commandId: "test_cmd",
         description: "Test Button",
-        icon: "fa-square",
+        icon: "square",
+        icon_class: "oi-filled",
         ...obj,
     });
     const repeat = (count, fn) => range(count).map(fn);
@@ -1267,7 +1270,7 @@ test("toolbar items without namespace default to 'expanded'", async () => {
                     groupId: "test_group",
                     commandId: "test_cmd",
                     description: "Test Button",
-                    icon: "fa-square",
+                    icon: "square",
                 },
             ],
         };
