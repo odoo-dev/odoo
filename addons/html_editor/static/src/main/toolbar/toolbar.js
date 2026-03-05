@@ -39,6 +39,7 @@ export class Toolbar extends Component {
                                                 ...base,
                                                 run: Function,
                                                 icon: { type: String, optional: true },
+                                                icon_class: { type: String, optional: true },
                                                 text: { type: String, optional: true },
                                                 isActive: Boolean,
                                             });
@@ -82,7 +83,7 @@ export const toolbarButtonProps = {
 export function composeToolbarButton(userCommand, toolbarItem) {
     const description = toolbarItem.description || userCommand.description;
     return {
-        ...pick(userCommand, "icon"),
+        ...pick(userCommand, "icon", "icon_class"),
         ...omit(toolbarItem, "commandId", "commandParams"),
         run: () => userCommand.run(toolbarItem.commandParams),
         isAvailable: (selection) =>

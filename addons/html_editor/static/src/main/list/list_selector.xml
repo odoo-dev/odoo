@@ -9,8 +9,9 @@
                         <button
                             t-att-title="button.description"
                             t-att-name="button.id"
-                            t-attf-class="btn btn-light fa {{button.icon}}"
+                            class="btn btn-light oi"
                             t-att-class="{ active: activeMode === button.mode }"
+                            t-att-data-icon="button.icon"
                             t-on-click="button.run"
                         />
                     </t>

@@ -13,7 +13,7 @@ export class SignaturePlugin extends Plugin {
                 id: "insertSignature",
                 title: _t("Signature"),
                 description: _t("Insert your signature"),
-                icon: "fa-pencil-square-o",
+                icon: "edit_square",
                 run: this.insertSignature.bind(this),
                 isAvailable: (selection) =>
                     this.config.allowImage && isHtmlContentSupported(selection),

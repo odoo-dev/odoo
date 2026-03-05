@@ -186,7 +186,8 @@ export class TableMenu extends Component {
         return [
             !this.isFirst && {
                 name: "move_left",
-                icon: "fa-chevron-left disabled",
+                icon: "chevron_left",
+                icon_class: "disabled",
                 text: ltr ? _t("Move left") : _t("Move right"),
                 action: (target) =>
                     this.props.moveColumn(this.tableGrid[0].indexOf(target) - 1, target),
@@ -195,7 +196,7 @@ export class TableMenu extends Component {
             },
             !this.isLast && {
                 name: "move_right",
-                icon: "fa-chevron-right",
+                icon: "chevron_right",
                 text: ltr ? _t("Move right") : _t("Move left"),
                 action: (target) =>
                     this.props.moveColumn(this.tableGrid[0].indexOf(target) + 1, target),
@@ -204,38 +205,40 @@ export class TableMenu extends Component {
             },
             {
                 name: "insert_left",
-                icon: "fa-plus",
+                icon: "add",
                 text: ltr ? _t("Insert left") : _t("Insert right"),
                 action: this.props.addColumn.bind(this, "before"),
             },
             {
                 name: "insert_right",
-                icon: "fa-plus",
+                icon: "add",
                 text: ltr ? _t("Insert right") : _t("Insert left"),
                 action: this.props.addColumn.bind(this, "after"),
             },
             {
                 name: "delete",
-                icon: "fa-trash",
+                icon: "delete",
+                icon_class: "oi-filled",
                 text: _t("Delete"),
                 action: this.props.removeColumn.bind(this),
             },
             this.hasCustomColumnWidth && {
                 name: "reset_column_size",
-                icon: "fa-table",
+                icon: "table_chart",
                 text: _t("Reset column size"),
                 action: (target) =>
                     this.props.resetColumnWidth(closestElement(target, isTableCell)),
             },
             this.hasCustomTableSize && {
                 name: "reset_table_size",
-                icon: "fa-table",
+                icon: "table_chart",
                 text: _t("Reset table size"),
                 action: (target) => this.props.resetTableSize(closestElement(target, "table")),
             },
             this.hasContent && {
                 name: "clear_content",
-                icon: "fa-times-circle",
+                icon: "cancel",
+                icon_class: "oi-filled",
                 text: _t("Clear content"),
                 action: this.props.clearColumnContent.bind(this),
             },
@@ -268,20 +271,20 @@ export class TableMenu extends Component {
             this.isFirst &&
                 !this.isTableHeader && {
                     name: "make_header",
-                    icon: "fa-th-large",
+                    icon: "view_module",
                     text: _t("Turn into header"),
                     action: (target) => this.props.turnIntoHeader(target.parentElement),
                 },
             this.isFirst &&
                 this.isTableHeader && {
                     name: "remove_header",
-                    icon: "fa-table",
+                    icon: "table_chart",
                     text: _t("Turn into row"),
                     action: (target) => this.props.turnIntoRow(target.parentElement),
                 },
             !this.isFirst && {
                 name: "move_up",
-                icon: "fa-chevron-up",
+                icon: "expand_less",
                 text: _t("Move up"),
                 action: (target) =>
                     this.props.moveRow(getRowIndex(target) - 1, target.parentElement),
@@ -290,7 +293,7 @@ export class TableMenu extends Component {
             },
             !this.isLast && {
                 name: "move_down",
-                icon: "fa-chevron-down",
+                icon: "expand_more",
                 text: _t("Move down"),
                 action: (target) =>
                     this.props.moveRow(getRowIndex(target) + 1, target.parentElement),
@@ -299,19 +302,19 @@ export class TableMenu extends Component {
             },
             !this.isTableHeader && {
                 name: "insert_above",
-                icon: "fa-plus",
+                icon: "add",
                 text: _t("Insert above"),
                 action: (target) => this.props.addRow("before", target.parentElement),
             },
             {
                 name: "insert_below",
-                icon: "fa-plus",
+                icon: "add",
                 text: _t("Insert below"),
                 action: (target) => this.props.addRow("after", target.parentElement),
             },
             {
                 name: "toggle_alternating_rows",
-                icon: "fa-paint-brush",
+                icon: "design_services",
                 text: hasAlternatingRowClass
                     ? _t("Clear alternate colors")
                     : _t("Alternate row colors"),
@@ -319,25 +322,27 @@ export class TableMenu extends Component {
             },
             {
                 name: "delete",
-                icon: "fa-trash",
+                icon: "delete",
+                icon_class: "oi-filled",
                 text: _t("Delete"),
                 action: (target) => this.props.removeRow(target.parentElement),
             },
             this.hasCustomRowHeight && {
                 name: "reset_row_size",
-                icon: "fa-table",
+                icon: "table_chart",
                 text: _t("Reset row size"),
                 action: (target) => this.props.resetRowHeight(closestElement(target, "tr")),
             },
             this.hasCustomTableSize && {
                 name: "reset_table_size",
-                icon: "fa-table",
+                icon: "table_chart",
                 text: _t("Reset table size"),
                 action: (target) => this.props.resetTableSize(closestElement(target, "table")),
             },
             this.hasContent && {
                 name: "clear_content",
-                icon: "fa-times-circle",
+                icon: "cancel",
+                icon_class: "oi-filled",
                 text: _t("Clear content"),
                 action: (target) => this.props.clearRowContent(target.parentElement),
             },

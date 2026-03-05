@@ -69,7 +69,7 @@ export const CLIPBOARD_WHITELISTS = {
         "IMG",
         "BR",
         "A",
-        ".fa",
+        ".oi",
     ],
     classes: [
         // Media
@@ -95,7 +95,7 @@ export const CLIPBOARD_WHITELISTS = {
         "oe-nested",
         // Miscellaneous
         /^btn/,
-        /^fa/,
+        /^oi/,
     ],
     attributes: ["class", "href", "src", "target", "colspan", "rowspan"],
     styledTags: ["SPAN", "B", "STRONG", "I", "S", "U", "FONT", "TD", "COL", "TR", "TH"],
