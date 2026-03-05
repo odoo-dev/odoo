@@ -247,6 +247,7 @@ export class DomainField extends Component {
             domain: this.getDomain(),
             isDebugMode: !!this.env.debug,
             onConfirm: this.update.bind(this),
+            isValid: this.state.isValid,
         });
     }
 

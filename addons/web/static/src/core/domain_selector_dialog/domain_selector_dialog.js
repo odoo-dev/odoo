@@ -28,6 +28,7 @@ export class DomainSelectorDialog extends Component {
         discardButtonText: { type: String, optional: true },
         title: { type: String, optional: true },
         context: { type: Object, optional: true },
+        isValid: { type: Boolean, optional: true, default: true },
     };
     static defaultProps = {
         isDebugMode: false,
@@ -77,21 +78,7 @@ export class DomainSelectorDialog extends Component {
 
     async onConfirm() {
         this.confirmButtonRef.el.disabled = true;
-        let domain;
-        let isValid;
-        try {
-            const evalContext = { ...user.context, ...this.props.context };
-            domain = new Domain(this.state.domain).toList(evalContext);
-        } catch {
-            isValid = false;
-        }
-        if (isValid === undefined) {
-            isValid = await rpc("/web/domain/validate", {
-                model: this.props.resModel,
-                domain,
-            });
-        }
-        if (!isValid) {
+        if (!this.props.isValid) {
             if (this.confirmButtonRef.el) {
                 this.confirmButtonRef.el.disabled = false;
             }
