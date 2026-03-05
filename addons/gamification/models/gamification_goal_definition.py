@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _, exceptions
-from odoo.fields import Domain
 from odoo.tools.safe_eval import safe_eval
 
 DOMAIN_TEMPLATE = "[('store', '=', True), '|', ('model_id', '=', model_id), ('model_id', 'in', model_inherited_ids)%s]"
@@ -98,12 +97,13 @@ class GamificationGoalDefinition(models.Model):
             if definition.computation_mode not in ('count', 'sum'):
                 continue
 
-            Model = self.env[definition.model_id.model]
+            Obj = self.env[definition.model_id.model]
             try:
                 domain = safe_eval(definition.domain, {
                     'user': self.env.user.with_user(self.env.user)
                 })
-                Domain(domain).validate(Model)
+                # dummy search to make sure the domain is valid
+                Obj.search_count(domain)
             except (ValueError, SyntaxError) as e:
                 msg = e
                 if isinstance(e, SyntaxError):

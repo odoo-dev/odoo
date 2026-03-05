@@ -1,7 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import http, _
-from odoo.fields import Domain
 from odoo.http import Controller, request
 from odoo.exceptions import ValidationError
 
@@ -18,7 +17,17 @@ class DomainController(Controller):
         if Model is None:
             raise ValidationError(_('Invalid model: %s', model))
         try:
-            Domain(domain).validate(Model.sudo())
+             # go through the motions of preparing the final SQL for the domain,
+            # so that anything invalid will raise an exception.
+            query = Model.sudo()._search(domain)
+
+            # Execute the search in EXPLAIN mode, to have the query parser
+            # verify it. EXPLAIN will make sure the query is never actually executed
+            # An alternative to EXPLAIN would be a LIMIT 0 clause, but the semantics
+            # of a falsy `limit` parameter when calling _search() do not permit it.
+            sql = SQL("EXPLAIN %s", query.select())
+            with mute_logger('odoo.sql_db'):
+                request.env.cr.execute(sql)
             return True
-        except (ValueError, TypeError):  # noqa: BLE001
+        except Exception:  # noqa: BLE001
             return False
