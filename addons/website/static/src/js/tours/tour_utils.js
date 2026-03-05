@@ -145,20 +145,19 @@ export function changeOption(
  */
 export function changeOptionInPopover(blockName, optionName, elementName) {
     const itemSelector = [
-        `.o_popover div.o-dropdown-item:contains("${elementName}")`,
-        `.o_popover span.o-dropdown-item:contains("${elementName}")`,
-        `.o_popover div.o-dropdown-item[title="${elementName}"]`,
-        `.o_popover span.o-dropdown-item[title="${elementName}"]`,
-        `.o_popover ${elementName}`,
+        `.o_popover .o-dropdown-item:contains("${elementName}")`,
+        `.o_popover .o-dropdown-item[title="${elementName}"]`,
     ].join(", ");
     return [
         changeOption(blockName, `[data-label='${optionName}'] .dropdown-toggle`),
         {
             content: `Check if "${elementName}" option is shown. If not, search for it.`,
             trigger: ".o_popover .o-dropdown-item",
-            async run(helpers) {
-                if (!helpers.queryFirst(itemSelector)) {
-                    await helpers.edit(elementName, ".o_popover input");
+            async run({ waitFor, edit }) {
+                try {
+                    await waitFor(itemSelector, { timeout: 5000 });
+                } catch {
+                    await edit(elementName, ".o_popover input");
                 }
             },
         },

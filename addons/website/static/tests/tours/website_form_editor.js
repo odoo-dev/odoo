@@ -51,6 +51,10 @@ const selectFieldByLabel = (label) => [
         trigger: ":iframe " + triggerFieldByLabel(label),
         run: "click",
     },
+    {
+        content: "Wait the field is well selected and that the right menu is the corresponding",
+        trigger: `div:has(.options-container-header .options-container-label:contains(field)) .we-bg-options-container [data-label=Label] input:value(${label})`,
+    },
 ];
 const selectButtonByText = function (text, dropdownContent) {
     return [
@@ -108,7 +112,10 @@ const addField = function (
         ...selectButtonByData("Text", data),
         {
             content: "Wait for field to load",
-            trigger: `:iframe .s_website_form_field[data-type="${name}"],:iframe .s_website_form_input[name="${name}"]`, //custom or existing field
+            //custom or existing field
+            trigger: !isCustom
+                ? `:iframe .s_website_form_input[name="${name}"]`
+                : `:iframe .s_website_form_field[data-type="${name}"],`,
         },
         ...changeOptionInPopover("Field", "Visibility Rule", display.visibility),
     ];
@@ -956,7 +963,6 @@ registerWebsitePreviewTour(
 registerWebsitePreviewTour(
     "website_form_conditional_required_checkboxes",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         edition: true,
     },
     () => [
@@ -975,19 +981,11 @@ registerWebsitePreviewTour(
         {
             content: "Select the form by clicking on an input field",
             trigger: ":iframe section.s_website_form input",
-            async run(actions) {
-                await actions.click();
-
-                // The next steps will be about removing non essential required
-                // fields. For the robustness of the test, check that amount
-                // of field stays the same.
-                const requiredFields = this.anchor
-                    .closest("[data-snippet]")
-                    .querySelectorAll(".s_website_form_required");
-                if (requiredFields.length !== NB_NON_ESSENTIAL_REQUIRED_FIELDS_IN_DEFAULT_FORM) {
-                    console.error("The amount of required fields seems to have changed");
-                }
-            },
+            run: "click",
+        },
+        {
+            content: "The amount of required fields must not change",
+            trigger: `:iframe [data-snippet]:has(section.s_website_form input):has(.s_website_form_required:count(${NB_NON_ESSENTIAL_REQUIRED_FIELDS_IN_DEFAULT_FORM}))`,
         },
         ...(function () {
             const steps = [];
@@ -1033,21 +1031,8 @@ registerWebsitePreviewTour(
 
         // Check that the resulting form behavior is correct
         {
-            content: "Wait for page reload",
-            trigger: 'body:not(.editor_enable) :iframe [data-snippet="s_website_form"]',
-            run: function (actions) {
-                // The next steps will be about removing non essential required
-                // fields. For the robustness of the test, check that amount
-                // of field stays the same.
-                const essentialFields = this.anchor.querySelectorAll(
-                    ".s_website_form_model_required"
-                );
-                if (
-                    essentialFields.length !== ESSENTIAL_FIELDS_VALID_DATA_FOR_DEFAULT_FORM.length
-                ) {
-                    console.error("The amount of model-required fields seems to have changed");
-                }
-            },
+            content: "The amount of model-required fields must not change",
+            trigger: `body:not(.editor_enable) :iframe [data-snippet="s_website_form"]:has(.s_website_form_model_required:count(${ESSENTIAL_FIELDS_VALID_DATA_FOR_DEFAULT_FORM.length}))`,
         },
         {
             content: "Wait the form is loaded before fill it",
@@ -1221,7 +1206,6 @@ registerWebsitePreviewTour(
 registerWebsitePreviewTour(
     "website_form_special_characters",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         edition: true,
     },
     () => [
