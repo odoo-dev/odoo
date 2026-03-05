@@ -122,6 +122,42 @@ class ChatbotCase(MailCommon, chatbot_common.ChatbotCase):
         self.assertEqual(len(welcome_steps), 1)
         self.assertEqual(welcome_steps, self.chatbot_script.script_step_ids[0])
 
+    def test_chatbot_restart_welcome_steps(self):
+        data = self.make_jsonrpc_request("/im_livechat/get_session", {
+            "channel_id": self.livechat_channel.id,
+            "chatbot_script_id": self.chatbot_script.id,
+        })
+        discuss_channel = self.env["discuss.channel"].browse(data["channel_id"])
+        welcome_steps = self.chatbot_script._get_welcome_steps()
+        previous_message_ids = discuss_channel.message_ids.ids
+        for _ in range(2):
+            self.make_jsonrpc_request("/chatbot/restart", {
+                "channel_id": discuss_channel.id,
+                "chatbot_script_id": self.chatbot_script.id,
+            })
+            self.assertFalse(discuss_channel.chatbot_current_step_id)
+            self.assertFalse(discuss_channel.chatbot_message_ids)
+            for index, step in enumerate(welcome_steps, start=1):
+                self.make_jsonrpc_request("/chatbot/step/trigger", {
+                    "channel_id": discuss_channel.id,
+                    "chatbot_script_id": self.chatbot_script.id,
+                })
+                self.assertEqual(discuss_channel.chatbot_current_step_id, step)
+                self.assertEqual(len(discuss_channel.chatbot_message_ids), index)
+            messages = discuss_channel.chatbot_message_ids.sorted("id").mail_message_id
+            self.assertFalse(set(messages.ids) & set(previous_message_ids))
+            self.assertEqual(
+                [html2plaintext(message.body) for message in messages],
+                [html2plaintext(step.message) for step in welcome_steps],
+            )
+            self.assertEqual(discuss_channel.chatbot_current_step_id, self.step_dispatch)
+            self.assertFalse(discuss_channel.livechat_end_dt)
+            previous_message_ids = discuss_channel.message_ids.ids
+            self._post_answer_and_trigger_next_step(
+                discuss_channel, chatbot_script_answer=self.step_dispatch_buy_software,
+            )
+            self.assertEqual(discuss_channel.chatbot_current_step_id, self.step_email)
+
     def test_chatbot_not_invited_to_rtc_calls(self):
         with self.mock_datetime_and_now(self.env.cr.now()):
             data = self.make_jsonrpc_request(
