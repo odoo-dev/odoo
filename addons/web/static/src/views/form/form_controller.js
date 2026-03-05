@@ -490,7 +490,8 @@ export class FormController extends Component {
     }
 
     async beforeLeave({ forceLeave } = {}) {
-        if (this.model.root.dirty && !forceLeave) {
+        const isDirty = await this.model.root.isDirty();
+        if (isDirty && !forceLeave) {
             return this.save({
                 reload: false,
                 onError: (error, options) => this.onSaveError(error, options, true),
