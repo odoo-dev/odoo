@@ -10,4 +10,6 @@ class WebsiteWebClient(WebClient):
     def bundle(self, bundle_name, **bundle_params):
         if 'website_id' in bundle_params:
             request.update_context(website_id=int(bundle_params['website_id']))
+        elif bundle_name.startswith('website.'):
+            request.update_context(website_id=self.env['website'].get_current_website().id)
         return super().bundle(bundle_name, **bundle_params)
