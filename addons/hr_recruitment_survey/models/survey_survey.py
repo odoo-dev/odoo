@@ -15,7 +15,7 @@ class SurveySurvey(models.Model):
         if self.env.user.has_group('hr_recruitment.group_hr_recruitment_interviewer') or \
                 self.env.user.has_group('survey.group_survey_user'):
             for survey in self:
-                survey.allowed_survey_types = (survey.allowed_survey_types or {}) | {'recruitment': 'fa-suitcase'}
+                survey.allowed_survey_types = (survey.allowed_survey_types or {}) | {'recruitment': 'luggage'}
 
     def get_formview_id(self, access_uid=None):
         if self.survey_type == 'recruitment':

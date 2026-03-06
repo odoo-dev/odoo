@@ -388,10 +388,10 @@ class SurveySurvey(models.Model):
     def _compute_allowed_survey_types(self):
         """Assign static mapping of allowed survey types and respective icons depending on users groups."""
         self.allowed_survey_types = {
-            'survey': 'fa-edit',
-            'live_session': 'fa-bar-chart-o',
-            'assessment': "fa-mortar-board",
-            'custom': 'fa-paint-brush',
+            'survey': 'edit',
+            'live_session': 'bar_chart',
+            'assessment': 'school',
+            'custom': 'design_services',
         } if self.env.user.has_group('survey.group_survey_user') else {}
 
     @api.onchange('survey_type')
