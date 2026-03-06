@@ -479,7 +479,7 @@ actual arch.
 
                 if view.type == 'qweb':
                     continue
-            except (etree.ParseError, ValueError) as e:
+            except (etree.ParseError, ValueError, TypeError) as e:
                 err = ValidationError(_(
                     "Error while parsing or validating view:\n\n%(error)s",
                     error=e,
@@ -581,7 +581,7 @@ actual arch.
                 combined_arch = view._get_combined_arch()
                 if view.type != 'qweb':
                     view._postprocess_view(combined_arch, view.model, is_compute_warning_info=True)
-            except (etree.ParseError, ValueError) as e:
+            except (etree.ParseError, ValueError, TypeError) as e:
                 view.warning_info = str(e)
 
     def _validate_xml_encoding(self, text):
@@ -615,7 +615,7 @@ actual arch.
                                 "Allowed types are: %(valid_types)s",
                                 view_type=values['type'], valid_types=', '.join(valid_types)
                             ))
-                    except (etree.ParseError, ValueError):
+                    except (etree.ParseError, ValueError, TypeError):
                         # don't raise here, the constraint that runs `self._check_xml` will
                         # do the job properly.
                         pass
