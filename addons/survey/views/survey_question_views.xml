@@ -25,16 +25,21 @@
                     <div invisible="is_page" class="mb-0">
                         <field name="question_type" nolabel="1" widget="badges_selection" required="not is_page"
                             options="{'icon_mapping': {
-                                'simple_choice': 'fa-dot-circle-o',
-                                'multiple_choice': 'fa-check-square-o',
-                                'text_box': 'fa-bars',
-                                'char_box': 'fa-minus',
-                                'numerical_box': 'fa-hashtag',
-                                'scale': 'fa-smile-o',
-                                'date': 'fa-calendar-o',
-                                'datetime': 'fa-calendar',
-                                'time': 'fa-clock-o',
-                                'matrix': 'fa-th',    
+                                'simple_choice': 'radio_button_checked',
+                                'multiple_choice': 'check_box',
+                                'text_box': 'menu',
+                                'char_box': 'remove',
+                                'numerical_box': 'tag',
+                                'scale': 'sentiment_satisfied',
+                                'date': 'calendar_today',
+                                'datetime': 'calendar_today',
+                                'time': 'schedule',
+                                'matrix': 'grid_view',
+                            },
+                            'icon_class_mapping': {
+                                'multiple_choice': 'oi-filled',
+                                'date': 'oi-filled',
+                                'datetime': 'oi-filled',
                             }}"/>
                     </div>
                     <div class="oe_title">

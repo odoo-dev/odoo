@@ -54,12 +54,15 @@
                         options="{
                             'allowed_selection_field': 'allowed_survey_types',
                             'icon_mapping': {
-                                'survey': 'fa-edit',
-                                'live_session': 'fa-bar-chart-o',
-                                'assessment': 'fa-mortar-board',
-                                'custom': 'fa-paint-brush',
-                                'recruitment': 'fa-suitcase',
-                                'appraisal': 'fa-star-half-empty'
+                                'survey': 'edit',
+                                'live_session': 'bar_chart',
+                                'assessment': 'school',
+                                'custom': 'design_services',
+                                'recruitment': 'luggage',
+                                'appraisal': 'star_half'
+                            },
+                            'icon_class_mapping': {
+                                'survey': 'oi-filled'
                             }
                         }"/>
                     <div class="oe_title w-100">
