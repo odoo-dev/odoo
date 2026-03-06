@@ -382,7 +382,7 @@
 <template id="default_website_rating">
     <!-- ratings -->
     <div>
-        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+        <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
             <strong class="s_rating_title">Customer Relationship</strong>
             <div class="s_rating_icons o_not_editable">
                 <span class="s_rating_active_icons text-primary">
@@ -396,7 +396,7 @@
                 </span>
             </div>
         </div>
-        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+        <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
             <strong class="s_rating_title">Personal Evolution</strong>
             <div class="s_rating_icons o_not_editable">
                 <span class="s_rating_active_icons text-primary">
@@ -410,7 +410,7 @@
                 </span>
             </div>
         </div>
-        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+        <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
             <strong class="s_rating_title">Autonomy</strong>
             <div class="s_rating_icons o_not_editable">
                 <span class="s_rating_active_icons text-primary">
@@ -424,7 +424,7 @@
                 </span>
             </div>
         </div>
-        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+        <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
             <strong class="s_rating_title">Administrative Work</strong>
             <div class="s_rating_icons o_not_editable">
                 <span class="s_rating_active_icons text-primary">
@@ -438,7 +438,7 @@
                 </span>
             </div>
         </div>
-        <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+        <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
             <strong class="s_rating_title">Technical Expertise</strong>
             <div class="s_rating_icons o_not_editable">
                 <span class="s_rating_active_icons text-primary">
