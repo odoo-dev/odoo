@@ -897,7 +897,7 @@ export class PosStore extends Reactive {
         if (values.product_id.to_weight && this.config.iface_electronic_scale && configure) {
             if (values.product_id.isScaleAvailable) {
                 this.scale.setProduct(values.product_id, this.getProductPrice(values.product_id));
-                const weight = await this.weighProduct();
+                const weight = await this.weighProduct(options);
                 if (weight) {
                     values.qty = weight;
                 } else if (weight !== null) {

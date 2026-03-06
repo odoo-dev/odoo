@@ -43,6 +43,43 @@ Toledo8217Protocol = SerialProtocol(
     emptyAnswerValid=False,
 )
 
+# Dialog 04 (Price computing) protocol.
+# Our recommended scale, the Mettler-Toledo "Ariva-S", supports this protocol on
+# both the USB and RS232 ports, it can be configured in the setup menu as protocol option 8.
+Dialog04Protocol = SerialProtocol(
+    name='Toledo Dialog 04',
+    baudrate=4800,
+    bytesize=serial.SEVENBITS,
+    stopbits=serial.STOPBITS_ONE,
+    parity=serial.PARITY_ODD,
+    timeout=1,
+    writeTimeout=1,
+    measureRegexp=rb"\x0202\x1b\d\x1b(\d{5})\x1b(\d{6})\x1b(\d{6})\x03",
+    statusRegexp=rb"\x0209\x1b(\d\d)\x03",
+    commandDelay=0.1,
+    measureDelay=0.1,
+    newMeasureDelay=0.1,
+    commandTerminator=b'',
+    measureCommand=b'\x04\x05',
+    emptyAnswerValid=False,
+)
+
+DIALOG_04_ERRORS = {
+    "00": "NO_ERROR",
+    "01": "GENERAL_ERROR",
+    "02": "PARITY_ERROR",
+    "10": "INVALID_RECORD",
+    "11": "INVALID_PRICE",
+    "12": "INVALID_TARE",
+    "13": "INVALID_TEXT",
+    "20": "SCALE_IN_MOTION",
+    "21": "NO_CHANGE",
+    "22": "PRICE_NOT_AVAILABLE",
+    "30": "WEIGHT_ZERO",
+    "31": "WEIGHT_NEGATIVE",
+    "32": "WEIGHT_OVERLOAD",
+}
+
 # The ADAM scales have their own RS232 protocol, usually documented in the scale's manual
 #   e.g at https://www.adamequipment.com/media/docs/Print%20Publications/Manuals/PDF/AZEXTRA/AZEXTRA-UM.pdf
 #          https://www.manualslib.com/manual/879782/Adam-Equipment-Cbd-4.html?page=32#manual
@@ -107,6 +144,7 @@ class ScaleDriver(SerialDriver):
 
         self._actions.update({
             'read_once': self._read_once_action,
+            'set_price': self._set_price_action,
             'start_reading': self._start_reading_action,
             'stop_reading': self._stop_reading_action,
         })
@@ -118,6 +156,9 @@ class ScaleDriver(SerialDriver):
     def _stop_reading_action(self, data):
         """Stops asking for the scale value."""
         self._is_reading = False
+
+    def _set_price_action(self, data):
+        pass
 
     def _read_once_action(self, data):
         """Reads the scale current weight value and pushes it to the frontend."""
@@ -253,6 +294,79 @@ class Toledo8217Driver(ScaleDriver):
                         'status': self._status,
                     }
                     break
+
+
+class Dialog04Driver(ScaleDriver):
+    _protocol = Dialog04Protocol
+
+    def __init__(self, identifier, device):
+        super().__init__(identifier, device)
+        self.device_manufacturer = "Toledo"
+        self.net_weight_char = b""
+        self.current_unit_price = 1.00
+
+    @classmethod
+    def supported(cls, device):
+        try:
+            with serial_connection(device["identifier"], cls._protocol) as connection:
+                _logger.critical("TRYING DIALOG 04 with: %s", b"\x04\x0208\x03")
+                connection.write(b"\x04\x0208\x03")
+                answer = cls._get_raw_response(connection)
+                _logger.critical("ANSWER: %s", answer)
+                if re.match(cls._protocol.statusRegexp, answer):
+                    _logger.critical("COMPATIBLE")
+                    return True
+        except serial.SerialTimeoutException:
+            pass
+        except Exception:
+            _logger.exception('Error while probing %s with protocol %s', device, cls._protocol.name)
+        return False
+
+    def _set_price_action(self, data):
+        self.current_unit_price = data["unit_price"]
+        self._send_unit_price()
+
+    def _send_unit_price(self):
+        formatted_unit_price = f"{self.current_unit_price:07.2f}".replace(".", "")
+        payload = b"\x04\x0201\x1b" + formatted_unit_price.encode() + b"\x1b\x03"
+        self._connection.write(payload)
+        self._get_raw_response(self._connection)
+
+    @staticmethod
+    def _get_raw_response(connection):
+        first_char = connection.read(1)
+        if first_char == b"\x02":
+            return first_char + connection.read_until(b"\x03")
+        return first_char
+
+    def _read_weight(self):
+        self._connection.write(self._protocol.measureCommand)
+        answer = self._get_raw_response(self._connection)
+        match = re.match(self._protocol.measureRegexp, answer)
+        if match:
+            weight = float(match.group(1)) / 1000
+            unit_price = float(match.group(2)) / 100
+            total_price = float(match.group(3)) / 100
+            self.data["value"] = weight
+            self.data["total_price"] = total_price
+            _logger.critical("%.3f kg x $%.2f = $%.2f", weight, unit_price, total_price)
+            self._send_unit_price()
+        else:
+            self._read_status(answer)
+
+    def _read_status(self, answer):
+        self._connection.write(b"\x04\x0208\x03")
+        answer = self._get_raw_response(self._connection)
+        status_match = re.match(self._protocol.statusRegexp, answer)
+        if status_match:
+            error = DIALOG_04_ERRORS[status_match[1].decode()]
+            if error in ["NO_CHANGE", "SCALE_IN_MOTION"]:
+                return
+            if error == "PRICE_NOT_AVAILABLE":
+                self._send_unit_price()
+            else:
+                self.data["value"] = 0
+                self.data["total_price"] = 0
 
 
 class AdamEquipmentDriver(ScaleDriver):
