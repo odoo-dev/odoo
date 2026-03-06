@@ -153,7 +153,7 @@ class MrpProduction(models.Model):
         index=True, required=True, tracking=True)
     date_finished = fields.Datetime(
         'End', copy=False, default=_get_default_date_finished,
-        compute='_compute_date_finished', store=True,
+        compute='_compute_date_finished', store=True, tracking=True,
         help="Date you expect to finish production or actual date you finished production.")
     duration_expected = fields.Float("Expected Duration", help="Total expected duration (in minutes)", compute='_compute_duration_expected', store=True)
     duration = fields.Float("Real Duration", help="Total real duration (in minutes)", compute='_compute_duration', store=True)
@@ -2234,7 +2234,6 @@ class MrpProduction(models.Model):
         })
         for production in self:
             production.write({
-                'date_finished': fields.Datetime.now(),
                 'priority': '0',
                 'is_locked': True,
                 'state': 'done',
