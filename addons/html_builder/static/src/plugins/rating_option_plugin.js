@@ -28,7 +28,7 @@ class RatingOptionPlugin extends Plugin {
 export class SetIconsAction extends BuilderAction {
     static id = "setIcons";
     apply({ editingElement, params: { mainParam: iconParam } }) {
-        editingElement.dataset.icon = iconParam;
+        editingElement.dataset.ratingIcon = iconParam;
         renderIcons(editingElement);
         delete editingElement.dataset.activeCustomIcon;
         delete editingElement.dataset.inactiveCustomIcon;
@@ -77,7 +77,7 @@ export class CustomIconAction extends BuilderAction {
             inactiveIconEls.length > 0 ? inactiveIconEls[0].getAttribute("class") : customClass;
         editingElement.dataset.activeCustomIcon = faClassActiveCustomIcons;
         editingElement.dataset.inactiveCustomIcon = faClassInactiveCustomIcons;
-        editingElement.dataset.icon = "custom";
+        editingElement.dataset.ratingIcon = "custom";
     }
 }
 export class ActiveIconsNumberAction extends BuilderAction {
@@ -135,7 +135,7 @@ function getAllIcons(editingElement) {
     return editingElement.querySelectorAll(".s_rating_icons i");
 }
 function getIconType(editingElement) {
-    return editingElement.dataset.icon;
+    return editingElement.dataset.ratingIcon;
 }
 function getInactiveCustomIcons(editingElement) {
     return editingElement.dataset.inactiveCustomIcon || "";
@@ -145,19 +145,14 @@ function getInactiveIcons(editingElement) {
 }
 function renderIcons(editingElement) {
     const iconType = getIconType(editingElement);
-    const icons = {
-        "fa-star": "fa-star-o",
-        "fa-thumbs-up": "fa-thumbs-o-up",
-        "fa-circle": "fa-circle-o",
-        "fa-square": "fa-square-o",
-        "fa-heart": "fa-heart-o",
-    };
-    const faClassActiveIcons =
-        iconType === "custom" ? getActiveCustomIcons(editingElement) : "fa " + iconType;
-    const faClassInactiveIcons =
-        iconType === "custom" ? getInactiveCustomIcons(editingElement) : "fa " + icons[iconType];
     const activeIconEls = getActiveIcons(editingElement);
     const inactiveIconEls = getInactiveIcons(editingElement);
-    activeIconEls.forEach((activeIconEl) => (activeIconEl.className = faClassActiveIcons));
-    inactiveIconEls.forEach((inactiveIconEl) => (inactiveIconEl.className = faClassInactiveIcons));
+    activeIconEls.forEach((activeIconEl) => {
+        activeIconEl.className = "oi oi-filled";
+        activeIconEl.dataset.icon = iconType;
+    });
+    inactiveIconEls.forEach((inactiveIconEl) => {
+        inactiveIconEl.className = "oi";
+        inactiveIconEl.dataset.icon = iconType;
+    });
 }
