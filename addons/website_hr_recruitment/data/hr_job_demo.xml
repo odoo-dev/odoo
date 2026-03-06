@@ -6,7 +6,7 @@
         <field name="website_rating" type="html">
             <!-- ratings -->
             <div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Customer Relationship</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -20,7 +20,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Personal Evolution</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -34,7 +34,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Autonomy</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -48,7 +48,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Administrative Work</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -62,7 +62,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Technical Expertise</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -231,7 +231,7 @@
         <field name="website_rating" type="html">
             <!-- ratings -->
             <div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Problem-solving</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -245,7 +245,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Skill Development</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -259,7 +259,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Autonomy</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -273,7 +273,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Client Interaction</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -287,7 +287,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Management</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -454,7 +454,7 @@
         <field name="website_rating" type="html">
             <!-- ratings -->
             <div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Customer Relationship</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -468,7 +468,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Personal Evolution</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -482,7 +482,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Innovation</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -496,7 +496,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Administrative Work</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -510,7 +510,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Technical Expertise</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -678,7 +678,7 @@
         <field name="website_rating" type="html">
             <!-- ratings -->
             <div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Technology Strategy</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -692,7 +692,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Leadership</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -706,7 +706,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Collaboration</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -720,7 +720,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Administrative Work</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -734,7 +734,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Cybersecurity</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -853,7 +853,7 @@
         <field name="website_rating" type="html">
             <!-- ratings -->
             <div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Learning</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -867,7 +867,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Adaptability</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -881,7 +881,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Autonomy</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -895,7 +895,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Problem-Solving</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -909,7 +909,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Be enthusiastic</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -1077,7 +1077,7 @@
         <field name="website_rating" type="html">
             <!-- ratings -->
             <div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Talent Acquisition</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -1091,7 +1091,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Compliance and Regulations</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -1105,7 +1105,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Diversity and Inclusion</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -1119,7 +1119,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Conflict Resolution</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
@@ -1133,7 +1133,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="s_rating pb8" data-vcss="001" data-icon="fa-star" data-snippet="s_rating">
+                <div class="s_rating pb8" data-vcss="001" data-rating-icon="star" data-snippet="s_rating">
                     <strong class="s_rating_title">Technical Expertise</strong>
                     <div class="s_rating_icons o_not_editable">
                         <span class="s_rating_active_icons text-primary">
