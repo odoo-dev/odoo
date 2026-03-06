@@ -17,15 +17,7 @@ import { CallbackRecorder } from "@web/search/action_hook";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { PATH_KEYS, router as _router } from "@web/core/browser/router";
 
-import {
-    Component,
-    markup,
-    onMounted,
-    onWillUnmount,
-    onError,
-    xml,
-    status,
-} from "@odoo/owl";
+import { Component, markup, onMounted, onWillUnmount, onError, xml, status } from "@odoo/owl";
 import { downloadReport, getReportUrl } from "./reports/utils";
 import { zip } from "@web/core/utils/arrays";
 import { isHtmlEmpty } from "@web/core/utils/html";
@@ -896,10 +888,10 @@ export function makeActionManager(env, router = _router) {
         controller.config.setEmbeddedActions = (embeddedActions) => {
             controller.embeddedActions = embeddedActions;
         };
-        controller.config.historyBack = () => {
+        controller.config.historyBack = ({ forceLeave } = {}) => {
             const previousController = controllerStack[controllerStack.length - 2];
             if (previousController) {
-                restore(previousController.jsId);
+                restore(previousController.jsId, { forceLeave });
             } else {
                 env.bus.trigger("WEBCLIENT:LOAD_DEFAULT_APP");
             }
@@ -1717,7 +1709,7 @@ export function makeActionManager(env, router = _router) {
      *
      * @param {string} jsId
      */
-    async function restore(jsId) {
+    async function restore(jsId, { forceLeave } = {}) {
         await keepLast.add(Promise.resolve());
         let index;
         if (!jsId) {
@@ -1729,7 +1721,7 @@ export function makeActionManager(env, router = _router) {
             const msg = jsId ? "Invalid controller to restore" : "No controller to restore";
             throw new ControllerNotFoundError(msg);
         }
-        const canProceed = await clearUncommittedChanges(env);
+        const canProceed = await clearUncommittedChanges(env, { forceLeave });
         if (!canProceed) {
             return;
         }
@@ -1741,7 +1733,7 @@ export function makeActionManager(env, router = _router) {
             }
             const { actionRequest, options } = actionParams;
             controllerStack = controllerStack.slice(0, index);
-            return doAction(actionRequest, options);
+            return doAction(actionRequest, Object.assign({}, options, { forceLeave }));
         }
         if (controller.action.type === "ir.actions.act_window") {
             if (controller.isMounted) {

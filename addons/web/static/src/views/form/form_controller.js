@@ -1,4 +1,11 @@
-import { onRendered, useComponent, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
+import {
+    onRendered,
+    useComponent,
+    useLayoutEffect,
+    useRef,
+    useState,
+    useSubEnv,
+} from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
@@ -515,7 +522,11 @@ export class FormController extends Component {
     }
 
     async beforeLeave({ forceLeave } = {}) {
-        if (this.model.root.dirty && !forceLeave) {
+        if (forceLeave) {
+            return true;
+        }
+        const isDirty = await this.model.root.isDirty();
+        if (isDirty) {
             return this.save({
                 reload: false,
                 onError: (error, options) => this.onSaveError(error, options, true),
@@ -719,7 +730,7 @@ export class FormController extends Component {
         if (this.env.inDialog) {
             await this.env.dialogData.close();
         } else if (this.model.root.isNew) {
-            this.env.config.historyBack();
+            this.env.config.historyBack({ forceLeave: true });
         }
     }
 
