@@ -983,6 +983,9 @@ class DomainCondition(Domain):
                 if domain != self:
                     return domain
 
+            if not field.store and not field.compute_sql:
+                self._raise("No SQL representation")
+
         # apply optimizations of the level for operator and type
         optimizations = _OPTIMIZATIONS_FOR[level]
         for opt in optimizations.get(self.operator, ()):
