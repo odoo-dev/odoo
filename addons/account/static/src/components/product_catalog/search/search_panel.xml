@@ -28,7 +28,7 @@
                 </header>
                 <ul class="list-group d-block">
                     <li
-                        draggable="true"
+                        t-att-draggable="isSectionDraggable == true ? 'true' : 'false'"
                         t-foreach="this.state.sections.keys()"
                         t-as="sectionId"
                         t-key="sectionId"
@@ -42,11 +42,11 @@
                         <div class="d-flex align-items-center">
                             <t t-set="section" t-value="this.state.sections.get(sectionId)"/>
                             <span
-                                t-if="sectionId"
+                                t-if="isSectionDraggable and sectionId"
                                 class="o_row_handle oi oi-draggable ui-sortable-handle"
                             />
                             <i
-                                t-else=""
+                                t-elif="canCreateSections"
                                 class="fa fa-pencil"
                                 t-on-click="() => this.enableSectionInput('top')"
                             />
@@ -82,7 +82,7 @@
                     t-on-blur="createSection"
                 />
                 <button
-                    t-else=""
+                    t-elif="canCreateSections"
                     class="btn btn-link px-0 py-1"
                     type="button"
                     t-on-click="() => this.enableSectionInput('bottom')"

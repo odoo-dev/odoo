@@ -36,6 +36,14 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         return this.env.searchModel.selectedSection;
     }
 
+    get canCreateSections() {
+        return true;
+    }
+
+    get isSectionDraggable() {
+        return true
+    }
+
     onDragStart(sectionId, ev) {
         ev.dataTransfer.setData('section_id', sectionId);
     }
