@@ -9,6 +9,7 @@ import itertools
 import logging
 import operator as pyoperator
 import re
+import traceback
 import typing
 import warnings
 from collections.abc import Set as AbstractSet
@@ -46,6 +47,9 @@ COMPANY_DEPENDENT_FIELDS = (
 PYTHON_INEQUALITY_OPERATOR = {'<': pyoperator.lt, '>': pyoperator.gt, '<=': pyoperator.le, '>=': pyoperator.ge}
 
 _logger = logging.getLogger('odoo.fields')
+
+# Set of stack signatures to avoid repeated stack_info for "write to empty recordset" warning
+_empty_recordset_write_stacks_logged = set()
 
 
 def resolve_mro(model: BaseModel, name: str, predicate) -> list[typing.Any]:
@@ -1851,6 +1855,20 @@ class Field[T]:
         protected_ids = []
         new_ids = []
         other_ids = []
+        if not records and value is not False and value is not None:
+            global _empty_recordset_write_stacks_logged
+            stack_sig = tuple(
+                (f.filename, f.lineno, f.name)
+                for f in traceback.extract_stack()[:-1]
+            )
+            stack_info = stack_sig not in _empty_recordset_write_stacks_logged
+            if stack_info:
+                _empty_recordset_write_stacks_logged.add(stack_sig)
+                _logger.warning(
+                    "write to empty recordset with value: %s",
+                    value,
+                    stack_info=stack_info,
+                )
         for record_id in records._ids:
             if record_id in records.env._protected.get(self, ()):
                 protected_ids.append(record_id)
@@ -1862,8 +1880,6 @@ class Field[T]:
         if protected_ids:
             # records being computed: no business logic, no recomputation
             protected_records = records.__class__(records.env, tuple(protected_ids), records._prefetch_ids)
-            if not protected_records and value is not False and value is not None:
-                raise ValidationError(records.env._("write to empty recordset with value: %s", value))
             self.write(protected_records, value)
 
         if new_ids:
@@ -1872,8 +1888,6 @@ class Field[T]:
             with records.env.protecting(records.pool.field_computed.get(self, [self]), new_records):
                 if self.relational:
                     new_records.modified([self.name], before=True)
-                if not new_records and value is not False and value is not None:
-                    raise ValidationError(records.env._("write to empty recordset with value: %s", value))
                 self.write(new_records, value)
                 new_records.modified([self.name])
 

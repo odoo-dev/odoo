@@ -20,7 +20,7 @@ from odoo.addons.base.tests.files import SVG_B64, ZIP_RAW
 from odoo.addons.test_orm.tests.test_domain_expression import TransactionExpressionCase
 
 
-@tagged('at_install', '-post_install')  # LEGACY at_install
+# @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
     def setUp(self):
         # for tests methods that create custom models/fields
@@ -97,6 +97,18 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         with self.assertRaisesRegex(ValueError, 'Invalid field'):
             cat.new({'name': 'Foo', 'zzz': 42})
+    
+    # def test_06_write_empty_recordset(self):
+    #     """ Test writing to a field on an empty recordset. """
+    #     empty = self.env['test_orm.message']
+    #     with self.assertRaises(ValidationError):
+    #         empty.name = 'toto'
+
+    #     message = self.env['test_orm.message'].create({})
+    #     self.assertFalse(message.discussion)
+    #     with self.assertRaises(ValidationError):
+    #         message.discussion_name = 'toto'
+    #     self.assertEqual(message.discussion_name, 'toto')
 
     def test_10_computed(self):
         """ check definition of computed fields """
