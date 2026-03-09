@@ -127,8 +127,6 @@ class PosOrder(models.Model):
             self.action_pos_order_paid()
             self._create_order_picking()
             self._compute_total_cost_in_real_time()
-
-        self._generate_order_invoice()
         return self.id
 
     def _update_lines(self, order, pos_order, fields=[]):
@@ -154,12 +152,13 @@ class PosOrder(models.Model):
                     _logger.info("Added %s %s to pos.order #%s", field, list(added_ids), pos_order.id)
                 order[field] = []
 
-    def _generate_order_invoice(self):
+    def generate_order_invoice(self):
         if self.to_invoice and self.state == 'paid' and self.config_id.invoice_journal_id:
             self._generate_pos_order_invoice()
         elif not self.config_id.invoice_journal_id:
             _logger.warning('Trying to create an invoice without any journal configured')
             raise UserError(_('No invoice journal configured for this POS session.'))
+        return self.read_pos_data([], self.config_id.id)
 
     def update_order_partner(self, order):
         partner_id = self.env['res.partner'].browse(order['partner_id'])
@@ -183,7 +182,7 @@ class PosOrder(models.Model):
         if order.get('payment_ids'):
             self._update_lines(order, existing_order, ['lines', 'payment_ids'])
             self._process_payment_lines(order, existing_order, existing_order.session_id, False)
-        existing_order._generate_order_invoice()
+        existing_order.generate_order_invoice()
 
     def _clean_payment_lines(self):
         self.ensure_one()

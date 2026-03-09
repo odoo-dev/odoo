@@ -133,8 +133,10 @@ class TestPoSSaleReport(TestPoSCommon, TestPointOfSaleHttpCommon):
         data['lines'][0][2]['sale_order_origin_id'] = sale_order.id
         data['lines'][0][2]['sale_order_line_id'] = sale_order.order_line[0].id
         order_ids = self.env['pos.order'].sync_from_ui([data])
+        order = self.env['pos.order'].browse(order_ids['pos.order'][0]['id']).exists()
+        order.generate_order_invoice()
 
-        move_id = self.env['account.move'].browse(order_ids['pos.order'][0]['account_move'])
+        move_id = order.account_move
         self.assertEqual(move_id.partner_id.id, self.customer.id)
         self.assertEqual(move_id.partner_shipping_id.id, self.other_customer.id)
 

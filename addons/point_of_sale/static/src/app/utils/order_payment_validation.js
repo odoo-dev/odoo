@@ -66,16 +66,6 @@ export default class OrderPaymentValidation {
         return true;
     }
 
-    /**
-     * This method can be overridden to perform checks before starting the order validation process.
-     */
-    shouldDownloadInvoice() {
-        if (!this.pos.config.canInvoice) {
-            return false;
-        }
-        return true;
-    }
-
     async shouldHideValidationBehindFeedbackScreen() {
         const nextPage = this.nextPage;
         const waitForFn = async () => {
@@ -160,24 +150,7 @@ export default class OrderPaymentValidation {
                 return false;
             }
 
-            // 2. Invoice, should not stop the validation process but a dialog is shown if an
-            // error occured.
-            if (this.shouldDownloadInvoice() && this.order.isToInvoice()) {
-                if (this.order.raw.account_move) {
-                    await this.pos.env.services.account_move.downloadPdf(
-                        this.order.raw.account_move
-                    );
-                } else {
-                    this.pos.dialog.add(AlertDialog, {
-                        title: _t("Backend Invoice"),
-                        body: _t(
-                            "An error occurred while trying to generate an invoice. Try again from the order tab or generate the invoice from the backend."
-                        ),
-                    });
-                }
-            }
-
-            // 3. Post process.
+            // 2. Post process.
             const postPushOrders = syncOrderResult.filter((order) => order.waitForPushOrder());
             if (postPushOrders.length > 0) {
                 await this.postPushOrderResolve(postPushOrders.map((order) => order.id));

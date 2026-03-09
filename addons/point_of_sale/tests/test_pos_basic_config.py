@@ -1340,12 +1340,13 @@ class TestPoSBasicConfig(TestPoSCommon):
         order_data['access_token'] = '0123456789'
         res = self.env['pos.order'].sync_from_ui([order_data])
         order_id = res['pos.order'][0]['id']
+        order = self.env['pos.order'].browse(order_id)
+        order.generate_order_invoice()
 
         # Sync the same order again
         res = self.env['pos.order'].sync_from_ui([order_data])
         self.assertEqual(res['pos.order'][0]['id'], order_id, 'Syncing the same order should not create a new one')
 
-        order = self.env['pos.order'].browse(order_id)
         self.assertEqual(order.picking_count, 1, 'Order should have one picking')
         self.assertEqual(len(order.payment_ids), 1, 'Order should have one payment')
         self.assertEqual(self.env['account.move'].search_count([('pos_order_ids', 'in', order.ids)]), 1, 'Order should have one invoice')

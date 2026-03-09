@@ -87,6 +87,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'payment_method_id': self.customer_account_payment_method.id
         })
         order_payment.with_context(**payment_context).check()
+        order.generate_order_invoice()
 
         self.assertEqual(self.partner_test_1.total_due, 10)
         current_session.action_pos_session_closing_control()

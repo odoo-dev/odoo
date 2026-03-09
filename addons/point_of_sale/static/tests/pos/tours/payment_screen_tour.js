@@ -5,6 +5,7 @@ import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_
 import { registry } from "@web/core/registry";
 import * as OfflineUtil from "@point_of_sale/../tests/generic_helpers/offline_util";
 import * as TicketScreen from "@point_of_sale/../tests/pos/tours/utils/ticket_screen_util";
+import * as FeedbackScreen from "@point_of_sale/../tests/pos/tours/utils/feedback_screen_util";
 import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
 import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
 import { negateStep } from "@point_of_sale/../tests/generic_helpers/utils";
@@ -209,8 +210,10 @@ registry.category("web_tour.tours").add("PaymentScreenInvoiceOrder", {
                 },
             },
             PaymentScreen.clickValidate(),
+            FeedbackScreen.isShown(),
             // Edit payment button shouldn't be available for posted orders
             negateStep({ trigger: ".feedback-screen .edit-order-payment:contains(Edit Payment)" }),
+            FeedbackScreen.clickNextOrder(),
         ].flat(),
 });
 

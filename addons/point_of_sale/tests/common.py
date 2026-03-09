@@ -53,7 +53,8 @@ class CommonPosTest(ValuationReconciliationTestCommon):
             'use_pricelist': True,
             'available_pricelist_ids': [(6, 0, self.pricelist_eur.ids)],
             'pricelist_id': self.pricelist_eur.id,
-            'payment_method_ids': [(6, 0, self.bank_payment_method.ids)]
+            'payment_method_ids': [(6, 0, self.bank_payment_method.ids)],
+            'use_download_invoice': True,
         })
         self.pos_config_usd = self.env['pos.config'].create({
             'name': 'PoS Config USD',
@@ -63,7 +64,8 @@ class CommonPosTest(ValuationReconciliationTestCommon):
                 (4, self.credit_payment_method.id),
                 (4, self.bank_payment_method.id),
                 (4, self.cash_payment_method.id),
-            ]
+            ],
+            'use_download_invoice': True,
         })
 
     def create_res_partners(self):
@@ -333,6 +335,7 @@ class CommonPosTest(ValuationReconciliationTestCommon):
                 order_payment = self.env['pos.make.payment'].with_context(**payment_context).create(make_payment)
                 order_payment.with_context(**payment_context).check()
 
+        order.generate_order_invoice()
         if data.get('refund_data'):
             refund_action = order.refund()
             refund = self.env['pos.order'].browse(refund_action['res_id'])
@@ -347,6 +350,7 @@ class CommonPosTest(ValuationReconciliationTestCommon):
                     make_refund['amount'] = refund_data['amount']
                 refund_payment = self.env['pos.make.payment'].with_context(**payment_context).create(make_refund)
                 refund_payment.with_context(**payment_context).check()
+            refund.generate_order_invoice()
 
         return order, refund
 
@@ -468,6 +472,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
             'invoice_journal_id': cls.invoice_journal.id,
             'available_pricelist_ids': cls.currency_pricelist.ids,
             'pricelist_id': cls.currency_pricelist.id,
+            'use_download_invoice': True,
         })
         cls.company_data['default_journal_cash'].pos_payment_method_ids.unlink()
         cls.cash_pm1 = config.payment_method_ids.filtered(lambda c: c.journal_id.type == 'cash')
@@ -568,6 +573,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
             'available_pricelist_ids': other_pricelist.ids,
             'pricelist_id': other_pricelist.id,
             'payment_method_ids': [cls.cash_pm2.id, cls.bank_pm2.id],
+            'use_download_invoice': True,
         })
         return config
 
@@ -889,6 +895,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         order_data = [self.create_ui_order_data(**params) for params in order_data_params]
         order_ids = [order['id'] for order in self.env['pos.order'].sync_from_ui(order_data)['pos.order']]
         for order_id in self.env["pos.order"].browse(order_ids):
+            order_id.generate_order_invoice()
             result[order_id.uuid] = order_id
         return result
 

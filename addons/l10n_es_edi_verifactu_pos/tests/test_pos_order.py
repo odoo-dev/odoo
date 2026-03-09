@@ -77,7 +77,9 @@ class TestL10nEsEdiVerifactuPosOrder(TestL10nEsEdiVerifactuPosCommon):
 
         with name_patch, prepare_invoice_vals_patch:
             results = self.env['pos.order'].sync_from_ui([order_data])
-        return self.env['pos.order'].browse(results['pos.order'][0]['id'])
+            order = self.env['pos.order'].browse(results['pos.order'][0]['id']).exists()
+            order.generate_order_invoice()
+        return order
 
     def test_record_identifier(self):
         with self.with_pos_session():

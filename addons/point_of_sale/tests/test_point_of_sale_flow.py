@@ -653,6 +653,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'payment_method_id': self.customer_account_payment_method.id
         })
         order_payment.with_context(**payment_context).check()
+        order.generate_order_invoice()
 
         self.assertEqual(order.account_move.invoice_date_due, (datetime.now() + timedelta(days=30)).date())
 

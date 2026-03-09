@@ -40,6 +40,7 @@ class TestAngloSaxonCommon(AccountTestInvoicingCommon):
         cls.pos_config = cls.env['pos.config'].create({
             'name': 'New POS config',
             'payment_method_ids': cls.cash_payment_method,
+            'use_download_invoice': True,
         })
         cls.product = cls.env['product.product'].create({
             'name': 'New product',
@@ -475,6 +476,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         # I click on the validate button to register the payment.
         context_payment = {'active_id': self.pos_order_pos0.id}
         self.pos_make_payment_0.with_context(context_payment).check()
+        self.pos_order_pos0.generate_order_invoice()
 
         # I close the current session to generate the journal entries
         current_session_id = self.pos_config.current_session_id
@@ -579,6 +581,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
         })
         context_payment = {'active_id': pos_order.id}
         pos_payment.with_context(context_payment).check()
+        pos_order.generate_order_invoice()
 
         valuation_account = self.category.property_stock_valuation_account_id
         valuation_lines = pos_order.account_move.line_ids.filtered(lambda line: line.account_id == valuation_account)

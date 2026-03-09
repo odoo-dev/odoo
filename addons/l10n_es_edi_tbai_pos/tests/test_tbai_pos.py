@@ -23,6 +23,7 @@ class TestPosEdi(TestEsEdiTbaiCommonGipuzkoa, CommonPosEsEdiTest):
             side_effect=self.mock_request_error if with_error else None,
         ):
             pos_make_payment.with_context(context_make_payment).check()
+            pos_order.generate_order_invoice()
 
     def test_tbai_pos_order(self):
         self.ten_dollars_with_10_incl.product_variant_id.lst_price = 100

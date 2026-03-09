@@ -315,6 +315,13 @@ export class PosStore extends WithLazyGetterTrap {
         window.location.href = url.href;
     }
 
+    /**
+     * This method can be overridden to perform checks before starting the order validation process.
+     */
+    shouldDownloadInvoice(order) {
+        return Boolean(this.config.use_download_invoice && this.config.canInvoice);
+    }
+
     async showLoginScreen() {
         this.resetCashier();
         this.navigate("LoginScreen");
@@ -1472,7 +1479,21 @@ export class PosStore extends WithLazyGetterTrap {
         }
     }
 
-    postSyncAllOrders(orders) {}
+    async postSyncAllOrders(orders) {
+        const ordersToInvoice = orders.filter(
+            (o) => o.state == "paid" && o.isToInvoice() && !o.account_move
+        );
+        const orderInvoices = [];
+        for (const order of ordersToInvoice) {
+            const shouldDownloadInvoice = this.shouldDownloadInvoice(order);
+            const orderInvoice = this.generateOrderInvoice(order, shouldDownloadInvoice);
+            if (shouldDownloadInvoice) {
+                orderInvoices.push(orderInvoice);
+            }
+        }
+        await Promise.all(orderInvoices);
+    }
+
     async syncAllOrders(options = {}) {
         if (this.data.network.offline) {
             if (options.throw) {
@@ -1590,6 +1611,34 @@ export class PosStore extends WithLazyGetterTrap {
 
     pushSingleOrder(order) {
         return this.pushOrderMutex.exec(() => this.syncAllOrders(order));
+    }
+
+    async generateOrderInvoice(order, downloadInvoice = false) {
+        if (!order) {
+            return;
+        }
+        try {
+            await this.data.callRelated("pos.order", "generate_order_invoice", [order.id]);
+            if (downloadInvoice) {
+                await this.env.services.account_move.downloadPdf(order.account_move.id);
+            }
+        } catch (err) {
+            logPosMessage(
+                "Validation",
+                "afterOrderValidation",
+                "Invoice Generation Failed",
+                CONSOLE_COLOR,
+                [err]
+            );
+            if (downloadInvoice) {
+                this.dialog.add(AlertDialog, {
+                    title: _t("Backend Invoice"),
+                    body: _t(
+                        "An error occurred while trying to generate an invoice. Try again from the order tab or generate the invoice from the backend."
+                    ),
+                });
+            }
+        }
     }
 
     async pay() {
