@@ -16,7 +16,7 @@ from operator import attrgetter
 
 from psycopg2.extras import Json as PsycopgJson
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.tools import SQL, reset_cached_properties, sql
 from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.misc import frozendict, SENTINEL, Sentinel, unique
@@ -757,6 +757,8 @@ class Field[T]:
             for name in path:
                 # take the first record when traversing
                 target = target[name][:1]
+            if not target and record_value[record] is not False:
+                raise ValidationError(records.env._("Cannot inverse related value for field %s: %s", self, record_value[record]))
             # update 'target' only if 'record' and 'target' are both real or
             # both new (see `test_base_objects.py`, `test_basic`)
             if target and bool(target.id) == bool(record.id):
