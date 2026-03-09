@@ -16,7 +16,7 @@ from operator import attrgetter
 
 from psycopg2.extras import Json as PsycopgJson
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.tools import SQL, reset_cached_properties, sql
 from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.misc import frozendict, SENTINEL, Sentinel, unique
@@ -1862,6 +1862,8 @@ class Field[T]:
         if protected_ids:
             # records being computed: no business logic, no recomputation
             protected_records = records.__class__(records.env, tuple(protected_ids), records._prefetch_ids)
+            if not protected_records and value is not False and value is not None:
+                raise ValidationError(records.env._("write to empty recordset with value: %s", value))
             self.write(protected_records, value)
 
         if new_ids:
@@ -1870,6 +1872,8 @@ class Field[T]:
             with records.env.protecting(records.pool.field_computed.get(self, [self]), new_records):
                 if self.relational:
                     new_records.modified([self.name], before=True)
+                if not new_records and value is not False and value is not None:
+                    raise ValidationError(records.env._("write to empty recordset with value: %s", value))
                 self.write(new_records, value)
                 new_records.modified([self.name])
 
