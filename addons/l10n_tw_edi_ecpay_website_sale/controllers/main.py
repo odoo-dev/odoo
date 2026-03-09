@@ -172,7 +172,8 @@ class WebsiteSaleL10nTW(WebsiteSale):
     ):
         rendering_values = super()._prepare_address_form_values(*args, callback=callback, order_sudo=order_sudo, **kwargs)
         partner_sudo = kwargs.get('partner_sudo') or (args[0] if args else None)
-        if partner_sudo and request.website.sudo().company_id.account_fiscal_country_id.code == 'TW' and request.website.sudo().company_id._is_ecpay_enabled():
+        website = self.env['website'].get_current_website()
+        if partner_sudo and website.sudo().company_id.account_fiscal_country_id.code == 'TW' and website.sudo().company_id._is_ecpay_enabled():
             rendering_values["l10n_tw_edi_require_paper_format"] = partner_sudo.l10n_tw_edi_require_paper_format
         return rendering_values
 

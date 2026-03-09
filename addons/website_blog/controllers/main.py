@@ -320,7 +320,7 @@ class WebsiteBlog(http.Controller):
         if (
             not next_post
             or not next_post.sudo().is_published
-            or next_post.website_id.id not in (False, request.website.id)
+            or next_post.website_id.id not in (False, website.id)
         ):
             # Fallback to the next post in the list.
             all_post_ids = all_post.ids

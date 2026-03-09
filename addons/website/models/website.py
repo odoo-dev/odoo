@@ -26,9 +26,9 @@ from odoo.fields import Domain
 from odoo.http import request
 from odoo.models import Query
 from odoo.modules.module import get_manifest
-from odoo.tools import BinaryBytes, file_open
+from odoo.tools import BinaryBytes, file_open, lazy
 from odoo.tools.image import image_process
-from odoo.tools.sql import SQL, escape_psql, lazy
+from odoo.tools.sql import SQL, escape_psql
 from odoo.tools.translate import _
 
 logger = logging.getLogger(__name__)
