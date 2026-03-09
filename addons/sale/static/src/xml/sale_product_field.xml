@@ -11,9 +11,9 @@
                 class="btn btn-secondary fa fa-pencil px-2"
                 tabindex="-1"
                 draggable="false"
-                t-att-aria-label="configurationButtonHelp"
-                t-att-data-tooltip="configurationButtonHelp"
-                t-on-click="onEditConfiguration"
+                t-att-aria-label="this.configurationButtonHelp"
+                t-att-data-tooltip="this.configurationButtonHelp"
+                t-on-click="this.onEditConfiguration"
             />
         </xpath>
     </t>

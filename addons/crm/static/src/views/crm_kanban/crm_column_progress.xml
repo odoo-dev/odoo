@@ -27,7 +27,7 @@
             <t t-elif="props.aggregate.value === 0"><b/></t>
 
             <t t-if="showRecurringRevenue">
-                <t t-set="rrmAggregate" t-value="getRecurringRevenueGroupAggregate(props.group)"/>
+                <t t-set="rrmAggregate" t-value="this.getRecurringRevenueGroupAggregate(this.props.group)"/>
                 <AnimatedNumber
                     t-if="rrmAggregate.value"
                     value="rrmAggregate.value"
@@ -36,11 +36,11 @@
                     currencies="[rrmAggregate.currency]"
                     animationClass="'o_animated_grow_huge'"
                 >
-                    <t t-set-slot="prefix" t-if="props.aggregate.value != 0">
+                    <t t-set-slot="prefix" t-if="this.props.aggregate.value != 0">
                         <strong class="me-1">+</strong>
                     </t>
                 </AnimatedNumber>
-                <b t-if="!props.aggregate.value" class="ps-1">MRR</b>
+                <b t-if="!this.props.aggregate.value" class="ps-1">MRR</b>
             </t>
         </AnimatedNumber>
     </t>

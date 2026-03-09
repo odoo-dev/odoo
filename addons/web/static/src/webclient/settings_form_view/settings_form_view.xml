@@ -23,14 +23,14 @@
         </xpath>
         <xpath expr="//Layout/t[@t-set-slot='control-panel-status-indicator']" position="replace">
             <t t-set-slot="control-panel-status-indicator">
-                <span t-if="model.root.dirty" class="text-muted ms-2 o_dirty_warning">Unsaved changes</span>
+                <span t-if="this.model.root.dirty" class="text-muted ms-2 o_dirty_warning">Unsaved changes</span>
             </t>
         </xpath>
         <xpath expr="//Layout/t[@t-set-slot='control-panel-additional-actions']" position="replace"/>
-        <xpath expr="//Layout/t[@t-component='props.Renderer']" position="attributes">
+        <xpath expr="//Layout/t[@t-component='this.props.Renderer']" position="attributes">
             <attribute name="initialApp">initialApp</attribute>
         </xpath>
-        <xpath expr="//Layout/t[@t-component='props.Renderer']" position="inside">
+        <xpath expr="//Layout/t[@t-component='this.props.Renderer']" position="inside">
             <t t-set-slot="NoContentHelper" isVisible="state.displayNoContent">
                 <t t-call="web.NoContentHelper">
                     <t t-set="title">No settings found</t>

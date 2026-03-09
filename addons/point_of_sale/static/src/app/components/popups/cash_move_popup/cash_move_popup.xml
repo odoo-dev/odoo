@@ -14,12 +14,12 @@
                 </div>
                 <CashInput
                     class="this.ui.isSmall ? 'mw-50 h-50' : 'w-25'"
-                    tModel="[state, 'amount']"
-                    currencySymbol="pos.currency.symbol"
-                    currencyPosition="pos.currency.position"
+                    tModel="[this.state, 'amount']"
+                    currencySymbol="this.pos.currency.symbol"
+                    currencyPosition="this.pos.currency.position"
                     isValid="(val) => env.utils.isValidFloat(val)"
                     autofocus="true"
-                    readonly="ui.isSmall"
+                    readonly="this.ui.isSmall"
                     onBlur="() => this.handleAmountBlur()"
                     onClick="() => this.openNumpadDialog()"
                     getRef="(ref) => this.inputRef = ref"
@@ -34,11 +34,11 @@
                     <!-- First line of buttons -->
                     <div class="d-flex gap-2">
                         <button class="button confirm btn btn-lg lh-lg btn-primary"
-                            t-on-click="confirm"
-                            t-att-disabled="!isValidCashMove()">
+                            t-on-click="this.confirm"
+                            t-att-disabled="!this.isValidCashMove()">
                             Confirm
                         </button>
-                        <button class="button cancel btn btn-lg lh-lg btn-secondary" t-on-click="props.close">
+                        <button class="button cancel btn btn-lg lh-lg btn-secondary" t-on-click="this.props.close">
                             Discard
                         </button>
                     </div>

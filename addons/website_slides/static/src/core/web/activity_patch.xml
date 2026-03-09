@@ -3,10 +3,10 @@
     <t t-inherit="mail.Activity" t-inherit-mode="extension">
         <xpath expr="//t[@name='tools']" position="replace">
             <t t-if="props.activity.request_partner_id and props.activity.res_model === 'slide.channel'">
-                <button class="btn btn-link" t-on-click="onGrantAccess">
+                <button class="btn btn-link" t-on-click="this.onGrantAccess">
                     <i class="fa fa-check"/> Grant Access
                 </button>
-                <button class="btn btn-link" t-on-click="onRefuseAccess">
+                <button class="btn btn-link" t-on-click="this.onRefuseAccess">
                     <i class="fa fa-times"/> Refuse Access
                 </button>
             </t>

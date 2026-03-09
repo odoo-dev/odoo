@@ -68,10 +68,10 @@ export class HootMain extends Component {
     static props = {};
 
     static template = xml`
-        <t t-if="env.runner.headless">
+        <t t-if="this.env.runner.headless">
             <div style="${HEADLESS_CONTAINER_STYLE}">
                 Running in headless mode
-                <a style="${HEADLESS_LINK_STYLE}" t-att-href="createUrl({ headless: null })">
+                <a style="${HEADLESS_LINK_STYLE}" t-att-href="this.createUrl({ headless: null })">
                     Run with UI
                 </a>
             </div>

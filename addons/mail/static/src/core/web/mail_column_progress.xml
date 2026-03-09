@@ -4,8 +4,8 @@
         <AnimatedNumber position="after">
             <t t-if="props.aggregateOn">
                 <span class="text-900 text-nowrap cursor-default"
-                     t-att-title="props.aggregateOn.title">
-                    /<span class="o_column_progress_aggregated_on" t-out="props.aggregateOn.value"/>
+                     t-att-title="this.props.aggregateOn.title">
+                    /<span class="o_column_progress_aggregated_on" t-out="this.props.aggregateOn.value"/>
                 </span>
             </t>
         </AnimatedNumber>

@@ -35,7 +35,7 @@
                 className="'fa fa-edit'"
             />
             <BuilderButton
-                t-if="!state.ribbonEditMode"
+                t-if="!this.state.ribbonEditMode"
                 title.translate="Create"
                 action="'createRibbon'"
                 className="'fa fa-plus text-success border-0'"
@@ -45,7 +45,7 @@
             />
         </BuilderRow>
 
-        <t t-if="state.ribbonEditMode">
+        <t t-if="this.state.ribbonEditMode">
             <BuilderContext action="'modifyRibbon'">
                 <BuilderRow label.translate="Name" level="1">
                     <BuilderTextInput actionParam="'name'" />

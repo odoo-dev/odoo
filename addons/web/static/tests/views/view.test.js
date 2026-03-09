@@ -1133,7 +1133,7 @@ test("react to prop 'domain' changes", async function () {
     viewRegistry.add("toy", { type: "toy", Controller: ToyController }, { force: true });
     class Parent extends Component {
         static props = ["*"];
-        static template = xml`<View t-props="state"/>`;
+        static template = xml`<View t-props="this.state"/>`;
         static components = { View };
         setup() {
             this.state = useState({

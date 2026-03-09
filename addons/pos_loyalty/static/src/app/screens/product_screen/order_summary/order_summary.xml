@@ -3,11 +3,11 @@
     <t t-name="pos_loyalty.OrderSummary" t-inherit="point_of_sale.OrderSummary" t-inherit-mode="extension">
 		<xpath expr="//Orderline" position="inside" >
             <li t-if="line.isGiftCardOrEWalletReward()">
-                Current Balance: <t t-out="line.getGiftCardOrEWalletBalance()"/>
+                Current Balance: <t t-out="this.line.getGiftCardOrEWalletBalance()"/>
             </li>
             <t t-if="!line.isGiftCardOrEWalletReward() and line.getEWalletGiftCardProgramType() === 'gift_card'">
-                <a t-if="!line.gift_code and line.qty &lt;= 1" class="text-wrap text-action" t-on-click="() => this.manageGiftCard(line)">Sell physical gift card?</a>
-                <div t-if="line.gift_code" class="text-wrap" t-out="line.gift_code"/>
+                <a t-if="!this.line.gift_code and this.line.qty &lt;= 1" class="text-wrap text-action" t-on-click="() => this.manageGiftCard(line)">Sell physical gift card?</a>
+                <div t-if="this.line.gift_code" class="text-wrap" t-out="this.line.gift_code"/>
             </t>
         </xpath>
         <xpath expr="//OrderDisplay/t[@t-set-slot='details']/div[hasclass('combo-proposition')]" position="before">

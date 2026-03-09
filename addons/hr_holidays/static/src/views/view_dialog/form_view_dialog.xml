@@ -5,7 +5,7 @@
         <xpath expr="//button[hasclass('o_form_button_save')]" position="replace">
             <button
                 class="btn btn-primary o_form_button_save"
-                t-on-click="saveButtonClicked"
+                t-on-click="this.saveButtonClicked"
                 t-if="canSave"
                 data-hotkey="q">
                 <span t-if="this.record.isNew">Submit Request</span>
@@ -17,7 +17,7 @@
             <button type="button"
                     class="btn btn-secondary o_form_button_cancel"
                     data-hotkey="j"
-                    t-on-click.stop="discard"
+                    t-on-click.stop="this.discard"
                     t-if="canClose">
                 Discard
             </button>
@@ -41,10 +41,10 @@
                 data-hotkey="x">Refuse</button>
         </xpath>
         <xpath expr="." position="inside">
-            <button class="btn btn-danger ms-auto" t-if="canDelete" t-on-click="deleteRecord" data-hotkey="v">
+            <button class="btn btn-danger ms-auto" t-if="canDelete" t-on-click="this.deleteRecord" data-hotkey="v">
                 Delete Time Off
             </button>
-            <button class="btn btn-danger" t-att-class="{'ms-auto': !canDelete}" t-if="canCancel" t-on-click="cancelRecord" data-hotkey="x">
+            <button class="btn btn-danger" t-att-class="{'ms-auto': !this.canDelete}" t-if="canCancel" t-on-click="this.cancelRecord" data-hotkey="x">
                 Cancel Time Off
             </button>
         </xpath>

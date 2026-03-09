@@ -1,7 +1,7 @@
 <templates>
 
     <t t-name="account.UploadDropZone">
-        <t t-if="dashboardState.isDragging or props.visible">
+        <t t-if="this.dashboardState.isDragging or this.props.visible">
             <div
                 class="o_drop_area d-flex align-items-center justify-content-center flex-column"
                 t-att-class="{

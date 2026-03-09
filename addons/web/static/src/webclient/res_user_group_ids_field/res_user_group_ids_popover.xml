@@ -7,14 +7,14 @@
             <tbody>
                 <tr>
                     <td>
-                        <span t-if="privilege" class="fw-bold" t-out="privilege.name"/>
+                        <span t-if="this.privilege" class="fw-bold" t-out="this.privilege.name"/>
                         <span t-else="">Group</span>
                     </td>
                     <td>
                         <a class="fw-bold" href="#" t-on-click="() => this.onGroupClicked(group)" t-out="group.name"/>
                     </td>
                 </tr>
-                <tr t-if="impliedGroups.length">
+                <tr t-if="this.impliedGroups.length">
                     <td>Implied by</td>
                     <td>
                         <div t-foreach="impliedGroups" t-as="group" t-key="group.id">
@@ -22,7 +22,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr t-if="exclusiveImplyGroups.length">
+                <tr t-if="this.exclusiveImplyGroups.length">
                     <td>Exclusively implies</td>
                     <td>
                         <div t-foreach="exclusiveImplyGroups" t-as="group" t-key="group.id">
@@ -30,7 +30,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr t-if="jointImplyGroups.length or jointExtraImplyGroups.length">
+                <tr t-if="this.jointImplyGroups.length or this.jointExtraImplyGroups.length">
                     <td>Jointly implies</td>
                     <td>
                         <div t-foreach="jointImplyGroups" t-as="group" t-key="group.id" class="text-muted">

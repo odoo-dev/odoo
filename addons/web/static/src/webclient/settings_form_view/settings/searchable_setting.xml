@@ -6,10 +6,10 @@
             <attribute name="t-if">visible()</attribute>
         </div>
         <span class="o_form_label" position="replace">
-            <span class="o_form_label"><HighlightText originalText="labelString"/></span>
+            <span class="o_form_label"><HighlightText originalText="this.labelString"/></span>
         </span>
         <div class="text-muted" position="replace">
-            <div class="text-muted"><HighlightText originalText="props.help"/></div>
+            <div class="text-muted"><HighlightText originalText="this.props.help"/></div>
         </div>
     </t>
 </templates>

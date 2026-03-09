@@ -2,7 +2,7 @@
 <templates>
 
 <t t-name="website.DuplicatePageDialog">
-    <WebsiteDialog close="props.close" primaryClick="() => this.duplicate()">
+    <WebsiteDialog close="this.props.close" primaryClick="() => this.duplicate()">
         <div class="mb-3 row">
             <label class="col-form-label col-md-3">
                 Page Name
@@ -15,7 +15,7 @@
 </t>
 
 <t t-name="website.PageDependencies">
-    <t t-if="!!Object.keys(state.dependencies).length">
+    <t t-if="!!Object.keys(this.state.dependencies).length">
         <t t-if="props.mode === 'popover'">
             <t t-set="depTemplate">
                 <t t-call="{{ constructor.popoverTemplate }}"/>
@@ -64,15 +64,15 @@
 </t>
 
 <t t-name="website.DeletePageDialog">
-    <WebsiteDialog title.translate="Delete Page" close="props.close">
-        <p t-if="props.resIds.length > 1">Ready to make these web pages disappear into thin air? Are you sure?<br/> They will be gone forever!<br/><br/>
+    <WebsiteDialog title.translate="Delete Page" close="this.props.close">
+        <p t-if="this.props.resIds.length > 1">Ready to make these web pages disappear into thin air? Are you sure?<br/> They will be gone forever!<br/><br/>
             <span class="text-warning">But before deleting, make sure you update all links referring to them. That way, your customers won't bump into the not-so-famous 404 error page.</span>
         </p>
         <p t-else="">Ready to make this web page disappear into thin air? Are you sure?<br/> It will be gone forever!<br/><br/>
             <span class="text-warning">But before deleting, make sure you update all links referring to it. That way, your customers won't bump into the not-so-famous 404 error page.</span>
         </p>  
-        <PageDependencies resIds="props.resIds" resModel="props.resModel" mode="'collapse'"/>
-        <CheckBox value="state.confirm" onChange.bind="onConfirmCheckboxChange">
+        <PageDependencies resIds="this.props.resIds" resModel="this.props.resModel" mode="'collapse'"/>
+        <CheckBox value="this.state.confirm" onChange.bind="this.onConfirmCheckboxChange">
             <p class="text-warning">I am sure about this.</p>
         </CheckBox>
 

@@ -6,7 +6,7 @@
                 <button class="btn btn-outline-secondary" type="button" t-custom-ref="picker"><i class="fa fa-lg fa-smile-o"/></button>
                 <input type="text" t-custom-model="props.model.label" class="form-control rounded" placeholder="Type your option" t-custom-ref="root"/>
             </div>
-            <button t-if="props.deletable" class="btn btn-primary" title="Delete option" t-on-click="props.onClickRemove"><i class="fa fa-trash"/></button>
+            <button t-if="this.props.deletable" class="btn btn-primary" title="Delete option" t-on-click="this.props.onClickRemove"><i class="fa fa-trash"/></button>
         </div>
     </t>
 </templates>

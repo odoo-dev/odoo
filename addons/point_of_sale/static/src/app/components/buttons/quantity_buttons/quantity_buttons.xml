@@ -13,14 +13,14 @@
                 class="form-control quantity text-center"
                 name="pos_quantity"
                 type="number"
-                t-att-value="props.quantity"
+                t-att-value="this.props.quantity"
                 t-on-click.stop=""
-                t-on-change="setQuantity"/>
+                t-on-change="this.setQuantity"/>
             <button
                 t-attf-class="px-2-5 btn btn-secondary btn-sm {{ props.btnClasses or 'd-md-inline-block' }}"
                 name="pos_quantity_button_plus"
                 aria-label="Add one"
-                t-att-disabled="props.isPlusButtonDisabled"
+                t-att-disabled="this.props.isPlusButtonDisabled"
                 t-on-click.stop="() => this.changeQuantity(1)">
                 <i class="fa fa-plus"/>
             </button>

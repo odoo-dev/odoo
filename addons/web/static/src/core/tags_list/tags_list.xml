@@ -7,7 +7,7 @@
         </t>
         <t t-set="invisibleTagCount" t-value="this.invisibleTags.length"/>
         <t t-if="invisibleTagCount">
-            <span class="o_tags_list_counter o_m2m_avatar_empty rounded text-center fw-bold cursor-default" data-tooltip-template="web.TagsList.Tooltip" data-tooltip-position="right" t-att-data-tooltip-info="tooltipInfo" t-on-click.stop="">
+            <span class="o_tags_list_counter o_m2m_avatar_empty rounded text-center fw-bold cursor-default" data-tooltip-template="web.TagsList.Tooltip" data-tooltip-position="right" t-att-data-tooltip-info="this.tooltipInfo" t-on-click.stop="">
                 <span t-out="invisibleTagCount gt 9 ? '9+' : '+' + invisibleTagCount"/>
             </span>
         </t>

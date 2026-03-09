@@ -16,7 +16,7 @@
                 </div>
                 <div class="h1 fw-light mb-4 text-600">We'll set you up and running in <b>4 steps</b>
                 </div>
-                <button class="o_configurator_show btn btn-primary btn-lg px-4 py-2" t-on-click="goToDescription">Let's do it</button>
+                <button class="o_configurator_show btn btn-primary btn-lg px-4 py-2" t-on-click="this.goToDescription">Let's do it</button>
             </div>
         </div>
         <SkipButton skip="this.props.skip"/>
@@ -125,19 +125,19 @@
                     <div class="h2 text-center">
                         <b>Detect</b> from Logo</div>
                     <div class="d-flex flex-column flex-grow-1 py-4">
-                        <button t-on-click="uploadLogo" t-attf-class="o_configurator_logo_upload position-relative btn btn-link rounded bg-100 overflow-hidden d-flex flex-grow-1 justify-content-center align-items-center text-decoration-none {{state.logo? 'h-50' : ''}}">
-                            <input type="file" class="logo_selection_input" t-on-change="changeLogo" style="display:none" name="logo_selection" t-custom-ref="logoSelectionInput" accept="image/*"/>
+                        <button t-on-click="this.uploadLogo" t-attf-class="o_configurator_logo_upload position-relative btn btn-link rounded bg-100 overflow-hidden d-flex flex-grow-1 justify-content-center align-items-center text-decoration-none {{state.logo? 'h-50' : ''}}">
+                            <input type="file" class="logo_selection_input" t-on-change="this.changeLogo" style="display:none" name="logo_selection" t-custom-ref="logoSelectionInput" accept="image/*"/>
                             <div class="h3 o_configurator_logo_button text-center">
                                 <i t-attf-class="fa fa-cloud-upload {{state.logo? 'fa-4x' : 'fa-6x'}}"></i>
-                                <div class="text-center">Upload <span t-if="state.logo">a new image</span>
+                                <div class="text-center">Upload <span t-if="this.state.logo">a new image</span>
                                 </div>
                             </div>
-                            <div t-if="state.logo" class="o_configurator_logo_wrapper position-absolute d-flex justify-content-center align-items-center bg-white w-100 h-100">
-                                <img style="height: 120px" t-attf-src="{{state.logo}}" alt="Logo"/>
+                            <div t-if="this.state.logo" class="o_configurator_logo_wrapper position-absolute d-flex justify-content-center align-items-center bg-white w-100 h-100">
+                                <img style="height: 120px" t-attf-src="{{this.state.logo}}" alt="Logo"/>
                             </div>
-                            <i t-if="state.logo" class="fa fa-2x fa-times-circle text-danger position-absolute top-0 end-0 pe-2 pt-2" t-on-click="removeLogo"/>
+                            <i t-if="this.state.logo" class="fa fa-2x fa-times-circle text-danger position-absolute top-0 end-0 pe-2 pt-2" t-on-click="removeLogo"/>
                         </button>
-                        <div t-if="state.recommendedPalette" class="w-75 mx-auto px-2 pt-3" style="max-width: 184px;">
+                        <div t-if="this.state.recommendedPalette" class="w-75 mx-auto px-2 pt-3" style="max-width: 184px;">
                             <button t-attf-class="palette_card o_btn_reset w-100 rounded-pill overflow-hidden d-flex {{state.getSelectedPaletteName() == 'recommendedPalette' ? 'selected' : ''}}"
                                  t-on-click="() => this.selectPalette('recommendedPalette')" t-attf-style="background-color: {{state.recommendedPalette.color3}}">
                                 <div class="color_sample w-100" t-attf-style="background-color: {{state.recommendedPalette.color1}}"/>
@@ -159,7 +159,7 @@
                     <div class="h2 text-center">
                         <b>Choose</b> a Color Palette</div>
                     <div class="d-flex flex-wrap align-items-end">
-                        <t t-foreach="state.getPalettes()" t-as="palette" t-key="palette_index">
+                        <t t-foreach="this.state.getPalettes()" t-as="palette" t-key="palette_index">
                             <div class="o_palette_card_container w-25 px-2 pt-3">
                                 <button t-attf-class="palette_card o_btn_reset w-100 rounded-pill overflow-hidden d-flex {{state.getSelectedPaletteName() == palette.name ? 'selected' : ''}}"
                                      t-on-click="() => this.selectPalette(palette.name)" t-attf-style="background-color: {{palette.color3}}">
@@ -291,7 +291,7 @@
 
 <t t-name="website.Configurator.Configurator">
     <div class="o_configurator_container">
-        <t t-component="currentComponent" t-props="componentProps"/>
+        <t t-component="this.currentComponent" t-props="this.componentProps"/>
     </div>
 </t>
 

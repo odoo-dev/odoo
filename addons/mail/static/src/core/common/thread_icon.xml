@@ -8,13 +8,13 @@
         })"/>
         <t t-set="attr" t-value="{ 'class': class }"/>
         <t name="extra"/>
-        <t t-if="channel?.channel_type === 'channel'">
-            <div t-if="!channel.group_public_id" class="fa fa-globe o-fs-small" t-att="attr" title="Public Channel"/>
+        <t t-if="this.channel?.channel_type === 'channel'">
+            <div t-if="!this.channel.group_public_id" class="fa fa-globe o-fs-small" t-att="attr" title="Public Channel"/>
         </t>
-        <t t-elif="channel?.channel_type === 'group'">
+        <t t-elif="this.channel?.channel_type === 'group'">
             <t name="group"/>
         </t>
-        <t t-elif="channel?.showImStatus and channel?.channel_type?.includes('chat') and correspondent">
+        <t t-elif="this.channel?.showImStatus and this.channel?.channel_type?.includes('chat') and this.correspondent">
             <t name="chat">
                 <t name="chat_static">
                     <ImStatus t-if="correspondent.im_status" className="class" member="correspondent" size="props.size" typing="props.typing"/>
@@ -24,10 +24,10 @@
                 </t>
             </t>
         </t>
-        <t t-elif="props.thread.model === 'mail.box'">
-            <div t-if="props.thread.id === 'inbox'" class="fa fa-fw fa-inbox" t-att="attr"/>
-            <div t-elif="props.thread.id === 'bookmark'" class="fa fa-fw fa-bookmark-o" t-att="attr"/>
-            <div t-elif="props.thread.id === 'history'" class="fa fa-fw fa-history" t-att="attr"/>
+        <t t-elif="this.props.thread.model === 'mail.box'">
+            <div t-if="this.props.thread.id === 'inbox'" class="fa fa-fw fa-inbox" t-att="attr"/>
+            <div t-elif="this.props.thread.id === 'bookmark'" class="fa fa-fw fa-bookmark-o" t-att="attr"/>
+            <div t-elif="this.props.thread.id === 'history'" class="fa fa-fw fa-history" t-att="attr"/>
         </t>
     </t>
 

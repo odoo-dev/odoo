@@ -9,7 +9,7 @@
                 title="Toggle chatter"
                 data-hotkey="d"
                 t-attf-class="btn btn-light btn-chatter todo_toggle_chatter #{state.displayChatter ? 'active' : '' }"
-                t-on-click="toggleChatter"
+                t-on-click="this.toggleChatter"
             >
                 <i class="fa fa-comments"/>
             </a>

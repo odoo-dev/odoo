@@ -18,7 +18,7 @@
                                 class="form-check-input"
                                 type="checkbox"
                                 role="switch"
-                                t-att-checked="selectedSection.filtered ? true : false"
+                                t-att-checked="this.selectedSection.filtered ? true : false"
                                 t-on-click="() => this.setSelectedSection(
                                     selectedSection.sectionId, !selectedSection.filtered
                                 )"
@@ -55,8 +55,8 @@
                                 class="ms-2 o_section_input"
                                 type="text"
                                 t-custom-model="this.state.newSectionName"
-                                t-on-keydown="onSectionInputKeydown"
-                                t-on-blur="createSection"
+                                t-on-keydown="this.onSectionInputKeydown"
+                                t-on-blur="this.createSection"
                             />
                             <div
                                 t-else=""
@@ -78,8 +78,8 @@
                     type="text"
                     placeholder="Enter a description"
                     t-custom-model="this.state.newSectionName"
-                    t-on-keydown="onSectionInputKeydown"
-                    t-on-blur="createSection"
+                    t-on-keydown="this.onSectionInputKeydown"
+                    t-on-blur="this.createSection"
                 />
                 <button
                     t-else=""

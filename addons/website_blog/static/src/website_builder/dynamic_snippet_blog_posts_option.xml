@@ -12,7 +12,7 @@
         <BuilderRow label.translate="Blog" t-if="!isSingleMode">
             <BuilderSelect dataAttributeAction="'filterByBlogId'" preview="false">
                 <BuilderSelectItem dataAttributeActionValue="'-1'">All blogs</BuilderSelectItem>
-                <t t-foreach="blogState.blogs" t-as="blog" t-key="blog.id">
+                <t t-foreach="this.blogState.blogs" t-as="blog" t-key="blog.id">
                     <BuilderSelectItem dataAttributeActionValue="`${blog.id}`" t-out="blog.name"/>
                 </t>
             </BuilderSelect>

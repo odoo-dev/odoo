@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.CalendarYearPopover">
-        <t t-if="env.isSmall">
+        <t t-if="this.env.isSmall">
             <Dialog title="dialogTitle">
                 <t t-call="{{ constructor.subTemplates.body }}" />
                 <t t-set-slot="footer">
@@ -23,14 +23,14 @@
         </div>
         <div class="o_cw_body popover-body d-flex flex-column gap-2">
             <t t-call="{{ constructor.subTemplates.body }}" />
-            <t t-if="props.model.canCreate">
+            <t t-if="this.props.model.canCreate">
                 <t t-call="{{ constructor.subTemplates.footer }}" />
             </t>
         </div>
     </t>
 
     <t t-name="web.CalendarYearPopover.body">
-        <div t-foreach="recordGroups" t-as="recordGroup" t-key="recordGroup.title">
+        <div t-foreach="this.recordGroups" t-as="recordGroup" t-key="recordGroup.title">
             <h5 t-out="recordGroup.title" />
             <t t-foreach="recordGroup.records" t-as="record" t-key="record.id">
                 <t t-call="{{ constructor.subTemplates.record }}" />
@@ -39,8 +39,8 @@
     </t>
 
     <t t-name="web.CalendarYearPopover.footer">
-        <t t-if="props.model.canCreate">
-            <a href="#" class="btn-link o_cw_popover_create" t-on-click.prevent="onCreateButtonClick">
+        <t t-if="this.props.model.canCreate">
+            <a href="#" class="btn-link o_cw_popover_create" t-on-click.prevent="this.onCreateButtonClick">
                 <i class="fa fa-plus" />
                 Create
             </a>

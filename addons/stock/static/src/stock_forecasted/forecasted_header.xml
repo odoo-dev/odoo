@@ -4,8 +4,8 @@
         <div class="d-flex flex-wrap pb-1 justify-content-between">
             <div class="o_product_name">
                 <h3 name="product_name">
-                    <t t-if="props.docs.product_templates">
-                        <t t-foreach="props.docs.product_templates" t-as="product_template" t-key='product_template.id'>
+                    <t t-if="this.props.docs.product_templates">
+                        <t t-foreach="this.props.docs.product_templates" t-as="product_template" t-key='product_template.id'>
                             <a href="#"
                             t-on-click.prevent="() => this.props.openView('product.template', 'form', product_template.id)"
                             t-out="product_template.display_name"/>
@@ -25,28 +25,28 @@
                     <div class="h3">
                         <a href="#"
                             t-on-click.prevent="() => this._onClickInventory()"
-                           t-out="_formatFloat(this.quantityOnHand)"/>
+                           t-out="this._formatFloat(this.quantityOnHand)"/>
                     </div>
                     <div>On Hand</div>
                 </div>
                 <div class="h3 col-md-auto text-center">+</div>
                 <div t-attf-class="col-md-auto text-center #{props.docs.incoming_qty}">
                     <div class="h3">
-                        <t t-out="_formatFloat(this.incomingQty)"/>
+                        <t t-out="this._formatFloat(this.incomingQty)"/>
                     </div>
                     <div>Incoming</div>
                 </div>
                 <div class="h3 col-md-auto text-center">-</div>
                 <div t-attf-class="col-md-auto text-center #{props.docs.outgoing_qty}">
                     <div class="h3">
-                        <t t-out="_formatFloat(this.outgoingQty)"/>
+                        <t t-out="this._formatFloat(this.outgoingQty)"/>
                     </div>
                     <div>Outgoing</div>
                 </div>
                 <div class="h3 col-md-auto text-center">=</div>
                 <div t-attf-class="col-md-auto text-center #{props.docs.virtual_available &lt; 0 and 'text-danger'}" name="forecasted_value">
                     <div class="h3">
-                        <span t-out="_formatFloat(this.virtualAvailable)"/>
+                        <span t-out="this._formatFloat(this.virtualAvailable)"/>
                         <span t-out="' ' + this.uom"/>
                     </div>
                     <div>Forecasted</div>

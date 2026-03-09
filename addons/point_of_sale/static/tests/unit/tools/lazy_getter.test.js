@@ -82,8 +82,8 @@ class AppStore extends WithLazyGetterTrap {
 class WithStore extends Component {
     static props = {};
     static template = xml`
-        <span t-att-class="property">
-            <t t-out="constructor.name" />: <t t-out="this.store[property]" />
+        <span t-att-class="this.property">
+            <t t-out="constructor.name" />: <t t-out="this.store[this.property]" />
         </span>
     `;
 

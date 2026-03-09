@@ -39,7 +39,7 @@
     <t t-name="mass_mailing.IframeBody">
         <div class="o_mass_mailing_value"
             t-att-class="{ 'o_readonly': props.readonly, 'note-editable': !props.readonly, 'o_rtl': isRTL }">
-            <t t-if="props.readonly">
+            <t t-if="this.props.readonly">
                 <t t-out="props.config.value"/>
             </t>
         </div>

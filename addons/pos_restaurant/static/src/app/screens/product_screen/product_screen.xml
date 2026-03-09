@@ -42,18 +42,18 @@
                         class="btn-switchpane pay-button pay-small btn btn-lg flex-grow-1 lh-sm"
                         t-attf-class="{{ this.pos.config.module_pos_restaurant ? 'btn-secondary' : 'btn-primary' }}"
                         t-on-click="() => this.pos.pay()"
-                        t-att-disabled="currentOrder.isEmpty()">
+                        t-att-disabled="this.currentOrder.isEmpty()">
                         <span class="d-block">Pay</span>
-                        <small><t t-out="total" /></small>
+                        <small><t t-out="this.total" /></small>
                     </button>
                 </t>
             </t>
         </xpath>
         <xpath expr="//button[hasclass('review-button')]" position="replace">
-            <button class="btn-switchpane btn btn-lg flex-grow-1 review-button lh-sm" t-attf-class="{{ primaryReviewButton ? 'btn-primary' : 'btn-secondary' }}" t-on-click="switchPane">
+            <button class="btn-switchpane btn btn-lg flex-grow-1 review-button lh-sm" t-attf-class="{{ primaryReviewButton ? 'btn-primary' : 'btn-secondary' }}" t-on-click="this.switchPane">
                 <span class="d-block">Cart</span>
-                <small t-if="this.swapButton"><t t-out="total" /></small>
-                <small t-else=""><t t-out="items"/> items</small>
+                <small t-if="this.swapButton"><t t-out="this.total" /></small>
+                <small t-else=""><t t-out="this.items"/> items</small>
             </button>
         </xpath>
         <xpath expr="//ActionpadWidget" position="attributes">

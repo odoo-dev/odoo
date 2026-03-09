@@ -16,7 +16,7 @@
         <xpath expr="//section[hasclass('o_search_panel_sections')]" position="before">
             <t t-if="displaySuggest">
                 <t t-call="PurchaseSuggest.SearchPanel.Header"/>
-                <t t-if="suggest.suggestToggle.isOn">
+                <t t-if="this.suggest.suggestToggle.isOn">
                     <div class="o_suggest_feature">
                         <t t-call="PurchaseSuggest.SearchPanel.DaysInput"/>
                         <t t-call="PurchaseSuggest.SearchPanel.BasedOn"/>

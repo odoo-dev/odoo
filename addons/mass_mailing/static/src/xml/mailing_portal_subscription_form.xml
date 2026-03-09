@@ -9,9 +9,9 @@
         <ul id="o_mailing_subscription_form_lists"
             t-if="listsMember.length"
             class="list-group">
-            <li t-foreach="listsMember"
+            <li t-foreach="this.listsMember"
                 t-as="mailing_list"
-                t-key="mailing_list_key"
+                t-key="this.mailing_list_key"
                 class="list-group-item d-flex align-items-center">
                 <input type="checkbox"
                        name="mailing_list_ids"
@@ -38,7 +38,7 @@
             class="list-group">
             <li t-foreach="listsProposal"
                 t-as="mailing_list"
-                t-key="mailing_list_key"
+                t-key="this.mailing_list_key"
                 class="list-group-item">
                 <input type="checkbox"
                        name="mailing_list_ids"
@@ -62,9 +62,9 @@
         </p>
         <ul class="list-group mb-4"
             t-if="listsOptin.length">
-            <t t-foreach="listsOptin"
+            <t t-foreach="this.listsOptin"
                t-as="mailing_list"
-               t-key="mailing_list_key">
+               t-key="this.mailing_list_key">
                 <li class="list-group-item d-flex align-items-center">
                     <strong t-out="mailing_list['name']"/>
                 </li>

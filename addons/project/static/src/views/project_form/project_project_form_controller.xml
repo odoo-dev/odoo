@@ -5,7 +5,7 @@
             <ProjectTemplateDropdown t-if="canCreate"
                 onCreate="() => this.create()"
                 newButtonClasses="'btn btn-outline-primary o_form_button_create'"
-                context="props.context"
+                context="this.props.context"
             />
         </button>
     </t>

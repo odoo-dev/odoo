@@ -5230,7 +5230,7 @@ test(`discard changes on a new (dirty) form view`, async () => {
 test(`discard has to wait for changes in each field`, async () => {
     const def = new Deferred();
     class CustomField extends Component {
-        static template = xml`<input t-ref="input" t-att-value="value" t-on-blur="onBlur" t-on-input="onInput" />`;
+        static template = xml`<input t-ref="input" t-att-value="this.value" t-on-blur="this.onBlur" t-on-input="this.onInput" />`;
         static props = {
             ...standardFieldProps,
         };
@@ -9899,7 +9899,7 @@ test(`rainbowman attributes correctly passed on button click`, async () => {
 test(`basic support for widgets`, async () => {
     class MyComponent extends Component {
         static props = ["*"];
-        static template = xml`<div t-esc="value"/>`;
+        static template = xml`<div t-esc="this.value"/>`;
         get value() {
             return JSON.stringify(this.props.record.data);
         }
@@ -9938,7 +9938,7 @@ test(`widget with class attribute`, async () => {
 test(`widget with readonly attribute`, async () => {
     class MyComponent extends Component {
         static props = ["*"];
-        static template = xml`<span t-esc="value"/>`;
+        static template = xml`<span t-esc="this.value"/>`;
         get value() {
             return this.props.readonly ? "readonly" : "not readonly";
         }
@@ -9992,7 +9992,7 @@ test(`support header button as widgets on form statusbar on mobile`, async () =>
 test(`basic support for widgets: onchange update`, async () => {
     class MyWidget extends Component {
         static props = ["*"];
-        static template = xml`<t t-esc="state.dataToDisplay" />`;
+        static template = xml`<t t-esc="this.state.dataToDisplay" />`;
         setup() {
             this.state = useState({
                 dataToDisplay: this.props.record.data.foo,
@@ -11083,7 +11083,7 @@ test(`fieldDependencies support for fields`, async () => {
     fieldsRegistry.add("custom_field", {
         component: class CustomField extends Component {
             static props = ["*"];
-            static template = xml`<span t-esc="props.record.data.int_field"/>`;
+            static template = xml`<span t-esc="this.props.record.data.int_field"/>`;
         },
         fieldDependencies: [{ name: "int_field", type: "integer" }],
     });
@@ -11103,7 +11103,7 @@ test(`fieldDependencies support for fields: dependence on a relational field`, a
     registry.category("fields").add("custom_field", {
         component: class CustomField extends Component {
             static props = ["*"];
-            static template = xml`<span t-esc="props.record.data.product_id.display_name"/>`;
+            static template = xml`<span t-esc="this.props.record.data.product_id.display_name"/>`;
         },
         fieldDependencies: [{ name: "product_id", type: "many2one", relation: "product" }],
     });
@@ -11937,7 +11937,7 @@ test(`coming to an action with an error from a form view with a dirty x2m`, asyn
         static props = ["*"];
         static template = xml`
             <div class="test_widget">
-                <button t-on-click="onClick">MyButton</button>
+                <button t-on-click="this.onClick">MyButton</button>
             </div>
         `;
         setup() {
@@ -12019,7 +12019,7 @@ test(`coming to an action with an error from a form view with a record in creati
         static props = ["*"];
         static template = xml`
                 <div class="test_widget">
-                    <button t-on-click="onClick">MyButton</button>
+                    <button t-on-click="this.onClick">MyButton</button>
                 </div>`;
         setup() {
             this.actionService = useService("action");
@@ -12199,7 +12199,7 @@ test(`widget update several fields including an x2m`, async () => {
     };
     class TestWidget extends Component {
         static props = ["*"];
-        static template = xml`<div><button t-on-click="onClick">Click</button></div>`;
+        static template = xml`<div><button t-on-click="this.onClick">Click</button></div>`;
 
         onClick() {
             this.props.record.update({
@@ -12500,7 +12500,7 @@ test(`custom x2many with relatedFields and list view not inline`, async () => {
 test(`custom many2one with relatedFields`, async () => {
     class CustomMany2One extends Component {
         static template = xml`
-            <t t-set="value" t-value="props.record.data[props.name]"/>
+            <t t-set="value" t-value="this.props.record.data[this.props.name]"/>
             <div class="content">
                 <div t-esc="value.id"/>
                 <div t-esc="value.display_name"/>
@@ -12611,7 +12611,7 @@ test(`field with special data`, async () => {
 test(`field with special data (with persistent Cache)`, async () => {
     class MyWidget extends Component {
         static props = ["*"];
-        static template = xml`<div class="my_widget">MyWidget <t t-esc="specialData.data.test"/></div>`;
+        static template = xml`<div class="my_widget">MyWidget <t t-esc="this.specialData.data.test"/></div>`;
         setup() {
             this.specialData = useSpecialData((orm, props) => {
                 const { record } = props;
@@ -12788,7 +12788,7 @@ test(`an empty json object does not pass the required check`, async () => {
     class JsonField extends Component {
         static props = ["*"];
         static supportedTypes = ["json"];
-        static template = xml`<span><input t-on-change="onChange"/></span>`;
+        static template = xml`<span><input t-on-change="this.onChange"/></span>`;
 
         onChange(ev) {
             this.props.record.update({ [this.props.name]: JSON.parse(ev.target.value) });
@@ -13034,7 +13034,7 @@ test(`cog menu action is executed with up to date context`, async () => {
     });
 
     class MyField extends CharField {
-        static template = xml`<button class="my_btn" t-on-click="onClick">Reload</button>`;
+        static template = xml`<button class="my_btn" t-on-click="this.onClick">Reload</button>`;
         onClick() {
             this.props.record.model.load({ context: { x: "z" } });
         }
@@ -13075,7 +13075,7 @@ test(`cog menu action is executed with up to date context`, async () => {
 test("CogMenu receives the model in env", async () => {
     class CogItem extends Component {
         static props = ["*"];
-        static template = xml`<button class="test-cog" t-on-click="onClick">Test</button>`;
+        static template = xml`<button class="test-cog" t-on-click="this.onClick">Test</button>`;
         onClick() {
             expect.step([`cog clicked`, this.env.model.root.resModel, this.env.model.root.resId]);
         }

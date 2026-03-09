@@ -2,17 +2,17 @@
 <templates xml:space="preserve">
 
     <t t-name="web.DebugMenu.ProfilingItem">
-        <DropdownItem class="o_debug_profiling_item_wrapper">
+        <DropdownItem class="this.o_debug_profiling_item_wrapper">
             <div class="d-flex justify-content-between ps-3">
                 <div class="align-self-center">
-                    <div t-if="profiling.state.isEnabled" class="alert alert-info py-2 me-3">Recording...</div>
+                    <div t-if="this.profiling.state.isEnabled" class="alert alert-info py-2 me-3">Recording...</div>
                     <span class="o_profiling_switch">
                         <span class="form-check form-switch" t-on-click.stop.prevent="() => this.profiling.toggleProfiling()">
-                            <input type="checkbox" class="form-check-input" id="enable_profiling" t-att-checked="profiling.state.isEnabled"/>
+                            <input type="checkbox" class="form-check-input" id="enable_profiling" t-att-checked="this.profiling.state.isEnabled"/>
                             <label class="form-check-label">Enable profiling</label>
                         </span>
                     </span>
-                    <t t-if="profiling.state.isEnabled">
+                    <t t-if="this.profiling.state.isEnabled">
                         <span class="o_profiling_switch form-check form-switch mt-2" t-on-click.stop.prevent="() => this.profiling.toggleCollector('sql')">
                             <input type="checkbox" class="form-check-input" id="profile_sql"
                                 t-att-checked="profiling.isCollectorEnabled('sql')"/>
@@ -67,7 +67,7 @@
                         </span>
                     </t>
                 </div>
-                <a href="#" t-on-click.prevent="openProfiles" t-attf-class="btn btn-light align-self-baseline {{profiling.state.isEnabled ? 'py-2' : ''}}">
+                <a href="#" t-on-click.prevent="this.openProfiles" t-attf-class="btn btn-light align-self-baseline {{profiling.state.isEnabled ? 'py-2' : ''}}">
                     <i class="o_open_profiling oi oi-launch" />
                 </a>
             </div>

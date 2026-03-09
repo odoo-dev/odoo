@@ -8,11 +8,11 @@
     <BuilderRow label.translate="Display Options" preview="false">
         <BuilderCheckbox id="'display_options_opt'" action="'toggleDisplayOptions'" />
     </BuilderRow>
-    <BuilderRow t-if="!isActiveItem('no_input_opt')"
+    <BuilderRow t-if="!this.isActiveItem('no_input_opt')"
                 label.translate="Pre-filled Options" preview="false">
         <BuilderCheckbox id="'pre_filled_opt'" action="'togglePrefilledOptions'" />
     </BuilderRow>
-    <t t-if="isActiveItem('no_input_opt') || isActiveItem('pre_filled_opt')">
+    <t t-if="this.isActiveItem('no_input_opt') || this.isActiveItem('pre_filled_opt')">
         <t t-set="translatedDefaultDescription">Add a description here</t>
         <BuilderList
                 action="'setPrefilledOptions'"
@@ -20,7 +20,7 @@
                 itemShape="{ value: 'number', description: 'text' }"
                 default="{ value: '50', description: translatedDefaultDescription }"
                 columnWidth="{ value: 'w-25' }"
-                hiddenProperties="isActiveItem('pre_filled_descriptions_opt') ? [] : ['description']"
+                hiddenProperties="this.isActiveItem('pre_filled_descriptions_opt') ? [] : ['description']"
         />
         <BuilderRow label.translate="Descriptions" level="1" preview="false">
             <BuilderCheckbox id="'pre_filled_descriptions_opt'" action="'toggleDescriptions'" />
@@ -28,22 +28,22 @@
     </t>
     <BuilderRow label.translate="Custom Amount" preview="false">
         <BuilderSelect action="'selectAmountInput'">
-            <t t-if="!isActiveItem('display_options_opt') || isActiveItem('pre_filled_opt') || isActiveItem('no_input_opt')">
+            <t t-if="!this.isActiveItem('display_options_opt') || this.isActiveItem('pre_filled_opt') || this.isActiveItem('no_input_opt')">
                 <BuilderSelectItem id="'free_amount_opt'" actionParam="'freeAmount'">Input</BuilderSelectItem>
             </t>
-            <t t-if="isActiveItem('display_options_opt')">
+            <t t-if="this.isActiveItem('display_options_opt')">
                 <BuilderSelectItem id="'slider_opt'" actionParam="'slider'">Slider</BuilderSelectItem>
             </t>
-            <t t-if="isActiveItem('no_input_opt') || isActiveItem('pre_filled_opt')">
+            <t t-if="this.isActiveItem('no_input_opt') || this.isActiveItem('pre_filled_opt')">
                 <BuilderSelectItem id="'no_input_opt'" actionParam="''">None</BuilderSelectItem>
             </t>
         </BuilderSelect>
     </BuilderRow>
-    <BuilderRow t-if="!isActiveItem('no_input_opt')"
+    <BuilderRow t-if="!this.isActiveItem('no_input_opt')"
                 label.translate="Minimum" level="1">
         <BuilderNumberInput step="1" action="'setMinimumAmount'"/>
     </BuilderRow>
-    <t t-if="isActiveItem('slider_opt')">
+    <t t-if="this.isActiveItem('slider_opt')">
         <BuilderRow label.translate="Maximum" level="1">
             <BuilderNumberInput step="1" action="'setMaximumAmount'"/>
         </BuilderRow>
@@ -57,14 +57,14 @@
 </t>
 
 <t t-name="website_payment.donation.descriptionTranslationInputs">
-    <t t-foreach="descriptions" t-as="description" t-key="description_index">
+    <t t-foreach="this.descriptions" t-as="description" t-key="description_index">
         <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" name="donation_descriptions" t-att-value="description"/>
     </t>
 </t>
 
 <t t-name="website_payment.donation.prefilledButtons">
     <div class="s_donation_prefilled_buttons mb-2">
-        <t t-foreach="prefilled_buttons" t-as="prefilled_button_value" t-key="prefilled_button_value_index">
+        <t t-foreach="this.prefilled_buttons" t-as="prefilled_button_value" t-key="this.prefilled_button_value_index">
             <button class="s_donation_btn btn btn-outline-primary btn-lg mb-2 me-1 o_not_editable"
                     type="button"
                     contenteditable="false"
@@ -78,7 +78,7 @@
 </t>
 <t t-name="website_payment.donation.prefilledButtonsDescriptions">
     <div class="s_donation_prefilled_buttons my-4">
-        <t t-foreach="prefilled_buttons" t-as="prefilled_button" t-key="prefilled_button_value_index">
+        <t t-foreach="this.prefilled_buttons" t-as="prefilled_button" t-key="prefilled_button_value_index">
             <div class="s_donation_btn_description d-sm-flex align-items-center my-3 o_not_editable o_translate_mode_hidden" contenteditable="false">
                 <button class="s_donation_btn btn btn-outline-primary btn-lg me-3"
                         type="button"

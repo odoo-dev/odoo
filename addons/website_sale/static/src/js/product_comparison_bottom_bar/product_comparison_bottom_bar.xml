@@ -3,7 +3,7 @@
     <t t-name="website_sale.ProductComparisonBottomBar">
         <div class="o_not_editable position-absolute top-0 start-0 bottom-0 end-0 d-flex align-items-end justify-content-end p-0 pe-none">
             <div
-                t-if="state.products.size"
+                t-if="this.state.products.size"
                 class="o_wsale_comparison_bottom_bar sticky-bottom flex-shrink-0 w-100 bg-body pe-auto"
                 name="comparison_bottom_bar"
             >

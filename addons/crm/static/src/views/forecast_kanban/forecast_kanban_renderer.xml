@@ -6,8 +6,8 @@
                 <ForecastKanbanColumnQuickCreate
                     folded="true"
                     onFoldChange="() => {}"
-                    onValidate.bind="addForecastColumn"
-                    groupByField="props.list.groupByField"
+                    onValidate.bind="this.addForecastColumn"
+                    groupByField="this.props.list.groupByField"
                 />
             </t>
             <t t-else="">$0</t>
