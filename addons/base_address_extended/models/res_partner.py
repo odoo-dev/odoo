@@ -14,7 +14,11 @@ class ResPartner(models.Model):
     street_number2 = fields.Char(
         'Door', compute='_compute_street_data', inverse='_inverse_street_data', store=True)
 
-    city_id = fields.Many2one(comodel_name='res.city', string='City ID')
+    city_id = fields.Many2one(comodel_name='res.city',
+        string='City ID',
+        readonly=False, store=True,
+        compute="_compute_city_id"
+    )
     country_enforce_cities = fields.Boolean(related='country_id.enforce_cities')
 
     @api.model
@@ -43,6 +47,17 @@ class ResPartner(models.Model):
             'street_number': self.street_number,
             'street_number2': self.street_number2
         }
+
+    @api.depends('city')
+    def _compute_city_id(self):
+        for partner in self:
+            if partner.country_id and partner.country_id.enforce_cities and partner.city:
+                city = self.env['res.city'].search([
+                    ('country_id', '=', partner.country_id.id),
+                    ('name', '=ilike', partner.city),
+                ], limit=1)
+                if city and partner.city_id != city:
+                    partner.city_id = city.id
 
     @api.onchange('city_id')
     def _onchange_city_id(self):
