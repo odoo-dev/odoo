@@ -66,6 +66,7 @@ export class BlockTab extends Component {
      * @param {Object} snippet the clicked snippet group
      */
     onSnippetGroupClick(snippet) {
+        this.state.cancelDragAndDrop = this.cancelDragAndDrop;
         this.shared.blockTab.onSnippetGroupClick(snippet, this.state);
     }
 
@@ -114,7 +115,11 @@ export class BlockTab extends Component {
 
         if (selectedSnippetEl) {
             await this.shared.blockTab.scrollToDroppedSnippet(selectedSnippetEl);
-            await this.shared.blockTab.processDroppedSnippet(selectedSnippetEl, this.dragState);
+            await this.shared.blockTab.processDroppedSnippet(
+                selectedSnippetEl,
+                this.dragState,
+                this.cancelDragAndDrop
+            );
         } else {
             this.cancelDragAndDrop();
         }
@@ -396,7 +401,11 @@ export class BlockTab extends Component {
 
                     // Process the dropped element.
                     if (!isSnippetGroup) {
-                        await this.shared.blockTab.processDroppedSnippet(snippetEl, this.dragState);
+                        await this.shared.blockTab.processDroppedSnippet(
+                            snippetEl,
+                            this.dragState,
+                            this.cancelDragAndDrop
+                        );
                         delete this.cancelDragAndDrop;
                     } else {
                         this.shared.operation.next(
