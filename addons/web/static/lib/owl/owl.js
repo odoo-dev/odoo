@@ -2435,7 +2435,7 @@
                 }
             }
             this.component = new C(props, env, this);
-            const ctx = Object.assign(Object.create({}), { this: this.component });
+            const ctx = Object.assign(Object.create({}), { this: this.component, __owl__: this });
             this.renderFn = app.getTemplate(C.template).bind(this.component, ctx, this);
             this.component.setup();
             currentNode = null;
@@ -3048,7 +3048,7 @@
     }
     function callSlot(ctx, parent, key, name, dynamic, extra, defaultContent) {
         key = key + "__slot_" + name;
-        const slots = ctx.props.slots || {};
+        const slots = (ctx['this'] || ctx).props.slots || {};
         const { __render, __ctx, __scope } = slots[name] || {};
         const slotScope = ObjectCreate(__ctx || {});
         if (__scope) {
@@ -6332,7 +6332,7 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2026-03-09T12:58:06.211Z';
+    __info__.date = '2026-03-09T15:29:18.401Z';
     __info__.hash = '8f3b430';
     __info__.url = 'https://github.com/odoo/owl';
 
