@@ -280,7 +280,7 @@
         <tr class="o_data_row"
             t-att-class="this.getRowClass(record)"
             t-att-data-id="record.id"
-            t-att-data-group-id="groupId"
+            t-att-data-group-id="this.groupId"
             t-on-click.capture="(ev) => this.onClickCapture(record, ev)"
             t-on-mouseover.capture="(ev) => this.ignoreEventInSelectionMode(ev)"
             t-on-mouseout.capture="(ev) => this.ignoreEventInSelectionMode(ev)"
