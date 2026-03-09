@@ -840,22 +840,25 @@ font[class*='bg-'] {
 
 @for $-size from 1 through length($o-colors) {
     .o_color_#{$-size - 1} {
-       // Compute background-color and text-color values for different uses,
-       // allowing to apply the value from colorfield on desired UI elements.
-       // this set of variables covers all the possible scenarios.
-
-        $-color: nth($o-colors, $-size);
+        $-base: nth($o-colors, $-size);
 
         $-is-website-palette-dark: color-contrast($body-color) == $color-contrast-dark;
-        $-bg-lightness-adjusted: if($-is-website-palette-dark, -40%, 0%);
 
-        $-background-color: if($-is-website-palette-dark, adjust-color($-color, $lightness: $-bg-lightness-adjusted, $saturation: 5%), tint-color($-color, 90%));
+        @if $-is-website-palette-dark {
+            --background-color: oklch(from #{$-base} calc(l - 0.4) calc(c + 0.05) h);
+            --color: oklch(from #{$-base} 0.95 0.05 h);
+            --background-color-contrast: oklch(from #{$-base} 0.98 0.02 h);
+            --badge-border-color: oklch(from #{$-base} calc(l - 0.2) c h);
 
-        --background-color: #{$-background-color};
-        --color: #{increase-contrast($-color, $-background-color)};
-        --background-color-contrast: #{color-contrast($-background-color, $min-contrast-ratio: 3)};
-        --badge-color-hover: #{color-contrast($-color, $min-contrast-ratio: 3)};
-        --badge-border-color: #{$-color};
+        }@else {
+
+            --background-color: oklch(from #{$-base} 0.97 0.02 h);
+            --color: oklch(from #{$-base} 0.40 0.08 h);
+            --background-color-contrast: oklch(from #{$-base} 0.25 0.05 h);
+            --badge-border-color: oklch(from #{$-base} 0.80 0.06 h);
+        }
+
+        --badge-color-hover: #{color-contrast($-base, $min-contrast-ratio: 3)};
     }
 }
 

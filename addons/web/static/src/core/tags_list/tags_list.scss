@@ -4,12 +4,11 @@
 
     @for $size from 1 through length($o-colors) {
         &.o_tag_color_#{$size - 1} {
-            $-bg: adjust-color(nth($o-colors, $size), $lightness: 25%, $saturation: 15%);
-            $-color: adjust-color(nth($o-colors, $size), $lightness: -40%, $saturation: -15%);
+            $-base: nth($o-colors, $size);
 
             &, &::after {
-                @include o-print-color($-bg, background-color, bg-opacity);
-                @include o-print-color($-color, color, text-opacity);
+                background-color: var(--background-color, oklch(from #{$-base} 0.90 0.06 h / var(--bg-opacity, 1)));
+                color: var(--color, oklch(from #{$-base} 0.35 0.1 h));
             }
         }
     }
