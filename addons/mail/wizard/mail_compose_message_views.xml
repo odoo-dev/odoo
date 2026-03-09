@@ -43,6 +43,7 @@
                         </div>
                         <field name="subject" placeholder="Welcome to MyCompany!" required="True"/>
                     </group>
+                    <field name="preview_attachment"/>
                     <field name="can_edit_body" invisible="1"/>
                     <div invisible="composition_mode == 'mass_mail'">
                         <field name="body" widget="html_composer_message" class="oe-bordered-editor"

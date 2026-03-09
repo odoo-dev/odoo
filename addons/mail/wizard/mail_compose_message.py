@@ -197,6 +197,15 @@ class MailComposer(models.TransientModel):
     # template generation
     template_name = fields.Char('Template Name')
 
+    preview_attachment = fields.Html(compute='_compute_preview_attachment')
+
+    @api.depends('body', 'attachment_ids')
+    def _compute_preview_attachment(self):
+        for record in self:
+            attachments = record.attachment_ids.filtered(
+                lambda a: f'data-attachment-id="{a.id}"' not in (record.body or ''))
+            record.preview_attachment = self.env["mail.mail"]._render_attachments_links(attachments)
+
     @api.constrains('res_ids')
     def _check_res_ids(self):
         """ Check res_ids is a valid list of integers (or Falsy). """
