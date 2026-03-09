@@ -31,6 +31,11 @@ const standardAddressFields = {
         label: _t("Country field"),
         type: ["char", "many2one"]
     }
+
+    city_id: {
+        label: _t("City Id field"),
+        type: ["many2one"]
+    }
 }
 
 export class AddressAutoComplete extends CharField {
@@ -117,7 +122,7 @@ export class AddressAutoComplete extends CharField {
             if (recordFieldName in activeFields) {
                 if (fields[recordFieldName].type === "many2one") {
                     value = value && { id: value[0], display_name: value[1] };
-                } else if (Array.isArray(value)) {
+                } else if (Array.isArray(value) && value) {
                     value = value[1];
                 }
                 valuesToUpdate[recordFieldName] = value || false;

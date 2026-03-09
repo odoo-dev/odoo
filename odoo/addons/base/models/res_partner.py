@@ -328,6 +328,10 @@ class ResPartner(models.Model):
         "Contacts require a name",
     )
 
+    @api.model
+    def _get_res_city_by_name(self, name, country_id):
+        pass
+
     def _get_street_split(self):
         self.ensure_one()
         return tools.street_split(self.street or '')
