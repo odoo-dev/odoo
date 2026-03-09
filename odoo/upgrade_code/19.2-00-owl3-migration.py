@@ -894,6 +894,16 @@ MISC_WHITELIST = {
     "pos_restaurant.floor_screen_element": {'element'},  # for each + t-call
     "sale_management.ListRenderer.RecordRow": {'record'},  # Nested t-inherits
     "sale.ListRenderer.RecordRow": {'record', 'column', 'hasDeleteButton'},  # Nested t-inherits
+    "web_studio.ViewEditor.View": { 'scope' },  # dynamic t-call 
+    "web_studio.property.subOptions": {'attribute'},  # dynamic t-call
+    "web_studio.property.defaultInput": {'attribute'},  # dynamic t-call
+    "web_studio.property.selection": {'attribute'},  # dynamic t-call
+    "web_studio.property.domain": {'attribute'},  # dynamic t-call
+    "web_studio.property.digits": {'attribute'},  # dynamic t-call
+    "web_studio.property.boolean": {'attribute'},  # dynamic t-call
+    "web_studio.property.field": {'attribute'},  # dynamic t-call
+    "web_studio.property.number": {'attribute'},  # dynamic t-call
+    "web_studio.property.string": {'attribute'},  # dynamic t-call
 }
 
 ACCOUNT_WHITELIST = {
@@ -904,7 +914,7 @@ ACCOUNT_WHITELIST = {
     "account_reports.journal_balance": {'warningParams'},  # dynamic t-call
     "account_reports.inconsistent_statement_warning": {'warningParams'},  # dynamic t-call
 }
-THIS_TARGETS = ["account"]
+THIS_TARGETS = ["web_studio"]
 
 
 def upgrade_this(file_manager, log_info, log_error):
