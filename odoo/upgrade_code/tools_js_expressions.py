@@ -916,6 +916,7 @@ def update_template(path: str, content: str, modules: list[str], aggregator: Var
     result = result.replace("><![CDATA[", ">").replace("]]>", "")
     result = result.replace("\u200b", "&#8203;")
     result = result.replace("&&", "&amp;&amp;")
+    result = result.replace(") =&gt;", ") =>")
     result = unmask_xml_entities(result)
     return result, compiler.warnings
 
@@ -1425,6 +1426,11 @@ tests = [
     </t>
 </templates>
 """,
+    },
+    {
+        "name": "Arrow function formatting error",
+        "content": """<button t-on-click= "(e) => this.removeLine(line,e)"/>""",
+        "expected": """<button t-on-click="(e) => this.removeLine(this.line,e)"/>""",
     },
     {
         "name": "Doesn't but this before &...; expr",
