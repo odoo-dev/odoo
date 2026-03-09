@@ -1421,7 +1421,6 @@ class Website(models.CachedModel):
         :return: website recordset
         """
         existing_ids = self._cached_data()['id']
-
         if website_id := self.env.context.get('website_id'):
             # during the match of env['ir.http'], the website information was
             # added from the request.
@@ -1449,12 +1448,6 @@ class Website(models.CachedModel):
                 website_id = False
 
         return self.browse(website_id).with_context(website_id=website_id)
-
-    @api.model
-    @tools.ormcache('website_id')
-    def _website_id_exists(self, website_id):
-        if website_id and self.browse(website_id).exists():
-            return website_id
 
     def _force(self):
         if request:
@@ -1486,6 +1479,7 @@ class Website(models.CachedModel):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """
         self.ensure_one()
 
+        self = self.with_context(website_id=self.id)
         view = self.env['ir.ui.view']._get_template_view(template).sudo()
         view._handle_visibility(do_raise=True)
 

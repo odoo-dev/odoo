@@ -34,7 +34,7 @@ class WebsiteMenu(models.Model):
         for menu in self:
             if menu.is_mega_menu:
                 if not menu.mega_menu_content:
-                    menu.mega_menu_content = website._render_template('website.s_mega_menu_odoo_menu')
+                    menu.mega_menu_content = (self.website_id or website)._render_template('website.s_mega_menu_odoo_menu')
             else:
                 menu.mega_menu_content = False
                 menu.mega_menu_classes = False
@@ -291,6 +291,8 @@ class WebsiteMenu(models.Model):
 
     @api.model
     def save(self, website_id, data):
+        self = self.with_context(website_id=website_id)
+
         def replace_id(old_id, new_id):
             for menu in data['data']:
                 if menu['id'] == old_id:

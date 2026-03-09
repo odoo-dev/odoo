@@ -240,15 +240,15 @@ class IrHttp(models.AbstractModel):
         - False
         """
         if force_website_id := request.session.get('force_website_id'):
-            website_id = self.env['website']._website_id_exists(force_website_id)
-            if website_id:
-                return website_id
+            if force_website_id in self.env['website']._cached_data()['id']:
+                return force_website_id
             else:
                 # Don't crash is session website got deleted
                 request.session.pop('force_website_id')
 
         if website_id := request.env.context.get('website_id'):
-            return self.env['website']._website_id_exists(website_id)
+            if website_id in self.env['website']._cached_data()['id']:
+                return website_id
         return False
 
     @api.model

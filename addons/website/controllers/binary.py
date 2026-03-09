@@ -7,6 +7,6 @@ class WebsiteBinary(Binary):
     @http.route([
         '/web/assets/<int:website_id>/<unique>/<string:filename>'], type='http', auth="public", readonly=True)
     def content_assets_website(self, website_id=None, **kwargs):
-        if not request.env['website']._website_id_exists(website_id):
+        if website_id not in request.env['website']._cached_data()['id']:
             raise request.not_found()
         return super().content_assets(**kwargs, assets_params={'website_id': website_id})
