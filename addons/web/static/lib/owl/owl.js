@@ -2435,7 +2435,7 @@
                 }
             }
             this.component = new C(props, env, this);
-            const ctx = Object.assign(Object.create(this.component), { this: this.component });
+            const ctx = Object.assign(Object.create({}), { this: this.component });
             this.renderFn = app.getTemplate(C.template).bind(this.component, ctx, this);
             this.component.setup();
             currentNode = null;
@@ -6332,8 +6332,8 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2026-01-30T07:49:47.618Z';
-    __info__.hash = '52abf8d';
+    __info__.date = '2026-03-09T12:58:06.211Z';
+    __info__.hash = '8f3b430';
     __info__.url = 'https://github.com/odoo/owl';
 
 
