@@ -44,3 +44,20 @@
     min-width: 18px !important;
     min-height: 18px !important;
 }
+
+@include media-breakpoint-down(sm) {
+    .o_form_view .o_inner_group.oe_subtotal_footer .o_cell.o_wrap_label {
+        text-align: left;
+    }
+}
+
+.o_form_header_group .o_form_header_details {
+  width: 100%;
+  flex: 1;
+}
+
+@include media-breakpoint-only(md) {
+    .o_form_view .o_inner_group.oe_subtotal_footer {
+        grid-template-columns: max-content auto;
+    }
+}

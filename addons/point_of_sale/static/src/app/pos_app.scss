@@ -103,3 +103,9 @@ html {
     background-position: center;
     background-repeat: no-repeat;
 }
+
+@include media-breakpoint-only(md) {
+    .o_form_view .o_inner_group .o_cell_custom {
+        grid-column: span var(--o-grid-column-span, 2) !important;
+    }
+}
