@@ -779,7 +779,15 @@ class TemplateCompiler:
                 stack.pop()
 
             # Arrow detection
-            if next_tok and next_tok.type == "OPERATOR" and (next_tok.value == "=\u2007>" or next_tok.value == "=>"):
+            is_arrow = False
+            if next_tok and next_tok.type == "OPERATOR" and next_tok.value in ("=\u2007>", "=>"):
+                is_arrow = True
+            elif next_tok and next_tok.value == "=":
+                next_next_tok = next_non_whitespace(tokens, tokens.index(next_tok))
+                if next_next_tok and next_next_tok.value == "__xgtx__":
+                    is_arrow = True
+
+            if is_arrow:
                 if tok.type == "RIGHT_PAREN":
                     # (a, b) => ...
                     j = i - 1
@@ -1113,8 +1121,8 @@ tests = [
     },
     {
         "name": "TODO component function",
-        "content": """<A onSaveCallback="(timesheet) =&gt; this.onSaveTimesheetForm(timesheet)"/>""",
-        "expected": """<A onSaveCallback="(timesheet) => this.onSaveTimesheetForm(timesheet)"/>""",
+        "content": """<A onSaveCallback="(timesheet, changes) =&gt; this.onSaveTimesheetForm(timesheet, changes)"/>""",
+        "expected": """<A onSaveCallback="(timesheet, changes) => this.onSaveTimesheetForm(timesheet, changes)"/>""",
     },
     {
         "name": "t-if",
