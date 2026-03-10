@@ -320,11 +320,7 @@ export class Form extends Interaction {
         this.removeErrorMessages();
         // Both functions must be executed at least once.
         // They are written on separate lines to avoid short-circuit evaluation.
-        let isFormValid = this.checkErrorFields({});
-        isFormValid =
-            (await this.checkFileTypeValidationErrors(
-                this.el.querySelectorAll("input[type=file]:not([disabled])")
-            )) && isFormValid;
+        const isFormValid = await this.checkErrorFields({});
         if (!isFormValid) {
             this.updateStatus("error", _t("Please fill in the form correctly."));
             return false;
@@ -436,7 +432,7 @@ export class Form extends Interaction {
                     this.updateStatus("error", resultData.error ? resultData.error : false);
                     if (resultData.error_fields) {
                         // If the server return a list of bad fields, show these fields for users
-                        this.checkErrorFields(resultData.error_fields);
+                        await this.checkErrorFields(resultData.error_fields);
                     }
                 } else {
                     // Success, redirect or update status
@@ -580,7 +576,7 @@ export class Form extends Interaction {
         return allValid;
     }
 
-    checkErrorFields(errorFields) {
+    async checkErrorFields(errorFields) {
         let formValid = true;
         let firstInvalidInput = null;
         // Loop on all fields
@@ -597,7 +593,8 @@ export class Form extends Interaction {
                     ".s_website_form_input:not(#editable_select), .o_website_form_input:not(#editable_select)"
                 ),
             ]; // !compatibility
-            const invalidInputs = inputEls.filter((inputEl) => {
+            const invalidInputs = [];
+            for (const inputEl of inputEls) {
                 // Special check for multiple required checkbox for same
                 // field as it seems checkValidity forces every required
                 // checkbox to be checked, instead of looking at other
@@ -614,8 +611,9 @@ export class Form extends Interaction {
                     const checkboxes = inputEls.filter(
                         (el) => el.required && el.type === "checkbox"
                     );
-                    return !checkboxes.some((checkbox) => checkbox.checkValidity());
-
+                    if (!checkboxes.some((checkbox) => checkbox.checkValidity())) {
+                        invalidInputs.push(inputEl);
+                    }
                     // Special cases for dates and datetimes
                     // FIXME this seems like dead code, the inputs do not use
                     // those classes, their parent does (but it seemed to work
@@ -627,17 +625,19 @@ export class Form extends Interaction {
                     // !compatibility
                     const date = parseDate(inputEl.value);
                     if (!date || !date.isValid) {
-                        return true;
+                        invalidInputs.push(inputEl);
                     }
                 } else if (inputEl.matches(".s_website_form_datetime, .o_website_form_datetime")) {
                     // !compatibility
                     const date = parseDateTime(inputEl.value);
                     if (!date || !date.isValid) {
-                        return true;
+                        invalidInputs.push(inputEl);
                     }
+                } else if (inputEl.type === "file" && !(await this.isFileInputValid(inputEl))) {
+                    invalidInputs.push(inputEl);
                 } else if (this.requirementFunction(fieldEl) === false) {
                     this.updateStatusInline(fieldEl.dataset.errorMessage, inputEl);
-                    return true;
+                    invalidInputs.push(inputEl);
                 } else if (inputEl.hasAttribute("maxlength") && inputEl.hasAttribute("minlength")) {
                     const maxChars = parseInt(inputEl.getAttribute("maxlength"));
                     const minChars = parseInt(inputEl.getAttribute("minlength"));
@@ -650,7 +650,7 @@ export class Form extends Interaction {
                             ),
                             inputEl
                         );
-                        return true;
+                        invalidInputs.push(inputEl);
                     }
                 }
 
@@ -663,8 +663,10 @@ export class Form extends Interaction {
                 // their purpose is to be able to enter additional data when
                 // some condition is fulfilled. If such a field is required,
                 // it is only required when visible for example.
-                return !inputEl.checkValidity();
-            });
+                if (!inputEl.checkValidity()) {
+                    invalidInputs.push(inputEl);
+                }
+            }
 
             // Update field color if invalid or erroneous
             const controlEls = fieldEl.querySelectorAll(
