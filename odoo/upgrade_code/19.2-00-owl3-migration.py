@@ -913,6 +913,7 @@ MISC_WHITELIST = {
     "web_studio.property.field": {'attribute'},  # dynamic t-call
     "web_studio.property.number": {'attribute'},  # dynamic t-call
     "web_studio.property.string": {'attribute'},  # dynamic t-call
+    "web_map.MapRenderer.PinListItems": {'records'},  # dynamic t-call
 }
 
 ACCOUNT_WHITELIST = {
@@ -923,7 +924,7 @@ ACCOUNT_WHITELIST = {
     "account_reports.journal_balance": {'warningParams'},  # dynamic t-call
     "account_reports.inconsistent_statement_warning": {'warningParams'},  # dynamic t-call
 }
-THIS_TARGETS = ["web_studio"]
+THIS_TARGETS = ["web_map"]
 
 
 def upgrade_this(file_manager, log_info, log_error):
