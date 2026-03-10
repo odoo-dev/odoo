@@ -36,6 +36,7 @@ RESERVED_WORDS = {
     "Object",
     "Date",
     "__globals__",
+    "None",  # technically not correct but will prevent crash
 }
 
 WORD_REPLACEMENT = {
@@ -1120,7 +1121,7 @@ tests = [
         "expected": """<A onSaveCallback="(this.timesheet) => this.onSaveTimesheetForm(this.timesheet)"/>""",
     },
     {
-        "name": "TODO component function",
+        "name": "Arrow detection with &gt",
         "content": """<A onSaveCallback="(timesheet, changes) =&gt; this.onSaveTimesheetForm(timesheet, changes)"/>""",
         "expected": """<A onSaveCallback="(timesheet, changes) => this.onSaveTimesheetForm(timesheet, changes)"/>""",
     },
