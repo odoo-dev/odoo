@@ -916,6 +916,7 @@ MISC_WHITELIST = {
     "web_studio.property.string": {'attribute'},  # dynamic t-call
     "web_map.MapRenderer.PinListItems": {'records'},  # dynamic t-call
     "web_studio.StudioHomeMenu": {'app_index'},  # xpath on a t-foreach
+    "auth_passkey_portal.rename": {'oldname'},  # t-attf-value
 }
 
 ACCOUNT_WHITELIST = {
