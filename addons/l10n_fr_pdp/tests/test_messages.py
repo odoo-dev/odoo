@@ -24,12 +24,12 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.env.company.l10n_fr_pdp_proxy_state = 'receiver'
+        cls.env.company.account_peppol_proxy_state = 'receiver'
         cls.invalid_partner = cls.env['res.partner'].create([{
             'name': 'Wintermute',
             'city': 'Copenhagen',
             'country_id': cls.env.ref('base.dk').id,
-            'invoice_sending_method': 'pdp',
+            'invoice_sending_method': 'peppol',
             'vat': 'DK12345674',
         }])
 
@@ -121,7 +121,7 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         move = self._create_french_invoice()
         move.action_post()
 
-        wizard = self.create_send_and_print(move, sending_methods=['email', 'pdp'])
+        wizard = self.create_send_and_print(move, sending_methods=['email', 'peppol'])
         self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
 
         # the ubl xml placeholder should be generated
@@ -138,38 +138,38 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
             },
         ])
 
-        wizard.sending_methods = ['pdp']
+        wizard.sending_methods = ['peppol']
         wizard.action_send_and_print()
-        self.assertEqual(self._get_mail_message(move).preview, 'The document has been sent to the PDP Access Point for processing')
+        self.assertEqual(self._get_mail_message(move).preview, 'The invoice has been sent to the Peppol Access Point. The following attachments were sent with the XML:')
 
     def test_send_pdp_not_receiver(self):
-        self.env.company.l10n_fr_pdp_proxy_state = False
+        self.env.company.account_peppol_proxy_state = False
         move = self._create_french_invoice()
         move.action_post()
         wizard = self.env['account.move.send.wizard'].create({
             'move_id': move.id,
         })
-        self.assertEqual(move.partner_id.pdp_verification_state, 'valid')
-        self.assertTrue('pdp' not in wizard.sending_method_checkboxes)  # pdp checkbox not shown
-        self.assertTrue('pdp' not in wizard.sending_methods)  # pdp is not checked by default
+        self.assertEqual(move.partner_id.peppol_verification_state, 'valid')
+        self.assertTrue('peppol' not in wizard.sending_method_checkboxes)  # peppol checkbox not shown
+        self.assertTrue('peppol' not in wizard.sending_methods)  # peppol is not checked by default
 
     def test_send_pdp_not_valid_format(self):
-        partner = self.invalid_partner
         move = self._create_french_invoice()
-        move.partner_id = partner
         move.action_post()
+        move.partner_id.invoice_edi_format = 'xrechnung'
         wizard = self.env['account.move.send.wizard'].create({
             'move_id': move.id,
         })
-        self.assertEqual(partner.pdp_verification_state, 'not_valid_format')
-        self.assertTrue('pdp' not in wizard.sending_methods)  # pdp is not checked by default
-        self.assertTrue(wizard.sending_method_checkboxes['pdp']['readonly'])  # can't select pdp
+        self.assertEqual(move.partner_id.peppol_verification_state, 'not_valid_format')
+        self.assertTrue('peppol' not in wizard.sending_methods)  # peppol is not checked by default
+        self.assertTrue(wizard.sending_method_checkboxes['peppol']['readonly'])  # can't select peppol
         self.assertFalse(wizard.alerts)  # there is no alerts
 
     def test_send_pdp_not_valid_partner(self):
         partner = self.invalid_partner
         partner.write({
-            'pdp_identifier': '111111111',
+            'peppol_eas': '0225',
+            'peppol_endpoint': '111111111',
             'invoice_edi_format': 'ubl_21_fr',
         })
         move = self._create_french_invoice()
@@ -178,9 +178,9 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         wizard = self.env['account.move.send.wizard'].create({
             'move_id': move.id,
         })
-        self.assertEqual(partner.pdp_verification_state, 'not_valid')
-        self.assertTrue('pdp' not in wizard.sending_methods)  # pdp is not checked by default
-        self.assertTrue(wizard.sending_method_checkboxes['pdp']['readonly'])  # can't select pdp
+        self.assertEqual(partner.peppol_verification_state, 'not_valid')
+        self.assertTrue('peppol' not in wizard.sending_methods)  # peppol is not checked by default
+        self.assertTrue(wizard.sending_method_checkboxes['peppol']['readonly'])  # can't select peppol
         self.assertFalse(wizard.alerts)  # there is no alerts
 
     def test_resend_error_pdp_message(self):
@@ -190,71 +190,71 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
 
         wizard = self.create_send_and_print(move)
         self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
-        self.assertTrue('pdp' in wizard.sending_methods)
+        self.assertTrue('peppol' in wizard.sending_methods)
         with self._set_context({'error': True}):
             wizard.action_send_and_print()
 
-            self.env['account_edi_proxy_client.user']._cron_pdp_get_message_status()
-            self.assertRecordValues(move, [{'pdp_move_state': 'error', 'pdp_message_uuid': FAKE_UUID[0]}])
+            self.env['account_edi_proxy_client.user']._cron_peppol_get_message_status()
+            self.assertRecordValues(move, [{'peppol_move_state': 'error', 'peppol_message_uuid': FAKE_UUID[0]}])
 
         # we can't send the ubl document again unless we regenerate the pdf
         move.invoice_pdf_report_id.unlink()
         wizard = self.create_send_and_print(move)
         self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
-        self.assertTrue('pdp' in wizard.sending_methods)
+        self.assertTrue('peppol' in wizard.sending_methods)
 
         wizard.action_send_and_print()
 
-        self.env['account_edi_proxy_client.user']._cron_pdp_get_message_status()
-        self.assertEqual(move.pdp_move_state, 'done')
+        self.env['account_edi_proxy_client.user']._cron_peppol_get_message_status()
+        self.assertEqual(move.peppol_move_state, 'done')
 
     def test_pdp_send_success_message(self):
         # should be able to send valid invoices correctly
         # attachment should be generated
-        # pdp_move_state should be set to done
+        # peppol_move_state should be set to done
         move = self._create_french_invoice()
         move.action_post()
 
         wizard = self.create_send_and_print(move)
         self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
-        self.assertTrue('pdp' in wizard.sending_methods)
+        self.assertTrue('peppol' in wizard.sending_methods)
 
         wizard.action_send_and_print()
 
-        self.env['account_edi_proxy_client.user']._cron_pdp_get_message_status()
+        self.env['account_edi_proxy_client.user']._cron_peppol_get_message_status()
         self.assertRecordValues(
             move,
             [{
-                'pdp_move_state': 'done',
-                'pdp_message_uuid': FAKE_UUID[0],
+                'peppol_move_state': 'done',
+                'peppol_message_uuid': FAKE_UUID[0],
             }],
         )
         self.assertTrue(bool(move.ubl_cii_xml_id))
 
     def test_pdp_send_invalid_edi_user(self):
         # an invalid edi user should not be able to send invoices via pdp
-        self.env.company.l10n_fr_pdp_proxy_state = 'rejected'
+        self.env.company.account_peppol_proxy_state = 'rejected'
 
         move = self._create_french_invoice()
         move.action_post()
 
         wizard = self.create_send_and_print(move)
-        self.assertTrue('pdp' not in wizard.sending_method_checkboxes)
+        self.assertTrue('peppol' not in wizard.sending_method_checkboxes)
 
     def test_receive_error_pdp(self):
         # an error pdp message should be created
         with self._set_context({'error': True}):
-            self.env['account_edi_proxy_client.user']._cron_pdp_get_new_documents()
+            self.env['account_edi_proxy_client.user']._cron_peppol_get_new_documents()
 
-            move = self.env['account.move'].search([('pdp_message_uuid', '=', FAKE_UUID[1])])
-            self.assertRecordValues(move, [{'pdp_move_state': 'error', 'move_type': 'in_invoice'}])
+            move = self.env['account.move'].search([('peppol_message_uuid', '=', FAKE_UUID[1])])
+            self.assertRecordValues(move, [{'peppol_move_state': 'error', 'move_type': 'in_invoice'}])
 
     def test_receive_success_pdp(self):
         # a correct move should be created
-        self.env['account_edi_proxy_client.user']._cron_pdp_get_new_documents()
+        self.env['account_edi_proxy_client.user']._cron_peppol_get_new_documents()
 
-        move = self.env['account.move'].search([('pdp_message_uuid', '=', FAKE_UUID[1])])
-        self.assertRecordValues(move, [{'pdp_move_state': 'in_hand', 'move_type': 'in_invoice'}])
+        move = self.env['account.move'].search([('peppol_message_uuid', '=', FAKE_UUID[1])])
+        self.assertRecordValues(move, [{'peppol_move_state': 'in_hand', 'move_type': 'in_invoice'}])
 
     def test_silent_error_while_creating_xml(self):
         """When in multi/async mode, the generation of XML can fail silently (without raising).
@@ -270,9 +270,9 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
 
         wizard = self.create_send_and_print(move_1 + move_2)
         with patch(
-            'odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20.AccountEdiXmlUBL20._export_invoice_constraints',
+            'odoo.addons.l10n_fr_pdp.models.account_edi_xml_ubl_21_fr.AccountEdiXmlUbl21Fr._export_invoice_constraints_new',
             mocked_export_invoice_constraints
         ):
             wizard.action_send_and_print()
             self.env.ref('account.ir_cron_account_move_send').method_direct_trigger()
-        self.assertEqual(move_1.pdp_move_state, 'error')
+        self.assertEqual(move_1.peppol_move_state, 'error')

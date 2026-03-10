@@ -147,7 +147,7 @@ class PdpResponseWizard(models.TransientModel):
                             "tax_percent": self._round_format_number_2(key['amount']),
                         } for key, tax_details in self._get_tax_details(move).items() if key
                     ]
-                    company.pdp_edi_user._pdp_send_response(moves, 'paid', additional_info={**additional_info, 'payments': payments})
+                    company.account_peppol_edi_user._pdp_send_response(moves, 'paid', additional_info={**additional_info, 'payments': payments})
             else:
-                company.pdp_edi_user._pdp_send_response(moves, self.status, additional_info=additional_info)
+                company.account_peppol_edi_user._pdp_send_response(moves, self.status, additional_info=additional_info)
         return self.env.context.get('cancel_res', True)

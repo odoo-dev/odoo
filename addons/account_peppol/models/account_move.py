@@ -1,8 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
 from odoo.addons.account.models.company import PEPPOL_MAILING_COUNTRIES
+from odoo.exceptions import UserError
+
+UNSENT_PEPPOL_MOVE_STATES = {'ready', 'to_send', 'error'}
 
 
 class AccountMove(models.Model):
@@ -26,7 +28,7 @@ class AccountMove(models.Model):
     def action_cancel_peppol_documents(self):
         # if the peppol_move_state is processing/done
         # then it means it has been already sent to peppol proxy and we can't cancel
-        if any(move.peppol_move_state in {'processing', 'done'} for move in self):
+        if any(move.peppol_move_state not in UNSENT_PEPPOL_MOVE_STATES for move in self):
             raise UserError(_("Cannot cancel an entry that has already been sent to PEPPOL"))
         self.peppol_move_state = False
         self.sending_data = False
@@ -46,7 +48,7 @@ class AccountMove(models.Model):
             elif (
                 move.state == 'draft'
                 and move.is_sale_document(include_receipts=True)
-                and move.peppol_move_state not in ('processing', 'done')
+                and move.peppol_move_state in UNSENT_PEPPOL_MOVE_STATES
             ):
                 move.peppol_move_state = False
             else:
@@ -66,7 +68,7 @@ class AccountMove(models.Model):
         if company_on_peppol and company_country in PEPPOL_MAILING_COUNTRIES and invoice_country in PEPPOL_MAILING_COUNTRIES:
             render_context['peppol_info'] = {
                 'peppol_country': invoice_country,
-                'is_peppol_sent': invoice.peppol_move_state in ('processing', 'done'),
+                'is_peppol_sent': invoice.peppol_move_state not in UNSENT_PEPPOL_MOVE_STATES,
                 'partner_on_peppol': invoice.commercial_partner_id.peppol_verification_state in ('valid', 'not_valid_format'),
             }
         return render_context

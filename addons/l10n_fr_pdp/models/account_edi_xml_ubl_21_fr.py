@@ -35,7 +35,7 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
 
         for partner_type in ('supplier', 'customer'):
             partner = vals[partner_type]
-            if not partner.pdp_identifier:
+            if partner.peppol_eas != '0225' or not partner.peppol_endpoint:
                 constraints[f"ubl_21_fr_{partner_type}_pdp_identifier_required"] = _("The following partner's PDP identifier is missing: %s", partner.display_name)
             if not partner.siret:
                 constraints[f"ubl_21_fr_{partner_type}_siret_required"] = _("The following partner's SIRET is missing: %s", partner.display_name)
@@ -55,19 +55,7 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
                     'peppol_eas': peppol_eas,
                     'peppol_endpoint': peppol_endpoint,
                 })
-            # Note: we can not import `pdp_identifier` because the partner vals are passed to `_import_partner` which
-            #       only has a fixed set of kwargs.
-            #       We set the value in `_import_fill_invoice`
         return partner_vals
-
-    def _import_fill_invoice(self, invoice, tree, qty_factor):
-        logs = super()._import_fill_invoice(invoice, tree, qty_factor)
-
-        partner = invoice.partner_id
-        if partner.peppol_eas == '0225':
-            partner.pdp_identifier = partner.peppol_endpoint
-
-        return logs
 
     def _add_invoice_header_nodes(self, document_node, vals):
         # EXTENDS account.edi.xml.ubl_21
@@ -113,15 +101,6 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         node['cbc:CountrySubentityCode'] = None
         node['cac:Country']['cbc:Name'] = None
         return node
-
-    def _ubl_add_party_endpoint_id_node(self, vals):
-        super()._ubl_add_party_endpoint_id_node(vals)
-        partner = vals['party_vals']['partner']
-        commercial_partner = partner.commercial_partner_id
-        vals['party_node']['cbc:EndpointID'] = {
-            '_text': commercial_partner.pdp_identifier,
-            'schemeID': '0225',
-        }
 
     def _ubl_add_party_identification_nodes(self, vals):
         super()._ubl_add_party_identification_nodes(vals)

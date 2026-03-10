@@ -282,6 +282,9 @@ class ResPartner(models.Model):
             return _("The Peppol endpoint is not valid. "
                      "It should contain exactly 10 digits (Company Registry number)."
                      "The expected format is: 1234567890")
+        if eas == '0225':
+            # TODO: rename module to PA?
+            return _("The Peppol endpoint scheme is reserved. Please install the 'France - PDP' module (l10n_fr_pdp) first")
 
     @api.model
     def _get_edi_builder(self, invoice_edi_format):
@@ -297,19 +300,3 @@ class ResPartner(models.Model):
             return self.env['account.edi.xml.ubl_bis3']
         if invoice_edi_format == 'ubl_sg':
             return self.env['account.edi.xml.ubl_sg']
-
-    @api.model
-    def _check_peppol_verification_state(self, edi_identification, invoice_edi_format, participant_info):
-        # For `account_peppol`, `l10n_fr_pdp_proxy`
-        if participant_info is None:
-            return 'not_valid'
-        else:
-            is_participant_on_network = self._check_peppol_participant_exists(participant_info, edi_identification)
-            if is_participant_on_network:
-                is_valid_format = self._check_document_type_support(participant_info, invoice_edi_format)
-                if is_valid_format:
-                    return 'valid'
-                else:
-                    return 'not_valid_format'
-            else:
-                return 'not_valid'

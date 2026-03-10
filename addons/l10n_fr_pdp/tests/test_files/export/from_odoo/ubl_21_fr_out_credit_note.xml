@@ -23,7 +23,7 @@
     <cac:Party>
       <cbc:EndpointID schemeID="0225">968515759_96851575905899</cbc:EndpointID>
       <cac:PartyIdentification>
-        <cbc:ID schemeID="0002">968515759</cbc:ID>
+        <cbc:ID schemeID="0009">96851575905899</cbc:ID>
       </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>company_1_data</cbc:Name>
@@ -56,7 +56,7 @@
     <cac:Party>
       <cbc:EndpointID schemeID="0225">968515759_96851575905823</cbc:EndpointID>
       <cac:PartyIdentification>
-        <cbc:ID schemeID="0002">968515759</cbc:ID>
+        <cbc:ID schemeID="0009">96851575905823</cbc:ID>
       </cac:PartyIdentification>
       <cac:PartyName>
         <cbc:Name>SUPER FRENCH PARTNER</cbc:Name>

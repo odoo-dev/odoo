@@ -24,14 +24,13 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
             'invoice_edi_format': 'ubl_21_fr',
         })
         self.assertRecordValues(partner, [{
-            'pdp_identifier': '968515759_96851575905877',
             'peppol_endpoint': '968515759_96851575905877',
             'peppol_eas': '0225',
         }])
 
     def test_pdp_edi_formats(self):
         partner = self.partner_a
-        partner.invoice_sending_method = 'pdp'
+        partner.invoice_sending_method = 'peppol'
         self.assertEqual(partner._get_pdp_receiver_identification_info()[0], 'pdp')
         with self.assertRaises(UserError):
             partner.invoice_edi_format = 'ubl_bis3'
@@ -42,7 +41,7 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
     def test_validate_partner_be_invalid_format(self):
         partner = self.partner_b
         self.assertRecordValues(partner, [{
-            'pdp_verification_state': 'not_valid',
+            'peppol_verification_state': 'not_valid',
             'pdp_verification_display_state': 'peppol_not_valid',
             'invoice_edi_format': 'ubl_bis3',
         }])
@@ -51,10 +50,18 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
             partner._get_pdp_receiver_identification_info(),
             ('peppol', "0208:0239843188")
         )
-        partner.invoice_edi_format = 'facturx'  # this should trigger a verification state update
+
+        def _request_handler(s: requests.Session, r: requests.PreparedRequest, /, **kwargs):
+            self.assertEqual(r.method, "GET")
+            origin = self.env['account_edi_proxy_client.user']._get_proxy_urls()['pdp']['test']
+            self.assertTrue(r.url.startswith(f"{origin}/api/pdp/1/peppol_lookup?peppol_identifier="))
+            peppol_identifier = parse_qs(r.path_url.rsplit('?')[1])['peppol_identifier'][0]
+            return self._get_peppol_lookup_response(peppol_identifier, "0208:0239843188")
+        with mock.patch.object(requests.sessions.Session, 'send', _request_handler):
+            partner.invoice_edi_format = 'xrechnung'  # this should trigger a verification state update
 
         self.assertRecordValues(partner, [{
-            'pdp_verification_state': 'not_valid_format',
+            'peppol_verification_state': 'not_valid_format',
             'pdp_verification_display_state': 'peppol_not_valid_format',
         }])
 
@@ -65,7 +72,7 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
             ('peppol', "0208:0239843188")
         )
         self.assertRecordValues(partner, [{
-            'pdp_verification_state': 'not_valid',
+            'peppol_verification_state': 'not_valid',
             'pdp_verification_display_state': 'peppol_not_valid',
             'invoice_edi_format': 'ubl_bis3',
         }])
@@ -78,10 +85,10 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
             return self._get_peppol_lookup_response(peppol_identifier, "0208:0239843188", ubl3_services=False)
 
         with mock.patch.object(requests.sessions.Session, 'send', _request_handler):
-            partner.button_pdp_check_partner_endpoint()
+            partner.button_account_peppol_check_partner_endpoint()
 
         self.assertRecordValues(partner, [{
-            'pdp_verification_state': 'not_valid_format',
+            'peppol_verification_state': 'not_valid_format',
             'pdp_verification_display_state': 'peppol_not_valid_format',
         }])
 
@@ -94,12 +101,12 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
 
         partner.invoice_sending_method = False
         with mock.patch.object(requests.sessions.Session, 'send', _request_handler):
-            partner.button_pdp_check_partner_endpoint()
+            partner.button_account_peppol_check_partner_endpoint()
 
         self.assertRecordValues(partner, [{
-            'pdp_verification_state': 'valid',
+            'peppol_verification_state': 'valid',
             'pdp_verification_display_state': 'peppol_valid',
-            'invoice_sending_method': 'pdp',
+            'invoice_sending_method': False,
         }])
 
     def test_validate_partner_fr(self):
@@ -109,7 +116,7 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
             ('pdp', "0225:968515759_96851575905823")
         )
         self.assertRecordValues(partner, [{
-            'pdp_verification_state': 'not_valid',
+            'peppol_verification_state': 'not_valid',
             'pdp_verification_display_state': 'pdp_not_valid',
             'invoice_edi_format': 'ubl_21_fr',
         }])
@@ -123,10 +130,10 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
 
         partner.invoice_sending_method = False
         with mock.patch.object(requests.sessions.Session, 'send', _request_handler):
-            partner.button_pdp_check_partner_endpoint()
+            partner.button_account_peppol_check_partner_endpoint()
 
         self.assertRecordValues(partner, [{
-            'pdp_verification_state': 'valid',
+            'peppol_verification_state': 'valid',
             'pdp_verification_display_state': 'pdp_valid',
-            'invoice_sending_method': 'pdp',
+            'invoice_sending_method': False,
         }])

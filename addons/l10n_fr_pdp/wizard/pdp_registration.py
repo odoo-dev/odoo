@@ -12,7 +12,7 @@ class PdpRegistration(models.TransientModel):
         default=lambda self: self.env.company,
     )
     contact_email = fields.Char(
-        related='company_id.pdp_contact_email',
+        related='company_id.account_peppol_contact_email',
         readonly=False,
         required=True,
     )
@@ -28,7 +28,7 @@ class PdpRegistration(models.TransientModel):
         string='EDI user',
         compute='_compute_edi_user_id',
     )
-    l10n_fr_pdp_proxy_state = fields.Selection(related='company_id.l10n_fr_pdp_proxy_state', readonly=False)
+    account_peppol_proxy_state = fields.Selection(related='company_id.account_peppol_proxy_state', readonly=False)
     warnings = fields.Json(
         string="Warnings",
         compute="_compute_warnings",
@@ -56,7 +56,7 @@ class PdpRegistration(models.TransientModel):
     @api.depends('edi_user_id')
     def _compute_edi_mode(self):
         for wizard in self:
-            wizard.edi_mode = wizard.company_id._get_pdp_edi_mode()
+            wizard.edi_mode = wizard.company_id._get_peppol_edi_mode()
 
     @api.depends('pdp_identifier')
     def _compute_warnings(self):
@@ -116,10 +116,12 @@ class PdpRegistration(models.TransientModel):
 
         self._ensure_mandatory_fields()
 
-        if self.l10n_fr_pdp_proxy_state in ('pending', 'receiver'):
-            pdp_state_translated = dict(self._fields['l10n_fr_pdp_proxy_state']._description_selection(self.env))[self.l10n_fr_pdp_proxy_state]
-            raise UserError(
-                _('Cannot register a user with a %s application', pdp_state_translated))
+        if self.account_peppol_proxy_state in ('smp_registration', 'receiver'):
+            pdp_state_translated = dict(self._fields['account_peppol_proxy_state']._description_selection(self.env))[self.account_peppol_proxy_state]
+            raise UserError(_('Cannot register a user with a %s application', pdp_state_translated))
+
+        if self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol'):
+            raise UserError(_('There is a connection to Peppol (non-PDP) already'))
 
         edi_user = self.edi_user_id or self.env['account_edi_proxy_client.user']._register_proxy_user(self.company_id, 'pdp', self.edi_mode)
 
@@ -130,19 +132,19 @@ class PdpRegistration(models.TransientModel):
         if not modules.module.current_test:
             self.env.cr.commit()
 
-        if self.l10n_fr_pdp_proxy_state not in ('pending', 'receiver'):
-            edi_user._pdp_register_receiver()
-            self.invalidate_recordset()  # registering may i.e. have changed self.l10n_fr_pdp_proxy_state
+        if self.account_peppol_proxy_state not in ('smp_registration', 'receiver'):
+            edi_user._peppol_register_receiver()
+            self.invalidate_recordset()  # registering may i.e. have changed self.account_peppol_proxy_state
 
         notifications = {
             False: _('Something went wrong.'),
-            'pending': _('Your registration will be activated soon.'),
+            'smp_registration': _('Your registration will be activated soon.'),
             'receiver': _('You can now send and receive electronic invoices.'),
             'rejected': _('Your registration has been rejected.'),
         }
         return self._action_send_notification(
             title="PDP Status",
-            message=notifications[self.l10n_fr_pdp_proxy_state],
+            message=notifications[self.account_peppol_proxy_state],
         )
 
     def button_deregister_pdp_participant(self):
@@ -152,4 +154,4 @@ class PdpRegistration(models.TransientModel):
         self.ensure_one()
 
         if self.edi_user_id:
-            self.edi_user_id._pdp_deregister_participant()
+            self.edi_user_id._peppol_deregister_participant()

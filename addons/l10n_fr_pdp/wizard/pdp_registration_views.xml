@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <div class="m-0" name="warnings" invisible="not warnings or not l10n_fr_pdp_proxy_state">
+                    <div class="m-0" name="warnings" invisible="not warnings or not account_peppol_proxy_state">
                         <field name="warnings" class="o_field_html" widget="actionable_errors"/>
                     </div>
 
@@ -25,7 +25,7 @@
                     </group>
 
                     <!-- edi mode info -->
-                    <div colspan="2" class="row" invisible="l10n_fr_pdp_proxy_state">
+                    <div colspan="2" class="row" invisible="account_peppol_proxy_state">
                         <div class="text-muted col" invisible="edi_mode != 'prod'">
                             By clicking the button below I accept that Odoo may process my e-invoices.
                         </div>

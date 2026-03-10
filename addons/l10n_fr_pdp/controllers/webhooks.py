@@ -2,6 +2,7 @@ from odoo import http
 from odoo.http import request
 
 
+# TODO use `account_peppol` webhooks in 18.3 (https://github.com/odoo/odoo/commit/ca8f2e8cf2e18e52576a9dc0aca9c85485e3d19f)
 class PdpWebhookController(http.Controller):
 
     @http.route(
@@ -15,7 +16,7 @@ class PdpWebhookController(http.Controller):
         edi_client = request.env['account_edi_proxy_client.user']._get_pdp_user_from_token(token, url=request.httprequest.url)
 
         cron = request.env.ref(
-            'l10n_fr_pdp.ir_cron_pdp_get_new_documents',
+            'account_peppol.ir_cron_peppol_get_new_documents',
             raise_if_not_found=False,
         )
         if edi_client and cron:
@@ -34,7 +35,7 @@ class PdpWebhookController(http.Controller):
         edi_client = request.env['account_edi_proxy_client.user']._get_pdp_user_from_token(token, url=request.httprequest.url)
 
         cron = request.env.ref(
-            'l10n_fr_pdp.ir_cron_pdp_get_message_status',
+            'account_peppol.ir_cron_peppol_get_message_status',
             raise_if_not_found=False,
         )
         if edi_client and cron:
@@ -53,7 +54,7 @@ class PdpWebhookController(http.Controller):
         edi_client = request.env['account_edi_proxy_client.user']._get_pdp_user_from_token(token, url=request.httprequest.url)
 
         cron = request.env.ref(
-            'l10n_fr_pdp.ir_cron_pdp_get_participant_status',
+            'account_peppol.ir_cron_peppol_get_participant_status',
             raise_if_not_found=False,
         )
         if edi_client and cron:

@@ -29,12 +29,7 @@ class TestL10nFrPdpCommon(TestUblCiiCommon, TestAccountMoveSendCommon):
         cls.fakenow = datetime.datetime(2024, 12, 5)
         cls.startClassPatcher(freeze_time(cls.fakenow))
 
-        cls.env['ir.config_parameter'].sudo().set_param('l10n_fr_pdp.edi.mode', 'test')
-
-        # To avoid blocked requests in the logs
-        if cls.env['ir.module.module']._get('account_peppol').state == 'installed':
-            not_valid_peppol_verification_state = mock.patch('odoo.addons.account_peppol.models.res_partner.ResPartner._get_peppol_verification_state', return_value='not_valid')
-            cls.startClassPatcher(not_valid_peppol_verification_state)
+        cls.env['ir.config_parameter'].sudo().set_param('account_pepol.edi.mode', 'test')
 
         company = cls.company_data['company']
         company.write({
@@ -42,17 +37,14 @@ class TestL10nFrPdpCommon(TestUblCiiCommon, TestAccountMoveSendCommon):
             'city': 'Rennes',
             'zip': '35043',
             'vat': 'FR91746948785',
-            'siret': '96851575905899',
             'phone': '+33612345678',
+            'pdp_identifier': '968515759_96851575905899'  # Should set siret, peppol_eas and peppol_endpoint
         })
         cls.env['res.partner.bank'].create({
             'acc_type': 'iban',
             'partner_id': cls.company_data['company'].partner_id.id,
             'acc_number': 'FR5000400440116243',
             'allow_out_payment': True,
-        })
-        company.partner_id.write({
-            'pdp_identifier': '968515759_96851575905899',
         })
 
         edi_identification = cls.env['account_edi_proxy_client.user']._get_proxy_identification(cls.env.company, 'pdp')
@@ -79,7 +71,8 @@ class TestL10nFrPdpCommon(TestUblCiiCommon, TestAccountMoveSendCommon):
             'vat': 'FR23334175221',
             'siret': '96851575905823',
             'invoice_edi_format': 'ubl_21_fr',
-            'pdp_identifier': '968515759_96851575905823',
+            'peppol_eas': '0225',
+            'peppol_endpoint': '968515759_96851575905823',
         })
         cls.partner_b.write({
             'name': 'SUPER BELGIAN PARTNER',
@@ -92,7 +85,6 @@ class TestL10nFrPdpCommon(TestUblCiiCommon, TestAccountMoveSendCommon):
             'invoice_edi_format': 'ubl_bis3',
             'peppol_eas': '0208',
             'peppol_endpoint': '0239843188',
-            'pdp_identifier': False,
 
         })
 
@@ -197,9 +189,9 @@ class TestL10nFrPdpCommon(TestUblCiiCommon, TestAccountMoveSendCommon):
 
     @classmethod
     def _send_patched(cls, invoice):
-        valid_pdp_verification_state = mock.patch('odoo.addons.l10n_fr_pdp.models.res_partner.ResPartner._get_pdp_verification_state', return_value='valid')
-        with valid_pdp_verification_state:
-            # The successful verification sets the `invoice_sending_method` to `pdp` on the partner
+        valid_peppol_verification_state = mock.patch('odoo.addons.l10n_fr_pdp.models.res_partner.ResPartner._get_peppol_verification_state', return_value='valid')
+        with valid_peppol_verification_state:
+            # The successful verification sets the `invoice_sending_method` to `peppol` on the partner
             wizard = cls.env['account.move.send.wizard'] \
                 .with_context(active_model=invoice._name, active_ids=invoice.ids) \
                 .create({})

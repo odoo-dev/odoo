@@ -54,6 +54,10 @@ class ResConfigSettings(models.TransientModel):
         registration_action = registration_wizard._action_open_peppol_form(reopen=False)
         return registration_action
 
+    def _get_peppol_proxy_type(self):
+        self.ensure_one()
+        return self.account_peppol_edi_user.proxy_type
+
     @handle_demo
     def button_update_peppol_user_data(self):
         """
@@ -73,7 +77,7 @@ class ResConfigSettings(models.TransientModel):
         }
 
         self.account_peppol_edi_user._call_peppol_proxy(
-            endpoint='/api/peppol/1/update_user',
+            endpoint=self.account_peppol_edi_user._get_peppol_proxy_endpoint('update_user'),
             params=params,
         )
         return True

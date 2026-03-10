@@ -7,6 +7,7 @@ from odoo import _, api, fields, models
 
 from odoo.addons.account.models.company import PEPPOL_LIST
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
+from odoo.addons.account_peppol.models.account_move import UNSENT_PEPPOL_MOVE_STATES
 
 _logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class AccountMoveSend(models.AbstractModel):
         }
         info_always_on_countries = {'BE', 'FI', 'LU', 'LV', 'NL', 'NO', 'SE'}
         can_send = self.env['account_edi_proxy_client.user']._get_can_send_domain()
-        any_moves_not_sent_peppol = any(move.peppol_move_state not in ('processing', 'done') for move in moves)
+        any_moves_not_sent_peppol = any(move.peppol_move_state in UNSENT_PEPPOL_MOVE_STATES for move in moves)
         always_on_companies = moves.company_id.filtered(
             lambda c: c.country_code in info_always_on_countries and c.account_peppol_proxy_state not in can_send
         )
@@ -93,6 +94,39 @@ class AccountMoveSend(models.AbstractModel):
     # -------------------------------------------------------------------------
     # SENDING METHODS
     # -------------------------------------------------------------------------
+
+    def _get_peppol_document_params(self, edi_user, partner, invoice, invoice_data):
+        if invoice_data.get('ubl_cii_xml_attachment_values'):
+            xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
+            filename = invoice_data['ubl_cii_xml_attachment_values']['name']
+        elif invoice.ubl_cii_xml_id and invoice.peppol_move_state in UNSENT_PEPPOL_MOVE_STATES:
+            xml_file = invoice.ubl_cii_xml_id.raw
+            filename = invoice.ubl_cii_xml_id.name
+        else:
+            invoice.peppol_move_state = 'error'
+            builder = invoice.partner_id.commercial_partner_id._get_edi_builder(invoice_data['invoice_edi_format'])
+            invoice_data['error'] = _(
+                "Errors occurred while creating the EDI document (format: %s):",
+                builder._description
+            )
+            return None
+
+        if invoice.invoice_pdf_report_id and self._needs_ubl_postprocessing(invoice_data):
+            self._postprocess_invoice_ubl_xml(invoice, invoice_data)
+            xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
+            filename = invoice_data['ubl_cii_xml_attachment_values']['name']
+
+        if len(xml_file) > 64000000:
+            invoice_data['error'] = _("Invoice %s is too big to send via peppol (64MB limit)", invoice.name)
+            return None
+
+        receiver_identification = f"{partner.peppol_eas}:{partner.peppol_endpoint}"
+
+        return {
+            'filename': filename,
+            'receiver': receiver_identification,
+            'ubl': b64encode(xml_file).decode(),
+        }
 
     def _get_default_invoice_edi_format(self, move, **kwargs) -> str:
         # EXTENDS 'account' - default on bis3 if Peppol is set but no format on the partner
@@ -137,7 +171,7 @@ class AccountMoveSend(models.AbstractModel):
                 self.env['res.partner']._get_peppol_verification_state(partner.peppol_endpoint, partner.peppol_eas, invoice_edi_format) == 'valid',
                 move.company_id.account_peppol_proxy_state != 'rejected',
                 move._need_ubl_cii_xml(invoice_edi_format)
-                or move.ubl_cii_xml_id and move.peppol_move_state not in ('processing', 'done'),
+                or move.ubl_cii_xml_id and move.peppol_move_state in UNSENT_PEPPOL_MOVE_STATES,
             ])
         else:
             return super()._is_applicable_to_move(method, move, **move_data)
@@ -158,6 +192,7 @@ class AccountMoveSend(models.AbstractModel):
     def _call_web_service_after_invoice_pdf_render(self, invoices_data):
         # EXTENDS 'account'
         super()._call_web_service_after_invoice_pdf_render(invoices_data)
+        edi_user = next(iter(invoices_data), self.env['account.move']).company_id.account_peppol_edi_user
 
         params = {'documents': []}
         invoices_data_peppol = {}
@@ -185,43 +220,14 @@ class AccountMoveSend(models.AbstractModel):
                 if not self._is_applicable_to_move('peppol', invoice, **invoice_data):
                     continue
 
-                if invoice_data.get('ubl_cii_xml_attachment_values'):
-                    xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
-                    filename = invoice_data['ubl_cii_xml_attachment_values']['name']
-                elif invoice.ubl_cii_xml_id and invoice.peppol_move_state not in ('processing', 'done'):
-                    xml_file = invoice.ubl_cii_xml_id.raw
-                    filename = invoice.ubl_cii_xml_id.name
-                else:
-                    invoice.peppol_move_state = 'error'
-                    builder = invoice.partner_id.commercial_partner_id._get_edi_builder(invoice_data['invoice_edi_format'])
-                    invoice_data['error'] = _(
-                        "Errors occurred while creating the EDI document (format: %s):",
-                        builder._description
-                    )
-                    continue
+                if document := self._get_peppol_document_params(edi_user, partner, invoice, invoice_data):
+                    params['documents'].append(document)
 
-                if invoice.invoice_pdf_report_id and self._needs_ubl_postprocessing(invoice_data):
-                    self._postprocess_invoice_ubl_xml(invoice, invoice_data)
-                    xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
-                    filename = invoice_data['ubl_cii_xml_attachment_values']['name']
-
-                if len(xml_file) > 64000000:
-                    invoice_data['error'] = _("Invoice %s is too big to send via peppol (64MB limit)", invoice.name)
-                    continue
-
-                receiver_identification = f"{partner.peppol_eas}:{partner.peppol_endpoint}"
-                params['documents'].append({
-                    'filename': filename,
-                    'receiver': receiver_identification,
-                    'ubl': b64encode(xml_file).decode(),
-                })
                 invoices_data_peppol[invoice] = invoice_data
                 to_lock_peppol_invoices |= invoice
 
         if not params['documents']:
             return
-
-        edi_user = next(iter(invoices_data)).company_id.account_peppol_edi_user
 
         if not self.env['res.company']._with_locked_records(to_lock_peppol_invoices, allow_raising=False):
             _logger.error('Failed to lock invoices for Peppol sending')
@@ -229,7 +235,7 @@ class AccountMoveSend(models.AbstractModel):
 
         try:
             response = edi_user._call_peppol_proxy(
-                "/api/peppol/1/send_document",
+                endpoint=edi_user._get_peppol_proxy_endpoint('send_document'),
                 params=params,
             )
         except AccountEdiProxyError as e:

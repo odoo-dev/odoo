@@ -1,25 +1,16 @@
-from odoo import fields, models
+from odoo import models
 
 
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
-    l10n_fr_pdp_proxy_state = fields.Selection(related='company_id.l10n_fr_pdp_proxy_state')
-    is_pdp_journal = fields.Boolean(string='Journal used for PDP')
-
-    def pdp_get_new_documents(self):
+    # TODO: maybe not
+    def peppol_get_message_status(self):
+        """Override to fetch incoming lifecycle message"""
+        super().peppol_get_message_status()
         edi_users = self.env['account_edi_proxy_client.user'].search([
-            ('company_id.l10n_fr_pdp_proxy_state', '=', 'receiver'),
+            ('company_id.account_peppol_proxy_state', '=', 'receiver'),
             ('company_id', 'in', self.company_id.ids),
-            ('proxy_type', '=', 'pdp'),
+            ('proxy_type', 'in', self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()),
         ])
-        edi_users._pdp_get_new_documents()
-
-    def pdp_get_message_status(self):
-        edi_users = self.env['account_edi_proxy_client.user'].search([
-            ('company_id.l10n_fr_pdp_proxy_state', '=', 'receiver'),
-            ('company_id', 'in', self.company_id.ids),
-            ('proxy_type', '=', 'pdp'),
-        ])
-        edi_users._pdp_get_new_documents()  # TODO: to fetch incoming lifecycle messages
-        edi_users._pdp_get_message_status()
+        edi_users._peppol_get_message_status()

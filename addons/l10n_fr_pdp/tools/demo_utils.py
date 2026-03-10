@@ -10,7 +10,7 @@ DEMO_PRIVATE_KEY = 'account_peppol/tools/private_key.pem'
 # -------------------------------------------------------------------------
 
 
-def _mock_call_pdp_proxy(func, self, *args, **kwargs):
+def _mock_call_peppol_proxy(func, self, *args, **kwargs):
     if self.proxy_type != 'pdp':
         return func(self, *args, **kwargs)
 
@@ -45,14 +45,23 @@ def _mock_register_proxy_user(func, self, *args, **kwargs):
     return edi_user
 
 
+def _mock_peppol_register_receiver(func, self, *args, **kwargs):
+    func(self, *args, **kwargs)
+    if self.proxy_type != 'pdp':
+        return
+    self.company_id.account_peppol_proxy_state = 'receiver'
+
+
 def _mock_pdp_annuaire_lookup_participant(func, self, *args, **kwargs):
     (edi_identification, _invoice_edi_format) = args
     peppol_eas = edi_identification.partition(":")[0]
     return {'in_annuaire': peppol_eas == '0225'}
 
 
-def _mock_get_pdp_peppol_verification_state(func, self, *args, **kwargs):
-    (_edi_identification, invoice_edi_format) = args
+def _mock_get_peppol_verification_state(func, self, *args, **kwargs):
+    (peppol_endpoint, peppol_eas, invoice_edi_format) = args
+    if peppol_eas != '0225':
+        func(peppol_endpoint, peppol_eas, invoice_edi_format)
     if not invoice_edi_format:
         return 'not_valid'
     if invoice_edi_format not in self._get_peppol_formats():
@@ -62,9 +71,10 @@ def _mock_get_pdp_peppol_verification_state(func, self, *args, **kwargs):
 
 _demo_behaviour = {
     '_register_proxy_user': _mock_register_proxy_user,  # account_edi_proxy_client.user
-    '_call_pdp_proxy': _mock_call_pdp_proxy,  # account_edi_proxy_client.user
+    '_peppol_register_receiver': _mock_peppol_register_receiver,  # account_edi_proxy_client.user
+    '_call_peppol_proxy': _mock_call_peppol_proxy,  # account_edi_proxy_client.user
     '_pdp_annuaire_lookup_participant': _mock_pdp_annuaire_lookup_participant,  # res.partner
-    '_get_pdp_peppol_verification_state': _mock_get_pdp_peppol_verification_state,  # res.partner
+    '_get_peppol_verification_state': _mock_get_peppol_verification_state,  # res.partner
 }
 
 # -------------------------------------------------------------------------
@@ -79,6 +89,6 @@ def handle_demo(func, self, *args, **kwargs):
     First handle the decision: "Are we in demo mode?", and conditionally decide which function to
     execute.
     """
-    if self.env.company._get_pdp_edi_mode() == 'demo':
+    if self.env.company._get_peppol_edi_mode() == 'demo':
         return _demo_behaviour[func.__name__](func, self, *args, **kwargs)
     return func(self, *args, **kwargs)

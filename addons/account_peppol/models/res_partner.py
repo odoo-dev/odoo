@@ -9,8 +9,10 @@ from hashlib import md5
 from urllib import parse
 
 from odoo import api, fields, models
-from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.addons.account.models.company import PEPPOL_LIST
+from odoo.addons.account_peppol.models.account_edi_proxy_user import IAP_ENDPOINT_MAP
+from odoo.addons.account_peppol.tools.demo_utils import handle_demo
+
 
 TIMEOUT = 10
 _logger = logging.getLogger(__name__)
@@ -163,12 +165,14 @@ class ResPartner(models.Model):
     @api.model
     def _peppol_lookup_participant(self, edi_identification):
         """NAPTR DNS peppol participant lookup through Odoo's Peppol proxy"""
-        if (edi_mode := self.env.company._get_peppol_edi_mode()) == 'demo':
+        company = self.env.company
+        if (edi_mode := company._get_peppol_edi_mode()) == 'demo':
             return
 
-        origin = self.env['account_edi_proxy_client.user']._get_proxy_urls()['peppol'][edi_mode]
+        proxy_type = company._get_peppol_proxy_type()
+        origin = self.env['account_edi_proxy_client.user']._get_proxy_urls()[proxy_type][edi_mode]
         query = parse.urlencode({'peppol_identifier': edi_identification.lower()})
-        endpoint = f'{origin}/api/peppol/1/lookup?{query}'
+        endpoint = f'{origin}{IAP_ENDPOINT_MAP[proxy_type]["lookup"]}?{query}'
 
         try:
             response = requests.get(endpoint, timeout=TIMEOUT)
@@ -301,4 +305,15 @@ class ResPartner(models.Model):
 
         edi_identification = f"{peppol_eas}:{peppol_endpoint}".lower()
         participant_info = self._peppol_lookup_participant(edi_identification)
-        return self._check_peppol_verification_state(edi_identification, invoice_edi_format, participant_info)
+        if participant_info is None:
+            return 'not_valid'
+        else:
+            is_participant_on_network = self._check_peppol_participant_exists(participant_info, edi_identification)
+            if is_participant_on_network:
+                is_valid_format = self._check_document_type_support(participant_info, invoice_edi_format)
+                if is_valid_format:
+                    return 'valid'
+                else:
+                    return 'not_valid_format'
+            else:
+                return 'not_valid'

@@ -3,23 +3,16 @@ from datetime import datetime
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+from odoo.addons.account_peppol.models.account_move import UNSENT_PEPPOL_MOVE_STATES
 from odoo.addons.l10n_fr_pdp.models.account_edi_proxy_user import STATUS_TO_PROCESS_CONDITION_CODE
 from odoo.addons.l10n_fr_pdp.models.account_edi_xml_ubl_21_fr import PDP_CUSTOMIZATION_ID
-
-UNSENT_PDP_MOVE_STATES = {'ready', 'to_send', 'error'}
 
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    pdp_message_uuid = fields.Char(string='PDP Message ID', copy=False)
-    pdp_move_state = fields.Selection(
-        selection=[
-            ('ready', 'Ready to send'),
-            ('to_send', 'Queued'),
-            ('processing', 'Pending Reception'),
-            ('done', 'Done'),
-            ('error', 'Error'),
+    peppol_move_state = fields.Selection(
+        selection_add=[
             ('submitted', 'Submitted'),
             ('received', 'Received'),
             ('made_available', 'Made Available'),
@@ -32,52 +25,48 @@ class AccountMove(models.Model):
             ('rejected', 'Rejected'),
             ('cancelled', 'Cancelled'),
         ],
-        compute='_compute_pdp_move_state',
-        store=True,
-        string='PDP status',
-        copy=False,
     )
     pdp_response_ids = fields.One2many('pdp.response', 'move_id')
     pdp_can_send_response = fields.Boolean(compute='_compute_pdp_can_send_response')
 
-    @api.depends('state', 'pdp_response_ids')
-    def _compute_pdp_move_state(self):
+    @api.depends('pdp_response_ids', 'pdp_response_ids.pdp_state')
+    def _compute_peppol_move_state(self):
         for move in self:
             # Handle sale and purchase documents in case we sent / received the document.
-            if move.pdp_move_state != 'error' and (response_status := move._pdp_get_response_status()):
-                move.pdp_move_state = response_status
+            if move.peppol_move_state != 'error' and (response_status := move._pdp_get_response_status()):
+                move.peppol_move_state = response_status
                 continue
 
             if not move.is_sale_document(include_receipts=True):
                 continue
             # Handle the cases that we have not sent the move yet.
-            # Roughly speaking we set the `pdp_move_state` to `ready` after posting
+            # Roughly speaking we set the `peppol_move_state` to `ready` after posting
             # (in case the company and partner are on the PDP network and we have not sent it already)
             # and reset it to `False` when resetting to draft
             # (except if we have sent it already).
             if all([
-                move.company_id.l10n_fr_pdp_proxy_state == 'receiver',
-                move.commercial_partner_id.pdp_verification_state == 'valid',
+                move.company_id.account_peppol_proxy_state == 'receiver',
+                move.commercial_partner_id.peppol_verification_state == 'valid',
                 move.state == 'posted',
-                not move.pdp_move_state,
+                not move.peppol_move_state,
             ]):
-                move.pdp_move_state = 'ready'
+                move.peppol_move_state = 'ready'
             elif (
                 move.state == 'draft'
-                and move.pdp_move_state in UNSENT_PDP_MOVE_STATES
+                and move.peppol_move_state in UNSENT_PEPPOL_MOVE_STATES
             ):
-                move.pdp_move_state = False
+                move.peppol_move_state = False
 
-    @api.depends("pdp_message_uuid")
+    @api.depends('peppol_move_state', 'peppol_message_uuid')
     def _compute_pdp_can_send_response(self):
         for move in self:
-            move.pdp_can_send_response = bool(move.pdp_message_uuid) and move.pdp_move_state not in UNSENT_PDP_MOVE_STATES
+            move.pdp_can_send_response = bool(move.peppol_message_uuid) and move.peppol_move_state not in UNSENT_PEPPOL_MOVE_STATES
 
     def _pdp_get_response_status(self):
         """Return the PDP response status of the message"""
         self.ensure_one()
         # Non-PDP messages do not have a response status
-        if not self.pdp_message_uuid:
+        if not self.peppol_message_uuid:
             return False
 
         # Take the latest response status if we have any
@@ -97,17 +86,13 @@ class AccountMove(models.Model):
     def _get_ubl_cii_builder_from_xml_tree(self, tree):
         # Extends account_edi_ubl_cii
         customization_id = tree.find('{*}CustomizationID')
+        # Note: The CustomizationID alone is not enough because e.g. SuperPDP just sends `urn:cen.eu:en16931:2017`
+        #       but still expects the full French validation.
         if customization_id is not None and customization_id.text == PDP_CUSTOMIZATION_ID:
-            return self.env['account.edi.xml.ubl_21_fr']
+            receiver_endpoint_node = tree.find('./{*}AccountingCustomerParty/{*}Party/{*}EndpointID')
+            if receiver_endpoint_node is not None and receiver_endpoint_node.get('schemeID') == '0225':
+                return self.env['account.edi.xml.ubl_21_fr']
         return super()._get_ubl_cii_builder_from_xml_tree(tree)
-
-    def action_cancel_pdp_documents(self):
-        # if the pdp_move_state is processing/done
-        # then it means it has been already sent to pdp proxy and we can't cancel
-        if any(move.pdp_move_state not in UNSENT_PDP_MOVE_STATES for move in self):
-            raise UserError(_("Cannot cancel an entry that has already been sent"))
-        self.pdp_move_state = False
-        self.sending_data = False
 
     def action_pdp_open_response_wizard(self):
         # TODO: what about peppol (via PDP) moves? And business response?

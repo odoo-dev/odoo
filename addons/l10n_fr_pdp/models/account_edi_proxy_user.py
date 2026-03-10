@@ -3,10 +3,11 @@ from datetime import datetime
 from lxml import etree
 from markupsafe import Markup
 
-from odoo import _, api, fields, models, modules, tools
+from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
+from odoo.addons.account_peppol.models.account_edi_proxy_user import IAP_ENDPOINT_MAP
 from odoo.addons.l10n_fr_pdp.tools.demo_utils import handle_demo
 
 _logger = logging.getLogger(__name__)
@@ -49,6 +50,19 @@ def _parse_cdar_date(date_string):
     return datetime.strptime(date_string, '%Y%m%d')
 
 
+def _parse_cdar_datetime_node(node):
+    if node is None:
+        return None
+    issue_date_parser = {
+        '102': lambda n: dt.replace(hour=12) if (dt := _parse_cdar_date(n)) else None,
+        '204': _parse_cdar_datetime,
+    }.get(node.get('format'), _parse_cdar_datetime)
+    try:
+        return issue_date_parser(node.text)
+    except Exception:  # noqa: BLE001
+        return None
+
+
 class AccountEdiProxyClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
@@ -58,21 +72,31 @@ class AccountEdiProxyClientUser(models.Model):
     # HELPER METHODS
     # -------------------------------------------------------------------------
 
+    @api.model
+    def _get_peppol_proxy_types(self):
+        # Extend 'account_peppol'
+        return super()._get_peppol_proxy_types() + ['pdp']
+
     def _get_proxy_urls(self):
         urls = super()._get_proxy_urls()
         urls['pdp'] = {
             'prod': 'https://pdp.api.odoo.com',
-            'test': 'https://pdp.test.odoo.com',
-            # 'test': 'http://localhost:9999',  # TODO: for local testing
+            # 'test': 'https://pdp.test.odoo.com',
+            'test': 'http://localhost:9999',  # TODO: for local testing
             'demo': 'demo',
         }
         return urls
+
+    @handle_demo
+    def _call_peppol_proxy(self, endpoint, params=None):
+        return super()._call_peppol_proxy(endpoint, params=params)
 
     def _get_proxy_identification(self, company, proxy_type):
         if proxy_type != 'pdp':
             return super()._get_proxy_identification(company, proxy_type)
         if not company.pdp_identifier:
-            raise UserError(_("Please fill the PDP identifier."))
+            scheme = dict(self.env["res.partner"]._fields['response_code']._description_selection(self.env))["0225"]
+            raise UserError(_("Please fill the Peppol Endpoint field with scheme '%s' on the company partner.", scheme))
         return f'0225:{company.pdp_identifier}'
 
     @handle_demo
@@ -92,7 +116,7 @@ class AccountEdiProxyClientUser(models.Model):
         else:
             try:
                 # b64encode returns a bytestring, we need it as a string
-                response = self._make_request(self._get_server_url(proxy_type, edi_mode) + '/api/pdp/1/connect', params={
+                response = self._make_request(self._get_server_url(proxy_type, edi_mode) + IAP_ENDPOINT_MAP['pdp']["connect"], params={
                     'dbuuid': company.env['ir.config_parameter'].get_param('database.uuid'),
                     'company_id': company.id,
                     'peppol_identifier': peppol_identifier,
@@ -114,104 +138,35 @@ class AccountEdiProxyClientUser(models.Model):
             'refresh_token': response['refresh_token'],
         })
 
+    def _get_peppol_company_details(self):
+        self.ensure_one()
+        result = super()._get_peppol_company_details()
+        if self.proxy_type == 'pdp':
+            result.update({
+                'peppol_webhook_endpoint': self.company_id._get_pdp_webhook_endpoint(),
+                'peppol_webhook_token': self._generate_pdp_webhook_token(),
+            })
+        return result
+
     @handle_demo
-    def _call_pdp_proxy(self, endpoint, params=None):
+    def _peppol_register_receiver(self):
         self.ensure_one()
         if self.proxy_type != 'pdp':
-            raise UserError(_('EDI user should be of type PDP'))
+            return super()._peppol_register_receiver()
 
-        params = params or {}
-        try:
-            response = self._make_request(
-                f"{self._get_server_url()}{endpoint}",
-                params=params,
-            )
-        except AccountEdiProxyError as e:
-            if e.code in ('client_gone', 'no_such_user_found'):
-                # TODO: may be too "aggressive" in production; but useful for testing?
-                self.company_id.l10n_fr_pdp_proxy_state = False
-                self.unlink()
-                if not modules.module.current_test:
-                    self.env.cr.commit()
-                raise UserError(_('We could not find a user with this information on our server. Please check your information.'))
-            raise UserError(e.message)
-
-        if 'error' in response:
-            errors = [
-                response['error'].get('subject'),
-                response['error'].get('message'),
-            ]
-            message = '\n'.join([error for error in errors if error])
-            raise UserError(message or _('Connection error, please try again later.'))
-        return response
-
-    def _get_pdp_company_details(self):
-        self.ensure_one()
-        return {
-            'peppol_company_name': self.company_id.display_name,
-            'peppol_company_vat': self.company_id.vat,
-            'peppol_company_street': self.company_id.street,
-            'peppol_company_city': self.company_id.city,
-            'peppol_company_zip': self.company_id.zip,
-            'peppol_country_code': self.company_id.country_id.code,
-            'peppol_contact_email': self.company_id.pdp_contact_email,
-            'peppol_webhook_endpoint': self.company_id._get_pdp_webhook_endpoint(),
-            'peppol_webhook_token': self._generate_pdp_webhook_token(),
-        }
-
-    def _pdp_register_receiver(self):
-        # remove in master
-        self.ensure_one()
         company = self.company_id
-        if company.l10n_fr_pdp_proxy_state in ('pending', 'receiver'):
+        if company.account_peppol_proxy_state in ('smp_registration', 'receiver'):
             # a participant can only try registering as a receiver if they are not registered
-            pdp_state_translated = dict(company._fields['l10n_fr_pdp_proxy_state'].selection)[company.l10n_fr_pdp_proxy_state]
-            raise UserError(_('Cannot register a user with a %s application', pdp_state_translated))
+            proxy_state_translated = dict(company._fields['account_peppol_proxy_state'].selection)[company.account_peppol_proxy_state]
+            raise UserError(_('Cannot register a user with a %s application', proxy_state_translated))
 
-        params = {
-            'company_details': self._get_pdp_company_details(),
-            'supported_identifiers': list(self.company_id._pdp_supported_document_types()),
-        }
-        self._call_pdp_proxy(
-            endpoint='/api/pdp/1/register_receiver',
-            params=params,
-        )
-        company.l10n_fr_pdp_proxy_state = 'pending'
+        super()._peppol_register_receiver()
 
         datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
-        self.env.ref('l10n_fr_pdp.ir_cron_pdp_get_participant_status')._trigger(at=datetime_in_1_hour)
-
-    def _pdp_deregister_participant(self):
-        self.ensure_one()
-
-        proxy_state = self.company_id.l10n_fr_pdp_proxy_state
-        if proxy_state == 'receiver':
-            # fetch all documents and message statuses before unlinking the edi user
-            # so that the invoices are acknowledged
-            self._cron_pdp_get_message_status()
-            self._cron_pdp_get_new_documents()
-            if not tools.config['test_enable'] and not modules.module.current_test:
-                self.env.cr.commit()
-
-        if proxy_state:
-            self._call_pdp_proxy(endpoint='/api/pdp/1/cancel_pdp_registration')
-
-        self.company_id.l10n_fr_pdp_proxy_state = False
-        self.unlink()
-
-    def _pdp_get_participant_status(self):
-        for edi_user in self:
-            edi_user = edi_user.with_company(edi_user.company_id)
-            try:
-                proxy_user = edi_user._call_pdp_proxy("/api/pdp/1/participant_status")
-            except AccountEdiProxyError as e:
-                _logger.error('Error while updating PDP participant status: %s', e)
-                continue
-
-            if proxy_user['pdp_state'] in ('pending', 'receiver', 'rejected'):
-                edi_user.company_id.l10n_fr_pdp_proxy_state = proxy_user['pdp_state']
+        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
 
     def _generate_pdp_webhook_token(self):
+        # TODO: update with changes from peppol webhook (higher version)
         self.ensure_one()
         expiration = 30 * 24  # in 30 days
         msg = [self.id, self.company_id._get_pdp_webhook_endpoint()]
@@ -233,7 +188,7 @@ class AccountEdiProxyClientUser(models.Model):
 
     def _pdp_reset_webhook(self):
         for edi_user in self:
-            edi_user._call_pdp_proxy(
+            edi_user._call_peppol_proxy(
                 '/api/pdp/1/set_webhook',
                 params={
                     'webhook_url': edi_user.company_id._get_pdp_webhook_endpoint(),
@@ -241,86 +196,12 @@ class AccountEdiProxyClientUser(models.Model):
                 }
             )
 
-    def _pdp_get_new_documents(self, batch_size=None):
-        job_count = batch_size or BATCH_SIZE
-        need_retrigger = False
-        params = {
-            'domain': {
-                'direction': 'incoming',
-                'errors': False,
-            }
-        }
-        for edi_user in self:
-            edi_user = edi_user.with_company(edi_user.company_id)
-            params['domain']['receiver_identifier'] = edi_user.edi_identification
-            try:
-                # request all messages that haven't been acknowledged
-                messages = edi_user._call_pdp_proxy(
-                    "/api/pdp/1/get_all_documents",
-                    params=params,
-                )
-            except UserError as e:
-                _logger.error('Error while receiving the document from PDP Proxy: %s', e)
-                continue
-
-            message_uuids = [
-                message['uuid']
-                for message in messages.get('messages', [])
-            ]
-            if not message_uuids:
-                continue
-
-            need_retrigger = need_retrigger or len(message_uuids) > job_count
-            message_uuids = message_uuids[:job_count]
-
-            # retrieve attachments for filtered messages
-            all_messages = edi_user._call_pdp_proxy(
-                "/api/pdp/1/get_document",
-                params={'message_uuids': message_uuids},
-            )
-            processed_uuid_to_record = edi_user._pdp_process_new_messages(all_messages)
-
-            if not tools.config['test_enable']:
-                self.env.cr.commit()
-            if processed_uuid_to_record:
-                edi_user._call_pdp_proxy(
-                    "/api/pdp/1/ack",
-                    params={'message_uuids': list(processed_uuid_to_record)},
-                )
-        if need_retrigger:
-            self.env.ref('l10n_fr_pdp.ir_cron_pdp_get_new_documents')._trigger()
-
-    def _pdp_get_message_status(self, batch_size=None):
-        job_count = batch_size or BATCH_SIZE
-        need_retrigger = False
-        for edi_user in self:
-            edi_user = edi_user.with_company(edi_user.company_id)
-            documents = edi_user._pdp_get_documents_for_status(job_count)
-            if not documents:
-                continue
-            need_retrigger = need_retrigger or len(documents) > job_count
-            uuid_to_record = {document.pdp_message_uuid: document for document in documents[:job_count]}
-            messages_to_process = edi_user._call_pdp_proxy(
-                "/api/pdp/1/get_document",
-                params={'message_uuids': list(uuid_to_record)},
-            )
-
-            processed_message_uuids = edi_user._pdp_process_messages_status(messages_to_process, uuid_to_record)
-
-            if processed_message_uuids:
-                edi_user._call_pdp_proxy(
-                    "/api/pdp/1/ack",
-                    params={'message_uuids': processed_message_uuids},
-                )
-        if need_retrigger:
-            self.env.ref('l10n_fr_pdp.ir_cron_pdp_get_message_status')._trigger()
-
     def _pdp_get_documents_for_status(self, batch_size):
         self.ensure_one()
 
         edi_user_moves = self.env['account.move'].search(
             [
-                ('pdp_move_state', '=', 'processing'),
+                ('peppol_move_state', '=', 'processing'),
                 ('company_id', '=', self.company_id.id),
             ],
             limit=batch_size + 1,
@@ -397,11 +278,11 @@ class AccountEdiProxyClientUser(models.Model):
                         # thrown when the IAP is still processing the message
                         continue
                     move._message_log(body=self.env._("PDP error: %s", content['error'].get('data', {}).get('message') or content['error']['message']))
-                    move.pdp_move_state = 'error'
+                    move.peppol_move_state = 'error'
                     processed_message_uuids.append(uuid)
                     continue
 
-                move.pdp_move_state = content['state']
+                move.peppol_move_state = content['state']
                 move._message_log(body=self.env._('PDP status update: %s', content['state']))
                 processed_message_uuids.append(uuid)
         return processed_message_uuids
@@ -422,10 +303,10 @@ class AccountEdiProxyClientUser(models.Model):
         try:
             issue_time = fields.Datetime.now()
             additional_info['issue_datetime'] = fields.Datetime.to_string(issue_time)
-            response = self._call_pdp_proxy(
+            response = self._call_peppol_proxy(
                 "/api/pdp/1/send_response",
                 params={
-                    'reference_uuids': reference_moves.mapped('pdp_message_uuid'),
+                    'reference_uuids': reference_moves.mapped('peppol_message_uuid'),
                     'status': status,
                     'additional_info': additional_info or {},
                 },
@@ -454,7 +335,7 @@ class AccountEdiProxyClientUser(models.Model):
             status_list = [{'note': additional_info.get('note')}]  # We only put the note since we have all other info
             self.env['pdp.response'].create([
                 {
-                    'pdp_message_uuid': message['message_uuid'],
+                    'peppol_message_uuid': message['message_uuid'],
                     'response_code': status,
                     'status_info': "\n\n".join([self._format_status_dict(status) for status in status_list]),
                     'pdp_state': 'processing',
@@ -473,7 +354,7 @@ class AccountEdiProxyClientUser(models.Model):
         self.ensure_one()
         processed_messages = {}
         response_uuids = []
-        purchase_journal = self.company_id.pdp_purchase_journal_id
+        purchase_journal = self.company_id.peppol_purchase_journal_id
 
         # Note: We process the invoices first to avoid importing a response before its origin move
         for uuid, content in messages.items():
@@ -487,10 +368,10 @@ class AccountEdiProxyClientUser(models.Model):
 
         origin_message_uuids = [messages[uuid]['origin_message_uuid'] for uuid in response_uuids]
         relevant_moves_domain = [
-            ('pdp_message_uuid', 'in', origin_message_uuids),
+            ('peppol_message_uuid', 'in', origin_message_uuids),
             ('company_id', '=', self.company_id.id),
         ]
-        uuid_to_move_map = self.env['account.move'].search(relevant_moves_domain).grouped('pdp_message_uuid')
+        uuid_to_move_map = self.env['account.move'].search(relevant_moves_domain).grouped('peppol_message_uuid')
         for uuid in response_uuids:
             content = messages[uuid]
             origin_uuid = content['origin_message_uuid']
@@ -543,7 +424,7 @@ class AccountEdiProxyClientUser(models.Model):
 
         response_code_description = response_code_to_description_map[response_code]
         response = self.env['pdp.response'].create({
-            'pdp_message_uuid': uuid,
+            'peppol_message_uuid': uuid,
             'response_code': response_code,
             'pdp_state': content['state'],
             'move_id': origin_move.id,
@@ -591,7 +472,7 @@ class AccountEdiProxyClientUser(models.Model):
         return {
             'process_condition_code': process_condition_code,
             'response_code': PROCESS_CONDITION_CODE_TO_RESPONSE_CODE.get(process_condition_code, process_condition_code),
-            'issue_date': _parse_cdar_datetime(xml_node.findtext("rsm:AcknowledgementDocument/ram:IssueDateTime/udt:DateTimeString", namespaces=CDAR_NSMAP)),
+            'issue_date': _parse_cdar_datetime_node(xml_node.find("rsm:AcknowledgementDocument/ram:IssueDateTime/udt:DateTimeString", namespaces=CDAR_NSMAP)),
             'status_list': status_list,
         }
 
@@ -640,8 +521,8 @@ class AccountEdiProxyClientUser(models.Model):
         move = self.env['account.move'].create({
             'journal_id': journal.id,
             'move_type': 'in_invoice',
-            'pdp_move_state': content['state'],
-            'pdp_message_uuid': uuid,
+            'peppol_move_state': content['state'],
+            'peppol_message_uuid': uuid,
         })
         if 'is_in_extractable_state' in move._fields:
             move.is_in_extractable_state = False
@@ -662,23 +543,6 @@ class AccountEdiProxyClientUser(models.Model):
     # CRONS
     # -------------------------------------------------------------------------
 
-    def _cron_pdp_get_new_documents(self):
-        edi_users = self.search([('proxy_type', '=', 'pdp'), ('company_id.l10n_fr_pdp_proxy_state', '=', 'receiver')])
-        edi_users._pdp_get_new_documents()
-
-    def _cron_pdp_get_message_status(self):
-        edi_users = self.search([('proxy_type', '=', 'pdp'), ('company_id.l10n_fr_pdp_proxy_state', '=', 'receiver')])
-        edi_users._pdp_get_message_status()
-
-    def _cron_pdp_get_participant_status(self):
-        edi_users = self.search([('proxy_type', '=', 'pdp')])
-        edi_users._pdp_get_participant_status()
-
-        # throughout the registration process, we need to check the status more frequently
-        if self.search_count([('company_id.l10n_fr_pdp_proxy_state', '=', 'pending')], limit=1):
-            datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
-            self.env.ref('l10n_fr_pdp.ir_cron_pdp_get_participant_status')._trigger(at=datetime_in_1_hour)
-
     def _cron_pdp_webhook_keepalive(self):
-        edi_users = self.search([('proxy_type', '=', 'pdp'), ('company_id.l10n_fr_pdp_proxy_state', '=', 'receiver')])
+        edi_users = self.search([('proxy_type', '=', 'pdp'), ('company_id.account_peppol_proxy_state', '=', 'receiver')])
         edi_users._pdp_reset_webhook()

@@ -5,7 +5,7 @@ class PdpResponse(models.Model):
     _name = 'pdp.response'
     _description = 'Response Messages for PDP'
 
-    pdp_message_uuid = fields.Char('PDP UUID', required=True)
+    peppol_message_uuid = fields.Char('Peppol Message UUID', required=True)
     response_code = fields.Selection(
         selection=[
             ('submitted', 'Submitted'),

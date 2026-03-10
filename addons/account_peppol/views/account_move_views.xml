@@ -16,10 +16,10 @@
 
             <xpath expr="//div[@name='journal_div']" position="after">
                 <label for="peppol_move_state"
-                       invisible="not peppol_move_state or state == 'draft' or move_type in ('in_invoice', 'in_refund')"/>
+                       invisible="not peppol_move_state"/>
                 <div name="peppol_div"
                      class="d-flex"
-                     invisible="not peppol_move_state or state == 'draft' or move_type in ('in_invoice', 'in_refund')">
+                     invisible="not peppol_move_state">
                     <field name="peppol_move_state" class="oe_inline"/>
                     <span class="mx-1" invisible="'demo_' not in peppol_message_uuid"> (Demo)</span>
                     <span class="text-muted mx-3"

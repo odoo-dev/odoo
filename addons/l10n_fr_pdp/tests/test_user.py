@@ -24,7 +24,7 @@ class TestPdpUser(TestL10nFrPdpCommon):
             '/api/pdp/1/update_user': {'result': {}},
             '/api/pdp/1/participant_status': {
                 'result': {
-                    'pdp_state': participant_state,
+                    'peppol_state': participant_state,
                 }
             },
             '/api/pdp/1/cancel_pdp_registration': {'result': {}},
@@ -68,34 +68,34 @@ class TestPdpUser(TestL10nFrPdpCommon):
         company = self.env.company
         wizard = self.env['pdp.registration'].create(self._get_participant_vals())
         wizard.button_register_pdp_participant()
-        self.assertEqual(company.l10n_fr_pdp_proxy_state, 'pending')
+        self.assertEqual(company.account_peppol_proxy_state, 'smp_registration')
 
         # The participant should be automatically registered as receiver after some time
         with self._set_context({'participant_state': 'receiver'}):
-            self.env['account_edi_proxy_client.user']._cron_pdp_get_participant_status()
-            self.assertEqual(self.env.company.l10n_fr_pdp_proxy_state, 'receiver')
+            self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
+            self.assertEqual(self.env.company.account_peppol_proxy_state, 'receiver')
 
     def test_pdp_create_reject_participant(self):
-        # the l10n_fr_pdp_proxy_state should change to rejected
+        # the account_peppol_proxy_state should change to rejected
         # if we reject the participant
         company = self.env.company
         wizard = self.env['pdp.registration'].create(self._get_participant_vals())
 
         with self._set_context({'participant_state': 'rejected'}):
             wizard.button_register_pdp_participant()
-            self.env['account_edi_proxy_client.user']._cron_pdp_get_participant_status()
-            self.assertEqual(company.l10n_fr_pdp_proxy_state, 'rejected')
+            self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
+            self.assertEqual(company.account_peppol_proxy_state, 'rejected')
 
     def test_pdp_create_duplicate_participant(self):
         """ If you create a duplicate participant, it will take over the previous one"""
         wizard = self.env['pdp.registration'].create(self._get_participant_vals())
         wizard.button_register_pdp_participant()
 
-        wizard.l10n_fr_pdp_proxy_state = False
+        wizard.account_peppol_proxy_state = False
         wizard.button_register_pdp_participant()
-        self.assertEqual(self.env.company.l10n_fr_pdp_proxy_state, 'pending')
+        self.assertEqual(self.env.company.account_peppol_proxy_state, 'smp_registration')
 
         # The participant is still a receiver on IAP
         with self._set_context({'participant_state': 'receiver'}):
-            self.env['account_edi_proxy_client.user']._cron_pdp_get_participant_status()
-            self.assertEqual(self.env.company.l10n_fr_pdp_proxy_state, 'receiver')
+            self.env['account_edi_proxy_client.user']._cron_peppol_get_participant_status()
+            self.assertEqual(self.env.company.account_peppol_proxy_state, 'receiver')

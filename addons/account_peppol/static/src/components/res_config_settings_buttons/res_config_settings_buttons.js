@@ -33,6 +33,10 @@ class PeppolSettingsButtons extends Component {
         return this.props.record.data.account_peppol_proxy_state;
     }
 
+    get ediIdentification() {
+        return this.props.record.data.account_peppol_edi_identification;
+    }
+
     get migrationPrepared() {
         return this.props.record.data.account_peppol_proxy_state === "receiver" && Boolean(this.props.record.data.account_peppol_migration_key);
     }
