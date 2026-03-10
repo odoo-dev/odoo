@@ -1102,6 +1102,11 @@ tests = [
         "expected": '<div t-custom-portal="this.portalTarget"/>',
     },
     {
+        "name": "t-custom-ref",
+        "content": """<input t-custom-ref="{{ state.name }}"/>""",
+        "expected": """<input t-custom-ref="{{ this.state.name }}"/>""",
+    },
+    {
         "name": "t-if",
         "content": '<div t-if="expr">aa</div>',
         "expected": '<div t-if="this.expr">aa</div>',

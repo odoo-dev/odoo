@@ -31,6 +31,7 @@ CHECKSUM_FILES = (
 # - renderToFragment
 # - renderToElement
 EXCLUDED_TEMPLATES = (
+    'point_of_sale.Navbar',  # Inherited from checksum file, to remove from list when checksum is recertified
     'Appointment.appointment_info_no_capacity',
     'Appointment.appointment_info_no_slot',
     'Appointment.appointment_info_no_slot_month',
