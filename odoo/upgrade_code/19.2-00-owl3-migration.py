@@ -892,9 +892,10 @@ MISC_WHITELIST = {
     "hr_skills.SkillsListRenderer.Rows": {'list'},  # dynamic t-call I guess
     "crm.ColumnProgress": {'bar'},  # Nested inherit
     "pos_restaurant.floor_screen_element": {'element'},  # for each + t-call
+    "product_matrix.matrix": {'format'},  # Var passed via t-set above t-call
     "sale_management.ListRenderer.RecordRow": {'record'},  # Nested t-inherits
     "sale.ListRenderer.RecordRow": {'record', 'column', 'hasDeleteButton'},  # Nested t-inherits
-    "web_studio.ViewEditor.View": { 'scope' },  # dynamic t-call 
+    "web_studio.ViewEditor.View": { 'scope' },  # dynamic t-call
     "web_studio.property.subOptions": {'attribute'},  # dynamic t-call
     "web_studio.property.defaultInput": {'attribute'},  # dynamic t-call
     "web_studio.property.selection": {'attribute'},  # dynamic t-call
