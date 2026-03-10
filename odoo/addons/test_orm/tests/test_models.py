@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import inspect
+
 from odoo.exceptions import AccessError, LockError
 from odoo.tests.common import TransactionCase, tagged
 from odoo.tools import mute_logger
@@ -252,3 +254,39 @@ class TestORM(TransactionCase):
         self.assertCountEqual(foo.mapped('state_ids.code'), ['NF', 'SF', 'WF', 'EF'])
         self.assertEqual(bar.name, 'Bar')
         self.assertCountEqual(bar.mapped('state_ids.code'), ['NB', 'SB'])
+
+
+class TestORMOverride(TransactionCase):
+    def test_write_override_translated_field(self):
+        base_write = self.env.registry['base'].write
+        violations = []
+        for model in self.env.registry.values():
+            if model.write is base_write:
+                continue
+            translated_field_names = [
+                field.name for field in model._fields.values() if field.translate
+            ]
+            if not translated_field_names:
+                continue
+            # Inspect each write override in the MRO (write can be overridden at multiple levels)
+            for cls in model.__mro__:
+                if 'write' not in cls.__dict__:
+                    continue
+                write_method = cls.__dict__['write']
+                if write_method is base_write:
+                    continue
+                source = inspect.getsource(write_method)
+                for field_name in translated_field_names:
+                    pattern1 = f"vals['{field_name}']"
+                    pattern2 = f'vals["{field_name}"]'
+                    pattern3 = f"vals.get('{field_name}'"
+                    pattern4 = f'vals.get("{field_name}"'
+                    if pattern1 in source or pattern2 in source or pattern3 in source or pattern4 in source:
+                        violations.append(
+                            f"{model._name}.write ({cls.__module__}.{cls.__name__}): for  translated field '{field_name}'"
+                        )
+        if violations:
+            self.fail(
+                "Override write for translated fields"
+                + "\n".join(f"  - {v}" for v in violations)
+            )
