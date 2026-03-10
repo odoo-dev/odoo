@@ -101,7 +101,8 @@ class Properties(Field):
             if not self.inherited_field:
                 # make the field computed, and set its dependencies
                 self._depends = (self.definition_record, )
-                self.compute = self._compute
+                if not self.related:
+                    self.compute = self._compute
 
     def setup(self, model):
         if not self._setup_done and self.definition_record and self.definition_record_field:

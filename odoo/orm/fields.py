@@ -559,6 +559,9 @@ class Field[T]:
             self._setup_done = True
             # column_type might be changed during Field.setup
             reset_cached_properties(self)
+
+            if self.store and self.column_type and self.search:
+                _logger.warning('Stored field %s has a search method', self)
     #
     # Setup of non-related fields
     #
@@ -613,6 +616,8 @@ class Field[T]:
     def setup_related(self, model: BaseModel) -> None:
         """ Setup the attributes of a related field. """
         assert isinstance(self.related, str), self.related
+        if (self.compute or (self.inverse and not self.readonly)):
+            _logger.warning('Related field %s is computed or has an inverse method', self)
 
         # determine the chain of fields, and make sure they are all set up
         field_seq = []
