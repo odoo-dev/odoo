@@ -5,9 +5,11 @@ import { loadBundle } from "@web/core/assets";
  * have same origin sandbox policy enabled, and must be in the DOM (Chrome does
  * not dispatch the "load" event for an iframe without `src`).
  *
- * @param {HTMLIFrameElement} iframe
- * @param {Function} [callback]
- * @returns {Promise}
+ * @template [I=HTMLIFrameElement]
+ * @template [T=any]
+ * @param {I} iframe
+ * @param {(iframe: I) => T} [callback]
+ * @returns {Promise<T>}
  */
 export function loadIframe(iframe, callback = () => {}) {
     const { promise: iframeLoaded, resolve } = Promise.withResolvers();
@@ -22,7 +24,7 @@ export function loadIframe(iframe, callback = () => {}) {
         onIframeLoaded();
     } else {
         // Browsers like Firefox only make iframe document available after dispatching "load"
-        iframe.addEventListener("load", () => onIframeLoaded(), { once: true });
+        iframe.addEventListener("load", onIframeLoaded, { once: true });
     }
     return iframeLoaded;
 }
@@ -33,17 +35,16 @@ export function loadIframe(iframe, callback = () => {}) {
  * "load" event for an iframe without `src`).
  *
  * @param {HTMLIFrameElement} iframe
- * @param {Array<string>} bundles assets bundle names
- * @param {Object} [options] type of files to load
- * @returns {Promise}
+ * @param {string[]} bundles assets bundle names
+ * @param {Parameters<typeof loadBundle>[1]} [options] type of files to load
  */
-export function loadIframeBundles(iframe, bundles, { css = true, js = false } = {}) {
-    return loadIframe(iframe, async () =>
-        Promise.all(
-            bundles.map(
-                async (bundle) =>
-                    await loadBundle(bundle, { targetDoc: iframe.contentDocument, css, js })
-            )
-        )
+export function loadIframeBundles(iframe, bundles, options) {
+    const bundleOptions = {
+        js: false,
+        targetDoc: iframe.contentDocument,
+        ...options,
+    };
+    return loadIframe(iframe, () =>
+        Promise.all(bundles.map((bundle) => loadBundle(bundle, bundleOptions))),
     );
 }

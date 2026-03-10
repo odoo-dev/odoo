@@ -13,6 +13,7 @@ import {
     watchListeners,
 } from "@odoo/hoot";
 
+import { mockAssetsFactory } from "./mock_assets.hoot";
 import { mockBrowserFactory } from "./mock_browser.hoot";
 import { mockCurrencyFactory } from "./mock_currency.hoot";
 import { mockFunctionsFactory } from "./mock_functions.hoot";
@@ -81,7 +82,7 @@ async function defineModuleSet(fileSuffix, entryPoints, additionalAddons) {
         if (!moduleNamesCache.has(joinedAddons)) {
             moduleNamesCache.set(
                 joinedAddons,
-                sortedModuleNames.filter((name) => !name.endsWith(fileSuffix) && filter(name))
+                sortedModuleNames.filter((name) => !name.endsWith(fileSuffix) && filter(name)),
             );
         }
 
@@ -116,7 +117,7 @@ async function describeDrySuite(fileSuffix, entryPoints) {
                 throw new Error(
                     `Test files cannot have exports, found the following exported member(s) in module ${fullModuleName}:${exports
                         .map((name) => `\n - ${name}`)
-                        .join("")}`
+                        .join("")}`,
                 );
             }
         });
@@ -154,7 +155,7 @@ async function fetchDependencies(addons) {
                 dependencyCache[moduleName].resolve();
 
                 dependencies[moduleName] = dependencyNames.filter(
-                    (dep) => !DEFAULT_ADDONS.includes(dep)
+                    (dep) => !DEFAULT_ADDONS.includes(dep),
                 );
             }
 
@@ -449,7 +450,7 @@ class ModuleSetLoader extends loader.constructor {
             watchKeys(window.odoo),
             watchKeys(window, ALLOWED_GLOBAL_KEYS),
             watchListeners(window),
-            watchAddedNodes(window)
+            watchAddedNodes(window),
         );
 
         // Load module set modules (without entry point)
@@ -520,6 +521,7 @@ const MODULE_MOCKS_BY_NAME = new Map([
     // Fixed modules
     ["@web/core/template_inheritance", mockFixedFactory],
     // Other mocks
+    ["@web/core/assets", mockAssetsFactory],
     ["@web/core/browser/browser", mockBrowserFactory],
     ["@web/core/currency", mockCurrencyFactory],
     ["@web/core/templates", mockTemplatesFactory],
@@ -584,7 +586,7 @@ export async function fetchModelDefinitions(modelNames) {
             const [s, some, does] =
                 namesList.length === 1 ? ["", "this", "does"] : ["s", "some or all of these", "do"];
             const message = `Could not fetch definition${s} for server model${s} "${namesList.join(
-                `", "`
+                `", "`,
             )}": ${some} model${s} ${does} not exist`;
             throw new Error(message);
         }
