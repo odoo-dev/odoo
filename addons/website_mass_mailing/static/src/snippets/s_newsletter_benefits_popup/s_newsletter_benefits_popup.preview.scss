@@ -1,0 +1,9 @@
+.o_add_snippets_preview {
+    // Adjust popup height for mobile preview
+    // (e.g. s_newsletter_benefits_popup)
+    @include media-breakpoint-down(md) {
+        [data-snippet="s_newsletter_benefits_popup"] {
+            min-height: 800px !important;
+        }
+    }
+}

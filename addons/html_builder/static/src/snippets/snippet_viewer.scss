@@ -4,7 +4,7 @@
     > body {
         overflow-x: hidden;
         overflow-y: auto;
-        width: 30%;
+        width: calc(100% / 3.33);
         height: 100%;
         background-color: unset;
         scrollbar-gutter: stable both-edges;
@@ -16,12 +16,22 @@
         width: 333%;
         height: 100%;
 
+        .o_snippets_container {
+            column-count: 2;
+        }
+
+        .o_snippet_item {
+            break-inside: avoid;
+        }
+
         .o_snippet_preview_wrap {
+            $-snippet-margin-x: map-get($spacers, 5) * .5;
+            $-snippet-margin-bottom: map-get($spacers, 3) * 4;
+            --_zoom: 1;
             min-height: 100px;
             box-shadow: 0 0 6rem rgba(0, 0, 0, 0.16);
-            margin: map-get($spacers, 5) (map-get($spacers, 5) * .5) (map-get($spacers, 3) * 4);
+            margin: 0 calc(#{$-snippet-margin-x} / var(--_zoom)) calc(#{$-snippet-margin-bottom} / var(--_zoom));
             background-color: var(--body-bg);
-            transform: scale(.98);
             cursor: pointer;
 
             [data-snippet="s_carousel"],
@@ -57,10 +67,6 @@
             }
             [inert="inert"] > [data-snippet] {
                 isolation: isolate;
-
-                &[data-snippet="s_text_block"] {
-                    font-size: 1.6rem;
-                }
 
                 &.s_popup {
                     min-height: 660px;
@@ -113,7 +119,7 @@
             &:hover, &:focus-visible {
                 box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
                 &::after {
-                    outline: 6px solid $o-we-handles-accent-color;
+                    outline: calc(6px / var(--_zoom)) solid $o-we-handles-accent-color;
                 }
             }
             &.o_snippet_preview_install {
@@ -178,4 +184,37 @@
             color: $white;
         }
     }
+
+    &.o_is_mobile_preview {
+        > body {
+            width: 100%;
+        }
+        .o_snippets_preview_row {
+            .o_snippets_container {
+                column-count: 3;
+            }
+
+            .o_custom_snippet_edit > * {
+                font-size: x-large;
+            }
+
+            .o_snippet_preview_wrap {
+                --_zoom: 2;
+
+                &[data-label]:not([data-label=""])::before,
+                &.o_snippet_preview_install > .o_snippet_preview_install_btn {
+                    transform: scale(1.67);
+                }
+
+                &.o_snippet_preview_install > .o_snippet_preview_install_btn {
+                    transform-origin: top;
+                }
+            }
+        }
+    }
+}
+
+iframe.o_is_mobile_preview {
+    zoom: 2;
+    width: 100%;
 }
