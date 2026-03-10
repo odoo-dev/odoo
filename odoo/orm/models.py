@@ -3858,6 +3858,15 @@ class BaseModel(metaclass=MetaModel):
                 # inverse records that are not being computed
                 try:
                     fields[0].determine_inverse(real_recs)
+                    for field in fields:
+                        if not field.store and field.compute:
+                            if field in protected:
+                                # remove the protected after inverse to
+                                # 1. avoid endless recursion when inverse
+                                # 2. allow these non-stored fields to be recomputed after inverse
+                                env._protected[field].difference_update(real_recs._ids)
+                            # invalidate the field.store in case the inverse will cause compute to be a different value
+                            real_recs.invalidate_recordset(fnames=[field.name])
                 except AccessError as e:
                     if fields[0].inherited:
                         description = self.env['ir.model']._get(self._name).name
@@ -4079,8 +4088,9 @@ class BaseModel(metaclass=MetaModel):
         records = self._create(data_list)
 
         # protect fields being written against recomputation
-        protected_fields = [(data['protected'], data['record']) for data in data_list]
-        with self.env.protecting(protected_fields):
+        protected_data = [(data['protected'], data['record']) for data in data_list]
+        protected_fields = {field for data in data_list for field in data['protected']}
+        with self.env.protecting(protected_data):
             # fill cached_only fields
             for data in data_list:
                 if vals := data['cached_only']:
@@ -4103,6 +4113,11 @@ class BaseModel(metaclass=MetaModel):
 
                 inv_records = self.browse(inv_rec_ids)
                 next(iter(fields)).determine_inverse(inv_records)
+                for field in fields:
+                    if not field.store and field.compute:
+                        if field in protected_fields:
+                            self.env._protected[field].difference_update(inv_records._ids)
+                        inv_records.invalidate_recordset(fnames=[field.name])
                 # Values of non-stored fields were cached before running inverse methods. In case of x2many create
                 # commands, the cache may therefore hold NewId records. We must now invalidate those values.
                 inv_relational_fnames = [field.name for field in fields if field.type in ('one2many', 'many2many') and not field.store]
