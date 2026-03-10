@@ -110,6 +110,7 @@ class AccountMove(models.Model):
         self.sending_data = False
 
     def action_pdp_open_response_wizard(self):
+        # TODO: what about peppol (via PDP) moves? And business response?
         pdp_moves = self.filtered('pdp_can_send_response')
         if not pdp_moves:
             raise UserError(_("Cannot send response for any of the journal entries."))

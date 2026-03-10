@@ -1,11 +1,6 @@
 from urllib.parse import urljoin
 import re
 
-try:
-    import phonenumbers
-except ImportError:
-    phonenumbers = None
-
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -22,10 +17,6 @@ class ResCompany(models.Model):
         compute='_compute_pdp_contact_email', store=True, readonly=False,
         help='Primary contact email for PDP connection related communications and notifications.\n'
              'In particular, this email is used by Odoo to reconnect your PDP account in case of database change.',
-    )
-    pdp_phone_number = fields.Char(
-        string='PDP Mobile Number',
-        compute='_compute_pdp_phone_number', store=True, readonly=False,
     )
     l10n_fr_pdp_proxy_state = fields.Selection(
         selection=[
@@ -55,17 +46,6 @@ class ResCompany(models.Model):
             if not company.pdp_contact_email:
                 company.pdp_contact_email = company.email
 
-    @api.depends('phone')
-    def _compute_pdp_phone_number(self):
-        for company in self:
-            if not company.pdp_phone_number:
-                try:
-                    # precompute only if it's a valid phone number
-                    company._sanitize_pdp_phone_number(company.phone)
-                    company.pdp_phone_number = company.phone
-                except ValidationError:
-                    continue
-
     @api.depends('account_edi_proxy_client_ids')
     def _compute_pdp_edi_user(self):
         for company in self:
@@ -92,33 +72,6 @@ class ResCompany(models.Model):
             ])
             journals_to_reset.is_pdp_journal = False
             company.pdp_purchase_journal_id.is_pdp_journal = True
-
-    def _sanitize_pdp_phone_number(self, phone_number=None):
-        self.ensure_one()
-
-        error_message = _(
-            "Please enter the mobile number in the correct international format.\n"
-            "For example: +32123456789, where +32 is the country code.\n"
-            "Currently, only European countries are supported.")
-
-        if not phonenumbers:
-            raise ValidationError(_("Please install the phonenumbers library."))
-
-        phone_number = phone_number or self.pdp_phone_number
-        if not phone_number:
-            return
-
-        if not phone_number.startswith('+'):
-            phone_number = f'+{phone_number}'
-
-        try:
-            phone_nbr = phonenumbers.parse(phone_number)
-        except phonenumbers.phonenumberutil.NumberParseException:
-            raise ValidationError(error_message)
-
-        country_code = phonenumbers.phonenumberutil.region_code_for_number(phone_nbr)
-        if country_code not in PEPPOL_LIST or not phonenumbers.is_valid_number(phone_nbr):
-            raise ValidationError(error_message)
 
     @api.model
     def _check_pdp_identifier(self, pdp_identifier, warning=False):

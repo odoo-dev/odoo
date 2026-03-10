@@ -130,11 +130,12 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
 
         siret = commercial_partner.siret or ''
         siren = siret[:9]
-        party_id = siren
-        party_id_scheme = "0002"
-        # party_id = siret
-        # party_id_scheme = "0009"
-        # TODO: siret if siret?
+        if len(siret) == 14:
+            party_id = siret
+            party_id_scheme = "0009"
+        else:
+            party_id = siren
+            party_id_scheme = "0002"
         # [UBL-SR-16] Buyer identifier shall occur maximum once
         vals['party_node']['cac:PartyIdentification'] = {
             'cbc:ID': {'_text': party_id, 'schemeID': party_id_scheme},
@@ -145,12 +146,13 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         super()._ubl_add_party_tax_scheme_nodes(vals)
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
+        vat = commercial_partner.vat != '/' and commercial_partner.vat
 
         vals['party_node']['cac:PartyTaxScheme'] = [
             {
-                'cbc:CompanyID': {'_text': commercial_partner.vat or commercial_partner.pdp_identifier},
+                'cbc:CompanyID': {'_text': vat or commercial_partner.pdp_identifier},
                 'cac:TaxScheme': {
-                    'cbc:ID': {'_text': 'VAT' if commercial_partner.vat else "0225"},
+                    'cbc:ID': {'_text': 'VAT' if vat else "0225"},
                 },
             },
         ]

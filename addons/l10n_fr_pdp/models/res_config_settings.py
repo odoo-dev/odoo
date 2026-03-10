@@ -10,7 +10,6 @@ class ResConfigSettings(models.TransientModel):
     l10n_fr_pdp_edi_user = fields.Many2one(related='company_id.pdp_edi_user')
     l10n_fr_pdp_edi_mode = fields.Selection(related='l10n_fr_pdp_edi_user.edi_mode', string="PDP EDI Operating Mode")
     l10n_fr_pdp_contact_email = fields.Char(related='company_id.pdp_contact_email', readonly=False)
-    l10n_fr_pdp_phone_number = fields.Char(related='company_id.pdp_phone_number', readonly=False)
     l10n_fr_pdp_edi_identification = fields.Char(related='l10n_fr_pdp_edi_user.edi_identification', string="PDP EDI identification")
     l10n_fr_pdp_proxy_state = fields.Selection(related='company_id.l10n_fr_pdp_proxy_state', readonly=False)
     l10n_fr_pdp_purchase_journal_id = fields.Many2one(related='company_id.pdp_purchase_journal_id', readonly=False)
@@ -31,12 +30,11 @@ class ResConfigSettings(models.TransientModel):
         """
         self.ensure_one()
 
-        if not self.l10n_fr_pdp_contact_email or not self.l10n_fr_pdp_phone_number:
-            raise ValidationError(_("Contact email and mobile number are required."))
+        if not self.l10n_fr_pdp_contact_email:
+            raise ValidationError(_("The contact email is required."))
 
         params = {
             'update_data': {
-                'peppol_phone_number': self.l10n_fr_pdp_phone_number,
                 'peppol_contact_email': self.l10n_fr_pdp_contact_email,
             }
         }

@@ -72,8 +72,7 @@ class AccountEdiProxyClientUser(models.Model):
         if proxy_type != 'pdp':
             return super()._get_proxy_identification(company, proxy_type)
         if not company.pdp_identifier:
-            raise UserError(
-                _("Please fill the PDP identifier."))
+            raise UserError(_("Please fill the PDP identifier."))
         return f'0225:{company.pdp_identifier}'
 
     @handle_demo
@@ -155,7 +154,6 @@ class AccountEdiProxyClientUser(models.Model):
             'peppol_company_city': self.company_id.city,
             'peppol_company_zip': self.company_id.zip,
             'peppol_country_code': self.company_id.country_id.code,
-            'peppol_phone_number': self.company_id.pdp_phone_number,
             'peppol_contact_email': self.company_id.pdp_contact_email,
             'peppol_webhook_endpoint': self.company_id._get_pdp_webhook_endpoint(),
             'peppol_webhook_token': self._generate_pdp_webhook_token(),

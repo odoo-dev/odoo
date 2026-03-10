@@ -1,9 +1,3 @@
-import contextlib
-try:
-    import phonenumbers
-except ImportError:
-    phonenumbers = None
-
 from odoo import _, api, fields, models, modules
 from odoo.exceptions import UserError, ValidationError
 
@@ -22,7 +16,6 @@ class PdpRegistration(models.TransientModel):
         readonly=False,
         required=True,
     )
-    phone_number = fields.Char(related='company_id.pdp_phone_number', readonly=False)
     pdp_identifier = fields.Char(related='company_id.pdp_identifier', readonly=False, required=True)
     edi_mode = fields.Selection(
         string='EDI mode',
@@ -50,22 +43,6 @@ class PdpRegistration(models.TransientModel):
         for wizard in self:
             if wizard.pdp_identifier:
                 wizard.pdp_identifier = ''.join(char for char in wizard.pdp_identifier if char == '_' or char.isalnum())
-
-    @api.onchange('phone_number')
-    def _onchange_phone_number(self):
-        self.env['res.company']._check_phonenumbers_import()
-        for wizard in self:
-            if wizard.phone_number:
-                # The `phone_number` we set is not necessarily valid (may fail `_sanitize_peppol_phone_number`)
-                with contextlib.suppress(phonenumbers.NumberParseException):
-                    parsed_phone_number = phonenumbers.parse(
-                        wizard.phone_number,
-                        region=wizard.company_id.country_code,
-                    )
-                    wizard.phone_number = phonenumbers.format_number(
-                        parsed_phone_number,
-                        phonenumbers.PhoneNumberFormat.E164,
-                    )
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -102,8 +79,8 @@ class PdpRegistration(models.TransientModel):
     # -------------------------------------------------------------------------
 
     def _ensure_mandatory_fields(self):
-        if not self.contact_email or not self.phone_number:
-            raise ValidationError(_("Contact email and phone number are required."))
+        if not self.contact_email:
+            raise ValidationError(_("The contact email is required."))
 
     def _action_send_notification(self, title, message):
         move_ids = self.env.context.get('active_ids')

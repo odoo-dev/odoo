@@ -46,7 +46,6 @@ class TestPdpUser(TestL10nFrPdpCommon):
     def _get_participant_vals(self):
         return {
             'pdp_identifier': '0000000000',
-            'phone_number': '+32483123456',
             'contact_email': 'yourcompany@test.example.com',
         }
 

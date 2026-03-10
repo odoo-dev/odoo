@@ -22,8 +22,8 @@ class PdpResponseWizard(models.TransientModel):
             # For incoming messages
             ("refused", "Refused"),
             ("approved", "Approved"),
-            # TODO: maybe we should not support the following
             ("in_hand", "In Hand"),
+            # Supported on IAP side:
             # ("contested", "Contested"),
             # ("payment_sent", "Payment Sent"),
         ],

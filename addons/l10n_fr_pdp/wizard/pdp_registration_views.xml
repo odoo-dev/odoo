@@ -21,9 +21,6 @@
                                string="Identifier"/>
                         <field name="contact_email"
                                string="Email"/>
-                        <field name="phone_number"
-                               string="Phone"
-                               required="edi_mode != 'demo'"/>
 
                     </group>
 
