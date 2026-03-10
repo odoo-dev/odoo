@@ -47,6 +47,9 @@ PYTHON_INEQUALITY_OPERATOR = {'<': pyoperator.lt, '>': pyoperator.gt, '<=': pyop
 
 _logger = logging.getLogger('odoo.fields')
 
+# Track field override warnings to avoid duplicate logs for the same field
+_warned_field_overrides: set[tuple[str, str]] = set()
+
 
 def resolve_mro(model: BaseModel, name: str, predicate) -> list[typing.Any]:
     """ Return the list of successively overridden values of attribute ``name``
@@ -561,7 +564,10 @@ class Field[T]:
             reset_cached_properties(self)
 
             if self.store and self.column_type and self.search:
-                _logger.warning('Stored field %s has a search method', self)
+                key = (str(self), 'stored_search')
+                if key not in _warned_field_overrides:
+                    _warned_field_overrides.add(key)
+                    _logger.warning("Stored field %s has a search method", self)
     #
     # Setup of non-related fields
     #
@@ -617,7 +623,10 @@ class Field[T]:
         """ Setup the attributes of a related field. """
         assert isinstance(self.related, str), self.related
         if (self.compute or (self.inverse and not self.readonly)):
-            _logger.warning('Related field %s is computed or has an inverse method', self)
+            key = (str(self), 'related_computed')
+            if key not in _warned_field_overrides:
+                _warned_field_overrides.add(key)
+                _logger.warning("Related field %s is computed or has an inverse method", self)
 
         # determine the chain of fields, and make sure they are all set up
         field_seq = []
