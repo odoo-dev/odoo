@@ -1,6 +1,5 @@
-import { Component, onWillStart, whenReady, xml } from "@odoo/owl";
+import { whenReady } from "@odoo/owl";
 import { session } from "@web/session";
-import { registry } from "./registry";
 
 /**
  * @typedef {{
@@ -87,28 +86,6 @@ export function loadCSS() {
 export class AssetsLoadingError extends Error {}
 
 /**
- * Utility component that loads an asset bundle before instanciating a component
- */
-export class LazyComponent extends Component {
-    static template = xml`<t t-component="Component" t-props="componentProps"/>`;
-    static props = {
-        Component: String,
-        bundle: String,
-        props: { type: [Object, Function], optional: true },
-    };
-    setup() {
-        onWillStart(async () => {
-            await loadBundle(this.props.bundle);
-            this.Component = registry.category("lazy_components").get(this.props.Component);
-        });
-    }
-
-    get componentProps() {
-        return typeof this.props.props === "function" ? this.props.props() : this.props.props;
-    }
-}
-
-/**
  * This export is done only in order to modify the behavior of the exported
  * functions. This is done in order to be able to make a test environment.
  * Modules should only use the methods exported below.
@@ -174,8 +151,8 @@ export const assets = {
         if (typeof bundleName !== "string") {
             throw new Error(
                 `loadBundle(bundleName:string) accepts only bundleName argument as a string ! Not ${JSON.stringify(
-                    bundleName
-                )} as ${typeof bundleName}`
+                    bundleName,
+                )} as ${typeof bundleName}`,
             );
         }
         return getBundle(bundleName).then(({ cssLibs, jsLibs }) => {
@@ -224,10 +201,10 @@ export const assets = {
                         });
                 } else {
                     reject(
-                        new AssetsLoadingError(`The loading of ${url} failed`, { cause: error })
+                        new AssetsLoadingError(`The loading of ${url} failed`, { cause: error }),
                     );
                 }
-            })
+            }),
         );
         cacheMap.set(url, promise);
         targetDoc.head.appendChild(linkEl);
@@ -254,7 +231,7 @@ export const assets = {
             onLoadAndError(scriptEl, resolve, (error) => {
                 cacheMap.delete(url);
                 reject(new AssetsLoadingError(`The loading of ${url} failed`, { cause: error }));
-            })
+            }),
         );
         cacheMap.set(url, promise);
         targetDoc.head.appendChild(scriptEl);

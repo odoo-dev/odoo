@@ -1,14 +1,8 @@
 import { useComponent, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
-import {
-    Component,
-    onMounted,
-    onWillDestroy,
-    onWillStart,
-    onWillUnmount,
-    status,
-} from "@odoo/owl";
-import { LazyComponent, loadBundle } from "@web/core/assets";
+import { Component, onMounted, onWillDestroy, onWillStart, onWillUnmount, status } from "@odoo/owl";
+import { loadBundle } from "@web/core/assets";
+import { LazyComponent } from "@web/core/lazy_component";
 import { browser } from "@web/core/browser/browser";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
@@ -90,7 +84,7 @@ export class WebsiteBuilderClientAction extends Component {
         useBus(
             websiteSystrayRegistry,
             "CONTENT-UPDATED",
-            () => (this.state.is404 = this.websiteService.is404)
+            () => (this.state.is404 = this.websiteService.is404),
         );
 
         onMounted(() => {
@@ -103,7 +97,7 @@ export class WebsiteBuilderClientAction extends Component {
                     }
                     this.toggleIsMobile(websiteContext.isMobile);
                 },
-                [this.websiteContext]
+                [this.websiteContext],
             );
         });
 
@@ -117,7 +111,7 @@ export class WebsiteBuilderClientAction extends Component {
             const updateWebsiteId = (websiteId) => {
                 const encodedPath = encodeURIComponent(this.path);
                 this.initialUrl = `/website/force/${encodeURIComponent(
-                    websiteId
+                    websiteId,
                 )}?path=${encodedPath}`;
                 this.websiteService.currentWebsiteId = websiteId;
             };
@@ -176,7 +170,7 @@ export class WebsiteBuilderClientAction extends Component {
                     this.addSystrayItems();
                 }
             },
-            [this.state]
+            [this.state],
         );
         useLayoutEffect(
             (isEditing) => {
@@ -197,7 +191,7 @@ export class WebsiteBuilderClientAction extends Component {
                 }
                 return () => clearTimeout(this.navBarTimeout);
             },
-            () => [this.state.isEditing]
+            () => [this.state.isEditing],
         );
     }
 
@@ -207,7 +201,7 @@ export class WebsiteBuilderClientAction extends Component {
 
     get websiteBuilderProps() {
         const iframeLoaded = this.iframeLoaded.then((el) =>
-            this.waitForIframeReady().then(() => el)
+            this.waitForIframeReady().then(() => el),
         );
         const builderProps = {
             closeEditor: this.reloadIframeAndCloseEditor.bind(this),
@@ -255,7 +249,7 @@ export class WebsiteBuilderClientAction extends Component {
                     props: this.systrayProps,
                     isDisplayed: () => true,
                 },
-                { sequence: -100 }
+                { sequence: -100 },
             );
             websiteSystrayRegistry.trigger("EDIT-WEBSITE");
         }
@@ -289,7 +283,7 @@ export class WebsiteBuilderClientAction extends Component {
                 detail: {
                     iframeDocument: this.websiteContent.el.contentDocument.document,
                 },
-            })
+            }),
         );
         this.unblockIframe();
         this.state.isEditing = true;
@@ -333,7 +327,7 @@ export class WebsiteBuilderClientAction extends Component {
         if (
             !isHTTPSorNakedDomainRedirection(
                 iframe.contentWindow.location.origin,
-                window.location.origin
+                window.location.origin,
             )
         ) {
             // If another domain ends up loading in the iframe (for example,
@@ -566,7 +560,7 @@ export class WebsiteBuilderClientAction extends Component {
             const encodedPath = pathSegments.join("/");
             this.websiteContent.el.contentWindow.location.href = new URL(
                 encodedPath,
-                this.websiteContent.el.contentWindow.location
+                this.websiteContent.el.contentWindow.location,
             );
         } else {
             this.websiteContent.el.contentWindow.location.reload();
@@ -580,8 +574,8 @@ export class WebsiteBuilderClientAction extends Component {
         const websiteId = this.websiteService.currentWebsite.id;
         redirect(
             `/odoo/action-website.website_preview?website_id=${encodeURIComponent(
-                websiteId
-            )}&path=${currentPath}&enable_editor=1`
+                websiteId,
+            )}&path=${currentPath}&enable_editor=1`,
         );
     }
 
@@ -618,14 +612,14 @@ export class WebsiteBuilderClientAction extends Component {
                 this.websiteService.websiteRootInstance = event.detail.rootInstance;
                 deferred.resolve();
             },
-            { once: true }
+            { once: true },
         );
     }
 
     async addWelcomeMessage() {
         if (this.websiteService.isRestrictedEditor && !this.state.isEditing) {
             const wrapEl = this.websiteContent.el.contentDocument.querySelector(
-                "#wrapwrap.homepage #wrap"
+                "#wrapwrap.homepage #wrap",
             );
             if (wrapEl && !wrapEl.innerHTML.trim()) {
                 this.welcomeMessageEl = renderToElement("website.homepage_editor_welcome_message");
@@ -640,7 +634,7 @@ export class WebsiteBuilderClientAction extends Component {
                 this.hotkeyService.registerIframe(this.websiteContent.el);
                 this.websiteContent.el.contentWindow.addEventListener(
                     "beforeunload",
-                    this.onPageUnload.bind(this)
+                    this.onPageUnload.bind(this),
                 );
 
                 this.addListeners(this.websiteContent.el.contentDocument);
@@ -667,7 +661,7 @@ export class WebsiteBuilderClientAction extends Component {
     cleanIframeFallback() {
         // Remove autoplay in all iframes urls so videos are not
         const iframesEl = this.iframefallback.el.contentDocument.querySelectorAll(
-            'iframe[src]:not([src=""])'
+            'iframe[src]:not([src=""])',
         );
         for (const iframeEl of iframesEl) {
             const url = new URL(iframeEl.src);
@@ -686,7 +680,7 @@ export class WebsiteBuilderClientAction extends Component {
         this.websitePreviewRef.el.classList.toggle("o_is_mobile", isMobile);
         this.websiteContent.el?.contentDocument.documentElement.classList.toggle(
             "o_is_mobile",
-            isMobile
+            isMobile,
         );
     }
 
@@ -723,7 +717,7 @@ export class WebsiteBuilderClientAction extends Component {
         const path = this.websiteService.contentWindow.location;
         const debugMode = this.env.debug ? `&debug=${this.env.debug}` : "";
         redirect(
-            `/odoo/action-website.website_preview?path=${encodeURIComponent(path)}${debugMode}`
+            `/odoo/action-website.website_preview?path=${encodeURIComponent(path)}${debugMode}`,
         );
     }
 
