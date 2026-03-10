@@ -456,8 +456,8 @@ COMP_REGEXP = re.compile(r"^//[A-Z]\w*")
 SKIP_XPATH_ATTRS = {"name", "ref", "set-slot", "slot"}  # attributes to skip
 COMPONENT_TARGET_RE = re.compile(r"//([A-Z][\w\.-]*)")
 VALUE_ATTR_RE = re.compile(r"(@value)='(.*?)'")
-ENTITY_RE = re.compile(r"&([A-Za-z0-9#]{2,4});")
-UNMASK_RE = re.compile(r"__x([A-Za-z0-9#]{2,4})x__")
+ENTITY_RE = re.compile(r"&([A-Za-z0-9#]{2,5});")
+UNMASK_RE = re.compile(r"__x([A-Za-z0-9#]{2,5})x__")
 
 
 def mask_xml_entities(text):
