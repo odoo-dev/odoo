@@ -1431,7 +1431,7 @@ export class TablePlugin extends Plugin {
         return didDeselectTable;
     }
 
-    applyTableColor(color, mode, previewMode) {
+    applyTableColor(color, mode, coloredNodes, previewMode) {
         const selectedTds = [...this.editable.querySelectorAll(".o_selected_td")].filter(
             (node) => node.isContentEditable
         );
@@ -1442,10 +1442,9 @@ export class TablePlugin extends Plugin {
             );
             for (const td of selectedTds) {
                 this.dependencies.color.colorElement(td, color, mode);
-                if (color) {
-                    td.style["color"] = getComputedStyle(td).color;
-                } else {
-                    td.style["color"] = "";
+                td.style["color"] = color ? getComputedStyle(td).color : "";
+                if (mode === "backgroundColor" && color) {
+                    [td, ...descendants(td)].forEach((n) => coloredNodes.add(n));
                 }
             }
         }

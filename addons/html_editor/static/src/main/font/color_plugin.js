@@ -8,9 +8,9 @@ import {
 } from "@html_editor/utils/color";
 import { fillEmpty, unwrapContents } from "@html_editor/utils/dom";
 import {
+    isElement,
     isEmptyBlock,
     isRedundantElement,
-    isTextNode,
     isVisibleTextNode,
     isWhitespace,
     isZWS,
@@ -120,15 +120,13 @@ export class ColorPlugin extends Plugin {
             for (const mode of colorModes) {
                 let max = 40;
                 const hasAnySelectedNodeColor = (mode) => {
-                    const nodes = this.dependencies.selection
-                        .getTargetedNodes()
-                        .filter(
-                            (n) =>
-                                isTextNode(n) ||
-                                (mode === "backgroundColor" &&
-                                    n.classList.contains("o_selected_td"))
-                        );
-                    return hasAnyNodesColor(nodes, mode);
+                    const nodes = this.dependencies.selection.getTargetedNodes();
+                    return hasAnyNodesColor(
+                        nodes.filter(
+                            (n) => !isElement(n) || descendants(n).some((d) => nodes.includes(d))
+                        ),
+                        mode
+                    );
                 };
                 while (hasAnySelectedNodeColor(mode) && max > 0) {
                     this.applyColor("", mode);
@@ -155,7 +153,8 @@ export class ColorPlugin extends Plugin {
         if (mode === "backgroundColor") {
             color = this.processThrough("apply_background_color_processors", color, mode);
         }
-        if (this.delegateTo("color_apply_overrides", color, mode, previewMode)) {
+        const coloredNodes = new Set();
+        if (this.delegateTo("color_apply_overrides", color, mode, coloredNodes, previewMode)) {
             return;
         }
         const selection = this.dependencies.selection.getEditableSelection();
@@ -200,29 +199,13 @@ export class ColorPlugin extends Plugin {
                 : current;
         };
 
-        const hexColor = rgbaToHex(color).toLowerCase();
         const selectedNodes = targetedNodes
-            .filter((node) => {
-                if (mode === "backgroundColor" && color) {
-                    return !closestElement(node, "table.o_selected_table");
-                }
-                if (closestElement(node).classList.contains("o_default_color")) {
-                    return false;
-                }
-                const li = closestElement(node, "li");
-                if (li && color && this.dependencies.selection.areNodeContentsFullySelected(li)) {
-                    return rgbaToHex(li.style.color).toLowerCase() !== hexColor;
-                }
-                return true;
-            })
-            .map((node) => findTopMostDecoration(node));
-
-        const targetedFieldNodes = new Set(
-            this.dependencies.selection
-                .getTargetedNodes()
-                .map((n) => closestElement(n, "*[t-field],*[t-out],*[t-esc]"))
-                .filter(Boolean)
-        );
+            .filter(
+                (node) =>
+                    !coloredNodes.has(node) &&
+                    !closestElement(node).classList.contains("o_default_color")
+            )
+            .map(findTopMostDecoration);
 
         const alreadyWithinFont = new Set();
         const getFonts = (selectedNodes) =>
@@ -328,10 +311,6 @@ export class ColorPlugin extends Plugin {
                 }
                 return font;
             });
-
-        for (const fieldNode of targetedFieldNodes) {
-            this.colorElement(fieldNode, color, mode);
-        }
 
         let fonts = getFonts(selectedNodes);
         // Dirty fix as the previous call could have unconnected elements

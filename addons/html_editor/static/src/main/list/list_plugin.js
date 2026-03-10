@@ -177,7 +177,6 @@ export class ListPlugin extends Plugin {
         on_step_added_handlers: this.updateToolbarButtons.bind(this),
         on_deleted_handlers: this.adjustListPaddingOnDelete.bind(this),
         on_will_insert_separator_handlers: this.exitList.bind(this),
-        on_will_format_selection_handlers: this.applyFormatToListItem.bind(this),
 
         /** Processors */
         normalize_processors: this.normalize.bind(this),
@@ -192,6 +191,7 @@ export class ListPlugin extends Plugin {
         shift_tab_overrides: this.handleShiftTab.bind(this),
         split_element_block_overrides: this.handleSplitBlock.bind(this),
         color_apply_overrides: this.applyColorToListItem.bind(this),
+        format_apply_overrides: this.applyFormatToListItem.bind(this),
         triple_click_overrides: this.handleTripleClick.bind(this),
 
         is_node_fully_selected_predicates: (node, selection, range) => {
@@ -1109,7 +1109,7 @@ export class ListPlugin extends Plugin {
         );
     }
 
-    applyColorToListItem(color, mode) {
+    applyColorToListItem(color, mode, coloredNodes) {
         this.dependencies.split.splitSelection();
         const targetedNodes = this.dependencies.selection.getTargetedNodes();
         const listItems = new Set(
@@ -1121,18 +1121,17 @@ export class ListPlugin extends Plugin {
         const cursors = this.dependencies.selection.preserveSelection();
         for (const listItem of listItems) {
             if (this.dependencies.selection.areNodeContentsFullySelected(listItem)) {
+                const listItemDescendants = descendants(listItem);
                 for (const node of [
                     listItem,
-                    ...descendants(listItem).filter(
+                    ...listItemDescendants.filter(
                         (n) => isElement(n) && closestElement(n, "LI") === listItem
                     ),
                 ]) {
-                    // Remove any color-related classes.
                     const classesToRemove = [...node.classList].filter(
                         (cls) => cls === "o_default_color" || TEXT_CLASSES_REGEX.test(cls)
                     );
                     removeClass(node, ...classesToRemove);
-
                     if (node.style.color) {
                         removeStyle(node, "color");
                     }
@@ -1144,6 +1143,10 @@ export class ListPlugin extends Plugin {
                     for (const list of sublists) {
                         list.classList.add("o_default_color");
                     }
+                    coloredNodes.add(listItem);
+                    listItemDescendants
+                        .filter((n) => !sublists.some((list) => list.contains(n)))
+                        .forEach((n) => coloredNodes.add(n));
                 }
             } else if (
                 color === "" &&
@@ -1168,7 +1171,7 @@ export class ListPlugin extends Plugin {
         cursors.restore();
     }
 
-    applyFormatToListItem(formatName, { formatProps, applyStyle } = {}) {
+    applyFormatToListItem(formatName, formattedNodes, { formatProps, applyStyle } = {}) {
         if (!["setFontSizeClassName", "fontSize"].includes(formatName)) {
             return;
         }
@@ -1197,9 +1200,10 @@ export class ListPlugin extends Plugin {
             }
 
             if (this.dependencies.selection.areNodeContentsFullySelected(listItem)) {
+                const listItemDescendants = descendants(listItem);
                 for (const node of [
                     listItem,
-                    ...descendants(listItem).filter(
+                    ...listItemDescendants.filter(
                         (n) => isElement(n) && closestElement(n, "LI") === listItem
                     ),
                 ]) {
@@ -1219,6 +1223,10 @@ export class ListPlugin extends Plugin {
                     for (const list of sublists) {
                         list.classList.add("o_default_font_size");
                     }
+                    formattedNodes.add(listItem);
+                    listItemDescendants
+                        .filter((n) => !sublists.some((list) => list.contains(n)))
+                        .forEach((n) => formattedNodes.add(n));
                 }
             } else if (!applyStyle && hasExistingFontSize) {
                 const textNodes = targetedNodes.filter(
@@ -1241,7 +1249,6 @@ export class ListPlugin extends Plugin {
         for (const list of listsSet) {
             this.adjustListPadding(list);
         }
-        return true;
     }
 
     /**
