@@ -913,11 +913,11 @@ def update_template(path: str, content: str, modules: list[str], aggregator: Var
         compiler.fix_rendering_context(tree)
 
     result = update_etree(content, callback)
+    result = unmask_xml_entities(result)
     result = result.replace("><![CDATA[", ">").replace("]]>", "")
     result = result.replace("\u200b", "&#8203;")
     result = result.replace("&&", "&amp;&amp;")
     result = result.replace(") =&gt;", ") =>")
-    result = unmask_xml_entities(result)
     return result, compiler.warnings
 
 # ------------------------------------------------------------------------------
@@ -1103,8 +1103,18 @@ tests = [
     },
     {
         "name": "t-custom-ref",
-        "content": """<input t-custom-ref="{{ state.name }}"/>""",
-        "expected": """<input t-custom-ref="{{ this.state.name }}"/>""",
+        "content": """<input t-custom-ref="{{state.activePageId === page.id ? 'autofocus' : page.id}}"/>""",
+        "expected": """<input t-custom-ref="{{this.state.activePageId === this.page.id ? 'autofocus' : this.page.id}}"/>""",
+    },
+    {
+        "name": "formatting",
+        "content": """<A onSaveCallback="(this.timesheet) =&gt; this.onSaveTimesheetForm(this.timesheet)"/>""",
+        "expected": """<A onSaveCallback="(this.timesheet) => this.onSaveTimesheetForm(this.timesheet)"/>""",
+    },
+    {
+        "name": "TODO component function",
+        "content": """<A onSaveCallback="(timesheet) =&gt; this.onSaveTimesheetForm(timesheet)"/>""",
+        "expected": """<A onSaveCallback="(timesheet) => this.onSaveTimesheetForm(timesheet)"/>""",
     },
     {
         "name": "t-if",
