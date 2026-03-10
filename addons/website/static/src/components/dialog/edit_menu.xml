@@ -28,6 +28,26 @@
                 <small class="form-text">Hint: Type '/' to search an existing page and '#' to link to an anchor.</small>
             </div>
         </div>
+        <div class="mb-3 row">
+            <label class="col-form-label col-md-3">Image</label>
+            <div class="col-md-9 d-flex align-items-center gap-2">
+                <div t-if="imagePreviewSrc" class="position-relative d-inline-flex">
+                    <img t-att-src="imagePreviewSrc" class="img-thumbnail o_menu_dialog_image_preview"
+                        style="max-height:72px; max-width:144px; object-fit:cover;" alt=""/>
+                    <button type="button" t-on-click="onImageRemove"
+                        class="btn btn-danger btn-sm position-absolute top-0 end-0 p-1 lh-1 d-flex align-items-center justify-content-center"
+                        aria-label="Remove image" title="Remove image">
+                        <i class="oi oi-close"/>
+                    </button>
+                </div>
+                <label class="btn btn-sm btn-outline-secondary mb-0">
+                    <i class="fa fa-upload me-1"/>
+                    <t t-if="state.hasImage">Change</t>
+                    <t t-else="">Upload</t>
+                    <input type="file" accept="image/*" t-on-change="onImageUpload" class="d-none"/>
+                </label>
+            </div>
+        </div>
     </WebsiteDialog>
 </t>
 
@@ -54,7 +74,7 @@
                     aria-label="Delete Menu Item" title="Delete Menu Item"/>
             </div>
         </div>
-        <ul t-if="props.menu.children.length">
+        <ul t-if="props.menu.children.length" class="ps-3 pb-2">
             <t t-foreach="props.menu.children" t-as="submenu" t-key="submenu.fields['id']">
                 <MenuRow menu="submenu" edit="props.edit" delete="props.delete" createPage="props.createPage"/>
             </t>

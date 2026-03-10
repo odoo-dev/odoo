@@ -121,7 +121,7 @@
     <t t-set="show_dropdown" t-value="(submenu.is_mega_menu and submenu.is_visible) or submenu.child_id.filtered(lambda menu: menu.is_visible)"/>
     <t t-set="is_accordion_nav" t-value="is_vertical_nav and not submenu.is_mega_menu"/>
 
-    <li t-if="submenu.is_visible and not (submenu.child_id or submenu.is_mega_menu)" t-attf-class="#{item_class or ''} #{is_vertical_nav and 'px-0'}" role="presentation">
+    <li t-if="submenu.is_visible and not (submenu.child_id or submenu.is_mega_menu)" t-attf-class="#{item_class or ''} #{is_vertical_nav and 'px-0'} opacity-trigger-hover" role="presentation">
         <a t-att-href="submenu._clean_url()"
            t-attf-class="#{link_class or ''} #{submenu._is_active() and 'active'}"
            role="menuitem"
@@ -129,6 +129,16 @@
            t-att-target="'_blank' if submenu.new_window else None">
             <span t-field="submenu.name"/>
         </a>
+        <div t-if="submenu.has_image and parentHasImage"
+             class="o_dropdown_menu_image_wrapper position-absolute d-flex align-items-center justify-content-center"
+        >
+            <div
+                 t-field="submenu.image"
+                 class="o_not_editable"
+                 t-options='{"widget": "image", "alt": "", "class": "o_dropdown_menu_image pe-none rounded opacity-0 opacity-100-hover" + ""}'
+            />
+        </div>
+
     </li>
     <li t-elif="show_dropdown" t-attf-class="#{item_class or ''} #{submenu.is_mega_menu and 'position-static'} #{offcanvas_is_leftside and 'o_mega_menu_left'} #{is_accordion_nav and 'accordion accordion-flush' or 'dropdown'}" role="presentation">
         <a
@@ -184,9 +194,20 @@
                 </ul>
             </div>
         </div>
-        <ul t-else="" t-attf-class="dropdown-menu #{dropdown_menu_classes}" role="menu">
+        <ul t-else="" t-attf-class="dropdown-menu #{dropdown_menu_classes} {{submenu.has_image and 'o_dropdown_menu_images' }}" role="menu">
+<!--            <div t-if="submenu.has_image" class="o_dropdown_menu_images_container"/>-->
+            <div t-if="submenu.has_image"
+                 class="o_dropdown_menu_image_wrapper position-absolute d-flex align-items-center justify-content-center"
+            >
+                <div
+                        t-field="submenu.image"
+                        class="o_not_editable"
+                        t-options='{"widget": "image", "alt": "", "class": "o_dropdown_menu_image pe-none rounded" + ""}'
+                />
+            </div>
             <t t-foreach="submenu.child_id" t-as="submenu">
                 <t t-call="website.submenu"
+                   parentHasImage="submenu.has_image"
                    item_class="None"
                    link_class.f="dropdown-item"/>
             </t>

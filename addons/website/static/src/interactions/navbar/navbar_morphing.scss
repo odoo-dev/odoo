@@ -24,6 +24,14 @@
         0
     );
 
+    &:has(.o_dropdown_menu_images) {
+        transform: translateX(-10%) translate3d(
+            var(--NavBarMorphing-left),
+            var(--NavBarMorphing-top),
+            0
+        );
+    }
+
     &.o_navbar_morphing_container_animated {
         transition:
                 transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),

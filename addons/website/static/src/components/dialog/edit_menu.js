@@ -66,6 +66,8 @@ export class MenuDialog extends Component {
         name: { type: String, optional: true },
         url: { type: String, optional: true },
         isMegaMenu: { type: Boolean, optional: true },
+        id: { type: [Number, String], optional: true },
+        hasImage: { type: Boolean, optional: true },
         save: Function,
         close: Function,
     };
@@ -84,6 +86,9 @@ export class MenuDialog extends Component {
             name: this.props.name,
             invalidName: false,
             invalidUrl: false,
+            hasImage: this.props.hasImage || false,
+            previewSrc: null,
+            rawBase64: null,
         });
 
         const keepLast = new KeepLast();
@@ -119,6 +124,26 @@ export class MenuDialog extends Component {
         );
     }
 
+    /**
+     * Returns the src to use for the image preview, or false when no image is set.
+     *
+     * Priority:
+     *  1. A local data URL from a fresh upload (state.previewSrc is a string).
+     *  2. The server-side image URL for an existing menu entry that has an image
+     *     (state.previewSrc is null, state.hasImage is true, numeric id available).
+     *  3. false — no image to show.
+     */
+    get imagePreviewSrc() {
+        if (this.state.previewSrc !== null) {
+            return this.state.previewSrc;
+        }
+        const numericId = parseInt(this.props.id);
+        if (this.state.hasImage && !isNaN(numericId)) {
+            return `/web/image/website.menu/${numericId}/image`;
+        }
+        return false;
+    }
+
     onClickOk() {
         this.state.invalidName = !this.state.name;
         if (this.state.invalidName) {
@@ -133,7 +158,16 @@ export class MenuDialog extends Component {
                 // Do nothing if URL is invalid.
             }
         }
-        this.props.save(this.state.name, url);
+
+        // Build imageUpdate only when the user made a change.
+        // null  → no change (caller leaves image fields untouched)
+        // { hasImage, data } → caller must update both has_image and image fields
+        const imageUpdate =
+            this.state.rawBase64 !== null
+                ? { hasImage: this.state.hasImage, data: this.state.rawBase64 }
+                : null;
+
+        this.props.save(this.state.name, url, imageUpdate);
         this.props.close();
     }
 
@@ -152,6 +186,30 @@ export class MenuDialog extends Component {
             const title = ev.target.value;
             this.state.url = title ? "/" + wUtils.slugify(title) : "";
         }
+    }
+
+    onImageUpload(ev) {
+        const file = ev.target.files[0];
+        if (!file) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataUrl = e.target.result;
+            // Keep the full data URL for preview; send only the raw base64 to the server.
+            this.state.previewSrc = dataUrl;
+            this.state.rawBase64 = dataUrl.split(",")[1];
+            this.state.hasImage = true;
+        };
+        reader.readAsDataURL(file);
+        // Reset input so the same file can be re-selected if needed.
+        ev.target.value = "";
+    }
+
+    onImageRemove() {
+        this.state.previewSrc = false;
+        this.state.rawBase64 = false;
+        this.state.hasImage = false;
     }
 }
 
@@ -304,7 +362,7 @@ export class EditMenuDialog extends Component {
         this.dialogs.add(MenuDialog, {
             isMegaMenu,
             url: "",
-            save: (name, url) => {
+            save: (name, url, imageUpdate) => {
                 const newMenu = reactive({
                     fields: {
                         id: `menu_${new Date().toISOString()}`,
@@ -314,6 +372,8 @@ export class EditMenuDialog extends Component {
                         is_mega_menu: isMegaMenu,
                         sequence: 0,
                         parent_id: false,
+                        has_image: imageUpdate ? imageUpdate.hasImage : false,
+                        ...(imageUpdate && imageUpdate.data ? { image: imageUpdate.data } : {}),
                     },
                     children: [],
                     page_not_found: false,
@@ -328,13 +388,20 @@ export class EditMenuDialog extends Component {
     editMenu(id) {
         const menuToEdit = this.map.get(id);
         this.dialogs.add(MenuDialog, {
+            id,
             name: menuToEdit.fields["name"],
             url: menuToEdit.fields["url"],
             isMegaMenu: menuToEdit.fields["is_mega_menu"],
-            save: (name, url) => {
+            hasImage: menuToEdit.fields["has_image"],
+            save: (name, url, imageUpdate) => {
                 menuToEdit.fields["name"] = name;
                 menuToEdit.fields["url"] = url || "#";
                 menuToEdit.page_not_found = false;
+                if (imageUpdate !== null) {
+                    menuToEdit.fields["has_image"] = imageUpdate.hasImage;
+                    // false = cleared, string = new base64 data
+                    menuToEdit.fields["image"] = imageUpdate.data;
+                }
                 this.checkMenuUrlExists(menuToEdit, url);
             },
         });

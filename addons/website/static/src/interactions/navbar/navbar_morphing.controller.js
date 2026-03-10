@@ -20,6 +20,7 @@ export class NavbarMorphingController {
         this.currentLabel = null;
         this.currentSourceHTML = null;
         this.currentIsMegaMenu = false;
+        this.currentHasImages = false;
         this.anchorTop = 0;
         this.anchorLeft = 0;
         // Click-lock state: when true, hover-away events don't dismiss the panel.
@@ -71,7 +72,12 @@ export class NavbarMorphingController {
         const rect = anchor.getBoundingClientRect();
         this.anchorTop = rect.bottom;
         this.anchorLeft = rect.left + (rect.width / 2);
-        this._renderMenu(sourceMenu.innerHTML, sourceMenu.classList.contains('o_mega_menu'), null);
+        this._renderMenu(
+            sourceMenu.innerHTML,
+            sourceMenu.classList.contains('o_mega_menu'),
+            sourceMenu.classList.contains('o_dropdown_menu_images'),
+            null
+        );
     }
 
     /**
@@ -86,7 +92,12 @@ export class NavbarMorphingController {
             label: this.currentLabel,
         });
         this.currentLabel = label;
-        this._renderMenu(subMenuEl.innerHTML, subMenuEl.classList.contains('o_mega_menu'), label);
+        this._renderMenu(
+            subMenuEl.innerHTML,
+            subMenuEl.classList.contains('o_mega_menu'),
+            subMenuEl.classList.contains('o_dropdown_menu_images'),
+            label
+        );
     }
 
     /**
@@ -103,9 +114,10 @@ export class NavbarMorphingController {
      * Core rendering method. Fades in a new content wrapper and fades out the old one.
      * @param {string}  innerHTML  - raw HTML to inject as the menu content
      * @param {boolean} isMegaMenu - whether to apply mega-menu styling
+     * @param {boolean} hasImages - whether has to handle images
      * @param {string|null} label  - if non-null, a back header is prepended with this title
      */
-    _renderMenu(innerHTML, isMegaMenu, label) {
+    _renderMenu(innerHTML, isMegaMenu, hasImages, label) {
         if (this.closeTimer) {
             clearTimeout(this.closeTimer);
         }
@@ -117,6 +129,7 @@ export class NavbarMorphingController {
         // Store current source so drillIn can save it later
         this.currentSourceHTML = innerHTML;
         this.currentIsMegaMenu = isMegaMenu;
+        this.currentHasImages = hasImages;
 
         this.wrapper.classList.toggle('o_navbar_morphing_container_animated', !isOpening);
         newMenu.style.opacity = "0";
@@ -134,6 +147,7 @@ export class NavbarMorphingController {
             }
             newMenu.insertAdjacentHTML('beforeend', innerHTML);
             newMenu.classList.toggle('o_mega_menu', isMegaMenu);
+            newMenu.classList.toggle('o_dropdown_menu_images', hasImages);
 
             this.wrapper.appendChild(newMenu);
             this.recalculate(isOpening, newMenu);

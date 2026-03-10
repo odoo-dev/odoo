@@ -55,6 +55,8 @@ class WebsiteMenu(models.Model):
     is_mega_menu = fields.Boolean(compute=_compute_field_is_mega_menu, inverse=_set_field_is_mega_menu)
     mega_menu_content = fields.Html(translate=html_translate, sanitize=False, prefetch=True)
     mega_menu_classes = fields.Char()
+    image = fields.Image("Image", max_width=1024, max_height=1024)
+    has_image = fields.Boolean("Has Image", default=False)
 
     @api.depends('website_id')
     @api.depends_context('display_website')
@@ -150,6 +152,17 @@ class WebsiteMenu(models.Model):
                 menus |= new_menu
         # Only one record per vals is returned but multiple could have been created
         return menus
+
+    @api.model
+    def _set_parent_to_website_root(self, menu_ids):
+        """Set parent_id to the owning website's root menu.
+        Used by demo/test data files where ``env`` is not available inside
+        ``<field eval="...">`` attributes and the website root menu cannot be
+        referenced via a plain ``ref()`` call.
+        """
+        for menu in self.browse(menu_ids):
+            if menu.website_id:
+                menu.parent_id = menu.website_id.menu_id
 
     def write(self, vals):
         if any(self._ids):
@@ -277,6 +290,7 @@ class WebsiteMenu(models.Model):
                     'is_mega_menu': node.is_mega_menu,
                     'sequence': node.sequence,
                     'parent_id': node.parent_id.id,
+                    'has_image': node.has_image,
                 },
                 'children': [],
                 'is_homepage': node.url == (website.homepage_url or '/'),
@@ -303,7 +317,14 @@ class WebsiteMenu(models.Model):
             mid = menu['id']
             # new menu are prefixed by new-
             if isinstance(mid, str):
-                new_menu = self.create({'name': menu['name'], 'website_id': website_id})
+                create_vals = {
+                    'name': menu['name'],
+                    'website_id': website_id,
+                    'has_image': menu.get('has_image', False),
+                }
+                if menu.get('image'):
+                    create_vals['image'] = menu['image']
+                new_menu = self.create(create_vals)
                 replace_id(mid, new_menu.id)
         for menu in data['data']:
             menu_id = self.browse(menu['id'])

@@ -3408,3 +3408,23 @@ body.editor_enable {
         }
     }
 }
+
+
+// Header Designs
+.o_dropdown_menu_images.show {
+    padding-right: 300px;
+    min-height: 300px;
+
+    .o_dropdown_menu_image_wrapper {
+        top: var(--dropdown-padding-y);
+        right: var(--dropdown-padding-y);
+        width: 280px;
+        height: 280px;
+        background-color: var(--dropdown-bg-color);
+    }
+
+    .o_dropdown_menu_image {
+        max-width: 280px;
+        max-height: 280px;
+    }
+}
