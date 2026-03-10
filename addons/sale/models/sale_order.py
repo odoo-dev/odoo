@@ -1566,9 +1566,9 @@ class SaleOrder(models.Model):
                     ),
                 )
                 invoice_item_sequence += 1
-
-            invoice_vals['invoice_line_ids'] += invoice_line_vals
-            invoice_vals_list.append(invoice_vals)
+            if len(invoice_line_vals) == len(order.order_line) or order.invoice_ids:
+                invoice_vals['invoice_line_ids'] += invoice_line_vals
+                invoice_vals_list.append(invoice_vals)
 
         if not invoice_vals_list and self._context.get('raise_if_nothing_to_invoice', True):
             raise UserError(self._nothing_to_invoice_error_message())
