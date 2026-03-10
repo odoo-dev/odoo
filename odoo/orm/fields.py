@@ -427,7 +427,9 @@ class Field[T]:
         # determine all inherited field attributes
         attrs = {}
         modules: list[str] = []
-        for field in self._args__.get('_base_fields__', ()):
+        was_store = isinstance(getattr(type(self), '_column_type', None), property) or bool(self._column_type)
+        had_search = False
+        for i, field in enumerate(self._args__.get('_base_fields__', ())):
             if not isinstance(self, type(field)):
                 # 'self' overrides 'field' and their types are not compatible;
                 # so we ignore all the parameters collected so far
@@ -435,9 +437,34 @@ class Field[T]:
                 modules.clear()
                 continue
             attrs.update(field._args__)
+            if i == 0:
+                if 'store' in field._args__:
+                    was_store = field._args__['store']
+                elif field._args__.get('related') or field._args__.get('compute'):
+                    was_store = False
+            if 'store' in field._args__:
+                if not was_store and field._args__['store'] and had_search and 'search' not in field._args__:
+                    key = (str(self), 'stored_search')
+                    if key not in _warned_field_overrides:
+                        _warned_field_overrides.add(key)
+                        _logger.warning(f"Change a non-stored field with search method to a stored field: %s", self)
+                was_store = field._args__['store']
+            if 'search' in field._args__:
+                had_search = field._args__['search']
             if field._module:
                 modules.append(field._module)
         attrs.update(self._args__)
+        if not self._args__.get('_base_fields__', None):
+            if 'store' in self._args__:
+                was_store = self._args__['store']
+            elif self._args__.get('related') or self._args__.get('compute'):
+                was_store = False
+        if 'store' in self._args__:
+            if was_store and self._args__['store'] and had_search and 'search' not in self._args__:
+                key = (str(self), 'stored_search')
+                if key not in _warned_field_overrides:
+                    _warned_field_overrides.add(key)
+                    _logger.warning(f"Change a non-stored field with search method to a stored field: %s", self)
         if self._module:
             modules.append(self._module)
 
@@ -562,12 +589,6 @@ class Field[T]:
             self._setup_done = True
             # column_type might be changed during Field.setup
             reset_cached_properties(self)
-
-            if self.store and self.column_type and self.search:
-                key = (str(self), 'stored_search')
-                if key not in _warned_field_overrides:
-                    _warned_field_overrides.add(key)
-                    _logger.warning("Stored field %s has a search method", self)
     #
     # Setup of non-related fields
     #
