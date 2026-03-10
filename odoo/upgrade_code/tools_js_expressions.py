@@ -660,7 +660,7 @@ class TemplateCompiler:
                     node.set(attr, self._compile_expr(value))
                 if attr.startswith("t-attf-"):
                     self.process_dynamic_string(node, attr)
-                if attr == "t-call" or attr == "t-ref" or attr == "t-slot":
+                if attr == "t-call" or attr == "t-ref" or attr == "t-custom-ref" or attr == "t-slot":
                     self.process_dynamic_string(node, attr)
 
             if self._is_component(node):
