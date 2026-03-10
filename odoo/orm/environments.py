@@ -441,7 +441,7 @@ class Environment(Mapping[str, "BaseModel"]):
 
             for field, rec_ids in ids_by_field.items():
                 ids = protected.get(field)
-                protected[field] = ids.union(rec_ids) if ids else frozenset(rec_ids)
+                protected[field] = ids.union(rec_ids) if ids else set(rec_ids)
             yield
         finally:
             protected.popmap()
@@ -596,7 +596,7 @@ class Transaction:
         # x2many fields if they are not in cache yet
         self.field_data_patches = defaultdict["Field", defaultdict["IdType", list["IdType"]]](lambda: defaultdict(list))
         # fields to protect {field: ids}
-        self.protected = StackMap["Field", frozenset["IdType"]]()
+        self.protected = StackMap["Field", set["IdType"]]()
         # pending computations {field: ids}
         self.tocompute = defaultdict["Field", OrderedSet["IdType"]](OrderedSet)
         # backward-compatible view of the cache
