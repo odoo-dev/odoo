@@ -882,6 +882,7 @@ MAIL_WHITELIST = {
     "mail.Composer.suggestionCannedResponse": {'option'},  # dynamic t-call
     "mail.Composer.suggestionEmoji": {'option'},  # dynamic t-call
     "mail.RottingStatusBarDurationField": {'item'},  # dynamic t-call
+    "mail.ActivityViewCell": {'resId'},  # for each + t-call
 }
 MISC_WHITELIST = {
     "pos_event.QuestionInputs": {'questions', 'stateObject'},  # Var above t-call
