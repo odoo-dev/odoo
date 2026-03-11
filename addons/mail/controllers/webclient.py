@@ -1,9 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from collections import defaultdict
 
+from odoo.fields import Domain
 from odoo.http import request
 
 from odoo.addons.mail.controllers.thread import ThreadController
+from odoo.addons.mail.models.mail_message import SHARE_DOMAIN
 from odoo.addons.mail.tools.discuss import Store, mail_route
 from odoo.addons.mail.tools.store_handler import (
     store_handler,
@@ -145,18 +147,31 @@ class WebclientController(ThreadController):
             lost.sudo().unlink()  # no unlink right except admin, ok to remove as lost anyway
         store.add(valid.mail_message_id, "_store_notification_fields")
 
-    @store_handler("/mail/thread/messages", audience="logged_in", readonly=False)
-    def store_get_thread_messages(self, store: Store, thread_model, thread_id, fetch_params=None):
+    @store_handler("/mail/thread/messages", audience="everyone", readonly=False)
+    def store_get_thread_messages(
+        self,
+        store: Store,
+        thread_model,
+        thread_id,
+        fetch_params=None,
+        access_params=None,
+        share_only=False,
+        **params,
+    ):
         request.update_context(add_chatter_fields=True)
         if thread := self._get_thread_with_access(
             thread_model,
             thread_id,
             mode="read",
+            **(access_params or {}),
         ):
+            self._prepare_fetch_context(thread, access_params)
             messages = self._resolve_messages(
                 store,
+                domain=self._get_fetch_domain(thread, share_only, **params),
                 thread=thread,
                 fetch_params=fetch_params,
+                sudo=thread.env.su,
             )
             if not request.env.user._is_public():
                 messages.set_message_done()
@@ -234,7 +249,7 @@ class WebclientController(ThreadController):
         )
         messages = fetch_res.pop("messages")
         if add_to_store:
-            request.update_context(messages=request.env.context["messages"] | messages)
+            request.update_context(messages=messages | request.env.context["messages"])
         store.resolve_data_request(
             lambda res: (
                 [res.attr(k, v) for k, v in fetch_res.items()],
@@ -242,3 +257,31 @@ class WebclientController(ThreadController):
             ),
         )
         return messages
+
+    @classmethod
+    def _prepare_fetch_context(cls, thread, access_params=None):
+        """To override to update the context before fetching thread messages if needed."""
+        return
+
+    @classmethod
+    def _get_fetch_domain(cls, thread, share_only=False, **params):
+        """Defines the fetch domain and restricts the fetched messages by user type. As a security
+        matter, non-internal users can only read the messages with non-internal subtypes. This early
+        check ensures that they won't pass the ACL, even if they are superusers.
+        Message types are further filtered per model via `_get_share_message_types`."""
+        if (
+            share_only
+            or not request.env.user._is_internal()
+            or not thread.sudo(False).has_access("read")
+        ):
+            return (
+                SHARE_DOMAIN
+                & ~request.env["mail.message"]._get_empty_domain()
+                # Todo: should be replaced by _get_share_message_types after removing website_message_ids
+                & Domain(
+                    "message_type",
+                    "in",
+                    ["auto_comment", "comment", "email", "email_outgoing", "out_of_office"],
+                )
+            )
+        return Domain.TRUE

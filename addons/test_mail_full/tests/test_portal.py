@@ -74,13 +74,13 @@ class TestPortalControllers(TestPortal):
         )
         self.authenticate(None, None)
         chatter_fetch_params = {
+            "access_params": {"token": self.record_portal.access_token},
             "thread_id": self.record_portal.id,
             "thread_model": self.record_portal._name,
-            "token": self.record_portal.access_token,
         }
         result = self.make_jsonrpc_request(
             "/mail/store",
-            {"fetch_params": [["/mail/chatter_fetch", chatter_fetch_params]]},
+            {"fetch_params": [["/mail/thread/messages", chatter_fetch_params]]},
         )
         fetched_ids = [msg["id"] for msg in result["mail.message"]]
         self.assertIn(
