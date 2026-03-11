@@ -2512,6 +2512,31 @@
     function shouldSkip(prop) {
         return typeof prop === "symbol" || SKIP_PROPS.has(prop);
     }
+    /**
+     * Symbol used to store the raw component reference on ctx objects.
+     * This allows nested scopes (created by protectScope) to retrieve the
+     * original component without going through the proxy (which would return
+     * a componentProxy instead).
+     */
+    const TRACKING_COMPONENT = Symbol("trackingComponent");
+    /**
+     * Walks the prototype chain from `ctx` up to (but not including) `component`
+     * to determine if `prop` is an own property on any ctx layer.
+     *
+     * This correctly classifies loop variables from outer t-foreach scopes as "ctx"
+     * even when accessed from an inner scope where they are not own properties on
+     * the immediate ctx layer.
+     */
+    function isCtxProperty(ctx, component, prop) {
+        let current = ctx;
+        while (current && current !== component) {
+            if (Object.prototype.hasOwnProperty.call(current, prop)) {
+                return true;
+            }
+            current = Object.getPrototypeOf(current);
+        }
+        return false;
+    }
     // ---------------------------------------------------------------------------
     // Proxy factories
     // ---------------------------------------------------------------------------
@@ -2526,6 +2551,9 @@
     function createTrackedCtx(ctx, component, templateName) {
         templateName = _templateNameAliases.get(templateName) || templateName;
         const componentProxy = createComponentProxy(component, templateName);
+        // Store the raw component on the ctx so nested scopes can retrieve it
+        // via the symbol (which bypasses proxy tracking).
+        ctx[TRACKING_COMPONENT] = component;
         const handler = {
             get(target, prop, receiver) {
                 if (!_tracking || shouldSkip(prop)) {
@@ -2548,8 +2576,9 @@
                     _getterStack.pop();
                     return value;
                 }
-                const isOwn = Object.prototype.hasOwnProperty.call(target, prop);
-                const source = isOwn ? "ctx" : "component";
+                // Walk the ctx prototype chain to correctly classify properties from
+                // parent scopes (e.g., outer t-foreach loop variables) as "ctx".
+                const source = isCtxProperty(target, component, prop) ? "ctx" : "component";
                 // Record the access
                 if (_getterStack.length === 0) {
                     // Top-level template access
@@ -3613,9 +3642,9 @@
             newCtx[isBoundary] = 1;
         }
         if (isThisTrackingEnabled()) {
-            const parentComponent = ctx["this"];
-            // find the real component if ctx["this"] is already a proxy
-            const comp = parentComponent || component;
+            // Use the TRACKING_COMPONENT symbol to get the raw component instance,
+            // avoiding ctx["this"] which returns a componentProxy through the tracking proxy.
+            const comp = ctx[TRACKING_COMPONENT] || component;
             // We don't have the template name here, but createTrackedCtx
             // will use the stack if it exists.
             return createTrackedCtx(newCtx, comp, "unknown");
@@ -6962,8 +6991,8 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2026-03-11T13:59:47.040Z';
-    __info__.hash = 'b2d04b1';
+    __info__.date = '2026-03-11T17:16:01.305Z';
+    __info__.hash = '9a2b8d4';
     __info__.url = 'https://github.com/odoo/owl';
 
 
