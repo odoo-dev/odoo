@@ -38,7 +38,7 @@ export class CodeEditor extends Component {
         showLineNumbers: true,
     };
 
-    static MODES = ["javascript", "xml", "qweb", "scss", "python"];
+    static MODES = ["javascript", "xml", "qweb", "scss", "python", "pgsql"];
     static THEMES = ["", "monokai"];
 
     setup() {
