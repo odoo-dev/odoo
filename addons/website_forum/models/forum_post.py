@@ -912,7 +912,7 @@ class ForumPost(models.Model):
             'search_fields': search_fields,
             'fetch_fields': fetch_fields,
             'mapping': mapping,
-            'icon': 'fa-comment-o',
+            'icon': 'forum',
             'order': order,
         }
 

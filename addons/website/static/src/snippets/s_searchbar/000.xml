@@ -19,7 +19,7 @@
         <div class="d-flex align-items-center flex-wrap o_search_result_item">
             <t t-if="widget.displayImage">
                 <img t-if="result['image_url']" t-att-src="result['image_url']" class="flex-shrink-0 o_image_64_contain"/>
-                <i t-else="" t-attf-class="o_image_64_contain text-center pt16 fa #{result['_fa']}" style="font-size: 34px;"/>
+                <i t-else="" class="o_image_64_contain text-center pt16 oi" t-att-data-icon="result['_icon']" style="font-size: 34px;"/>
             </t>
             <div class="o_search_result_item_detail px-3">
                 <t t-set="description" t-value="parts['description'] and widget.displayDescription and result['description']"/>

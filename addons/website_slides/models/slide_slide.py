@@ -1300,23 +1300,23 @@ class SlideSlide(models.Model):
             'search_fields': search_fields,
             'fetch_fields': fetch_fields,
             'mapping': mapping,
-            'icon': 'fa-shopping-cart',
+            'icon': 'shopping_cart',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
         icon_per_category = {
-            'infographic': 'fa-file-picture-o',
-            'article': 'fa-file-text',
-            'presentation': 'fa-file-pdf-o',
-            'document': 'fa-file-pdf-o',
-            'video': 'fa-play-circle',
-            'quiz': 'fa-question-circle',
-            'link': 'fa-file-code-o', # appears in template "slide_icon"
+            'infographic': 'image',
+            'article': 'article',
+            'presentation': 'picture_as_pdf',
+            'document': 'picture_as_pdf',
+            'video': 'play_circle',
+            'quiz': 'help',
+            'link': 'code', # appears in template "slide_icon"
         }
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for slide, data in zip(self, results_data):
-            data['_fa'] = icon_per_category.get(slide.slide_category, 'fa-file-pdf-o')
+            data['_icon'] = icon_per_category.get(slide.slide_category, 'description')
             data['url'] = slide.website_absolute_url
             data['course'] = _('Course: %s', slide.channel_id.name)
             data['course_url'] = slide.channel_id.website_absolute_url
