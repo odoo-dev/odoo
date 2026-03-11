@@ -24,21 +24,6 @@ class WebsiteMenu(models.Model):
         menu = self.search([], limit=1, order="sequence DESC")
         return menu.sequence or 0
 
-    @api.depends('mega_menu_content')
-    def _compute_field_is_mega_menu(self):
-        for menu in self:
-            menu.is_mega_menu = bool(menu.mega_menu_content)
-
-    def _set_field_is_mega_menu(self):
-        website = self.env['website'].get_current_website()
-        for menu in self:
-            if menu.is_mega_menu:
-                if not menu.mega_menu_content:
-                    menu.mega_menu_content = (self.website_id or website)._render_template('website.s_mega_menu_odoo_menu')
-            else:
-                menu.mega_menu_content = False
-                menu.mega_menu_classes = False
-
     name = fields.Char('Menu', required=True, translate=True)
     url = fields.Char("Url", compute="_compute_url", store=True, required=True, readonly=False, default="#", copy=True)
     page_id = fields.Many2one('website.page', 'Related Page', ondelete='cascade', index='btree_not_null')
@@ -53,9 +38,24 @@ class WebsiteMenu(models.Model):
     group_ids = fields.Many2many('res.groups', string='Visible Groups',
         groups='base.group_user',
         help="User needs to be at least in one of these groups to see the menu")
-    is_mega_menu = fields.Boolean(compute=_compute_field_is_mega_menu, inverse=_set_field_is_mega_menu)
+    is_mega_menu = fields.Boolean(compute='_compute_field_is_mega_menu', inverse='_inverse_field_is_mega_menu')
     mega_menu_content = fields.Html(translate=html_translate, sanitize=False, prefetch=True)
     mega_menu_classes = fields.Char()
+
+    @api.depends('mega_menu_content')
+    def _compute_field_is_mega_menu(self):
+        for menu in self:
+            menu.is_mega_menu = bool(menu.mega_menu_content)
+
+    def _inverse_field_is_mega_menu(self):
+        website = self.env['website'].get_current_website()
+        for menu in self:
+            if menu.is_mega_menu:
+                if not menu.mega_menu_content:
+                    menu.mega_menu_content = (menu.website_id or website).with_context(inherit_branding=False)._render_template('website.s_mega_menu_odoo_menu')
+            else:
+                menu.mega_menu_content = False
+                menu.mega_menu_classes = False
 
     @api.depends('website_id')
     @api.depends_context('display_website')
@@ -107,6 +107,15 @@ class WebsiteMenu(models.Model):
                 # Submenu structure constraint
                 if record.child_id and (parent_menu.parent_id or record.child_id.child_id):
                     raise UserError(_("Menus with child menus cannot be added as a submenu."))
+
+    @api.constrains("mega_menu_content")
+    def _validate_mega_menu_content(self):
+        """
+        Checks that there is no editing branding in the html content.
+        """
+        for record in self:
+            if record.mega_menu_content and ' data-oe-model=' in record.mega_menu_content:
+                raise UserError(_("Presence of publishing branding in html content is forbidden"))
 
     @api.model_create_multi
     def create(self, vals_list):
