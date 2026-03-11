@@ -40,9 +40,13 @@ class PosCategory(models.Model):
     def _load_pos_data_domain(self, data, config):
         domain = []
         if config.limit_categories:
-            preparation_categories = [printer['product_categories_ids'] for printer in data['pos.printer']]
-            flattened_preparation_categories = [item for sublist in preparation_categories for item in sublist]
-            domain += [('id', 'in', flattened_preparation_categories + config.iface_available_categ_ids.ids)]
+            printer_category_ids = {
+                cat_id
+                for printer in data['pos.printer']
+                for cat_id in printer['product_categories_ids']
+            }
+            printer_categories = self.env['pos.category'].browse(printer_category_ids)._get_descendants()
+            domain += [('id', 'in', printer_categories.ids + config.iface_available_categ_ids.ids)]
         return domain
 
     @api.model
