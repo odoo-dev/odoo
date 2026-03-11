@@ -9,7 +9,7 @@
                 <tr t-foreach="this.computeItems()" t-as="item" t-key="item.fabricatedKey" t-att-data-id="item.id">
                     <td>
                         <button class="btn o_drag_handle ps-0">
-                            <i class="oi oi-draggable"/>
+                            <i class="oi" data-icon="drag_indicator"/>
                         </button>
                     </td>
                     <td width="100%">
@@ -56,7 +56,7 @@
 
 <t t-name="website.example_social_media_link">
     <a href="https://www.example.com" target="_blank" aria-label="example">
-        <i class="fa rounded shadow-sm o_editable_media fa-pencil"/>
+        <i class="oi oi-filled rounded shadow-sm o_editable_media" data-icon="edit"/>
     </a>
 </t>
 

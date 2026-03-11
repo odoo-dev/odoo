@@ -34,82 +34,82 @@ const socialMediaInfo = new Map(
         facebook: {
             recorded: true,
             label: _t("Facebook"),
-            iconClass: "fa-facebook",
+            iconClass: "oi_facebook",
             extraHostnameRegex: /(^|\.)fb\.(com|me)$/,
         },
         twitter: {
             recorded: true,
             label: _t("X"),
-            iconClass: "fa-twitter",
+            iconClass: "oi_x",
             extraHostnameRegex: /(^|\.)x\.com$/,
         },
         linkedin: {
             recorded: true,
             label: _t("LinkedIn"),
-            iconClass: "fa-linkedin",
+            iconClass: "oi_linkedin",
         },
         youtube: {
             recorded: true,
             label: _t("YouTube"),
-            iconClass: "fa-youtube-play",
+            iconClass: "oi_youtube-play",
             extraHostnameRegex: /(^|\.)youtu\.be$/,
         },
         instagram: {
             recorded: true,
             label: _t("Instagram"),
-            iconClass: "fa-instagram",
+            iconClass: "oi_instagram",
             extraHostnameRegex: /(^|\.)instagr\.(am|com)$/,
         },
         github: {
             recorded: true,
             label: _t("GitHub"),
-            iconClass: "fa-github",
+            iconClass: "oi_github",
         },
         tiktok: {
             recorded: true,
             label: _t("TikTok"),
-            iconClass: "fa-tiktok",
+            iconClass: "oi_tiktok",
         },
         discord: {
             recorded: true,
             label: _t("Discord"),
-            iconClass: "fa-discord",
+            iconClass: "oi_discord",
         },
         "google-play": {
             label: _t("Google Play"),
-            iconClass: "fa-google-play",
+            iconClass: "oi_google-play",
             // Without this, the default finds 'google' instead
             extraHostnameRegex: /(^|\.)play\.google\.com$/,
         },
         google: {
             label: _t("Google"),
-            iconClass: "fa-google",
+            iconClass: "oi_google",
         },
         whatsapp: {
             label: _t("Whatsapp"),
-            iconClass: "fa-whatsapp",
+            iconClass: "oi_whatsapp",
             extraHostnameRegex: /(^|\.)wa\.me$/,
         },
         pinterest: {
             label: _t("Pinterest"),
-            iconClass: "fa-pinterest-p",
+            iconClass: "oi_pinterest-p",
         },
         kickstarter: {
             label: _t("Kickstarter"),
-            iconClass: "fa-kickstarter",
+            iconClass: "oi_kickstarter",
         },
         strava: {
             label: _t("Strava"),
-            iconClass: "fa-strava",
+            iconClass: "oi_strava",
         },
         bluesky: {
             label: _t("Bluesky"),
-            iconClass: "fa-bluesky",
+            iconClass: "oi_bluesky",
             extraHostnameRegex: /(^|\.)bsky\.(app|social)$/,
         },
         threads: {
             label: _t("Threads"),
-            iconClass: "fa-threads",
+            iconClass: "oi_threads",
         },
     })
 );
@@ -274,9 +274,10 @@ export class SocialMediaOptionPlugin extends Plugin {
             renderToFragment("website.example_social_media_link").children[0];
         this.removeSocialMediaClasses(el);
         this.removeIconClasses(el);
-        el.querySelector(ICON_SELECTOR)?.classList.add(
-            socialMediaInfo.get(socialMediaName)?.iconClass || "fa-pencil"
+        el.querySelector(ICON_SELECTOR)?.setAttribute('data-icon',
+            socialMediaInfo.get(socialMediaName)?.iconClass || "edit"
         );
+        console.log(socialMediaInfo.get(socialMediaName))
         if (socialMediaName) {
             el.href = `/website/social/${encodeURIComponent(socialMediaName)}`;
             el.classList.add(`s_social_media_${socialMediaName}`);
@@ -309,9 +310,9 @@ export class SocialMediaOptionPlugin extends Plugin {
     removeIconClasses(el) {
         const iconEl = el.querySelector(ICON_SELECTOR);
         if (iconEl) {
-            // Remove every fa classes except fa-x sizes.
+            // Remove every oi classes except oi-x sizes.
             for (const c of iconEl.classList) {
-                if (/^fa-[^0-9]/.test(c)) {
+                if (/^oi-[^0-9]/.test(c)) {
                     iconEl.classList.remove(c);
                 }
             }
@@ -369,7 +370,7 @@ export class ResetSocialMediaIconSizeAction extends BuilderAction {
     static id = "resetSocialMediaIconSize";
     apply({ editingElement }) {
         [...editingElement.classList]
-            .filter((className) => /^fa-[2-5]x$/.test(className))
+            .filter((className) => /^oi-[2-5]x$/.test(className))
             .forEach((className) => editingElement.classList.remove(className));
     }
 }
@@ -442,13 +443,13 @@ export class EditSocialMediaLinkAction extends BuilderAction {
         } else if (info.name) {
             fonts.computeFonts();
             iconClass = fonts.fontIcons[0].alias
-                .filter((el) => el.replace(/^fa-/, "").includes(info.name))
+                .filter((el) => el.replace(/^oi-/, "").includes(info.name))
                 .reduce((a, b) => (a.length && a.length <= b.length ? a : b), "");
         }
 
         if (iconClass) {
             this.dependencies.socialMediaOptionPlugin.removeIconClasses(editingElement);
-            editingElement.querySelector(ICON_SELECTOR)?.classList.add(iconClass);
+            editingElement.querySelector(ICON_SELECTOR)?.setAttribute("data-icon", iconClass);
         }
     }
 }
