@@ -246,7 +246,7 @@ class WebsitePage(models.Model):
             'search_fields': search_fields,
             'fetch_fields': fetch_fields,
             'mapping': mapping,
-            'icon': 'fa-file-o',
+            'icon': 'description',
         }
 
     @api.model
