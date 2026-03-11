@@ -73,6 +73,8 @@ class GoogleCalendarSync(models.AbstractModel):
             for record in self:
                 if record.need_sync and record.google_id:
                     record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values(), timeout=3)
+                elif vals.get('is_draft') is False:
+                    record.with_user(record._get_event_user())._google_insert(google_service, record._google_values(), timeout=3)
 
         return result
 
@@ -145,8 +147,6 @@ class GoogleCalendarSync(models.AbstractModel):
                 if record.google_id and record.need_sync:
                     record.with_user(record._get_event_user())._google_delete(google_service, record.google_id)
             for record in new_records:
-                if record._is_google_insertion_blocked(sender_user=self.env.user):
-                    continue
                 record.with_user(record._get_event_user())._google_insert(google_service, record._google_values())
             for record in updated_records:
                 record.with_user(record._get_event_user())._google_patch(google_service, record.google_id, record._google_values())
@@ -301,7 +301,8 @@ class GoogleCalendarSync(models.AbstractModel):
 
     @after_commit
     def _google_insert(self, google_service: GoogleCalendarService, values, timeout=TIMEOUT):
-        if not values:
+        self.ensure_one()
+        if not values or self._is_google_insertion_blocked(self.env.user):
             return
         with google_calendar_token(self.env.user.sudo()) as token:
             if token:

@@ -46,6 +46,13 @@ export class AttendeeCalendarCommonRenderer extends CalendarCommonRenderer {
     /**
      * @override
      */
+    isEventToFade(event) {
+        return super.isEventToFade(...arguments) || event.rawRecord.is_draft;
+    }
+
+    /**
+     * @override
+     */
     onEventDidMount({ el, event }) {
         super.onEventDidMount(...arguments);
         const record = this.props.model.records[event.id];

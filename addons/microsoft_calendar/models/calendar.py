@@ -114,6 +114,11 @@ class CalendarEvent(models.Model):
             for vals in vals_list
         ])
 
+    def _create_from_microsoft(self, microsoft_event, vals_list):
+        for vals in vals_list:
+            vals['is_draft'] = False
+        return super()._create_from_microsoft(microsoft_event, vals_list)
+
     def _check_organizer_validation(self, sender_user, partner_included):
         """ Check if the proposed event organizer can be set accordingly. """
         # Edge case: events created or updated from Microsoft should not check organizer validation.
@@ -721,5 +726,4 @@ class CalendarEvent(models.Model):
 
     def _is_microsoft_insertion_blocked(self, sender_user):
         self.ensure_one()
-        has_different_owner = self.user_id and self.user_id != sender_user
-        return has_different_owner
+        return self.is_draft or (self.user_id and self.user_id != sender_user)

@@ -84,6 +84,8 @@ class MicrosoftCalendarSync(models.AbstractModel):
                         if not values:
                             continue
                         record._microsoft_patch(record._get_organizer(), record.microsoft_id, values, timeout=timeout)
+                elif vals.get('is_draft') is False:
+                    record._microsoft_insert(record._microsoft_values(self._get_microsoft_synced_fields()), timeout=timeout)
 
         return result
 
@@ -143,9 +145,6 @@ class MicrosoftCalendarSync(models.AbstractModel):
             record._microsoft_delete(record._get_organizer(), record.microsoft_id)
         for record in new_records:
             values = record._microsoft_values(self._get_microsoft_synced_fields())
-            sender_user = record._get_event_user_m()
-            if record._is_microsoft_insertion_blocked(sender_user):
-                continue
             if isinstance(values, dict):
                 record._microsoft_insert(values)
             else:
@@ -404,7 +403,8 @@ class MicrosoftCalendarSync(models.AbstractModel):
         'self' may have been modified between the call of '_microsoft_insert' and its execution,
         due to @after_commit decorator.
         """
-        if not values:
+        self.ensure_one()
+        if not values or self._is_microsoft_insertion_blocked(self._get_event_user_m()):
             return
         microsoft_service = self._get_microsoft_service()
         sender_user = self._get_event_user_m()
