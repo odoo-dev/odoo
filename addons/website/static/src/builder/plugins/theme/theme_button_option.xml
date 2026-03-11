@@ -32,7 +32,8 @@
         <BuilderRow label.translate="Font Family">
             <ThemeFontFamilyOption
                 cssVariable="'buttons-font'"
-                buttonIcon="'fa-trash'"
+                buttonIcon="'delete'"
+                buttonIconClass="'oi-filled'"
                 buttonTitle.translate="Reset to Default Font Family"/>
         </BuilderRow>
         <BuilderRow label.translate="Padding" tooltip.translate="Vertical and Horizontal padding" action="'customizeWebsiteVariable'">

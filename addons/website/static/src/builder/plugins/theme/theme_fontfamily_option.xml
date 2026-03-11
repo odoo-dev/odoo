@@ -12,6 +12,7 @@
         actionParam="props.cssVariable"
         className="'btn-danger-color-hover'"
         icon="props.buttonIcon"
+        icon_class="props.buttonIconClass"
         title="props.buttonTitle"/>
 </t>
 
