@@ -385,7 +385,7 @@ class SaleOrderLine(models.Model):
             line = line.with_company(line.company_id)
             if line.state != 'sale' or line.order_id.locked or line.product_id.type != 'consu':
                 continue
-            qty = line._get_qty_procurement(previous_product_uom_qty)
+            qty = previous_product_uom_qty and previous_product_uom_qty.get(line.id) or 0
             if float_compare(qty, line.product_uom_qty, precision_digits=precision) == 0:
                 continue
 
