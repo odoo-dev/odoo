@@ -236,3 +236,13 @@ class TestMessageController(MailControllerThreadCommon):
                 result = self.make_jsonrpc_request("/mail/read_subscription_data", {"follower_id": follower.id})
                 self.assertIn(subtype_public.id, result["subtype_ids"])
                 self.assertEqual(subtype_internal.id in result["subtype_ids"], internal_expected)
+
+    def test_message_fetch_access(self):
+        """Test access to fetch the messages on a record with group_user access."""
+        record = self.env["mail.performance.thread"].create({"name": "Test"})
+        self._execute_message_fetch_subtests(
+            (self.user_admin, self.user_employee), record, allowed="all"
+        )
+        self._execute_message_fetch_subtests(
+            (self.guest, self.user_portal, self.user_public), record, allowed=False
+        )
