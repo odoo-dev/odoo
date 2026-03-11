@@ -603,7 +603,7 @@ export class Thread extends Record {
         return {
             thread_id: this.id,
             thread_model: this.model,
-            ...this.rpcParams,
+            ...(Object.keys(this.rpcParams).length > 0 && { access_params: this.rpcParams }),
         };
     }
 
@@ -620,10 +620,6 @@ export class Thread extends Record {
         if (this.model === "mail.box" && this.id === "history") {
             return `/mail/history/messages`;
         }
-        return this.fetchRouteChatter;
-    }
-
-    get fetchRouteChatter() {
         return "/mail/thread/messages";
     }
 
