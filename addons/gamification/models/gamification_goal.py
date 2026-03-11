@@ -3,6 +3,8 @@
 
 import ast
 import logging
+import re
+from ast import literal_eval
 from datetime import date, datetime, timedelta
 
 from odoo import api, fields, models, _, exceptions
@@ -178,7 +180,7 @@ class GamificationGoal(models.Model):
                 Obj = self.env[definition.model_id.model]
 
                 field_date_name = definition.field_date_id.name
-                if definition.batch_mode:
+                if definition.batch_mode and False:
                     # batch mode, trying to do as much as possible in one request
                     general_domain = ast.literal_eval(definition.domain)
                     field_name = definition.batch_distinctive_field.name
@@ -217,7 +219,7 @@ class GamificationGoal(models.Model):
                     sum_supported = bool(field) and field.type in {'integer', 'float', 'monetary'}
                     for goal in goals:
                         # eval the domain with user replaced by goal user object
-                        domain = safe_eval(definition.domain, {'user': goal.user_id})
+                        domain = literal_eval(re.sub(r'\buser\.id\b', str(goal.user_id.id), definition.domain))
 
                         # add temporal clause(s) to the domain if fields are filled on the goal
                         if goal.start_date and field_date_name:
