@@ -640,7 +640,7 @@ class Website(Home):
             mapping = record['_mapping']
             model = request.env[record['model']]
             mapped = {
-                '_fa': record.get('_fa'),
+                '_icon': record.get('_icon'),
             }
             for mapped_name, field_meta in mapping.items():
                 value = record.get(field_meta.get('name'))

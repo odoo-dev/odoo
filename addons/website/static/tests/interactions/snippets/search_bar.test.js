@@ -44,17 +44,17 @@ function supportAutocomplete() {
         return {
             results: [
                 {
-                    _fa: "fa-file-o",
+                    _icon: "description",
                     name: "Xyz 1",
                     website_url: "/website/test/xyz-1",
                 },
                 {
-                    _fa: "fa-file-o",
+                    _icon: "description",
                     name: "Xyz 2",
                     website_url: "/website/test/xyz-2",
                 },
                 {
-                    _fa: "fa-file-o",
+                    _icon: "description",
                     name: "Xyz 3",
                     website_url: "/website/test/xyz-3",
                 },

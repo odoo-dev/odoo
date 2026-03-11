@@ -937,7 +937,7 @@ class ProductTemplate(models.Model):
             "search_fields": search_fields,
             "fetch_fields": fetch_fields,
             "mapping": mapping,
-            "icon": "fa-shopping-cart",
+            "icon": "shopping_cart",
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):

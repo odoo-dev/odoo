@@ -123,7 +123,7 @@ class BlogBlog(models.Model):
             'search_fields': search_fields,
             'fetch_fields': fetch_fields,
             'mapping': mapping,
-            'icon': 'fa-rss-square',
+            'icon': 'rss_feed',
             'order': 'name desc, id desc' if 'name desc' in order else 'name asc, id desc',
         }
 
@@ -355,7 +355,7 @@ class BlogPost(models.Model):
             'search_fields': search_fields,
             'fetch_fields': fetch_fields,
             'mapping': mapping,
-            'icon': 'fa-rss',
+            'icon': 'rss_feed',
         }
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):
