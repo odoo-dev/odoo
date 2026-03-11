@@ -138,9 +138,9 @@ registerWebsitePreviewTour(
                 ":has(a:eq(4)[href='/website/social/github'])" +
                 ":has(a:eq(5)[href='/website/social/tiktok'])" +
                 ":has(a:eq(6)[href='/website/social/discord'])" +
-                ":has(a:eq(7)[href='https://www.youtu.be/y7TlnAv6cto']:has(i.fa-youtube-play))" +
-                ":has(a:eq(8)[href='https://whatever.it/1EdSw9X']:has(i.fa-pencil))" +
-                ":has(a:eq(9)[href='https://instagr.am/odoo.official/']:has(i.fa-instagram))",
+                ":has(a:eq(7)[href='https://www.youtu.be/y7TlnAv6cto']:has(i[data-icon='oi_youtube-play']))" +
+                ":has(a:eq(8)[href='https://whatever.it/1EdSw9X']:has(i[data-icon='edit']))" +
+                ":has(a:eq(9)[href='https://instagr.am/odoo.official/']:has(i[data-icon='oi_instagram']))",
         },
         // Create a custom link, not officially supported, ensure icon is found.
         {
@@ -152,7 +152,7 @@ registerWebsitePreviewTour(
             content: "Ensure paypal icon is found",
             trigger:
                 ":iframe .s_social_media" +
-                ":has(a:eq(7)[href='https://www.paypal.com/abc']:has(i.fa-paypal))",
+                ":has(a:eq(7)[href='https://www.paypal.com/abc']:has(i[data-icon='oi_paypal']))",
         },
         ...preventRaceConditionStep,
         {
@@ -163,7 +163,7 @@ registerWebsitePreviewTour(
         {
             content: "Ensure custom link was removed",
             trigger:
-                ':iframe .s_social_media:has(a:eq(7)[href="https://whatever.it/1EdSw9X"]:has(i.fa-pencil))',
+                ':iframe .s_social_media:has(a:eq(7)[href="https://whatever.it/1EdSw9X"]:has(i[data-icon="edit"]))',
         },
         {
             content: "Click on the toggle to show Facebook",
@@ -182,8 +182,8 @@ registerWebsitePreviewTour(
                 ":has(a:eq(5)[href='/website/social/tiktok'])" +
                 ":has(a:eq(6)[href='/website/social/discord'])" +
                 ":has(a:eq(7)[href='/website/social/facebook'])" +
-                ":has(a:eq(8)[href='https://whatever.it/1EdSw9X']:has(i.fa-pencil))" +
-                ":has(a:eq(9)[href='https://instagr.am/odoo.official/']:has(i.fa-instagram))",
+                ":has(a:eq(8)[href='https://whatever.it/1EdSw9X']:has(i[data-icon='edit']))" +
+                ":has(a:eq(9)[href='https://instagr.am/odoo.official/']:has(i[data-icon='oi_instagram']))",
         },
         {
             content: "Change url of the DB instagram link",
@@ -199,12 +199,12 @@ registerWebsitePreviewTour(
         }),
         {
             content: "Check if we can still change custom icons",
-            trigger: ':iframe .s_social_media a[href="https://whatever.it/1EdSw9X"] i.fa-pencil',
+            trigger: ':iframe .s_social_media a[href="https://whatever.it/1EdSw9X"] i[data-icon="edit"]',
             run: "dblclick",
         },
         {
             content: "Select a new icon",
-            trigger: ".o_select_media_dialog .fa-heart",
+            trigger: ".o_select_media_dialog [data-icon='favorite']",
             run: "click",
         },
         {
@@ -219,8 +219,8 @@ registerWebsitePreviewTour(
                 ":has(a:eq(5)[href='/website/social/tiktok'])" +
                 ":has(a:eq(6)[href='/website/social/discord'])" +
                 ":has(a:eq(7)[href='/website/social/facebook'])" +
-                ":has(a:eq(8)[href='https://whatever.it/1EdSw9X']:has(i.fa-heart))" +
-                ":has(a:eq(9)[href='https://instagr.am/odoo.official/']:has(i.fa-instagram))",
+                ":has(a:eq(8)[href='https://whatever.it/1EdSw9X']:has(i[data-icon='favorite']))" +
+                ":has(a:eq(9)[href='https://instagr.am/odoo.official/']:has(i[data-icon='oi_instagram']))",
         },
         ...unfoldOptionsGroup("Social Media"),
         // Create a social network but replace its icon by an image before setting
