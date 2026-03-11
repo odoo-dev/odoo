@@ -11,6 +11,7 @@ import { selectElements } from "@html_editor/utils/dom_traversal";
 
 /**
  * @typedef {{
+ *     cancelDragAndDrop?: Function;
  *     columnWidth: number;
  *     columnHeight: number;
  *     columnSpan: number;
