@@ -2,7 +2,7 @@
 
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
-from odoo.tools.js_transpiler import transpile_javascript
+from odoo.tools.js_transpiler import convert_xml_tagged_template, transpile_javascript
 
 
 @tagged('post_install', '-at_install')
@@ -17,6 +17,7 @@ class TestJsTranspiler(TransactionCase):
 'use strict';
 let __exports = {};
 /** @odoo-module alias=test_assetsbundle.Alias **/
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/alias';
 return __exports;
 });
 
@@ -35,6 +36,7 @@ odoo.define(`test_assetsbundle.Alias`, ['@test_assetsbundle/alias'], function (r
 'use strict';
 let __exports = {};
 /** @odoo-module alias=test_assetsbundle.Alias default=False **/
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/alias';
 return __exports;
 });
 
@@ -52,6 +54,7 @@ odoo.define(`test_assetsbundle.Alias`, ['@test_assetsbundle/alias'], function (r
 'use strict';
 let __exports = {};
 /** @odoo-module alias=test_assetsbundle.Alias default=0 **/
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/alias';
 return __exports;
 });
 
@@ -69,6 +72,7 @@ odoo.define(`test_assetsbundle.Alias`, ['@test_assetsbundle/alias'], function (r
 'use strict';
 let __exports = {};
 /** @odoo-module alias=test_assetsbundle.Alias default=false **/
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/alias';
 return __exports;
 });
 
@@ -105,6 +109,8 @@ const Boat = __exports.Boat = class Boat extends Vehicule {}
 
 const Ferrari = __exports.Ferrari = class Ferrari extends Car {};
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/classes';
+if (typeof Vehicule === "function") Vehicule.___filename = '@test_assetsbundle/classes';
 return __exports;
 });
 """
@@ -179,6 +185,7 @@ const aaa = "keep!";
   comments
  */
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/comments';
 return __exports;
 });
 """
@@ -225,6 +232,7 @@ __exports[Symbol.for("default")] = sayHelloDefault; function sayHelloDefault() {
   console.log("Hello Default");
 }
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/functions';
 return __exports;
 });
 """
@@ -305,6 +313,7 @@ const test = `import { Line14, Notification } from "../src/Dialog";`
 const Line15 = require("test/Dialog");
 const Line16 = require("test.Dialog.error");
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/import';
 return __exports;
 });
 """
@@ -331,6 +340,7 @@ const b = require("@tests/dir");
 const c = require("@tests/dir")[Symbol.for("default")];
 
 const d = require("@tests")[Symbol.for("default")];
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle';
 return __exports;
 });
 """
@@ -389,6 +399,7 @@ export {a, aReallyVeryLongNameWithSomeExtra /* a comment must not cause catastro
 
 Object.assign(__exports, require("@tests/Dialog"));
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/list';
 return __exports;
 });
 """
@@ -424,6 +435,7 @@ __exports[Symbol.for("default")] = 100;
 
 __exports[Symbol.for("default")] = a;
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/variables';
 return __exports;
 });
 """
@@ -439,6 +451,7 @@ return __exports;
 'use strict';
 let __exports = {};
 QUnit.module("test_assetsbundle", function() {QUnit.test("Tests", function (assert) {{}})});
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/../tests/alias';
 return __exports;
 });
 """
@@ -454,6 +467,7 @@ return __exports;
 'use strict';
 let __exports = {};
 QUnit.module("test_assetsbundle", function() {QUnit.debug("Tests", function (assert) {{}})});
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/../tests/alias';
 return __exports;
 });
 """
@@ -469,6 +483,7 @@ return __exports;
 'use strict';
 let __exports = {};
 let a = 1 + 1;
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/../tests/alias';
 return __exports;
 });
 """
@@ -516,6 +531,7 @@ const dialog = require("@test/Dialog2")
 * const comment = require("@test/Comment")
 */
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/alias';
 return __exports;
 });
 """
@@ -538,7 +554,41 @@ let __exports = {};
 
 require("@test_assetsbundle/some_file");
 
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = '@test_assetsbundle/a';
 return __exports;
 });
 """
         self.assertEqual(result, expected_result)
+
+    def test_15_xml_tagged_template_single(self):
+        result = convert_xml_tagged_template("@web/core/component", 'const tmpl = xml`<div>hello</div>`;')
+        self.assertEqual(result, 'const tmpl = xml.withSourceId("xml-@web/core/component:1")`<div>hello</div>`;')
+
+    def test_16_xml_tagged_template_multiple(self):
+        content = 'const a = xml`<div/>`;\nconst b = xml`<span/>`;'
+        result = convert_xml_tagged_template("@web/views/list", content)
+        self.assertEqual(result, 'const a = xml.withSourceId("xml-@web/views/list:1")`<div/>`;\nconst b = xml.withSourceId("xml-@web/views/list:2")`<span/>`;')
+
+    def test_17_xml_tagged_template_interpolation(self):
+        result = convert_xml_tagged_template("@web/core/tmpl", 'xml`<t t-name="${name}"/>`')
+        self.assertEqual(result, 'xml.withSourceId("xml-@web/core/tmpl:1")`<t t-name="${name}"/>`')
+
+    def test_18_xml_tagged_template_dotxml(self):
+        content = 'owl.xml`<div/>`;'
+        result = convert_xml_tagged_template("@web/core/x", content)
+        self.assertEqual(result, 'owl.xml.withSourceId("xml-@web/core/x:1")`<div/>`;')
+
+    def test_18b_xml_tagged_template_no_match_suffixed(self):
+        content = 'escapeXml`test`;'
+        result = convert_xml_tagged_template("@web/core/x", content)
+        self.assertEqual(result, content)
+
+    def test_19_xml_tagged_template_skip_local_redefine(self):
+        content = 'function xml(s) { return s.trim(); }\nxml`<div/>`;'
+        result = convert_xml_tagged_template("@web/hoot/value", content)
+        self.assertEqual(result, content)
+
+    def test_20_xml_tagged_template_noop(self):
+        content = 'const x = 1 + 2;'
+        result = convert_xml_tagged_template("@web/core/utils", content)
+        self.assertEqual(result, content)

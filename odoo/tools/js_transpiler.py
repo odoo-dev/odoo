@@ -46,6 +46,7 @@ def transpile_javascript(url, content):
         convert_variable_export,
         convert_object_export,
         convert_default_export,
+        partial(convert_xml_tagged_template, module_path),
         partial(wrap_with_qunit_module, url),
         partial(wrap_with_odoo_define, module_path, dependencies),
         partial(convert_t, url)
@@ -96,6 +97,25 @@ def url_to_module_path(url):
     else:
         raise ValueError("The js file %r must be in the folder '/static/src' or '/static/lib' or '/static/test'" % url)
 
+XML_TAGGED_TEMPLATE_RE = re.compile(r'(?<![\w$])xml`')
+
+def convert_xml_tagged_template(module_path, content):
+    """
+    Replaces standalone xml`...` tagged template calls with
+    xml.withSourceId("xml-<module_path>:<n>")`...` so that each template
+    gets a stable, source-traceable identifier instead of a runtime counter.
+    """
+    # Skip files that locally redefine xml (e.g., hoot's whitespace-stripping wrapper)
+    if re.search(r'\bfunction\s+xml\s*\(', content):
+        return content
+    counter = 0
+    def repl(match):
+        nonlocal counter
+        counter += 1
+        return f'xml.withSourceId("xml-{module_path}:{counter}")`'
+    return XML_TAGGED_TEMPLATE_RE.sub(repl, content)
+
+
 def wrap_with_qunit_module(url, content):
     """
     Wraps the test file content (source code) with the QUnit.module('module_name', function() {...}).
@@ -106,16 +126,32 @@ def wrap_with_qunit_module(url, content):
     else:
         return content
 
+# Non-exported class declarations: "class Foo extends ..."
+LOCAL_CLASS_DECL_RE = re.compile(r'^(?P<space>\s*)class\s+(?!extends\b)(?P<identifier>[\w$]+)', re.MULTILINE)
+# Non-exported class expressions assigned to variables: "const Foo = class ..."
+LOCAL_CLASS_EXPR_RE = re.compile(r'^(?P<space>\s*)(?:const|let|var)\s+(?P<identifier>[\w$]+)\s*=\s*class\b', re.MULTILINE)
+
+
 def wrap_with_odoo_define(module_path, dependencies, content):
     """
     Wraps the current content (source code) with the odoo.define call.
     It adds as a second argument the list of dependencies.
     Should logically be called once all other operations have been performed.
     """
+    # Non-exported class declarations still need ___filename for this-tracking.
+    # After convert_export_class, exported classes start with "const Name = __exports.Name = class Name"
+    # so ^\s*class only matches non-exported declarations. Also catch class expressions
+    # assigned to variables (const Foo = class extends ...).
+    local_classes = LOCAL_CLASS_DECL_RE.findall(content) + LOCAL_CLASS_EXPR_RE.findall(content)
+    local_filename_lines = ''.join(
+        f'\nif (typeof {name} === "function") {name}.___filename = {module_path!r};'
+        for _, name in local_classes
+    )
     return f"""odoo.define({module_path!r}, {list(dependencies)}, function (require) {{
 'use strict';
 let __exports = {{}};
 {content}
+for (const __k in __exports) if (typeof __exports[__k] === "function") __exports[__k].___filename = {module_path!r};{local_filename_lines}
 return __exports;
 }});
 """

@@ -1,8 +1,12 @@
 const RSTRIP_REGEXP = /(?=\n[ \t]*$)/;
 
 let translationContext = null;
+let sourceFileUrl = null;
+let sourceTemplateName = null;
 
 const TCTX = "t-translation-context";
+const TSRC = "t-source-file";
+const TTPL = "t-source-template";
 
 /**
  * @param {Node} node
@@ -29,6 +33,24 @@ function setTranslationContext(node) {
         case Node.ELEMENT_NODE:
             node.setAttribute(TCTX, translationContext);
             break;
+    }
+}
+
+/**
+ * @param {Node} node
+ */
+function setSourceFile(node) {
+    if (sourceFileUrl && node.nodeType === Node.ELEMENT_NODE) {
+        node.setAttribute(TSRC, sourceFileUrl);
+    }
+}
+
+/**
+ * @param {Node} node
+ */
+function setSourceTemplate(node) {
+    if (sourceTemplateName && node.nodeType === Node.ELEMENT_NODE) {
+        node.setAttribute(TTPL, sourceTemplateName);
     }
 }
 
@@ -145,7 +167,7 @@ function getNode(element, operation) {
         const result = doc.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE);
         return result.singleNodeValue;
     }
-    const attributes = [...operation.attributes].filter((attr) => !attr.name.startsWith(TCTX));
+    const attributes = [...operation.attributes].filter((attr) => !attr.name.startsWith(TCTX) && attr.name !== TSRC && attr.name !== TTPL);
     for (const elem of root.querySelectorAll(operation.tagName)) {
         if (
             attributes.every(
@@ -189,6 +211,8 @@ function getNodes(element, operation) {
             nodes.push(node);
         } else {
             setTranslationContext(childNode);
+            setSourceFile(childNode);
+            setSourceTemplate(childNode);
             nodes.push(childNode);
         }
     }
@@ -284,6 +308,8 @@ function replace(root, target, operation) {
                 for (const child of operation.childNodes) {
                     if (child.nodeType === Node.ELEMENT_NODE) {
                         setTranslationContext(child);
+                        setSourceFile(child);
+                        setSourceTemplate(child);
                         operationContent = child;
                         break;
                     }
@@ -307,6 +333,8 @@ function replace(root, target, operation) {
             }
             for (const node of [...operation.childNodes]) {
                 setTranslationContext(node);
+                setSourceFile(node);
+                setSourceTemplate(node);
                 target.append(node);
             }
             break;
@@ -322,8 +350,10 @@ function replace(root, target, operation) {
  * @param {string} [url=""]
  * @returns {Element} root modified (in place) by the operations
  */
-export function applyInheritance(root, operations, url = "") {
+export function applyInheritance(root, operations, url = "", templateName = "") {
     translationContext = url.split("/")[1] ?? ""; // use addon name as context
+    sourceFileUrl = url;
+    sourceTemplateName = templateName;
     for (const operation of operations.children) {
         const target = getElement(root, operation);
         const position = operation.getAttribute("position") || "inside";
@@ -375,5 +405,7 @@ export function applyInheritance(root, operations, url = "") {
         }
     }
     translationContext = null;
+    sourceFileUrl = null;
+    sourceTemplateName = null;
     return root;
 }

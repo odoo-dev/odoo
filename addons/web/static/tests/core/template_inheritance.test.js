@@ -49,7 +49,7 @@ test("single operation: replace", async () => {
                 <t>
                     <xpath expr="./div/h2" position="replace"><h3>Other title</h3></xpath>
                 </t>`,
-            result: `<t t-name="web.A" t-translation-context="from_target"> <div><h3 t-translation-context="from_op">Other title</h3>text</div> </t>`,
+            result: `<t t-name="web.A" t-translation-context="from_target"> <div><h3 t-translation-context="from_op" t-source-file="test/from_op">Other title</h3>text</div> </t>`,
             // TODO check if text should be there? (I think there is a bug in python code)
         },
     ];
@@ -67,7 +67,7 @@ test("single operation: replace (debug mode)", async () => {
                 <t>
                     <xpath expr="./div/h2" position="replace"><h3>Other title</h3></xpath>
                 </t>`,
-            result: `<t t-name="web.A" t-translation-context="from_target"> <div><!-- From file: test/from_op ; expr="./div/h2" ; position="replace" --><h3 t-translation-context="from_op">Other title</h3>text</div> </t>`,
+            result: `<t t-name="web.A" t-translation-context="from_target"> <div><!-- From file: test/from_op ; expr="./div/h2" ; position="replace" --><h3 t-translation-context="from_op" t-source-file="test/from_op">Other title</h3>text</div> </t>`,
         },
     ];
     for (const { arch, operations, result } of toTest) {
@@ -83,7 +83,7 @@ test("single operation: replace root (and use a $0)", async () => {
                 <t>
                     <xpath expr="." position="replace"><div>At first I was afraid</div>$0</xpath>
                 </t>`,
-            result: `<div t-translation-context="from_op" t-name="web.A">At first I was afraid</div>`,
+            result: `<div t-translation-context="from_op" t-source-file="test/from_op" t-name="web.A">At first I was afraid</div>`,
             // in outer mode with no parent only first child of operation is kept
         },
         {
@@ -92,7 +92,7 @@ test("single operation: replace root (and use a $0)", async () => {
                 <t>
                     <xpath expr="." position="replace"> <div>$0</div><div>At first I was afraid</div> </xpath>
                 </t>`,
-            result: `<div t-translation-context="from_op" t-name="web.A"><t t-name="web.A" t-translation-context="from_target"> <div>I was petrified</div> </t></div>`,
+            result: `<div t-translation-context="from_op" t-source-file="test/from_op" t-name="web.A"><t t-name="web.A" t-translation-context="from_target"> <div>I was petrified</div> </t></div>`,
         },
         {
             arch: `<t t-name="web.A"> <div>I was petrified</div> </t>`,
@@ -100,7 +100,7 @@ test("single operation: replace root (and use a $0)", async () => {
                 <t>
                     <xpath expr="." position="replace"> <t><t t-if="cond"><div>At first I was afraid</div></t><t t-else="">$0</t></t> </xpath>
                 </t>`,
-            result: `<t t-translation-context="from_op" t-name="web.A"><t t-if="cond"><div>At first I was afraid</div></t><t t-else=""><t t-name="web.A" t-translation-context="from_target"> <div>I was petrified</div> </t></t></t>`,
+            result: `<t t-translation-context="from_op" t-source-file="test/from_op" t-name="web.A"><t t-if="cond"><div>At first I was afraid</div></t><t t-else=""><t t-name="web.A" t-translation-context="from_target"> <div>I was petrified</div> </t></t></t>`,
         },
         {
             arch: `<form t-name="template_1_1" random-attr="gloria"> <div>At first I was afraid</div> <form>Inner Form</form> </form>`,
@@ -110,7 +110,7 @@ test("single operation: replace root (and use a $0)", async () => {
                         <div> Form replacer </div>
                     </xpath>
                 </t>`,
-            result: `<div t-translation-context="from_op" t-name="template_1_1"> Form replacer </div>`,
+            result: `<div t-translation-context="from_op" t-source-file="test/from_op" t-name="template_1_1"> Form replacer </div>`,
         },
         {
             arch: `<form t-name="template_1_1" random-attr="gloria"> <div>At first I was afraid</div> </form>`,
@@ -121,7 +121,7 @@ test("single operation: replace root (and use a $0)", async () => {
                     </xpath>
                 </t>
             `,
-            result: `<div overriden-attr="overriden" t-translation-context="from_op" t-name="template_1_1">And I grew strong</div>`,
+            result: `<div overriden-attr="overriden" t-translation-context="from_op" t-source-file="test/from_op" t-name="template_1_1">And I grew strong</div>`,
         },
     ];
     for (const { arch, operations, result } of toTest) {
@@ -137,7 +137,7 @@ test("single operation: replace (mode inner)", async () => {
                 <t>
                     <xpath expr="./div" position="replace" mode="inner"> E <div/> F <span attr1="12"/> </xpath>
                 </t>`,
-            result: `<t t-name="web.A" t-translation-context="from_target"> <div> E <div t-translation-context="from_op"/> F <span attr1="12" t-translation-context="from_op"/> </div> </t>`,
+            result: `<t t-name="web.A" t-translation-context="from_target"> <div> E <div t-translation-context="from_op" t-source-file="test/from_op"/> F <span attr1="12" t-translation-context="from_op" t-source-file="test/from_op"/> </div> </t>`,
         },
     ];
     for (const { arch, operations, result } of toTest) {
@@ -154,7 +154,7 @@ test("single operation: replace (mode inner) (debug mode)", async () => {
                 <t>
                     <xpath expr="./div" position="replace" mode="inner"> E <div/> F <span attr1="12"/> </xpath>
                 </t>`,
-            result: `<t t-name="web.A" t-translation-context="from_target"> <div><!-- From file: test/from_op ; expr="./div" ; position="replace" ; mode="inner" --> E <div t-translation-context="from_op"/> F <span attr1="12" t-translation-context="from_op"/> </div> </t>`,
+            result: `<t t-name="web.A" t-translation-context="from_target"> <div><!-- From file: test/from_op ; expr="./div" ; position="replace" ; mode="inner" --> E <div t-translation-context="from_op" t-source-file="test/from_op"/> F <span attr1="12" t-translation-context="from_op" t-source-file="test/from_op"/> </div> </t>`,
         },
     ];
     for (const { arch, operations, result } of toTest) {
@@ -170,7 +170,7 @@ test("single operation: before", async () => {
                 <t>
                     <xpath expr="./div/h2" position="before"> <h3>Other title</h3>Yooplahoo!<h4>Yet another title</h4> </xpath>
                 </t>`,
-            result: `<t t-name="web.A" t-translation-context="from_target"> <div>AAB is the best <h3 t-translation-context="from_op">Other title</h3>Yooplahoo!<h4 t-translation-context="from_op">Yet another title</h4> <h2>Title</h2>text</div> </t>`,
+            result: `<t t-name="web.A" t-translation-context="from_target"> <div>AAB is the best <h3 t-translation-context="from_op" t-source-file="test/from_op">Other title</h3>Yooplahoo!<h4 t-translation-context="from_op" t-source-file="test/from_op">Yet another title</h4> <h2>Title</h2>text</div> </t>`,
         },
         {
             arch: `<t t-name="web.A"> <div>AAB is the best<h2>Title</h2><div><span>Ola</span></div></div> </t>`,
@@ -202,7 +202,7 @@ test("single operation: inside", async () => {
                 <t>
                     <xpath expr="./div/div" position="inside"> Hop! <xpath expr="./div/h2" position="move" /> <span>Yellow</span> </xpath>
                 </t>`,
-            result: `<t t-name="web.A" t-translation-context="from_target"> <div>AAB is the best <div> Hop! <h2 t-translation-context="from_target">Title</h2> <span t-translation-context="from_op">Yellow</span> </div> </div> </t>`,
+            result: `<t t-name="web.A" t-translation-context="from_target"> <div>AAB is the best <div> Hop! <h2 t-translation-context="from_target">Title</h2> <span t-translation-context="from_op" t-source-file="test/from_op">Yellow</span> </div> </div> </t>`,
         },
         {
             arch: `<t><div/></t>`,
@@ -226,7 +226,7 @@ test("single operation: inside", async () => {
                 <t>
                     <xpath expr="./div" position="inside"><span/></xpath>
                 </t>`,
-            result: `<t t-translation-context="from_target">a<div><span t-translation-context="from_op"/></div><span/></t>`,
+            result: `<t t-translation-context="from_target">a<div><span t-translation-context="from_op" t-source-file="test/from_op"/></div><span/></t>`,
         },
     ];
     for (const { arch, operations, result } of toTest) {
@@ -242,7 +242,7 @@ test("single operation: after", async () => {
                 <t>
                     <xpath expr="./div/h2" position="after"> Hop! <xpath expr="./div/div[@id=2]" position="move" /> <span>Yellow</span> </xpath>
                 </t>`,
-            result: `<t t-name="web.A" t-translation-context="from_target"> <div> AAB is the best <h2>Title</h2> Hop! <div id="2" t-translation-context="from_target"/> <span t-translation-context="from_op">Yellow</span>  <div id="1"/>  </div> </t>`,
+            result: `<t t-name="web.A" t-translation-context="from_target"> <div> AAB is the best <h2>Title</h2> Hop! <div id="2" t-translation-context="from_target"/> <span t-translation-context="from_op" t-source-file="test/from_op">Yellow</span>  <div id="1"/>  </div> </t>`,
         },
         {
             arch: `<t t-name="web.A" t-translation-context="from_target"> <div/>a </t>`,
@@ -311,6 +311,90 @@ test("single operation: attributes (debug mode)", async () => {
     for (const { arch, operations, result } of toTest) {
         expect(_applyInheritance(arch, operations)).toBe(result);
     }
+});
+
+test("source file: inside position sets t-source-file on new elements", async () => {
+    const arch = `<t t-name="web.A"><div><span>Original</span></div></t>`;
+    const operations = `
+        <t>
+            <xpath expr="./div" position="inside"><p>Added</p></xpath>
+        </t>`;
+    expect(_applyInheritance(arch, operations)).toBe(
+        `<t t-name="web.A" t-translation-context="from_target"><div><span>Original</span><p t-translation-context="from_op" t-source-file="test/from_op">Added</p></div></t>`
+    );
+});
+
+test("source file: before position sets t-source-file on new elements", async () => {
+    const arch = `<t t-name="web.A"><div><span>Original</span></div></t>`;
+    const operations = `
+        <t>
+            <xpath expr="./div/span" position="before"><p>Before</p></xpath>
+        </t>`;
+    expect(_applyInheritance(arch, operations)).toBe(
+        `<t t-name="web.A" t-translation-context="from_target"><div><p t-translation-context="from_op" t-source-file="test/from_op">Before</p><span>Original</span></div></t>`
+    );
+});
+
+test("source file: after position sets t-source-file on new elements", async () => {
+    const arch = `<t t-name="web.A"><div><span>Original</span></div></t>`;
+    const operations = `
+        <t>
+            <xpath expr="./div/span" position="after"><p>After</p></xpath>
+        </t>`;
+    expect(_applyInheritance(arch, operations)).toBe(
+        `<t t-name="web.A" t-translation-context="from_target"><div><span>Original</span><p t-translation-context="from_op" t-source-file="test/from_op">After</p></div></t>`
+    );
+});
+
+test("source file: replace (outer) sets t-source-file on replacement", async () => {
+    const arch = `<t t-name="web.A"><div><span>Original</span></div></t>`;
+    const operations = `
+        <t>
+            <xpath expr="./div/span" position="replace"><p>Replaced</p></xpath>
+        </t>`;
+    expect(_applyInheritance(arch, operations)).toBe(
+        `<t t-name="web.A" t-translation-context="from_target"><div><p t-translation-context="from_op" t-source-file="test/from_op">Replaced</p></div></t>`
+    );
+});
+
+test("source file: replace (inner) sets t-source-file on new children", async () => {
+    const arch = `<t t-name="web.A"><div><span>Original</span></div></t>`;
+    const operations = `
+        <t>
+            <xpath expr="./div" position="replace" mode="inner"><p>Inner</p></xpath>
+        </t>`;
+    expect(_applyInheritance(arch, operations)).toBe(
+        `<t t-name="web.A" t-translation-context="from_target"><div><p t-translation-context="from_op" t-source-file="test/from_op">Inner</p></div></t>`
+    );
+});
+
+test("source file: replace root sets t-source-file on replacement", async () => {
+    const arch = `<t t-name="web.A"><div>Original</div></t>`;
+    const operations = `
+        <t>
+            <xpath expr="." position="replace"><div>New root</div></xpath>
+        </t>`;
+    expect(_applyInheritance(arch, operations)).toBe(
+        `<div t-translation-context="from_op" t-source-file="test/from_op" t-name="web.A">New root</div>`
+    );
+});
+
+test("source file: different urls produce different t-source-file values", async () => {
+    const arch = `<t t-name="web.A"><div><span>Original</span></div></t>`;
+    const operations = `
+        <t>
+            <xpath expr="./div" position="inside"><p>Added</p></xpath>
+        </t>`;
+    expect(_applyInheritance(arch, operations, "account/views/invoice.xml")).toBe(
+        `<t t-name="web.A" t-translation-context="from_target"><div><span>Original</span><p t-translation-context="views" t-source-file="account/views/invoice.xml">Added</p></div></t>`
+    );
+});
+
+test("source file: original elements do not get t-source-file", async () => {
+    const arch = `<t t-name="web.A"><div><span>Original</span></div></t>`;
+    const operations = `<t/>`;
+    const result = _applyInheritance(arch, operations);
+    expect(result).not.toInclude("t-source-file");
 });
 
 test("xpath with hasclass", async () => {

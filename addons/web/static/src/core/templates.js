@@ -46,6 +46,8 @@ function _getTemplate(name, blockId = null) {
         if (!inheritFrom) {
             const addon = info[name].url.split("/")[1];
             parsedTemplates[name].setAttribute("t-translation-context", addon);
+            parsedTemplates[name].setAttribute("t-source-file", info[name].url);
+            parsedTemplates[name].setAttribute("t-source-template", name);
         }
     }
     let processedTemplate = parsedTemplates[name];
@@ -59,7 +61,7 @@ function _getTemplate(name, blockId = null) {
             );
         }
         const element = getClone(processedTemplate);
-        processedTemplate = applyInheritance(getClone(parentTemplate), element, info[name].url);
+        processedTemplate = applyInheritance(getClone(parentTemplate), element, info[name].url, name);
         if (processedTemplate.tagName !== element.tagName) {
             const temp = processedTemplate;
             processedTemplate = new Document().createElement(element.tagName);

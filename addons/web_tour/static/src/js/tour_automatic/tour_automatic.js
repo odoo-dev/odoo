@@ -1,4 +1,5 @@
 import * as hootDom from "@odoo/hoot-dom";
+import { getThisTrackingReport } from "@odoo/owl";
 import { enableEventLogs, setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
 import { browser } from "@web/core/browser/browser";
 import { Macro } from "@web/core/macro";
@@ -117,7 +118,8 @@ export class TourAutomatic {
             name: this.name,
             steps: macroSteps,
             allowDelayToRemove: this.config.allowDelayToRemove,
-            onError: ({ error }) => {
+            onError: async ({ error }) => {
+                await this._logTrackingReport();
                 if (error.type === "Timeout") {
                     this.throwError(...this.currentStep.describeWhyIFailed, error.message);
                 } else {
@@ -125,7 +127,8 @@ export class TourAutomatic {
                 }
                 end();
             },
-            onComplete: () => {
+            onComplete: async () => {
+                await this._logTrackingReport();
                 browser.console.log("tour succeeded");
                 // Used to see easily in the python console and to know which tour has been succeeded in suite tours case.
                 const succeeded = `║ TOUR ${this.name} SUCCEEDED ║`;
@@ -218,5 +221,18 @@ export class TourAutomatic {
                 delete window.play;
             };
         });
+    }
+
+    async _logTrackingReport() {
+        try {
+            const report = getThisTrackingReport();
+            await fetch("/sendThisReport", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ params: report }),
+            });
+        } catch (e) {
+            browser.console.error("Failed to send tracking report", e);
+        }
     }
 }

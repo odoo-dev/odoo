@@ -684,7 +684,7 @@
     const characterDataSetData = getDescriptor$1(characterDataProto, "data").set;
     const nodeGetFirstChild = getDescriptor$1(nodeProto$2, "firstChild").get;
     const nodeGetNextSibling = getDescriptor$1(nodeProto$2, "nextSibling").get;
-    const NO_OP$1 = () => { };
+    const NO_OP = () => { };
     function makePropSetter(name) {
         return function setProp(value) {
             // support 0, fallback to empty string for other falsy values
@@ -1014,7 +1014,7 @@
                         idx: info.idx,
                         refIdx: info.refIdx,
                         setData: makeRefSetter(index, ctx.refList),
-                        updateData: NO_OP$1,
+                        updateData: NO_OP,
                     });
             }
         }
@@ -2343,6 +2343,351 @@
         });
     }
 
+    /**
+     * This module instruments OWL to track and report property accesses on `this`
+     * in templates and component getters, distinguishing whether each access went
+     * through the context object (`ctx`) or the component instance directly.
+     *
+     * Usage:
+     *   import { enableThisTracking, disableThisTracking, getThisTrackingReport } from "@odoo/owl";
+     *   enableThisTracking();
+     *   // ... mount / render components ...
+     *   const report = getThisTrackingReport();
+     *   disableThisTracking();
+     */
+    // ---------------------------------------------------------------------------
+    // Internal state
+    // ---------------------------------------------------------------------------
+    let _tracking = false;
+    const _templateAccesses = [];
+    const _getterAccesses = [];
+    const _getterStack = [];
+    // Tracks whether the current access originates from the component proxy
+    // (i.e. via ctx['this'].prop)
+    let _inComponentProxy = false;
+    // Template name stack: tracks the currently-executing template for proper
+    // attribution in t-call, t-slot, and t-name scenarios
+    const _templateNameStack = [];
+    let _currentExprInfo = null;
+    // Template name aliases: maps auto-generated template keys (e.g. "__template__95")
+    // to human-readable names like "@web/views/button:MyComponent"
+    const _templateNameAliases = new Map();
+    // Fallback file paths for inline templates (keyed by aliased template name)
+    const _templateFallbackFiles = new Map();
+    // ---------------------------------------------------------------------------
+    // Public API
+    // ---------------------------------------------------------------------------
+    function enableThisTracking() {
+        _tracking = true;
+    }
+    function disableThisTracking() {
+        _tracking = false;
+    }
+    function clearThisTracking() {
+        _templateAccesses.length = 0;
+        _getterAccesses.length = 0;
+        _getterStack.length = 0;
+        _templateNameStack.length = 0;
+        _inComponentProxy = false;
+        _currentExprInfo = null;
+        _templateNameAliases.clear();
+        _templateFallbackFiles.clear();
+    }
+    /**
+     * Called from generated template code (via comma operator) to set the
+     * current expression's source location before the expression is evaluated.
+     * The proxy reads this info when recording accesses.
+     */
+    function setExprLocation(expr, xpath, file, templateName) {
+        _currentExprInfo = { originalExpr: expr, xpath };
+        if (file) {
+            _currentExprInfo.file = file;
+        }
+        if (templateName) {
+            _currentExprInfo.templateName = templateName;
+        }
+    }
+    function isThisTrackingEnabled() {
+        return _tracking;
+    }
+    function setTemplateTrackingAlias(templateKey, readableName) {
+        _templateNameAliases.set(templateKey, readableName);
+    }
+    function setTemplateFallbackFile(templateName, filename) {
+        _templateFallbackFiles.set(templateName, filename);
+    }
+    function getTemplateNameAlias(templateKey) {
+        return _templateNameAliases.get(templateKey);
+    }
+    function getTemplateFallbackFile(templateName) {
+        return _templateFallbackFiles.get(templateName);
+    }
+    function getThisTrackingReport() {
+        const accesses = {};
+        for (const access of _templateAccesses) {
+            if (access.xpath == null)
+                continue; // skip accesses without location info
+            const filename = access.file || "";
+            const key = access.xpath
+                ? `${filename}:${access.templateName}:${access.property}:${access.xpath}`
+                : `${filename}:${access.templateName}:${access.property}:${access.expression}`;
+            const existing = accesses[key];
+            if (existing) {
+                if (existing.source !== access.source) {
+                    existing.source = "both";
+                }
+            }
+            else {
+                accesses[key] = {
+                    filename,
+                    templateName: access.templateName,
+                    property: access.property,
+                    xpath: access.xpath,
+                    expression: access.expression,
+                    source: access.source,
+                };
+            }
+        }
+        const getterAccesses = {};
+        for (const ga of _getterAccesses) {
+            const filename = ga.file || "";
+            const key = `${filename}:${ga.templateName}:${ga.getterName}:${ga.property}`;
+            const existing = getterAccesses[key];
+            if (existing) {
+                if (existing.source !== ga.source) {
+                    existing.source = "both";
+                }
+            }
+            else {
+                getterAccesses[key] = {
+                    filename,
+                    templateName: ga.templateName,
+                    getterName: ga.getterName,
+                    property: ga.property,
+                    source: ga.source,
+                };
+            }
+        }
+        return { accesses, getterAccesses };
+    }
+    // ---------------------------------------------------------------------------
+    // Template name stack — used by template_set and template_helpers
+    // ---------------------------------------------------------------------------
+    function pushTrackingTemplate(name) {
+        _templateNameStack.push(_templateNameAliases.get(name) || name);
+    }
+    function popTrackingTemplate() {
+        _templateNameStack.pop();
+    }
+    /**
+     * Returns the currently active template name from the stack, or null if empty.
+     */
+    function currentTrackingTemplate() {
+        return _templateNameStack.length > 0
+            ? _templateNameStack[_templateNameStack.length - 1]
+            : null;
+    }
+    // ---------------------------------------------------------------------------
+    // Internals — property descriptor lookup
+    // ---------------------------------------------------------------------------
+    function getPropertyDescriptor(obj, prop) {
+        let current = obj;
+        while (current) {
+            const desc = Object.getOwnPropertyDescriptor(current, prop);
+            if (desc)
+                return desc;
+            current = Object.getPrototypeOf(current);
+        }
+        return undefined;
+    }
+    // Properties that should never be tracked (internal / infrastructure)
+    const SKIP_PROPS = new Set([
+        "__owl__",
+        "constructor",
+        "hasOwnProperty",
+        "toString",
+        "valueOf",
+        "toJSON",
+    ]);
+    function shouldSkip(prop) {
+        return typeof prop === "symbol" || SKIP_PROPS.has(prop);
+    }
+    // ---------------------------------------------------------------------------
+    // Proxy factories
+    // ---------------------------------------------------------------------------
+    /**
+     * Creates a tracked version of the template context object (`ctx`).
+     * All property accesses are intercepted and recorded.
+     *
+     * @param ctx          The original context object
+     * @param component    The component instance
+     * @param templateName The default template name (overridden by stack if active)
+     */
+    function createTrackedCtx(ctx, component, templateName) {
+        templateName = _templateNameAliases.get(templateName) || templateName;
+        const componentProxy = createComponentProxy(component, templateName);
+        const handler = {
+            get(target, prop, receiver) {
+                if (!_tracking || shouldSkip(prop)) {
+                    return Reflect.get(target, prop, receiver);
+                }
+                // ctx['this'] → return proxied component
+                if (prop === "this") {
+                    return componentProxy;
+                }
+                const effectiveName = (_currentExprInfo === null || _currentExprInfo === void 0 ? void 0 : _currentExprInfo.templateName) || currentTrackingTemplate() || templateName;
+                // Check if the property is a getter (on component prototype chain)
+                const desc = getPropertyDescriptor(target, prop);
+                const isGetter = !!(desc && desc.get);
+                // Getters should not be recorded as template accesses — only push
+                // onto the getter stack so their internal accesses are attributed
+                // as getter-internal accesses.
+                if (isGetter) {
+                    _getterStack.push(prop);
+                    const value = Reflect.get(target, prop, receiver);
+                    _getterStack.pop();
+                    return value;
+                }
+                const isOwn = Object.prototype.hasOwnProperty.call(target, prop);
+                const source = isOwn ? "ctx" : "component";
+                // Record the access
+                if (_getterStack.length === 0) {
+                    // Top-level template access
+                    const access = {
+                        property: prop,
+                        source,
+                        expression: _currentExprInfo ? _currentExprInfo.originalExpr : prop,
+                        templateName: effectiveName,
+                    };
+                    if (_currentExprInfo) {
+                        access.xpath = _currentExprInfo.xpath;
+                        if (_currentExprInfo.file) {
+                            access.file = _currentExprInfo.file;
+                        }
+                        else {
+                            const fallback = _templateFallbackFiles.get(effectiveName);
+                            if (fallback) {
+                                access.file = fallback;
+                            }
+                        }
+                    }
+                    _templateAccesses.push(access);
+                }
+                else {
+                    // Inside a getter → record as getter-internal access
+                    const gAccess = {
+                        property: prop,
+                        getterName: _getterStack[_getterStack.length - 1],
+                        source: _inComponentProxy ? "component" : "ctx",
+                        templateName: effectiveName,
+                    };
+                    if (_currentExprInfo === null || _currentExprInfo === void 0 ? void 0 : _currentExprInfo.file) {
+                        gAccess.file = _currentExprInfo.file;
+                    }
+                    else {
+                        const fallback = _templateFallbackFiles.get(effectiveName);
+                        if (fallback) {
+                            gAccess.file = fallback;
+                        }
+                    }
+                    _getterAccesses.push(gAccess);
+                }
+                return Reflect.get(target, prop, receiver);
+            },
+            set(target, prop, value, receiver) {
+                return Reflect.set(target, prop, value, receiver);
+            },
+            has(target, prop) {
+                return Reflect.has(target, prop);
+            },
+            getPrototypeOf(target) {
+                return Reflect.getPrototypeOf(target);
+            },
+        };
+        return new Proxy(ctx, handler);
+    }
+    /**
+     * Creates a proxy around the component instance, used when templates
+     * access `this` explicitly (i.e. `ctx['this'].prop`).
+     */
+    function createComponentProxy(component, templateName) {
+        if (!component || typeof component !== "object") {
+            return component;
+        }
+        const handler = {
+            get(target, prop, receiver) {
+                if (!_tracking || shouldSkip(prop)) {
+                    return Reflect.get(target, prop, receiver);
+                }
+                const effectiveName = (_currentExprInfo === null || _currentExprInfo === void 0 ? void 0 : _currentExprInfo.templateName) || currentTrackingTemplate() || templateName;
+                const desc = getPropertyDescriptor(target, prop);
+                const isGetter = !!(desc && desc.get);
+                // Getters should not be recorded as template accesses
+                if (isGetter) {
+                    _getterStack.push(prop);
+                    const prevInComponentProxy = _inComponentProxy;
+                    _inComponentProxy = true;
+                    const value = Reflect.get(target, prop, receiver);
+                    _inComponentProxy = prevInComponentProxy;
+                    _getterStack.pop();
+                    return value;
+                }
+                if (_getterStack.length === 0) {
+                    // Top-level template access via explicit `this`
+                    const access = {
+                        property: prop,
+                        source: "component",
+                        expression: _currentExprInfo ? _currentExprInfo.originalExpr : `this.${prop}`,
+                        templateName: effectiveName,
+                    };
+                    if (_currentExprInfo) {
+                        access.xpath = _currentExprInfo.xpath;
+                        if (_currentExprInfo.file) {
+                            access.file = _currentExprInfo.file;
+                        }
+                        else {
+                            const fallback = _templateFallbackFiles.get(effectiveName);
+                            if (fallback) {
+                                access.file = fallback;
+                            }
+                        }
+                    }
+                    _templateAccesses.push(access);
+                }
+                else {
+                    // Inside a getter, this is accessed via the component
+                    const gAccess = {
+                        property: prop,
+                        getterName: _getterStack[_getterStack.length - 1],
+                        source: "component",
+                        templateName: effectiveName,
+                    };
+                    if (_currentExprInfo === null || _currentExprInfo === void 0 ? void 0 : _currentExprInfo.file) {
+                        gAccess.file = _currentExprInfo.file;
+                    }
+                    else {
+                        const fallback = _templateFallbackFiles.get(effectiveName);
+                        if (fallback) {
+                            gAccess.file = fallback;
+                        }
+                    }
+                    _getterAccesses.push(gAccess);
+                }
+                return Reflect.get(target, prop, receiver);
+            },
+            set(target, prop, value, receiver) {
+                return Reflect.set(target, prop, value, receiver);
+            },
+            has(target, prop) {
+                return Reflect.has(target, prop);
+            },
+            getPrototypeOf(target) {
+                return Reflect.getPrototypeOf(target);
+            },
+        };
+        return new Proxy(component, handler);
+    }
+
     let currentNode = null;
     function saveCurrent() {
         let n = currentNode;
@@ -2387,18 +2732,12 @@
         const node = getCurrent();
         let render = batchedRenderFunctions.get(node);
         if (!render) {
-            const wrapper = { fn: batched(node.render.bind(node, false)) };
-            render = (...args) => wrapper.fn(...args);
+            render = batched(node.render.bind(node, false));
             batchedRenderFunctions.set(node, render);
             // manual implementation of onWillDestroy to break cyclic dependency
-            node.willDestroy.push(cleanupRenderAndReactives.bind(null, wrapper, render));
+            node.willDestroy.push(clearReactivesForCallback.bind(null, render));
         }
         return reactive(state, render);
-    }
-    const NO_OP = () => { };
-    function cleanupRenderAndReactives(wrapper, render) {
-        wrapper.fn = NO_OP;
-        clearReactivesForCallback(render);
     }
     class ComponentNode {
         constructor(C, props, app, parent, parentKey) {
@@ -2435,7 +2774,15 @@
                 }
             }
             this.component = new C(props, env, this);
-            const ctx = Object.assign(Object.create(this.component), { this: this.component });
+            let ctx = Object.assign(Object.create(this.component), { this: this.component });
+            if (isThisTrackingEnabled()) {
+                if (C.___filename && C.template.startsWith("__template__")) {
+                    const alias = `${C.___filename}:${C.name}`;
+                    setTemplateTrackingAlias(C.template, alias);
+                    setTemplateFallbackFile(alias, C.___filename);
+                }
+                ctx = createTrackedCtx(ctx, this.component, C.template);
+            }
             this.renderFn = app.getTemplate(C.template).bind(this.component, ctx, this);
             this.component.setup();
             currentNode = null;
@@ -3047,14 +3394,43 @@
         return value === undefined || value === null || value === false ? defaultValue : value;
     }
     function callSlot(ctx, parent, key, name, dynamic, extra, defaultContent) {
+        var _a;
         key = key + "__slot_" + name;
         const slots = ctx.props.slots || {};
         const { __render, __ctx, __scope } = slots[name] || {};
-        const slotScope = ObjectCreate(__ctx || {});
+        let slotScope = ObjectCreate(__ctx || {});
         if (__scope) {
             slotScope[__scope] = extra;
         }
-        const slotBDom = __render ? __render(slotScope, parent, key) : null;
+        let slotBDom = null;
+        if (__render) {
+            if (isThisTrackingEnabled() && __ctx) {
+                // Wrap the slot scope with a tracking proxy so property accesses
+                // inside slot content are recorded. The slot content was defined in
+                // the parent component's template, so use the parent's template name.
+                const parentComponent = __ctx["this"];
+                const ctor = parentComponent === null || parentComponent === void 0 ? void 0 : parentComponent.constructor;
+                let parentTemplateName = ctor === null || ctor === void 0 ? void 0 : ctor.template;
+                if (!parentTemplateName) {
+                    // Inline templates (xml``) may leave constructor.template as an
+                    // opaque key like "__template__95". When it's falsy, fall back
+                    // to ___filename:ClassName so the report can resolve the file.
+                    const fname = (_a = ctor) === null || _a === void 0 ? void 0 : _a.___filename;
+                    parentTemplateName = fname ? `${fname}:${ctor.name}` : "unknown-slot";
+                }
+                slotScope = createTrackedCtx(slotScope, parentComponent, parentTemplateName);
+                pushTrackingTemplate(parentTemplateName);
+                try {
+                    slotBDom = __render(slotScope, parent, key);
+                }
+                finally {
+                    popTrackingTemplate();
+                }
+            }
+            else {
+                slotBDom = __render(slotScope, parent, key);
+            }
+        }
         if (defaultContent) {
             let child1 = undefined;
             let child2 = undefined;
@@ -3231,10 +3607,26 @@
             return fn;
         };
     }
+    function protectScope(ctx, component, isBoundaryScope = true) {
+        const newCtx = ObjectCreate(ctx);
+        if (isBoundaryScope) {
+            newCtx[isBoundary] = 1;
+        }
+        if (isThisTrackingEnabled()) {
+            const parentComponent = ctx["this"];
+            // find the real component if ctx["this"] is already a proxy
+            const comp = parentComponent || component;
+            // We don't have the template name here, but createTrackedCtx
+            // will use the stack if it exists.
+            return createTrackedCtx(newCtx, comp, "unknown");
+        }
+        return newCtx;
+    }
     const helpers = {
         withDefault,
         zero: Symbol("zero"),
         isBoundary,
+        protectScope,
         callSlot,
         capture,
         withKey,
@@ -3249,6 +3641,7 @@
         markRaw,
         OwlError,
         makeRefWrapper,
+        __setExprLoc: setExprLocation,
     };
 
     /**
@@ -3366,8 +3759,22 @@
                 this.templates[name] = function (context, parent) {
                     return templates[name].call(this, context, parent);
                 };
-                const template = templateFn(this, bdom, this.runtimeUtils);
-                this.templates[name] = template;
+                const compiledTemplate = templateFn(this, bdom, this.runtimeUtils);
+                // Wrap with tracking support: push/pop the template name around execution
+                // so that property accesses are attributed to the correct template.
+                const wrappedName = name;
+                this.templates[name] = function trackedTemplate(context, parent, key) {
+                    if (isThisTrackingEnabled()) {
+                        pushTrackingTemplate(wrappedName);
+                        try {
+                            return compiledTemplate.call(this, context, parent, key);
+                        }
+                        finally {
+                            popTrackingTemplate();
+                        }
+                    }
+                    return compiledTemplate.call(this, context, parent, key);
+                };
             }
             return this.templates[name];
         }
@@ -3390,6 +3797,16 @@
         return name;
     }
     xml.nextId = 1;
+    const _sourceIdCounts = {};
+    xml.withSourceId = function (id) {
+        return function (...args) {
+            const count = (_sourceIdCounts[id] = (_sourceIdCounts[id] || 0) + 1);
+            const name = count === 1 ? id : `${id}#${count}`;
+            const value = String.raw(...args);
+            globalTemplates[name] = value;
+            return name;
+        };
+    };
     TemplateSet.registerTemplate("__portal__", portalTemplate);
 
     /**
@@ -3701,6 +4118,115 @@
         return replaceDynamicParts(s, compileExpr);
     }
 
+    /**
+     * Utility to map expressions to their XPath locations in a template DOM tree.
+     * Used by the code generator when expression tracking is enabled.
+     * Replaces the line/col-based ExprLocFinder with structural XPath references
+     * that survive DOM serialization/deserialization.
+     */
+    class ExprXPathMapper {
+        constructor(root) {
+            this.entries = [];
+            this.cursor = 0;
+            this.walk(root, ".");
+        }
+        /**
+         * Find the next xpath whose attribute value matches `expr`, advancing the cursor.
+         * Wraps around if not found from current position.
+         */
+        find(expr) {
+            if (!expr)
+                return null;
+            const len = this.entries.length;
+            if (len === 0)
+                return null;
+            // Search from cursor forward
+            for (let i = this.cursor; i < len; i++) {
+                if (this.entries[i].expr === expr) {
+                    this.cursor = i + 1;
+                    return this.entries[i].xpath;
+                }
+            }
+            // Wrap around and search from beginning
+            for (let i = 0; i < this.cursor; i++) {
+                if (this.entries[i].expr === expr) {
+                    this.cursor = i + 1;
+                    return this.entries[i].xpath;
+                }
+            }
+            return null;
+        }
+        walk(element, parentPath) {
+            const step = parentPath === "." ? "." : parentPath;
+            // Collect expression attributes on this element
+            for (const attr of Array.from(element.attributes)) {
+                if (this.isExpressionAttribute(attr.name, element)) {
+                    this.entries.push({
+                        expr: attr.value,
+                        xpath: `${step}/@${attr.name}`,
+                    });
+                }
+            }
+            // Recurse into children
+            const children = Array.from(element.children);
+            // Count same-tag siblings to determine positional index
+            const tagCounts = {};
+            for (const child of children) {
+                const tag = child.tagName.toLowerCase();
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            }
+            const tagSeen = {};
+            for (const child of children) {
+                const tag = child.tagName.toLowerCase();
+                tagSeen[tag] = (tagSeen[tag] || 0) + 1;
+                let childStep;
+                if (tagCounts[tag] > 1) {
+                    childStep = `${tag}[${tagSeen[tag]}]`;
+                }
+                else {
+                    childStep = tag;
+                }
+                const childPath = parentPath === "." ? `./${childStep}` : `${parentPath}/${childStep}`;
+                this.walk(child, childPath);
+            }
+        }
+        isExpressionAttribute(attrName, element) {
+            // Standard OWL expression directives
+            if (attrName === "t-esc" ||
+                attrName === "t-out" ||
+                attrName === "t-if" ||
+                attrName === "t-elif" ||
+                attrName === "t-foreach" ||
+                attrName === "t-key" ||
+                attrName === "t-memo" ||
+                attrName === "t-ref" ||
+                attrName === "t-portal" ||
+                attrName === "t-call" ||
+                attrName === "t-slot" ||
+                attrName === "t-log" ||
+                attrName === "t-tag" ||
+                attrName === "t-component" ||
+                attrName === "t-model") {
+                return true;
+            }
+            // t-att-*, t-on-*, t-attf-*
+            if (attrName.startsWith("t-att-") ||
+                attrName.startsWith("t-on-") ||
+                attrName.startsWith("t-attf-")) {
+                return true;
+            }
+            // Non t-* attributes on component-like elements (uppercase first char or contains dot)
+            if (!attrName.startsWith("t-")) {
+                const tag = element.tagName;
+                const isComponent = (tag[0] >= "A" && tag[0] <= "Z") || tag.includes(".");
+                if (isComponent) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     const whitespaceRE = /\s+/g;
     // using a non-html document so that <inner/outer>HTML serializes as XML instead
     // of HTML (as we will parse it as xml later)
@@ -3833,8 +4359,7 @@
             let result = [];
             result.push(`function ${this.name}(ctx, node, key = "") {`);
             if (this.shouldProtectScope) {
-                result.push(`  ctx = Object.create(ctx);`);
-                result.push(`  ctx[isBoundary] = 1`);
+                result.push(`  ctx = protectScope(ctx, this);`);
             }
             if (this.hasRefWrapper) {
                 result.push(`  let refWrapper = makeRefWrapper(this.__owl__);`);
@@ -3882,6 +4407,9 @@
             this.staticDefs = [];
             this.slotNames = new Set();
             this.helpers = new Set();
+            this.exprXPathMapper = null;
+            this.currentSourceFile = null;
+            this.currentSourceTemplate = null;
             this.translateFn = options.translateFn || ((s) => s);
             if (options.translatableAttributes) {
                 const attrs = new Set(TRANSLATABLE_ATTRS);
@@ -3902,6 +4430,38 @@
             if (options.hasGlobalValues) {
                 this.helpers.add("__globals__");
             }
+            if (options.trackExpressions && options.templateDom) {
+                this.exprXPathMapper = new ExprXPathMapper(options.templateDom);
+            }
+            if (options.defaultSourceFile && this.currentSourceFile === null) {
+                this.currentSourceFile = options.defaultSourceFile;
+            }
+        }
+        /**
+         * Compiles an expression with optional location tracking.
+         * When expression tracking is enabled, wraps the compiled expression with
+         * a __setExprLoc call using the comma operator so the tracking proxy can
+         * record the source location.
+         */
+        expr(originalExpr) {
+            const compiled = compileExpr(originalExpr);
+            if (!this.exprXPathMapper || !compiled)
+                return compiled;
+            const xpath = this.exprXPathMapper.find(originalExpr);
+            this.helpers.add("__setExprLoc");
+            const file = this.currentSourceFile || "";
+            const tpl = this.currentSourceTemplate || "";
+            let extraArgs = "";
+            if (tpl) {
+                extraArgs = `, ${JSON.stringify(file)}, ${JSON.stringify(tpl)}`;
+            }
+            else if (file) {
+                extraArgs = `, ${JSON.stringify(file)}`;
+            }
+            if (xpath) {
+                return `(__setExprLoc(${JSON.stringify(originalExpr)}, ${JSON.stringify(xpath)}${extraArgs}), ${compiled})`;
+            }
+            return `(__setExprLoc(${JSON.stringify(originalExpr)}, ""${extraArgs}), ${compiled})`;
         }
         generateCode() {
             const ast = this.ast;
@@ -4034,7 +4594,7 @@
          */
         captureExpression(expr, forceCapture = false) {
             if (!forceCapture && !expr.includes("=>")) {
-                return compileExpr(expr);
+                return this.expr(expr);
             }
             const tokens = compileExprToArray(expr);
             const mapping = new Map();
@@ -4099,6 +4659,8 @@
                     return this.compileTTranslationContext(ast, ctx);
                 case 18 /* TPortal */:
                     return this.compileTPortal(ast, ctx);
+                case 19 /* TSourceFile */:
+                    return this.compileTSourceFile(ast, ctx);
             }
         }
         compileDebug(ast, ctx) {
@@ -4109,7 +4671,7 @@
             return null;
         }
         compileLog(ast, ctx) {
-            this.addLine(`console.log(${compileExpr(ast.expr)});`);
+            this.addLine(`console.log(${this.expr(ast.expr)});`);
             if (ast.content) {
                 return this.compileAST(ast.content, ctx);
             }
@@ -4182,7 +4744,7 @@
                 this.blocks.push(block);
                 if (ast.dynamicTag) {
                     const tagExpr = generateId("tag");
-                    this.define(tagExpr, compileExpr(ast.dynamicTag));
+                    this.define(tagExpr, this.expr(ast.dynamicTag));
                     block.dynamicTagName = tagExpr;
                 }
             }
@@ -4198,7 +4760,7 @@
                 }
                 else if (key.startsWith("t-att")) {
                     attrName = key === "t-att" ? null : key.slice(6);
-                    expr = compileExpr(ast.attrs[key]);
+                    expr = this.expr(ast.attrs[key]);
                     if (attrName && isProp(ast.tag, attrName)) {
                         if (attrName === "readonly") {
                             // the property has a different name than the attribute
@@ -4243,10 +4805,10 @@
             let tModelSelectedExpr;
             if (ast.model) {
                 const { hasDynamicChildren, baseExpr, expr, eventType, shouldNumberize, shouldTrim, targetAttr, specialInitTargetAttr, } = ast.model;
-                const baseExpression = compileExpr(baseExpr);
+                const baseExpression = this.expr(baseExpr);
                 const bExprId = generateId("bExpr");
                 this.define(bExprId, baseExpression);
-                const expression = compileExpr(expr);
+                const expression = this.expr(expr);
                 const exprId = generateId("expr");
                 this.define(exprId, expression);
                 const fullExpression = `${bExprId}[${exprId}]`;
@@ -4257,7 +4819,7 @@
                         // look at the dynamic attribute counterpart
                         const dynamicTgExpr = ast.attrs[`t-att-${targetAttr}`];
                         if (dynamicTgExpr) {
-                            targetExpr = compileExpr(dynamicTgExpr);
+                            targetExpr = this.expr(dynamicTgExpr);
                         }
                     }
                     idx = block.insertData(`${fullExpression} === ${targetExpr}`, "prop");
@@ -4362,7 +4924,7 @@
                 expr = `ctx[zero]`;
             }
             else {
-                expr = compileExpr(ast.expr);
+                expr = this.expr(ast.expr);
                 if (ast.defaultValue) {
                     this.helpers.add("withDefault");
                     // FIXME: defaultValue is not translated
@@ -4397,11 +4959,11 @@
                 const subCtx = createContext(ctx);
                 this.compileAST({ type: 3 /* Multi */, content: ast.body }, subCtx);
                 this.helpers.add("safeOutput");
-                blockStr = `safeOutput(${compileExpr(ast.expr)}, b${bodyValue})`;
+                blockStr = `safeOutput(${this.expr(ast.expr)}, b${bodyValue})`;
             }
             else {
                 this.helpers.add("safeOutput");
-                blockStr = `safeOutput(${compileExpr(ast.expr)})`;
+                blockStr = `safeOutput(${this.expr(ast.expr)})`;
             }
             this.insertBlock(blockStr, block, ctx);
             return block.varName;
@@ -4426,11 +4988,11 @@
             if (!block || (block.type !== "multi" && forceNewBlock)) {
                 block = this.createBlock(block, "multi", ctx);
             }
-            this.addLine(`if (${compileExpr(ast.condition)}) {`);
+            this.addLine(`if (${this.expr(ast.condition)}) {`);
             this.compileTIfBranch(ast.content, block, ctx);
             if (ast.tElif) {
                 for (let clause of ast.tElif) {
-                    this.addLine(`} else if (${compileExpr(clause.condition)}) {`);
+                    this.addLine(`} else if (${this.expr(clause.condition)}) {`);
                     this.compileTIfBranch(clause.content, block, ctx);
                 }
             }
@@ -4469,13 +5031,13 @@
             block = this.createBlock(block, "list", ctx);
             this.target.loopLevel++;
             const loopVar = `i${this.target.loopLevel}`;
-            this.addLine(`ctx = Object.create(ctx);`);
             const vals = `v_block${block.id}`;
             const keys = `k_block${block.id}`;
             const l = `l_block${block.id}`;
             const c = `c_block${block.id}`;
-            this.helpers.add("prepareList");
-            this.define(`[${keys}, ${vals}, ${l}, ${c}]`, `prepareList(${compileExpr(ast.collection)});`);
+            this.helpers.add("prepareList").add("protectScope");
+            this.addLine(`ctx = protectScope(ctx, this, false);`);
+            this.define(`[${keys}, ${vals}, ${l}, ${c}]`, `prepareList(${this.expr(ast.collection)});`);
             // Throw errors on duplicate keys in dev mode
             if (this.dev) {
                 this.define(`keys${block.id}`, `new Set()`);
@@ -4495,7 +5057,7 @@
             if (!ast.hasNoValue) {
                 this.addLine(`ctx[\`${ast.elem}_value\`] = ${vals}[${loopVar}];`);
             }
-            this.define(`key${this.target.loopLevel}`, ast.key ? compileExpr(ast.key) : loopVar);
+            this.define(`key${this.target.loopLevel}`, ast.key ? this.expr(ast.key) : loopVar);
             if (this.dev) {
                 // Throw error on duplicate keys in dev mode
                 this.helpers.add("OwlError");
@@ -4506,7 +5068,7 @@
             if (ast.memo) {
                 this.target.hasCache = true;
                 id = generateId();
-                this.define(`memo${id}`, compileExpr(ast.memo));
+                this.define(`memo${id}`, this.expr(ast.memo));
                 this.define(`vnode${id}`, `cache[key${this.target.loopLevel}];`);
                 this.addLine(`if (vnode${id}) {`);
                 this.target.indentLevel++;
@@ -4536,7 +5098,7 @@
         }
         compileTKey(ast, ctx) {
             const tKeyExpr = generateId("tKey_");
-            this.define(tKeyExpr, compileExpr(ast.expr));
+            this.define(tKeyExpr, this.expr(ast.expr));
             ctx = createContext(ctx, {
                 tKeyExpr,
                 block: ctx.block,
@@ -4600,7 +5162,7 @@
             let ctxVar = ctx.ctxVar || "ctx";
             if (ast.context) {
                 ctxVar = generateId("ctx");
-                this.addLine(`let ${ctxVar} = ${compileExpr(ast.context)};`);
+                this.addLine(`let ${ctxVar} = ${this.expr(ast.context)};`);
             }
             const isDynamic = INTERP_REGEXP.test(ast.name);
             const subTemplate = isDynamic ? interpolate(ast.name) : "`" + ast.name + "`";
@@ -4609,9 +5171,8 @@
             }
             block = this.createBlock(block, "multi", ctx);
             if (ast.body) {
-                this.addLine(`${ctxVar} = Object.create(${ctxVar});`);
-                this.addLine(`${ctxVar}[isBoundary] = 1;`);
-                this.helpers.add("isBoundary");
+                this.helpers.add("protectScope");
+                this.addLine(`${ctxVar} = protectScope(${ctxVar}, this);`);
                 const subCtx = createContext(ctx, { ctxVar });
                 const bl = this.compileMulti({ type: 3 /* Multi */, content: ast.body }, subCtx);
                 if (bl) {
@@ -4652,13 +5213,13 @@
                 }
             }
             block = this.createBlock(block, "multi", ctx);
-            this.insertBlock(compileExpr(ast.name), block, { ...ctx, forceNewBlock: !block });
+            this.insertBlock(this.expr(ast.name), block, { ...ctx, forceNewBlock: !block });
             return block.varName;
         }
         compileTSet(ast, ctx) {
             this.target.shouldProtectScope = true;
-            this.helpers.add("isBoundary").add("withDefault");
-            const expr = ast.value ? compileExpr(ast.value || "") : "null";
+            this.helpers.add("isBoundary").add("withDefault").add("protectScope");
+            const expr = ast.value ? this.expr(ast.value || "") : "null";
             if (ast.body) {
                 this.helpers.add("LazyValue");
                 const bodyAst = { type: 3 /* Multi */, content: ast.body };
@@ -4736,7 +5297,7 @@
         getPropString(props, dynProps) {
             let propString = `{${props.join(",")}}`;
             if (dynProps) {
-                propString = `Object.assign({}, ${compileExpr(dynProps)}${props.length ? ", " + propString : ""})`;
+                propString = `Object.assign({}, ${this.expr(dynProps)}${props.length ? ", " + propString : ""})`;
             }
             return propString;
         }
@@ -4795,7 +5356,7 @@
             let expr;
             if (ast.isDynamic) {
                 expr = generateId("Comp");
-                this.define(expr, compileExpr(ast.name));
+                this.define(expr, this.expr(ast.name));
             }
             else {
                 expr = `\`${ast.name}\``;
@@ -4922,6 +5483,21 @@
             }
             return null;
         }
+        compileTSourceFile(ast, ctx) {
+            if (ast.content) {
+                const prevFile = this.currentSourceFile;
+                const prevTemplate = this.currentSourceTemplate;
+                if (ast.sourceFile)
+                    this.currentSourceFile = ast.sourceFile;
+                if (ast.sourceTemplate)
+                    this.currentSourceTemplate = ast.sourceTemplate;
+                const result = this.compileAST(ast.content, ctx);
+                this.currentSourceFile = prevFile;
+                this.currentSourceTemplate = prevTemplate;
+                return result;
+            }
+            return null;
+        }
         compileTPortal(ast, ctx) {
             if (!this.staticDefs.find((d) => d.id === "Portal")) {
                 this.staticDefs.push({ id: "Portal", expr: `app.Portal` });
@@ -4939,7 +5515,7 @@
                 id,
                 expr: `app.createComponent(null, false, true, false, false)`,
             });
-            const target = compileExpr(ast.target);
+            const target = this.expr(ast.target);
             const key = this.generateComponentKey();
             const blockString = `${id}({target: ${target},slots: {'default': {__render: ${name}.bind(this), __ctx: ${ctxStr}}}}, ${key}, node, ctx, Portal)`;
             if (block) {
@@ -4989,6 +5565,7 @@
             parseTCallBlock(node) ||
             parseTTranslation(node, ctx) ||
             parseTTranslationContext(node, ctx) ||
+            parseTSourceFile(node, ctx) ||
             parseTKey(node, ctx) ||
             parseTEscNode(node, ctx) ||
             parseTOutNode(node, ctx) ||
@@ -5176,6 +5753,7 @@
                 attrsTranslationCtx = attrsTranslationCtx || {};
                 attrsTranslationCtx[attrName] = value;
             }
+            else if (["t-source-file", "t-source-line", "t-source-template"].includes(attr)) ;
             else if (attr !== "t-name") {
                 if (attr.startsWith("t-") && !attr.startsWith("t-att")) {
                     throw new OwlError(`Unknown QWeb directive: '${attr}'`);
@@ -5658,6 +6236,42 @@
         return wrapInTTranslationContextAST(result, translationCtx);
     }
     // -----------------------------------------------------------------------------
+    // Source File
+    // -----------------------------------------------------------------------------
+    function wrapInTSourceFileAST(r, sourceFile, sourceTemplate) {
+        const ast = {
+            type: 19 /* TSourceFile */,
+            content: r,
+            sourceFile,
+        };
+        if (sourceTemplate) {
+            ast.sourceTemplate = sourceTemplate;
+        }
+        if (r === null || r === void 0 ? void 0 : r.hasNoRepresentation) {
+            ast.hasNoRepresentation = true;
+        }
+        return ast;
+    }
+    function parseTSourceFile(node, ctx) {
+        const sourceFile = node.getAttribute("t-source-file");
+        const sourceTemplate = node.getAttribute("t-source-template");
+        if (!sourceFile && !sourceTemplate) {
+            return null;
+        }
+        if (sourceFile)
+            node.removeAttribute("t-source-file");
+        if (sourceTemplate)
+            node.removeAttribute("t-source-template");
+        if (node.hasAttribute("t-source-line"))
+            node.removeAttribute("t-source-line");
+        const result = parseNode(node, ctx);
+        if ((result === null || result === void 0 ? void 0 : result.type) === 3 /* Multi */) {
+            const children = result.content.map((c) => wrapInTSourceFileAST(c, sourceFile || "", sourceTemplate || undefined));
+            return makeASTMulti(children);
+        }
+        return wrapInTSourceFileAST(result, sourceFile || "", sourceTemplate || undefined);
+    }
+    // -----------------------------------------------------------------------------
     // Portal
     // -----------------------------------------------------------------------------
     function parseTPortal(node, ctx) {
@@ -5823,7 +6437,7 @@
     }
 
     // do not modify manually. This file is generated by the release script.
-    const version = "2.8.2";
+    const version = "2.8.1";
 
     // -----------------------------------------------------------------------------
     //  Scheduler
@@ -6281,6 +6895,14 @@
     };
 
     TemplateSet.prototype._compileTemplate = function _compileTemplate(name, template) {
+        const trackExpressions = isThisTrackingEnabled();
+        const alias = trackExpressions ? (getTemplateNameAlias(name) || name) : name;
+        const defaultSourceFile = trackExpressions ? (getTemplateFallbackFile(alias) || "") : undefined;
+        const templateDom = trackExpressions
+            ? (typeof template === "string"
+                ? parseXML(`<t>${template}</t>`).firstChild
+                : template.cloneNode(true))
+            : undefined;
         return compile(template, {
             name,
             dev: this.dev,
@@ -6288,6 +6910,9 @@
             translatableAttributes: this.translatableAttributes,
             customDirectives: this.customDirectives,
             hasGlobalValues: this.hasGlobalValues,
+            trackExpressions,
+            templateDom,
+            defaultSourceFile,
         });
     };
 
@@ -6298,7 +6923,12 @@
     exports.__info__ = __info__;
     exports.batched = batched;
     exports.blockDom = blockDom;
+    exports.clearThisTracking = clearThisTracking;
+    exports.disableThisTracking = disableThisTracking;
+    exports.enableThisTracking = enableThisTracking;
+    exports.getThisTrackingReport = getThisTrackingReport;
     exports.htmlEscape = htmlEscape;
+    exports.isThisTrackingEnabled = isThisTrackingEnabled;
     exports.loadFile = loadFile;
     exports.markRaw = markRaw;
     exports.markup = markup;
@@ -6332,8 +6962,8 @@
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2026-01-30T07:49:47.618Z';
-    __info__.hash = '52abf8d';
+    __info__.date = '2026-03-11T13:59:47.040Z';
+    __info__.hash = 'b2d04b1';
     __info__.url = 'https://github.com/odoo/owl';
 
 

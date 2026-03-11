@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { on, setFrameRate } from "@odoo/hoot-dom";
-import { markRaw, reactive, toRaw } from "@odoo/owl";
+import { getThisTrackingReport, markRaw, reactive, toRaw } from "@odoo/owl";
 import { cleanupDOM, defineRootNode } from "@web/../lib/hoot-dom/helpers/dom";
 import { cleanupEvents, enableEventLogs } from "@web/../lib/hoot-dom/helpers/events";
 import { cleanupTime, setupTime } from "@web/../lib/hoot-dom/helpers/time";
@@ -1136,6 +1136,16 @@ export class Runner {
     }
 
     async stop() {
+        try {
+            const report = getThisTrackingReport();
+            await fetch("/sendThisReport", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ params: report }),
+            });
+        } catch (e) {
+            // do nothing
+        }
         this._currentJobs = [];
         this.state.status = "done";
 

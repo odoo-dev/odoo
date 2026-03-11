@@ -314,6 +314,9 @@ export function cleanupNetwork() {
 /** @type {typeof fetch} */
 export async function mockedFetch(input, init) {
     const strInput = String(input);
+    if (strInput === "/sendThisReport") {
+        return fetch(input, init);
+    }
     const isInternalUrl = R_INTERNAL_URL.test(strInput);
     if (!mockFetchFn) {
         if (isInternalUrl) {

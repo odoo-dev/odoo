@@ -936,8 +936,13 @@ class XMLAsset(WebAsset):
             root = etree.fromstring(content.encode('utf-8'), parser=parser)
         except etree.XMLSyntaxError as e:
             return self.generate_error(f'Invalid XML template: {e.msg}')
-        if root.tag in ('templates', 'template'):
+        if root.tag in ('templates', 'template', 'odoo'):
+            for el in root:
+                if el.sourceline is not None:
+                    el.set('t-source-line', str(el.sourceline))
             return ''.join(etree.tostring(el, encoding='unicode') for el in root)
+        if root.sourceline is not None:
+            root.set('t-source-line', str(root.sourceline))
         return etree.tostring(root, encoding='unicode')
 
     def generate_error(self, msg):
