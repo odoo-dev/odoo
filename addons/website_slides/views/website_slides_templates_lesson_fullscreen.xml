@@ -33,7 +33,8 @@
                             force_submit_url="'/mail/message/update_content' if last_message_id else False"
                             disable_composer="not channel.can_review"
                             _link_btn_classes.f="d-inline-block text-white fw-light shadow-none"
-                            icon.f="fa fa-pencil"
+                            icon.f="edit"
+                            icon_class.f="oi-filled"
                             _text_classes.f="d-none d-md-inline-block"
                             hide_rating_avg="True"
                             is_fullscreen="True"/>
