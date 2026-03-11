@@ -88,18 +88,13 @@ class HrVersion(models.Model):
         # {resource: intervals}
         versions_with_calendar_work_entry_source = self.filtered(lambda version: version.work_entry_source == 'calendar')
         result = dict()
-        for calendar, versions in versions_with_calendar_work_entry_source.grouped('resource_calendar_id').items():
-            fully_flex_versions = versions.filtered('is_fully_flexible')
-            for version in fully_flex_versions:
-                result.update({version.employee_id.resource_id.id: Intervals([(start_dt, end_dt, self.env['resource.calendar.attendance'])])})
-            remaining_versions = (versions - fully_flex_versions).with_prefetch()
-            resources_per_tz = remaining_versions._get_resources_per_tz()
-            if remaining_versions:
-                result.update(calendar._attendance_intervals_batch(
-                    start_dt,
-                    end_dt,
-                    resources_per_tz=resources_per_tz,
-                ))
+        for calendar, versions in versions_with_calendar_work_entry_source.filtered('resource_calendar_id').grouped('resource_calendar_id').items():
+            resources_per_tz = versions._get_resources_per_tz()
+            result.update(calendar._attendance_intervals_batch(
+                start_dt,
+                end_dt,
+                resources_per_tz=resources_per_tz,
+            ))
         return result
 
     def _get_interval_work_entry_type(self, interval):
@@ -157,7 +152,14 @@ class HrVersion(models.Model):
             calendar = version.resource_calendar_id
             resource = employee.resource_id
             tz = ZoneInfo(version._get_tz())
-            expected_attendances = expected_attendances_by_resource[resource.id]
+            expected_attendances = expected_attendances_by_resource.get(resource.id, Intervals())
+
+            if not version.resource_calendar_id:
+                # No working schedule: work entries come exclusively from employee leave
+                # requests. No attendance intervals or global time-offs apply.
+                version_vals += version._get_no_calendar_work_entry_vals(
+                    start_dt, end_dt, all_leaves_by_resource[resource.id])
+                continue
 
             # Other calendars: In case the employee has declared time off in another calendar
             # Example: Take a time off, then a credit time.
@@ -197,21 +199,7 @@ class HrVersion(models.Model):
             leaves = leaves_by_resource[resource.id]
             worked_leaves = worked_leaves_by_resource[resource.id]
 
-            real_attendances = expected_attendances - leaves - worked_leaves
-            if version.is_fully_flexible:
-                real_leaves = leaves
-            elif version.is_flexible:
-                # Flexible hours case
-                # For multi day leaves, we want them to occupy the virtual working schedule 12 AM to average working days
-                # For one day leaves, we want them to occupy exactly the time it was taken, for a time off in days
-                # this will mean the virtual schedule and for time off in hours the chosen hours
-                one_day_leaves = Intervals([l for l in leaves if l[0].astimezone(tz).date() == l[1].astimezone(tz).date()], keep_distinct=True)
-                multi_day_leaves = leaves - one_day_leaves
-                resources_per_tz = version._get_resources_per_tz()
-                static_attendances = calendar._attendance_intervals_batch(
-                    start_dt, end_dt, resources_per_tz=resources_per_tz)[resource.id]
-                real_leaves = (static_attendances & multi_day_leaves) | one_day_leaves
-            elif version.has_static_work_entries() or not leaves:
+            if version.has_static_work_entries() or not leaves:
                 real_leaves = expected_attendances & leaves
             else:
                 resources_per_tz = version._get_resources_per_tz()
@@ -282,6 +270,48 @@ class HrVersion(models.Model):
     # will override in attendance bridge to add overtime vals
     def _get_real_attendances(self, attendances, leaves, worked_leaves):
         return attendances - leaves - worked_leaves
+
+    def _get_no_calendar_work_entry_vals(self, start_dt, end_dt, resource_calendar_leaves):
+        """
+        Generate work entry vals for a version without a working schedule.
+        Work entries come exclusively from employee leave requests (hr.leave);
+        no attendance intervals or global time-offs apply.
+        Emits {date, duration, ...} directly so postprocess skips duration recomputation.
+        """
+        self.ensure_one()
+        tz = ZoneInfo(self._get_tz())
+        employee = self.employee_id
+        vals = []
+        for rcl in resource_calendar_leaves.filtered('holiday_id'):
+            rcl_start = rcl.date_from.astimezone(tz)
+            rcl_end = rcl.date_to.astimezone(tz)
+            clipped_start = max(rcl_start, start_dt.astimezone(tz))
+            clipped_end = min(rcl_end, end_dt.astimezone(tz))
+            if clipped_start >= clipped_end:
+                continue
+            holiday = rcl.holiday_id
+            total_secs = (rcl_end - rcl_start).total_seconds()
+            clipped_secs = (clipped_end - clipped_start).total_seconds()
+            if total_secs and holiday.number_of_hours:
+                # Prorate hours proportionally when the leave is clipped at a period boundary
+                duration = holiday.number_of_hours * clipped_secs / total_secs
+            else:
+                # Fully flexible (no hours_per_day/week defined): fall back to wall-clock hours
+                duration = clipped_secs / 3600
+            work_entry_type = (
+                self._get_leave_work_entry_type(rcl)
+                or self.env.ref('hr_work_entry.generic_work_entry_type_leave')
+            )
+            interval = (clipped_start, clipped_end, rcl)
+            vals.append(dict([
+                ('date', clipped_start.date()),
+                ('duration', duration),
+                ('work_entry_type_id', work_entry_type),
+                ('employee_id', employee),
+                ('version_id', self),
+                ('company_id', self.company_id),
+            ] + self._get_more_vals_leave_interval(interval, [interval])))
+        return vals
 
     def _get_work_entries_values(self, date_start, date_stop):
         """
