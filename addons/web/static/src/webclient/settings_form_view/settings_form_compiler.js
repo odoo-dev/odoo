@@ -91,9 +91,11 @@ export class SettingsFormCompiler extends FormCompiler {
     }
 
     compileBlock(el, params) {
+        params.blockTitle = toStringExpression(el.getAttribute("title") || "");
+        params.blockTip = toStringExpression(el.getAttribute("help") || "");
         const settingsContainer = createElement("SettingsBlock", {
-            title: toStringExpression(el.getAttribute("title") || ""),
-            tip: toStringExpression(el.getAttribute("help") || ""),
+            title: params.blockTitle,
+            tip: params.blockTip,
         });
         for (const child of el.children) {
             append(settingsContainer, this.compileNode(child, params));
@@ -105,6 +107,13 @@ export class SettingsFormCompiler extends FormCompiler {
         params.componentName =
             el.getAttribute("type") === "header" ? "SettingHeader" : "SearchableSetting";
         const res = super.compileSetting(el, params);
+        const fieldName = res.getAttribute("fieldName");
+        const string = res.getAttribute("string");
+        const help = res.getAttribute("help");
+        res.setAttribute(
+            "t-if",
+            `__comp__.isSettingVisible(${fieldName}, ${string}, ${help}, ${params.blockTitle}, ${params.blockTip})`
+        );
         return res;
     }
 }
