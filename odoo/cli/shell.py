@@ -11,7 +11,7 @@ from odoo import api
 from odoo.modules.registry import Registry
 from odoo.service import server
 from odoo.tools import config
-from . import Command, server as cli_server
+from . import Command, server as cli_server, shell_audit
 
 _logger = logging.getLogger(__name__)
 
@@ -52,6 +52,23 @@ class Console(code.InteractiveConsole):
             readline.parse_and_bind("tab: complete")
 
 
+class AuditConsole(Console):
+    """Console subclass that records each complete command into the audit transcript."""
+
+    def runsource(self, source, filename="<input>", symbol="single"):
+        import codeop  # noqa: PLC0415
+        try:
+            code_obj = codeop.compile_command(source, filename, symbol)
+        except (OverflowError, SyntaxError, ValueError):
+            # Syntax error - treat as complete (super will show the error)
+            code_obj = True
+        if code_obj is None:
+            # Incomplete input - wait for more lines before recording
+            return super().runsource(source, filename, symbol)
+        shell_audit.append_command(source)
+        return super().runsource(source, filename, symbol)
+
+
 class Shell(Command):
     """Start odoo in an interactive shell"""
     supported_shells = ['ipython', 'ptpython', 'bpython', 'python']
@@ -79,7 +96,9 @@ class Shell(Command):
     def console(self, local_vars):
         if not os.isatty(sys.stdin.fileno()):
             local_vars['__name__'] = '__main__'
-            exec(sys.stdin.read(), local_vars)
+            source = sys.stdin.read()
+            shell_audit.append_command(source)
+            exec(source, local_vars)
         else:
             if 'env' not in local_vars:
                 print('No environment set, use `%s shell -d dbname` to get one.' % sys.argv[0])
@@ -106,8 +125,10 @@ class Shell(Command):
 
     def ipython(self, local_vars, pythonstartup=None):
         from IPython import start_ipython  # noqa: PLC0415
+        local_vars['_setup_audit'] = shell_audit.setup_ipython
         argv = (
-            ['--TerminalIPythonApp.display_banner=False']
+            ['--TerminalIPythonApp.display_banner=False',
+             '--TerminalIPythonApp.exec_lines=_setup_audit(get_ipython())']
             + ([f'--TerminalIPythonApp.exec_files={pythonstartup}'] if pythonstartup else [])
         )
         start_ipython(argv=argv, user_ns=local_vars)
@@ -121,7 +142,7 @@ class Shell(Command):
         embed(local_vars, args=['-q', '-i', pythonstartup] if pythonstartup else None)
 
     def python(self, local_vars, pythonstartup=None):
-        console = Console(local_vars)
+        console = AuditConsole(local_vars)
         if pythonstartup:
             with open(pythonstartup, encoding='utf-8') as f:
                 console.runsource(f.read(), filename=pythonstartup, symbol='exec')
@@ -134,6 +155,8 @@ class Shell(Command):
         }
         if dbname:
             registry = Registry(dbname)
+            shell_audit.install_patches()
+            shell_audit._install_query_hook()
             with registry.cursor() as cr:
                 uid = api.SUPERUSER_ID
                 ctx = api.Environment(cr, uid, {})['res.users'].context_get()
@@ -144,6 +167,9 @@ class Shell(Command):
                 # avoid logging warning "rolling back the transaction before testing"
                 # from odoo.tests.shell.run_tests if the user hasn't done anything.
                 cr.rollback()
+                # Activate audit only after the registry setup is complete so
+                # that internal setup queries and commits are not captured.
+                shell_audit._activate()
                 self.console(local_vars)
                 cr.rollback()
         else:
