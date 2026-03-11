@@ -10,7 +10,7 @@
     <t t-name="html_editor.EmbeddedComponentToolbarButton">
         <button t-if="!props.hidden" t-custom-ref="buttonRef" t-on-click="props.onClick" t-att-name="props.name" t-att-title="props.title"
             class="btn btn-primary btn-link btn-sm border-0 py-0 text-break text-start text-o-color-2 text-capitalize fw-bold border-transparent bg-transparent">
-            <i t-if="props.icon" t-attf-class="fa #{props.icon} me-1"/>
+            <i t-if="props.icon" t-attf-class="oi #{props.icon_class} me-1" t-att-data-icon="props.icon"/>
             <span class="o_embedded_toolbar_button_text" t-out="props.label"/>
         </button>
     </t>
