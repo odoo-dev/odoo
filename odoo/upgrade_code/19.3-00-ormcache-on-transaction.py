@@ -9,7 +9,6 @@ if typing.TYPE_CHECKING:
 
 def upgrade(file_manager: FileManager):
     clear_cache_re = re.compile(r"\bregistry\.clear_cache")
-
     for file in file_manager:
         if file.path.suffix != '.py':
             continue

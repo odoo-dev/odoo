@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from odoo import api, fields, models, _, SUPERUSER_ID
 from odoo.exceptions import UserError
 from odoo.fields import Domain
-from odoo.tools import ormcache, float_is_zero
+from odoo.tools import float_is_zero
 from odoo.tools.intervals import Intervals
 
 
@@ -25,7 +25,7 @@ class HrVersion(models.Model):
         ''', groups="base.group_system,hr.group_hr_manager")
 
     # YTI Break ormcache + select country attendance entry type
-    @ormcache()
+    @api.ormcache()
     def _get_default_work_entry_type_id(self):
         attendance = self.env.ref('hr_work_entry.generic_work_entry_type_attendance', raise_if_not_found=False)
         return attendance.id if attendance else False

@@ -117,7 +117,7 @@ class Website(models.CachedModel):
         'domain', 'cookies_bar',
     )
 
-    @tools.ormcache(cache='default')
+    @api.ormcache(cache='default')
     def _cached_data(self):
         # method is overridden to use cache 'default' instead of 'stable'
         # hack: retrieve the original method to skip the ormcache wrapper
@@ -322,7 +322,7 @@ class Website(models.CachedModel):
         }
 
     # self.env.uid for ir.rule groups on menu
-    @tools.ormcache('self.env.uid', 'self.id', cache='templates')
+    @api.ormcache('self.env.uid', 'self.id', cache='templates')
     def is_menu_cache_disabled(self):
         """
         Checks if the website menu contains a record like url.
@@ -1448,7 +1448,7 @@ class Website(models.CachedModel):
         return self.browse(website_id)
 
     @api.model
-    @tools.ormcache('domain_name', 'fallback')
+    @api.ormcache('domain_name', 'fallback')
     def _get_current_website_id(self, domain_name, fallback=True):
         """Get the current website id.
 

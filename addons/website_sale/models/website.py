@@ -13,7 +13,7 @@ from odoo import SUPERUSER_ID, api, fields, models
 from odoo.exceptions import AccessError, MissingError
 from odoo.fields import Domain
 from odoo.http import request
-from odoo.tools import BinaryBytes, file_open, ormcache
+from odoo.tools import BinaryBytes, file_open
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.translate import LazyTranslate, _
 
@@ -548,7 +548,7 @@ class Website(models.Model):
         return res
 
     # This method is cached, must not return records! See also #8795
-    @ormcache(
+    @api.ormcache(
         "country_code", "show_visible", "current_pl_id", "website_pricelist_ids", "partner_pl_id"
     )
     def _get_pl_partner_order(

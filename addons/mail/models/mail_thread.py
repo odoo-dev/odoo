@@ -36,7 +36,7 @@ from odoo.tools import (
     BinaryBytes,
     is_html_empty, html_escape, html2plaintext,
     clean_context, split_every, SQL,
-    OrderedSet, ormcache, is_list_of,
+    OrderedSet, is_list_of,
 )
 from odoo.tools.mail import (
     append_content_to_html, decode_message_header,
@@ -623,7 +623,7 @@ class MailThread(models.AbstractModel):
         """
         return ''
 
-    @ormcache('self.env.uid', 'self.env.su')
+    @api.ormcache('self.env.uid', 'self.env.su')
     def _track_get_fields(self):
         """ Return the set of tracked fields names for the current model. """
         model_fields = {

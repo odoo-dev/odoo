@@ -9,7 +9,7 @@ import werkzeug
 from lxml import etree
 
 import odoo
-from odoo import api, models, tools
+from odoo import api, models
 from odoo import SUPERUSER_ID
 from odoo.exceptions import AccessError
 from odoo.fields import Domain
@@ -108,7 +108,7 @@ class IrHttp(models.AbstractModel):
 
         return super()._url_for(url_from, lang_code)
 
-    @tools.ormcache('website_id', cache='routing')
+    @api.ormcache('website_id', cache='routing')
     def _rewrite_len(self, website_id: int) -> int:
         rewrites = self._get_rewrites(website_id)
         return len(rewrites)
