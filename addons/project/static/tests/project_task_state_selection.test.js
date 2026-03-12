@@ -37,7 +37,7 @@ test("project.task (kanban): check task state widget", async () => {
     await animationFrame();
     expect("div[name='state']:first-child button.dropdown-toggle i[data-icon='cancel']").toBeVisible({
         message:
-            "If the canceled state as been selected, the fa-times-circle icon should be displayed",
+            "If the canceled state as been selected, the cancel icon should be displayed",
     });
 
     await click("div[name='state'] i[data-icon='hourglass_empty']");
