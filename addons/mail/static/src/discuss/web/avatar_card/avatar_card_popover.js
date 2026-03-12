@@ -15,9 +15,9 @@ export class AvatarCardPopover extends Component {
     static template = "mail.AvatarCardPopover";
     static components = { ActionList, Dropdown, DropdownItem, ImStatus };
     static props = {
-        id: { type: Number, required: true },
+        id: { type: Number },
         channelMember: { type: Object, optional: true },
-        close: { type: Function, required: true },
+        close: { type: Function },
         model: {
             type: String,
             validate: (m) => ["res.users", "res.partner"].includes(m),
