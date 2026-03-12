@@ -173,7 +173,7 @@ export class HootDebugToolBar extends Component {
                             title="Exit debug mode (Ctrl + Esc)"
                             t-on-click.stop="exitDebugMode"
                         >
-                            <i class="fa fa-sign-out" />
+                            <i class="oi" data-icon="logout" />
                         </button>
                         <t t-if="done">
                             <button
@@ -181,7 +181,7 @@ export class HootDebugToolBar extends Component {
                                 title="Restart test (F5)"
                                 t-on-click.stop="refresh"
                             >
-                                <i class="fa fa-refresh" />
+                                <i class="oi" data-icon="refresh" />
                             </button>
                         </t>
                     </div>
@@ -218,7 +218,7 @@ export class HootDebugToolBar extends Component {
                         />
                     </button>
                     <button class="p-2" t-on-click="toggleConfig">
-                        <i class="fa fa-cog" />
+                        <i class="oi oi-filled" data-icon="settings" />
                     </button>
                 </div>
                 <t t-if="state.open">

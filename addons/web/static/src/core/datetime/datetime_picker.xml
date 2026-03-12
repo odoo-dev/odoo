@@ -60,7 +60,7 @@
                     showSeconds="props.rounding === 0"
                     inputCssClass="'o_input'"
                 />
-                <i t-if="state.timeValues[0] and state.timeValues[1]" class="fa fa-long-arrow-right"/>
+                <i t-if="state.timeValues[0] and state.timeValues[1]" class="oi" data-icon="east"/>
                 <TimePicker
                     t-if="state.timeValues[1]"
                     value="state.timeValues[1]"
@@ -110,7 +110,7 @@
                     tabindex="-1"
                     data-available-offline=""
                 >
-                    <i class="oi oi-chevron-left" t-att-title="activePrecisionLevel.prevTitle" />
+                    <i class="oi" data-icon="chevron_backward" t-att-title="activePrecisionLevel.prevTitle" />
                 </button>
                 <button
                     class="o_next btn btn-sm opacity-75 opacity-100-hover"
@@ -118,7 +118,7 @@
                     tabindex="-1"
                     data-available-offline=""
                 >
-                    <i class="oi oi-chevron-right" t-att-title="activePrecisionLevel.nextTitle" />
+                    <i class="oi" data-icon="chevron_forward" t-att-title="activePrecisionLevel.nextTitle" />
                 </button>
                 <button
                     class="o_zoom_out o_datetime_button btn opacity-75 opacity-100-hover text-truncate"

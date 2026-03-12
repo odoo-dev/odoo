@@ -345,10 +345,10 @@
                                 <field name="user_id" widget="many2one_avatar_user" />
                                 <field name="date_deadline" widget="remaining_days" class="ms-2"/>
                                 <button type="object" name="action_done" class="btn btn-link btn-sm ms-auto me-1" invisible="active == False">
-                                    <i class="fa fa-check" /> Done
+                                    <i class="oi" data-icon="check" /> Done
                                 </button>
                                 <button type="object" name="unlink" class="btn btn-link text-danger btn-sm">
-                                    <i class="fa fa-times" /> Cancel
+                                    <i class="oi" data-icon="close" /> Cancel
                                 </button>
                             </footer>
                         </main>

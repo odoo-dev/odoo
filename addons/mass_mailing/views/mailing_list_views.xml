@@ -161,7 +161,7 @@
                                     <field name="contact_count_email" class="fw-normal"/>
                                     <br/>
                                     <span class="text-muted">
-                                        <i class="fa fa-envelope-o"/> Contacts
+                                        <i class="oi" data-icon="mail"/> Contacts
                                     </span>
                                 </a>
                                 <a class="me-sm-0 me-3 fs-4 fw-light lh-1 text-truncate" tabindex="-1"

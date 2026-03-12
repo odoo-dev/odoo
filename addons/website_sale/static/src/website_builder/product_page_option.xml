@@ -134,7 +134,7 @@
                 </BuilderSelectItem>
 	            <BuilderSelectItem actionValue="'grid'">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="oi oi-apps"/>Grid
+                        <i class="oi" data-icon="apps"/>Grid
                     </div>
                 </BuilderSelectItem>
 	        </BuilderSelect>
@@ -352,7 +352,7 @@
             action="'websiteConfig'"
             actionParam="{ views: ['website_sale.product_buy_now'] }"
         >
-            <i class="fa fa-fw fa-bolt"/>
+            <i class="oi oi-fw" data-icon="flash_on"/>
             Buy Now
         </BuilderButton>
         <BuilderButton title.translate="Select Quantity" className="'o_we_buy_now_btn'"

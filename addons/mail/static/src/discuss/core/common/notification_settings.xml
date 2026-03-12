@@ -21,7 +21,7 @@
                     }" t-custom-ref="mute-button">
                         <span class="text-wrap text-start text-break">Mute Conversation</span>
                         <div class="o-discuss-NotificationSettings-separator flex-grow-1"/>
-                        <i t-if="!this.env[this.DROPDOWN_NESTING]" class="fa fa-caret-right fa-lg mx-2"/>
+                        <i t-if="!this.env[this.DROPDOWN_NESTING]" class="oi oi-lg mx-2" data-icon="arrow_right"/>
                     </button>
                     <t t-set-slot="content">
                         <t t-call="discuss.NotificationSettings.muteSttings"/>

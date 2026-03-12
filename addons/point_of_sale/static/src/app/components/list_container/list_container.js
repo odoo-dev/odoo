@@ -40,7 +40,7 @@ export class ListContainer extends Component {
     static template = xml`
         <div class="d-flex gap-1 align-items-center flex-grow-1" t-attf-class="{{props.class}}" t-att-class="{'overflow-hidden': !isUiSmall}">
             <button t-if="props.onClickPlus" class="list-plus-btn btn btn-secondary btn-lg flex-shrink-0 lh-lg" t-on-click="props.onClickPlus">
-                <i class="fa fa-fw fa-plus-circle" aria-hidden="true"/>
+                <i class="oi oi-fw" data-icon="add_circle" aria-hidden="true"/>
             </button>
             <span t-if="props.onClickPlus" class="navbar-separator mx-1"/>
             <div class="overflow-hidden flex-grow-1">

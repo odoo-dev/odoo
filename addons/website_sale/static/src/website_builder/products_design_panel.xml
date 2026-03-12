@@ -153,7 +153,7 @@
                 >
                     <i
                         class="oi me-2"
-                        t-att-class="style.type == 'catalog' ? 'oi-apps' : 'oi-view-list'"
+                        t-att-data-icon="style.type == 'catalog' ? 'apps' : 'view_list'"
                     />
                     <span t-out="style.label"/>
                 </div>
@@ -185,7 +185,7 @@
                         <div t-else="" class="d-flex align-items-center ps-1">
                             <i
                                 class="oi me-2"
-                                t-att-class="style.type == 'catalog' ? 'oi-apps' : 'oi-view-list'"
+                                t-att-data-icon="style.type == 'catalog' ? 'apps' : 'view_list'"
                             />
                             <t t-out="style.label"/>
                         </div>

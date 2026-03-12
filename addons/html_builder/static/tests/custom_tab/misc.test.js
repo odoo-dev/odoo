@@ -728,7 +728,7 @@ describe("isActiveItem", () => {
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='2']"
         ).toBeVisible();
-        await contains(".fa-undo").click();
+        await contains("[data-icon='undo']").click();
         expect(":iframe .test-options-target").toHaveAttribute("my-attribute1", "x");
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='1']"
@@ -736,7 +736,7 @@ describe("isActiveItem", () => {
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='2']"
         ).not.toHaveCount();
-        await contains(".fa-undo").click();
+        await contains("[data-icon='undo']").click();
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='1']"
         ).not.toHaveCount();

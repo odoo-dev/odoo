@@ -2253,10 +2253,10 @@ test("sidebar: cannot leave channel with group_ids", async () => {
     ]);
     await start();
     await openDiscuss();
-    await click(".o-mail-DiscussSidebarChannel:text(General) .oi-ellipsis-h");
+    await click(".o-mail-DiscussSidebarChannel:text(General) [data-icon='more_horiz']");
     await waitFor(".dropdown-item:text(Notification Settings)"); // check anything else in the dropdown
     await waitForNone(".dropdown-item:text(Leave Channel)");
-    await click(".o-mail-DiscussSidebarChannel:text(Special) .oi-ellipsis-h");
+    await click(".o-mail-DiscussSidebarChannel:text(Special) [data-icon='more_horiz']");
     await waitFor(".dropdown-item:text(Leave Channel)");
 });
 

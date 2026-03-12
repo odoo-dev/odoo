@@ -307,7 +307,7 @@
                                         <field name="task_id" invisible="not context.get('default_project_id')" class="p-0 fw-bold fs-5"/>
                                     </span>
                                     <span>
-                                        <i class="fa fa-calendar me-1" role="img" aria-label="Date" title="Date"></i>
+                                        <i class="oi oi-filled me-1" data-icon="calendar_today" role="img" aria-label="Date" title="Date"></i>
                                         <field name="date"/><span invisible="context.get('is_my_timesheets')"> - <field name="employee_id"/></span>
                                     </span>
                                     <span class="text-truncate" t-att-title="record.name.value"><field name="name" class="fst-italic"/></span>

@@ -44,7 +44,8 @@
                     >
                         <button class="alert-link btn btn-link btn-sm p-0">
                             <i
-                                t-attf-class="fa fa-fw {{'fa-refresh' if available_qty else 'fa-trash-o'}}"
+                                class="oi oi-fw"
+                                t-attf-data-icon="{{'refresh' if available_qty else 'delete'}}"
                                 role="presentation"
                                 aria-label="Update cart quantities"
                             />
@@ -115,7 +116,8 @@
         <span name="o_delivery_method_name" position="before">
             <i
                 t-if="request.website.sudo().in_store_dm_id"
-                t-attf-class="fa fa-fw {{'fa-map-marker' if dm.delivery_type == 'in_store' else 'fa-truck'}} me-1"
+                class="oi oi-fw me-1"
+                t-attf-data-icon="{{'location_on' if dm.delivery_type == 'in_store' else 'local_shipping'}}"
                 role="presentation"
                 aria-label="Delivery method"
             />

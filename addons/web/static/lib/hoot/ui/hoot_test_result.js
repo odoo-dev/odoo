@@ -123,8 +123,8 @@ const EVENT_TEMPLATE = /* xml */ `
             target="_blank"
         >
             <t t-if="event.flags">
-                <i t-if="event.hasFlag('rejects')" class="fa fa-times" />
-                <i t-elif="event.hasFlag('resolves')" class="fa fa-arrow-right" />
+                <i t-if="event.hasFlag('rejects')" class="oi" data-icon="close" />
+                <i t-elif="event.hasFlag('resolves')" class="oi" data-icon="arrow_forward" />
                 <i t-if="event.hasFlag('not')" class="fa fa-exclamation" />
             </t>
             <strong t-esc="event.label" />

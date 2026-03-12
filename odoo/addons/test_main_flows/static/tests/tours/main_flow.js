@@ -906,7 +906,7 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     isActive: ["mobile"],
-    trigger: ".o_control_panel_navigation .btn .fa-search",
+    trigger: ".o_control_panel_navigation .btn [data-icon='search']",
     run: "click",
 }, {
     isActive: ["desktop"],

@@ -8,7 +8,7 @@
             href="#"
             class="ml8 o_employee_chat_btn"
             role="button">
-            <i class="fa fa-comments align-middle fs-6"/>
+            <i class="oi oi-filled align-middle fs-6" data-icon="forum"/>
         </a>
     </t>
 </templates>

@@ -162,13 +162,13 @@
                             <div>
                                 <a type="object" name="action_view_cards_shared" href="#" class="me-1">
                                     <span class="badge rounded-pill">
-                                        <i class="fa fa-fw fa-share" aria-label="Shares" role="img" title="Shares"/>
+                                        <i class="oi oi-fw" data-icon="share" aria-label="Shares" role="img" title="Shares"/>
                                         <field name="card_share_count"/>
                                     </span>
                                 </a>
                                 <a type="object" name="action_view_cards_clicked" href="#" class="me-1">
                                     <span class="badge rounded-pill">
-                                        <i class="fa fa-fw fa-mouse-pointer" aria-label="Clicks" role="img" title="Clicks"/>
+                                        <i class="oi oi-fw" data-icon="mouse"  aria-label="Clicks" role="img" title="Clicks"/>
                                         <field name="target_url_click_count"/>
                                     </span>
                                 </a>

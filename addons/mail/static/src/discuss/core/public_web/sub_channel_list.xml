@@ -11,8 +11,8 @@
                             </div>
                         </div>
                         <button class="btn btn-outline-secondary px-2 py-1" aria-label="Search button" t-on-click="this.search">
-                            <i t-if="!this.state.loading" class="o_searchview_icon oi oi-search" role="img" aria-label="Search Sub Channels" title="Search Sub Channels"/>
-                            <i t-else="" class="fa fa-circle-o-notch fa-spin" aria-label="Search in progress" title="Search in progress"/>
+                            <i t-if="!this.state.loading" class="o_searchview_icon oi" data-icon="search" role="img" aria-label="Search Sub Channels" title="Search Sub Channels"/>
+                            <i t-else="" class="oi oi-spin" data-icon="autorenew" aria-label="Search in progress" title="Search in progress"/>
                         </button>
                         <button t-if="this.props.channel.canCreateSubChannels" class="btn btn-primary smaller" aria-label="Create Thread" t-on-click="this.onClickCreate">Create</button>
                     </div>

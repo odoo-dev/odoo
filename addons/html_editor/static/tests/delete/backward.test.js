@@ -408,7 +408,7 @@ describe("Selection collapsed", () => {
 
         test("should remove a fontawesome", async () => {
             await testEditor({
-                contentBefore: `<div><p>abc<span class="fa"></span>[]def</p></div>`,
+                contentBefore: `<div><p>abc<span class="oi"></span>[]def</p></div>`,
                 stepFunction: async (editor) => {
                     deleteBackward(editor);
                 },

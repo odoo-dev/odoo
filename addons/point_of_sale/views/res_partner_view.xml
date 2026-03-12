@@ -51,12 +51,12 @@
                                     </div>
                                     <label for="email" class="d-md-none"/>
                                     <div class="o_input_box">
-                                        <i class="o_input_box_overlay_start d-none d-md-inline-flex fa fa-envelope" title="Email"/>
+                                        <i class="o_input_box_overlay_start d-none d-md-inline-flex oi oi-filled" data-icon="mail" title="Email"/>
                                         <field name="email" widget="email" required="user_ids" placeholder="Email"/>
                                     </div>
                                     <label for="phone" class="d-md-none"/>
                                     <div class="o_input_box">
-                                        <i class="o_input_box_overlay_start d-none d-md-inline-flex fa fa-phone" title="Phone"/>
+                                        <i class="o_input_box_overlay_start d-none d-md-inline-flex oi oi-filled" data-icon="phone" title="Phone"/>
                                         <field name="phone" widget="phone" placeholder="Phone"/>
                                     </div>
                                 </div>

@@ -30,7 +30,7 @@
                 <span class="fw-bolder px-2 text-break"><t t-out="this.displayName"/></span>
                 <span class="o-mail-Activity-user px-1" t-if="this.props.activity.user_id?.partner_id" >for <t t-out="this.props.activity.user_id.partner_id.displayName"/></span>
                 <button class="btn btn-link btn-primary p-0 lh-1 border-0">
-                    <i class="fa fa-info-circle" role="img" title="Info" aria-label="Info" t-on-click="this.toggleDetails"/>
+                    <i class="oi" data-icon="info" role="img" title="Info" aria-label="Info" t-on-click="this.toggleDetails"/>
                 </button>
             </div>
             <div t-if="this.state.showDetails">
@@ -50,7 +50,7 @@
             <div t-if="this.props.activity.can_write" class="lh-lg">
                 <t name="tools">
                     <button class="o-mail-Activity-markDone btn btn-link btn-success p-0 me-3" t-on-click="this.onClickMarkAsDone">
-                        <i class="fa fa-check"/> Mark Done
+                        <i class="oi" data-icon="check"/> Mark Done
                     </button>
                     <FileUploader t-if="this.props.activity.activity_category === 'upload_file'" onUploaded.bind="this.onFileUploaded">
                         <t t-set-slot="toggler">
@@ -60,10 +60,10 @@
                         </t>
                     </FileUploader>
                     <button class="o-mail-Activity-edit btn btn-link text-action p-0 me-3" t-on-click="this.edit">
-                        <i class="fa fa-pencil"/> Edit
+                        <i class="oi oi-filled" data-icon="edit"/> Edit
                     </button>
                     <button class="btn btn-link btn-danger p-0" t-on-click="this.unlink">
-                        <i class="fa fa-times"/> Cancel
+                        <i class="oi" data-icon="close"/> Cancel
                     </button>
                 </t>
             </div>

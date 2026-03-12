@@ -9,7 +9,8 @@
 				<t t-set-slot="pack-lot-icon">
 					<i t-if="line.getProduct()?.product_tmpl_id?.isTracked()"
 						t-on-click.stop="() => this.editPackLotLines(line)" role="img"
-						t-attf-class="{{ line.hasValidProductLot() ? 'text-success' : 'text-danger'}} fa fa-list line-lot-icon ms-1"
+						t-attf-class="{{ line.hasValidProductLot() ? 'text-success' : 'text-danger'}} oi line-lot-icon ms-1"
+						data-icon="format_list_bulleted"
 						t-attf-title="{{ line.hasValidProductLot() ? 'Valid product lot' : 'Invalid product lot'}}" />
 				</t>
 			</Orderline>

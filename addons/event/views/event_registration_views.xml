@@ -143,16 +143,16 @@
                                 <field class="text-truncate text-primary" name="event_id" invisible="context.get('default_event_id')"/>
                             </div>
                             <span class="text-truncate" invisible="not company_name">
-                                <i class="fa fa-building" title="Attendee Company"/> <field name="company_name"/>
+                                <i class="oi oi-filled" data-icon="business" title="Attendee Company"/> <field name="company_name"/>
                             </span>
                             <div id="event_ticket_id">
                                 <field name="registration_properties"/>
                                 <div t-if="record.event_slot_id.raw_value">
-                                    <i class="fa fa-calendar" title="Slot"/>
+                                    <i class="oi oi-filled" data-icon="calendar_today" title="Slot"/>
                                     <field name="event_slot_id" class="fw-bold text-truncate ms-1"/>
                                 </div>
                                 <div t-if="record.event_ticket_id.raw_value">
-                                    <i class="fa fa-ticket" title="Ticket type"/>
+                                    <i class="oi" data-icon="confirmation_number" title="Ticket type"/>
                                     <field name="event_ticket_id" class="fw-bold text-truncate ms-1"/>
                                 </div>
                             </div>

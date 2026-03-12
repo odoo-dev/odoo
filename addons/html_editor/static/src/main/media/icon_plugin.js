@@ -68,15 +68,15 @@ export class IconPlugin extends Plugin {
                 // FEFF is directly adjacent to it.
                 const isIconRelatedNode = (node) => {
                     if (
-                        node.classList?.contains("fa") ||
-                        node.parentElement?.classList.contains("fa")
+                        node.classList?.contains("oi") ||
+                        node.parentElement?.classList.contains("oi")
                     ) {
                         return true;
                     }
                     if (isZwnbsp(node) && isIconInTargetedNodes) {
                         return (
-                            node.nextElementSibling?.classList?.contains("fa") ||
-                            node.previousElementSibling?.classList?.contains("fa")
+                            node.nextElementSibling?.classList?.contains("oi") ||
+                            node.previousElementSibling?.classList?.contains("oi")
                         );
                     }
                     return false;

@@ -57,11 +57,11 @@
                 <div class="o_survey_session_open_link o_form_header_group gap-md-0 justify-content-between px-5 py-4 rounded-3 bg-black">
                     <div class="fs-5 o_survey_session_copy">
                         <span class="text-info o_survey_session_copy_url" t-out="survey.session_link"/>
-                        <i class="fa fa-copy"/>
+                        <i class="oi" data-icon="content_copy"/>
                     </div>
                     <a role="button" class="o_survey_session_navigation_next btn btn-lg btn-primary w-100 w-md-auto">
                         <span class="o_survey_session_navigation_next_label">Start</span>
-                        <i class="oi oi-chevron-right"/>
+                        <i class="oi" data-icon="chevron_forward"/>
                     </a>
                 </div>
             </div>
@@ -131,10 +131,10 @@
                 <a role="button"
                     class="o_survey_session_navigation o_survey_session_navigation_next p-2 bg-light text-nowrap">
                     <span class="o_survey_session_navigation_next_label me-2 fw-bold d-none d-md-inline"/>
-                    <i class="fw-bold oi oi-chevron-right"/>
+                    <i class="oi" data-icon="chevron_forward"/>
                 </a>
                 <a role="button"
-                    class="fw-bold oi oi-chevron-left o_survey_session_navigation o_survey_session_navigation_previous p-3" />
+                    class="oi o_survey_session_navigation o_survey_session_navigation_previous p-3" data-icon="chevron_backward"/>
                 <div class="o_survey_session_results flex-column flex-grow-1 mx-5">
                     <div class="row">
                         <div class="col-lg-12"><h1 t-out="question.title"></h1></div>
@@ -183,8 +183,8 @@
                             <span t-else="">Leaderboard</span>
                         </h1>
                         <div t-att-class="'o_survey_leaderboard_buttons fw-bold %s' % 'd-none' if not is_last_question else 'ms-2'">
-                            <a href="#" role="button" class="o_survey_session_close btn btn-primary mt-1"><i class="fa fa-close"/> Close</a>
-                            <a href="#" role="button" class="o_survey_session_close btn btn-primary mt-1" t-att-data-show-results="True"><i class="fa fa-bar-chart"/> Results</a>
+                            <a href="#" role="button" class="o_survey_session_close btn btn-primary mt-1"><i class="oi" data-icon="close"/> Close</a>
+                            <a href="#" role="button" class="o_survey_session_close btn btn-primary mt-1" t-att-data-show-results="True"><i class="oi" data-icon="bar_chart"/> Results</a>
                         </div>
                     </div>
                     <div class="justify-content-center d-flex flex-column flex-grow-1 mt-5 mb-5 pb-5 o_survey_session_leaderboard_container"/>
@@ -210,7 +210,7 @@
                     t-att-data-current-score="str(current_score)"
                     t-att-data-updated-score="str(round(score.get('updated_score', 0)))"
                     t-att-data-max-question-score="str(round(max_question_score))">
-                    <i class="o_survey_session_leaderboard_caret fa mt-1"/>
+                    <i class="o_survey_session_leaderboard_caret oi mt-1"/>
                     <div class="d-inline-block fw-bold align-top position-relative">
                         <div class="d-inline-block me-2 o_survey_session_leaderboard_position">
                             <t t-out="str(score_index + 1)"/>.

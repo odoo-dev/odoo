@@ -19,7 +19,7 @@
                 >
                     <button class="btn d-flex justify-content-between align-items-center o_attach w-100 o_input_box o_input" data-tooltip="Attach">
                         <span class="o_input" t-out="uploadText" />
-                        <i class="btn btn-link o_input_box_overlay_end position-static fa fa-paperclip" />
+                        <i class="btn btn-link o_input_box_overlay_end position-static oi" data-icon="attach_file"/>
                     </button>
                 </FileInput>
             </div>
@@ -50,7 +50,7 @@
                 </div>
             </div>
 
-            <div class="o_attachment_uploaded"><i class="text-success fa fa-check" role="img" aria-label="Uploaded" title="Uploaded"/></div>
+            <div class="o_attachment_uploaded"><i class="oi text-success" data-icon="check" role="img" aria-label="Uploaded" title="Uploaded"/></div>
             <div t-if="editable" class="o_attachment_delete" t-on-click.stop="() => this.onFileRemove(file.id)"><span role="img" aria-label="Delete" title="Delete">×</span></div>
         </div>
     </div>

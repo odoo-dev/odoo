@@ -12,7 +12,7 @@
         </xpath>
         <xpath expr="//CashierName" position="after">
             <button t-if="pos.config.module_pos_hr and !ui.isSmall" class="lock-screen btn btn-light btn-lg lh-lg" title="Lock" t-on-click="() => this.pos.showLoginScreen()">
-                <i class="fa fa-fw fa-unlock"/>
+                <i class="oi oi-fw" data-icon="lock_open"/>
             </button>
         </xpath>
         <xpath expr="//Dropdown//div[hasclass('pos-burger-menu-items')]" position="inside">

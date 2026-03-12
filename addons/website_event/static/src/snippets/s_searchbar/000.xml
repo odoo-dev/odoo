@@ -5,7 +5,7 @@
     <t t-inherit="website.s_searchbar.autocomplete" t-inherit-mode="extension">
         <xpath expr="//div[@class='o_search_result_item_detail px-3']" position="inside">
             <span t-if="result['address_name']" class="small">
-                <span class="fa fa-map-marker"/> <t t-out="result['address_name']"/>
+                <span class="oi" data-icon="location_on"/> <t t-out="result['address_name']"/>
             </span>
         </xpath>
     </t>

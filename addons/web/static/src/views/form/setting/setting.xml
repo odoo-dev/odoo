@@ -13,13 +13,13 @@
                     <span class="o_form_label"><t t-out="labelString"/></span>
                 </t>
                 <t t-if="labelString and props.info">
-                    <span class="fa fa-info-circle" t-att-title="props.info"/>
+                    <span class="oi" data-icon="info" t-att-title="props.info"/>
                 </t>
                 <t t-if="labelString and props.documentation">
                     <DocumentationLink path="props.documentation" icon="'fa-question-circle'"/>
                 </t>
                 <t t-if="displayCompanyDependentIcon">
-                    <span class="fa fa-lg fa-building-o" title="Values set here are company-specific."/>
+                    <span class="oi oi-lg" data-icon="business" title="Values set here are company-specific."/>
                 </t>
                 <t t-if="labelString and props.help">
                     <div class="text-muted"><t t-out="props.help"/></div>

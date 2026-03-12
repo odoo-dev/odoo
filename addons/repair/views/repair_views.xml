@@ -114,7 +114,7 @@
                             <label for="lot_id" invisible="tracking not in ['serial', 'lot']"/>
                             <div class="o_row" invisible="tracking not in ['serial', 'lot']">
                                 <field name="lot_id" context="{'default_product_id': product_id}" groups="stock.group_production_lot" invisible="tracking not in ['serial', 'lot']" readonly="state == 'done'" required="state=='done' and tracking in ['serial', 'lot']"/>
-                                <button name="action_generate_serial" type="object" class="btn btn-primary fa fa-plus-square-o" aria-label="Creates a new serial/lot number" title="Creates a new serial/lot number" role="img" invisible="lot_id"/>
+                                <button name="action_generate_serial" type="object" class="btn btn-primary oi" data-icon="add_box" aria-label="Creates a new serial/lot number" title="Creates a new serial/lot number" role="img" invisible="lot_id"/>
                             </div>
                             <label for="product_qty" invisible="not product_id" groups="base.group_no_one"/>
                             <div class="o_row" invisible="not product_id" groups="base.group_no_one">

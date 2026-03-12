@@ -197,7 +197,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-emerald"
                                             t-on-click.stop="() => this.filterResults('passed')"
                                         >
-                                            <i class="fa fa-check-circle" />
+                                            <i class="oi oi-filled" data-icon="check_circle" />
                                             <strong t-out="runnerReporting.passed" />
                                         </button>
                                         tests passed
@@ -209,7 +209,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-rose"
                                             t-on-click.stop="() => this.filterResults('failed')"
                                         >
-                                            <i class="fa fa-times-circle" />
+                                            <i class="oi oi-filled" data-icon="cancel" />
                                             <strong t-out="runnerReporting.failed" />
                                         </button>
                                         tests failed
@@ -233,7 +233,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-purple"
                                             t-on-click.stop="() => this.filterResults('todo')"
                                         >
-                                            <i class="fa fa-exclamation-circle" />
+                                            <i class="oi" data-icon="error" />
                                             <strong t-out="runnerReporting.todo" />
                                         </button>
                                         tests to do

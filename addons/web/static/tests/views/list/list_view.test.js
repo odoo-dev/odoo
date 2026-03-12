@@ -218,7 +218,7 @@ defineModels([Foo, Bar, Currency, ResCompany, ResPartner, ResUsers]);
 
 async function clickControlPanelAction(buttonName) {
     if (getMockEnv().isSmall) {
-        await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
+        await contains(".o_control_panel_breadcrumbs .o_cp_action_menus [data-icon='settings']").click();
         await contains(`.o-dropdown-item button[name="${buttonName}"]`).click();
     } else {
         await contains(`.o_control_panel_actions button[name="${buttonName}"]`).click();
@@ -1148,9 +1148,9 @@ test(`list view with adjacent buttons with invisible modifier`, async () => {
     expect(`.o_data_row`).toHaveCount(4);
     expect(`.o_data_row td.o_list_button`).toHaveCount(4);
     expect(queryAllTexts(`.o_data_cell`)).toEqual(["yop", "", "blip", "", "gnap", "", "blip", ""]);
-    expect(`td button i.fa-star`).toHaveCount(2);
-    expect(`td button i.fa-refresh`).toHaveCount(3);
-    expect(`td button i.fa-exclamation`).toHaveCount(3);
+    expect(`td button i[data-icon="star"].oi-filled`).toHaveCount(2);
+    expect(`td button i[data-icon="refresh"]`).toHaveCount(3);
+    expect(`td button i[data-icon="priority_high"]`).toHaveCount(3);
 });
 
 test(`list view with adjacent buttons with width attribute`, async () => {
@@ -1170,10 +1170,10 @@ test(`list view with adjacent buttons with width attribute`, async () => {
     expect(`th:not(.o_list_record_selector)`).toHaveCount(4, {
         message: "adjacent buttons with no width in the arch must be grouped in a single column",
     });
-    expect(".o_data_row td:not(.o_list_record_selector):eq(1) .fa-play").toHaveCount(1);
-    expect(".o_data_row td:not(.o_list_record_selector):eq(2) .fa-heart").toHaveCount(1);
-    expect(".o_data_row td:not(.o_list_record_selector):eq(3) .fa-cog").toHaveCount(1);
-    expect(".o_data_row td:not(.o_list_record_selector):eq(3) .fa-list").toHaveCount(1);
+    expect(".o_data_row td:not(.o_list_record_selector):eq(1) [data-icon='play_arrow']").toHaveCount(1);
+    expect(".o_data_row td:not(.o_list_record_selector):eq(2) [data-icon='favorite']").toHaveCount(1);
+    expect(".o_data_row td:not(.o_list_record_selector):eq(3) [data-icon='settings']").toHaveCount(1);
+    expect(".o_data_row td:not(.o_list_record_selector):eq(3) [data-icon='format_list_bulleted']").toHaveCount(1);
 });
 
 test(`list view with icon buttons`, async () => {
@@ -1191,10 +1191,10 @@ test(`list view with icon buttons`, async () => {
             </list>
         `,
     });
-    expect(`button.btn.btn-link i.fa.fa-asterisk`).toHaveCount(1);
-    expect(`button.btn.btn-link.o_yeah i.fa.fa-star`).toHaveCount(1);
-    expect(`button.btn.btn-link.o_yeah:contains(Refresh) i.fa.fa-refresh`).toHaveCount(1);
-    expect(`button.btn.btn-danger.o_yeah:contains(Danger) i.fa.fa-exclamation`).toHaveCount(1);
+    expect(`button.btn.btn-link i[data-icon="emergency"]`).toHaveCount(1);
+    expect(`button.btn.btn-link.o_yeah i[data-icon="star"].oi-filled`).toHaveCount(1);
+    expect(`button.btn.btn-link.o_yeah:contains(Refresh) i[data-icon="refresh"]`).toHaveCount(1);
+    expect(`button.btn.btn-danger.o_yeah:contains(Danger) i[data-icon="priority_high"]`).toHaveCount(1);
     expect(`button.btn.btn-link.btn-danger`).toHaveCount(0);
 });
 
@@ -1263,10 +1263,10 @@ test(`list view: action button in controlPanel basic rendering on mobile`, async
         `,
     });
     expect(`.o_control_panel_actions > *`).toHaveCount(0);
-    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
+    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus [data-icon='settings']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual(["Export"]);
     await clickRecordSelector();
-    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
+    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus [data-icon='settings']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual([
         "plaf",
         "Export",
@@ -1274,7 +1274,7 @@ test(`list view: action button in controlPanel basic rendering on mobile`, async
         "Delete",
     ]);
     await clickRecordSelector();
-    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
+    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus [data-icon='settings']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual(["Export"]);
 });
 
@@ -1355,7 +1355,7 @@ test(`list view: action button in controlPanel with display='always' on mobile`,
     ]);
 
     await clickRecordSelector();
-    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus .fa-cog").click();
+    await contains(".o_control_panel_breadcrumbs .o_cp_action_menus [data-icon='settings']").click();
     expect(queryAllTexts(`.o-dropdown--menu .o-dropdown-item`)).toEqual([
         "",
         "default-selection",
@@ -2085,7 +2085,7 @@ test(`discard a new record in editable="top" list with less than 4 records`, asy
     expect(`tbody tr:eq(0)`).toHaveClass("o_selected_row");
 
     if (getMockEnv().isSmall) {
-        await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+        await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
     }
 
     await contains(`.o_list_button_discard`).click();
@@ -3249,12 +3249,12 @@ test(`change a record field in readonly should change same record in other group
     await contains(`.o_group_header`).click(); // open Value 1 group
     await contains(`.o_group_header:eq(1)`).click(); // open Value 2 group
     expect(queryAllTexts(`.o_list_char`)).toEqual(["yop", "blip", "yop"]);
-    expect(`.o_priority_star.fa-star`).toHaveCount(0, {
+    expect(`.o_priority_star[data-icon="star"].oi-filled`).toHaveCount(0, {
         message: "should not have any starred records",
     });
 
     await contains(`.o_priority_star`).click();
-    expect(`.o_priority_star.fa-star`).toHaveCount(2, {
+    expect(`.o_priority_star[data-icon="star"].oi-filled`).toHaveCount(2, {
         message: "both 'yop' records should have been starred",
     });
     expect.verifySteps(["web_save"]);
@@ -8478,7 +8478,7 @@ test(`list view, editable, with a button`, async () => {
         `,
     });
     await contains(`.o_list_button_add`).click();
-    expect(`table button i.o_button_icon.fa-phone`).toHaveCount(1, {
+    expect(`table button i.o_button_icon[data-icon="phone"]`).toHaveCount(1, {
         message: "should have rendered a button",
     });
     expect(`table button:eq(0)`).toHaveProperty("disabled", false, {
@@ -8688,7 +8688,7 @@ test(`click on a button in a list view`, async () => {
     expect(`tbody .o_list_button`).toHaveCount(4, {
         message: "there should be one button per row",
     });
-    expect(`.o_data_row .o_list_button .o_button_icon.fa.fa-car`).toHaveCount(4);
+    expect(`.o_data_row .o_list_button .o_button_icon[data-icon="directions_car"]`).toHaveCount(4);
 
     await contains(`.o_data_row .o_list_button button`).click();
     // should have reloaded the view (after the action is complete)
@@ -8896,7 +8896,7 @@ test(`list view with nested groups`, async () => {
     // basic rendering tests
     expect(`.o_group_header`).toHaveCount(2);
     expect(queryAllTexts(`.o_group_name`, { inline: true })).toEqual(["Value 1 4", "Value 2 2"]);
-    expect(`.o_group_name .fa-caret-right`).toHaveCount(2);
+    expect(`.o_group_name [data-icon="arrow_right"]`).toHaveCount(2);
     expect(`.o_group_header:eq(0) span:first`).toHaveStyle({ "--o-list-group-level": "0" });
     expect(queryAllTexts(`.o_group_header .o_list_number`)).toEqual(["16", "14"]);
 
@@ -8910,7 +8910,7 @@ test(`list view with nested groups`, async () => {
         "yop 1",
         "Value 2 2",
     ]);
-    expect(`.o_group_name:eq(0) .fa-caret-down`).toHaveCount(1);
+    expect(`.o_group_name:eq(0) [data-icon="arrow_drop_down"]`).toHaveCount(1);
     expect(`.o_group_header:eq(1) span:first`).toHaveStyle({ "--o-list-group-level": "1" });
     expect(queryAllTexts(`.o_group_header .o_list_number`)).toEqual([
         "16",
@@ -8942,7 +8942,7 @@ test(`list view with nested groups`, async () => {
     await contains(`.o_group_header:eq(1)`).click();
     expect.verifySteps([]);
     expect(`.o_group_header`).toHaveCount(2);
-    expect(`.o_group_name .fa-caret-right`).toHaveCount(2);
+    expect(`.o_group_name [[data-icon='arrow_right']]`).toHaveCount(2);
     expect(`.o_data_row`).toHaveCount(0);
 });
 
@@ -12956,13 +12956,13 @@ test(`grouped list edition with boolean_favorite widget`, async () => {
     });
 
     await contains(`.o_group_header`).click();
-    expect(`.o_data_row:eq(0) .fa-star`).toHaveCount(1, {
+    expect(`.o_data_row:eq(0) [data-icon="star"].oi-filled`).toHaveCount(1, {
         message: "boolean value of the first record should be true",
     });
 
-    await contains(".o_data_row:eq(0) .fa-star", { visible: false }).click();
+    await contains(".o_data_row:eq(0) [data-icon='star'].oi-filled", { visible: false }).click();
     expect.verifySteps(["web_save"]);
-    expect(`.o_data_row:eq(0) .fa-star-o`).toHaveCount(1, {
+    expect(`.o_data_row:eq(0) [data-icon="star"]`).toHaveCount(1, {
         message: "boolean value of the first record should have been updated",
     });
 });
@@ -17031,7 +17031,7 @@ test(`sort on a non sortable field with allow_order option`, async () => {
     expect(queryAllProperties(`[name=bar] input`, "checked")).toEqual([false, true, true]);
     expect(`th[data-name=bar]`).toHaveClass("o_column_sortable");
     expect(`th[data-name=bar]`).toHaveClass("table-active");
-    expect(`th[data-name=bar] i`).toHaveClass("fa-sort-asc");
+    expect(`th[data-name=bar] i`).toHaveAttribute("data-icon", "arrow_upward");
 });
 
 test(`sort rows in a grouped list view`, async () => {
@@ -17048,7 +17048,7 @@ test(`sort rows in a grouped list view`, async () => {
     await contains(`th[data-name=int_field]`).click();
     expect(queryAllTexts(`.o_data_cell`)).toEqual(["9", "10", "17"]);
     expect(`th[data-name=int_field]`).toHaveClass("o_column_sortable");
-    expect(`th[data-name=int_field] i`).toHaveClass("fa-sort-asc");
+    expect(`th[data-name=int_field] i`).toHaveAttribute("data-icon", "arrow_upward");
 });
 
 test.tags("desktop");
@@ -18871,7 +18871,7 @@ test("selection is properly displayed (single page) on mobile", async () => {
 
     expect(".o_data_row").toHaveCount(4);
     expect(".o_selection_box").toHaveCount(0);
-    expect(".o_control_panel .fa-search").toHaveCount(1);
+    expect(".o_control_panel [data-icon='search']").toHaveCount(1);
 
     // select a record
     await contains(".o_data_row:nth-child(1)").drag();
@@ -18897,7 +18897,7 @@ test("selection is properly displayed (single page) on mobile", async () => {
     // unselect all
     await unselectAllRecords();
     expect(".o_selection_box").toHaveCount(0);
-    expect(".o_control_panel .fa-search").toHaveCount(1);
+    expect(".o_control_panel [data-icon='search']").toHaveCount(1);
 });
 
 test.tags("mobile");
@@ -19289,7 +19289,7 @@ test(`list with custom cog action that has a confirmation target="new" action`, 
     expect(".o_list_view").toHaveCount(1);
 
     await selectAllRecords();
-    await contains(`.o_cp_action_menus button:has(.fa-cog)`).click();
+    await contains(`.o_cp_action_menus button:has([data-icon="settings"])`).click();
     await contains(`.o-dropdown-item:contains(Sort of confirmation dialog)`).click();
     expect(".o_dialog").toHaveCount(1);
 

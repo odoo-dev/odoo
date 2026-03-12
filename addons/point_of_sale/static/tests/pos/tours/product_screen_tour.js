@@ -574,7 +574,7 @@ registry.category("web_tour.tours").add("PosCustomerAllFieldsDisplayed", {
             {
                 isActive: ["mobile"],
                 content: `Click search field`,
-                trigger: `.fa-search.undefined`,
+                trigger: `[data-icon="search"].undefined`,
                 run: `click`,
             },
             {
@@ -794,7 +794,7 @@ registry.category("web_tour.tours").add("AddMultipleSerialsAtOnce", {
             ProductScreen.clickDisplayedProduct("Product A"),
             [
                 {
-                    trigger: ".fa-trash-o",
+                    trigger: "[data-icon='delete']",
                     run: "click",
                 },
             ],
@@ -1060,7 +1060,7 @@ registry.category("web_tour.tours").add("test_archived_product_removed_and_order
             },
             BackendUtils.openProductForm("A Test Product"),
             {
-                trigger: `.fa-cog`,
+                trigger: `[data-icon="settings"]`,
                 run: "click",
             },
             {

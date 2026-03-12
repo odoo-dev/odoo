@@ -300,7 +300,7 @@
                                     Refuse
                                 </button>
                                 <button t-if="record.attachment_is_visible and record.supported_attachment_ids_count.raw_value > 0" name="action_documents" type="object" class="btn btn-link btn-sm ps-0 text-danger">
-                                    <i class="fa fa-paperclip"> <field name="supported_attachment_ids_count" nolabel="1"/></i>
+                                    <i class="oi" data-icon="attach_file"> <field name="supported_attachment_ids_count" nolabel="1"/></i>
                                 </button>
                             </bottom>
                         </div>
@@ -326,7 +326,7 @@
                             </div>
                             <div class="text-muted">
                                 <field name="work_entry_type_id" display="full"/>
-                                <field name="date_from"/> <i class="fa fa-long-arrow-right" title="to" /> <field name="date_to"/>
+                                <field name="date_from"/> <i class="oi" data-icon="east" title="to" /> <field name="date_to"/>
                             </div>
                         </div>
                     </div>

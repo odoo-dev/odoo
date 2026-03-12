@@ -11,12 +11,12 @@
         </xpath>
         <xpath expr="//button[@name='hierarchy_search_subsidiaries']/t[@t-if]" position="replace">
             <t t-if="!this.props.node.nodes.length">
-                <i class="fa fa-fw fa-caret-right"/>
+                <i class="oi oi-fw" data-icon="arrow_right"/>
             </t>
         </xpath>
         <xpath expr="//button[@name='hierarchy_search_subsidiaries']/t[@t-else]" position="replace">
             <t t-else="">
-                <i class="fa fa-fw fa-caret-down"/>
+                <i class="oi oi-fw" data-icon="arrow_drop_down"/>
             </t>
         </xpath>
     </t>

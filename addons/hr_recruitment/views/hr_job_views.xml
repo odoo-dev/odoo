@@ -92,7 +92,7 @@
                                                 </div>
                                         </div>
                                         <div t-if="record.alias_email.value" class="d-flex align-items-baseline mt-1 small text-muted">
-                                            <i class="fa fa-envelope flex-shrink-0 me-1 text-center" title="Email"></i>
+                                            <i class="oi oi-filled flex-shrink-0 me-1 text-center" data-icon="mail" title="Email"></i>
                                             <field name="alias_id" class="d-flex flex-wrap"
                                                 groups="hr_recruitment.group_hr_recruitment_interviewer"/>
                                         </div>
@@ -133,7 +133,7 @@
                                         <div class="d-flex justify-content-sm-start justify-content-xl-start mt-1">
                                             <div class="position-relative">
                                                 <button name="action_open_activities" type="object" class="px-2 pt-2 pb-1">
-                                                    <i class="fa fa-2x fa-clock-o" role="img" aria-label="Activities"></i>
+                                                    <i class="oi oi-2x" data-icon="schedule" role="img" aria-label="Activities"></i>
                                                     <span class="activity_badge position-absolute translate-middle badge rounded-pill bg-danger text-light" t-if="record.activity_count.raw_value > 0">
                                                         <field name="activity_count"/>
                                                     </span> 
@@ -195,7 +195,7 @@
                                         <div class="col-1 align-content-end me-1" style="max-width: 1.5rem;"
                                             groups="hr_recruitment.group_hr_recruitment_interviewer">
                                             <div class="d-flex flex-row justify-content-center">
-                                                <i class="fa fa-user" title="new_applications_icon" aria-hidden="true"/>
+                                                <i class="oi oi-filled" data-icon="person" title="new_applications_icon" aria-hidden="true"/>
                                             </div>
                                         </div>
                                         <div class="col align-content-end">

@@ -12,7 +12,7 @@ registry.category("web_tour.tours").add("blog_autocomplete_with_date", {
             expectUnloadPage: true,
         },
         {
-            trigger: '#o_wblog_posts_loop span:has(i.fa-calendar-o):has(a[href="/blog"])',
+            trigger: '#o_wblog_posts_loop span:has(i[data-icon="calendar_today"]):has(a[href="/blog"])',
         },
         {
             content: "Enter search term",
@@ -24,13 +24,13 @@ registry.category("web_tour.tours").add("blog_autocomplete_with_date", {
         },
         {
             content: "Wait for suggestions then click on search icon",
-            trigger: ".o_searchbar_form button:has(i.oi-search)",
+            trigger: ".o_searchbar_form button:has(i[data-icon='search'])",
             run: "click",
             expectUnloadPage: true,
         },
         {
             content: "Ensure both filters are applied",
-            trigger: `#o_wblog_posts_loop:has(span a[href="/blog?search=a"]):has(span i.fa-calendar-o):has(span a[href^="/blog?date_begin"]):has(span i.fa-search)`,
+            trigger: `#o_wblog_posts_loop:has(span a[href="/blog?search=a"]):has(span i[data-icon="calendar_today"]):has(span a[href^="/blog?date_begin"]):has(span i[data-icon="search"])`,
         },
     ],
 });

@@ -91,7 +91,7 @@
             color: var(--EmojiPicker-text-color, $input-placeholder-color);
         }
 
-        & + .oi-search {
+        & + [data-icon="search"] {
             color: var(--EmojiPicker-text-color, $body-color);
         }
     }

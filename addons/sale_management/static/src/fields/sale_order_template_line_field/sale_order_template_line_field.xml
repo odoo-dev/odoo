@@ -11,7 +11,7 @@
                 onSelected="() => this.toggleIsOptional(this.record)"
                 attrs="{ 'class': this.disableOptionalButton(this.record) ? 'disabled' : '' }"
             >
-                <i class="me-1 fa fa-fw fa-dot-circle-o"/>
+                <i class="oi oi-fw me-1" data-icon="radio_button_checked"/>
                 <span t-if="this.record.data.is_optional">Unset Optional</span>
                 <span t-else="">Set Optional</span>
             </DropdownItem>

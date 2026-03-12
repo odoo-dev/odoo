@@ -133,7 +133,7 @@ const canEditInBackEnd = () => [
     },
     {
         content: "Return to website",
-        trigger: ".o-form-buttonbox .fa-globe",
+        trigger: ".o-form-buttonbox [data-icon='public']",
         run: "click",
     },
 ];
@@ -150,7 +150,7 @@ const canViewInBackEnd = () => [
     },
     {
         content: "Return to website",
-        trigger: ".o-form-buttonbox .fa-globe",
+        trigger: ".o-form-buttonbox [data-icon='public']",
         run: "click",
     },
 ];

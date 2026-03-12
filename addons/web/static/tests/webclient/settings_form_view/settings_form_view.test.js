@@ -164,8 +164,8 @@ test("change setting on nav bar click in base settings on desktop", async () => 
     expect(".o_searchview input").toBeFocused({ message: "searchview input should be focused" });
     expect(".app_settings_block:not(.d-none) .app_settings_header").toHaveCount(1);
     expect(".o_setting_box a").toHaveCount(2);
-    expect(".o_setting_box span.fa:eq(0)").toHaveAttribute("title", "this is bar info");
-    expect(".o_setting_box span.fa:eq(1)").toHaveAttribute("title", "this is foo info");
+    expect(".o_setting_box span.oi:eq(0)").toHaveAttribute("title", "this is bar info");
+    expect(".o_setting_box span.oi:eq(1)").toHaveAttribute("title", "this is foo info");
     expect(".o_setting_box a:eq(0)").toHaveAttribute(
         "href",
         "https://www.odoo.com/documentation/1.0/applications/technical/web/settings/this_is_a_test.html"
@@ -314,8 +314,8 @@ test("change setting on nav bar click in base settings on mobile", async () => {
     expect(".o_form_editable").not.toHaveClass("o_form_nosheet");
     expect(".app_settings_block:not(.d-none) .app_settings_header").toHaveCount(1);
     expect(".o_setting_box a").toHaveCount(2);
-    expect(".o_setting_box span.fa:eq(0)").toHaveAttribute("title", "this is bar info");
-    expect(".o_setting_box span.fa:eq(1)").toHaveAttribute("title", "this is foo info");
+    expect(".o_setting_box span.oi:eq(0)").toHaveAttribute("title", "this is bar info");
+    expect(".o_setting_box span.oi:eq(1)").toHaveAttribute("title", "this is foo info");
     expect(".o_setting_box a:eq(0)").toHaveAttribute(
         "href",
         "https://www.odoo.com/documentation/1.0/applications/technical/web/settings/this_is_a_test.html"
@@ -2136,7 +2136,7 @@ test("BinaryField is correctly rendered in Settings form view", async () => {
             </form>
         `,
     });
-    expect('.o_field_widget[name="file"] .fa-download').toHaveCount(1, {
+    expect('.o_field_widget[name="file"] [data-icon="download"]').toHaveCount(1, {
         message: "Download button should be display in settings form view",
     });
     expect('.o_field_widget[name="file"].o_field_binary .o_input').toHaveValue("coucou.txt", {
@@ -2159,7 +2159,7 @@ test("BinaryField is correctly rendered in Settings form view", async () => {
         }
     };
     after(on(document, "click", onDownloadClick));
-    await click(".fa-download");
+    await click("[data-icon='download']");
     await def;
 
     await click(".o_field_binary .o_clear_file_button");

@@ -8,7 +8,7 @@
                 class="js_discount"
                 t-att-class="this.buttonClass"
                 t-on-click="() => this.clickDiscount()">
-                <i class="fa fa-tag me-1"/>Discount
+                <i class="oi me-1" data-icon="label"/>Discount
             </button>
         </xpath>
     </t>

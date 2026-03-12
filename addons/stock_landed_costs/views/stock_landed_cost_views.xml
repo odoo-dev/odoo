@@ -159,7 +159,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-6">
-                                    <i class="fa fa-clock-o" title="Date" role="img" aria-label="Date"/><field name="date"/>
+                                    <i class="oi" data-icon="schedule" title="Date" role="img" aria-label="Date"/><field name="date"/>
                                 </div>
                                 <field name="account_journal_id" class="col-6 text-end" readonly="state == 'done'"/>
                             </div>

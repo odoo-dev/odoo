@@ -34,8 +34,8 @@ test("should add an icon from the media modal dialog", async () => {
     await animationFrame();
     await contains(".o-we-command").click();
     await contains(".modal .modal-body .nav-item:nth-child(3) button").click();
-    await contains(".modal .modal-body .fa-heart").click();
-    expect(p).toHaveInnerHTML(`x<span class="fa fa-heart" contenteditable="false">\u200b</span>`);
+    await contains(".modal .modal-body [data-icon='favorite']").click();
+    expect(p).toHaveInnerHTML(`x<span class="oi oi-filled" data-icon="favorite" contenteditable="false">\u200b</span>`);
 });
 
 test("should delete text forward", async () => {
@@ -231,7 +231,7 @@ describe("toolbar dropdowns", () => {
     test("text alignment dropdown should not close on click", async () => {
         const { p } = await setup();
         click(".o-we-toolbar .btn[name='text_align']");
-        const alignCenterButtonSelector = ".dropdown-menu button.fa-align-center";
+        const alignCenterButtonSelector = ".dropdown-menu button[data-icon='format_align_center']";
         await focusAndClick(alignCenterButtonSelector);
         await animationFrame();
         expect(alignCenterButtonSelector).toBeVisible();

@@ -5,12 +5,17 @@
             <div class="input-group">
                 <input t-custom-ref="input" t-on-keydown="this.onKeydown" t-custom-model="state.email" t-att-disabled="this.isInputDisabled" type="text" class="form-control" t-att-class="{'bg-view': !this.isInputDisabled}" placeholder="mail@example.com" />
                 <button class="btn btn-primary" type="button" data-action="sendTranscript" t-att-disabled="this.isButtonDisabled" t-on-click="this.onClickSend">
-                    <i class="fa" t-att-class="{
-                        'fa-circle-o-notch fa-spin': this.state.status === this.STATUS.SENDING,
-                        'fa-check': this.state.status === this.STATUS.SENT,
-                        'fa-paper-plane': this.state.status === this.STATUS.IDLE,
-                        'fa-repeat': this.state.status === this.STATUS.FAILED,
-                    }" />
+                    <i class="oi" t-att-class="{
+                        'oi-spin': this.state.status === this.STATUS.SENDING,
+                        'oi-filled': this.state.status === this.STATUS.IDLE,
+                    }"
+                    t-att-data-icon="{
+                        this.STATUS.SENDING: 'autorenew',
+                        this.STATUS.SENT: 'check',
+                        this.STATUS.IDLE: 'send',
+                        this.STATUS.FAILED: 'redo',
+                    }[this.state.status]"
+                    />
                 </button>
             </div>
             <div class="form-text ms-1">

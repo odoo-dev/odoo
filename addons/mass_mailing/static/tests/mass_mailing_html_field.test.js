@@ -479,7 +479,7 @@ describe("field HTML", () => {
         await waitFor(".o-snippets-menu [data-label='Domain']", { timeout: 3000 });
         expect(
             queryOne(
-                ".o-snippets-menu [data-label='Domain'] span.fa-filter + span"
+                ".o-snippets-menu [data-label='Domain'] span[data-icon='filter_alt'] + span"
             ).textContent.toLowerCase()
         ).toBe("id = 1");
         await clickSave();

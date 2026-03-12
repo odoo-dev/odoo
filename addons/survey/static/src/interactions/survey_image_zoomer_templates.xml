@@ -12,10 +12,10 @@
                         <img class="o_survey_img_zoom_image img img-fluid d-block m-auto" t-att-src="sourceImage" alt="Zoomed Image"/>
                         <div class="o_survey_img_zoom_controls_wrapper position-absolute">
                             <button type="button" class="o_survey_img_zoom_in_btn text-white me-1" aria-label="Zoom in">
-                                <span class="fa fa-plus"/>
+                                <span class="oi" data-icon="add"/>
                             </button>
                             <button type="button" class="o_survey_img_zoom_out_btn text-white ms-1" aria-label="Zoom out">
-                                <span class="fa fa-minus"/>
+                                <span class="oi" data-icon="remove"/>
                             </button>
                         </div>
                     </div>

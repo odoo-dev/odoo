@@ -11,25 +11,25 @@
         <div class="s_share">
             <a t-attf-href="https://www.facebook.com/sharer/sharer.php?u=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="facebook" aria-label="Share on Facebook" title="Share on Facebook" target="_blank">
-                <i class="fa fa-facebook-square fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_facebook-square"/>
             </a>
             <a t-attf-href="https://twitter.com/intent/tweet?text=#{record.name}&amp;url=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="twitter" aria-label="Share on X" title="Share on X" target="_blank">
-                <i class="fa fa-twitter fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_x"/>
             </a>
             <a t-attf-href="http://www.linkedin.com/sharing/share-offsite/?url=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="linkedin" aria-label="Share on LinkedIn" title="Share on LinkedIn" target="_blank">
-                <i class="fa fa-linkedin fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_linkedin"/>
             </a>
             <a t-attf-href="https://wa.me/?text=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="whatsapp" aria-label="Share on Whatsapp" title="Share on Whatsapp" target="_blank">
-                <i class="fa fa-whatsapp fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_whatsapp"/>
             </a>
             <a t-attf-href="http://pinterest.com/pin/create/button/?url=#{website_share_url}"
                 social-key="pinterest"
                 class="btn border bg-white o_wslides_js_social_share"
                 aria-label="Share on Pinterest" title="Share on Pinterest">
-                <i class="fa fa-pinterest fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_pinterest"/>
             </a>
         </div>
     </div>
@@ -47,7 +47,7 @@
                     t-attf-data-slide-id="#{record.id if record._name == 'slide.slide' else False}"
                     t-attf-data-channel-id="#{record.id if record._name == 'slide.channel' else False}"
                     style="border-top-end-radius: 4px;border-bottom-end-radius: 4px;">
-                    <i class="fa fa-envelope"/> Send Email
+                    <i class="oi oi-filled" data-icon="mail"/> Send Email
                 </button>
             </div>
             <div class="alert alert-info d-none" role="alert">
@@ -73,7 +73,7 @@
                 <t t-out="slide.embed_code_external"/>
             </textarea>
             <button t-att-id="'share_embed_clipboard_button_id_%s' % record.id" class="btn btn-sm btn-primary o_embed_clipboard_button float-end mt-1 p-2" >
-                <i class="fa fa-clipboard"/> Copy Embed Code
+                <i class="oi" data-icon="assignment"/> Copy Embed Code
             </button>
         </div>
         <div t-if="slide.slide_category == 'document' and not embed_hide_starting_page" class="input-group mt-5">
@@ -127,7 +127,7 @@
             readonly="readonly" onclick="this.select();"
             t-att-value="website_share_url"/>
         <button t-att-id="'share_link_clipboard_button_id_%s' % record.id" class="btn btn-sm btn-primary o_clipboard_button" >
-            <i class="fa fa-clipboard"/> Copy Link
+            <i class="oi" data-icon="assignment"/> Copy Link
         </button>
     </div>
 </template>

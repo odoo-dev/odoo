@@ -27,7 +27,7 @@
                                         <span class="o_form_label">MB</span>
                                     </div>
                                     <button class="btn btn-link pt-0" type="object" name="action_retrieve_max_email_size">
-                                        <i class="fa fa-gear"/> Detect Max Limit
+                                        <i class="oi oi-filled" data-icon="settings"/> Detect Max Limit
                                     </button>
                                 </div>
                             </group>
