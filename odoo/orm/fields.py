@@ -322,6 +322,29 @@ class Field[T]:
         self._sequence = next(_global_seq)
         self._args__ = frozendict({key: val for key, val in kwargs.items() if val is not SENTINEL})
 
+    def __hash__(self):
+        return hash((self.model_name, self.name))
+
+    def __eq__(self, value):
+        if value is self:
+            return True
+        if isinstance(value, Field) and self.model_name == value.model_name and self.name == value.name:
+            import inspect
+            frame = inspect.currentframe().f_back
+            caller_info = None
+            while frame is not caller_info:
+                caller_info = frame
+                if 'misc.py' in frame.f_code.co_filename:
+                    frame = frame.f_back
+                if 'pydevd' in frame.f_code.co_filename:
+                    # debugger stuff
+                    return False
+                if frame.f_code.co_name == 'setup_related' and frame.f_code.co_filename.endswith('fields.py'):
+                    # skip field_setup_dependents
+                    return False
+            _logger.warning("Comparing too similar fields: %s, in %s", self, caller_info)
+        return False
+
     def __str__(self):
         if not self.name:
             return "<%s.%s>" % (__name__, type(self).__name__)
