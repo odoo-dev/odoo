@@ -201,7 +201,7 @@
                                             <i t-attf-class="o_configurator_feature_status oi {{feature.selected ? 'oi-filled text-success' : 'text-300'}}" t-attf-data-icon="{{feature.selected ? 'check_circle' : 'circle'}}" />
                                         </t>
                                         <div t-attf-class="h2 mb-0 card-title d-flex align-items-center {{isInstalled ? 'text-muted' : ''}}">
-                                            <i t-attf-class="me-2 oi {{isInstalled ? 'text-muted' : (feature.type == 'page' ? 'text-info' : 'text-warning')}}" t-attf-data-icon="{{feature.icon}}"/>
+                                            <i t-attf-class="me-2 oi {{isInstalled ? 'text-muted' : (feature.type == 'page' ? 'text-info' : 'text-warning')}} {{feature.icon_class}}" t-attf-data-icon="{{feature.icon}}"/>
                                             <h3 class="m-1">
                                                 <t t-out="feature.name"/>
                                             </h3>
