@@ -128,9 +128,8 @@
                 'o-unread': thread.self_member_id?.message_unread_counter > 0 and !thread.self_member_id?.mute_until_dt,
                 'opacity-50': thread.self_member_id?.mute_until_dt,
             }">
-                <span class="text-truncate" t-esc="thread.displayName" t-att-class="{
-                    'fw-bolder': thread.self_member_id?.message_unread_counter > 0,
-                    'opacity-75 opacity-100-hover': !(thread.self_member_id?.message_unread_counter > 0 and !thread.self_member_id?.mute_until_dt),
+                <span class="o-mail-DiscussSidebar-itemName text-truncate" t-esc="thread.displayName" t-att-class="{
+                    'o-unread fw-bolder': thread.self_member_id?.message_unread_counter > 0 and !thread.self_member_id?.mute_until_dt,
                 }" t-att-style="store.discuss.isSidebarCompact ? 'text-overflow: clip;' : ''"/>
                 <span class="flex-grow-1"/>
                 <t t-if="!store.discuss.isSidebarCompact" t-call="mail.DiscussSidebarChannel.actions"/>
@@ -155,7 +154,7 @@
                     <img class="w-100 h-100 rounded-2 object-fit-cover" t-att-class="threadAvatarAttClass" t-att-src="thread.avatarUrl" alt="Thread Image"/>
                     <ThreadIcon t-if="thread.channel_type?.includes('chat') or (thread.channel_type === 'channel' and !thread.group_public_id)" thread="thread" size="'small'" className="'o-mail-DiscussSidebarChannel-threadIcon position-absolute top-100 start-100 translate-middle mt-n1 ms-n1 d-flex align-items-center justify-content-center rounded-circle bg-inherit'"/>
                 </div>
-                <span t-if="!store.discuss.isSidebarCompact" class="o-mail-DiscussSidebarChannel-itemName mx-2 text-truncate text-start lh-sm opacity-trigger-hove flex-grow-1" t-att-class="itemNameAttClass">
+                <span t-if="!store.discuss.isSidebarCompact" class="o-mail-DiscussSidebar-itemName mx-2 text-truncate text-start lh-sm opacity-trigger-hove flex-grow-1" t-att-class="itemNameAttClass">
                     <t t-esc="thread.displayName"/>
                 </span>
             </div>

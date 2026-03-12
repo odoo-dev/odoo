@@ -136,9 +136,6 @@ export class DiscussSidebarChannel extends Component {
             "o-unread fw-bolder":
                 this.thread.self_member_id?.message_unread_counter > 0 &&
                 !this.thread.self_member_id?.mute_until_dt,
-            "opacity-75 opacity-100-hover":
-                this.thread.self_member_id?.message_unread_counter === 0 ||
-                this.thread.self_member_id?.mute_until_dt,
         };
     }
 

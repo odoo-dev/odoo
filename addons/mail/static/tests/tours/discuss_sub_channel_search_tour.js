@@ -131,7 +131,7 @@ registry.category("web_tour.tours").add("create_thread_for_attachment_without_bo
     steps: () => [
         {
             content: "Open general channel",
-            trigger: '.o-mail-DiscussSidebarChannel-itemName:contains("general")',
+            trigger: '.o-mail-DiscussSidebar-itemName:contains("general")',
             run: "click",
         },
         {

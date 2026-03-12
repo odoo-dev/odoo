@@ -104,7 +104,7 @@ test("Discuss Sidebar shows out of office indication", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-DiscussSidebarChannel-itemName .text-warning", {
+    await contains(".o-mail-DiscussSidebar-itemName .text-warning", {
         text: "Back on Apr 11",
     });
 });

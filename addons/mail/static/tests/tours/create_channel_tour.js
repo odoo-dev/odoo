@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 registry.category("web_tour.tours").add("can_create_channel_from_form_view", {
     steps: () => [
         {
-            trigger: ".o-mail-DiscussSidebarChannel-itemName:contains(OdooBot)",
+            trigger: ".o-mail-DiscussSidebar-itemName:contains(OdooBot)",
             run: "click",
         },
         {
@@ -23,7 +23,7 @@ registry.category("web_tour.tours").add("can_create_channel_from_form_view", {
             run: "click",
         },
         {
-            trigger: ".o-mail-DiscussSidebarChannel-itemName:contains('Test channel')",
+            trigger: ".o-mail-DiscussSidebar-itemName:contains('Test channel')",
         },
     ],
 });

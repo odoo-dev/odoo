@@ -171,5 +171,5 @@ test("Can create group chat from ctrl-k without any user selected", async () => 
     triggerHotkey("control+k");
     await click(".o_command_name:contains(Create Chat)");
     await click(".modal-footer > .btn:contains(Create Group Chat)");
-    await contains(".o-mail-DiscussSidebarChannel-itemName", { text: "Mitchell Admin" });
+    await contains(".o-mail-DiscussSidebar-itemName", { text: "Mitchell Admin" });
 });
