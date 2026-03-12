@@ -267,6 +267,32 @@ def get_view_id_and_type(action, view_type: str | None) -> tuple[int | None, str
     return view_id, view_type
 
 
+def resolve_search_default_domain(model, search_view_id, context, eval_context):
+    """Resolve search_default_* context keys into a domain.
+
+    Parses the search view to find <filter name="..."> elements matching
+    search_default_* keys and combines their domains with AND.
+    """
+    def filters_from_context():
+        view_tree = None
+        for key, value in context.items():
+            if key.startswith('search_default_') and value:
+                filter_name = key[15:]
+                if not check_object_name(filter_name):
+                    raise ValueError(model.env._("Invalid default search filter name for %s", key))
+                if view_tree is None:
+                    view = model.get_view(search_view_id, 'search')
+                    view_tree = etree.fromstring(view['arch'])
+                if (element := view_tree.find(Rf'.//filter[@name="{filter_name}"]')) is not None:
+                    if domain := element.attrib.get('domain'):
+                        yield domain
+
+    return Domain.AND(
+        safe_eval(domain, eval_context)
+        for domain in filters_from_context()
+    )
+
+
 def get_default_domain(model, action, context, eval_context):
     for ir_filter in model.env['ir.filters'].get_filters(model._name, action._origin.id):
         if ir_filter['is_default']:
@@ -276,26 +302,7 @@ def get_default_domain(model, action, context, eval_context):
             default_domain = ast.literal_eval(domain_str)
             break
     else:
-        def filters_from_context():
-            view_tree = None
-            for key, value in context.items():
-                if key.startswith('search_default_') and value:
-                    filter_name = key[15:]
-                    if not check_object_name(filter_name):
-                        raise ValueError(model.env._("Invalid default search filter name for %s", key))
-                    if view_tree is None:
-                        view = model.get_view(action.search_view_id.id, 'search')
-                        view_tree = etree.fromstring(view['arch'])
-                    if (element := view_tree.find(Rf'.//filter[@name="{filter_name}"]')) is not None:
-                        # parse the domain
-                        if domain := element.attrib.get('domain'):
-                            yield domain
-                        # not parsing context['group_by']
-
-        default_domain = Domain.AND(
-            safe_eval(domain, eval_context)
-            for domain in filters_from_context()
-        )
+        default_domain = resolve_search_default_domain(model, action.search_view_id.id, context, eval_context)
     return default_domain
 
 
