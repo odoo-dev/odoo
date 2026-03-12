@@ -7,7 +7,7 @@ from .misc import _cached, version_gte
 from .models import rename_model
 from .modules import rename_module
 from .orm import env
-from .pg import column_exists, format_query, parallel_execute, rename_table, table_exists
+from .pg import column_exists, format_query, parallel_execute, rename_table, table_exists, remove_constraint
 from .report import add_to_migration_reports
 
 try:
@@ -103,6 +103,17 @@ def rename_custom_module(cr, old_module_name, new_module_name, report_details=""
         ),
     )
 
+def remove_custom_constraint(cr, table_name, constraint_name, report_details=""):
+    remove_constraint(cr, table_name, constraint_name)
+    add_to_migration_reports(
+        category="Removed Custom Constraint",
+        message=(
+            f"The '{constraint_name}' constraint on the '{table_name}' table has "
+            "been removed to ensure the migration process can be completed. "
+            "This constraint was preventing data updates during the upgrade. "
+            f"{report_details}"
+        ),
+    )
 
 def rename_custom_table(
     cr,
