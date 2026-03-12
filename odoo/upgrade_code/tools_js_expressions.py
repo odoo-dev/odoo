@@ -453,7 +453,7 @@ def prev_non_whitespace(tokens, i):
 
 T_ATTR_RE = re.compile(r"@t-([\w-]+)='(.*?)'")  # For eg xpath=expr="[@t-if]"
 EVENT_ATTR_RE = re.compile(r"(@(?:onSelected|onChange)(?:\.[\w-]+)?)='(.*?)'")
-COMP_REGEXP = re.compile(r"^//[A-Z]\w*")
+COMP_REGEXP = re.compile(r"^.*/[A-Z][\w\-]*(?:\[.*?\])*$")  # This regex ensures the *last* node in the path starts with an uppercase letter.
 SKIP_XPATH_ATTRS = {"name", "ref", "set-slot", "slot"}  # attributes to skip
 COMPONENT_TARGET_RE = re.compile(r"//([A-Z][\w\.-]*)")
 VALUE_ATTR_RE = re.compile(r"(@value)='(.*?)'")
@@ -986,6 +986,25 @@ tests = [
 """,
     },
     {
+        "name": "attributes targetting html",
+        "content": """
+<t t-name="sfsdg" t-inherit="web.ListView">
+<xpath expr="//Dropdown/button" position="attributes">
+    <attribute name="class" remove="p-0" add="shadow-none" separator=" "/>
+    <attribute name="t-att-class">getTogglerClass(currentValue)</attribute>
+</xpath>
+</t>
+""",
+        "expected": """
+<t t-name="sfsdg" t-inherit="web.ListView">
+<xpath expr="//Dropdown/button" position="attributes">
+    <attribute name="class" remove="p-0" add="shadow-none" separator=" "/>
+    <attribute name="t-att-class">this.getTogglerClass(this.currentValue)</attribute>
+</xpath>
+</t>
+""",
+    },
+    {
         "name": "dynamic t-call",
         "content": """<t t-call="{{ getAuthMethodFormTemplate(state.authMethod) }}"/>""",
         "expected": """<t t-call="{{ this.getAuthMethodFormTemplate(this.state.authMethod) }}"/>""",
@@ -1025,6 +1044,21 @@ tests = [
         "content": "<div><!-- dfsf --></div>",
         "expected": "<div><!-- dfsf --></div>",
     },
+    {
+        "name": "comments 2",
+        "content": """<?xml version="1.0" encoding="UTF-8"?>
+<!--This field displays a placeholder even if the field is currently not selected.-->
+<templates xml:space="preserve">
+</templates>
+""",
+        "expected": """<?xml version="1.0" encoding="UTF-8"?>
+TODO why dones this test pass
+<!--This field displays a placeholder even if the field is currently not selected.-->
+<templates xml:space="preserve">
+</templates>
+""",
+    },
+
     {
         "name": "simple t-out",
         "content": '<div><t t-out="coucou"/></div>',
