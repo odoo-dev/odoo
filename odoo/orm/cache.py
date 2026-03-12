@@ -15,7 +15,6 @@ import time
 import typing
 
 if typing.TYPE_CHECKING:
-    from odoo.tools.lru import LRU
     from collections.abc import Callable, Iterable
     from odoo.models import BaseModel
 
@@ -90,7 +89,7 @@ class ormcache:
 
     def add_value(self, *args, cache_value=None, **kwargs) -> None:
         model: BaseModel = args[0]
-        d: LRU = model.pool._Registry__caches[self.cache_name]  # type: ignore
+        d = model.env.transaction.ormcaches__[self.cache_name]
         key = self.key(*args, **kwargs)
         d[key] = cache_value
 
@@ -109,7 +108,7 @@ class ormcache:
 
     def lookup(self, *args, **kwargs):
         model: BaseModel = args[0]
-        d: LRU = model.pool._Registry__caches[self.cache_name]  # type: ignore
+        d = model.env.transaction.ormcaches__[self.cache_name]
         key = self.key(*args, **kwargs)
         counter = _COUNTERS[model.pool.db_name, self.method]
 
@@ -143,6 +142,57 @@ class ormcache:
             return value
         else:
             return self.method(*args, **kwargs)
+
+
+class ormcache_layer(MutableMapping):
+    """ Layered mapping for caches.
+    Similar to a ChainMap, but removal is not possible.
+    """
+    __slots__ = ('data', 'parent')
+
+    def __init__(self, parent: MutableMapping):
+        self.parent = parent
+        self.data = {}
+
+    def __getitem__(self, key):
+        value = self.data.get(key, SENTINEL)
+        if value is not SENTINEL:
+            return value
+        return self.parent[key]
+
+    def __iter__(self):
+        keys = self.data.keys()
+        yield from self.parent.keys() - keys
+        yield from keys
+
+    def __len__(self):
+        # approximation
+        return len(self.data) + len(self.parent)
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __delitem__(self, key):
+        raise NotImplementedError
+
+    def clear(self):
+        # XXX make not implemented after removing clear() calls
+        self.data.clear()
+        self.parent = {}
+
+    def update_parent(self):
+        """Move the data from this layer to the parent."""
+        self.parent.update(self.data)
+        self.data.clear()
+
+    def __str__(self):
+        items = [len(self.data)]
+        parent = self.parent
+        while isinstance(parent, ormcache_layer):
+            items.append(len(parent.data))
+            parent = parent.parent
+        items.append(f'{parent.__class__.__name__}({len(parent)})')
+        return f'ormcache_layer{items}'
 
 
 def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are there for signals)
@@ -189,7 +239,7 @@ def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are t
                 _logger.info("Processing database %s (%d/%d)", dbname, i, len(registries))
                 db_cache_stats = cache_stats[dbname]
                 db_cache_usage = cache_usage[dbname]
-                for cache_name, cache in registry._Registry__caches.items():
+                for cache_name, (_seq, cache) in registry.registry_caches__.items():
                     cache_total_size = 0
                     for cache_key, cache_value in cache.snapshot.items():
                         method = cache_key[1]
@@ -286,12 +336,12 @@ def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are t
                          name="odoo.signal.log_ormcache_stats_with_size").start()
 
 
-def get_cache_key_counter(bound_method: Callable, *args, **kwargs) -> tuple[LRU, tuple, ormcache_counter]:
+def get_cache_key_counter(bound_method: Callable, *args, **kwargs) -> tuple[ormcache_layer, tuple, ormcache_counter]:
     """ Return the cache, key and stat counter for the given call. """
     # Used for testing only.
     model: BaseModel = bound_method.__self__  # type: ignore
     ormcache_instance: ormcache = bound_method.__cache__  # type: ignore
-    cache: LRU = model.pool._Registry__caches[ormcache_instance.cache_name]  # type: ignore
+    cache = model.env.transaction.ormcaches__[ormcache_instance.cache_name]
     key = ormcache_instance.key(model, *args, **kwargs)
     counter = _COUNTERS[model.pool.db_name, ormcache_instance.method]
     return cache, key, counter

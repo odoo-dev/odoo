@@ -199,9 +199,19 @@ def flushing_cursor(cr: Cursor):
     yield
 
     # flush and invalidate changes made by the main cursor
-    cr.transaction.default_env.invalidate_all(flush=True)
+    #cr.transaction.default_env.invalidate_all(flush=True)
     # then reset it to start fresh
-    cr.transaction.reset()
+    #cr.transaction.reset()
+    # simluate transaction.committing()
+    state_stack, closing = cr.transaction._state_stack__, cr._closing
+    try:
+        cr._closing = False  # do a reset
+        cr.transaction._state_stack__ = []  # replace the stack
+        with cr.transaction.committing():
+            pass  # no real commit
+    finally:
+        cr.transaction._state_stack__ = state_stack
+        cr._closing = closing
 
 
 def standalone(*tags):
@@ -1072,7 +1082,7 @@ class BaseCase(case.TestCase):
     def drop_ormcaches(cls) -> None:
         """ Remove all data in ORM caches without signaling, just like in a new Registry. """
         _logger.debug("Clearing all ORM caches")
-        for lru in cls.registry._Registry__caches.values():
+        for _seq, lru in cls.registry.registry_caches__.values():
             lru.clear()
 
     @classmethod
@@ -1087,7 +1097,7 @@ class BaseCase(case.TestCase):
             )
 
         def get_sequences(cr):
-            return registry.registry_sequence, registry.cache_sequences.copy()
+            return registry.registry_sequence, {name: val[0] for name, val in registry.registry_caches__.items()}
 
         return [
             # New cursor should point to the test's cursor
@@ -1342,24 +1352,27 @@ class TransactionCase(BaseCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.registry = Registry(get_db_name())
-        cls.registry_start_sequence = cls.registry.registry_sequence
+        registry_start_sequence = cls.registry.registry_sequence
 
-        def reset_registry_changes(*a, drop_caches=False, **kw):
+        def reset_registry_changes(*a, drop_caches=False, set_caches=None, **kw):
+            nonlocal registry_start_sequence
             registry = cls.registry
-            setup_registry = cls.registry_start_sequence != registry.registry_sequence
+            setup_registry = registry_start_sequence != registry.registry_sequence
             with contextlib.closing(registry.cursor(readonly=not setup_registry)) as cr:
                 seq, _cache_sequences = registry.get_sequences(cr)
-                cls.registry_start_sequence = registry.registry_sequence = seq
+                registry_start_sequence = registry.registry_sequence = seq
                 if setup_registry:
                     _logger.info("Setup registry models during testing")
                     registry._setup_models__(cr)
+            if set_caches:
+                registry.registry_caches__ = set_caches
             if drop_caches:
                 cls.drop_ormcaches()
             return registry
 
         cls.startClassPatcher(patch.object(Registry, 'new', reset_registry_changes))
         cls.addClassCleanup(cls._gc_filestore)
-        cls.addClassCleanup(reset_registry_changes, drop_caches=True)
+        cls.addClassCleanup(reset_registry_changes, set_caches=cls.registry.registry_caches__.copy())
 
         def signal_changes(cr, names):
             if 'registry' in names:
@@ -1368,12 +1381,12 @@ class TransactionCase(BaseCase):
                     return
                 _logger.info('Simulating signal changes during tests')
                 cls.registry.registry_sequence += 1
-                for key, seq in cls.registry.cache_sequences.items():
-                    cls.registry.cache_sequences[key] = seq + 1
+                for key, (seq, data) in cls.registry.registry_caches__.items():
+                    cls.registry.registry_caches__[key] = (seq + 1, {})
             elif names:
                 _logger.debug('Simulating signal changes during tests')
                 for name in names:
-                    cls.registry.cache_sequences[name] += 1
+                    cls.registry.registry_caches__[name] = (cls.registry.registry_caches__[name][0] + 1, {})
 
         cls.startClassPatcher(patch.object(cls.registry, '_signal_changes', signal_changes))
 

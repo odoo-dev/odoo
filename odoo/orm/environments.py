@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import functools
+import inspect
 import logging
 import typing
 from collections import defaultdict, deque
@@ -19,10 +20,12 @@ from odoo.exceptions import AccessError, UserError, CacheMiss
 from odoo.sql_db import BaseCursor
 from odoo.tools import clean_context, frozendict, reset_cached_properties, OrderedSet, SQL
 from odoo.tools.func import deprecated
+from odoo.tools.lru import LRU
 from odoo.tools.translate import get_translation, get_translated_module, LazyGettext
 from odoo.tools.misc import StackMap, SENTINEL
 
-from .registry import Registry, _CACHES_BY_KEY
+from .cache import ormcache_layer
+from .registry import _CACHES_BY_KEY, _REGISTRY_CACHES, Registry
 from .query import Query
 from .utils import SUPERUSER_ID
 
@@ -585,11 +588,11 @@ class Transaction:
     __slots__ = (
         '_Transaction__file_open_tmp_paths',
         '_cache', '_recent_envs',
-        '_registry_invalidated', '_registry_sequence',
+        '_registry_caches__', '_registry_invalidated', '_registry_sequence',
         '_state_stack__', '_weak_envs',
         'access_read', 'default_env',
         'field_data', 'field_data_patches', 'field_dirty',
-        'protected', 'registry', 'tocompute',
+        'ormcaches__', 'protected', 'registry', 'tocompute',
     )
 
     def __init__(self, registry: Registry):
@@ -603,6 +606,8 @@ class Transaction:
         self.default_env: Environment | None = None
         self._registry_invalidated: int = 0
         self._registry_sequence = registry.registry_sequence
+        self._registry_caches__: dict[str, tuple[int, MutableMapping]] = {}
+        self.ormcaches__: dict[str, ormcache_layer] = {}
         # transaction state manipulated by savepoints
         self._state_stack__: list[TransactionState] = []
 
@@ -733,7 +738,11 @@ class Transaction:
         When the registry changed, create a new registry and rebind to it.
         Otherwise, invalidate named caches and their dependencies.
         """
+        assert not self._registry_caches__, "Cannot check in the middle of a transaction"
         registry = self.registry
+        self._registry_caches__ = registry.registry_caches__.copy()
+        for name, (seq, data) in self._registry_caches__.items():
+            self.ormcaches__[name] = ormcache_layer(data)
         if not registry.ready:
             _logger_signaling.debug("%s: skip check signaling, registry not ready", self.registry.db_name)
             return
@@ -745,28 +754,32 @@ class Transaction:
         if registry_sequence != db_registry_sequence:
             _logger_signaling.info("Reloading the model registry after database signaling.")
             self.registry = registry = Registry.new(registry.db_name)
+            self._registry_caches__ = registry.registry_caches__.copy()
+            for name, (seq, data) in self._registry_caches__.items():
+                self.ormcaches__[name] = ormcache_layer(data)
             if _logger_signaling.isEnabledFor(logging.DEBUG):
                 changes += "[Registry - %s -> %s]" % (registry_sequence, db_registry_sequence)
         # Check if the model caches must be invalidated.
         else:
             invalidated = set()
+            registry_caches = self._registry_caches__
             for cache_name, expected_sequence in db_cache_sequences.items():
-                cache_sequence = registry.cache_sequences[cache_name]
+                cache_sequence = registry_caches[cache_name][0]
                 if cache_sequence == expected_sequence:
                     continue
-                registry.cache_sequences[cache_name] = expected_sequence
+                data = LRU(_REGISTRY_CACHES[cache_name])
+                registry.registry_caches__[cache_name] = registry_caches[cache_name] = (expected_sequence, data)
+                self.ormcaches__[cache_name] = ormcache_layer(data)
                 for name in _CACHES_BY_KEY[cache_name]:
                     if '.' in name:
-                        registry.cache_sequences[name] = expected_sequence
+                        data = LRU(_REGISTRY_CACHES[name])
+                        registry.registry_caches__[name] = registry_caches[name] = (registry_caches[name][0] + 1, data)
+                        self.ormcaches__[name] = ormcache_layer(data)
                     invalidated.add(name)
                 if _logger_signaling.isEnabledFor(logging.DEBUG):
                     changes += "[Cache %s - %s -> %s]" % (cache_name, cache_sequence, expected_sequence)
-            self.registry.cache_invalidated.clear()
             if invalidated:
                 _logger_signaling.info("Invalidating caches after database signaling: %s", sorted(invalidated))
-                caches = self.registry._Registry__caches
-                for name in sorted(invalidated):
-                    caches[name].clear()
         if changes:
             _logger_signaling.debug("Multiprocess signaling check: %s", changes)
 
@@ -802,7 +815,24 @@ class Transaction:
     def invalidate_ormcache(self, cache_name: str = 'default') -> None:
         """ Clear the caches associated to methods decorated with
         ``api.ormcache`` if cache is in `cache_name` subset. """
-        self.registry._clear_cache(cache_name)
+        assert '.' not in cache_name
+
+        if _logger_signaling.isEnabledFor(logging.DEBUG):
+            # log information about invalidation_cause
+            # could be interresting to log in info but this will need to minimize invalidation first,
+            # mainly in some setupclass and crons
+            frame = inspect.currentframe().f_back
+            code = frame.f_code
+            frame_self = frame.f_locals.get('self')
+            frame_str = f'{code.co_filename}:{frame.f_lineno} ({type(frame_self)})'
+            _logger_signaling.debug('Invalidating %s model cache from %s', cache_name, frame_str)
+
+        for name in _CACHES_BY_KEY.get(cache_name, ()):
+            # rebuild a new cache with the correct number of layers
+            cache = LRU(_REGISTRY_CACHES[name])
+            for _ in range(len(self._state_stack__) + 1):
+                cache = ormcache_layer(cache)
+            self.ormcaches__[name] = cache
 
     @deprecated("Since 20.0, renamed to invalidate_access_cache")
     def clear_access_cache(self, model_name: str = '') -> None:
@@ -861,6 +891,7 @@ class Transaction:
         self._state_stack__ = [
             TransactionState(
                 default_env=state.default_env,
+                ormcaches__=state.ormcaches__,
                 registry_invalidated=self._registry_invalidated,
                 registry_sequence=self._registry_sequence,
             ) for state in self._state_stack__]
@@ -875,33 +906,45 @@ class Transaction:
         self.clear()
         # recheck signaling for the ormcache
         if cr is not None and not cr._closing:
+            self._registry_caches__.clear()
             self._check_signaling(cr)
+        else:
+            pass  # XXX signaling? self._registry_caches__ = self.registry.registry_caches__.copy()
+            # ormcaches are not reset or cleared
 
     @contextmanager
     def committing(self):
         """ Context for committing the connection. """
         assert not self._state_stack__, "Pending savepoints not released, cannot commit!"
         registry = self.registry
+        push_caches = {}
         env = self.default_env or next(iter(self.envs), None)
         if env is not None:
             cr = env.cr
             cr.flush()  # first flush remaining changes
 
-            # TODO move cache invalidation to transaction
             names = set()
             if self._registry_invalidated:
                 names.add('registry')
-            for cache_name in self.registry.cache_invalidated:
-                if '.' not in cache_name:
-                    names.add(cache_name)
-                registry.cache_sequences[cache_name] += 1
-            self.registry._signal_changes(cr, names)
-            self.registry.cache_invalidated.clear()
+            for name, (seq, registry_data) in self._registry_caches__.items():
+                data = self.ormcaches__[name].parent
+                if data is registry_data:
+                    continue  # not invalidated
+                if name in _CACHES_BY_KEY:
+                    names.add(name)
+                push_caches[name] = (seq + 1, data)
+            registry._signal_changes(cr, names)
         else:
             _logger_signaling.debug("no cursor to flush signaling", stack_info=True)
             cr = None
 
         yield
+
+        # propagate the cache to the registry
+        # XXX should lock to push
+        registry.registry_caches__.update(push_caches)
+        for layer in self.ormcaches__.values():
+            layer.update_parent()
 
         if cr is None:
             self.reset()
@@ -935,14 +978,26 @@ class Transaction:
         self.flush()
         self._state_stack__.append(TransactionState(
             default_env=self.default_env,
+            ormcaches__=self.ormcaches__,
             registry_invalidated=self._registry_invalidated,
             registry_sequence=self._registry_sequence,
         ))
+        # create a new layer for the cache
+        self.ormcaches__ = {
+            name: ormcache_layer(data)
+            for name, data in self.ormcaches__.items()
+        }
 
     def merge_state(self):
         """ Merge current state into the last saved state. """
         assert self._state_stack__, "no state to pop"
-        self._state_stack__.pop()
+        state = self._state_stack__.pop()
+
+        # merge into the parent layer
+        for name, layer in self.ormcaches__.items():
+            layer.update_parent()
+            state.ormcaches__[name] = layer.parent  # patch the parent if invalidated
+        self.ormcaches__ = state.ormcaches__
 
     def restore_state(self):
         """ Restore the previously saved state of the transaction after
@@ -950,8 +1005,13 @@ class Transaction:
         if self._state_stack__:
             state = self._state_stack__[-1]
             self.default_env = state.default_env
+            parent_ormcaches = state.ormcaches__
             registry_invalidated = state.registry_invalidated
         else:
+            parent_ormcaches = {
+                name: data
+                for name, (_seq, data) in self._registry_caches__.items()
+            }
             registry_invalidated = 0
 
         env = self.default_env or next(iter(self.envs), None)
@@ -965,6 +1025,10 @@ class Transaction:
         self.clear()
         for env in self.envs:
             reset_cached_properties(env)
+        self.ormcaches__ = {
+            name: ormcache_layer(data)
+            for name, data in parent_ormcaches.items()
+        }
         if self._registry_invalidated != registry_invalidated:
             self._reset_registry_change()
             self._registry_invalidated = registry_invalidated
@@ -973,6 +1037,7 @@ class Transaction:
 class TransactionState(typing.NamedTuple):
     """ The state of the transaction that can be stacked for savepoint operations. """
     default_env: Environment | None
+    ormcaches__: dict[str, ormcache_layer]
     registry_invalidated: int
     registry_sequence: int
 

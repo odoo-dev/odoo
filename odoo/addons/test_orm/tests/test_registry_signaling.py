@@ -24,8 +24,6 @@ class TestOrmCache(TransactionCase):
         super().setUpClass()
         if cls.env.transaction._registry_invalidated:
             raise AssertionError('Registry should not be invalidated when starting this test')
-        if cls.registry.cache_invalidated:
-            raise AssertionError('Cache should not be invalidated when starting this test')
 
     def test_ormcache(self):
         """ Test the effectiveness of the ormcache() decorator. """
@@ -34,14 +32,12 @@ class TestOrmCache(TransactionCase):
 
         # retrieve the cache, its key and stat counter
         from odoo.orm.cache import get_cache_key_counter  # noqa: PLC0415
+        self.env.transaction.invalidate_ormcache()
         cache, key, counter = get_cache_key_counter(IMD._xmlid_lookup, XMLID)
         hit = counter.hit
         miss = counter.miss
         tx_hit = counter.tx_hit
         tx_miss = counter.tx_miss
-
-        # clear the caches of ir.model.data, retrieve its key and
-        self.env.transaction.invalidate_ormcache()
         self.assertNotIn(key, cache)
 
         # lookup some reference
@@ -69,16 +65,46 @@ class TestOrmCache(TransactionCase):
         self.assertIn(key, cache)
 
     def test_invalidation(self):
-        self.assertEqual(self.env.registry.cache_invalidated, set())
+        transaction = self.env.transaction
+        reg_caches = transaction._registry_caches__.copy()
+
+        def root(data):
+            while hasattr(data, 'parent'):
+                data = data.parent
+            return data
+
+        def cache_invalidated():
+            # cache is invalidated if the layer is detached from the registry
+            # cache that the transaction started with
+            return {
+                name for name, data in transaction.ormcaches__.items()
+                if root(data) is not reg_caches[name][1] and '.' not in name
+            }
+        self.assertEqual(cache_invalidated(), set())
         self.env.transaction.invalidate_ormcache()
         self.env.transaction.invalidate_ormcache('templates')
-        self.assertEqual(self.env.registry.cache_invalidated, {'default', 'templates'})
+        self.assertEqual(cache_invalidated(), {'default', 'templates'})
         self.env.transaction.reset()
-        self.assertEqual(self.env.registry.cache_invalidated, set())
+        self.assertEqual(cache_invalidated(), set())
         self.env.transaction.invalidate_ormcache('assets')
-        self.assertEqual(self.env.registry.cache_invalidated, {'assets'})
+        self.assertEqual(cache_invalidated(), {'assets'})
         self.env.transaction.reset()
-        self.assertEqual(self.env.registry.cache_invalidated, set())
+        self.assertEqual(cache_invalidated(), set())
+
+    def test_invalidation_in_savepoints(self):
+        cr = self.env.cr
+        transaction = self.env.transaction
+        transaction.invalidate_ormcache()
+        # XXX
+        # set value
+        with cr.savepoint() as sp:
+            # XXX set value
+            transaction.invalidate_ormcache()
+            sp.rollback()
+            # XXX set value
+            transaction.invalidate_ormcache()
+        # set value
+        transaction.invalidate_ormcache()
 
     def test_signaling_gc(self):
         cr = self.env.cr
@@ -143,16 +169,28 @@ class TestOrmCacheSignaling(BaseCase):
 
         assert not self._registry_patched, "registry must not be patched"
         self.patch(self.cr, 'commit', simulated_commit)
-        self.registry.cache_invalidated.clear()
         # flush once to set the nextval from the sequence
         self.transaction.invalidate_ormcache('default')
         self.transaction.invalidate_ormcache('assets')
         self.cr.commit()
-        self.old_sequences = dict(self.registry.cache_sequences)
+        self.old_sequences = self.transaction._registry_caches__.copy()
+        self.addCleanup(self.registry.registry_caches__.update, self.registry.registry_caches__.copy())
+        self.assertFalse(self.cache_invalidated)
 
     @property
     def cache_invalidated(self):
-        return self.registry.cache_invalidated
+        # cache is invalidated if the layer is detached from the registry
+        # cache that the transaction started with
+        def root(data):
+            while hasattr(data, 'parent'):
+                data = data.parent
+            return data
+
+        return {
+            name for name, data in self.transaction.ormcaches__.items()
+            if root(data) is not self.transaction._registry_caches__[name][1]
+            and '.' not in name
+        }
 
     def test_signaling_01_single(self):
         transaction = self.transaction
@@ -169,18 +207,18 @@ class TestOrmCacheSignaling(BaseCase):
             ["INFO:odoo.registry:Caches invalidated, signaling through the database: ['assets']"],
         )
 
-        for key, value in self.old_sequences.items():
+        for key, (value, _data) in self.old_sequences.items():
             if key == 'assets':
-                self.assertEqual(value + 1, registry.cache_sequences[key], "Assets cache sequence should have changed")
-            else:
-                self.assertEqual(value, registry.cache_sequences[key], f"other registry sequence shouldn't have changed {key}")
+                self.assertEqual(value + 1, registry.registry_caches__[key][0], "Assets cache sequence should have changed")
+            elif '.' not in key:  # sequences of sub-caches don't matter
+                self.assertEqual(value, registry.registry_caches__[key][0], f"other registry sequence shouldn't have changed {key}")
 
         with self.assertNoLogs(None, None):  # the registry sequence should be up to date on the same worker
             transaction.reset()
 
         # simulate other worker state
 
-        registry.cache_sequences.update(self.old_sequences)
+        registry.registry_caches__.update(self.old_sequences)
 
         with self.assertLogs() as logs:
             transaction.reset()
@@ -207,18 +245,18 @@ class TestOrmCacheSignaling(BaseCase):
             ],
         )
 
-        for key, value in self.old_sequences.items():
+        for key, (value, _data) in self.old_sequences.items():
             if key in ('assets', 'default'):
-                self.assertEqual(value + 1, registry.cache_sequences[key], "Assets and default cache sequence should have changed")
-            else:
-                self.assertEqual(value, registry.cache_sequences[key], f"other registry sequence shouldn't have changed {key}")
+                self.assertEqual(value + 1, registry.registry_caches__[key][0], "Assets and default cache sequence should have changed")
+            elif '.' not in key:  # sequences of sub-caches don't matter
+                self.assertEqual(value, registry.registry_caches__[key][0], f"other registry sequence shouldn't have changed {key}")
 
         with self.assertNoLogs(None, None):  # the registry sequence should be up to date on the same worker
             transaction.reset()
 
         # simulate other worker state
 
-        registry.cache_sequences.update(self.old_sequences)
+        registry.registry_caches__.update(self.old_sequences)
 
         with self.assertLogs() as logs:
             transaction.reset()
