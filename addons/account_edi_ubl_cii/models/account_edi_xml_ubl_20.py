@@ -4,6 +4,7 @@ from lxml import etree
 
 from odoo import models, _
 from odoo.tools import html2plaintext, cleanup_xml_node
+from odoo.addons.account_edi_ubl_cii.tools.ubl_20_optional_fields import PEPPOL_INVOICE_OPTIONAL_FIELDS, PEPPOL_INVOICE_OPTIONAL_LINE_FIELDS, PEPPOL_CREDIT_NOTE_OPTIONAL_FIELDS, PEPPOL_CREDIT_NOTE_OPTIONAL_LINE_FIELDS
 
 UBL_NAMESPACES = {
     'cbc': "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
@@ -523,6 +524,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         return {
             'currency': line.currency_id,
             'currency_dp': self._get_currency_decimal_places(line.currency_id),
+            '__id': line,
             'id': line_id + 1,
             'line_quantity': line.quantity,
             'line_quantity_attrs': {'unitCode': uom},
@@ -800,8 +802,47 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         })
         return constraints
 
+    def _add_invoice_optional_vals(self, vals):
+        if (vals['document_type'] == 'invoice'):
+            self.add_invoice_optional_vals(vals, PEPPOL_INVOICE_OPTIONAL_FIELDS)
+        elif (vals['document_type'] == 'credit_note'):
+            self.add_invoice_optional_vals(vals, PEPPOL_CREDIT_NOTE_OPTIONAL_FIELDS)
+
+    def _add_invoice_line_optional_vals(self, line_node, vals):
+        if (vals['document_type'] == 'invoice'):
+            self.add_invoice_line_optional_vals(line_node, vals, PEPPOL_INVOICE_OPTIONAL_LINE_FIELDS)
+        elif (vals['document_type'] == 'credit_note'):
+            self.add_invoice_line_optional_vals(line_node, vals, PEPPOL_CREDIT_NOTE_OPTIONAL_LINE_FIELDS)
+
+    def add_invoice_optional_vals(self, vals, optional_fields):
+        move = vals['invoice']
+        invoice_optional_fields = {key: move[key] for key in move._fields if key.startswith("x_studio_peppol") and move[key] and key in optional_fields}
+        for field in invoice_optional_fields:
+            path = optional_fields[field]["path"]
+            attrs = optional_fields[field]["attrs"](move)
+            node = vals['vals']
+            for tag in path:
+                if tag not in node:
+                    node[tag] = {}
+                node = node[tag]
+            node.update(attrs)
+
+    def add_invoice_line_optional_vals(self, line_node, vals, optional_line_fields):
+        move_line = line_node['__id']
+        move_line_optional_fields = {key: move_line[key] for key in move_line._fields if key.startswith("x_studio_peppol") and move_line[key] and key in optional_line_fields}
+        for field in move_line_optional_fields:
+            node = line_node
+            for tag in optional_line_fields[field]["path"]:
+                if tag not in node:
+                    node[tag] = {}
+                node = node[tag]
+            node.update(optional_line_fields[field]["attrs"](move_line))
+
     def _export_invoice(self, invoice):
         vals = self._export_invoice_vals(invoice.with_context(lang=invoice.partner_id.lang))
+        self._add_invoice_optional_vals(vals)
+        for line_val in vals['vals']['line_vals']:
+            self._add_invoice_line_optional_vals(line_val, vals)
         errors = [constraint for constraint in self._export_invoice_constraints(invoice, vals).values() if constraint]
         xml_content = self.env['ir.qweb']._render(vals['main_template'], vals)
         return etree.tostring(cleanup_xml_node(xml_content), xml_declaration=True, encoding='UTF-8'), set(errors)
