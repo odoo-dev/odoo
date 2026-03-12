@@ -428,7 +428,7 @@ class WebsitePage(models.Model):
 
     @tools.conditional(
         'xml' not in tools.config['dev_mode'],
-        tools.ormcache('self._get_cache_key(request)', cache='templates.cached_values'),
+        api.ormcache('self._get_cache_key(request)', cache='templates.cached_values'),
     )
     def _get_response_cached(self, request) -> tuple[Response, int, str]:
         """ Returns the response corresponding to the request.
@@ -486,7 +486,7 @@ class WebsitePage(models.Model):
 
     @tools.conditional(
         'xml' not in tools.config['dev_mode'],
-        tools.ormcache('(request.httprequest.path, self.env.context.get("website_id"))', cache='templates.cached_values'),
+        api.ormcache('(request.httprequest.path, self.env.context.get("website_id"))', cache='templates.cached_values'),
     )
     @api.model
     def _get_page_info(self, request) -> dict | None:

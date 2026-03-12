@@ -6,7 +6,7 @@ from datetime import datetime
 
 from odoo import _, api, fields, models
 from odoo.exceptions import MissingError
-from odoo.tools import clean_context, ormcache
+from odoo.tools import clean_context
 
 if typing.TYPE_CHECKING:
     from odoo.api import ValuesType
@@ -185,7 +185,7 @@ class MailTrackMixin(models.AbstractModel):
         self._track_clear()
         return records_su, initial_values, trackings
 
-    @ormcache('self.env.uid', 'self.env.su')
+    @api.ormcache('self.env.uid', 'self.env.su')
     def _track_get_fields(self) -> set[str]:
         """ Return the set of tracked fields names for the current model. """
         model_fields = {

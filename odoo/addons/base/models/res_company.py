@@ -8,7 +8,7 @@ from odoo import api, fields, models, modules, tools
 from odoo.api import SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
-from odoo.tools import SQL, BinaryBytes, file_open, html2plaintext, ormcache
+from odoo.tools import SQL, BinaryBytes, file_open, html2plaintext
 from odoo.tools.image import image_process
 from odoo.tools.sql import table_columns
 
@@ -459,7 +459,7 @@ class ResCompany(models.CachedModel):
 
         return main_company
 
-    @ormcache('tuple(self.env.companies.ids)', 'self.id', 'self.env.uid')
+    @api.ormcache('tuple(self.env.companies.ids)', 'self.id', 'self.env.uid')
     def __accessible_branches(self):
         # Get branches of this company that the current user can use
         self.ensure_one()

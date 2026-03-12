@@ -674,7 +674,7 @@ class ResUsers(models.Model):
         return vals_list
 
     @api.model
-    @tools.ormcache('self.env.uid')
+    @api.ormcache('self.env.uid')
     def context_get(self):
         # use read() to not read other fields: this must work while modifying
         # the schema of models res.users or res.partner
@@ -704,7 +704,7 @@ class ResUsers(models.Model):
 
         return frozendict(context)
 
-    @tools.ormcache('self.id')
+    @api.ormcache('self.id')
     def _get_company_ids(self):
         # use search() instead of `self.company_ids` to avoid extra query for `active_test`
         domain = [('active', '=', True), ('user_ids', 'in', self.id)]
@@ -793,7 +793,7 @@ class ResUsers(models.Model):
         return auth_info
 
     @api.model
-    @tools.ormcache('uid', 'passwd')
+    @api.ormcache('uid', 'passwd')
     def _check_uid_passwd(self, uid, passwd):
         """Verifies that the given (uid, password) is authorized and
            raise an exception if it is not."""
@@ -830,7 +830,7 @@ class ResUsers(models.Model):
             "group_by": SQL("res_users.id"),
         }
 
-    @tools.ormcache('sid')
+    @api.ormcache('sid')
     def _compute_session_token(self, sid):
         """ Compute a session token given a session id and a user id """
         # retrieve the fields used to generate the session token
@@ -1080,7 +1080,7 @@ class ResUsers(models.Model):
         # for new record don't fill the ormcache
         return group_id in (self._get_group_ids() if self.id else self.all_group_ids._origin._ids)
 
-    @tools.ormcache('self.id')
+    @api.ormcache('self.id')
     def _get_group_ids(self):
         """ Return ``self``'s group ids (as a tuple)."""
         self.ensure_one()
@@ -1175,7 +1175,7 @@ class ResUsers(models.Model):
     def get_company_currency_id(self):
         return self.env.company.currency_id.id
 
-    @tools.ormcache(cache='stable')
+    @api.ormcache(cache='stable')
     def _crypt_context(self):
         """ Passlib CryptContext instance used to encrypt and verify
         passwords. Can be overridden if technical, legal or political matters

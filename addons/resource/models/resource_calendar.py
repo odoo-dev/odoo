@@ -12,7 +12,7 @@ from dateutil.rrule import DAILY, rrule
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Command, Domain
-from odoo.tools import float_compare, ormcache
+from odoo.tools import float_compare
 from odoo.tools.date_utils import end_of, float_to_time, localized, to_timezone, start_of
 from odoo.tools.float_utils import float_round
 from odoo.tools.intervals import Intervals
@@ -876,7 +876,7 @@ class ResourceCalendar(models.Model):
             week_type = str(self.env['resource.calendar.attendance'].get_week_type(date))
         return sum(attendances_per_week_type[week_type].mapped('duration_hours'))
 
-    @ormcache('self.id')
+    @api.ormcache('self.id')
     def _get_working_hours(self):
         self.ensure_one()
 

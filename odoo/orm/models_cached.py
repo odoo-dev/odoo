@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tools import frozendict, ormcache
+from odoo import api
+from odoo.tools import frozendict
 
 from .models import Model
 
@@ -25,7 +26,7 @@ class CachedModel(Model):
     def _clear_cache_on_fields(self):
         return self._cached_data_fields
 
-    @ormcache(cache='stable')
+    @api.ormcache(cache='stable')
     def _cached_data(self) -> frozendict:
         """ Return the cached values for all records that satisfy ``_cached_data_domain``.
         The result is a mapping where keys are field names (including field ``id``)
