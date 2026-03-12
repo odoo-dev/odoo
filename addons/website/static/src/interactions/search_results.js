@@ -30,8 +30,8 @@ export class SearchResults extends Interaction {
         const buttonEl = ev.target;
         const searchType = buttonEl.dataset.searchType;
         const offset = parseInt(buttonEl.dataset.offset || this.limit);
-        const [html, hasMore] = await this.keepLast.add(
-            rpc("/website/load_more_search", {
+        const { html: html, has_more: hasMore } = await this.keepLast.add(
+            rpc("/website/snippet/autocomplete", {
                 search: this.inputEl.value,
                 search_type: searchType,
                 offset: offset,
@@ -40,6 +40,9 @@ export class SearchResults extends Interaction {
                 max_nb_chars: Math.round(
                     Math.max(this.autocompleteMinWidth, this.inputEl.clientWidth / 3) * 0.22
                 ),
+                options: {
+                    renderTemplate: true,
+                },
             })
         );
         const doc = parseHTML(document, html);

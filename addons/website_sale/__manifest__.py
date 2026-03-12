@@ -44,7 +44,6 @@
         "templates/shop_empty_screens/svg_templates.xml",
         "templates/website_templates.xml",
         "templates/wishlist_templates.xml",
-
         # Qweb templates -> checkout
         "templates/checkout/checkout_templates.xml",  # Shared templates first
         "templates/checkout/address_templates.xml",

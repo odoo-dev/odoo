@@ -14,7 +14,6 @@ from odoo.tools.translate import html_translate
 
 from odoo.addons.website.models import ir_http
 from odoo.addons.website.tools import text_from_html
-from odoo.addons.website_sale.const import SHOP_PATH
 
 # A delimiter that users aren't likely to search for in product codes.
 RARE_DELIMITER = "\u241e"
@@ -930,8 +929,16 @@ class ProductTemplate(models.Model):
             domains.append([("list_price", "<=", max_price)])
         if attribute_value_dict:
             domains.extend(self._get_attribute_value_domain(attribute_value_dict))
-        search_fields = ["name", "default_code", "variants_default_code", "description_ecommerce", "attribute_line_ids.value_ids.name", "product_tag_ids.name"]
-        fetch_fields = ["id", "name", "website_url", "description_ecommerce"]
+        search_fields = [
+            "name",
+            "default_code",
+            "variants_default_code",
+            "description_ecommerce",
+            "attribute_line_ids.value_ids.name",
+            "product_tag_ids.name",
+            "description_sale",
+        ]
+        fetch_fields = ["id", "name", "website_url", "description_ecommerce", "description_sale"]
         mapping = {
             "name": {"name": "name", "type": "text", "match": True},
             "website_url": {"name": "website_url", "type": "text", "truncate": False},
@@ -940,6 +947,7 @@ class ProductTemplate(models.Model):
             "description": {"name": "description_ecommerce", "type": "text", "html": True, "match": True},
             "tags": {"name": "product_tag_ids", "type": "tags", "match": True},
             "attribute_value_ids": {"name": "attribute_value_ids", "type": "tags", "match": True, "force_show": True},
+            "description_sale": {"name": "description_sale", "type": "text", "html": True, "match": True},
         }
         return {
             "model": "product.template",
@@ -956,24 +964,24 @@ class ProductTemplate(models.Model):
         results_data = super()._search_render_results(fetch_fields, mapping, icon, limit)
         for product, data in zip(self, results_data):
             combination_info = product._get_combination_info(only_template=True)
-            values = product.mapped('attribute_line_ids.value_ids')
-            data["attribute_value_ids"] = values.read(['id', 'name'])
-            data["product_tag_ids"] = product.product_tag_ids.read(['name'])
+            values = product.mapped("attribute_line_ids.value_ids")
+            data["attribute_value_ids"] = values.read(["id", "name"])
+            data["product_tag_ids"] = product.product_tag_ids.read(["name"])
             price = self._search_render_results_prices(
                 mapping, combination_info
             )
             if price:
                 data["price"] = price
-            data["image_url"] = '/web/image/product.template/%s/image_128' % data["id"]
+            data["image_url"] = "/web/image/product.template/%s/image_128" % data["id"]
         return results_data
 
     def _search_render_results_prices(self, mapping, combination_info):
-        if combination_info.get('hide_price'):
+        if combination_info.get("hide_price"):
             return None
 
-        monetary_options = {'display_currency': mapping['search_item_metadata']['display_currency']}
-        price = self.env['ir.qweb.field.monetary'].value_to_html(
-            combination_info['price'], monetary_options
+        monetary_options = {"display_currency": mapping["search_item_metadata"]["display_currency"]}
+        price = self.env["ir.qweb.field.monetary"].value_to_html(
+            combination_info["price"], monetary_options
         )
         return price
 

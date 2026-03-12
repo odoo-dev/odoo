@@ -6,7 +6,6 @@ import { rpc } from "@web/core/network/rpc";
 import { getTemplate } from "@web/core/templates";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { utils as ui } from "@web/core/ui/ui_service";
-import { _t } from "@web/core/l10n/translation";
 import { renderToElement } from "@web/core/utils/render";
 
 export class SearchBar extends Interaction {
@@ -165,8 +164,7 @@ export class SearchBar extends Interaction {
     updateButtonContent(count) {
         this.hideLoadingSpinner();
         this.buttonEl.toggleAttribute("disabled", count === 0);
-        const countText = count <= 1 ? _t("%s result", count) : _t("%s results", count);
-        this.resultsEl.querySelector(".o_search_count").textContent = countText;
+        this.resultsEl.querySelector(".o_search_count").textContent = count;
     }
 
     hideLoadingSpinner() {
@@ -309,14 +307,8 @@ export class SearchBar extends Interaction {
      * @param {MouseEvent} ev
      */
     onSearch(ev) {
-        if (this.inputEl.value) {
-            // actual search
-            this.limit = 0; // prevent autocomplete
-        } else {
-            // clear button clicked
-            this.render(); // remove existing suggestions
-            ev.preventDefault();
-        }
+        this.render();
+        ev.preventDefault();
     }
 }
 

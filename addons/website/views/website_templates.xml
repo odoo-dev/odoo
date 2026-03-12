@@ -3119,7 +3119,6 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
 
 <template id="website_search_box" name="Website Searchbox">
     <t t-set="search_count" t-value="search_count or 0"/>
-    <t t-set="search_count_string" t-value="str(search_count) + ' result' + ('s' if search_count &gt; 1 else '')"/>
     <div
         t-attf-class="{{_input_group_classes}} o_search_input_group input-group {{'d-none' if _simple_button_layout else ''}}" role="search"
         t-att-data-force-modal-trigger="_force_modal_trigger or _simple_button_layout">
@@ -3141,7 +3140,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
                 <span class="visually-hidden">Loading...</span>
             </span>
             <small t-attf-class="o_search_found_results {{'d-none' if not search else ''}}">
-                <span class="o_search_count" t-out="search_count_string"/>
+                <span class="o_search_count" t-out="search_count"/> result(s)
             </small>
             <i t-attf-class="{{'d-none' if search else ''}} oi oi-search"/>
         </button>
@@ -3221,7 +3220,7 @@ Sitemap: <t t-out="url_root"/>sitemap.xml
                             <t t-out="result.get('search_item_metadata')"/>
                         </span>
                     </div>
-                    <div class="o_search_result_description d-empty-none w-50">
+                    <div class="o_search_result_description d-empty-none w-100 w-md-50">
                         <t t-if="result.get('tags')" t-out="result['tags']"/>
                         <p
                             t-elif="result.get('description')"

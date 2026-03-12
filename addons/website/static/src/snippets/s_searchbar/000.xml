@@ -104,7 +104,7 @@
                                 <span class="visually-hidden">Loading...</span>
                             </span>
                             <small class="o_search_found_results d-none">
-                                <span class="o_search_count"></span>
+                                <span class="o_search_count"></span> result(s)
                             </small>
                             <i class="oi oi-search"></i>
                         </button>

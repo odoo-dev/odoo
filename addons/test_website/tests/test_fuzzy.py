@@ -30,7 +30,7 @@ class TestAutoComplete(TransactionCase):
 
     def _autocomplete_page(self, term, expected_count, expected_fuzzy_term):
         self._autocomplete(term, expected_count, expected_fuzzy_term, search_type="pages", options={
-            'allowFuzzy': True
+            'allowFuzzy': True,
         })
 
     def test_01_many_records(self):
@@ -95,7 +95,7 @@ class TestAutoComplete(TransactionCase):
             # Indeed, `name` is a field of `website.page` record but only at the
             # ORM level, not in SQL, due to how `inherits` works.
             self.env.ref('website.default_website')._search_with_fuzzy(
-                'pages', 'test', limit=5, order='name asc, website_id desc, id', options={
+                'pages', 'test', limit=5, offset=0, order='name asc, website_id desc, id', options={
                     'allowFuzzy': True,
                 }
             )

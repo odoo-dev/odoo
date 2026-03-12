@@ -605,6 +605,7 @@ class Website(Home):
         :param dict options: options map containing
             allowFuzzy: enables the fuzzy matching when truthy
             fuzzy (boolean): True when called after finding a name through fuzzy matching
+            templateKey (str): the key of the template to use for rendering results
 
         :returns: dict (or False if no result) containing
             - 'results' (dict): contain multiple groups of results, each group is a dict with:
@@ -713,9 +714,15 @@ class Website(Home):
 
             result[group_key] = {
                 'groupName': group_name,
-                'searchCount': search_result.get('count'),
+                'searchCount': search_result.get('count') or 0,
                 'data': result_data,
             }
+
+        if options.get('renderTemplate'):
+            values = next(iter(result.values()), {})
+            has_more = values.get('searchCount') > offset + limit
+            html = self.env['ir.ui.view']._render_template('website.search_result_item', {'results': values})
+            return {'html': html, 'has_more': has_more}
 
         return {
             'results': result,
@@ -771,7 +778,7 @@ class Website(Home):
             return request.render('website.list_hybrid')
 
         options = self._get_hybrid_search_options(**kw)
-        data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=limit, offset=0, max_nb_chars=200, options=options)
+        data = self.autocomplete(search_type=search_type, term=search, order='name asc', limit=limit, offset=0, max_nb_chars=75, options=options)
 
         results = data.get('results', [])
         search_count = data.get('results_count', 0)
@@ -786,29 +793,6 @@ class Website(Home):
             'search_count': search_count,
         }
         return request.render('website.list_hybrid', values)
-
-    @http.route('/website/load_more_search', type='jsonrpc', auth="public", website=True, readonly=True)
-    def load_more_search(self, search='', search_type='all', offset=0, limit=24, **kwargs):
-        """
-        Load the next batch of search results for the hybrid website search view.
-
-        :param str search: Search term entered by the user.
-        :param str search_type: Scope of the search. 'all' searches across all models.
-        :param int offset: Number of records to skip.
-        :param int limit: Maximum number of records to fetch in this batch.
-
-        :returns: tuple (html, has_more)
-            - html (str): Rendered HTML for the next batch of results.
-            - has_more (bool): Whether more results remain beyond the current batch.
-        """
-        options = self._get_hybrid_search_options(**kwargs)
-        max_nb_chars = kwargs.get('max_nb_chars')
-        data = self.autocomplete(search_type=search_type, term=search, order='name asc', offset=offset, limit=limit, max_nb_chars=max_nb_chars, options=options)
-
-        values = next(iter(data.get('results', {}).values()), {})
-        has_more = values.get('searchCount') > offset + limit
-        html = self.env['ir.ui.view']._render_template('website.search_result_item', {'results': values})
-        return html, has_more
 
     # ------------------------------------------------------
     # Edit

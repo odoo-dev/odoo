@@ -12,6 +12,7 @@ from odoo import api, fields, models, tools, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import is_html_empty
+from odoo.tools.misc import format_duration
 
 _logger = logging.getLogger(__name__)
 
@@ -1086,9 +1087,7 @@ class SlideChannel(models.Model):
             data['tag_ids'] = channel.tag_ids.read(['name'])
             data['image_url'] = '/web/image/slide.channel/%s/image_128' % data['id']
             if data['total_time']:
-                h = int(data['total_time'])
-                m = round((data['total_time'] - h) * 60)
-                data['total_time'] = f"{h:2d}:{m:02d} h"
+                data['total_time'] = format_duration(data['total_time'])
         return results_data
 
     def _get_placeholder_filename(self, field):

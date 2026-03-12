@@ -321,7 +321,7 @@ class BlogPost(models.Model):
             'fetch_fields': fetch_fields,
             'mapping': mapping,
             'icon': 'fa-rss',
-            'group_name': self.env._("Blogs Articles"),
+            'group_name': self.env._("Blog Articles"),
             'sequence': 60,
         }
 
