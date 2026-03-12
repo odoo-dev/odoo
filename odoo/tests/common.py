@@ -59,12 +59,12 @@ import odoo.cli
 import odoo.http
 import odoo.models
 import odoo.orm.registry
-from odoo import api
+from odoo import api, sql_db
 from odoo.exceptions import AccessError
 from odoo.fields import Command
 from odoo.modules.registry import Registry, DummyRLock
 from odoo.service import security
-from odoo.sql_db import Cursor, Savepoint
+from odoo.sql_db import Cursor, Savepoint, db_connect
 from odoo.tools import config, float_compare, mute_logger, profiler, SQL, DotDict
 from odoo.tools.mail import single_email_re
 from odoo.tools.misc import find_in_path, lower_logging
@@ -139,7 +139,7 @@ def get_db_name():
 
 standalone_tests = defaultdict(list)
 
-
+sql_counter = 0
 class RegistryRLock(threading._RLock):
     @property
     def count(self):
@@ -1083,6 +1083,17 @@ class TransactionCase(BaseCase):
         cls.startClassPatcher(cls._signal_changes_patcher)
 
         cls.cr = cls.registry.cursor()
+
+        global sql_counter
+        if sql_db.sql_counter - sql_counter > 10000:
+            start = time.time()
+            with contextlib.closing(db_connect(get_db_name()).cursor()) as cr:
+                cr._cnx.autocommit = True
+                cr.execute("VACUUM")
+                #cr.execute("ANALYZE")
+            _logger.info("VACUUM done in %.2f seconds", time.time() - start)
+            sql_counter = sql_db.sql_counter
+
         cls.addClassCleanup(cast(Cursor, cls.cr).close)
 
         def check_cursor_stack():
