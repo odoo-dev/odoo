@@ -25,7 +25,7 @@
             'opacity-75': props.channel.notEq(rtc.channel) and compact,
         }">
             <button class="o-mail-DiscussSidebarCallParticipants-expandBtn btn btn-link p-1 my-n1 ms-n1 me-0 align-self-start d-flex rounded-circle" t-if="!compact" t-on-click="() => state.expanded = !state.expanded">
-                <i class="oi o-xxsmaller text-muted text-dark" t-att-class="{'oi-chevron-right': !state.expanded, 'oi-chevron-down': state.expanded}" t-att-title="title"/>
+                <i class="oi o-xxsmaller text-muted text-dark" t-attf-data-icon="{{ state.expanded ? 'keyboard_arrow_down' : 'chevron_forward' }}" t-att-title="title"/>
             </button>
             <AvatarStack
                 t-if="!state.expanded"

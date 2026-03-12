@@ -79,9 +79,9 @@
                         </small>
                     </span>
                     <span class="d-flex align-items-center gap-1 small fw-bold">
-                        <i class="fa fa-clock-o" role="img"/>
+                        <i class="oi" data-icon="schedule" role="img"/>
                         <t t-out="openingHoursLabel"/>
-                        <i class="o_location_selector_hours_caret fa fa-caret-up ms-auto transition-base"/>
+                        <i class="o_location_selector_hours_caret oi ms-auto transition-base" data-icon="arrow_drop_up"/>
                     </span>
 
                     <!-- Schedule -->

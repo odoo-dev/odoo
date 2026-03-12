@@ -11,7 +11,7 @@
                         Stop sharing
                     </button>
                     <button class="o-discuss-CallInfiniteMirroringWarning-dismiss border-0 bg-transparent opacity-50 opacity-100-hover pe-auto" t-on-click="() => this.props.onClose()">
-                        <i class="fa fa-lg fa-times-circle"/>
+                        <i class="oi oi-lg oi-filled" data-icon="cancel"/>
                     </button>
                 </div>
             </div>

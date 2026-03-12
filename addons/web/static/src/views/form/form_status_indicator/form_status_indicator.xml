@@ -12,7 +12,7 @@
                     data-tooltip="Save manually"
                     aria-label="Save manually"
                     t-ref="save">
-                    <i class="fa fa-cloud-upload fa-fw" />
+                    <i class="oi oi-fw" data-icon="cloud_upload" />
                 </button>
                 <button
                     type="button"
@@ -21,14 +21,14 @@
                     t-on-click.stop="discard"
                     data-tooltip="Discard all changes"
                     aria-label="Discard all changes">
-                    <i class="fa fa-times fa-fw" />
+                    <i class="oi oi-fw" data-icon="close" />
                 </button>
             </div>
             <span
                 t-if="!props.model.root.isNew and indicatorMode === 'invalid'"
                 class="text-danger small ms-2"
                 data-tooltip="Unable to save. Correct the issue or discard all changes">
-                <i class="fa fa-warning" />
+                <i class="oi" data-icon="warning" />
             </span>
         </div>
     </t>

@@ -3,7 +3,7 @@
     <t t-name="stock_account.StockValuationReport.FilterDate">
         <div id="filter_date" t-ref="filterDate" class="d-print-none" t-on-click="onDateClick">
             <button class="btn btn-secondary">
-                <i class="fa fa-calendar me-1"/>As of <t t-out="date"/>
+                <i class="oi oi-filled me-1" data-icon="calendar_today"/>As of <t t-out="date"/>
             </button>
         </div>
         <div class="d-none d-print-block">

@@ -98,7 +98,7 @@
                                     <field name="account_id"/>
                                 </div>
                                 <strong t-if="record.date_maturity.raw_value" class="col-4 ps-0 text-end">
-                                    <i class="fa fa-clock-o" aria-label="Date" role="img" title="Date"/> <field name="date_maturity"/>
+                                    <i class="oi" data-icon="schedule" aria-label="Date" role="img" title="Date"/> <field name="date_maturity"/>
                                 </strong>
                             </div>
                             <div class="row mb4" style="min-height: 60px;">

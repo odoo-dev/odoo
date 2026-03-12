@@ -34,7 +34,7 @@
                     target="_blank"
                     aria-label="Print"
                 >
-                    <i class="fa fa-print me-2"/>Print
+                    <i class="oi me-2" data-icon="print"/>Print
                 </a>
             </div>
             <div id="order_name" class="mb-4">
@@ -91,7 +91,7 @@
                     aria-label="Edit"
                     t-attf-href="/odoo/action-payment.action_payment_provider/{{tx_sudo.provider_id.id}}"
                 >
-                    <i class="fa fa-pencil"/>
+                    <i class="oi oi-filled" data-icon="edit"/>
                 </a>
                 <div>
                     <t t-if="tx_sudo.state == 'pending'">

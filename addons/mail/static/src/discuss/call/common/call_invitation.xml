@@ -9,7 +9,7 @@
                         <div class="d-flex align-items-center" style="min-width: 0;">
                             <div class="o-mail-CallInvitation-avatar flex-shrink-0 cursor-pointer d-flex align-items-center justify-content-center rounded-circle overflow-hidden" t-att-class="{'bg-primary': !inviter}" t-on-click="() => props.channel.open({ focus: true })" t-att-title="avatarTitle">
                                 <img t-if="inviter" class="object-fit-cover h-100 w-100" t-att-src="inviter.avatarUrl" alt="Avatar"/>
-                                <i t-else="" class="fa fa-phone"/>
+                                <i t-else="" class="oi oi-filled" data-icon="phone"/>
                             </div>
                             <div class="ms-2 me-3 flex-grow-1 overflow-hidden">
                                 <p class="o-discuss-CallInvitation-channelName m-0 fw-bold small text-truncate" t-esc="props.channel.displayName"/>

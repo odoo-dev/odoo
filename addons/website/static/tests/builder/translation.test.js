@@ -63,7 +63,7 @@ test("show invisible elements in translate mode", async () => {
 
     expect(":iframe .o_snippet_invisible").toHaveAttribute("data-invisible", "1");
     await contains(
-        ".o_we_invisible_el_panel  .o_we_invisible_entry:contains('Invisible Element') i.fa-eye-slash"
+        ".o_we_invisible_el_panel  .o_we_invisible_entry:contains('Invisible Element') i[data-icon='visibility_off']"
     ).click();
     expect(":iframe .o_snippet_invisible").not.toHaveAttribute("data-invisible");
 });
@@ -229,7 +229,7 @@ test("translate attribute history", async () => {
             translated ? " oe_translated" : ""
         }" loading="lazy" title="${titleName}" style="" data-oe-translation-state="to_translate"></img>`;
     expect(wrapEl).toHaveInnerHTML(getImg({ titleName: "titre", translated: true }));
-    await contains(".o-snippets-menu button.fa-undo").click();
+    await contains(".o-snippets-menu button[data-icon='undo']").click();
     expect(wrapEl).toHaveInnerHTML(getImg({ titleName: "title", translated: false }));
     await contains(":iframe img").click();
     expect(".modal .modal-body input").toHaveValue("title");

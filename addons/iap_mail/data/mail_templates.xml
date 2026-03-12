@@ -31,7 +31,7 @@
 
             <div class="col-sm-12 row m-0 p-0">
                 <div t-if="founded_year" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-calendar text-primary"/>
+                    <i class="oi oi-fw oi-filled me-2 text-primary" data-icon="calendar_today"/>
                     <b>Founded</b>
                 </div>
                 <div t-if="founded_year" class="my-1 col-sm-9" t-out="founded_year" />
@@ -41,7 +41,7 @@
                 <t t-if="industry_group" t-set="sectors" t-value="sectors + [industry_group]" />
                 <t t-if="sub_industry" t-set="sectors" t-value="sectors + [sub_industry]" />
                 <div t-if="sectors" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-industry text-primary"/>
+                    <i class="oi oi-fw me-2 text-primary" data-icon="factory"/>
                     <b>Sectors</b>
                 </div>
                 <div t-if="sectors" class="my-1 col-sm-9">
@@ -50,19 +50,19 @@
                     </t>
                 </div>
                 <div t-if="employees" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-users text-primary"/>
+                    <i class="oi oi-fw oi-filled me-2 text-primary" data-icon="group"/>
                     <b>Employees</b>
                 </div>
                 <div t-if="employees" class="my-1 col-sm-9" t-out="'%.0f' % employees" />
                 <div t-if="estimated_annual_revenue" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-money text-primary"/>
+                    <i class="oi oi-fw me-2 text-primary" data-icon="payments"/>
                     <b>Estimated revenue</b>
                 </div>
                 <div t-if="estimated_annual_revenue" class="my-1 col-sm-9">
                     <span t-out="estimated_annual_revenue" /><span> per year</span>
                 </div>
                 <div t-if="phone_numbers" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-phone text-primary"/>
+                    <i class="oi oi-fw oi-filled me-2 text-primary" data-icon="phone"/>
                     <b>Phone</b>
                 </div>
                 <div t-if="phone_numbers" class="col-sm-9">
@@ -71,7 +71,7 @@
                     </t>
                 </div>
                 <div t-if="email" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-envelope text-primary"/>
+                    <i class="oi oi-fw me-2 text-primary" data-icon="mail"/>
                     <b>Email</b>
                 </div>
                 <div t-if="email" class="col-sm-9">
@@ -80,12 +80,12 @@
                     </t>
                 </div>
                 <div t-if="timezone" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-globe text-primary"/>
+                    <i class="oi oi-fw me-2 text-primary" data-icon="public"/>
                     <b>Timezone</b>
                 </div>
                 <div t-if="timezone" class="my-1 col-sm-9" t-out="timezone.replace('_', ' ')" />
                 <div t-if="tech" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-cube text-primary"/>
+                    <i class="oi oi-fw me-2 text-primary" data-icon="deployed_code"/>
                     <b>Technologies Used</b>
                 </div>
                 <div t-if="tech" class="my-1 col-sm-9">
@@ -94,7 +94,7 @@
                     </t>
                 </div>
                 <div t-if="twitter_bio" class="d-flex my-1 p-0 col-sm-3">
-                    <i class="fa fa-fw me-2 fa-twitter text-primary"/>
+                    <i class="oi oi-fw me-2 text-primary" data-icon="oi_twitter"/>
                     <b>X</b>
                 </div>
                 <div t-if="twitter_bio" class="my-1 col-sm-9">

@@ -16,7 +16,7 @@ export function getSnippetName(snippetEl) {
     if (snippetEl.matches("img")) {
         return _t("Image");
     }
-    if (snippetEl.matches(".fa")) {
+    if (snippetEl.matches(".oi")) {
         return _t("Icon");
     }
     if (snippetEl.matches(".media_iframe_video")) {

@@ -125,8 +125,8 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
             multiCalendar,
             showLine,
             iconMap: {
-                "office": "fa-building",
-                "home": "fa-home",
+                "office": "business",
+                "home": "home",
             },
         }
     }

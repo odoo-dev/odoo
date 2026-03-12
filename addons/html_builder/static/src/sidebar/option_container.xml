@@ -40,7 +40,8 @@
                 <t t-if="props.isClonable || props.cloneDisabledReason">
                     <!-- Disabled buttons do not display their title -->
                     <span t-att-title="props.cloneDisabledReason" t-att-aria-label="props.cloneDisabledReason">
-	                    <button class="fa fa-fw fa-clone oe_snippet_clone o-hb-btn btn btn-success-color-hover"
+	                    <button class="oi oi-fw oe_snippet_clone o-hb-btn btn btn-success-color-hover"
+                                data-icon="content_copy"
 	                            title="Duplicate this block"
 	                            aria-label="Duplicate this block"
                                 t-att-disabled="!!props.cloneDisabledReason"
@@ -50,7 +51,8 @@
                 <t t-if="props.isRemovable || props.removeDisabledReason">
                     <!-- Disabled buttons do not display their title -->
                     <span t-att-title="props.removeDisabledReason" t-att-aria-label="props.removeDisabledReason">
-	                    <button class="fa fa-fw fa-trash oe_snippet_remove o-hb-btn btn btn-danger-color-hover"
+	                    <button class="oi oi-fw oi-filled oe_snippet_remove o-hb-btn btn btn-danger-color-hover"
+                                data-icon="delete"
 	                            title="Remove this block"
 	                            aria-label="Remove this block"
 	                            t-att-disabled="!!props.removeDisabledReason"

@@ -4,11 +4,11 @@
         <xpath expr="//*[@t-ref='displayName']" position="inside">
                 <div t-if="member.channel_id.channel_type === 'livechat'" class="ms-2 d-flex flex-wrap">
                     <span t-if="member.getLangName()" class="me-2">
-                        <i class="fa fa-comment-o me-1" aria-label="Lang"/>
+                        <i class="oi me-1" data-icon="chat_bubble" aria-label="Lang"/>
                         <t t-esc="member.getLangName()"/>
                     </span>
                     <span t-if="member.persona?.country_id or member.channel_id.country_id">
-                        <i class="fa fa-globe me-1" aria-label="country"/>
+                        <i class="oi me-1" data-icon="public" aria-label="country"/>
                         <t t-esc="member.persona?.country_id?.name ?? member.channel_id.country_id.name"/>
                     </span>
                 </div>

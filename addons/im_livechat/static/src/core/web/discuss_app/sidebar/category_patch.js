@@ -23,8 +23,11 @@ const DiscussSidebarCategoryPatch = {
                     ? this.category.livechat_channel_id.leaveTitle
                     : this.category.livechat_channel_id.joinTitle,
                 icon: this.category.livechat_channel_id.are_you_inside
-                    ? "fa fa-sign-out fa-rotate-180 text-danger"
-                    : "fa fa-sign-in text-success",
+                    ? "logout"
+                    : "login",
+                icon_class: this.category.livechat_channel_id.are_you_inside
+                    ? "oi-rotate-180 text-danger"
+                    : "text-success",
             });
         }
         return actions;

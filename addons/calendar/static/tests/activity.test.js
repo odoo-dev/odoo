@@ -18,7 +18,7 @@ test("activity click on Reschedule", async () => {
     const pyEnv = await startServer();
     const resPartnerId = pyEnv["res.partner"].create({});
     const meetingActivityTypeId = pyEnv["mail.activity.type"].create({
-        icon: "fa-calendar",
+        icon: "calendar_today",
         name: "Meeting",
     });
     const calendarAttendeeId = pyEnv["calendar.attendee"].create({
@@ -48,7 +48,7 @@ test("Can cancel activity linked to an event", async () => {
     const pyEnv = await startServer();
     const partnerId = pyEnv["res.partner"].create({ name: "Milan Kundera" });
     const activityTypeId = pyEnv["mail.activity.type"].create({
-        icon: "fa-calendar",
+        icon: "calendar_today",
         name: "Meeting",
     });
     const attendeeId = pyEnv["calendar.attendee"].create({

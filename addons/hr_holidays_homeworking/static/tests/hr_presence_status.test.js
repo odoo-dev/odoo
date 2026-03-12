@@ -29,8 +29,8 @@ test("Show Time Off before Work Location", async () => {
                 <field name="hr_icon_display" widget="hr_presence_status"/>
             </form>`,
     });
-    expect("small.fa-building").toHaveCount(0);
-    expect("small.fa-plane").toBeVisible();
-    expect("small.fa-plane").toHaveAttribute("title", "On leave, back on Jan 6, 2025");
-    expect("small.fa-plane").toHaveClass("o_icon_employee_absent");
+    expect("small[data-icon='business']").toHaveCount(0);
+    expect("small[data-icon='travel']").toBeVisible();
+    expect("small[data-icon='travel']").toHaveAttribute("title", "On leave, back on Jan 6, 2025");
+    expect("small[data-icon='travel']").toHaveClass("o_icon_employee_absent");
 });

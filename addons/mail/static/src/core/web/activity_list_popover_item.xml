@@ -13,19 +13,19 @@
                     <FileUploader t-if="hasFileUploader" onUploaded.bind="onFileUploaded">
                         <t t-set-slot="toggler">
                             <button class="btn btn-sm btn-success btn-link" title="Upload file" aria-label="Upload File">
-                                <i class="fa fa-upload"/>
+                                <i class="oi" data-icon="upload"/>
                             </button>
                         </t>
                     </FileUploader>
                     <button t-if="hasMarkDoneButton" class="o-mail-ActivityListPopoverItem-markAsDone btn btn-sm btn-success btn-link" title="Mark as done" aria-label="Mark as done" t-on-click="onClickMarkAsDone">
-                        <i class="fa fa-check"/>
+                        <i class="oi" data-icon="check"/>
                     </button>
                 </t>
                 <button t-if="hasEditButton" class="o-mail-ActivityListPopoverItem-editbtn btn btn-sm btn-success btn-link" title="Edit" aria-label="Edit" t-on-click="onClickEditActivityButton">
-                    <i class="fa fa-pencil"/>
+                    <i class="oi oi-filled" data-icon="edit"/>
                 </button>
                 <button t-if="hasCancelButton" class="o-mail-ActivityListPopoverItem-cancel btn btn-sm btn-danger btn-link" title="Cancel" aria-label="Cancel" t-on-click="unlink">
-                    <i class="fa fa-times"/>
+                    <i class="oi" data-icon="close"/>
                 </button>
             </div>
             <div class="d-flex align-items-center flex-wrap mx-3">

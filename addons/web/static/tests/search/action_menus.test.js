@@ -158,7 +158,7 @@ test("render ActionMenus in form view", async () => {
     ]);
 
     // select CogMenu
-    await contains(`div.o_control_panel_breadcrumbs_actions i.fa-cog`).click();
+    await contains(`div.o_control_panel_breadcrumbs_actions i[data-icon="settings"]`).click();
 
     // select Print dropdown
     await contains(`button.o-dropdown:contains(Print)`).click();
@@ -175,7 +175,7 @@ test("render ActionMenus in form view", async () => {
     await contains(`button.o_form_button_save`).click();
     expect(`.o_pager_counter`).toHaveText("2 / 2");
     expect.verifySteps(["onchange", "web_save"]);
-    await contains(`div.o_control_panel_breadcrumbs_actions i.fa-cog`).click();
+    await contains(`div.o_control_panel_breadcrumbs_actions i[data-icon="settings"]`).click();
     await contains(`button.o-dropdown:contains(Print)`).click();
     expect(queryAllTexts(`.o-dropdown--menu-submenu span.o-dropdown-item`)).toEqual([
         "Some Report always visible",
@@ -186,7 +186,7 @@ test("render ActionMenus in form view", async () => {
     // switch back to first record
     await contains(`.o_pager_previous`).click();
     expect(`.o_pager_counter`).toHaveText("1 / 2");
-    await contains(`div.o_control_panel_breadcrumbs_actions i.fa-cog`).click();
+    await contains(`div.o_control_panel_breadcrumbs_actions i[data-icon="settings"]`).click();
     await contains(`button.o-dropdown:contains(Print)`).click();
     expect(queryAllTexts(`.o-dropdown--menu-submenu span.o-dropdown-item`)).toEqual([
         "Some Report always visible",

@@ -35,11 +35,12 @@ test("Office Location (online)", async () => {
                 <field name="hr_icon_display" widget="hr_presence_status"/>
             </form>`,
     });
-    expect("small.fa-building").toHaveCount(1);
-    expect("small.fa-home").toHaveCount(0);
-    expect("small.fa-map-marker").toHaveCount(0);
-    expect("small").toHaveClass(["text-success", "fa-building"]);; // color == text-success
-    expect("small.fa-building[title='Office 1']").toHaveCount(1);
+    expect("small[data-icon='business']").toHaveCount(1);
+    expect("small[data-icon='home']").toHaveCount(0);
+    expect("small[data-icon='location_on']").toHaveCount(0);
+    expect("small").toHaveClass("text-success"); // color == text-success
+    expect("small").toHaveAttribute("data-icon","business");
+    expect("small[data-icon='business'][title='Office 1']").toHaveCount(1);
 });
 
 test("Home Location (away)", async () => {
@@ -64,9 +65,10 @@ test("Home Location (away)", async () => {
                 <field name="hr_icon_display" widget="hr_presence_status"/>
             </form>`,
     });
-    expect("small.fa-home").toHaveCount(1);
-    expect("small.fa-building").toHaveCount(0);
-    expect("small.fa-map-marker").toHaveCount(0);
-    expect("small").toHaveClass(["o_icon_employee_absent", "fa-home"]); // color == text-warning
-    expect("small.fa-home[title='Home']").toHaveCount(1);
+    expect("small[data-icon='home']").toHaveCount(1);
+    expect("small[data-icon='business']").toHaveCount(0);
+    expect("small[data-icon='location_on']").toHaveCount(0);
+    expect("small").toHaveClass("o_icon_employee_absent"); // color == text-warning
+    expect("small").toHaveAttribute("data-icon","home");
+    expect("small[data-icon='home'][title='Home']").toHaveCount(1);
 });

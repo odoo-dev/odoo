@@ -788,7 +788,7 @@ test("don't close dropdown outside the active element", async () => {
     expect(DROPDOWN_MENU).toHaveCount(1);
 
     if (getMockEnv().isSmall) {
-        await click(".modal-dialog .oi-arrow-left");
+        await click(".modal-dialog [data-icon='west']");
     } else {
         await click(".modal-dialog .btn-close");
     }

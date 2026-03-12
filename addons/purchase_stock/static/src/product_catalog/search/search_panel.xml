@@ -29,7 +29,7 @@
     <t t-name="PurchaseSuggest.SearchPanel.Header">
         <div name="search_panel_suggestion" class="d-flex pt-4 mt-3">
             <header class=" text-uppercase cursor-default" t-att-title="tooltipTitle">
-                <i class="fa fa-lg fa-lightbulb-o text-primary me-2"/>
+                <i class="oi oi-lg text-primary me-2" data-icon="lightbulb"/>
                 <b class="me-2">Suggest</b>
             </header>
             <div class="d-flex align-items-center ms-auto">

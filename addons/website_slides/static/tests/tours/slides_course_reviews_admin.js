@@ -62,7 +62,7 @@ registry.category("web_tour.tours").add("course_reviews_admin", {
         },
         {
             content: "Select 5 stars for the admin review",
-            trigger: ".modal.modal_shown .modal-body i.fa.fa-star-o:eq(3)",
+            trigger: ".modal.modal_shown .modal-body i[data-icon='star']:eq(3)",
             run: "click",
         },
         {

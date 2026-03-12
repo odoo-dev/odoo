@@ -10,19 +10,19 @@ registry.category("web_tour.tours").add('sale_product_configurator_optional_prod
         ...tourUtils.selectCustomer("Tajine Saucisse"),
         ...tourUtils.addProduct("Customizable Desk (TEST)"),
         {
-            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Office Chair Black")) button:has(i.oi-plus)',
+            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Office Chair Black")) button:has(i[data-icon="add"])',
             run: "click",
         },
         {
-            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Customizable Desk")) button:has(i.oi-plus)',
+            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Customizable Desk")) button:has(i[data-icon="add"])',
             run: "click",
         },
         {
-            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Chair floor protection")) button:has(i.oi-plus)',
+            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Chair floor protection")) button:has(i[data-icon="add"])',
             run: "click",
         },
         {
-            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Conference Chair")) button:has(i.oi-plus)',
+            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Conference Chair")) button:has(i[data-icon="add"])',
             run: "click",
         },
         {
@@ -30,7 +30,7 @@ registry.category("web_tour.tours").add('sale_product_configurator_optional_prod
             run: "click",
         },
         {
-            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Conference Chair")) button:has(i.oi-plus)',
+            trigger: 'tr:has(div[name="o_sale_product_configurator_name"]:contains("Conference Chair")) button:has(i[data-icon="add"])',
             run: "click",
         },
         {

@@ -5,7 +5,7 @@
             <div class="pb-4">
                 <h4>Data to import</h4>
                 <div class="mb-2 d-flex align-items-center">
-                    <i class="fa fa-file white me-2"></i>
+                    <i class="oi oi-filled white me-2" data-icon="description"></i>
                     <div class="fst-italic truncate"><t t-esc="fileName"/></div>
                     <span class="fst-italic"><t t-esc="fileExtension"/></span>
                 </div>
@@ -143,7 +143,7 @@
                 <h4>Help</h4>
                 <t t-foreach="props.importTemplates" t-as="template" t-key="template">
                     <a class="d-block my-2" t-att-href="template.template" aria-label="Download" data-tooltip="Download">
-                        <i class="fa fa-download"/> <span><t t-esc="template.label"/></span>
+                        <i class="oi oi-fw" data-icon="download"/> <span><t t-esc="template.label"/></span>
                     </a>
                 </t>
                 <DocumentationLink path="'/applications/general/export_import_data.html'" icon="'fa-external-link'" label.translate="Go to Import FAQ"/>

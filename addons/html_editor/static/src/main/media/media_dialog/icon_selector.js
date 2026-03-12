@@ -4,7 +4,7 @@ import { fonts } from "@html_editor/utils/fonts";
 import { Component, useState } from "@odoo/owl";
 
 export class IconSelector extends Component {
-    static mediaSpecificClasses = ["fa"];
+    static mediaSpecificClasses = ["oi"];
     static mediaSpecificStyles = ["color", "background-color"];
     static mediaExtraClasses = [
         "rounded-circle",
@@ -13,7 +13,7 @@ export class IconSelector extends Component {
         "shadow",
         /^text-\S+$/,
         /^bg-\S+$/,
-        /^fa-\S+$/,
+        /^oi-\S+$/,
     ];
     static tagNames = ["SPAN", "I"];
     static template = "html_editor.IconSelector";

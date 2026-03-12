@@ -7,7 +7,7 @@
             <t t-set="title_fold">Fold</t>
             <t t-set="title_unfold">Unfold</t>
             <span t-if="hasFoldButton" t-attf-class="o_mrp_bom_{{ props.isFolded ? 'unfoldable' : 'foldable' }} btn btn-light ps-0 py-0" t-att-aria-label="props.isFolded ? title_unfold : title_fold" t-att-title="props.isFolded ? title_unfold : title_fold">
-                <i t-attf-class="fa fa-fw fa-caret-{{ props.isFolded ? 'right' : 'down' }}" role="img"/>
+                <i class="oi oi-fw" t-attf-data-icon="{{ props.isFolded ? 'arrow_right' : 'arrow_drop_down' }}" role="img"/>
                 <t t-if="props.type == 'operations'">Operations</t>
                 <t t-elif="props.type == 'byproducts'">By-Products</t>
             </span>

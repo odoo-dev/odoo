@@ -14,7 +14,7 @@ import { patch } from "@web/core/utils/patch";
 
 export class FontAwesomeOption extends BaseOptionComponent {
     static template = "mass_mailing.FontAwesomeOption";
-    static selector = "span.fa, i.fa";
+    static selector = "span.oi, i.oi";
 }
 
 patch(ImageAndFaOption, {

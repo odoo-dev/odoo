@@ -19,16 +19,19 @@ test("BooleanIcon field in form view", async () => {
         type: "form",
         arch: `
             <form>
-                <field name="bar" widget="boolean_icon" options="{'icon': 'fa-recycle'}" />
-                <field name="foo" widget="boolean_icon" options="{'icon': 'fa-trash'}" />
+                <field name="bar" widget="boolean_icon" options="{'icon': 'recycling'}" />
+                <field name="foo" widget="boolean_icon" options="{'icon': 'delete'}" />
             </form>`,
     });
     expect(".o_field_boolean_icon button").toHaveCount(2);
     expect("[name='bar'] button").toHaveAttribute("data-tooltip", "Bar field");
-    expect("[name='bar'] button").toHaveClass("btn-primary fa-recycle");
-    expect("[name='foo'] button").toHaveClass("btn-outline-secondary fa-trash");
+    expect("[name='bar'] button").toHaveClass("btn-primary");
+    expect("[name='bar'] button").toHaveAttribute("data-icon", "recycling");
+    expect("[name='foo'] button").toHaveClass("btn-outline-secondary");
+    expect("[name='foo'] button").toHaveAttribute("data-icon", "delete");
 
     await click("[name='bar'] button");
     await animationFrame();
-    expect("[name='bar'] button").toHaveClass("btn-outline-secondary fa-recycle");
+    expect("[name='bar'] button").toHaveClass("btn-outline-secondary");
+    expect("[name='bar'] button").toHaveAttribute("data-icon", "recycling");
 });

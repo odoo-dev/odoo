@@ -10,7 +10,7 @@ export class CalendarMobileFilterPanel extends Component {
         toggleSideBar: Function,
     };
     get caretDirection() {
-        return this.props.sideBarShown ? "down" : "left";
+        return this.props.sideBarShown ? "keyboard_arrow_down" : "chevron_backward";
     }
     getFilterColor(filter) {
         return `o_color_${getColor(filter.colorIndex)}`;

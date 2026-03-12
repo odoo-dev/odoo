@@ -416,7 +416,7 @@ export class Message extends Record {
                 if (this.ended_poll_ids.length) {
                     text = this.poll.pollClosedText;
                 }
-                return markup`<i class="fa fa-fw o-me-0_5 oi oi-view-cohort"></i>${text}`;
+                return markup`<i class="oi oi-fw o-me-0_5" data-icon="oi_view-cohort"></i>${text}`;
             }
             if (this.notificationType === "call") {
                 return _t("%(caller)s started a call", { caller: this.authorName });
@@ -507,7 +507,7 @@ export class Message extends Record {
                         count: attachments.length - 1,
                     });
             }
-            return markup`<i class="fa me-1 ${this.previewIcon}"></i>${messageBody}`;
+            return markup`<i class="oi me-1" data-icon="${this.previewIcon}""></i>${messageBody}`;
         },
     });
 
@@ -516,7 +516,7 @@ export class Message extends Record {
         compute() {
             const messageBody = this.bodyPreview;
             if (this.isSelfAuthored) {
-                return markup`<i class="fa fa-mail-reply me-1 opacity-75"></i>${_t(
+                return markup`<i class="oi me-1 opacity-75" data-icon="reply"></i>${_t(
                     "You: %(message_content)s",
                     { message_content: messageBody }
                 )}`;
@@ -539,13 +539,13 @@ export class Message extends Record {
         const firstAttachment = attachments[0];
         switch (true) {
             case firstAttachment.isImage:
-                return "fa-picture-o";
+                return "image";
             case firstAttachment.mimetype === "audio/mpeg":
-                return firstAttachment.voice ? "fa-microphone" : "fa-headphones";
+                return firstAttachment.voice ? "mic" : "headphones";
             case firstAttachment.isVideo:
-                return "fa-video-camera";
+                return "videocam";
             default:
-                return "fa-file";
+                return "description";
         }
     }
 

@@ -372,9 +372,9 @@
                                 <field name="product_id"/>, <field name="qty_production" class="ms-1"/> <field name="product_uom_id" groups="uom.group_uom"/><t t-if="record.finished_lot_ids.value">, </t> <field t-if="record.finished_lot_ids.value" name="finished_lot_ids" class="ms-1"/>
                             </h5>
                             <div class="o_kanban_workorder_status d-flex ms-auto" t-if="record.state.raw_value == 'progress'">
-                                <span t-if="record.working_state.raw_value != 'blocked' and record.working_user_ids.raw_value.length > 0" class="fa fa-play fs-6" role="img" aria-label="Is running" title="Is running"/>
-                                <span t-if="record.working_state.raw_value != 'blocked' and record.working_user_ids.raw_value.length == 0 and record.last_working_user_id.raw_value" class="fa fa-pause" role="img" aria-label="Is paused" title="Is paused"/>
-                                <span t-if="record.working_state.raw_value == 'blocked' and (record.working_user_ids.raw_value.length == 0 or record.last_working_user_id.raw_value)" class="fa fa-stop" role="img" aria-label="Is stopped" title="Is stopped"/>
+                                <span t-if="record.working_state.raw_value != 'blocked' and record.working_user_ids.raw_value.length > 0" class="oi fs-6" data-icon="play_arrow" role="img" aria-label="Is running" title="Is running"/>
+                                <span t-if="record.working_state.raw_value != 'blocked' and record.working_user_ids.raw_value.length == 0 and record.last_working_user_id.raw_value" class="oi" data-icon="pause" role="img" aria-label="Is paused" title="Is paused"/>
+                                <span t-if="record.working_state.raw_value == 'blocked' and (record.working_user_ids.raw_value.length == 0 or record.last_working_user_id.raw_value)" class="oi" data-icon="stop" role="img" aria-label="Is stopped" title="Is stopped"/>
                                 <field t-if="record.last_working_user_id.raw_value" name="last_working_user_id" widget="image" options="{'preview_image': 'avatar_128'}" class="ms-1 o_avatar"/>
                             </div>
                         </footer>

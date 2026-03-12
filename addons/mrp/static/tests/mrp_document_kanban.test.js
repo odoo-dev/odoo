@@ -102,7 +102,7 @@ test("mrp: click on image opens attachment viewer", async () => {
 
     await click(".o_kanban_previewer");
     await contains(".o-FileViewer");
-    await click(".o-FileViewer-headerButton .fa-times");
+    await click(".o-FileViewer-headerButton [data-icon='close']");
     await contains(".o-FileViewer", { count: 0 });
 });
 

@@ -4,7 +4,7 @@
 <!-- Products Search Bar autocomplete item -->
 <we-button t-name="website_sale.ribbonSelectItem" t-att-data-set-ribbon="ribbon.id">
     <t t-out="ribbon.name"/>
-    <span t-attf-class="fa fa-arrow-#{isLeft ? 'left' : 'right'} ms-1"></span>
+    <span class="oi ms-1" t-attf-data-icon="#{isLeft ? 'arrow_back' : 'arrow_forward'}"></span>
     <span
         t-attf-class="o_wsale_color_preview ms-1"
         t-attf-style="background-color: #{ribbon.bg_color}"

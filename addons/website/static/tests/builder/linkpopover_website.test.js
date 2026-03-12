@@ -172,7 +172,7 @@ test("LinkPopover opens in full composer", async () => {
     await insertText(htmlEditor, "test");
     const node = queryOne(".odoo-editor-editable div");
     setSelection({ anchorNode: node, anchorOffset: 0, focusNode: node, focusOffset: 1 });
-    await mailClick(".o-we-toolbar .fa-link");
+    await mailClick(".o-we-toolbar [data-icon='link']");
     await waitFor(".o-we-linkpopover");
     await animationFrame();
     expect(".o-we-linkpopover").toHaveCount(1);

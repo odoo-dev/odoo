@@ -7,7 +7,7 @@
             action="'websiteConfig'"
             actionParam="{views:['website_sale_wishlist.product_add_to_wishlist']}"
         >
-            <i class="fa fa-fw fa-heart"/>
+            <i class="oi oi-fw oi-filled" data-icon="favorite"/>
             Wishlist
         </BuilderButton>
     </BuilderRow>

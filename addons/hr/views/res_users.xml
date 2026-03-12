@@ -59,15 +59,15 @@
                 </xpath>
                 <xpath expr="//div[hasclass('oe_title')]" position="inside">
                     <h5 class="d-flex align-items-baseline mb-0">
-                        <i class="fa fa-envelope fa-fw me-1 text-primary" title="Work Email"/>
+                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Work Email"/>
                         <field name="work_email" widget="email" placeholder="Work Email" string="Work Email" class="w-75"/>
                     </h5>
                     <h5 class="d-flex align-items-baseline mb-0">
-                        <i class="fa fa-phone fa-fw me-1 text-primary" title="Work Phone"/>
+                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="phone" title="Work Phone"/>
                         <field name="work_phone" widget="phone" placeholder="Work Phone" string="Work Phone" class="w-75"/>
                     </h5>
                     <h5 class="d-flex align-items-baseline mb-0">
-                        <i class="fa fa-mobile fa-fw me-1 text-primary" title="Work Mobile"/>
+                        <i class="oi oi-fw me-1 text-primary" data-icon="smartphone" title="Work Mobile"/>
                         <field name="mobile_phone" widget="phone" placeholder="Work Mobile" string="Work Mobile" class="w-75"/>
                     </h5>
                 </xpath>
@@ -203,24 +203,24 @@
                 <xpath expr="//h5[@name='h5_phone']" position="attributes">
                     <attribute name="invisible">employee_id</attribute>
                 </xpath>
-                <xpath expr="//h5[@name='h5_login']/i[hasclass('fa-envelope')]" position="attributes">
+                <xpath expr="//h5[@name='h5_login']/i[@data-icon='mail']" position="attributes">
                     <attribute name="invisible">(not employee_id and login != email) or (employee_id and login != work_email)</attribute>
                 </xpath>
-                <xpath expr="//h5[@name='h5_login']/i[hasclass('fa-key')]" position="attributes">
+                <xpath expr="//h5[@name='h5_login']/i[@data-icon='key']" position="attributes">
                     <attribute name="invisible">(not employee_id and login == email) or (employee_id and login == work_email)</attribute>
                 </xpath>
                 <xpath expr="//div[hasclass('oe_title')]" position="inside">
                     <h5 class="d-flex align-items-baseline mb-0" invisible="not employee_id or login == work_email">
-                        <i class="fa fa-envelope fa-fw me-1 text-primary" title="Work Email"/>
+                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Work Email"/>
                         <field name="email_domain_placeholder" invisible="1" />
                         <field name="work_email" widget="email" string="Work Email" class="w-75" options="{'placeholder_field': 'email_domain_placeholder'}"/>
                     </h5>
                     <h5 class="d-flex align-items-baseline mb-0" invisible="not employee_id">
-                        <i class="fa fa-phone fa-fw me-1 text-primary" title="Work Phone"/>
+                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="phone" title="Work Phone"/>
                         <field name="work_phone" widget="phone" placeholder="Work Phone" string="Work Phone" class="w-75"/>
                     </h5>
                     <h5 class="d-flex align-items-baseline mb-0" invisible="not employee_id">
-                        <i class="fa fa-mobile fa-fw me-1 text-primary" title="Work Mobile"/>
+                        <i class="oi oi-fw me-1 text-primary" data-icon="smartphone" title="Work Mobile"/>
                         <field name="mobile_phone" widget="phone" placeholder="Work Mobile" string="Work Mobile" class="w-75"/>
                     </h5>
                 </xpath>

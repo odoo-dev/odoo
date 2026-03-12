@@ -11,7 +11,7 @@
                     </t>
                     <t t-else="">
                         <div class="d-flex flex-column align-items-center" t-att-class="{'mb-4': !env.inWelcomePage}">
-                            <i class="fa fa-camera fa-4x mb-2 opacity-50"/>
+                            <i class="oi oi-4x mb-2 opacity-50" data-icon="photo_camera"/>
                             <span class="fs-4 fw-bold">No Camera Preview</span>
                             <small class="opacity-50">
                                 <t t-if="rtc.cameraPermission !== 'granted'">Please allow access in your browser settings.</t>
@@ -38,7 +38,7 @@
             </div>
             <div class="d-flex align-items-center flex-grow-0 flex-shrink-0 px-2 text-muted">
                 <a role="button" t-on-click="onClickSettings" title="Advanced Settings">
-                    <i class="fa fa-fw fa-gear"/>
+                    <i class="oi oi-fw oi-filled" data-icon="settings"/>
                 </a>
             </div>
         </div>

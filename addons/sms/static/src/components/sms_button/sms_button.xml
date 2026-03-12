@@ -7,7 +7,7 @@
             t-att-href="phoneHref"
             t-on-click.prevent.stop="onClick"
             class="ms-3 d-inline-flex align-items-center o_field_phone_sms"
-        ><i class="mi" data-icon="sms" aria-hidden="true"/><small class="fw-bold ms-1">SMS</small></a>
+        ><i class="oi" data-icon="sms" aria-hidden="true"/><small class="fw-bold ms-1">SMS</small></a>
     </t>
 
 </templates>

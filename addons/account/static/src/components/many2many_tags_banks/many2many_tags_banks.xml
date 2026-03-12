@@ -2,8 +2,8 @@
 <templates xml:space="preserve">
     <t t-name="account.BankTag">
         <BadgeTag color="this.props.color" onClick="this.props.onClick" onDelete="this.props.onDelete" tooltip="this.props.tooltip" crossTooltip="this.props.crossTooltip">
-            <i t-if="this.props.allowOutPayment" class="me-1 fa fa-shield text-success" data-tooltip="Trusted"/>
-            <i t-else="" class="me-1 fa fa-exclamation-circle text-danger" data-tooltip="Untrusted"/>
+            <i t-if="this.props.allowOutPayment" class="me-1 oi text-success" data-icon="security" data-tooltip="Trusted"/>
+            <i t-else="" class="me-1 oi text-danger" data-icon="error" data-tooltip="Untrusted"/>
             <div class="o_tag_badge_text" t-out="this.props.text"/>
         </BadgeTag>
     </t>
@@ -12,7 +12,8 @@
         <xpath expr="//div[hasclass('o_field_many2many_selection')]" position="inside">
             <button
                 aria-label="Internal link"
-                class="btn btn-link text-action o_dropdown_button px-1 py-0 oi oi-arrow-right"
+                class="btn btn-link text-action o_dropdown_button oi px-1 py-0"
+                data-icon="east"
                 data-tooltip="Internal link"
                 draggable="false"
                 tabindex="-1"

@@ -36,7 +36,7 @@ export class ProjectMilestone extends Component {
     }
 
     _getCheckBoxIcon() {
-        return this.milestone.is_reached ? "fa-check-square-o" : "fa-square-o";
+        return this.milestone.is_reached ? "check_box" : "square";
     }
 
     onWillUpdateProps(nextProps) {

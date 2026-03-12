@@ -11,7 +11,7 @@
                         <div class="company-field text-bg-muted" t-esc="props.partner.parent_name or ''" />
                     </div>
                     <Dropdown t-if="this.pos.cashier._role !== 'minimal'">
-                        <button class="btn btn-ligth fa fa-bars" />
+                        <button class="btn btn-ligth oi" data-icon="menu"/>
                         <t t-set-slot="content">
                             <DropdownItem onSelected="() => props.onClickEdit(props.partner)">
                                 Edit Details
@@ -25,15 +25,15 @@
                 <div class="partner-line-adress p-1" t-if="props.partner.pos_contact_address" t-esc="props.partner.pos_contact_address" />
                 <div class="partner-line-email p-1">
                     <div class="mb-1" t-if="props.partner.phone">
-                        <i class="fa fa-fw fa-phone me-2" /><t t-esc="props.partner.phone" />
+                        <i class="oi oi-fw oi-filled me-2" data-icon="phone" /><t t-esc="props.partner.phone" />
                     </div>
                     <div t-if="props.partner.email" class="email-field mb-1">
-                        <i class="fa fa-fw fa-paper-plane-o me-2" /><t t-esc="props.partner.email" />
+                        <i class="oi oi-fw me-2" data-icon="send"/><t t-esc="props.partner.email" />
                     </div>
                 </div>
                 <div class="p-1">
                     <button t-if="props.isSelected" t-on-click.stop="props.onClickUnselect" class="unselect-tag-mobile d-inline-block d-lg-none btn btn-light border">
-                        <i class="fa fa-times me-1"></i>
+                        <i class="oi me-1" data-icon="close"></i>
                         <span>UNSELECT</span>
                     </button>
                 </div>
@@ -51,24 +51,24 @@
                 </td>
                 <td class="partner-line-email ">
                     <div t-if="props.partner.phone">
-                        <i class="fa fa-fw fa-phone me-2"/><t t-esc="props.partner.phone"/>
+                        <i class="oi oi-fw oi-filled me-2" data-icon="phone"/><t t-esc="props.partner.phone"/>
                     </div>
                     <div t-if="props.partner.email" class="email-field">
-                        <i class="fa fa-fw fa-paper-plane-o me-2"/><t t-esc="props.partner.email" />
+                        <i class="oi oi-fw me-2" data-icon="send"/><t t-esc="props.partner.email" />
                     </div>
                 </td>
                 <!-- FIXME: this should be in pos_settle_due, not here -->
                 <td class="partner-line-balance" t-if="props.isBalanceDisplayed"></td>
                 <td class="edit-partner-button-cell align-middle pe-0">
                     <button t-if="props.isSelected" t-on-click.stop="props.onClickUnselect" class="unselect-tag d-lg-inline-block d-none btn btn-link btn-lg mt-1 float-end">
-                        <i class="fa fa-check"/>
+                        <i class="oi" data-icon="check"/>
                     </button>
                 </td>
                 <td class="edit-partner-button-cell align-middle">
                     <t t-if="this.pos.cashier._role !== 'minimal'">
                         <Dropdown>
                             <button class="btn btn-light btn-lg lh-lg border float-end">
-                                <i class="fa fa-fw fa-bars"/>
+                                <i class="oi oi-fw" data-icon="menu"/>
                             </button>
                             <t t-set-slot="content">
                                 <DropdownItem onSelected="() => props.onClickEdit(props.partner)">

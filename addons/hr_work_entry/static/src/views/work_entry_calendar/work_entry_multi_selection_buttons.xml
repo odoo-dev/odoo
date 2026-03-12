@@ -3,7 +3,7 @@
     <t t-name="hr_work_entry.WorkEntryCalendarMultiSelectionButtons" t-inherit="web.MultiSelectionButtons" t-inherit-mode="primary">
         <button data-tooltip="Delete" position="before">
             <button class="btn btn-secondary" data-tooltip="Reset Selected Work Entries" t-on-click="() => this.props.reactive.onQuickReset()">
-                <i class="fa fa-undo"/>
+                <i class="oi" data-icon="undo"/>
             </button>
         </button>
 

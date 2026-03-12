@@ -53,7 +53,7 @@
             <button class="btn btn-light position-relative ms-2 d-lg-none"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#o_wevent_exhibitors_offcanvas">
-                <i class="fa fa-sliders"/>
+                <i class="oi" data-icon="tune"/>
             </button>
         </div>
     </div>
@@ -214,7 +214,7 @@
         <p t-else="">We could not find any exhibitor at this moment.</p>
         <div class="o_not_editable my-3" groups="event.group_event_user">
             <a class="btn o_wevent_cta" target="_blank" t-att-href="'/odoo/%s/action-website_event_exhibitor.event_sponsor_action_from_event' % event.id">
-                <span class="fa fa-plus me-1"/> Add Exhibitors
+                <span class="oi me-1" data-icon="add"/> Add Exhibitors
             </a>
         </div>
     </div>
@@ -247,7 +247,7 @@
                     <div t-if="sponsor_image_url" class="card-img-top position-static o_wesponsor_bg_image"
                         t-attf-style="padding-top: 50%; background-image: url(#{sponsor_image_url});">
                         <small t-if="not sponsor.is_published" class="o_wesponsor_card_header_badge bg-danger">
-                            <i class="fa fa-ban me-2"/>Unpublished
+                            <i class="oi me-2" data-icon="block"/>Unpublished
                         </small>
                         <img class="position-absolute me-3 mt-3"
                             style="right: 0; top: 0; max-height: 20px;"
@@ -258,7 +258,7 @@
                     <div t-else="" class="o_wesponsor_gradient card-img-top"
                         style="padding-top: 50%">
                         <small t-if="not sponsor.is_published" class="o_wesponsor_card_header_badge bg-danger">
-                            <i class="fa fa-ban me-2"/>Unpublished
+                            <i class="oi me-2" data-icon="block"/>Unpublished
                         </small>
                     </div>
                 </div>
@@ -299,7 +299,7 @@
     <div class="d-flex flex-wrap align-items-center mb-3">
         <t t-foreach="search_countries" t-as="country">
             <span class="o_search_tag d-flex align-items-baseline ps-2 my-2 me-2 border rounded bg-white">
-                <i class="fa fa-tag me-2 text-muted"/>
+                <i class="oi me-2 text-muted" data-icon="label"/>
                 <t t-out="country.display_name"/>
                 <span t-att-data-post="'/event/%s/exhibitors?%s' % (
                     slug(event),
@@ -309,7 +309,7 @@
         </t>
         <t t-foreach="search_sponsorships" t-as="sponsorship">
             <span class="o_search_tag d-flex align-items-baseline ps-2 my-2 me-2 border rounded bg-white">
-                <i class="fa fa-tag me-2 text-muted"/>
+                <i class="oi me-2 text-muted" data-icon="label"/>
                 <t t-out="sponsorship.display_name"/>
                 <span t-att-data-post="'/event/%s/exhibitors?%s' % (
                     slug(event),

@@ -30,7 +30,7 @@ registry.category("web_tour.tours").add("test_base_automation", {
         },
         {
             content: "Select model contact",
-            trigger: ".dropdown-menu li a:contains(Contact):not(:has(.fa-spin))",
+            trigger: ".dropdown-menu li a:contains(Contact):not(:has(.oi-spin))",
             run: "click",
         },
         {
@@ -105,7 +105,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
         },
         {
             trigger:
-                ".dropdown-menu li a:contains(test_base_automation.project):not(:has(.fa-spin))",
+                ".dropdown-menu li a:contains(test_base_automation.project):not(:has(.oi-spin))",
             run: "click",
         },
         {
@@ -148,7 +148,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             run: "edit test",
         },
         {
-            trigger: ".dropdown-menu li a:contains(test):not(:has(.fa-spin))",
+            trigger: ".dropdown-menu li a:contains(test):not(:has(.oi-spin))",
             run: "click",
         },
         {
@@ -223,7 +223,7 @@ registry.category("web_tour.tours").add("test_base_automation_on_tag_added", {
             run: "edit High",
         },
         {
-            trigger: ".dropdown-menu li a:contains(High):not(:has(.fa-spin))",
+            trigger: ".dropdown-menu li a:contains(High):not(:has(.oi-spin))",
             run: "click",
         },
         {
@@ -347,7 +347,7 @@ registry.category("web_tour.tours").add("test_kanban_automation_view_create_acti
         {
             trigger: "div[name='action_server_ids']:contains(Create Contact with name NameX)",
             async run() {
-                assertEqual(document.querySelectorAll(".fa.fa-plus-square").length, 1);
+                assertEqual(document.querySelectorAll("[data-icon='add_box']").length, 1);
             },
         },
     ],
@@ -533,7 +533,7 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
         },
         {
             trigger:
-                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin)",
+                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .oi-spin)",
             run() {
                 assertEqual(this.anchor.innerText, "test stage\nSearch more...");
             },
@@ -557,7 +557,7 @@ registry.category("web_tour.tours").add("test_form_view_custom_reference_field",
         },
         {
             trigger:
-                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .fa-spin)",
+                ".o_field_widget[name='trg_field_ref'] .o-autocomplete--dropdown-menu:not(:has(a .oi-spin)",
             run() {
                 assertEqual(this.anchor.innerText, "test tag\nSearch more...");
             },

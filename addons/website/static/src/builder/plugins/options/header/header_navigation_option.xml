@@ -59,13 +59,13 @@
 
         <BuilderSelect action="'websiteConfig'">
             <BuilderSelectItem actionParam="{ views: align_left_views }">
-                <span><i class="fa fa-align-left fa-fw"></i></span>
+                <span><i class="oi oi-fw" data-icon="align_left"></i></span>
             </BuilderSelectItem>
             <BuilderSelectItem actionParam="{ views: align_center_views }">
-                <span><i class="fa fa-align-center fa-fw"></i></span>
+                <span><i class="oi oi-fw" data-icon="align_center"></i></span>
             </BuilderSelectItem>
             <BuilderSelectItem actionParam="{ views: align_right_views }">
-                <span><i class="fa fa-align-right fa-fw"></i></span>
+                <span><i class="oi oi-fw" data-icon="align_right"></i></span>
             </BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
@@ -91,21 +91,21 @@
                     views: [],
                 }"
             >
-                <span><i class="fa fa-align-left fa-fw"></i></span>
+                <span><i class="oi oi-fw" data-icon="align_left"></i></span>
             </BuilderSelectItem>
             <BuilderSelectItem
                 actionParam="{
                     views: ['website.template_header_mobile_align_center'],
                 }"
             >
-                <span><i class="fa fa-align-center fa-fw"></i></span>
+                <span><i class="oi oi-fw" data-icon="align_center"></i></span>
             </BuilderSelectItem>
             <BuilderSelectItem
                 actionParam="{
                     views: ['website.template_header_mobile_align_right'],
                 }"
             >
-                <span><i class="fa fa-align-right fa-fw"></i></span>
+                <span><i class="oi oi-fw" data-icon="align_right"></i></span>
             </BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>

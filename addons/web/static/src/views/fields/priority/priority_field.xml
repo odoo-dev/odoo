@@ -7,9 +7,10 @@
                 <t t-if="!value_first">
                     <t t-if="props.readonly">
                         <span
-                            class="o_priority_star fa o_disabled"
+                            class="o_priority_star oi o_disabled"
+                            data-icon="star"
                             role="radio"
-                            t-att-class="value_index lte index ? 'fa-star' : 'fa-star-o'"
+                            t-att-class="{'oi-filled': value_index lte index}"
                             tabindex="0"
                             t-att-data-tooltip="getTooltip(value[1])"
                             t-att-aria-checked="value_index === index ? 'true' : 'false'"
@@ -19,9 +20,10 @@
                     <t t-else="">
                         <a
                             href="#"
-                            class="o_priority_star fa"
+                            class="o_priority_star oi"
+                            data-icon="star"
                             role="radio"
-                            t-att-class="value_index lte index ? 'fa-star' : 'fa-star-o opacity-25 opacity-100-hover'"
+                            t-att-class="value_index lte index ? 'oi-filled' : 'opacity-25 opacity-100-hover'"
                             tabindex="0"
                             t-att-data-tooltip="getTooltip(value[1])"
                             t-att-aria-checked="value_index === index ? 'true' : 'false'"

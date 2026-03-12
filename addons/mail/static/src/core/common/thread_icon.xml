@@ -3,9 +3,9 @@
 
     <t t-name="mail.ThreadIcon">
         <div class="o-mail-ThreadIcon d-flex justify-content-center flex-shrink-0" t-att-class="props.className">
-            <t t-set="sizeClass" t-value="props.size === 'large' ? 'fa-lg' : props.size === 'small' ? 'o-xsmaller' : ''"/>
+            <t t-set="sizeClass" t-value="props.size === 'large' ? 'oi-lg' : props.size === 'small' ? 'o-xsmaller' : ''"/>
             <t t-if="channel?.channel_type === 'channel'">
-                <div t-if="!channel.group_public_id" class="fa fa-fw fa-globe" t-att-class="sizeClass" title="Public Channel"/>
+                <div t-if="!channel.group_public_id" class="oi oi-fw" data-icon="public" t-att-class="sizeClass" title="Public Channel"/>
             </t>
             <t t-elif="channel?.channel_type === 'group'">
                 <t name="group"/>
@@ -21,9 +21,9 @@
                 </t>
             </t>
             <t t-elif="props.thread.model === 'mail.box'">
-                <div t-if="props.thread.id === 'inbox'" class="fa fa-fw fa-inbox" t-att-class="sizeClass"/>
-                <div t-elif="props.thread.id === 'starred'" class="fa fa-fw fa-star-o" t-att-class="sizeClass"/>
-                <div t-elif="props.thread.id === 'history'" class="fa fa-fw fa-history" t-att-class="sizeClass"/>
+                <div t-if="props.thread.id === 'inbox'" class="oi oi-fw" data-icon="inbox" t-att-class="sizeClass"/>
+                <div t-elif="props.thread.id === 'starred'" class="oi oi-fw" data-icon="star" t-att-class="sizeClass"/>
+                <div t-elif="props.thread.id === 'history'" class="oi oi-fw" data-icon="history" t-att-class="sizeClass"/>
             </t>
         </div>
     </t>

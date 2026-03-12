@@ -1197,7 +1197,7 @@ test(`create and change events on mobile`, async () => {
     // click on an existing event to open the formViewDialog
     await clickEvent(4);
     const container = ".modal";
-    const closeButton = ".oi-arrow-left";
+    const closeButton = "[data-icon='west']";
     expect(container).toHaveCount(1);
     expect(`${container} .o_cw_popover_edit`).toHaveCount(1);
     expect(`${container} .o_cw_popover_delete`).toHaveCount(1);
@@ -4456,7 +4456,7 @@ test(`edit record and attempt to create a record with "create" attribute set to 
     // click on an existing event to open the formViewDialog
     await clickEvent(4);
     const popover = getMockEnv().isSmall ? ".modal" : ".o_cw_popover";
-    const closeButton = getMockEnv().isSmall ? ".oi-arrow-left" : ".o_cw_popover_close";
+    const closeButton = getMockEnv().isSmall ? `[data-icon="west"]` : ".o_cw_popover_close";
     expect(popover).toHaveCount(1);
     expect(`${popover} .o_cw_popover_edit`).toHaveCount(1);
     expect(`${popover} .o_cw_popover_delete`).toHaveCount(1);
@@ -5250,7 +5250,7 @@ test(`calendar sidebar state is saved on session storage`, async () => {
     });
     expect(`.o_calendar_sidebar`).toHaveCount(0);
 
-    await contains(`.o_sidebar_toggler .oi-panel-right`).click();
+    await contains(`.o_sidebar_toggler [data-icon="dock_to_right"]`).click();
     expect(`.o_calendar_sidebar`).toHaveCount(1);
     expect.verifySteps(["calendar.showSideBar-read", "calendar.showSideBar-true"]);
 });

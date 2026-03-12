@@ -21,10 +21,10 @@
                     <t t-esc="props.addText"/>
             </button>
             <div class="d-flex align-items-center">
-                <span t-if="state.urlInput and state.isValidatingUrl" class="o_we_url_loading mx-2 fa fa-lg fa-circle-o-notch fa-spin" title="Loading..."/>
-                <span t-elif="state.urlInput and state.isValidUrl and state.isValidFileFormat" class="o_we_url_success text-success mx-2 fa fa-lg fa-check" title="The URL seems valid."/>
-                <span t-elif="state.urlInput and !state.isValidUrl" class="o_we_url_error text-danger mx-2 oi oi-large oi-close" title="The URL does not seem to work."/>
-                <span t-elif="props.urlWarningTitle and state.urlInput and state.isValidUrl and !state.isValidFileFormat" class="o_we_url_warning text-warning mx-2 fa fa-lg fa-warning" t-att-title="props.urlWarningTitle"/>
+                <span t-if="state.urlInput and state.isValidatingUrl" class="o_we_url_loading oi oi-lg oi-spin mx-2" data-icon="autorenew" title="Loading..."/>
+                <span t-elif="state.urlInput and state.isValidUrl and state.isValidFileFormat" class="o_we_url_success oi oi-lg text-success mx-2" data-icon="check" title="The URL seems valid."/>
+                <span t-elif="state.urlInput and !state.isValidUrl" class="o_we_url_error text-danger mx-2 oi oi-lg" data-icon="close_small" title="The URL does not seem to work."/>
+                <span t-elif="props.urlWarningTitle and state.urlInput and state.isValidUrl and !state.isValidFileFormat" class="o_we_url_warning oi oi-lg text-warning mx-2" data-icon="warning" t-att-title="props.urlWarningTitle"/>
             </div>
         </div>
         <input type="file" class="d-none o_file_input" t-on-change="onChangeFileInput" t-ref="file-input" t-att-accept="props.accept" t-att-multiple="props.multiSelect and 'multiple'"/>
@@ -71,7 +71,7 @@
             </div>
         </div>
         <div t-if="this.state.canScrollAttachments"
-            class="position-sticky d-flex align-items-center mx-auto btn btn-primary rounded-circle oi oi-chevron-down o_scroll_attachments"
+            class="position-sticky d-flex align-items-center mx-auto btn btn-primary oi rounded-circle o_scroll_attachments" data-icon="keyboard_arrow_down"
             t-on-click="handleScrollAttachments"/>
     </div>
 </t>

@@ -3,7 +3,7 @@
     <t t-inherit="mail.DiscussSidebarChannel.main" t-inherit-mode="extension">
         <xpath expr="//*[@t-ref='displayNameAdditionalContent']" position="inside">
             <t t-if="channel.livechat_status === 'need_help'">
-                <i t-if="channel.matchesSelfExpertise" class="fa fa-star o-mail-starred me-2" role="image" title="Relevant to your expertise"/>
+                <i t-if="channel.matchesSelfExpertise" class="oi oi-filled o-mail-starred me-2" data-icon="star" role="image" title="Relevant to your expertise"/>
                 <span t-if="helpState.text" class="o-livechat-LookingForHelp-timer text-muted fw-normal" t-esc="helpState.text"/>
             </t>
         </xpath>

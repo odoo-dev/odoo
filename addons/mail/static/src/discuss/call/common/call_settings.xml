@@ -56,8 +56,8 @@
                             <span class="d-flex border border-2 rounded w-100" t-attf-class="{{ store.settings.isRegisteringKey ? 'border-danger' : 'border-primary' }}">
                                 <span t-if="store.settings.push_to_talk_key" class="ms-1 px-3 fs-3 flex-grow-1" t-esc="store.settings.pushToTalkKeyText"/>
                                 <button class="btn btn-link px-2 py-0 text-black" t-on-click="onClickRegisterKeyButton">
-                                    <i t-if="store.settings.isRegisteringKey" title="Cancel" aria-label="Cancel" class="fa fa-2x fa-times-circle"/>
-                                    <i t-else="" title="Register new key" aria-label="Register new key" class="fa fa-2x fa-keyboard-o"/>
+                                    <i t-if="store.settings.isRegisteringKey" title="Cancel" aria-label="Cancel" class="oi oi-filled oi-2x" data-icon="cancel"/>
+                                    <i t-else="" title="Register new key" aria-label="Register new key" class="oi oi-2x" data-icon="keyboard"/>
                                 </button>
                             </span>
                         </label>

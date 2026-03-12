@@ -13,7 +13,7 @@
                         <div class="d-flex gap-2">
                             <t t-if="review" t-call="survey.survey_button_retake"/>
                             <p><a role="button" title="Print Results" class="btn btn-secondary btn-lg d-print-none o_survey_user_results_print">
-                                <i class="fa fa-print"/>
+                                <i class="oi" data-icon="print"/>
                             </a></p>
                         </div>
                     </div>

@@ -120,7 +120,7 @@
                 title="Search"
                 class="btn btn-light"
             >
-                <i class="oi oi-search"/>
+                <i class="oi" data-icon="search"/>
             </button>
         </div>
     </t>

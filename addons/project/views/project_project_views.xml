@@ -112,10 +112,10 @@
                                            invisible="not alias_email"/>
                                     <field name="privacy_visibility" widget="radio"/>
                                     <span colspan="2" class="text-muted o_row ps-1" invisible="access_instruction_message == ''">
-                                        <i class="fa fa-lightbulb-o pe-2" title="Info"/><field class="d-inline" name="access_instruction_message" nolabel="1"/>
+                                        <i class="oi pe-2" data-icon="lightbulb" title="Info"/><field class="d-inline" name="access_instruction_message" nolabel="1"/>
                                     </span>
                                     <span colspan="2" class="text-muted o_row ps-1" invisible="privacy_visibility_warning == ''">
-                                        <i class="fa fa-warning pe-2" title="Warning"/><field class="d-inline" name="privacy_visibility_warning" nolabel="1"/>
+                                        <i class="oi pe-2" data-icon="warning" title="Warning"/><field class="d-inline" name="privacy_visibility_warning" nolabel="1"/>
                                     </span>
                                 </group>
                                 <group name="analytic" groups="analytic.group_analytic_accounting">
@@ -449,20 +449,20 @@
                                 </div>
                                 <div class="o_project_kanban_body min-w-0 pb-4 me-2">
                                     <span name="partner_name" class="text-muted d-flex align-items-baseline" t-if="record.partner_id.value">
-                                        <span class="fa fa-user me-2" aria-label="Partner" title="Partner"></span><field class="text-truncate" name="partner_id"/>
+                                        <span class="oi oi-filled me-2" data-icon="person" aria-label="Partner" title="Partner"></span><field class="text-truncate" name="partner_id"/>
                                     </span>
                                     <div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted d-flex align-items-baseline">
-                                        <span class="fa fa-clock-o me-2" title="Dates"/>
+                                        <span class="oi me-2" data-icon="schedule" title="Dates"/>
                                         <field name="date_start" widget="daterange" options="{'end_date_field': 'date'}"/>
                                     </div>
                                     <div t-if="record.alias_email.value" class="text-muted text-truncate" t-att-title="record.alias_email.value">
-                                        <span class="fa fa-envelope-o me-2" aria-label="Domain Alias" title="Domain Alias"></span><field name="alias_email"/>
+                                        <span class="oi me-2" data-icon="mail" aria-label="Domain Alias" title="Domain Alias"></span><field name="alias_email"/>
                                     </div>
                                     <div t-if="record.show_ratings.raw_value and record.rating_count.raw_value &gt; 0" class="d-flex text-muted">
                                         <b class="me-1">
-                                            <span class="fa mt4 fa-smile-o fw-bolder text-success" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Happy" role="img" aria-label="Happy face"/>
-                                            <span class="fa mt4 fa-meh-o fw-bolder text-warning" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Neutral" role="img" aria-label="Neutral face"/>
-                                            <span class="fa mt4 fa-frown-o fw-bolder text-danger" t-else="" title="Average Rating: Unhappy" role="img" aria-label="Unhappy face"/>
+                                            <span class="oi mt4 fw-bolder text-success" data-icon="sentiment_satisfied" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Happy" role="img" aria-label="Happy face"/>
+                                            <span class="oi mt4 fw-bolder text-warning" data-icon="sentiment_neutral" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Neutral" role="img" aria-label="Neutral face"/>
+                                            <span class="oi mt4 fw-bolder text-danger" data-icon="sentiment_sad" t-else="" title="Average Rating: Unhappy" role="img" aria-label="Unhappy face"/>
                                         </b>
                                         <t t-if="record.rating_avg.raw_value % 1 == 0">
                                             <field name="rating_avg" nolabel="1" widget="float" digits="[1, 0]"/>
@@ -490,7 +490,7 @@
                                             type="object"
                                             t-attf-title="#{record.milestone_count_reached.value} Milestones reached out of #{record.milestone_count.value}"
                                         >
-                                            <span class="fa fa-flag me-1"/>
+                                            <span class="oi oi-filled me-1" data-icon="flag"/>
                                             <field name="milestone_count_reached"/>/<field name="milestone_count"/>
                                         </a>
                                     </div>

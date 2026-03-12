@@ -78,7 +78,7 @@ registerWebsitePreviewTour(
         {
             // Wait until the drag and drop is resolved (causing a history step)
             // before clicking save.
-            trigger: ".o-snippets-top-actions button.fa-undo:not([disabled])",
+            trigger: ".o-snippets-top-actions button[data-icon='undo']:not([disabled])",
         },
         {
             trigger: "button[data-action=save]",

@@ -49,20 +49,18 @@ const storePatch = {
             {
                 label: _t("In progress"),
                 status: "in_progress",
-                icon: "fa fa-comments",
-                iconSmall: "fa fa-comments o-xsmaller",
+                icon: "forum",
+                iconClass: "oi-filled",
             },
             {
                 label: _t("Waiting for customer"),
                 status: "waiting",
-                icon: "fa fa-hourglass-start",
-                iconSmall: "fa fa-hourglass-start o-xsmaller",
+                icon: "hourglass_top",
             },
             {
                 label: _t("Looking for help"),
                 status: "need_help",
-                icon: "fa fa-lg fa-exclamation-circle",
-                iconSmall: "fa fa-exclamation-circle",
+                icon: "error",
             },
         ];
     },

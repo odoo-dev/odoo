@@ -64,7 +64,7 @@ export function clickCancel() {
 export function clickDiscard() {
     return {
         content: "Click on Discard button",
-        trigger: ".btn.btn-link .oi-close",
+        trigger: ".btn.btn-link [data-icon='close_small']",
         run: "click",
     };
 }

@@ -137,19 +137,19 @@
                                             required="True" style="font-size: min(4vw, 2.6rem);"/>
                                     </h1>
                                     <h5 class="d-flex align-items-baseline mb-0">
-                                        <i class="fa fa-envelope fa-fw me-1 text-primary" title="Work Email"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Work Email"/>
                                         <field name="work_email" widget="email" placeholder="e.g. johndoe@example.com" string="Work Email" class="w-100 w-sm-75"/>
                                     </h5>
                                     <h5 class="d-flex align-items-baseline mb-0">
-                                        <i class="fa fa-phone fa-fw me-1 text-primary" title="Work Phone"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="phone" title="Work Phone"/>
                                         <field name="work_phone" widget="phone" placeholder="Work Phone" string="Work Phone"  class="w-100 w-sm-75"/>
                                     </h5>
                                     <h5 class="d-flex align-items-baseline mb-0">
-                                        <i class="fa fa-mobile fa-fw me-1 text-primary" title="Work Mobile"/>
+                                        <i class="oi oi-fw me-1 text-primary" data-icon="smartphone" title="Work Mobile"/>
                                         <field name="mobile_phone" widget="phone" placeholder="Work Mobile" string="Work Mobile"  class="w-100 w-sm-75"/>
                                     </h5>
                                     <h5>
-                                        <i class="fa fa-tags fa-fw me-1 text-primary" title="Tags"/>
+                                        <i class="oi oi-fw me-1 text-primary" data-icon="sell" title="Tags"/>
                                         <field name="category_ids" widget="many2many_tags"
                                             options="{'color_field': 'color', 'no_create_edit': True}"
                                             placeholder="e.g. Founder, Motorized, Building B, ..." groups="hr.group_hr_user"/>
@@ -190,7 +190,7 @@
                                                 role="button"
                                                 class="float-end me-2 cursor-pointer"
                                                 context="{'hierarchy_res_id': id}">
-                                                <i class="fa fa-share-alt fa-rotate-90 ms-1 mt-1" role="img" aria-label="Full Chart"/>
+                                                <i class="oi oi-rotate-90 ms-1 mt-1" data-icon="family_history" role="img" aria-label="Full Chart"/>
                                                 Full Chart
                                             </a>
                                         </div>
@@ -680,25 +680,25 @@
                                     <field class="fw-bold fs-5" name="name" placeholder="Employee's Name"/>
                                 </div>
                                 <div t-if="record.job_title.raw_value" class="text-truncate">
-                                    <i class="fa fa-fw me-2 fa-suitcase text-primary" title="Job Position"/>
+                                    <i class="oi oi-fw me-2 text-primary" data-icon="luggage" title="Job Position"/>
                                     <field name="job_title"/>
                                 </div>
                                 <div t-if="record.work_email.raw_value" class="text-truncate">
-                                    <i class="fa fa-fw me-2 fa-envelope text-primary" title="Email"/>
+                                    <i class="oi oi-fw oi-filled me-2 text-primary" data-icon="mail" title="Email"/>
                                     <field name="work_email" />
                                 </div>
                                 <div t-if="record.work_phone.raw_value">
-                                    <i class="fa fa-fw me-2 fa-phone text-primary" title="Phone"/>
+                                    <i class="oi oi-fw oi-filled me-2 text-primary" data-icon="phone" title="Phone"/>
                                     <field name="work_phone" />
                                 </div>
                                 <div t-if="record.contract_date_start.raw_value" groups="hr.group_hr_manager" t-att-class="{'text-danger': record.contract_date_end.raw_value &lt; luxon.DateTime.now().toISO()}">
-                                    <i class="fa fa-fw me-2 fa-briefcase text-primary" title="Contract"/>
+                                    <i class="oi oi-fw me-2 text-primary" data-icon="work" title="Contract"/>
                                     <field name="contract_date_start"/>
                                     <span t-if="record.contract_date_end.raw_value"> - </span>
                                     <field t-if="record.contract_date_end.raw_value" name="contract_date_end"/>
                                 </div>
                                 <div invisible="not birthday" groups="hr.group_hr_user">
-                                    <i class="fa fa-fw me-2 fa-birthday-cake text-primary" title="Birthday"/>
+                                    <i class="oi oi-fw me-2 text-primary" data-icon="cake" title="Birthday"/>
                                     <field name="birthday"/>
                                 </div>
                                 <field name="employee_properties" widget="properties"/>

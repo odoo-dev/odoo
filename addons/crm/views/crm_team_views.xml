@@ -190,7 +190,7 @@
                     <div colspan="2">
                         <div class="o_crm_lead_all_assigned_month_exceeded" invisible="not lead_all_assigned_month_exceeded"/>
                         <div class="o_crm_lead_month_assignment text-muted" invisible="not assignment_enabled">
-                            <i class="fa fa-info-circle me-2" title="Assigned Lead Count"/>
+                            <i class="oi me-2" data-icon="info" title="Assigned Lead Count"/>
                             <field name="lead_all_assigned_month_count" class="oe_inline"/><span> leads assigned this month
                             on a maximum of </span><field name="assignment_max" class="oe_inline"/>
                         </div>
@@ -259,7 +259,7 @@
 
                     <xpath expr="//field[@name='name']" position="after">
                         <div class="ms-2" t-if="record.alias_name.value and record.alias_domain.value">
-                            <span t-translation="off"><i class="fa fa-envelope-o" aria-label="Leads" title="Leads" role="img"></i>&amp;nbsp; <field name="alias_id"/></span>
+                            <span t-translation="off"><i class="oi" data-icon="mail" aria-label="Leads" title="Leads" role="img"></i>&amp;nbsp; <field name="alias_id"/></span>
                         </div>
                     </xpath>
 

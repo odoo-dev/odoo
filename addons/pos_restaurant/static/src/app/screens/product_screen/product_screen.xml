@@ -27,7 +27,7 @@
                             t-on-click="() => doSubmitOrder.call()"
                             t-elif="this.pos.kitchenPrinters.length and this.currentOrder.uiState.lastPrints.length"
                             t-att-disabled="doSubmitOrder.status === 'loading'">
-                        <i class="fa fa-cutlery" aria-hidden="true"></i>
+                        <i class="oi" data-icon="restaurant" aria-hidden="true"></i>
                     </button>
                     <button
                         class="btn-switchpane new-button btn btn-lg flex-grow-1 lh-sm btn-secondary"

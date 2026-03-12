@@ -21,13 +21,13 @@ export class FaResizeAction extends ClassAction {
     static id = "faResize";
     apply(context) {
         const { editingElement } = context;
-        editingElement.classList.remove("fa-1x", "fa-lg");
+        editingElement.classList.remove("oi-1x", "oi-lg");
         super.apply(context);
     }
 }
 export class FontAwesomeOptionComponent extends BaseOptionComponent {
     static template = "website.FontAwesomeOption";
-    static selector = "span.fa, i.fa, .social_media_img";
+    static selector = "span.oi, i.oi, .social_media_img";
     static exclude = "[data-oe-xpath]";
     static components = { BorderConfigurator };
     setup() {

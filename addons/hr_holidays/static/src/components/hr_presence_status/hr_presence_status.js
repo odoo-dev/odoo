@@ -26,7 +26,7 @@ const patchHrPresenceStatus = () => ({
 
     get icon() {
         if (this.value.startsWith("presence_holiday")) {
-            return "fa-plane";
+            return "travel";
         }
         return super.icon;
     },

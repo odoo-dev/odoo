@@ -205,7 +205,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Select a Sales Order Item as Default Sales Order Item for each task in this project.',
     run: "edit S",
 }, {
-    trigger: '[name="sale_line_id"] ul.ui-autocomplete > li:first-child > a:not(:has(i.fa))',
+    trigger: '[name="sale_line_id"] ul.ui-autocomplete > li:first-child > a:not(:has(i.oi))',
     content: 'Select the Sales Order Item in the autocomplete dropdown.',
     run: "click",
 },
@@ -225,7 +225,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Select an employee to link a Sales Order Item on his timesheets into this project.',
     run: 'click',
 }, {
-    trigger: '[name="employee_id"] ul.ui-autocomplete > li:first-child > a:not(:has(i.fa))',
+    trigger: '[name="employee_id"] ul.ui-autocomplete > li:first-child > a:not(:has(i.oi))',
     content: 'Select the first employee in the autocomplete dropdown',
     run: "click",
 }, {
@@ -234,7 +234,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     tooltipPosition: 'bottom',
     run: "edit S",
 }, {
-    trigger: '[name=sale_line_id] ul.ui-autocomplete > li:first-child > a:not(:has(i.fa))',
+    trigger: '[name=sale_line_id] ul.ui-autocomplete > li:first-child > a:not(:has(i.oi))',
     content: 'Select the first Sales Order Item in the autocomplete dropdown.',
     run: "click",
 }, {
@@ -272,7 +272,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Select the first sale order of the list',
     run: "edit Prepaid",
 }, {
-    trigger: 'ul.ui-autocomplete > li:first-child > a:not(:has(i.fa))',
+    trigger: 'ul.ui-autocomplete > li:first-child > a:not(:has(i.oi))',
     content: 'Select the first item on the autocomplete dropdown',
     run: "click",
 }, {
@@ -284,7 +284,7 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     content: 'Open the project',
     run: "click",
 }, {
-    trigger: ".o_control_panel_navigation button i.fa-sliders",
+    trigger: ".o_control_panel_navigation button i[data-icon='tune']",
     content: 'Open embedded actions',
     run: "click",
 }, {
@@ -305,14 +305,14 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     trigger: ".o_rightpanel_section[name='profitability'] .o_rightpanel_data > div > .o_rightpanel_subsection:eq(0) > table > thead > tr > th:eq(0):contains('Revenues')",
     content: 'Check the user sees Profitability subsection row',
 }, {
-    trigger: "button.o_group_caret:has(.fa-caret-right)",
+    trigger: "button.o_group_caret:has([data-icon='arrow_right'])",
     content: 'Check that the dropdown button is present',
     run: "click",
 }, {
     trigger: "th:contains('Sales Order Items')",
     content: 'Check that the sale items section is present',
 }, {
-    trigger: "button.o_group_caret:has(.fa-caret-down)",
+    trigger: "button.o_group_caret:has([data-icon='arrow_drop_down'])",
     content: 'Check that the button has changed',
     run: "click",
 }, {

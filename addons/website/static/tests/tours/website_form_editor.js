@@ -730,7 +730,7 @@ registerWebsitePreviewTour(
         {
             content: "Check that the delete button is disabled and shows the tooltip",
             trigger:
-                '.options-container-header span[title=\'The field "subject" is mandatory for the action "Send an E-mail".\'] > button.fa-trash[disabled]',
+                '.options-container-header span[title=\'The field "subject" is mandatory for the action "Send an E-mail".\'] > button[data-icon="delete"].oi-filled[disabled]',
         },
         ...changeOptionInPopover("Field", "Visibility Rule", "Visible only if"),
         ...selectButtonByData("Your Name", "[data-action-value='Philippe of Belgium']"),
@@ -1073,7 +1073,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Check the form was sent (success page without form)",
-            trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-paper-plane',
+            trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) [data-icon="send"]',
         },
         {
             content: "Go back to the form",
@@ -1097,7 +1097,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Check the form was again sent (success page without form)",
-            trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-paper-plane',
+            trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) [data-icon="send"]',
         },
     ]
 );
@@ -1251,7 +1251,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Check the form was again sent (success page without form)",
-            trigger: ":iframe body:not(:has([data-snippet='s_website_form'])) .fa-paper-plane",
+            trigger: ":iframe body:not(:has([data-snippet='s_website_form'])) [data-icon="send"]",
         },
     ]
 );

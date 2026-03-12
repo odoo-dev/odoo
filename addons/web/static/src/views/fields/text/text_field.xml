@@ -26,7 +26,8 @@
                         record="props.record"
                     />
                     <button t-if="props.dynamicPlaceholder"
-                        class="btn m-0 py-2 px-2 fa fa-magic position-relative"
+                        class="btn oi m-0 py-2 px-2 position-relative"
+                        data-icon="wand_stars"
                         title="Insert Field"
                         t-on-click="onDynamicPlaceholderOpen"
                     />

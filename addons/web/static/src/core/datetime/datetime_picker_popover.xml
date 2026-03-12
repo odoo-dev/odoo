@@ -10,7 +10,7 @@
                         tabindex="-1"
                         t-on-click="props.pickerProps.onReset"
                     >
-                        <i class="fa fa-eraser" />
+                        <i class="oi" data-icon="ink_eraser" />
                     </button>
                     <button
                         class="btn btn-sm btn-primary"

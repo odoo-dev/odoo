@@ -71,16 +71,16 @@
                                     </h1>
                                     <div class="d-flex align-items-baseline w-100">
                                         <field name="email" invisible="1"/> <!-- needed to update partner's email from on_change_login() -->
-                                        <i class="fa fa-fw me-1 fa-envelope text-primary" title="Email"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Email"/>
                                         <field name="email_domain_placeholder" invisible="1" /> <!-- needed to compute the placeholder whenever the dialog opens -->
                                         <field name="login" class="w-100" options="{'placeholder_field': 'email_domain_placeholder'}"/>
                                     </div>
                                     <div class="d-flex align-items-baseline w-100">
-                                        <i class="fa fa-fw me-1 fa-phone text-primary" title="Phone"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="phone" title="Phone"/>
                                         <field name="phone" class="w-100" widget="phone" placeholder="Phone"/>
                                     </div>
                                     <div class="d-flex align-items-baseline w-100" groups="base.group_multi_company">
-                                        <i class="fa fa-fw me-1 fa-building text-primary" title="Company"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="business" title="Company"/>
                                         <field name="company_id" class="w-100" context="{'user_preference': 0}" placeholder="Company"/>
                                     </div>
                                 </div>
@@ -136,16 +136,16 @@
                                     <field name="name" placeholder="e.g. John Doe" required="1"/>
                                 </h1>
                                 <h5 name="h5_login" class="d-flex align-items-baseline mb-0">
-                                    <i class="fa fa-fw fa-envelope me-1 text-primary" title="Login / Email" invisible="login != email"/>
-                                    <i class="fa fa-fw fa-key me-1 text-primary" title="Login" invisible="login == email"/>
+                                    <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Login / Email" invisible="login != email"/>
+                                    <i class="oi oi-fw me-1 text-primary" data-icon="key" title="Login" invisible="login == email"/>
                                     <field name="login" placeholder="Login" class="w-75"/>
                                 </h5>
                                 <h5 name="h5_email" class="d-flex align-items-baseline mb-0" invisible="login == email">
-                                    <i class="fa fa-fw fa-envelope me-1 text-primary" title="Email"/>
+                                    <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Email"/>
                                     <field name="email" placeholder="Email" class="w-75"/>
                                 </h5>
                                 <h5 name="h5_phone" class="d-flex align-items-baseline mb-0">
-                                    <i class="fa fa-fw fa-phone me-1 text-primary" title="Phone"/>
+                                    <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="phone" title="Phone"/>
                                     <field name="phone" placeholder="Phone" class="w-75"/>
                                 </h5>
                             </div>
@@ -175,7 +175,8 @@
                                             <button
                                                 type="action"
                                                 name="%(base.action_view_base_language_install)d"
-                                                class="oe_edit_only btn-sm btn-link mb4 fa fa-globe"
+                                                class="oe_edit_only btn-sm btn-link mb4 oi"
+                                                data-icon="public"
                                                 groups="base.group_system"
                                                 aria-label="Add a language"
                                                 title="Add a language"/>
@@ -275,16 +276,16 @@
                             <main class="w-100 ps-2 pt-1">
                                 <div>
                                     <div t-if="record.active.raw_value" class="text-success float-end mb4">
-                                        <i class="fa fa-circle" role="img" aria-label="Ok" title="Ok"></i>
+                                        <i class="oi oi-filled" data-icon="circle" role="img" aria-label="Ok" title="Ok"></i>
                                     </div>
                                     <div t-else="" class="text-danger float-end mb4">
-                                        <i class="fa fa-circle" role="img" aria-label="Invalid" title="Invalid"></i>
+                                        <i class="oi oi-filled" data-icon="circle" role="img" aria-label="Invalid" title="Invalid"></i>
                                     </div>
                                     <field class="fw-bold" name="name"/>
                                 </div>
                                 <div>
                                     <span class="mb4 text-truncate" title="Login">
-                                        <i class="fa fa-envelope me-1" role="img" aria-label="Login"></i>
+                                        <i class="oi oi-filled me-1" data-icon="mail" role="img" aria-label="Login"></i>
                                         <field name="login"/>
                                     </span>
                                     <field class="badge rounded-pill float-end" name="lang"/>
@@ -420,11 +421,11 @@
                                     <field name="name"/>
                                 </h1>
                                 <h5 name="h5_email" class="d-flex align-items-baseline mb-0">
-                                    <i class="fa fa-fw fa-envelope text-primary" title="Email"/>
+                                    <i class="oi oi-fw oi-filled text-primary" data-icon="mail" title="Email"/>
                                     <field name="email" placeholder="Email" class="w-75"/>
                                 </h5>
                                 <h5 name="h5_phone" class="d-flex align-items-baseline mb-0">
-                                    <i class="fa fa-fw fa-phone text-primary" title="Phone"/>
+                                    <i class="oi oi-fw oi-filled text-primary" data-icon="phone" title="Phone"/>
                                     <field name="phone" placeholder="Phone" class="w-75"/>
                                 </h5>
                             </div>
@@ -439,7 +440,8 @@
                                             <button
                                                 type="action"
                                                 name="%(base.action_view_base_language_install)d"
-                                                class="oe_edit_only btn-sm btn-link mb4 fa fa-globe"
+                                                class="oe_edit_only btn-sm btn-link mb4 oi"
+                                                data-icon="public"
                                                 aria-label="Add a language"
                                                 groups="base.group_system"
                                                 title="Add a language"

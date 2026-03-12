@@ -102,7 +102,7 @@
         <t t-if="ui.isSmall">
             <button class="btn-switchpane back-button validation-button btn btn-secondary btn-lg lh-lg "
                 t-on-click="() => pos.onClickBackButton()">
-                <i class="oi oi-chevron-left fa-fw" role="img" aria-label="Go Back" title="Go Back" />
+                <i class="oi oi-fw" data-icon="chevron_backward" role="img" aria-label="Go Back" title="Go Back" />
             </button>
         </t>
         <t t-else="">
@@ -122,7 +122,7 @@
                     t-att-class="{ 'highlight text-action': currentOrder.getPartner() }"
                     t-attf-class="{{ currentOrder.isCustomerRequired ? 'btn-primary' : 'btn-secondary' }}"
                     t-on-click="() => this.pos.selectPartner()">
-                    <i class="fa fa-user me-2" role="img" title="Customer" />
+                    <i class="oi oi-filled me-2" data-icon="person" role="img" title="Customer" />
                     <span class="partner-name">
                         <t t-if="currentOrder.getPartner()" t-esc="currentOrder.getPartner().name"/>
                         <t t-else="">Customer</t>
@@ -132,28 +132,28 @@
                     t-att-class="{ 'highlight active': currentOrder.isToInvoice(), 'opacity-50': !pos.config.canInvoice }"
                     t-on-click="toggleIsToInvoice" t-att-disabled="currentOrder.lines[0]?.refunded_orderline_id?.order_id?.isToInvoice()">
                     <span>
-                        <i class="fa fa-file-text-o me-2" />
+                        <i class="oi me-2" data-icon="article" />
                         <t t-if="pos.config.canInvoice">Invoice</t>
                         <t t-else="">Not available</t>
                     </span>
-                    <i class="fa me-2" t-attf-class="{{ currentOrder.isToInvoice() ? 'fa-check-square text-action' : 'fa-square-o' }}" /> 
+                    <i class="oi me-2" t-att-class="{ 'text-action oi-filled': currentOrder.isToInvoice() }" t-attf-data-icon="{{ currentOrder.isToInvoice() ? 'check_box' : 'square' }}" /> 
                 </button>
             </div>
             <div t-if="(pos.config.iface_tipproduct and pos.config.tip_product_id) or pos.config.iface_cashdrawer or pos.config.ship_later" class="d-flex flex-column gap-1 w-100">
                 <button t-if="pos.config.iface_tipproduct and pos.config.tip_product_id" class="button btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 lh-lg" t-att-class="{ 'highlight active text-action': currentOrder.getTip() }"
                     t-on-click="addTip">
-                    <span t-attf-class="{{currentOrder.getTip() ? 'me-auto' : 'mx-auto' }}"><i class="fa fa-heart me-2" />Tip</span>
+                    <span t-attf-class="{{currentOrder.getTip() ? 'me-auto' : 'mx-auto' }}"><i class="oi oi-filled me-2" data-icon="favorite" />Tip</span>
                     <t t-if="currentOrder.getTip() != 0">
                         <t t-esc="env.utils.formatCurrency(currentOrder.getTip())" />
                     </t>
                 </button>
                 <button t-if="pos.config.iface_cashdrawer" class="button col js_cashdrawer btn btn-light py-3 text-start rounded-0 border-top border-start border-end"
                     t-on-click="pos.openCashbox">
-                    <i class="fa fa-archive me-2" />Open Cashbox 
+                    <i class="oi me-2" data-icon="archive"/>Open Cashbox 
                 </button>
                 <button t-if="pos.config.ship_later" class="button btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 lh-lg" t-att-class="{ 'highlight active text-action': currentOrder.shipping_date }"
                     t-on-click="toggleShippingDatePicker">
-                    <span t-attf-class="{{currentOrder.shipping_date ? 'me-auto' : 'mx-auto' }}"><i class="fa fa-clock-o me-2" />Ship Later</span>
+                    <span t-attf-class="{{currentOrder.shipping_date ? 'me-auto' : 'mx-auto' }}"><i class="oi me-2" data-icon="schedule" />Ship Later</span>
                     <span t-if="currentOrder.shipping_date">
                         <t t-esc="currentOrder.formatDateOrTime('shipping_date', 'date')" />
                     </span>

@@ -28,7 +28,8 @@
                     />
                 </t>
                 <button t-if="hasDynamicPlaceholder"
-                    class="btn m-0 py-0 px-2 fa fa-magic"
+                    class="btn oi m-0 py-0 px-2"
+                    data-icon="wand_stars"
                     title="Insert Field"
                     t-on-click="onDynamicPlaceholderOpen"
                 />

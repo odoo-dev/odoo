@@ -30,7 +30,7 @@
                     t-att-data-product-id="product_variant_id"
                     t-att-data-product-template-id="product.id"
                 >
-                    <span class="fa fa-exchange fa-fw o_not-animable"/>
+                    <span class="oi oi-w o_not-animable" data-icon="swap_horiz"/>
                     <span class="o_label small ms-2">Compare</span>
                 </button>
 
@@ -41,7 +41,7 @@
                     comparison button
                 -->
                 <div class="o_add_compare_placeholder pe-none opacity-0 btn">
-                    <span class="fa fa-exchange fa-fw"/>
+                    <span class="oi oi-w" data-icon="swap_horiz"/>
                 </div>
             </t>
         </xpath>
@@ -78,7 +78,7 @@
                 t-att-data-product-id="product_variant_id"
                 t-att-data-product-template-id="product.id"
             >
-                <span class="fa fa-exchange"/>
+                <span class="oi" data-icon="swap_horiz"/>
                 <span t-att-class="'d-inline ms-2' + (' d-lg-none' if website.product_page_image_width == '50_pc' and not (is_view_active('website_sale.cta_wrapper_boxed') or is_view_active('website_sale.cta_wrapper_large')) or is_view_active('website_sale_wishlist.product_add_to_wishlist') else '')">Add to compare</span>
             </button>
         </xpath>
@@ -305,7 +305,7 @@
                                         aria-label="Remove product from comparison"
                                         t-att-data-product-id="product.id"
                                     >
-                                        <i class="oi oi-close"/>
+                                        <i class="oi" data-icon="close_small"/>
                                     </button>
                                 </li>
                             </ul>
@@ -365,7 +365,7 @@
                                                 t-att-data-ptav-ids="json.dumps(product.product_template_attribute_value_ids.ids)"
                                                 t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
                                             >
-                                                <i class="fa fa-shopping-cart me-2" aria-hidden="true"/>Add to Cart
+                                                <i class="oi me-2" data-icon="shopping_cart" aria-hidden="true"/>Add to Cart
                                             </button>
                                         </div>
                                     </div>
@@ -437,7 +437,7 @@
                                 class="btn btn-link ps-0 text-decoration-none"
                                 aria-label="Continue shopping"
                             >
-                                <i class="oi oi-chevron-left me-1"/> Back to shop
+                                <i class="oi me-1" data-icon="chevron_backward"/> Back to shop
                             </a>
                             <button
                                 class="button btn btn-light ms-auto"

@@ -234,7 +234,7 @@ export class ColorPlugin extends Plugin {
                     closestElement(node, "span") ||
                     closestElement(node, (node) => hasTextColorClass(node, mode));
 
-                const faNodes = font?.querySelectorAll(".fa");
+                const faNodes = font?.querySelectorAll(".oi");
                 if (faNodes && Array.from(faNodes).some((faNode) => faNode.contains(node))) {
                     return font;
                 }

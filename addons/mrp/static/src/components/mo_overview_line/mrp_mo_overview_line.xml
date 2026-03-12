@@ -5,7 +5,7 @@
         <td class="text-start">
             <div t-attf-style="margin-left: {{ marginMultiplicator * 20 }}px" class="d-inline-block">
                 <span t-if="props.hasFoldButton" class="btn btn-light p-0" t-attf-aria-label="{{ foldButtonTitle }}" t-attf-title="{{ foldButtonTitle }}" style="margin-right: 1px">
-                    <i t-attf-class="fa fa-fw fa-caret-{{ props.isFolded ? 'right' : 'down' }}" role="img"/>
+                    <i class="oi oi-fw" t-attf-data-icon="{{ props.isFolded ? 'arrow_right' : 'arrow_drop_down' }}" role="img"/>
                 </span>
                 <a t-if="data.id and data.model === 'mrp.workorder'" href="#" t-on-click.prevent="openWorkorder" t-out="data.name"/>
                 <a t-elif="data.id and data.model" href="#" t-on-click.prevent="openForm" t-out="data.name"/>
@@ -32,7 +32,7 @@
         <td class="text-end" t-if="props.showOptions.receipts">
             <t t-if="data.receipt">
                 <span t-attf-class="{{ getColorClass(data.receipt.decorator) }}" t-out="data.receipt.display"/>
-                <a href="#" role="button" t-on-click.prevent="openForecast" title="Forecast Report" t-attf-class="fa fa-fw fa-area-chart ms-1 {{getColorClass(data.receipt.decorator)}}"/>
+                <a href="#" role="button" t-on-click.prevent="openForecast" title="Forecast Report" t-attf-class="oi oi-fw ms-1 {{getColorClass(data.receipt.decorator)}}" data-icon="area_chart"/>
             </t>
         </td>
         <td class="text-end" t-if="props.showOptions.unitCosts" t-out="formatMonetary(data.unit_cost)"/>

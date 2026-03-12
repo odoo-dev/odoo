@@ -141,7 +141,7 @@ export class HootStatusPanel extends Component {
                         <t t-if="env.runner.aborted">, run aborted by user</t>)
                     </span>
                     <span class="md:hidden flex items-center gap-1">
-                        <i class="fa fa-clock-o" />
+                        <i class="oi" data-icon="schedule" />
                         <strong class="text-primary" t-esc="env.runner.totalTime" />
                     </span>
                 </t>
@@ -160,7 +160,7 @@ export class HootStatusPanel extends Component {
                         t-on-click.stop="() => this.filterResults('passed')"
                         t-attf-title="Show {{ runnerReporting.passed }} passed tests"
                     >
-                        <i class="fa fa-check-circle" />
+                        <i class="oi oi-filled" data-icon="check_circle" />
                         <t t-esc="runnerReporting.passed" />
                     </button>
                 </t>
@@ -171,7 +171,7 @@ export class HootStatusPanel extends Component {
                         t-on-click.stop="() => this.filterResults('failed')"
                         t-attf-title="Show {{ runnerReporting.failed }} failed tests"
                     >
-                        <i class="fa fa-times-circle" />
+                        <i class="oi oi-filled" data-icon="cancel" />
                         <t t-esc="runnerReporting.failed" />
                     </button>
                 </t>
@@ -193,7 +193,7 @@ export class HootStatusPanel extends Component {
                         t-on-click.stop="() => this.filterResults('todo')"
                         t-attf-title="Show {{ runnerReporting.todo }} tests to do"
                     >
-                        <i class="fa fa-exclamation-circle" />
+                        <i class="oi" data-icon="error" />
                         <t t-esc="runnerReporting.todo" />
                     </button>
                 </t>
@@ -206,7 +206,7 @@ export class HootStatusPanel extends Component {
                             t-att-disabled="uiState.resultsPage === 0"
                             t-on-click.stop="previousPage"
                         >
-                            <i class="fa fa-chevron-left" />
+                            <i class="oi" data-icon="chevron_left" />
                         </button>
                         <strong class="text-primary" t-esc="uiState.resultsPage + 1" />
                         <span class="text-gray">/</span>

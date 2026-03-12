@@ -7,14 +7,14 @@
                 <div class="input-group">
                     <t t-call="web.CharField"/>
                     <button type="button" title="Open section" class="btn oe_edit_only o_icon_button" t-on-click.stop="onExternalBtnClick">
-                        <i class="fa fa-fw o_button_icon fa-external-link"/>
+                        <i class="o_button_icon oi oi-fw" data-icon="open_in_new"/>
                     </button>
                 </div>
             </t>
         </xpath>
         <xpath expr="//span[@t-esc='formattedValue']" position="after">
             <t t-if="props.record.data.is_page">
-                <i class="fa fa-fw o_button_icon fa-pencil"/>
+                <i class="o_button_icon oi oi-fw" data-icon="edit"/>
             </t>
         </xpath>
     </t>

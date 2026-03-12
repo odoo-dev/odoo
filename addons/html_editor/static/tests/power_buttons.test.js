@@ -132,7 +132,7 @@ describe.tags("desktop");
 describe("buttons", () => {
     test("should create a numbered list using power buttons", async () => {
         const { el } = await setupEditor("<p>[]<br></p>");
-        await click(".o_we_power_buttons .power_button.fa-list-ol");
+        await click(".o_we_power_buttons .power_button[data-icon='format_list_numbered']");
         expect(getContent(el)).toBe(
             `<ol><li o-we-hint-text="List" class="o-we-hint">[]<br></li></ol>`
         );
@@ -140,7 +140,7 @@ describe("buttons", () => {
 
     test("should create a bullet list using power buttons", async () => {
         const { el } = await setupEditor("<p>[]<br></p>");
-        await click(".o_we_power_buttons .power_button.fa-list-ul");
+        await click(".o_we_power_buttons .power_button[data-icon='format_list_bulleted']");
         expect(getContent(el)).toBe(
             `<ul><li o-we-hint-text="List" class="o-we-hint">[]<br></li></ul>`
         );
@@ -148,7 +148,7 @@ describe("buttons", () => {
 
     test("should create a check list using power buttons", async () => {
         const { el } = await setupEditor("<p>[]<br></p>");
-        await click(".o_we_power_buttons .power_button.fa-check-square-o");
+        await click(".o_we_power_buttons .power_button[data-icon='check_box']");
         expect(getContent(el)).toBe(
             `<ul class="o_checklist"><li o-we-hint-text="List" class="o-we-hint">[]<br></li></ul>`
         );
@@ -166,21 +166,21 @@ describe("buttons", () => {
             },
         ]);
         await setupEditor("<p>[]<br></p>");
-        click(".o_we_power_buttons .power_button.fa-file-image-o");
+        click(".o_we_power_buttons .power_button[data-icon='image']");
         await animationFrame();
         expect(".o_select_media_dialog").toBeVisible();
     });
 
     test("should open link popover in 'button primary' mode using power buttons", async () => {
         await setupEditor("<p>[]<br></p>");
-        click(".o_we_power_buttons .power_button.fa-square");
+        click(".o_we_power_buttons .power_button[data-icon='square']");
         await animationFrame();
         await expectElementCount(".o-we-linkpopover", 1);
     });
 
     test("should open powerbox using power buttons", async () => {
         await setupEditor("<p>[]<br></p>");
-        click(".o_we_power_buttons .power_button.oi-ellipsis-v");
+        click(".o_we_power_buttons .power_button[data-icon='more_vert']");
         await animationFrame();
         await expectElementCount(".o-we-powerbox", 1);
     });
@@ -207,13 +207,13 @@ describe("individual button availability", () => {
             config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
         });
         expect(".o_we_power_buttons").toBeVisible();
-        expect(".power_button.fa-bug").toBeVisible();
+        expect(".power_button[data-icon='bug_report']").toBeVisible();
 
         // Place cursor in the second paragraph
         setSelection({ anchorNode: el.children[1], anchorOffset: 0 });
         await tick();
 
         expect(".o_we_power_buttons").toBeVisible();
-        expect(".power_button.fa-bug").not.toBeVisible();
+        expect(".power_button[data-icon='bug_report']").not.toBeVisible();
     });
 });

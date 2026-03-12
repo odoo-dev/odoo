@@ -334,7 +334,7 @@ export const PublicRoot = publicWidget.Widget.extend({
         var $buttons = $(ev.currentTarget).find('button[type="submit"], a.a-submit').toArray();
         $buttons.forEach((btn) => {
             var $btn = $(btn);
-            $btn.prepend('<i class="fa fa-circle-o-notch fa-spin"></i> ');
+            $btn.prepend('<i class="oi oi-spin" data-icon="autorenew"></i> ');
             $btn.prop('disabled', true);
         });
     },

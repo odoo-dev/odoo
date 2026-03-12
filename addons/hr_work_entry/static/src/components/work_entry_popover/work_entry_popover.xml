@@ -20,13 +20,13 @@
                                     record="currentRecord.record"
                                     title="currentRecord.record.work_entry_source">
                                 <t t-set-slot="contents">
-                                    <i class="fa fa-link"/>
+                                    <i class="oi" data-icon="link"/>
                                 </t>
                             </ViewButton>
                         </span>
                     </h4>
                     <span class="ms-4 mt-1 me-2 cursor-pointer" t-on-click.stop="props.close">
-                        <i class="fa fa-close" />
+                        <i class="oi" data-icon="close" />
                     </span>
                 </div>
                 <div class="popover-body o_form_view o_form_nosheet py-0">
@@ -61,7 +61,7 @@
                                     Split
                                 </t>
                             </button>
-                            <i class="fa fa-danger" t-if="currentRecord.record.isDirty"></i>
+                            <i class="oi" data-icon="warning" t-if="currentRecord.record.isDirty"></i>
                             <ViewButton t-if="!state.isSplit" className="'btn btn-sm ms-0 btn-danger'"
                                         clickParams="{type: 'object', name: 'unlink'}"
                                         icon="'fa-trash'"
@@ -69,7 +69,7 @@
                                         string.translate="Delete"/>
                         </div>
                         <span t-else="" class="w-100 text-center mb-2 mx-2" name="work_entry_validated_message">
-                            <i class="fa fa-lock me-1"/>
+                            <i class="oi me-1" data-icon="lock"/>
                             <span>You cannot edit a validated work entry</span>
                         </span>
                     </div>

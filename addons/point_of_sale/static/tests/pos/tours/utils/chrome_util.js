@@ -10,7 +10,7 @@ export function confirmPopup() {
 export function clickMenuButton() {
     return {
         content: "Click on the menu button",
-        trigger: ".pos-rightheader button:has(.fa-bars)",
+        trigger: ".pos-rightheader button:has([data-icon='menu'])",
         run: "click",
     };
 }
@@ -25,7 +25,7 @@ export function clickMenuOption(name, options) {
 export function waitForMenuButtons() {
     return {
         content: "Wait for the menu buttons to be available",
-        trigger: ".pos-rightheader button:has(.fa-bars)",
+        trigger: ".pos-rightheader button:has([data-icon='menu'])",
     };
 }
 export function waitForMenuOptionsToOpen() {
@@ -163,7 +163,7 @@ function _hasFloatingOrder(name, yes) {
         },
         {
             isActive: ["mobile"],
-            trigger: ".pos-leftheader button.fa-caret-down",
+            trigger: ".pos-leftheader button[data-icon='arrow_drop_down']",
             run: "click",
         },
         {
@@ -174,7 +174,7 @@ function _hasFloatingOrder(name, yes) {
         },
         {
             isActive: ["mobile"],
-            trigger: ".oi-arrow-left",
+            trigger: "[data-icon='west']",
             run: "click",
         },
     ];
@@ -229,12 +229,12 @@ export function waitRequest() {
             async run({ waitFor }) {
                 let isLoading = false;
                 try {
-                    isLoading = await waitFor("body:has(.fa-circle-o-notch)", { timeout: 2000 });
+                    isLoading = await waitFor("body:has([data-icon='autorenew'])", { timeout: 2000 });
                 } catch {
-                    /* fa-circle-o-notch will certainly never appears :'( */
+                    /* autorenew icon will certainly never appears :'( */
                 }
                 if (isLoading) {
-                    await waitFor("body:not(:has(.fa-circle-o-notch))", { timeout: 10000 });
+                    await waitFor("body:not(:has([data-icon='autorenew']))", { timeout: 10000 });
                 }
             },
         },
@@ -259,14 +259,14 @@ export function storedOrderCount(expectedCount) {
 export function isSynced() {
     return {
         content: "Check if the request is proceeded",
-        trigger: negate(".fa-spin", ".status-buttons"),
+        trigger: negate(".oi-spin", ".status-buttons"),
     };
 }
 
 export function clickOnScanButton() {
     return {
         content: "Click the Scan button located in the top header.",
-        trigger: ".pos-topheader .status-buttons .fa-barcode",
+        trigger: ".pos-topheader .status-buttons [data-icon='barcode']",
         run: "click",
     };
 }

@@ -6,11 +6,11 @@
                 <div class="o-mail-Composer-stars enabled cursor-pointer" t-on-mouseleave="() => portalState.starValue = portalState.ratingValue">
                     <t t-set="index" t-value="0" />
                     <t t-foreach="Array(portalState.starValue)" t-as="num" t-key="num_index">
-                        <i class="fa fa-star" role="img" aria-label="Full star" t-att-index="index" t-on-mousemove="onMoveStar" t-on-click="onClickStar"/>
+                        <i class="oi oi-filled" data-icon="star" role="img" aria-label="Full star" t-att-index="index" t-on-mousemove="onMoveStar" t-on-click="onClickStar"/>
                         <t t-set="index" t-value="index + 1" />
                     </t>
                     <t t-foreach="Array(5 - portalState.starValue)" t-as="num" t-key="num_index">
-                        <i class="fa fa-star-o text-black-25" role="img" aria-label="Empty star" t-att-index="index" t-on-mousemove="onMoveStar" t-on-click="onClickStar"/>
+                        <i class="oi text-black-25" data-icon="star" role="img" aria-label="Empty star" t-att-index="index" t-on-mousemove="onMoveStar" t-on-click="onClickStar"/>
                         <t t-set="index" t-value="index + 1" />
                     </t>
                 </div>

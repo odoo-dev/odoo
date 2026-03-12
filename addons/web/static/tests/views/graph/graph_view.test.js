@@ -2158,48 +2158,48 @@ test("graph view sort by measure", async () => {
         `,
     });
 
-    expect(".fa-sort-amount-asc").toHaveCount(1);
-    expect(".fa-sort-amount-desc").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
 
     checkLegend(view, []);
     checkMeasure("Count");
-    expect(".fa-sort-amount-desc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 3, 1] });
 
     await clickSort("asc");
 
-    expect(".fa-sort-amount-asc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", { data: [1, 3, 4] });
 
     await clickSort("desc");
 
-    expect(".fa-sort-amount-desc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 3, 1] });
 
     // again click on descending button to deactivate order
     await clickSort("desc");
 
-    expect(".fa-sort-amount-desc").not.toHaveClass("active");
+    expect("[data-icon='sort']").not.toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 1, 3] });
 
     // set line mode
     await selectMode("line");
-    expect(".fa-sort-amount-asc").toHaveCount(1);
-    expect(".fa-sort-amount-desc").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
 
     checkLegend(view, []);
     checkMeasure("Count");
-    expect(".fa-sort-amount-desc").not.toHaveClass("active");
+    expect("[data-icon='sort']").not.toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 1, 3] });
 
     await clickSort("asc");
 
-    expect(".fa-sort-amount-asc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", { data: [1, 3, 4] });
 
     await clickSort("desc");
 
-    expect(".fa-sort-amount-desc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 3, 1] });
 });
 
@@ -2224,18 +2224,18 @@ test("graph view sort by measure for grouped data", async () => {
 
     await clickSort("asc");
 
-    expect(".fa-sort-amount-asc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", [{ data: [1, 3, 1] }, { data: [0, 0, 3] }, { data: [1, 3, 4] }]);
 
     await clickSort("desc");
 
-    expect(".fa-sort-amount-desc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", [{ data: [1, 3, 1] }, { data: [3, 0, 0] }, { data: [4, 3, 1] }]);
 
     // again click on descending button to deactivate order
     await clickSort("desc");
 
-    expect(".fa-sort-amount-desc").not.toHaveClass("active");
+    expect("[data-icon='sort']").not.toHaveClass("active");
     checkDatasets(view, "data", [{ data: [1, 1, 3] }, { data: [3, 0, 0] }, { data: [4, 1, 3] }]);
 });
 
@@ -2273,7 +2273,7 @@ test("graph view sort by measure for multiple grouped data", async () => {
 
     await clickSort("asc");
 
-    expect(".fa-sort-amount-asc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", [
         { data: [1, 1, 2, 2] },
         { data: [0, 1, 0, 0] },
@@ -2283,7 +2283,7 @@ test("graph view sort by measure for multiple grouped data", async () => {
 
     await clickSort("desc");
 
-    expect(".fa-sort-amount-desc").toHaveClass("active");
+    expect("[data-icon='sort']").toHaveClass("active");
     checkDatasets(view, "data", [
         { data: [1, 0, 0, 0] },
         { data: [2, 1, 2, 1] },
@@ -2294,7 +2294,7 @@ test("graph view sort by measure for multiple grouped data", async () => {
     // again click on descending button to deactivate order
     await clickSort("desc");
 
-    expect(".fa-sort-amount-desc").not.toHaveClass("active");
+    expect("[data-icon='sort']").not.toHaveClass("active");
     checkDatasets(view, "data", [
         { data: [1, 0, 0, 0] },
         { data: [1, 2, 1, 2] },

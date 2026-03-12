@@ -11,7 +11,7 @@
             <t t-if="env.isSmall">
                 <t t-set="previousBreadcrumb" t-value="visiblePathBreadcrumbs.at(-1)"/>
                 <button class="o_back_button btn btn-link d-print-none px-1 py-0" t-on-click.prevent="previousBreadcrumb.onSelected">
-                    <i class="oi oi-fw oi-arrow-left"/>
+                    <i class="oi oi-fw" data-icon="west"/>
                 </button>
             </t>
             <t t-else="">
@@ -19,7 +19,7 @@
                     <li t-if="collapsedBreadcrumbs.length" class="breadcrumb-item d-inline-flex min-w-0">
                         <Dropdown>
                             <button class="btn btn-light btn-sm px-1 p-0">
-                                <i class="oi oi-ellipsis-h"/>
+                                <i class="oi" data-icon="more_horiz"/>
                             </button>
                             <t t-set-slot="content">
                                 <t t-foreach="collapsedBreadcrumbs" t-as="breadcrumb" t-key="breadcrumb.jsId">

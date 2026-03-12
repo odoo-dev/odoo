@@ -158,15 +158,15 @@
                                     <div class="d-flex flex-nowrap">
                                         <button name="clear_videocall_location" type="object" class="btn btn-link btn-lg ms-1 px-1 py-0"
                                             invisible="not videocall_location or not user_can_edit" context="{'recurrence_update': recurrence_update}">
-                                            <span title="Clear meeting" class="fa fa-times"></span>
+                                            <span title="Clear meeting" class="oi" data-icon="close"></span>
                                         </button>
                                         <button name="action_join_video_call" class="btn btn-link btn-lg px-1 py-0" help="Join Video Call" type="object"
                                             invisible="not videocall_location or not user_can_edit">
-                                            <span title="Join video call" class="fa fa-sign-in"></span>
+                                            <span title="Join video call" class="oi" data-icon="login"></span>
                                         </button>
                                         <button name="set_discuss_videocall_location" type="object" class="btn btn-link btn-sm px-0 text-nowrap"
                                             invisible="videocall_location or not user_can_edit" context="{'recurrence_update': recurrence_update}">
-                                            <span class="fa fa-plus"></span><span> Odoo meeting</span>
+                                            <span class="oi" data-icon="add"></span><span> Odoo meeting</span>
                                         </button>
                                     </div>
                                 </div>
@@ -311,9 +311,9 @@
                                             <field name="email" widget="email"/>
                                             <span>Status: <field name="state" /></span>
                                             <footer class="justify-content-end">
-                                                <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" class="btn fa fa-asterisk"/>
-                                                <button name="do_accept" invisible="state not in ('needsAction', 'tentative', 'declined')" string="Accept" type="object" class="btn fa fa-check text-success"/>
-                                                <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="Decline" type="object" class="btn fa fa-times-circle text-danger"/>
+                                                <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" class="btn oi" data-icon="emergency"/>
+                                                <button name="do_accept" invisible="state not in ('needsAction', 'tentative', 'declined')" string="Accept" type="object" class="btn oi text-success" data-icon="check"/>
+                                                <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="Decline" type="object" class="btn oi oi-filled text-danger" data-icon="oi-cancel"/>
                                             </footer>
                                         </t>
                                     </templates>
@@ -340,14 +340,14 @@
                 </div>
                 <field name="invalid_email_partner_ids" invisible="1"/> <!--used in many2many_attendees widget-->
                 <div class="d-flex align-items-center pt-1 pb-2" colspan="2">
-                    <i class="fa fa-fw flex-shrink-0 fa-tag text-600 me-2" title="Booking Name"/>
+                    <i class="oi oi-fw flex-shrink-0 text-600 me-2" data-icon="label" title="Booking Name"/>
                     <field name="name" nolabel="1"
                         placeholder="Add Title"
                         class="w-100 mb-0"
                     />
                 </div>
                 <div class="d-flex align-items-center pt-1 pb-2" colspan="2">
-                    <i class="fa fa-fw flex-shrink-0 fa-clock-o text-600 me-2" title="Dates"/>
+                    <i class="oi oi-fw flex-shrink-0 text-600 me-2" data-icon="schedule" title="Dates"/>
                     <!--when "stop" is set manually, "duration" is computed. When "start" is changed
                     "stop" is computed based on the previously-computed "duration". Hence we need to
                     keep the last computed duration in the front-end model and send it with "start"
@@ -371,7 +371,7 @@
                     <field name="stop" invisible="1"/>
                 </div>
                 <div class="d-flex pt-1 pb-2" colspan="2">
-                    <i class="fa fa-fw flex-shrink-0 fa-user mt-1 text-600 me-2" title="Participants"/>
+                    <i class="oi oi-fw flex-shrink-0 mt-1 text-600 me-2" data-icon="person" title="Participants"/>
                     <field name="partner_ids" nolabel="1"
                         widget="many2many_tags"
                         placeholder="Participants"
@@ -379,7 +379,7 @@
                     />
                 </div>
                 <div class="d-flex align-items-center pt-1 pb-2" colspan="2">
-                    <i class="fa fa-fw flex-shrink-0 fa-map text-600 me-2" title="Location"/>
+                    <i class="oi oi-fw flex-shrink-0 text-600 me-2" data-icon="map" title="Location"/>
                     <field name="location" nolabel="1"
                         placeholder="Location"
                         class="w-100 mb-0"
@@ -391,23 +391,23 @@
                     <field name="videocall_source" force_save="1" invisible="1"/>
                     <button name="set_discuss_videocall_location" type="object" class="ms-1 pe-0 btn-link text-nowrap"
                         invisible="videocall_location" context="{'recurrence_update': recurrence_update}">
-                        <span class="fa fa-plus me-1"/>Video
+                        <span class="oi me-1" data-icon="add"/>Video
                     </button>
                 </div>
                 <div class="d-flex align-items-center pt-1 pb-2" colspan="2" invisible="not videocall_location">
-                    <i class="fa fa-fw flex-shrink-0 fa-video-camera text-600 me-2" title="Videocall URL"/>
+                    <i class="oi oi-fw oi-filled flex-shrink-0 text-600 me-2" data-icon="videocam" title="Videocall URL"/>
                     <field name="videocall_location" nolabel="1"
                         widget="CopyClipboardChar"
                         class="w-100 mb-0 o_field_CopyClipboardChar"
                     />
-                    <button name="clear_videocall_location" class="btn btn-sm px-0"><i class="fa fa-remove" title="Remove"/></button>
+                    <button name="clear_videocall_location" class="btn btn-sm px-0"><i class="oi" data-icon="close" title="Remove"/></button>
                 </div>
                 <div class="d-flex align-items-center pt-1 pb-2" colspan="2">
-                    <i class="fa fa-fw flex-shrink-0 fa-lock text-600 me-2" title="Visibility"/>
+                    <i class="oi oi-fw flex-shrink-0 text-600 me-2" data-icon="lock" title="Visibility"/>
                     <field name="privacy" nolabel="1" class="w-100 mb-0" placeholder="Visibility"/>
                 </div>
                 <div class="d-flex pt-1 pb-2" colspan="2">
-                    <i class="fa fa-fw flex-shrink-0 fa-sticky-note mt-2 text-600 me-2" title="Notes"/>
+                    <i class="oi oi-fw oi-filled flex-shrink-0 mt-2 text-600 me-2" data-icon="sticky_note_2" title="Notes"/>
                     <field name="notes" nolabel="1" class="w-100" placeholder="Notes" widget="calendar_event_notes_html"/>
                 </div>
             </form>

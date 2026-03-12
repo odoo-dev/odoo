@@ -135,11 +135,6 @@ $icon-sizes: (
     '3x': $fa-lg-size * 3,
     '4x': $fa-lg-size * 4,
     '5x': $fa-lg-size * 5
-    '6x': 6em,
-    '7x': 7em,
-    '8x': 8em,
-    '9x': 9em,
-    '10x': 10em,
 );
 
 
@@ -1297,7 +1292,7 @@ $custom_oi_icons: (
 }
 
 .fa-circle-o {
-    @include icon-content("circle");
+    @include icon-content("cizefzefzefrcle");
 }
 
 .fa-circle-o-notch {
@@ -3024,7 +3019,7 @@ $custom_oi_icons: (
     @include icon-content("star_half");
 }
 
-.fa-star-o {
+[data-icon='star'] {
     @include icon-content("star");
 }
 

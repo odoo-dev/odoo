@@ -40,7 +40,7 @@
                                         <field options="{'line_breaks': False}" widget="text" class="text-break d-block" name="name" default_focus="1" placeholder="Name (company or person)" required="type == 'contact'"/>
                                     </h1>
                                     <div class="d-flex align-items-baseline w-md-50">
-                                        <i class="fa fa-fw me-1 fa-building text-primary" title="Company"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="business" title="Company"/>
                                         <field name="parent_id" class="w-100"
                                             widget="res_partner_many2one"
                                             placeholder="Company Employer"
@@ -48,11 +48,11 @@
                                             context="{'default_user_id': user_id}"/>
                                     </div>
                                     <div class="d-flex align-items-baseline w-md-50">
-                                        <i class="fa fa-fw me-1 fa-envelope text-primary" title="Email"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Email"/>
                                         <field name="email" class="w-100" widget="email" required="user_ids" placeholder="Email"/>
                                     </div>
                                     <div class="d-flex align-items-baseline w-md-50">
-                                        <i class="fa fa-fw me-1 fa-phone text-primary" title="Phone"/>
+                                        <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="phone" title="Phone"/>
                                         <field name="phone" class="w-100" widget="phone" placeholder="Phone"/>
                                     </div>
                                 </div>

@@ -7,7 +7,7 @@
             action="'websiteConfig'"
             actionParam="{views:['website_sale_comparison.product_add_to_compare']}"
         >
-            <i class="fa fa-fw fa-exchange"/>
+            <i class="oi oi-fw" data-icon="swap_horiz"/>
             Compare
         </BuilderButton>
     </BuilderRow>

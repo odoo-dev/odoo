@@ -1211,11 +1211,11 @@ test("Notification Sent", async () => {
     await contains(".o-mail-Message");
     await contains(".o-mail-Message-notification");
     await contains(".o-mail-Message-notification i");
-    expect(".o-mail-Message-notification i:first").toHaveClass("fa-envelope-o");
+    expect(".o-mail-Message-notification i:first").toHaveAttribute("data-icon", "mail");
     await click(".o-mail-Message-notification");
     await contains(".o-mail-MessageNotificationPopover");
     await contains(".o-mail-MessageNotificationPopover i");
-    expect(".o-mail-MessageNotificationPopover i:first").toHaveClass("fa-check");
+    expect(".o-mail-MessageNotificationPopover i:first").toHaveAttribute("data-icon", "check");
     await contains(".o-mail-MessageNotificationPopover:text('Someone')");
 });
 
@@ -1242,7 +1242,7 @@ test("Notification Error", async () => {
     await contains(".o-mail-Message");
     await contains(".o-mail-Message-notification");
     await contains(".o-mail-Message-notification i");
-    expect(".o-mail-Message-notification i:first").toHaveClass("fa-envelope");
+    expect(".o-mail-Message-notification i:first").toHaveAttribute("data-icon", "mail");
     await click(".o-mail-Message-notification").then(() => {});
     await contains(".o-mail-MessageNotificationPopover");
     expect(".o-mail-MessageNotificationPopover i.fa-times.text-danger").toHaveCount(1);

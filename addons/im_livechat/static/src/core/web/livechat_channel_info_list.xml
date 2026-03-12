@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="im_livechat.LivechatChannelInfoList">
-        <ActionPanel title.translate="Information" minWidth="200" initialWidth="env.inMeetingView ? 400 : 300" icon="'fa fa-info'">
+        <ActionPanel title.translate="Information" minWidth="200" initialWidth="env.inMeetingView ? 400 : 300" icon="'info'">
             <a t-if="visitorProfileURL" class="btn btn-primary mt-1" t-on-click.prevent="openVisitorProfile" t-att-href="visitorProfileURL" title="View Contact">
                 View Contact
             </a>
@@ -28,7 +28,7 @@
                 <h6 class="pt-3 mb-0">Chatbot answers</h6>
                 <t t-foreach="expectAnswerSteps" t-as="step" t-key="step.id">
                     <div class="d-flex align-items-center gap-1 bg-inherit rounded-3">
-                        <i class="fa fa-comment-o me-1"/>
+                        <i class="oi me-1" data-icon="chat_bubble"/>
                         <span class="text-truncate" t-esc="step.answer"/>
                     </div>
                 </t>
@@ -41,7 +41,7 @@
             <div t-if="props.thread.livechat_end_dt" class="d-flex flex-column bg-inherit gap-1">
                 <h6 class="pt-3 mb-0">Send conversation</h6>
                 <TranscriptSender thread="props.thread"/>
-                <a class="btn btn-outline-secondary" title="Download a copy of this conversation" target="_blank" t-att-href="props.thread.transcriptUrl"><i class="pe-2 fa fa-download"/>Download</a>
+                <a class="btn btn-outline-secondary" title="Download a copy of this conversation" target="_blank" t-att-href="props.thread.transcriptUrl"><i class="oi pe-2" data-icon="download"/>Download</a>
             </div>
         </ActionPanel>
     </t>
@@ -58,7 +58,7 @@
                     contenteditable="false"
                     target="_blank"
                 >
-                    <i class="fa fa-external-link opacity-75"/>
+                    <i class="oi opacity-75" data-icon="open_in_new"/>
                     <span class="ms-1 fw-bold" t-esc="record.name"/>
                 </a>
             </t>

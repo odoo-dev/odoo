@@ -99,21 +99,21 @@ test("Change the background position and apply", async () => {
     await dragAndDropBgImage();
     await contains(".o_we_image_position_overlay .btn-primary").click();
     expect(".o_we_image_position_overlay").toHaveCount(0);
-    expect("button.fa-undo").toBeEnabled();
+    expect("button[data-icon='undo']").toBeEnabled();
 });
 
 test("Change the background position and discard", async () => {
     await dragAndDropBgImage();
     await contains(".o_we_image_position_overlay .btn-danger").click();
     expect(".o_we_image_position_overlay").toHaveCount(0);
-    expect("button.fa-undo").not.toBeEnabled();
+    expect("button[data-icon='undo']").not.toBeEnabled();
 });
 
 test("Change the background position and click out of the iframe", async () => {
     await dragAndDropBgImage();
     await contains(".o_customize_tab").click();
     expect(".o_we_image_position_overlay").toHaveCount(0);
-    expect("button.fa-undo").not.toBeEnabled();
+    expect("button[data-icon='undo']").not.toBeEnabled();
 });
 
 test("Background position overlay layout", async () => {

@@ -13,7 +13,7 @@
             <div t-if="visitor?.pageVisitHistoryText" class="d-flex flex-column bg-inherit gap-1">
                 <h6 class="pt-3">Recent page views</h6>
                 <div t-if="visitor.website_id">
-                    <i class="me-1 fa fa-globe" aria-label="Website"/>
+                    <i class="oi me-1" data-icon="public" aria-label="Website"/>
                     <span t-esc="visitor.website_id.name"/>
                 </div>
                 <span t-esc="visitor.pageVisitHistoryText"/>
@@ -33,7 +33,7 @@
                             'rounded-bottom-0 border-bottom': !channel_last,
                         }"
                     >
-                        <i class="fa fa-external-link opacity-75"/>
+                        <i class="oi opacity-75" data-icon="open_in_new"/>
                         <span class="ms-1 fw-bold" t-esc="channel.displayName"/>
                         <span t-if="channel.livechat_end_dt" class="o-xsmaller text-muted" t-out="CLOSED_ON_TEXT(channel)"/>
                     </a>

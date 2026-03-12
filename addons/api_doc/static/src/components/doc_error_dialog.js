@@ -5,7 +5,7 @@ export class DocErrorDialog extends Component {
     static template = xml`
         <div class="alert error mt-1 d-flex flex-column" role="alert">
             <div class="d-flex align-items-center mb-2">
-                <i class="pe-2 fa fa-exclamation-triangle fa-lg" aria-hidden="true"/>
+                <i class="pe-2 oi oi-lg" data-icon="warning" aria-hidden="true"/>
                 <h5 class="m-0 text-danger">Error while loading models: <strong t-out="props.name"/></h5>
             </div>
             <t t-if="props.traceback">
@@ -15,7 +15,7 @@ export class DocErrorDialog extends Component {
                         t-ref="copyButton"
                         t-on-click="onClickClipboard"
                     >
-                        <span class="fa fa-clipboard"/>
+                        <span class="oi" data-icon="assignment"/>
                     </button>
                     <pre class="small text-break p-4" t-out="props.traceback"/>
                 </div>

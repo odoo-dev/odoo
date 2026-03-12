@@ -57,7 +57,7 @@
                             </small>
                             <div t-if="props.message.scheduledDatetime" t-att-class="{ 'ms-2': (env.inChatWindow and isAlignedRight) or (isPersistentMessageFromAnotherThread) }" t-att-title="props.message.scheduledDateSimple">
                                 <span class="text-600 cursor-pointer">
-                                    <i class="fa fa-calendar-o"/>
+                                    <i class="oi" data-icon="calendar_today"/>
                                 </span>
                             </div>
                             <t t-if="isAlignedRight" t-call="mail.Message.notification"/>
@@ -120,7 +120,7 @@
                                                             <t t-if="message.translationSource" t-esc="translatedFromText"/>
                                                         </p>
                                                         <p class="fst-italic text-muted small" t-if="message.translationErrors">
-                                                            <i class="text-danger fa fa-warning" role="img" aria-label="Translation Failure"/>
+                                                            <i class="oi text-danger" data-icon="warning" role="img" aria-label="Translation Failure"/>
                                                             <t t-if="message.translationErrors" t-esc="translationFailureText"/>
                                                         </p>
                                                         <t t-if="showSubtypeDescription" t-out="props.messageSearch?.highlight(message.subtype_id?.description) ?? message.subtype_id?.description"/>
@@ -190,7 +190,7 @@
 
 <t t-name="mail.Message.emptyQuickAction">
     <button class="btn border-0 o-p-0_5 rounded-0 opacity-0 pe-none">
-        <i class="fa-lg fa fa-question"/>
+        <i class="oi oi-lg" data-icon="help"/>
     </button>
 </t>
 
@@ -202,7 +202,7 @@
     </div>
     <div t-elif="message.thread?.eq(props.thread) and (message.incoming_email_to?.length or message.incoming_email_cc?.length)" class="mx-1">
         <span class="o-mail-Message-notification cursor-pointer" t-att-class="message.failureNotifications.length > 0 ? 'text-danger' : text-600" role="button" tabindex="0" t-on-click="onClickNotification">
-            <i class="fa fa-envelope-o" role="img"/>
+            <i class="oi" data-icon="mail" role="img"/>
         </span>
     </div>
 </t>
@@ -214,8 +214,8 @@
 </t>
 
 <t t-name="mail.Message.pendingStatus">
-    <button t-if="message.postFailRedo" class="btn p-0" title="Failed to post the message. Click to retry" t-on-click="() => message.postFailRedo?.()"><i class="fa fa-fw fa-warning text-warning"/></button>
-    <span t-else="" class="o-mail-Message-pendingProgress"><i class="fa fa-fw fa-circle-o-notch fa-spin opacity-50"/></span>
+    <button t-if="message.postFailRedo" class="btn p-0" title="Failed to post the message. Click to retry" t-on-click="() => message.postFailRedo?.()"><i class="oi oi-fw text-warning" data-icon="warning"/></button>
+    <span t-else="" class="o-mail-Message-pendingProgress"><i class="oi oi-fw oi-spin opacity-50" data-icon="autorenew"/></span>
 </t>
 
 <t t-name="mail.Message.mentionedChannelIcon">
@@ -224,15 +224,15 @@
 
 <t t-name="mail.Message.sidebarStarred">
     <small class="text-center lh-1 o-opacity-35" t-att-class="{ 'align-self-start ms-1': isAlignedRight, 'align-self-end me-1': !isAlignedRight, 'mt-2': props.squashed, 'mt-1': !props.squashed }" title="Starred message">
-        <i class="fa fa-star o-mail-starred"/>
+        <i class="oi oi-filled o-mail-starred" data-icon="star"/>
     </small>
 </t>
 
     <t t-name="mail.Message.messageLink">
         <span>
             <span class="me-1" t-out="message.thread.displayName"/>
-            <span class="fa fa-angle-right me-1" aria-hidden="true"/>
-            <span class="fa fa-comment" aria-hidden="true"/>
+            <span class="oi me-1" data-icon="keyboard_arrow_right" aria-hidden="true"/>
+            <span class="oi oi-filled" data-icon="chat_bubble" aria-hidden="true"/>
         </span>
     </t>
 

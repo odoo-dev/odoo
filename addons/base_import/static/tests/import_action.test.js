@@ -788,7 +788,7 @@ describe("Import view", () => {
 
         await contains(".o_import_data_content .o_select_menu").selectDropdownItem("Display name");
         if (getMockEnv().isSmall) {
-            await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+            await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
             await contains(".o-dropdown--menu button:visible").click();
         } else {
             await contains(".o_control_panel_main_buttons button:nth-child(2)").click();
@@ -830,7 +830,7 @@ describe("Import view", () => {
         // For this test, we force the display of an error message if this field is set
         await contains(".o_import_data_content .o_select_menu").selectDropdownItem("Selection");
         if (getMockEnv().isSmall) {
-            await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+            await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
             await contains(".o-dropdown--menu button:visible").click();
         } else {
             await contains(".o_control_panel_main_buttons button:nth-child(2)").click();
@@ -893,7 +893,7 @@ describe("Import view", () => {
         // For this test, we force the display of an error message if this field is set
         await contains(".o_import_data_content .o_select_menu").selectDropdownItem("Bar");
         if (getMockEnv().isSmall) {
-            await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+            await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
             await contains(".o-dropdown--menu button:visible").click();
         } else {
             await contains(".o_control_panel_main_buttons button:nth-child(2)").click();
@@ -963,7 +963,7 @@ describe("Import view", () => {
         });
         await contains(".o_import_field_many2many select").select("import_skip_records");
         if (getMockEnv().isSmall) {
-            await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+            await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
             await contains(".o-dropdown--menu button:visible").click();
         } else {
             await contains(".o_control_panel_main_buttons button:nth-child(2)").click();
@@ -1121,7 +1121,7 @@ describe("Import view", () => {
         await animationFrame();
         await contains("input#o_import_batch_limit").edit(1);
         if (getMockEnv().isSmall) {
-            await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+            await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
             await contains(".o-dropdown--menu button:visible").click();
         } else {
             await contains(".o_control_panel_main_buttons button:nth-child(2)").click();
@@ -1446,7 +1446,7 @@ describe("Import view", () => {
         // For this test, we force the display of an error message if this field is set
         await contains(".o_import_data_content .o_select_menu").selectDropdownItem("Many2Many");
         if (getMockEnv().isSmall) {
-            await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+            await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
             await contains(".o-dropdown--menu button:visible").click();
         } else {
             await contains(".o_control_panel_main_buttons button:nth-child(2)").click();
@@ -1509,7 +1509,7 @@ describe("Import view", () => {
         // the format is correctly formatted in the UI
         await contains(".o_import_formatting button").click();
         if (getMockEnv().isSmall) {
-            await contains(".o_control_panel_main_buttons button > .oi-ellipsis-v").click();
+            await contains(".o_control_panel_main_buttons button > [data-icon='more_vert']").click();
             await contains(".o-dropdown--menu button:visible").click();
         } else {
             await contains(".o_control_panel_main_buttons button:contains(Import):eq(0)").click();

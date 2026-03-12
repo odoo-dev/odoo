@@ -6,7 +6,7 @@
             <div t-if="props.items.print?.length" class="d-inline-block">
                 <Dropdown beforeOpen.bind="loadPrintItems">
                     <button class="btn btn-secondary" data-hotkey="shift+u">
-                        <i class="fa fa-print me-1"/>
+                        <i class="oi me-1" data-icon="print"/>
                         <span class="o_dropdown_title" t-out="props.printDropdownTitle"/>
                     </button>
                     <t t-set-slot="content">
@@ -24,7 +24,7 @@
             <div t-if="actionItems.length" class="d-inline-block">
                 <Dropdown>
                     <button class="btn btn-secondary" data-hotkey="u">
-                        <i class="fa fa-cog mi-filled me-1"/>
+                        <i class="fa fa-cog oi-filled me-1"/>
                         <span class="o_dropdown_title">Actions</span>
                     </button>
                     <t t-set-slot="content">
@@ -34,7 +34,7 @@
                             </t>
                             <t t-if="item.Component" t-component="item.Component" t-props="item.props" />
                             <DropdownItem t-else="" class="item.class ? item.class + ' o_menu_item' : 'o_menu_item'" onSelected="() => this.onItemSelected(item)">
-                                <i t-if="item.icon" t-att-class="item.icon + ' me-1 fa-fw oi-fw'"/>
+                                <i t-if="item.icon" t-att-class="item.icon + ' me-1 oi-fw'"/>
                                 <t t-esc="item.description"/>
                             </DropdownItem>
                             <t t-set="currentGroup" t-value="item.groupNumber"/>

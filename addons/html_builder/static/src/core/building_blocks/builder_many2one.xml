@@ -26,7 +26,7 @@
                 t-on-focusin="hasPreview ? () => this.preview() : undefined"
                 t-on-focusout="revert"
                 aria-label="Unselect">
-            <i class="oi oi-close" role="presentation"/>
+            <i class="oi" data-icon="close_small" role="presentation"/>
         </button>
     </BuilderComponent>
 </t>

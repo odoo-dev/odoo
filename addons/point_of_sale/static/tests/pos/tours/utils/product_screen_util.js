@@ -53,7 +53,7 @@ export function selectFloatingOrder(index) {
     return [
         {
             isActive: ["mobile"],
-            trigger: ".fa-caret-down",
+            trigger: "[data-icon='arrow_drop_down']",
             run: "click",
         },
         {
@@ -67,7 +67,7 @@ export function checkFloatingOrderCount(expectedCount) {
     return [
         {
             isActive: ["mobile"],
-            trigger: ".fa-caret-down",
+            trigger: "[data-icon='arrow_drop_down']",
             run: "click",
         },
         {
@@ -84,7 +84,7 @@ export function checkFloatingOrderCount(expectedCount) {
         },
         {
             isActive: ["mobile"],
-            trigger: ".modal-header .oi-arrow-left",
+            trigger: ".modal-header [data-icon='west']",
             run: "click",
         },
     ];
@@ -682,7 +682,7 @@ export function searchProduct(string) {
         {
             isActive: ["mobile"],
             content: `Click search field`,
-            trigger: `.fa-search`,
+            trigger: `[data-icon="search"]`,
             run: `click`,
         },
         {

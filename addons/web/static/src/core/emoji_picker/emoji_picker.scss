@@ -61,7 +61,7 @@
             opacity: var(--EmojiPicker-placeholderOpacity, 50%);
         }
         &:not(:focus) {
-            & + .oi-search {
+            & + [data-icon="search"] {
                 color: $text-muted;
             }
         }

@@ -373,7 +373,7 @@ describe("field HTML", () => {
         htmlField.editor.config.onChange({ isPreviewing: false });
         await click(section);
         await waitFor(".hb-row .hb-row-label span:contains(Domain)");
-        expect(queryOne(".hb-row span.fa-filter + span").textContent.toLowerCase()).toBe("id = 1");
+        expect(queryOne(".hb-row span[data-icon='filter_alt'] + span").textContent.toLowerCase()).toBe("id = 1");
         await clickSave();
         await waitFor(".o_mail_body_inline table[t-if]");
         expect(queryOne(".o_mail_body_inline table[t-if]")).toHaveAttribute(

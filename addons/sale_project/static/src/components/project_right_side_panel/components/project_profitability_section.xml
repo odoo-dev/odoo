@@ -7,7 +7,7 @@
                 <div class="position-relative d-flex gap-1">
                     <t t-if="this.props.revenue.isSectionFoldable">
                         <button class="o_group_caret btn btn-link d-flex gap-1 flex-grow-1 p-0 text-reset text-start" t-on-click="() => this.toggleSaleItems()">
-                            <i t-attf-class="fa fa-fw #{state.isFolded ? 'fa-caret-right' : 'fa-caret-down'} mt-1"/>
+                            <i class="oi oi-fw mt-1" t-att-data-icon="state.isFolded ? 'arrow_right' : 'arrow_drop_down'"/>
                             <span t-out="revenue_label"/>
                         </button>
                     </t>
@@ -20,7 +20,7 @@
                         aria-label="Internal link"
                         data-tooltip="Internal link"
                     >
-                        <i class="oi oi-arrow-right"/>
+                        <i class="oi" data-icon="east"/>
                     </a>
                 </div>
             </td>
@@ -73,7 +73,7 @@
                             <tr t-if="state.displayLoadMore">
                                 <td class="pt-0 pb-3" colspan="4">
                                     <a class="btn btn-link" t-on-click="() => this.onLoadMoreClick(revenue)">
-                                        Load more <i class="fa fa-arrow-circle-down ms-1"/>
+                                        Load more <i class="oi oi-filled ms-1" data-icon="arrow_circle_down"/>
                                     </a>
                                 </td>
                             </tr>

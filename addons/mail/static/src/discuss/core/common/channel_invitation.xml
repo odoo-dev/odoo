@@ -37,12 +37,12 @@
                         <div class="o-discuss-ChannelInvitation-selectedList d-flex flex-wrap overflow-auto o-scrollbar-thin">
                             <t t-foreach="selectedPartners" t-as="selectedPartner" t-key="selectedPartner.id">
                                 <button class="btn btn-light fw-bolder smaller pe-1" title="Unselect person" t-on-click="() => this.onClickSelectedPartner(selectedPartner)">
-                                    <t t-esc="selectedPartner.name"/> <i class="oi oi-close border border-dark-subtle ms-1"/>
+                                    <t t-esc="selectedPartner.name"/> <i class="oi border border-dark-subtle ms-1" data-icon="close_small"/>
                                 </button>
                             </t>
                             <t t-foreach="state.selectedEmails" t-as="selectedEmail" t-key="selectedEmail">
                                 <button class="btn btn-light fw-bolder smaller pe-1" title="Unselect person" t-on-click="() => this.onClickSelectedEmail(selectedEmail)">
-                                    <t t-esc="selectedEmail"/> <i class="oi oi-close border border-dark-subtle ms-1"/>
+                                    <t t-esc="selectedEmail"/> <i class="oi border border-dark-subtle ms-1" data-icon="close_small"/>
                                 </button>
                             </t>
                         </div>
@@ -55,7 +55,7 @@
                 <div t-if="props.channel?.invitationLink" class="input-group">
                     <input class="border border-secondary form-control lh-1 rounded-start border-0 smaller" type="text" t-att-value="props.channel.invitationLink" readonly="" disabled="" t-on-focus="onFocusInvitationLinkInput"/>
                     <button class="btn btn-primary px-2 o-py-0_5" t-on-click="onClickCopy">
-                        <i class="fa fa-copy"/>
+                        <i class="oi" data-icon="content_copy"/>
                     </button>
                 </div>
                 <div t-if="props.channel?.accessRestrictedToGroupText" class="mt-2 text-muted smaller mx-1" t-esc="props.channel.accessRestrictedToGroupText"/>
@@ -75,7 +75,7 @@
                         <ImStatus persona="selectablePartner" className="'position-absolute top-100 start-100 translate-middle mt-n1 ms-n1'" size="'md'"/>
                     </t>
                     <div t-else="" class="w-100 h-100 d-flex align-items-center justify-content-center rounded-3 bg-primary text-white">
-                        <i class="fa fa-envelope"/>
+                        <i class="oi oi-filled" data-icon="mail"/>
                     </div>
                 </div>
             </div>

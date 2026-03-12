@@ -18,13 +18,13 @@
                             t-on-change="() => this.onChange(item)"
                         />
                         <t t-if="item[0] === 'office'">
-                            <i class="fa fa-building-o fa-2x" role="img"/>
+                            <i class="oi oi-2x" data-icon="business" role="img"/>
                         </t>
                         <t t-elif="item[0] === 'home'">
-                            <i class="fa fa-home fa-2x" role="img"/>
+                            <i class="oi oi-2x" data-icon="home" role="img"/>
                         </t>
                         <t t-else="">
-                            <i class="fa fa-map-marker fa-2x" role="img"/>
+                            <i class="oi oi-2x" data-icon="location_on" role="img"/>
                         </t>
                     </div>
                 </t>

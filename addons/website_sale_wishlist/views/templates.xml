@@ -31,7 +31,8 @@
                     t-att-title="in_wish and btnTitleActive or btnTitle"
                 >
                     <span
-                        t-attf-class="fa o_not-animable #{in_wish and 'fa-heart' or 'fa-heart-o'}"
+                        t-attf-class="oi o_not-animable #{in_wish and 'oi-filled' or ''}"
+                        data-icon="favorite"
                         role="presentation"
                     />
                     <span t-if="not in_wish" class="o_label small ms-2">Add to wishlist</span>
@@ -67,7 +68,7 @@
                 t-att-data-product-template-id="line.product_id.product_tmpl_id.id"
                 title="Wishlist"
             >
-                <i class="fa fa-fw fa-heart-o"/>
+                <i class="oi oi-fw" data-icon="favorite"/>
             </button>
         </xpath>
     </template>
@@ -108,7 +109,7 @@
                 t-att-data-product-template-id="product.id"
                 title="Add to wishlist"
             >
-                <i class="fa fa-heart-o me-2 me-lg-0" role="img" aria-label="Add to wishlist"/>
+                <i class="oi me-2 me-lg-0" data-icon="favorite" role="img" aria-label="Add to wishlist"/>
                 <t
                     t-set="_span_classes"
                     t-valuef="d-inline"
@@ -129,7 +130,7 @@
         <li t-attf-class="o_wsale_my_wish #{not show_wishes and 'd-none'} #{_item_class}">
             <a href="/shop/wishlist" t-attf-class="#{_link_class}">
                 <div t-attf-class="#{_icon_wrap_class}">
-                    <i t-if="_icon" class="fa fa-1x fa-heart fa-stack"/>
+                    <i t-if="_icon" class="oi oi-1x oi-filled oi-stack" data-icon="favorite"/>
                     <sup
                         t-out="wishcount"
                         t-attf-class="my_wish_quantity o_animate_blink badge bg-primary #{_badge_class} #{'d-none' if (wishcount == 0) else ''}"
@@ -350,7 +351,8 @@
                                                 t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
                                             >
                                                 <i
-                                                    class="fa fa-fw fa-shopping-cart o_not-animable"
+                                                    class="oi oi-fw o_not-animable"
+                                                    data-icon="shopping_cart"
                                                     role="presentation"
                                                 />
                                                 <span class="o_label small ms-1">Add to Cart</span>
@@ -365,7 +367,7 @@
                                             class="btn btn-light o_wish_rm z-3 rounded-pill lh-1"
                                             title="Remove from wishlist"
                                         >
-                                            <i class="oi oi-close" role="presentation"/>
+                                            <i class="oi" data-icon="close_small" role="presentation"/>
                                         </button>
                                     </t>
                                     <t t-call="website_sale.products_item"

@@ -27,7 +27,8 @@
                 taken
             </t>
             <span t-if="show_popover"
-                t-att-class="'o_timeoff_info fa' + (warning ? ' fa-exclamation-triangle' : ' fa-question-circle-o')"
+                class="o_timeoff_info oi"
+                t-att-data-icon="warning ? 'warning' : 'help_outline'"
             />
         </span>
         <span t-if="props.requires_allocation and data.closest_allocation_expire !== false" class="text-uppercase o_timeoff_validity">
@@ -76,7 +77,7 @@
             </span>
             <span class="d-inline-block m-0 mb-3"
                 t-if="props.closest &amp;&amp; props.closest &lt; props.left">
-                <i class="fa fa-warning"/> Only <t t-esc="props.closest"/>
+                <i class="oi" data-icon="warning"/> Only <t t-esc="props.closest"/>
                 <t t-if="props.unit_of_measure == 'hour'"> hours</t>
                 <t t-else=""> days</t>
                 can be used before the allocation expires.

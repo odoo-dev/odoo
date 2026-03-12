@@ -27,7 +27,7 @@
                     <t t-else="" t-set="joinText">Join</t>
                     <span class="mb-0 text-success" t-esc="joinText"/>
                     <span class="rounded-circle bg-success d-flex align-items-center justify-content-center p-2">
-                        <i class="oi oi-arrow-right text-white"/>
+                        <i class="oi text-white" data-icon="east"/>
                     </span>
                 </button>
             </div>

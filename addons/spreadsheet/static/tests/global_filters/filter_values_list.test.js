@@ -54,7 +54,7 @@ test("basic text filter", async function () {
     });
     await mountFilterValuesList(env, { model });
     expect(".o-filter-values").toHaveCount(1);
-    expect(".fa-pencil").toHaveCount(0);
+    expect("[data-icon='edit']").toHaveCount(0);
 });
 
 test("Edit filter is displayed when the props openFiltersEditor is set", async function () {
