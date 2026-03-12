@@ -90,7 +90,7 @@ class ormcache:
 
     def add_value(self, *args, cache_value=None, **kwargs) -> None:
         model: BaseModel = args[0]
-        d: LRU = model.pool._Registry__caches[self.cache_name]  # type: ignore
+        d = model.env.transaction._state.ormcaches[self.cache_name]
         key = self.key(*args, **kwargs)
         d[key] = cache_value
 
@@ -109,7 +109,7 @@ class ormcache:
 
     def lookup(self, *args, **kwargs):
         model: BaseModel = args[0]
-        d: LRU = model.pool._Registry__caches[self.cache_name]  # type: ignore
+        d = model.env.transaction._state.ormcaches[self.cache_name]
         key = self.key(*args, **kwargs)
         counter = _COUNTERS[model.pool.db_name, self.method]
 
@@ -143,6 +143,48 @@ class ormcache:
             return value
         else:
             return self.method(*args, **kwargs)
+
+
+class ormcache_layer(MutableMapping):
+    __slots__ = ('data', 'parent')
+
+    def __init__(self, parent: MutableMapping | None = None):
+        self.parent = parent
+        self.data = {}
+
+    def __getitem__(self, key):
+        value = self.data.get(key, SENTINEL)
+        if value is not SENTINEL:
+            return value
+        if self.parent is None:
+            raise KeyError(key)
+        return self.parent[key]
+
+    def __iter__(self):
+        if self.parent is not None:
+            yield from self.parent
+        yield from self.data
+
+    def __len__(self):
+        return len(self.data) + (0 if self.parent is None else len(self.parent))
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __delitem__(self, key):
+        raise NotImplementedError
+
+    def clear(self):
+        self.parent = None
+        self.data.clear()
+
+    def reset(self):
+        self.data.clear()
+
+    def update_parent(self):
+        if self.parent is not None:
+            self.parent.update(self.data)
+            self.data.clear()
 
 
 def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are there for signals)
@@ -291,7 +333,7 @@ def get_cache_key_counter(bound_method: Callable, *args, **kwargs) -> tuple[LRU,
     # Used for testing only.
     model: BaseModel = bound_method.__self__  # type: ignore
     ormcache_instance: ormcache = bound_method.__cache__  # type: ignore
-    cache: LRU = model.pool._Registry__caches[ormcache_instance.cache_name]  # type: ignore
+    cache = model.env.transaction._state.ormcaches[ormcache_instance.cache_name]
     key = ormcache_instance.key(model, *args, **kwargs)
     counter = _COUNTERS[model.pool.db_name, ormcache_instance.method]
     return cache, key, counter

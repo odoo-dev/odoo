@@ -33,7 +33,7 @@ from odoo.tools import (
 )
 from odoo.tools.func import locked, reset_cached_properties
 from odoo.tools.lru import LRU
-from odoo.tools.misc import Collector, format_frame
+from odoo.tools.misc import Collector
 
 from .utils import SUPERUSER_ID
 from . import model_classes
@@ -1003,13 +1003,6 @@ class Registry(Mapping[str, type["BaseModel"]]):
         for cache in _CACHES_BY_KEY[cache_name]:
             self.__caches[cache].clear()
         self.cache_invalidated.add(cache_name)
-
-        # log information about invalidation_cause
-        if _logger.isEnabledFor(logging.DEBUG):
-            # could be interresting to log in info but this will need to minimize invalidation first,
-            # mainly in some setupclass and crons
-            caller_info = format_frame(inspect.currentframe().f_back)  # type: ignore
-            _logger.debug('Invalidating %s model cache from %s', cache_name, caller_info)
 
     def is_an_ordinary_table(self, model: BaseModel) -> bool:
         """ Return whether the given model has an ordinary table. """

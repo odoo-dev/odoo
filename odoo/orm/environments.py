@@ -21,7 +21,8 @@ from odoo.tools import clean_context, frozendict, reset_cached_properties, Order
 from odoo.tools.translate import get_translation, get_translated_module, LazyGettext
 from odoo.tools.misc import StackMap, SENTINEL
 
-from .registry import Registry
+from .cache import ormcache_layer
+from .registry import _CACHES_BY_KEY, Registry
 from .query import Query
 from .utils import SUPERUSER_ID
 
@@ -711,7 +712,20 @@ class Transaction:
     def invalidate_ormcache(self, cache_name: str = 'default') -> None:
         """ Clear the caches associated to methods decorated with
         ``tools.ormcache``if cache is in `cache_name` subset. """
+        assert '.' not in cache_name
         self.registry._clear_cache(cache_name)
+        for name in _CACHES_BY_KEY.get(cache_name, ()):
+            self._state.ormcaches[name].clear()
+
+        # log information about invalidation_cause
+        if _logger.isEnabledFor(logging.DEBUG):
+            # could be interresting to log in info but this will need to minimize invalidation first,
+            # mainly in some setupclass and crons
+            import inspect  # noqa: PLC0415
+            frame = inspect.currentframe().f_back
+            code = frame.f_code
+            frame_str = f'{code.co_name} {code.co_filename}:{frame.f_lineno}'
+            _logger.debug('Invalidating %s model cache from %s', cache_name, frame_str)
 
     def clear_access_cache(self, model_name: str = '') -> None:
         """ Clear the access cache for record rule checks. """
@@ -733,6 +747,8 @@ class Transaction:
         for env in self.envs:
             env.cr.cache.clear()
             break  # all envs of the transaction share the same cursor
+        for layer in self._state.ormcaches.values():
+            layer.reset()
 
     def reset(self) -> None:
         """ Reset the transaction.  This clears the transaction, and reassigns
@@ -774,6 +790,12 @@ class TransactionState:
         self.default_env = transaction.default_env
         self.registry_sequence = transaction.registry.registry_sequence
 
+        parent_ormcaches = parent.ormcaches if parent is not None else transaction.registry._Registry__caches
+        self.ormcaches = {
+            name: ormcache_layer(data)
+            for name, data in parent_ormcaches.items()
+        }
+
     @contextmanager
     def committing(self):
         """ Called when connection commits. """
@@ -783,6 +805,8 @@ class TransactionState:
         if self.parent is not None:
             _logger.warning("Committing the transaction from within a savepoint!", stack_info=True)
         yield
+        for layer in self.ormcaches.values():
+            layer.update_parent()
         self.transaction.clear()
         assert self.parent is None, "Pending savepoints not released"
 
@@ -823,6 +847,8 @@ class TransactionState:
         transaction = self.transaction
         assert self.parent is not None
         assert transaction._state is self, "Invalid transaction savepoint state"
+        for layer in self.ormcaches.values():
+            layer.update_parent()
         transaction._state = self.parent
         transaction = None  # make this state unusable
 
