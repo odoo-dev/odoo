@@ -7,6 +7,7 @@ export class SingleData extends Component {
         name: String,
         value: String,
         icon: { type: String, optional: true },
+        icon_class: { type: String, optional: true },
         style: { type: String, optional: true },
         slots: { type: Object, optional: true },
         btnName: { type: String, optional: true },
@@ -33,7 +34,7 @@ export class SingleData extends Component {
         <div t-att-class="this.props.style === 'primary' ? 'odoo-bg-primary' : 'odoo-bg-secondary'" class="rounded odoo-pill" />
         <div class="flex-grow-1 overflow-hidden">
             <h6 class="m-0">
-                <i t-if="this.props.icon" class="me-2 fa" t-att-class="this.props.icon" aria-hidden="true"></i>
+                <i t-if="this.props.icon" class="oi me-2" t-att-class="this.props.icon_class" t-att-data-icon="this.props.icon" aria-hidden="true"></i>
                 <t t-esc="this.props.name" />
             </h6>
             <p t-if="!this.valueIsURL" class="m-0 text-secondary one-line" t-esc="this.props.value or 'Not Configured'" />
