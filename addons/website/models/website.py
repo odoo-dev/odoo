@@ -1490,6 +1490,8 @@ class Website(models.CachedModel):
 
         self = self.with_context(website_id=self.id)
         view = self.env['ir.ui.view']._get_template_view(template).sudo()
+        if isinstance(template, int) and view.key:
+            view = self.env['ir.ui.view']._get_template_view(view.key).sudo()
         view._handle_visibility(do_raise=True)
 
         if values is None:
@@ -1555,7 +1557,7 @@ class Website(models.CachedModel):
                 # will add the branding on fields (into values)
                 context['inherit_branding_auto'] = True
 
-        return self.env['ir.qweb'].with_context(**context)._render(template, values)
+        return self.env['ir.qweb'].with_context(**context)._render(view.id, values)
 
     @api.model
     def is_view_active(self, key):

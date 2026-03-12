@@ -442,7 +442,7 @@ class IrUiView(models.Model):
         return True
 
     def _render_template(self, template, values=None):
-        if values and values.get('request') and values['request'].is_frontend:
+        if self.env.context.get('website_id'):
             website = self.env['website'].get_current_website()
             return website._render_template(template, values)
         return super()._render_template(template, values=values)
