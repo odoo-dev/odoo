@@ -309,14 +309,8 @@ export class SearchBar extends Interaction {
      * @param {MouseEvent} ev
      */
     onSearch(ev) {
-        if (this.inputEl.value) {
-            // actual search
-            this.limit = 0; // prevent autocomplete
-        } else {
-            // clear button clicked
-            this.render(); // remove existing suggestions
-            ev.preventDefault();
-        }
+        this.render();
+        ev.preventDefault();
     }
 }
 
