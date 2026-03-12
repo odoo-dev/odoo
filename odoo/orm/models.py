@@ -118,6 +118,13 @@ SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
 NO_ACCESS = '.'
 
 
+BAD_FIELDS = {
+    'stock.warehouse.manufacture_to_resupply',  # need fix from stock (demo of mrp)
+    'stock.warehouse.orderpoint.qty_to_order',  # need fix from stock (install + test_replenishment_order_to_max)
+    'stock.warehouse.buy_to_resupply',  # need fix from stock (install + test_04_mto_multiple_po)
+}
+
+
 def parse_read_group_spec(spec: str) -> tuple:
     """ Return a triplet corresponding to the given field/property_name/aggregate specification. """
     res_match = regex_read_group_spec.match(spec)
@@ -3860,6 +3867,8 @@ class BaseModel(metaclass=MetaModel):
                     fields[0].determine_inverse(real_recs)
                     for field in fields:
                         if not field.store and field.compute:
+                            if f'{self._name}.{field.name}' in BAD_FIELDS:
+                                continue
                             if field in protected:
                                 # remove the protected after inverse to
                                 # 1. avoid endless recursion when inverse
@@ -4115,6 +4124,8 @@ class BaseModel(metaclass=MetaModel):
                 next(iter(fields)).determine_inverse(inv_records)
                 for field in fields:
                     if not field.store and field.compute:
+                        if f'{self._name}.{field.name}' in BAD_FIELDS:
+                            continue
                         if field in protected_fields:
                             self.env._protected[field].difference_update(inv_records._ids)
                         inv_records.invalidate_recordset(fnames=[field.name])
