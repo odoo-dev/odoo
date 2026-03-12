@@ -27,6 +27,7 @@ export class NavbarMorphingInteraction extends Interaction {
         _root: {
             "t-on-mouseleave": this.handleNavMouseleave,
             "t-on-click": this.onMorphingContainerClick,
+            "t-on-navbar:autohide:adapted": this.onAutoHideAdapted,
         },
         _window: {
             "t-on-resize": this.onWindowResize,
@@ -40,6 +41,7 @@ export class NavbarMorphingInteraction extends Interaction {
     }
 
     isSmall() {
+        // console.log('isSmall', uiUtils.getSize() < this.breakpointSize);
         return uiUtils.getSize() < this.breakpointSize;
     }
 
@@ -52,6 +54,9 @@ export class NavbarMorphingInteraction extends Interaction {
         // Cloned toggles inside the morphing container must not trigger hover-open;
         // they are handled exclusively by the click handler (onMorphingContainerClick).
         if (toggle.closest('.o_navbar_morphing_container')) return;
+        // Items relocated into the auto-hide overflow dropdown are handled by
+        // Bootstrap as a regular nested dropdown; morphing must not intercept them.
+        // if (toggle.closest('.o_extra_menu_items')) return;
         const menu = toggle.closest('li.dropdown')?.querySelector(':scope > .dropdown-menu');
         if (menu) {
             this.navbarMorphingService.open(toggle, menu, this.navbarEl);
@@ -111,11 +116,12 @@ export class NavbarMorphingInteraction extends Interaction {
     }
 
     onWindowResize() {
-        // If the viewport drops below the breakpoint while the panel is open,
-        // dismiss it immediately so the mobile navbar takes over cleanly.
-        if (this.isSmall()) {
-            this.handleDismiss();
-        }
+        this.handleDismiss(true);
+    }
+
+    onAutoHideAdapted() {
+        this.setLinksActiveState();
+        this.navbarMorphingService.reset();
     }
 
     handleMorphMouseleave(ev) {
@@ -138,9 +144,9 @@ export class NavbarMorphingInteraction extends Interaction {
         }
     }
 
-    handleDismiss() {
+    handleDismiss(forceClose) {
         this.setLinksActiveState();
-        this.navbarMorphingService.close()
+        this.navbarMorphingService.close(forceClose)
     }
 }
 

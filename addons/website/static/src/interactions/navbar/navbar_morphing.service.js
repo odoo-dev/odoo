@@ -9,14 +9,13 @@ const NavbarMorphingService = {
         return {
             open(anchor, menuElement, navbarEl) {
                 if (!controller) {
-                    // Initialize controller with the navbar as parent
                     controller = NavbarMorphingController.get(env, navbarEl);
                 }
                 controller.morphTo(anchor, menuElement, navbarEl);
             },
-            close() {
+            close(forceClose) {
                 // Hover-driven dismiss: ignored while the user has click-locked the panel.
-                if (controller && !controller.clickLocked) controller.hide();
+                if (controller && (!controller.clickLocked || forceClose)) controller.hide();
             },
             drillIn(subMenuEl, label) {
                 if (controller) controller.drillIn(subMenuEl, label);
@@ -26,6 +25,12 @@ const NavbarMorphingService = {
             },
             lockClick() {
                 if (controller) controller.lockClick();
+            },
+            reset() {
+                if (controller) {
+                    controller.destroy();
+                    controller = null;
+                }
             },
         };
     },

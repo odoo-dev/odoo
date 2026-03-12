@@ -329,6 +329,9 @@ async function autoHideMenu(el, options) {
             window.Dropdown.getOrCreateInstance(extraMenuEl).show();
         }
         el.classList.remove(...options.loadingStyleClasses);
+        // Notify other components (e.g. navbar morphing) that the menu structure
+        // may have changed so they can update their state accordingly.
+        el.dispatchEvent(new CustomEvent("navbar:autohide:adapted", { bubbles: true }));
     }
 }
 

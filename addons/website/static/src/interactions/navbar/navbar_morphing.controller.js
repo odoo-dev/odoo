@@ -72,6 +72,7 @@ export class NavbarMorphingController {
         const rect = anchor.getBoundingClientRect();
         this.anchorTop = rect.bottom;
         this.anchorLeft = rect.left + (rect.width / 2);
+
         this._renderMenu(
             sourceMenu.innerHTML,
             sourceMenu.classList.contains('o_mega_menu'),
@@ -89,6 +90,7 @@ export class NavbarMorphingController {
         this.stack.push({
             innerHTML: this.currentSourceHTML,
             isMegaMenu: this.currentIsMegaMenu,
+            hasImages: this.currentHasImages,
             label: this.currentLabel,
         });
         this.currentLabel = label;
@@ -107,7 +109,7 @@ export class NavbarMorphingController {
         const prev = this.stack.pop();
         if (!prev) return;
         this.currentLabel = prev.label;
-        this._renderMenu(prev.innerHTML, prev.isMegaMenu, prev.label);
+        this._renderMenu(prev.innerHTML, prev.isMegaMenu, prev.hasImages, prev.label);
     }
 
     /**
@@ -203,5 +205,18 @@ export class NavbarMorphingController {
             this.stack = [];
             this.currentLabel = null;
         }, 100);
+    }
+    
+    destroy() {
+        this._removeBackdrop();
+        clearTimeout(this.closeTimer);
+        clearTimeout(this._overflowRestoreTimer);
+        if (this.currentMenu) {
+            this.currentMenu.remove();
+            this.currentMenu = null;
+        }
+        this.wrapper.remove();
+        this.stack = [];
+        NavbarMorphingController.instance = null;
     }
 }

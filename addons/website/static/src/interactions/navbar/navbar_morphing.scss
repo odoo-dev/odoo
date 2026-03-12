@@ -6,10 +6,12 @@
 
 .o_navbar_morphing_container {
     position: fixed;
-    z-index: 1050;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 50px 100px -20px rgba(50,50,93,.25), 0 30px 60px -30px rgba(0,0,0,.3);
+    z-index: $zindex-dropdown + 50; // Ensure that's clickable against regular dropdowns
+    box-sizing: content-box;
+    background-color: var(--dropdown-bg, #{$dropdown-bg});
+    border: var(--dropdown-border-width, #{$dropdown-border-width}) solid var(--dropdown-border-color, #{$dropdown-border-color});
+    @include border-radius(var(--dropdown-border-radius, #{$dropdown-border-radius}));
+    @include box-shadow(var(--dropdown-box-shadow, #{$dropdown-box-shadow}));
     overflow: hidden;
     pointer-events: auto;
     top: 0;
@@ -18,18 +20,26 @@
     /* Ensure it starts at 0 if you want the grow effect on first open */
     width: 0;
     height: 0;
-    transform: translateX(-50%) translate3d(
-        var(--NavBarMorphing-left),
-        var(--NavBarMorphing-top),
-        0
-    );
+    // Centered on the anchor by default (-50%), but clamped so the panel
+    // always stays at least $spacer-3 (16px) away from each viewport edge.
+    // Inside translateX(), percentages resolve to the element's own width,
+    // so  100% = full panel width  and  100vw - 100% - gap = max safe offset.
+    transform:
+        translateX(clamp(
+            #{map-get($spacers, 3)},
+            calc(var(--NavBarMorphing-left) - 50%),
+            calc(100vw - 100% - #{map-get($spacers, 3)})
+        ))
+        translate3d(0, var(--NavBarMorphing-top), 0);
 
     &:has(.o_dropdown_menu_images) {
-        transform: translateX(-10%) translate3d(
-            var(--NavBarMorphing-left),
-            var(--NavBarMorphing-top),
-            0
-        );
+        transform:
+            translateX(clamp(
+                #{map-get($spacers, 3)},
+                calc(var(--NavBarMorphing-left) - 10%),
+                calc(100vw - 100% - #{map-get($spacers, 3)})
+            ))
+            translate3d(0, var(--NavBarMorphing-top), 0);
     }
 
     &.o_navbar_morphing_container_animated {
@@ -48,6 +58,19 @@
         max-height: none !important;
         overflow: hidden !important;
 
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            &:after {
+                font-family: "odoo_ui_icons";
+                border: 0;
+                content: '\e83b';
+                font-size: .8em;
+            }
+        }
+
         &.dropdown-menu {
             background: none;
             border: none;
@@ -61,13 +84,6 @@
         }
     }
 
-    /* IMPORTANT: Ensure original menu items are still display: block
-       inside our shared container even if hidden in the navbar */
-    .o_navbar_morphing_content_wrapper .dropdown-item {
-        display: block;
-        width: 100%;
-    }
-
     /* Back header shown when navigating into a nested submenu */
     .o_navbar_morphing_back_header {
         padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
@@ -75,7 +91,7 @@
     }
 
     .o_navbar_morphing_back_btn:hover .oi {
-        transform: translatex(-.15em);
+        transform: translateX(-.15em);
     }
 }
 

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 <t t-name="website.navbar_morphing.wrapper">
-    <div class="o_navbar_morphing_container d-none"/>
+    <div class="o_navbar_morphing_container o_no_autohide_item d-none"/>
 </t>
 
 <t t-name="website.navbar_morphing.submenu">
