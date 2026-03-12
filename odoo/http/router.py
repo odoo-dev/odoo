@@ -407,6 +407,9 @@ def serve_db(request: Request) -> Response:
             readonly = endpoint.routing['readonly']
             if callable(readonly):
                 readonly = readonly(endpoint.func.__self__, rule, args)
+        # update the parent cache for the route mapping
+        for layer in request.env.transaction.ormcaches__.values():
+            layer.update_parent()
 
         # keep on using the RO cursor when a readonly route matched,
         # and for serve fallback
