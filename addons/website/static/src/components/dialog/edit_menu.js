@@ -273,7 +273,7 @@ export class EditMenuDialog extends Component {
             ref: this.menuEditor,
             handle: "div",
             nest: true,
-            maxLevels: 2,
+            maxLevels: 3,
             onDrop: this._moveMenu.bind(this),
             isAllowed: this._isAllowedMove.bind(this),
             useElementSize: true,

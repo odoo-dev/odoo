@@ -84,7 +84,7 @@ class WebsiteMenu(models.Model):
         Ensure valid menu hierarchy and mega menu constraints.
 
         Rules enforced:
-        - Menus must not exceed two levels of nesting.
+        - Menus must not exceed three levels of nesting.
         - A mega menu must not have a parent or child.
         - Menus with children cannot be added as a submenu under another menu.
         """
@@ -97,8 +97,8 @@ class WebsiteMenu(models.Model):
             while current_menu:
                 level += 1
                 current_menu = current_menu.parent_id
-                if level > 2:
-                    raise UserError(_("Menus cannot have more than two levels of hierarchy."))
+                if level > 3:
+                    raise UserError(_("Menus cannot have more than three levels of hierarchy."))
 
             if parent_menu:
                 # Mega menu constraint
