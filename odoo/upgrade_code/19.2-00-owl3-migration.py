@@ -851,7 +851,7 @@ WEB_WHITELIST = {
     "web.CalendarYearPopover.record": {'record'},  # t-for-each above dynamic t-call
     "web.FieldTooltip": {'field', 'debug', 'resModel'},  # JSON stringify context
     "web.ListRenderer.RecordRow": {'record', 'group', 'groupId', '_canSelectRecord'},  # dynamic t-call I guess,
-    "web.ListRenderer.GroupRow": {'group'},  # dynamic t-call I guess
+    "web.ListRenderer.GroupRow": {'group', 'group_index'},  # dynamic t-call I guess
     "web.ListHeaderTooltip": {'field'},  # JSON stringify context
     "web.Many2ManyBinaryField.attachment_preview": {'file'},  # t-for-each above t-call
     "web.Many2ManyTagsAvatarField.option": {'autoCompleteItemScope'},  # t-slot-scope above dynamic t-call
@@ -870,7 +870,8 @@ WEB_WHITELIST = {
     "web.TreeEditor.complex_condition": {'node'},  # Nested inherit
     "views.ViewButtonTooltip": {'debug', 'button', 'model'},  # JSON stringify context
     "web.StatusBarField": {'items'},  # dynamic t-call
-    "web.SectionMenu": {'subMenu_index', 'apps'}  # dynamic t-call in t-foreach
+    "web.SectionMenu": {'subMenu_index', 'apps'},  # dynamic t-call in t-foreach
+    "web.NavBar.AppsMenu.Sidebar": {'subMenu_index'},  # dynamic t-call in t-foreach
 }
 MAIL_WHITELIST = {
     "discuss.GifPicker.gif": {'gif_value'},  # for-each above t-call
