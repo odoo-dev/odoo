@@ -19,7 +19,7 @@ class ResPartner(models.Model):
             result = geo_obj.geo_find(search, force_country=country)
         return result
 
-    def geo_localize(self):
+    def geo_localize(self, notify=True):
         # We need country names in English below
         if not self.env.context.get('force_geo_localize') and (
             self.env.context.get('import_file')
@@ -44,7 +44,7 @@ class ResPartner(models.Model):
                 })
             else:
                 partners_not_geo_localized |= partner
-        if partners_not_geo_localized:
+        if partners_not_geo_localized and notify:
             self.env.user._bus_send("simple_notification", {
                 'type': 'danger',
                 'title': _("Warning"),

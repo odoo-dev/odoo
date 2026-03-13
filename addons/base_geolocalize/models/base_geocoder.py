@@ -79,6 +79,40 @@ class BaseGeocoder(models.AbstractModel):
             result = None
         return result
 
+    # TODO: investigate which API to use -- balance runtime and free to use
+    @api.model
+    def get_travel_time(self, coordinates: list[tuple]):
+        """
+        Use OSRM Route service to calculate travel time between two locations
+        :return: travel time in hours or None if not found
+        """
+        mb_token = self.env['ir.config_parameter'].sudo().get_str('web_map.token_map_box')
+        if not mb_token:
+            return None
+        url = "https://api.mapbox.com/directions/v5/mapbox/driving/"  # TODO: try with traffic
+        # url = "http://router.project-osrm.org/route/v1/driving/"
+        url += ";".join(f"{lon},{lat}" for lat, lon in coordinates)
+        import requests  # noqa: PLC0415
+        try:
+            # TODO: can use depart_at if wanted!
+            params = {
+                'access_token': mb_token,
+                'overview': 'false',
+                'alternatives': 'false',
+                'steps': 'false',
+            }
+            result = requests.get(url, params=params, timeout=10).json()
+            if result['code'] != 'Ok':
+                _logger.debug('Invalid Mapbox call: %s - %s',
+                              result['code'], result.get('message', ''))
+                error_msg = _('Unable to retrive travel time, received the error:\n%s', result.get('error_message'))
+                raise UserError(error_msg)
+            travel_times = [float(trip['duration']) / 3600 or 0.0 for trip in result['routes'][0]['legs']]
+            return travel_times
+        except Exception as e:
+            _logger.error("Mapbox route call failed: %s", e)
+        return None
+
     @api.model
     def _call_openstreetmap(self, addr, **kw):
         """
