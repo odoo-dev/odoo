@@ -18,12 +18,14 @@ class TestMailingABTestingCommon(MassMailCommon):
         self.ab_testing_mailing_1 = self.env['mailing.mailing'].create({
             'subject': 'A/B Testing V1',
             'contact_list_ids': self.mailing_list.ids,
+            'campaign_id': self.env['utm.campaign'].create({'name': 'A/B Testing Campaign'}).id,
             'ab_testing_enabled': True,
             'ab_testing_pc': 10,
             'ab_testing_schedule_datetime': datetime.now(),
         })
         self.ab_testing_mailing_2 = self.ab_testing_mailing_1.copy({
             'subject': 'A/B Testing V2',
+            'campaign_id': self.ab_testing_mailing_1.campaign_id.id,
             'ab_testing_pc': 20,
         })
         self.ab_testing_campaign = self.ab_testing_mailing_1.campaign_id
@@ -100,6 +102,7 @@ class TestMailingABTesting(TestMailingABTestingCommon):
         ab_mailing = self.env['mailing.mailing'].create({
             'subject': 'A/B Testing V1',
             'contact_list_ids': self.mailing_list.ids,
+            'campaign_id': self.env['utm.campaign'].create({'name': 'A/B Testing Campaign'}).id,
             'ab_testing_enabled': True,
             'ab_testing_winner_selection': 'manual',
             'ab_testing_schedule_datetime': schedule_datetime,
