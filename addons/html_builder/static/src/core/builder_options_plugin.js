@@ -483,20 +483,20 @@ export class BuilderOptionsPlugin extends Plugin {
             return;
         }
         // Store the next target to activate in the current commit.
-        this.dependencies.domMutation.update("nextTarget", targetEl);
+        this.dependencies.domMutation.updateExternal("nextTarget", targetEl);
     }
 
     onWillCommit(type) {
         if (!["undo", "redo"].includes(type)) {
             // Store the current target in the current commit.
-            this.dependencies.domMutation.update("currentTarget", this.target);
+            this.dependencies.domMutation.updateExternal("currentTarget", this.target);
         }
     }
 
     onCommitted(commit) {
         // If a target is specified, activate its containers, otherwise simply
         // update them.
-        const nextTargetEl = commit.data.nextTarget;
+        const nextTargetEl = commit.data.external.nextTarget;
         if (nextTargetEl) {
             this.updateContainers(nextTargetEl, { forceUpdate: true });
         } else if (nextTargetEl === false) {
@@ -513,11 +513,11 @@ export class BuilderOptionsPlugin extends Plugin {
      * @param {String} mode "undo" or "redo"
      */
     restoreContainers(revertedCommit, mode) {
-        if (revertedCommit && revertedCommit.data.currentTarget) {
-            let targetEl = revertedCommit.data.currentTarget;
+        if (revertedCommit && revertedCommit.data.external.currentTarget) {
+            let targetEl = revertedCommit.data.external.currentTarget;
             // If the commit was supposed to activate another target, activate
             // this one instead.
-            const nextTarget = revertedCommit.data.nextTarget;
+            const nextTarget = revertedCommit.data.external.nextTarget;
             if (mode === "redo" && (nextTarget || nextTarget === false)) {
                 targetEl = nextTarget;
             }

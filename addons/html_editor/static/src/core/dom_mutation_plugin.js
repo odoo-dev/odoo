@@ -7,14 +7,6 @@ import { toggleClass } from "@html_editor/utils/dom";
 import { withSequence } from "@html_editor/utils/resource";
 import { EditorCommit } from "@html_editor/utils/commit";
 
-// The commit data keys handled by `DomMutation`.
-const DOM_MUTATION_COMMIT_DATA_KEYS = [
-    "mutations",
-    "activeElementId",
-    "selection",
-    "selectionAfter",
-];
-
 /**
  * @typedef { import("../utils/commit").EditorCommit } Commit
  * @typedef { import("../utils/commit").EditorCommitType } EditorCommitType
@@ -118,6 +110,7 @@ const DOM_MUTATION_COMMIT_DATA_KEYS = [
  * @property { NodeId } activeElementId              // the ID of the active element before applying the mutations
  * @property { SerializedSelection } selection       // the serialized selection before applying the mutations
  * @property { SerializedSelection } selectionAfter  // the serialized selection after applying the mutations
+ * @property { Object } external                     // any data added from and managed by an external plugin
  */
 /**
  * @typedef { Object } DomMutationShared
@@ -127,7 +120,7 @@ const DOM_MUTATION_COMMIT_DATA_KEYS = [
  * @property { DomMutationPlugin['unstage'] } unstage
  * @property { DomMutationPlugin['stash'] } stash
  * @property { DomMutationPlugin['unstash'] } unstash
- * @property { DomMutationPlugin['update'] } update
+ * @property { DomMutationPlugin['updateExternal'] } updateExternal
  * @property { DomMutationPlugin['addCustomMutation'] } addCustomMutation
  * @property { DomMutationPlugin['applyCustomMutation'] } applyCustomMutation
  * @property { DomMutationPlugin['hasStagedMutations'] } hasStagedMutations
@@ -158,7 +151,7 @@ export class DomMutationPlugin extends Plugin {
         "unstage",
         "stash",
         "unstash",
-        "update",
+        "updateExternal",
         // From Original
         "addCustomMutation",
         "applyCustomMutation",
@@ -226,10 +219,8 @@ export class DomMutationPlugin extends Plugin {
                 // Include any commit data stored in the reverted commit and that
                 // is not handled by this plugin.
                 // Note AGE: this is the `extraStepInfos` stuff.
-                for (const [key, value] of Object.entries(revertedCommit.data)) {
-                    if (!DOM_MUTATION_COMMIT_DATA_KEYS.includes(key)) {
-                        this.update(key, value);
-                    }
+                for (const [key, value] of Object.entries(revertedCommit.data.external)) {
+                    this.updateExternal(key, value);
                 }
                 this._commit({
                     type: "undo",
@@ -246,10 +237,8 @@ export class DomMutationPlugin extends Plugin {
                 // Include any commit data stored in the reverted commit and
                 // that is not handled by this plugin.
                 // Note AGE: this is the `extraStepInfos` stuff.
-                for (const [key, value] of Object.entries(revertedCommit.data)) {
-                    if (!DOM_MUTATION_COMMIT_DATA_KEYS.includes(key)) {
-                        this.update(key, value);
-                    }
+                for (const [key, value] of Object.entries(revertedCommit.data.external)) {
+                    this.updateExternal(key, value);
                 }
                 this._commit({
                     type: "redo",
@@ -295,7 +284,7 @@ export class DomMutationPlugin extends Plugin {
         this.trigger("on_will_commit_handlers", type); // making sure it updates the commit we're adding
         const commit = this.dependencies.history.write(this.createCommit(type, metadata));
 
-        this.resetCurrentChanges();
+        this.currentChanges = new CurrentChanges();
 
         this.stageSelection();
 
@@ -329,18 +318,20 @@ export class DomMutationPlugin extends Plugin {
                 case "classList":
                 case "attributes": {
                     const nodeId = this.getNodeId(record.target);
-                    this.currentChanges.mutations.push({ ...omit(record, "target"), nodeId });
+                    this.currentChanges.addMutations({ ...omit(record, "target"), nodeId });
                     break;
                 }
                 case "childList": {
-                    this.currentChanges.mutations.push(...this.splitChildListRecord(record));
+                    this.currentChanges.addMutations(...this.splitChildListRecord(record));
                     break;
                 }
             }
         }
     }
 
-    unstage(changes) {}
+    unstage(changes) {
+        // TODO AGE
+    }
 
     stash() {
         this.currentStash.push(this.discardDraft());
@@ -352,7 +343,7 @@ export class DomMutationPlugin extends Plugin {
             this.applyMutations(changes.mutations);
             if (this.isObserverDisabled) {
                 // Make sure the unstashed mutations are recorded.
-                this.currentChanges.mutations.push(...changes.mutations);
+                this.currentChanges.addMutations(...changes.mutations);
             }
             // TODO AGE: shouldn't this also apply other changes?
         }
@@ -364,46 +355,18 @@ export class DomMutationPlugin extends Plugin {
      * @param {string} key
      * @param {any} value
      */
-    update(key, value) {
-        if (key in DOM_MUTATION_COMMIT_DATA_KEYS) {
-            console.warn("Can't update a reserved commit data key.");
-        } else {
-            this.currentChanges[key] = value;
-        }
+    updateExternal(key, value) {
+        this.currentChanges.updateExternal(key, value);
     }
 
     // Private
 
-    resetCurrentChanges() {
-        /** @type { CommitData } */
-        this.currentChanges = {
-            authorTimestamp: Date.now(),
-            mutations: [],
-            activeElementId: null,
-            selection: {},
-            selectionAfter: null,
-        };
-    }
-
     clean() {
-        this.resetCurrentChanges();
+        this.currentChanges = new CurrentChanges();
         /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean>, characterData: Map<string, string> }> } */
         this.lastObservedState = new WeakMap();
         this.nodeMap = new NodeMap();
         this.setNodeId(this.editable);
-    }
-
-    /**
-     * Set a key/value pair in the data of the next commit, allowing changes to
-     * locally managed keys.
-     *
-     * Note AGE: Maybe not needed but right now I want to play it safe.
-     *
-     * @param {string} key
-     * @param {any} value
-     */
-    updateLocal(key, value) {
-        this.currentChanges[key] = value;
     }
 
     // DOM Map
@@ -587,13 +550,12 @@ export class DomMutationPlugin extends Plugin {
 
     // TODO: rename
     discardDraft() {
-        /** @type { CommitData } */
-        const changes = { ...this.currentChanges };
+        const changes = this.currentChanges.data;
         // Discard current draft.
         this.handleObserverRecords();
         this.revertMutations(this.currentChanges.mutations);
         this.observer.takeRecords();
-        this.updateLocal("mutations", []);
+        this.currentChanges.resetMutations();
         return changes;
     }
 
@@ -601,16 +563,14 @@ export class DomMutationPlugin extends Plugin {
      * @returns {EditorCommit<DomMutationCommitData>}
      */
     createCommit(type = "original", metadata = {}) {
-        this.updateLocal(
-            "selectionAfter",
-            this.serializeSelection(this.dependencies.selection.getEditableSelection())
+        this.currentChanges.selectionAfter = this.serializeSelection(
+            this.dependencies.selection.getEditableSelection()
         );
-        const data = { ...this.currentChanges };
         return this.processThrough(
             "editor_commit_processors",
             new EditorCommit({
                 type,
-                data,
+                data: this.currentChanges.data,
                 metadata,
             })
         );
@@ -673,7 +633,7 @@ export class DomMutationPlugin extends Plugin {
         this.setSerializedFocus(activeElementId);
         this.stageFocus();
         this.setSerializedSelection(selection);
-        this.updateLocal("selection", selectionAfter);
+        this.currentChanges.selection = selectionAfter;
     }
 
     /**
@@ -1538,7 +1498,7 @@ export class DomMutationPlugin extends Plugin {
             );
             return;
         }
-        this.updateLocal("selection", this.serializeSelection(selection));
+        this.currentChanges.selection = this.serializeSelection(selection);
     }
 
     /**
@@ -1550,7 +1510,7 @@ export class DomMutationPlugin extends Plugin {
             activeElement = this.editable;
         }
         if (this.editable.contains(activeElement)) {
-            this.updateLocal("activeElementId", this.setNodeId(activeElement));
+            this.currentChanges.activeElementId = this.setNodeId(activeElement);
         }
     }
 
@@ -1575,7 +1535,7 @@ export class DomMutationPlugin extends Plugin {
                 this.addCustomMutation({ apply: revert, revert: apply });
             },
         };
-        this.currentChanges.mutations.push(customMutation);
+        this.currentChanges.addMutations(customMutation);
     }
 
     // Preview stuff
@@ -1596,7 +1556,7 @@ export class DomMutationPlugin extends Plugin {
         if (commit === this.dependencies.history.getHistoryCommits().at(-1)) {
             return;
         }
-        let lastRevertedChanges = { ...this.currentChanges };
+        let lastRevertedChanges = this.currentChanges.data;
         const commitsToRestore = this.dependencies.history.getCommitsUntil(commit.id);
         const irreversibleCommits = [];
         for (const commitToRestore of commitsToRestore) {
@@ -1643,10 +1603,7 @@ export class DomMutationPlugin extends Plugin {
         const selectionToRestore = this.dependencies.selection.preserveSelection();
 
         // Preserve any current data not handled by this plugin for a later commit.
-        const dataToPreserve = { ...this.currentChanges };
-        Object.keys(dataToPreserve).forEach(
-            (key) => DOM_MUTATION_COMMIT_DATA_KEYS.includes(key) && delete dataToPreserve[key]
-        );
+        const dataToPreserve = { ...this.currentChanges.external };
 
         const commit = this.dependencies.history.getHistoryCommits().at(-1);
         let hasBeenRestored = false;
@@ -1680,9 +1637,7 @@ export class DomMutationPlugin extends Plugin {
             // TODO ABD TODO @phoenix: evaluate if the selection is not restorable at the desired position
             selectionToRestore.restore();
             Object.entries(dataToPreserve).forEach(([key, value]) => {
-                // TODO AGE: If I remove the warning in `update`, I could
-                // actually skip the check when making `dataToPreserve`.
-                this.update(key, value);
+                this.updateExternal(key, value);
             });
             this.trigger("on_savepoint_restored_handlers");
         };
@@ -1813,5 +1768,57 @@ export class DomMutationPlugin extends Plugin {
     generateId() {
         // No need for secure random number.
         return Math.floor(Math.random() * Math.pow(2, 52)).toString();
+    }
+}
+
+class CurrentChanges {
+    constructor() {
+        /** @type { number } */
+        this.authorTimestamp = Date.now();
+        /** @type { EditorMutation[] } */
+        this.mutations = [];
+        /** @type { NodeId | null } */
+        this.activeElementId = null;
+        /** @type { SerializedSelection | {} } */
+        this.selection = {};
+        /** @type { SerializedSelection | null } */
+        this.selectionAfter = null;
+        /** @type { Object } */
+        this.external = {};
+    }
+
+    /**
+     * @return { DomMutationCommitData }
+     */
+    get data() {
+        return {
+            authorTimestamp: this.authorTimestamp,
+            mutations: [...this.mutations],
+            activeElementId: this.activeElementId,
+            selection: { ...this.selection },
+            selectionAfter: { ...(this.selectionAfter || {}) },
+            external: { ...this.external },
+        };
+    }
+
+    /**
+     * @param  {...EditorMutation} mutations
+     */
+    addMutations(...mutations) {
+        this.mutations.push(...mutations);
+    }
+
+    resetMutations() {
+        this.mutations = [];
+    }
+
+    /**
+     * Set a key/value pair in the external data.
+     *
+     * @param {string} key
+     * @param {any} value
+     */
+    updateExternal(key, value) {
+        this.external[key] = value;
     }
 }
