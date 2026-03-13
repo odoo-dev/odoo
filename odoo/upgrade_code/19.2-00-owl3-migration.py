@@ -869,6 +869,8 @@ WEB_WHITELIST = {
     "web.TreeEditor.condition": {'node'},  # Nested inherit
     "web.TreeEditor.complex_condition": {'node'},  # Nested inherit
     "views.ViewButtonTooltip": {'debug', 'button', 'model'},  # JSON stringify context
+    "web.StatusBarField": {'items'},  # dynamic t-call
+    "web.SectionMenu": {'subMenu_index', 'apps'}  # dynamic t-call in t-foreach
 }
 MAIL_WHITELIST = {
     "discuss.GifPicker.gif": {'gif_value'},  # for-each above t-call
@@ -921,7 +923,10 @@ MISC_WHITELIST = {
     "website.form_radio": {'record_index'},  # dynamic t-calls from loops
     "website.form_checkbox": {'record_index'},  # dynamic t-calls from loops
     "website_sale.DynamicSnippetProductsOption": {'filteredTemplates'},  # dynamic t-calls from loops
-    
+    "project.NotebookTaskListRenderer.Rows": {'list'},  # dynamic t-call
+    "project.DependOnIdsListRowsRenderer": {'list'},  # dynamic t-call
+    "planning.PlanningCalendarCommonPopover.body": {'slot'},  # dynamic t-calls from loops
+    "web_studio.Form.InnerGroup": {'row_index'},  # dynamic t-calls from loops
 }
 
 ACCOUNT_WHITELIST = {
