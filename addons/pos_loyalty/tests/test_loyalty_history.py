@@ -10,7 +10,6 @@ from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCom
 class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
 
     def test_pos_loyalty_history(self):
-        partner_aaa = self.env['res.partner'].create({'name': 'AAA Test Partner'})
         self.whiteboard_pen.product_variant_ids.write({'lst_price': 10})
         self.main_pos_config.write({
             'tax_regime_selection': False,
@@ -35,13 +34,12 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
             })],
         })
         self.start_pos_tour("LoyaltyHistoryTour")
-        loyalty_card = loyalty_program.coupon_ids.filtered(lambda coupon: coupon.partner_id.id == partner_aaa.id)
+        loyalty_card = loyalty_program.coupon_ids.filtered(lambda coupon: coupon.partner_id.id == self.b_test_partner.id)
         self.assertEqual(len(loyalty_card.history_ids), 1,
                         "Loyalty History line should be created on pos oder confirmation")
 
     def test_duplicate_coupon_confirm(self):
         """ Test that duplicate coupon confirm calls do not affect the coupon."""
-        test_partner = self.env['res.partner'].create({'name': 'Test Partner'})
         ewallet_program = self.env['loyalty.program'].create({
             'name': 'eWallet Program',
             'program_type': 'ewallet',
@@ -64,7 +62,7 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
         pos_order = self.env['pos.order'].create({
             'config_id': self.main_pos_config.id,
             'session_id': self.main_pos_config.current_session_id.id,
-            'partner_id': test_partner.id,
+            'partner_id': self.b_test_partner.id,
             'amount_paid': 50,
             'amount_return': 0,
             'amount_tax': 0,
@@ -77,13 +75,13 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
                 'program_id': ewallet_program.id,
                 'coupon_id': -1,
                 'barcode': '',
-                'partner_id': test_partner.id,
+                'partner_id': self.b_test_partner.id,
             }
         }
         pos_order.confirm_coupon_programs(coupon_data)
 
         def check_coupon(points, history_count):
-            created_card = self.env['loyalty.card'].search([('program_id', '=', ewallet_program.id), ('partner_id', '=', test_partner.id)])
+            created_card = self.env['loyalty.card'].search([('program_id', '=', ewallet_program.id), ('partner_id', '=', self.b_test_partner.id)])
             self.assertEqual(created_card.points, points, "The coupon should have 50 points after the first confirmation.")
             self.assertEqual(len(created_card.history_ids), history_count, "The history should have one entry after the first confirmation.")
 
@@ -95,21 +93,21 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
         new_pos_order = self.env['pos.order'].create({
             'config_id': self.main_pos_config.id,
             'session_id': self.main_pos_config.current_session_id.id,
-            'partner_id': test_partner.id,
+            'partner_id': self.b_test_partner.id,
             'amount_paid': 0,
             'amount_return': 0,
             'amount_tax': 0,
             'amount_total': 0,
         })
 
-        loyalty_card = self.env['loyalty.card'].search([('program_id', '=', ewallet_program.id), ('partner_id', '=', test_partner.id)])
+        loyalty_card = self.env['loyalty.card'].search([('program_id', '=', ewallet_program.id), ('partner_id', '=', self.b_test_partner.id)])
         coupon_data = {
             loyalty_card.id: {
                 'points': -10,
                 'program_id': ewallet_program.id,
                 'coupon_id': loyalty_card.id,
                 'barcode': '',
-                'partner_id': test_partner.id,
+                'partner_id': self.b_test_partner.id,
             }
         }
 
@@ -130,7 +128,6 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
 
     def test_gift_card_partner(self):
         """ Test that the gift card's partner is correctly set as the customer who bought it."""
-        test_partner = self.env['res.partner'].create({'name': 'Test Partner'})
         LoyaltyProgram = self.env['loyalty.program']
         self.env.ref('loyalty.gift_card_product_50').write({'active': True})
         gift_card_program = LoyaltyProgram.browse(
@@ -141,7 +138,7 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
         pos_order = self.env['pos.order'].create({
             'config_id': self.main_pos_config.id,
             'session_id': self.main_pos_config.current_session_id.id,
-            'partner_id': test_partner.id,
+            'partner_id': self.b_test_partner.id,
             'lines': [Command.create({
                 'product_id': self.env.ref('loyalty.gift_card_product_50').id,
                 'price_unit': 50,
@@ -166,4 +163,4 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
         }
         pos_order.confirm_coupon_programs(coupon_data)
         loyalty_card = self.env['loyalty.card'].search([('code', '=', 'test-code')])
-        self.assertEqual(loyalty_card.partner_id, test_partner)
+        self.assertEqual(loyalty_card.partner_id, self.b_test_partner)

@@ -94,7 +94,7 @@ registry.category("web_tour.tours").add("ChromeTour", {
             // Invoice an order
             ProductScreen.addOrderline("Whiteboard Pen", "5", "6"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Partner Test 1"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank"),
             PaymentScreen.clickInvoiceButton(),
@@ -185,7 +185,7 @@ registry.category("web_tour.tours").add("test_reload_page_before_payment_with_cu
             refresh(),
             ProductScreen.productIsDisplayed("Desk Organizer"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Partner Test 1"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Customer Account"),
             PaymentScreen.clickValidate(),
@@ -198,7 +198,7 @@ registry.category("web_tour.tours").add("test_reload_page_before_payment_with_cu
             Dialog.cancel(),
             PaymentScreen.clickValidate(),
             Dialog.confirm("Ok"),
-            PaymentScreen.clickCustomer("Partner Test 1"),
+            PaymentScreen.clickCustomer("B Test Partner"),
             PaymentScreen.clickValidate(),
         ].flat(),
 });
@@ -216,7 +216,7 @@ registry.category("web_tour.tours").add("test_edit_paid_order", {
             FeedbackScreen.clickEditPayment(),
             // Add customer
             PaymentScreen.clickPartnerButton(),
-            PaymentScreen.clickCustomer("Partner Test 1"),
+            PaymentScreen.clickCustomer("B Test Partner"),
             PaymentScreen.clickInvoiceButton(),
             {
                 content: "wait for 200 ms",
@@ -358,9 +358,9 @@ registry.category("web_tour.tours").add("test_click_all_orders_keep_customer", {
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Partner Test 1"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.clickPartnerButton(),
-            PartnerList.clickPartnerOptions("Partner Test 1"),
+            PartnerList.clickPartnerOptions("B Test Partner"),
             {
                 isActive: ["auto"],
                 trigger: "body .dropdown-item:contains('All Orders')",
@@ -371,7 +371,7 @@ registry.category("web_tour.tours").add("test_click_all_orders_keep_customer", {
             ProductScreen.isShown(),
             {
                 content: "customer is selected",
-                trigger: ".product-screen .set-partner:contains('Partner Test 1')",
+                trigger: ".product-screen .set-partner:contains('B Test Partner')",
             },
         ].flat(),
 });

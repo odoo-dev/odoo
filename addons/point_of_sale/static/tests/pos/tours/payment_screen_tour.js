@@ -196,7 +196,7 @@ registry.category("web_tour.tours").add("PaymentScreenInvoiceOrder", {
             Dialog.confirm("Open Register"),
             ProductScreen.addOrderline("Product Test", "1"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Partner Test 1"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.clickPayButton(),
 
             PaymentScreen.clickPaymentMethod("Bank"),

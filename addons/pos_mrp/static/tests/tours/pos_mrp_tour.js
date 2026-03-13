@@ -19,7 +19,7 @@ registry.category("web_tour.tours").add("test_ship_later_kit_and_mto_manufacture
             ProductScreen.clickInfoProduct("Basic Kit", [Dialog.confirm("Close")]),
             Dialog.isNot(),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("AAAA Super Customer"),
+            ProductScreen.clickCustomer("B Test Partner Super Customer"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickShipLaterButton(),

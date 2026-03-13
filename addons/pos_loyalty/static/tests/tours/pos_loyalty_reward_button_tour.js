@@ -140,7 +140,7 @@ registry.category("web_tour.tours").add("PosLoyaltyFreeProductTour2", {
             Dialog.confirm("Open Register"),
 
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("AAA Partner"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.addOrderline("Test Product A", "1"),
             PosLoyalty.isRewardButtonHighlighted(true, true),
             ProductScreen.clickControlButton("Reward"),

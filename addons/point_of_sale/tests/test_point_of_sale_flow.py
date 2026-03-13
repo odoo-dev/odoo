@@ -195,16 +195,9 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.assertEqual(current_session.state, 'closed')
 
     def test_pos_orders_count(self):
-        parent_partner = self.env['res.partner'].create({
-            'name': 'Parent Partner',
-        })
-        child_partner = self.env['res.partner'].create({
-            'name': 'Child Partner',
-            'parent_id': parent_partner.id
-        })
         order_1, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': parent_partner.id,
+                'partner_id': self.c_test_partner.id,
             },
             'line_data': [
                 {'product_id': self.twenty_dollars_with_15_incl.product_variant_id.id},
@@ -215,7 +208,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         order_2, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': child_partner.id,
+                'partner_id': self.d_child_partner.id,
             },
             'line_data': [
                 {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
@@ -226,8 +219,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         self.assertEqual(len(order_1), 1, "Expected 1 order directly on parent partner")
         self.assertEqual(len(order_2), 1, "Expected 1 order directly on child partner")
-        self.assertEqual(parent_partner.pos_order_count, 2, "Parent partner should see 2 orders including child’s")
-        self.assertEqual(child_partner.pos_order_count, 1, "Child partner should see only their own order")
+        self.assertEqual(self.c_test_partner.pos_order_count, 2, "Parent partner should see 2 orders including child’s")
+        self.assertEqual(self.d_child_partner.pos_order_count, 1, "Child partner should see only their own order")
 
     def test_order_to_picking(self):
         """
@@ -241,8 +234,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         """
         order_1, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_jcb.id,
-                'pricelist_id': self.partner_jcb.property_product_pricelist.id,
+                'partner_id': self.b_test_partner.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [
                 {'product_id': self.twenty_dollars_with_15_incl.product_variant_id.id},
@@ -254,8 +247,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         order_2, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_lowe.id,
-                'pricelist_id': self.partner_lowe.property_product_pricelist.id,
+                'partner_id': self.b_test_partner.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [
                 {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
@@ -267,8 +260,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         order_3, order_refund_3 = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_vlst.id,
-                'pricelist_id': self.partner_vlst.property_product_pricelist.id,
+                'partner_id': self.b_test_partner.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [
                 {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
@@ -338,8 +331,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.pos_config_usd.current_session_id.update_stock_at_closing = False
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_manv.id,
-                'pricelist_id': self.partner_manv.property_product_pricelist.id,
+                'partner_id': self.b_test_partner.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [
                 {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
@@ -388,8 +381,8 @@ class TestPointOfSaleFlow(CommonPosTest):
 
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_mobt.id,
-                'pricelist_id': self.partner_mobt.property_product_pricelist.id,
+                'partner_id': self.b_test_partner.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [
                 {'product_id': self.ten_dollars_no_tax.product_variant_id.id},
@@ -421,8 +414,8 @@ class TestPointOfSaleFlow(CommonPosTest):
     def test_order_to_invoice_no_tax(self):
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_mobt.id,
-                'pricelist_id': self.partner_mobt.property_product_pricelist.id,
+                'partner_id': self.b_test_partner.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [
                 {'product_id': self.ten_dollars_no_tax.product_variant_id.id},
@@ -582,8 +575,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         order, _ = self.create_backend_pos_order({
             'order_data': {
                 'shipping_date': fields.Date.today(),
-                'partner_id': self.partner_mobt.id,
-                'pricelist_id': self.partner_mobt.property_product_pricelist.id,
+                'partner_id': self.a_test_partner_with_address.id,
+                'pricelist_id': self.a_test_partner_with_address.property_product_pricelist.id,
             },
             'line_data': [
                 {
@@ -667,7 +660,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_adgu.id,
+                'partner_id': self.b_test_partner.id,
                 'to_invoice': True,
             },
             'line_data': [
@@ -727,7 +720,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             }])
 
         with freeze_time('2020-01-03'):
-            order.partner_id = self.partner_adgu.id
+            order.partner_id = self.b_test_partner.id
             order.action_pos_order_invoice()
 
         # Check the reverse moves, one for the closing entry, one for the statement lines.
@@ -827,7 +820,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             }])
 
         with freeze_time('2020-01-03'):
-            order.partner_id = self.partner_adgu.id
+            order.partner_id = self.b_test_partner.id
             order.action_pos_order_invoice()
 
         # Check the reverse moves, one for the closing entry, one for the statement lines.
@@ -882,7 +875,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         self.pos_config_usd.current_session_id.action_pos_session_closing_control()
         with freeze_time('2020-01-03'):
-            order.partner_id = self.partner_stva.id
+            order.partner_id = self.b_test_partner.id
             order.action_pos_order_invoice()
 
         picking_ids = order.session_id.picking_ids
@@ -896,14 +889,14 @@ class TestPointOfSaleFlow(CommonPosTest):
         """
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
-        account = self.partner_jcb.property_account_receivable_id
+        account = self.b_test_partner.property_account_receivable_id
         current_session.company_id.account_default_pos_receivable_account_id = account
 
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_jcb.id,
+                'partner_id': self.b_test_partner.id,
                 'to_invoice': True,
-                'pricelist_id': self.partner_jcb.property_product_pricelist.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [
                 {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id},
@@ -955,13 +948,13 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.env['stock.quant']._update_available_quantity(
             self.ten_dollars_with_10_incl.product_variant_id,
             self.stock_location,
-            1, lot_id=lot1, owner_id=self.partner_adgu)
+            1, lot_id=lot1, owner_id=self.b_test_partner)
 
 
         # create pos order with the two SN created before
         self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_adgu.id,
+                'partner_id': self.b_test_partner.id,
                 'pricelist_id': self.pos_config_usd.pricelist_id.id,
             },
             'line_data': [
@@ -976,7 +969,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         current_session = self.pos_config_usd.current_session_id
         current_session.action_pos_session_closing_control()
-        self.assertEqual(current_session.picking_ids.move_line_ids.owner_id.id, self.partner_adgu.id)
+        self.assertEqual(current_session.picking_ids.move_line_ids.owner_id.id, self.b_test_partner.id)
 
     def test_order_refund_with_invoice(self):
         """This test make sure that credit notes of pos orders are correctly
@@ -985,7 +978,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         current_session = self.pos_config_usd.current_session_id
         self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_adgu.id,
+                'partner_id': self.b_test_partner.id,
                 'to_invoice': True,
             },
             'line_data': [
@@ -1039,7 +1032,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         order, _ = self.create_backend_pos_order({
             'order_data': {
                 'pricelist_id': self.pos_config_usd.pricelist_id.id,
-                'partner_id': self.partner_adgu.id,
+                'partner_id': self.b_test_partner.id,
                 'shipping_date': fields.Date.today(),
             },
             'line_data': [
@@ -1132,7 +1125,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.assertEqual(stock_quant_2.quantity, 5)
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_adgu.id,
+                'partner_id': self.b_test_partner.id,
                 'pricelist_id': self.pos_config_usd.pricelist_id.id,
             },
             'line_data': [{
@@ -1178,7 +1171,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         current_session = sub_pos_config.current_session_id
         self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_moda.id,
+                'partner_id': self.b_test_partner.id,
                 'pricelist_id': sub_pos_config.pricelist_id.id,
             },
             'line_data': [
@@ -1238,7 +1231,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.env['stock.route'].search([('name', '=', 'Buy')]).warehouse_ids = self.env['stock.warehouse'].search([])
         self.ten_dollars_with_15_incl.write({
             'seller_ids': [Command.create({
-                'partner_id': self.partner_stva.id,
+                'partner_id': self.b_test_partner.id,
                 'min_qty': 1.0,
                 'price': 10.0,
             })]
@@ -1253,7 +1246,7 @@ class TestPointOfSaleFlow(CommonPosTest):
 
         self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_stva.id,
+                'partner_id': self.b_test_partner.id,
                 'pricelist_id': self.pos_config_usd.pricelist_id.id,
             },
             'line_data': [
@@ -1971,16 +1964,13 @@ class TestPointOfSaleFlow(CommonPosTest):
 
     def test_delete_res_partner_linked_to_pos_order(self):
         """ Test that a partner linked to a pos order cannot be deleted. """
-        partner = self.env['res.partner'].create({
-            'name': 'Partner test',
-        })
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
 
         self.env['pos.order'].create({
             'company_id': self.env.company.id,
             'session_id': current_session.id,
-            'partner_id': partner.id,
+            'partner_id': self.b_test_partner.id,
             'lines': [(0, 0, {
                 'name': "OL/0001",
                 'product_id': self.product.id,
@@ -2001,17 +1991,13 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
 
         with self.assertRaises(ValidationError, msg='You cannot delete a customer that has point of sales orders. You can archive it instead.'):
-            partner.unlink()
+            self.b_test_partner.unlink()
 
     def test_split_payment_linked_to_accounting_partner(self):
         self.bank_payment_method.write({'split_transactions': True})
         self.pos_config_usd.open_ui()
         current_session = self.pos_config_usd.current_session_id
 
-        child_partner = self.env['res.partner'].create({
-            'name': 'partner1 child',
-            'parent_id': self.partner.id
-        })
         product_order = {
             'amount_paid': 750,
             'amount_tax': 0,
@@ -2030,7 +2016,7 @@ class TestPointOfSaleFlow(CommonPosTest):
                 'qty': 1,
             }]],
             'name': 'Order 12345-123-1234',
-            'partner_id': child_partner.id,
+            'partner_id': self.d_child_partner.id,
             'session_id': current_session.id,
             'sequence_number': 2,
             'payment_ids': [[0, 0, {
@@ -2294,7 +2280,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         # Create an order with negative qty only (no Refund action → is_refund stays False)
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_mobt.id,
+                'partner_id': self.b_test_partner.id,
                 'pricelist_id': self.pos_config_usd.pricelist_id.id,
             },
             'line_data': [

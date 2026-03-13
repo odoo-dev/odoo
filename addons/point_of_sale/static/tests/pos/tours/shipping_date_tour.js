@@ -52,7 +52,7 @@ registry.category("web_tour.tours").add("test_pos_order_shipping_date", {
             },
             PaymentScreen.clickValidate(),
             Dialog.confirm(),
-            PartnerList.clickPartner("Partner Test with Address"),
+            PartnerList.clickPartner("A Partner Test with Address"),
             FeedbackScreen.isShown(),
             FeedbackScreen.checkTicketData({
                 is_shipping_date: true,

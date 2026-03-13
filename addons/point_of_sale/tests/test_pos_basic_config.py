@@ -1005,14 +1005,13 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertTrue(closed_session.state == 'closed', 'Session should be closed.')
 
         return_to_invoice = closed_session.order_ids[1]
-        test_customer = self.env['res.partner'].create({'name': 'Test Customer'})
         new_session_date = return_to_invoice.date_order + relativedelta(days=2)
 
         with freeze_time(new_session_date):
             # Create a new session after 2 days
             self.open_new_session(0)
             # Invoice the uninvoiced refund
-            return_to_invoice.write({'partner_id': test_customer.id})
+            return_to_invoice.write({'partner_id': self.b_test_partner.id})
             return_to_invoice.action_pos_order_invoice()
             # Check the credit note
             self.assertTrue(return_to_invoice.account_move, 'Invoice should be created.')
@@ -1060,13 +1059,12 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertTrue(closed_session.state == 'closed', 'Session should be closed.')
 
         order_to_invoice = closed_session.order_ids[0]
-        test_customer = self.env['res.partner'].create({'name': 'Test Customer'})
 
         with freeze_time(fields.Datetime.now() + relativedelta(days=2)):
             # create new session after 2 days
             self.open_new_session(0)
             # invoice the uninvoiced order
-            order_to_invoice.write({'partner_id': test_customer.id})
+            order_to_invoice.write({'partner_id': self.b_test_partner.id})
             order_to_invoice.action_pos_order_invoice()
             # check invoice
             invoice = order_to_invoice.account_move
@@ -1113,12 +1111,11 @@ class TestPoSBasicConfig(TestPoSCommon):
         self.assertTrue(closed_session.state == 'closed', 'Session should be closed.')
 
         order_to_invoice = closed_session.order_ids[0]
-        test_customer = self.env['res.partner'].create({'name': 'Test Customer'})
 
         # Create a new session
         self.open_new_session(0)
         # Invoice the uninvoiced order
-        order_to_invoice.write({'partner_id': test_customer.id})
+        order_to_invoice.write({'partner_id': self.b_test_partner.id})
         order_to_invoice.action_pos_order_invoice()
         # Check the invoice for the lines
         self.assertTrue(order_to_invoice.account_move, 'Invoice should be created.')

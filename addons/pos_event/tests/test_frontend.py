@@ -221,7 +221,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'limit_categories': True,
             'iface_available_categ_ids': [(6, 0, [self.event_category.id])],
         })
-        self.env['res.partner'].search([('name', '=', 'Partner Test 1')]).write({
+        self.env['res.partner'].search([('name', '=', 'B Test Partner')]).write({
             'property_product_pricelist': self.main_pos_config.available_pricelist_ids.filtered(lambda pl: pl.item_ids)[0],
         })
         self.main_pos_config.with_user(self.pos_user).open_ui()

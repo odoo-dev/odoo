@@ -39,7 +39,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         }).action_apply_inventory()
 
         sale_order = self.env['sale.order'].sudo().create({
-            'partner_id': self.partner_stva.id,
+            'partner_id': self.b_test_partner.id,
             'order_line': [(0, 0, {
                 'product_id': self.twenty_dollars_no_tax.product_variant_id.id,
                 'name': self.twenty_dollars_no_tax.product_variant_id.name,
@@ -50,7 +50,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         sale_order.action_confirm()
         order, _ = self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_stva.id,
+                'partner_id': self.b_test_partner.id,
                 'shipping_date': fields.Date.today(),
             },
             'line_data': [{

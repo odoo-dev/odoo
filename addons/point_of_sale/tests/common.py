@@ -6,6 +6,7 @@ from odoo import fields, tools
 from odoo.fields import Command
 from odoo.tests import Form
 from odoo.addons.stock_account.tests.test_anglo_saxon_valuation_reconciliation_common import ValuationReconciliationTestCommon
+from odoo.addons.point_of_sale.tests.common_setup_methods import create_res_partners
 
 _logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class CommonPosTest(ValuationReconciliationTestCommon):
         self.env.ref('base.EUR').active = True
         self.env.ref('base.USD').active = True
 
-        self.create_res_partners(self)
+        create_res_partners(self)
         self.create_account_cash_rounding(self)
         self.create_pos_categories(self)
         self.create_account_taxes(self)
@@ -64,32 +65,6 @@ class CommonPosTest(ValuationReconciliationTestCommon):
                 (4, self.bank_payment_method.id),
                 (4, self.cash_payment_method.id),
             ]
-        })
-
-    def create_res_partners(self):
-        self.partner_mobt = self.env['res.partner'].create({
-            'name': 'MOBT',
-        })
-        self.partner_adgu = self.env['res.partner'].create({
-            'name': 'ADGU',
-        })
-        self.partner_lowe = self.env['res.partner'].create({
-            'name': 'LOWE',
-        })
-        self.partner_jcb = self.env['res.partner'].create({
-            'name': 'JCB',
-        })
-        self.partner_moda = self.env['res.partner'].create({
-            'name': 'MODA',
-        })
-        self.partner_stva = self.env['res.partner'].create({
-            'name': 'STVA',
-        })
-        self.partner_manv = self.env['res.partner'].create({
-            'name': 'MANV',
-        })
-        self.partner_vlst = self.env['res.partner'].create({
-            'name': 'VLST',
         })
 
     def create_account_cash_rounding(self):

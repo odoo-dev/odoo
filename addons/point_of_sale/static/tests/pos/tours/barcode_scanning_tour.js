@@ -98,7 +98,7 @@ registry.category("web_tour.tours").add("BarcodeScanPartnerTour", {
 
             // scan the customer barcode
             scan_barcode("0421234567890"),
-            ProductScreen.customerIsSelected("John Doe"),
+            ProductScreen.customerIsSelected("B Test Partner"),
             scan_barcode("0241234567890"),
             Notification.has(
                 "Unknown Barcode 0241234567890. The Point of Sale could not find any product, customer, employee or action associated with the scanned barcode."

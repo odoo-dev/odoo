@@ -82,7 +82,7 @@ registry.category("web_tour.tours").add("PosLoyaltyPointsGiftcard", {
             PosLoyalty.orderTotalIs("50.00"),
             PosLoyalty.finalizeOrder("Cash", "50"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("AAAA"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.addOrderline("product_a", "1"),
             PosLoyalty.enterCode("044123456"),
             PosLoyalty.orderTotalIs("50.00"),

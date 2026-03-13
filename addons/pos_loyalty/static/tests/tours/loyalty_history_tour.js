@@ -11,7 +11,7 @@ registry.category("web_tour.tours").add("LoyaltyHistoryTour", {
             Dialog.confirm("Open Register"),
             ProductScreen.addOrderline("Whiteboard Pen", "1"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("AAA Test Partner"),
+            ProductScreen.clickCustomer("B Test Partner"),
             PosLoyalty.orderTotalIs("10"),
 
             PosLoyalty.finalizeOrder("Cash", "10"),

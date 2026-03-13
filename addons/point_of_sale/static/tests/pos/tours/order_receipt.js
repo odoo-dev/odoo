@@ -12,7 +12,7 @@ registry.category("web_tour.tours").add("test_receipt_data", {
             Dialog.confirm("Open Register"),
             ProductScreen.orderIsEmpty(),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Example Partner"),
+            ProductScreen.clickCustomer("A Partner Test with Address"),
             ProductScreen.clickDisplayedProduct("Example Simple Product"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickShipLaterButton(),

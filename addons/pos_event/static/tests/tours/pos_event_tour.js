@@ -108,7 +108,7 @@ registry.category("web_tour.tours").add("test_orderline_price_remain_same_as_tic
             Dialog.confirm(),
             ProductScreen.totalAmountIs("200.00"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Partner Test 1"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.totalAmountIs("200.00"),
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Bank", true, { remaining: "0.00" }),

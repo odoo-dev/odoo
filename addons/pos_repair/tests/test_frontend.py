@@ -24,7 +24,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                     'company_id': self.env.company.id,
                 })
             ],
-            'partner_id': self.env['res.partner'].create({'name': 'Partner 1'}).id
+            'partner_id': self.b_test_partner.id
         })
         self.repair1._action_repair_confirm()
         self.repair1.action_repair_start()

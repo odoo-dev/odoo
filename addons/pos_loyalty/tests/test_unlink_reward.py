@@ -9,8 +9,8 @@ class TestUnlinkReward(CommonPosLoyaltyTest):
     def test_pos_unlink_reward(self):
         self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_lowe.id,
-                'pricelist_id': self.partner_lowe.property_product_pricelist.id,
+                'partner_id': self.b_test_partner.id,
+                'pricelist_id': self.b_test_partner.property_product_pricelist.id,
             },
             'line_data': [{
                 'qty': 5,

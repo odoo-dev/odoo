@@ -14,7 +14,7 @@ from odoo import Command, api
 from odoo.tools import BinaryBytes, DEFAULT_SERVER_DATE_FORMAT
 from odoo.tests import tagged, loaded_demo_data
 from odoo.addons.account.tests.common import TestTaxCommon, AccountTestInvoicingHttpCommon
-from odoo.addons.point_of_sale.tests.common_setup_methods import setup_product_combo_items
+from odoo.addons.point_of_sale.tests.common_setup_methods import setup_product_combo_items, create_res_partners
 from datetime import date, timedelta, datetime
 from odoo.addons.point_of_sale.tests.common import archive_products
 from odoo.exceptions import UserError
@@ -616,24 +616,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             if partner:
                 partner.unlink()
 
-        partners = cls.env['res.partner'].create([
-            {'name': 'Partner Test 1'},
-            {'name': 'Partner Test 2'},
-            {'name': 'Partner Test 3'},
-            {
-                'name': 'Partner Full',
-                'email': 'partner.full@example.com',
-                'street': '77 Santa Barbara Rd',
-                'city': 'Pleasant Hill',
-                'state_id': cls.env.ref('base.state_us_5').id,
-                'zip': '94523',
-                'country_id': cls.env.ref('base.us').id,
-            }
-        ])
-        cls.partner_test_1 = partners[0]
-        cls.partner_test_2 = partners[1]
-        cls.partner_test_3 = partners[2]
-        cls.partner_full = partners[3]
+        create_res_partners(cls)
 
         # Change the default sale pricelist of customers,
         # so the js tests can expect deterministically this pricelist when selecting a customer.
@@ -1694,14 +1677,8 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def test_res_partner_scan_barcode(self):
         # default Customer Barcodes pattern is '042'
-        self.env['res.partner'].create({
-            'name': 'John Doe',
-            'barcode': '0421234567890',
-        })
-        self.env['res.partner'].create({
-            'name': 'Dusty-Bun',
-            'barcode': '0241234567890',
-        })
+        self.b_test_partner.barcode = '0421234567890'
+        self.c_test_partner.barcode = '0241234567890'
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'BarcodeScanPartnerTour', login="pos_user")
 
@@ -2343,7 +2320,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertEqual(edited_orders[0].picking_ids[0].scheduled_date, datetime(next_year, 5, 30, 0, 0, 0))
         # check invoice created
         self.assertTrue(edited_orders[1].account_move)
-        self.assertEqual(edited_orders[1].partner_id.name, 'Partner Test 1')
+        self.assertEqual(edited_orders[1].partner_id.name, 'B Test Partner')
 
     def test_reuse_empty_floating_order(self):
         """ Verify that after a payment, POS should reuse an existing empty floating order if available, instead of always creating new ones """
@@ -2373,7 +2350,7 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'value_amount': 100,
             })]
         })
-        self.partner_test_1.property_payment_term_id = payment_term.id
+        self.b_test_partner.property_payment_term_id = payment_term.id
 
         tax = self.env['account.tax'].create({
             'name': 'Tax 10%',
@@ -2391,10 +2368,10 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PaymentScreenInvoiceOrder', login="pos_user")
 
-        order = self.env['pos.order'].search([('partner_id', '=', self.partner_test_1.id)], limit=1)
+        order = self.env['pos.order'].search([('partner_id', '=', self.b_test_partner.id)], limit=1)
         self.assertTrue(order)
 
-        self.assertEqual(order.partner_id, self.partner_test_1)
+        self.assertEqual(order.partner_id, self.b_test_partner)
 
         invoice = self.env['account.move'].search([('invoice_origin', '=', order.pos_reference)], limit=1)
         self.assertTrue(invoice)
@@ -3049,13 +3026,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertIn(children_categs[1].id, category_id, "Child category is available and should appear in the POS")
 
     def test_pos_order_shipping_date(self):
-        self.env['res.partner'].create({
-            'name': 'Partner Test with Address',
-            'street': 'test street',
-            'zip': '1234',
-            'city': 'test city',
-            'country_id': self.env.ref('base.us').id
-        })
         self.main_pos_config.write({'ship_later': True})
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(
@@ -3416,13 +3386,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.preset_delivery = self.env['pos.preset'].create({
             'name': 'Delivery',
             'identification': 'address',
-        })
-        self.env['res.partner'].create({
-            'name': 'Test Partner',
-            'street': '123 Test Street',
-            'city': 'Test City',
-            'zip': '12345',
-            'country_id': self.env['res.country'].search([], limit=1).id,
         })
         self.main_pos_config.write({
             'use_presets': True,
@@ -3950,15 +3913,12 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         pos_session = self.main_pos_config.current_session_id
 
-        partner = self.env['res.partner'].create({
-            'name': 'AA Customer',
-            'property_product_pricelist': not_available_pricelist.id,
-        })
+        self.b_test_partner.property_product_pricelist = not_available_pricelist.id
 
         order = self.env['pos.order'].create({
             'company_id': self.env.company.id,
             'session_id': pos_session.id,
-            'partner_id': partner.id,
+            'partner_id': self.b_test_partner.id,
             'config_id': self.main_pos_config.id,
             'lines': [(0, 0, {
                 'name': 'OL/0001',
@@ -3982,7 +3942,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_not_available_pricelist_not_set_on_order', login="pos_user")
 
-        created_order = self.env['pos.order'].search([('partner_id', '=', partner.id)], limit=1)
+        created_order = self.env['pos.order'].search([('partner_id', '=', self.b_test_partner.id)], limit=1)
         self.assertNotEqual(created_order.pricelist_id, not_available_pricelist)
 
     def test_pos_open_ui_button(self):

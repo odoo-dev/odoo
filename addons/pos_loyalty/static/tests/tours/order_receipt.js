@@ -13,7 +13,7 @@ registry.category("web_tour.tours").add("test_receipt_data_pos_loyalty", {
             Dialog.confirm("Open Register"),
             ProductScreen.addOrderline("Example Simple Product", "4"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Example Partner"),
+            ProductScreen.clickCustomer("A Partner Test with Address"),
             PosLoyalty.claimReward("Free Product - Example Simple Product"),
             PosLoyalty.hasRewardLine("Free Product - Example Simple Product", "-5.80", "1"),
             PosLoyalty.orderTotalIs("23.20"),

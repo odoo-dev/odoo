@@ -31,7 +31,7 @@ class TestPosMrp(CommonPosMrpTest):
         order, _ = self.create_backend_pos_order({
             'order_data': {
                 'to_invoice': True,
-                'partner_id': self.partner_moda.id,
+                'partner_id': self.b_test_partner.id,
             },
             'line_data': [
                 {'product_id': self.product_product_kit_three.id},
@@ -82,7 +82,7 @@ class TestPosMrp(CommonPosMrpTest):
         order, _ = self.create_backend_pos_order({
             'order_data': {
                 'to_invoice': True,
-                'partner_id': self.partner_moda.id,
+                'partner_id': self.b_test_partner.id,
             },
             'line_data': [
                 {'product_id': self.product_product_kit_one.id, 'qty': 2},
@@ -391,7 +391,7 @@ class TestPosMrpTemp(CommonPosMrpTest):
 
         self.create_backend_pos_order({
             'order_data': {
-                'partner_id': self.partner_moda.id,
+                'partner_id': self.b_test_partner.id,
             },
             'line_data': [
                 {'product_id': self.product_product_kit_one.id, 'qty': 1},

@@ -233,3 +233,33 @@ def setup_product_combo_items(self):
             "pos_categ_ids": [(6, 0, [pos_category_2.id])],
         }
     )
+
+
+def create_res_partners(self):
+    self.a_test_partner_with_address = self.env['res.partner'].create({
+        'name': 'A Partner Test with Address',
+        'email': 'partner.full@example.com',
+        'street': '77 Santa Barbara Rd',
+        'city': 'Pleasant Hill',
+        'state_id': self.env.ref('base.state_us_5').id,
+        'zip': '94523',
+        'country_id': self.env.ref('base.us').id,
+    })
+    self.b_test_partner = self.env['res.partner'].create({
+        'name': 'B Test Partner',
+        'email': 'b.test.partner@example.com',
+    })
+    self.c_test_partner = self.env['res.partner'].create({
+        'name': 'C Test Partner',
+    })
+    self.d_child_partner = self.env['res.partner'].create({
+        'name': 'D Child Partner',
+        'email': 'd.test.partner@example.com',
+        'parent_id': self.c_test_partner.id
+    })
+    self.e_test_partner = self.env['res.partner'].create({
+        'name': 'E Test Partner',
+    })
+    self.f_test_partner = self.env['res.partner'].create({
+        'name': 'F Test Partner',
+    })

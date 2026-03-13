@@ -38,15 +38,6 @@ class TestPosOrderReceipt(TestPointOfSaleHttpCommon):
             'pos_categ_ids': [(4, self.category.id)],
         })
 
-        self.example_partner = self.env['res.partner'].create({
-            'name': 'Example Partner',
-            'street': '123 Example St',
-            'city': 'Example City',
-            'zip': '12345',
-            'country_id': self.env.ref('base.us').id,
-            'email': 'example.partner@example.com',
-        })
-
         self.main_pos_config.write({
             'iface_available_categ_ids': [(6, 0, [self.category.id])],
             'limit_categories': True,
