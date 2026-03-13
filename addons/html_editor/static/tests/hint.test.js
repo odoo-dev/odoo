@@ -156,7 +156,7 @@ test("should not lose track of temporary hints on split block", async () => {
             <p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]<br></p>
         `)
     );
-    // Changing the selection should not generate mutations for the next step
+    // Changing the selection should not generate mutations for the next commit.
     expect(plugins.get("domMutation").currentChanges.mutations.length).toBe(0);
 });
 

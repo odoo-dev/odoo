@@ -141,9 +141,9 @@ export class BuilderOptionsPlugin extends Plugin {
     /** @type {import("plugins").BuilderResources} */
     resources = {
         on_will_commit_handlers: this.onWillCommit.bind(this),
-        on_step_added_handlers: this.onStepAdded.bind(this),
-        on_undone_handlers: (revertedStep) => this.restoreContainers(revertedStep, "undo"),
-        on_redone_handlers: (revertedStep) => this.restoreContainers(revertedStep, "redo"),
+        on_committed_handlers: this.onCommitted.bind(this),
+        on_undone_handlers: (revertedCommit) => this.restoreContainers(revertedCommit, "undo"),
+        on_redone_handlers: (revertedCommit) => this.restoreContainers(revertedCommit, "redo"),
         clean_for_save_processors: this.cleanForSave.bind(this),
         on_editor_started_handlers: () => {
             if (this.config.initialTarget) {
@@ -268,7 +268,7 @@ export class BuilderOptionsPlugin extends Plugin {
     updateContainers(target, { forceUpdate = false } = {}) {
         if (this.dependencies.domMutation.hasStagedMutations()) {
             console.warn(
-                "Should not have any mutations in the current step when you update the container selection"
+                "Should not have any mutations in the current commit when you update the container selection"
             );
         }
         if (this.dependencies.domMutation.getIsPreviewing()) {
@@ -473,8 +473,8 @@ export class BuilderOptionsPlugin extends Plugin {
 
     /**
      * Activates the containers of the given element or deactivate them if false
-     * is given. They will be (de)activated once the current step is added (see
-     * `onStepAdded`).
+     * is given. They will be (de)activated once the current commit is added (see
+     * `onCommitted`).
      *
      * @param {HTMLElement|Boolean} targetEl the element to activate or `false`
      */
@@ -482,21 +482,21 @@ export class BuilderOptionsPlugin extends Plugin {
         if (this.dependencies.domMutation.getIsPreviewing()) {
             return;
         }
-        // Store the next target to activate in the current step.
+        // Store the next target to activate in the current commit.
         this.dependencies.domMutation.update("nextTarget", targetEl);
     }
 
     onWillCommit(type) {
         if (!["undo", "redo"].includes(type)) {
-            // Store the current target in the current step.
+            // Store the current target in the current commit.
             this.dependencies.domMutation.update("currentTarget", this.target);
         }
     }
 
-    onStepAdded(step) {
+    onCommitted(commit) {
         // If a target is specified, activate its containers, otherwise simply
         // update them.
-        const nextTargetEl = step.commit.data.nextTarget;
+        const nextTargetEl = commit.data.nextTarget;
         if (nextTargetEl) {
             this.updateContainers(nextTargetEl, { forceUpdate: true });
         } else if (nextTargetEl === false) {
@@ -507,17 +507,17 @@ export class BuilderOptionsPlugin extends Plugin {
     }
 
     /**
-     * Restores the containers of the target stored in the reverted step.
+     * Restores the containers of the target stored in the reverted commit.
      *
-     * @param {Object} revertedStep the step
+     * @param {Object} revertedCommit the commit
      * @param {String} mode "undo" or "redo"
      */
-    restoreContainers(revertedStep, mode) {
-        if (revertedStep && revertedStep.commit.data.currentTarget) {
-            let targetEl = revertedStep.commit.data.currentTarget;
-            // If the step was supposed to activate another target, activate
+    restoreContainers(revertedCommit, mode) {
+        if (revertedCommit && revertedCommit.data.currentTarget) {
+            let targetEl = revertedCommit.data.currentTarget;
+            // If the commit was supposed to activate another target, activate
             // this one instead.
-            const nextTarget = revertedStep.commit.data.nextTarget;
+            const nextTarget = revertedCommit.data.nextTarget;
             if (mode === "redo" && (nextTarget || nextTarget === false)) {
                 targetEl = nextTarget;
             }

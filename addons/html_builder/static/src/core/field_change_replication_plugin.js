@@ -37,12 +37,12 @@ export class FieldChangeReplicationPlugin extends Plugin {
 
     /**
      * @param { Node } commonAncestor
-     * @param { "original"|"undo"|"redo"|"restore" } stepState
+     * @param { "original"|"undo"|"redo"|"restore" } commitType
      */
-    normalizeProcessor(commonAncestor, stepState) {
+    normalizeProcessor(commonAncestor, commitType) {
         const fields = this.fieldsToReplicate;
         this.fieldsToReplicate = new Set();
-        if (stepState !== "original") {
+        if (commitType !== "original") {
             return;
         }
         const touchedEls = new Set();

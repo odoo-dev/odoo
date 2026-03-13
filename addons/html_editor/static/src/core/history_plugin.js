@@ -9,45 +9,40 @@ import { _t } from "@web/core/l10n/translation";
  * @typedef { import("../utils/dom_map").SerializedSelection } SerializedSelection
  * @typedef { import("../utils/dom_map").NodeId } NodeId
  *
- * @typedef { string } HistoryStepId
- * @typedef { "original"|"undo"|"redo"|"restore"|"reset" } HistoryStepType
- *
- * @typedef { Object } HistoryStep
- * @property { HistoryStepId } id
- * @property { HistoryStepType } type
- * @property { EditorCommit } commit
- * @property { HistoryStepId } previousStepId
- *
  * @typedef { import("./dom_mutation_plugin").EditorMutation } EditorMutation
  * @typedef { import("./dom_mutation_plugin").EditorMutationRecord } EditorMutationRecord
- * @typedef { import("./dom_mutation_plugin").EditorCommit } EditorCommit
+ *
+ * @typedef { import("../utils/commit").EditorCommit } EditorCommit
+ * @typedef { import("../utils/commit").EditorCommitId } EditorCommitId
+ * @typedef { import("../utils/commit").EditorCommitType } EditorCommitType
+ * @typedef { import("../utils/commit").EditorCommitData } EditorCommitData
  */
 /**
  * @typedef { Object } HistoryShared
  * @property { HistoryPlugin['write'] } write
  * @property { HistoryPlugin['undo'] } undo
  * @property { HistoryPlugin['redo'] } redo
- * @property { HistoryPlugin['addExternalStep'] } addExternalStep
+ * @property { HistoryPlugin['addExternalCommit'] } addExternalCommit
  * @property { HistoryPlugin['canRedo'] } canRedo
  * @property { HistoryPlugin['canUndo'] } canUndo
- * @property { HistoryPlugin['getHistorySteps'] } getHistorySteps
+ * @property { HistoryPlugin['getHistoryCommits'] } getHistoryCommits
  * @property { HistoryPlugin['reset'] } reset
- * @property { HistoryPlugin['resetFromSteps'] } resetFromSteps
+ * @property { HistoryPlugin['resetFromCommits'] } resetFromCommits
  * @property { HistoryPlugin['getCommitsUntil'] } getCommitsUntil
  */
 /**
  * @typedef {((record: EditorMutationRecord) => void)[]} on_attribute_changed_handlers
  * @typedef {((records: EditorMutationRecord[]) => void)[]} on_will_filter_mutation_record_handlers
- * @typedef {(() => void)[]} on_external_step_added_handlers
+ * @typedef {(() => void)[]} on_external_commit_added_handlers
  * @typedef {(() => void)[]} on_history_cleaned_handlers
  * @typedef {(() => void)[]} on_history_reset_handlers
- * @typedef {(() => void)[]} on_history_reset_from_steps_handlers
- * @typedef {((revertedStep: HistoryStep) => void)[]} on_redone_handlers
- * @typedef {((revertedStep: HistoryStep) => void)[]} on_undone_handlers
- * @typedef {((step: HistoryStep) => void)[]} on_step_added_handlers
+ * @typedef {(() => void)[]} on_history_reset_from_commits_handlers
+ * @typedef {((revertedCommit: EditorCommit) => void)[]} on_redone_handlers
+ * @typedef {((revertedCommit: EditorCommit) => void)[]} on_undone_handlers
+ * @typedef {((commit: EditorCommit) => void)[]} on_committed_handlers
  *
  * @typedef {((record: EditorMutationRecord) => boolean | undefined)[]} is_mutation_record_savable_predicates
- * @typedef {((step: HistoryStep) => boolean | undefined)[]} is_step_reversible_predicates
+ * @typedef {((commit: EditorCommit) => boolean | undefined)[]} is_commit_reversible_predicates
  *
  * @typedef {((
  *    arg: {
@@ -59,11 +54,10 @@ import { _t } from "@web/core/l10n/translation";
  *    },
  *    options: { ensureNewMutations: boolean }
  *  ) => arg)[]} attribute_change_processors
- * @typedef {((step: HistoryStep) => HistoryStep)[]} history_step_processors
  * @typedef {((node: Node, attributeName: string, attributeValue: string) => boolean)[]} set_attribute_overrides
  */
 
-export const STEP_DEBOUNCE_DELAY = 250;
+export const COMMIT_DEBOUNCE_DELAY = 250;
 
 export class HistoryPlugin extends Plugin {
     static id = "history";
@@ -74,15 +68,14 @@ export class HistoryPlugin extends Plugin {
         "undo",
         "redo",
         // From original
-        "addExternalStep",
+        "addExternalCommit",
         "canRedo",
         "canUndo",
-        "getHistorySteps",
+        "getHistoryCommits",
         "reset",
-        "resetFromSteps",
+        "resetFromCommits",
         // Had to add
         "getCommitsUntil",
-        "createStep", // should it get processed or just raw?
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -127,6 +120,10 @@ export class HistoryPlugin extends Plugin {
         on_editor_started_handlers: () => {
             this.reset(this.config.content);
         },
+        editor_commit_processors: (commit) => {
+            commit.updateData("previousCommitId", this.commits.at(-1)?.id);
+            return commit;
+        },
     };
 
     setup() {
@@ -137,12 +134,15 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * @param { EditorCommit[] } commit
-     * @param { HistoryStepType } [type = "original"]
+     * @param { EditorCommit } commit
+     * @returns { EditorCommit }
      */
-    write(commit, type = "original") {
-        // @todo @phoenix should we allow to pause the making of a step?
-        // if (!this.stepsActive) {
+    write(commit) {
+        // Set the timestamp of the commit or keep the timestamp of the commit
+        // it reverts (see `DomMutation`: `on_single_commit_(un|re)done_handlers`).
+        commit.write();
+        // @todo @phoenix should we allow to pause the making of a commit?
+        // if (!this.commitsActive) {
         //     return;
         // }
         // @todo @phoenix link zws plugin
@@ -150,7 +150,7 @@ export class HistoryPlugin extends Plugin {
         // @todo @phoenix sanitize plugin
         // this.sanitize();
 
-        // Set the state of the step here.
+        // Set the state of the commit here.
         // That way, the state of undo and redo is truly accessible when
         // executing the onChange callback.
         // It is useful for external components if they execute
@@ -158,56 +158,54 @@ export class HistoryPlugin extends Plugin {
         // TODO AGE: the comment above mentions a link between config.onChange
         // and can(Undo|Redo) -> should we call config.onChange here instead of
         // in domMutation?
-        const currentStep = this.createStep(commit, type);
-
-        this.steps.push(currentStep);
+        this.commits.push(commit);
         // @todo @phoenix add this in the linkzws plugin.
         // this._setLinkZws();
-        return currentStep;
+        return commit;
     }
 
     undo() {
-        if (this.steps.length === 1) {
+        if (this.commits.length === 1) {
             return;
         }
         this.trigger("on_will_undo_handlers");
-        let revertedStep;
-        for (revertedStep of this.getNextUndoSteps()) {
-            this.revertStep(revertedStep, { ensureNewMutations: true });
-            this.revertedSteps.add(revertedStep.id);
-            this.trigger("on_single_step_undone_handlers", revertedStep);
+        let revertedCommit;
+        for (revertedCommit of this.getNextUndoCommits()) {
+            this.revertCommit(revertedCommit, { ensureNewMutations: true });
+            this.revertedCommits.add(revertedCommit.id);
+            this.trigger("on_single_commit_undone_handlers", revertedCommit);
         }
-        this.trigger("on_undone_handlers", revertedStep);
+        this.trigger("on_undone_handlers", revertedCommit);
     }
 
     redo() {
         this.trigger("on_will_redo_handlers");
-        let revertedStep;
-        for (revertedStep of this.getNextRedoSteps()) {
-            this.revertStep(revertedStep, { ensureNewMutations: true });
-            this.revertedSteps.add(revertedStep.id);
-            this.trigger("on_single_step_redone_handlers", revertedStep);
+        let revertedCommit;
+        for (revertedCommit of this.getNextRedoCommits()) {
+            this.revertCommit(revertedCommit, { ensureNewMutations: true });
+            this.revertedCommits.add(revertedCommit.id);
+            this.trigger("on_single_commit_redone_handlers", revertedCommit);
         }
-        this.trigger("on_redone_handlers", revertedStep);
+        this.trigger("on_redone_handlers", revertedCommit);
     }
 
     // Private
 
-    applyStep(step) {
-        this.delegateTo("apply_commit_overrides", step.commit);
+    applyCommit(commit) {
+        this.delegateTo("apply_commit_overrides", commit);
     }
 
-    revertStep(step, { ensureNewMutations = false } = {}) {
-        this.delegateTo("revert_commit_overrides", step.commit, { ensureNewMutations });
+    revertCommit(commit, { ensureNewMutations = false } = {}) {
+        this.delegateTo("revert_commit_overrides", commit, { ensureNewMutations });
     }
 
     clean() {
-        /** @type { HistoryStep[] } */
-        this.steps = [];
-        /** @type {Set<HistoryStepId>} Steps reverted by undo/redo operations */
-        this.revertedSteps = new Set();
-        /** @type {Set<HistoryStepId>} Steps reverted by restoring to a save point */
-        this.discardedSteps = new Set();
+        /** @type { EditorCommit[] } */
+        this.commits = [];
+        /** @type {Set<EditorCommitId>} Commits reverted by undo/redo operations */
+        this.revertedCommits = new Set();
+        /** @type {Set<EditorCommitId>} Commits reverted by restoring to a save point */
+        this.discardedCommits = new Set();
         this.trigger("on_history_cleaned_handlers");
     }
 
@@ -224,60 +222,36 @@ export class HistoryPlugin extends Plugin {
     // NEW: process commit
 
     /**
-     * @param {EditorCommit} commit
-     * @param { HistoryStepType } type
-     * @returns { HistoryStep }
-     */
-    createStep(commit, type) {
-        return this.processHistoryStep({
-            id: commit.id,
-            type,
-            commit,
-            previousStepId: this.steps.at(-1)?.id,
-        });
-    }
-
-    // Steps
-
-    /**
-     * @param { HistoryStep } step
-     * @returns { HistoryStep }
-     */
-    processHistoryStep(step) {
-        return this.processThrough("history_step_processors", step);
-    }
-
-    /**
-     * Insert a step in the history.
+     * Insert a commit in the history.
      *
-     * @param { HistoryStep } newStep
+     * @param { EditorCommit } newCommit
      * @param { number } index
      */
-    addExternalStep(newStep, index) {
-        this.trigger("on_will_add_external_step_handlers");
-        const stepsAfterNewStep = this.steps.slice(index);
-        for (const stepToRevert of stepsAfterNewStep.slice().reverse()) {
-            this.revertStep(stepToRevert);
+    addExternalCommit(newCommit, index) {
+        this.trigger("on_will_add_external_commit_handlers");
+        const commitsAfterNewCommit = this.commits.slice(index);
+        for (const commitToRevert of commitsAfterNewCommit.slice().reverse()) {
+            this.revertCommit(commitToRevert);
         }
-        this.applyStep(newStep);
+        this.applyCommit(newCommit);
         let root;
         this.getResource("commit_root_providers").find((p) => {
-            root = p(newStep.commit);
+            root = p(newCommit);
             return root;
         });
         this.processThrough("normalize_processors", root);
-        this.steps.splice(index, 0, newStep);
-        for (const stepToApply of stepsAfterNewStep) {
-            this.applyStep(stepToApply);
+        this.commits.splice(index, 0, newCommit);
+        for (const commitToApply of commitsAfterNewCommit) {
+            this.applyCommit(commitToApply);
         }
-        this.trigger("on_external_step_added_handlers");
+        this.trigger("on_external_commit_added_handlers");
     }
 
-    getHistorySteps() {
-        return this.steps;
+    getHistoryCommits() {
+        return this.commits;
     }
 
-    // Before applying a step
+    // Before applying a commit
 
     canUndo() {
         return this.getNextUndoIndex() > 0;
@@ -288,133 +262,136 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * Get the step index in the history to undo.
+     * Get the commit index in the history to undo.
      * Return -1 if no undo index can be found.
      *
-     * @param { number } fromIndex step index from which to search
+     * @param { number } fromIndex commit index from which to search
      */
-    getNextUndoIndex(fromIndex = this.steps.length) {
-        // Go back to first step that can be undone ("original", "reset" or "redo").
+    getNextUndoIndex(fromIndex = this.commits.length) {
+        // Go back to first commit that can be undone ("original", "reset" or "redo").
         // Do not undo the initial commit.
         for (let index = fromIndex - 1; index > 0; index--) {
-            const step = this.steps[index];
-            if (!this.isReversibleStep(step) || this.discardedSteps.has(step.id)) {
+            const commit = this.commits[index];
+            if (!this.isReversibleCommit(commit) || this.discardedCommits.has(commit.id)) {
                 continue;
             }
             if (
-                ["original", "reset", "redo"].includes(step.type) &&
-                !this.revertedSteps.has(step.id)
+                ["original", "reset", "redo"].includes(commit.type) &&
+                !this.revertedCommits.has(commit.id)
             ) {
                 return index;
             }
         }
-        // There is no steps left to be undone, return an index that does not
-        // point to any step
+        // There is no commits left to be undone, return an index that does not
+        // point to any commit
         return -1;
     }
     /**
-     * Returns the steps to be reverted by a single undo.
+     * Returns the commits to be reverted by a single undo.
      */
-    getNextUndoSteps() {
-        let referenceStepIndex = this.getNextUndoIndex();
+    getNextUndoCommits() {
+        let referenceCommitIndex = this.getNextUndoIndex();
         // Do not undo the initial commit.
-        if (referenceStepIndex <= 0) {
+        if (referenceCommitIndex <= 0) {
             return [];
         }
-        let nextStepIndex = this.getNextUndoIndex(referenceStepIndex);
-        const result = [this.steps[referenceStepIndex]];
-        while (nextStepIndex >= 0 && this.canStepsBeBatched(referenceStepIndex, nextStepIndex)) {
-            result.push(this.steps[nextStepIndex]);
-            referenceStepIndex = nextStepIndex;
-            nextStepIndex = this.getNextUndoIndex(nextStepIndex);
+        let nextCommitIndex = this.getNextUndoIndex(referenceCommitIndex);
+        const result = [this.commits[referenceCommitIndex]];
+        while (
+            nextCommitIndex >= 0 &&
+            this.canCommitsBeBatched(referenceCommitIndex, nextCommitIndex)
+        ) {
+            result.push(this.commits[nextCommitIndex]);
+            referenceCommitIndex = nextCommitIndex;
+            nextCommitIndex = this.getNextUndoIndex(nextCommitIndex);
         }
         return result;
     }
     /**
-     * Returns true if steps can be batched in a single undo/redo.
-     * Currrently: steps with a single mutation on the same text node.
+     * Returns true if commits can be batched in a single undo/redo.
+     * Currrently: commits with a single mutation on the same text node.
      * @param { number } index1
      * @param { number } index2
      */
-    canStepsBeBatched(index1, index2) {
-        const step1 = this.steps[index1];
-        const step2 = this.steps[index2];
-        if (!step1.commit.batchable || !step2.commit.batchable) {
+    canCommitsBeBatched(index1, index2) {
+        const commit1 = this.commits[index1];
+        const commit2 = this.commits[index2];
+        if (!commit1.batchable || !commit2.batchable) {
             return false;
         }
         // Keep only if close enough in time.
-        if (
-            Math.abs(step1.commit.data.commitTimestamp - step2.commit.data.commitTimestamp) >
-            STEP_DEBOUNCE_DELAY
-        ) {
+        if (Math.abs(commit1.writtenAt - commit2.writtenAt) > COMMIT_DEBOUNCE_DELAY) {
             return false;
         }
         return true;
     }
     /**
-     * Get the step index in the history to redo.
+     * Get the commit index in the history to redo.
      * Return -1 if no redo index can be found.
      *
-     * @param { number } fromIndex step index from which to search
+     * @param { number } fromIndex commit index from which to search
      */
-    getNextRedoIndex(fromIndex = this.steps.length) {
-        // Look for an "undo" step that has not yet been redone. Stop search if
-        // a "original" step is found.
+    getNextRedoIndex(fromIndex = this.commits.length) {
+        // Look for an "undo" commit that has not yet been redone. Stop search if
+        // a "original" commit is found.
         // Do not undo the initial commit.
         for (let index = fromIndex - 1; index > 0; index--) {
-            const step = this.steps[index];
-            if (!this.isReversibleStep(step) || this.discardedSteps.has(step.id)) {
+            const commit = this.commits[index];
+            if (!this.isReversibleCommit(commit) || this.discardedCommits.has(commit.id)) {
                 continue;
             }
-            if (["original", "reset"].includes(step.type)) {
+            if (["original", "reset"].includes(commit.type)) {
                 return -1;
             }
-            if (step.type === "undo" && !this.revertedSteps.has(step.id)) {
+            if (commit.type === "undo" && !this.revertedCommits.has(commit.id)) {
                 return index;
             }
         }
         return -1;
     }
     /**
-     * Returns the steps to be redone by a single redo.
+     * Returns the commits to be redone by a single redo.
      */
-    getNextRedoSteps() {
-        let referenceStepIndex = this.getNextRedoIndex();
+    getNextRedoCommits() {
+        let referenceCommitIndex = this.getNextRedoIndex();
         // Do not revert the initial commit.
-        if (referenceStepIndex <= 0) {
+        if (referenceCommitIndex <= 0) {
             return [];
         }
-        let nextStepIndex = this.getNextRedoIndex(referenceStepIndex);
-        const result = [this.steps[referenceStepIndex]];
-        while (nextStepIndex >= 0 && this.canStepsBeBatched(referenceStepIndex, nextStepIndex)) {
-            result.push(this.steps[nextStepIndex]);
-            referenceStepIndex = nextStepIndex;
-            nextStepIndex = this.getNextRedoIndex(nextStepIndex);
+        let nextCommitIndex = this.getNextRedoIndex(referenceCommitIndex);
+        const result = [this.commits[referenceCommitIndex]];
+        while (
+            nextCommitIndex >= 0 &&
+            this.canCommitsBeBatched(referenceCommitIndex, nextCommitIndex)
+        ) {
+            result.push(this.commits[nextCommitIndex]);
+            referenceCommitIndex = nextCommitIndex;
+            nextCommitIndex = this.getNextRedoIndex(nextCommitIndex);
         }
         return result;
     }
 
-    // Applying a step
+    // Applying a commit
 
     /**
-     * Get the commits saved in steps between the step of given id (not
-     * included) and the most recent one. If no step id is given, return all
+     * Get the commits saved in commits between the commit of given id (not
+     * included) and the most recent one. If no commit id is given, return all
      * commits but the first.
      *
-     * @param {HistoryStepId} [stepId]
+     * @param {EditorCommitId} [commitId]
      * @returns { { ...EditorCommit, discard: false | () => void }[] }
      */
-    getCommitsUntil(stepId) {
-        const stepIndex = this.steps.findLastIndex((step) => step?.id === stepId);
-        return this.steps
-            .slice(stepIndex === -1 ? 1 : stepIndex + 1)
-            .map((step) => {
-                if (step.commit && this.isReversibleStep(step)) {
-                    step.commit.discard = () => {
-                        this.discardedSteps.add(step.id);
+    getCommitsUntil(commitId) {
+        const commitIndex = this.commits.findLastIndex((commit) => commit?.id === commitId);
+        return this.commits
+            .slice(commitIndex === -1 ? 1 : commitIndex + 1)
+            .map((commit) => {
+                if (commit && this.isReversibleCommit(commit)) {
+                    commit.discard = () => {
+                        this.discardedCommits.add(commit.id);
                     };
                 }
-                return step.commit;
+                return commit;
             })
             .filter(Boolean)
             .reverse();
@@ -423,25 +400,25 @@ export class HistoryPlugin extends Plugin {
     /**
      * Meant to be overriden.
      *
-     * @param { HistoryStep } step
+     * @param { EditorCommit } commit
      */
-    isReversibleStep(step) {
-        return this.checkPredicates("is_step_reversible_predicates", step) ?? true;
+    isReversibleCommit(commit) {
+        return this.checkPredicates("is_commit_reversible_predicates", commit) ?? true;
     }
 
     /**
-     * @param { HistoryStep[] } steps
+     * @param { EditorCommit[] } commits
      */
-    resetFromSteps(steps) {
-        this.trigger("on_will_reset_history_from_steps_handlers");
+    resetFromCommits(commits) {
+        this.trigger("on_will_reset_history_from_commits_handlers");
         this.editable.replaceChildren();
         this.clean();
-        steps.forEach(this.applyStep.bind(this));
-        this.steps = steps;
+        commits.forEach(this.applyCommit.bind(this));
+        this.commits = commits;
         // todo: to test
-        this.trigger("on_history_reset_from_steps_handlers");
+        this.trigger("on_history_reset_from_commits_handlers");
         // TODO AGE: all this was wrapped in a `domMutations.withObserverOff`,
-        // and there was a dispatch to on_history_reset_from_steps_handlers at the
+        // and there was a dispatch to on_history_reset_from_commits_handlers at the
         // end of the callback _and_ after the call to `withObserverOff`. I
         // replaced the `withObserverOff` with disabling/enabling the observer
         // in the resources dispatched here. So I wasn't able to put this second

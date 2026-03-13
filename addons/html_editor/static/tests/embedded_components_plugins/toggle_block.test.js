@@ -3,7 +3,7 @@ import { setupEditor } from "../_helpers/editor";
 import { unformat } from "../_helpers/format";
 import { getContent, setContent } from "../_helpers/selection";
 import {
-    addStep,
+    commit,
     deleteBackward,
     deleteForward,
     insertText,
@@ -932,14 +932,14 @@ describe("Insert (paste, drop) inside toggle title", () => {
             <div class="o-paragraph">HelloWorld</div>
         `);
         editor.shared.dom.insert(parseHTML(editor.document, `<p>New</p>`));
-        addStep(editor);
+        commit(editor);
         expect("[data-embedded-editable='title']").toHaveInnerHTML(`
             <div class="o-paragraph">HelloNewWorld</div>
         `);
         editor.shared.dom.insert(
             parseHTML(editor.document, `<div class="oe_unbreakable">brol</div>`)
         );
-        addStep(editor);
+        commit(editor);
         expect(getContent(el)).toBe(
             unformat(`
                 <div data-embedded="toggleBlock" data-oe-protected="true" contenteditable="false" data-embedded-props='{ "toggleBlockId": "1" }'>

@@ -29,16 +29,16 @@ export class EmbeddedComponentPlugin extends Plugin {
         on_attribute_changed_handlers: this.onChangeAttribute.bind(this),
         on_savepoint_restored_handlers: () => this.handleComponents(this.editable),
         on_history_reset_handlers: () => this.handleComponents(this.editable),
-        on_history_reset_from_steps_handlers: () => this.handleComponents(this.editable),
-        on_step_added_handlers: (step) => {
+        on_history_reset_from_commits_handlers: () => this.handleComponents(this.editable),
+        on_committed_handlers: (commit) => {
             let root;
             this.getResource("commit_root_providers").find((p) => {
-                root = p(step.commit);
+                root = p(commit);
                 return root;
             });
             this.handleComponents(root);
         },
-        on_external_step_added_handlers: () => this.handleComponents(this.editable),
+        on_external_commit_added_handlers: () => this.handleComponents(this.editable),
 
         /** Processors */
         clean_for_save_processors: (root) => this.cleanForSave(root),
@@ -136,14 +136,14 @@ export class EmbeddedComponentPlugin extends Plugin {
 
     /**
      * Apply an embedded state change received from `data-embedded-state`
-     * attribute. In some cases (undo/redo/revertStepsUntil history operations),
+     * attribute. In some cases (undo/redo/revertCommitsUntil history operations),
      * the attribute has to be set to a new value, computed by the
      * stateChangeManager.
      *
      * @param {Object} attributeChange @see HistoryPlugin
      * @param { Object } options
      * @param { boolean } options.ensureNewMutations whether the mutation is being used
-     *        to create a new step
+     *        to create a new commit
      * @returns {string} new attribute value to set on the node, which might be
      *        unchanged
      */

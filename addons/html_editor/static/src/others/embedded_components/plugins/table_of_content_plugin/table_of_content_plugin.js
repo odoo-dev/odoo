@@ -32,19 +32,19 @@ export class TableOfContentPlugin extends Plugin {
         /** Handlers */
         on_savepoint_restored_handlers: () => this.delayedUpdateTableOfContents(this.editable),
         on_history_reset_handlers: () => this.delayedUpdateTableOfContents(this.editable),
-        on_history_reset_from_steps_handlers: () =>
+        on_history_reset_from_commits_handlers: () =>
             this.delayedUpdateTableOfContents(this.editable),
-        on_step_added_handlers: (step) => {
+        on_committed_handlers: (commit) => {
             let root;
             this.getResource("commit_root_providers").find((p) => {
-                root = p(step.commit);
+                root = p(commit);
                 return root;
             });
             return this.delayedUpdateTableOfContents(
                 this.dependencies.domMutation.getNodeById(root)
             );
         },
-        on_external_step_added_handlers: this.delayedUpdateTableOfContents.bind(
+        on_external_commit_added_handlers: this.delayedUpdateTableOfContents.bind(
             this,
             this.editable
         ),

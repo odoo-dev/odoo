@@ -43,7 +43,7 @@ import { FormController } from "@web/views/form/form_controller";
 import { Counter, EmbeddedWrapperMixin } from "./_helpers/embedded_component";
 import { moveSelectionOutsideEditor, setSelection } from "./_helpers/selection";
 import {
-    ensureDistinctHistoryStep,
+    ensureDistinctHistoryCommit,
     insertText,
     pasteOdooEditorHtml,
     pasteText,
@@ -841,7 +841,7 @@ test("undo after discard html field changes in form", async () => {
     await click(".odoo-editor-editable");
     setSelectionInHtmlField();
     await insertText(htmlEditor, "tes");
-    await ensureDistinctHistoryStep();
+    await ensureDistinctHistoryCommit();
     await insertText(htmlEditor, "t");
     await animationFrame();
     expect(".odoo-editor-editable p").toHaveText("testfirst");
@@ -936,10 +936,10 @@ test("Embed video by pasting video URL", async () => {
 
     // Press Enter to select first option in the powerbox ("Embed Youtube Video").
     await press("Enter");
-    // Insertion triggers selectionchange & addStep creates selection
-    // placeholder.fixSelectionInsideEditableRoot moves selection into it,
-    // trigger another selectionchange that removes selection placeholder.
-    // So we must wait for the o-we-hint.
+    // Insertion triggers `selectionchange` and `commit` creates a selection
+    // placeholder. `fixSelectionInsideEditableRoot` moves the selection into it
+    // and triggers another `selectionchange` that removes the selection
+    // placeholder. So we must wait for the `.o-we-hint`.
     await waitFor(".o-we-hint");
     await animationFrame();
     const videoIframe = queryOne("div[data-embedded='video']");
@@ -1641,9 +1641,9 @@ test("edit and enable/disable codeview with editor toolbar", async () => {
 
     setSelectionInHtmlField();
     await insertText(htmlEditor, "Hello");
-    await ensureDistinctHistoryStep();
+    await ensureDistinctHistoryCommit();
     await insertText(htmlEditor, " ");
-    await ensureDistinctHistoryStep();
+    await ensureDistinctHistoryCommit();
     expect("[name='txt'] .odoo-editor-editable").toHaveInnerHTML("<p>Hello first </p>");
 
     // Switch to code view
@@ -1680,8 +1680,8 @@ test("edit and save a html field in collaborative should keep the same wysiwyg",
         expect(normalizeHTML(txt, stripHistoryIds)).toBe("<p>Hello first</p>");
         expect.step("web_save");
         args[1].txt = txt.replace(
-            /\sdata-last-history-steps="[^"]*?"/,
-            ' data-last-history-steps="12345"'
+            /\sdata-last-history-commits="[^"]*?"/,
+            ' data-last-history-commits="12345"'
         );
     });
     onRpc("/html_editor/get_ice_servers", () => []);

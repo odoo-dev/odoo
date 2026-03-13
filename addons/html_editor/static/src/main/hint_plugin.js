@@ -27,7 +27,7 @@ export class HintPlugin extends Plugin {
     resources = {
         /** Handlers */
         on_selectionchange_handlers: this.triggerDebouncedUpdateHints.bind(this),
-        on_external_history_step_added_handlers: () => {
+        on_external_history_commit_added_handlers: () => {
             this.clearHints();
             this.updateHints();
         },

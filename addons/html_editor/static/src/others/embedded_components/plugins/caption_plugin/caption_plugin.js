@@ -241,7 +241,7 @@ export class CaptionPlugin extends Plugin {
                     }
                     if (!this.captionsBeingAdded?.has(id)) {
                         // If the caption is being added, we update without
-                        // adding a history step because it will be added at the
+                        // adding a history commit because it will be added at the
                         // end of adding the caption, by `addImageCaption`.
                         this.dependencies.domMutation.commit();
                     }

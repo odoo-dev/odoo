@@ -69,7 +69,7 @@ export class ImageTransformButton extends Component {
         title: String,
         getTargetedImage: Function,
         resetImageTransformation: Function,
-        addStep: Function,
+        commit: Function,
         document: { validate: (p) => p.nodeType === Node.DOCUMENT_NODE },
         editable: { validate: (p) => p.nodeType === Node.ELEMENT_NODE },
         ...toolbarButtonProps,
@@ -107,7 +107,7 @@ export class ImageTransformButton extends Component {
                 document: this.props.document,
                 editable: this.props.editable,
                 destroy: () => this.closeImageTransformation(),
-                onChange: () => this.props.addStep(),
+                onChange: () => this.props.commit(),
             },
         });
     }

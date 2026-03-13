@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 <t t-name="website_builder.AttributeTranslateDialog">
-    <WebsiteDialog close.bind="addStepAndClose"
+    <WebsiteDialog close.bind="commitAndClose"
         title.translate="Translate Attribute"
         showSecondaryButton="false">
         <div class="mb-3">

@@ -430,7 +430,7 @@ export class DragAndDropPlugin extends Plugin {
                     dragState: this.dragState,
                 });
 
-                // Add a history step only if the element was not dropped where
+                // Add a history commit only if the element was not dropped where
                 // it was before, otherwise cancel everything.
                 let hasSamePositionAsStart;
                 if ("hasSamePositionAsStart" in this.dragState) {

@@ -1,4 +1,12 @@
-import { reactive, useComponent, useEnv, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
+import {
+    reactive,
+    useComponent,
+    useEnv,
+    useLayoutEffect,
+    useRef,
+    useState,
+    useSubEnv,
+} from "@web/owl2/utils";
 import { isElement, isTextNode } from "@html_editor/utils/dom_info";
 import {
     Component,
@@ -940,7 +948,7 @@ export function useInputDebouncedCommit(ref) {
     }, 550);
     // ↑ 500 is the delay when holding keydown between the 1st and 2nd event
     // fired. Some additional delay by the browser may add another ~5-10ms.
-    // We debounce above that threshold to keep a single history step when
+    // We debounce above that threshold to keep a single history commit when
     // holding up/down on a number or range input.
 }
 

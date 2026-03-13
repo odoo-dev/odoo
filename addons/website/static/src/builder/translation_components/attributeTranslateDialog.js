@@ -7,7 +7,7 @@ export class AttributeTranslateDialog extends Component {
     static props = {
         node: { validate: (p) => p.nodeType === Node.ELEMENT_NODE },
         elToTranslationInfoMap: Object,
-        addStep: Function,
+        commit: Function,
         applyCustomMutation: Function,
         close: Function,
     };
@@ -37,7 +37,7 @@ export class AttributeTranslateDialog extends Component {
         return this.props.elToTranslationInfoMap.get(this.props.node);
     }
 
-    addStepAndClose() {
+    commitAndClose() {
         const oldValue = JSON.parse(JSON.stringify(this.translationInfos));
         this.props.applyCustomMutation({
             apply: () => {
@@ -51,7 +51,7 @@ export class AttributeTranslateDialog extends Component {
                 }
             },
         });
-        this.props.addStep();
+        this.props.commit();
         this.props.close();
     }
 }

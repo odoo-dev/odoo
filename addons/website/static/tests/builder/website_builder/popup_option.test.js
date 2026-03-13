@@ -130,8 +130,8 @@ describe("Popup options: popup in page before edit", () => {
         expect(":iframe .s_popup .modal").not.toBeVisible();
         expect(":iframe .s_popup").toHaveClass("d-none");
         expect(".o_we_invisible_entry .fa").toHaveClass("fa-eye-slash");
-        // Ensure that no mutations were registered in the history.
-        // `addStep` return the created step, or false if there was no mutations
+        // Ensure that no mutations were registered in the `domMutation` plugin.
+        // `commit` returns the written commit, or `false` if there were no mutations.
         expect(builder.getEditor().shared.domMutation.commit()).toBe(false);
     });
 

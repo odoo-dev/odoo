@@ -163,7 +163,7 @@ export class ToolbarPlugin extends Plugin {
         on_selectionchange_handlers: this.handleSelectionChange.bind(this),
         on_selection_leave_handlers: () => this.closeToolbar(),
         on_selection_enter_handlers: () => this.updateToolbar(),
-        on_step_added_handlers: () => this.updateToolbar(),
+        on_committed_handlers: () => this.updateToolbar(),
         user_commands: {
             id: "expandToolbar",
             run: () => {
@@ -353,7 +353,7 @@ export class ToolbarPlugin extends Plugin {
     }
 
     /**
-     * Different handlers might call updateToolbar (e.g. step added and
+     * Different handlers might call updateToolbar (e.g. commit added and
      * selection change) in the same tick. To avoid unnecessary updates, we
      * batch the calls.
      */

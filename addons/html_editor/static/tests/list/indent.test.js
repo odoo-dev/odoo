@@ -1371,7 +1371,7 @@ describe("Mixed: list + paragraph", () => {
         /* eslint-enable */
         expect(getContent(el)).toBe(expectedContent);
 
-        // Check that it was done as single history step.
+        // Check that it was done as single history commit.
         undo(editor);
         expect(getContent(el)).toBe(contentBefore);
     });

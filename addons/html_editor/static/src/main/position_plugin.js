@@ -14,10 +14,10 @@ export class PositionPlugin extends Plugin {
     static id = "position";
     /** @type {import("plugins").EditorResources} */
     resources = {
-        // todo: it is strange that the position plugin is aware of on_external_history_step_added_handlers and on_history_reset_from_steps_handlers.
-        on_external_history_step_added_handlers: this.layoutGeometryChange.bind(this),
-        on_history_reset_from_steps_handlers: this.layoutGeometryChange.bind(this),
-        on_step_added_handlers: this.layoutGeometryChange.bind(this),
+        // todo: it is strange that the position plugin is aware of on_external_history_commit_added_handlers and on_history_reset_from_commits_handlers.
+        on_external_history_commit_added_handlers: this.layoutGeometryChange.bind(this),
+        on_history_reset_from_commits_handlers: this.layoutGeometryChange.bind(this),
+        on_committed_handlers: this.layoutGeometryChange.bind(this),
         on_will_filter_mutation_record_handlers:
             this.handlePotentialLayoutGeometryChange.bind(this),
     };

@@ -985,7 +985,7 @@ export class LinkPlugin extends Plugin {
                 ];
             }
             cursors.restore();
-            // when only unlink an inline image, add step after the unwrapping
+            // when only unlink an inline image, commit after the unwrapping
             if (
                 selectedImageNodes.length === 1 &&
                 selectedImageNodes.length === targetedNodes.length

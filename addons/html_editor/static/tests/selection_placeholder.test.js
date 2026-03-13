@@ -3,7 +3,7 @@ import { testEditor } from "./_helpers/editor";
 import { unformat } from "./_helpers/format";
 import { animationFrame, press, tick } from "@odoo/hoot-dom";
 import {
-    ensureDistinctHistoryStep,
+    ensureDistinctHistoryCommit,
     insertText,
     simulateArrowKeyPress,
     splitBlock,
@@ -474,7 +474,7 @@ test("can undo/redo the persisting of selection placeholders", async () => {
         contentBeforeEdit: makeContent("b[]", '<p data-selection-placeholder=""><br></p>'),
         stepFunction: async (editor) => {
             await insertText(editor, "c");
-            await ensureDistinctHistoryStep();
+            await ensureDistinctHistoryCommit();
             expect(getContent(editor.editable)).toBe(
                 makeContent("bc[]", '<p data-selection-placeholder=""><br></p>'),
                 {

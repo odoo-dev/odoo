@@ -26,7 +26,7 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
     resources = {
         /** Handlers */
         on_collaboration_notification_handlers: this.handleCollaborationNotification.bind(this),
-        on_external_history_step_added_handlers: this.refreshSelection.bind(this),
+        on_external_history_commit_added_handlers: this.refreshSelection.bind(this),
         on_layout_geometry_change_handlers: this.refreshSelection.bind(this),
         on_movable_element_set_handlers: this.disableAvatarForElement.bind(this),
         on_will_unset_movable_element_handlers: this.enableAvatars.bind(this),

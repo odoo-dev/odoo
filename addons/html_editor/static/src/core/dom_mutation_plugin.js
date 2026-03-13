@@ -5,6 +5,7 @@ import { childNodes, descendants, getCommonAncestor } from "@html_editor/utils/d
 import { omit, pick } from "@web/core/utils/objects";
 import { toggleClass } from "@html_editor/utils/dom";
 import { withSequence } from "@html_editor/utils/resource";
+import { EditorCommit } from "@html_editor/utils/commit";
 
 // The commit data keys handled by `DomMutation`.
 const DOM_MUTATION_COMMIT_DATA_KEYS = [
@@ -15,6 +16,9 @@ const DOM_MUTATION_COMMIT_DATA_KEYS = [
 ];
 
 /**
+ * @typedef { import("../utils/commit").EditorCommit } Commit
+ * @typedef { import("../utils/commit").EditorCommitType } EditorCommitType
+ *
  * @typedef { string } NodeId
  *
  * @typedef { Object } SerializedNode
@@ -108,20 +112,12 @@ const DOM_MUTATION_COMMIT_DATA_KEYS = [
  * @property { Function } preview
  * @property { Function } revert
  *
- * @typedef { {
- *      authorTimestamp: number,              // timestamp of the commit authoring, before any mutation is applied
- *      mutations: EditorMutation[],          // the mutations to apply/revert
- *      activeElementId: NodeId,              // the ID of the active element before applying the mutations
- *      selection: SerializedSelection,       // the serialized selection before applying the mutations
- *      selectionAfter: SerializedSelection,  // the serialized selection after applying the mutations
- *      [key: string]: any,                   // additional properties
- * } } CommitData
- *
- * @typedef { string } CommitId
- *
- * @typedef { Object } EditorCommit
- * @property { CommitId } id
- * @property { CommitData } data
+ * @typedef { Object } DomMutationCommitData
+ * @property { number } authorTimestamp              // timestamp of the commit authoring, before any mutation is applied
+ * @property { EditorMutation[] } mutations          // the mutations to apply/revert
+ * @property { NodeId } activeElementId              // the ID of the active element before applying the mutations
+ * @property { SerializedSelection } selection       // the serialized selection before applying the mutations
+ * @property { SerializedSelection } selectionAfter  // the serialized selection after applying the mutations
  */
 /**
  * @typedef { Object } DomMutationShared
@@ -148,7 +144,8 @@ const DOM_MUTATION_COMMIT_DATA_KEYS = [
  * @typedef {((root: HTMLElement) => void)[]} content_updated_handlers
  * @typedef {(() => void)[]} on_savepoint_restored_handlers
  * @typedef {((node: Node, childTreesToSerialize: Tree[]) => Tree[])[]} serializable_descendants_processors
- * @typedef {(() => void)[]} on_will_commit_handlers
+ * @typedef {((type: EditorCommitType) => void)[]} on_will_commit_handlers
+ * @typedef {((commit: Commit) => Commit)[]} editor_commit_processors
  */
 export class DomMutationPlugin extends Plugin {
     static id = "domMutation";
@@ -182,28 +179,28 @@ export class DomMutationPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         on_editor_started_handlers: withSequence(9, this.enableObserver.bind(this)),
-        on_will_reset_history_from_steps_handlers: () => {
+        on_will_reset_history_from_commits_handlers: () => {
             // TODO AGE: this is only to replace the `withObserverOff` call in
-            // `history.resetFromSteps` but it's not useful for `history.reset`,
-            // and assumes a call to `history_reset_from_steps_handlers` after.
+            // `history.resetFromCommits` but it's not useful for `history.reset`,
+            // and assumes a call to `history_reset_from_commits_handlers` after.
             this.lastEnableObserverCallback = this.disableObserver();
         },
-        on_history_reset_from_steps_handlers: () => {
+        on_history_reset_from_commits_handlers: () => {
             // See above.
             this.lastEnableObserverCallback?.();
             this.lastEnableObserverCallback = undefined;
         },
         on_history_reset_handlers: withSequence(0, () => {
-            this.dependencies.history.write(this.createSnapshotCommit(), "reset");
+            this.dependencies.history.write(this.createSnapshotCommit("reset"));
             this.stageSelection();
         }),
         on_prepare_drag_handlers: this.disableHasStagedMutationsWarning.bind(this),
         on_history_cleaned_handlers: this.clean.bind(this),
-        on_will_add_external_step_handlers: () => {
-            // The last step is an uncommited draft, revert it first
+        on_will_add_external_commit_handlers: () => {
+            // The last commit is an uncommited draft, revert it first
             this.stash();
         },
-        on_external_step_added_handlers: () => {
+        on_external_commit_added_handlers: () => {
             // Reapply the uncommited draft, since this is not an operation which should cancel it
             this.unstash();
         },
@@ -220,45 +217,47 @@ export class DomMutationPlugin extends Plugin {
             }
         },
         on_will_undo_handlers: this.discardDraft.bind(this),
-        on_single_step_undone_handlers: withSequence(0, (revertedStep) => {
+        on_single_commit_undone_handlers: withSequence(0, (revertedCommit) => {
             // TODO AGE: This used to be done in history after undo a single
-            // step and before dispatching on_undone_handlers. See if there is a
-            // better way.
+            // commit and before dispatching on_undone_handlers. See if there is
+            // a better way.
             // Consider the last position of the history as an undo.
-            if (revertedStep) {
-                // Include any commit data stored in the reverted step and that
+            if (revertedCommit) {
+                // Include any commit data stored in the reverted commit and that
                 // is not handled by this plugin.
                 // Note AGE: this is the `extraStepInfos` stuff.
-                for (const [key, value] of Object.entries(revertedStep.commit.data)) {
+                for (const [key, value] of Object.entries(revertedCommit.data)) {
                     if (!DOM_MUTATION_COMMIT_DATA_KEYS.includes(key)) {
                         this.update(key, value);
                     }
                 }
                 this._commit({
-                    stepType: "undo",
-                    batchable: revertedStep.commit.batchable,
-                    batchingTimestamp: revertedStep.commit.batchingTimestamp,
+                    type: "undo",
+                    batchable: revertedCommit.batchable,
+                    batchingTimestamp: revertedCommit.batchingTimestamp,
+                    writtenAt: revertedCommit.writtenAt,
                 });
             }
         }),
         on_will_redo_handlers: this.discardDraft.bind(this),
-        on_single_step_redone_handlers: withSequence(0, (revertedStep) => {
+        on_single_commit_redone_handlers: withSequence(0, (revertedCommit) => {
             // TODO AGE: This used to be done in history after redo a single
-            // step and before dispatching on_redone_handlers. See if there is a
-            // better way.
-            if (revertedStep) {
-                // Include any commit data stored in the reverted step and that
-                // is not handled by this plugin.
+            // commit and before dispatching on_redone_handlers. See if there is
+            // a better way.
+            if (revertedCommit) {
+                // Include any commit data stored in the reverted commit and
+                // that is not handled by this plugin.
                 // Note AGE: this is the `extraStepInfos` stuff.
-                for (const [key, value] of Object.entries(revertedStep.commit.data)) {
+                for (const [key, value] of Object.entries(revertedCommit.data)) {
                     if (!DOM_MUTATION_COMMIT_DATA_KEYS.includes(key)) {
                         this.update(key, value);
                     }
                 }
                 this._commit({
-                    stepType: "redo",
-                    batchable: revertedStep.commit.batchable,
-                    batchingTimestamp: revertedStep.commit.batchingTimestamp,
+                    type: "redo",
+                    batchable: revertedCommit.batchable,
+                    batchingTimestamp: revertedCommit.batchingTimestamp,
+                    writtenAt: revertedCommit.writtenAt,
                 });
             }
         }),
@@ -283,13 +282,17 @@ export class DomMutationPlugin extends Plugin {
         this.currentStash = [];
     }
 
-    // TODO AGE: stepType should actually just be commit.type.
     commit({ batchable = false } = {}) {
         return this._commit({ batchable });
     }
 
-    _commit({ stepType = "original", batchable = false, batchingTimestamp = Date.now() } = {}) {
-        const hasMutations = this.prepareForCommit(stepType || "original");
+    _commit({
+        type = "original",
+        batchable = false,
+        batchingTimestamp = Date.now(),
+        writtenAt = null,
+    } = {}) {
+        const hasMutations = this.prepareForCommit(type || "original");
         if (!hasMutations) {
             // TODO: I isolated `prepareForCommit` for now for simplicity for me
             // but it's not clear with its return functions so it should not
@@ -298,22 +301,19 @@ export class DomMutationPlugin extends Plugin {
         }
 
         // AGE TODO: rename
-        this.trigger("on_will_commit_handlers", stepType); // making sure it updates the step we're adding
-        const commit = this.createCommit({ batchable, batchingTimestamp });
-        // Set the timestamp of the commit or keep the timestamp of the commit
-        // it reverts (see `on_single_step_(un|re)done_handlers`).
-        commit.data.commitTimestamp ??= Date.now();
-        const step = this.dependencies.history.write(commit, stepType);
+        this.trigger("on_will_commit_handlers", type); // making sure it updates the commit we're adding
+        const commit = this.dependencies.history.write(
+            this.createCommit({ type, batchable, batchingTimestamp, writtenAt })
+        );
 
         this.resetCurrentChanges();
 
         this.stageSelection();
 
-        // TODO AGE: rename (step => commit)? Note: will not trigger for a reset
-        // step (it calls history.write directly). That's like it used to be
-        // before my changes: reset caused a step without calling addStep but by
-        // using steps.push directly.
-        this.trigger("on_step_added_handlers", step);
+        // Note AGE: will not trigger for a reset commit (it calls history.write
+        // directly). That's like it used to be before my changes: reset caused
+        // a step without calling addStep but by using steps.push directly.
+        this.trigger("on_committed_handlers", commit);
 
         this.config.onChange?.({ isPreviewing: this.isPreviewing });
         return commit;
@@ -577,17 +577,17 @@ export class DomMutationPlugin extends Plugin {
 
     // NEW: Commit creation
 
-    prepareForCommit(stepType) {
-        this.handleObserverRecords(true, stepType);
+    prepareForCommit(type) {
+        this.handleObserverRecords(true, type);
         const currentMutationsCount = this.currentChanges.mutations.length;
         if (currentMutationsCount === 0) {
             return false;
         }
         const commitRoot = this.getMutationsRoot(this.currentChanges.mutations) || this.editable;
-        this.processThrough("normalize_processors", commitRoot, stepType);
-        this.handleObserverRecords(false, stepType);
+        this.processThrough("normalize_processors", commitRoot, type);
+        this.handleObserverRecords(false, type);
         if (currentMutationsCount === this.currentChanges.mutations.length) {
-            // If there was no registered mutation during the normalization step,
+            // If there was no registered mutation during the normalization commit,
             // force the dispatch of a content_updated to allow i.e. the hint
             // plugin to react to non-observed changes (i.e. a div becoming
             // a baseContainer).
@@ -609,50 +609,59 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @returns {EditorMutationCommit}
+     * @returns {EditorCommit<DomMutationCommitData>}
      */
-    createCommit({ batchable, batchingTimestamp }) {
+    createCommit({ type = "original", batchable, batchingTimestamp, writtenAt } = {}) {
         this.updateLocal(
             "selectionAfter",
             this.serializeSelection(this.dependencies.selection.getEditableSelection())
         );
         const data = { ...this.currentChanges };
-        return {
-            id: this.generateId(),
-            data,
-            batchable,
-            batchingTimestamp,
-        };
+        return this.processThrough(
+            "editor_commit_processors",
+            new EditorCommit({
+                type,
+                data,
+                batchable,
+                batchingTimestamp,
+                writtenAt,
+            })
+        );
     }
 
     /**
-     * @returns {EditorMutationCommit}
+     * @param { CommitType } [type = "original"]
+     * @returns {EditorCommit<DomMutationCommitData>}
      */
-    createSnapshotCommit() {
+    createSnapshotCommit(type = "original") {
         const authorTimestamp = this.currentChanges.authorTimestamp || Date.now();
-        return {
-            id: this.dependencies.history.getHistorySteps().at(-1)?.id || this.generateId(),
-            data: {
-                authorTimestamp,
-                mutations: childNodes(this.editable)
-                    .filter((node) => this.nodeMap.hasNode(node))
-                    .map((node) => ({
-                        type: "add",
-                        parentNodeId: "root",
-                        nodeId: this.getNodeId(node),
-                        serializedNode: this.serializeNode(node),
-                        nextNodeId: null,
-                    })),
-                activeElementId: null,
-                selection: {
-                    anchorNode: undefined,
-                    anchorOffset: undefined,
-                    focusNode: undefined,
-                    focusOffset: undefined,
+        return this.processThrough(
+            "editor_commit_processors",
+            new EditorCommit({
+                id: this.dependencies.history.getHistoryCommits().at(-1)?.id,
+                type,
+                data: {
+                    authorTimestamp,
+                    mutations: childNodes(this.editable)
+                        .filter((node) => this.nodeMap.hasNode(node))
+                        .map((node) => ({
+                            type: "add",
+                            parentNodeId: "root",
+                            nodeId: this.getNodeId(node),
+                            serializedNode: this.serializeNode(node),
+                            nextNodeId: null,
+                        })),
+                    activeElementId: null,
+                    selection: {
+                        anchorNode: undefined,
+                        anchorOffset: undefined,
+                        focusNode: undefined,
+                        focusOffset: undefined,
+                    },
+                    selectionAfter: null,
                 },
-                selectionAfter: null,
-            },
-        };
+            })
+        );
     }
 
     // NEW: Apply mutations
@@ -978,15 +987,15 @@ export class DomMutationPlugin extends Plugin {
 
     // New mutations
 
-    handleObserverRecords(dispatch = true, stepType) {
-        this.handleNewRecords(this.observer.takeRecords(), dispatch, stepType);
+    handleObserverRecords(dispatch = true, type) {
+        this.handleNewRecords(this.observer.takeRecords(), dispatch, type);
     }
 
     /**
      * @param { NativeMutationRecord[] } records
      * @param { boolean } [dispatch]
-     * @param { import("./history_plugin").HistoryStepType } [currentOperation] the type
-     * of the step we're about to write (TODO AGE: obviously this is wrong)
+     * @param { CommitType } [currentOperation] the type
+     * of the commit we're about to write (TODO AGE: obviously this is wrong)
      */
     handleNewRecords(records, dispatch = true, currentOperation) {
         const processedRecords = this.processNewRecords(records);
@@ -1585,23 +1594,23 @@ export class DomMutationPlugin extends Plugin {
     // Preview stuff
 
     /**
-     * TODO AGE: review link with history and steps.
-     * Restores the editable to the state of a previous step.
-     * It does so by discarding the current draft and reverting reversible steps
-     * until the specified step index, while ensuring that irreversible steps
-     * are maintained. This will add a new "restore" step and set the reverted
-     * steps's state to "discarded".
+     * TODO AGE: review link with history and commits.
+     * Restores the editable to the state of a previous commit.
+     * It does so by discarding the current draft and reverting reversible commits
+     * until the specified commit index, while ensuring that irreversible commits
+     * are maintained. This will add a new "restore" commit and set the reverted
+     * commits's state to "discarded".
      *
-     * @param {HistoryStep} step
+     * @param {Commit} commit
      * @returns {CommitData | undefined}
      */
-    restoreToStep(step) {
+    restoreToCommit(commit) {
         this.discardDraft();
-        if (step === this.dependencies.history.getHistorySteps().at(-1)) {
+        if (commit === this.dependencies.history.getHistoryCommits().at(-1)) {
             return;
         }
         let lastRevertedChanges = { ...this.currentChanges };
-        const commitsToRestore = this.dependencies.history.getCommitsUntil(step.id);
+        const commitsToRestore = this.dependencies.history.getCommitsUntil(commit.id);
         const irreversibleCommits = [];
         for (const commitToRestore of commitsToRestore) {
             this.revertMutations(commitToRestore.data.mutations, {
@@ -1631,7 +1640,7 @@ export class DomMutationPlugin extends Plugin {
         this.setSerializedSelection(lastRevertedChanges.selection);
         // Register resulting mutations as a new "restore" commit (prevent undo).
         this.dispatchContentUpdated();
-        this._commit({ stepType: "restore" });
+        this._commit({ type: "restore" });
         return lastRevertedChanges;
     }
 
@@ -1652,14 +1661,14 @@ export class DomMutationPlugin extends Plugin {
             (key) => DOM_MUTATION_COMMIT_DATA_KEYS.includes(key) && delete dataToPreserve[key]
         );
 
-        const step = this.dependencies.history.getHistorySteps().at(-1);
+        const commit = this.dependencies.history.getHistoryCommits().at(-1);
         let hasBeenRestored = false;
         return () => {
             if (hasBeenRestored) {
                 return;
             }
             hasBeenRestored = true;
-            const lastRevertedChanges = this.restoreToStep(step);
+            const lastRevertedChanges = this.restoreToCommit(commit);
 
             if (lastRevertedChanges?.selection && !draftMutations.length) {
                 selectionToRestore.setCursor((cursor) => {
@@ -1677,7 +1686,7 @@ export class DomMutationPlugin extends Plugin {
                 });
             }
 
-            // Apply draft mutations to recover the same currentStep state
+            // Apply draft mutations to recover the same currentChanges state
             // as before.
             this.applyMutations(draftMutations, { ensureNewMutations: true });
             this.handleObserverRecords();
@@ -1707,13 +1716,13 @@ export class DomMutationPlugin extends Plugin {
                 this.isPreviewing = true;
                 this.stageSelection();
                 operation(...args);
-                // todo: We should not add a step on preview as it would send
-                // unnecessary steps in collaboration and let the other peer see
-                // what we preview.
+                // todo: We should not add a commit on preview as it would send
+                // unnecessary commits in collaboration and let the other peer
+                // see what we preview.
                 //
-                // The operation should be similar than in the 'commit'
-                // (normalize etc...) hence the 'addStep' (but we need to remove
-                // it for the collaboration).
+                // The operation should be similar to the 'commit' (normalize
+                // etc...) hence the call to 'commit' (but we need to remove it
+                // for the collaboration).
                 this.commit();
             },
             commit: (...args) => {
@@ -1759,13 +1768,13 @@ export class DomMutationPlugin extends Plugin {
                 if (this.isDestroyed) {
                     return;
                 }
-                // todo: We should not add a step on preview as it would send
-                // unnecessary steps in collaboration and let the other peer see
-                // what we preview.
+                // todo: We should not add a commit on preview as it would send
+                // unnecessary commits in collaboration and let the other peer
+                // see what we preview.
                 //
-                // The operation should be similar than in the 'commit'
-                // (normalize etc...) hence the 'addStep' (but we need to remove
-                // it for the collaboration).
+                // The operation should be similar to the 'commit' (normalize
+                // etc...) hence the call to 'commit' (but we need to remove it
+                // for the collaboration).
                 this.commit();
             },
             commit: async (...args) => {
@@ -1812,7 +1821,7 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @returns { CommitId  }
+     * @returns { NodeId  }
      */
     generateId() {
         // No need for secure random number.

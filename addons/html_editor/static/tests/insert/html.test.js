@@ -6,7 +6,7 @@ import { unformat } from "../_helpers/format";
 import { getContent } from "../_helpers/selection";
 import { cleanHints } from "../_helpers/dispatch";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
-import { addStep } from "../_helpers/user_actions";
+import { commit } from "../_helpers/user_actions";
 import { Plugin } from "@html_editor/plugin";
 import { waitFor } from "@odoo/hoot-dom";
 
@@ -305,10 +305,10 @@ describe("collapsed selection", () => {
             parseHTML(editor.document, `<p data-oe-protected="true">in</p>`).firstElementChild
         );
         editor.shared.domMutation.commit();
-        // Insertion triggers selectionchange & addStep creates selection
-        // placeholder.fixSelectionInsideEditableRoot moves selection into it,
-        // trigger another selectionchange that removes selection placeholder.
-        // So we must wait for the o-we-hint.
+        // Insertion triggers `selectionchange` and `commit` creates a selection
+        // placeholder. `fixSelectionInsideEditableRoot` moves the selection
+        // into it and triggers another `selectionchange` that removes the
+        // selection placeholder. So we must wait for the `.o-we-hint`.
         await waitFor(".o-we-hint");
         cleanHints(editor);
         expect(getContent(editor.editable, { sortAttrs: true })).toBe(
@@ -399,7 +399,7 @@ describe("collapsed selection", () => {
             }
         );
         editor.shared.dom.insert("notasurprise");
-        addStep(editor);
+        commit(editor);
         expect(getContent(el)).toBe(`<p class="first">?</p><p class="second">surprise[]!</p>`);
     });
 });

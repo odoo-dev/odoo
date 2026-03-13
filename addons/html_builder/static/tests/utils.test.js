@@ -13,7 +13,7 @@ import { contains, onRpc } from "@web/../tests/web_test_helpers";
 describe.current.tags("desktop");
 
 describe("useDomState", () => {
-    test("Should not update the state of an async useDomState if a new step has been made", async () => {
+    test("Should not update the state of an async useDomState if a new commit has been written", async () => {
         let currentResolve;
         addBuilderOption(
             class extends BaseOptionComponent {

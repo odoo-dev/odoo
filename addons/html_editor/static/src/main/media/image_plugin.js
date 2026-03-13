@@ -217,7 +217,7 @@ export class ImagePlugin extends Plugin {
         on_will_save_media_dialog_handlers: async (elements) => {
             for (const element of elements) {
                 if (element && element.tagName === "IMG") {
-                    this.resetImageTransformation(element, { addStep: false });
+                    this.resetImageTransformation(element, { commit: false });
                 }
             }
         },
@@ -387,14 +387,14 @@ export class ImagePlugin extends Plugin {
         this.dependencies.domMutation.commit();
     }
 
-    resetImageTransformation(image, { addStep = true } = {}) {
+    resetImageTransformation(image, { commit = true } = {}) {
         image.setAttribute(
             "style",
             (image.getAttribute("style") || "").replace(/[^;]*transform[\w:]*;?/g, "")
         );
         image.style.removeProperty("width");
         image.style.removeProperty("height");
-        if (addStep) {
+        if (commit) {
             this.dependencies.domMutation.commit();
         }
     }
@@ -406,7 +406,7 @@ export class ImagePlugin extends Plugin {
             title: _t("Transform the picture (click twice to reset transformation)"),
             getTargetedImage: this.getTargetedImage.bind(this),
             resetImageTransformation: this.resetImageTransformation.bind(this),
-            addStep: this.dependencies.domMutation.commit.bind(this),
+            commit: this.dependencies.domMutation.commit.bind(this),
             document: this.document,
             editable: this.editable,
             activeTitle: _t("Click again to reset transformation"),

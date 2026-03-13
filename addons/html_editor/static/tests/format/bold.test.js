@@ -65,7 +65,7 @@ test("should make qweb tag bold (2)", async () => {
     });
 });
 
-test("should make qweb tag bold and create a step even with partial selection inside contenteditable false", async () => {
+test("should make qweb tag bold and create a commit even with partial selection inside contenteditable false", async () => {
     const { editor, el } = await setupEditor(
         `<div><p t-out="'Test'" contenteditable="false">T[e]st</p></div>`
     );
@@ -76,13 +76,13 @@ test("should make qweb tag bold and create a step even with partial selection in
             '<p data-selection-placeholder=""><br></p>'
     );
     expect(queryOne(`p[contenteditable="false"]`).childNodes.length).toBe(1);
-    const historySteps = editor.shared.history.getHistorySteps();
-    expect(historySteps.length).toBe(2);
-    const lastStep = historySteps.at(-1);
-    expect(lastStep.commit.data.mutations.length).toBe(1);
-    expect(lastStep.commit.data.mutations[0].type).toBe("attributes");
-    expect(lastStep.commit.data.mutations[0].attributeName).toBe("style");
-    expect(lastStep.commit.data.mutations[0].value).toBe("font-weight: bolder;");
+    const historyCommits = editor.shared.history.getHistoryCommits();
+    expect(historyCommits.length).toBe(2);
+    const lastCommit = historyCommits.at(-1);
+    expect(lastCommit.data.mutations.length).toBe(1);
+    expect(lastCommit.data.mutations[0].type).toBe("attributes");
+    expect(lastCommit.data.mutations[0].attributeName).toBe("style");
+    expect(lastCommit.data.mutations[0].value).toBe("font-weight: bolder;");
 });
 
 test.tags("desktop");
@@ -480,14 +480,14 @@ test("should not remove empty bold tag in an empty block when changing selection
     );
 });
 
-test("should not add history step for bold on collapsed selection", async () => {
+test("should not add history commit for bold on collapsed selection", async () => {
     const { editor, el } = await setupEditor("<p>abcd[]</p>");
 
     patchWithCleanup(console, { warn: () => {} });
 
     // Collapsed formatting shortcuts (e.g. Ctrl+B) shouldn’t create a history
-    // step. The empty inline tag is temporary: auto-cleaned if unused. We want
-    // to avoid having a phantom step in the history.
+    // commit. The empty inline tag is temporary: auto-cleaned if unused. We want
+    // to avoid having a phantom commit in the history.
     await press(["ctrl", "b"]);
     expect(getContent(el)).toBe(`<p>abcd<strong data-oe-zws-empty-inline="">[]\u200B</strong></p>`);
 

@@ -24,11 +24,11 @@ export class PopupVisibilityPlugin extends Plugin {
             const { target, attributeName, value, oldValue } = attributeChange;
             // On hide/show of the popup, the `style` attribute of the modal in
             // the popup is changed. This also happens with the option
-            // "Backdrop" on the popup. When reverting/re-applying steps that
+            // "Backdrop" on the popup. When reverting/re-applying commits that
             // are supposed to change the option, we do not want to also change
             // whether the popup is hidden of not. Here, we keep the `display`
             // property in the `style` attribute unchanged when the history
-            // revert/re-apply a step that modified it.
+            // revert/re-apply a commit that modified it.
             if (attributeName === "style" && target.matches(".s_popup > .modal")) {
                 const re = /display: .*?;/;
                 const oldDisplay = oldValue.match(re)?.[0] ?? "";

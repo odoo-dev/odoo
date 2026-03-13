@@ -147,27 +147,27 @@ export class TableUIPlugin extends Plugin {
         if (!td) {
             return;
         }
-        const withAddStep =
+        const withCommit =
             (fn) =>
             (...args) => {
                 fn(...args);
                 this.dependencies.domMutation.commit();
             };
         const tableMethods = {
-            moveColumn: withAddStep(this.dependencies.table.moveColumn),
-            addColumn: withAddStep(this.dependencies.table.addColumn),
-            removeColumn: withAddStep(this.dependencies.table.removeColumn),
-            moveRow: withAddStep(this.dependencies.table.moveRow),
-            addRow: withAddStep(this.dependencies.table.addRow),
-            removeRow: withAddStep(this.dependencies.table.removeRow),
-            turnIntoHeader: withAddStep(this.dependencies.table.turnIntoHeader),
-            turnIntoRow: withAddStep(this.dependencies.table.turnIntoRow),
-            resetRowHeight: withAddStep(this.dependencies.table.resetRowHeight),
-            resetColumnWidth: withAddStep(this.dependencies.table.resetColumnWidth),
-            resetTableSize: withAddStep(this.dependencies.table.resetTableSize),
-            clearColumnContent: withAddStep(this.dependencies.table.clearColumnContent),
-            clearRowContent: withAddStep(this.dependencies.table.clearRowContent),
-            toggleAlternatingRows: withAddStep(this.dependencies.table.toggleAlternatingRows),
+            moveColumn: withCommit(this.dependencies.table.moveColumn),
+            addColumn: withCommit(this.dependencies.table.addColumn),
+            removeColumn: withCommit(this.dependencies.table.removeColumn),
+            moveRow: withCommit(this.dependencies.table.moveRow),
+            addRow: withCommit(this.dependencies.table.addRow),
+            removeRow: withCommit(this.dependencies.table.removeRow),
+            turnIntoHeader: withCommit(this.dependencies.table.turnIntoHeader),
+            turnIntoRow: withCommit(this.dependencies.table.turnIntoRow),
+            resetRowHeight: withCommit(this.dependencies.table.resetRowHeight),
+            resetColumnWidth: withCommit(this.dependencies.table.resetColumnWidth),
+            resetTableSize: withCommit(this.dependencies.table.resetTableSize),
+            clearColumnContent: withCommit(this.dependencies.table.clearColumnContent),
+            clearRowContent: withCommit(this.dependencies.table.clearRowContent),
+            toggleAlternatingRows: withCommit(this.dependencies.table.toggleAlternatingRows),
         };
         if (td.cellIndex === 0) {
             this.rowMenu.open({
