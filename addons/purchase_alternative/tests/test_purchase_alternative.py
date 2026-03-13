@@ -102,6 +102,8 @@ class TestPurchaseAlternative(TestPurchaseAlternativeCommon):
         pos = self.env['purchase.order'].browse(pos)
         po_1, po_2, po_3, po_4, po_5 = pos
 
+        po_1.purchase_group_id = self.env['purchase.order.group'].create({})
+        po_3.purchase_group_id = self.env['purchase.order.group'].create({})
         po_1.alternative_po_ids |= po_2
         po_3.alternative_po_ids |= po_4
         groups = self.env['purchase.order.group'].search([('order_ids', 'in', pos.ids)])
@@ -109,6 +111,7 @@ class TestPurchaseAlternative(TestPurchaseAlternativeCommon):
         self.assertEqual(len(po_3.alternative_po_ids), 2, "PO3 and PO4 should only be linked to each other")
         self.assertEqual(len(groups), 2, "There should only be 2 groups: (PO1,PO2) and (PO3,PO4)")
 
+        po_5.purchase_group_id = self.env['purchase.order.group'].create({})
         # link non-linked PO to already linked PO
         po_5.alternative_po_ids |= po_4
         groups = self.env['purchase.order.group'].search([('order_ids', 'in', pos.ids)])
