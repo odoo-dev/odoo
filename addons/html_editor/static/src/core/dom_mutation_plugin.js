@@ -233,9 +233,7 @@ export class DomMutationPlugin extends Plugin {
                 }
                 this._commit({
                     type: "undo",
-                    batchable: revertedCommit.batchable,
-                    batchingTimestamp: revertedCommit.batchingTimestamp,
-                    writtenAt: revertedCommit.writtenAt,
+                    metadata: revertedCommit.metadata,
                 });
             }
         }),
@@ -255,9 +253,7 @@ export class DomMutationPlugin extends Plugin {
                 }
                 this._commit({
                     type: "redo",
-                    batchable: revertedCommit.batchable,
-                    batchingTimestamp: revertedCommit.batchingTimestamp,
-                    writtenAt: revertedCommit.writtenAt,
+                    metadata: revertedCommit.metadata,
                 });
             }
         }),
@@ -283,15 +279,10 @@ export class DomMutationPlugin extends Plugin {
     }
 
     commit({ batchable = false } = {}) {
-        return this._commit({ batchable });
+        return this._commit({ metadata: { batchable } });
     }
 
-    _commit({
-        type = "original",
-        batchable = false,
-        batchingTimestamp = Date.now(),
-        writtenAt = null,
-    } = {}) {
+    _commit({ type = "original", metadata = {} } = {}) {
         const hasMutations = this.prepareForCommit(type || "original");
         if (!hasMutations) {
             // TODO: I isolated `prepareForCommit` for now for simplicity for me
@@ -302,9 +293,7 @@ export class DomMutationPlugin extends Plugin {
 
         // AGE TODO: rename
         this.trigger("on_will_commit_handlers", type); // making sure it updates the commit we're adding
-        const commit = this.dependencies.history.write(
-            this.createCommit({ type, batchable, batchingTimestamp, writtenAt })
-        );
+        const commit = this.dependencies.history.write(this.createCommit(type, metadata));
 
         this.resetCurrentChanges();
 
@@ -611,7 +600,7 @@ export class DomMutationPlugin extends Plugin {
     /**
      * @returns {EditorCommit<DomMutationCommitData>}
      */
-    createCommit({ type = "original", batchable, batchingTimestamp, writtenAt } = {}) {
+    createCommit(type = "original", metadata = {}) {
         this.updateLocal(
             "selectionAfter",
             this.serializeSelection(this.dependencies.selection.getEditableSelection())
@@ -622,9 +611,7 @@ export class DomMutationPlugin extends Plugin {
             new EditorCommit({
                 type,
                 data,
-                batchable,
-                batchingTimestamp,
-                writtenAt,
+                metadata,
             })
         );
     }

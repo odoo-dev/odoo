@@ -140,7 +140,7 @@ export class HistoryPlugin extends Plugin {
     write(commit) {
         // Set the timestamp of the commit or keep the timestamp of the commit
         // it reverts (see `DomMutation`: `on_single_commit_(un|re)done_handlers`).
-        commit.write();
+        commit.stamp();
         // @todo @phoenix should we allow to pause the making of a commit?
         // if (!this.commitsActive) {
         //     return;
@@ -316,11 +316,14 @@ export class HistoryPlugin extends Plugin {
     canCommitsBeBatched(index1, index2) {
         const commit1 = this.commits[index1];
         const commit2 = this.commits[index2];
-        if (!commit1.batchable || !commit2.batchable) {
+        if (!commit1.metadata.batchable || !commit2.metadata.batchable) {
             return false;
         }
         // Keep only if close enough in time.
-        if (Math.abs(commit1.writtenAt - commit2.writtenAt) > COMMIT_DEBOUNCE_DELAY) {
+        if (
+            Math.abs(commit1.metadata.commitTimestamp - commit2.metadata.commitTimestamp) >
+            COMMIT_DEBOUNCE_DELAY
+        ) {
             return false;
         }
         return true;
