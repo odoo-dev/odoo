@@ -562,7 +562,6 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _get_error_html(cls, env, code, values):
-        values['request'] = request
         try:
             return code, env['ir.ui.view']._render_template('http_routing.%s' % code, values)
         except MissingError:
@@ -604,7 +603,7 @@ class IrHttp(models.AbstractModel):
             code, html = cls._get_error_html(request.env, code, values)
         except Exception:
             _logger.exception("Couldn't render a template for http status %s", code)
-            code, html = 418, request.env['ir.ui.view']._render_template('http_routing.http_error', values)
+            code, html = 418, cls._get_error_html(cls, request.env, 'http_error', values)
 
         response = Response(html, status=code, content_type='text/html;charset=utf-8')
         cls._post_dispatch(response)

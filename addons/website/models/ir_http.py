@@ -13,7 +13,7 @@ from urllib3.util import parse_url
 import odoo
 from odoo import api, models, tools
 from odoo import SUPERUSER_ID
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, MissingError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools.json import scriptsafe as json_scriptsafe
@@ -513,10 +513,29 @@ class IrHttp(models.AbstractModel):
 
     @classmethod
     def _get_error_html(cls, env, code, values):
+        raw_code = code
+        template = 'http_routing.%s' % code
+        is_frontend = request.is_frontend or env.context.get('website_id')
+
         if code in ('page_404', 'protected_403'):
+            raw_code = code.split('_')[1]
+            template = 'website.%s' % code
+            values['request'] = request
+            is_frontend = True
+        elif code == 'http_error':
+            raw_code = 418
+
+        try:
+            env['ir.ui.view']._get_template_view(template)
+        except MissingError:
+            if str(raw_code)[0] == '4':
+                template = 'http_routing.4xx'
+
+        if is_frontend:
             website = request.env['website'].get_current_website(fallback=True)
-            return code.split('_')[1], website._render_template('website.%s' % code, values)
-        return super()._get_error_html(env, code, values)
+            return raw_code, website._render_template(template, values)
+        else:
+            return raw_code, env['ir.ui.view']._render_template(template, values)
 
     @api.model
     def get_frontend_session_info(self):
