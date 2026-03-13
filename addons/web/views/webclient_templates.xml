@@ -209,7 +209,7 @@
             <em class="d-block my-3 small text-center text-muted">- or -</em>
             <div class="list-group">
                 <a t-foreach="auth_btns" t-as="p" t-attf-class="{{p.get('list_item_class')}} list-group-item list-group-item-action d-flex align-items-center gap-2 py-2" t-att-href="p.get('auth_link') or '#'">
-                    <i t-att-class="p['css_class']" role="presentation"/>
+                    <i t-att-class="p['css_class']" t-att-data-icon="p.get('icon') or 'login'" role="presentation"/>
                     <span class="mx-auto" t-out="p['body']"/>
                 </a>
             </div>
