@@ -711,10 +711,11 @@ class TemplateCompiler:
             if attr_name and attr_name.startswith("t-attf-"):
                 compile_expr = self._process_dynamic_string
 
-            if node.get("add", False):
-                node.set("add", compile_expr(node.get("add")))
-            elif node.get("remove", False):
-                node.set("remove", compile_expr(node.get("remove")))
+            if node.get("add") or node.get("remove"):
+                if node.get("add"):
+                    node.set("add", compile_expr(node.get("add")))
+                if node.get("remove"):
+                    node.set("remove", compile_expr(node.get("remove")))
             else:
                 node.text = etree.CDATA(compile_expr(txt))
 
@@ -969,42 +970,6 @@ tests = [
 """,
     },
     {
-        "name": "attribute in xpath",
-        "content": """
-<t t-name="sfsdg" t-inherit="web.ListView">
-<xpath expr="//button[@class='nav-link']" position="attributes">
-    <attribute name="t-on-click">() => changeTabTo(navItem[0])</attribute>
-</xpath>
-</t>
-""",
-        "expected": """
-<t t-name="sfsdg" t-inherit="web.ListView">
-<xpath expr="//button[@class='nav-link']" position="attributes">
-    <attribute name="t-on-click">() => this.changeTabTo(this.navItem[0])</attribute>
-</xpath>
-</t>
-""",
-    },
-    {
-        "name": "attributes targetting html",
-        "content": """
-<t t-name="sfsdg" t-inherit="web.ListView">
-<xpath expr="//Dropdown/button" position="attributes">
-    <attribute name="class" remove="p-0" add="shadow-none" separator=" "/>
-    <attribute name="t-att-class">getTogglerClass(currentValue)</attribute>
-</xpath>
-</t>
-""",
-        "expected": """
-<t t-name="sfsdg" t-inherit="web.ListView">
-<xpath expr="//Dropdown/button" position="attributes">
-    <attribute name="class" remove="p-0" add="shadow-none" separator=" "/>
-    <attribute name="t-att-class">this.getTogglerClass(this.currentValue)</attribute>
-</xpath>
-</t>
-""",
-    },
-    {
         "name": "dynamic t-call",
         "content": """<t t-call="{{ getAuthMethodFormTemplate(state.authMethod) }}"/>""",
         "expected": """<t t-call="{{ this.getAuthMethodFormTemplate(this.state.authMethod) }}"/>""",
@@ -1243,6 +1208,42 @@ TODO why dones this test pass
 """,
     },
     {
+        "name": "attribute in xpath",
+        "content": """
+<t t-name="sfsdg" t-inherit="web.ListView">
+<xpath expr="//button[@class='nav-link']" position="attributes">
+    <attribute name="t-on-click">() => changeTabTo(navItem[0])</attribute>
+</xpath>
+</t>
+""",
+        "expected": """
+<t t-name="sfsdg" t-inherit="web.ListView">
+<xpath expr="//button[@class='nav-link']" position="attributes">
+    <attribute name="t-on-click">() => this.changeTabTo(this.navItem[0])</attribute>
+</xpath>
+</t>
+""",
+    },
+    {
+        "name": "attributes targetting through component",
+        "content": """
+<t t-name="sfsdg" t-inherit="web.ListView">
+<xpath expr="//Dropdown/button" position="attributes">
+    <attribute name="class" remove="p-0" add="shadow-none" separator=" "/>
+    <attribute name="t-att-class">getTogglerClass(currentValue)</attribute>
+</xpath>
+</t>
+""",
+        "expected": """
+<t t-name="sfsdg" t-inherit="web.ListView">
+<xpath expr="//Dropdown/button" position="attributes">
+    <attribute name="class" remove="p-0" add="shadow-none" separator=" "/>
+    <attribute name="t-att-class">this.getTogglerClass(this.currentValue)</attribute>
+</xpath>
+</t>
+""",
+    },
+    {
         "name": "xpath position=attribute, 2",
         "content": """
 <t t-name="sfsdg" t-inherit="web.ListView">
@@ -1283,6 +1284,7 @@ TODO why dones this test pass
     <xpath expr="//span[@t-att-title='item.fullTimeInStage']" position="attributes">
         <attribute name="t-attf-class" add="--o-mail-livechat-btn-color {{ props.thread?.channel?.channel_type === 'ai_chat' ? 'ms-0' : '' }}" separator=" "/>
         <attribute name="t-if" remove="(!props.record.data.is_rotting || !item.isSelected)" separator=" and "/>
+        <attribute name="t-if" add="props.record.data" remove="!item.isSelected" separator=" and "/>
     </xpath>
 </t>
 """,
@@ -1291,6 +1293,7 @@ TODO why dones this test pass
     <xpath expr="//span[@t-att-title='this.item.fullTimeInStage']" position="attributes">
         <attribute name="t-attf-class" add="--o-mail-livechat-btn-color {{ this.props.thread?.channel?.channel_type === 'ai_chat' ? 'ms-0' : '' }}" separator=" "/>
         <attribute name="t-if" remove="(!this.props.record.data.is_rotting || !this.item.isSelected)" separator=" and "/>
+        <attribute name="t-if" add="this.props.record.data" remove="!this.item.isSelected" separator=" and "/>
     </xpath>
 </t>
 """,
