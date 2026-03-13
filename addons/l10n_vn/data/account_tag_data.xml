@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="l10n_vn.operating_depreciation" model="account.account.tag">
+            <field name="name">02. Operating_depreciation</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_provision" model="account.account.tag">
+            <field name="name">03. Operating_provision</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_forex_gain_loss" model="account.account.tag">
+            <field name="name">04. Operating_forex</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_fin_activities" model="account.account.tag">
+            <field name="name">05. Operating_financial activities</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_borrowing_expense" model="account.account.tag">
+            <field name="name">06. Operating_borrowing expenses</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_other_adjustment" model="account.account.tag">
+            <field name="name">07. Operating_other adjustments</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_trade_receivable" model="account.account.tag">
+            <field name="name">09. Operating_receivables</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_inventory" model="account.account.tag">
+            <field name="name">10. Operating_inventory</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_trade_payable" model="account.account.tag">
+            <field name="name">11. Operating_payables</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_deferred_expense" model="account.account.tag">
+            <field name="name">12. Operating_deferred expenses</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_trading_securities" model="account.account.tag">
+            <field name="name">13. Operating_trading securities</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_paid_borrowing_expense" model="account.account.tag">
+            <field name="name">14. Operating_borrowing expenses</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_paid_CIT" model="account.account.tag">
+            <field name="name">15. Operating_CIT</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_other_receivable" model="account.account.tag">
+            <field name="name">16. Operating_other receivables</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.operating_other_payable" model="account.account.tag">
+            <field name="name">17. Operating_other payables</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.investing_purchase_FA" model="account.account.tag">
+            <field name="name">21. Investing_cash out from purchase of fixed assets</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.investing_disposal_FA" model="account.account.tag">
+            <field name="name">22. Investing_cash in from disposal, sales of fixed assets</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.investing_cash_out_debt_instruments" model="account.account.tag">
+            <field name="name">23. Investing_cash out from lending, purchase of debt instruments</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.investing_cash_in_debt_instruments" model="account.account.tag">
+            <field name="name">24. Investing_cash in from borrowing collection, sales of debt instruments</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.investing_cash_out_captial_contribution" model="account.account.tag">
+            <field name="name">25. Investing_cash out for capital contribution in other entities</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.investing_cash_in_captial_contribution" model="account.account.tag">
+            <field name="name">26. Investing_cash in from captial contribution in other entities</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.investing_cash_in_interest_dividend" model="account.account.tag">
+            <field name="name">27. Investing_cash in from interest, dividend</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.finance_share_issuance" model="account.account.tag">
+            <field name="name">31. Financing_cash in from share issuance, capital contribution</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.finance_repay_capital_purchase_share" model="account.account.tag">
+            <field name="name">32. Financing_cash out for captial contribution, buy issued shares</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.finance_receipt_borrowing" model="account.account.tag">
+            <field name="name">33. Financing_cash in from borrowing</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.finance_borrowing_repay" model="account.account.tag">
+            <field name="name">34. Financing_cash out from repayment of borrowing</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.finance_fin_lease_repay" model="account.account.tag">
+            <field name="name">35. Financing_cash out from repayment of financial lease</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.finance_dividend" model="account.account.tag">
+            <field name="name">36. Financing_devidend paid to owner</field>
+            <field name="applicability">accounts</field>
+        </record>
+        <record id="l10n_vn.currency_differences" model="account.account.tag">
+            <field name="name">61. Currency translation differences</field>
+            <field name="applicability">accounts</field>
+        </record>
+    </data>
+</odoo>
