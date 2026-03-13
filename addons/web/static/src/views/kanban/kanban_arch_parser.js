@@ -1,5 +1,5 @@
 import { exprToBoolean } from "@web/core/utils/strings";
-import { extractAttributes, visitXML } from "@web/core/utils/xml";
+import { extractAttributes, parseXML, visitXML } from "@web/core/utils/xml";
 import { stringToOrderBy } from "@web/search/utils/order_by";
 import { Field } from "@web/views/fields/field";
 import { getActiveActions, processButton } from "@web/views/utils";
@@ -48,6 +48,14 @@ export class KanbanArchParser {
         visitXML(xmlDoc, (node) => {
             if (node.hasAttribute("t-name")) {
                 templateDocs[node.getAttribute("t-name")] = node;
+                if (
+                    node.getAttribute("t-name") === KANBAN_MENU_ATTRIBUTE &&
+                    node.hasAttribute("t-if")
+                ) {
+                    const template = parseXML(`<t t-call="{{ this.constructor.menuTemplate }}"/>`);
+                    template.setAttribute("t-if", node.getAttribute("t-if"));
+                    templateDocs["menu_conditional"] = template;
+                }
                 return;
             }
             if (node.tagName === "header") {
