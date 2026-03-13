@@ -10,6 +10,7 @@ from freezegun import freeze_time
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 import unittest.mock
+from odoo.addons.point_of_sale.tests.common_setup_methods import create_res_partners
 
 
 @odoo.tests.tagged('post_install', '-at_install')
@@ -22,6 +23,7 @@ class TestPoSBasicConfig(TestPoSCommon):
 
     def setUp(self):
         super(TestPoSBasicConfig, self).setUp()
+        create_res_partners(self)
         self.config = self.basic_config
         self.product0 = self.create_product('Product 0', self.categ_basic, 0.0, 0.0)
         self.product1 = self.create_product('Product 1', self.categ_basic, 10.0, 5)

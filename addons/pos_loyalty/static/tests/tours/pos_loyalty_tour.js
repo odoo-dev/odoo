@@ -517,13 +517,13 @@ registry.category("web_tour.tours").add("CustomerLoyaltyPointsDisplayed", {
             ProductScreen.selectedOrderlineHas("product_a", "1", "100.00"),
 
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("John Doe"),
+            ProductScreen.clickCustomer("B Test Partner"),
 
             PosLoyalty.orderTotalIs("100.00"),
             PosLoyalty.pointsAwardedAre("100"),
             PosLoyalty.finalizeOrder("Cash", "100.00"),
 
-            PosLoyalty.checkPartnerPoints("John Doe", "100.00"),
+            PosLoyalty.checkPartnerPoints("B Test Partner", "100.00"),
         ].flat(),
 });
 
@@ -635,13 +635,12 @@ registry.category("web_tour.tours").add("test_settle_dont_give_points_again", {
 });
 
 registry.category("web_tour.tours").add("test_refund_does_not_decrease_points", {
-    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Refunding Guy", true),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.clickDisplayedProduct("Refund Product"),
             ProductScreen.clickControlButton("Reward"),
             SelectionPopup.has("$ 1 per point on your order", { run: "click" }),
@@ -680,13 +679,12 @@ registry.category("web_tour.tours").add("test_scan_loyalty_card_select_customer"
 });
 
 registry.category("web_tour.tours").add("test_min_qty_points_awarded", {
-    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("AA Partner"),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.clickDisplayedProduct("Whiteboard Pen"),
             PosLoyalty.claimReward("Free Product"),
             PosLoyalty.pointsTotalIs("90"),

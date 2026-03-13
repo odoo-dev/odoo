@@ -240,12 +240,8 @@ export function clickPartnerButton() {
         },
     ];
 }
-export function clickCustomer(name, pressEnter = false) {
-    return [
-        ...PartnerList.searchCustomerValue(name, pressEnter),
-        PartnerList.clickPartner(name),
-        { ...back(), isActive: ["mobile"] },
-    ];
+export function clickCustomer(name) {
+    return [PartnerList.clickPartner(name), { ...back(), isActive: ["mobile"] }];
 }
 export function selectPreset(selectedPreset, presetToSelect, presetPopup = true) {
     const steps = [

@@ -233,7 +233,7 @@ registry.category("web_tour.tours").add("test_edit_paid_order", {
             ProductScreen.clickPayButton(),
             PaymentScreen.clickPaymentMethod("Cash"),
             PaymentScreen.clickPartnerButton(),
-            PaymentScreen.clickCustomer("Partner Full"),
+            PaymentScreen.clickCustomer("A Partner Test with Address"),
             // This will set today's date as shipping date
             PaymentScreen.clickShipLaterButton(),
             PaymentScreen.clickValidate(),

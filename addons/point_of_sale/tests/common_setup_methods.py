@@ -260,6 +260,3 @@ def create_res_partners(self):
     self.e_test_partner = self.env['res.partner'].create({
         'name': 'E Test Partner',
     })
-    self.f_test_partner = self.env['res.partner'].create({
-        'name': 'F Test Partner',
-    })

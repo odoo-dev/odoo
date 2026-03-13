@@ -14,7 +14,6 @@ class TestPoSSaleReport(TestPoSCommon, TestPointOfSaleHttpCommon):
         super(TestPoSSaleReport, self).setUp()
         self.config = self.basic_config
         self.product0 = self.create_product('Product 0', self.categ_basic, 0.0, 0.0)
-        self.partner_1 = self.env['res.partner'].create({'name': 'Test Partner 1'})
         # Ensure that adding a uom to the product with a factor != 1
         # does not cause an error in weight and volume calculation
         self.uom_reference = self.env['uom.uom'].create({
@@ -165,7 +164,7 @@ class TestPoSSaleReport(TestPoSCommon, TestPointOfSaleHttpCommon):
 
         orders = []
 
-        orders.append(self.create_ui_order_data([(self.product0, 5, 100), (self.product0, 3)], {}, self.partner_1))
+        orders.append(self.create_ui_order_data([(self.product0, 5, 100), (self.product0, 3)], {}, self.b_test_partner))
         orders[0]['shipping_date'] = fields.Date.to_string(fields.Date.today())
 
         order = self.env['pos.order'].sync_from_ui(orders)

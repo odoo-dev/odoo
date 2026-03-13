@@ -342,7 +342,6 @@ class TestUi(TestPointOfSaleHttpCommon, OnlinePaymentCommon):
         Test that the data sent to the pos contains the information needed to identify
         which payment method requires a customer.
         """
-        self.env['res.partner'].create({'name': 'A Test Partner'})
         online_pm = self.pos_config.payment_method_ids.search([('is_online_payment', '=', True)], limit=1)
         self.pos_config.with_user(self.pos_admin).open_ui()
 

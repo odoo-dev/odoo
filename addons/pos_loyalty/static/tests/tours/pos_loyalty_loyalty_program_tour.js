@@ -69,10 +69,9 @@ registry.category("web_tour.tours").add("PosLoyaltyLoyaltyProgram1", {
 });
 
 registry.category("web_tour.tours").add("PosLoyaltyLoyaltyProgram2", {
-    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
-            // Order1: Immediately set the customer to Test Partner AAA which has 4 points.
+            // Order1: Immediately set the customer to B Test Partner which has 4 points.
             // - He has enough points to purchase a free product but since there is still
             //   no product in the order, reward button should not yet be highlighted.
             // - Furthermore, clicking the reward product should not add it as reward product.
@@ -280,7 +279,7 @@ registry.category("web_tour.tours").add("test_not_create_loyalty_card_expired_pr
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Test Partner", true),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.addOrderline("Desk Organizer", "3"),
             PosLoyalty.finalizeOrder("Cash", "15.3"),
         ].flat(),
@@ -292,7 +291,7 @@ registry.category("web_tour.tours").add("PosOrderClaimReward", {
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Test Partner", true),
+            ProductScreen.clickCustomer("B Test Partner"),
             ProductScreen.addOrderline("Desk Organizer", "3"),
             PosLoyalty.isPointsDisplayed(true),
             PosLoyalty.claimReward("Free Product - Whiteboard Pen"),
@@ -306,7 +305,7 @@ registry.category("web_tour.tours").add("PosOrderNoPoints", {
         [
             Chrome.startPoS(),
             ProductScreen.clickPartnerButton(),
-            ProductScreen.clickCustomer("Test Partner 2", true),
+            ProductScreen.clickCustomer("C Test Partner"),
             ProductScreen.addOrderline("Desk Organizer", "3"),
             PosLoyalty.isPointsDisplayed(false),
             PosLoyalty.finalizeOrder("Cash", "15.3"),
