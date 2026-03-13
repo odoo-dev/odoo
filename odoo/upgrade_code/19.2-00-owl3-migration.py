@@ -897,15 +897,15 @@ MISC_WHITELIST = {
     "product_matrix.matrix": {'format'},  # Var passed via t-set above t-call
     "sale_management.ListRenderer.RecordRow": {'record'},  # Nested t-inherits
     "sale.ListRenderer.RecordRow": {'record', 'column', 'hasDeleteButton'},  # Nested t-inherits
-    "web_gantt.GanttRenderer.RowHeader": {'row'}, # dynamic t-calls from loops
-    "web_gantt.GanttRenderer.RowContent": {'row'}, # dynamic t-calls from loops
-    "web_gantt.GanttRenderer.Pill": {'pill', 'row'}, # dynamic t-calls from loops
-    "web_gantt.GanttRenderer.GroupPill": {'pill', 'row'}, # dynamic t-calls from loops
-    "web_gantt.GanttRenderer.ConnectorCreator": {'pill', 'alignment'}, # dynamic t-calls from loops
-    "web_grid.Section": {'row'}, # dynamic t-calls from loops
-    "web_grid.Row": {'row', 'section'}, # dynamic t-calls from loops
-    "web_grid.AddLine": {'row'}, # dynamic t-calls from loops
-    "web_studio.ViewEditor.View": { 'scope' },  # dynamic t-call
+    "web_gantt.GanttRenderer.RowHeader": {'row'},  # dynamic t-calls from loops
+    "web_gantt.GanttRenderer.RowContent": {'row'},  # dynamic t-calls from loops
+    "web_gantt.GanttRenderer.Pill": {'pill', 'row'},  # dynamic t-calls from loops
+    "web_gantt.GanttRenderer.GroupPill": {'pill', 'row'},  # dynamic t-calls from loops
+    "web_gantt.GanttRenderer.ConnectorCreator": {'pill', 'alignment'},  # dynamic t-calls from loops
+    "web_grid.Section": {'row'},  # dynamic t-calls from loops
+    "web_grid.Row": {'row', 'section'},  # dynamic t-calls from loops
+    "web_grid.AddLine": {'row'},  # dynamic t-calls from loops
+    "web_studio.ViewEditor.View": {'scope'},  # dynamic t-call
     "web_studio.property.subOptions": {'attribute'},  # dynamic t-call
     "web_studio.property.defaultInput": {'attribute'},  # dynamic t-call
     "web_studio.property.selection": {'attribute'},  # dynamic t-call
@@ -918,6 +918,10 @@ MISC_WHITELIST = {
     "web_map.MapRenderer.PinListItems": {'records'},  # dynamic t-call
     "web_studio.StudioHomeMenu": {'app_index'},  # xpath on a t-foreach
     "auth_passkey_portal.rename": {'oldname'},  # t-attf-value
+    "website.form_radio": {'record_index'},  # dynamic t-calls from loops
+    "website.form_checkbox": {'record_index'},  # dynamic t-calls from loops
+    "website_sale.DynamicSnippetProductsOption": {'filteredTemplates'},  # dynamic t-calls from loops
+    
 }
 
 ACCOUNT_WHITELIST = {
