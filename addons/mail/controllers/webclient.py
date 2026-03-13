@@ -53,13 +53,25 @@ class WebclientController(ThreadController):
             if request.env.user._is_internal():
                 self._process_request_for_internal_user(store, name, params)
         if messages := request.env.context["messages"]:
-            store.add(
-                messages,
-                "_store_message_fields",
-                fields_params={"inbox_fields": True}
-                if request.env.context["add_inbox_fields"]
-                else None,
-            )
+            if request.env.context["add_inbox_fields"]:
+                # sudo: bus.bus: reading non-sensitive last id
+                bus_last_id = request.env["bus.bus"].sudo()._bus_last_id()
+                store.add(messages, "_store_message_fields", fields_params={"inbox_fields": True})
+                records_by_model = {}
+                for record in messages._record_by_message().values():
+                    records_by_model.setdefault(record._name, request.env[record._name])
+                    records_by_model[record._name] |= record
+                for records in records_by_model.values():
+                    store.add(
+                        records,
+                        lambda res: (
+                            res.attr("message_needaction_counter"),
+                            res.attr("message_needaction_counter_bus_id", bus_last_id),
+                        ),
+                        as_thread=True,
+                    )
+            else:
+                store.add(messages, "_store_message_fields")
         store.data_id = None
 
     @classmethod
