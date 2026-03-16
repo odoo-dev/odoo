@@ -2,7 +2,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.fields import Command
+from odoo.fields import Command, Domain
 
 
 class SaleOrderTemplate(models.Model):
@@ -68,6 +68,10 @@ class SaleOrderTemplate(models.Model):
         help="If set, SO with this template will invoice in this journal; "
         "otherwise the sales journal with the lowest sequence is used.",
     )
+
+    # Section template related fields
+    # order from which this section template was created
+    source_order_id = fields.Many2one(string="Source order", comodel_name="sale.order")
 
     # === COMPUTE METHODS ===#
 
@@ -245,3 +249,46 @@ class SaleOrderTemplate(models.Model):
                 "product_uom_qty": 0,
             }),
         ]
+
+    # === PUBLIC ===#
+
+    @api.model
+    def get_section_templates(self, company_id):
+        """Return section templates created by the current user for the given company and its
+        accessible branches.
+
+        :param int company_id: ID of the company to fetch templates for
+        :return: Section templates
+        :rtype: list[dict]
+        """
+        company = self.env["res.company"].browse(company_id)
+        domain = (
+            Domain("source_order_id", "!=", False)
+            & Domain("create_uid", "=", self.env.user.id)
+            & Domain("company_id", "in", tuple(company._accessible_branches().ids))
+        )
+        return self.with_context(active_test=False).search_read(
+            domain, fields=["id", "name", "source_order_id"]
+        )
+
+    def prepare_section_template_order_lines(self, order_changes, fields_spec):
+        """Prepare `sale.order.line` value dicts from a section template.
+
+        Builds order line values from the given section template, applies
+        `sale.order.line` onchange with provided order-level changes, and
+        returns the resulting values ready for insertion.
+
+        :param dict order_changes: Order values to consider for onchange
+        :param dict fields_spec: Fields specification for onchange
+        :return: Prepared sale order line values
+        :rtype: list[dict]
+        """
+        self.ensure_one()
+        result = []
+
+        for line in self.sale_order_template_line_ids:
+            onchange_values = {**line._prepare_order_line_values(), **order_changes}
+            onchange_result = self.env["sale.order.line"].onchange(onchange_values, [], fields_spec)
+            result.append(onchange_result.get("value", {}))
+
+        return result
