@@ -141,25 +141,44 @@ class AccountEdiXmlUBLANZ(models.AbstractModel):
         elif commercial_partner.country_code == 'NZ' and commercial_partner.company_registry:
             vals['party_node']['cbc:EndpointID']['_text'] = commercial_partner.company_registry
 
-    def _ubl_add_party_tax_scheme_nodes(self, vals):
-        # EXTENDS
-        super()._ubl_add_party_tax_scheme_nodes(vals)
+    def _ubl_a_nz_add_accounting_party_tax_scheme_nodes(self, vals):
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
+        country_code = commercial_partner.country_code
 
-        if (
-            (commercial_partner.country_code == 'AU' and commercial_partner.vat)
-            or (commercial_partner.country_code == 'NZ' and commercial_partner.company_registry)
-        ):
+        # Get the VAT from the 'vat' field.
+        vat = commercial_partner.vat.upper() if commercial_partner.vat and commercial_partner.vat != '/' else None
+
+        if country_code == 'AU' and vat:
             vals['party_node']['cac:PartyTaxScheme'] = [{
                 'cbc:CompanyID': {
-                    '_text': vals['party_node']['cbc:EndpointID']['_text'],
-                    'schemeID': None,
+                    '_text': vat.replace(" ", ""),
+                    'schemeID': '0151',
                 },
                 'cac:TaxScheme': {
                     'cbc:ID': {'_text': 'GST'},
                 },
             }]
+        elif country_code == 'NZ' and commercial_partner.company_registry:
+            vals['party_node']['cac:PartyTaxScheme'] = [{
+                'cbc:CompanyID': {
+                    '_text': commercial_partner.company_registry,
+                    'schemeID': '0088',
+                },
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'GST'},
+                },
+            }]
+
+    def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
+        self._ubl_a_nz_add_accounting_party_tax_scheme_nodes(vals)
+
+    def _ubl_add_accounting_customer_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_accounting_customer_party_tax_scheme_nodes(vals)
+        self._ubl_a_nz_add_accounting_party_tax_scheme_nodes(vals)
 
     def _ubl_add_party_legal_entity_nodes(self, vals):
         # EXTENDS

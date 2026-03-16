@@ -167,9 +167,7 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
         document_node['cbc:CustomizationID'] = {'_text': self._get_customization_ids()['pint_my']}
         document_node['cbc:ProfileID'] = {'_text': 'urn:peppol:bis:billing'}
 
-    def _ubl_add_party_tax_scheme_nodes(self, vals):
-        # EXTENDS account.edi.ubl_bis3
-        super()._ubl_add_party_tax_scheme_nodes(vals)
+    def _pint_my_accounting_party_tax_scheme_nodes(self, vals):
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
 
@@ -177,13 +175,14 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
             vals['party_node']['cac:PartyTaxScheme'] = [{
                 'cbc:CompanyID': {'_text': commercial_partner.sst_registration_number or 'NA'},
                 'cac:TaxScheme': {
-                    'cbc:ID': {'_text': 'NOT_EU_VAT'},
+                    'cbc:ID': {'_text': 'SST'},
                 },
             }]
 
     def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
         # EXTENDS account.edi.ubl_bis3
         super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
+        self._pint_my_accounting_party_tax_scheme_nodes(vals)
         nodes = vals['party_node']['cac:PartyTaxScheme']
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
@@ -195,6 +194,11 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
                     'cbc:ID': {'_text': 'GST'},
                 },
             })
+
+    def _ubl_add_accounting_customer_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_accounting_customer_party_tax_scheme_nodes(vals)
+        self._pint_my_accounting_party_tax_scheme_nodes(vals)
 
     def _export_invoice_constraints_new(self, invoice, vals):
         # EXTENDS account_edi_ubl_cii

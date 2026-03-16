@@ -192,42 +192,19 @@ class AccountEdiXmlUBLRO(models.AbstractModel):
             },
         }] if company_id else []
 
-    def _ubl_add_accounting_supplier_party_legal_entity_nodes(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_accounting_supplier_party_legal_entity_nodes(vals)
-        partner = vals['party_vals']['partner']
-        commercial_partner = partner.commercial_partner_id
-
-        if not _has_vat(commercial_partner.vat):
-            if commercial_partner.company_registry:
-                vals['party_node']['cac:PartyLegalEntity'] = [{
-                    'cbc:RegistrationName': {'_text': commercial_partner.name},
-                    'cbc:CompanyID': {
-                        '_text': commercial_partner.company_registry,
-                        'schemeID': None,
-                    },
-                }]
-            else:
-                vals['party_node']['cac:PartyLegalEntity'] = []
-
     def _ubl_add_accounting_customer_party_tax_scheme_nodes(self, vals):
         # EXTENDS account.edi.xml.ubl_bis3
         super()._ubl_add_accounting_customer_party_tax_scheme_nodes(vals)
-        partner = vals['party_vals']['partner']
-        commercial_partner = partner.commercial_partner_id
-        company_id = None
+        nodes = vals['party_node']['cac:PartyTaxScheme']
 
-        if not _has_vat(commercial_partner.vat):
-            company_id = DEFAULT_VAT
-        else:
-            company_id = commercial_partner.vat
-
-        vals['party_node']['cac:PartyTaxScheme'] = [{
-            'cbc:CompanyID': {'_text': company_id},
-            'cac:TaxScheme': {
-                'cbc:ID': {'_text': 'VAT' if company_id[:2].isalpha() else 'NOT_EU_VAT'},
-            },
-        }] if company_id else []
+        if not nodes:
+            # Customer with VAT nor CIF are given the default personal identifier code
+            nodes.append({
+                'cbc:CompanyID': {'_text': DEFAULT_VAT},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'DEFAULT_RO_CNP'},
+                },
+            })
 
     def _ubl_add_accounting_customer_party_legal_entity_nodes(self, vals):
         # EXTENDS account.edi.xml.ubl_bis3

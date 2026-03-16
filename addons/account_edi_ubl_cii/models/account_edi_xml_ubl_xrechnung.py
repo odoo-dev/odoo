@@ -103,9 +103,7 @@ class AccountEdiXmlUBLDE(models.AbstractModel):
                 'schemeID': 'EM'
             }
 
-    def _ubl_add_party_tax_scheme_nodes(self, vals):
-        # EXTENDS
-        super()._ubl_add_party_tax_scheme_nodes(vals)
+    def _ubl_de_add_accounting_party_tax_scheme_nodes(self, vals):
         nodes = vals['party_node']['cac:PartyTaxScheme']
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
@@ -120,6 +118,16 @@ class AccountEdiXmlUBLDE(models.AbstractModel):
                     'cbc:ID': {'_text': commercial_partner.peppol_eas},
                 },
             })
+
+    def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
+        self._ubl_de_add_accounting_party_tax_scheme_nodes(vals)
+
+    def _ubl_add_accounting_customer_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_accounting_customer_party_tax_scheme_nodes(vals)
+        self._ubl_de_add_accounting_party_tax_scheme_nodes(vals)
 
     def _ubl_add_party_legal_entity_nodes(self, vals):
         # EXTENDS

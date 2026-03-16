@@ -15,6 +15,22 @@ from stdnum.no import mva
 from stdnum.be import vat as be_vat
 
 CHORUS_PRO_PEPPOL_ID = "0009:11000201100044"
+MANDATORY_COUNTRY_CODE_PREFIX = [
+    '1A', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB',
+    'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ',
+    'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ',
+    'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'EL', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO',
+    'FR', 'GA', 'GB', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW',
+    'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM',
+    'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR',
+    'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ',
+    'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR',
+    'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE',
+    'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR',
+    'SS', 'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT',
+    'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'XI',
+    'YE', 'YT', 'ZA', 'ZM', 'ZW',
+]
 
 
 class AccountEdiXmlUBLBIS3(models.AbstractModel):
@@ -1322,35 +1338,6 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                 },
             })
 
-    def _ubl_add_party_tax_scheme_nodes(self, vals):
-        # EXTENDS account.edi.ubl
-        super()._ubl_add_party_tax_scheme_nodes(vals)
-        nodes = vals['party_node']['cac:PartyTaxScheme']
-        partner = vals['party_vals']['partner']
-        commercial_partner = partner.commercial_partner_id
-
-        if commercial_partner.vat and commercial_partner.vat != '/':
-            country_code = commercial_partner.country_id.code
-            if country_code in GST_COUNTRY_CODES:
-                tax_scheme_id = 'GST'
-            else:
-                tax_scheme_id = 'VAT'
-
-            nodes.append({
-                'cbc:CompanyID': {'_text': commercial_partner.vat},
-                'cac:TaxScheme': {
-                    'cbc:ID': {'_text': tax_scheme_id},
-                },
-            })
-        elif commercial_partner.peppol_endpoint and commercial_partner.peppol_eas:
-            # TaxScheme based on partner's EAS/Endpoint.
-            nodes.append({
-                'cbc:CompanyID': {'_text': commercial_partner.peppol_endpoint},
-                'cac:TaxScheme': {
-                    'cbc:ID': {'_text': commercial_partner.peppol_eas},
-                },
-            })
-
     def _ubl_add_party_legal_entity_nodes(self, vals):
         # EXTENDS account.edi.ubl
         super()._ubl_add_party_legal_entity_nodes(vals)
@@ -1426,6 +1413,87 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                 },
             })
 
+    def _bis3_get_party_tax_scheme_vat_node(self, vals):
+        """The VAT tax scheme node.
+        :param vals:        Some custom data.
+        """
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+        country_code = commercial_partner.country_code
+
+        # Get the VAT from the 'vat' field.
+        vat = commercial_partner.vat.upper() if commercial_partner.vat and commercial_partner.vat != '/' else None
+
+        if not (vat and country_code):
+            return None
+
+        if country_code in GST_COUNTRY_CODES:
+            # GST countries use 'GST' as SchemeID not 'VAT'
+            return None
+
+        # [BR-CO-09]-The Seller VAT identifier (BT-31), the Seller tax representative VAT identifier (BT-63)
+        # and the Buyer VAT identifier (BT-48) shall have a prefix in accordance with ISO code ISO 3166-1 alpha-2
+        # by which the country of issue may be identified. Nevertheless, Greece may use the prefix 'EL'.
+        if country_code in MANDATORY_COUNTRY_CODE_PREFIX and not vat.startswith(country_code):
+            if country_code == 'GR' and not vat.startswith('EL'):
+                # May start either with 'GR' or 'EL'
+                vat = f'EL{vat}'
+            elif country_code == 'HU':
+                # VAT for Hungarian companies can be retreived from the dometic tax number
+                vat = f'HU{vat[:8]}'
+            elif country_code == 'RO':
+                # Every company has a CIF in Romania. Only VAT-registered companies have
+                # a VAT number.
+                # To distinguish both, we just check if the number starts with RO or not.
+                return None
+            else:
+                vat = f'{country_code}{vat}'
+
+        return {
+            'cbc:CompanyID': {'_text': vat},
+            'cac:TaxScheme': {
+                'cbc:ID': {'_text': 'VAT'},
+            },
+        }
+
+    def _bis3_get_party_tax_scheme_local_node(self, vals):
+        """The local tax registration identification to state his registered tax status.
+        :param vals:        Some custom data.
+        """
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+        country_code = commercial_partner.country_code
+
+        # Get the VAT from the 'vat' field.
+        vat = commercial_partner.vat.upper() if commercial_partner.vat and commercial_partner.vat != '/' else None
+
+        if country_code in GST_COUNTRY_CODES:
+            return {
+                'cbc:CompanyID': {'_text': vat},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'GST'},
+                },
+            }
+        elif country_code == 'RO':
+            # The CIF can be stored in either the VAT field or the company_registry
+            vat = vat or commercial_partner.company_registry
+            # In the case of B2C, no VAT nor CIF are provided
+            if vat:
+                return {
+                    'cbc:CompanyID': {'_text': vat},
+                    'cac:TaxScheme': {
+                        'cbc:ID': {'_text': 'CIF'},
+                    },
+                }
+        elif commercial_partner.peppol_endpoint and commercial_partner.peppol_eas:
+            # Default fallback - TaxScheme based on partner's EAS/Endpoint.
+            return {
+                'cbc:CompanyID': {'_text': commercial_partner.peppol_endpoint},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': commercial_partner.peppol_eas},
+                },
+            }
+
     def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
         # EXTENDS account.edi.ubl
         super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
@@ -1433,6 +1501,12 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
 
+        node = self._bis3_get_party_tax_scheme_vat_node(vals) or self._bis3_get_party_tax_scheme_local_node(vals)
+        if node:
+            nodes.append(node)
+
+        # NO-R-002
+        # For Norwegian suppliers, most invoice issuers are required to append "Foretaksregisteret" to their invoice.
         if commercial_partner.country_code == 'NO':
             nodes.append({
                 'cbc:CompanyID': {'_text': "Foretaksregisteret"},
@@ -1440,6 +1514,15 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                     'cbc:ID': {'_text': "TAX"},
                 },
             })
+
+    def _ubl_add_accounting_customer_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._ubl_add_accounting_customer_party_tax_scheme_nodes(vals)
+        nodes = vals['party_node']['cac:PartyTaxScheme']
+
+        node = self._bis3_get_party_tax_scheme_vat_node(vals) or self._bis3_get_party_tax_scheme_local_node(vals)
+        if node:
+            nodes.append(node)
 
     def _add_invoice_accounting_supplier_party_nodes(self, document_node, vals):
         # OVERRIDE
