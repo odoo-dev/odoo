@@ -64,3 +64,31 @@ class TestMailMessage(common.MailCommon, HttpCase):
             ],
         ):
             message.unlink()
+
+    def test_message_post_no_email_to_archived_user_or_partner(self):
+        archived_user = mail_new_test_user(
+            self.env,
+            login="archived_user_mail",
+            name="Archived User",
+            email="archived_user@test.example.com",
+            notification_type="email",
+            groups="base.group_user",
+        )
+        archived_user.active = False
+        archived_partner = self.env["res.partner"].create({
+            "name": "Archived Partner",
+            "email": "archived_partner@test.example.com",
+            "active": False,
+        })
+
+        with self.mock_mail_gateway():
+            message = self.env.user.partner_id.message_post(
+                body="Hello world!",
+                partner_ids=(archived_user.partner_id | archived_partner).ids,
+            )
+
+        self.assertFalse(
+            message.notification_ids.filtered(lambda notif: notif.notification_type == "email"),
+            "Archived users or partners should not get email notifications.",
+        )
+        self.assertNotSentEmail([archived_user.partner_id, archived_partner])

@@ -3436,6 +3436,34 @@ class MailThread(models.AbstractModel):
           the transaction has been committed using a post-commit hook;
         """
         partners_data = [r for r in recipients_data if r['notif'] == 'email']
+        partner_ids = [r['id'] for r in partners_data if r['id']]
+
+        if partner_ids:
+            users = self.env['res.users'].sudo().with_context(active_test=False).read_group(
+                [('partner_id', 'in', partner_ids)],
+                ['partner_id', 'active'],
+                ['partner_id'],
+            )
+
+            archived_only_partner_ids = {
+                u['partner_id'][0]
+                for u in users
+                if not u['active']
+            }
+
+            active_partner_ids = {
+                u['partner_id'][0]
+                for u in users
+                if u['active']
+            }
+
+            archived_only_partner_ids -= active_partner_ids
+
+            if archived_only_partner_ids:
+                partners_data = [
+                    r for r in partners_data
+                    if r['id'] not in archived_only_partner_ids
+                ]
         if not partners_data:
             return True
 
