@@ -34,6 +34,8 @@ test("status bar duration field used in form view", async () => {
             [stageIds[0]]: 7 * 24 * 60 * 60 + 30 * 60,
             [stageIds[1]]: 3 * 60 * 60,
             [stageIds[3]]: 24 * 2 * 60 * 60 + 5 * 60 * 60,
+            'd': '2026-03-11 05:12:22',
+            's': stageIds[2],
         },
     });
     await start();
