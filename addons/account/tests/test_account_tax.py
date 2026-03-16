@@ -188,17 +188,17 @@ class TestAccountTax(AccountTestInvoicingCommon, MailCase):
         self.assertEqual(len(self._new_msgs), 2)
         for msg, exp_values in zip(self._new_msgs.sorted(lambda m: m.body), [
             {
-                'body_content': '<b>Invoice</b> repartition line 3',
-                'tracking_values': [
-                    (False, 'char', '0.0', '-100.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
-                    (False, 'char', 'None', "['TaxTag12345']", {'field_info': {'name': 'Tax Grids', 'desc': 'Tax Grids', 'type': 'char'}}),
-                ],
-            }, {
                 'body_content': '<b>Refund</b> repartition line 3',
                 'tracking_values': [
                     (False, 'char', 'None', '131000 Tax Paid', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
                     (False, 'char', '0.0', '-100.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
                     (False, 'char', 'False', 'True', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
+                ],
+            }, {
+                'body_content': '<b>Invoice</b> repartition line 3',
+                'tracking_values': [
+                    (False, 'char', '0.0', '-100.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
+                    (False, 'char', 'None', "['TaxTag12345']", {'field_info': {'name': 'Tax Grids', 'desc': 'Tax Grids', 'type': 'char'}}),
                 ],
             },
         ], strict=True):
@@ -240,35 +240,35 @@ class TestAccountTax(AccountTestInvoicingCommon, MailCase):
                     (False, 'char', '100.0', '0.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
                 ],
             }, {
-                'body_content': '<b>Invoice</b> repartition line 2',
-                'tracking_values': [
-                    (False, 'char', '251000 Tax Received', 'None', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
-                    (False, 'char', 'True', 'False', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
-                ],
-            }, {
-                'body_content': '<b>Invoice</b> repartition line 3',
-                'tracking_values': [
-                    (False, 'char', 'None', '251000 Tax Received', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
-                    (False, 'char', '0.0', '100.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
-                    (False, 'char', 'False', 'True', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
-                ],
-            }, {
-                'body_content': '<b>Refund</b> repartition line 1',
+                'body_content': '<b>Refund</b> repartition line 1</p>',
                 'tracking_values': [
                     (False, 'char', '100.0', '0.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
                 ],
             }, {
-                'body_content': '<b>Refund</b> repartition line 2',
+                'body_content': '<b>Invoice</b> repartition line 3</p>',
+                'tracking_values': [
+                    (False, 'char', 'None', '251000 Tax Received', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
+                    (False, 'char', '0.0', '100.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
+                    (False, 'char', 'False', 'True', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
+                ],
+            }, {
+                'body_content': '<b>Refund</b> repartition line 3</p>',
+                'tracking_values': [
+                    (False, 'char', 'None', '251000 Tax Received', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
+                    (False, 'char', '0.0', '100.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
+                    (False, 'char', 'False', 'True', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
+                ],
+            }, {
+                'body_content': '<b>Invoice</b> repartition line 2</p>',
                 'tracking_values': [
                     (False, 'char', '251000 Tax Received', 'None', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
                     (False, 'char', 'True', 'False', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
                 ],
             }, {
-                'body_content': '<b>Refund</b> repartition line 3',
+                'body_content': '<b>Refund</b> repartition line 2</p>',
                 'tracking_values': [
-                    (False, 'char', 'None', '251000 Tax Received', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
-                    (False, 'char', '0.0', '100.0', {'field_info': {'name': 'Factor Percent', 'desc': 'Factor Percent', 'type': 'char'}}),
-                    (False, 'char', 'False', 'True', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
+                    (False, 'char', '251000 Tax Received', 'None', {'field_info': {'name': 'Account', 'desc': 'Account', 'type': 'char'}}),
+                    (False, 'char', 'True', 'False', {'field_info': {'name': 'Use in tax closing', 'desc': 'Use in tax closing', 'type': 'char'}}),
                 ],
             },
         ], strict=True):
