@@ -148,8 +148,6 @@ export class DomMutationPlugin extends Plugin {
         // Main
         "commit",
         "discard",
-        "stage",
-        "unstage",
         "stash",
         "unstash",
         "updateExternal",
@@ -307,11 +305,37 @@ export class DomMutationPlugin extends Plugin {
         this.revertChanges(this.createCommit().data);
     }
 
+    stash() {
+        this.currentStash.push(this.discardDraft());
+    }
+
+    unstash(index = -1) {
+        if (this.currentStash.length > index) {
+            const changes = this.currentStash.splice(index, 1)[0];
+            this.applyMutations(changes.mutations);
+            // TODO AGE: this condition is theoretically insufficient because
+            // the observer could also be disconnected. I guess best would be to
+            // reactivate it before calling `applyMutation` and disable it
+            // again. See about that when looking into
+            // `disableObserver`/`withObserverOff`.
+            if (this.isObserverDisabled) {
+                // Make sure the unstashed mutations are recorded.
+                this.currentChanges.addMutations(...changes.mutations);
+            }
+            // TODO AGE: shouldn't this also apply other changes?
+        }
+    }
+
     /**
-     * @param { NativeMutationRecord[] } records
-     * @return { EditorMutationRecord[] }
+     * @param { Object } [params]
+     * @param { NativeMutationRecord[] } [params.records = this.observer.takeRecords()]
+     * @param { boolean } [params.dispatch = true]
+     * @param { CommitType } [params.currentOperation] the type of the commit we're about to write
+     *
+     * TODO AGE: see if I can get rid of all these arguments. Should this be
+     * called `stage`?
      */
-    stage(records = this.observer.takeRecords()) {
+    flush({ records = this.observer.takeRecords(), dispatch = true, currentOperation } = {}) {
         if (this.observer.takeRecords().length) {
             throw new Error("MutationObserver has pending records");
         }
@@ -353,55 +377,18 @@ export class DomMutationPlugin extends Plugin {
         }
         this.currentChanges.addMutations(...mutations);
 
-        // And finally, inform other plugins if attributes changed.
-        for (const record of records) {
-            if (record.type === "attributes") {
-                this.trigger("on_attribute_changed_handlers", record);
+        // And finally, inform other plugins of changes.
+        if (records.length) {
+            for (const record of records) {
+                if (record.type === "attributes") {
+                    this.trigger("on_attribute_changed_handlers", record);
+                }
             }
-        }
-
-        return records;
-    }
-
-    unstage(changes) {
-        // TODO AGE
-    }
-
-    stash() {
-        this.currentStash.push(this.discardDraft());
-    }
-
-    unstash(index = -1) {
-        if (this.currentStash.length > index) {
-            const changes = this.currentStash.splice(index, 1)[0];
-            this.applyMutations(changes.mutations);
-            // TODO AGE: this condition is theoretically insufficient because
-            // the observer could also be disconnected. I guess best would be to
-            // reactivate it before calling `applyMutation` and disable it
-            // again. See about that when looking into
-            // `disableObserver`/`withObserverOff`.
-            if (this.isObserverDisabled) {
-                // Make sure the unstashed mutations are recorded.
-                this.currentChanges.addMutations(...changes.mutations);
-            }
-            // TODO AGE: shouldn't this also apply other changes?
-        }
-    }
-
-    /**
-     * @param { Object } [params]
-     * @param { NativeMutationRecord[] } [params.records = this.observer.takeRecords()]
-     * @param { boolean } [params.dispatch = true]
-     * @param { CommitType } [params.currentOperation] the type of the commit we're about to write
-     */
-    flush({ records = this.observer.takeRecords(), dispatch = true, currentOperation } = {}) {
-        const stagedRecords = this.stage(records);
-        if (stagedRecords.length) {
             // TODO modify `handleMutations` of web_studio to handle `undoOperation`.
             if (dispatch) {
-                this.trigger("on_new_records_handled_handlers", stagedRecords, currentOperation);
+                this.trigger("on_new_records_handled_handlers", records, currentOperation);
                 // Process potential new mutations caused by the handlers.
-                this.stage();
+                this.flush({ dispatch: false });
             }
             this.dispatchContentUpdated();
         }
