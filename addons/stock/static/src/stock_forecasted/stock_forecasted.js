@@ -40,14 +40,15 @@ export class StockForecasted extends Component {
         onWillStart(this._getReportValues);
     }
 
+    get warehouseId() {
+        return this.context.warehouse_id;
+    }
+
     async _getReportValues() {
         await this._getResModel();
         const isTemplate = !this.resModel || this.resModel === 'product.template';
         this.reportModelName = `stock.forecasted_product_${isTemplate ? "template" : "product"}`;
-        this.warehouses.splice(0, this.warehouses.length);
-        this.warehouses.push(...await this.orm.searchRead('stock.warehouse', [],['id', 'name', 'code']));
-        if (!this.context.warehouse_id) {
-            this.updateWarehouse(this.warehouses[0].id);
+        await this._loadWarehouses();
         }
         const reportValues = await this.orm.call(this.reportModelName, "get_report_values", [], {
             context: this.context,
@@ -85,8 +86,20 @@ export class StockForecasted extends Component {
         }
     }
 
+    async _loadWarehouses() {
+        const warehouses = await this.orm.searchRead('stock.warehouse', [], ['id', 'name', 'code']);
+        this.warehouses = warehouses.length > 1
+            ? [{ id: 0, name: _t("All Warehouses") }, ...warehouses]
+            : warehouses;
+
+        // If no warehouse ID is set in the context, set a default.
+        if (this.warehouseId === undefined) {
+            this.updateWarehouse(this.warehouses[0].id);
+        }
+    }
+
     async updateWarehouse(id) {
-        const hasPreviousValue = this.context.warehouse_id !== undefined;
+        const hasPreviousValue = this.warehouseId !== undefined;
         this.context.warehouse_id = id;
         if (hasPreviousValue) {
             await this.reloadReport();
@@ -105,10 +118,17 @@ export class StockForecasted extends Component {
         return this.action.doAction(actionRequest, options);
     }
 
+    get selectedWarehouseIds() {
+        if (this.warehouseId === 0) {
+            return this.warehouses.filter((warehouse) => warehouse.id > 0).map((warehouse) => warehouse.id);
+        }
+        return [this.warehouseId];
+    }
+
     get graphDomain() {
         const domain = [
             ["state", "=", "forecast"],
-            ["warehouse_id", "=", this.context.warehouse_id],
+            ["warehouse_id", "in", this.selectedWarehouseIds],
         ];
         if (this.resModel === "product.template") {
             domain.push(["product_tmpl_id", "=", this.productId]);
