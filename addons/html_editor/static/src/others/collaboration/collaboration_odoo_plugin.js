@@ -124,6 +124,7 @@ export class CollaborationOdooPlugin extends Plugin {
     getCurrentCollaborativeSelection() {
         const selection = this.dependencies.selection.getEditableSelection();
         return {
+            // TODO AGE: if I could get rid of this, I could put serializeSelection in CurrentChanges.
             selection: this.dependencies.domMutation.serializeSelection(selection),
             peerId: this.config.collaboration.peerId,
         };

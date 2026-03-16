@@ -563,8 +563,8 @@ export class DomMutationPlugin extends Plugin {
      * @returns {EditorCommit<DomMutationCommitData>}
      */
     createCommit(type = "original", metadata = {}) {
-        this.currentChanges.selectionAfter = this.serializeSelection(
-            this.dependencies.selection.getEditableSelection()
+        this.currentChanges.updateSelectionAfter(
+            this.serializeSelection(this.dependencies.selection.getEditableSelection())
         );
         return this.processThrough(
             "editor_commit_processors",
@@ -633,7 +633,7 @@ export class DomMutationPlugin extends Plugin {
         this.setSerializedFocus(activeElementId);
         this.stageFocus();
         this.setSerializedSelection(selection);
-        this.currentChanges.selection = selectionAfter;
+        this.currentChanges.updateSelection(selectionAfter);
     }
 
     /**
@@ -1498,7 +1498,7 @@ export class DomMutationPlugin extends Plugin {
             );
             return;
         }
-        this.currentChanges.selection = this.serializeSelection(selection);
+        this.currentChanges.updateSelection(this.serializeSelection(selection));
     }
 
     /**
@@ -1510,7 +1510,7 @@ export class DomMutationPlugin extends Plugin {
             activeElement = this.editable;
         }
         if (this.editable.contains(activeElement)) {
-            this.currentChanges.activeElementId = this.setNodeId(activeElement);
+            this.currentChanges.updateActiveElement(this.setNodeId(activeElement));
         }
     }
 
@@ -1774,17 +1774,17 @@ export class DomMutationPlugin extends Plugin {
 class CurrentChanges {
     constructor() {
         /** @type { number } */
-        this.authorTimestamp = Date.now();
+        this._authorTimestamp = Date.now();
         /** @type { EditorMutation[] } */
-        this.mutations = [];
+        this._mutations = [];
         /** @type { NodeId | null } */
-        this.activeElementId = null;
+        this._activeElementId = null;
         /** @type { SerializedSelection | {} } */
-        this.selection = {};
+        this._selection = {};
         /** @type { SerializedSelection | null } */
-        this.selectionAfter = null;
+        this._selectionAfter = null;
         /** @type { Object } */
-        this.external = {};
+        this._external = {};
     }
 
     /**
@@ -1792,24 +1792,69 @@ class CurrentChanges {
      */
     get data() {
         return {
-            authorTimestamp: this.authorTimestamp,
-            mutations: [...this.mutations],
-            activeElementId: this.activeElementId,
-            selection: { ...this.selection },
-            selectionAfter: { ...(this.selectionAfter || {}) },
-            external: { ...this.external },
+            authorTimestamp: this._authorTimestamp,
+            mutations: [...this._mutations],
+            activeElementId: this._activeElementId,
+            selection: { ...this._selection },
+            selectionAfter: { ...(this._selectionAfter || {}) },
+            external: { ...this._external },
         };
+    }
+
+    get authorTimestamp() {
+        return this._authorTimestamp;
+    }
+
+    get mutations() {
+        return [...this._mutations];
+    }
+
+    get activeElementId() {
+        return this._activeElementId;
+    }
+
+    get selection() {
+        return this._selection;
+    }
+
+    get selectionAfter() {
+        return this._selectionAfter;
+    }
+
+    get external() {
+        return this._external;
     }
 
     /**
      * @param  {...EditorMutation} mutations
      */
     addMutations(...mutations) {
-        this.mutations.push(...mutations);
+        this._mutations.push(...mutations);
     }
 
     resetMutations() {
-        this.mutations = [];
+        this._mutations = [];
+    }
+
+    /**
+     * @param {NodeId} nodeId
+     */
+    updateActiveElement(nodeId) {
+        this._activeElementId = nodeId;
+    }
+
+    /**
+     * @param {SerializedSelection} serializedSelection
+     */
+    updateSelection(serializedSelection) {
+        this._selection = serializedSelection;
+    }
+
+    /**
+     * @param {SerializedSelection} serializedSelection
+     */
+    updateSelectionAfter(serializedSelection) {
+        this._selectionAfter = serializedSelection;
     }
 
     /**
@@ -1819,6 +1864,6 @@ class CurrentChanges {
      * @param {any} value
      */
     updateExternal(key, value) {
-        this.external[key] = value;
+        this._external[key] = value;
     }
 }
