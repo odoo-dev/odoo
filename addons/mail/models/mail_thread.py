@@ -2875,7 +2875,7 @@ class MailThread(models.AbstractModel):
             self._process_attachments_for_post(attachments, attachment_ids, msg_values)
         )  # attachement_ids, body
 
-        new_message = self._message_create([msg_values], message_tracking_values)
+        new_message = self._message_create([msg_values])
         self._fallback_lang()._notify_thread(new_message, msg_values, **notif_kwargs)
         return new_message
 
@@ -2970,7 +2970,6 @@ class MailThread(models.AbstractModel):
             'is_internal': True,
             'subject': subject,
             'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
-            'tracking_value_ids': tracking_value_ids,
             # recipients
             'email_add_signature': False,  # False as no notification -> no need to compute signature
             'message_id': generate_tracking_message_id('message-notify'),  # why? this is all but a notify
@@ -3179,7 +3178,6 @@ class MailThread(models.AbstractModel):
             'res_id',
             'subject',
             'subtype_id',
-            'tracking_value_ids',
         }
 
     def _get_message_create_ignore_field_names(self):
