@@ -330,7 +330,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     .finally(() => this.services.ui.unblock());
             };
             await blockedApply(value);
-            this.dependencies.domMutation.addCustomMutation({
+            this.dependencies.domMutation.stageCustomMutation({
                 apply: () => blockedApply(value),
                 revert: () => blockedApply(oldValue),
             });
@@ -518,7 +518,7 @@ export class ToggleBodyBgImageAction extends BuilderAction {
     }
     async applyConfig(oldConfig, newConfig) {
         await this.applyConfigWithLoader(newConfig);
-        this.dependencies.domMutation.addCustomMutation({
+        this.dependencies.domMutation.stageCustomMutation({
             apply: () => this.applyConfigWithLoader(newConfig),
             revert: () => this.applyConfigWithLoader(oldConfig),
         });

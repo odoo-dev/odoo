@@ -389,7 +389,7 @@ describe("system classes and attributes", () => {
         const p = el.querySelector("p");
         p.className = "";
         p.className = "y";
-        domMutationPlugin.handleObserverRecords();
+        domMutationPlugin.flush();
         domMutationPlugin.revertMutations(domMutationPlugin.currentChanges.mutations);
 
         expect(getContent(el)).toBe(`<p class="y">a</p>`);

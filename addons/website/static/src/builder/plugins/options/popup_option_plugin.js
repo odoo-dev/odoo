@@ -68,7 +68,7 @@ class PopupOptionPlugin extends Plugin {
     onSnippetDropped({ snippetEl }) {
         if (snippetEl.matches(".s_popup")) {
             this.assignUniqueID(snippetEl);
-            this.dependencies.domMutation.addCustomMutation({
+            this.dependencies.domMutation.stageCustomMutation({
                 apply: () => {
                     this.dependencies.visibility.toggleTargetVisibility(snippetEl, true);
                 },
@@ -81,7 +81,7 @@ class PopupOptionPlugin extends Plugin {
 
     onWillRemove(el) {
         this.dependencies.visibility.toggleTargetVisibility(el, false);
-        this.dependencies.domMutation.addCustomMutation({
+        this.dependencies.domMutation.stageCustomMutation({
             apply: () => {
                 this.dependencies.visibility.toggleTargetVisibility(el, false);
             },

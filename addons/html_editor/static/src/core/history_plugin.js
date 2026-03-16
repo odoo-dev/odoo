@@ -31,7 +31,6 @@ import { _t } from "@web/core/l10n/translation";
  * @property { HistoryPlugin['getCommitsUntil'] } getCommitsUntil
  */
 /**
- * @typedef {((record: EditorMutationRecord) => void)[]} on_attribute_changed_handlers
  * @typedef {((records: EditorMutationRecord[]) => void)[]} on_will_filter_mutation_record_handlers
  * @typedef {(() => void)[]} on_external_commit_added_handlers
  * @typedef {(() => void)[]} on_history_cleaned_handlers
