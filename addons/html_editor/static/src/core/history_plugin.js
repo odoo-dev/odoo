@@ -149,15 +149,6 @@ export class HistoryPlugin extends Plugin {
         // this._resetLinkZws();
         // @todo @phoenix sanitize plugin
         // this.sanitize();
-
-        // Set the state of the commit here.
-        // That way, the state of undo and redo is truly accessible when
-        // executing the onChange callback.
-        // It is useful for external components if they execute
-        // shared.can(Undo|Redo)
-        // TODO AGE: the comment above mentions a link between config.onChange
-        // and can(Undo|Redo) -> should we call config.onChange here instead of
-        // in domMutation?
         this.commits.push(commit);
         // @todo @phoenix add this in the linkzws plugin.
         // this._setLinkZws();

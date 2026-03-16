@@ -270,14 +270,18 @@ export class DomMutationPlugin extends Plugin {
     _commit({ type = "original", metadata = {} } = {}) {
         const hasMutations = this.prepareForCommit(type || "original");
         if (!hasMutations) {
-            // TODO: I isolated `prepareForCommit` for now for simplicity for me
+            // TODO AGE: I isolated `prepareForCommit` for now for simplicity for me
             // but it's not clear with its return functions so it should not
             // remain this way.
             return false;
         }
 
-        // AGE TODO: rename
+        // TODO AGE: rename
         this.trigger("on_will_commit_handlers", type); // making sure it updates the commit we're adding
+
+        // Set the type of the commit here. That way, the state of undo and redo
+        // is truly accessible when executing the onChange callback. It is
+        // useful for external components if they execute shared.can(Undo|Redo)
         const commit = this.dependencies.history.write(this.createCommit(type, metadata));
 
         this.currentChanges = new CurrentChanges();
@@ -295,7 +299,7 @@ export class DomMutationPlugin extends Plugin {
 
     discard() {
         if (!this.prepareForCommit()) {
-            // TODO: not sure it's needed here. If not, probably better not to
+            // TODO AGE: not sure it's needed here. If not, probably better not to
             // make a commit and just to call revert directly.
             return;
         }
@@ -306,8 +310,8 @@ export class DomMutationPlugin extends Plugin {
      * @param { EditorMutationRecord[] } records
      */
     stage(records) {
-        // AGE note: is eventually called when calling `handleObserverRecords`.
-        // Maybe `handleObserverRecords` is the higher level function then?
+        // Note AGE: is eventually called when calling `handleObserverRecords`.
+        // TODO AGE: Maybe `handleObserverRecords` is the higher level function then?
         for (const record of records) {
             switch (record.type) {
                 case "characterData":
