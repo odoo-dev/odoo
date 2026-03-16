@@ -307,26 +307,34 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @param { EditorMutationRecord[] } records
+     * @param { (EditorMutationRecord | EditorMutation)[] } records
      */
-    stage(records) {
-        // Note AGE: is eventually called when calling `handleObserverRecords`.
-        // TODO AGE: Maybe `handleObserverRecords` is the higher level function then?
+    stage(records = []) {
+        const mutations = [];
         for (const record of records) {
             switch (record.type) {
                 case "characterData":
                 case "classList":
                 case "attributes": {
                     const nodeId = this.getNodeId(record.target);
-                    this.currentChanges.addMutations({ ...omit(record, "target"), nodeId });
+                    mutations.push({ ...omit(record, "target"), nodeId });
                     break;
                 }
                 case "childList": {
-                    this.currentChanges.addMutations(...this.splitChildListRecord(record));
+                    mutations.push(...this.splitChildListRecord(record));
                     break;
                 }
             }
         }
+        this.currentChanges.addMutations(...mutations);
+    }
+
+    /**
+     * @param { boolean } [dispatch]
+     * @param { CommitType } [type]
+     */
+    stageObserverRecords(dispatch = true, type) {
+        this.handleNewRecords(this.observer.takeRecords(), dispatch, type);
     }
 
     unstage(changes) {
@@ -343,7 +351,7 @@ export class DomMutationPlugin extends Plugin {
             this.applyMutations(changes.mutations);
             if (this.isObserverDisabled) {
                 // Make sure the unstashed mutations are recorded.
-                this.currentChanges.addMutations(...changes.mutations);
+                this.stage(changes.mutations);
             }
             // TODO AGE: shouldn't this also apply other changes?
         }
@@ -530,14 +538,14 @@ export class DomMutationPlugin extends Plugin {
     // NEW: Commit creation
 
     prepareForCommit(type) {
-        this.handleObserverRecords(true, type);
+        this.stageObserverRecords(true, type);
         const currentMutationsCount = this.currentChanges.mutations.length;
         if (currentMutationsCount === 0) {
             return false;
         }
         const commitRoot = this.getMutationsRoot(this.currentChanges.mutations) || this.editable;
         this.processThrough("normalize_processors", commitRoot, type);
-        this.handleObserverRecords(false, type);
+        this.stageObserverRecords(false, type);
         if (currentMutationsCount === this.currentChanges.mutations.length) {
             // If there was no registered mutation during the normalization commit,
             // force the dispatch of a content_updated to allow i.e. the hint
@@ -552,7 +560,7 @@ export class DomMutationPlugin extends Plugin {
     discardDraft() {
         const changes = this.currentChanges.data;
         // Discard current draft.
-        this.handleObserverRecords();
+        this.stageObserverRecords();
         this.revertMutations(this.currentChanges.mutations);
         this.observer.takeRecords();
         this.currentChanges.resetMutations();
@@ -858,11 +866,11 @@ export class DomMutationPlugin extends Plugin {
             if (this.enableObserverCallbacks.size > 0) {
                 return;
             }
-            this.handleObserverRecords();
+            this.stageObserverRecords();
             this.isObserverDisabled = false;
         };
         this.enableObserverCallbacks.add(enableObserver);
-        this.handleObserverRecords();
+        this.stageObserverRecords();
         this.isObserverDisabled = true;
         return enableObserver;
     }
@@ -873,7 +881,7 @@ export class DomMutationPlugin extends Plugin {
      * TODO AGE: why do we need this _and_ disableObserver?
      */
     withObserverOff(callback) {
-        this.handleObserverRecords();
+        this.stageObserverRecords();
         this.observer.disconnect();
         callback();
         this.enableObserver();
@@ -933,10 +941,6 @@ export class DomMutationPlugin extends Plugin {
     }
 
     // New mutations
-
-    handleObserverRecords(dispatch = true, type) {
-        this.handleNewRecords(this.observer.takeRecords(), dispatch, type);
-    }
 
     /**
      * @param { NativeMutationRecord[] } records
@@ -1534,7 +1538,7 @@ export class DomMutationPlugin extends Plugin {
                 this.addCustomMutation({ apply: revert, revert: apply });
             },
         };
-        this.currentChanges.addMutations(customMutation);
+        this.stage([customMutation]);
     }
 
     // Preview stuff
@@ -1596,7 +1600,7 @@ export class DomMutationPlugin extends Plugin {
      * @returns {Function}
      */
     makeSavePoint() {
-        this.handleObserverRecords();
+        this.stageObserverRecords();
         const draftMutations = [...this.currentChanges.mutations];
         // TODO ABD TODO @phoenix: selection may become obsolete, it should evolve with mutations.
         const selectionToRestore = this.dependencies.selection.preserveSelection();
@@ -1632,7 +1636,7 @@ export class DomMutationPlugin extends Plugin {
             // Apply draft mutations to recover the same currentChanges state
             // as before.
             this.applyMutations(draftMutations, { ensureNewMutations: true });
-            this.handleObserverRecords();
+            this.stageObserverRecords();
             // TODO ABD TODO @phoenix: evaluate if the selection is not restorable at the desired position
             selectionToRestore.restore();
             Object.entries(dataToPreserve).forEach(([key, value]) => {
