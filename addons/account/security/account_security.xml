@@ -134,6 +134,19 @@
         <field name="perm_create" eval="False"/>
         <field name="perm_unlink" eval="False"/>
     </record>
+    <record id="account_bank_statement_line_rule_invoice_user" model="ir.rule" forcecreate="1">
+        <field name="name">account.bank.statement.line.invoice.user</field>
+        <field name="model_id" ref="model_account_bank_statement_line"/>
+        <field name="groups" eval="[(4, ref('account.group_account_invoice'))]"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="account_bank_statement_line_rule_basic_user" model="ir.rule" forcecreate="1">
+        <field name="name">account.bank.statement.line.basic.user</field>
+        <field name="model_id" ref="model_account_bank_statement_line"/>
+        <field name="groups" eval="[(4, ref('account.group_account_basic'))]"/>
+    </record>
 
     <!-- give access to all records, in case it is combined with another rule, like sale.account_invoice_report_rule_see_personal -->
     <record id="account_invoice_report_rule_readonly" model="ir.rule" forcecreate="1">
