@@ -947,10 +947,9 @@ export class DomMutationPlugin extends Plugin {
             // `undoOperation`
             if (dispatch) {
                 this.trigger("on_new_records_handled_handlers", processedRecords, currentOperation);
+                // Process potential new mutations caused by the handlers.
+                this.processNewRecords(this.observer.takeRecords());
             }
-            // Process potential new records adds by on_new_records_handled_handlers.
-            // TODO AGE: shouldn't this be in the if then?
-            this.processNewRecords(this.observer.takeRecords());
             this.dispatchContentUpdated();
         }
     }
