@@ -215,36 +215,32 @@ export class DomMutationPlugin extends Plugin {
             // commit and before dispatching on_undone_handlers. See if there is
             // a better way.
             // Consider the last position of the history as an undo.
-            if (revertedCommit) {
-                // Include any commit data stored in the reverted commit and that
-                // is not handled by this plugin.
-                // Note AGE: this is the `extraStepInfos` stuff.
-                for (const [key, value] of Object.entries(revertedCommit.data.external)) {
-                    this.updateExternal(key, value);
-                }
-                this._commit({
-                    type: "undo",
-                    metadata: revertedCommit.metadata,
-                });
+            // Include any commit data stored in the reverted commit and that
+            // is not handled by this plugin.
+            // Note AGE: this is the `extraStepInfos` stuff.
+            for (const [key, value] of Object.entries(revertedCommit.data.external)) {
+                this.updateExternal(key, value);
             }
+            this._commit({
+                type: "undo",
+                metadata: revertedCommit.metadata,
+            });
         }),
         on_will_redo_handlers: this.discardDraft.bind(this),
         on_single_commit_redone_handlers: withSequence(0, (revertedCommit) => {
             // TODO AGE: This used to be done in history after redo a single
             // commit and before dispatching on_redone_handlers. See if there is
             // a better way.
-            if (revertedCommit) {
-                // Include any commit data stored in the reverted commit and
-                // that is not handled by this plugin.
-                // Note AGE: this is the `extraStepInfos` stuff.
-                for (const [key, value] of Object.entries(revertedCommit.data.external)) {
-                    this.updateExternal(key, value);
-                }
-                this._commit({
-                    type: "redo",
-                    metadata: revertedCommit.metadata,
-                });
+            // Include any commit data stored in the reverted commit and
+            // that is not handled by this plugin.
+            // Note AGE: this is the `extraStepInfos` stuff.
+            for (const [key, value] of Object.entries(revertedCommit.data.external)) {
+                this.updateExternal(key, value);
             }
+            this._commit({
+                type: "redo",
+                metadata: revertedCommit.metadata,
+            });
         }),
         commit_root_providers: (commit) =>
             this.getMutationsRoot(commit.data.mutations || []) || this.editable,
