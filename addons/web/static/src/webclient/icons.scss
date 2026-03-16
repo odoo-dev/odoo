@@ -5,55 +5,40 @@
 // Sizes
 // ----------------------------------------------------------------------------
 
-$oi-default-size: 1em;   // Normally 13px
+$oi-default-size: 1em;   // Normally 14px
 $oi-fw-ratio: 1.28571429; // Matches .fa-fw
-$mi-size-multiplier: 1.214285; // Compensate pictogram's inner spacing
-
-$oi-sizes: (
-    'small': (
-        'font-size': .769em,    // ~ 10px
-        'vertical-align': 10%,
-    ),
-    'normal': (
-        'font-size': $oi-default-size,
-    ),
-    'large': (
-        'font-size': 1.315em,   // ~ 17px
-        'vertical-align': -6%,
-    ),
-    'larger': (
-        'font-size': 1.462em,   // ~ 19px
-        'vertical-align': -10%,
-    ),
-);
-
+$ms-size-multiplier: 1.214285; // Compensate pictogram's inner spacing
 
 // ================================
 // MIXINS
 // ================================
 
 @mixin material-icon-base {
-    font-family: $material-font-family;
-    font-weight: 500 !important;
+    display: inline-block;
+    font-family: var(--icon-font-family, #{$ms-font-family});
     font-style: normal;
+    font-size: var(--oi-font-size, #{$default-icon-size});
+    font-variation-settings: "FILL" var(--o-mi-fill, 0), "opsz" 24;
+    font-weight: 400 !important;
     line-height: 1;
     letter-spacing: normal;
     text-transform: none;
-    display: inline-block;
     white-space: nowrap;
     word-wrap: normal;
     direction: ltr;
+    vertical-align: -11.5%;
+    speak: never;
+    -webkit-font-smoothing: antialiased;
     -webkit-font-feature-settings: 'liga';
-    -moz-font-feature-settings: 'liga';
     -moz-osx-font-smoothing: grayscale;
-    font-variation-settings: "FILL" var(--o-mi-fill, 0);
-    font-size: $default-icon-size;
+    -moz-font-feature-settings: 'liga';
 
     &:before {
         transform: scale(1.214285);
         display: inline-block;
         content: attr(data-icon);
-        vertical-align: -6%;
+        text-rendering: geometricPrecision;
+        font-size: var(--oi-font-size, $oi-default-size);
     }
 }
 
@@ -79,17 +64,6 @@ $oi-sizes: (
 // Allows to dinamically update rules according to the context and eventual
 // utility classes.
 // ----------------------------------------------------------------------------
-.oi, .fa, .mi {
-    text-rendering: geometricPrecision;
-}
-
-.oi {
-    &:before {
-        font-size: var(--oi-font-size, $oi-default-size);
-        vertical-align: var(--oi-vertical-align,  6%);
-        text-rendering: geometricPrecision;
-    }
-}
 
 .oi-fw {
     width: calc(#{$oi-fw-ratio} * var(--oi-font-size, #{$oi-default-size}));
@@ -98,19 +72,19 @@ $oi-sizes: (
 
 // Print CSS variables for each size/breakpoint
 // ----------------------------------------------------------------------------
-@each $breakpoint in map-keys($grid-breakpoints) {
-    @include media-breakpoint-up($breakpoint) {
-        $-infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+// @each $breakpoint in map-keys($grid-breakpoints) {
+//     @include media-breakpoint-up($breakpoint) {
+//         $-infix: breakpoint-infix($breakpoint, $grid-breakpoints);
 
-        @each $-key, $-values in $oi-sizes {
-            .oi#{$-infix}-#{$-key} {
-                @each $-rule, $-value in $-values {
-                    @include print-variable('oi-#{$-rule}', $-value);
-                }
-            }
-        }
-    }
-}
+//         @each $-key, $-values in $oi-sizes {
+//             .oi#{$-infix}-#{$-key} {
+//                 @each $-rule, $-value in $-values {
+//                     @include print-variable('oi-#{$-rule}', $-value);
+//                 }
+//             }
+//         }
+//     }
+// }
 
 // Rely on animations already defined by FontAwesome
 // ----------------------------------------------------------------------------
@@ -147,18 +121,20 @@ $oi-sizes: (
 // SCSS VARIABLES
 // ================================
 
-$material-font-family: 'Material Symbols Outlined';
+$ms-font-family: 'material_symbols_sharp';
+$oi-font-family: 'odoo_ui_icons';
 $default-icon-size: $oi-default-size;
+// TODO : review large size and get rid of $fa- variables
 $fa-lg-size: $oi-default-size * 1.25;
 $fa-fw-width: 1.28571em;
 
 // Icon sizing map
 $icon-sizes: (
-        'lg': $fa-lg-size,
-        '2x': $fa-lg-size * 2,
-        '3x': $fa-lg-size * 3,
-        '4x': $fa-lg-size * 4,
-        '5x': $fa-lg-size * 5
+    'lg': $fa-lg-size,
+    '2x': $fa-lg-size * 2,
+    '3x': $fa-lg-size * 3,
+    '4x': $fa-lg-size * 4,
+    '5x': $fa-lg-size * 5
 );
 
 
@@ -166,28 +142,97 @@ $icon-sizes: (
 // BASE CLASSES
 // ================================
 
-// Generic ms class for Material Symbols
+// Generic class for Material Symbols and OI extended library icons.
+.oi {
+    @include material-icon-base;
+}
+
+// To remove after the switch
 .mi, .fa {
     @include material-icon-base;
 }
 
 // ================================
 // ODOO ICONS override mapping
-//
-// Unchanged icons:
-// .oi.oi-view-pivot,
-// .oi-view-cohort,
-// .oi-studio,
-// .oi-threads,
-// .oi-kickstarter,
-// .oi-x,
-// .oi-x-square,
-// .oi-tiktok,
-// .oi-bluesky,
-// .oi-google-play,
-// .oi-strava,
-// .oi-discord,
-// .oi-odoo,
+/* Kept for compatibility with website made prior saas-19.3 */
+/* ---------------------------------------------------------------------------- */
+.oi-threads:before { content: '\e818'; }
+.oi-kickstarter:before { content: '\e819'; }
+.oi-x:before { content: '\e81a'; }
+.oi-x-square:before { content: '\e848'; }
+.oi-tiktok:before { content: '\e81b'; }
+.oi-bluesky:before { content: '\e81c'; }
+.oi-google-play:before { content: '\e81d'; }
+.oi-strava:before { content: '\e80f'; }
+.oi-discord:before { content: '\e811'; }
+.oi-view-pivot:before { content: '\e800'; }
+.oi-view-cohort:before { content: '\e816'; }
+.oi-studio:before { content: '\e813'; }
+.oi-odoo:before { content: '\e806'; }
+
+/* Custom icon mapping */
+/* ---------------------------------------------------------------------------- */
+
+$custom_oi_icons: (
+    // Brands
+    "threads": (
+        'value': '\e818'
+    ),
+    "kickstarter": (
+        'value': '\e819'
+    ),
+    "x": (
+        'value': '\e81a'
+    ),
+    "x-square": (
+        'value': '\e848'
+    ),
+    "tiktok": (
+        'value': '\e81b'
+    ),
+    "bluesky": (
+        'value': '\e81c'
+    ),
+    "google-play": (
+        'value': '\e81d'
+    ),
+    "strava": (
+        'value': '\e80f'
+    ),
+    "discord": (
+        'value': '\e811'
+    ),
+    // Views
+    "view-pivot": (
+        'value': '\e800',
+    ),
+    "view-cohort": (
+        'value': '\e816',
+    ),
+    "studio": (
+        'value': '\e813'
+    ),
+    // Misc
+    "odoo": (
+        'value': '\e806'
+    ),
+);
+
+.oi {
+    @each $icon-name, $icon-content in $custom_oi_icons {
+        // Add "oi_" prefix to avoid conflict with Material Symbols icon names
+        &[data-icon="oi_#{$icon-name}"] {
+            --icon-font-family: #{$oi-font-family};
+
+            &:before {
+                content: '#{map-get($icon-content, 'value')}';
+            }
+        }
+    }
+}
+
+// ================================
+// ODOO ICONS TO MATERIAL SYMBOLS MAPPING
 // ================================
 
 .oi-text-break {
@@ -222,7 +267,8 @@ $icon-sizes: (
 }
 .oi-panel-right {
     @include material-icon-base;
-    @include icon-content("dock_to_right");
+    @include icon-content("dock_to_left");
+    // @include icon-content("dock_to_right");
 }
 .oi-launch {
     @include material-icon-base;
@@ -244,11 +290,13 @@ $icon-sizes: (
 }
 .oi-chevron-left {
     @include material-icon-base;
-    @include icon-content("arrow_back_ios_new");
+    // @include icon-content("arrow_back_ios_new");
+    @include icon-content("chevron_backward");
 }
 .oi-chevron-right {
     @include material-icon-base;
-    @include icon-content("arrow_forward_ios");
+    // @include icon-content("arrow_forward_ios");
+    @include icon-content("chevron_forward");
 }
 .oi-chevron-up {
     @include material-icon-base;
@@ -428,12 +476,12 @@ $icon-sizes: (
 
 .oi.oi-view-list {
     @include material-icon-base;
-    @include icon-content("menu");
+    @include icon-content("view_list");
 }
 
 .oi.oi-view-kanban {
     @include material-icon-base;
-    @include icon-content("dashboard");
+    @include icon-content("view_kanban");
 }
 
 
@@ -3321,56 +3369,79 @@ $icon-sizes: (
 // Dynamic size generation using SCSS loops
 @each $name, $size in $icon-sizes {
     .fa-#{$name},
-    .mi-#{$name} {
+    .oi-#{$name} {
         font-size: $size;
 
         @if $name == 'lg' {
-            line-height: 0.75em;
-            vertical-align: -15%;
+            // line-height: 0.75em;
+            // vertical-align: -15%;
 
             line-height: 0.5;
-            vertical-align: -28%;
+            vertical-align: -40%;
         }
     }
 }
 
+// fa-stack, what should we do ?
+// Temporary kept for compatibility.
+.oi-stack, .fa-stack {
+    position: relative;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    vertical-align: middle;
+}
+
+.oi-stack-1x, .oi-stack-2x,
+.fa-stack-1x, .fa-stack-2x {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.oi-stack-2x, .fa-stack-2x {
+    font-size: 2em;
+}
+
 // Fixed width for consistent alignment
-.fa-fw,
-.mi-fw {
+// To remove after the switch
+.fa-fw {
     width: $fa-fw-width;
     text-align: center;
 }
 
 // Rotation classes using mixin
 .fa-rotate-90,
-.mi-rotate-90 {
+.oi-rotate-90 {
     @include rotate(90);
 }
 
 .fa-rotate-180,
-.mi-rotate-180 {
+.oi-rotate-180 {
     @include rotate(180);
 }
 
 .fa-rotate-270,
-.mi-rotate-270 {
+.oi-rotate-270 {
     @include rotate(270);
 }
 
 // Flipping classes using mixin
 .fa-flip-horizontal,
-.mi-flip-horizontal {
+.oi-flip-horizontal {
     @include flip(-1, 1);
 }
 
 .fa-flip-vertical,
-.mi-flip-vertical {
+.oi-flip-vertical {
     @include flip(1, -1);
 }
 
 // Spinning animation
 .fa-spin,
-.mi-spin {
+.oi-spin {
     -webkit-animation: fa-spin 2s infinite linear;
     animation: fa-spin 2s infinite linear;
 }
@@ -3398,9 +3469,9 @@ $icon-sizes: (
 // ================================
 
 // Predefined Material Symbols variants
-.mi-filled {
+.oi-filled {
     --o-mi-fill: 1;
 }
-.mi-outlined {
+.oi-outlined {
     --o-mi-fill: 0;
 }
