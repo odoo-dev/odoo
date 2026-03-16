@@ -13,7 +13,7 @@
             @include o-position-absolute(.5rem, .5rem);
             overflow: hidden;
             border-radius: 100%;
-            font: normal normal normal 1rem/1 "Material Symbols Outlined";
+            font: normal normal normal 1rem/1 "material_symbols_sharp";
             color: $o-action;
             backdrop-filter: brightness(100);
             content: "check";

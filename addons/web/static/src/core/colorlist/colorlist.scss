@@ -36,7 +36,7 @@
                 justify-content: center;
                 align-items: center;
                 color: var(--color, #{$body-color});
-                font: normal normal normal var(--ColorListField-Entry-minWidth, o-to-rem(20px))/1 "Material Symbols Outlined";
+                font: normal normal normal var(--ColorListField-Entry-minWidth, o-to-rem(20px))/1 "material_symbols_sharp";
                 content: "check";
             }
         }

@@ -5,55 +5,40 @@
 // Sizes
 // ----------------------------------------------------------------------------
 
-$oi-default-size: 1em;   // Normally 13px
+$oi-default-size: 1em;   // Normally 14px
 $oi-fw-ratio: 1.28571429; // Matches .fa-fw
-$mi-size-multiplier: 1.214285; // Compensate pictogram's inner spacing
-
-$oi-sizes: (
-    'small': (
-        'font-size': .769em,    // ~ 10px
-        'vertical-align': 10%,
-    ),
-    'normal': (
-        'font-size': $oi-default-size,
-    ),
-    'large': (
-        'font-size': 1.315em,   // ~ 17px
-        'vertical-align': -6%,
-    ),
-    'larger': (
-        'font-size': 1.462em,   // ~ 19px
-        'vertical-align': -10%,
-    ),
-);
-
+$ms-size-multiplier: 1.214285; // Compensate pictogram's inner spacing
 
 // ================================
 // MIXINS
 // ================================
 
 @mixin material-icon-base {
-    font-family: $material-font-family;
-    font-weight: 500 !important;
+    display: inline-block;
+    font-family: var(--icon-font-family, #{$ms-font-family});
     font-style: normal;
+    font-size: var(--oi-font-size, #{$default-icon-size});
+    font-variation-settings: "FILL" var(--o-mi-fill, 0), "opsz" 24;
+    font-weight: 400 !important;
     line-height: 1;
     letter-spacing: normal;
     text-transform: none;
-    display: inline-block;
     white-space: nowrap;
     word-wrap: normal;
     direction: ltr;
+    vertical-align: -11.5%;
+    speak: never;
+    -webkit-font-smoothing: antialiased;
     -webkit-font-feature-settings: 'liga';
-    -moz-font-feature-settings: 'liga';
     -moz-osx-font-smoothing: grayscale;
-    font-variation-settings: "FILL" var(--o-mi-fill, 0);
-    font-size: $default-icon-size;
+    -moz-font-feature-settings: 'liga';
 
     &:before {
         transform: scale(1.214285);
         display: inline-block;
         content: attr(data-icon);
-        vertical-align: -6%;
+        text-rendering: geometricPrecision;
+        font-size: var(--oi-font-size, $oi-default-size);
     }
 }
 
@@ -79,17 +64,6 @@ $oi-sizes: (
 // Allows to dinamically update rules according to the context and eventual
 // utility classes.
 // ----------------------------------------------------------------------------
-.oi, .fa, .mi {
-    text-rendering: geometricPrecision;
-}
-
-.oi {
-    &:before {
-        font-size: var(--oi-font-size, $oi-default-size);
-        vertical-align: var(--oi-vertical-align,  6%);
-        text-rendering: geometricPrecision;
-    }
-}
 
 .oi-fw {
     width: calc(#{$oi-fw-ratio} * var(--oi-font-size, #{$oi-default-size}));
@@ -98,19 +72,19 @@ $oi-sizes: (
 
 // Print CSS variables for each size/breakpoint
 // ----------------------------------------------------------------------------
-@each $breakpoint in map-keys($grid-breakpoints) {
-    @include media-breakpoint-up($breakpoint) {
-        $-infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+// @each $breakpoint in map-keys($grid-breakpoints) {
+//     @include media-breakpoint-up($breakpoint) {
+//         $-infix: breakpoint-infix($breakpoint, $grid-breakpoints);
 
-        @each $-key, $-values in $oi-sizes {
-            .oi#{$-infix}-#{$-key} {
-                @each $-rule, $-value in $-values {
-                    @include print-variable('oi-#{$-rule}', $-value);
-                }
-            }
-        }
-    }
-}
+//         @each $-key, $-values in $oi-sizes {
+//             .oi#{$-infix}-#{$-key} {
+//                 @each $-rule, $-value in $-values {
+//                     @include print-variable('oi-#{$-rule}', $-value);
+//                 }
+//             }
+//         }
+//     }
+// }
 
 // Rely on animations already defined by FontAwesome
 // ----------------------------------------------------------------------------
@@ -147,18 +121,25 @@ $oi-sizes: (
 // SCSS VARIABLES
 // ================================
 
-$material-font-family: 'Material Symbols Outlined';
+$ms-font-family: 'material_symbols_sharp';
+$oi-font-family: 'odoo_ui_icons';
 $default-icon-size: $oi-default-size;
+// TODO : review large size and get rid of $fa- variables
 $fa-lg-size: $oi-default-size * 1.25;
 $fa-fw-width: 1.28571em;
 
 // Icon sizing map
 $icon-sizes: (
-        'lg': $fa-lg-size,
-        '2x': $fa-lg-size * 2,
-        '3x': $fa-lg-size * 3,
-        '4x': $fa-lg-size * 4,
-        '5x': $fa-lg-size * 5
+    'lg': $fa-lg-size,
+    '2x': $fa-lg-size * 2,
+    '3x': $fa-lg-size * 3,
+    '4x': $fa-lg-size * 4,
+    '5x': $fa-lg-size * 5,
+    '6x': 6em,
+    '7x': 7em,
+    '8x': 8em,
+    '9x': 9em,
+    '10x': 10em,
 );
 
 
@@ -166,28 +147,334 @@ $icon-sizes: (
 // BASE CLASSES
 // ================================
 
-// Generic ms class for Material Symbols
+// Generic class for Material Symbols and OI extended library icons.
+.oi {
+    @include material-icon-base;
+}
+
+// To remove after the switch
 .mi, .fa {
     @include material-icon-base;
 }
 
 // ================================
 // ODOO ICONS override mapping
-//
-// Unchanged icons:
-// .oi.oi-view-pivot,
-// .oi-view-cohort,
-// .oi-studio,
-// .oi-threads,
-// .oi-kickstarter,
-// .oi-x,
-// .oi-x-square,
-// .oi-tiktok,
-// .oi-bluesky,
-// .oi-google-play,
-// .oi-strava,
-// .oi-discord,
-// .oi-odoo,
+/* Kept for compatibility with website made prior saas-19.3 */
+/* ---------------------------------------------------------------------------- */
+.oi-threads:before { content: '\e818'; }
+.oi-kickstarter:before { content: '\e819'; }
+.oi-x:before { content: '\e81a'; }
+.oi-x-square:before { content: '\e848'; }
+.oi-tiktok:before { content: '\e81b'; }
+.oi-bluesky:before { content: '\e81c'; }
+.oi-google-play:before { content: '\e81d'; }
+.oi-strava:before { content: '\e80f'; }
+.oi-discord:before { content: '\e811'; }
+.oi-view-pivot:before { content: '\e800'; }
+.oi-view-cohort:before { content: '\e816'; }
+.oi-studio:before { content: '\e813'; }
+.oi-odoo:before { content: '\e806'; }
+
+/* Custom icon mapping */
+/* ---------------------------------------------------------------------------- */
+
+$oi-custom-icons: (
+    // Brands
+    "threads": ('value': '\e818'),
+    "kickstarter": ('value': '\e819'),
+    "x": ('value': '\e81a'),
+    "twitter": ('value': '\e81a'),
+    "x-square": ('value': '\e848'),
+    "twitter-square": ('value': '\e848'),
+    "tiktok": ('value': '\e81b'),
+    "bluesky": ('value': '\e81c'),
+    "google-play": ('value': '\e81d'),
+    "strava": ('value': '\e80f'),
+    "discord": ('value': '\e811'),
+    "amazon": ('value': '\e801'),
+    "angellist": ('value': '\e802'),
+    "bandcamp": ('value': '\e803'),
+    "binoculars": ('value': '\e804'),
+    "bitbucket-square": ('value': '\e805'),
+    "bitbucket": ('value': '\e807'),
+    "black-tie": ('value': '\e808'),
+    "bomb": ('value': '\e809'),
+    "buysellads": ('value': '\e80a'),
+    "cc-amex": ('value': '\e80b'),
+    "github-square": ('value': '\e80c'),
+    "500px": ('value': '\e80d'),
+    "adn": ('value': '\e80e'),
+    "android": ('value': '\e810'),
+    "apple": ('value': '\e812'),
+    "behance-square": ('value': '\e814'),
+    "behance": ('value': '\e815'),
+    "birthday-cake": ('value': '\e817'),
+    "chrome": ('value': '\e822'),
+    "codepen": ('value': '\e823'),
+    "codiepie": ('value': '\e824'),
+    "connectdevelop": ('value': '\e825'),
+    "contao": ('value': '\e826'),
+    "creative-commons": ('value': '\e827'),
+    "css3": ('value': '\e828'),
+    "delicious": ('value': '\e82a'),
+    "deviantart": ('value': '\e82b'),
+    "digg": ('value': '\e82c'),
+    "dribbble": ('value': '\e82d'),
+    "dropbox": ('value': '\e82e'),
+    "drupal": ('value': '\e82f'),
+    "edge": ('value': '\e830'),
+    "eercast": ('value': '\e831'),
+    "empire": ('value': '\e832'),
+    "envira": ('value': '\e833'),
+    "etsy": ('value': '\e834'),
+    "expeditedssl": ('value': '\e835'),
+    "fa": ('value': '\e836'),
+    "facebook-official": ('value': '\e837'),
+    "facebook-square": ('value': '\e838'),
+    "facebook": ('value': '\e839'),
+    "firefox": ('value': '\e83a'),
+    "first-order": ('value': '\e83b'),
+    "flickr": ('value': '\e83c'),
+    "fonticons": ('value': '\e83d'),
+    "fort-awesome": ('value': '\e83e'),
+    "forumbee": ('value': '\e83f'),
+    "foursquare": ('value': '\e840'),
+    "free-code-camp": ('value': '\e841'),
+    "get-pocket": ('value': '\e842'),
+    "gg-circle": ('value': '\e843'),
+    "gg": ('value': '\e844'),
+    "git-square": ('value': '\e845'),
+    "git": ('value': '\e846'),
+    "github-alt": ('value': '\e847'),
+    "github": ('value': '\e849'),
+    "gitlab": ('value': '\e84a'),
+    "gittip": ('value': '\e84b'),
+    "glide-g": ('value': '\e84c'),
+    "glide": ('value': '\e84d'),
+    "google-plus-circle": ('value': '\e84e'),
+    "google-plus-square": ('value': '\e84f'),
+    "google-plus": ('value': '\e850'),
+    "google-wallet": ('value': '\e851'),
+    "google": ('value': '\e852'),
+    "grav": ('value': '\e853'),
+    "hacker-news": ('value': '\e854'),
+    "hand-lizard-o": ('value': '\e855'),
+    "hand-peace-o": ('value': '\e856'),
+    "hand-scissors-o": ('value': '\e857'),
+    "hand-spock-o": ('value': '\e858'),
+    "houzz": ('value': '\e859'),
+    "html5": ('value': '\e85a'),
+    "imdb": ('value': '\e85b'),
+    "instagram": ('value': '\e85c'),
+    "internet-explorer": ('value': '\e85d'),
+    "ioxhost": ('value': '\e85e'),
+    "joomla": ('value': '\e85f'),
+    "jsfiddle": ('value': '\e860'),
+    "lastfm-square": ('value': '\e861'),
+    "lastfm": ('value': '\e862'),
+    "leanpub": ('value': '\e863'),
+    "lemon-o": ('value': '\e864'),
+    "linkedin-square": ('value': '\e865'),
+    "linkedin": ('value': '\e866'),
+    "linode": ('value': '\e867'),
+    "linux": ('value': '\e868'),
+    "magnet": ('value': '\e869'),
+    "maxcdn": ('value': '\e86e'),
+    "meanpath": ('value': '\e86f'),
+    "medium": ('value': '\e870'),
+    "meetup": ('value': '\e871'),
+    "mercury": ('value': '\e872'),
+    "mixcloud": ('value': '\e873'),
+    "modx": ('value': '\e874'),
+    "neuter": ('value': '\e875'),
+    "odnoklassniki-square": ('value': '\e876'),
+    "odnoklassniki": ('value': '\e877'),
+    "opencart": ('value': '\e878'),
+    "openid": ('value': '\e879'),
+    "opera": ('value': '\e87a'),
+    "optin-monster": ('value': '\e87b'),
+    "pagelines": ('value': '\e87c'),
+    "paypal": ('value': '\e87d'),
+    "cc-paypal": ('value': '\e81f'),
+    "pied-piper-alt": ('value': '\e87e'),
+    "pied-piper-pp": ('value': '\e87f'),
+    "pied-piper": ('value': '\e880'),
+    "pinterest-p": ('value': '\e881'),
+    "pinterest-square": ('value': '\e882'),
+    "pinterest": ('value': '\e883'),
+    "product-hunt": ('value': '\e884'),
+    "qq": ('value': '\e885'),
+    "quora": ('value': '\e886'),
+    "ra": ('value': '\e887'),
+    "ravelry": ('value': '\e888'),
+    "reddit-alien": ('value': '\e889'),
+    "reddit-square": ('value': '\e88a'),
+    "reddit": ('value': '\e88b'),
+    "renren": ('value': '\e88c'),
+    "safari": ('value': '\e88d'),
+    "scribd": ('value': '\e88e'),
+    "sellsy": ('value': '\e88f'),
+    "shirtsinbulk": ('value': '\e890'),
+    "simplybuilt": ('value': '\e891'),
+    "skyatlas": ('value': '\e892'),
+    "skype": ('value': '\e893'),
+    "slack": ('value': '\e894'),
+    "slideshare": ('value': '\e895'),
+    "snapchat-ghost": ('value': '\e896'),
+    "snapchat-square": ('value': '\e897'),
+    "snapchat": ('value': '\e898'),
+    "soundcloud": ('value': '\e899'),
+    "spotify": ('value': '\e89a'),
+    "stack-exchange": ('value': '\e89b'),
+    "stack-overflow": ('value': '\e89c'),
+    "steam-square": ('value': '\e89d'),
+    "steam": ('value': '\e89e'),
+    "stumbleupon-circle": ('value': '\e89f'),
+    "stumbleupon": ('value': '\e8a0'),
+    "superpowers": ('value': '\e8a1'),
+    "telegram": ('value': '\e8a2'),
+    "weibo": ('value': '\e820'),
+    "tencent-weibo": ('value': '\e8a3'),
+    "themeisle": ('value': '\e8a4'),
+    "trademark": ('value': '\e8a5'),
+    "trello": ('value': '\e8a6'),
+    "tripadvisor": ('value': '\e8a7'),
+    "tumblr-square": ('value': '\e8a8'),
+    "tumblr": ('value': '\e8a9'),
+    "twitch": ('value': '\e8aa'),
+    "user-secret": ('value': '\e8ab'),
+    "viacoin": ('value': '\e8ae'),
+    "viadeo-square": ('value': '\e8af'),
+    "viadeo": ('value': '\e8b0'),
+    "vimeo-square": ('value': '\e8b1'),
+    "vimeo": ('value': '\e8b2'),
+    "vine": ('value': '\e8b3'),
+    "vk": ('value': '\e8b4'),
+    "wechat": ('value': '\e8b5'),
+    "whatsapp": ('value': '\e8b6'),
+    "wikipedia-w": ('value': '\e8b7'),
+    "windows": ('value': '\e8b8'),
+    "wordpress": ('value': '\e8b9'),
+    "wpbeginner": ('value': '\e8ba'),
+    "wpexplorer": ('value': '\e8bb'),
+    "wpforms": ('value': '\e8bc'),
+    "xing-square": ('value': '\e8bd'),
+    "xing": ('value': '\e8be'),
+    "y-combinator": ('value': '\e8bf'),
+    "yahoo": ('value': '\e8c0'),
+    "yelp": ('value': '\e8c1'),
+    "youtube-play": ('value': '\e8c2'),
+    "youtube-square": ('value': '\e8c3'),
+    "youtube": ('value': '\e8c4'),
+    "cc-diners-club": ('value': '\e8c5'),
+    "cc-stripe": ('value': '\e8c6'),
+    "cc-visa": ('value': '\e8c7'),
+    "cc-jcb": ('value': '\e8c8'),
+    "dashcube": ('value': '\e8c9'),
+    "cc-mastercard": ('value': '\e8ca'),
+    "cc-discover": ('value': '\e8cb'),
+    // Views
+    "view-pivot": ('value': '\e800','rtl': true),
+    "view-cohort": ('value': '\e816', 'rtl': true),
+    "view-kanban": ('value': '\e81e'),
+    "studio": ('value': '\e813'),
+    // Misc
+    "odoo": ('value': '\e806'),
+    "mars-double": ('value': '\e86a'),
+    "mars-stroke-h": ('value': '\e86b'),
+    "mars-stroke-v": ('value': '\e86c'),
+    "mars-stroke": ('value': '\e86d'),
+    "venus-double": ('value': '\e8ac'),
+    "venus-mars": ('value': '\e8ad'),
+);
+
+.oi {
+    @each $icon-name, $icon-content in $oi-custom-icons {
+        // Add "oi_" prefix to avoid conflict with Material Symbols icon names
+        &[data-icon="oi_#{$icon-name}"] {
+            --icon-font-family: #{$oi-font-family};
+
+            &:before {
+                content: '#{map-get($icon-content, 'value')}';
+            }
+
+            @if index($icon-content, 'rtl') {
+                .o_rtl & {
+                    transform: rotateY(180deg);
+                }
+            }
+        }
+    }
+}
+
+/* RTL adaptations - Flip directional icons by 180 degree. */
+/* ---------------------------------------------------------------------------- */
+
+$ms-rtl-icons:
+    "arrow_back",
+    "arrow_back_2",
+    "arrow_back_ios",
+    "arrow_back_ios_new",
+    "arrow_circle_left",
+    "arrow_circle_right",
+    "arrow_forward",
+    "arrow_forward_ios",
+    "arrow_insert",
+    "arrow_left",
+    "arrow_left_alt",
+    "arrow_menu_close",
+    "arrow_menu_open",
+    "arrow_outward",
+    "arrow_right",
+    "arrow_right_alt",
+    "arrow_top_left",
+    "arrow_top_right",
+    "double_arrow",
+    "keyboard_arrow_left",
+    "keyboard_arrow_right",
+    "keyboard_double_arrow_left",
+    "keyboard_double_arrow_right",
+    "line_end_arrow",
+    "line_end_arrow_notch",
+    "line_start_arrow",
+    "line_start_arrow_notch",
+    "mobile_arrow_up_right",
+    "play_arrow",
+    "subdirectory_arrow_left",
+    "subdirectory_arrow_right",
+    "arrows_more_down",
+    "arrows_more_up",
+    "chevron_backward",
+    "chevron_forward",
+    "chevron_left",
+    "chevron_right",
+    "east",
+    "west",
+    "north_east",
+    "north_west",
+    "south_east",
+    "south_west",
+    "turn_left",
+    "turn_right",
+    "turn_sharp_left",
+    "turn_sharp_right",
+    "turn_slight_left",
+    "turn_slight_right",
+    "u_turn_left",
+    "u_turn_right",
+    "horizontal_align_left",
+    "horizontal_align_right";
+
+.o_rtl {
+    @each $icon in $ms-rtl-icons {
+        [data-icon="#{$icon}"] {
+            transform: rotateY(180deg);
+        }
+    }
+}
+
+// ================================
+// ODOO ICONS TO MATERIAL SYMBOLS MAPPING
 // ================================
 
 .oi-text-break {
@@ -222,7 +509,8 @@ $icon-sizes: (
 }
 .oi-panel-right {
     @include material-icon-base;
-    @include icon-content("dock_to_right");
+    @include icon-content("dock_to_left");
+    // @include icon-content("dock_to_right");
 }
 .oi-launch {
     @include material-icon-base;
@@ -244,11 +532,13 @@ $icon-sizes: (
 }
 .oi-chevron-left {
     @include material-icon-base;
-    @include icon-content("arrow_back_ios_new");
+    // @include icon-content("arrow_back_ios_new");
+    @include icon-content("chevron_backward");
 }
 .oi-chevron-right {
     @include material-icon-base;
-    @include icon-content("arrow_forward_ios");
+    // @include icon-content("arrow_forward_ios");
+    @include icon-content("chevron_forward");
 }
 .oi-chevron-up {
     @include material-icon-base;
@@ -428,12 +718,12 @@ $icon-sizes: (
 
 .oi.oi-view-list {
     @include material-icon-base;
-    @include icon-content("menu");
+    @include icon-content("view_list");
 }
 
 .oi.oi-view-kanban {
     @include material-icon-base;
-    @include icon-content("dashboard");
+    @include icon-content("view_kanban");
 }
 
 
@@ -442,7 +732,8 @@ $icon-sizes: (
 // ================================
 
 .fa-500px {
-    @include icon-content("🈵");
+    @include icon-content("\e80d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-address-book {
@@ -470,7 +761,8 @@ $icon-sizes: (
 }
 
 .fa-adn {
-    @include icon-content("🈵");
+    @include icon-content("\e80e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-align-center {
@@ -490,7 +782,8 @@ $icon-sizes: (
 }
 
 .fa-amazon {
-    @include icon-content("🈵");
+    @include icon-content("\e801");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-ambulance {
@@ -507,11 +800,13 @@ $icon-sizes: (
 }
 
 .fa-android {
-    @include icon-content("🈵");
+    @include icon-content("\e810");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-angellist {
-    @include icon-content("🈵");
+    @include icon-content("\e802");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-angle-double-down {
@@ -547,7 +842,8 @@ $icon-sizes: (
 }
 
 .fa-apple {
-    @include icon-content("🈵");
+    @include icon-content("\e812");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-archive {
@@ -660,7 +956,8 @@ $icon-sizes: (
 }
 
 .fa-bandcamp {
-    @include icon-content("🈵");
+    @include icon-content("\e803");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-bank,
@@ -726,11 +1023,13 @@ $icon-sizes: (
 }
 
 .fa-behance {
-    @include icon-content("🈵");
+    @include icon-content("\e815");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-behance-square {
-    @include icon-content("🈵");
+    @include icon-content("\e814");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-bell {
@@ -756,7 +1055,8 @@ $icon-sizes: (
 }
 
 .fa-binoculars {
-    @include icon-content("🈵");
+    @include icon-content("\e804");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-birthday-cake {
@@ -764,11 +1064,13 @@ $icon-sizes: (
 }
 
 .fa-bitbucket {
-    @include icon-content("🈵");
+    @include icon-content("\e807");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-bitbucket-square {
-    @include icon-content("🈵");
+    @include icon-content("\e805");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-bitcoin,
@@ -777,7 +1079,8 @@ $icon-sizes: (
 }
 
 .fa-black-tie {
-    @include icon-content("🈵");
+    @include icon-content("\e808");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-blind {
@@ -802,7 +1105,8 @@ $icon-sizes: (
 }
 
 .fa-bomb {
-    @include icon-content("🈵");
+    @include icon-content("\e809");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-book {
@@ -852,7 +1156,8 @@ $icon-sizes: (
 }
 
 .fa-buysellads {
-    @include icon-content("🈵");
+    @include icon-content("\e80a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cab,
@@ -946,35 +1251,43 @@ $icon-sizes: (
 }
 
 .fa-cc-amex {
-    @include icon-content("🈵");
+    @include icon-content("\e80b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cc-diners-club {
-    @include icon-content("🈵");
+    @include icon-content("\e8c5");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cc-discover {
-    @include icon-content("🈵");
+    @include icon-content("\e8cb");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cc-jcb {
-    @include icon-content("🈵");
+    @include icon-content("\e8c8");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cc-mastercard {
-    @include icon-content("🈵");
+    @include icon-content("\e8ca");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cc-paypal {
-    @include icon-content("🈵");
+    @include icon-content("\e81f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cc-stripe {
-    @include icon-content("🈵");
+    @include icon-content("\e8c6");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cc-visa {
-    @include icon-content("🈵");
+    @include icon-content("\e8c7");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-certificate {
@@ -1054,7 +1367,8 @@ $icon-sizes: (
 }
 
 .fa-chrome {
-    @include icon-content("🈵");
+    @include icon-content("\e822");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-circle {
@@ -1120,11 +1434,13 @@ $icon-sizes: (
 }
 
 .fa-codepen {
-    @include icon-content("🈵");
+    @include icon-content("\e823");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-codiepie {
-    @include icon-content("🈵");
+    @include icon-content("\e824");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-coffee {
@@ -1182,11 +1498,13 @@ $icon-sizes: (
 }
 
 .fa-connectdevelop {
-    @include icon-content("🈵");
+    @include icon-content("\e825");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-contao {
-    @include icon-content("🈵");
+    @include icon-content("\e826");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-copy,
@@ -1199,7 +1517,8 @@ $icon-sizes: (
 }
 
 .fa-creative-commons {
-    @include icon-content("🈵");
+    @include icon-content("\e827");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-credit-card {
@@ -1219,7 +1538,8 @@ $icon-sizes: (
 }
 
 .fa-css3 {
-    @include icon-content("🈵");
+    @include icon-content("\e828");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-cube {
@@ -1245,7 +1565,8 @@ $icon-sizes: (
 }
 
 .fa-dashcube {
-    @include icon-content("🈵");
+    @include icon-content("\e8c9");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-database {
@@ -1264,7 +1585,8 @@ $icon-sizes: (
 }
 
 .fa-delicious {
-    @include icon-content("🈵");
+    @include icon-content("\e82a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-desktop {
@@ -1272,7 +1594,8 @@ $icon-sizes: (
 }
 
 .fa-deviantart {
-    @include icon-content("🈵");
+    @include icon-content("\e82b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-diamond {
@@ -1280,7 +1603,8 @@ $icon-sizes: (
 }
 
 .fa-digg {
-    @include icon-content("🈵");
+    @include icon-content("\e82c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-dollar,
@@ -1297,7 +1621,8 @@ $icon-sizes: (
 }
 
 .fa-dribbble {
-    @include icon-content("🈵");
+    @include icon-content("\e82d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-drivers-license,
@@ -1312,15 +1637,18 @@ $icon-sizes: (
 }
 
 .fa-dropbox {
-    @include icon-content("🈵");
+    @include icon-content("\e82e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-drupal {
-    @include icon-content("🈵");
+    @include icon-content("\e82f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-edge {
-    @include icon-content("🈵");
+    @include icon-content("\e830");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-edit {
@@ -1329,7 +1657,8 @@ $icon-sizes: (
 }
 
 .fa-eercast {
-    @include icon-content("🈵");
+    @include icon-content("\e831");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-eject {
@@ -1346,7 +1675,8 @@ $icon-sizes: (
 
 .fa-empire,
 .fa-ge {
-    @include icon-content("🈵");
+    @include icon-content("\e832");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-envelope {
@@ -1373,7 +1703,8 @@ $icon-sizes: (
 }
 
 .fa-envira {
-    @include icon-content("🈵");
+    @include icon-content("\e833");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-eraser {
@@ -1381,7 +1712,8 @@ $icon-sizes: (
 }
 
 .fa-etsy {
-    @include icon-content("🈵");
+    @include icon-content("\e834");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-eur,
@@ -1411,7 +1743,8 @@ $icon-sizes: (
 }
 
 .fa-expeditedssl {
-    @include icon-content("🈵");
+    @include icon-content("\e835");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-external-link {
@@ -1436,20 +1769,24 @@ $icon-sizes: (
 
 .fa-fa,
 .fa-font-awesome {
-    @include icon-content("🈵");
+    @include icon-content("\e83e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-facebook,
 .fa-facebook-f {
-    @include icon-content("🈵");
+    @include icon-content("\e839");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-facebook-official {
-    @include icon-content("🈵");
+    @include icon-content("\e837");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-facebook-square {
-    @include icon-content("🈵");
+    @include icon-content("\e838");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-fast-backward {
@@ -1554,11 +1891,13 @@ $icon-sizes: (
 }
 
 .fa-firefox {
-    @include icon-content("🈵");
+    @include icon-content("\e83a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-first-order {
-    @include icon-content("🈵");
+    @include icon-content("\e83b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-flag {
@@ -1579,7 +1918,8 @@ $icon-sizes: (
 }
 
 .fa-flickr {
-    @include icon-content("🈵");
+    @include icon-content("\e83c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-floppy-o,
@@ -1610,15 +1950,18 @@ $icon-sizes: (
 }
 
 .fa-fonticons {
-    @include icon-content("🈵");
+    @include icon-content("\e83d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-fort-awesome {
-    @include icon-content("🈵");
+    @include icon-content("\e83e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-forumbee {
-    @include icon-content("🈵");
+    @include icon-content("\e83f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-forward {
@@ -1626,11 +1969,13 @@ $icon-sizes: (
 }
 
 .fa-foursquare {
-    @include icon-content("🈵");
+    @include icon-content("\e840");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-free-code-camp {
-    @include icon-content("🈵");
+    @include icon-content("\e841");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-frown-o {
@@ -1660,15 +2005,18 @@ $icon-sizes: (
 }
 
 .fa-get-pocket {
-    @include icon-content("🈵");
+    @include icon-content("\e842");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-gg {
-    @include icon-content("🈵");
+    @include icon-content("\e844");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-gg-circle {
-    @include icon-content("🈵");
+    @include icon-content("\e843");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-gift {
@@ -1676,32 +2024,39 @@ $icon-sizes: (
 }
 
 .fa-git {
-    @include icon-content("🈵");
+    @include icon-content("\e846");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-git-square {
-    @include icon-content("🈵");
+    @include icon-content("\e845");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-github {
-    @include icon-content("🈵");
+    @include icon-content("\e849");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-github-alt {
-    @include icon-content("🈵");
+    @include icon-content("\e847");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-github-square {
-    @include icon-content("🈵");
+    @include icon-content("\e80c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-gitlab {
-    @include icon-content("🈵");
+    @include icon-content("\e84a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-gittip,
 .fa-gratipay {
-    @include icon-content("🈵");
+    @include icon-content("\e84b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-glass {
@@ -1709,11 +2064,13 @@ $icon-sizes: (
 }
 
 .fa-glide {
-    @include icon-content("🈵");
+    @include icon-content("\e84d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-glide-g {
-    @include icon-content("🈵");
+    @include icon-content("\e84c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-globe {
@@ -1721,24 +2078,29 @@ $icon-sizes: (
 }
 
 .fa-google {
-    @include icon-content("🈵");
+    @include icon-content("\e852");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-google-plus {
-    @include icon-content("🈵");
+    @include icon-content("\e850");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-google-plus-circle,
 .fa-google-plus-official {
-    @include icon-content("🈵");
+    @include icon-content("\e84e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-google-plus-square {
-    @include icon-content("🈵");
+    @include icon-content("\e84f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-google-wallet {
-    @include icon-content("🈵");
+    @include icon-content("\e851");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-graduation-cap,
@@ -1747,7 +2109,8 @@ $icon-sizes: (
 }
 
 .fa-grav {
-    @include icon-content("🈵");
+    @include icon-content("\e853");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-group,
@@ -1763,7 +2126,8 @@ $icon-sizes: (
 .fa-hacker-news,
 .fa-y-combinator-square,
 .fa-yc-square {
-    @include icon-content("🈵");
+    @include icon-content("\e854");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-hand-grab-o,
@@ -1772,7 +2136,8 @@ $icon-sizes: (
 }
 
 .fa-hand-lizard-o {
-    @include icon-content("🈵");
+    @include icon-content("\e855");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-hand-o-down {
@@ -1797,7 +2162,8 @@ $icon-sizes: (
 }
 
 .fa-hand-peace-o {
-    @include icon-content("🈵");
+    @include icon-content("\e856");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-hand-pointer-o {
@@ -1805,11 +2171,13 @@ $icon-sizes: (
 }
 
 .fa-hand-scissors-o {
-    @include icon-content("🈵");
+    @include icon-content("\e857");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-hand-spock-o {
-    @include icon-content("🈵");
+    @include icon-content("\e858");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-handshake-o {
@@ -1881,11 +2249,13 @@ $icon-sizes: (
 }
 
 .fa-houzz {
-    @include icon-content("🈵");
+    @include icon-content("\e859");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-html5 {
-    @include icon-content("🈵");
+    @include icon-content("\e85a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-i-cursor {
@@ -1909,7 +2279,8 @@ $icon-sizes: (
 }
 
 .fa-imdb {
-    @include icon-content("🈵");
+    @include icon-content("\e85b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-inbox {
@@ -1938,11 +2309,13 @@ $icon-sizes: (
 }
 
 .fa-instagram {
-    @include icon-content("🈵");
+    @include icon-content("\e85c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-internet-explorer {
-    @include icon-content("🈵");
+    @include icon-content("\e85d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-intersex,
@@ -1951,7 +2324,8 @@ $icon-sizes: (
 }
 
 .fa-ioxhost {
-    @include icon-content("🈵");
+    @include icon-content("\e85e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-italic {
@@ -1959,11 +2333,13 @@ $icon-sizes: (
 }
 
 .fa-joomla {
-    @include icon-content("🈵");
+    @include icon-content("\e85f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-jsfiddle {
-    @include icon-content("🈵");
+    @include icon-content("\e860");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-key {
@@ -1988,11 +2364,13 @@ $icon-sizes: (
 }
 
 .fa-lastfm {
-    @include icon-content("🈵");
+    @include icon-content("\e862");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-lastfm-square {
-    @include icon-content("🈵");
+    @include icon-content("\e861");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-leaf {
@@ -2000,11 +2378,13 @@ $icon-sizes: (
 }
 
 .fa-leanpub {
-    @include icon-content("🈵");
+    @include icon-content("\e863");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-lemon-o {
-    @include icon-content("🈵");
+    @include icon-content("\e864");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-level-down {
@@ -2032,19 +2412,23 @@ $icon-sizes: (
 }
 
 .fa-linkedin {
-    @include icon-content("🈵");
+    @include icon-content("\e866");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-linkedin-square {
-    @include icon-content("🈵");
+    @include icon-content("\e865");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-linode {
-    @include icon-content("🈵");
+    @include icon-content("\e867");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-linux {
-    @include icon-content("🈵");
+    @include icon-content("\e868");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-list {
@@ -2096,7 +2480,8 @@ $icon-sizes: (
 }
 
 .fa-magnet {
-    @include icon-content("🈵");
+    @include icon-content("\e869");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-mail-forward,
@@ -2143,31 +2528,38 @@ $icon-sizes: (
 }
 
 .fa-mars-double {
-    @include icon-content("🈵");
+    @include icon-content("\e86a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-mars-stroke {
-    @include icon-content("🈵");
+    @include icon-content("\e86d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-mars-stroke-h {
-    @include icon-content("🈵");
+    @include icon-content("\e86b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-mars-stroke-v {
-    @include icon-content("🈵");
+    @include icon-content("\e86c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-maxcdn {
-    @include icon-content("🈵");
+    @include icon-content("\e86e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-meanpath {
-    @include icon-content("🈵");
+    @include icon-content("\e86f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-medium {
-    @include icon-content("🈵");
+    @include icon-content("\e870");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-medkit {
@@ -2175,7 +2567,8 @@ $icon-sizes: (
 }
 
 .fa-meetup {
-    @include icon-content("🈵");
+    @include icon-content("\e871");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-meh-o {
@@ -2183,7 +2576,8 @@ $icon-sizes: (
 }
 
 .fa-mercury {
-    @include icon-content("🈵");
+    @include icon-content("\e872");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-microchip {
@@ -2216,7 +2610,8 @@ $icon-sizes: (
 }
 
 .fa-mixcloud {
-    @include icon-content("🈵");
+    @include icon-content("\e873");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-mobile,
@@ -2225,7 +2620,8 @@ $icon-sizes: (
 }
 
 .fa-modx {
-    @include icon-content("🈵");
+    @include icon-content("\e874");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-money {
@@ -2249,7 +2645,8 @@ $icon-sizes: (
 }
 
 .fa-neuter {
-    @include icon-content("🈵");
+    @include icon-content("\e875");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-newspaper-o {
@@ -2265,31 +2662,38 @@ $icon-sizes: (
 }
 
 .fa-odnoklassniki {
-    @include icon-content("🈵");
+    @include icon-content("\e877");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-odnoklassniki-square {
-    @include icon-content("🈵");
+    @include icon-content("\e876");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-opencart {
-    @include icon-content("🈵");
+    @include icon-content("\e878");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-openid {
-    @include icon-content("🈵");
+    @include icon-content("\e879");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-opera {
-    @include icon-content("🈵");
+    @include icon-content("\e87a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-optin-monster {
-    @include icon-content("🈵");
+    @include icon-content("\e87b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-pagelines {
-    @include icon-content("🈵");
+    @include icon-content("\e87c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-paint-brush {
@@ -2337,7 +2741,8 @@ $icon-sizes: (
 }
 
 .fa-paypal {
-    @include icon-content("🈵");
+    @include icon-content("\e87d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-pencil {
@@ -2374,27 +2779,33 @@ $icon-sizes: (
 }
 
 .fa-pied-piper {
-    @include icon-content("🈵");
+    @include icon-content("\e880");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-pied-piper-alt {
-    @include icon-content("🈵");
+    @include icon-content("\e87e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-pied-piper-pp {
-    @include icon-content("🈵");
+    @include icon-content("\e87f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-pinterest {
-    @include icon-content("🈵");
+    @include icon-content("\e883");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-pinterest-p {
-    @include icon-content("🈵");
+    @include icon-content("\e881");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-pinterest-square {
-    @include icon-content("🈵");
+    @include icon-content("\e882");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-plane {
@@ -2448,7 +2859,8 @@ $icon-sizes: (
 }
 
 .fa-product-hunt {
-    @include icon-content("🈵");
+    @include icon-content("\e884");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-puzzle-piece {
@@ -2456,7 +2868,8 @@ $icon-sizes: (
 }
 
 .fa-qq {
-    @include icon-content("🈵");
+    @include icon-content("\e885");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-qrcode {
@@ -2476,7 +2889,8 @@ $icon-sizes: (
 }
 
 .fa-quora {
-    @include icon-content("🈵");
+    @include icon-content("\e886");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-quote-left {
@@ -2490,7 +2904,8 @@ $icon-sizes: (
 .fa-ra,
 .fa-rebel,
 .fa-resistance {
-    @include icon-content("🈵");
+    @include icon-content("\e887");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-random {
@@ -2498,7 +2913,8 @@ $icon-sizes: (
 }
 
 .fa-ravelry {
-    @include icon-content("🈵");
+    @include icon-content("\e888");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-recycle {
@@ -2506,15 +2922,18 @@ $icon-sizes: (
 }
 
 .fa-reddit {
-    @include icon-content("🈵");
+    @include icon-content("\e88b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-reddit-alien {
-    @include icon-content("🈵");
+    @include icon-content("\e889");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-reddit-square {
-    @include icon-content("🈵");
+    @include icon-content("\e88a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-refresh {
@@ -2526,7 +2945,8 @@ $icon-sizes: (
 }
 
 .fa-renren {
-    @include icon-content("🈵");
+    @include icon-content("\e88c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-repeat,
@@ -2562,11 +2982,13 @@ $icon-sizes: (
 }
 
 .fa-safari {
-    @include icon-content("🈵");
+    @include icon-content("\e88d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-scribd {
-    @include icon-content("🈵");
+    @include icon-content("\e88e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-search {
@@ -2582,7 +3004,8 @@ $icon-sizes: (
 }
 
 .fa-sellsy {
-    @include icon-content("🈵");
+    @include icon-content("\e88f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-server {
@@ -2615,7 +3038,8 @@ $icon-sizes: (
 }
 
 .fa-shirtsinbulk {
-    @include icon-content("🈵");
+    @include icon-content("\e890");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-shopping-bag {
@@ -2652,7 +3076,8 @@ $icon-sizes: (
 }
 
 .fa-simplybuilt {
-    @include icon-content("🈵");
+    @include icon-content("\e891");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-sitemap {
@@ -2660,15 +3085,18 @@ $icon-sizes: (
 }
 
 .fa-skyatlas {
-    @include icon-content("🈵");
+    @include icon-content("\e892");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-skype {
-    @include icon-content("🈵");
+    @include icon-content("\e893");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-slack {
-    @include icon-content("🈵");
+    @include icon-content("\e894");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-sliders {
@@ -2676,7 +3104,8 @@ $icon-sizes: (
 }
 
 .fa-slideshare {
-    @include icon-content("🈵");
+    @include icon-content("\e895");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-smile-o {
@@ -2684,15 +3113,18 @@ $icon-sizes: (
 }
 
 .fa-snapchat {
-    @include icon-content("🈵");
+    @include icon-content("\e898");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-snapchat-ghost {
-    @include icon-content("🈵");
+    @include icon-content("\e896");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-snapchat-square {
-    @include icon-content("🈵");
+    @include icon-content("\e897");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-snowflake-o {
@@ -2739,7 +3171,8 @@ $icon-sizes: (
 }
 
 .fa-soundcloud {
-    @include icon-content("🈵");
+    @include icon-content("\e899");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-space-shuttle {
@@ -2755,7 +3188,8 @@ $icon-sizes: (
 }
 
 .fa-spotify {
-    @include icon-content("🈵");
+    @include icon-content("\e89a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-square {
@@ -2768,11 +3202,13 @@ $icon-sizes: (
 }
 
 .fa-stack-exchange {
-    @include icon-content("🈵");
+    @include icon-content("\e89b");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-stack-overflow {
-    @include icon-content("🈵");
+    @include icon-content("\e89c");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-star {
@@ -2795,11 +3231,13 @@ $icon-sizes: (
 }
 
 .fa-steam {
-    @include icon-content("🈵");
+    @include icon-content("\e89e");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-steam-square {
-    @include icon-content("🈵");
+    @include icon-content("\e89d");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-step-backward {
@@ -2845,11 +3283,13 @@ $icon-sizes: (
 }
 
 .fa-stumbleupon {
-    @include icon-content("🈵");
+    @include icon-content("\e8a0");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-stumbleupon-circle {
-    @include icon-content("🈵");
+    @include icon-content("\e89f");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-subscript {
@@ -2869,7 +3309,8 @@ $icon-sizes: (
 }
 
 .fa-superpowers {
-    @include icon-content("🈵");
+    @include icon-content("\e8a1");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-superscript {
@@ -2897,7 +3338,8 @@ $icon-sizes: (
 }
 
 .fa-telegram {
-    @include icon-content("🈵");
+    @include icon-content("\e8a2");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-television,
@@ -2906,7 +3348,8 @@ $icon-sizes: (
 }
 
 .fa-tencent-weibo {
-    @include icon-content("🈵");
+    @include icon-content("\e8a3");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-terminal {
@@ -2934,7 +3377,8 @@ $icon-sizes: (
 }
 
 .fa-themeisle {
-    @include icon-content("🈵");
+    @include icon-content("\e8a4");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-thermometer,
@@ -3022,7 +3466,8 @@ $icon-sizes: (
 }
 
 .fa-trademark {
-    @include icon-content("🈵");
+    @include icon-content("\e8a5");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-train {
@@ -3047,11 +3492,13 @@ $icon-sizes: (
 }
 
 .fa-trello {
-    @include icon-content("🈵");
+    @include icon-content("\e8a6");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-tripadvisor {
-    @include icon-content("🈵");
+    @include icon-content("\e8a7");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-trophy {
@@ -3072,23 +3519,28 @@ $icon-sizes: (
 }
 
 .fa-tumblr {
-    @include icon-content("🈵");
+    @include icon-content("\e8a9");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-tumblr-square {
-    @include icon-content("🈵");
+    @include icon-content("\e8a8");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-twitch {
-    @include icon-content("🈵");
+    @include icon-content("\e8aa");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-twitter {
-    @include icon-content("🈵");
+    @include icon-content("\e81a");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-twitter-square {
-    @include icon-content("🈵");
+    @include icon-content("\e848");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-umbrella {
@@ -3147,7 +3599,8 @@ $icon-sizes: (
 }
 
 .fa-user-secret {
-    @include icon-content("🈵");
+    @include icon-content("\e8ab");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-user-times {
@@ -3160,23 +3613,28 @@ $icon-sizes: (
 }
 
 .fa-venus-double {
-    @include icon-content("🈵");
+    @include icon-content("\e8ac");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-venus-mars {
-    @include icon-content("🈵");
+    @include icon-content("\e8ad");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-viacoin {
-    @include icon-content("🈵");
+    @include icon-content("\e8ae");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-viadeo {
-    @include icon-content("🈵");
+    @include icon-content("\e8b0");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-viadeo-square {
-    @include icon-content("🈵");
+    @include icon-content("\e8af");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-video-camera {
@@ -3185,19 +3643,23 @@ $icon-sizes: (
 }
 
 .fa-vimeo {
-    @include icon-content("🈵");
+    @include icon-content("\e8b2");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-vimeo-square {
-    @include icon-content("🈵");
+    @include icon-content("\e8b1");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-vine {
-    @include icon-content("🈵");
+    @include icon-content("\e8b3");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-vk {
-    @include icon-content("🈵");
+    @include icon-content("\e8b4");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-volume-control-phone {
@@ -3218,15 +3680,18 @@ $icon-sizes: (
 
 .fa-wechat,
 .fa-weixin {
-    @include icon-content("🈵");
+    @include icon-content("\e8b5");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-weibo {
-    @include icon-content("🈵");
+    @include icon-content("e820");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-whatsapp {
-    @include icon-content("🈵");
+    @include icon-content("\e8b6");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-wheelchair {
@@ -3242,7 +3707,8 @@ $icon-sizes: (
 }
 
 .fa-wikipedia-w {
-    @include icon-content("🈵");
+    @include icon-content("\e8b7");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-window-maximize {
@@ -3258,23 +3724,28 @@ $icon-sizes: (
 }
 
 .fa-windows {
-    @include icon-content("🈵");
+    @include icon-content("\e8b8");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-wordpress {
-    @include icon-content("🈵");
+    @include icon-content("\e8b9");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-wpbeginner {
-    @include icon-content("🈵");
+    @include icon-content("\e8ba");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-wpexplorer {
-    @include icon-content("🈵");
+    @include icon-content("\e8bb");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-wpforms {
-    @include icon-content("🈵");
+    @include icon-content("\e8bc");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-wrench {
@@ -3282,36 +3753,44 @@ $icon-sizes: (
 }
 
 .fa-xing {
-    @include icon-content("🈵");
+    @include icon-content("\e8be");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-xing-square {
-    @include icon-content("🈵");
+    @include icon-content("\e8bd");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-y-combinator,
 .fa-yc {
-    @include icon-content("🈵");
+    @include icon-content("\e8bf");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-yahoo {
-    @include icon-content("🈵");
+    @include icon-content("\e8c0");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-yelp {
-    @include icon-content("🈵");
+    @include icon-content("\e8c1");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-youtube {
-    @include icon-content("🈵");
+    @include icon-content("\e8c4");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-youtube-play {
-    @include icon-content("🈵");
+    @include icon-content("\e8c2");
+    --icon-font-family: #{$oi-font-family};
 }
 
 .fa-youtube-square {
-    @include icon-content("🈵");
+    @include icon-content("\e8c3");
+    --icon-font-family: #{$oi-font-family};
 }
 
 // ================================
@@ -3321,56 +3800,79 @@ $icon-sizes: (
 // Dynamic size generation using SCSS loops
 @each $name, $size in $icon-sizes {
     .fa-#{$name},
-    .mi-#{$name} {
+    .oi-#{$name} {
         font-size: $size;
 
         @if $name == 'lg' {
-            line-height: 0.75em;
-            vertical-align: -15%;
+            // line-height: 0.75em;
+            // vertical-align: -15%;
 
             line-height: 0.5;
-            vertical-align: -28%;
+            vertical-align: -40%;
         }
     }
 }
 
+// fa-stack, what should we do ?
+// Temporary kept for compatibility.
+.oi-stack, .fa-stack {
+    position: relative;
+    display: inline-block;
+    width: 2em;
+    height: 2em;
+    line-height: 2em;
+    vertical-align: middle;
+}
+
+.oi-stack-1x, .oi-stack-2x,
+.fa-stack-1x, .fa-stack-2x {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+.oi-stack-2x, .fa-stack-2x {
+    font-size: 2em;
+}
+
 // Fixed width for consistent alignment
-.fa-fw,
-.mi-fw {
+// To remove after the switch
+.fa-fw {
     width: $fa-fw-width;
     text-align: center;
 }
 
 // Rotation classes using mixin
 .fa-rotate-90,
-.mi-rotate-90 {
+.oi-rotate-90 {
     @include rotate(90);
 }
 
 .fa-rotate-180,
-.mi-rotate-180 {
+.oi-rotate-180 {
     @include rotate(180);
 }
 
 .fa-rotate-270,
-.mi-rotate-270 {
+.oi-rotate-270 {
     @include rotate(270);
 }
 
 // Flipping classes using mixin
 .fa-flip-horizontal,
-.mi-flip-horizontal {
+.oi-flip-horizontal {
     @include flip(-1, 1);
 }
 
 .fa-flip-vertical,
-.mi-flip-vertical {
+.oi-flip-vertical {
     @include flip(1, -1);
 }
 
 // Spinning animation
 .fa-spin,
-.mi-spin {
+.oi-spin {
     -webkit-animation: fa-spin 2s infinite linear;
     animation: fa-spin 2s infinite linear;
 }
@@ -3398,9 +3900,9 @@ $icon-sizes: (
 // ================================
 
 // Predefined Material Symbols variants
-.mi-filled {
+.oi-filled {
     --o-mi-fill: 1;
 }
-.mi-outlined {
+.oi-outlined {
     --o-mi-fill: 0;
 }

@@ -80,7 +80,7 @@ kbd {
       &:before {
         @include o-position-absolute(0);
         transform: translate(-1.25em, 50%);
-        font: 1em/1 "Material Symbols Outlined";
+        font: 1em/1 "material_symbols_sharp";
         color: $link-color;
         content: "check";
       }
@@ -98,7 +98,7 @@ kbd {
     &::after {
       @include o-position-absolute(0, $left: 90%);
       transform: translate(0, 50%);
-      font: 1em/1 "Material Symbols Outlined";
+      font: 1em/1 "material_symbols_sharp";
       color: $link-color;
       display: inline-block;
       content: "check";
