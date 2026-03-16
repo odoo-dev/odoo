@@ -260,7 +260,7 @@ export class DomMutationPlugin extends Plugin {
         this.enableObserverCallbacks = new Set();
         this._cleanups.push(() => this.observer.disconnect());
         this.clean();
-        /** @type { CommitData[] } */
+        /** @type { DomMutationCommitData[] } */
         this.currentStash = [];
     }
 
@@ -308,9 +308,29 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @param { (EditorMutationRecord | EditorMutation)[] } records
+     * @param { NativeMutationRecord[] } records
+     * @return { EditorMutationRecord[] }
      */
-    stage(records = []) {
+    stage(records = this.observer.takeRecords()) {
+        if (this.observer.takeRecords().length) {
+            throw new Error("MutationObserver has pending records");
+        }
+
+        // First process the records:
+        // 1) Filter.
+        records = this.filterAttributeMutationRecords(records);
+        records = this.filterSameTextContentMutationRecords(records);
+        records = this.filterOutIntermediateStateMutationRecords(records);
+        // 2) Transform.
+        records = this.transformToEditorMutationRecords(records);
+        // 3) Filter some more and adjust.
+        records = records.filter((record) => !this.isSystemMutationRecord(record));
+        records = this.filterAndAdjustEditorMutationRecords(records);
+
+        // Then stage them.
+        // TODO AGE: find out why we need to do this for `currentChanges` but
+        // `on_attribute_changed_handlers` requires `target` and we return
+        // `records`. Those two things can/should probably change.
         const mutations = [];
         for (const record of records) {
             switch (record.type) {
@@ -332,6 +352,15 @@ export class DomMutationPlugin extends Plugin {
             }
         }
         this.currentChanges.addMutations(...mutations);
+
+        // And finally, inform other plugins if attributes changed.
+        for (const record of records) {
+            if (record.type === "attributes") {
+                this.trigger("on_attribute_changed_handlers", record);
+            }
+        }
+
+        return records;
     }
 
     unstage(changes) {
@@ -346,9 +375,14 @@ export class DomMutationPlugin extends Plugin {
         if (this.currentStash.length > index) {
             const changes = this.currentStash.splice(index, 1)[0];
             this.applyMutations(changes.mutations);
+            // TODO AGE: this condition is theoretically insufficient because
+            // the observer could also be disconnected. I guess best would be to
+            // reactivate it before calling `applyMutation` and disable it
+            // again. See about that when looking into
+            // `disableObserver`/`withObserverOff`.
             if (this.isObserverDisabled) {
                 // Make sure the unstashed mutations are recorded.
-                this.stage(changes.mutations);
+                this.currentChanges.addMutations(...changes.mutations);
             }
             // TODO AGE: shouldn't this also apply other changes?
         }
@@ -361,13 +395,13 @@ export class DomMutationPlugin extends Plugin {
      * @param { CommitType } [params.currentOperation] the type of the commit we're about to write
      */
     flush({ records = this.observer.takeRecords(), dispatch = true, currentOperation } = {}) {
-        const stagedRecords = this.stageObserverRecords(records);
+        const stagedRecords = this.stage(records);
         if (stagedRecords.length) {
             // TODO modify `handleMutations` of web_studio to handle `undoOperation`.
             if (dispatch) {
                 this.trigger("on_new_records_handled_handlers", stagedRecords, currentOperation);
                 // Process potential new mutations caused by the handlers.
-                this.stageObserverRecords();
+                this.stage();
             }
             this.dispatchContentUpdated();
         }
@@ -959,38 +993,6 @@ export class DomMutationPlugin extends Plugin {
     // New mutations
 
     /**
-     * @param {NativeMutationRecord[]} [records = this.observer.takeRecords()]
-     * @return {EditorMutationRecord[]} the processed and staged records
-     */
-    stageObserverRecords(records = this.observer.takeRecords()) {
-        if (this.observer.takeRecords().length) {
-            throw new Error("MutationObserver has pending records");
-        }
-        // First process the records:
-        // 1) Filter.
-        records = this.filterAttributeMutationRecords(records);
-        records = this.filterSameTextContentMutationRecords(records);
-        records = this.filterOutIntermediateStateMutationRecords(records);
-        // 2) Transform.
-        records = this.transformToEditorMutationRecords(records);
-        // 3) Filter some more and adjust.
-        records = records.filter((record) => !this.isSystemMutationRecord(record));
-        records = this.filterAndAdjustEditorMutationRecords(records);
-
-        // Then stage them.
-        this.stage(records);
-
-        // And inform other plugins if attributes changed.
-        for (const record of records) {
-            if (record.type === "attributes") {
-                this.trigger("on_attribute_changed_handlers", record);
-            }
-        }
-
-        return records;
-    }
-
-    /**
      * Transforms NativeMutationRecords into EditorMutationRecords.
      *
      * ChildList record have added/removed trees added to them.
@@ -1540,7 +1542,7 @@ export class DomMutationPlugin extends Plugin {
                 this.stageCustomMutation({ apply: revert, revert: apply });
             },
         };
-        this.stage([customMutation]);
+        this.currentChanges.addMutations(customMutation);
     }
 
     // Preview stuff
@@ -1572,7 +1574,7 @@ export class DomMutationPlugin extends Plugin {
             // the state change is done with the intermediate attribute value
             // and not with the final value in the DOM after all commits were
             // reverted then applied again.
-            this.stageObserverRecords();
+            this.flush({ dispatch: false });
             if (commitToRestore.discard) {
                 commitToRestore.discard();
                 lastRevertedChanges = commitToRestore.data;
@@ -1585,7 +1587,7 @@ export class DomMutationPlugin extends Plugin {
             this.applyMutations(irreversibleCommit.data.mutations, {
                 ensureNewMutations: true,
             });
-            this.stageObserverRecords();
+            this.flush({ dispatch: false });
         }
         // TODO ABD TODO @phoenix: review selections, this selection could be obsolete
         // depending on the non-reversible commits that were applied.
