@@ -60,3 +60,10 @@ class SaleOrderLine(models.Model):
             else:
                 line.margin = line.price_subtotal - (line.purchase_price * line.product_uom_qty)
                 line.margin_percent = line.price_subtotal and line.margin / line.price_subtotal
+
+    def _prepare_template_line_values(self):
+        vals = super()._prepare_template_line_values()
+        if not self.product_id:
+            vals["purchase_price"] = self.purchase_price
+
+        return vals

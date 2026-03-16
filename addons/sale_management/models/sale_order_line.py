@@ -106,11 +106,14 @@ class SaleOrderLine(models.Model):
     def _prepare_template_line_values(self):
         """Prepare create values for a sale order template line from a sale order line.
 
+        If the line is linked to a product, the product is stored and pricing is recomputed later.
+        For product lines without a product, price, discount, and taxes are copied explicitly.
+
         :return: `sale.order.template.line` create values
         :rtype: dict
         """
         self.ensure_one()
-        return {
+        vals = {
             "name": self.name,
             "product_uom_qty": self.product_uom_qty,
             "product_uom_id": self.product_uom_id.id,
@@ -120,3 +123,12 @@ class SaleOrderLine(models.Model):
             "collapse_composition": self.collapse_composition,
             "collapse_prices": self.collapse_prices,
         }
+
+        if not self.product_id:
+            vals.update({
+                "tax_ids": [Command.set(self.tax_ids.ids)],
+                "discount": self.discount,
+                "unit_price": self.price_unit,
+            })
+
+        return vals

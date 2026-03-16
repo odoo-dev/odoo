@@ -2,6 +2,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Command
 
 
 class SaleOrderTemplateLine(models.Model):
@@ -72,6 +73,13 @@ class SaleOrderTemplateLine(models.Model):
     collapse_composition = fields.Boolean()
     collapse_prices = fields.Boolean()
 
+    # Technical fields which stores values for product SO line without product_id
+    discount = fields.Float(string="Discount (%)", digits="Discount")
+    unit_price = fields.Float(
+        string="Unit Price", digits="Product Price", min_display_digits="Product Price"
+    )
+    tax_ids = fields.Many2many(string="Taxes", comodel_name="account.tax")
+
     # === COMPUTE METHODS ===#
 
     @api.depends("product_id", "product_id.uom_id", "product_id.uom_ids")
@@ -134,7 +142,10 @@ class SaleOrderTemplateLine(models.Model):
         return [("sale_ok", "=", True), ("type", "!=", "combo")]
 
     def _prepare_order_line_values(self):
-        """Give the values to create the corresponding order line.
+        """Prepare values to create a sale order line from a template line.
+
+        Line without products take price, discount, taxes from itself otherwise compute it based on
+        product and related values.
 
         :return: `sale.order.line` create values
         :rtype: dict
@@ -152,4 +163,12 @@ class SaleOrderTemplateLine(models.Model):
         }
         if self.name:
             vals["name"] = self.name
+
+        if not self.product_id:
+            vals.update({
+                "tax_ids": [Command.set(self.tax_ids.ids)],
+                "discount": self.discount,
+                "price_unit": self.unit_price,
+            })
+
         return vals
