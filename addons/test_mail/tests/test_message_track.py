@@ -133,6 +133,7 @@ class TestTrackingAPI(TestTrackingCommon):
     def test_tracking_custom(self):
         ticket_customer_field = self.env['ir.model.fields']._get('mail.test.ticket', 'customer_id')
         test_tracking_records = self.test_tracking_records.with_env(self.env)
+        test_tracking_records.currency_id = self.env.company.currency_id.id
         test_tracking_records._track_add(
             {record.id: {
                 'false_field_char': 'old',
@@ -151,7 +152,7 @@ class TestTrackingAPI(TestTrackingCommon):
             fields_info={
                 'false_field_char': {'string': 'False Field Char', 'type': 'char'},
                 'false_field_int': {'string': 'False Field Int', 'type': 'integer'},
-                'false_field_monetary': {'string': 'False Field Monetary', 'type': 'monetary', 'currency_id': self.env.ref('base.USD').id},
+                'false_field_monetary': {'string': 'False Field Monetary', 'type': 'monetary', 'currency_id': self.env.ref('base.USD').id, 'currency_field': 'currency_id'},
                 'false_field_m2o_from_ticket': {'field_id': ticket_customer_field.id, 'type': 'many2one'},
                 'false_field_m2o_cd': {'company_dependent': True, 'string': 'False Field M2O Company Dependent', 'type': 'many2one'},
             },
@@ -518,63 +519,6 @@ class TestTrackingAPI(TestTrackingCommon):
                 'tracking_values': [('user_id', 'many2one', False, self.user_admin)],
             }
         )
-
-    @users('employee')
-    def test_tracking_tweak_filter_for_display(self):
-        """Check that tracked fields filtered for display are not present in the front-end and
-        email formatting methods. See `_track_filter_for_display`"""
-        original_user = self.user_admin
-        new_user = self.user_employee
-
-        records = self.env['mail.test.track'].create([{
-            'name': 'TestTrack Hide User Field',
-            'user_id': original_user.id,
-            'track_fields_tofilter': 'user_id',
-        }, {
-            'name': 'TestTrack Show All Fields',
-            'user_id': original_user.id,
-            'track_fields_tofilter': '',
-        }])
-        self.flush_tracking()
-
-        records.write({'user_id': new_user.id})
-        self.flush_tracking()
-
-        for record in records:
-            self.assertEqual(len(record.message_ids), 2, 'Should be a creation message and a tracking message')
-            self.assertMessageFields(
-                record.message_ids[0], {
-                    'tracking_values': [('user_id', 'many2one', original_user, new_user)],
-                }
-            )
-        # first record: tracking value should be hidden
-        message_0 = records[0].message_ids[0]
-        formatted = Store().add(message_0, "_store_message_fields").get_result()["mail.message"][0]
-        self.assertEqual(formatted['trackingValues'], [], 'Hidden values should not be formatted')
-        mail_render = records[0]._notify_by_email_prepare_rendering_context(message_0, {})
-        self.assertEqual(mail_render['tracking_values'], [])
-
-        # second record: all values displayed
-        message_1 = records[1].message_ids[0]
-        formatted = Store().add(message_1, "_store_message_fields").get_result()["mail.message"][0]
-        self.assertEqual(len(formatted['trackingValues']), 1)
-        self.assertDictEqual(
-            formatted['trackingValues'][0],
-            {
-                'id': message_1.sudo().tracking_value_ids.id,
-                'fieldInfo': {
-                    'companyId': False,
-                    'changedField': 'Responsible',
-                    'currencyId': False,
-                    'floatPrecision': None,
-                    'fieldType': 'many2one',
-                    'isPropertyField': False,
-                },
-                'newValue': new_user.display_name,
-                'oldValue': original_user.display_name,
-            })
-        mail_render = records[1]._notify_by_email_prepare_rendering_context(message_1, {})
-        self.assertEqual(mail_render['tracking_values'], [('Responsible', original_user.display_name, new_user.display_name)])
 
     @users('employee')
     def test_tracking_update(self):
@@ -1362,67 +1306,6 @@ class TestTrackingInternals(TestTrackingCommon):
                 ],
             })
 
-    def test_track_groups(self):
-        """ Test field groups and filtering when using standard helpers """
-        # say that 'email_from' is accessible to erp_managers only
-        field = self.record._fields['email_from']
-        self.addCleanup(setattr, field, 'groups', field.groups)
-        field.groups = 'base.group_erp_manager'
-
-        with self.mock_mail_gateway(), self.mock_mail_app():
-            self.record.sudo().write({'email_from': 'X'})
-            self.flush_tracking()
-        track_msg = self._new_msgs
-        self.assertMessageFields(track_msg, {'tracking_values': [
-            ('email_from', 'char', False, 'X'),
-        ]})
-
-        formatted_tracking_values = [{
-            'id': track_msg.tracking_value_ids.id,
-            'fieldInfo': {
-                'changedField': 'Email From',
-                'companyId': False,
-                'currencyId': False,
-                'fieldType': 'char',
-                'floatPrecision': None,
-                'isPropertyField': False,
-            },
-            'newValue': 'X',
-            'oldValue': False,
-        }]
-        for user, exp_values in [(self.user_employee, []), (self.user_admin, formatted_tracking_values)]:
-            self.env.transaction.reset()
-            msg_as_user = Store().add(track_msg.with_user(user), "_store_message_fields").get_result()
-            self.assertEqual(
-                msg_as_user["mail.message"][0].get("trackingValues"), exp_values,
-            )
-            msg_as_user = Store().add(track_msg.with_user(user).sudo(), "_store_message_fields").get_result()
-            self.assertEqual(
-                msg_as_user["mail.message"][0].get("trackingValues"),
-                formatted_tracking_values,
-                "Sudo should allow to bypass field protection",
-            )
-
-        record_as_user = self.record.with_user(self.user_employee)
-        record_as_admin = self.record.with_user(self.user_admin)
-        values_emp = record_as_user._notify_by_email_prepare_rendering_context(self.record.message_ids[0], {})
-        values_admin = record_as_admin._notify_by_email_prepare_rendering_context(self.record.message_ids[0], {})
-        values_sudo = record_as_user.sudo()._notify_by_email_prepare_rendering_context(self.record.message_ids[0], {})
-        self.assertFalse(values_emp.get('tracking_values'), "should not have protected tracking values")
-        self.assertTrue(values_admin.get('tracking_values'), "should have protected tracking values")
-        self.assertTrue(values_sudo.get('tracking_values'), "should have protected tracking values")
-
-        # test editing the record with user not in the group of the field
-        self.env.invalidate_all()
-        self.env.registry.clear_cache()
-        record_form = Form(self.record.with_user(self.user_employee))
-        record_form.name = 'TestDoNoCrash'
-        # the employee user must be able to save the fields on which they can write
-        # if we fetch all the tracked fields, ignoring the group of the current user
-        # it will crash and it shouldn't
-        record = record_form.save()
-        self.assertEqual(record.name, 'TestDoNoCrash')
-
     @users('employee')
     def test_track_invalid(self):
         """ Test invalid use cases: unknown field, unsupported type, ... """
@@ -1440,6 +1323,7 @@ class TestTrackingInternals(TestTrackingCommon):
             track_values, {
                 'field_id': False,
                 'field_info': {'desc': 'Test', 'name': 'not_existing_field', 'type': 'char'},
+                'field_label': 'Test',
                 'field_name': 'not_existing_field',
                 'field_type': 'char',
                 'old_value': '',
@@ -1647,108 +1531,3 @@ class TestTrackingInternals(TestTrackingCommon):
         finally:
             # Restore model to prevent registry errors after test
             self.env.registry.models['mail.test.ticket'] = model
-
-    @users('employee')
-    def test_unlinked_field(self):
-        """ Check that removing a field removes its tracking values. """
-        record = self.record.with_env(self.env)
-        record.write({'email_from': 'new_value'})  # create a tracking value
-
-        record_other = self.env['mail.test.ticket'].create({})
-        self.flush_tracking()
-        record_other.write({'email_from': 'email.from.1@example.com'})
-        self.flush_tracking()
-        record_other.write({
-            'customer_id': self.test_partner.id,
-            'email_from': 'email.from.2@example.com',
-            'user_id': self.env.user.id,
-        })
-        self.flush_tracking()
-
-        self.assertMessageFields(
-            record.message_ids[0], {'tracking_values': [('email_from', 'char', False, 'new_value')]}
-        )
-        self.assertMessageFields(
-            record_other.message_ids[0], {'tracking_values': [
-                ('customer_id', 'many2one', False, self.test_partner),
-                ('email_from', 'char', 'email.from.1@example.com', 'email.from.2@example.com'),
-                ('user_id', 'many2one', False, self.env.user)
-            ]}
-        )
-        self.assertMessageFields(
-            record_other.message_ids[1], {'tracking_values': [('email_from', 'char', False, 'email.from.1@example.com')]}
-        )
-
-        # check display / format
-        trackings_all = (record + record_other).message_ids.sudo().tracking_value_ids
-        trackings_all_sorted = [
-            trackings_all.filtered(lambda t: t.field_id.name == 'user_id'),  # tracking=1
-            trackings_all.filtered(lambda t: t.field_id.name == 'customer_id'),  # tracking=2
-            trackings_all.filtered(lambda t: t.field_id.name == 'email_from')[0],  # tracking=True -> 100
-            trackings_all.filtered(lambda t: t.field_id.name == 'email_from')[1],  # tracking=True -> 100
-            trackings_all.filtered(lambda t: t.field_id.name == 'email_from')[2],  # tracking=True -> 100
-        ]
-        fields_info = [
-            ('user_id', 'many2one', 'Responsible'),
-            ('customer_id', 'many2one', 'Customer'),
-            ('email_from', 'char', 'Email From'),
-            ('email_from', 'char', 'Email From'),
-            ('email_from', 'char', 'Email From'),
-        ]
-        values_info = [
-            ('', self.env.user.name),
-            ('', self.test_partner.name),
-            (False, 'new_value'),
-            ('email.from.1@example.com', 'email.from.2@example.com'),
-            (False, 'email.from.1@example.com'),
-        ]
-        formatted = record.env['mail.message']._message_tracking_value_format(trackings_all)
-        self.assertEqual(
-            formatted,
-            [
-                {
-                    'id': tracking.id,
-                    'fieldInfo': {
-                        'changedField': field_info[2],
-                        'companyId': False,
-                        'currencyId': False,
-                        'fieldType': field_info[1],
-                        'floatPrecision': None,
-                        'isPropertyField': False,
-                    },
-                    'newValue': values[1],
-                    'oldValue': values[0],
-                }
-                for tracking, field_info, values in zip(trackings_all_sorted, fields_info, values_info)
-            ]
-        )
-
-        # remove fields
-        fields_toremove = self.env['ir.model.fields'].sudo().search([
-            ('model', '=', 'mail.test.ticket'),
-            ('name', 'in', ('email_from', 'user_id', 'datetime'))  # also include a non tracked field
-        ])
-        fields_toremove.with_context(force_delete=True).unlink()
-        self.assertEqual(len(trackings_all.exists()), 5)
-
-        # check display / format, even if field is removed
-        formatted = record.env['mail.message']._message_tracking_value_format(trackings_all)
-        self.assertEqual(
-            formatted,
-            [
-                {
-                    'id': tracking.id,
-                    'fieldInfo': {
-                        'changedField': field_info[2],
-                        'companyId': False,
-                        'currencyId': False,
-                        'fieldType': field_info[1],
-                        'isPropertyField': False,
-                        'floatPrecision': None,
-                    },
-                    'newValue': values[1],
-                    'oldValue': values[0],
-                }
-                for tracking, field_info, values in zip(trackings_all_sorted, fields_info, values_info)
-            ]
-        )

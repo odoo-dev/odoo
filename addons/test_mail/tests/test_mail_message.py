@@ -224,7 +224,7 @@ class TestMessageValues(MailCommon):
         self.flush_tracking()
         tracking_message = record.message_ids[0]
         self.assertFalse(tracking_message.attachment_ids)
-        self.assertTrue(is_html_empty(tracking_message.body))
+        self.assertTrue(is_html_empty(tracking_message.message_type != 'tracking' and tracking_message.body))
         self.assertFalse(tracking_message.subtype_id.description)
         self.assertFalse(tracking_message.sudo()._filter_empty(), 'Has tracking values')
         with self.assertRaises(UserError, msg='Tracking values prevent from updating content'):

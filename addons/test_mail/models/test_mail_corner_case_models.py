@@ -173,7 +173,7 @@ class MailTestTrackAll(models.Model):
         tracking=8)
     many2one_field_id = fields.Many2one('res.partner', string='Many2one', tracking=9)
     many2one_cd_field_id = fields.Many2one('res.partner', string='Many2one CD', tracking=10, company_dependent=True)
-    monetary_field = fields.Monetary('Monetary', tracking=11)
+    monetary_field = fields.Monetary('Monetary', tracking=11, currency_field='currency_id')
     one2many_field = fields.One2many(
         'mail.test.track.all.o2m', 'mail_track_all_id',
         string='One2Many',
@@ -261,7 +261,7 @@ class MailTestTrackMixin(models.Model):
         tracking=8)
     many2one_field_id = fields.Many2one('res.partner', string='Many2one', tracking=9)
     many2one_cd_field_id = fields.Many2one('res.partner', string='Many2one CD', tracking=10, company_dependent=True)
-    monetary_field = fields.Monetary('Monetary', tracking=11)
+    monetary_field = fields.Monetary('Monetary', tracking=11, currency_field='currency_id')
     selection_field = fields.Selection(
         string='Selection',
         selection=[('first', 'FIRST'), ('second', 'SECOND')],
