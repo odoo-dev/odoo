@@ -36,11 +36,10 @@ import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 import { localization } from "@web/core/l10n/localization";
 import { user } from "@web/core/user";
 
-import { Model } from "@odoo/o-spreadsheet";
-
 import * as spreadsheet from "@odoo/o-spreadsheet";
 import { waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { Partner, Product } from "../../helpers/data";
+import { createModel } from "../../helpers/model";
 const { toZone } = spreadsheet.helpers;
 
 describe.current.tags("headless");
@@ -1975,7 +1974,7 @@ test("Duplicate pivot respects the formula id increment", async () => {
 });
 
 test("Cannot duplicate unknown pivot", async () => {
-    const model = new Model();
+    const model = createModel();
     const result = model.dispatch("DUPLICATE_PIVOT", {
         pivotId: "hello",
         newPivotId: "new",
@@ -1986,7 +1985,7 @@ test("Cannot duplicate unknown pivot", async () => {
 test("Spreadsheet pivot table ignored by global fiter plugin", () => {
     allowTranslations();
 
-    const model = new Model();
+    const model = createModel();
     model.selection.selectZone({ cell: { col: 0, row: 0 }, zone: toZone("A1:A4") });
     const pivotId = "pivot1";
     const sheetId = model.getters.getActiveSheetId();

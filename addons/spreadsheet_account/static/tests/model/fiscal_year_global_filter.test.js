@@ -1,12 +1,12 @@
 /** @ts-check */
 import { describe, expect, test } from "@odoo/hoot";
-import { Model } from "@odoo/o-spreadsheet";
 import {
     dateFilterValueToString,
     getDateRange,
     getNextDateFilterValue,
     getPreviousDateFilterValue,
 } from "@spreadsheet/global_filters/helpers";
+import { createModel } from "@spreadsheet/../tests/helpers/model";
 
 const { DateTime } = luxon;
 
@@ -20,7 +20,7 @@ const modelConfig = {
 };
 
 test("fiscal_year global filter", () => {
-    const model = new Model({}, modelConfig);
+    const model = createModel({}, modelConfig);
     const now = DateTime.fromISO("2022-10-16");
     const filterValue = { type: "fiscal_year", offset: 0 };
 
@@ -45,7 +45,7 @@ test("fiscal_year global filter", () => {
 });
 
 test("Data source offset is applied to fiscal_year global filter", () => {
-    const model = new Model({}, modelConfig);
+    const model = createModel({}, modelConfig);
     const now = DateTime.fromISO("2022-10-16");
     const filterValue = { type: "fiscal_year", offset: 1 };
     let dataSourceOffset = 2;
@@ -71,6 +71,6 @@ test("this_fiscal_year global filter", () => {
             },
         ],
     };
-    const model = new Model(spreadsheetData, modelConfig);
+    const model = createModel(spreadsheetData, modelConfig);
     expect(model.getters.getGlobalFilterValue("1")).toEqual({ type: "fiscal_year", offset: 0 });
 });

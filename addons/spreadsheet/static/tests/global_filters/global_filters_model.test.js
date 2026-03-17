@@ -2,7 +2,7 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame, mockDate, mockTimeZone } from "@odoo/hoot-mock";
 
-import { DispatchResult, Model, helpers, constants, CompiledFormula } from "@odoo/o-spreadsheet";
+import { DispatchResult, helpers, constants, CompiledFormula } from "@odoo/o-spreadsheet";
 import { Domain } from "@web/core/domain";
 import {
     defineSpreadsheetModels,
@@ -57,6 +57,7 @@ import { toRangeData } from "@spreadsheet/../tests/helpers/zones";
 import { GlobalFiltersCoreViewPlugin } from "@spreadsheet/global_filters/plugins/global_filters_core_view_plugin";
 import { waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { PivotUIGlobalFilterPlugin } from "@spreadsheet/pivot/index";
+import { createModel } from "../helpers/model";
 
 describe.current.tags("headless");
 defineSpreadsheetModels();
@@ -83,7 +84,10 @@ function getFiltersMatchingPivot(model, formula) {
     const pivotUIPlugin = model["handlers"].find(
         (handler) => handler instanceof PivotUIGlobalFilterPlugin
     );
-    return pivotUIPlugin._getFiltersMatchingPivot(sheetId, CompiledFormula.Compile(formula, sheetId, model.getters));
+    return pivotUIPlugin._getFiltersMatchingPivot(
+        sheetId,
+        CompiledFormula.Compile(formula, sheetId, model.getters)
+    );
 }
 
 test("Can add a global filter", async function () {
@@ -486,7 +490,7 @@ test("Can import/export filters", async function () {
         message: "it should have updated the list domain",
     });
 
-    const newModel = new Model(model.exportData(), {
+    const newModel = createModel(model.exportData(), {
         custom: model.config.custom,
     });
 
@@ -553,7 +557,7 @@ test("Can import/export filters of only list", async function () {
         message: "it should have updated the list domain",
     });
 
-    const newModel = new Model(model.exportData(), {
+    const newModel = createModel(model.exportData(), {
         custom: model.config.custom,
     });
 
@@ -946,7 +950,7 @@ test("import/export a text filter range", async function () {
     const data = model.exportData();
     expect(data.globalFilters[0].rangesOfAllowedValues).toEqual(["Sheet1!A1:A2"]);
     // import
-    const newModel = new Model(data);
+    const newModel = createModel(data);
     const ranges = newModel.getters.getGlobalFilter("42").rangesOfAllowedValues;
     expect(ranges.length).toBe(1);
     expect(ranges[0].zone).toEqual(toZone("A1:A2"));
@@ -1618,7 +1622,7 @@ test("Default value defines value", async function () {
 test("Default value defines value at model loading", async function () {
     const label = "This year";
     const defaultValue = { operator: "ilike", strings: ["value"] };
-    const model = new Model({
+    const model = createModel({
         globalFilters: [{ type: "text", label, defaultValue, fields: {}, id: "1" }],
     });
     const [filter] = model.getters.getGlobalFilters();
@@ -1808,7 +1812,7 @@ test("Date filter automatic undefined values for from_to filter", async function
 
 test("Date filter automatic default value at model loading", async function () {
     const label = "This year";
-    const model = new Model({
+    const model = createModel({
         globalFilters: [
             {
                 type: "date",
@@ -1827,7 +1831,7 @@ test("Date filter automatic default value at model loading", async function () {
 test("Relative date filter at model loading", async function () {
     const label = "Last Month";
     const defaultValue = "last_30_days";
-    const model = new Model({
+    const model = createModel({
         globalFilters: [
             {
                 type: "date",
@@ -2024,7 +2028,7 @@ test("Relative date filter with offset domain value", async function () {
 });
 
 test("from_to date filter at model loading", async function () {
-    const model = new Model({
+    const model = createModel({
         globalFilters: [
             {
                 type: "date",
@@ -2611,7 +2615,7 @@ test("Can create a relative date filter with an empty default value", async () =
 });
 
 test("allowDispatch of MOVE_GLOBAL_FILTERS", function () {
-    const model = new Model();
+    const model = createModel();
     const filter1 = {
         id: "1",
         type: "text",
@@ -2636,7 +2640,7 @@ test("allowDispatch of MOVE_GLOBAL_FILTERS", function () {
 });
 
 test("can move a global filter", function () {
-    const model = new Model();
+    const model = createModel();
     const filter1 = {
         id: 1,
         type: "text",
@@ -2670,7 +2674,7 @@ test("Spreadsheet pivot are not impacted by global filter", function () {
     // This test is to ensure that the start of evaluation do not crash.
     // It will be removed as soon as the feature is implemented in spreadsheet.
 
-    new Model({
+    createModel({
         sheets: [{ id: "1" }],
         pivots: [
             {
@@ -2831,7 +2835,7 @@ test("Updating the list domain should keep the global filter domain", async () =
 });
 
 test("Can add a boolean filter", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -2843,7 +2847,7 @@ test("Can add a boolean filter", async () => {
 });
 
 test("Add a boolean filter with a default value", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -2855,7 +2859,7 @@ test("Add a boolean filter with a default value", async () => {
 });
 
 test("Check boolean filter domain", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -2875,7 +2879,7 @@ test("Check boolean filter domain", async () => {
 });
 
 test("Can add a selection filter", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -2895,7 +2899,7 @@ test("Can add a selection filter", async () => {
 });
 
 test("Check selection filter domain", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -2931,7 +2935,7 @@ test("Check selection filter domain", async () => {
 
 for (const operator of ["in", "not in", "child_of"]) {
     test(`relation global filter with operator ${operator}`, async () => {
-        const model = new Model();
+        const model = createModel();
         const filter = {
             id: "42",
             label: "test",
@@ -2948,7 +2952,7 @@ for (const operator of ["in", "not in", "child_of"]) {
 
 for (const operator of ["ilike", "not ilike"]) {
     test(`relation global filter with text operator ${operator}`, async () => {
-        const model = new Model();
+        const model = createModel();
         const filter = {
             id: "42",
             label: "test",
@@ -2984,7 +2988,7 @@ test("text global filter with starts_with operator", async () => {
 
 for (const operator of ["ilike", "not ilike"]) {
     test(`text global filter with contains operator ${operator}`, async () => {
-        const model = new Model();
+        const model = createModel();
         const filter = {
             id: "42",
             label: "test",
@@ -3003,7 +3007,7 @@ for (const operator of ["ilike", "not ilike"]) {
 
 for (const operator of ["in", "not in"]) {
     test(`text global filter with operator ${operator}`, async () => {
-        const model = new Model();
+        const model = createModel();
         const filter = {
             id: "42",
             label: "test",
@@ -3019,7 +3023,7 @@ for (const operator of ["in", "not in"]) {
 }
 
 test("Can add a numeric filter", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -3037,7 +3041,7 @@ test("Can add a numeric filter", async () => {
 });
 
 test("Can add a numeric filter with a default value", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -3052,7 +3056,7 @@ test("Can add a numeric filter with a default value", async () => {
 });
 
 test("Check numeric filter domain", async () => {
-    const model = new Model();
+    const model = createModel();
     const filter = {
         id: "42",
         label: "test",
@@ -3119,7 +3123,7 @@ test("Undo/Redo of global filter update", async () => {
 });
 
 test("Default value of text filter", () => {
-    const model = new Model();
+    const model = createModel();
     let result = addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "text",
@@ -3173,7 +3177,7 @@ test("Default value of text filter", () => {
 });
 
 test("Default value of selection filter", () => {
-    const model = new Model();
+    const model = createModel();
     let result = addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "selection",
@@ -3228,7 +3232,7 @@ test("Default value of selection filter", () => {
 });
 
 test("Default value of numeric filter", () => {
-    const model = new Model();
+    const model = createModel();
     let result = addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "numeric",
@@ -3274,7 +3278,7 @@ test("Default value of numeric filter", () => {
 });
 
 test("Default value of date filter", () => {
-    const model = new Model();
+    const model = createModel();
     let result = addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "date",
@@ -3334,7 +3338,7 @@ test("Default value of date filter", () => {
 });
 
 test("Default value of relation filter", () => {
-    const model = new Model();
+    const model = createModel();
     let result = addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "relation",
@@ -3405,7 +3409,7 @@ test("Default value of relation filter", () => {
 });
 
 test("Default value of boolean filter", () => {
-    const model = new Model();
+    const model = createModel();
 
     let result = addGlobalFilterWithoutReload(model, {
         id: "2",

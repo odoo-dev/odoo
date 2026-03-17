@@ -1,18 +1,18 @@
 /** @ts-check */
 import { describe, expect, test } from "@odoo/hoot";
 
-import { Model } from "@odoo/o-spreadsheet";
 import { defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
 import {
     addGlobalFilterWithoutReload,
     setGlobalFilterValueWithoutReload,
 } from "@spreadsheet/../tests/helpers/commands";
+import { createModel } from "../helpers/model";
 
 describe.current.tags("headless");
 defineSpreadsheetModels();
 
 test("Value of text filter", () => {
-    const model = new Model();
+    const model = createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "text",
@@ -57,7 +57,7 @@ test("Value of text filter", () => {
 });
 
 test("Value of selection filter", () => {
-    const model = new Model();
+    const model = createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "selection",
@@ -99,7 +99,7 @@ test("Value of selection filter", () => {
 });
 
 test("Value of numeric filter", () => {
-    const model = new Model();
+    const model = createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "numeric",
@@ -150,7 +150,7 @@ test("Value of numeric filter", () => {
 });
 
 test("Value of date filter", () => {
-    const model = new Model();
+    const model = createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "date",
@@ -270,7 +270,7 @@ test("Value of date filter", () => {
 });
 
 test("Value of relation filter", () => {
-    const model = new Model();
+    const model = createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "relation",

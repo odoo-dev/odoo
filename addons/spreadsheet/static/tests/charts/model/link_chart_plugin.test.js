@@ -8,7 +8,7 @@ import { createSpreadsheetWithList } from "../../helpers/list";
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 import { makeMockEnv } from "@web/../tests/web_test_helpers";
 
-import { Model } from "@odoo/o-spreadsheet";
+import { createModel } from "../../helpers/model";
 
 const chartId = "uuid1";
 
@@ -18,7 +18,7 @@ defineSpreadsheetModels();
 
 test("Links between charts and ir.menus are correctly imported/exported", async function () {
     const env = await makeMockEnv();
-    const model = new Model({}, { custom: { env } });
+    const model = createModel({}, { custom: { env } });
     createBasicChart(model, chartId);
     model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
         chartId,
@@ -29,7 +29,7 @@ test("Links between charts and ir.menus are correctly imported/exported", async 
         { type: "odooMenu", odooMenuId: 1 },
         { message: "Link to odoo menu is exported" }
     );
-    const importedModel = new Model(exportedData, { custom: { env } });
+    const importedModel = createModel(exportedData, { custom: { env } });
     const chartMenu = importedModel.getters.getChartOdooLink(chartId);
     expect(chartMenu).toEqual(
         { type: "odooMenu", odooMenuId: 1 },

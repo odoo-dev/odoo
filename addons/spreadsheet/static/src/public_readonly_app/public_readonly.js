@@ -69,6 +69,7 @@ export class PublicReadonlySpreadsheet extends Component {
             },
             this.data.revisions || []
         );
+        this.model.startModel();
         markRaw(this.model);
         if (this.env.debug) {
             // eslint-disable-next-line no-import-assign

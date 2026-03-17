@@ -255,6 +255,7 @@ export class DashboardLoader {
      */
     _createSpreadsheetModel(snapshot, revisions = [], config) {
         const model = new Model(snapshot, config, revisions);
+        model.startModel();
         this._activateFirstSheet(model);
         config.custom.odooDataProvider.addEventListener("data-source-updated", () =>
             model.dispatch("EVALUATE_CELLS")

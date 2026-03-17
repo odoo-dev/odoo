@@ -4,12 +4,12 @@ import { click, edit, queryAllTexts } from "@odoo/hoot-dom";
 import { defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
 import { contains, makeMockEnv, mountWithCleanup, onRpc } from "@web/../tests/web_test_helpers";
 
-import { Model } from "@odoo/o-spreadsheet";
 import { addGlobalFilter } from "@spreadsheet/../tests/helpers/commands";
 
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 import { Component, onWillUnmount, xml } from "@odoo/owl";
 import { DashboardSearchBarMenu } from "@spreadsheet_dashboard/bundle/dashboard_action/dashboard_search_bar_menu/dashboard_search_bar_menu";
+import { createModel } from "@spreadsheet/../tests/helpers/model";
 
 describe.current.tags("headless");
 defineSpreadsheetModels();
@@ -43,7 +43,7 @@ let model;
 
 beforeEach(async () => {
     env = await makeMockEnv();
-    model = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    model = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
 });
 
 test("basic text filter", async function () {

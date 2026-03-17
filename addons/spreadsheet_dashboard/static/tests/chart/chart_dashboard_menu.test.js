@@ -1,7 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { Model } from "@odoo/o-spreadsheet";
 import { insertChartInSpreadsheet } from "@spreadsheet/../tests/helpers/chart";
-import { makeSpreadsheetMockEnv } from "@spreadsheet/../tests/helpers/model";
+import { makeSpreadsheetMockEnv, createModel } from "@spreadsheet/../tests/helpers/model";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 import { createDashboardActionWithData } from "@spreadsheet_dashboard/../tests/helpers/dashboard_action";
 import { defineSpreadsheetDashboardModels } from "@spreadsheet_dashboard/../tests/helpers/data";
@@ -12,7 +11,7 @@ defineSpreadsheetDashboardModels();
 
 test("can change granularity", async () => {
     const env = await makeSpreadsheetMockEnv();
-    const setupModel = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    const setupModel = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
     const chartId = insertChartInSpreadsheet(setupModel, "odoo_line", {
         metaData: {
             groupBy: ["date:month"],

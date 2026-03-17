@@ -1,8 +1,8 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-dom";
-import { Model, components } from "@odoo/o-spreadsheet";
+import { components } from "@odoo/o-spreadsheet";
 import { createBasicChart } from "@spreadsheet/../tests/helpers/commands";
-import { makeSpreadsheetMockEnv } from "@spreadsheet/../tests/helpers/model";
+import { makeSpreadsheetMockEnv, createModel } from "@spreadsheet/../tests/helpers/model";
 import { OdooDataProvider } from "@spreadsheet/data_sources/odoo_data_provider";
 import { createDashboardActionWithData } from "@spreadsheet_dashboard/../tests/helpers/dashboard_action";
 import { defineSpreadsheetDashboardModels } from "@spreadsheet_dashboard/../tests/helpers/data";
@@ -24,7 +24,7 @@ function spyCharts() {
 
 test("Charts are animated only at first render", async () => {
     const env = await makeSpreadsheetMockEnv();
-    const setupModel = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    const setupModel = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
     createBasicChart(setupModel, "chartId");
     const charts = spyCharts();
     const { model } = await createDashboardActionWithData(setupModel.exportData());
@@ -46,7 +46,7 @@ test("Charts are animated only at first render", async () => {
 
 test("Charts are animated when chart type changes", async () => {
     const env = await makeSpreadsheetMockEnv();
-    const setupModel = new Model({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    const setupModel = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
     createBasicChart(setupModel, "chartId");
     const charts = spyCharts();
     const { model } = await createDashboardActionWithData(setupModel.exportData());
