@@ -71,7 +71,7 @@
             inset-inline-start: calc(1.5 * var(--inputbox-overlay-padding-x));
         }
         &.o_input_box_overlay_end {
-            inset-inline-end: calc(var(--inputbox-overlay-padding-x));
+            inset-inline-end: var(--inputbox-overlay-padding-toggler);
         }
     }
 }
@@ -79,8 +79,12 @@
 .o_input_box:has(.o_input_box_overlay_inline) {
     .o_input_box_overlay_end.o_input_box_overlay_inline {
         transition: right .4s;
+        inset-inline-end: var(--inputbox-inner-padding-end) !important;
+        top: unset;
+        bottom: var(--inputbox-overlay-padding-y);
+
         &:not(.o_touch_device .o_input_box_overlay_end):not(.o_input_box:focus-within .o_input_box_overlay_end) {
-            inset-inline-end: var(--inputbox-overlay-inline-position) !important;
+            inset-inline-end: #{'max(var(--inputbox-inner-padding-end), var(--inputbox-overlay-inline-position))'} !important;
         }
     }
 }

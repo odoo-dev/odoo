@@ -43,7 +43,6 @@ function _positionInputBoxOverlay(target) {
         endPadding += overlay.clientWidth + gap;
     }
     closestInputBox.style.setProperty("--inputbox-overlay-end-size", endPadding + "px");
-    
     if (inlineOverlay) {
         const inputEl = closestInputBox.querySelector(
             "input, textarea, select, [contenteditable]"
@@ -52,6 +51,7 @@ function _positionInputBoxOverlay(target) {
             let inputLength = inputEl.value?.length || 0;
             let paddingSize = startPadding;
             if (closestInputBox.querySelector(".o_tag")) {
+                inputEl.style.minWidth = inlineOverlay.clientWidth + "px";
                 const tagsLength = closestInputBox.offsetWidth - inputEl.offsetWidth;
                 paddingSize += tagsLength;
             }
@@ -63,8 +63,6 @@ function _positionInputBoxOverlay(target) {
                 );
             }
         }
-        inlineOverlay.style["inset-inline-end"] = "var(--inputbox-overlay-padding-toggler)";
-        endPadding += inlineOverlay.clientWidth + gap;
     }
 }
 
