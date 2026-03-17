@@ -145,12 +145,9 @@ class WebclientController(ThreadController):
     @classmethod
     def _process_request_for_internal_user(self, store: Store, name, params):
         if name == "systray_get_activities":
-            # sudo: bus.bus: reading non-sensitive last id
-            bus_last_id = request.env["bus.bus"].sudo()._bus_last_id()
             groups = request.env["res.users"]._get_activity_groups()
             store.add_global_values(
                 activityCounter=sum(group.get("total_count", 0) for group in groups),
-                activity_counter_bus_id=bus_last_id,
                 activityGroups=groups,
             )
         if name == "mail.canned.response":

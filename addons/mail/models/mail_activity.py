@@ -318,8 +318,12 @@ class MailActivity(models.Model):
         # send notifications about activity creation
         todo_activities = activities.filtered(lambda act: act.active and act.date_deadline <= fields.Date.today() and act.user_id)
         if todo_activities:
+            stores = Store.Stores()
             for user, user_activities in todo_activities.grouped('user_id').items():
-                user._bus_send("mail.activity/updated", {"activity_created": True, "count_diff": len(user_activities)})
+                stores[user].add_global_values(
+                    lambda res: res.counter("activityCounter", increment=len(user_activities)),
+                )
+            stores.bus_send()
         return activities
 
     def write(self, vals):
@@ -357,20 +361,21 @@ class MailActivity(models.Model):
         # update activity counter
         if original_user_todo_activity_count is not None:
             new_user_todo_activity_count = get_user_todo_activity_count(self)
+            stores = Store.Stores()
             for user in new_user_todo_activity_count.keys() | original_user_todo_activity_count.keys():
                 count_diff = new_user_todo_activity_count.get(user, 0) - original_user_todo_activity_count.get(user, 0)
-                if count_diff > 0:
-                    user._bus_send("mail.activity/updated", {"activity_created": True, "count_diff": count_diff})
-                elif count_diff < 0:
-                    user._bus_send("mail.activity/updated", {"activity_deleted": True, "count_diff": count_diff})
+                stores[user].add_global_values(lambda res: res.counter("activityCounter", increment=count_diff))
+            stores.bus_send()
 
         return res
 
     def unlink(self):
         todo_activities = self.filtered(lambda act: act.active and act.date_deadline <= fields.Date.today() and act.user_id)
         if todo_activities:
+            stores = Store.Stores()
             for user, user_activities in todo_activities.grouped('user_id').items():
-                user._bus_send("mail.activity/updated", {"activity_deleted": True, "count_diff": -len(user_activities)})
+                stores[user].add_global_values(lambda res: res.counter("activityCounter", decrement=len(user_activities)))
+            stores.bus_send()
         return super().unlink()
 
     @api.model
