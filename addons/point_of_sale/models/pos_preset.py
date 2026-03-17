@@ -1,4 +1,4 @@
-from odoo import fields, models, api, _
+from odoo import fields, models, api, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError, UserError
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -20,6 +20,20 @@ class PosPreset(models.Model):
     has_image = fields.Boolean(compute='_compute_has_image')
     count_linked_orders = fields.Integer(compute='_compute_count_linked_orders')
     count_linked_config = fields.Integer(compute='_compute_count_linked_config')
+
+    # Service Charge
+    service_fee = fields.Boolean(string='Service Charge', default=False)
+    service_fee_product_id = fields.Many2one('product.product', string='Service Charge Product', default=lambda self: self.env.ref('point_of_sale.product_product_service_charge', raise_if_not_found=False))
+    service_fee_type = fields.Selection([('fixed', 'Fixed Price'), ('percentage', 'Percentage')], string='Type', default='percentage')
+    service_fee_amount = fields.Float(string='Amount', default=0.0)
+    service_fee_based_on = fields.Selection([('pre_discount', 'Order total before discount(s)'), ('post_discount', 'Order total after discount(s)')], string='Based on', default='pre_discount')
+
+    @api.constrains('service_fee', 'service_fee_amount')
+    def _check_service_fee(self):
+        for preset in self:
+            if preset.service_fee:
+                if preset.service_fee_amount < 0:
+                    raise ValidationError(_('Service charge amount must be positive.'))
 
     # Timing options
     use_timing = fields.Boolean(string='Manage orders by time', default=False)
@@ -43,7 +57,7 @@ class PosPreset(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         return ['id', 'name', 'pricelist_id', 'fiscal_position_id', 'is_return', 'color', 'has_image', 'write_date', 'identification',
-            'use_timing', 'slots_per_interval', 'interval_time', 'attendance_ids']
+            'use_timing', 'slots_per_interval', 'interval_time', 'attendance_ids', 'service_fee', 'service_fee_product_id', 'service_fee_type', 'service_fee_amount', 'service_fee_based_on']
 
     def _compute_count_linked_orders(self):
         for record in self:
@@ -75,10 +89,8 @@ class PosPreset(models.Model):
         usage = defaultdict(int)
         orders = self.env['pos.order'].search([
             ('preset_id', '=', self.id),
-            ('session_id.state', '=', 'opened'),
-            ('preset_time', '!=', False),
-            ('state', 'in', ['draft', 'paid']),
-            ('create_date', '>=', fields.Datetime.now() - timedelta(days=1))
+            ('state', 'not in', ['cancel']),
+            ('preset_time', '!=', False)
         ])
         for order in orders:
             sql_datetime_str = order.preset_time.strftime("%Y-%m-%d %H:%M:%S")

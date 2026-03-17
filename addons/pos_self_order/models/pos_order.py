@@ -136,6 +136,7 @@ class PosOrder(models.Model):
                 'combo_parent_id': line_data.get('combo_parent_id'),
                 'combo_item_id': line_data.get('combo_item_id'),
                 'combo_line_ids': [id for id in line_data.get('combo_line_ids', []) if isinstance(id, int)],
+                'sequence': line_data.get('sequence', 10),
             }]
         return []
 
@@ -228,6 +229,64 @@ class PosOrder(models.Model):
         )
         self.amount_tax = tax_totals['tax_amount_currency']
         self.amount_total = tax_totals['total_amount_currency']
+        self._compute_service_charge()
+
+    def _compute_service_charge(self):
+        self.ensure_one()
+        if not self.preset_id or not self.preset_id.service_fee or not self.preset_id.service_fee_product_id:
+            service_charge_lines = self.lines.filtered(lambda l: l.product_id == self.preset_id.service_fee_product_id)
+            service_charge_lines.unlink()
+            return
+
+        service_charge_product = self.preset_id.service_fee_product_id
+        service_charge_lines = self.lines.filtered(lambda l: l.is_service_charge)
+        
+        # Remove lines that don't match the current product
+        stale_lines = service_charge_lines.filtered(lambda l: l.product_id != service_charge_product)
+        if stale_lines:
+            stale_lines.unlink()
+            service_charge_lines -= stale_lines
+
+        service_charge_line = service_charge_lines[:1]
+        
+        if not service_charge_line:
+            service_charge_line = self.env['pos.order.line'].create({
+                'order_id': self.id,
+                'product_id': service_charge_product.id,
+                'qty': 0,
+                'price_unit': 0,
+                'price_type': 'manual',
+                'sequence': 10000,
+                'is_service_charge': True,
+            })
+
+        qty = self.customer_count or 1 if self.preset_id.service_fee_type == 'fixed' else 1
+        price = 0
+        if self.preset_id.service_fee_type == 'fixed':
+            price = self.preset_id.service_fee_amount
+        else:
+            total = 0
+            if self.preset_id.service_fee_based_on == 'pre_discount':
+                for line in self.lines:
+                    if line == service_charge_line:
+                        continue
+                    # Approximate pre-discount: price_unit * qty
+                    # Note: price_unit in self-order recompute is already the pricelist price.
+                    total += line.price_unit * line.qty
+            else:
+                total = sum(l.price_subtotal_incl for l in self.lines if l != service_charge_line)
+            price = total * (self.preset_id.service_fee_amount / 100)
+
+        if service_charge_line.qty != qty or service_charge_line.price_unit != price:
+            service_charge_line.write({
+                'qty': qty,
+                'price_unit': price,
+                'price_subtotal': price * qty,
+                'price_subtotal_incl': price * qty, # Backend might need proper tax calculation later if taxes apply
+            })
+            # Re-update totals after service charge change
+            self.amount_total = sum(self.lines.mapped('price_subtotal_incl'))
+            self.amount_tax = sum(l.price_subtotal_incl - l.price_subtotal for l in self.lines)
 
     def _compute_line_price(self, line):
         pricelist = self.pricelist_id

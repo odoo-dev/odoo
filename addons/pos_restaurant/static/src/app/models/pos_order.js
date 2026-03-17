@@ -18,6 +18,7 @@ patch(PosOrder.prototype, {
     },
     setCustomerCount(count) {
         this.customer_count = Math.max(count, 1);
+        this.updateServiceCharge();
     },
     getTable() {
         return this.table_id;

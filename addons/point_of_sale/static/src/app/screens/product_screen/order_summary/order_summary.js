@@ -204,6 +204,16 @@ export class OrderSummary extends Component {
             }
             return;
         }
+        if (selectedLine && selectedLine === order.getServiceChargeLine()) {
+            this.numberBuffer.reset();
+            this.dialog.add(AlertDialog, {
+                title: _t("Cannot modify Service Charge"),
+                body: _t(
+                    "The Service Charge line is automatically calculated and cannot be modified."
+                ),
+            });
+            return;
+        }
         if (
             selectedLine &&
             this.pos.numpadMode === "quantity" &&

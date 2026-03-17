@@ -115,6 +115,13 @@ class PosConfig(models.Model):
             'receipt_printer_ids', 'use_order_printer', 'other_devices', 'pos_snooze_ids',
         ]
 
+    def _get_special_products(self):
+        res = super()._get_special_products()
+        for preset in self.available_preset_ids:
+            if preset.service_fee and preset.service_fee_product_id:
+                res |= preset.service_fee_product_id
+        return res
+
     def _update_access_token(self):
         self.access_token = uuid.uuid4().hex[:16]
         self.floor_ids.table_ids._update_identifier()

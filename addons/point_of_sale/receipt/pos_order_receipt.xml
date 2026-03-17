@@ -47,6 +47,15 @@
                                     <td class="text-start w-70" name="rounding">Rounding:</td>
                                     <td class="text-end w-30 rounding-amount font-monospace" t-out="extra_data['prices']['rounding_amount']" />
                                 </tr>
+                                <tr t-if="extra_data['service_charge']">
+                                    <td class="text-start w-70">
+                                        <t t-out="extra_data['service_charge']['name']" />
+                                        <t t-if="extra_data['service_charge']['qty'] > 1">
+                                            (x<t t-out="extra_data['service_charge']['qty']" />)
+                                        </t>
+                                    </td>
+                                    <td class="text-end w-30 font-monospace"><t t-out="extra_data['service_charge']['amount']" /></td>
+                                </tr>
                                 <tr class="text-bold">
                                     <td class="text-start w-70" name="total">Total:</td>
                                     <td class="text-end w-30"><span class="total-amount font-monospace" t-out="extra_data['prices']['total_amount']" /></td>

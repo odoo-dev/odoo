@@ -16,6 +16,13 @@
                             <field name="mail_template_id" invisible="not available_in_self" />
                         </group>
                     </group>
+                    <group string="Additional Fee">
+                        <field name="service_fee" />
+                        <field name="service_fee_product_id" invisible="not service_fee" required="service_fee" />
+                        <field name="service_fee_type" invisible="not service_fee" widget="radio" />
+                        <field name="service_fee_based_on" invisible="not service_fee or service_fee_type != 'percentage'" />
+                        <field name="service_fee_amount" invisible="not service_fee" />
+                    </group>
                 </page>
             </xpath>
         </field>

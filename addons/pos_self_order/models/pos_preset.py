@@ -26,7 +26,7 @@ class PosPreset(models.Model):
     @api.model
     def _load_pos_self_data_fields(self, config):
         params = super()._load_pos_self_data_fields(config)
-        params.extend(['service_at', 'mail_template_id'])
+        params.extend(['service_at', 'mail_template_id', 'service_fee', 'service_fee_product_id', 'service_fee_type', 'service_fee_amount', 'service_fee_based_on'])
         return params
     
     @api.model

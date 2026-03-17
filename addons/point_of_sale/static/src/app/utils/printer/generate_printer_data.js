@@ -181,22 +181,25 @@ export class GeneratePrinterData {
     }
 
     generateLineData() {
-        return this.order.lines.map((line) => {
-            const productData = { ...line.product_id.raw };
-            productData.display_name = line.getFullProductName();
+        const serviceChargeLine = this.order.getServiceChargeLine();
+        return this.order.lines
+            .filter((line) => line !== serviceChargeLine)
+            .map((line) => {
+                const productData = { ...line.product_id.raw };
+                productData.display_name = line.getFullProductName();
 
-            return {
-                ...line.raw,
-                product_data: productData,
-                product_uom_name: line.product_id.uom_id?.name || "",
-                unit_price: line.currencyDisplayPriceUnit,
-                product_unit_price: line.product_id.displayPriceUnit,
-                price_subtotal_incl: line.currencyDisplayPrice,
-                lot_names: line.pack_lot_ids?.length
-                    ? line.pack_lot_ids.map((l) => l.lot_name)
-                    : false,
-            };
-        });
+                return {
+                    ...line.raw,
+                    product_data: productData,
+                    product_uom_name: line.product_id.uom_id?.name || "",
+                    unit_price: line.currencyDisplayPriceUnit,
+                    product_unit_price: line.product_id.displayPriceUnit,
+                    price_subtotal_incl: line.currencyDisplayPrice,
+                    lot_names: line.pack_lot_ids?.length
+                        ? line.pack_lot_ids.map((l) => l.lot_name)
+                        : false,
+                };
+            });
     }
 
     generatePaymentData() {
@@ -224,6 +227,16 @@ export class GeneratePrinterData {
                   this.formatCurrency(this.order.displayPrice * (p / 100)),
               ])
             : false;
+
+        const serviceChargeLine = this.order.getServiceChargeLine();
+        let serviceCharge = false;
+        if (serviceChargeLine) {
+            serviceCharge = {
+                amount: serviceChargeLine.currencyDisplayPrice,
+                qty: serviceChargeLine.qty,
+                name: serviceChargeLine.getFullProductName(),
+            };
+        }
 
         return {
             order: this.order.raw,
@@ -255,6 +268,7 @@ export class GeneratePrinterData {
                 cashier_name: this.order.getCashierName(),
                 formated_date_order: this.order.formatDateOrTime("date_order", "datetime"),
                 formated_shipping_date: this.order.formatDateOrTime("shipping_date", "date"),
+                service_charge: serviceCharge,
             },
         };
     }

@@ -1024,6 +1024,7 @@ export class PosStore extends WithLazyGetterTrap {
             this.hasJustAddedProduct = false;
         }, 3000);
 
+        this.selectedOrder.updateServiceCharge();
         return order.getSelectedOrderline();
     }
     requiresOrderLineConfiguration(configure, code, product) {

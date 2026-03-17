@@ -51,7 +51,9 @@ export class CartPage extends Component {
                 ? order.unsentLines
                 : this.selfOrder.currentOrder.lines) || [];
 
-        return lines.filter((line) => !line.combo_parent_id);
+        return lines
+            .filter((line) => !line.combo_parent_id)
+            .sort((a, b) => (a.sequence || 10) - (b.sequence || 10));
     }
 
     get totalPriceAndTax() {
@@ -301,6 +303,10 @@ export class CartPage extends Component {
             }
             return price;
         }
+    }
+
+    isServiceCharge(line) {
+        return line.is_service_charge;
     }
 
     canChangeQuantity(line) {

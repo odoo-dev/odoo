@@ -953,7 +953,9 @@ patch(PosStore.prototype, {
             lines.push(...selectedCourse.lines);
         }
         lines.forEach((line) => {
-            line.course_id = destCourse.id;
+            if (line !== line.order_id.getServiceChargeLine()) {
+                line.course_id = destCourse.id;
+            }
         });
         order.selectCourse(destCourse);
     },

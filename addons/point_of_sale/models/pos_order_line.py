@@ -12,8 +12,11 @@ from odoo.exceptions import UserError
 class PosOrderLine(models.Model):
     _name = 'pos.order.line'
     _description = "Point of Sale Order Line"
+    _order = "sequence, id"
     _rec_name = 'product_id'
     _inherit = ['pos.load.mixin']
+
+    sequence = fields.Integer(string='Sequence', default=10)
 
     company_id = fields.Many2one('res.company', string='Company', related='order_id.company_id', store=True)
     name = fields.Char(string='Line No', required=True, copy=False)
@@ -60,6 +63,7 @@ class PosOrderLine(models.Model):
 
     combo_item_id = fields.Many2one('product.combo.item', string='Combo Item')
     is_edited = fields.Boolean('Edited')
+    is_service_charge = fields.Boolean('Service Charge', default=False)
     # Technical field holding custom data for the taxes computation engine.
     extra_tax_data = fields.Json()
 
@@ -77,7 +81,7 @@ class PosOrderLine(models.Model):
             'product_id', 'discount', 'tax_ids', 'pack_lot_ids', 'customer_note',
             'refunded_qty', 'price_extra', 'full_product_name', 'refunded_orderline_id',
             'combo_parent_id', 'combo_line_ids', 'combo_item_id', 'refund_orderline_ids',
-            'extra_tax_data', 'write_date',
+            'extra_tax_data', 'write_date', 'sequence', 'is_service_charge',
         ]
 
     @api.depends('refund_orderline_ids', 'refund_orderline_ids.order_id.state')

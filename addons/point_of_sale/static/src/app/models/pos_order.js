@@ -53,6 +53,11 @@ export class PosOrder extends PosOrderAccounting {
         }
     }
 
+    triggerRecomputeAllPrices() {
+        super.triggerRecomputeAllPrices();
+        this.updateServiceCharge();
+    }
+
     initState() {
         super.initState();
         // !!Keep all uiState in one object!!
@@ -197,6 +202,130 @@ export class PosOrder extends PosOrderAccounting {
         if (preset.is_return) {
             this.lines.forEach((l) => l.setQuantity(-Math.abs(l.getQuantity()), true));
         }
+        this.updateServiceCharge();
+    }
+
+    updateServiceCharge() {
+        if (this._updatingServiceCharge) {
+            return;
+        }
+        const preset =
+            typeof this.preset_id === "object"
+                ? this.preset_id
+                : this.models["pos.preset"].get(this.preset_id);
+
+        const serviceChargeLines = this.lines.filter((l) => l.is_service_charge);
+
+        if (!preset?.service_fee || !preset?.service_fee_product_id) {
+            if (serviceChargeLines.length) {
+                this._updatingServiceCharge = true;
+                try {
+                    serviceChargeLines.forEach((l) => this.removeOrderline(l));
+                } finally {
+                    this._updatingServiceCharge = false;
+                }
+            }
+            return;
+        }
+
+        this._updatingServiceCharge = true;
+        try {
+            const product = preset.service_fee_product_id;
+            const productId = product.id || product;
+
+            // Remove stale service charge lines (those with different products)
+            const toRemove = serviceChargeLines.filter((l) => l.product_id.id !== productId);
+            if (toRemove.length) {
+                toRemove.forEach((l) => this.removeOrderline(l));
+            }
+
+            let line = serviceChargeLines.find((l) => l.product_id.id === productId);
+
+            if (!line) {
+                line = this.models["pos.order.line"].create({
+                    order_id: this,
+                    product_id: product,
+                    price_type: "manual",
+                    course_id: null,
+                    sequence: 10000,
+                    is_service_charge: true,
+                });
+                this.selectOrderline(this.getLastOrderline());
+            }
+
+            const feeAmount = parseFloat(preset.service_fee_amount || 0);
+            const qty = preset.service_fee_type === "fixed" ? this.customer_count || 1 : 1;
+            let price = 0;
+
+            if (preset.service_fee_type === "fixed") {
+                price = feeAmount;
+            } else {
+                // Percentage
+                const total =
+                    preset.service_fee_based_on === "pre_discount"
+                        ? this.getPreDiscountTotal()
+                        : this.getPostDiscountTotal();
+                price = total * (feeAmount / 100);
+            }
+
+            if (isNaN(price) || !isFinite(price)) {
+                price = 0;
+            }
+
+            const ProductPrice = this.models["decimal.precision"].find(
+                (dp) => dp.name === "Product Price"
+            );
+            const roundedPrice = ProductPrice.round(price);
+            const roundedQty = isNaN(qty) ? 1 : qty;
+
+            if (
+                line.getQuantity() !== roundedQty ||
+                ProductPrice.round(line.price_unit || 0) !== roundedPrice
+            ) {
+                line.setUnitPrice(roundedPrice);
+                line.setQuantity(roundedQty);
+                this.triggerRecomputeAllPrices();
+            }
+        } finally {
+            this._updatingServiceCharge = false;
+        }
+    }
+
+    getServiceChargeLine() {
+        return this.lines.find((l) => l.is_service_charge);
+    }
+
+    getPreDiscountTotal() {
+        const nonServiceChargeLines = this.lines.filter(
+            (l) => !l.is_service_charge && !l.combo_parent_id
+        );
+        if (!nonServiceChargeLines.length) {
+            return 0;
+        }
+        const data = this.getPriceWithOptions({
+            lines: nonServiceChargeLines,
+            baseLineOpts: { discount: 0.0 },
+        });
+        const total =
+            this.config.iface_tax_included === "total"
+                ? data.taxDetails.total_amount_no_rounding
+                : data.taxDetails.base_amount;
+        return this.currency.round(total);
+    }
+
+    getPostDiscountTotal() {
+        const nonServiceChargeLines = this.lines.filter(
+            (l) => !l.is_service_charge && !l.combo_parent_id
+        );
+        if (!nonServiceChargeLines.length) {
+            return 0;
+        }
+        const data = this.getPriceWithOptions({ lines: nonServiceChargeLines });
+        const total =
+            this.config.iface_tax_included === "total"
+                ? data.taxDetails.total_amount_no_rounding
+                : data.taxDetails.base_amount;
+        return this.currency.round(total);
     }
 
     getCashierName() {
@@ -440,6 +569,7 @@ export class PosOrder extends PosOrderAccounting {
         if (!this.lines.length) {
             this.general_customer_note = ""; // reset general note on empty order
         }
+        this.triggerRecomputeAllPrices();
         this.selectOrderline(this.getLastOrderline());
         return true;
     }
@@ -696,7 +826,7 @@ export class PosOrder extends PosOrderAccounting {
 
     // NOTE: Overrided in pos_loyalty to put loyalty rewards at this end of array.
     getOrderlines() {
-        return this.lines;
+        return [...this.lines].sort((a, b) => (a.sequence || 10) - (b.sequence || 10));
     }
 
     serializeForORM(opts = {}) {
