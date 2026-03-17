@@ -15,8 +15,10 @@ function _positionInputBoxOverlay(target) {
         return;
     }
     const startOverlays = getVisibleElements(closestInputBox, `.o_input_box_overlay_start`);
-    const endOverlays = getVisibleElements(closestInputBox, `.o_input_box_overlay_end`);
-    if (!startOverlays.length && !endOverlays.length) {
+    const endOverlays = getVisibleElements(closestInputBox, `.o_input_box_overlay_end:not(.o_input_box_overlay_inline)`);
+    // end overlays are ordered to display an inline item first if any, and static overlays are displayed at the very end
+    const inlineOverlay = getVisibleElements(closestInputBox, `.o_input_box_overlay_end.o_input_box_overlay_inline`)[0];
+    if (!startOverlays.length && !endOverlays.length && !inlineOverlay) {
         return;
     }
     let startPadding = 0;
@@ -41,18 +43,28 @@ function _positionInputBoxOverlay(target) {
         endPadding += overlay.clientWidth + gap;
     }
     closestInputBox.style.setProperty("--inputbox-overlay-end-size", endPadding + "px");
-    const inlineEl = closestInputBox.querySelector(".o_input_box_overlay_inline");
-    if (inlineEl) {
+    
+    if (inlineOverlay) {
         const inputEl = closestInputBox.querySelector(
-            ".o_input, textarea, select, [contenteditable]"
+            "input, textarea, select, [contenteditable]"
         );
-        if (inputEl && inputEl.value) {
-            const length = inputEl.value.length;
-            closestInputBox.style.setProperty(
-                "--inputbox-overlay-inline-position",
-                `calc(100% - (${length}px + ${length}ch) - var(--inputbox-overlay-size) - var(--inputbox-spacing-unit))`
-            );
+        if (inputEl) {
+            let inputLength = inputEl.value?.length || 0;
+            let paddingSize = startPadding;
+            if (closestInputBox.querySelector(".o_tag")) {
+                const tagsLength = closestInputBox.offsetWidth - inputEl.offsetWidth;
+                paddingSize += tagsLength;
+            }
+            if (inputLength || paddingSize) {
+                paddingSize += inlineOverlay.clientWidth;
+                closestInputBox.style.setProperty(
+                    "--inputbox-overlay-inline-position",
+                    `calc(100% - ${paddingSize}px - ${inputLength}ch - var(--inputbox-spacing-unit))`
+                );
+            }
         }
+        inlineOverlay.style["inset-inline-end"] = "var(--inputbox-overlay-padding-toggler)";
+        endPadding += inlineOverlay.clientWidth + gap;
     }
 }
 

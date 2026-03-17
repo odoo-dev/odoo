@@ -61,7 +61,7 @@
             line-height: 0;
             padding: 0 !important;
         }
-        &:is(span, .fa), :is(span, .fa) {
+        &:is(span, .fa, .o_input_box_overlay_inline), :is(span, .fa) {
             &:not(button, .btn, button *, .btn *) {
                 pointer-events: none;
             }
@@ -78,7 +78,6 @@
 
 .o_input_box:has(.o_input_box_overlay_inline) {
     .o_input_box_overlay_end.o_input_box_overlay_inline {
-        width: auto !important;
         transition: right .4s;
         &:not(.o_touch_device .o_input_box_overlay_end):not(.o_input_box:focus-within .o_input_box_overlay_end) {
             inset-inline-end: var(--inputbox-overlay-inline-position) !important;
