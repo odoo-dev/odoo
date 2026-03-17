@@ -10,6 +10,7 @@ class TestCIIFR(TestUBLCommon):
     @TestUBLCommon.setup_country('fr')
     def setUpClass(cls):
         super().setUpClass()
+        cls.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', 'False')
 
         cls.partner_1 = cls.env['res.partner'].create({
             'name': "partner_1",

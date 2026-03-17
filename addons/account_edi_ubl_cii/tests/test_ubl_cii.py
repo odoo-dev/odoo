@@ -50,6 +50,7 @@ class TestAccountEdiUblCii(TestUblCiiCommon):
         super().setUp()
 
     def test_export_import_product(self):
+        self.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', 'False')
         products = self.env['product.product'].create([{
             'name': 'XYZ',
             'default_code': '1234',
@@ -255,6 +256,7 @@ class TestAccountEdiUblCii(TestUblCiiCommon):
         self.assertEqual(end_date.text, '20241231')
 
     def test_export_import_billing_dates(self):
+        self.env['ir.config_parameter'].sudo().set_param('account_edi_ubl_cii.use_new_dict_to_xml_helpers', 'False')
         if self.env.ref('base.module_accountant').state != 'installed':
             self.skipTest("payment_custom module is not installed")
 

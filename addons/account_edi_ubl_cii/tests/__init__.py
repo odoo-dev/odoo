@@ -2,6 +2,7 @@ from . import test_autopost_bills
 from . import test_partner_peppol_fields
 from . import test_ubl_cii
 from . import test_download_docs
+from . import test_cii_export_facturx_fr
 from . import test_ubl_export_bis3_be
 from . import test_ubl_export_bis3_invoice_be_down_payment
 from . import test_ubl_import_bis3_invoice_be
