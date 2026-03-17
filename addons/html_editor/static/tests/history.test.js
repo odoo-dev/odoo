@@ -384,7 +384,7 @@ describe("system classes and attributes", () => {
     test("should skip the mutations if no changes in state", async () => {
         const { el, plugins } = await setupEditor(`<p class="y">a</p>`, { config: { Plugins } });
 
-        /** @type import("../src/core/dom_mutation_plugin").DomMutationPlugin") */
+        /** @type {import("../src/core/dom_mutation_plugin").DomMutationPlugin"} */
         const domMutationPlugin = plugins.get("domMutation");
         const p = el.querySelector("p");
         p.className = "";
@@ -692,14 +692,18 @@ describe("destroy", () => {
             static dependencies = ["history", "dom"];
             static id = "test";
             resources = {
-                is_mutation_record_savable_predicates: this.isMutationRecordSavable.bind(this),
+                is_mutation_savable_predicates: this.isMutationRecordSavable.bind(this),
             };
+            /**
+             * @param {import("../src/core/dom_mutation_plugin").NativeMutation} record
+             * @returns {boolean | undefined}
+             */
             isMutationRecordSavable(record) {
                 if (
                     record.type === "childList" &&
-                    record.addedTrees.length === 1 &&
-                    record.addedTrees[0].node.nodeType === Node.ELEMENT_NODE &&
-                    record.addedTrees[0].node.matches(".test")
+                    record.addedNodes.length === 1 &&
+                    record.addedNodes[0].nodeType === Node.ELEMENT_NODE &&
+                    record.addedNodes[0].matches(".test")
                 ) {
                     expect.step("dispatch");
                     return false;

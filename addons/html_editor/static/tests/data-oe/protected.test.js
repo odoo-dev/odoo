@@ -630,13 +630,17 @@ test("protected plugin is robust against other plugins which can filter mutation
     class FilterPlugin extends Plugin {
         static id = "filterPlugin";
         resources = {
-            is_mutation_record_savable_predicates: this.isMutationRecordSavable.bind(this),
+            is_mutation_savable_predicates: this.isMutationRecordSavable.bind(this),
         };
+        /**
+         * @param {import("@html_editor/core/dom_mutation_plugin").NativeMutation} record
+         * @returns {boolean | undefined}
+         */
         isMutationRecordSavable(record) {
             if (
                 record.type === "childList" &&
-                record.removedTrees.length === 1 &&
-                record.removedTrees[0].node === a
+                record.removedNodes.length === 1 &&
+                record.removedNodes[0] === a
             ) {
                 // Artificially hide the removal of `a` node
                 return false;

@@ -32,7 +32,7 @@ import { _t } from "@web/core/l10n/translation";
 export class SavePlugin extends Plugin {
     static id = "savePlugin";
     static shared = ["save", "ignoreDirty", "groupElements"];
-    static dependencies = ["history"];
+    static dependencies = ["history", "domMutation"];
 
     /** @type {import("plugins").BuilderResources} */
     resources = {
@@ -138,8 +138,8 @@ export class SavePlugin extends Plugin {
     /**
      * Handles the flag of the closest savable element to the mutation as dirty
      *
-     * @param {Object} records - The observed mutations
-     * @param {String} currentOperation - The name of the current operation
+     * @param {import("@html_editor/core/dom_mutation_plugin").SerializedMutation[]} records - The observed mutations
+     * @param {import("@html_editor/utils/commit").EditorCommitType} currentOperation - The name of the current operation
      */
     handleMutations(records, currentOperation) {
         if (!this.canObserve) {
@@ -153,10 +153,13 @@ export class SavePlugin extends Plugin {
         // TODO: should do nothing if currently undo/redoing as `o_dirty` would
         // then already have been handled by the history plugin.
         for (const record of records) {
-            if (record.attributeName === "contenteditable") {
+            if (record.type === "attributes" && record.attributeName === "contenteditable") {
                 continue;
             }
-            let targetEl = record.target;
+            let targetEl = this.dependencies.domMutation.getNodeById(
+                ((record.type === "add" || record.type === "remove") && record.parentNodeId) ||
+                    record.nodeId
+            );
             if (!targetEl.isConnected) {
                 continue;
             }

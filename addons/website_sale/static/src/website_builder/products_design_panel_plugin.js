@@ -6,7 +6,7 @@ import { ProductsDesignPanel } from "./products_design_panel";
 
 export class ProductsDesignPanelPlugin extends Plugin {
     static id = "productsDesignPanel";
-    static dependencies = ["builderActions", "builderComponents"];
+    static dependencies = ["builderActions", "builderComponents", "domMutation"];
     static shared = ["registerPanel", "unregisterPanel"];
 
     resources = {
@@ -54,8 +54,8 @@ export class ProductsDesignPanelPlugin extends Plugin {
 
     /**
      * Handles the flag of the closest product savable element
-     * @param {Object} records - The observed mutations
-     * @param {String} currentOperation - The name of the current operation
+     * @param {import("@html_editor/core/dom_mutation_plugin").SerializedMutation[]} records - The observed mutations
+     * @param {import("@html_editor/utils/commit").EditorCommitType} currentOperation - The name of the current operation
      */
     handleMutations(records, currentOperation) {
         if (currentOperation === "undo" || currentOperation === "redo") {
@@ -64,10 +64,10 @@ export class ProductsDesignPanelPlugin extends Plugin {
             return;
         }
         for (const record of records) {
-            if (record.attributeName === "contenteditable") {
+            if (record.type === "attributes" && record.attributeName === "contenteditable") {
                 continue;
             }
-            let targetEl = record.target;
+            let targetEl = this.dependencies.domMutation.getNodeById(record.nodeId);
             if (!targetEl.isConnected) {
                 continue;
             }

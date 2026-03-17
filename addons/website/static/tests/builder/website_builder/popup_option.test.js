@@ -83,7 +83,11 @@ describe("Popup options: popup in page before edit", () => {
                     //   modal, and verifies that it did not add mutations
                     // TODO: once the service website_edit runs during the
                     // tests, this plugin should be removed
-                    is_mutation_record_savable_predicates: (record) => {
+                    /**
+                     * @param {import("@html_editor/core/dom_mutation_plugin").NativeMutation} record
+                     * @returns { boolean | undefined}
+                     */
+                    is_classlist_mutation_savable_predicates: (record) => {
                         if (record.target.matches?.(".s_popup") && record.className === "d-none") {
                             return false;
                         }

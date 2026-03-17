@@ -41,11 +41,19 @@ export class DropZonePlugin extends Plugin {
     ];
     /** @type {import("plugins").BuilderResources} */
     resources = {
-        is_mutation_record_savable_predicates: (record) => {
+        /**
+         * @param {import("@html_editor/core/dom_mutation_plugin").NativeMutation} record
+         * @returns {boolean | undefined}
+         */
+        is_mutation_savable_predicates: (record) => {
             if (record.type === "childList") {
-                const addedOrRemovedNode = (record.addedTrees[0] || record.removedTrees[0]).node;
+                const addedOrRemovedNode = record.addedNodes[0] || record.removedNodes[0];
                 // Do not record the addition/removal of the dropzones.
-                if (isElement(addedOrRemovedNode) && addedOrRemovedNode.matches(".oe_drop_zone")) {
+                if (
+                    addedOrRemovedNode &&
+                    isElement(addedOrRemovedNode) &&
+                    addedOrRemovedNode.matches(".oe_drop_zone")
+                ) {
                     return false;
                 }
             }

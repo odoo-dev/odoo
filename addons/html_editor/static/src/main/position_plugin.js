@@ -49,11 +49,14 @@ export class PositionPlugin extends Plugin {
         }
     }
 
+    /**
+     * @param {import("@html_editor/core/dom_mutation_plugin").NativeMutation[]} records
+     */
     handlePotentialLayoutGeometryChange(records) {
         for (const record of records) {
             if (
-                record.type === "classList" ||
-                (record.type === "attributes" && record.attributeName === "style")
+                record.type === "attributes" &&
+                (record.attributeName === "class" || record.attributeName === "style")
             ) {
                 this.debouncedLayoutGeometryChange();
                 return;

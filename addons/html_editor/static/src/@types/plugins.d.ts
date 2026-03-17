@@ -10,7 +10,7 @@ declare module "plugins" {
     import { DialogShared } from "@html_editor/core/dialog_plugin";
     import { on_inserted_handlers, before_insert_processors, on_will_set_tag_handlers, DomShared, node_to_insert_processors, system_attributes, system_classes, system_style_properties, are_inlines_allowed_at_root_predicates } from "@html_editor/core/dom_plugin";
     import { is_format_class_predicates, on_will_format_selection_handlers, FormatShared, has_format_predicates, on_all_formats_removed_handlers } from "@html_editor/core/format_plugin";
-    import { on_attribute_changed_handlers, attribute_change_processors, on_will_write_commit_handlers, on_will_filter_mutation_record_handlers, on_content_updated_handlers, on_external_commit_added_handlers, on_new_records_handled_handlers, on_history_cleaned_handlers, on_history_reset_from_commits_handlers, on_history_reset_handlers, editor_commit_processors, HistoryShared, on_redone_handlers, on_undone_handlers, on_savepoint_restored_handlers, is_mutation_record_savable_predicates, serializable_descendants_processors, set_attribute_overrides, on_commit_added_handlers, is_commit_reversible_predicates } from "@html_editor/core/history_plugin";
+    import { on_attribute_changed_handlers, attribute_change_processors, on_will_write_commit_handlers, on_will_filter_mutation_record_handlers, on_content_updated_handlers, on_external_commit_added_handlers, on_new_records_handled_handlers, on_history_cleaned_handlers, on_history_reset_from_commits_handlers, on_history_reset_handlers, editor_commit_processors, HistoryShared, on_redone_handlers, on_undone_handlers, on_savepoint_restored_handlers, is_mutation_savable_predicates, is_classlist_mutation_savable_predicates, serializable_descendants_processors, set_attribute_overrides, on_commit_added_handlers, is_commit_reversible_predicates } from "@html_editor/core/history_plugin";
     import { on_beforeinput_handlers, on_input_handlers } from "@html_editor/core/input_plugin";
     import { on_will_break_line_handlers, insert_line_break_element_overrides, LineBreakShared } from "@html_editor/core/line_break_plugin";
     import { OverlayShared } from "@html_editor/core/overlay_plugin";
@@ -201,6 +201,7 @@ declare module "plugins" {
         can_display_toolbar_predicates: can_display_toolbar_predicates;
         has_format_predicates: has_format_predicates;
         is_char_tangible_for_keyboard_navigation_predicates: is_char_tangible_for_keyboard_navigation_predicates;
+        is_classlist_mutation_savable_predicates: is_classlist_mutation_savable_predicates;
         is_empty_link_legit_predicates: is_empty_link_legit_predicates;
         is_format_class_predicates: is_format_class_predicates;
         is_functional_empty_node_predicates: is_functional_empty_node_predicates;
@@ -208,7 +209,7 @@ declare module "plugins" {
         is_link_editable_predicates: is_link_editable_predicates;
         is_link_eligible_for_visual_indication_predicates: is_link_eligible_for_visual_indication_predicates;
         is_link_eligible_for_zwnbsp_predicates: is_link_eligible_for_zwnbsp_predicates;
-        is_mutation_record_savable_predicates: is_mutation_record_savable_predicates;
+        is_mutation_savable_predicates: is_mutation_savable_predicates;
         is_node_editable_predicates: is_node_editable_predicates;
         is_node_fully_selected_predicates: is_node_fully_selected_predicates;
         is_node_removable_predicates: is_node_removable_predicates;

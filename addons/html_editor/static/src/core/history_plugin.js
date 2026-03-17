@@ -10,7 +10,6 @@ import { _t } from "@web/core/l10n/translation";
  * @typedef { import("../utils/dom_map").NodeId } NodeId
  *
  * @typedef { import("./dom_mutation_plugin").EditorMutation } EditorMutation
- * @typedef { import("./dom_mutation_plugin").EditorMutationRecord } EditorMutationRecord
  *
  * @typedef { import("../utils/commit").EditorCommit } EditorCommit
  * @typedef { import("../utils/commit").EditorCommitId } EditorCommitId
@@ -31,7 +30,6 @@ import { _t } from "@web/core/l10n/translation";
  * @property { HistoryPlugin['getCommitsUntil'] } getCommitsUntil
  */
 /**
- * @typedef {((records: EditorMutationRecord[]) => void)[]} on_will_filter_mutation_record_handlers
  * @typedef {(() => void)[]} on_external_commit_added_handlers
  * @typedef {(() => void)[]} on_history_cleaned_handlers
  * @typedef {(() => void)[]} on_history_reset_handlers
@@ -40,19 +38,8 @@ import { _t } from "@web/core/l10n/translation";
  * @typedef {((revertedCommit: EditorCommit) => void)[]} on_undone_handlers
  * @typedef {((commit: EditorCommit) => void)[]} on_committed_handlers
  *
- * @typedef {((record: EditorMutationRecord) => boolean | undefined)[]} is_mutation_record_savable_predicates
  * @typedef {((commit: EditorCommit) => boolean | undefined)[]} is_commit_reversible_predicates
  *
- * @typedef {((
- *    arg: {
- *      target: Node,
- *      attributeName: string,
- *      oldValue: string,
- *      value: string,
- *      reverse: boolean,
- *    },
- *    options: { ensureNewMutations: boolean }
- *  ) => arg)[]} attribute_change_processors
  * @typedef {((node: Node, attributeName: string, attributeValue: string) => boolean)[]} set_attribute_overrides
  */
 

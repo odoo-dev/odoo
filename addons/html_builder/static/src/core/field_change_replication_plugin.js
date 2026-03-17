@@ -8,7 +8,7 @@ import { withSequence } from "@html_editor/utils/resource";
 
 export class FieldChangeReplicationPlugin extends Plugin {
     static id = "fieldChangeReplication";
-    static dependencies = ["dom"];
+    static dependencies = ["dom", "domMutation"];
 
     /** @type {import("plugins").BuilderResources} */
     resources = {
@@ -21,13 +21,16 @@ export class FieldChangeReplicationPlugin extends Plugin {
     }
 
     /**
-     * @param { import("@html_editor/core/history_plugin").HistoryMutationRecord[] } records
+     * @param { import("@html_editor/core/dom_mutation_plugin").SerializedMutation[] } records
      */
     handleMutations(records) {
         records
             .filter((r) => !(r.type === "attributes" && r.attributeName.startsWith("data-oe-t")))
             .map((r) =>
-                closestElement(r.target, "[data-oe-model], [data-oe-translation-source-sha]")
+                closestElement(
+                    this.dependencies.domMutation.getNodeById(r.nodeId),
+                    "[data-oe-model], [data-oe-translation-source-sha]"
+                )
             )
             .filter(Boolean)
             // Do not forward "unstyled" copies to other nodes.

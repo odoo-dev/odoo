@@ -11,19 +11,20 @@ class SpacingOptionPlugin extends Plugin {
         builder_actions: {
             SetGridSpacingAction,
         },
-        is_mutation_record_savable_predicates: this.isMutationRecordSavable.bind(this),
+        is_mutation_savable_predicates: this.isMutationRecordSavable.bind(this),
         on_cloned_handlers: this.onCloned.bind(this),
         clean_for_save_processors: this.cleanForSave.bind(this),
     };
 
     /**
-     * @param {import("@html_editor/core/history_plugin").HistoryMutationRecord} record
+     * @param {import("@html_editor/core/dom_mutation_plugin").NativeMutation} record
+     * @returns {boolean | undefind}
      */
     isMutationRecordSavable(record) {
         // Do not consider the grid preview in the history.
         if (record.type === "childList") {
-            const node = (record.addedTrees[0] || record.removedTrees[0]).node;
-            if (node.matches && node.matches(".o_we_grid_preview") && isBlock(node)) {
+            const node = record.addedNodes[0] || record.removedNodes[0];
+            if (node?.matches?.(".o_we_grid_preview") && isBlock(node)) {
                 return false;
             }
         }

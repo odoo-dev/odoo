@@ -8,10 +8,14 @@ import { withSequence } from "@html_editor/utils/resource";
 import { EditorCommit } from "@html_editor/utils/commit";
 
 /**
- * @typedef { import("../utils/commit").EditorCommit } Commit
- * @typedef { import("../utils/commit").EditorCommitType } EditorCommitType
- *
+ * DOM
+ */
+/**
  * @typedef { string } NodeId
+ *
+ * @typedef { Object } Tree
+ * @property { Node } node
+ * @property { Tree[] } children
  *
  * @typedef { Object } SerializedNode
  * @property { number } nodeType
@@ -26,83 +30,14 @@ import { EditorCommit } from "@html_editor/utils/commit";
  * @property { number } anchorOffset
  * @property { NodeId } focusNodeId
  * @property { number } focusOffset
- *
- * @typedef {Object} NativeMutationRecordClassList
- * @property { "classList" } type
- * @property { Node } target
- * @property { string } className
- * @property { boolean } oldValue
- * @property { boolean } value
- *
- * @typedef {Object} NativeMutationRecordAttributes
- * @property { "attributes" } type
- * @property { Node } target
- * @property { string } attributeName
- * @property { string } oldValue
- * @property { string } value
- *
- * @typedef {Object} NativeMutationRecordCharacterData
- * @property { "characterData" } type
- * @property { Node } target
- * @property { string } oldValue
- * @property { string } value
- *
- * @typedef {Object} Tree
- * @property {Node} node
- * @property {Tree[]} children
- *
- * @typedef {Object} NativeMutationRecordChildList
- * @property { "childList" } type
- * @property { Node } target
- * @property { Node } previousSibling
- * @property { Node } nextSibling
- * @property { Tree[] } addedTrees
- * @property { Tree[] } removedTrees
- *
- * @typedef { NativeMutationRecordClassList | NativeMutationRecordAttributes | NativeMutationRecordCharacterData | NativeMutationRecordChildList } EditorMutationRecord
- *
- * @typedef { Object } EditorMutationCharacterData
- * @property { "characterData" } type
- * @property { NodeId } nodeId
- * @property { string } value
- * @property { string } oldValue
- *
- * @typedef { Object } EditorMutationAttributes
- * @property { "attributes" } type
- * @property { NodeId } nodeId
- * @property { string } attributeName
- * @property { string } value
- * @property { string } oldValue
- *
- * @typedef { Object } EditorMutationClassList
- * @property { "classList" } type
- * @property { NodeId } nodeId
- * @property { string } className
- * @property { boolean } value
- * @property { boolean } oldValue
- *
- * @typedef { Object } EditorMutationAdd
- * @property { "add" } type
- * @property { NodeId } nodeId
- * @property { NodeId } parentNodeId
- * @property { SerializedNode } serializedNode
- * @property { NodeId } nextNodeId
- * @property { NodeId } previousNodeId
- *
- * @typedef { Object } EditorMutationRemove
- * @property { "remove" } type
- * @property { NodeId } nodeId
- * @property { NodeId } parentNodeId
- * @property { SerializedNode } serializedNode
- * @property { NodeId } nextNodeId
- * @property { NodeId } previousNodeId
- *
- * @typedef { EditorMutationCharacterData | EditorMutationAttributes | EditorMutationClassList | EditorMutationAdd | EditorMutationRemove } EditorMutation
- *
- * @typedef { Object } PreviewableOperation
- * @property { Function } commit
- * @property { Function } preview
- * @property { Function } revert
+ */
+
+/**
+ * COMMITS
+ */
+/**
+ * @typedef { import("../utils/commit").EditorCommit } Commit
+ * @typedef { import("../utils/commit").EditorCommitType } EditorCommitType
  *
  * @typedef { Object } DomMutationCommitData
  * @property { number } authorTimestamp              // timestamp of the commit authoring, before any mutation is applied
@@ -112,6 +47,84 @@ import { EditorCommit } from "@html_editor/utils/commit";
  * @property { SerializedSelection } selectionAfter  // the serialized selection after applying the mutations
  * @property { Object } external                     // any data added from and managed by an external plugin
  */
+
+/**
+ * MUTATIONS
+ */
+/**
+ * @typedef { "attributes" | "characterData" | "childList" } NativeMutationType
+ */
+/**
+ * Native Mutations
+ * ----------------
+ *
+ * Narrowed typing for the native `MutationRecord` type, to differentiate between
+ * each mutation type, omitting all properties that are always `null` for the
+ * given type of mutation.
+ *
+ * @template { NativeMutationType } [T=NativeMutationType]
+ * @typedef { Extract<|
+ *    (Pick<MutationRecord, "target" | "attributeName" | "attributeNamespace" | "oldValue"> & { type: "attributes" })
+ *  | (Pick<MutationRecord, "target" | "oldValue"> & { type: "characterData" })
+ *  | (Pick<MutationRecord, "target" | "addedNodes" | "removedNodes" | "previousSibling" | "nextSibling"> & { type: "childList" }),
+ * { type: T }
+ * > } NativeMutation
+ */
+/**
+ * @typedef { Exclude<NativeMutationType, "childList"> | "classList" | "add" | "remove" } EditorMutationType
+ */
+/**
+ * Editor Mutations
+ * ----------------
+ *
+ * Expanded mutation object, with extra information that is helpful for our
+ * purposes in the editor.
+ *
+ * @template { EditorMutationType } [T=EditorMutationType]
+ * @typedef { Extract<|
+ *    (NativeMutation<"attributes"> | { value: string })
+ *  | (Omit<NativeMutation<"attributes">, "attributeName" | "attributeNamespace" | "type"> & { type: "classList", className: string, value: boolean })
+ *  | (NativeMutation<"characterData"> | { value: string })
+ *  | (Pick<NativeMutation<"childList">, "previousSibling" | "nextSibling"> | { tree: Tree, parent: Node } & { type: "add" })
+ *  | (Pick<NativeMutation<"childList">, "previousSibling" | "nextSibling"> | { tree: Tree, parent: Node } & { type: "remove" }),
+ * { type: T }
+ * > } EditorMutation
+ */
+/**
+ * Serialized Mutations
+ * --------------------
+ *
+ * Serialized version of `EditorMutation`s for safely passing around the editor
+ * without losing references and to allow as JSON payload.
+ *
+ * @template { EditorMutationType } [T=EditorMutationType]
+ * @typedef { Extract<|
+ *     (Omit<EditorMutation<"attributes">, "target"> & { nodeId: NodeId })
+ *   | (Omit<EditorMutation<"classList">, "target"> & { nodeId: NodeId })
+ *   | (Omit<EditorMutation<"characterData">, "target"> & { nodeId: NodeId })
+ *   | (Omit<EditorMutation<"classList">, "target"> & { nodeId: NodeId })
+ *   | (Omit<EditorMutation<"add">, "target" | "previousSibling" | "nextSibling" | "tree" | "parent"> & { nodeId: NodeId, previousNodeId: NodeId, nextNodeId: NodeId, serializedNode: SerializedNode, parentNodeId: NodeId })
+ *   | (Omit<EditorMutation<"remove">, "target" | "previousSibling" | "nextSibling" | "tree" | "parent"> & { nodeId: NodeId, previousNodeId: NodeId, nextNodeId: NodeId, serializedNode: SerializedNode, parentNodeId: NodeId }),
+ *   { type: T }
+ * > } SerializedMutation
+ */
+
+/**
+ * @typedef { Object } PreviewableOperation
+ * @property { Function } commit
+ * @property { Function } preview
+ * @property { Function } revert
+ */
+/**
+ * @typedef { Object } ObservedState
+ * @property { Map<string, string> } attributes
+ * @property { Map<string, boolean> } classList
+ * @property { Map<string, string> } characterData
+ */
+/**
+ * @typedef { WeakMap<NativeMutation<"childList">, { added: Tree[], removed: Tree[] }> } ChildListToTreesMap
+ */
+
 /**
  * @typedef { Object } DomMutationShared
  * @property { DomMutationPlugin['commit'] } commit
@@ -132,25 +145,51 @@ import { EditorCommit } from "@html_editor/utils/commit";
  * @property { DomMutationPlugin['stageSelection'] } stageSelection
  * @property { DomMutationPlugin['stageFocus'] } stageFocus
  * @property { DomMutationPlugin['getIsPreviewing'] } getIsPreviewing
+ * @property { DomMutationPlugin['getNodeById'] } getNodeById
+ * @property { DomMutationPlugin['getNodeId'] } getNodeId
+ * @property { DomMutationPlugin['serializeSelection'] } serializeSelection
  */
+
 /**
- * @typedef {((root: HTMLElement) => void)[]} on_content_updated_handlers
- * @typedef {((record: EditorMutationRecord) => void)[]} on_attribute_changed_handlers
- * @typedef {(() => void)[]} on_savepoint_restored_handlers
- * @typedef {((node: Node, childTreesToSerialize: Tree[]) => Tree[])[]} serializable_descendants_processors
- * @typedef {((type: EditorCommitType) => void)[]} on_will_commit_handlers
- * @typedef {((commit: Commit) => Commit)[]} editor_commit_processors
+ * @typedef { ((
+ *    arg: {
+ *      nodeId: NodeId,
+ *      attributeName: string,
+ *      oldValue: string,
+ *      value: string,
+ *      reverse: boolean,
+ *    },
+ *    options: { ensureNewMutations: boolean }
+ *  ) => arg)[] } attribute_change_processors
+ * @typedef { ((root: HTMLElement) => void)[] } on_content_updated_handlers
+ * @typedef { ((record: SerializedMutation[]) => void)[] } on_attribute_changed_handlers
+ * @typedef { ((record: SerializedMutation[], currentOperation: EditorCommitType) => void)[] } on_new_records_handled_handlers
+ * @typedef { (() => void)[] } on_savepoint_restored_handlers
+ * @typedef { ((node: Node, childTreesToSerialize: Tree[]) => Tree[])[] } serializable_descendants_processors
+ * @typedef { ((type: EditorCommitType) => void)[] } on_will_commit_handlers
+ * @typedef { ((records: NativeMutation[]) => void)[] } on_will_filter_mutation_record_handlers
+ * @typedef { ((commit: Commit) => Commit)[] } editor_commit_processors
+ * @typedef { ((record: NativeMutation) => boolean | undefined)[] } is_mutation_savable_predicates
+ * @typedef { ((record: EditorMutation<"classList">) => boolean | undefined)[] } is_classlist_mutation_savable_predicates
  */
 export class DomMutationPlugin extends Plugin {
     static id = "domMutation";
     static dependencies = ["history", "selection", "sanitize"];
     static shared = [
-        // Main
+        // Main public API
         "commit",
         "discard",
+        "stage",
+        "unstage",
         "stash",
         "unstash",
         "updateExternal",
+
+        // DOM Map Handling
+        "getNodeById",
+        "getNodeId",
+        "serializeSelection",
+
         // From Original
         "stageCustomMutation",
         "applyCustomMutation",
@@ -163,10 +202,6 @@ export class DomMutationPlugin extends Plugin {
         "createSnapshotCommit",
         "stageSelection",
         "stageFocus",
-        // From DOM Map
-        "getNodeById",
-        "getNodeId",
-        "serializeSelection",
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -262,6 +297,19 @@ export class DomMutationPlugin extends Plugin {
         this.currentStash = [];
     }
 
+    clean() {
+        this.currentChanges = new CurrentChanges();
+        // TODO AGE: rename to clarify what it is.
+        /** @type { WeakMap<Node, ObservedState } */
+        this.lastObservedState = new WeakMap();
+        this.nodeMap = new NodeMap();
+        this.setNodeId(this.editable);
+    }
+
+    // ===============
+    // Main public API
+    // ===============
+
     commit({ batchable = false } = {}) {
         return this._commit({ metadata: { batchable } });
     }
@@ -320,15 +368,27 @@ export class DomMutationPlugin extends Plugin {
             // `disableObserver`/`withObserverOff`.
             if (this.isObserverDisabled) {
                 // Make sure the unstashed mutations are recorded.
-                this.currentChanges.addMutations(...changes.mutations);
+                this.stage(changes.mutations);
             }
             // TODO AGE: shouldn't this also apply other changes?
         }
     }
 
     /**
+     * @param { EditorMutation | EditorMutation[] } records
+     */
+    stage(records) {
+        records = Array.isArray(records) ? records : [records];
+        this.currentChanges.addMutations(...records);
+    }
+
+    unstage(mutations) {
+        // TODO AGE
+    }
+
+    /**
      * @param { Object } [params]
-     * @param { NativeMutationRecord[] } [params.records = this.observer.takeRecords()]
+     * @param { NativeMutation[] } [params.records = this.observer.takeRecords()]
      * @param { boolean } [params.dispatch = true]
      * @param { CommitType } [params.currentOperation] the type of the commit we're about to write
      *
@@ -341,52 +401,26 @@ export class DomMutationPlugin extends Plugin {
         }
 
         // First process the records:
-        // 1) Filter.
-        records = this.filterAttributeMutationRecords(records);
-        records = this.filterSameTextContentMutationRecords(records);
-        records = this.filterOutIntermediateStateMutationRecords(records);
-        // 2) Transform.
-        records = this.transformToEditorMutationRecords(records);
-        // 3) Filter some more and adjust.
-        records = records.filter((record) => !this.isSystemMutationRecord(record));
-        records = this.filterAndAdjustEditorMutationRecords(records);
+        const processedRecords = this.processNativeMutations(records);
+        const serializedRecords = this.serializeEditorMutations(processedRecords);
 
         // Then stage them.
-        // TODO AGE: find out why we need to do this for `currentChanges` but
-        // `on_attribute_changed_handlers` requires `target` and we return
-        // `records`. Those two things can/should probably change.
-        const mutations = [];
-        for (const record of records) {
-            switch (record.type) {
-                case "characterData":
-                case "classList":
-                case "attributes": {
-                    const nodeId = this.getNodeId(record.target);
-                    mutations.push({ ...omit(record, "target"), nodeId });
-                    break;
-                }
-                case "childList": {
-                    mutations.push(...this.splitChildListRecord(record));
-                    break;
-                }
-                case "custom": {
-                    mutations.push(record);
-                    break;
-                }
-            }
-        }
-        this.currentChanges.addMutations(...mutations);
+        this.stage(serializedRecords);
 
         // And finally, inform other plugins of changes.
-        if (records.length) {
-            for (const record of records) {
-                if (record.type === "attributes") {
-                    this.trigger("on_attribute_changed_handlers", record);
+        if (serializedRecords.length) {
+            for (const mutation of serializedRecords) {
+                if (mutation.type === "attributes") {
+                    this.trigger("on_attribute_changed_handlers", mutation);
                 }
             }
             // TODO modify `handleMutations` of web_studio to handle `undoOperation`.
             if (dispatch) {
-                this.trigger("on_new_records_handled_handlers", records, currentOperation);
+                this.trigger(
+                    "on_new_records_handled_handlers",
+                    serializedRecords,
+                    currentOperation
+                );
                 // Process potential new mutations caused by the handlers.
                 this.flush({ dispatch: false });
             }
@@ -397,28 +431,416 @@ export class DomMutationPlugin extends Plugin {
     /**
      * Set a key/value pair in the data of the next commit.
      *
-     * @param {string} key
-     * @param {any} value
+     * @param { string } key
+     * @param { any } value
      */
     updateExternal(key, value) {
         this.currentChanges.updateExternal(key, value);
     }
 
-    // Private
-
-    clean() {
-        this.currentChanges = new CurrentChanges();
-        /** @type { WeakMap<Node, { attributes: Map<string, string>, classList: Map<string, boolean>, characterData: Map<string, string> }> } */
-        this.lastObservedState = new WeakMap();
-        this.nodeMap = new NodeMap();
-        this.setNodeId(this.editable);
-    }
-
-    // DOM Map
+    // ===================
+    // Mutation processing
+    // ===================
 
     /**
-     * @param {NodeId} id
-     * @returns {Node | undefined}
+     * Filter through a batch of `NativeMutation`s then turn them into
+     * `EditorMutation`s by adding information to them and splitting them so we
+     * have individual records for each class change, each added node and each
+     * removed nodes, and assign an ID to any added node.
+     *
+     * @param { NativeMutation[] } mutations
+     * @returns { EditorMutation[] }
+     */
+    processNativeMutations(mutations) {
+        this.trigger("on_will_filter_mutation_record_handlers", mutations);
+
+        // Filter out same-textContent mutations. This needs to happen
+        // first because it could affect the siblings computations below.
+        mutations = mutations.filter((mutation) => {
+            if (mutation.type === "childList") {
+                // Check if a mutation consists of removing and adding a single
+                // text node with the same text content, which occurs in Firefox
+                // but is optimized away in Chrome.
+                const { addedNodes, removedNodes } = mutation;
+                const [firstAdded, firstRemoved] = [addedNodes[0], removedNodes[0]];
+                if (
+                    [addedNodes, removedNodes].every((nodes) => nodes.length === 1) &&
+                    [firstAdded, firstRemoved].every((node) => node.nodeType === Node.TEXT_NODE) &&
+                    firstAdded.textContent === firstRemoved.textContent
+                ) {
+                    const oldId = this.getNodeId(firstRemoved);
+                    if (oldId) {
+                        this.nodeMap.set(oldId, firstAdded);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
+
+        // Build a map of childList trees for all the mutations.
+        const childListToTrees = this.createChildListToTreesMap(mutations);
+
+        // Track the attributes/characterData mutation occurrences.
+        const [isFirstAttribute, isFirstCharData] = [trackOccurrencesPair(), trackOccurrences()];
+        const isFirstOccurrence = (mutation) =>
+            mutation.type === "attributes"
+                ? isFirstAttribute(mutation.target, mutation.attributeName)
+                : isFirstCharData(mutation.target);
+
+        // Now do the processing.
+        return mutations
+            .flatMap((mutation) => {
+                if (!this.isObservedNode(mutation.target)) {
+                    return false;
+                }
+                const isSavable =
+                    !this.isObserverDisabled &&
+                    (this.checkPredicates("is_mutation_savable_predicates", mutation) ?? true);
+                switch (mutation.type) {
+                    case "attributes":
+                    case "characterData": {
+                        if (isSavable) {
+                            // Keep only the first mutation record for each
+                            // (node, attribute) pair. Mutation records of type
+                            // "attribute" and "characterData" provide the old
+                            // value, but not the new value. When multiple
+                            // mutations occur in the same batch for an
+                            // element's attribute or characterData, we only
+                            // know the final value of the accumulated changes,
+                            // which is the DOM's current state. The oldValue
+                            // provided by mutations after the first one are
+                            // intermediate states that we do not care about.
+                            // Discarding them allows us to store a single
+                            // record representing the accumulated changes,
+                            // instead of reconstructing the new value
+                            // introduced by each mutation.
+                            if (isFirstOccurrence(mutation)) {
+                                if (mutation.type === "attributes") {
+                                    return this.processAttributesMutation(mutation);
+                                } else if (mutation.type === "characterData") {
+                                    return this.processCharacterDataMutation(mutation);
+                                }
+                            }
+                        } else {
+                            // If the observer is disabled, store the last
+                            // observed state of the target's affected property
+                            // (attribute/class/textContent) and drop the
+                            // record.
+                            this.storeOldValue(mutation);
+                        }
+                        return false;
+                    }
+                    case "childList": {
+                        return (
+                            isSavable && this.processChildListMutation(mutation, childListToTrees)
+                        );
+                    }
+                }
+            })
+            .filter(Boolean);
+    }
+
+    /**
+     * Process a native mutation of type "attributes" by returning `false` if it
+     * should be ignored, or turning it into one or several `EditorMutation`s.
+     *
+     * This involves:
+     * - splitting a change on the "class" attribute into an array of mutations
+     *   of type "classList" @see createClassListMutations
+     * - giving it a `value` property
+     * - updating its `oldValue` property @see updateOldValue
+     *
+     * @param { NativeMutation<"attributes"> } mutation
+     * @returns { |
+     *        EditorMutation<"attributes">
+     *      | EditorMutation<"classList">[]
+     *      | false }
+     */
+    processAttributesMutation(mutation) {
+        if (
+            // Skip the attributes change on the dom.
+            mutation.target === this.editable ||
+            mutation.attributeName === "contenteditable" ||
+            // Skip system mutations.
+            this.mutationFilteredAttributes.has(mutation.attributeName)
+        ) {
+            return false;
+        }
+        if (mutation.attributeName === "class") {
+            return (
+                this.createClassListMutations(mutation)
+                    .map(this.updateOldValue.bind(this))
+                    // Filter out no-op.
+                    .filter((classRecord) => classRecord.value !== classRecord.oldValue)
+            );
+        } else {
+            const processedMutation = this.updateOldValue(
+                /** @type { EditorMutation<"attributes"> } */ {
+                    ...pick(mutation, "type", "target", "attributeName", "oldValue"),
+                    value: mutation.target.getAttribute(mutation.attributeName),
+                }
+            );
+            if (processedMutation.value === processedMutation.oldValue) {
+                // Filter out no-op.
+                return false;
+            }
+            return processedMutation;
+        }
+    }
+
+    /**
+     * Process a native mutation of type "characterData" by returning `false` if
+     * it should be ignored, or turning it into one an `EditorMutation`.
+     *
+     * This involves:
+     * - giving it a `value` property
+     * - updating its `oldValue` property @see updateOldValue
+     *
+     * @param {NativeMutation<"characterData">} mutation
+     * @returns {EditorMutation<"characterData"> | false}
+     */
+    processCharacterDataMutation(mutation) {
+        const processedMutation = this.updateOldValue(
+            /** @type { EditorMutation<"characterData"> } */ {
+                ...pick(mutation, "type", "target", "oldValue"),
+                value: mutation.target.textContent,
+            }
+        );
+        // Filter out no-ops.
+        return processedMutation.value === processedMutation.oldValue ? false : processedMutation;
+    }
+
+    /**
+     * Process a native mutation of type "childList" by returning `false` if it
+     * should be ignored, or turning it into an array of single-node
+     * `EditorMutation`s of types "add" and/or "remove".
+     *
+     * This involves:
+     * - assigning IDs to all added nodes
+     * - splitting the record into one record per item in the `addedNodes` and
+     *   `removedNodes` arrays
+     * - giving each newly created record the native mutation's target as
+     *   `parent` property
+     * - giving each newly created record a `tree` property containing the tree
+     *   of the record's corresponding `addedNodes` or `removedNodes` item.
+     *
+     * Note: Splitting the record requires having build a `ChildListToTreesMap`
+     * with @see createChildListToTreesMap using all the records in the batch.
+     *
+     * @param { NativeMutation<"childList"> } mutation
+     * @param { ChildListToTreesMap } childListToTrees
+     * @returns { EditorMutation<"add" | "remove">[] | false }
+     */
+    processChildListMutation(mutation, childListToTrees) {
+        if (!this.nodeMap.hasNode(mutation.target)) {
+            throw new Error("Unknown parent node");
+        }
+
+        const trees = childListToTrees.get(mutation);
+
+        // Filter out unobserved nodes in the removed trees.
+        const removeUnobservedNodes = (tree) =>
+            this.isObservedNode(tree.node)
+                ? {
+                      node: tree.node,
+                      children: tree.children.map(removeUnobservedNodes).filter(Boolean),
+                  }
+                : null;
+        trees.removed = trees.removed.map(removeUnobservedNodes).filter(Boolean);
+        childListToTrees.set(mutation, trees); // TODO AGE: probably not necessary.
+
+        // Invalidate sibling references to unobserved nodes
+        const previousSibling =
+            mutation.previousSibling === null || this.isObservedNode(mutation.previousSibling)
+                ? mutation.previousSibling
+                : undefined;
+        const nextSibling =
+            mutation.nextSibling === null || this.isObservedNode(mutation.nextSibling)
+                ? mutation.nextSibling
+                : undefined;
+
+        if (
+            // Filter out no-op
+            (!trees.added.length && !trees.removed.length) ||
+            // Filter out mutation without a valid position for node insertion
+            (previousSibling === undefined && nextSibling === undefined)
+        ) {
+            return false;
+        }
+
+        // Assign ids to newly added childList nodes early so later records in
+        // the same `MutationObserver` batch can resolve them (notably in
+        // `isObservedNode`).
+        trees.added
+            .flatMap(treeToNodes)
+            .filter((node) => !this.nodeMap.hasNode(node))
+            .forEach((node) => this.nodeMap.set(this.generateId(), node));
+
+        // Split the mutation into single node mutations.
+        return [
+            ...trees.removed.map((tree, index) => ({
+                type: "remove",
+                tree,
+                parent: mutation.target,
+                previousSibling,
+                nextSibling: trees.removed[index + 1]?.node || nextSibling,
+            })),
+            ...trees.added.map((tree, index) => ({
+                type: "add",
+                tree,
+                parent: mutation.target,
+                previousSibling: trees.added[index - 1]?.node || previousSibling,
+                nextSibling,
+            })),
+        ];
+    }
+
+    /**
+     * Turn `EditorMutation`s into `SerializedMutation`s by replacing their
+     * references to nodes with node IDs and serialized trees.
+     *
+     * @param { EditorMutation[] } records
+     * @returns { SerializedMutation[] }
+     */
+    serializeEditorMutations(records) {
+        return records.flatMap((record) => {
+            switch (record.type) {
+                case "characterData":
+                case "classList":
+                case "attributes": {
+                    const nodeId = this.getNodeId(record.target);
+                    return { ...omit(record, "target"), nodeId };
+                }
+                case "add":
+                case "remove": {
+                    const [nextNodeId, previousNodeId] = [
+                        record.nextSibling,
+                        record.previousSibling,
+                    ].map((sibling) =>
+                        // Preserve undefined and null values
+                        sibling ? this.getNodeId(sibling) : sibling
+                    );
+                    // Note: IDs are assigned to added nodes in
+                    // `processChildListMutation`.
+                    return {
+                        type: record.type,
+                        nodeId: this.getNodeId(record.tree.node),
+                        parentNodeId: this.getNodeId(record.parent),
+                        serializedNode: this.serializeTree(record.tree),
+                        nextNodeId,
+                        previousNodeId,
+                    };
+                }
+                default: {
+                    return record;
+                }
+            }
+        });
+    }
+
+    /**
+     * Break down a single class attribute `NativeMutation` into individual
+     * class addition/removal `EditorMutation`s for more precise history
+     * tracking.
+     *
+     * @param { NativeMutation<"attributes"> } mutation
+     * @returns { EditorMutation<"classList">[] }
+     */
+    createClassListMutations(mutation) {
+        // oldValue can be nullish, or have extra spaces
+        const classesBefore = new Set(mutation.oldValue?.split(" ").filter(Boolean));
+        const classesAfter = new Set(mutation.target.classList);
+        const addedClasses = classesAfter.difference(classesBefore);
+        const removedClasses = classesBefore.difference(classesAfter);
+
+        /** @type { (className: string, isAdded: boolean) => EditorMutation<"classList"> } */
+        const createClassRecord = (className, isAdded) => ({
+            type: "classList",
+            target: mutation.target,
+            className,
+            value: isAdded,
+            oldValue: !isAdded,
+        });
+        // Generate records for each class change, skipping system mutations.
+        return [
+            ...[...addedClasses].map((cls) => createClassRecord(cls, true)),
+            ...[...removedClasses].map((cls) => createClassRecord(cls, false)),
+        ].filter(
+            (classRecord) =>
+                !this.mutationFilteredClasses.has(classRecord.className) &&
+                (this.checkPredicates("is_classlist_mutation_savable_predicates", classRecord) ??
+                    true)
+        );
+    }
+
+    /**
+     * `NativeMutation` records of type "childList" do not contain information
+     * about the descendants of the added/removed nodes at the time of the
+     * mutation. This returns a map from the "childList" mutations in a batch to
+     * their respective added/removed trees.
+     *
+     * @param { NativeMutation[] } mutations
+     * @returns { ChildListToTreesMap }
+     */
+    createChildListToTreesMap(mutations) {
+        /** @type { ChildListToTreesMap } */
+        const childListToTreesMap = new WeakMap();
+        /** @type { WeakMap<Node, Node[]> } */
+        const childListSnapshot = new WeakMap();
+        /**
+         * @param {Node} node
+         * @returns {Node[]}
+         */
+        const getChildListSnapshot = (node) => childListSnapshot.get(node) || childNodes(node);
+        /**
+         * @param {Node} node
+         * @returns {Tree}
+         */
+        const makeSnapshotTree = (node) => ({
+            node,
+            children: getChildListSnapshot(node).map(makeSnapshotTree),
+        });
+        /**
+         * Reconstructs the child list before a mutation based on the state
+         * after it and the child list modifications
+         *
+         * @param {Node[]} childListAfter
+         * @param {NativeMutation} record
+         * @returns {Node[]}
+         */
+        const reconstructChildList = (childListAfter, record) => {
+            const { removedNodes, previousSibling, nextSibling } = record;
+            const previousSiblingNodes = previousSibling
+                ? childListAfter.slice(0, childListAfter.indexOf(previousSibling) + 1)
+                : [];
+            const nextSiblingNodes = nextSibling
+                ? childListAfter.slice(childListAfter.indexOf(nextSibling))
+                : [];
+            return [...previousSiblingNodes, ...removedNodes, ...nextSiblingNodes];
+        };
+        mutations.toReversed().forEach((/** @type { NativeMutation } */ record) => {
+            if (record.type === "childList") {
+                childListToTreesMap.set(record, {
+                    added: [...record.addedNodes].map(makeSnapshotTree),
+                    removed: [...record.removedNodes].map(makeSnapshotTree),
+                });
+                // Update snapshot for previous mutations
+                const childListAfterMutation = getChildListSnapshot(record.target);
+                const childListBefore = reconstructChildList(childListAfterMutation, record);
+                childListSnapshot.set(record.target, childListBefore);
+            }
+        });
+        return childListToTreesMap;
+    }
+
+    // ================
+    // DOM Map Handling
+    // ================
+
+    /**
+     * @param { NodeId } id
+     * @returns { Node | undefined }
      */
     getNodeById(id) {
         return this.nodeMap.getNode(id);
@@ -467,15 +889,15 @@ export class DomMutationPlugin extends Plugin {
      * Serialize a node and its children.
      *
      * @param { Node } node
-     * @returns {SerializedNode|null}
+     * @returns { SerializedNode | null }
      */
     serializeNode(node) {
         return this.serializeTree(nodeToTree(node));
     }
 
     /**
-     * @param {Tree} tree
-     * @returns {SerializedNode|null}
+     * @param { Tree } tree
+     * @returns { SerializedNode | null }
      */
     serializeTree(tree) {
         const node = tree.node;
@@ -605,7 +1027,7 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @returns {EditorCommit<DomMutationCommitData>}
+     * @returns { EditorCommit<DomMutationCommitData> }
      */
     createCommit(type = "original", metadata = {}) {
         this.currentChanges.updateSelectionAfter(
@@ -623,7 +1045,7 @@ export class DomMutationPlugin extends Plugin {
 
     /**
      * @param { CommitType } [type = "original"]
-     * @returns {EditorCommit<DomMutationCommitData>}
+     * @returns { EditorCommit<DomMutationCommitData> }
      */
     createSnapshotCommit(type = "original") {
         const authorTimestamp = this.currentChanges.authorTimestamp || Date.now();
@@ -682,7 +1104,7 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @param {EditorMutation[]} mutations
+     * @param { EditorMutation[] } mutations
      */
     revertMutations(mutations, { ensureNewMutations = false } = {}) {
         const revertedMutations = mutations.map((mutation) => {
@@ -705,7 +1127,7 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @param {EditorMutation[]} mutations
+     * @param { EditorMutation[] } mutations
      * @param { Object } options
      * @param { boolean } options.ensureNewMutations whether to ensure new
      *        mutations are generated when applying the mutations
@@ -741,13 +1163,7 @@ export class DomMutationPlugin extends Plugin {
                     if (node) {
                         const { value } = this.processThrough(
                             "attribute_change_processors",
-                            {
-                                target: node,
-                                attributeName: mutation.attributeName,
-                                oldValue: mutation.oldValue,
-                                value: mutation.value,
-                                reverse,
-                            },
+                            { ...mutation, reverse },
                             { ensureNewMutations }
                         );
                         this.setAttribute(node, mutation.attributeName, value);
@@ -785,7 +1201,7 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @param {EditorMutationAdd} mutation
+     * @param { EditorMutation<"add"> } mutation
      */
     applyAddMutation(mutation) {
         const { nodeId, serializedNode, parentNodeId, nextNodeId, previousNodeId } = mutation;
@@ -823,7 +1239,7 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * @param {EditorMutationRemove} mutation
+     * @param { EditorMutation<"remove"> } mutation
      */
     applyRemoveMutation(mutation) {
         const parent = this.getNodeById(mutation.parentNodeId);
@@ -933,7 +1349,7 @@ export class DomMutationPlugin extends Plugin {
      * /!\ Do not re-introduce nodes that had been already added to the DOM in
      * a commit. @see isObservedNode
      *
-     * @param {Function} callback
+     * @param { Function } callback
      */
     ignoreDOMMutations(callback) {
         const enableObserver = this.disableObserver();
@@ -954,8 +1370,8 @@ export class DomMutationPlugin extends Plugin {
      * with {@link ignoreDOMMutations}. Such node will not be flagged as
      * unobserved and history might become inconsistent.
      *
-     * @param {Node} node
-     * @returns {boolean}
+     * @param { Node } node
+     * @returns { boolean }
      */
     isObservedNode(node) {
         return this.nodeMap.hasNode(node);
@@ -975,208 +1391,6 @@ export class DomMutationPlugin extends Plugin {
         return !!this.currentChanges.mutations.find((m) =>
             ["characterData", "remove", "add"].includes(m.type)
         );
-    }
-
-    // New mutations
-
-    /**
-     * Transforms NativeMutationRecords into EditorMutationRecords.
-     *
-     * ChildList record have added/removed trees added to them.
-     * Class attribute records are expanded into multiple classList records.
-     * Attribute records have their oldValue normalized and new value added to it.
-     * CharacterData records have the new value added to it.
-     *
-     * @param {NativeMutationRecord[]} records
-     * @returns {EditorMutationRecord[]}
-     */
-    transformToEditorMutationRecords(records) {
-        records = this.transformChildListRecords(records);
-        return records.flatMap((record) => {
-            if (record.type === "attributes") {
-                if (record.attributeName === "class") {
-                    return this.splitClassMutationRecord(record);
-                }
-                const oldValue = record.oldValue === undefined ? null : record.oldValue;
-                const value = record.target.getAttribute(record.attributeName);
-                return { ...pick(record, "type", "target", "attributeName"), oldValue, value };
-            }
-            if (record.type === "characterData") {
-                const value = record.target.textContent;
-                return { ...pick(record, "type", "target", "oldValue"), value };
-            }
-            return record;
-        });
-    }
-
-    // Mutations filtering/processing
-
-    /**
-     * If the observer is disabled, store the last observed state of the
-     * target's affected property (attribute/class/textContent) and drop the
-     * record.
-     *
-     * Otherwise (observer enabled), update the record as follows:
-     * - mutations targeting an unobserved node are dropped
-     * - mutations of type "attributes", "classList", and "characterData" have
-     * their `oldValue` adjusted to the last observed state of that target's
-     * property
-     * - mutations of type "childList" are updated to not include references to
-     * unobserved nodes.
-     *
-     * @param {EditorMutationRecord[]} records
-     * @returns {EditorMutationRecord[]}
-     */
-    filterAndAdjustEditorMutationRecords(records) {
-        this.trigger("on_will_filter_mutation_record_handlers", records);
-        const isRecordSavable = (record) =>
-            this.checkPredicates("is_mutation_record_savable_predicates", record) ?? true;
-        const result = [];
-        for (const record of records) {
-            if (!this.isObservedNode(record.target)) {
-                continue;
-            }
-            if (this.isObserverDisabled || !isRecordSavable(record)) {
-                if (record.type !== "childList") {
-                    this.storeOldValue(record);
-                }
-                continue;
-            }
-            const updatedRecord =
-                record.type === "childList"
-                    ? this.updateChildListRecord(record)
-                    : this.updateOldValue(record);
-            if (this.isValidRecord(updatedRecord)) {
-                if (record.type === "childList") {
-                    record.addedTrees
-                        .flatMap(treeToNodes)
-                        .filter((node) => !this.nodeMap.hasNode(node))
-                        .forEach((node) => this.nodeMap.set(this.generateId(), node));
-                }
-                result.push(updatedRecord);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * @param {EditorMutationRecord} record
-     */
-    isValidRecord(record) {
-        switch (record.type) {
-            case "attributes":
-            case "classList":
-            case "characterData":
-                // Filter out no-op
-                return record.value !== record.oldValue;
-            case "childList":
-                return (
-                    // Filter out no-op
-                    (record.addedTrees.length || record.removedTrees.length) &&
-                    // Filter out mutation without a valid position for node insertion
-                    (record.previousSibling !== undefined || record.nextSibling !== undefined)
-                );
-        }
-    }
-
-    /**
-     * @param { EditorMutationRecord } record
-     */
-    isSystemMutationRecord(record) {
-        if (record.type === "attributes") {
-            return this.mutationFilteredAttributes.has(record.attributeName);
-        }
-        if (record.type === "classList") {
-            return this.mutationFilteredClasses.has(record.className);
-        }
-        return false;
-    }
-
-    /**
-     * @param {NativeMutationRecordChildList} record
-     * @returns { (EditorMutationRemove|EditorMutationAdd)[] }
-     */
-    splitChildListRecord(record) {
-        const parentNodeId = this.getNodeId(record.target);
-        if (!parentNodeId) {
-            throw new Error("Unknown parent node");
-        }
-
-        const makeSingleNodeRecords = (trees, type) =>
-            trees.map((tree, index, treeList) => {
-                const node = tree.node;
-                const nodeList = treeList.map((t) => t.node);
-                const [previousSibling, nextSibling] =
-                    type === "add"
-                        ? [nodeList[index - 1] || record.previousSibling, record.nextSibling]
-                        : [record.previousSibling, nodeList[index + 1] || record.nextSibling];
-                const [nextNodeId, previousNodeId] = [nextSibling, previousSibling].map((sibling) =>
-                    // Preserve undefined and null values
-                    sibling ? this.getNodeId(sibling) : sibling
-                );
-                const nodeId = this.getNodeId(node);
-                const serializedNode = this.serializeTree(tree);
-                return { type, nodeId, parentNodeId, serializedNode, nextNodeId, previousNodeId };
-            });
-
-        return [
-            ...makeSingleNodeRecords(record.removedTrees, "remove"),
-            ...makeSingleNodeRecords(record.addedTrees, "add"),
-        ];
-    }
-
-    /**
-     * ChildList mutation records do not contain information about the
-     * descendants of the added/removed nodes at the time of the mutation. This
-     * method transforms childList mutation records to include information about
-     * the added/removed trees.
-     *
-     * @param {NativeMutationRecord[]} records
-     * @returns {(EditorMutationRecord|NativeMutationRecord)[]}
-     */
-    transformChildListRecords(records) {
-        /** @type {WeakMap<Node, Node[]>} */
-        const childListSnapshot = new WeakMap();
-        /** @type {(node: Node) => Node[]} */
-        const getChildListSnapshot = (node) => childListSnapshot.get(node) || childNodes(node);
-        /** @type {(node: Node) => Tree} */
-        const makeSnapshotTree = (node) => ({
-            node,
-            children: getChildListSnapshot(node).map(makeSnapshotTree),
-        });
-
-        // Reconstructs the child list before a mutation based on the state
-        // after it and the child list modifications
-        /** @type {(childListAfter: Node[], record: NativeMutationRecord) => Node[]} */
-        const reconstructChildList = (childListAfter, record) => {
-            const { removedNodes, previousSibling, nextSibling } = record;
-            const previousSiblingNodes = previousSibling
-                ? childListAfter.slice(0, childListAfter.indexOf(previousSibling) + 1)
-                : [];
-            const nextSiblingNodes = nextSibling
-                ? childListAfter.slice(childListAfter.indexOf(nextSibling))
-                : [];
-            return [...previousSiblingNodes, ...removedNodes, ...nextSiblingNodes];
-        };
-
-        return records
-            .toReversed()
-            .map((/** @type {NativeMutationRecord} */ record) => {
-                if (record.type !== "childList") {
-                    return record;
-                }
-                const transformedRecord = {
-                    ...pick(record, "type", "previousSibling", "nextSibling", "target"),
-                    addedTrees: [...record.addedNodes].map(makeSnapshotTree),
-                    removedTrees: [...record.removedNodes].map(makeSnapshotTree),
-                };
-                // Update snapshot for previous mutations
-                const childListAfterMutation = getChildListSnapshot(record.target);
-                const childListBefore = reconstructChildList(childListAfterMutation, record);
-                childListSnapshot.set(record.target, childListBefore);
-                return transformedRecord;
-            })
-            .toReversed();
     }
 
     /**
@@ -1228,168 +1442,6 @@ export class DomMutationPlugin extends Plugin {
         }
     }
 
-    /**
-     * @param { NativeMutationRecord[] } records
-     */
-    filterAttributeMutationRecords(records) {
-        return records.filter((record) => {
-            if (record.type !== "attributes") {
-                return true;
-            }
-            // Skip the attributes change on the dom.
-            if (record.target === this.editable) {
-                return false;
-            }
-            if (record.attributeName === "contenteditable") {
-                return false;
-            }
-            return true;
-        });
-    }
-
-    /**
-     * @param { NativeMutationRecord[] } records
-     * @returns { NativeMutationRecord[] }
-     */
-    filterSameTextContentMutationRecords(records) {
-        const filteredRecords = [];
-        for (const record of records) {
-            if (record.type === "childList" && this.isSameTextContentMutation(record)) {
-                const { addedNodes, removedNodes } = record;
-                const oldId = this.getNodeId(removedNodes[0]);
-                if (oldId) {
-                    this.nodeMap.set(oldId, addedNodes[0]);
-                    continue;
-                }
-            }
-            filteredRecords.push(record);
-        }
-        return filteredRecords;
-    }
-
-    /**
-     * @param {NativeMutationRecordChildList} record
-     * @returns {NativeMutationRecordChildList}
-     */
-    updateChildListRecord(record) {
-        // Invalidate sibling references to unobserved nodes
-        const isValidReference = (node) => node === null || this.isObservedNode(node);
-        const updateSibling = (sibling) => (isValidReference(sibling) ? sibling : undefined);
-        const previousSibling = updateSibling(record.previousSibling);
-        const nextSibling = updateSibling(record.nextSibling);
-
-        // Filter out unobserved nodes in removedTrees
-        const removeUnobservedNodes = (tree) => {
-            if (!this.isObservedNode(tree.node)) {
-                return null;
-            }
-            return {
-                node: tree.node,
-                children: tree.children.map(removeUnobservedNodes).filter(Boolean),
-            };
-        };
-        const removedTrees = record.removedTrees.map(removeUnobservedNodes).filter(Boolean);
-
-        return {
-            ...record,
-            previousSibling,
-            nextSibling,
-            removedTrees,
-        };
-    }
-
-    /**
-     * Check if a mutation consists of removing and adding a single text node
-     * with the same text content, which occurs in Firefox but is optimized
-     * away in Chrome.
-     *
-     * @param { NativeMutationRecord } record
-     */
-    isSameTextContentMutation(record) {
-        const { addedNodes, removedNodes } = record;
-        return (
-            record.type === "childList" &&
-            addedNodes.length === 1 &&
-            removedNodes.length === 1 &&
-            addedNodes[0].nodeType === Node.TEXT_NODE &&
-            removedNodes[0].nodeType === Node.TEXT_NODE &&
-            addedNodes[0].textContent === removedNodes[0].textContent
-        );
-    }
-
-    /**
-     * Mutation records of type "attribute" and "characterData" provide the old
-     * value, but not the new value. When multiple mutations occur in the same
-     * batch for an element's attribute or characterData, we only know the final
-     * value of the accumulated changes, which is the DOM's current state.
-     *
-     *  The oldValue provided by mutations after the first one are intermediate
-     *  states that we do not care about. Discarding them allows us to store a
-     *  single record representing the accumulated changes, instead of
-     *  reconstructing the new value introduced by each mutation.
-     *
-     * @param { NativeMutationRecord[] } records
-     */
-    filterOutIntermediateStateMutationRecords(records) {
-        // Keep track of visited attributes per each node
-        const isFirstAttributeOccurrence = trackOccurrencesPair();
-        // Keep track of visited nodes for characterData mutations
-        const isFirstCharDataOccurence = trackOccurrences();
-        const filteredRecords = [];
-        for (const record of records) {
-            if (record.type === "attributes") {
-                // Keep only the first mutation record for each (node, attribute) pair.
-                if (isFirstAttributeOccurrence(record.target, record.attributeName)) {
-                    filteredRecords.push(record);
-                }
-            } else if (record.type === "characterData") {
-                // Keep only the first charData mutation record for each node.
-                if (isFirstCharDataOccurence(record.target)) {
-                    filteredRecords.push(record);
-                }
-            } else {
-                filteredRecords.push(record);
-            }
-        }
-        return filteredRecords;
-    }
-
-    /**
-     * Breaks down a class attribute mutation into individual class
-     * addition/removal records for more precise history tracking.
-     *
-     * @param { NativeMutationRecord } record of type "attributes" with attributeName === "class"
-     * @returns { NativeMutationRecordClassList[]}
-     */
-    splitClassMutationRecord(record) {
-        // oldValue can be nullish, or have extra spaces
-        const oldValue = record.oldValue?.split(" ").filter(Boolean);
-        const classesBefore = new Set(oldValue);
-        const classesAfter = new Set(record.target.classList);
-        // @todo: use Set.prototype.difference when it becomes widely available
-        const setDifference = (setA, setB) => {
-            const diff = new Set(setA);
-            setB.forEach((item) => diff.delete(item));
-            return diff;
-        };
-        const addedClasses = setDifference(classesAfter, classesBefore);
-        const removedClasses = setDifference(classesBefore, classesAfter);
-
-        /** @type {(className: string, isAdded: boolean) => NativeMutationRecordClassList } */
-        const createClassRecord = (className, isAdded) => ({
-            type: "classList",
-            target: record.target,
-            className,
-            value: isAdded,
-            oldValue: !isAdded,
-        });
-        // Generate records for each class change
-        return [
-            ...[...addedClasses].map((cls) => createClassRecord(cls, true)),
-            ...[...removedClasses].map((cls) => createClassRecord(cls, false)),
-        ];
-    }
-
     // State storage stuff
 
     /**
@@ -1408,19 +1460,35 @@ export class DomMutationPlugin extends Plugin {
      *
      * @see updateOldValue
      *
-     * @param {NativeMutationRecordAttributes|NativeMutationRecordClassList|NativeMutationRecordCharacterData} record
+     * @param { NativeMutation<"attributes"|"characterData"> } record
      */
     storeOldValue(record) {
-        const { stateMap, key } = this.getObservedStateStorage(record);
-        // Only store it if not already stored.
-        if (!stateMap.has(key)) {
-            stateMap.set(key, record.oldValue);
+        /** @type { (NativeMutation<"attributes"|"characterData"> | EditorMutation<"classList">)[] } */
+        let mutations = [record];
+        if (record.type === "attributes" && record.attributeName === "class") {
+            // If the record is a change in a class attribute, first split it so
+            // we can handle the old value of each class individually.
+            mutations = this.createClassListMutations(record);
+        }
+        for (const mutation of mutations) {
+            const { stateMap, key } = this.getObservedStateStorage(mutation);
+            // Only store it if not already stored.
+            if (!stateMap.has(key)) {
+                stateMap.set(key, mutation.oldValue);
+            }
         }
     }
 
     /**
-     * @param {EditorMutationRecord} record
-     * @returns { { stateMap: Map, key: string } }
+     * @template { "attributes" | "characterData" } T
+     * @param { |
+     *        NativeMutation<T>
+     *      | EditorMutation<T | "childList">
+     * } record
+     * @returns { {
+     *      stateMap: ObservedState[T | "childList"],
+     *      key: string
+     * } }
      */
     getObservedStateStorage(record) {
         // Add entry for current target if not already present.
@@ -1449,14 +1517,16 @@ export class DomMutationPlugin extends Plugin {
      * have the correct historical "oldValue" by checking against the last
      * observed state.
      *
-     * When the observer is enabled, it updates a record's `oldValue` with the last
-     * observed state, and removes the entry to prevent reuse. Without removing
-     * the entry, the same historical value might be incorrectly applied to
-     * future mutation records targeting the same attribute/class of the same
-     * element, which would create incorrect history mutations.
+     * When the observer is enabled, it updates a record's `oldValue` with the
+     * last observed state, and removes the entry to prevent reuse. Without
+     * removing the entry, the same historical value might be incorrectly
+     * applied to future mutation records targeting the same
+     * attribute/class of the same element, which would create incorrect
+     * history mutations.
      *
-     * @param {NativeMutationRecordAttributes|NativeMutationRecordClassList|NativeMutationRecordCharacterData} record
-     * @returns {NativeMutationRecordAttributes|NativeMutationRecordClassList|NativeMutationRecordCharacterData}
+     * @template { NativeMutationType } T
+     * @param { EditorMutation<T>} record
+     * @returns { EditorMutation<T> }
      */
     updateOldValue(record) {
         const { stateMap, key } = this.getObservedStateStorage(record);
@@ -1529,7 +1599,7 @@ export class DomMutationPlugin extends Plugin {
                 this.stageCustomMutation({ apply: revert, revert: apply });
             },
         };
-        this.currentChanges.addMutations(customMutation);
+        this.stage(customMutation);
     }
 
     // Preview stuff
@@ -1542,8 +1612,8 @@ export class DomMutationPlugin extends Plugin {
      * are maintained. This will add a new "restore" commit and set the reverted
      * commits's state to "discarded".
      *
-     * @param {Commit} commit
-     * @returns {CommitData | undefined}
+     * @param { Commit } commit
+     * @returns { CommitData | undefined }
      */
     restoreToCommit(commit) {
         this.discardDraft();
@@ -1588,7 +1658,7 @@ export class DomMutationPlugin extends Plugin {
     /**
      * Returns a function that can be later called to revert history to the
      * current state.
-     * @returns {Function}
+     * @returns { Function }
      */
     makeSavePoint() {
         this.flush();
@@ -1639,8 +1709,8 @@ export class DomMutationPlugin extends Plugin {
 
     /**
      * Creates a set of functions to preview, apply, and revert an operation.
-     * @param {Function} operation
-     * @returns {PreviewableOperation}
+     * @param { Function } operation
+     * @returns { PreviewableOperation }
      */
     makePreviewableOperation(operation) {
         let revertOperation = () => {};
@@ -1677,8 +1747,8 @@ export class DomMutationPlugin extends Plugin {
 
     /**
      * Creates a set of functions to preview, apply, and revert an async operation.
-     * @param {Function} operation
-     * @returns {PreviewableOperation}
+     * @param { Function } operation
+     * @returns { PreviewableOperation }
      */
     makePreviewableAsyncOperation(operation) {
         let revertOperation = async () => {};
@@ -1742,8 +1812,8 @@ export class DomMutationPlugin extends Plugin {
 
     /**
      * Returns the deepest common ancestor element of the given mutations.
-     * @param {(EditorMutation)[]} mutations - The array of mutations.
-     * @returns {HTMLElement|null} - The common ancestor element.
+     * @param { (EditorMutation)[] } mutations - The array of mutations.
+     * @returns { HTMLElement | null } - The common ancestor element.
      */
     getMutationsRoot(mutations) {
         const nodes = mutations
@@ -1820,7 +1890,7 @@ class CurrentChanges {
     }
 
     /**
-     * @param  {...EditorMutation} mutations
+     * @param  { ...EditorMutation } mutations
      */
     addMutations(...mutations) {
         this._mutations.push(...mutations);
@@ -1831,21 +1901,21 @@ class CurrentChanges {
     }
 
     /**
-     * @param {NodeId} nodeId
+     * @param { NodeId } nodeId
      */
     updateActiveElement(nodeId) {
         this._activeElementId = nodeId;
     }
 
     /**
-     * @param {SerializedSelection} serializedSelection
+     * @param { SerializedSelection } serializedSelection
      */
     updateSelection(serializedSelection) {
         this._selection = serializedSelection;
     }
 
     /**
-     * @param {SerializedSelection} serializedSelection
+     * @param { SerializedSelection } serializedSelection
      */
     updateSelectionAfter(serializedSelection) {
         this._selectionAfter = serializedSelection;
@@ -1854,8 +1924,8 @@ class CurrentChanges {
     /**
      * Set a key/value pair in the external data.
      *
-     * @param {string} key
-     * @param {any} value
+     * @param { string } key
+     * @param { any } value
      */
     updateExternal(key, value) {
         this._external[key] = value;

@@ -49,7 +49,7 @@ export class EmbeddedComponentPlugin extends Plugin {
         attribute_change_processors: this.onChangeAttribute.bind(this),
 
         /** Predicates */
-        is_mutation_record_savable_predicates: this.isMutationRecordSavable.bind(this),
+        is_mutation_savable_predicates: this.isMutationRecordSavable.bind(this),
 
         /** Selectors */
         move_node_whitelist_selectors: "[data-embedded]",
@@ -76,6 +76,10 @@ export class EmbeddedComponentPlugin extends Plugin {
         // when on_editor_started_handlers are called.
     }
 
+    /**
+     * @param {import("@html_editor/core/dom_mutation_plugin").NativeMutation} record
+     * @returns {boolean | undefined}
+     */
     isMutationRecordSavable(record) {
         if (
             this.nodeMap.get(record.target) &&
@@ -140,7 +144,7 @@ export class EmbeddedComponentPlugin extends Plugin {
      * the attribute has to be set to a new value, computed by the
      * stateChangeManager.
      *
-     * @param {Object} attributeChange @see HistoryPlugin
+     * @param {import("@html_editor/core/dom_mutation_plugin").EditorMutationAttributes} attributeChange
      * @param { Object } options
      * @param { boolean } options.ensureNewMutations whether the mutation is being used
      *        to create a new commit
@@ -154,7 +158,8 @@ export class EmbeddedComponentPlugin extends Plugin {
             const attrState = attributeChange.reverse
                 ? attributeChange.oldValue
                 : attributeChange.value;
-            const stateChangeManager = this.getStateChangeManager(attributeChange.target);
+            const target = this.dependencies.domMutation.getNodeById(attributeChange.nodeId);
+            const stateChangeManager = this.getStateChangeManager(target);
             if (stateChangeManager) {
                 // onStateChanged returns undefined if no change is needed for
                 // the attribute value

@@ -51,7 +51,7 @@ export class GridLayoutPlugin extends Plugin {
         on_element_dropped_near_handlers: this.onElementDroppedNear.bind(this),
         on_element_dropped_handlers: this.onElementDropped.bind(this),
         // Ignore background grid in history
-        is_mutation_record_savable_predicates: this.ignoreBackgroundGrid.bind(this),
+        is_mutation_savable_predicates: this.ignoreBackgroundGrid.bind(this),
     };
 
     setup() {
@@ -76,11 +76,17 @@ export class GridLayoutPlugin extends Plugin {
         return !!targetEl && targetEl === containerEl;
     }
 
+    /**
+     *
+     * @param {import("@html_editor/core/dom_mutation_plugin").NativeMutation} record
+     * @returns {boolean | undefined}
+     */
     ignoreBackgroundGrid(record) {
         if (record.type === "childList") {
-            const addedOrRemovedNode = (record.addedTrees[0] || record.removedTrees[0]).node;
+            const addedOrRemovedNode = record.addedNodes[0] || record.removedNodes[0];
             // Do not record the addition/removal of the background grid.
             if (
+                addedOrRemovedNode &&
                 isElement(addedOrRemovedNode) &&
                 addedOrRemovedNode.matches(".o_we_background_grid")
             ) {

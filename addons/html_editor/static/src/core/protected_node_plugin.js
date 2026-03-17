@@ -9,8 +9,6 @@ const UNPROTECTED_SELECTOR = `[data-oe-protected="false"]`;
 /**
  * @typedef { Object } ProtectedNodeShared
  * @property { ProtectedNodePlugin['setProtectingNode'] } setProtectingNode
- *
- * @typedef { import("./history_plugin").HistoryMutationRecord } HistoryMutationRecord
  */
 
 export class ProtectedNodePlugin extends Plugin {
@@ -39,7 +37,7 @@ export class ProtectedNodePlugin extends Plugin {
                 }
             },
         ],
-        is_mutation_record_savable_predicates: this.isMutationRecordSavable.bind(this),
+        is_mutation_savable_predicates: this.isMutationRecordSavable.bind(this),
 
         /** Providers */
         removable_descendants_providers: this.filterDescendantsToRemove.bind(this),
@@ -107,7 +105,7 @@ export class ProtectedNodePlugin extends Plugin {
     }
 
     /**
-     * @param {HistoryMutationRecord[]} records
+     * @param {import("./dom_mutation_plugin").NativeMutation[]} records
      */
     beforeFilteringMutationRecords(records) {
         for (const record of records) {
@@ -115,7 +113,7 @@ export class ProtectedNodePlugin extends Plugin {
                 if (record.target.nodeType !== Node.ELEMENT_NODE) {
                     return;
                 }
-                const addedNodes = record.addedTrees.map((tree) => tree.node);
+                const addedNodes = record.addedNodes;
                 if (
                     (this.protectedNodes.has(record.target) &&
                         !record.target.matches(UNPROTECTED_SELECTOR)) ||
@@ -137,7 +135,7 @@ export class ProtectedNodePlugin extends Plugin {
     }
 
     /**
-     * @param {HistoryMutationRecord} record
+     * @param {import("./dom_mutation_plugin").NativeMutation} record
      * @return {boolean}
      */
     isMutationRecordSavable(record) {
