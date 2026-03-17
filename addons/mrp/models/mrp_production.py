@@ -2398,6 +2398,7 @@ class MrpProduction(models.Model):
                 'default_company_id': self.company_id.id,
                 'default_location_id': self.location_dest_id.id if self.state == 'done' else self.location_src_id.id,
                 'default_location_dest_id': self.company_id.scrap_location_id.id,
+                'unlink_on_discard': True,
             },
             'target': 'new',
         }
