@@ -7,53 +7,56 @@ import { Component } from "@odoo/owl";
 import { getVisibleElements } from "../utils/ui";
 
 function _positionInputBoxOverlay(target) {
-    const _hasTouch = hasTouch();
     const closestInputBox =
         target.closest(".o_input_box:not(.o_input_box .o_input_box)") ||
         target.querySelector(".o_input_box");
     if (!closestInputBox) {
         return;
     }
-    const startOverlays = getVisibleElements(closestInputBox, `.o_input_box_overlay_start`);
-    const endOverlays = getVisibleElements(closestInputBox, `.o_input_box_overlay_end`);
-    if (!startOverlays.length && !endOverlays.length) {
+    const endOverlays = getVisibleElements(closestInputBox, `.o_input_box_overlay_end:not(.o_input_box_overlay_inline)`);
+    const inlineOverlay = getVisibleElements(closestInputBox, `.o_input_box_overlay_inline`)[0];
+
+    if (endOverlays.length < 2 && !inlineOverlay) {
         return;
     }
-    let startPadding = 0;
+    
     let endPadding = 0;
-    const gap = parseInt(
-        getComputedStyle(closestInputBox).getPropertyValue("--inputbox-spacing-unit")
-    );
-    for (let i = 0; i < startOverlays.length; i++) {
-        const offset = startPadding > 0 ? ` + ${startPadding}px` : "";
-        startOverlays[i].style["inset-inline-start"] = `calc((1.5 * var(--inputbox-overlay-padding-x)) ${offset})`;
-        startPadding += startOverlays[i].clientWidth + gap;
-    };
-    closestInputBox.style.setProperty("--inputbox-overlay-start-size", startPadding + "px");
     for (let i = endOverlays.length; i > 0; i--) {
         const overlay = endOverlays[i - 1];
-        if (_hasTouch && overlay.classList.contains("btn-link")) {
+        if (hasTouch() && overlay.classList.contains("btn-link")) {
             overlay.classList.add("btn-secondary");
             overlay.classList.remove("btn-link");
         }
+        if (endOverlays.length === 1) {
+            // no need to do the next processing
+            return;
+        }
         const offset = endPadding > 0 ? ` + ${endPadding}px` : "";
         overlay.style["inset-inline-end"] = `calc(var(--inputbox-overlay-padding-x) ${offset})`;
-        endPadding += overlay.clientWidth + gap;
+        endPadding += overlay.clientWidth + 8; //--inputbox-spacing-unit
     }
     closestInputBox.style.setProperty("--inputbox-overlay-end-size", endPadding + "px");
-    const inlineEl = closestInputBox.querySelector(".o_input_box_overlay_inline");
-    if (inlineEl) {
-        const inputEl = closestInputBox.querySelector(
-            ".o_input, textarea, select, [contenteditable]"
-        );
-        if (inputEl && inputEl.value) {
-            const length = inputEl.value.length;
-            closestInputBox.style.setProperty(
-                "--inputbox-overlay-inline-position",
-                `calc(100% - (${length}px + ${length}ch) - var(--inputbox-overlay-size) - var(--inputbox-spacing-unit))`
+    if (inlineOverlay) {
+            const inputEl = closestInputBox.querySelector(
+                "input, button, textarea, select, [contenteditable]"
             );
+            if (inputEl) {
+                let inputLength = inputEl.value?.length || 0;
+                let paddingSize = 0//const startPadding;
+                if (closestInputBox.querySelector(".o_tag")) {
+                    inputEl.style.minWidth = inlineOverlay.clientWidth + "px";
+                    const tagsLength = closestInputBox.offsetWidth - inputEl.offsetWidth;
+                    paddingSize += tagsLength;
+                }
+                if (inputLength || paddingSize) {
+                    paddingSize += inlineOverlay.clientWidth;
+                    closestInputBox.style.setProperty(
+                        "--inputbox-overlay-inline-position",
+                        `calc(${paddingSize}px + ${inputLength}ch + var(--inputbox-spacing-unit) + var(--inputbox-overlay-padding-toggler))`
+                    );
+                }
+            }
         }
-    }
 }
 
 export function positionInputBoxOverlay(target) {

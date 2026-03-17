@@ -2,9 +2,9 @@
 <templates xml:space="preserve">
 
     <t t-name="web.Many2OneAvatarField">
-        <t t-set="relation" t-value="this.props.record.fields[this.props.name].relation"/>
-        <t t-set="value" t-value="this.props.record.data[this.props.name]"/>
-        <div class="d-flex align-items-center gap-1 o_input_box">
+        <t t-set="relation" t-value="props.record.fields[props.name].relation"/>
+        <t t-set="value" t-value="props.record.data[props.name]"/>
+        <div class="o_input_box">
             <span t-if="value" class="btn o_avatar o_m2o_avatar o_input_box_overlay_start">
                 <img class="rounded" t-attf-src="/web/image/{{relation}}/{{value.id}}/avatar_128?unique={{value.write_date.toMillis()}}"/>
             </span>

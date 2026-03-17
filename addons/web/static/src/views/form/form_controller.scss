@@ -1291,10 +1291,6 @@ body:not(.o_touch_device) .o_form_view {
             }
         }
     }
-
-    .o_form_sheet .o_field_widget.o_readonly_modifier:not(.o_form_label .o_field_widget) {
-        color: $text-muted;
-    }
 }
 
 // LABEL RULES

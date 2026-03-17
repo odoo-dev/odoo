@@ -366,10 +366,9 @@ export class Field extends Component {
     setup() {
         this.offlineService = useService("offline");
         this.fieldRef = useRef("fieldRef");
-
         this.debouncedOverlayPositioning = debounce(() => {
             positionInputBoxOverlay(this.fieldRef.el);
-        }, 500);
+        }, 250);
         if (this.props.fieldInfo) {
             this.field = this.props.fieldInfo.field;
         } else {
@@ -389,7 +388,7 @@ export class Field extends Component {
                 if (!fieldEl) {
                     return;
                 }
-                positionInputBoxOverlay(fieldEl);
+                this.debouncedOverlayPositioning();
                 if (hasTouch() && this.props.fieldInfo?.viewType === "form") {
                     const focusIn = () => this.onFieldFocus(true);
                     const focusOut = () => this.onFieldFocus(false);

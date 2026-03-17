@@ -15,11 +15,18 @@
     --inputbox-inner-padding-end: calc(var(--inputbox-overlay-padding-x) + var(--inputbox-overlay-end-size) + var(--inputbox-overlay-padding-toggler));
 
     &:has(.o_dropdown_button) {
-        --inputbox-overlay-padding-toggler: calc(var(--inputbox-overlay-padding-x) + (2 * var(--inputbox-spacing-unit)));
+        --inputbox-overlay-padding-toggler: calc(var(--inputbox-overlay-padding-x) + 2 * var(--inputbox-spacing-unit));
 
         .o_dropdown_button {
             inset-inline-end: var(--inputbox-overlay-end-size) !important;
         }
+    }
+
+    &:has(.o_input_box_overlay_start) {
+        --inputbox-overlay-start-size: calc(1.5 * var(--inputbox-overlay-padding-x) + 4 * var(--inputbox-spacing-unit));
+    }
+    &:has(.o_input_box_overlay_end:not(.o_input_box_overlay_inline)) {
+        --inputbox-overlay-end-size: calc(var(--inputbox-overlay-padding-x) + 4 * var(--inputbox-spacing-unit));
     }
 
     .o_input:not(.o_input .o_input), &:not(:has(.o_input)) {
@@ -71,17 +78,22 @@
             inset-inline-start: calc(1.5 * var(--inputbox-overlay-padding-x));
         }
         &.o_input_box_overlay_end {
-            inset-inline-end: calc(var(--inputbox-overlay-padding-x));
+            inset-inline-end: var(--inputbox-overlay-padding-x);
         }
     }
 }
 
 .o_input_box:has(.o_input_box_overlay_inline) {
-    .o_input_box_overlay_end.o_input_box_overlay_inline {
-        width: auto !important;
-        transition: right .4s;
-        &:not(.o_touch_device .o_input_box_overlay_end):not(.o_input_box:focus-within .o_input_box_overlay_end) {
-            inset-inline-end: var(--inputbox-overlay-inline-position) !important;
+    &:not(.o_touch_device .o_input_box) {
+        transition: width .4s;
+        &:not(:focus-within) {
+            width: var(--inputbox-overlay-inline-position);
+        }
+
+        .o_input_box_overlay_end.o_input_box_overlay_inline {
+            top: unset;
+            bottom: var(--inputbox-overlay-padding-y);
+            inset-inline-end: var(--inputbox-overlay-padding-toggler);
         }
     }
 }

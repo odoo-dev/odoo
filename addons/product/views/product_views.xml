@@ -56,8 +56,8 @@
                             options="{'convert_to_webp': True, 'preview_image': 'image_128'}"
                         />
                         <group class="o_form_header_details flex-grow-1">
-                            <h1 class="o_input_box" colspan="2">
-                                <field name="is_favorite" widget="boolean_favorite" nolabel="1" class="o_input_box_overlay_start"/>
+                            <h1 colspan="2">
+                                <field name="is_favorite" widget="boolean_favorite" nolabel="1"/>
                                 <field class="text-break" name="name" options="{'line_breaks': False}" widget="text" placeholder="e.g. Cheese Burger"/>
                             </h1>
                             <div name="options" class="d-flex flex-column flex-md-row flex-wrap" colspan="2">
@@ -251,12 +251,12 @@
                                     <label for="weight" invisible="product_variant_count &gt; 1 and not is_product_variant"/>
                                     <div class="o_input_box" name="weight" invisible="product_variant_count &gt; 1 and not is_product_variant">
                                         <field name="weight"/>
-                                        <field name="weight_uom_name" class="o_input_box_overlay_end"/>
+                                        <field name="weight_uom_name" class="o_input_box_overlay_end o_input_box_overlay_inline"/>
                                     </div>
                                     <label for="volume" invisible="product_variant_count &gt; 1 and not is_product_variant"/>
                                     <div class="o_input_box" name="volume" invisible="product_variant_count &gt; 1 and not is_product_variant">
                                         <field name="volume" string="Volume"/>
-                                        <field name="volume_uom_name" class="o_input_box_overlay_end"/>
+                                        <field name="volume_uom_name" class="o_input_box_overlay_end o_input_box_overlay_inline"/>
                                     </div>
                                 </group>
                             </group>
