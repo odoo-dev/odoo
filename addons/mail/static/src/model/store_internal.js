@@ -1,8 +1,13 @@
 /** @typedef {import("./record").Record} Record */
 /** @typedef {import("./record_list").RecordList} RecordList */
 
-import { ManyFieldVersion, SingleFieldVersion, SKIP_REVISION } from "@mail/model/field_version";
-import { IS_DELETED_SYM, isCommandList, isMany, normalizeManyCommands } from "@mail/model/misc";
+import {
+    CounterFieldVersion,
+    ManyFieldVersion,
+    SingleFieldVersion,
+    SKIP_REVISION,
+} from "@mail/model/field_version";
+import { IS_DELETED_SYM, isCommandList, isMany, normalizeFieldValue } from "@mail/model/misc";
 import { RecordInternal } from "@mail/model/record_internal";
 import { parseRawValue } from "@mail/utils/common/local_storage";
 
@@ -262,6 +267,8 @@ export class StoreInternal extends RecordInternal {
             if (!version) {
                 version = isMany(record.Model, fieldName)
                     ? new ManyFieldVersion(record.Model)
+                    : record.Model._.fieldsCounter.has(fieldName)
+                    ? new CounterFieldVersion()
                     : new SingleFieldVersion();
                 record._.fieldsVersion.set(fieldName, version);
             }
@@ -277,7 +284,7 @@ export class StoreInternal extends RecordInternal {
                   }
                 : version.lastRevision;
             const toApply = version.resolveApply(
-                isMany(record.Model, fieldName) ? normalizeManyCommands(value) : value,
+                normalizeFieldValue(record.Model, fieldName, value),
                 revision
             );
             if (toApply === SKIP_REVISION) {

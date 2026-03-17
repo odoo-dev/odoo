@@ -424,6 +424,97 @@ for (const testCase of MANY_FIELD_CASES) {
     });
 }
 
+const COUNTER_FIELD_CASES = [
+    {
+        name: "keep newer replace",
+        initial: { id: 1, likes: 0 },
+        steps: [
+            {
+                values: [["REPLACE", 10]],
+                meta: { snapshot: { xmin: 10, xmax: 10, xip_bitmap: "", current_xact_id: null } },
+                expected: 10,
+            },
+            {
+                values: [["REPLACE", 20]],
+                meta: { snapshot: { xmin: 30, xmax: 30, xip_bitmap: "", current_xact_id: null } },
+                expected: 20,
+            },
+            {
+                values: [["REPLACE", 15]],
+                meta: { snapshot: { xmin: 20, xmax: 20, xip_bitmap: "", current_xact_id: null } },
+                expected: 20,
+                description: "Older replace is ignored",
+            },
+        ],
+    },
+    {
+        name: "apply increments and decrements after replace",
+        initial: { id: 1, likes: 5 },
+        steps: [
+            {
+                values: [["REPLACE", 5]],
+                meta: { snapshot: { xmin: 10, xmax: 10, xip_bitmap: "", current_xact_id: null } },
+                expected: 5,
+            },
+            {
+                values: [["INCREMENT", 5]],
+                meta: { snapshot: { xmin: 20, xmax: 20, xip_bitmap: "", current_xact_id: null } },
+                expected: 10,
+            },
+            {
+                values: [["DECREMENT", 1]],
+                meta: { snapshot: { xmin: 30, xmax: 30, xip_bitmap: "", current_xact_id: null } },
+                expected: 9,
+            },
+            {
+                values: [["DECREMENT", 1]],
+                meta: { snapshot: { xmin: 5, xmax: 5, xip_bitmap: "", current_xact_id: null } },
+                expected: 9,
+                description: "Old decrement ignored because it's before last replace",
+            },
+        ],
+    },
+    {
+        name: "increment/decrement before replace are kept",
+        initial: { id: 1, likes: 0 },
+        steps: [
+            {
+                values: [["INCREMENT", 2]],
+                meta: { snapshot: { xmin: 10, xmax: 10, xip_bitmap: "", current_xact_id: null } },
+                expected: 2,
+            },
+            {
+                values: [["REPLACE", 1]],
+                meta: { snapshot: { xmin: 5, xmax: 5, xip_bitmap: "", current_xact_id: null } },
+                expected: 3,
+                description: "Increment after replace should be kept",
+            },
+        ],
+    },
+];
+
+for (const testCase of COUNTER_FIELD_CASES) {
+    const testFn = testCase.only ? test.only : test;
+    testFn(`counter store versioning - ${testCase.name}`, async () => {
+        (class Post extends Record {
+            static id = "id";
+            id;
+            likes = fields.Counter();
+        }).register(localRegistry);
+        const store = await start();
+        const post = store.Post.insert(testCase.initial);
+        for (const step of testCase.steps) {
+            store.insert({
+                Post: { id: post.id, likes: step.values },
+                __store_version__: step.meta,
+            });
+            expect(post.likes).toEqual(step.expected, {
+                message: step.description,
+            });
+        }
+    });
+}
+
 test("Inverse of relations are properly versioned", async () => {
     (class Message extends Record {
         static id = "id";

@@ -306,3 +306,45 @@ class TestDiscussTools(TransactionCase):
             data["discuss.channel"][0]["messages"],
             [("REPLACE", general.message_ids.ids), ("DELETE", general.message_ids[2].ids)],
         )
+
+    # 5xx Tests counter command modes
+    def test_550_counter_replace_clear_existing_data(self):
+        general = self.env["discuss.channel"].create({"name": "General"})
+        general.message_post(body="Message 1", message_type="comment")
+        general.message_post(body="Message 2", message_type="comment")
+        self_member = general.self_member_id
+        self_member._set_new_message_separator(0)
+        self.assertEqual(self_member.message_unread_counter, 2)
+        store = Store()
+        store.add(
+            self_member,
+            lambda res: (
+                res.counter("message_unread_counter", increment=1),
+                res.counter("message_unread_counter"),
+            ),
+        )
+        data = store.get_result()
+        self.assertEqual(data["discuss.channel.member"][0]["message_unread_counter"], [("REPLACE", 2)])
+
+    def test_560_counter_commands_are_all_added(self):
+        general = self.env["discuss.channel"].create({"name": "General"})
+        general.message_post(body="Message 1", message_type="comment")
+        general.message_post(body="Message 2", message_type="comment")
+        self_member = general.self_member_id
+        self_member._set_new_message_separator(0)
+        self.assertEqual(self_member.message_unread_counter, 2)
+        store = Store()
+        store.add(
+            self_member,
+            lambda res: (
+                res.counter("message_unread_counter"),
+                res.counter("message_unread_counter", increment=6),
+                res.counter("message_unread_counter", increment=1),
+                res.counter("message_unread_counter", decrement=2),
+            ),
+        )
+        data = store.get_result()
+        self.assertEqual(
+            data["discuss.channel.member"][0]["message_unread_counter"],
+            [("REPLACE", 2), ("INCREMENT", 6), ("INCREMENT", 1), ("DECREMENT", 2)],
+        )

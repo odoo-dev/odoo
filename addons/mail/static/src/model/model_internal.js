@@ -1,11 +1,13 @@
 import { toRaw } from "@odoo/owl";
-import { ATTR_SYM, MANY_SYM, ONE_SYM } from "./misc";
+import { ATTR_SYM, COUNTER_SYM, MANY_SYM, ONE_SYM } from "./misc";
 
 export class ModelInternal {
     /** @type {Map<string, boolean>} */
     fields = new Map();
     /** @type {Map<string, boolean>} */
     fieldsAttr = new Map();
+    /** @type {Map<string, boolean>} */
+    fieldsCounter = new Map();
     /** @type {Map<string, boolean>} */
     fieldsOne = new Map();
     /** @type {Map<string, boolean>} */
@@ -55,6 +57,9 @@ export class ModelInternal {
         this.fields.set(fieldName, true);
         if (data[ATTR_SYM]) {
             this.fieldsAttr.set(fieldName, true);
+        }
+        if (data[COUNTER_SYM]) {
+            this.fieldsCounter.set(fieldName, true);
         }
         if (data[ONE_SYM]) {
             this.fieldsOne.set(fieldName, true);

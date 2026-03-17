@@ -177,12 +177,18 @@ export class SingleFieldVersion {
 }
 
 /**
- * Track a multi value field's command history and determine which commands can be applied
- * based on revision snapshots.
+ * Maintains a revision aware history of incremental commands applied to a field.
+ *
+ * This class is designed for fields whose value is not stored directly, but derived from:
+ *   - an initial base value (`REPLACE` command)
+ *   - a sequence of incremental updates (`ADD`, `REMOVE`)
+ *
+ * Each command is associated with a revision (based on database snapshots), allowing to:
+ *   - Insert commands in the correct chronological position.
+ *   - Ignore outdated revisions.
+ *   - Recompute the correct field value when out of order updates are received.
  */
-export class ManyFieldVersion {
-    /** @type {import("@mail/model/record").Record} */
-    TargetModel;
+export class MultiValueVersion {
     /**
      * Tracks the command history for this field, in chronological order. Each entry
      * represents a single command along with the revision at which it was applied.
@@ -198,39 +204,6 @@ export class ManyFieldVersion {
             },
         },
     ];
-
-    constructor(TargetModel) {
-        this.TargetModel = TargetModel;
-    }
-
-    /**
-     * Determine what commands should be applied.
-     *
-     * @param {Array[]} commands
-     * @param {FieldRevision} incomingRevision
-     * @returns {Array[]|typeof SKIP_REVISION} The skip symbol, or the commands to apply
-     * to update the field.
-     */
-    resolveApply(commands, incomingRevision) {
-        if (!shouldReplace(incomingRevision, this.history[0].revision)) {
-            return SKIP_REVISION;
-        }
-        const insertionIndex = this._findInsertionIndex(incomingRevision);
-        const insertAtTheEnd = insertionIndex === this.history.length;
-        this.history.splice(
-            insertionIndex,
-            0,
-            ...commands.map((cmd) => ({ cmd, revision: incomingRevision }))
-        );
-        const lastReplaceIndex = this.history.findLastIndex((entry) => entry.cmd[0] === "REPLACE");
-        if (lastReplaceIndex >= insertionIndex) {
-            this.history = this.history.slice(lastReplaceIndex);
-        }
-        if (insertAtTheEnd) {
-            return commands;
-        }
-        return this._generateReplaceFromHistory();
-    }
 
     /**
      * Returns the index of the first element strictly greater than the given revision.
@@ -253,8 +226,73 @@ export class ManyFieldVersion {
         return start;
     }
 
+    /**
+     * Resolve how incoming commands should affect the current field state.
+     *
+     * This method:
+     *   - Rejects the update if its revision is older than the current base state.
+     *   - Inserts the new commands into the history at the correct position.
+     *   - Drops obsolete history if a newer `REPLACE` overrides previous commands.
+     *   - Computes the minimal set of commands required to update the field.
+     *
+     * @param {Array[]} commands
+     * @param {FieldRevision} incomingRevision
+     * @returns {Array[]|typeof SKIP_REVISION} The skip symbol, or the commands to apply
+     * to update the field.
+     */
+    resolveApply(commands, incomingRevision) {
+        if (!shouldReplace(incomingRevision, this.history[0].revision)) {
+            return SKIP_REVISION;
+        }
+        const insertionIndex = this._findInsertionIndex(incomingRevision);
+        const insertAtTheEnd = insertionIndex === this.history.length;
+        this.history.splice(
+            insertionIndex,
+            0,
+            ...commands.map((cmd) => ({ cmd, revision: incomingRevision }))
+        );
+        const lastReplaceIndex = this.history.findLastIndex((entry) => entry.cmd[0] === "REPLACE");
+        if (lastReplaceIndex >= insertionIndex) {
+            this.history = this.history.slice(lastReplaceIndex);
+        }
+        return this._computeNextValue(insertAtTheEnd, commands);
+    }
+
     get lastRevision() {
         return this.history.at(-1).revision;
+    }
+
+    /**
+     * Compute what should be applied to the field after integrating the new commands into
+     * the revision history.
+     *
+     * @param {boolean} insertAtTheEnd Whether the new commands were inserted at the end
+     * of the history.
+     * @param {[string, any][]} newCommands Commands that were just applied to the history.
+     * The first element of each array is the command name.
+     * @returns {any} The value to apply to the field.
+     */
+    _computeNextValue(insertAtTheEnd, newCommands) {}
+}
+
+/**
+ * Specialization of `MultiValueVersion` for many relation fields. Handles collections of
+ * records updated through commands.
+ */
+export class ManyFieldVersion extends MultiValueVersion {
+    /** @type {import("@mail/model/record").Record} */
+    TargetModel;
+
+    constructor(TargetModel) {
+        super();
+        this.TargetModel = TargetModel;
+    }
+
+    _computeNextValue(insertAtTheEnd, newCommands) {
+        if (insertAtTheEnd) {
+            return newCommands;
+        }
+        return this._generateReplaceFromHistory();
     }
 
     /** Returns a replace command, equivalent to all the commands in history. */
@@ -276,5 +314,31 @@ export class ManyFieldVersion {
             .sort((a, b) => a.idx - b.idx || a.subIdx - b.subIdx)
             .map((p) => p.value);
         return [["REPLACE", sortedValues]];
+    }
+}
+
+/**
+ * Specialization of `MultiValueVersion` for counter fields. Compute a numeric value
+ * derived from an initial value and incremental updates through commands.
+ */
+export class CounterFieldVersion extends MultiValueVersion {
+    _computeNextValue() {
+        let count = 0;
+        for (const { cmd } of this.history) {
+            switch (cmd[0]) {
+                case "REPLACE":
+                    count = cmd[1];
+                    break;
+                case "INCREMENT":
+                    count += cmd[1];
+                    break;
+                case "DECREMENT":
+                    count -= cmd[1];
+                    break;
+                default:
+                    console.warn(`Counter field received unknown command: ${cmd[0]}`);
+            }
+        }
+        return count;
     }
 }

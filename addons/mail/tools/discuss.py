@@ -426,7 +426,7 @@ class Store:
         target = self.data[model_name][index] if index else self.data[model_name]
         for key, val in values.items():
             assert key != "_DELETE", f"invalid key {key} in {model_name}: {values}"
-            if isinstance(val, Store.Relation):
+            if isinstance(val, (Store.Counter, Store.Relation)):
                 val._add_to_store(self, target, key)
             elif isinstance(val, datetime):
                 target[key] = odoo.fields.Datetime.to_string(val)
@@ -608,6 +608,54 @@ class Store:
                 self.sudo,
                 self.value,
             )
+
+    class Counter(Attr):
+        """Flags a numeric counter field to be added to the store.
+        - If increment/decrement is provided, the command is applied.
+        - Otherwise, returns the field's current value, as a "REPLACE" command.
+        - Multiple commands are accumulated.
+        """
+
+        def __init__(self, store, field_name, *, increment=None, decrement=None, predicate=None, sudo=False):
+            super().__init__(store, field_name, predicate=predicate, sudo=sudo)
+            if increment is not None and decrement is not None:
+                raise ValueError(_("Only one of increment or decrement can be set"))
+            self.increment = increment
+            self.decrement = decrement
+            self._command = None
+
+        def _get_value(self, record=None):
+            if self._command is not None:
+                return self
+            if self.increment is not None:
+                command = ("INCREMENT", self.increment)
+            elif self.decrement is not None:
+                command = ("DECREMENT", self.decrement)
+            else:
+                command = ("REPLACE", super()._get_value(record))
+            res = self.__class__(
+                self.store,
+                self.field_name,
+                increment=self.increment,
+                decrement=self.decrement,
+                predicate=self.predicate,
+                sudo=self.sudo,
+            )
+            res._command = command
+            return res
+
+        def _add_to_store(self, store, target, key):
+            command = self._command
+            if command[0] == "REPLACE":
+                target[key] = [command]
+                return
+            if key not in target:
+                target[key] = [command]
+            else:
+                target[key].append(command)
+
+        def _identity(self):
+            return (*super()._identity(), self.increment, self.decrement, self._command)
 
     class Relation(Attr):
         """Flags a record or field name to be added to the store in a relation."""
@@ -844,6 +892,17 @@ class Store:
                 self.append(
                     Store.Attr(self.store, field_name, value=value, predicate=predicate, sudo=sudo),
                 )
+
+        def counter(self, field_name, *, increment=None, decrement=None, sudo=False):
+            return self.append(
+                Store.Counter(
+                    self.store,
+                    field_name,
+                    increment=increment,
+                    decrement=decrement,
+                    sudo=sudo,
+                ),
+            )
 
         def from_method(self, method_name, **fields_params):
             """Add fields coming from a method on the records to the field list."""

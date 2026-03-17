@@ -5,7 +5,7 @@ import { markup, reactive, toRaw } from "@odoo/owl";
 import { mockService, patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 import { Record, Store, makeStore } from "@mail/model/export";
-import { AND, fields, makeRecordFieldLocalId, normalizeManyCommands } from "@mail/model/misc";
+import { AND, fields, makeRecordFieldLocalId, normalizeFieldValue } from "@mail/model/misc";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
 import { effect } from "@web/core/utils/reactive";
@@ -1590,31 +1590,67 @@ test("Record exists is reactive", async () => {
     await expect.waitForSteps(["thread does not exist"]);
 });
 
-test("Normalize many commands", () => {
+test("Normalize many commands", async () => {
+    (class Persona extends Record {
+        static id = "name";
+        channel_ids = fields.Many();
+    }).register(localRegistry);
+    const store = await start();
+    const persona = store.Persona.insert("John");
     // Falsy values or empty array are interpreted as clear.
     for (const clearValues of [null, undefined, false, []]) {
-        expect(normalizeManyCommands(clearValues)).toEqual([["REPLACE", []]]);
+        expect(normalizeFieldValue(persona.Model, "channel_ids", clearValues)).toEqual([
+            ["REPLACE", []],
+        ]);
     }
     // Raw values are interpreted as "REPLACE".
-    expect(normalizeManyCommands({ id: 1, name: "Test" })).toEqual([
+    expect(normalizeFieldValue(persona.Model, "channel_ids", { id: 1, name: "Test" })).toEqual([
         ["REPLACE", [{ id: 1, name: "Test" }]],
     ]);
-    expect(normalizeManyCommands([1, 2, 3])).toEqual([["REPLACE", [1, 2, 3]]]);
+    expect(normalizeFieldValue(persona.Model, "channel_ids", [1, 2, 3])).toEqual([
+        ["REPLACE", [1, 2, 3]],
+    ]);
     // Commands with non array value should normalize to array.
-    expect(normalizeManyCommands(["ADD", { id: 10 }])).toEqual([["ADD", [{ id: 10 }]]]);
+    expect(normalizeFieldValue(persona.Model, "channel_ids", ["ADD", { id: 10 }])).toEqual([
+        ["ADD", [{ id: 10 }]],
+    ]);
     const cmdList = [
         ["ADD", { id: 1 }],
         ["DELETE", { id: 2 }],
     ];
-    expect(normalizeManyCommands(cmdList)).toEqual([
+    expect(normalizeFieldValue(persona.Model, "channel_ids", cmdList)).toEqual([
         ["ADD", [{ id: 1 }]],
         ["DELETE", [{ id: 2 }]],
     ]);
     // Single command should normalize to command list including the command.
-    expect(normalizeManyCommands(["DELETE", [10, 20]])).toEqual([["DELETE", [10, 20]]]);
+    expect(normalizeFieldValue(persona.Model, "channel_ids", ["DELETE", [10, 20]])).toEqual([
+        ["DELETE", [10, 20]],
+    ]);
     // Mixed of raw values and commands should throw error.
     const mixed = [1, ["ADD", 2]];
-    expect(() => normalizeManyCommands(mixed)).toThrow(
+    expect(() => normalizeFieldValue(persona.Model, "channel_ids", mixed)).toThrow(
         "Many commands cannot mix raw values and commands"
     );
+});
+
+test("Counter fields support replace/increment/decrement commands", async () => {
+    (class Persona extends Record {
+        static id = "name";
+        unread_counter = fields.Counter(10);
+    }).register(localRegistry);
+    const store = await start();
+    const john = store.Persona.insert("John");
+    expect(john.unread_counter).toBe(10);
+    john.unread_counter += 1;
+    expect(john.unread_counter).toBe(11);
+    john.unread_counter = 20;
+    expect(john.unread_counter).toBe(20);
+    john.unread_counter -= 2;
+    expect(john.unread_counter).toBe(18);
+    store.Persona.insert({ name: "John", unread_counter: [["REPLACE", 5]] });
+    expect(john.unread_counter).toBe(5);
+    store.Persona.insert({ name: "John", unread_counter: [["INCREMENT", 10]] });
+    expect(john.unread_counter).toBe(15);
+    store.Persona.insert({ name: "John", unread_counter: [["DECREMENT", 1]] });
+    expect(john.unread_counter).toBe(14);
 });

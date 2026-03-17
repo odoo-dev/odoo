@@ -6,8 +6,9 @@ import { registry } from "@web/core/registry";
 export const modelRegistry = registry.category("discuss.model");
 
 export const FIELD_DEFINITION_SYM = Symbol("field_definition");
-/** @typedef {ATTR_SYM|MANY_SYM|ONE_SYM} FIELD_SYM */
+/** @typedef {ATTR_SYM|COUNTER_SYM|MANY_SYM|ONE_SYM} FIELD_SYM */
 export const ATTR_SYM = Symbol("attr");
+export const COUNTER_SYM = Symbol("counter");
 export const MANY_SYM = Symbol("many");
 export const ONE_SYM = Symbol("one");
 export const OR_SYM = Symbol("or");
@@ -33,6 +34,24 @@ export function isCommand(data) {
 }
 
 /**
+ * Normalize a value passed to store insert. Especially for `Many` and `Counter` fields
+ * which expect an array of commands.
+ *
+ * @param {typeof import("./record").Record} Model
+ * @param {string} fieldName
+ * @param {any} value
+ */
+export function normalizeFieldValue(model, fieldName, value) {
+    if (isMany(model, fieldName)) {
+        return normalizeManyCommands(value);
+    }
+    if (model._.fieldsCounter.has(fieldName)) {
+        return Array.isArray(value) ? value : [["REPLACE", value]];
+    }
+    return value;
+}
+
+/**
  * Normalize a list of many commands.
  *
  * @param {Array|Object|null|false|undefined} command Many command. Can
@@ -44,7 +63,7 @@ export function isCommand(data) {
  * - An array of raw values: interpreted as a replace.
  * @returns {Array<[string, any[]]>} Normalized list of `[mode, value]` arrays.
  */
-export function normalizeManyCommands(command) {
+function normalizeManyCommands(command) {
     const ensureArrayValue = (cmd) => [cmd[0], Array.isArray(cmd[1]) ? cmd[1] : [cmd[1]]];
     if (!command || (Array.isArray(command) && command.length === 0)) {
         return [["REPLACE", []]];
@@ -164,6 +183,19 @@ export const fields = {
      */
     Attr(def, param1) {
         return { ...param1, [FIELD_DEFINITION_SYM]: true, [ATTR_SYM]: true, default: def };
+    },
+    /**
+     * @param {Number} def
+     * @param {Object} [param1={}]
+     * @param {(this: Record) => void} [param1.onUpdate] function that is called when the field value is updated.
+     *   This is called at least once at record creation.
+     * @returns {Number}
+     */
+    Counter(def, param1 = {}) {
+        if (def !== undefined && !Number.isInteger(def)) {
+            throw new Error(`Counter fields expect an integer default, received: ${def}`);
+        }
+        return fields.Attr(def ?? 0, { ...param1, [COUNTER_SYM]: true });
     },
     /**
      * HTML fields are ATTR that are automatically markup when the data being inserted is a markup.
