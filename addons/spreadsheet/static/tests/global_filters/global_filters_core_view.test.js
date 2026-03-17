@@ -11,8 +11,8 @@ import { createModel } from "../helpers/model";
 describe.current.tags("headless");
 defineSpreadsheetModels();
 
-test("Value of text filter", () => {
-    const model = createModel();
+test("Value of text filter", async () => {
+    const model = await createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "text",
@@ -56,8 +56,8 @@ test("Value of text filter", () => {
     expect(result.reasons).toEqual(["InvalidValueTypeCombination"]);
 });
 
-test("Value of selection filter", () => {
-    const model = createModel();
+test("Value of selection filter", async () => {
+    const model = await createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "selection",
@@ -98,8 +98,8 @@ test("Value of selection filter", () => {
     expect(result.reasons).toEqual(["InvalidValueTypeCombination"]);
 });
 
-test("Value of numeric filter", () => {
-    const model = createModel();
+test("Value of numeric filter", async () => {
+    const model = await createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "numeric",
@@ -149,8 +149,8 @@ test("Value of numeric filter", () => {
     expect(result.isSuccessful).toBe(true);
 });
 
-test("Value of date filter", () => {
-    const model = createModel();
+test("Value of date filter", async () => {
+    const model = await createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "date",
@@ -269,8 +269,8 @@ test("Value of date filter", () => {
     }
 });
 
-test("Value of relation filter", () => {
-    const model = createModel();
+test("Value of relation filter", async () => {
+    const model = await createModel();
     addGlobalFilterWithoutReload(model, {
         id: "1",
         type: "relation",

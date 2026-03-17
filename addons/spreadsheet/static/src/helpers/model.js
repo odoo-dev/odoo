@@ -23,10 +23,10 @@ export async function fetchSpreadsheetModel(env, resModel, resId) {
     return createSpreadsheetModel({ env, data, revisions });
 }
 
-export function createSpreadsheetModel({ env, data, revisions }) {
+export async function createSpreadsheetModel({ env, data, revisions }) {
     const odooDataProvider = new OdooDataProvider(env);
     const model = new OdooSpreadsheetModel(data, { custom: { env, odooDataProvider } }, revisions);
-    model.startModel();
+    await model.startModel();
     return model;
 }
 

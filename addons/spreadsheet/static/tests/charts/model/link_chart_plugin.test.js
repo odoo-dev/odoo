@@ -18,7 +18,7 @@ defineSpreadsheetModels();
 
 test("Links between charts and ir.menus are correctly imported/exported", async function () {
     const env = await makeMockEnv();
-    const model = createModel({}, { custom: { env } });
+    const model = await createModel({}, { custom: { env } });
     createBasicChart(model, chartId);
     model.dispatch("UPDATE_ODOO_LINK_TO_CHART", {
         chartId,
@@ -29,7 +29,7 @@ test("Links between charts and ir.menus are correctly imported/exported", async 
         { type: "odooMenu", odooMenuId: 1 },
         { message: "Link to odoo menu is exported" }
     );
-    const importedModel = createModel(exportedData, { custom: { env } });
+    const importedModel = await createModel(exportedData, { custom: { env } });
     const chartMenu = importedModel.getters.getChartOdooLink(chartId);
     expect(chartMenu).toEqual(
         { type: "odooMenu", odooMenuId: 1 },

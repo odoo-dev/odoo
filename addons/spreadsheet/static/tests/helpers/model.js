@@ -17,9 +17,9 @@ import { markRaw } from "@odoo/owl";
  * @typedef {import("@spreadsheet/helpers/model").OdooSpreadsheetModel} OdooSpreadsheetModel
  */
 
-export function createModel(...args) {
+export async function createModel(...args) {
     const model = new Model(...args);
-    model.startModel();
+    await model.startModel();
     return model;
 }
 
@@ -44,7 +44,7 @@ export async function createModelWithDataSource(params = {}) {
     const env = await makeSpreadsheetMockEnv(params);
     const config = params.modelConfig;
     /** @type any*/
-    const model = createModel(params.spreadsheetData, {
+    const model = await createModel(params.spreadsheetData, {
         ...config,
         custom: {
             env,
@@ -93,8 +93,8 @@ export async function makeSpreadsheetMockEnv(params = {}) {
     return env;
 }
 
-export function createModelFromGrid(grid) {
-    const model = createModel();
+export async function createModelFromGrid(grid) {
+    const model = await createModel();
     for (const xc in grid) {
         if (grid[xc] !== undefined) {
             setCellContent(model, xc, grid[xc]);

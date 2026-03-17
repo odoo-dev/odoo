@@ -30,7 +30,7 @@ test("click a web link", async () => {
             },
         ],
     };
-    const model = createModel(data, { custom: { env } });
+    const model = await createModel(data, { custom: { env } });
     const cell = getEvaluatedCell(model, "A1");
     expect(urlRepresentation(cell.link, model.getters)).toBe("https://odoo.com");
     openLink(cell.link, env);
@@ -55,7 +55,7 @@ test("click a menu link", async () => {
             },
         ],
     };
-    const model = createModel(data, { custom: { env } });
+    const model = await createModel(data, { custom: { env } });
     const cell = getEvaluatedCell(model, "A1");
     expect(urlRepresentation(cell.link, model.getters)).toBe("menu with xmlid");
     openLink(cell.link, env);
@@ -82,7 +82,7 @@ test("middle-click a menu link", async () => {
         ],
     };
 
-    const model = createModel(data, { custom: { env } });
+    const model = await createModel(data, { custom: { env } });
     const cell = getEvaluatedCell(model, "A1");
     expect(urlRepresentation(cell.link, model.getters)).toBe("menu with xmlid");
     openLink(cell.link, env, true);
@@ -115,7 +115,7 @@ test("click a menu link [2]", async () => {
         },
     };
 
-    const model = createModel({}, { custom: { env } });
+    const model = await createModel({}, { custom: { env } });
     setCellContent(model, "A1", `[a view](odoo://view/${JSON.stringify(view)})`);
     const cell = getEvaluatedCell(model, "A1");
     expect(urlRepresentation(cell.link, model.getters)).toBe("an odoo view");
@@ -148,7 +148,7 @@ test("Click a link containing an action xml id", async () => {
         },
     };
 
-    const model = createModel({}, { custom: { env } });
+    const model = await createModel({}, { custom: { env } });
     setCellContent(model, "A1", `[an action link](odoo://view/${JSON.stringify(view)})`);
     const cell = getEvaluatedCell(model, "A1");
     expect(urlRepresentation(cell.link, model.getters)).toBe("My Action Name");
@@ -189,7 +189,7 @@ test("Can open link when some views are absent from the referred action", async 
         },
     };
 
-    const model = createModel({}, { custom: { env } });
+    const model = await createModel({}, { custom: { env } });
     setCellContent(model, "A1", `[an action link](odoo://view/${JSON.stringify(view)})`);
     const cell = getEvaluatedCell(model, "A1");
     expect(urlRepresentation(cell.link, model.getters)).toBe("My Action Name");
@@ -220,7 +220,7 @@ test("Context is passed correctly to the action service", async () => {
         },
     };
 
-    const model = createModel({}, { custom: { env } });
+    const model = await createModel({}, { custom: { env } });
     setCellContent(model, "A1", `[an action link](odoo://view/${JSON.stringify(view)})`);
     const cell = getEvaluatedCell(model, "A1");
     expect(urlRepresentation(cell.link, model.getters)).toBe("My Action Name");

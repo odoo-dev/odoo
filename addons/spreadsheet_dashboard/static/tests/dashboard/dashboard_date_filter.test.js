@@ -12,7 +12,7 @@ defineSpreadsheetModels();
  * @param {{ model: Model, filter: object}} props
  */
 async function mountDashboardFilterValue(env, props) {
-    const model = createModel();
+    const model = await createModel();
     await mountWithCleanup(DashboardDateFilter, { props: { model, ...props }, env });
 }
 

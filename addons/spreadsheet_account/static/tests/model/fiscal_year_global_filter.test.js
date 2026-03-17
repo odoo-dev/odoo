@@ -19,8 +19,8 @@ const modelConfig = {
     },
 };
 
-test("fiscal_year global filter", () => {
-    const model = createModel({}, modelConfig);
+test("fiscal_year global filter", async () => {
+    const model = await createModel({}, modelConfig);
     const now = DateTime.fromISO("2022-10-16");
     const filterValue = { type: "fiscal_year", offset: 0 };
 
@@ -44,8 +44,8 @@ test("fiscal_year global filter", () => {
     expect(dateFilterValueToString(previousValue, model.getters)).toBe("2021-2022");
 });
 
-test("Data source offset is applied to fiscal_year global filter", () => {
-    const model = createModel({}, modelConfig);
+test("Data source offset is applied to fiscal_year global filter", async () => {
+    const model = await createModel({}, modelConfig);
     const now = DateTime.fromISO("2022-10-16");
     const filterValue = { type: "fiscal_year", offset: 1 };
     let dataSourceOffset = 2;
@@ -60,7 +60,7 @@ test("Data source offset is applied to fiscal_year global filter", () => {
     expect(to.toISODate()).toBe("2023-06-30");
 });
 
-test("this_fiscal_year global filter", () => {
+test("this_fiscal_year global filter", async () => {
     const spreadsheetData = {
         globalFilters: [
             {
@@ -71,6 +71,6 @@ test("this_fiscal_year global filter", () => {
             },
         ],
     };
-    const model = createModel(spreadsheetData, modelConfig);
+    const model = await createModel(spreadsheetData, modelConfig);
     expect(model.getters.getGlobalFilterValue("1")).toEqual({ type: "fiscal_year", offset: 0 });
 });

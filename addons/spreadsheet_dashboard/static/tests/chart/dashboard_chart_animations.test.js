@@ -24,7 +24,10 @@ function spyCharts() {
 
 test("Charts are animated only at first render", async () => {
     const env = await makeSpreadsheetMockEnv();
-    const setupModel = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    const setupModel = await createModel(
+        {},
+        { custom: { odooDataProvider: new OdooDataProvider(env) } }
+    );
     createBasicChart(setupModel, "chartId");
     const charts = spyCharts();
     const { model } = await createDashboardActionWithData(setupModel.exportData());
@@ -46,7 +49,10 @@ test("Charts are animated only at first render", async () => {
 
 test("Charts are animated when chart type changes", async () => {
     const env = await makeSpreadsheetMockEnv();
-    const setupModel = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    const setupModel = await createModel(
+        {},
+        { custom: { odooDataProvider: new OdooDataProvider(env) } }
+    );
     createBasicChart(setupModel, "chartId");
     const charts = spyCharts();
     const { model } = await createDashboardActionWithData(setupModel.exportData());

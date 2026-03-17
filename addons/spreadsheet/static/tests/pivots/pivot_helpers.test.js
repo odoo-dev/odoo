@@ -29,7 +29,7 @@ beforeEach(() => {
 describe.current.tags("headless");
 
 test("Basic formula extractor", async function () {
-    const model = createModel();
+    const model = await createModel();
     const formula = `=PIVOT.VALUE("1", "test") + ODOO.LIST("2", "hello", "bla")`;
     const compiledFormula = CompiledFormula.Compile(formula, "no_sheet", model.getters);
     let functionName;
@@ -48,7 +48,7 @@ test("Basic formula extractor", async function () {
 });
 
 test("Extraction with two PIVOT formulas", async function () {
-    const model = createModel();
+    const model = await createModel();
     const formula = `=PIVOT.VALUE("1", "test") + PIVOT.VALUE("2", "hello")`;
     const compiledFormula = CompiledFormula.Compile(formula, "no_sheet", model.getters);
     const { functionName, args } = getFirstPivotFunction(compiledFormula, model.getters);
@@ -60,7 +60,7 @@ test("Extraction with two PIVOT formulas", async function () {
 });
 
 test("Number of formulas", async function () {
-    const model = createModel();
+    const model = await createModel();
     const formula = CompiledFormula.Compile(
         `=PIVOT.VALUE("1", "test") + PIVOT.VALUE("2", "hello") + ODOO.LIST("1", 1, "bla")`,
         "no_sheet",
@@ -77,7 +77,7 @@ test("Number of formulas", async function () {
 });
 
 test("getFirstPivotFunction does not crash when given crap", async function () {
-    const model = createModel();
+    const model = await createModel();
     expect(
         getFirstListFunction(CompiledFormula.Compile("=SUM(A1)", "no_sheet", model.getters))
     ).toBe(undefined);

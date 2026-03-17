@@ -11,7 +11,10 @@ defineSpreadsheetDashboardModels();
 
 test("can change granularity", async () => {
     const env = await makeSpreadsheetMockEnv();
-    const setupModel = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    const setupModel = await createModel(
+        {},
+        { custom: { odooDataProvider: new OdooDataProvider(env) } }
+    );
     const chartId = insertChartInSpreadsheet(setupModel, "odoo_line", {
         metaData: {
             groupBy: ["date:month"],

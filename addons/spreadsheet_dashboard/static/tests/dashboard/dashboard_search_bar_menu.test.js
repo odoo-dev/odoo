@@ -43,7 +43,7 @@ let model;
 
 beforeEach(async () => {
     env = await makeMockEnv();
-    model = createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
+    model = await createModel({}, { custom: { odooDataProvider: new OdooDataProvider(env) } });
 });
 
 test("basic text filter", async function () {

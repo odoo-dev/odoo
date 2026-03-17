@@ -220,7 +220,7 @@ export class DashboardLoader {
             const { snapshot, revisions, is_sample, translation_namespace } = result;
             dashboard.translationNamespace = translation_namespace;
             const config = this.getModelConfig(result);
-            dashboard.model = this._createSpreadsheetModel(snapshot, revisions, config);
+            dashboard.model = await this._createSpreadsheetModel(snapshot, revisions, config);
             dashboard.status = Status.Loaded;
             dashboard.isSample = is_sample;
         } catch (error) {
@@ -253,9 +253,9 @@ export class DashboardLoader {
      * @param {object} [defaultCurrency]
      * @returns {Model}
      */
-    _createSpreadsheetModel(snapshot, revisions = [], config) {
+    async _createSpreadsheetModel(snapshot, revisions = [], config) {
         const model = new Model(snapshot, config, revisions);
-        model.startModel();
+        await model.startModel();
         this._activateFirstSheet(model);
         config.custom.odooDataProvider.addEventListener("data-source-updated", () =>
             model.dispatch("EVALUATE_CELLS")

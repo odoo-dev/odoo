@@ -1974,7 +1974,7 @@ test("Duplicate pivot respects the formula id increment", async () => {
 });
 
 test("Cannot duplicate unknown pivot", async () => {
-    const model = createModel();
+    const model = await createModel();
     const result = model.dispatch("DUPLICATE_PIVOT", {
         pivotId: "hello",
         newPivotId: "new",
@@ -1982,10 +1982,10 @@ test("Cannot duplicate unknown pivot", async () => {
     expect(result.reasons).toEqual([CommandResult.PivotIdNotFound]);
 });
 
-test("Spreadsheet pivot table ignored by global fiter plugin", () => {
+test("Spreadsheet pivot table ignored by global fiter plugin", async () => {
     allowTranslations();
 
-    const model = createModel();
+    const model = await createModel();
     model.selection.selectZone({ cell: { col: 0, row: 0 }, zone: toZone("A1:A4") });
     const pivotId = "pivot1";
     const sheetId = model.getters.getActiveSheetId();
