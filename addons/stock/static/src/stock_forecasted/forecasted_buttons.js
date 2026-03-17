@@ -14,7 +14,7 @@ export class ForecastedButtons extends Component {
         this.actionService = useService("action");
         this.orm = useService("orm");
         this.context = this.props.action.context;
-        this.productId = this.context.active_id;
+        this.productId = this.context.variant_id ? this.context.variant_id : this.context.active_id;
         this.resModel = this.props.resModel || this.context.active_model || this.context.params?.active_model || 'product.template';
     }
 
@@ -29,9 +29,11 @@ export class ForecastedButtons extends Component {
 
     async _onClickReplenish() {
         const context = { ...this.context };
-        if (this.resModel === 'product.product') {
+        const isTemplate = this.resModel === "product.template" ||
+          (this.context.active_model === "product.template" && !this.context.variant_id);
+        if (!isTemplate) {
             context.default_product_id = this.productId;
-        } else if (this.resModel === 'product.template') {
+        } else {
             context.default_product_tmpl_id = this.productId;
         }
         context.default_warehouse_id = this.context.warehouse_id;
