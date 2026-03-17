@@ -14,7 +14,7 @@ class ChangeProductionQty(models.TransientModel):
         required=True, ondelete='cascade')
     product_qty = fields.Float(
         'Quantity To Produce',
-        digits='Product Unit', required=True)
+        min_display_digits='Product Unit', required=True)
 
     @api.model
     def default_get(self, fields):

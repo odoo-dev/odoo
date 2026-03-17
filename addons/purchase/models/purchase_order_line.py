@@ -19,7 +19,7 @@ class PurchaseOrderLine(models.Model):
         string='Description', required=True, compute='_compute_price_unit_and_date_planned_and_name', store=True, readonly=False)
     translated_product_name = fields.Text(compute='_compute_translated_product_name')
     sequence = fields.Integer(string='Sequence', default=10)
-    product_qty = fields.Float(string='Quantity', digits='Product Unit', required=True)
+    product_qty = fields.Float(string='Quantity', min_display_digits='Product Unit', required=True)
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     date_planned = fields.Datetime(
         string='Expected Arrival', index=True,
@@ -56,27 +56,27 @@ class PurchaseOrderLine(models.Model):
     invoice_lines = fields.One2many('account.move.line', 'purchase_line_id', string="Bill Lines", readonly=True, copy=False)
 
     # Replace by invoiced Qty
-    qty_invoiced = fields.Float(compute='_compute_qty_invoiced', string="Billed Qty", digits='Product Unit', store=True)
+    qty_invoiced = fields.Float(compute='_compute_qty_invoiced', string="Billed Qty", min_display_digits='Product Unit', store=True)
 
     qty_received_method = fields.Selection([('manual', 'Manual')], string="Received Qty Method", compute='_compute_qty_received_method', store=True,
         help="According to product configuration, the received quantity can be automatically computed by mechanism:\n"
              "  - Manual: the quantity is set manually on the line\n"
              "  - Stock Moves: the quantity comes from confirmed pickings\n")
-    qty_received = fields.Float("Received Qty", compute='_compute_qty_received', inverse='_inverse_qty_received', compute_sudo=True, store=True, digits='Product Unit')
-    qty_received_manual = fields.Float("Manual Received Qty", digits='Product Unit', copy=False)
+    qty_received = fields.Float("Received Qty", compute='_compute_qty_received', inverse='_inverse_qty_received', compute_sudo=True, store=True, min_display_digits='Product Unit')
+    qty_received_manual = fields.Float("Manual Received Qty", min_display_digits='Product Unit', copy=False)
     qty_to_invoice = fields.Float(compute='_compute_qty_invoiced', string='To Invoice Quantity', store=True, readonly=True,
-                                  digits='Product Unit')
+                                  min_display_digits='Product Unit')
 
     # Same than `qty_received` and `qty_to_invoice` but non-stored and depending of the context.
     qty_received_at_date = fields.Float(
         string="Received",
         compute='_compute_qty_received_at_date',
-        digits='Product Unit'
+        min_display_digits='Product Unit'
     )
     qty_invoiced_at_date = fields.Float(
         string="Billed",
         compute='_compute_qty_invoiced_at_date',
-        digits='Product Unit'
+        min_display_digits='Product Unit'
     )
 
     amount_to_invoice_at_date = fields.Float(string='Amount', compute='_compute_amount_to_invoice_at_date')

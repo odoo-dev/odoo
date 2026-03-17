@@ -74,15 +74,15 @@ class ProductProduct(models.Model):
         Used to compute margins on sale orders.""")
     volume = fields.Float('Volume', digits='Volume')
     weight = fields.Float('Weight', digits='Stock Weight')
-    qty_available = fields.Float('Quantity On Hand', company_dependent=True, digits='Product Unit')
+    qty_available = fields.Float('Quantity On Hand', company_dependent=True, min_display_digits='Product Unit')
     virtual_available = fields.Float(
         'Forecasted Quantity', compute='_compute_quantities', compute_sudo=False, search='_search_virtual_available',
-        digits='Product Unit', help="Forecasted quantity if all confirmed sales and purchase orders were delivered.")
+        min_display_digits='Product Unit', help="Forecasted quantity if all confirmed sales and purchase orders were delivered.")
     incoming_qty = fields.Float(
-        'Incoming', compute='_compute_quantities', compute_sudo=False, search='_search_incoming_qty', digits='Product Unit',
+        'Incoming', compute='_compute_quantities', compute_sudo=False, search='_search_incoming_qty', min_display_digits='Product Unit',
         help="Quantity of planned incoming quantities from all confirmed purchase orders not received.")
     outgoing_qty = fields.Float(
-        'Outgoing', compute='_compute_quantities', compute_sudo=False, search='_search_outgoing_qty', digits='Product Unit',
+        'Outgoing', compute='_compute_quantities', compute_sudo=False, search='_search_outgoing_qty', min_display_digits='Product Unit',
         help="Quantity of planned outgoing quantities from all confirmed sale orders not delivered.")
     pricelist_rule_ids = fields.One2many(
         string="Pricelist Rules",

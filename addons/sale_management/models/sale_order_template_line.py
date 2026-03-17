@@ -54,7 +54,7 @@ class SaleOrderTemplateLine(models.Model):
         precompute=True,
     )
     product_uom_qty = fields.Float(
-        string="Quantity", required=True, digits="Product Unit", default=1
+        string="Quantity", required=True, min_display_digits="Product Unit", default=1,
     )
 
     display_type = fields.Selection(

@@ -26,7 +26,7 @@ class MrpProductionSplit(models.TransientModel):
         'mrp.production.split.line', 'mrp_production_split_id',
         'Split Details', compute="_compute_details", store=True, readonly=False)
     valid_details = fields.Boolean("Valid", compute="_compute_valid_details")
-    max_batch_size = fields.Float("Max Batch Size", compute="_compute_max_batch_size", digits='Product Unit', readonly=False)
+    max_batch_size = fields.Float("Max Batch Size", compute="_compute_max_batch_size", min_display_digits='Product Unit', readonly=False)
     num_splits = fields.Integer("# Splits", compute="_compute_num_splits", readonly=True)
 
     @api.depends('production_id')
@@ -101,7 +101,7 @@ class MrpProductionSplitLine(models.TransientModel):
 
     mrp_production_split_id = fields.Many2one(
         'mrp.production.split', 'Split Production', required=True, ondelete="cascade")
-    quantity = fields.Float('Quantity To Produce', digits='Product Unit', required=True)
+    quantity = fields.Float('Quantity To Produce', min_display_digits='Product Unit', required=True)
     user_id = fields.Many2one(
         'res.users', 'Responsible',
         domain=lambda self: [('all_group_ids', 'in', self.env.ref('mrp.group_mrp_user').id)])

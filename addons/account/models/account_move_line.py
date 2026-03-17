@@ -383,7 +383,7 @@ class AccountMoveLine(models.Model):
     quantity = fields.Float(
         string='Quantity',
         compute='_compute_quantity', store=True, readonly=False, precompute=True,
-        digits='Product Unit',
+        min_display_digits='Product Unit',
         help="The optional quantity expressed by this line, eg: number of product sold. "
              "The quantity is not a legal requirement but is very useful for some reports.",
     )

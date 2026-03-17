@@ -10,7 +10,7 @@ from odoo.fields import Domain
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
-    sales_count = fields.Float(compute="_compute_sales_count", string="Sold", digits="Product Unit")
+    sales_count = fields.Float(compute="_compute_sales_count", string="Sold", min_display_digits="Product Unit")
 
     product_catalog_product_is_in_sale_order = fields.Boolean(
         compute="_compute_product_is_in_sale_order", search="_search_product_is_in_sale_order"

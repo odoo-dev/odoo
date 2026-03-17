@@ -4887,22 +4887,10 @@ class AccountMove(models.Model):
         """
         container = {'records': self}
         with self._check_balanced(container),\
-             self._disable_discount_precision(),\
              self._sync_dynamic_lines(container):
             move = self or self.create({})
             yield move
             container['records'] = move
-
-    @contextmanager
-    def _disable_discount_precision(self):
-        """Disable the user defined precision for discounts.
-
-        This is useful for importing documents coming from other softwares and providers.
-        The reasonning is that if the document that we are importing has a discount, it
-        shouldn't be rounded to the local settings.
-        """
-        with self._disable_recursion({'records': self}, 'ignore_discount_precision'):
-            yield
 
     def _reason_cannot_decode_has_invoice_lines(self):
         """ Helper to get a reason why an invoice cannot be decoded if it has invoice lines. """

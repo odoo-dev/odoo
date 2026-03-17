@@ -16,9 +16,9 @@ class SaleOrderLine(models.Model):
     route_ids = fields.Many2many('stock.route', string='Routes', domain=[('sale_selectable', '=', True)], ondelete='restrict')
     move_ids = fields.One2many('stock.move', 'sale_line_id', string='Stock Moves')
     forecast_expected_date = fields.Datetime(compute='_compute_qty_at_date')
-    free_qty_today = fields.Float(compute='_compute_qty_at_date', digits='Product Unit')
+    free_qty_today = fields.Float(compute='_compute_qty_at_date', min_display_digits='Product Unit')
     warehouse_id = fields.Many2one('stock.warehouse', compute='_compute_warehouse_id', store=True)
-    qty_to_deliver = fields.Float(compute='_compute_qty_to_deliver', digits='Product Unit')
+    qty_to_deliver = fields.Float(compute='_compute_qty_to_deliver', min_display_digits='Product Unit')
     is_mto = fields.Boolean(compute='_compute_is_mto')
     display_qty_widget = fields.Boolean(compute='_compute_qty_to_deliver')
     customer_lead = fields.Integer(

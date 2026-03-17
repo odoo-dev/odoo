@@ -41,7 +41,7 @@ class MrpBom(models.Model):
     byproduct_ids = fields.One2many('mrp.bom.byproduct', 'bom_id', 'By-products', copy=True)
     product_qty = fields.Float(
         'Quantity', default=1.0,
-        digits='Product Unit', required=True,
+        min_display_digits='Product Unit', required=True,
         help="This should be the smallest quantity that this product can be produced in. If the BOM contains operations, make sure the work center capacity is accurate.")
     uom_id = fields.Many2one(
         'uom.uom', 'Unit',
@@ -80,7 +80,7 @@ class MrpBom(models.Model):
         string="Days to prepare Manufacturing Order", default=0,
         help="Create and confirm Manufacturing Orders this many days in advance, to have enough time to replenish components or manufacture semi-finished products.")
     show_set_bom_button = fields.Boolean(compute="_compute_show_set_bom_button")
-    batch_size = fields.Float('Batch Size Value', default=1.0, digits='Product Unit', help="All automatically generated manufacturing orders for this product will be of this size.")
+    batch_size = fields.Float('Batch Size Value', default=1.0, min_display_digits='Product Unit', help="All automatically generated manufacturing orders for this product will be of this size.")
     enable_batch_size = fields.Boolean('Batch Size', default=False)
 
     note = fields.Html(string="Additional Notes", help="Add this note on the manufacturing order to share any additional information")
@@ -670,7 +670,7 @@ class MrpBomLine(models.Model):
         related='bom_id.company_id', store=True, index=True, readonly=True)
     product_qty = fields.Float(
         'Quantity', default=1.0,
-        digits='Product Unit', required=True)
+        min_display_digits='Product Unit', required=True)
     uom_id = fields.Many2one(
         'uom.uom', 'Unit',
         default=_default_uom_id, required=True)
@@ -853,7 +853,7 @@ class MrpBomByproduct(models.Model):
     company_id = fields.Many2one(related='bom_id.company_id', store=True, index=True, readonly=True)
     product_qty = fields.Float(
         'Quantity',
-        default=1.0, digits='Product Unit', required=True)
+        default=1.0, min_display_digits='Product Unit', required=True)
     uom_id = fields.Many2one('uom.uom', 'Unit', required=True,
                                      compute="_compute_uom_id", store=True, readonly=False, precompute=True)
     bom_id = fields.Many2one('mrp.bom', 'BoM', ondelete='cascade', index=True)

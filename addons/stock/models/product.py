@@ -50,7 +50,7 @@ class ProductProduct(models.Model):
     stock_move_ids = fields.One2many('stock.move', 'product_id') # used to compute quantities
     qty_available = fields.Float(
         'Quantity On Hand', compute='_compute_quantities', search='_search_qty_available',
-        inverse='_inverse_qty_available', digits='Product Unit', compute_sudo=False, store=False,
+        inverse='_inverse_qty_available', min_display_digits='Product Unit', compute_sudo=False, store=False,
         help="Current quantity of products.\n"
              "In a context with a single Stock Location, this includes "
              "goods stored at this Location, or any of its children.\n"
@@ -73,7 +73,7 @@ class ProductProduct(models.Model):
              "with 'internal' type.")
     free_qty = fields.Float(
         'Free To Use Quantity ', compute='_compute_quantities', search='_search_free_qty',
-        digits='Product Unit', compute_sudo=False,
+        min_display_digits='Product Unit', compute_sudo=False,
         help="Available quantity (computed as Quantity On Hand "
              "- reserved quantity)\n"
              "In a context with a single Stock Location, this includes "
@@ -811,7 +811,7 @@ class ProductTemplate(models.Model):
     description_pickingin = fields.Text('Description on Receptions', translate=True)
     qty_available = fields.Float(
         'Quantity On Hand', compute='_compute_quantities', search='_search_qty_available',
-        inverse='_inverse_qty_available', compute_sudo=False, digits='Product Unit')
+        inverse='_inverse_qty_available', compute_sudo=False, min_display_digits='Product Unit')
     # The goal of these fields is to be able to put some keys in context from search view in order
     # to influence computed field.
     location_id = fields.Many2one('stock.location', 'Location', store=False)

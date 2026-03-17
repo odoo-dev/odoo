@@ -54,14 +54,14 @@ class MrpWorkorder(models.Model):
     priority = fields.Selection(related='production_id.priority')
     qty_producing = fields.Float(
         compute='_compute_qty_producing', inverse='_set_qty_producing',
-        string='Currently Produced Quantity', digits='Product Unit')
-    qty_remaining = fields.Float('Quantity To Be Produced', compute='_compute_qty_remaining', digits='Product Unit')
+        string='Currently Produced Quantity', min_display_digits='Product Unit')
+    qty_remaining = fields.Float('Quantity To Be Produced', compute='_compute_qty_remaining', min_display_digits='Product Unit')
     qty_produced = fields.Float(
         'Quantity Done', default=0.0,
-        digits='Product Unit',
+        min_display_digits='Product Unit',
         copy=False,
         help="The number of products already handled by this work order")
-    qty_ready = fields.Float('Quantity Ready', compute='_compute_qty_ready', digits='Product Unit')
+    qty_ready = fields.Float('Quantity Ready', compute='_compute_qty_ready', min_display_digits='Product Unit')
     is_produced = fields.Boolean(string="Has Been Produced",
         compute='_compute_is_produced')
     state = fields.Selection([
@@ -132,7 +132,7 @@ class MrpWorkorder(models.Model):
     production_date = fields.Datetime('Production Date', compute='_compute_production_date', store=True)
     json_popover = fields.Char('Popover Data JSON', compute='_compute_json_popover')
     show_json_popover = fields.Boolean('Show Popover?', compute='_compute_json_popover')
-    qty_reported_from_previous_wo = fields.Float('Carried Quantity', digits='Product Unit', copy=False,
+    qty_reported_from_previous_wo = fields.Float('Carried Quantity', min_display_digits='Product Unit', copy=False,
         help="The quantity already produced awaiting allocation in the backorders chain.")
     is_planned = fields.Boolean(compute='_compute_is_planned')
     allow_workorder_dependencies = fields.Boolean(related='production_id.allow_workorder_dependencies')

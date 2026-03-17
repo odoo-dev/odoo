@@ -151,7 +151,7 @@ class SaleOrderLine(models.Model):
     product_uom_qty = fields.Float(
         string="Quantity",
         compute="_compute_product_uom_qty",
-        digits="Product Unit",
+        min_display_digits="Product Unit",
         default=1.0,
         store=True,
         readonly=False,
@@ -170,7 +170,7 @@ class SaleOrderLine(models.Model):
     )
     allowed_uom_ids = fields.Many2many("uom.uom", compute="_compute_allowed_uom_ids")
     qty_available_today = fields.Float(compute="_compute_qty_at_date")
-    virtual_available_at_date = fields.Float(compute="_compute_qty_at_date", digits="Product Unit")
+    virtual_available_at_date = fields.Float(compute="_compute_qty_at_date", min_display_digits="Product Unit")
     display_qty_widget = fields.Boolean(compute="_compute_display_qty_widget")
     is_storable = fields.Boolean(related="product_id.is_storable")
     scheduled_date = fields.Datetime(string="Delivery Date", compute="_compute_qty_at_date")
@@ -283,7 +283,7 @@ class SaleOrderLine(models.Model):
         string="Delivery Quantity",
         compute="_compute_qty_delivered",
         default=0.0,
-        digits="Product Unit",
+        min_display_digits="Product Unit",
         store=True,
         readonly=False,
         copy=False,
@@ -296,18 +296,18 @@ class SaleOrderLine(models.Model):
     qty_invoiced = fields.Float(
         string="Invoiced Quantity",
         compute="_compute_qty_invoiced",
-        digits="Product Unit",
+        min_display_digits="Product Unit",
         store=True,
     )
     qty_invoiced_posted = fields.Float(
         string="Invoiced Quantity (posted)",
         compute="_compute_qty_invoiced_posted",
-        digits="Product Unit",
+        min_display_digits="Product Unit",
     )
     qty_to_invoice = fields.Float(
         string="Quantity To Invoice",
         compute="_compute_qty_to_invoice",
-        digits="Product Unit",
+        min_display_digits="Product Unit",
         store=True,
     )
 
@@ -357,10 +357,10 @@ class SaleOrderLine(models.Model):
 
     # Same than `qty_delivered` and `qty_invoiced` but non-stored and depending of the context.
     qty_delivered_at_date = fields.Float(
-        string="Delivered", compute="_compute_qty_delivered_at_date", digits="Product Unit"
+        string="Delivered", compute="_compute_qty_delivered_at_date", min_display_digits="Product Unit",
     )
     qty_invoiced_at_date = fields.Float(
-        string="Invoiced", compute="_compute_qty_invoiced_at_date", digits="Product Unit"
+        string="Invoiced", compute="_compute_qty_invoiced_at_date", min_display_digits="Product Unit",
     )
 
     # Technical field holding custom data for the taxes computation engine.

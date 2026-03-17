@@ -8,7 +8,7 @@ class SaleOrderLine(models.Model):
 
     is_delivery = fields.Boolean(string="Is a Delivery", default=False)
     product_qty = fields.Float(
-        string="Product Qty", compute="_compute_product_qty", digits="Product Unit"
+        string="Product Qty", compute="_compute_product_qty", min_display_digits="Product Unit",
     )
     recompute_delivery_price = fields.Boolean(related="order_id.recompute_delivery_price")
 

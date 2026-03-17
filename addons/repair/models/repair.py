@@ -88,7 +88,7 @@ class RepairOrder(models.Model):
         check_company=True)
     product_qty = fields.Float(
         'Product Quantity', compute='_compute_product_qty', readonly=False, store=True,
-        default=1.0, digits='Product Unit')
+        default=1.0, min_display_digits='Product Unit')
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
     uom_id = fields.Many2one(
         'uom.uom', 'Unit', domain="[('id', 'in', allowed_uom_ids)]",

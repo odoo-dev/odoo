@@ -36,7 +36,7 @@ class AccountMoveLine(models.Model):
 
     l10n_tr_original_quantity = fields.Float(
         string="Original Quantity",
-        digits="Product Unit",
+        min_display_digits="Product Unit",
         help="The quantity originally sold for this product.",
     )
 

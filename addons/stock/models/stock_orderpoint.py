@@ -55,10 +55,10 @@ class StockWarehouseOrderpoint(models.Model):
         'uom.uom', 'Unit', related='product_id.uom_id')
     product_uom_name = fields.Char(string='Product unit of measure label', related='uom_id.display_name', readonly=True)
     product_min_qty = fields.Float(
-        'Min Quantity', digits='Product Unit', required=True, default=0.0,
+        'Min Quantity', min_display_digits='Product Unit', required=True, default=0.0,
         help="The minimum Stock level that will trigger a replenishment.")
     product_max_qty = fields.Float(
-        'Max Quantity', digits='Product Unit', required=True, default=0.0,
+        'Max Quantity', min_display_digits='Product Unit', required=True, default=0.0,
         compute='_compute_product_max_qty', readonly=False, store=True,
         help="Stock level to reach when replenishing.")
     allowed_replenishment_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_replenishment_uom_ids')
@@ -83,12 +83,12 @@ class StockWarehouseOrderpoint(models.Model):
         'stock.route', search='_search_effective_route_id', compute='_compute_effective_route_id',
         store=False, help='Either the route set directly or the one computed to be used by this replenishment'
     )
-    qty_on_hand = fields.Float('On Hand', readonly=True, compute='_compute_qty', digits='Product Unit')
-    qty_forecast = fields.Float('Forecast', readonly=True, compute='_compute_qty', digits='Product Unit')
-    qty_to_order = fields.Float('To Order', compute='_compute_qty_to_order', inverse='_inverse_qty_to_order', search='_search_qty_to_order', digits='Product Unit')
-    qty_to_order_computed = fields.Float('To Order Computed', store=True, compute='_compute_qty_to_order_computed', digits='Product Unit')
-    qty_to_order_manual = fields.Float('To Order Manual', digits='Product Unit')
-    qty_to_order_to_max = fields.Float('To Order to Reach Max', compute='_compute_qty_to_order_to_max', digits='Product Unit')
+    qty_on_hand = fields.Float('On Hand', readonly=True, compute='_compute_qty', min_display_digits='Product Unit')
+    qty_forecast = fields.Float('Forecast', readonly=True, compute='_compute_qty', min_display_digits='Product Unit')
+    qty_to_order = fields.Float('To Order', compute='_compute_qty_to_order', inverse='_inverse_qty_to_order', search='_search_qty_to_order', min_display_digits='Product Unit')
+    qty_to_order_computed = fields.Float('To Order Computed', store=True, compute='_compute_qty_to_order_computed', min_display_digits='Product Unit')
+    qty_to_order_manual = fields.Float('To Order Manual', min_display_digits='Product Unit')
+    qty_to_order_to_max = fields.Float('To Order to Reach Max', compute='_compute_qty_to_order_to_max', min_display_digits='Product Unit')
 
     days_to_order = fields.Float(compute='_compute_days_to_order', help="Numbers of days  in advance that replenishments demands are created.")
 

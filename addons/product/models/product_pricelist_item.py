@@ -43,7 +43,7 @@ class ProductPricelistItem(models.Model):
     min_quantity = fields.Float(
         string="Min. Quantity",
         default=0,
-        digits='Product Unit',
+        min_display_digits='Product Unit',
         help="For the rule to apply, bought/sold quantity must be greater "
              "than or equal to the minimum quantity specified in this field.\n"
              "Expressed in the default unit of measure of the product.")

@@ -117,16 +117,16 @@ class ProductTemplate(models.Model):
         help='A storable product is a product for which you manage stock.')
     qty_available = fields.Float(
         'Quantity On Hand', compute='_compute_quantities', search='_search_qty_available',
-        inverse='_set_qty_available', compute_sudo=False, digits='Product Unit')
+        inverse='_set_qty_available', compute_sudo=False, min_display_digits='Product Unit')
     virtual_available = fields.Float(
         'Forecasted Quantity', compute='_compute_quantities', search='_search_virtual_available',
-        compute_sudo=False, digits='Product Unit')
+        compute_sudo=False, min_display_digits='Product Unit')
     incoming_qty = fields.Float(
         'Incoming', compute='_compute_quantities', search='_search_incoming_qty',
-        compute_sudo=False, digits='Product Unit')
+        compute_sudo=False, min_display_digits='Product Unit')
     outgoing_qty = fields.Float(
         'Outgoing', compute='_compute_quantities', search='_search_outgoing_qty',
-        compute_sudo=False, digits='Product Unit')
+        compute_sudo=False, min_display_digits='Product Unit')
     volume = fields.Float(
         'Volume', compute='_compute_volume', inverse='_set_volume', digits='Volume', store=True)
     volume_uom_name = fields.Char(string='Volume unit of measure label', compute='_compute_volume_uom_name')
