@@ -8,19 +8,19 @@ from odoo.fields import Domain
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
-    holiday_id = fields.Many2one("hr.leave", string='Time Off Request', copy=False, index='btree_not_null', export_string_translation=False)
+    holiday_id = fields.Many2one("hr.time", string='Time Off Request', copy=False, index='btree_not_null', export_string_translation=False)
     global_leave_id = fields.Many2one("resource.calendar.leaves", string="Global Time Off", index='btree_not_null', ondelete='cascade', export_string_translation=False)
     task_id = fields.Many2one(domain="[('allow_timesheets', '=', True), ('project_id', '=?', project_id), ('has_template_ancestor', '=', False), ('is_timeoff_task', '=', False)]")
 
     _timeoff_timesheet_idx = models.Index('(task_id) WHERE (global_leave_id IS NOT NULL OR holiday_id IS NOT NULL) AND project_id IS NOT NULL')
 
     def _get_redirect_action(self):
-        leave_form_view_id = self.env.ref('hr_holidays.hr_leave_view_form').id
+        leave_form_view_id = self.env.ref('hr_time.hr_time_view_form').id
         action_data = {
            'name': _('Time Off'),
            'type': 'ir.actions.act_window',
-           'res_model': 'hr.leave',
-           'views': [(self.env.ref('hr_holidays.hr_leave_view_tree_my').id, 'list'), (leave_form_view_id, 'form')],
+           'res_model': 'hr.time',
+           'views': [(self.env.ref('hr_time.hr_time_view_tree_my').id, 'list'), (leave_form_view_id, 'form')],
            'domain': [('id', 'in', self.holiday_id.ids)],
         }
         if len(self.holiday_id) == 1:
@@ -34,7 +34,7 @@ class AccountAnalyticLine(models.Model):
             raise UserError(_('You cannot delete timesheets that are linked to global time off.'))
         elif any(line.holiday_id for line in self):
             error_message = _('You cannot delete timesheets that are linked to time off requests. Please cancel your time off request from the Time Off application instead.')
-            if not self.env.user.has_group('hr_holidays.group_hr_holidays_user') and self.env.user not in self.holiday_id.sudo().user_id:
+            if not self.env.user.has_group('hr_time.group_hr_time_user') and self.env.user not in self.holiday_id.sudo().user_id:
                 raise UserError(error_message)
             action = self._get_redirect_action()
             raise RedirectWarning(error_message, action, _('View Time Off'))

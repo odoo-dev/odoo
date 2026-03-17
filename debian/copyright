@@ -25,7 +25,7 @@ Files: addons/base_import/models/odf_ods_reader.py
 Copyright: 2011 Marco Conti
 License: Apache-2.0
 
-Files: addons/hr_holidays/models/hr_leave*.py
+Files: addons/hr_time/models/hr_time*.py
 Copyright: 2005-2006 Axelor SARL
 License: LGPL-3+
 

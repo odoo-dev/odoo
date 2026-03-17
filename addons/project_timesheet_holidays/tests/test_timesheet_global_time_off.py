@@ -430,7 +430,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         test_user = self.env['res.users'].with_company(self.test_company).create({
             'name': 'Jonathan Doe',
             'login': 'jdoe@example.com',
-            'group_ids': [(4, self.env.ref('hr_timesheet.group_hr_timesheet_user').id), (4, self.env.ref('hr_holidays.group_hr_holidays_employee').id)],
+            'group_ids': [(4, self.env.ref('hr_timesheet.group_hr_timesheet_user').id), (4, self.env.ref('hr_time.group_hr_time_employee').id)],
         })
         test_user.with_company(self.test_company).action_create_employee()
         test_user.employee_id.write({
@@ -444,8 +444,8 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         # employee leave dates: from monday to friday
         today = datetime.today()
         next_monday = today.date() + timedelta(days=-today.weekday(), weeks=1)
-        hr_leave_start_datetime = datetime(next_monday.year, next_monday.month, next_monday.day, 8, 0, 0) # monday next week
-        hr_leave_end_datetime = hr_leave_start_datetime + timedelta(days=4, hours=9) # friday next week
+        hr_time_start_datetime = datetime(next_monday.year, next_monday.month, next_monday.day, 8, 0, 0)  # monday next week
+        hr_time_end_datetime = hr_time_start_datetime + timedelta(days=4, hours=9)  # friday next week
 
         self.env = self.env(context=dict(self.env.context, allowed_company_ids=self.test_company.ids))
 
@@ -459,19 +459,19 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         })
 
         # create and validate a leave for full time employee
-        HrLeave = self.env['hr.leave'].with_context(mail_create_nolog=True, mail_notrack=True)
-        holiday = HrLeave.with_user(test_user).create({
+        HrTime = self.env['hr.time'].with_context(mail_create_nolog=True, mail_notrack=True)
+        holiday = HrTime.with_user(test_user).create({
             'name': 'Leave 1',
             'employee_id': test_user.employee_id.id,
             'work_entry_type_id': hr_work_entry_type_with_ts.id,
-            'request_date_from': hr_leave_start_datetime,
-            'request_date_to': hr_leave_end_datetime,
+            'request_date_from': hr_time_start_datetime,
+            'request_date_to': hr_time_end_datetime,
         })
         holiday.sudo().action_approve()
         self.assertEqual(len(holiday.timesheet_ids), 5)
 
         # create overlapping global time off, with some margin over working day to account for different timezones
-        global_leave_start_datetime = hr_leave_start_datetime + timedelta(days=2, hours=-3)
+        global_leave_start_datetime = hr_time_start_datetime + timedelta(days=2, hours=-3)
         global_leave_end_datetime = global_leave_start_datetime + timedelta(hours=12)
 
         global_time_off = self.env['resource.calendar.leaves'].create({
@@ -482,7 +482,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         })
         gto_without_calendar = self.env['resource.calendar.leaves'].create({
             'name': 'Public Holiday without calendar',
-            'date_from': global_leave_start_datetime + timedelta(days=1), # still within the hr.leave being refused
+            'date_from': global_leave_start_datetime + timedelta(days=1),  # still within the hr.time being refused
             'date_to': global_leave_end_datetime + timedelta(days=1),
         })
 
@@ -503,12 +503,12 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         gto_without_calendar.unlink()
 
         # create a new leave at same dates
-        holiday2 = HrLeave.with_user(test_user).create({
+        holiday2 = HrTime.with_user(test_user).create({
             'name': 'Leave 2',
             'employee_id': test_user.employee_id.id,
             'work_entry_type_id': hr_work_entry_type_with_ts.id,
-            'request_date_from': hr_leave_start_datetime,
-            'request_date_to': hr_leave_end_datetime,
+            'request_date_from': hr_time_start_datetime,
+            'request_date_to': hr_time_end_datetime,
         })
         holiday2.sudo().action_approve()
 
@@ -521,7 +521,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         })
         gto_without_calendar = self.env['resource.calendar.leaves'].create({
             'name': 'Public Holiday without calendar',
-            'date_from': global_leave_start_datetime + timedelta(days=1), # still within the hr.leave being cancelled
+            'date_from': global_leave_start_datetime + timedelta(days=1),  # still within the hr.time being cancelled
             'date_to': global_leave_end_datetime + timedelta(days=1),
         })
 
@@ -537,12 +537,12 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
         self.assertTrue(gto_without_calendar.timesheet_ids.filtered(lambda r: r.employee_id == test_user.employee_id))
 
         # create a new leave at same dates
-        holiday3 = HrLeave.with_user(test_user).create({
+        holiday3 = HrTime.with_user(test_user).create({
             'name': 'Leave 3',
             'employee_id': test_user.employee_id.id,
             'work_entry_type_id': hr_work_entry_type_with_ts.id,
-            'request_date_from': hr_leave_start_datetime,
-            'request_date_to': hr_leave_end_datetime,
+            'request_date_from': hr_time_start_datetime,
+            'request_date_to': hr_time_end_datetime,
         })
         holiday3.sudo().action_approve()
 

@@ -8,7 +8,7 @@ from odoo.addons.mail.tests.common import MailCommon
 
 
 class TestLivechatHrHolidays(HttpCase, MailCommon):
-    """Tests for bridge between im_livechat and hr_holidays modules."""
+    """Tests for bridge between im_livechat and hr_time modules."""
 
     @classmethod
     def setUpClass(cls):
@@ -25,7 +25,7 @@ class TestLivechatHrHolidays(HttpCase, MailCommon):
             }
         )
         employee = cls.env["hr.employee"].create({"user_id": cls.user_employee.id})
-        cls.env["hr.leave"].with_context(leave_skip_state_check=True).create(
+        cls.env["hr.time"].with_context(leave_skip_state_check=True).create(
             {
                 "employee_id": employee.id,
                 "work_entry_type_id": work_entry_type.id,

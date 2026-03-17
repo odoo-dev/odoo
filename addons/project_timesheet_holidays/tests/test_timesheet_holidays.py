@@ -63,9 +63,9 @@ class TestTimesheetHolidays(TestCommonTimesheet):
         })
 
         # HR Officer allocates some leaves to the employee 1
-        self.Requests = self.env['hr.leave'].with_context(mail_create_nolog=True, mail_notrack=True)
-        self.Allocations = self.env['hr.leave.allocation'].with_context(mail_create_nolog=True, mail_notrack=True)
-        self.hr_leave_allocation_with_ts = self.Allocations.sudo().create({
+        self.Requests = self.env['hr.time'].with_context(mail_create_nolog=True, mail_notrack=True)
+        self.Allocations = self.env['hr.time.allocation'].with_context(mail_create_nolog=True, mail_notrack=True)
+        self.hr_time_allocation_with_ts = self.Allocations.sudo().create({
             'name': 'Days for limited category with timesheet',
             'employee_id': self.empl_employee.id,
             'work_entry_type_id': self.hr_work_entry_type_with_ts.id,
@@ -74,7 +74,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
             'date_from': time.strftime('%Y-01-01'),
             'date_to': time.strftime('%Y-12-31'),
         })
-        self.user_employee.group_ids |= self.env.ref('hr_holidays.group_hr_holidays_employee')
+        self.user_employee.group_ids |= self.env.ref('hr_time.group_hr_time_employee')
 
     def test_validate_with_timesheet(self):
         # employee creates a leave request
@@ -144,7 +144,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
         holiday.with_user(self.env.user).action_approve()
         self.assertEqual(len(holiday.timesheet_ids), holiday.number_of_days, 'Number of generated timesheets should be the same as the leave duration (1 per day between %s and %s)' % (fields.Datetime.to_string(self.leave_start_datetime), fields.Datetime.to_string(self.leave_end_datetime)))
 
-        self.env['hr.holidays.cancel.leave'].with_user(self.user_employee).with_context(default_leave_id=holiday.id) \
+        self.env['hr.time.cancel.leave'].with_user(self.user_employee).with_context(default_leave_id=holiday.id) \
             .new({'reason': 'Test remove holiday'}) \
             .action_cancel_leave()
         self.assertEqual(holiday.state, 'cancel', 'The time off should be archived')
@@ -316,7 +316,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
             'unit_of_measure': 'day',
         })
 
-        self.env['hr.leave'].sudo().create([
+        self.env['hr.time'].sudo().create([
             {
                 'work_entry_type_id': work_entry_type.id,
                 'employee_id': self.empl_employee.id,

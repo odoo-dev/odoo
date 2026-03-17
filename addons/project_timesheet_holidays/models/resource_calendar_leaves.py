@@ -155,7 +155,7 @@ class ResourceCalendarLeaves(models.Model):
                         elif d > max_date:
                             max_date = d
 
-        holidays_read_group = self.env['hr.leave']._read_group([
+        holidays_read_group = self.env['hr.time']._read_group([
             ('employee_id', 'in', employee_ids_all),
             ('date_from', '<=', max_date),
             ('date_to', '>=', min_date),
@@ -251,7 +251,7 @@ class ResourceCalendarLeaves(models.Model):
                     timesheet_vals_list.append(timesheet_vals)
         return self.env['account.analytic.line'].sudo().create(timesheet_vals_list)
 
-    def _get_overlapping_hr_leaves(self, domain=None):
+    def _get_overlapping_hr_times(self, domain=None):
         """Find leaves with potentially missing timesheets."""
         self.ensure_one()
         leave_domain = domain or []
@@ -262,7 +262,7 @@ class ResourceCalendarLeaves(models.Model):
         ]
         if self.calendar_id:
             leave_domain += [('resource_calendar_id', 'in', [False, self.calendar_id.id])]
-        return self.env['hr.leave'].search(leave_domain)
+        return self.env['hr.time'].search(leave_domain)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -273,7 +273,7 @@ class ResourceCalendarLeaves(models.Model):
     def write(self, vals):
         date_from, date_to, calendar_id = vals.get('date_from'), vals.get('date_to'), vals.get('calendar_id')
         global_time_off_updated = self.env['resource.calendar.leaves']
-        overlapping_leaves = self.env['hr.leave']
+        overlapping_leaves = self.env['hr.time']
         if date_from or date_to or 'calendar_id' in vals:
             global_time_off_updated = self.filtered(lambda r: (date_from is not None and r.date_from != date_from) or (date_to is not None and r.date_to != date_to) or (calendar_id is None or r.calendar_id.id != calendar_id))
             timesheets = global_time_off_updated.sudo().timesheet_ids
@@ -283,7 +283,7 @@ class ResourceCalendarLeaves(models.Model):
             if calendar_id:
                 for gto in global_time_off_updated:
                     domain = [] if gto.calendar_id else [('resource_calendar_id', '!=', calendar_id)]
-                    overlapping_leaves += gto._get_overlapping_hr_leaves(domain)
+                    overlapping_leaves += gto._get_overlapping_hr_times(domain)
         result = super().write(vals)
         global_time_off_updated and global_time_off_updated.sudo()._generate_timesheeets()
         if overlapping_leaves:
@@ -291,11 +291,11 @@ class ResourceCalendarLeaves(models.Model):
         return result
 
     @api.ondelete(at_uninstall=False)
-    def _regenerate_hr_leave_timesheets_on_gto_unlinked(self):
-        overlapping_leaves = self.env['hr.leave']
+    def _regenerate_hr_time_timesheets_on_gto_unlinked(self):
+        overlapping_leaves = self.env['hr.time']
         global_leaves = self.filtered(lambda l: not l.resource_id)
         for global_leave in global_leaves:
-            overlapping_leaves += global_leave._get_overlapping_hr_leaves()
+            overlapping_leaves += global_leave._get_overlapping_hr_times()
         if overlapping_leaves:
             # we need to ignore the global time off since it hasn't been deleted yet
             overlapping_leaves.sudo()._generate_timesheets(ignored_resource_calendar_leaves=global_leaves.ids)

@@ -271,8 +271,8 @@ addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js
 !addons/calendar/**/*
 !addons/hr
 !addons/hr/**/*
-!addons/hr_holidays
-!addons/hr_holidays/**/*
+!addons/hr_time
+!addons/hr_time/**/*
 !addons/hr_skills
 !addons/hr_skills/**/*
 !addons/im_livechat

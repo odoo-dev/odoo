@@ -25,7 +25,7 @@ class TestCancelTimeOff(TransactionCase):
             login='test_user',
             name='Test User',
             company_id=cls.company.id,
-            groups='base.group_user,hr_timesheet.group_hr_timesheet_user,hr_holidays.group_hr_holidays_employee',
+            groups='base.group_user,hr_timesheet.group_hr_timesheet_user,hr_time.group_hr_time_employee',
         )
         cls.employee = cls.env['hr.employee'].create({
             'name': 'Test Employee',
@@ -45,16 +45,16 @@ class TestCancelTimeOff(TransactionCase):
     @freeze_time('2020-01-01')
     def test_cancel_time_off(self):
         """ Test that an employee can cancel a future time off, that crosses a global leave,
-            if the employee is not in the group_hr_holidays_user.
+            if the employee is not in the group_hr_time_user.
 
             Test Case:
             =========
             1) Create a time off in the future and that crosses a global leave
             2) Approve the time off with the admin
-            3) Cancel the time off with the user that is not in the group_hr_holidays_user
+            3) Cancel the time off with the user that is not in the group_hr_time_user
             4) No read error on employee_ids should be raised
         """
-        time_off = self.env['hr.leave'].create({
+        time_off = self.env['hr.time'].create({
             'name': 'Test Time Off',
             'work_entry_type_id': self.generic_time_off_type.id,
             'employee_id': self.employee.id,
@@ -64,7 +64,7 @@ class TestCancelTimeOff(TransactionCase):
         time_off.action_approve()
         self.assertEqual(time_off.state, 'validate')
         HrHolidaysCancelLeave = self.env[
-            'hr.holidays.cancel.leave'].with_user(self.employee_user).with_company(self.company.id)
+            'hr.time.cancel.leave'].with_user(self.employee_user).with_company(self.company.id)
         HrHolidaysCancelLeave.create({
             'leave_id': time_off.id, 'reason': 'Test Reason'}).action_cancel_leave()
         self.assertEqual(time_off.state, 'cancel')
