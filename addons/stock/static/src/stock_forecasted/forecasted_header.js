@@ -9,7 +9,6 @@ export class ForecastedHeader extends Component {
     setup(){
         this.orm = useService("orm");
         this.action = useService("action");
-        this.tooltip = useService("tooltip");
 
         this._formatFloat = (num) => formatFloat(num, { digits: [0, this.props.docs.precision] });
     }
@@ -25,6 +24,30 @@ export class ForecastedHeader extends Component {
             action.help = markup(action.help);
         }
         return this.action.doAction(action);
+    }
+
+    async _onClickTransfers(type) {
+        const action = await this.orm.call(
+            'stock.picking', this._getPickingActionMethod(type), [], {}
+        );
+        action.domain = [
+            ...(action.domain || []),
+            ['product_id', 'in', this.props.docs.product_variants_ids],
+            ['state', 'not in', ['draft', 'done', 'cancel']],
+            ['picking_type_id.warehouse_id', 'in', this.props.selectedWarehouseIds]
+        ];
+        if (action.help) {
+            action.help = markup(action.help);
+        }
+        return this.action.doAction(action);
+    }
+
+    _getPickingActionMethod(type) {
+        const methodMap = {
+            incoming: 'get_action_picking_tree_incoming',
+            outgoing: 'get_action_picking_tree_outgoing',
+        };
+        return methodMap[type];
     }
 
     get products() {
