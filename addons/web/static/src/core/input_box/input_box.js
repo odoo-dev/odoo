@@ -45,7 +45,7 @@ function _positionInputBoxOverlay(target) {
     closestInputBox.style.setProperty("--inputbox-overlay-end-size", endPadding + "px");
     if (inlineOverlay) {
         const inputEl = closestInputBox.querySelector(
-            "input, textarea, select, [contenteditable]"
+            "input, button, textarea, select, [contenteditable]"
         );
         if (inputEl) {
             let inputLength = inputEl.value?.length || 0;

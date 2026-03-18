@@ -61,8 +61,8 @@
             line-height: 0;
             padding: 0 !important;
         }
-        &:is(span, .fa, .o_input_box_overlay_inline), :is(span, .fa) {
-            &:not(button, .btn, button *, .btn *) {
+        &, :is(span, .fa):not(button *, .btn *) {
+            &:not(button, .btn, :has(button, .btn)) {
                 pointer-events: none;
             }
         }
@@ -77,14 +77,22 @@
 }
 
 .o_input_box:has(.o_input_box_overlay_inline) {
-    .o_input_box_overlay_end.o_input_box_overlay_inline {
-        transition: right .4s;
-        inset-inline-end: var(--inputbox-inner-padding-end) !important;
-        top: unset;
-        bottom: var(--inputbox-overlay-padding-y);
+    &:not(.o_touch_device .o_input_box) {
+        &:focus-within {
+            transition: width .4s;
+        }
+        &:not(:focus-within) {
+            width: calc(var(--inputbox-overlay-inline-position));
+            .o_input_box_overlay_end {
+                // inset-inline-end: #{'max(var(--inputbox-inner-padding-end), var(--inputbox-overlay-inline-position))'} !important;
+            }
+        }
 
-        &:not(.o_touch_device .o_input_box_overlay_end):not(.o_input_box:focus-within .o_input_box_overlay_end) {
-            inset-inline-end: #{'max(var(--inputbox-inner-padding-end), var(--inputbox-overlay-inline-position))'} !important;
+        .o_input_box_overlay_end.o_input_box_overlay_inline {
+           
+            // inset-inline-end: var(--inputbox-inner-padding-end) !important;
+            top: unset;
+            bottom: var(--inputbox-overlay-padding-y);
         }
     }
 }
