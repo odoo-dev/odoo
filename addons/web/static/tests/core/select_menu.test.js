@@ -30,7 +30,7 @@ async function mountSingleApp(ComponentClass, props) {
     class TestComponent extends Component {
         static props = { components: { type: Array } };
         static template = xml`
-            <t t-foreach="props.components" t-as="comp" t-key="comp.component.name">
+            <t t-foreach="this.props.components" t-as="comp" t-key="comp.component.name">
                 <t t-component="comp.component" t-props="comp.props"/>
             </t>
         `;
@@ -57,9 +57,9 @@ class Parent extends Component {
     static components = { SelectMenu };
     static template = xml`
         <SelectMenu
-            choices="choices"
-            value="state.value"
-            onSelect.bind="onSelect"
+            choices="this.choices"
+            value="this.state.value"
+            onSelect.bind="this.onSelect"
         />
     `;
     setup() {
@@ -115,10 +115,10 @@ test("Selecting a choice calls onSelect and the displayed value is updated", asy
         static components = { SelectMenu };
         static template = xml`
             <SelectMenu
-                groups="groups"
-                choices="choices"
-                value="state.value"
-                onSelect.bind="onSelect"
+                groups="this.groups"
+                choices="this.choices"
+                value="this.state.value"
+                onSelect.bind="this.onSelect"
             />
         `;
         setup() {
@@ -189,7 +189,7 @@ test("Search input should be present as a toggler, but cannot be edited if searc
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices" searchable="false" />
+            <SelectMenu choices="this.choices" searchable="false" />
         `;
         setup() {
             this.choices = [
@@ -208,7 +208,7 @@ test("Search input should be present in a dropdown with a custom toggler", async
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices">
+            <SelectMenu choices="this.choices">
                 <span class="select_menu_test">Select something</span>
             </SelectMenu>
         `;
@@ -231,7 +231,7 @@ test("Search input should behave as a toggler only and an input should be presen
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices" />
+            <SelectMenu choices="this.choices" />
         `;
         setup() {
             this.choices = [
@@ -372,8 +372,8 @@ test("Clear the input calls 'onSelect' with null value and appears only when val
         static components = { SelectMenu };
         static template = xml`
             <SelectMenu
-                choices="choices"
-                value="state.value"
+                choices="this.choices"
+                value="this.state.value"
                 onSelect.bind="this.onSelect"
             />
         `;
@@ -404,8 +404,8 @@ test("When the 'required' props is set to true, the input cannot be cleared", as
         static template = xml`
             <SelectMenu
                 required="true"
-                choices="choices"
-                value="state.value"
+                choices="this.choices"
+                value="this.state.value"
             />
         `;
         setup() {
@@ -433,8 +433,8 @@ test("When the 'required' props is set to true, the clear button is not shown", 
         static template = xml`
             <SelectMenu
                 required="true"
-                choices="choices"
-                value="state.value"
+                choices="this.choices"
+                value="this.state.value"
             >
                 <span class="select_menu_test">Select something</span>
             </SelectMenu>
@@ -465,7 +465,7 @@ test("Items are sorted based on their label by default", async () => {
         static components = { SelectMenu };
         static template = xml`
             <SelectMenu
-                choices="choices"
+                choices="this.choices"
             />
         `;
         setup() {
@@ -486,7 +486,7 @@ test("autoSort props set to false", async () => {
     class MyParent extends Component {
         static props = ["*"];
         static components = { SelectMenu };
-        static template = xml`<SelectMenu choices="choices" autoSort="false"/>`;
+        static template = xml`<SelectMenu choices="this.choices" autoSort="false"/>`;
         setup() {
             this.choices = [
                 { label: "Hello", value: "hello" },
@@ -506,7 +506,7 @@ test("Custom toggler using default slot", async () => {
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices">
+            <SelectMenu choices="this.choices">
                 <span class="select_menu_test">Select something</span>
             </SelectMenu>
         `;
@@ -529,10 +529,10 @@ test("Custom choice template using a slot", async () => {
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices">
+            <SelectMenu choices="this.choices">
                 <span class="select_menu_test">Select something</span>
                 <t t-set-slot="choice" t-call-slot-scope="choice">
-                    <span class="coolClass" t-out="choice.data.label" />
+                    <span class="coolClass" t-out="this.choice.data.label" />
                 </t>
             </SelectMenu>
         `;
@@ -554,12 +554,12 @@ test("Custom slot for the bottom area sends the current search value", async () 
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices">
+            <SelectMenu choices="this.choices">
                 <span class="select_menu_test">Select something</span>
                 <t t-set-slot="bottomArea" t-call-slot-scope="select">
-                    <div t-if="select.data.searchValue" class="px-2">
-                        <button class="coolClass btn text-primary" t-on-click="() => this.onClick(select.data.searchValue)">
-                            Do something with "<i t-out="select.data.searchValue" />"
+                    <div t-if="this.select.data.searchValue" class="px-2">
+                        <button class="coolClass btn text-primary" t-on-click="() => this.onClick(this.select.data.searchValue)">
+                            Do something with "<i t-out="this.select.data.searchValue" />"
                         </button>
                     </div>
                 </t>
@@ -594,7 +594,7 @@ test("Groups properly added in the select", async () => {
     class MyParent extends Component {
         static props = ["*"];
         static components = { SelectMenu };
-        static template = xml`<SelectMenu groups="groups"/>`;
+        static template = xml`<SelectMenu groups="this.groups"/>`;
         setup() {
             this.groups = [
                 {
@@ -891,10 +891,10 @@ test("Props onInput is executed when the search changes", async () => {
         static components = { SelectMenu };
         static template = xml`
             <SelectMenu
-                choices="state.choices"
-                value="state.value"
-                onInput.bind="onInput"
-                onSelect.bind="onSelect"
+                choices="this.state.choices"
+                value="this.state.value"
+                onInput.bind="this.onInput"
+                onSelect.bind="this.onSelect"
             />
         `;
         setup() {
@@ -947,10 +947,10 @@ test("Choices are updated and filtered when props change", async () => {
         static components = { SelectMenu };
         static template = xml`
             <SelectMenu
-                choices="state.choices"
-                value="state.value"
-                onInput.bind="onInput"
-                onSelect.bind="onSelect"
+                choices="this.state.choices"
+                value="this.state.value"
+                onInput.bind="this.onInput"
+                onSelect.bind="this.onSelect"
             />
         `;
         setup() {
@@ -1008,10 +1008,10 @@ test("SelectMenu group items only after being opened", async () => {
         static props = ["*"];
         static template = xml`
             <SelectMenu
-                choices="state.choices"
-                groups="state.groups"
-                value="state.value"
-                onInput.bind="onInput"
+                choices="this.state.choices"
+                groups="this.state.groups"
+                value="this.state.value"
+                onInput.bind="this.onInput"
             />
         `;
         setup() {
@@ -1079,10 +1079,10 @@ test("search value is cleared when reopening the menu", async () => {
         static props = ["*"];
         static template = xml`
             <SelectMenu
-                choices="state.choices"
-                groups="state.groups"
-                value="state.value"
-                onInput.bind="onInput"
+                choices="this.state.choices"
+                groups="this.state.groups"
+                value="this.state.value"
+                onInput.bind="this.onInput"
             />
         `;
         setup() {
@@ -1115,7 +1115,7 @@ test("Groups can be member of sections", async () => {
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices" groups="groups" sections="sections" />
+            <SelectMenu choices="this.choices" groups="this.groups" sections="this.sections" />
         `;
         setup() {
             this.choices = [{ label: "Hello", value: "hello" }];
@@ -1173,9 +1173,9 @@ test("Can add custom data to choices", async () => {
         static props = ["*"];
         static components = { SelectMenu };
         static template = xml`
-            <SelectMenu choices="choices">
+            <SelectMenu choices="this.choices">
                 <t t-set-slot="choice" t-call-slot-scope="choice">
-                    <span class="coolClass" t-out="choice.data.custom" />
+                    <span class="coolClass" t-out="this.choice.data.custom" />
                 </t>
             </SelectMenu>
         `;
@@ -1245,8 +1245,8 @@ test("Fetch choices", async () => {
         static template = xml`
             <SelectMenu
                 value="this.state.value"
-                onInput.bind="loadChoice"
-                choices="state.choices"
+                onInput.bind="this.loadChoice"
+                choices="this.state.choices"
             />
         `;
         setup() {
@@ -1273,7 +1273,7 @@ test("In the BottomSheet, a 'Clear' button is present", async () => {
         static components = { SelectMenu };
         static template = xml`
             <SelectMenu
-                choices="choices"
+                choices="this.choices"
                 value="'test'"
                 onSelect.bind="this.onSelect"
             />
@@ -1300,8 +1300,8 @@ test("Ensure items are properly sorted", async () => {
         static components = { SelectMenu };
         static template = xml`
             <SelectMenu
-                groups="state.groups"
-                choices="state.choices"
+                groups="this.state.groups"
+                choices="this.state.choices"
             />
         `;
 
@@ -1384,7 +1384,7 @@ test("prevent glitch on open or focusout", async () => {
         static components = { SelectMenu };
         static props = ["*"];
         static template = xml`
-            <SelectMenu t-props="props">${slots}</SelectMenu>`;
+            <SelectMenu t-props="this.props">${slots}</SelectMenu>`;
     }
     await mountSingleApp(Wrapper, {
         choices: [

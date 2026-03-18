@@ -283,8 +283,8 @@ test("search input is focused when being toggled", async () => {
     class Parent extends Component {
         static template = xml`
             <div>
-                <t t-component="searchBarToggler.component" t-props="searchBarToggler.props"/>
-                <SearchBar toggler="searchBarToggler"/>
+                <t t-component="this.searchBarToggler.component" t-props="this.searchBarToggler.props"/>
+                <SearchBar toggler="this.searchBarToggler"/>
             </div>
         `;
         static components = { SearchBar };
@@ -1789,7 +1789,9 @@ test("facets display with any / not any operator (check brackets)", async functi
 
     await contains(".modal footer button").click();
     expect(getFacetTexts()).toEqual([
-        `Company : ( Bar : ( Bool ${label("not set")} and Bool ${label("not set")} ) and Bar : ( Bool ${label("set")} ) ) or Bar ${label("not set")}`,
+        `Company : ( Bar : ( Bool ${label("not set")} and Bool ${label(
+            "not set"
+        )} ) and Bar : ( Bool ${label("set")} ) ) or Bar ${label("not set")}`,
     ]);
     expect.verifySteps([`/web/domain/validate`]);
 });

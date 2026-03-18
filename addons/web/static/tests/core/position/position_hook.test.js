@@ -777,7 +777,7 @@ function shrinkPopperTest(position, offset, onPositioned, popperStyle = {}) {
             static template = xml`
                 <div id="container" t-custom-ref="container" style="background-color: salmon; display: flex; align-items: center; justify-content: center; width: 450px; height: 450px; margin: 25px;">
                     <div id="target" t-custom-ref="target" style="background-color: royalblue; width: 50px; height: 50px; margin-top: ${offset}px;"/>
-                    <div id="popper" t-custom-ref="popper" t-att-style="popperStyle">
+                    <div id="popper" t-custom-ref="popper" t-att-style="this.popperStyle">
                         <div id="popper-content" style="background-color: seagreen; height: 500px; width: 50px;"/>
                     </div>
                 </div>

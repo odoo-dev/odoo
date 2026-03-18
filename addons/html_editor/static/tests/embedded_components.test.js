@@ -309,8 +309,8 @@ describe("Mount and Destroy embedded components", () => {
         class RecursiveComponent extends Component {
             static template = xml`
                 <div>
-                    <div t-on-click="increment" t-att-class="'click count-' + props.index">Count:<t t-out="state.value"/></div>
-                    <div t-custom-ref="innerEditable" t-att-class="'innerEditable-' + props.index"/>
+                    <div t-on-click="this.increment" t-att-class="'click count-' + this.props.index">Count:<t t-out="this.state.value"/></div>
+                    <div t-custom-ref="innerEditable" t-att-class="'innerEditable-' + this.props.index"/>
                 </div>
             `;
             static props = {
@@ -774,8 +774,8 @@ describe("Mount processing", () => {
         const delayedWillStart = new Deferred();
         class LabeledCounter extends Counter {
             static template = xml`
-                <span t-custom-ref="root" class="counter" t-on-click="increment">
-                    <span t-custom-ref="label"/>:<t t-out="state.value"/>
+                <span t-custom-ref="root" class="counter" t-on-click="this.increment">
+                    <span t-custom-ref="label"/>:<t t-out="this.state.value"/>
                 </span>
             `;
             static props = {
@@ -884,8 +884,8 @@ describe("Mount processing", () => {
 
         class EmbeddedCounter extends Counter {
             static template = xml`
-                <span class="counter" t-on-click="increment">
-                    <t t-out="state.value"/>
+                <span class="counter" t-on-click="this.increment">
+                    <t t-out="this.state.value"/>
                 </span>
             `;
             setup() {

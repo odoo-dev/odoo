@@ -11,7 +11,7 @@ import { Component, xml } from "@odoo/owl";
 export class Counter extends Component {
     static props = ["*"];
     static template = xml`
-        <span t-custom-ref="root" class="counter" t-on-click="increment">Counter:<t t-out="state.value"/></span>`;
+        <span t-custom-ref="root" class="counter" t-on-click="this.increment">Counter:<t t-out="this.state.value"/></span>`;
 
     state = useState({ value: 0 });
     ref = useRef("root");
@@ -35,8 +35,8 @@ export class EmbeddedWrapper extends Component {
     static props = ["*"];
     static template = xml`
         <t>
-            <div t-if="editableDescendants.shallow" class="shallow" t-custom-ref="shallow"/>
-            <div t-if="!state.switch">
+            <div t-if="this.editableDescendants.shallow" class="shallow" t-custom-ref="shallow"/>
+            <div t-if="!this.state.switch">
                 <div class="deep" t-custom-ref="deep"/>
             </div>
             <div t-else="">
@@ -57,7 +57,7 @@ export class EmbeddedWrapper extends Component {
 export class OffsetCounter extends Component {
     static props = ["*"];
     static template = xml`
-        <span class="counter" t-on-click="increment">Counter:<t t-out="counterValue"/></span>`;
+        <span class="counter" t-on-click="this.increment">Counter:<t t-out="this.counterValue"/></span>`;
 
     setup() {
         this.embeddedState = useEmbeddedState(this.props.host);
@@ -95,7 +95,7 @@ export const offsetCounter = {
 export class SavedCounter extends Component {
     static props = ["*"];
     static template = xml`
-        <span class="counter" t-on-click="increment">Counter:<t t-out="counterValue"/></span>`;
+        <span class="counter" t-on-click="this.increment">Counter:<t t-out="this.counterValue"/></span>`;
 
     setup() {
         this.embeddedState = useEmbeddedState(this.props.host);
@@ -123,7 +123,7 @@ export const savedCounter = {
 export class CollaborativeObject extends Component {
     static props = ["*"];
     static template = xml`
-        <div class="obj"><t t-out="collaborativeObject"/></div>`;
+        <div class="obj"><t t-out="this.collaborativeObject"/></div>`;
 
     setup() {
         this.embeddedState = useEmbeddedState(this.props.host);
@@ -155,7 +155,7 @@ export const collaborativeObject = {
 export class NamedCounter extends Component {
     static props = ["*"];
     static template = xml`
-        <span class="counter" t-on-click="increment"><t t-out="props.name"/>:<t t-out="counterValue"/></span>`;
+        <span class="counter" t-on-click="this.increment"><t t-out="this.props.name"/>:<t t-out="this.counterValue"/></span>`;
 
     setup() {
         this.embeddedState = useEmbeddedState(this.props.host);

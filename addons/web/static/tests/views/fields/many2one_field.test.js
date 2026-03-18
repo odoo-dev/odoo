@@ -1501,8 +1501,8 @@ test("standalone many2one field", async () => {
     class Comp extends Component {
         static components = { Record, Field };
         static template = xml`
-            <Record resModel="'coucou'" fields="fields" fieldNames="['partner_id']" values="values" mode="'edit'" t-call-slot-scope="scope">
-                <Field name="'partner_id'" record="scope.record" canOpen="false" />
+            <Record resModel="'coucou'" fields="this.fields" fieldNames="['partner_id']" values="this.values" mode="'edit'" t-call-slot-scope="scope">
+                <Field name="'partner_id'" record="this.scope.record" canOpen="false" />
             </Record>
         `;
         static props = ["*"];

@@ -33,7 +33,7 @@ test("call onChange prop when some change occurs", async () => {
     class Parent extends Component {
         static components = { CheckBox };
         static props = {};
-        static template = xml`<CheckBox onChange="onChange" />`;
+        static template = xml`<CheckBox onChange="this.onChange" />`;
         onChange(checked) {
             value = checked;
         }
@@ -70,7 +70,7 @@ test("can toggle value by pressing ENTER", async () => {
     class Parent extends Component {
         static components = { CheckBox };
         static props = {};
-        static template = xml`<CheckBox onChange.bind="onChange" value="state.value" />`;
+        static template = xml`<CheckBox onChange.bind="this.onChange" value="this.state.value" />`;
 
         setup() {
             this.state = useState({ value: false });
@@ -100,7 +100,7 @@ test("toggling through multiple ways", async () => {
     class Parent extends Component {
         static components = { CheckBox };
         static props = {};
-        static template = xml`<CheckBox onChange.bind="onChange" value="state.value" />`;
+        static template = xml`<CheckBox onChange.bind="this.onChange" value="this.state.value" />`;
 
         setup() {
             this.state = useState({ value: false });

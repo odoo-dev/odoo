@@ -34,7 +34,7 @@ describe("useAutofocus", () => {
             static props = ["*"];
             static template = xml`
                 <span>
-                    <input type="text" t-custom-ref="autofocus" t-att-value="state.text" />
+                    <input type="text" t-custom-ref="autofocus" t-att-value="this.state.text" />
                 </span>
             `;
             setup() {
@@ -62,7 +62,7 @@ describe("useAutofocus", () => {
             static props = ["*"];
             static template = xml`
                 <span>
-                    <input type="number" t-custom-ref="autofocus" t-att-value="state.counter" />
+                    <input type="number" t-custom-ref="autofocus" t-att-value="this.state.counter" />
                 </span>
             `;
             setup() {
@@ -90,7 +90,7 @@ describe("useAutofocus", () => {
             static props = ["*"];
             static template = xml`
                 <span>
-                    <input t-if="state.showInput" type="text" t-custom-ref="autofocus" />
+                    <input t-if="this.state.showInput" type="text" t-custom-ref="autofocus" />
                 </span>
             `;
             setup() {
@@ -175,7 +175,7 @@ describe("useAutofocus", () => {
             static template = xml`
                 <span>
                     <input type="text" t-custom-ref="first" />
-                    <input t-if="state.showSecond" type="text" t-custom-ref="second" />
+                    <input t-if="this.state.showSecond" type="text" t-custom-ref="second" />
                 </span>
             `;
             setup() {
@@ -235,7 +235,7 @@ describe("useAutofocus", () => {
             static props = ["*"];
             static template = xml`
                     <div>
-                        <input type="text" t-custom-ref="autofocus" t-att-value="state.text" />
+                        <input type="text" t-custom-ref="autofocus" t-att-value="this.state.text" />
                     </div>
                 `;
             setup() {
@@ -282,7 +282,7 @@ describe("useBus", () => {
         class Parent extends Component {
             static components = { MyComponent };
             static props = ["*"];
-            static template = xml`<MyComponent t-if="state.child" />`;
+            static template = xml`<MyComponent t-if="this.state.child" />`;
 
             setup() {
                 this.state = useState(state);
@@ -359,7 +359,7 @@ describe("useService", () => {
         class Parent extends Component {
             static components = { MyComponent };
             static props = ["*"];
-            static template = xml`<MyComponent t-if="state.child" />`;
+            static template = xml`<MyComponent t-if="this.state.child" />`;
 
             setup() {
                 this.state = useState(state);
@@ -627,7 +627,7 @@ describe("useChildRef and useForwardRefToParent", () => {
 
         class Parent extends Component {
             static props = ["*"];
-            static template = xml`<div><Child someRef="someRef"/></div>`;
+            static template = xml`<div><Child someRef="this.someRef"/></div>`;
             static components = { Child };
             setup() {
                 this.someRef = useChildRef();
@@ -651,7 +651,7 @@ describe("useChildRef and useForwardRefToParent", () => {
 
         class Parent extends Component {
             static props = ["*"];
-            static template = xml`<div><Child t-if="state.hasChild" someRef="someRef"/></div>`;
+            static template = xml`<div><Child t-if="this.state.hasChild" someRef="this.someRef"/></div>`;
             static components = { Child };
             setup() {
                 this.someRef = useChildRef();

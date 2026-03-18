@@ -62,7 +62,7 @@ test("remove element with opened tooltip", async () => {
         static props = ["*"];
         static template = xml`
             <div>
-                <button t-if="state.visible" data-tooltip="hello">Action</button>
+                <button t-if="this.state.visible" data-tooltip="hello">Action</button>
             </div>`;
         setup() {
             this.state = useState({ visible: true });
@@ -210,7 +210,7 @@ test("tooltip with a template and info", async () => {
         static template = xml`
             <button
                 data-tooltip-template="my_tooltip_template"
-                t-att-data-tooltip-info="info">
+                t-att-data-tooltip-info="this.info">
                 Action
             </button>
         `;
@@ -243,7 +243,7 @@ test.tags("desktop");
 test("empty tooltip, no template", async () => {
     class MyComponent extends Component {
         static props = ["*"];
-        static template = xml`<button t-att-data-tooltip="tooltip">Action</button>`;
+        static template = xml`<button t-att-data-tooltip="this.tooltip">Action</button>`;
         get tooltip() {
             return "";
         }

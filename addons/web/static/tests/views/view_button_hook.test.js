@@ -29,7 +29,7 @@ test("action can be prevented", async () => {
     let executeInHandler;
 
     class MyComponent extends Component {
-        static template = xml`<div t-custom-ref="root" t-on-click="onClick" class="myComponent">Some text</div>`;
+        static template = xml`<div t-custom-ref="root" t-on-click="this.onClick" class="myComponent">Some text</div>`;
         static props = ["*"];
         setup() {
             const rootRef = useRef("root");
@@ -123,7 +123,7 @@ test("execute action in new window", async () => {
     });
 
     class MyComponent extends Component {
-        static template = xml`<div t-custom-ref="root" t-on-click="onClick" class="myComponent">Some text</div>`;
+        static template = xml`<div t-custom-ref="root" t-on-click="this.onClick" class="myComponent">Some text</div>`;
         static props = ["*"];
         setup() {
             const rootRef = useRef("root");
