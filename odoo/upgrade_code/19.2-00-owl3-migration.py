@@ -1026,6 +1026,33 @@ def upgrade_this_in_js(file_manager, log_info, log_error):
             log_error(file.path, e)
 
 
+def upgrade_t_slot(file_manager, log_info, log_error):
+    files = JSTooling.get_template_files(file_manager)
+    reg_t_slot = re.compile(r'\b(?<!-)t-slot([^=\s]*\s*=)')
+
+    def apply_transformations(text):
+        text = reg_t_slot.sub(r't-call-slot\1', text)
+        return text
+
+    for fileno, file in enumerate(files, start=1):
+        try:
+            raw_content = file.path.read_bytes()
+            content = raw_content.decode("utf-8", errors="ignore")
+
+            if file.path.suffix == ".js":
+                new_content = JSTooling.transform_xml_literals(content, apply_transformations)
+            else:
+                new_content = apply_transformations(content)
+
+            if new_content != content:
+                file.content = new_content
+
+        except Exception as e:  # noqa: BLE001
+            log_error(file.path, e)
+
+        file_manager.print_progress(fileno, len(files))
+
+
 def upgrade(file_manager) -> str:
     """Main upgrade_code entry point."""
     collector = MigrationCollector(file_manager)
@@ -1047,5 +1074,6 @@ def upgrade(file_manager) -> str:
     # collector.run_sub("Migrating t-model", upgrade_t_model)
     # collector.run_sub("Migrating this. in xml templates", upgrade_this)
     collector.run_sub("Migrating this. in test.js xml fragments", upgrade_this_in_js)
+    collector.run_sub("Migrating t-slot", upgrade_t_slot)
 
     collector.finalize()
