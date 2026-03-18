@@ -1,4 +1,4 @@
-from odoo.upgrade_code.tools_etree import update_etree
+from tools_etree import update_etree
 from lxml import etree
 from collections import defaultdict
 
@@ -454,7 +454,7 @@ def prev_non_whitespace(tokens, i):
 T_ATTR_RE = re.compile(r"@t-([\w-]+)='(.*?)'")  # For eg xpath=expr="[@t-if]"
 EVENT_ATTR_RE = re.compile(r"(@(?:onSelected|onChange)(?:\.[\w-]+)?)='(.*?)'")
 COMP_REGEXP = re.compile(r"^.*/[A-Z][\w\-]*(?:\[.*?\])*$")  # This regex ensures the *last* node in the path starts with an uppercase letter.
-SKIP_XPATH_ATTRS = {"name", "ref", "set-slot", "slot"}  # attributes to skip
+SKIP_XPATH_ATTRS = {"name", "ref", "set-slot", "slot", "call-slot"}  # attributes to skip
 COMPONENT_TARGET_RE = re.compile(r"//([A-Z][\w\.-]*)")
 VALUE_ATTR_RE = re.compile(r"(@value)='(.*?)'")
 ENTITY_RE = re.compile(r"&([A-Za-z0-9#]{2,5});")
@@ -484,6 +484,7 @@ def iter_elements(root):
 
 
 DIRECTIVES = [
+    "t-att",
     "t-esc",
     "t-out",
     "t-value",
@@ -493,7 +494,6 @@ DIRECTIVES = [
     "t-foreach",
     "t-component",
     "t-props",
-    "t-model",
     "t-tag",
     "t-call-context",
 ]
@@ -657,12 +657,17 @@ class TemplateCompiler:
                     node.set(attr, self._compile_expr(value))
                 if attr.startswith("t-att-") and not attr.startswith("t-attf-"):
                     node.set(attr, self._compile_expr(value))
-                if attr.startswith(("t-custom-model", "t-custom-portal")) and value:
+                if attr.startswith(("t-model", "t-custom-model", "t-portal", "t-custom-portal")) and value:
                     node.set(attr, self._compile_expr(value))
                 if attr.startswith("t-attf-"):
                     self.process_dynamic_string(node, attr)
-                if attr == "t-call" or attr == "t-ref" or attr == "t-custom-ref" or attr == "t-slot":
+                if attr in ('t-call', 't-ref', 't-custom-ref', 't-slot', 't-call-slot'):
                     self.process_dynamic_string(node, attr)
+
+            if 't-slot' in node.attrib or 't-call-slot' in node.attrib:
+                for attr, value in node.attrib.items():
+                    if not attr.startswith('t-'):
+                        node.set(attr, self._compile_expr(value))
 
             if self._is_component(node):
                 for attr, value in node.attrib.items():
@@ -990,6 +995,11 @@ tests = [
         "expected": """<t t-slot="{{ this.d }}"/>""",
     },
     {
+        "name": "dynamic t-call-slot",
+        "content": """<t t-call-slot="{{ d }}"/>""",
+        "expected": """<t t-call-slot="{{ this.d }}"/>""",
+    },
+    {
         "name": "t-model",
         "content": '<input t-model="state.value"/>',
         "expected": '<input t-model="this.state.value"/>',
@@ -1038,6 +1048,11 @@ TODO why dones this test pass
         "name": "another t-out",
         "content": '<div><t t-out="coucou.truc"/></div>',
         "expected": '<div><t t-out="this.coucou.truc"/></div>',
+    },
+    {
+        "name": "t-att",
+        "content": '<div t-att="attributes"/>',
+        "expected": '<div t-att="this.attributes"/>',
     },
     {
         "name": "simple t-attf-class",
@@ -1105,9 +1120,19 @@ TODO why dones this test pass
         "expected": '<input t-custom-model.trim="this.state.name"/>',
     },
     {
+        "name": "t-portal",
+        "content": '<div t-portal="portalTarget"/>',
+        "expected": '<div t-portal="this.portalTarget"/>',
+    },
+    {
         "name": "t-custom-portal",
         "content": '<div t-custom-portal="portalTarget"/>',
         "expected": '<div t-custom-portal="this.portalTarget"/>',
+    },
+    {
+        "name": "t-ref",
+        "content": """<input t-ref="{{state.activePageId === page.id ? 'autofocus' : page.id}}"/>""",
+        "expected": """<input t-ref="{{this.state.activePageId === this.page.id ? 'autofocus' : this.page.id}}"/>""",
     },
     {
         "name": "t-custom-ref",
@@ -1324,6 +1349,36 @@ TODO why dones this test pass
         display="search.display"/>
 </WithSearch>
 """,
+    },
+    {
+        "name": "t-slot props",
+        "content": """
+            <t>
+                <t t-set="b" t-value="'b'"/>
+                <t t-call-slot="default" a="a" b="b"/>
+            </t>
+        """,
+        "expected": """
+            <t>
+                <t t-set="b" t-value="'b'"/>
+                <t t-call-slot="default" a="this.a" b="b"/>
+            </t>
+        """,
+    },
+    {
+        "name": "t-call-slot props",
+        "content": """
+            <t>
+                <t t-set="b" t-value="'b'"/>
+                <t t-call-slot="default" a="a" b="b"/>
+            </t>
+        """,
+        "expected": """
+            <t>
+                <t t-set="b" t-value="'b'"/>
+                <t t-call-slot="default" a="this.a" b="b"/>
+            </t>
+        """,
     },
     {
         "name": "t-key",
@@ -2479,17 +2534,22 @@ def run_test_group(name, tests, func):
         if WHITELIST and name not in WHITELIST:
             continue
 
-        output = func(test)
+        try:
+            output = func(test)
 
-        if output != test["expected"]:
+            if output != test["expected"]:
+                fail += 1
+                print(f"{name}: fail")  # noqa: T201
+                print("Expected:")  # noqa: T201
+                print(test["expected"])  # noqa: T201
+                print("Output:")  # noqa: T201
+                print(output)  # noqa: T201
+            else:
+                success += 1
+        except Exception as e:  # noqa: BLE001
             fail += 1
             print(f"{name}: fail")  # noqa: T201
-            print("Expected:")  # noqa: T201
-            print(test["expected"])  # noqa: T201
-            print("Output:")  # noqa: T201
-            print(output)  # noqa: T201
-        else:
-            success += 1
+            print(e)
 
     return success, fail
 
