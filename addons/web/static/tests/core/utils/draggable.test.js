@@ -19,7 +19,7 @@ test("Parameters error handling", async () => {
     const mountList = async (setupList) => {
         class List extends Component {
             static template = xml`
-                <div t-ref="root" class="root">
+                <div t-custom-ref="root" class="root">
                     <ul class="list">
                         <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" t-out="i" class="item" />
                     </ul>
@@ -72,7 +72,7 @@ test("Simple dragging in single group", async () => {
 
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <ul class="list">
                     <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" t-out="i" class="item" />
                 </ul>
@@ -120,7 +120,7 @@ test("Dynamically disable draggable feature", async () => {
     const state = reactive({ enableDrag: true });
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <ul class="list">
                     <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" t-out="i" class="item" />
                 </ul>
@@ -164,7 +164,7 @@ test("Ignore specified elements", async () => {
 
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <ul class="list">
                     <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" class="item">
                         <span class="ignored" t-out="i" />
@@ -211,7 +211,7 @@ test("Ignore specific elements in a nested draggable", async () => {
     class List extends Component {
         static components = { List };
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <ul class="list">
                     <li t-foreach="[0, 1]" t-as="i" t-key="i"
                         t-attf-class="item parent #{ i % 2 ? 'ignored' : 'not-ignored' }">
@@ -272,7 +272,7 @@ test("Dragging element with touch event", async () => {
     mockTouch(true);
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <ul class="list">
                     <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" t-out="i" class="item" />
                 </ul>
@@ -313,7 +313,7 @@ test("Dragging element with touch event: initiation delay can be overrided", asy
     mockTouch(true);
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <ul class="list">
                     <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" t-out="i" class="item" />
                 </ul>
@@ -351,7 +351,7 @@ test.tags("desktop");
 test("Elements are confined within their container and keep their initial width and height", async () => {
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root" style="width: 800px; height: 600px;">
+            <div t-custom-ref="root" class="root" style="width: 800px; height: 600px;">
                 <ul class="list list-unstyled m-0 d-flex flex-column">
                     <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" t-out="i" class="item w-50 h-100" />
                 </ul>
@@ -423,7 +423,7 @@ test("Focusing is not lost after clicking", async () => {
 
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <input type="checkbox" class="item">Something</input>
             </div>`;
         static props = ["*"];
@@ -444,7 +444,7 @@ test("Focusing is not lost after clicking", async () => {
 test("allowDisconnected option", async () => {
     class List extends Component {
         static template = xml`
-            <div t-ref="root" class="root">
+            <div t-custom-ref="root" class="root">
                 <button class="handle" t-if="state.hasHandle">Handle</button>
                 <ul class="list list-unstyled m-0 d-flex flex-column">
                     <li t-foreach="[1, 2, 3]" t-as="i" t-key="i" t-out="i" class="item w-50 h-100" />
@@ -480,7 +480,7 @@ test("allowDisconnected option", async () => {
 test("draggable in iframe", async () => {
     class List extends Component {
         static template = xml`
-        <div t-ref="root" class="root">
+        <div t-custom-ref="root" class="root">
             <iframe class="mydroppable" t-att-srcdoc="srcdoc" />
         </div>`;
         static props = ["*"];
@@ -543,7 +543,7 @@ test("dragging element in iframe offset", async () => {
     const IDENTITY_MATRIX = new DOMMatrixReadOnly();
     class List extends Component {
         static template = xml`
-        <div t-ref="root" class="root">
+        <div t-custom-ref="root" class="root">
             <div class="p" />
             <div style="width: 50px;height:500px;"/>
             <div class="d-flex flex-row">

@@ -43,7 +43,7 @@
             </t>
         </Dropdown>
         <span t-attf-class="o_wo_status {{statusColor}}" t-elif="this.props.display === 'bubble'"/>
-        <span t-esc="formattedValue" class="badge rounded-pill" t-attf-class="{{statusColor}}" t-elif="this.props.display === 'badge'"/>
+        <span t-out="formattedValue" class="badge rounded-pill" t-attf-class="{{statusColor}}" t-elif="this.props.display === 'badge'"/>
     </t>
 
 </templates>

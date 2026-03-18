@@ -20,13 +20,13 @@
                 data-available-offline=""
                 t-on-click="() => this.offlineService.checkConnection()"
                 data-tooltip="Click to check connection and Sync">
-                <i t-attf-class="{{ labelIcon }} me-1"/><t t-esc="labelText"></t><i t-if="offlineService.hasScheduledCalls" class="fa fa-caret-down ms-2"/>
+                <i t-attf-class="{{ labelIcon }} me-1"/><t t-out="labelText"></t><i t-if="offlineService.hasScheduledCalls" class="fa fa-caret-down ms-2"/>
             </button>
             <t t-set-slot="content">
                 <div class="o_offline_systray_content px-2">
                     <t t-foreach="groupEntries" t-as="entry" t-key="entry[0]">
                         <div class="o_horizontal_separator text-uppercase fw-bolder small mb-1">
-                            <span t-esc="entry[0]"/> 
+                            <span t-out="entry[0]"/> 
                         </div>
                         <t t-foreach="entry[1]" t-as="element" t-key="element.id">
                             <DropdownItem
@@ -44,14 +44,14 @@
                                     <i t-if="element.error" class="o_button_icon fa fa-fw fa-exclamation-circle text-danger me-1"/>
                                     <span
                                         t-att-title="element.displayName"
-                                        t-esc="element.displayName"/>
+                                        t-out="element.displayName"/>
                                 </div>
                                 <div
                                     class="ms-auto"
                                     t-att-data-tooltip-template="'web.OfflineSystrayTooltip'"
                                     t-att-data-tooltip-info="element.tooltip">
                                     <span t-attf-class="o_tag mw-100 o_badge badge rounded-pill {{ 'o_tag_color_' + element.statusColor }}">
-                                        <t class="o_tag_badge_text o_badge_text" t-esc="element.status"/>
+                                        <t class="o_tag_badge_text o_badge_text" t-out="element.status"/>
                                     </span>
                                 </div>
                                 <div>
@@ -71,11 +71,11 @@
 
     <t t-name="web.OfflineSystrayTooltip">
         <div>
-            On <t t-esc="timeStamp"/>
+            On <t t-out="timeStamp"/>
         </div>
         <t t-foreach="details" t-as="entry" t-key="entry[0]">
             <div>
-                - <t t-esc="entry[0]"/>: <t t-esc="entry[1]"/><t t-if="entry[2]"> → <t t-esc="entry[2]"/></t>
+                - <t t-out="entry[0]"/>: <t t-out="entry[1]"/><t t-if="entry[2]"> → <t t-out="entry[2]"/></t>
             </div>
         </t>
     </t>

@@ -13,7 +13,7 @@
         <t t-if="props.readonly and !['boolean', 'many2one', 'many2many', 'tags', 'html', 'signature'].includes(props.type)">
             <span t-if="displayValue" t-out="displayValue"/>
         </t>
-        <div t-else="" t-ref="root">
+        <div t-else="" t-custom-ref="root">
             <t t-if="props.type === 'boolean'">
                 <CheckBox
                     id="props.id"
