@@ -933,6 +933,11 @@ class DomainCondition(Domain):
             field = model._fields[field_name]
         except KeyError:
             self._raise("Invalid field %s.%s", model._name, field_name)
+        if field.type == 'properties' and not property_name:
+            self._raise(
+                "Properties field %s.%s has an invalid or missing property",
+                model._name, field_name,
+            )
         # cache field value, with this hack to bypass immutability
         object.__setattr__(self, '_field_instance', field)
         return field, property_name or ''
