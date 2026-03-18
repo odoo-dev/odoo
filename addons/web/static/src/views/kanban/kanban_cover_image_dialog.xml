@@ -19,7 +19,7 @@
                 </t>
             </div>
             <t t-else="">There is no available image to be set as cover.</t>
-            <t t-set-slot="footer" t-slot-scope="dialog">
+            <t t-set-slot="footer" t-call-slot-scope="dialog">
                 <FileInput
                     autoOpen="!attachments.length"
                     acceptedFileExtensions="'image/*'"

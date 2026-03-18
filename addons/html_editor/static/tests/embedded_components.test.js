@@ -1,3 +1,4 @@
+import { useRef, useState } from "@web/owl2/utils";
 import {
     Counter,
     embedding,
@@ -27,8 +28,6 @@ import {
     onWillDestroy,
     onWillStart,
     onWillUnmount,
-    useRef,
-    useState,
     xml,
 } from "@odoo/owl";
 import { EmbeddedComponentPlugin } from "../src/others/embedded_component_plugin";

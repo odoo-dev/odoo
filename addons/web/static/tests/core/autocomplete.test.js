@@ -810,7 +810,7 @@ test("source with option slot", async () => {
     class Parent extends Component {
         static template = xml`
             <AutoComplete value="''" sources="sources">
-                <t t-set-slot="use_this_slot" t-slot-scope="scope">
+                <t t-set-slot="use_this_slot" t-call-slot-scope="scope">
                     <div class="slot_item">
                         <t t-esc="scope.data.id"/>: <t t-esc="scope.label"/>
                     </div>

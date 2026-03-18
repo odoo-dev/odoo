@@ -9,7 +9,7 @@
                 <img class="rounded" t-attf-src="/web/image/{{relation}}/{{value.id}}/avatar_128?unique={{value.write_date.toMillis()}}"/>
             </span>
             <Many2One t-props="m2oProps" cssClass="'w-100'">
-                <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                <t t-set-slot="autoCompleteItem" t-call-slot-scope="autoCompleteItemScope">
                     <span class="o_avatar_many2x_autocomplete o_avatar d-flex align-items-center">
                         <img class="rounded me-1" t-attf-src="/web/image/{{relation}}/{{autoCompleteItemScope.record.id}}/avatar_128"/>
                         <span t-out="autoCompleteItemScope.label"/>

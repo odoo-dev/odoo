@@ -3,7 +3,7 @@
 
     <t t-name="web.AnimatedNumber">
         <div class="o_animated_number ms-2 text-900 text-nowrap cursor-default" t-att-class="state.value !== props.value ? props.animationClass : ''" t-att-data-tooltip="props.title">
-            <t t-slot="prefix"/>
+            <t t-call-slot="prefix"/>
             <b t-out="format(state.value)" />
             <sup
                 t-if="props.currencies?.length > 1"

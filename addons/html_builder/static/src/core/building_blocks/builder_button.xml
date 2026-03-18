@@ -21,7 +21,7 @@
             <Image t-if="props.iconImg" src="props.iconImg" attrs="{alt:props.iconImgAlt}"/>
             <i t-if="props.icon" t-att-class="iconClassName" role="img"/>
             <t t-if="props.label"  t-out="props.label"/>
-            <t t-slot="default"/>
+            <t t-call-slot="default"/>
         </button>
     </BuilderComponent>
 </t>

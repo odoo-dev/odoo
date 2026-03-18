@@ -93,7 +93,7 @@ export class InternalTabHeader extends Component {
  * API simple.
  */
 export class TabHeader extends Component {
-    static template = xml`<InternalTabHeader id="props.id" title="props.title" headerRefs="env.tabsContext.headerRefs"><t t-slot="default"/></InternalTabHeader>`;
+    static template = xml`<InternalTabHeader id="props.id" title="props.title" headerRefs="env.tabsContext.headerRefs"><t t-call-slot="default"/></InternalTabHeader>`;
     static components = { InternalTabHeader };
     static props = TAB_HEADER_PROPS;
 }

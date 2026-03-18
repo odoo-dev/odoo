@@ -115,7 +115,7 @@ test("Transition HOC", async () => {
     });
     class Parent extends Component {
         static template = xml`
-            <Transition name="'test'" visible="state.show" immediate="true" t-slot-scope="transition" onLeave="onLeave">
+            <Transition name="'test'" visible="state.show" immediate="true" t-call-slot-scope="transition" onLeave="onLeave">
                 <div t-att-class="transition.className"/>
             </Transition>
         `;

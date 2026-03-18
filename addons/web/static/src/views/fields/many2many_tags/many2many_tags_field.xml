@@ -7,7 +7,7 @@
             t-att-class="{'o_tags_input o_input o_input_box': !props.readonly}"
             t-custom-ref="many2ManyTagsField"
         >
-            <TagsList t-props="this.tagsListProps" t-slot-scope="tag">
+            <TagsList t-props="this.tagsListProps" t-call-slot-scope="tag">
                 <Tag t-props="tag.props"/>
             </TagsList>
             <div t-if="showM2OSelectionField" class="o_field_many2many_selection" t-custom-ref="autoComplete">
@@ -26,7 +26,7 @@
                     nameCreateField="props.nameCreateField"
                     searchThreshold="props.searchThreshold"
                 >
-                    <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                    <t t-set-slot="autoCompleteItem" t-call-slot-scope="autoCompleteItemScope">
                         <span t-att-class="{ 'fw-bold': isSelected(autoCompleteItemScope.record) }">
                             <span t-out="autoCompleteItemScope.label"/>
                         </span>

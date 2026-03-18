@@ -9,7 +9,7 @@
             onInput="this.props.update"
             dropdown="true"
             autofocus="true">
-            <t t-set-slot="option" t-slot-scope="optionScope">
+            <t t-set-slot="option" t-call-slot-scope="optionScope">
                 <div class="d-flex align-items-center">
                     <img t-attf-src="/web/image/hr.employee.public/{{optionScope.data.id}}/avatar_128"
                             loading="lazy"

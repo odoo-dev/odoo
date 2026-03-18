@@ -25,7 +25,7 @@
                             fields="this.props.node.model.fields"
                             activeFields="this.props.node.model.activeFields"
                             values="this.props.node.data"
-                            t-slot-scope="data"
+                            t-call-slot-scope="data"
                     >
                         <t t-call="{{ this.templates['hierarchy-box'] }}" t-call-context="this.getRenderingContext(data)"/>
                     </Record>

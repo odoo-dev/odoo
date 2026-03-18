@@ -3,7 +3,7 @@
     <t t-name="crm.ShareTargetItem" t-inherit="web.ShareTargetItem" t-inherit-mode="primary">
         <xpath expr="//div[@t-if='this.hasMultiCompanies']" position="after">
             <div t-if="this.hasMultiTeams" class="d-flex flex-column p-2">
-                <Record t-props="this.teamRecordProps" t-slot-scope="data">
+                <Record t-props="this.teamRecordProps" t-call-slot-scope="data">
                     <h3>In sales team</h3>
                     <Field id="'team'" name="'team'" record="data.record" context="this.context" canOpen="false"/>
                 </Record>

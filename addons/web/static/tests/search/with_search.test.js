@@ -262,7 +262,7 @@ test("react to prop 'domain' changes", async () => {
     class Parent extends Component {
         static props = ["*"];
         static template = xml`
-            <WithSearch t-props="searchState" t-slot-scope="search">
+            <WithSearch t-props="searchState" t-call-slot-scope="search">
                 <TestComponent domain="search.domain"/>
             </WithSearch>
         `;
@@ -318,7 +318,7 @@ test("search defaults are removed from context at reload", async function () {
     class Parent extends Component {
         static props = ["*"];
         static template = xml`
-            <WithSearch t-props="searchState" t-slot-scope="search">
+            <WithSearch t-props="searchState" t-call-slot-scope="search">
                 <TestComponent
                     context="search.context"
                 />

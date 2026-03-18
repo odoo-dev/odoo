@@ -7,7 +7,7 @@
             <t t-set-slot="avatar">
                 <Avatar cssClass="'o_m2o_avatar'" resModel="relation" resId="this.value.id" uniqueId="this.uniqueId" noSpacing="true" displayName="this.displayName"/>
             </t>
-            <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+            <t t-set-slot="autoCompleteItem" t-call-slot-scope="autoCompleteItemScope">
                 <span class="o_avatar_many2x_autocomplete o_avatar d-flex align-items-center">
                     <img class="rounded me-1" t-attf-src="/web/image/{{relation}}/{{autoCompleteItemScope.record.id}}/avatar_128"/>
                     <span t-out="autoCompleteItemScope.label"/>

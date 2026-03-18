@@ -23,7 +23,7 @@
                 getIds.bind="getIds"
                 update.bind="update"
             >
-                <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                <t t-set-slot="autoCompleteItem" t-call-slot-scope="autoCompleteItemScope">
                     <span t-if="isAvatarModel" class="o_avatar_many2x_autocomplete o_avatar d-flex align-items-center">
                         <img class="rounded me-1" t-attf-src="/web/image/{{props.resModel}}/{{autoCompleteItemScope.data.record.id}}/avatar_128"/>
                         <t t-out="autoCompleteItemScope.label"/>

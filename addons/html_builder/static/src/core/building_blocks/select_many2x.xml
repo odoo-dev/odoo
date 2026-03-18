@@ -16,7 +16,7 @@
         togglerClass="'o-hb-selectMany2X-toggle btn-secondary'"
     >
         <t t-out="props.message"/>
-        <t t-set-slot="bottomArea" t-slot-scope="select">
+        <t t-set-slot="bottomArea" t-call-slot-scope="select">
             <a
                 t-if="state.hasMore"
                 t-on-click="() => this.searchMore(select.data.searchValue)"

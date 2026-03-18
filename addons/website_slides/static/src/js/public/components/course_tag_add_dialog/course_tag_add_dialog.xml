@@ -23,7 +23,7 @@
                     value="this.choices.tagId"
                 >
                     <t t-out="this.displayTagValue"/>
-                    <t t-set-slot="bottomArea" t-slot-scope="select">
+                    <t t-set-slot="bottomArea" t-call-slot-scope="select">
                         <DropdownItem
                             t-if="select.data.searchValue and this.state.canCreateTag"
                             class="'btn text-primary'"
@@ -44,7 +44,7 @@
                     value="this.choices.tagGroupId"
                 >
                     <t t-out="this.displayTagGroupValue"/>
-                    <t t-set-slot="bottomArea" t-slot-scope="select">
+                    <t t-set-slot="bottomArea" t-call-slot-scope="select">
                         <DropdownItem
                             t-if="select.data.searchValue and this.state.canCreateTagGroup"
                             class="'btn text-primary'"

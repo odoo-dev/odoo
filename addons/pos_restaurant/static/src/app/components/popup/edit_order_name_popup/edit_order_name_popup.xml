@@ -6,7 +6,7 @@
                 <ListContainer
                     t-if="this.items"
                     items="this.items"
-                    t-slot-scope="scope"
+                    t-call-slot-scope="scope"
                     class="'mb-3 h-100'"
                     forceSmall="false"
                 >

@@ -37,7 +37,7 @@
                 onClick.bind="this.onClickAvatarStack"
                 personas="this.sessions.map((s) => s.channel_member_id?.persona).filter(p => p)"
             >
-                <t t-if="this.compact" t-set-slot="avatarExtraInfo" t-slot-scope="scope">
+                <t t-if="this.compact" t-set-slot="avatarExtraInfo" t-call-slot-scope="scope">
                     <div class="o-mail-DiscussSidebarCallParticipants-status small" t-att-class="{
                         'position-absolute bg-inherit p-0 rounded-circle o-compact d-flex o-xsmaller text-start': this.compact,
                         'ms-1 d-flex align-items-center justify-content-center': !this.compact,

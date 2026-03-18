@@ -162,7 +162,7 @@
                         <div t-if="this.isOrderSynced" t-att-class="{ 'highlight text-danger': !this.getHasItemsToRefund() }" class="py-2 px-3 rounded-3 bg-view text-center">
                             Select the product(s) to refund and set the quantity
                         </div>
-                        <OrderDisplay order="_selectedSyncedOrder" t-if="_selectedSyncedOrder" t-slot-scope="scope">
+                        <OrderDisplay order="_selectedSyncedOrder" t-if="_selectedSyncedOrder" t-call-slot-scope="scope">
                             <t t-set="line" t-value="scope.line" />
                             <t t-set="qty" t-value="line.order_id?.uiState?.lineToRefund?.[line.uuid]?.qty" />
                             <Orderline line="line" t-on-click="() => this.onClickOrderline(line)" toRefund="qty" class="{'selected': line.id === _selectedOrderlineId}">

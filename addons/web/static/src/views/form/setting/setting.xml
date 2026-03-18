@@ -4,7 +4,7 @@
         <div t-att-class="classNames" t-att-id="props.id">
             <div class="o_setting_left_pane" t-att-data-tooltip="props.title" data-tooltip-delay="800">
                 <t t-if="props.fieldName and fieldType==='boolean'">
-                    <t t-slot="fieldSlot"/>
+                    <t t-call-slot="fieldSlot"/>
                 </t>
             </div>
             <div class="o_setting_right_pane" t-att-data-tooltip="props.title" data-tooltip-delay="800">
@@ -26,9 +26,9 @@
                 </t>
                 <div class="mt16">
                     <t t-if="props.fieldName and fieldType!=='boolean'">
-                        <t t-slot="fieldSlot"/>
+                        <t t-call-slot="fieldSlot"/>
                     </t>
-                    <t t-slot="default"/>
+                    <t t-call-slot="default"/>
                 </div>
             </div>
         </div>

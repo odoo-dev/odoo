@@ -7,7 +7,7 @@
             input="this.inputRef"
             placeholder="this.props.placeholder || ''"
         >
-            <t t-set-slot="option" t-slot-scope="optionScope">
+            <t t-set-slot="option" t-call-slot-scope="optionScope">
                 <div class="text-wrap">
                     <strong t-out="optionScope.label"/>
                     <div t-out="optionScope.data.description"/>

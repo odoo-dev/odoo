@@ -3,7 +3,7 @@
     <t t-name="point_of_sale.OrderTabs">
         <ListContainer items="this.props.orders.toSorted((a, b) => a.getName().localeCompare(b.getName()))"
             onClickPlus="() => this.newFloatingOrder()"
-            t-slot-scope="scope"
+            t-call-slot-scope="scope"
             class="this.props.class"
             forceSmall="this.ui.isSmall and !this.env.inDialog"
         >

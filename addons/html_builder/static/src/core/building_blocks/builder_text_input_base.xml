@@ -30,7 +30,7 @@
             t-att-value="state.value"
             t-att-style="props.style"
         />
-        <t t-slot="default"/>
+        <t t-call-slot="default"/>
     </div>
 </t>
 

@@ -6,7 +6,7 @@
                 <img class="icon" t-att-src="props.imgurl" alt="Search"></img>
                 <span class="appName"><t t-out="props.string"/></span>
             </div>
-            <t t-slot="default"/>
+            <t t-call-slot="default"/>
         </div>
     </t>
 </templates>

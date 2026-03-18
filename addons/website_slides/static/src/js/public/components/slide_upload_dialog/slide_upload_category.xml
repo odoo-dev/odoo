@@ -45,7 +45,7 @@
                                 />
                             </div>
                             <div t-else="" class="p-3">
-                                <t t-slot="tutorial"/>
+                                <t t-call-slot="tutorial"/>
                             </div>
                         </div>
                     </div>
@@ -101,7 +101,7 @@
                 onSelect.bind="this.onCategorySelect"
                 placeholder.translate="Select or create a category"
             >
-                <t t-set-slot="bottomArea" t-slot-scope="select">
+                <t t-set-slot="bottomArea" t-call-slot-scope="select">
                     <DropdownItem
                             t-if="select.data.searchValue and !this.choiceExists(select.data.searchValue, select.data.choices)"
                             class="'btn text-primary'"
@@ -122,7 +122,7 @@
                 onSelect.bind="this.onTagsSelect"
                 placeholder.translate="Select or create tags"
             >
-                <t t-set-slot="bottomArea" t-slot-scope="select">
+                <t t-set-slot="bottomArea" t-call-slot-scope="select">
                     <DropdownItem
                             t-if="select.data.searchValue and !this.choiceExists(select.data.searchValue, select.data.choices)"
                             class="'btn text-primary'"

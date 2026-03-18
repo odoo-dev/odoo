@@ -10,7 +10,7 @@
                 fullHeight="true"
                 darkBackground="true">
                 <t t-out="state.shapeLabel"/>
-                <t t-set-slot="content" t-slot-scope="panel">
+                <t t-set-slot="content" t-call-slot-scope="panel">
                     <ShapeSelector
                         onClose="panel.close"
                         shapeActionId="'setImageShape'"

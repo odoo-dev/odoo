@@ -49,7 +49,7 @@
                     </thead>
                     <tbody>
                         <tr t-foreach="this.state.formattedData" t-as="line" t-key="line.id" t-att-id="line_index" t-att-name="'line_' + line_index">
-                            <Record t-props="this.recordProps(line)" t-slot-scope="data">
+                            <Record t-props="this.recordProps(line)" t-call-slot-scope="data">
                                 <t t-foreach="Object.keys(data.record.fields).filter((f) => f.startsWith('x_plan') || f == 'account_id')" t-as="field" t-key="field">
                                     <td t-att-style="this.state.update_plan[field] ? '' : '--table-bg-state: var(--table-hover-bg);'">
                                         <Field t-if="this.state.update_plan[field]"

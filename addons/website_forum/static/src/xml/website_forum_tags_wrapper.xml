@@ -13,7 +13,7 @@
         placeholder.translate="Tags"
         disabled="this.props.isReadOnly"
         searchPlaceholder.translate="Please enter 2 or more characters">
-        <t t-set-slot="bottomArea" t-slot-scope="select">
+        <t t-set-slot="bottomArea" t-call-slot-scope="select">
             <DropdownItem
                 t-if="this.showCreateOption(select.data.searchValue)"
                 onSelected="() => this.onCreateOption(select.data.searchValue)"

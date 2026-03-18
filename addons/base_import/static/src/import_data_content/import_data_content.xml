@@ -78,7 +78,7 @@
                                     </t>
                                     <span t-else="" class="text-warning">To import, select a field...</span>
 
-                                    <t t-set-slot="choice" t-slot-scope="choice">
+                                    <t t-set-slot="choice" t-call-slot-scope="choice">
                                         <div t-att-class="`${choice.data.value and choice.data.value.required ? 'fw-bolder text-decoration-underline' : ''}`">
                                             <i class="o_import_field_choice o_import_field_icon position-relative d-inline-block align-middle me-2"
                                                 t-att-class="choice.data.iconClass"/>

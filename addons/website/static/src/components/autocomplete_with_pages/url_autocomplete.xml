@@ -9,7 +9,7 @@
             sources="this.sources"
             targetDropdown="this.props.targetDropdown"
         >
-            <t t-set-slot="option" t-slot-scope="optionScope">
+            <t t-set-slot="option" t-call-slot-scope="optionScope">
                 <div t-att-class="{
                     'fw-bold text-capitalize p-2': optionScope.data.separator,
                 }">

@@ -53,7 +53,7 @@
                     <button type="button" t-attf-class="o_select_menu_toggler d-flex border btn btn-light w-100 bg-light {{ props.togglerClass }}" t-att-disabled="props.disabled">
                         <span class="o_select_menu_toggler_slot text-start text-truncate">
                             <span t-if="props.placeholder and !props.value" class="text-muted" t-out="props.placeholder"/>
-                            <t t-slot="default" />
+                            <t t-call-slot="default" />
                         </span>
                         <span t-if="canDeselect" t-on-click.stop="onInputClear" class="o_select_menu_toggler_clear position-absolute top-50 end-0 me-3">
                             <i class="fa fa-times"></i>
@@ -79,7 +79,7 @@
                                 <t t-set="choice_index" t-value="choice_index" />
                             </t>
                         </t>
-                        <t t-if="props.slots and props.slots.bottomArea" t-slot="bottomArea" data="state"/>
+                        <t t-if="props.slots and props.slots.bottomArea" t-call-slot="bottomArea" data="state"/>
                     </div>
                 </t>
             </Dropdown>
@@ -101,7 +101,7 @@
             class="this.getItemClass(choice)"
             attrs="{ 'data-choice-index': choice_index }"
         >
-            <t t-if="props.slots and props.slots.choice" t-slot="choice" data="choice"/>
+            <t t-if="props.slots and props.slots.choice" t-call-slot="choice" data="choice"/>
             <t t-else="">
                 <div t-out="choice.label" />
             </t>

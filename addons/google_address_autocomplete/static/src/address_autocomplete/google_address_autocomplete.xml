@@ -10,7 +10,7 @@
             inputDebounceDelay="350"
             input="this.input"
         >
-            <t t-set-slot="option" t-slot-scope="optionScope">
+            <t t-set-slot="option" t-call-slot-scope="optionScope">
                 <strong t-out="optionScope.label"/>
             </t>
         </AutoComplete>

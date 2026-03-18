@@ -74,7 +74,7 @@ function filterPropsForComponent(Component, props) {
 export async function mountWithSearch(componentConstructor, searchProps = {}, config = {}) {
     class ComponentWithSearch extends Component {
         static template = xml`
-            <WithSearch t-props="withSearchProps" t-slot-scope="search">
+            <WithSearch t-props="withSearchProps" t-call-slot-scope="search">
                 <t t-component="component" t-props="getProps(search)"/>
             </WithSearch>
         `;
@@ -155,9 +155,7 @@ export function isItemSelected(label) {
  */
 export function isOptionSelected(itemLabel, optionLabel) {
     const { parentElement: root } = queryOne`.o_menu_item:text(${itemLabel})`;
-    return queryOne(`.o_item_option:text(${optionLabel})`, { root }).classList.contains(
-        "selected"
-    );
+    return queryOne(`.o_item_option:text(${optionLabel})`, { root }).classList.contains("selected");
 }
 
 export function getMenuItemTexts() {

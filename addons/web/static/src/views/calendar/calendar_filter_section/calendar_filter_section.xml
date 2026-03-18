@@ -42,7 +42,7 @@
                     </t>
                 </div>
                 <AutoComplete t-if="section.canAddFilter" t-props="autoCompleteProps">
-                    <t t-set-slot="option" t-slot-scope="optionScope">
+                    <t t-set-slot="option" t-call-slot-scope="optionScope">
                         <t t-if="optionScope.data.id and section.avatar.field">
                             <img class="rounded me-1 o_avatar" t-attf-src="/web/image/{{ section.avatar.model }}/{{ optionScope.data.id }}/{{ section.avatar.field }}"/>
                         </t>

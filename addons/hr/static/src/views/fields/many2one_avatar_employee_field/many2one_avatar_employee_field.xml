@@ -8,7 +8,7 @@
                 <AvatarEmployee cssClass="'o_m2o_avatar o_input_box_overlay_start'" resModel="this.relation" resId="value.id" noSpacing="true" uniqueId="this.uniqueId"/>
             </t>
             <Many2One t-props="this.m2oProps">
-                <t t-set-slot="autoCompleteItem" t-slot-scope="autoCompleteItemScope">
+                <t t-set-slot="autoCompleteItem" t-call-slot-scope="autoCompleteItemScope">
                     <div class="o_avatar_many2x_autocomplete d-flex align-items-center">
                         <AvatarEmployee resModel="this.relation" resId="autoCompleteItemScope.record.id" canOpenPopover="false"/>
                         <span t-out="autoCompleteItemScope.label"/>

@@ -45,7 +45,7 @@
                             <div class="d-flex align-items-center">
                                 <img class="o_avatar me-1" t-attf-src="/web/static/src/views/fields/properties/icons/{{this.state.propertyDefinition.type}}.png" style="--Avatar-size: 20px;"/>
                                 <SelectMenu autoSort="false" choices="this.availablePropertyTypes" id="this.getUniqueDomID('type')" menuClass="'o_field_property_definition_type_menu'" onSelect.bind="this.onPropertyTypeChange" required="true" togglerClass="'ps-1'" value="this.state.propertyDefinition.type">
-                                    <t t-set-slot="choice" t-slot-scope="choiceScope">
+                                    <t t-set-slot="choice" t-call-slot-scope="choiceScope">
                                         <div class="d-flex align-items-center" t-att-data-tooltip="choiceScope.data.tooltip">
                                             <img class="o_avatar me-2" t-attf-src="/web/static/src/views/fields/properties/icons/{{choiceScope.data.value}}.png" style="--Avatar-size: 20px;"/>
                                             <span t-out="choiceScope.data.label"/>

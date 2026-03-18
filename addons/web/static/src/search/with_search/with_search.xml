@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
   <t t-name="web.WithSearch">
-    <t t-slot="default"
+    <t t-call-slot="default"
       context="searchModel.context"
       domain="searchModel.domain"
       groupBy="searchModel.groupBy"

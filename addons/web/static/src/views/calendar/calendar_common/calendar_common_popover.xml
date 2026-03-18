@@ -45,7 +45,7 @@
             </li>
         </ul>
         <ul class="list-group list-group-flush o_cw_popover_fields_secondary">
-            <Record resModel="props.model.resModel" resId="props.record.id" fields="props.model.fields" activeFields="activeFields" mode="'readonly'" values="props.record.rawRecord" t-slot-scope="slot">
+            <Record resModel="props.model.resModel" resId="props.record.id" fields="props.model.fields" activeFields="activeFields" mode="'readonly'" values="props.record.rawRecord" t-call-slot-scope="slot">
                 <t t-foreach="Object.keys(props.model.popoverFieldNodes)" t-as="fieldId" t-key="fieldId">
                     <t t-set="fieldInfo" t-value="props.model.popoverFieldNodes[fieldId]"/>
                     <t t-set="fieldType" t-value="props.model.fields[fieldId].type"/>

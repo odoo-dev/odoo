@@ -26,7 +26,7 @@
                 <t t-set-slot="control-panel-navigation-additional">
                     <t t-component="this.searchBarToggler.component" t-props="this.searchBarToggler.props"/>
                 </t>
-                <t t-set-slot="default" t-slot-scope="layout">
+                <t t-set-slot="default" t-call-slot-scope="layout">
                 <t t-if="this.displayNoContent">
 					<ActionHelper noContentHelp="this.props.info.noContentHelp"/>
                 </t>

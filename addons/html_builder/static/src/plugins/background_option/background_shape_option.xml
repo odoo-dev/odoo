@@ -10,7 +10,7 @@
                 fullHeight="true"
                 darkBackground="true">
                 <t t-out="state.shapeName"/>
-                <t t-set-slot="content" t-slot-scope="panel">
+                <t t-set-slot="content" t-call-slot-scope="panel">
                     <BackgroundShapeSelector
                         onClose="panel.close"
                         shapeActionId="'setBackgroundShape'"

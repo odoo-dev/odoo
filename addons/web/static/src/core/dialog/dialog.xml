@@ -12,7 +12,7 @@
                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" t-attf-class="modal-{{ size }}">
                     <div class="modal-content" t-att-class="props.contentClass" t-att-style="contentStyle">
                         <header t-if="props.header" class="modal-header">
-                            <t t-slot="header" close="data.close" isFullscreen="isFullscreen">
+                            <t t-call-slot="header" close="data.close" isFullscreen="isFullscreen">
                                 <t t-call="web.Dialog.header">
                                     <t t-set="fullscreen" t-value="isFullscreen"/>
                                     <t t-set="onExpand" t-value="props.onExpand"/>
@@ -20,10 +20,10 @@
                             </t>
                         </header>
                         <main class="modal-body" t-attf-class="{{ props.bodyClass }}">
-                            <t t-slot="default" close="() => this.data.close()" />
+                            <t t-call-slot="default" close="() => this.data.close()" />
                         </main>
                         <footer t-if="props.footer" class="modal-footer d-empty-none justify-content-around justify-content-md-start flex-wrap gap-2 w-100">
-                            <t t-slot="footer" close="() => this.data.close()"/>
+                            <t t-call-slot="footer" close="() => this.data.close()"/>
                         </footer>
                     </div>
                 </div>

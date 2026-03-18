@@ -3,7 +3,7 @@
     <t t-name="account.ShareTargetItem" t-inherit="web.ShareTargetItem" t-inherit-mode="primary">
         <xpath expr="//div[@t-if='this.hasMultiCompanies']" position="after">
             <div t-if="this.hasMultiJournals" class="d-flex flex-column p-2">
-                <Record t-props="this.journalRecordProps" t-slot-scope="data">
+                <Record t-props="this.journalRecordProps" t-call-slot-scope="data">
                     <h3>In Journal</h3>
                     <Field id="'journal'" name="'journal'" record="data.record" context="this.context" canOpen="false"/>
                 </Record>

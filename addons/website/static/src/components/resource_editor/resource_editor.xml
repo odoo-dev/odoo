@@ -21,7 +21,7 @@
                         <t t-set="resource" t-value="this.state.currentResource"/>
                         <t t-set="label" t-value="this.state.type === 'xml' ? resource.name : resource.label"/>
                     </t>
-                    <t t-set-slot="choice" t-slot-scope="scope">
+                    <t t-set-slot="choice" t-call-slot-scope="scope">
                         <t t-call="website.ResourceEditor.ResourceLabel">
                             <t t-set="resource" t-value="this.state.resources[this.state.type][scope.data.value]"/>
                             <t t-set="label" t-value="scope.data.label"/>

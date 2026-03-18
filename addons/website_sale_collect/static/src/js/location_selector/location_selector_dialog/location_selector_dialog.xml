@@ -39,7 +39,7 @@
                 <span class="visually-hidden">
                     Selected country: <span aria-live="polite" t-out="this.state.selectedCountryData.name"/>
                 </span>
-                <t t-set-slot="choice" t-slot-scope="choice">
+                <t t-set-slot="choice" t-call-slot-scope="choice">
                     <span class="d-flex align-items-center text-truncate">
                         <img
                             t-att-src="choice.data.value.image_url"
