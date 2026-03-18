@@ -40,13 +40,13 @@ export class Chatter extends Component {
         onMounted(this._onMounted);
         onWillUpdateProps((nextProps) => {
             this.state.disabled = !nextProps.threadId;
-            if (
+            const threadChanged =
                 this.props.threadId !== nextProps.threadId ||
-                this.props.threadModel !== nextProps.threadModel
-            ) {
+                this.props.threadModel !== nextProps.threadModel;
+            if (threadChanged) {
                 this.changeThread(nextProps.threadModel, nextProps.threadId);
             }
-            if (!this.env.chatter || this.env.chatter?.fetchThreadData) {
+            if (!this.env.chatter || this.env.chatter?.fetchThreadData || threadChanged) {
                 if (this.env.chatter) {
                     this.env.chatter.fetchThreadData = false;
                 }
