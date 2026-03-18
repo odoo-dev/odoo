@@ -1,8 +1,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo import Command
 from odoo.addons.bus.tests.common import BusResult
 from odoo.addons.mail.tests import common
+from odoo.fields import Domain
 from odoo.tests import HttpCase, new_test_user, tagged, users
+from odoo.tests.common import RecordCapturer
 
 
 @tagged("mail_message")
@@ -64,3 +67,44 @@ class TestMailMessage(common.MailCommon, HttpCase):
             ],
         ):
             message.unlink()
+
+    def test_mail_message_partner_ids(self):
+        """ Test search, compute, inverse for the partner_ids field. """
+        Message = self.env['mail.message']
+        all_partners = self.partner_root | self.partner_admin | self.partner_employee
+        empty_partners = self.env['res.partner']
+        with (RecordCapturer(Message) as capture):
+            for create_values, (expected_partner_ids, expected_partner_to_ids, expected_partners_cc_ids) in (
+                    ({'partner_to_ids': self.partner_root, 'partner_cc_ids': self.partner_employee},
+                     (self.partner_root | self.partner_employee, self.partner_root, self.partner_employee)),
+                    ({'partner_to_ids': [Command.link(self.partner_root.id), Command.link(self.partner_admin.id)],
+                      'partner_cc_ids': [Command.link(self.partner_employee.id)]},
+                     (all_partners, self.partner_root | self.partner_admin, self.partner_employee)),
+                    ({'partner_ids': False},
+                     (empty_partners, empty_partners, empty_partners)),
+                    ({'partner_ids': all_partners, 'partner_cc_ids': self.partner_employee},
+                     (all_partners, self.partner_root | self.partner_admin, self.partner_employee)),
+            ):
+                with self.subTest(create_values=create_values):
+                    message = self.env['mail.message'].create(create_values)
+                    self.assertEqual(message.partner_ids, expected_partner_ids)
+                    self.assertEqual(message.partner_to_ids, expected_partner_to_ids)
+                    self.assertEqual(message.partner_cc_ids, expected_partners_cc_ids)
+        base_search = [('id', 'in', capture.records.ids)]
+        self.assertEqual(len(Message.search([*base_search, ('partner_ids', 'in', self.partner_admin.ids)])), 2)
+        self.assertEqual(len(Message.search([*base_search, ('partner_ids', 'not in', self.partner_admin.ids)])), 2)
+        self.assertEqual(len(Message.search([*base_search, ('partner_ids', '=', self.partner_root.id)])), 3)
+        self.assertEqual(len(Message.search([*base_search, ('partner_ids', '!=', self.partner_root.id)])), 1)
+        self.assertEqual(len(Message.search(
+            [*base_search, ('partner_ids', 'any', [('id', '=', self.partner_root.id)])])), 3)
+        self.assertEqual(len(Message.search(
+            [*base_search, ('partner_ids', 'not any', [('id', '=', self.partner_root.id)])])), 1)
+        self.assertEqual(Message.search([*base_search, ('id', 'child_of', capture.records.ids[0])]),
+                         capture.records[0])
+        # See Domain.__new__ docstring
+        self.assertEqual(len(Message.search(
+            Domain.AND([base_search, Domain('partner_ids', 'any!', self.partner_root._as_query())]))),
+            3)
+        self.assertEqual(len(Message.search(
+            Domain.AND([base_search, Domain('partner_ids', 'not any!', self.partner_root._as_query())]))),
+            1)

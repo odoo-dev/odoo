@@ -161,6 +161,8 @@ export class Message extends Record {
         },
     });
     partner_ids = fields.Many("res.partner");
+    /** subset of partner_ids who were in Cc on the message */
+    partner_cc_ids = fields.Many("res.partner");
     /** @type {string} */
     reply_to;
     subtype_id = fields.One("mail.message.subtype");

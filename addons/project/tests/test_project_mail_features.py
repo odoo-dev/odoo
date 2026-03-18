@@ -306,6 +306,7 @@ class TestProjectMailFeatures(TestProjectCommon, MailCommon):
                             'email': 'new.author@test.agrolait.com',
                             'name': 'New Author',
                             'partner_id': author.id,  # already created by project upon initial email reception
+                            'recipient_type': 'to',
                         }
                     ]
                 elif test_user == self.user_portal:
@@ -315,6 +316,7 @@ class TestProjectMailFeatures(TestProjectCommon, MailCommon):
                             'email': self.user_portal.email_normalized,
                             'name': self.user_portal.name,
                             'partner_id': self.user_portal.partner_id.id,
+                            'recipient_type': 'to',
                         }
                     ]
                 expected_all += [
@@ -323,12 +325,14 @@ class TestProjectMailFeatures(TestProjectCommon, MailCommon):
                         'email': 'new.customer@test.agrolait.com',
                         'name': 'New Customer',
                         'partner_id': new_partner_customer.id,
+                        'recipient_type': 'to',
                     },
                     {  # Email CC without a partner
                         'create_values': {},
                         'email': 'new.cc@test.agrolait.com',
                         'name': 'New Cc',
                         'partner_id': new_partner_cc.id,
+                        'recipient_type': 'cc',
                     },
                     # other CC (partner_2) and customer (partner_id) already follower
                 ]

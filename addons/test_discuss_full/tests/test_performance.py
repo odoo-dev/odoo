@@ -158,7 +158,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - fetch user (author)
     #       - fetch discuss_call_history
     #       - select the current db snapshot
-    _query_count_discuss_channels = 62
+    _query_count_discuss_channels = 63
 
     def setUp(self):
         super().setUp()
@@ -1430,6 +1430,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "needaction": False,
                 "notification_ids": [],
                 "parent_id": False,
+                "partner_cc_ids": [],
                 "partner_ids": [],
                 "pinned_at": False,
                 "rating_id": False,
@@ -1469,6 +1470,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "notification_ids": [last_message.notification_ids.id],
                 "thread": {"id": channel.id, "model": "discuss.channel"},
                 "parent_id": False,
+                "partner_cc_ids": [],
                 "partner_ids": [self.users[0].partner_id.id],
                 "pinned_at": False,
                 "rating_id": False,
@@ -1510,6 +1512,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "notification_ids": [],
                 "thread": {"id": channel.id, "model": "discuss.channel"},
                 "parent_id": False,
+                "partner_cc_ids": [],
                 "partner_ids": [],
                 "pinned_at": False,
                 "rating_id": False,
@@ -1549,6 +1552,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "thread": {"id": channel.id, "model": "discuss.channel"},
                 "parent_id": False,
                 "partner_ids": [],
+                "partner_cc_ids": [],
                 "pinned_at": False,
                 "rating_id": False,
                 "reactions": [],
@@ -1585,6 +1589,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "notification_ids": [],
                 "thread": {"id": channel.id, "model": "discuss.channel"},
                 "parent_id": False,
+                "partner_cc_ids": [],
                 "partner_ids": [],
                 "pinned_at": False,
                 "rating_id": False,
@@ -1619,6 +1624,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "needaction": False,
                 "notification_ids": [],
                 "parent_id": False,
+                "partner_cc_ids": [],
                 "partner_ids": [],
                 "pinned_at": False,
                 "rating_id": False,
@@ -1654,6 +1660,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "thread": {"id": channel.id, "model": "discuss.channel"},
                 "parent_id": False,
                 "partner_ids": [],
+                "partner_cc_ids": [],
                 "pinned_at": False,
                 "rating_id": False,
                 "reactions": [],
@@ -1687,6 +1694,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "notification_ids": [],
                 "thread": {"id": channel.id, "model": "discuss.channel"},
                 "parent_id": False,
+                "partner_cc_ids": [],
                 "partner_ids": [],
                 "pinned_at": False,
                 "rating_id": False,

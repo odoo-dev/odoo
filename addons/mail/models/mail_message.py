@@ -240,7 +240,13 @@ class MailMessage(models.Model):
     is_current_user_or_guest_author = fields.Boolean(compute='_compute_is_current_user_or_guest_author')
     # recipients: include inactive partners (they may have been archived after
     # the message was sent, but they should remain visible in the relation)
-    partner_ids = fields.Many2many('res.partner', string='Recipients', context={'active_test': False})
+    partner_ids = fields.Many2many('res.partner', string='Recipients', context={'active_test': False},
+                                   compute='_compute_partner_ids', inverse='_inverse_partner_ids',
+                                   search='_search_partner_ids')
+    partner_to_ids = fields.Many2many('res.partner', relation='mail_message_res_partner_rel',
+                                      string='Recipients To', context={'active_test': False})
+    partner_cc_ids = fields.Many2many('res.partner', relation='mail_message_res_partner_cc_rel',
+                                      string='Recipients Cc', context={'active_test': False})
     # email recipients of incoming emails: comma separated list of emails (not necessarily normalized)
     incoming_email_to = fields.Text('Emails To')
     incoming_email_cc = fields.Char('Emails Cc')
@@ -361,6 +367,35 @@ class MailMessage(models.Model):
                 message.is_current_user_or_guest_author = True
             else:
                 message.is_current_user_or_guest_author = False
+
+    @api.depends('partner_to_ids', 'partner_cc_ids')
+    def _compute_partner_ids(self):
+        for message in self:
+            message.partner_ids = message.partner_to_ids | message.partner_cc_ids
+
+    def _inverse_partner_ids(self):
+        for message in self:
+            current = message.partner_to_ids | message.partner_cc_ids
+            to_remove = current - message.partner_ids
+            to_add = message.partner_ids - current
+            # Avoid to write if the values were set by partner_to_ids and partner_cc_ids (to avoid access error)
+            if to_add:
+                message.partner_to_ids |= to_add
+            if to_remove:
+                message.partner_to_ids -= to_remove
+                message.partner_cc_ids -= to_remove
+
+    @api.model
+    def _search_partner_ids(self, operator, value):
+        positive_operators = {"in", "=", "child_of", "any", "any!"}
+        negative_operators = {"not in", "!=", "not any", "not any!"}
+        if operator not in positive_operators | negative_operators:
+            return NotImplemented
+        domain_parts = [
+            Domain("partner_to_ids", operator, value),
+            Domain("partner_cc_ids", operator, value),
+        ]
+        return Domain.OR(domain_parts) if operator in positive_operators else Domain.AND(domain_parts)
 
     def _compute_needaction(self):
         """ Need action on a mail.message = notified on my channel """
@@ -1157,6 +1192,13 @@ class MailMessage(models.Model):
         # sudo: res.partner: reading limited data of recipients is acceptable
         res.many(
             "partner_ids",
+            lambda res: res.from_method("_store_avatar_fields"),
+            dynamic_fields="_store_partner_name_dynamic_fields",
+            sort="id",
+            sudo=True,
+        )
+        res.many(
+            "partner_cc_ids",
             lambda res: res.from_method("_store_avatar_fields"),
             dynamic_fields="_store_partner_name_dynamic_fields",
             sort="id",
