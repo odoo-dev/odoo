@@ -201,11 +201,7 @@
                         <field name="date_finished" readonly="state in ['cancel', 'done']"/>
                         <field name="show_json_popover" invisible="1"/>
                         <field name="json_popover" widget="mrp_workorder_popover" class="oe_inline mx-2" invisible="not show_json_popover"/>
-                        <label for="duration_expected"/>
-                        <div class="o_input_box">
-                            <field name="duration_expected" widget="float_time" options="{'unit': 'minutes'}" readonly="state in ['cancel', 'done']"/>
-                            <span class="o_input_box_overlay_end o_input_box_overlay_inline">minutes</span>
-                        </div>
+                        <field name="duration_expected" widget="float_time" options="{'unit': 'minutes'}" readonly="state in ['cancel', 'done']"/>
                     </group>
                     <group>
                         <field name="production_id" force_save="1"/>
