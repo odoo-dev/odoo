@@ -15,7 +15,7 @@ from odoo.addons.test_mail.models.mail_test_ticket import MailTestTicket
 from odoo.addons.test_mail.tests.common import TestRecipients
 from odoo.fields import Command, Datetime as FieldDatetime, Domain
 from odoo.exceptions import AccessError, UserError
-from odoo.tests import Form, tagged, users
+from odoo.tests import Form, RecordCapturer, tagged, users
 from odoo.tools import email_normalize, mute_logger, formataddr
 
 
@@ -1084,12 +1084,14 @@ class TestComposerInternals(TestMailComposer):
                 # values come from template
                 if composition_mode == 'comment' and not batch:
                     self.assertEqual(len(new_partners), 2)
-                    self.assertEqual(composer.partner_ids, self.partner_1 + new_partners, 'Template took customer_id as set on record')
+                    self.assertEqual(composer.partner_ids, self.partner_1, 'Template took customer_id as set on record')
+                    self.assertEqual(composer.partner_cc_ids, new_partners)
                     self.assertEqual(composer.reply_to, 'info@test.example.com', 'Template was rendered')
                     self.assertTrue(composer.reply_to_force_new)
                 else:
                     self.assertEqual(len(new_partners), 0)
                     self.assertEqual(composer.partner_ids, base_recipients, 'Mass mode: kept original values')
+                    self.assertFalse(composer.partner_cc_ids)
                     self.assertEqual(composer.reply_to, self.template.reply_to, 'Mass mode: raw template value')
                     self.assertTrue(composer.reply_to_force_new, 'Mass mode: reply_to -> consider this is for new threads')
 
@@ -1118,7 +1120,8 @@ class TestComposerInternals(TestMailComposer):
 
                 # values come from template
                 if composition_mode == 'comment' and not batch:
-                    self.assertEqual(composer.partner_ids, self.partner_1 + new_partners)
+                    self.assertEqual(composer.partner_ids, self.partner_1)
+                    self.assertEqual(composer.partner_cc_ids, new_partners)
                 else:
                     self.assertFalse(composer.partner_ids)
                 if composition_mode == 'comment' and not batch:
@@ -1136,7 +1139,8 @@ class TestComposerInternals(TestMailComposer):
 
                 # values come from template
                 if composition_mode == 'comment' and not batch:
-                    self.assertEqual(composer.partner_ids, self.partner_1 + new_partners)
+                    self.assertEqual(composer.partner_ids, self.partner_1)
+                    self.assertEqual(composer.partner_cc_ids, new_partners)
                 else:
                     self.assertFalse(composer.partner_ids)
                 if composition_mode == 'comment' and not batch:
@@ -1724,20 +1728,31 @@ class TestComposerResultsComment(TestMailComposer, CronMixinCase):
     @mute_logger('odoo.tests', 'odoo.addons.mail.models.mail_mail', 'odoo.models.unlink')
     def test_mail_composer_recipients(self):
         """ Test partner_ids given to composer are given to the final message. """
+        partner_3, partner_4 = self.env['res.partner'].sudo().create(
+            [{"name": f"partner_{idx}", "email": f"partner_{idx}@ex.com"} for idx in (3, 4)])
         composer = self.env['mail.compose.message'].with_context(
             self._get_web_context(self.test_record)
         ).create({
             'body': '<p>Test Body</p>',
-            'partner_ids': [(4, self.partner_1.id), (4, self.partner_2.id)]
+            'partner_ids': [(4, self.partner_1.id), (4, self.partner_2.id)],
+            'partner_cc_ids': [(4, partner_3.id), (4, partner_4.id)],
         })
-        composer._action_send_mail()
+        with (self.mock_mail_gateway(mail_unlink_sent=False),
+              RecordCapturer(self.env['mail.mail'].sudo()) as capture_mail):
+            _, message = composer._action_send_mail()
 
-        message = self.test_record.message_ids[0]
         self.assertEqual(message.author_id, self.user_employee.partner_id)
         self.assertEqual(message.body, '<p>Test Body</p>')
         self.assertEqual(message.subject, self.test_record._message_compute_subject())
         self.assertEqual(message.subtype_id, self.env.ref('mail.mt_comment'))
-        self.assertEqual(message.partner_ids, self.partner_1 | self.partner_2)
+        self.assertEqual(message.partner_ids, self.partner_1 | self.partner_2 | partner_3 | partner_4)
+        self.assertEqual(message.partner_to_ids, self.partner_1 | self.partner_2)
+        self.assertEqual(message.partner_cc_ids, partner_3 | partner_4)
+        mails = capture_mail.records
+        self.assertEqual(len(mails), 2, "One for the responsible and another for the rest")
+        headers_list = [literal_eval(h) for h in mails.mapped('headers')]
+        expected_x_msg_cc_force = ','.join((partner_3 | partner_4).mapped('email_formatted'))
+        self.assertEqual([h.get('X-Msg-Cc-Force') for h in headers_list], [expected_x_msg_cc_force] * 2)
 
     def test_mail_composer_recipients_email_only(self):
         """Check that messages can be sent to standalone emails, with no associated partner."""

@@ -119,6 +119,7 @@ class TestMailFlow(MailCommon, TestRecipients):
             'email': self.customer_zboing.email_normalized,
             'name': self.customer_zboing.name,
             'partner_id': self.customer_zboing.id,
+            'recipient_type': 'to',
         }])
         with self.mock_mail_gateway(), self.mock_mail_app():
             emp_msg = lead.message_post(
@@ -320,24 +321,28 @@ class TestMailFlow(MailCommon, TestRecipients):
                 'email': 'portal@zboing.com',
                 'name': 'Portal Zboing',
                 'partner_id': self.customer_portal_zboing.id,
+                'recipient_type': 'to',
             },
             {  # primary email comes first
                 'create_values': {},
                 'email': 'sylvie.lelitre@zboing.com',
                 'name': 'Sylvie Lelitre (Zboing)',
                 'partner_id': partner_sylvie.id,
+                'recipient_type': 'to',
             },
             {  # reply message
                 'create_values': {},
                 'email': 'accounting@zboing.com',
                 'name': 'Josiane Quichopoils',
                 'partner_id': partner_accounting.id,
+                'recipient_type': 'to',
             },
             {  # mail cc
                 'create_values': {},
                 'email': 'pay@zboing.com',
                 'name': 'pay@zboing.com',
                 'partner_id': partner_pay.id,
+                'recipient_type': 'cc',
             },
         ]
         for suggested, expected in zip(suggested_all, expected_all):
