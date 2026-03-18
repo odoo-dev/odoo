@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { CONFIG_KEYS } from "../core/config";
 import { LOG_LEVELS } from "../core/logger";
 import { refresh } from "../core/url";
@@ -78,7 +78,7 @@ export class HootConfigMenu extends Component {
                         type="text"
                         autofocus=""
                         class="w-full outline-none border-b border-primary px-1"
-                        t-model.number="config.random"
+                        t-model.number="Object.assign(() => this.config.random, { set: (v) => this.config.random = v })"
                     />
                     <button
                         type="button"
@@ -98,7 +98,7 @@ export class HootConfigMenu extends Component {
                 <input
                     type="text"
                     class="outline-none border-b border-primary px-1 w-full"
-                    t-model.number="config.timeout"
+                    t-model.number="Object.assign(() => this.config.timeout, { set: (v) => this.config.timeout = v })"
                 />
             </label>
             <label
@@ -109,7 +109,7 @@ export class HootConfigMenu extends Component {
                 <input
                     type="text"
                     class="outline-none border-b border-primary px-1 w-full"
-                    t-model="this.config.networkDelay"
+                    t-model="Object.assign(() => this.config.networkDelay, { set: (v) => this.config.networkDelay = v })"
                 />
             </label>
             <label
@@ -119,7 +119,7 @@ export class HootConfigMenu extends Component {
                 <input
                     type="checkbox"
                     class="appearance-none border border-primary rounded-xs w-4 h-4"
-                    t-model="this.config.manual"
+                    t-model="Object.assign(() => this.config.manual, { set: (v) => this.config.manual = v })"
                 />
                 <span>Run tests manually</span>
             </label>
@@ -142,7 +142,7 @@ export class HootConfigMenu extends Component {
                         type="text"
                         autofocus=""
                         class="outline-none w-full border-b border-primary px-1"
-                        t-model.number="config.bail"
+                        t-model.number="Object.assign(() => this.config.bail, { set: (v) => this.config.bail = v })"
                     />
                 </small>
             </t>
@@ -164,7 +164,7 @@ export class HootConfigMenu extends Component {
                     <select
                         autofocus=""
                         class="outline-none w-full bg-base text-base border-b border-primary px-1"
-                        t-model.number="config.loglevel"
+                        t-model.number="Object.assign(() => this.config.loglevel, { set: (v) => this.config.loglevel = v })"
                     >
                         <t t-foreach="this.LOG_LEVELS" t-as="level" t-key="level.value">
                             <option
@@ -182,7 +182,7 @@ export class HootConfigMenu extends Component {
                 <input
                     type="checkbox"
                     class="appearance-none border border-primary rounded-xs w-4 h-4"
-                    t-model="this.config.notrycatch"
+                    t-model="Object.assign(() => this.config.notrycatch, { set: (v) => this.config.notrycatch = v })"
                 />
                 <span>No try/catch</span>
             </label>
@@ -233,7 +233,7 @@ export class HootConfigMenu extends Component {
                 <input
                     type="checkbox"
                     class="appearance-none border border-primary rounded-xs w-4 h-4"
-                    t-model="this.config.headless"
+                    t-model="Object.assign(() => this.config.headless, { set: (v) => this.config.headless = v })"
                 />
                 <span>Headless</span>
             </label>
@@ -244,7 +244,7 @@ export class HootConfigMenu extends Component {
                 <input
                     type="checkbox"
                     class="appearance-none border border-primary rounded-xs w-4 h-4"
-                    t-model="this.config.fun"
+                    t-model="Object.assign(() => this.config.fun, { set: (v) => this.config.fun = v })"
                 />
                 <span>Enable incentives</span>
             </label>
@@ -285,8 +285,8 @@ export class HootConfigMenu extends Component {
     setup() {
         const { runner, ui } = this.env;
         this.color = useColorScheme();
-        this.config = useState(runner.config);
-        this.uiState = useState(ui);
+        this.config = proxy(runner.config);
+        this.uiState = proxy(ui);
     }
 
     doesNotNeedRefresh() {

@@ -31,11 +31,10 @@
             <attribute name="initialApp">this.initialApp</attribute>
         </xpath>
         <xpath expr="//Layout/t[@t-component='this.props.Renderer']" position="inside">
-            <t t-set-slot="NoContentHelper" isVisible="state.displayNoContent">
-                <t t-call="web.NoContentHelper">
-                    <t t-set="title">No settings found</t>
-                    <t t-set="description">Try searching for another keyword</t>
-                </t>
+            <t t-set-slot="NoContentHelper" isVisible="this.state.displayNoContent">
+                <t t-call="web.NoContentHelper"
+                    title.translate="No settings found"
+                    description.translate="Try searching for another keyword"/>
             </t>
         </xpath>
     </t>

@@ -3,7 +3,7 @@
 
     <t t-name="web.TagsList">
         <t t-foreach="this.visibleTags" t-as="tag" t-key="tag.id or tag_index">
-            <t t-slot="default" t-props="tag"/>
+            <t t-call-slot="default" t-props="tag"/>
         </t>
         <t t-set="invisibleTagCount" t-value="this.invisibleTags.length"/>
         <t t-if="invisibleTagCount">

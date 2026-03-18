@@ -1,11 +1,4 @@
-import {
-    onRendered,
-    useComponent,
-    useLayoutEffect,
-    useRef,
-    useState,
-    useSubEnv,
-} from "@web/owl2/utils";
+import { useComponent, useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
@@ -310,10 +303,6 @@ export class FormController extends Component {
             }
         });
 
-        onRendered(() => {
-            this.env.config.setDisplayName(this.displayName());
-        });
-
         const { disableAutofocus } = this.archInfo;
         if (!disableAutofocus) {
             useLayoutEffect(
@@ -400,6 +389,7 @@ export class FormController extends Component {
     }
 
     onRootLoaded() {
+        this.env.config.setDisplayName(this.displayName());
         return this.model.root.setOfflineChanges(this.props.offlineId);
     }
 

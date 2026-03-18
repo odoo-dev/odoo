@@ -155,9 +155,7 @@ export function isItemSelected(label) {
  */
 export function isOptionSelected(itemLabel, optionLabel) {
     const { parentElement: root } = queryOne`.o_menu_item:text(${itemLabel})`;
-    return queryOne(`.o_item_option:text(${optionLabel})`, { root }).classList.contains(
-        "selected"
-    );
+    return queryOne(`.o_item_option:text(${optionLabel})`, { root }).classList.contains("selected");
 }
 
 export function getMenuItemTexts() {

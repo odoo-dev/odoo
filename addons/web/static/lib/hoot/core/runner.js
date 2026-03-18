@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { on, setFrameRate } from "@odoo/hoot-dom";
-import { markRaw, reactive, toRaw } from "@odoo/owl";
+import { effect, markRaw, proxy, toRaw } from "@odoo/owl";
 import { cleanupDOM, defineRootNode } from "@web/../lib/hoot-dom/helpers/dom";
 import { cleanupEvents, enableEventLogs } from "@web/../lib/hoot-dom/helpers/events";
 import { cleanupTime, setupTime } from "@web/../lib/hoot-dom/helpers/time";
@@ -408,9 +408,10 @@ export class Runner {
         if (this.headless) {
             this.config = { ...this.initialConfig };
         } else {
-            this.presets = reactive(this.presets);
-            this.state = reactive(this.state);
-            this.config = reactive({ ...this.initialConfig }, () => {
+            this.presets = proxy(this.presets);
+            this.state = proxy(this.state);
+            this.config = proxy({ ...this.initialConfig });
+            effect(() => {
                 setParams(
                     $fromEntries(
                         $entries(this.config).map(([key, value]) => [

@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, onPatched, onWillPatch, useRef, useState, xml } from "@odoo/owl";
+import { Component, onPatched, onWillPatch, proxy, xml } from "@odoo/owl";
 import { getActiveElement } from "@web/../lib/hoot-dom/helpers/dom";
 import { R_REGEX, REGEX_MARKER } from "@web/../lib/hoot-dom/hoot_dom_utils";
 import { Suite } from "../core/suite";
@@ -316,7 +316,7 @@ export class HootSearch extends Component {
     static template = xml`
         <t t-set="hasIncludeValue" t-value="this.getHasIncludeValue()" />
         <t t-set="isRunning" t-value="this.runnerState.status === 'running'" />
-        <search class="${HootSearch.name} flex-1" t-ref="root" t-on-keydown="this.onKeyDown">
+        <search class="${HootSearch.name} flex-1" t-ref="{ set: (el) => this.rootRef.el = el }" t-on-keydown="this.onKeyDown">
             <form class="relative" t-on-submit.prevent="this.refresh">
                 <div class="hoot-search-bar flex border rounded items-center bg-base px-1 gap-1 w-full transition-colors">
                     <t t-foreach="this.getCategoryCounts()" t-as="count" t-key="count.category">
@@ -341,7 +341,7 @@ export class HootSearch extends Component {
                         class="w-full rounded p-1 outline-none"
                         t-att-autofocus="!this.config.manual"
                         placeholder="Filter suites, tests or tags"
-                        t-ref="search-input"
+                        t-ref="{ set: (el) => this.searchInputRef.el = el }"
                         t-att-class="{ 'text-gray': !this.config.filter }"
                         t-att-disabled="isRunning"
                         t-att-value="this.state.query"
@@ -426,12 +426,12 @@ export class HootSearch extends Component {
         });
         runner.afterAll(() => this.focusSearchInput());
 
-        this.rootRef = useRef("root");
-        this.searchInputRef = useRef("search-input");
+        this.rootRef = { el: null };
+        this.searchInputRef = { el: null };
 
-        this.config = useState(runner.config);
+        this.config = proxy(runner.config);
         const query = this.config.filter || "";
-        this.state = useState({
+        this.state = proxy({
             categories: {
                 /** @type {Suite[]} */
                 suite: [],
@@ -445,11 +445,11 @@ export class HootSearch extends Component {
             query,
             showDropdown: false,
         });
-        this.runnerState = useState(runner.state);
+        this.runnerState = proxy(runner.state);
 
-        useHootKey(["Alt", "r"], this.toggleRegExp);
-        useHootKey(["Alt", "x"], this.toggleExact);
-        useHootKey(["Escape"], this.closeDropdown);
+        useHootKey(["Alt", "r"], this.toggleRegExp.bind(this));
+        useHootKey(["Alt", "x"], this.toggleExact.bind(this));
+        useHootKey(["Escape"], this.closeDropdown.bind(this));
 
         useWindowListener(
             "click",
@@ -879,7 +879,7 @@ export class HootSearch extends Component {
                     }
                 }
             }
-            this.__owl__.app.root.render(true);
+            [...this.__owl__.app.roots][0].render(true);
             console.warn("Secret sequence activated: all tests pass!");
         }
     }

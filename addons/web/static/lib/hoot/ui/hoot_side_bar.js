@@ -1,9 +1,9 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { Suite } from "../core/suite";
 import { createUrlFromId } from "../core/url";
-import { lookup, parseQuery } from "../hoot_utils";
+import { lookup, onWillRender, parseQuery, useLayoutEffect } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
 
 /**
@@ -64,7 +64,7 @@ export class HootSideBarSuite extends Component {
                 }"
             />
         </t>
-        <span t-ref="root" t-att-class="this.getClassName()" t-out="this.props.name" />
+        <span t-ref="{ set: (el) => this.rootRef.el = el }" t-att-class="this.getClassName()" t-out="this.props.name" />
         <t t-if="this.props.multi">
             <strong class="text-amber whitespace-nowrap me-1">
                 x<t t-out="this.props.multi" />
@@ -73,12 +73,12 @@ export class HootSideBarSuite extends Component {
     `;
 
     setup() {
-        const rootRef = useRef("root");
+        this.rootRef = { el: null };
         let wasSelected = false;
-        useEffect(
+        useLayoutEffect(
             (selected) => {
                 if (selected && !wasSelected) {
-                    rootRef.el.scrollIntoView({
+                    this.rootRef.el.scrollIntoView({
                         behavior: "smooth",
                         block: "center",
                     });
@@ -155,8 +155,8 @@ export class HootSideBar extends Component {
                         class="w-full rounded px-2 py-1 outline-none"
                         type="search"
                         placeholder="Search suites"
-                        t-ref="search-input"
-                        t-model="this.state.filter"
+                        t-ref="{ set: (el) => this.searchInputRef.el = el }"
+                        t-model="Object.assign(() => this.state.filter, { set: (v) => this.state.filter = v })"
                         t-on-keydown="this.onSearchInputKeydown"
                     />
                 </div>
@@ -180,7 +180,7 @@ export class HootSideBar extends Component {
                     <i t-attf-class="fa fa-{{ expanded ? 'compress' : 'expand' }}" />
                 </button>
             </form>
-            <ul class="overflow-x-hidden overflow-y-auto" t-ref="suites-list">
+            <ul class="overflow-x-hidden overflow-y-auto" t-ref="{ set: (el) => this.suitesListRef.el = el }">
                 <t t-foreach="this.filteredSuites" t-as="suite" t-key="suite.id">
                     <li class="flex items-center h-7 animate-slide-down">
                         <button
@@ -225,10 +225,10 @@ export class HootSideBar extends Component {
     setup() {
         const { runner, ui } = this.env;
 
-        this.searchInputRef = useRef("search-input");
-        this.suitesListRef = useRef("suites-list");
-        this.uiState = useState(ui);
-        this.state = useState({
+        this.searchInputRef = { el: null };
+        this.suitesListRef = { el: null };
+        this.uiState = proxy(ui);
+        this.state = proxy({
             filter: "",
             hideEmpty: false,
             suites: [],
@@ -251,7 +251,7 @@ export class HootSideBar extends Component {
             }
         });
 
-        onWillRender(() => {
+        onWillRender(this, () => {
             [this.filteredSuites, this.unfoldedIds] = this.getFilteredVisibleSuites();
         });
     }

@@ -46,7 +46,7 @@ export class Dialog extends Component {
     static template = xml`
     <t t-translation="off">
         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" t-att-data-bs-target="'#'+identifier" t-esc="this.props.btnName" />
-        <div t-ref="dialog" t-att-id="identifier" class="modal modal-dialog-scrollable fade" t-att-class="{'modal-lg': props.isLarge}" tabindex="-1" aria-hidden="true">
+        <div t-custom-ref="dialog" t-att-id="identifier" class="modal modal-dialog-scrollable fade" t-att-class="{'modal-lg': props.isLarge}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header gap-1">
@@ -54,11 +54,11 @@ export class Dialog extends Component {
                         <a t-if="props.help" t-att-href="props.help" class="fa fa-question-circle text-decoration-none text-dark" target="_blank"/>
                     </div>
                     <div class="modal-body position-relative dialog-body">
-                        <t t-slot="body" />
+                        <t t-call-slot="body" />
                     </div>
                     <div class="modal-footer justify-content-around justify-content-md-start flex-wrap gap-1 w-100">
                         <div class="d-flex gap-2">
-                            <t t-slot="footer" />
+                            <t t-call-slot="footer" />
                         </div>
                     </div>
                 </div>

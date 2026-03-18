@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { createUrl, refresh } from "../core/url";
 import { callHootKey, useHootKey, useWindowListener } from "../hoot_utils";
 import { HootButtons } from "./hoot_buttons";
@@ -118,7 +118,7 @@ export class HootMain extends Component {
 
     setup() {
         const { runner } = this.env;
-        this.state = useState({
+        this.state = proxy({
             debugTest: null,
         });
 
@@ -138,11 +138,11 @@ export class HootMain extends Component {
 
         useWindowListener("resize", (ev) => this.onWindowResize(ev));
         useWindowListener("keydown", callHootKey, { capture: true });
-        useHootKey(["Enter"], this.manualStart);
-        useHootKey(["Escape"], this.abort);
+        useHootKey(["Enter"], this.manualStart.bind(this));
+        useHootKey(["Escape"], this.abort.bind(this));
 
         if (!runner.config.headless) {
-            useHootKey(["Alt", "d"], this.toggleDebug);
+            useHootKey(["Alt", "d"], this.toggleDebug.bind(this));
         }
     }
 

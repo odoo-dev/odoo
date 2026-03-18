@@ -1364,7 +1364,7 @@
           <span t-else="1" class="o-fw-bold text-truncate" t-esc="dimensionDisplayName"/>
         </div>
         <div class="d-flex flex-rows" t-on-pointerdown.stop="">
-          <t t-slot="upper-right-icons"/>
+          <t t-call-slot="upper-right-icons"/>
           <i
             class="o-button-icon fa fa-trash pe-1 ps-2"
             t-if="props.onRemoved"
@@ -1372,7 +1372,7 @@
           />
         </div>
       </div>
-      <t t-slot="default"/>
+      <t t-call-slot="default"/>
     </div>
   </t>
 
@@ -1397,7 +1397,7 @@
         onValueSelected="autoComplete.provider.selectProposal"
         onValueHovered="() => {}"
       />
-      <t t-slot="default" t-on-click="togglePopover"/>
+      <t t-call-slot="default" t-on-click="togglePopover"/>
     </Popover>
   </t>
 
@@ -2344,10 +2344,10 @@
       <t t-if="props.slots.title or props.title">
         <div class="o-section-title">
           <t t-esc="props.title"/>
-          <t t-slot="title"/>
+          <t t-call-slot="title"/>
         </div>
       </t>
-      <t t-slot="default"/>
+      <t t-call-slot="default"/>
     </div>
   </t>
 
@@ -2409,7 +2409,7 @@
       </div>
       <Collapse isCollapsed="state.isCollapsed">
         <div class="pt-2">
-          <t t-slot="content"/>
+          <t t-call-slot="content"/>
         </div>
       </Collapse>
     </div>
@@ -2417,7 +2417,7 @@
 
   <t t-name="o-spreadsheet-Collapse">
     <div t-ref="content" class="os-collapse">
-      <t t-slot="default"/>
+      <t t-call-slot="default"/>
     </div>
   </t>
 
@@ -4116,7 +4116,7 @@
     <SeriesDesignEditor t-props="props">
       <t t-set-slot="data-series-extension" t-slot-scope="scope">
         <t t-set="index" t-value="scope.index"/>
-        <t t-slot="general-extension" index="index"/>
+        <t t-call-slot="general-extension" index="index"/>
         <Section class="'pt-0 pb-0'">
           <Section
             class="'pt-0 px-0 o-vertical-axis-selection'"
@@ -4214,7 +4214,7 @@
             />
           </Section>
         </Section>
-        <t t-slot="data-series-extension" index="state.index"/>
+        <t t-call-slot="data-series-extension" index="state.index"/>
       </t>
     </SidePanelCollapsible>
   </t>
@@ -4323,7 +4323,7 @@
           style="title"
           defaultStyle="{align: 'left', fontSize: this.props.defaultChartTitleFontSize}"
         />
-        <t t-slot="general-extension"/>
+        <t t-call-slot="general-extension"/>
       </t>
     </SidePanelCollapsible>
   </t>
@@ -4804,7 +4804,7 @@
         t-on-wheel="props.onMouseWheel"
         t-on-click.stop="">
         <div class="o-popover-content" t-ref="popoverContent">
-          <t t-slot="default"/>
+          <t t-call-slot="default"/>
         </div>
       </div>
     </t>
@@ -6663,7 +6663,7 @@
         t-if="!env.model.getters.isReadonly()"
         t-key="env.model.getters.getActiveSheetId()"
       />
-      <t t-slot="default"/>
+      <t t-call-slot="default"/>
     </div>
   </t>
 
@@ -8037,7 +8037,7 @@
         </t>
       </div>
       <div class="position-relative" t-ref="childContainer">
-        <t t-slot="default"/>
+        <t t-call-slot="default"/>
       </div>
     </div>
   </t>
