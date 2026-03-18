@@ -1025,6 +1025,10 @@ class PosConfig(models.Model):
             'sequence': 1,
         })
 
+    # Need for the override in pos_urban_piper and pos_platform_order
+    def _get_bank_payment_method_ids_for_company(self):
+        return self.env['pos.payment.method'].search([('journal_id.type', '=', 'bank'), ('company_id', 'in', self.env.company.parent_ids.ids)])
+
     def _create_journal_and_payment_methods(self, cash_ref=None, cash_journal_vals=None):
         """This should only be called at creation of a new pos.config."""
 
@@ -1052,14 +1056,14 @@ class PosConfig(models.Model):
         payment_methods |= cash_pm
 
         # only create bank and customer account payment methods per company
-        bank_pm = self.env['pos.payment.method'].search([('journal_id.type', '=', 'bank'), ('company_id', 'in', self.env.company.parent_ids.ids)])
-        if not bank_pm:
+        bank_pm_ids = self._get_bank_payment_method_ids_for_company()
+        if not bank_pm_ids:
             bank_journal = self.env['account.journal'].search([('type', '=', 'bank'), ('company_id', 'in', self.env.company.parent_ids.ids)], limit=1)
             if not bank_journal:
                 raise UserError(_('Ensure that there is an existing bank journal. Check if chart of accounts is installed in your company.'))
             chart_template = self.with_context(allowed_company_ids=self.env.company.root_id.ids).env['account.chart.template']
             outstanding_account = chart_template.ref('account_journal_payment_debit_account_id', raise_if_not_found=False) or self.env.company.transfer_account_id
-            bank_pm = self.env['pos.payment.method'].create({
+            bank_pm_ids = self.env['pos.payment.method'].create({
                 'name': _('Card'),
                 'journal_id': bank_journal.id,
                 'outstanding_account_id': outstanding_account.id if outstanding_account else False,
@@ -1067,7 +1071,7 @@ class PosConfig(models.Model):
                 'sequence': 2,
             })
 
-        payment_methods |= bank_pm
+        payment_methods |= bank_pm_ids
 
         pay_later_pm = self.env['pos.payment.method'].search([('journal_id', '=', False), ('split_transactions', '=', True), ('company_id', 'in', self.env.company.parent_ids.ids)])
         if not pay_later_pm:
