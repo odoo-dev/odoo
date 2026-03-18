@@ -1,7 +1,7 @@
 import { partnerCompareRegistry } from "@mail/core/common/partner_compare";
 import { cleanTerm } from "@mail/utils/common/format";
 import { toRaw } from "@odoo/owl";
-import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
+import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
 
 import { registry } from "@web/core/registry";
 import { fuzzyLookup } from "@web/core/utils/search";
@@ -16,7 +16,6 @@ export class SuggestionService {
         this.orm = services.orm;
         this.store = services["mail.store"];
         this.composer = services["mail.composer"];
-        this.emojis;
     }
 
     /**
@@ -46,8 +45,7 @@ export class SuggestionService {
                 await this.store.cannedReponses.fetch();
                 break;
             case ":": {
-                const { emojis } = await loadEmoji();
-                this.emojis = emojis;
+                await emojiLoader.load();
                 break;
             }
         }
@@ -94,7 +92,7 @@ export class SuggestionService {
             thread?.channel ? "get_mention_suggestions_from_channel" : "get_mention_suggestions",
             [],
             kwargs,
-            { abortSignal }
+            { abortSignal },
         );
         this.store.insert(data);
     }
@@ -108,14 +106,14 @@ export class SuggestionService {
             "get_mention_suggestions",
             [],
             { search: term },
-            { abortSignal }
+            { abortSignal },
         );
         this.store.insert(data);
     }
 
     searchCannedResponseSuggestions(cleanedSearchTerm) {
         const cannedResponses = Object.values(this.store["mail.canned.response"].records).filter(
-            (cannedResponse) => cleanTerm(cannedResponse.source).includes(cleanedSearchTerm)
+            (cannedResponse) => cleanTerm(cannedResponse.source).includes(cleanedSearchTerm),
         );
         const sortFunc = (c1, c2) => {
             const cleanedName1 = cleanTerm(c1.source);
@@ -148,8 +146,12 @@ export class SuggestionService {
 
     searchEmojisSuggestions(cleanedSearchTerm) {
         let emojis = [];
-        if (this.emojis && cleanedSearchTerm) {
-            emojis = fuzzyLookup(cleanedSearchTerm, this.emojis, (emoji) => emoji.shortcodes);
+        if (emojiLoader.loaded && cleanedSearchTerm) {
+            emojis = fuzzyLookup(
+                cleanedSearchTerm,
+                emojiLoader.emojis,
+                (emoji) => emoji.shortcodes,
+            );
         }
         return {
             type: "emoji",
@@ -195,7 +197,7 @@ export class SuggestionService {
 
     searchRoleSuggestions(cleanedSearchTerm) {
         const roles = Object.values(this.store["res.role"].records).filter((role) =>
-            cleanTerm(role.name).includes(cleanedSearchTerm)
+            cleanTerm(role.name).includes(cleanedSearchTerm),
         );
         const sortFunc = (r1, r2) => {
             const cleanedName1 = cleanTerm(r1.name);
@@ -234,7 +236,7 @@ export class SuggestionService {
 
     getPartnerSuggestions(thread) {
         return Object.values(this.store["res.partner"].records).filter((partner) =>
-            this.isSuggestionValid(partner, thread)
+            this.isSuggestionValid(partner, thread),
         );
     }
 
@@ -259,8 +261,8 @@ export class SuggestionService {
                     special.channel_types.includes(thread.channel?.channel_type) &&
                     cleanedSearchTerm.length >= Math.min(4, special.label.length) &&
                     (special.label.startsWith(cleanedSearchTerm) ||
-                        cleanTerm(special.description.toString()).includes(cleanedSearchTerm))
-            )
+                        cleanTerm(special.description.toString()).includes(cleanedSearchTerm)),
+            ),
         );
         return {
             type: "Partner",
@@ -307,7 +309,7 @@ export class SuggestionService {
             (channel) =>
                 channel.channel_type === "channel" &&
                 channel.displayName &&
-                cleanTerm(channel.displayName).includes(cleanedSearchTerm)
+                cleanTerm(channel.displayName).includes(cleanedSearchTerm),
         );
         const sortFunc = (c1, c2) => {
             const isPublicChannel1 = c1.channel_type === "channel" && !c2.group_public_id;

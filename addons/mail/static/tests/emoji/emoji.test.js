@@ -19,12 +19,20 @@ import {
 import { describe, getFixture, test } from "@odoo/hoot";
 
 import { queryFirst } from "@odoo/hoot-dom";
+import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
 
 describe.current.tags("desktop");
 defineMailModels();
 preloadBundle("web.assets_emoji");
 
 test("emoji picker correctly handles translations with special characters", async () => {
+    // Reset emoji loader to reload translations *for* the current test
+    patchWithCleanup(emojiLoader, {
+        categories: [],
+        emojis: [],
+        _loadingPromise: null,
+        _map: null,
+    });
     defineParams({
         translations: {
             "Japanese “here” button": `Bouton "ici" japonais`,
@@ -108,7 +116,7 @@ test("Basic keyboard navigation", async () => {
     await contains(".o-Emoji[data-index='0'].o-active");
     // detect amount of emojis per row for navigation
     const emojis = Array.from(
-        getFixture().querySelectorAll(".o-EmojiPicker-category[data-category='1'] ~ .o-Emoji")
+        getFixture().querySelectorAll(".o-EmojiPicker-category[data-category='1'] ~ .o-Emoji"),
     );
     const baseOffset = emojis[0].offsetTop;
     const breakIndex = emojis.findIndex((item) => item.offsetTop > baseOffset);
@@ -122,7 +130,7 @@ test("Basic keyboard navigation", async () => {
     triggerHotkey("ArrowUp");
     await contains(".o-EmojiPicker-content .o-Emoji[data-index='0'].o-active");
     const { codepoints } = queryFirst(
-        ".o-EmojiPicker-content .o-Emoji[data-index='0'].o-active"
+        ".o-EmojiPicker-content .o-Emoji[data-index='0'].o-active",
     ).dataset;
     triggerHotkey("Enter");
     await contains(".o-EmojiPicker", { count: 0 });
@@ -243,15 +251,13 @@ test("shortcodes shown in emoji title in message", async () => {
 });
 
 test("Emoji picker shows failure to load emojis", async () => {
-    // Simulate failure to load emojis
-    patchWithCleanup(odoo.loader.modules.get("@web/core/emoji_picker/emoji_data"), {
-        getEmojis() {
-            return [];
-        },
-    });
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "" });
     await start();
+    // Simulate failure to load emojis
+    patchWithCleanup(emojiLoader, {
+        emojis: [],
+    });
     await openDiscuss(channelId);
     await click("button[title='Add Emojis']");
     await contains(".o-EmojiPicker:text('😵‍💫 Failed to load emojis...')");

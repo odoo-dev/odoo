@@ -2,9 +2,9 @@ import { isEmptyBlock } from "@html_editor/utils/dom_info";
 
 import { fields, Record } from "@mail/model/export";
 import {
-    EMOJI_REGEX,
     convertBrToLineBreak,
     decorateEmojis,
+    EMOJI_REGEX,
     generateEmojisOnHtml,
     getNonEditableMentions,
     htmlToTextContentInline,
@@ -12,7 +12,6 @@ import {
 
 import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
-import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
@@ -20,6 +19,7 @@ import { createDocumentFragmentFromContent, createElementWithContent } from "@we
 import { url } from "@web/core/utils/urls";
 
 import { markup } from "@odoo/owl";
+import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
 import { discussComponentRegistry } from "./discuss_component_registry";
 
 const { DateTime } = luxon;
@@ -45,17 +45,13 @@ export class Message extends Record {
     call_history_ids = fields.Many("discuss.call.history");
     richBody = fields.Html("", {
         compute() {
-            if (!this.store.emojiLoader.loaded) {
-                loadEmoji();
-            }
+            emojiLoader.load();
             return decorateEmojis(this.body) ?? "";
         },
     });
     richTranslationValue = fields.Html("", {
         compute() {
-            if (!this.store.emojiLoader.loaded) {
-                loadEmoji();
-            }
+            emojiLoader.load();
             return decorateEmojis(this.translationValue) ?? "";
         },
     });
@@ -70,14 +66,16 @@ export class Message extends Record {
             return Boolean(
                 // ".o-mail-Message-edited" is the class added by the mail.thread in _message_update_content
                 // when the message is edited
-                createDocumentFragmentFromContent(this.body).querySelector(".o-mail-Message-edited")
+                createDocumentFragmentFromContent(this.body).querySelector(
+                    ".o-mail-Message-edited",
+                ),
             );
         },
     });
     editedDate = fields.Datetime({
         compute() {
             return createDocumentFragmentFromContent(this.body).querySelector(
-                ".o-mail-Message-edited"
+                ".o-mail-Message-edited",
             )?.dataset.oDatetime;
         },
     });
@@ -105,8 +103,8 @@ export class Message extends Record {
         compute() {
             return Boolean(
                 createDocumentFragmentFromContent(this.body).querySelector(
-                    '[summary="o_mail_notification"]'
-                )
+                    '[summary="o_mail_notification"]',
+                ),
             );
         },
     });
@@ -160,7 +158,7 @@ export class Message extends Record {
     self_notification = fields.One("mail.notification", {
         compute() {
             return this.notification_ids.find((n) =>
-                n.res_partner_id?.eq(this.store.self_user?.partner_id)
+                n.res_partner_id?.eq(this.store.self_user?.partner_id),
             );
         },
     });
@@ -297,7 +295,7 @@ export class Message extends Record {
         if (this.datetime?.year === DateTime.now().year) {
             return this.datetime.toLocaleString(
                 { ...DateTime.DATETIME_MED, year: undefined },
-                userLocale
+                userLocale,
             );
         }
         return this.datetime.toLocaleString({ ...DateTime.DATETIME_MED }, userLocale);
@@ -511,9 +509,9 @@ export class Message extends Record {
     get canToggleBookmark() {
         return Boolean(
             !this.is_transient &&
-                !this.isPending &&
-                this.store.self_user?.share === false &&
-                this.persistent
+            !this.isPending &&
+            this.store.self_user?.share === false &&
+            this.persistent,
         );
     }
 
@@ -561,7 +559,7 @@ export class Message extends Record {
             if (this.isSelfAuthored) {
                 return markup`<i class="fa fa-mail-reply me-1 opacity-75"></i>${_t(
                     "You: %(message_content)s",
-                    { message_content: messageBody }
+                    { message_content: messageBody },
                 )}`;
             }
             if (!this.author || this.author.notEq(this.thread?.channel?.correspondent?.persona)) {
@@ -596,9 +594,9 @@ export class Message extends Record {
     canAddReaction(thread) {
         return Boolean(
             !this.is_transient &&
-                !this.isPending &&
-                this.thread?.can_react &&
-                !this.thread.isTransient
+            !this.isPending &&
+            this.thread?.can_react &&
+            !this.thread.isTransient,
         );
     }
 
@@ -652,7 +650,7 @@ export class Message extends Record {
     async edit(
         body,
         attachments = [],
-        { mentionedChannels = [], mentionedPartners = [], mentionedRoles = [] } = {}
+        { mentionedChannels = [], mentionedPartners = [], mentionedRoles = [] } = {},
     ) {
         const messageBodyEl = createElementWithContent("div", this.body);
         const updatedBodyEl = createElementWithContent("div", body);
@@ -698,12 +696,12 @@ export class Message extends Record {
         const validChannels = (
             await Promise.all(
                 Array.from(
-                    doc.querySelectorAll(".o_channel_redirect[data-oe-model='discuss.channel']")
-                ).map(async (el) => this.store["discuss.channel"].getOrFetch(el.dataset.oeId))
+                    doc.querySelectorAll(".o_channel_redirect[data-oe-model='discuss.channel']"),
+                ).map(async (el) => this.store["discuss.channel"].getOrFetch(el.dataset.oeId)),
             )
         ).filter((channel) => channel?.exists());
         const validRoles = Array.from(
-            doc.querySelectorAll(".o-discuss-mention[data-oe-model='res.role']")
+            doc.querySelectorAll(".o-discuss-mention[data-oe-model='res.role']"),
         ).map((el) => this.store["res.role"].get(el.dataset.oeId));
         const text = convertBrToLineBreak(this.body);
         if (thread?.messageInEdition) {
@@ -739,7 +737,7 @@ export class Message extends Record {
         this.store.env.services.dialog.add(
             discussComponentRegistry.get("MessageDeleteDialog"),
             { message: this, onConfirm: () => this.onShowDeleteConfirm(owner) },
-            { context: owner }
+            { context: owner },
         );
     }
 
@@ -793,8 +791,8 @@ export class Message extends Record {
                     message_id: this.id,
                     ...this.thread.rpcParams,
                 },
-                { silent: true }
-            )
+                { silent: true },
+            ),
         );
     }
 
@@ -840,7 +838,7 @@ export class Message extends Record {
         await this.store.fetchStoreData(
             "add_bookmark",
             { message_id: this.id },
-            { readonly: false }
+            { readonly: false },
         );
     }
 
@@ -848,7 +846,7 @@ export class Message extends Record {
         await this.store.fetchStoreData(
             "remove_bookmark",
             { message_id: this.id },
-            { readonly: false }
+            { readonly: false },
         );
         this.closeNotificationFn?.();
         if (thread?.eq(this.store.bookmarkBox)) {
@@ -866,7 +864,7 @@ export class Message extends Record {
                             },
                         },
                     ],
-                }
+                },
             );
         }
     }
@@ -881,7 +879,7 @@ export class Message extends Record {
             _t('You are no longer following "%(thread_name)s".', {
                 thread_name: thread.display_name,
             }),
-            { type: "success" }
+            { type: "success" },
         );
     }
 

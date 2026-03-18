@@ -11,7 +11,7 @@ import { getInnerHtml, getOuterHtml } from "@mail/utils/common/html";
 import { htmlEscape, markup } from "@odoo/owl";
 
 import { router } from "@web/core/browser/router";
-import { loadEmoji, loader } from "@web/core/emoji_picker/emoji_picker";
+import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
 import { normalize } from "@web/core/l10n/utils";
 import {
     createDocumentFragmentFromContent,
@@ -76,7 +76,7 @@ export async function generateEmojisOnHtml(htmlBody, { allowEmojiLoading = true 
  */
 export async function prettifyMessageContent(
     rawBody,
-    { validMentions = [], allowEmojiLoading = true } = {}
+    { validMentions = [], allowEmojiLoading = true } = {},
 ) {
     let body = prettifyMessageText(rawBody, { validMentions });
     body = await generateEmojisOnHtml(body, { allowEmojiLoading });
@@ -118,8 +118,8 @@ function _parseAndTransform(nodes, transformFunction) {
         Object.values(nodes).map((node) =>
             transformFunction(node, function () {
                 return _parseAndTransform(node.childNodes, transformFunction);
-            })
-        )
+            }),
+        ),
     );
 }
 
@@ -255,7 +255,7 @@ export function generateChannelMentionElement(channel) {
  */
 function generateMentionsLinks(
     body,
-    { channels = [], partners = [], roles = [], specialMentions = [], thread }
+    { channels = [], partners = [], roles = [], specialMentions = [], thread },
 ) {
     const mentions = [];
     for (const partner of partners) {
@@ -307,13 +307,13 @@ function generateMentionsLinks(
  * @returns {Promise<ReturnType<markup>>}
  */
 async function _generateEmojisOnHtml(htmlString) {
-    const { emojis } = await loadEmoji();
+    const { emojis } = await emojiLoader.load();
     for (const emoji of emojis) {
-        for (const source of [...emoji.shortcodes, ...emoji.emoticons]) {
-            const escapedSource = htmlEscape(String(source));
+        for (const source of emoji.shortcodes.concat(emoji.emoticons)) {
+            const escapedSource = htmlEscape(source);
             const regexp = new RegExp(
                 "(\\s|^)(" + escapeRegExp(escapedSource) + ")(?=\\s|$|<)",
-                "g"
+                "g",
             );
             htmlString = htmlReplace(htmlString, regexp, (_, group1) => group1 + emoji.codepoints);
         }
@@ -408,7 +408,7 @@ export const EMOJI_REGEX = /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\u200d/gu;
  * @returns {ReturnType<markup>}
  */
 export function decorateEmojis(content) {
-    if (!loader.loaded || !content) {
+    if (!emojiLoader.loaded || !content) {
         return content;
     }
     const doc = createDocumentFragmentFromContent(content);
@@ -417,21 +417,24 @@ export function decorateEmojis(content) {
         doc.body,
         null,
         XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-        null
+        null,
     );
     for (let i = 0; i < nodes.snapshotLength; i++) {
         const node = nodes.snapshotItem(i);
         const span = document.createElement("span");
         setElementContent(
             span,
-            htmlReplaceAll(node.textContent, loader.loaded.emojiRegex, (codepoints) =>
-                markup(
-                    `<span class="o-mail-emoji" title="${htmlFormatList(
-                        loader.loaded.emojiValueToShortcodes[codepoints],
-                        { style: "unit-narrow" }
-                    )}">${htmlEscape(codepoints)}</span>`
-                )
-            )
+            htmlReplaceAll(node.textContent, EMOJI_REGEX, (codepoints) => {
+                if (!emojiLoader.map.has(codepoints)) {
+                    return codepoints;
+                }
+                const { shortcodes } = emojiLoader.map.get(codepoints);
+                return markup(
+                    `<span class="o-mail-emoji" title="${htmlFormatList(shortcodes, {
+                        style: "unit-narrow",
+                    })}">${htmlEscape(codepoints)}</span>`,
+                );
+            }),
         );
         node.replaceWith(...span.childNodes);
     }
