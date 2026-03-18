@@ -479,11 +479,16 @@ class JSTooling:
         return content
 
     @staticmethod
-    def get_js_files(file_manager):
+    def get_js_files(file_manager, include_test_files=False):
+        def check_path(file, include_test_files):
+            if include_test_files:
+                return True if '/static/' in file.path._str else False
+            return True if '/static/src' in file.path._str else False
+
         path_pattern = re.compile('|'.join(EXCLUDED_PATH + CHECKSUM_FILES))
         return [
             file for file in file_manager
-            if '/static/src/' in file.path._str
+            if check_path(file, include_test_files)
             and file.path.suffix == '.js'
             and not re.search(path_pattern, file.path._str)
         ]
@@ -938,7 +943,7 @@ ACCOUNT_WHITELIST = {
     "account_reports.journal_balance": {'warningParams'},  # dynamic t-call
     "account_reports.inconsistent_statement_warning": {'warningParams'},  # dynamic t-call
 }
-THIS_TARGETS = ["web_map"]
+THIS_TARGETS = []
 
 
 def upgrade_this(file_manager, log_info, log_error):
@@ -987,16 +992,9 @@ def upgrade_this(file_manager, log_info, log_error):
 
 
 def upgrade_this_in_js(file_manager, log_info, log_error):
+    js_files = JSTooling.get_js_files(file_manager, include_test_files=True)
     pattern = re.compile(r"(\bxml\s*`)(.*?)(`)", re.DOTALL)
-
-    test_files = [
-        f for f in file_manager
-        if f.path._str.endswith(".js")
-        and not any(f.path._str.endswith(p) for p in EXCLUDED_PATH)
-    ]
-
-    pattern = re.compile(r"(\bxml\s*`)(.*?)(`)", re.DOTALL)
-    for _, file in enumerate(test_files, start=1):
+    for _, file in enumerate(js_files, start=1):
         # TODO add warning for clients who have ${} inside fragments
         if THIS_TARGETS and not any(
             f"/{module}/" in file.path._str or f"/{module}_" in file.path._str
@@ -1011,7 +1009,8 @@ def upgrade_this_in_js(file_manager, log_info, log_error):
 
                 wrapped_xml = f"<t t-name='xyz'>{raw_xml}</t>"
 
-                processed_wrapped = update_template("", wrapped_xml, {}, {}, [], {})
+                aggregator = VariableAggregator(is_testing=True)
+                processed_wrapped, _ = update_template("", wrapped_xml, {}, aggregator, EXCLUDED_TEMPLATES)
 
                 inner_xml = re.sub(r'^<[^>]+>', '', processed_wrapped)
                 inner_xml = re.sub(r'</[^>]+>$', '', inner_xml)
@@ -1046,7 +1045,7 @@ def upgrade(file_manager) -> str:
     # collector.run_sub("Migrating t-esc", upgrade_t_esc)
     # collector.run_sub("Migrating t-ref", upgrade_t_ref)
     # collector.run_sub("Migrating t-model", upgrade_t_model)
-    collector.run_sub("Migrating this. in xml templates", upgrade_this)
-    # collector.run_sub("Migrating this. in test.js xml fragments", upgrade_this_in_js)
+    # collector.run_sub("Migrating this. in xml templates", upgrade_this)
+    collector.run_sub("Migrating this. in test.js xml fragments", upgrade_this_in_js)
 
     collector.finalize()
