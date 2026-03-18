@@ -478,7 +478,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
                 composer_form.attachment_ids.add(attachment)
             composer = composer_form.save()
 
-        with self.assertQueryCount(admin=57, employee=57):  # tm 57/57
+        with self.assertQueryCount(admin=58, employee=58):  # tm 57/57
             composer._action_send_mail()
 
         # notifications
@@ -600,7 +600,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
             )
             composer = composer_form.save()
 
-        with self.assertQueryCount(admin=54, employee=53):
+        with self.assertQueryCount(admin=55, employee=54):
             composer._action_send_mail()
 
         # notifications
@@ -630,7 +630,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
             )
             composer = composer_form.save()
 
-        with self.assertQueryCount(admin=69, employee=69):
+        with self.assertQueryCount(admin=70, employee=69):
             composer._action_send_mail()
 
         # notifications
@@ -657,7 +657,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
         # use another user already pre-defined with the email notification type,
         # so the ormcache is preserved.
         record = self.env['mail.test.track'].create({'name': 'Test'})
-        with self.assertQueryCount(admin=42, employee=41):
+        with self.assertQueryCount(admin=43, employee=42):
             record.write({
                 'user_id': self.user_emp_email.id,
             })
@@ -666,7 +666,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
     @warmup
     def test_message_assignation_inbox(self):
         record = self.env['mail.test.track'].create({'name': 'Test'})
-        with self.assertQueryCount(admin=23, employee=22):
+        with self.assertQueryCount(admin=24, employee=23):
             record.write({
                 'user_id': self.user_emp_inbox.id,
             })
@@ -1004,6 +1004,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             'name': 'only.email.1@test.example.com',
             'partner_id': new_partner.id,
             'create_values': {},
+            'recipient_type': 'to',
         })
 
     @users('employee')
@@ -1182,7 +1183,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
         customer_id = self.customer.id
         user_id = self.user_portal.id
 
-        with self.assertQueryCount(admin=95, employee=95):
+        with self.assertQueryCount(admin=96, employee=96):
             rec = self.env['mail.test.ticket'].create({
                 'name': 'Test',
                 'container_id': container_id,
@@ -1570,7 +1571,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
         """
         messages_all = self.messages_all.with_env(self.env)
 
-        with self.assertQueryCount(employee=27):  # tm 26
+        with self.assertQueryCount(employee=28):  # tm 28
             res = Store().add(messages_all, "_store_message_fields")._build_result()
 
         self.assertEqual(len(res["mail.message"]), 2 * 2)
@@ -1583,7 +1584,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
     def test_store_add_message_single(self):
         message = self.messages_all[0].with_env(self.env)
 
-        with self.assertQueryCount(employee=27):  # tm 26
+        with self.assertQueryCount(employee=28):  # tm 28
             res = Store().add(message, "_store_message_fields")._build_result()
 
         self.assertEqual(len(res["mail.message"]), 1)
@@ -1611,7 +1612,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
         self.env.flush_all()
         self.env.invalidate_all()
 
-        with self.assertQueryCount(employee=16):  # tm: 15
+        with self.assertQueryCount(employee=17):  # tm: 17
             res = Store().add(messages, "_store_message_fields")._build_result()
             self.assertEqual(len(res["mail.message"]), 6)
 
@@ -1671,6 +1672,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_cc_ids": [],
                                     "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,
@@ -1789,6 +1791,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_cc_ids": [],
                                     "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,

@@ -1,5 +1,9 @@
+from ast import literal_eval
+
+from odoo.addons.http_routing.tests.common import MockRequest
+from odoo.addons.mail.controllers.thread import ThreadController
 from odoo.addons.mail.tests.common_controllers import MailControllerThreadCommon, MessagePostSubTestData
-from odoo.tests import tagged
+from odoo.tests import RecordCapturer, tagged
 
 
 @tagged("-at_install", "post_install", "mail_controller")
@@ -169,3 +173,32 @@ class TestPortalThreadController(MailControllerThreadCommon):
                 test_partners(self.user_employee, True, all_partners, route_kw=sign),
             ),
         )
+
+    def test_mail_message_post(self):
+        """Test sending a mail with the controller using "Cc"."""
+        test_record = self.env['mail.test.ticket.mc'].create({'name': 'TestRecord'})
+        partner_to1, partner_cc1, partner_to2, partner_cc2 = self.env['res.partner'].create([
+            {'name': f'partner{name}', 'email': f'test_mail_message_post_{name}@ex.com'}
+            for name in ('to1', 'cc1', 'to2', 'cc2')])
+        partner_to = partner_to1 | partner_to2
+        partner_cc = partner_cc1 | partner_cc2
+        with (self.mock_mail_gateway(mail_unlink_sent=False),
+              MockRequest(self.env(user=self.user_employee)),
+              RecordCapturer(self.env['mail.mail'].sudo()) as capture_mail):
+            res = ThreadController().mail_message_post(
+                'mail.test.ticket.mc',
+                test_record.id,
+                {
+                    "body": "Test message",
+                    "partner_ids": partner_to.ids,
+                    "partner_cc_ids": partner_cc.ids,
+                },
+            )
+        message = self.env['mail.message'].browse(res['message_id'])
+        self.assertEqual(message.partner_ids, partner_to | partner_cc)
+        self.assertEqual(message.partner_to_ids, partner_to)
+        self.assertEqual(message.partner_cc_ids, partner_cc)
+        mail = capture_mail.records
+        self.assertEqual(len(mail), 1)
+        header = literal_eval(mail.headers)
+        self.assertEqual(header.get('X-Msg-Cc-Force'), ','.join(partner_cc.mapped('email_formatted')))

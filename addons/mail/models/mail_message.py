@@ -12,6 +12,7 @@ from lxml import html
 from typing import Self
 
 from odoo import _, api, fields, models, modules, tools
+from odoo.api import NewId
 from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.fields import Domain
 from odoo.tools import clean_context, groupby, SQL
@@ -240,7 +241,13 @@ class MailMessage(models.Model):
     is_current_user_or_guest_author = fields.Boolean(compute='_compute_is_current_user_or_guest_author')
     # recipients: include inactive partners (they may have been archived after
     # the message was sent, but they should remain visible in the relation)
-    partner_ids = fields.Many2many('res.partner', string='Recipients', context={'active_test': False})
+    partner_ids = fields.Many2many('res.partner', string='Recipients', context={'active_test': False},
+                                   compute='_compute_partner_ids', inverse='_inverse_partner_ids',
+                                   search='_search_partner_ids')
+    partner_to_ids = fields.Many2many('res.partner', relation='mail_message_res_partner_rel',
+                                      string='Recipients To', context={'active_test': False})
+    partner_cc_ids = fields.Many2many('res.partner', relation='mail_message_res_partner_cc_rel',
+                                      string='Recipients Cc', context={'active_test': False})
     # email recipients of incoming emails: comma separated list of emails (not necessarily normalized)
     incoming_email_to = fields.Text('Emails To')
     incoming_email_cc = fields.Char('Emails Cc')
@@ -361,6 +368,34 @@ class MailMessage(models.Model):
                 message.is_current_user_or_guest_author = True
             else:
                 message.is_current_user_or_guest_author = False
+
+    @api.depends('partner_to_ids', 'partner_cc_ids')
+    def _compute_partner_ids(self):
+        for message in self:
+            message.partner_ids = message.partner_to_ids | message.partner_cc_ids
+
+    def _inverse_partner_ids(self):
+        for message in self:
+            current = message.partner_to_ids | message.partner_cc_ids
+            to_remove = current - message.partner_ids
+            to_add = message.partner_ids - current
+            if to_add:
+                message.partner_to_ids |= to_add
+            if to_remove:
+                message.partner_to_ids -= to_remove
+                message.partner_cc_ids -= to_remove
+
+    @api.model
+    def _search_partner_ids(self, operator, value):
+        positive_operators = {"in", "=", "child_of", "any", "any!"}
+        negative_operators = {"not in", "!=", "not any", "not any!"}
+        if operator not in positive_operators | negative_operators:
+            return NotImplemented
+        domain_parts = [
+            Domain("partner_to_ids", operator, value),
+            Domain("partner_cc_ids", operator, value),
+        ]
+        return Domain.OR(domain_parts) if operator in positive_operators else Domain.AND(domain_parts)
 
     def _compute_needaction(self):
         """ Need action on a mail.message = notified on my channel """
@@ -565,9 +600,9 @@ class MailMessage(models.Model):
         # once we know they are accessible. At the end, the remaining entries
         # are the invalid ones.
         if self:
-            self.flush_recordset(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids'])
+            self.flush_recordset(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids', 'partner_to_ids', 'partner_cc_ids'])
         else:
-            self.flush_model(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids'])
+            self.flush_model(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids', 'partner_to_ids', 'partner_cc_ids'])
         self.env['mail.notification'].flush_model(['mail_message_id', 'res_partner_id'])
         pid = self.env.user.partner_id.id
 
@@ -734,6 +769,20 @@ class MailMessage(models.Model):
                 values['message_id'] = self._get_message_id(values)
             if 'reply_to' not in values:
                 values['reply_to'] = self._get_reply_to(values)
+            # Ensure partner_to_ids is present so access depending on partner_ids can be evaluated correctly.
+            if "partner_to_ids" not in values and values.get("partner_ids"):
+                empty = self.browse()
+                # Ignore create command (NewId) as they cannot impact access at create time. They are handled later
+                # in _inverse_partner_ids.
+                existing_partner_ids = [
+                    pid for pid in self._fields["partner_ids"].convert_to_cache(values["partner_ids"], empty)
+                    if not isinstance(pid, NewId)]
+                existing_partner_cc_ids = {
+                    pid
+                    for pid in (self._fields["partner_cc_ids"].convert_to_cache(
+                        values.get("partner_cc_ids", []), empty) if "partner_cc_ids" in values else ())
+                    if not isinstance(pid, NewId)}
+                values["partner_to_ids"] = [pid for pid in existing_partner_ids if pid not in existing_partner_cc_ids]
 
             if not values.get('attachment_ids', True):
                 # pop empty values
@@ -1157,6 +1206,13 @@ class MailMessage(models.Model):
         # sudo: res.partner: reading limited data of recipients is acceptable
         res.many(
             "partner_ids",
+            lambda res: res.from_method("_store_avatar_fields"),
+            dynamic_fields="_store_partner_name_dynamic_fields",
+            sort="id",
+            sudo=True,
+        )
+        res.many(
+            "partner_cc_ids",
             lambda res: res.from_method("_store_avatar_fields"),
             dynamic_fields="_store_partner_name_dynamic_fields",
             sort="id",

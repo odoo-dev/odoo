@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef } from "@web/owl2/utils";
+import { onWillStart, onWillUpdateProps } from "@odoo/owl";
+import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 
 import { patch } from "@web/core/utils/patch";
 
@@ -47,6 +48,11 @@ patch(Composer.prototype, {
                 this.subjectInputRef?.el,
             ]
         );
+        this.chatterState = useState({
+            isCcEnabled: false,
+        });
+        onWillStart(() => this._updateIsCcEnabled(this.props));
+        onWillUpdateProps((nextProps) => this._updateIsCcEnabled(nextProps));
         return super.setup();
     },
 
@@ -63,10 +69,28 @@ patch(Composer.prototype, {
         if (this.subject) {
             postData.subject = this.subject;
         }
+        postData.isCcEnabled = this.chatterState.isCcEnabled;
         return postData;
     },
 
     get subject() {
         return this.subjectInputRef.el?.value;
+    },
+
+    _updateIsCcEnabled(props) {
+        const allRecipients = (props.thread?.suggestedRecipients || []).concat(
+            props.thread?.additionalRecipients || []
+        );
+        if (allRecipients.filter((r) => r.recipient_type === "cc").length) {
+            this.chatterState.isCcEnabled = true;
+        }
+    },
+
+    get isCcEnabled() {
+        return this.chatterState.isCcEnabled;
+    },
+
+    toggleIsCcEnabled() {
+        this.chatterState.isCcEnabled = !this.chatterState.isCcEnabled;
     },
 });

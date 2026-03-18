@@ -19,6 +19,8 @@ export class RecipientsInput extends Component {
     static components = { AutoComplete, RecipientTag };
     static props = {
         thread: { type: Object },
+        recipientType: { type: String },
+        placeholder: { type: String },
     };
 
     setup() {
@@ -199,11 +201,8 @@ export class RecipientsInput extends Component {
                 bus: this.recipientCheckerBus,
             });
         };
-        for (const recipient of this.props.thread.suggestedRecipients) {
+        for (const recipient of this.getAllMailThreadRecipients()) {
             createTagForRecipient(recipient, "suggestedRecipients");
-        }
-        for (const recipient of this.props.thread.additionalRecipients) {
-            createTagForRecipient(recipient, "additionalRecipients");
         }
         return tags;
     }
@@ -213,7 +212,7 @@ export class RecipientsInput extends Component {
         return [
             ...this.props.thread.suggestedRecipients,
             ...this.props.thread.additionalRecipients,
-        ];
+        ].filter((r) => r.recipient_type === this.props.recipientType);
     }
 
     /**
@@ -236,14 +235,14 @@ export class RecipientsInput extends Component {
 
     /** @param {SuggestedRecipient} recipient */
     insertAdditionalRecipient(recipient) {
-        this.props.thread.additionalRecipients.push(recipient);
+        this.props.thread.additionalRecipients.push({
+            ...recipient,
+            recipient_type: this.props.recipientType,
+        });
     }
 
     /** @returns {string} */
     getPlaceholder() {
-        const hasRecipients =
-            this.props.thread.suggestedRecipients.length ||
-            this.props.thread.additionalRecipients.length;
-        return hasRecipients ? "" : _t("Followers only");
+        return this.getAllMailThreadRecipients().length ? "" : this.props.placeholder;
     }
 }
