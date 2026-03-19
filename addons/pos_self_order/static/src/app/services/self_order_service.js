@@ -472,6 +472,9 @@ export class SelfOrder extends Reactive {
 
     _getKioskPrintingCategoriesChanges(order, categories) {
         return order.lines.filter((orderline) => {
+            if (this.lastSentPreparationChange.lines[orderline.uuid]?.quantity === orderline.qty) {
+                return false;
+            }
             const baseProductId = orderline.combo_parent_id
                 ? orderline.combo_parent_id.product_id.id
                 : orderline.product_id.id;
@@ -500,8 +503,14 @@ export class SelfOrder extends Reactive {
                 Object.values(printer.config.product_categories_ids)
             );
             if (orderlines.length > 0) {
+                const originalQtys = orderlines.map((l) => l.qty);
                 const printingChanges = {
-                    new: orderlines,
+                    new: orderlines.map((l) => {
+                        const sentQty =
+                            this.lastSentPreparationChange?.lines?.[l.uuid]?.quantity || 0;
+                        l.qty = l.qty - sentQty;
+                        return l;
+                    }),
                     tracker: order.table_stand_number,
                     trackingNumber: order.tracking_number || "unknown number",
                     name: order.pos_reference || "unknown order",
@@ -519,6 +528,7 @@ export class SelfOrder extends Reactive {
                     changes: printingChanges,
                 });
                 await printer.printReceipt(receipt);
+                orderlines.forEach((l, i) => (l.qty = originalQtys[i]));
             }
         }
     }
@@ -649,6 +659,9 @@ export class SelfOrder extends Reactive {
             const tableIdentifier = this.router.getTableIdentifier([]);
             let uuid = this.selectedOrderUuid;
             this.currentOrder.recomputeOrderData();
+            this.lastSentPreparationChange = JSON.parse(
+                JSON.stringify(this.currentOrder.last_order_preparation_change)
+            );
             if (this.shouldUpdateLastOrderChange()) {
                 this.currentOrder.updateLastOrderChange();
             }
