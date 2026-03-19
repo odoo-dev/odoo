@@ -155,11 +155,11 @@ class PosOrder(models.Model):
                 order[field] = []
 
     def _generate_order_invoice(self):
-        if self.to_invoice and self.state == 'paid' and self.config_id.invoice_journal_id:
+        if self.to_invoice and self.state == 'paid' and self.config_id.journal_id:
             self._generate_pos_order_invoice()
-        elif not self.config_id.invoice_journal_id:
+        elif not self.config_id.journal_id:
             _logger.warning('Trying to create an invoice without any journal configured')
-            raise UserError(_('No invoice journal configured for this POS session.'))
+            raise UserError(_('No journal configured for this POS session.'))
 
     def update_order_partner(self, order):
         partner_id = self.env['res.partner'].browse(order['partner_id'])
@@ -935,7 +935,7 @@ class PosOrder(models.Model):
             'pos_refunded_invoice_ids': pos_refunded_invoice_ids,
             'pos_order_ids': self.ids,
             'ref': self.name if is_single_order else False,
-            'journal_id': self.config_id.invoice_journal_id.id,
+            'journal_id': self.config_id.journal_id.id,
             'move_type': move_type,
             'partner_id': self.partner_id.address_get(['invoice'])['invoice'],
             'partner_shipping_id': self.partner_id.address_get(['delivery'])['delivery'],

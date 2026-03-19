@@ -85,7 +85,8 @@ class PosSession(models.Model):
         help="Auto-generated session for orphan orders, ignored in constraints",
         readonly=True,
         copy=False)
-    move_id = fields.Many2one('account.move', string='Journal Entry', index=True)
+    move_id = fields.Many2one('account.move', string='Session Receipt', index=True)
+    stock_move_id = fields.Many2one('account.move', string='Stock Valuation Entry', index=True)
     payment_method_ids = fields.Many2many('pos.payment.method', related='config_id.payment_method_ids', string='Payment Methods')
     total_payments_amount = fields.Float(compute='_compute_total_payments_amount', string='Total Payments Amount')
     is_in_company_currency = fields.Boolean('Is Using Company Currency', compute='_compute_is_in_company_currency')
@@ -457,6 +458,11 @@ class PosSession(models.Model):
                 self.env['pos.order'].search([('session_id', '=', self.id), ('state', '=', 'paid')]).write({'state': 'done'})
             else:
                 record.move_id.sudo().unlink()
+            if record.stock_move_id:
+                if record.stock_move_id.line_ids:
+                    record.stock_move_id.with_company(self.company_id)._post()
+                else:
+                    record.stock_move_id.sudo().unlink()
             self.sudo().with_company(self.company_id)._reconcile_account_move_lines(data)
         else:
             self.sudo()._post_statement_difference(self.cash_register_difference)
@@ -805,18 +811,33 @@ class PosSession(models.Model):
         )
 
     def _create_account_move(self, balancing_account=False, amount_to_balance=0, bank_payment_method_diffs=None):
-        """ Create account.move and account.move.line records for this session.
+        """ Create account.move records for this session.
 
-        Side-effects include:
-            - setting self.move_id to the created account.move record
-            - reconciling cash receivable lines, invoice receivable lines and stock output lines
+        - move_id: an out_receipt covering all anonymous (to_invoice=False) orders.
+          Lines are aggregated by (revenue account + tax rate). Cash and bank
+          payment entries reconcile against this receipt's receivable lines.
+        - stock_move_id: a general journal entry in stock_journal_id for all
+          stock expense and valuation entries.
+
+        Invoiced orders are not represented here; their payments are settled
+        via direct account.payment records created at order time.
         """
-        account_move = self.env['account.move'].create({
+        session_receipt = self.env['account.move'].create({
+            'move_type': 'out_receipt',
             'journal_id': self.config_id.journal_id.id,
             'date': fields.Date.context_today(self),
             'ref': self.name,
         })
-        self.write({'move_id': account_move.id})
+        self.write({'move_id': session_receipt.id})
+
+        stock_journal = self.config_id.stock_journal_id
+        if stock_journal:
+            stock_move = self.env['account.move'].create({
+                'journal_id': stock_journal.id,
+                'date': fields.Date.context_today(self),
+                'ref': _('%s - Stock valuation', self.name),
+            })
+            self.write({'stock_move_id': stock_move.id})
 
         data = {'bank_payment_method_diffs': bank_payment_method_diffs or {}}
         data = self._accumulate_amounts(data)
@@ -824,7 +845,6 @@ class PosSession(models.Model):
         data = self._create_bank_payment_moves(data)
         data = self._create_pay_later_receivable_lines(data)
         data = self._create_cash_statement_lines_and_cash_move_lines(data)
-        data = self._create_invoice_receivable_lines(data)
         data = self._create_stock_valuation_lines(data)
         if balancing_account and amount_to_balance:
             data = self._create_balancing_line(data, balancing_account, amount_to_balance)
@@ -846,20 +866,12 @@ class PosSession(models.Model):
         combine_receivables_bank = defaultdict(amounts)
         combine_receivables_cash = defaultdict(amounts)
         combine_receivables_pay_later = defaultdict(amounts)
-        combine_invoice_receivables = defaultdict(amounts)
-        split_invoice_receivables = defaultdict(amounts)
         sales = defaultdict(amounts)
         taxes = defaultdict(tax_amounts)
         stock_expense = defaultdict(amounts)
         stock_return = defaultdict(amounts)
         stock_valuation = defaultdict(amounts)
         rounding_difference = {'amount': 0.0, 'amount_converted': 0.0}
-        # Track the receivable lines of the order's invoice payment moves for reconciliation
-        # These receivable lines are reconciled to the corresponding invoice receivable lines
-        # of this session's move_id.
-        combine_inv_payment_receivable_lines = defaultdict(lambda: self.env['account.move.line'])
-        split_inv_payment_receivable_lines = defaultdict(lambda: self.env['account.move.line'])
-        pos_receivable_account = self.company_id.account_default_pos_receivable_account_id
         currency_rounding = self.currency_id.rounding
         closed_orders = self._get_closed_orders()
         for order in closed_orders:
@@ -873,11 +885,9 @@ class PosSession(models.Model):
                 is_split_payment = payment.payment_method_id.split_transactions
                 payment_type = payment_method.type
 
-                # If not pay_later, we create the receivable vals for both invoiced and uninvoiced orders.
-                #   Separate the split and aggregated payments.
-                # Moreover, if the order is invoiced, we create the pos receivable vals that will balance the
-                # pos receivable lines from the invoice payments.
-                if payment_type != 'pay_later':
+                # Cash/bank receivables are only needed for anonymous orders. Invoiced orders
+                # are settled via a direct account.payment created at order time.
+                if payment_type != 'pay_later' and not order_is_invoiced:
                     if is_split_payment and payment_type == 'cash':
                         split_receivables_cash[payment] = self._update_amounts(split_receivables_cash[payment], {'amount': amount}, date)
                     elif not is_split_payment and payment_type == 'cash':
@@ -886,15 +896,6 @@ class PosSession(models.Model):
                         split_receivables_bank[payment] = self._update_amounts(split_receivables_bank[payment], {'amount': amount}, date)
                     elif not is_split_payment and payment_type == 'bank':
                         combine_receivables_bank[payment_method] = self._update_amounts(combine_receivables_bank[payment_method], {'amount': amount}, date)
-
-                    # Create the vals to create the pos receivables that will balance the pos receivables from invoice payment moves.
-                    if order_is_invoiced:
-                        if is_split_payment:
-                            split_inv_payment_receivable_lines[payment] |= payment.account_move_id.line_ids.filtered(lambda line: line.account_id == pos_receivable_account)
-                            split_invoice_receivables[payment] = self._update_amounts(split_invoice_receivables[payment], {'amount': payment.amount}, order.date_order)
-                        else:
-                            combine_inv_payment_receivable_lines[payment_method] |= payment.account_move_id.line_ids.filtered(lambda line: line.account_id == pos_receivable_account)
-                            combine_invoice_receivables[payment_method] = self._update_amounts(combine_invoice_receivables[payment_method], {'amount': payment.amount}, order.date_order)
 
                 # If pay_later, we create the receivable lines.
                 #   if split, with partner
@@ -990,29 +991,20 @@ class PosSession(models.Model):
             'combine_receivables_bank':            combine_receivables_bank,
             'split_receivables_cash':              split_receivables_cash,
             'combine_receivables_cash':            combine_receivables_cash,
-            'combine_invoice_receivables':         combine_invoice_receivables,
             'split_receivables_pay_later':         split_receivables_pay_later,
             'combine_receivables_pay_later':       combine_receivables_pay_later,
             'stock_return':                        stock_return,
             'stock_valuation':                     stock_valuation,
-            'combine_inv_payment_receivable_lines': combine_inv_payment_receivable_lines,
             'rounding_difference':                 rounding_difference,
             'MoveLine':                            MoveLine,
-            'split_invoice_receivables': split_invoice_receivables,
-            'split_inv_payment_receivable_lines': split_inv_payment_receivable_lines,
         })
         return data
 
     def _create_non_reconciliable_move_lines(self, data):
-        # Create account.move.line records for
-        #   - sales
-        #   - taxes
-        #   - stock expense
-        #   - non-cash split receivables (not for automatic reconciliation)
-        #   - non-cash combine receivables (not for automatic reconciliation)
+        # Create account.move.line records for sales, taxes and rounding in the session receipt.
+        # Stock expense lines are handled separately in _create_stock_valuation_lines.
         taxes = data.get('taxes')
         sales = data.get('sales')
-        stock_expense = data.get('stock_expense')
         rounding_difference = data.get('rounding_difference')
         MoveLine = data.get('MoveLine')
 
@@ -1030,14 +1022,10 @@ class PosSession(models.Model):
         if not float_is_zero(rounding_difference['amount'], precision_rounding=self.currency_id.rounding) or not float_is_zero(rounding_difference['amount_converted'], precision_rounding=self.currency_id.rounding):
             rounding_vals = [self._get_rounding_difference_vals(rounding_difference['amount'], rounding_difference['amount_converted'])]
 
-        MoveLine.create(tax_vals)
+        MoveLine.create(tax_vals + rounding_vals)
         move_line_ids = MoveLine.create(list(starmap(self._get_sale_vals, sales.items())))
         for key, ml_id in zip(sales.keys(), move_line_ids.ids):
             sales[key]['move_line_id'] = ml_id
-        MoveLine.create(
-            [self._get_stock_expense_vals(key, amounts['amount'], amounts['amount_converted']) for key, amounts in stock_expense.items()]
-            + rounding_vals
-        )
 
         return data
 
@@ -1233,63 +1221,46 @@ class PosSession(models.Model):
         return data
 
     def _create_invoice_receivable_lines(self, data):
-        # Create invoice receivable lines for this session's move_id.
-        # Keep reference of the invoice receivable lines because
-        # they are reconciled with the lines in combine_inv_payment_receivable_lines
-        MoveLine = data.get('MoveLine')
-        combine_invoice_receivables = data.get('combine_invoice_receivables')
-        split_invoice_receivables = data.get('split_invoice_receivables')
-
-        combine_invoice_receivable_vals = defaultdict(list)
-        split_invoice_receivable_vals = defaultdict(list)
-        combine_invoice_receivable_lines = {}
-        split_invoice_receivable_lines = {}
-        for payment_method, amounts in combine_invoice_receivables.items():
-            combine_invoice_receivable_vals[payment_method].append(self._get_invoice_receivable_vals(amounts['amount'], amounts['amount_converted']))
-        for payment, amounts in split_invoice_receivables.items():
-            split_invoice_receivable_vals[payment].append(self._get_invoice_receivable_vals(amounts['amount'], amounts['amount_converted']))
-        for payment_method, vals in combine_invoice_receivable_vals.items():
-            receivable_lines = MoveLine.create(vals)
-            combine_invoice_receivable_lines[payment_method] = receivable_lines
-        for payment, vals in split_invoice_receivable_vals.items():
-            receivable_lines = MoveLine.create(vals)
-            split_invoice_receivable_lines[payment] = receivable_lines
-
-        data.update({'combine_invoice_receivable_lines': combine_invoice_receivable_lines})
-        data.update({'split_invoice_receivable_lines': split_invoice_receivable_lines})
+        # Invoiced orders are no longer settled through the session receipt.
+        # Each invoiced payment creates a direct account.payment at order time.
+        # This method is kept for backward compatibility with overrides.
         return data
 
     def _create_stock_valuation_lines(self, data):
-        MoveLine = data.get('MoveLine')
+        # Stock expense (COGS) and stock valuation lines go into the stock_move_id
+        # (a general journal entry in stock_journal_id), keeping them out of the
+        # session out_receipt which should only contain revenue/tax/receivable lines.
+        if not self.stock_move_id:
+            return data
+
+        stock_expense = data.get('stock_expense')
         stock_valuation = data.get('stock_valuation')
         stock_return = data.get('stock_return')
+        StockMoveLine = self.env['account.move.line'].with_context(check_move_validity=False, skip_invoice_sync=True)
 
-        stock_valuation_vals = defaultdict(list)
-        stock_valuation_lines = {}
+        vals = []
+        for exp_account, amounts in stock_expense.items():
+            partial_args = {'account_id': exp_account.id, 'move_id': self.stock_move_id.id}
+            vals.append(self._debit_amounts(partial_args, amounts['amount'], amounts['amount_converted'], force_company_currency=True))
         for stock_moves in [stock_valuation, stock_return]:
             for account, amounts in stock_moves.items():
-                stock_valuation_vals[account].append(self._get_stock_valuation_vals(account, amounts['amount'], amounts['amount_converted']))
+                partial_args = {'account_id': account.id, 'move_id': self.stock_move_id.id}
+                vals.append(self._credit_amounts(partial_args, amounts['amount'], amounts['amount_converted'], force_company_currency=True))
 
-        for stock_valuation_acc, vals in stock_valuation_vals.items():
-            stock_valuation_lines[stock_valuation_acc] = MoveLine.create(vals)
-
+        stock_valuation_lines = StockMoveLine.create(vals)
         data.update({'stock_valuation_lines': stock_valuation_lines})
         return data
 
     def _reconcile_account_move_lines(self, data):
-        # reconcile cash receivable lines
+        # Reconcile the session receipt's cash/bank receivable lines with the
+        # corresponding cash statement lines and bank account.payment lines.
+        # Invoiced orders are already reconciled at order time (direct account.payment).
         split_cash_statement_lines = data.get('split_cash_statement_lines')
         combine_cash_statement_lines = data.get('combine_cash_statement_lines')
         split_cash_receivable_lines = data.get('split_cash_receivable_lines')
         combine_cash_receivable_lines = data.get('combine_cash_receivable_lines')
-        combine_inv_payment_receivable_lines = data.get('combine_inv_payment_receivable_lines')
-        split_inv_payment_receivable_lines = data.get('split_inv_payment_receivable_lines')
-        combine_invoice_receivable_lines = data.get('combine_invoice_receivable_lines')
-        split_invoice_receivable_lines = data.get('split_invoice_receivable_lines')
-        stock_output_lines = data.get('stock_output_lines')
         payment_method_to_receivable_lines = data.get('payment_method_to_receivable_lines')
         payment_to_receivable_lines = data.get('payment_to_receivable_lines')
-
 
         all_lines = (
               split_cash_statement_lines
@@ -1304,7 +1275,6 @@ class PosSession(models.Model):
         for lines in lines_by_account:
             lines.with_context(no_cash_basis=True).reconcile()
 
-
         for payment_method, lines in payment_method_to_receivable_lines.items():
             receivable_account = self._get_receivable_account(payment_method)
             if receivable_account.reconcile:
@@ -1312,18 +1282,6 @@ class PosSession(models.Model):
 
         for payment, lines in payment_to_receivable_lines.items():
             if payment.partner_id.property_account_receivable_id.reconcile:
-                lines.filtered(lambda line: not line.reconciled).with_context(no_cash_basis=True).reconcile()
-
-        # Reconcile invoice payments' receivable lines. But we only do when the account is reconcilable.
-        # Though `account_default_pos_receivable_account_id` should be of type receivable, there is currently
-        # no constraint for it. Therefore, it is possible to put set a non-reconcilable account to it.
-        if self.company_id.account_default_pos_receivable_account_id.reconcile:
-            for payment_method in combine_inv_payment_receivable_lines:
-                lines = combine_inv_payment_receivable_lines[payment_method] | combine_invoice_receivable_lines.get(payment_method, self.env['account.move.line'])
-                lines.filtered(lambda line: not line.reconciled).with_context(no_cash_basis=True).reconcile()
-
-            for payment in split_inv_payment_receivable_lines:
-                lines = split_inv_payment_receivable_lines[payment] | split_invoice_receivable_lines.get(payment, self.env['account.move.line'])
                 lines.filtered(lambda line: not line.reconciled).with_context(no_cash_basis=True).reconcile()
 
         return data

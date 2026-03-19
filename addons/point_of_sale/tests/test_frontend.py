@@ -581,7 +581,6 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
             'tax_regime_selection': True,
             'fiscal_position_ids': FP_POS_2M,
             'journal_id': test_sale_journal.id,
-            'invoice_journal_id': test_sale_journal.id,
             'payment_method_ids': [(0, 0, { 'name': 'Cash',
                                             'journal_id': cash_journal.id,
                                             'receivable_account_id': cls.account_receivable.id,

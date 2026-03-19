@@ -70,7 +70,7 @@ class TestPosSimpleInvoicedOrders(TestPoSCommon):
             'journal_entries_before_closing': {
                 '00100-010-0001': {
                     'invoice': {
-                        'journal_id': self.config.invoice_journal_id.id,
+                        'journal_id': self.config.journal_id.id,
                         'line_ids': [
                             {'account_id': self.sales_account.id, 'partner_id': self.customer.id, 'debit': 0, 'credit': 100, 'reconciled': False},
                             {'account_id': self.c1_receivable.id, 'partner_id': self.customer.id, 'debit': 100, 'credit': 0, 'reconciled': True},
@@ -117,7 +117,7 @@ class TestPosSimpleInvoicedOrders(TestPoSCommon):
             'journal_entries_before_closing': {
                 '00100-010-0001': {
                     'invoice': {
-                        'journal_id': self.config.invoice_journal_id.id,
+                        'journal_id': self.config.journal_id.id,
                         'line_ids': [
                             {'account_id': self.sales_account.id, 'partner_id': self.customer.id, 'debit': 0, 'credit': 100, 'reconciled': False},
                             {'account_id': self.c1_receivable.id, 'partner_id': self.customer.id, 'debit': 100, 'credit': 0, 'reconciled': False},
@@ -142,7 +142,7 @@ class TestPosSimpleInvoicedOrders(TestPoSCommon):
             'journal_entries_before_closing': {
                 '00100-010-0001': {
                     'invoice': {
-                        'journal_id': self.config.invoice_journal_id.id,
+                        'journal_id': self.config.journal_id.id,
                         'line_ids': [
                             {'account_id': self.sales_account.id, 'partner_id': self.customer.id, 'debit': 0, 'credit': 100, 'reconciled': False},
                             {'account_id': self.c1_receivable.id, 'partner_id': self.customer.id, 'debit': 100, 'credit': 0, 'reconciled': True},

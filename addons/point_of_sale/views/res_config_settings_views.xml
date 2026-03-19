@@ -259,17 +259,17 @@
                                         </div>
                                     </div>
                                 </setting>
-                                <setting string="Default Journals" id="pos_default_journals" help="Default journals for orders and invoices">
+                                <setting string="Default Journals" id="pos_default_journals" help="Default journals for POS documents and stock valuation">
                                     <div class="content-group mt16">
-                                        <div class="row" title="Whenever you close a session, one entry is generated in the following accounting journal for all the orders not invoiced. Invoices are recorded in accounting separately.">
-                                            <label string="Orders" for="pos_journal_id" class="col-lg-3 o_light_label" options="{'no_open': True, 'no_create': True}"/>
-                                            <field name="pos_journal_id" domain="[('company_id', '=', company_id), ('type', 'in', ('general', 'sale'))]" context="{'default_company_id': company_id, 'default_type': 'general'}" required="pos_company_has_template"/>
+                                        <div class="row" title="Sale journal used to post the session receipt (anonymous orders) and individual invoices.">
+                                            <label string="Sales Journal" for="pos_journal_id" class="col-lg-3 o_light_label" options="{'no_open': True, 'no_create': True}"/>
+                                            <field name="pos_journal_id" domain="[('company_id', '=', company_id), ('type', '=', 'sale')]" context="{'default_company_id': company_id, 'default_type': 'sale'}" required="pos_company_has_template"/>
                                         </div>
-                                        <div class="row">
-                                            <label string="Invoices" for="pos_invoice_journal_id" class="col-lg-3 o_light_label"/>
-                                            <field name="pos_invoice_journal_id"
-                                                domain="[('company_id', '=', company_id), ('type', '=', 'sale')]"
-                                                context="{'default_company_id': company_id, 'default_type': 'sale'}"/>
+                                        <div class="row" title="General journal used to post stock valuation entries at session close.">
+                                            <label string="Stock Journal" for="pos_stock_journal_id" class="col-lg-3 o_light_label"/>
+                                            <field name="pos_stock_journal_id"
+                                                domain="[('company_id', '=', company_id), ('type', '=', 'general')]"
+                                                context="{'default_company_id': company_id, 'default_type': 'general'}"/>
                                         </div>
                                     </div>
                                 </setting>

@@ -64,7 +64,7 @@ export class PosConfig extends models.ServerModel {
             is_installed_account_accountant: true,
             picking_type_id: 9,
             journal_id: 1,
-            invoice_journal_id: 1,
+            stock_journal_id: 1,
             currency_id: 1,
             iface_cashdrawer: false,
             iface_big_scrollbars: false,

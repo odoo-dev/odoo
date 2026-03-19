@@ -58,7 +58,6 @@ class CommonPosTest(ValuationReconciliationTestCommon):
         self.pos_config_usd = self.env['pos.config'].create({
             'name': 'PoS Config USD',
             'journal_id': self.company_data['default_journal_sale'].id,
-            'invoice_journal_id': self.company_data['default_journal_sale'].id,
             'payment_method_ids': [
                 (4, self.credit_payment_method.id),
                 (4, self.bank_payment_method.id),
@@ -418,7 +417,7 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
         })
         # Set Point of Sale configurations
         # basic_config
-        #   - derived from 'point_of_sale.pos_config_main' with added invoice_journal_id and credit payment method.
+        #   - derived from 'point_of_sale.pos_config_main' with an added credit payment method.
         # other_currency_config
         #   - pos.config set to have currency different from company currency.
         cls.basic_config = cls._create_basic_config()
@@ -465,7 +464,6 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
     def _create_basic_config(cls):
         config = cls.env['pos.config'].create({
             'name': 'PoS Shop Test',
-            'invoice_journal_id': cls.invoice_journal.id,
             'available_pricelist_ids': cls.currency_pricelist.ids,
             'pricelist_id': cls.currency_pricelist.id,
         })
@@ -562,7 +560,6 @@ class TestPoSCommon(ValuationReconciliationTestCommon):
 
         config = cls.env['pos.config'].create({
             'name': 'Shop Other',
-            'invoice_journal_id': other_invoice_journal.id,
             'journal_id': other_sales_journal.id,
             'use_pricelist': True,
             'available_pricelist_ids': other_pricelist.ids,

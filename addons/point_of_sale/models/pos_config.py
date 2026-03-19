@@ -29,13 +29,15 @@ class PosConfig(models.Model):
         return self.env['stock.warehouse'].search(self.env['stock.warehouse']._check_company_domain(self.env.company), limit=1).pos_type_id.id
 
     def _default_sale_journal(self):
-        journal = self.env['account.journal']._ensure_company_account_journal()
-        return journal
-
-    def _default_invoice_journal(self):
         return self.env['account.journal'].search([
             *self.env['account.journal']._check_company_domain(self.env.company),
             ('type', '=', 'sale'),
+        ], limit=1)
+
+    def _default_stock_journal(self):
+        return self.env['account.journal'].search([
+            *self.env['account.journal']._check_company_domain(self.env.company),
+            ('type', '=', 'general'),
         ], limit=1)
 
     def _default_payment_methods(self):
@@ -84,17 +86,18 @@ class PosConfig(models.Model):
         ondelete='restrict')
     journal_id = fields.Many2one(
         'account.journal', string='Point of Sale Journal',
-        domain=[('type', 'in', ('general', 'sale'))],
+        domain=[('type', '=', 'sale')],
         check_company=True,
-        help="Accounting journal used to post POS session journal entries and POS invoice payments.",
+        help="Accounting journal used to post POS session receipts and invoices.",
         default=_default_sale_journal,
         ondelete='restrict')
-    invoice_journal_id = fields.Many2one(
-        'account.journal', string='Invoice Journal',
+    stock_journal_id = fields.Many2one(
+        'account.journal', string='Stock Journal',
+        domain=[('type', '=', 'general')],
         check_company=True,
-        domain=[('type', '=', 'sale')],
-        help="Accounting journal used to create invoices.",
-        default=_default_invoice_journal)
+        help="Accounting journal used to post stock valuation entries.",
+        default=_default_stock_journal,
+        ondelete='restrict')
     currency_id = fields.Many2one('res.currency', compute='_compute_currency', store=True, compute_sudo=True, string="Currency")
     order_seq_id = fields.Many2one('ir.sequence', string='Order Sequence', readonly=True, copy=False)
     order_backend_seq_id = fields.Many2one('ir.sequence', string='Order Backend Sequence', readonly=True, copy=False)
@@ -502,7 +505,7 @@ class PosConfig(models.Model):
             if self.env['pos.payment.method'].search_count([('id', 'in', config.payment_method_ids.ids), ('company_id', '!=', config.company_id.id)]):
                 raise ValidationError(_("The payment methods for the point of sale %s must belong to its company.", self.name))
 
-    @api.constrains('pricelist_id', 'use_pricelist', 'available_pricelist_ids', 'journal_id', 'invoice_journal_id', 'payment_method_ids')
+    @api.constrains('pricelist_id', 'use_pricelist', 'available_pricelist_ids', 'journal_id', 'payment_method_ids')
     def _check_currencies(self):
         for config in self:
             if config.use_pricelist and config.pricelist_id and config.pricelist_id not in config.available_pricelist_ids:
@@ -517,8 +520,6 @@ class PosConfig(models.Model):
                 raise ValidationError(_("All available pricelists must be in the same currency as the company or"
                                         " as the Sales Journal set on this point of sale if you use"
                                         " the Accounting application."))
-            if config.invoice_journal_id.currency_id and config.invoice_journal_id.currency_id != config.currency_id:
-                raise ValidationError(_("The invoice journal must be in the same currency as the Sales Journal or the company currency if that is not set."))
 
     def _check_payment_method_ids(self):
         self.ensure_one()

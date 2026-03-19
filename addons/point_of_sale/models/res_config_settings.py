@@ -88,7 +88,7 @@ class ResConfigSettings(models.TransientModel):
     pos_iface_print_skip_screen = fields.Boolean(related='pos_config_id.iface_print_skip_screen', readonly=False)
     pos_iface_tax_included = fields.Selection(related='pos_config_id.iface_tax_included', readonly=False)
     pos_iface_tipproduct = fields.Boolean(related='pos_config_id.iface_tipproduct', readonly=False)
-    pos_invoice_journal_id = fields.Many2one(related='pos_config_id.invoice_journal_id', readonly=False)
+    pos_stock_journal_id = fields.Many2one(related='pos_config_id.stock_journal_id', readonly=False)
     pos_use_header_or_footer = fields.Boolean(related='pos_config_id.use_header_or_footer', readonly=False)
     pos_is_margins_costs_accessible_to_every_user = fields.Boolean(related='pos_config_id.is_margins_costs_accessible_to_every_user', readonly=False)
     pos_journal_id = fields.Many2one(related='pos_config_id.journal_id', readonly=False)

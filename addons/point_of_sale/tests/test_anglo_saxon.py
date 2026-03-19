@@ -56,7 +56,7 @@ class TestAngloSaxonCommon(AccountTestInvoicingCommon):
         cls.pos_config.journal_id = sale_journal
         cls.cash_journal = cls.env['account.journal'].create({'name': 'CASH journal', 'type': 'cash', 'code': 'CSH00'})
         cls.sale_journal = cls.env['account.journal'].create({'name': 'SALE journal', 'type': 'sale', 'code': 'INV00'})
-        cls.pos_config.invoice_journal_id = cls.sale_journal
+        cls.pos_config.journal_id = cls.sale_journal
         cls.cash_payment_method = cls.env['pos.payment.method'].create({
             'name': 'Cash Test',
             'journal_id': cls.cash_journal.id,
@@ -229,7 +229,7 @@ class TestAngloSaxonFlow(TestAngloSaxonCommon):
 
         # check the anglo saxon move lines
         line = pos_order_pos0.account_move.line_ids.filtered(lambda l: l.debit and l.account_id == self.category.property_account_expense_categ_id)
-        self.assertEqual(pos_order_pos0.account_move.journal_id, self.pos_config.invoice_journal_id)
+        self.assertEqual(pos_order_pos0.account_move.journal_id, self.pos_config.journal_id)
         self.assertEqual(line.debit, 27, 'As it is a fifo product, the move\'s value should be 5*5 + 2*1')
 
     @skip('Temporary to fast merge new valuation')

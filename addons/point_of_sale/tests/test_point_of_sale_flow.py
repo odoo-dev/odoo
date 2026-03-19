@@ -1173,7 +1173,6 @@ class TestPointOfSaleFlow(CommonPosTest):
         sub_pos_config = self.env['pos.config'].with_company(branch).create({
             'name': 'Main',
             'journal_id': self.company_data['default_journal_sale'].id,
-            'invoice_journal_id': self.company_data['default_journal_sale'].id,
             'payment_method_ids': [(4, bank_payment_method.id)],
         })
 
