@@ -77,6 +77,12 @@
         <field name="implied_ids" eval="[(4, ref('website.website_page_controller_expose'))]"/>
     </record>
 
+    <record id="website_page_controller_rule_designer" model="ir.rule">
+        <field name="name">website.controller.page: designer: full access</field>
+        <field name="model_id" ref="website.model_website_controller_page"/>
+        <field name="groups" eval="[(4, ref('website.group_website_designer'))]"/>
+    </record>
+
     <record id="website_page_controller_rule_public" model="ir.rule">
         <field name="name">website.controller.page: portal/public: read published pages</field>
         <field name="model_id" ref="website.model_website_controller_page"/>
