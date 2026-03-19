@@ -57,11 +57,12 @@ export class HootSideBarSuite extends Component {
     static template = xml`
         <t t-if="props.hasSuites">
             <i
-                class="fa fa-chevron-right text-xs transition"
+                class="oi text-xs transition"
                 t-att-class="{
                     'rotate-90': props.unfolded,
                     'opacity-25': !props.reporting.failed and !props.reporting.tests
                 }"
+                data-icon="chevron_right"
             />
         </t>
         <span t-ref="root" t-att-class="getClassName()" t-out="props.name" />
@@ -167,7 +168,7 @@ export class HootSideBar extends Component {
                         t-att-title="state.hideEmpty ? 'Show all suites' : 'Hide other suites'"
                         t-on-click.stop="toggleHideEmpty"
                     >
-                        <i t-attf-class="fa fa-{{ state.hideEmpty ? 'eye' : 'eye-slash' }}" />
+                        <i class="oi" t-att-data-icon="state.hideEmpty ? 'visibility' : 'visibility_off'" />
                     </button>
                 </t>
                 <t t-set="expanded" t-value="unfoldedIds.size === env.runner.suites.size" />
@@ -177,7 +178,7 @@ export class HootSideBar extends Component {
                     t-attf-title="{{ expanded ? 'Collapse' : 'Expand' }} all"
                     t-on-click.stop="() => this.toggleExpand(expanded)"
                 >
-                    <i t-attf-class="fa fa-{{ expanded ? 'compress' : 'expand' }}" />
+                    <i class="oi" t-att-data-icon="expanded ? 'close_fullscreen' : 'expand_content'" />
                 </button>
             </form>
             <ul class="overflow-x-hidden overflow-y-auto" t-ref="suites-list">

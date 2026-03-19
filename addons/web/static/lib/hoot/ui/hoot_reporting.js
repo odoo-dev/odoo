@@ -221,7 +221,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-cyan"
                                             t-on-click.stop="() => this.filterResults('skipped')"
                                         >
-                                            <i class="fa fa-pause-circle" />
+                                            <i class="oi oi-filled" data-icon="pause_circle" />
                                             <strong t-out="runnerReporting.skipped" />
                                         </button>
                                         tests skipped

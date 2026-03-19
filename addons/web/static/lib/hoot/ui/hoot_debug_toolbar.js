@@ -163,7 +163,8 @@ export class HootDebugToolBar extends Component {
             <div class="flex flex-col w-full overflow-hidden rounded shadow bg-gray-200 dark:bg-gray-800">
                 <div class="flex items-center gap-2 px-2">
                     <i
-                        class="fa fa-bug text-cyan p-2"
+                        class="oi text-cyan p-2"
+                        data-icon="bug_report"
                         t-att-class="{ 'cursor-move': !state.open }"
                         t-ref="handle"
                     />
