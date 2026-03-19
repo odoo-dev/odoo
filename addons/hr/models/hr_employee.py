@@ -2049,6 +2049,7 @@ class HrEmployee(models.Model):
         return all_employees._get_versions_with_contract_overlap_with_period(date_from, date_to)
 
     def _get_unusual_days(self, date_from, date_to=None):
+        self.ensure_one()
         date_from_date = datetime.strptime(date_from, '%Y-%m-%d %H:%M:%S').date()
         date_to_date = datetime.strptime(date_to, '%Y-%m-%d %H:%M:%S').date() if date_to else None
         employee_versions = self.env['hr.version'].sudo().search([('employee_id', '=', self.id)]).filtered(
@@ -2056,21 +2057,32 @@ class HrEmployee(models.Model):
         if not employee_versions:
             # Checking the calendar directly allows to not grey out the leaves taken
             # by the employee or fallback to the company calendar
-            return (self.resource_calendar_id or self.env.company.resource_calendar_id)._get_unusual_days(
+            unusual_days = (self.resource_calendar_id or self.env.company.resource_calendar_id)._get_unusual_days(
                 datetime.combine(fields.Date.from_string(date_from), time.min, tzinfo=UTC),
                 datetime.combine(fields.Date.from_string(date_to), time.max, tzinfo=UTC),
                 self.company_id,
             )
-        unusual_days = {}
-        for version in employee_versions:
-            tmp_date_from = max(date_from_date, version.date_start)
-            tmp_date_to = min(date_to_date, version.date_end) if version.date_end else date_to_date
-            unusual_days.update(version.resource_calendar_id.sudo(False)._get_unusual_days(
-                datetime.combine(fields.Date.from_string(tmp_date_from), time.min, tzinfo=UTC),
-                datetime.combine(fields.Date.from_string(tmp_date_to), time.max, tzinfo=UTC),
-                self.company_id,
-                self.resource_id,
-            ))
+        else:
+            unusual_days = {}
+            for version in employee_versions:
+                tmp_date_from = max(date_from_date, version.date_start)
+                tmp_date_to = min(date_to_date, version.date_end) if version.date_end else date_to_date
+                unusual_days.update(version.resource_calendar_id.sudo(False)._get_unusual_days(
+                    datetime.combine(fields.Date.from_string(tmp_date_from), time.min, tzinfo=UTC),
+                    datetime.combine(fields.Date.from_string(tmp_date_to), time.max, tzinfo=UTC),
+                    self.company_id,
+                    self.resource_id,
+                ))
+        public_holidays = self.env['resource.public.holiday'].search([
+            ('date', '>=', date_from_date),
+            ('date', '<=', date_to_date),
+            ('company_id', 'in', [self.company_id.id, False]),
+            ('state_ids', 'in', [self.company_id.state_id.id, False]),
+            ('country_id', 'in', [self.company_country_id.id, False]),
+            ('calendar_ids', 'in', [self.resource_calendar_id.id, False]),
+        ])
+        for ph in public_holidays:
+            unusual_days[fields.Date.to_string(ph.date)] = True
         return unusual_days
 
     def formatted_employee_attendance_intervals(self, start, stop):

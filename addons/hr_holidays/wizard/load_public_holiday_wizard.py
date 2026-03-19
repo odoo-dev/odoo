@@ -44,14 +44,14 @@ class LoadPublicHolidaysWizard(models.TransientModel):
                 prepared_public_holidays = wizard._prepare_public_holidays_data()
                 preview_values = [
                     public_holiday_value
-                    for company_data in prepared_public_holidays['prepared_public_holidays'].values()
-                    for public_holiday_value in company_data
+                    for country_data in prepared_public_holidays['prepared_public_holidays'].values()
+                    for public_holiday_value in country_data
                 ]
                 commands.extend(
                     Command.create({
                         'name': preview_value['name'],
                         'start_date': preview_value['start_date'],
-                        'company_id': preview_value['company_id'],
+                        'country_id': preview_value['country_id'],
                     })
                     for preview_value in preview_values
                 )
@@ -63,14 +63,14 @@ class LoadPublicHolidaysWizard(models.TransientModel):
         warning_messages = self._get_warning_messages(prepared_public_holidays)
         notification_messages = []
         convert_datetime = self.env.context.get('public_holiday_convert_datetime', True)
-        for company_id, create_values in self._get_create_values_by_company().items():
-            company = self.env['res.company'].browse(company_id)
-            created_leaves = self.env['resource.calendar.leaves'].with_context(convert_datetime=convert_datetime).create(create_values)
+        for country_id, create_values in self._get_create_values_by_company().items():
+            country = self.env['res.country'].browse(country_id)
+            created_leaves = self.env['resource.public.holiday'].create(create_values)
             if created_leaves:
                 notification_messages.append(self.env._(
-                    'Created %(count)s public holiday(s) for %(company)s.',
+                    'Created %(count)s public holiday(s) for %(country)s.',
                     count=len(created_leaves),
-                    company=company.name,
+                    country=country.name,
                 ))
         notification_messages.extend(warning_messages)
         next_action = {'type': 'ir.actions.act_window_close'}
@@ -91,16 +91,15 @@ class LoadPublicHolidaysWizard(models.TransientModel):
         companies = self.env.companies
         prepared_public_holidays = {}
         companies_without_country = self.env['res.company']
-        companies_without_public_holidays = self.env['res.company']
-        companies_with_all_existing_holidays = self.env['res.company']
-        existing_holidays_dict = dict(self.env["resource.calendar.leaves"]._read_group(
+        countries_without_public_holidays = self.env['res.company']
+        countries_with_all_existing_holidays = self.env['res.company']
+        existing_holidays_dict = dict(self.env["resource.public.holiday"]._read_group(
             domain=[
-                ('company_id', 'in', companies.ids),
-                ('date_from', '<=', datetime(self.year, 12, 31, 0, 0, 0)),
-                ('date_to', '>=', datetime(self.year, 1, 1, 0, 0, 0)),
-                ('resource_id', '=', False),
+                ('country_id', 'in', companies.country_id.ids),
+                ('date', '<=', datetime(self.year, 12, 31)),
+                ('date', '>=', datetime(self.year, 1, 1)),
             ],
-            groupby=['company_id'],
+            groupby=['country_id'],
             aggregates=['id:recordset'],
         ))
 
@@ -109,13 +108,13 @@ class LoadPublicHolidaysWizard(models.TransientModel):
                 companies_without_country |= company
                 continue
 
+        for country in companies.country_id:
             try:
-                csv_file_path = file_path(f"hr_holidays/data/public_holidays/public_holidays_{company.country_code.lower()}.csv")
+                csv_file_path = file_path(f"hr_holidays/data/public_holidays/public_holidays_{country.code.lower()}.csv")
             except FileNotFoundError:
-                companies_without_public_holidays |= company
+                countries_without_public_holidays |= country
                 continue
 
-            company_tz = ZoneInfo(company.tz or self.env.user.tz or 'UTC')
             public_holidays_values_dict = {}
             has_holidays_for_year = False
             with file_open(csv_file_path) as f:
@@ -130,11 +129,9 @@ class LoadPublicHolidaysWizard(models.TransientModel):
                         continue
 
                     has_holidays_for_year = True
-                    holiday_start_utc = convert_timezone(datetime.combine(holiday_date, time.min), UTC, company_tz)
-                    holiday_end_utc = convert_timezone(datetime.combine(holiday_date, time.max), UTC, company_tz)
                     overlapping = any(
-                        holiday.date_from <= holiday_end_utc and holiday.date_to >= holiday_start_utc
-                        for holiday in existing_holidays_dict.get(company, [])
+                        holiday.date == holiday_date
+                        for holiday in existing_holidays_dict.get(country, [])
                     )
                     if overlapping:
                         continue
@@ -146,66 +143,56 @@ class LoadPublicHolidaysWizard(models.TransientModel):
                         public_holidays_values_dict[holiday_date] = {
                             'name': holiday_name,
                             'start_date': holiday_date,
-                            'company_id': company.id,
+                            'country_id': country.id,
                         }
 
             if public_holidays_values_dict:
                 prepared_public_holidays[company.id] = list(public_holidays_values_dict.values())
             elif not has_holidays_for_year:
-                companies_without_public_holidays += company
+                countries_without_public_holidays += company
             else:
-                companies_with_all_existing_holidays += company
+                countries_with_all_existing_holidays += company
 
         return {
             'prepared_public_holidays': prepared_public_holidays,
             'companies_without_country': companies_without_country,
-            'companies_without_public_holidays': companies_without_public_holidays,
-            'companies_with_all_existing_holidays': companies_with_all_existing_holidays,
+            'countries_without_public_holidays': countries_without_public_holidays,
+            'countries_with_all_existing_holidays': countries_with_all_existing_holidays,
         }
 
     def _get_warning_messages(self, prepared_public_holidays):
         self.ensure_one()
         warning_messages = []
-        if prepared_public_holidays['companies_with_all_existing_holidays']:
-            warning_messages.append(self.env._(
-                "All public holidays for %(year)s are already present for: %(companies)s.",
-                year=self.year,
-                companies=', '.join(prepared_public_holidays['companies_with_all_existing_holidays'].mapped('name')),
-            ))
         if prepared_public_holidays['companies_without_country']:
             warning_messages.append(self.env._(
                 "These companies do not have a country set: %(companies)s.",
                 companies=', '.join(prepared_public_holidays['companies_without_country'].mapped('name')),
             ))
-        if prepared_public_holidays['companies_without_public_holidays']:
+        if prepared_public_holidays['countries_with_all_existing_holidays']:
             warning_messages.append(self.env._(
-                "Public holiday data is not available for %(year)s for: %(companies)s.",
+                "All public holidays for %(year)s are already present for: %(countries)s.",
                 year=self.year,
-                companies=', '.join(prepared_public_holidays['companies_without_public_holidays'].mapped('name')),
+                countries=', '.join(prepared_public_holidays['countries_with_all_existing_holidays'].mapped('name')),
+            ))
+        if prepared_public_holidays['countries_without_public_holidays']:
+            warning_messages.append(self.env._(
+                "Public holiday data is not available for %(year)s for: %(countries)s.",
+                year=self.year,
+                countries=', '.join(prepared_public_holidays['countries_without_public_holidays'].mapped('name')),
             ))
         return warning_messages
 
     def _get_create_values_by_company(self):
         self.ensure_one()
-        values_by_company = defaultdict(list)
-        companies = self.env.companies
+        values_by_country = defaultdict(list)
+        countries = self.env.companies.country_id
         for line in self.line_ids:
-            company = line.company_id
-            if company not in companies:
+            if line.country_id not in countries:
                 continue
-            company_tz = ZoneInfo(company.tz or 'UTC')
-            create_values = {
+            values_by_country[line.country_id.id].append({
                 'name': line.name,
-                'date_from': convert_timezone(datetime.combine(line.start_date, time.min), UTC, company_tz),
-                'date_to': convert_timezone(datetime.combine(line.start_date, time.max), UTC, company_tz),
-                'company_id': company.id,
-            }
-            work_entry_type = line.work_entry_type_id
-            if work_entry_type:
-                create_values.update({
-                    'work_entry_type_id': work_entry_type.id,
-                    'count_as': work_entry_type.count_as,
-                    'elligible_for_accrual_rate': work_entry_type.elligible_for_accrual_rate,
-                })
-            values_by_company[company.id].append(create_values)
-        return values_by_company
+                'date': line.start_date,
+                'country_id': line.country_id.id,
+                'work_entry_type_id': line.work_entry_type_id.id,
+            })
+        return values_by_country

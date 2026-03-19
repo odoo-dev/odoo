@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="resource_public_holiday_view_search" model="ir.ui.view">
+        <field name="name">resource.public.holiday.view.search</field>
+        <field name="model">resource.public.holiday</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="state_ids"/>
+                <field name="country_id"/>
+                <field name="company_id"/>
+                <field name="calendar_ids"/>
+                <field name="state_ids"/>
+                <filter string="Date" name="filter_date" date="date" default_period="year"/>
+                <filter string="Upcoming" name="upcoming" domain="[('date', '&gt;', 'today')]"/>
+                <group name="groupby">
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'date'}"/>
+                    <filter string="State" name="group_by_state" context="{'group_by': 'state_ids'}"/>
+                    <filter string="Country" name="group_by_country" context="{'group_by': 'country_id'}"/>
+                    <filter string="Company" name="group_by_company" context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="resource_public_holiday_view_tree" model="ir.ui.view">
+        <field name="name">resource.public.holiday.view.tree</field>
+        <field name="model">resource.public.holiday</field>
+        <field name="arch" type="xml">
+            <list string="Public Holidays" editable="bottom">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="state_ids" widget="many2many_tags"/>
+                <field name="country_id"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="calendar_ids" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="resource_public_holiday_action" model="ir.actions.act_window">
+        <field name="name">Public Holidays</field>
+        <field name="res_model">resource.public.holiday</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="resource_public_holiday_view_tree"/>
+        <field name="search_view_id" ref="resource_public_holiday_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new public holiday
+            </p>
+            <p>
+                Public holidays are used to define non-working days for specific countries, states, or work locations.
+            </p>
+        </field>
+    </record>
+</odoo>

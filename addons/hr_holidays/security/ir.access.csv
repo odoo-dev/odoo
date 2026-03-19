@@ -81,6 +81,7 @@ hr_leave_accrual_plan_rule_multi_company,Accrual plan multi company rule,hr.leav
 access_hr_leave_accrual_level_user,hr.leave.accrual.level.user,hr.leave.accrual.level,hr_holidays.group_hr_holidays_user,r,
 access_hr_leave_accrual_level_manager,hr.leave.accrual.level.manager,hr.leave.accrual.level,hr_holidays.group_hr_holidays_manager,crud,
 access_hr_holidays_cancel_leave,access_hr_holidays_cancel_leave,hr.holidays.cancel.leave,hr_holidays.group_hr_holidays_employee,crud,
+access_hr_public_holiday_manager,Public Holiday: officer access,resource.public.holiday,hr_holidays.group_hr_holidays_user,crud,
 access_hr_leave_mandatory_day_user,access_hr_holidays_mandatory_day_user,hr.leave.mandatory.day,hr_holidays.group_hr_holidays_employee,r,
 access_hr_leave_mandatory_day_manager,access_hr_holidays_mandatory_day_manager,hr.leave.mandatory.day,hr_holidays.group_hr_holidays_manager,crud,
 hr_leave_mandatory_day_rule_multi_company,Mandatory Day: multi company rule,hr.leave.mandatory.day,,crud,"[('company_id', 'in', company_ids + [False])]"

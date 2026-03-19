@@ -1,9 +1,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import UTC, datetime, time
+from datetime import UTC, date, datetime, time
 from zoneinfo import ZoneInfo
 
 from odoo import fields, models
+from odoo.fields import Domain
 from odoo.tools import babel_locale_parse
 from odoo.tools.date_utils import weeknumber
 
@@ -47,3 +48,26 @@ class ResourceResource(models.Model):
                 resource_hours_per_week[self.id][week] -= holiday_id.number_of_hours
         else:
             super()._format_leave(leave, resource_hours_per_day, resource_hours_per_week, ranges_to_remove, start_day, end_day, locale)
+
+    def _get_ph_domain(self, target_date=date.today()):
+        employee_resources = self.filtered('employee_id')
+        other_resources = self - employee_resources
+        global_domain = super(ResourceResource, other_resources)._get_ph_domain(target_date)
+        for resource in employee_resources:
+            valid_version_sudo = self.env['hr.version']
+            if resource.employee_id:
+                valid_version_sudo = resource.sudo().employee_id._get_version(target_date)
+            domain = Domain([
+                ('company_id', 'in', [False, resource.company_id.id]),
+                ('calendar_ids', 'in', [False, resource.calendar_id.id]),
+            ])
+            if valid_version_sudo:
+                work_location_sudo = valid_version_sudo.work_location_id
+                address_sudo = work_location_sudo.address_id or valid_version_sudo.company_id.partner_id
+                domain = Domain.AND([domain, Domain([
+                    ('country_id', 'in', [False, address_sudo.country_id.id]),
+                    ('state_ids', 'in', [False, address_sudo.state_id.id]),
+                    ('work_location_ids', 'in', [False, work_location_sudo.id]),
+                ])])
+            global_domain = Domain.OR([global_domain, domain])
+        return global_domain

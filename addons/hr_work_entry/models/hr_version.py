@@ -133,6 +133,23 @@ class HrVersion(models.Model):
         for leave in resource_calendar_leaves:
             all_leaves_by_resource[leave.resource_id.id] |= leave
 
+        global_domain = Domain.FALSE
+        for version in self:
+            work_location_sudo = version.work_location_id
+            address_sudo = work_location_sudo.address_id or version.company_id.partner_id
+            domain = Domain([
+                ('company_id', 'in', [False, version.company_id.id]),
+                ('calendar_ids', 'in', [False, version.calendar_id.id]),
+                ('country_id', 'in', [False, address_sudo.country_id.id]),
+                ('state_ids', 'in', [False, address_sudo.state_id.id]),
+                ('work_location_ids', 'in', [False, work_location_sudo.id]),
+                ('date', '>=', version.date_start),
+                ('date', '<=', version.date_end),
+            ])
+            global_domain = Domain.OR([global_domain, domain])
+        all_public_leaves = self.env['resource.public.holiday'].search(global_domain)
+        # TODO BEDO
+
         tz_dates = {}
         for version in self:
             employee = version.employee_id

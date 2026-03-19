@@ -9,3 +9,6 @@ resource_calendar_leaves_rule_group_user_create,resource.calendar.leaves: employ
 resource_calendar_leaves_rule_group_user_modify,resource.calendar.leaves: employee modifies own,resource.calendar.leaves,base.group_user,cud,"[('resource_id', '!=', False), ('resource_id.user_id', 'in', [False, user.id])]"
 resource_calendar_leaves_rule_group_admin_modify,resource.calendar.leaves: admin modifies global,resource.calendar.leaves,base.group_erp_manager,cud,"[('resource_id', '=', False)]"
 resource_calendar_leaves_rule_multi_company,resource.calendar.leaves: multi-company rule,resource.calendar.leaves,,crud,"[('company_id', 'in', company_ids + [False])]"
+access_resource_public_holiday_user,Public Holiday: user read access,resource.public.holiday,base.group_user,r,
+access_resource_public_holiday_system,Public Holiday: system access,resource.public.holiday,base.group_system,crud,
+access_resource_public_holiday_rule_multi_company,Public Holiday: multi company rule,resource.public.holiday,,crud,"[('company_id', 'in', company_ids + [False])]"

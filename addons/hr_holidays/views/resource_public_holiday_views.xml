@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="resource_public_holiday_view_search" model="ir.ui.view">
+        <field name="name">resource.public.holiday.view.search.inherit</field>
+        <field name="inherit_id" ref="resource.resource_public_holiday_view_search"/>
+        <field name="model">resource.public.holiday</field>
+        <field name="arch" type="xml">
+            <search position="inside">
+                <field name="work_location_ids"/>
+            </search>
+            <group name="groupby" position="inside">
+                <filter string="Work Location" name="group_by_work_location" context="{'group_by': 'work_location_ids'}"/>
+            </group>
+        </field>
+    </record>
+
+    <record id="resource_public_holiday_view_tree" model="ir.ui.view">
+        <field name="name">resource.public.holiday.view.tree.inherit</field>
+        <field name="inherit_id" ref="resource.resource_public_holiday_view_tree"/>
+        <field name="model">resource.public.holiday</field>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <header>
+                    <button
+                        name="load_public_holidays"
+                        string="Load Public Holidays"
+                        type="object"
+                        class="btn btn-secondary"
+                        display="always"
+                    />
+                </header>
+            </xpath>
+            <field name="country_id" position="after">
+                <field name="work_location_ids" widget="many2many_tags" optional="hide"/>
+            </field>
+        </field>
+    </record>
+</odoo>

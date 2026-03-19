@@ -407,6 +407,47 @@ class ResourceCalendar(models.Model):
         dt1 = datetime.combine(dt1.date(), time.max, tzinfo=tz)
         return dt0, dt1
 
+    def _public_leave_intervals_batch(self, start_dt, end_dt, resources_per_tz=None):
+        res = defaultdict(lambda: Intervals([]))
+        if not resources_per_tz:
+            public_holidays = self.env['resource.public.holiday'].search([
+                ('date', '>=', start_dt.date()),
+                ('date', '<=', end_dt.date()),
+                ('company_id', 'in', [False, self.company_id.id]),
+                ('country_id', 'in', [False, self.country_id.id]),
+                ('calendar_ids', 'in', [False, self.id]),
+            ])
+            res[False] |= Intervals([(
+                datetime.combine(holiday.date, time.min).replace(tzinfo=start_dt.tzinfo),
+                datetime.combine(holiday.date, time.max).replace(tzinfo=start_dt.tzinfo),
+                self.env['resource.calendar.leaves'],
+            ) for holiday in public_holidays])
+
+            return res
+
+        all_resources = sum(resources_per_tz.values(), self.env['resource.resource'])
+        all_domain = all_resources._get_ph_domain(start_dt.date())
+        all_public_holidays = self.env['resource.public.holiday'].search(Domain.AND([
+            Domain('date', '>=', start_dt.date()),
+            Domain('date', '<=', end_dt.date()),
+            all_domain,
+        ]))
+
+        for tz, resources in resources_per_tz.items():
+            tz_holiday_intervals = {}
+            for holiday in all_public_holidays:
+                tz_holiday_intervals[holiday] = Intervals([(
+                    datetime.combine(holiday.date, time.min).replace(tzinfo=tz),
+                    datetime.combine(holiday.date, time.max).replace(tzinfo=tz),
+                    self.env['resource.calendar.leaves'],
+                )])
+            for resource in resources:
+                public_holidays = all_public_holidays.filtered_domain(resource._get_ph_domain(start_dt.date()))
+                for holiday in public_holidays:
+                    res[resource.id] |= tz_holiday_intervals[holiday]
+
+        return res
+
     def _leave_intervals(self, start_dt, end_dt, resource=None, domain=None, tz=None):
         if resource is None:
             resource = self.env['resource.resource']
@@ -468,7 +509,9 @@ class ResourceCalendar(models.Model):
                     if leave_resource and leave_resource._is_flexible():
                         dt0, dt1 = self._handle_flexible_leave_interval(dt0, dt1, leave)
                     result[resource.id].append((max(start, dt0), min(end, dt1), leave))
-        return {r.id: Intervals(result[r.id]) for r in all_resources}
+
+        public_leave_intervals = self._public_leave_intervals_batch(start_dt, end_dt, resources_per_tz)
+        return {r.id: Intervals(result[r.id]) | public_leave_intervals[r.id] for r in all_resources}
 
     def _work_intervals_batch(self, start_dt, end_dt, resources_per_tz=None, domain=None, compute_leaves=True):
         """ Return the effective work intervals between the given datetimes. """

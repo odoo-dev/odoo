@@ -2,12 +2,12 @@
 
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta, UTC
-from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Domain
 from odoo.addons.resource.models.utils import HOURS_PER_DAY
 from odoo.addons.mail.tools.discuss import Store
 from odoo.tools import OrderedSet, float_round
@@ -392,19 +392,18 @@ class HrEmployee(models.Model):
 
     @api.model
     def get_public_holidays_data(self, date_start, date_end):
-        self = self._get_contextual_employee()
-        employee_tz = ZoneInfo(self._get_tz() if self else self.env.user.tz or 'UTC')
-        public_holidays = self._get_public_holidays(date_start, date_end).sorted('date_from')
-        return list(map(lambda bh: {
-            'id': -bh.id,
+        employee = self._get_contextual_employee()
+        public_holidays = employee._get_public_holidays(date_start, date_end)
+        return [{
+            'id': -ph.id,
             'colorIndex': 0,
-            'end': datetime.combine(bh.date_to.astimezone(employee_tz), datetime.max.time()).isoformat(),
+            'end': datetime.combine(ph.date, time.max).isoformat(),
             'endType': "datetime",
             'isAllDay': True,
-            'start': datetime.combine(bh.date_from.astimezone(employee_tz), datetime.min.time()).isoformat(),
+            'start': datetime.combine(ph.date, time.min).isoformat(),
             'startType': "datetime",
-            'title': bh.name,
-        }, public_holidays))
+            'title': ph.name,
+        } for ph in public_holidays]
 
     @api.model
     def get_time_off_dashboard_data(self, target_date=None):
@@ -437,17 +436,18 @@ class HrEmployee(models.Model):
         return values
 
     def _get_public_holidays(self, date_start, date_end):
-        domain = [
-            ('resource_id', '=', False),
+        location = self.work_location_id.address_id
+        domain = Domain([
             ('company_id', 'in', self.env.companies.ids),
-            ('date_from', '<=', date_end),
-            ('date_to', '>=', date_start),
-            '|',
-            ('calendar_id', '=', False),
-            ('calendar_id', '=', self.resource_calendar_id.id),
-        ]
+            ('country_id', 'in', [False] + location.country_id.ids),
+            ('date', '<=', date_end),
+            ('date', '>=', date_start),
+            ('calendar_ids', '=', [False] + self.resource_calendar_id.ids),
+            ('state_ids', 'in', [False] + location.state_id.ids),
+            ('work_location_ids', 'in', [False] + location.ids),
+        ])
 
-        return self.env['resource.calendar.leaves'].search(domain)
+        return self.env['resource.public.holiday'].search(domain)
 
     @api.model
     def get_mandatory_days_data(self, date_start, date_end):
@@ -466,10 +466,10 @@ class HrEmployee(models.Model):
         return [{
             'id': -sd.id,
             'colorIndex': sd.color,
-            'end': datetime.combine(sd.end_date, datetime.max.time()).isoformat(),
+            'end': datetime.combine(sd.end_date, time.max).isoformat(),
             'endType': "datetime",
             'isAllDay': True,
-            'start': datetime.combine(sd.start_date, datetime.min.time()).isoformat(),
+            'start': datetime.combine(sd.start_date, time.min).isoformat(),
             'startType': "datetime",
             'title': sd.name,
         } for sd in mandatory_days]

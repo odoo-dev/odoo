@@ -2,12 +2,13 @@
 
 from copy import deepcopy
 from collections import defaultdict
-from datetime import datetime, timedelta, time
+from datetime import date, datetime, timedelta, time
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta, weekdays
 
 from odoo import api, fields, models
+from odoo.fields import Domain
 from odoo.addons.base.models.res_partner import _tz_get
 from odoo.exceptions import ValidationError
 from odoo.tools import get_lang, babel_locale_parse
@@ -441,3 +442,14 @@ class ResourceResource(models.Model):
 
     def _get_resources_per_tz(self):
         return self.grouped(lambda r: ZoneInfo(r.tz))
+
+    def _get_ph_domain(self, target_date=date.today()):
+        global_domain = Domain.FALSE
+        for resource in self:
+            domain = Domain([
+                ('company_id', 'in', [False, resource.company_id.id]),
+                ('calendar_ids', 'in', [False, resource.calendar_id.id]),
+                ('country_id', 'in', [False, resource.country_id.id]),
+            ])
+            global_domain = Domain.OR([global_domain, domain])
+        return global_domain

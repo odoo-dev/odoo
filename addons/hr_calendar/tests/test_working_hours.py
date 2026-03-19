@@ -618,8 +618,8 @@ class TestWorkingHoursWithVersion(TestHrContractCalendarCommon):
 
         self.assertFalse(calendar_event.unavailable_partner_ids)
 
-        _leave = self.env["resource.calendar.leaves"].create({
-            "calendar_id": self.calendar_35h.id,
+        self.env["resource.public.holiday"].create({
+            "calendar_ids": self.calendar_35h.ids,
             "date_from": event_date,
             "date_to": event_date + timedelta(hours=2),
             "name": "Casual Leave",
