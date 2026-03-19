@@ -87,6 +87,7 @@ export class ImageSelector extends FileSelector {
         this.fileMimetypes = IMAGE_MIMETYPES.join(",");
         this.isImageField =
             !!this.props.media?.closest("[data-oe-type=image]") || !!this.props.addFieldImage;
+        this.isProcessingClick = false;
     }
 
     get canLoadMore() {
@@ -344,7 +345,12 @@ export class ImageSelector extends FileSelector {
     }
 
     async onClickAttachment(attachment) {
+        if (this.isProcessingClick) {
+            return;
+        }
+        this.isProcessingClick = true;
         if (attachment.unselectable) {
+            this.isProcessingClick = false;
             this.notificationService.add(
                 _t(
                     "You can not replace a field by this image. If you want to use this image, first save it on your computer and then upload it here."
@@ -359,7 +365,9 @@ export class ImageSelector extends FileSelector {
         this.selectAttachment(attachment);
         if (!this.props.multiSelect) {
             await this.props.save();
+            return;
         }
+        this.isProcessingClick = false;
     }
 
     async onClickMedia(media) {
