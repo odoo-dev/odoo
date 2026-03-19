@@ -125,6 +125,7 @@ class TestChannelInternals(MailCommon, HttpCase):
                                     {
                                         "display_name": "Channel",
                                         "id": channel.id,
+                                        "has_mail_thread": True,
                                         "model": "discuss.channel",
                                         "module_icon": "/mail/static/description/icon.png",
                                         "rating_avg": 0.0,

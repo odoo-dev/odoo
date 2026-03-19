@@ -125,6 +125,7 @@ export class MailMessage extends models.ServerModel {
                 const thread_data = {
                     display_name: thread.name ?? thread.display_name,
                     module_icon: "/base/static/description/icon.png",
+                    has_mail_thread: this.env[message.model]._inherit?.includes("mail.thread"),
                 };
                 if (for_current_user && add_followers) {
                     thread_data.selfFollower = mailDataHelpers.Store.one(

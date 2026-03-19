@@ -198,6 +198,7 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                     {
                         "display_name": "test1 Ernest Employee",
                         "id": channel_livechat_1.id,
+                        "has_mail_thread": True,
                         "model": "discuss.channel",
                         "module_icon": "/mail/static/description/icon.png",
                         "rating_avg": 5.0,
@@ -306,6 +307,7 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
                                     {
                                         "display_name": "Chell Gladys Ernest Employee",
                                         "id": channel.id,
+                                        "has_mail_thread": True,
                                         "model": "discuss.channel",
                                         "module_icon": "/mail/static/description/icon.png",
                                         "rating_avg": 5.0,
