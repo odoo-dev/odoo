@@ -45,6 +45,15 @@
                     </div>
                 </setting>
             </setting>
+            <setting id="product_attributes_setting" position="before">
+                <setting
+                    id="unpublish_out_of_stock_setting"
+                    help="Unpublish/Republish products based on stock availability."
+                    readonly="default_allow_out_of_stock_order"
+                >
+                    <field name="unpublish_out_of_stock_products"/>
+                </setting>
+            </setting>
         </field>
     </record>
 

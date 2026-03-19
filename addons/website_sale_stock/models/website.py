@@ -7,6 +7,9 @@ class Website(models.Model):
     _inherit = "website"
 
     warehouse_id = fields.Many2one("stock.warehouse", string="Warehouse")
+    unpublish_out_of_stock_products = fields.Boolean(
+        string="Unpublish out-of-stock products", default=False
+    )
 
     def _get_product_available_qty(self, product, **_kwargs):
         """Give the available quantity of a given product.

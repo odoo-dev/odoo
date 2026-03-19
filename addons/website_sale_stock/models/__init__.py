@@ -10,6 +10,8 @@ from . import (
     res_config_settings,
     sale_order,
     sale_order_line,
+    stock_move,
     stock_picking,
+    stock_quant,
     website,
 )

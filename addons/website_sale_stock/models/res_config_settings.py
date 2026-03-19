@@ -21,3 +21,8 @@ class ResConfigSettings(models.TransientModel):
         domain="[('company_id', '=', website_company_id)]",
         readonly=False,
     )
+    unpublish_out_of_stock_products = fields.Boolean(
+        string="Unpublish out-of-stock products",
+        related="website_id.unpublish_out_of_stock_products",
+        readonly=False,
+    )

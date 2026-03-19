@@ -5,6 +5,13 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="website_sale.product_template_form_view" />
         <field name="arch" type="xml">
+            <field name="website_published" position="after">
+                <field name="website_auto_unpublished" invisible="1"/>
+                <span
+                    class="text-muted fst-italic ms-2 small"
+                    invisible="not website_auto_unpublished"
+                >Auto-unpublished (out of stock)</span>
+            </field>
             <group name="shop" position="after">
                 <group
                     name="ecommerce_inventory"

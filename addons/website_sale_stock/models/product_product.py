@@ -49,6 +49,46 @@ class ProductProduct(models.Model):
         free_qty = self.env["website"].get_current_website()._get_product_available_qty(self.sudo())
         return free_qty <= 0
 
+    def _is_sold_out_for_website(self, website):
+        """Return whether the product is sold out for a specific website.
+
+        Used for the auto-publish/unpublish feature. Takes the website packaging
+        threshold into account: if the product has packaging UoMs defined, the
+        product is considered sold out as soon as the available quantity drops
+        below the smallest packaging quantity.
+
+        :param website: `website` record to check availability against
+        :return: whether the product is considered sold out for the given website
+        :rtype: bool
+        """
+        self.ensure_one()
+        if not self.is_storable or self.allow_out_of_stock_order:
+            return False
+        free_qty = website._get_product_available_qty(self.sudo())
+        min_qty = self._get_website_min_packaging_qty()
+        return free_qty < min_qty
+
+    def _get_website_min_packaging_qty(self):
+        """Return the minimum sellable quantity for website auto-publish checks.
+
+        If the product has additional packaging UoMs (uom_ids), the smallest
+        packaging quantity (expressed in the product's base UoM) is returned so
+        that unpublishing fires as soon as a full packaging unit is no longer
+        available. Falls back to 1 when no packagings are defined.
+
+        :return: minimum quantity threshold
+        :rtype: float
+        """
+        self.ensure_one()
+        packaging_uoms = self.uom_ids
+        if not packaging_uoms:
+            return 1.0
+        # Each UoM's `factor` is the absolute quantity in the reference unit.
+        # Convert to the product's own UoM so the comparison is consistent.
+        ref_to_product = self.uom_id.factor or 1.0
+        min_qty = min(uom.factor / ref_to_product for uom in packaging_uoms)
+        return max(min_qty, 1.0)
+
     def _website_show_quick_add(self):
         return not self._is_sold_out() and super()._website_show_quick_add()
 
