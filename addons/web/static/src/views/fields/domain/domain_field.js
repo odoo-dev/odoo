@@ -191,7 +191,7 @@ export class DomainField extends Component {
             throw new Error(`Invalid model: ${resModel}`);
         }
 
-        const domain = this.getEvaluatedDomain(props);
+        const domain = this.quickValidityCheck(props);
         if (domain.isInvalid) {
             this.updateState({ isValid: false, recordCount: 0 });
             return;
