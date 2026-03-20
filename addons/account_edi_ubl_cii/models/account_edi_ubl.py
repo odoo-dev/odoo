@@ -278,6 +278,21 @@ class AccountEdiUBL(models.AbstractModel):
         return new_base_lines + extra_base_lines
 
     # -------------------------------------------------------------------------
+    # EXPORT: HELPERS
+    # -------------------------------------------------------------------------
+
+    def _get_partner_identifiers_by_country_code(self, partner):
+        identifiers = partner.all_identifiers
+        identifiers_by_country_code = {}
+        for key, identifier in identifiers.items():
+            country_code = identifier.get('country_code')
+            if country_code:
+                identifiers_by_country_code.setdefault(country_code, {})[key] = identifier
+            else:
+                identifiers_by_country_code[key] = identifier
+        return identifiers_by_country_code
+
+    # -------------------------------------------------------------------------
     # EXPORT: Collecting data
     # -------------------------------------------------------------------------
 

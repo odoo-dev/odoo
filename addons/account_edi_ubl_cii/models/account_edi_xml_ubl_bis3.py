@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from odoo import _, api, models
 from odoo.tools import html2plaintext
 from odoo.tools.misc import formatLang, str2bool, NON_BREAKING_SPACE
@@ -10,6 +9,10 @@ from odoo.addons.account_edi_ubl_cii.models.account_edi_common import (
     EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES,
 )
 from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import UBL_NAMESPACES
+from odoo.addons.account_edi_ubl_cii.tools.party_identifiers import (
+    get_identifier_metadata_of_country,
+    get_tin_metadata_of_country,
+)
 
 from stdnum.no import mva
 from stdnum.be import vat as be_vat
@@ -554,6 +557,239 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     def _add_document_currency_vals(self, vals):
         super()._add_document_currency_vals(vals)
         vals['currency_dp'] = 2  # In BIS 3, always use 2 decimal places
+
+    # -------------------------------------------------------------------------
+    # EXPORT: MULTI-ID
+    # -------------------------------------------------------------------------
+
+    def _ubl_add_partner_identifiers_tin_from_vat_field(self, vals, partner, identifiers):
+        vat = partner.vat.upper() if partner.vat and partner.vat != '/' else None
+        country_code = partner.country_code
+        if not vat or not country_code:
+            return
+
+        for key, value in party_identifiers.TIN_METADATA.items():
+            if (
+                country_code in value.get('countries', [])
+                and key not in identifiers
+                and (normalized_value := party_identifiers.normalize_identifier(key, vat))
+            ):
+                identifiers[key] = {
+                    'iso6523': value.get('iso6523'),
+                    'category': value['category'],
+                    'country_code': country_code,
+                    'value': normalized_value,
+                }
+                return
+
+    def _ubl_add_partner_identifiers_tin_from_peppol_eas_endpoint_fields(self, vals, partner, identifiers):
+        peppol_eas = partner.peppol_eas
+        peppol_endpoint = partner.peppol_endpoint
+        if not peppol_eas and not peppol_endpoint:
+            return
+
+        for key, value in party_identifiers.TIN_METADATA.items():
+            if (
+                peppol_eas == value.get('iso6523')
+                and key not in identifiers
+                and len(value.get('countries', [])) == 1
+                and (normalized_value := party_identifiers.normalize_identifier(key, peppol_endpoint))
+            ):
+                country_code = value['countries'][0]
+                identifiers[key] = {
+                    'iso6523': value['iso6523'],
+                    'category': value['category'],
+                    'country_code': country_code,
+                    'value': normalized_value,
+                }
+                return
+
+    def _ubl_add_partner_identifiers_enterprise_number_from_company_registry_field(self, vals, partner, identifiers):
+        company_registry = partner.company_registry
+        country_code = partner.country_code
+        if not company_registry or not country_code:
+            return
+
+        for key, value in party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA.items():
+            if (
+                country_code in value.get('countries', [])
+                and value.get('category') == 'EN'
+                and key not in identifiers
+                and (normalized_value := party_identifiers.normalize_identifier(key, company_registry))
+            ):
+                identifiers[key] = {
+                    'iso6523': value.get('iso6523'),
+                    'category': 'EN',
+                    'country_code': country_code,
+                    'value': normalized_value,
+                }
+                return
+
+    def _ubl_add_partner_misc_identifiers_from_custom_fields(self, vals, partner, identifiers):
+        country_code = partner.country_code
+
+        # AU_ACN skipped
+
+        # BE_CN
+        if (
+            country_code == 'BE'
+            and 'citizen_identification' in partner._fields
+            and 'BE_CN' not in identifiers
+            and (normalized_value := party_identifiers.normalize_identifier('BE_CN', partner.citizen_identification))
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['BE_CN']
+            identifiers['BE_CN'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': normalized_value,
+            }
+
+        # DE_GEBA skipped
+        # DE_LTW skipped
+
+        # DK_CVR is the VAT number without the DK prefix.
+        if (
+            country_code == 'DK'
+            and 'DK_VAT' in identifiers
+            and 'DK_CVR' not in identifiers
+            and (deduced_values := party_identifiers.get_deduced_additional_identifiers('DK_VAT', identifiers['DK_VAT']['value']))
+            and (dk_cvr := deduced_values.get('DK_CVR'))
+            and (normalized_value := party_identifiers.normalize_identifier('DK_CVR', dk_cvr))
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['DK_CVR']
+            identifiers['DK_CVR'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': normalized_value,
+            }
+
+        # DK_SE skipped
+        # DUNS skipped
+
+        # EAN_GLN
+        if (
+            'global_location_number' in partner._fields
+            and 'EAN_GLN' not in identifiers
+            and (normalized_value := party_identifiers.normalize_identifier('EAN_GLN', partner.global_location_number))
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['EAN_GLN']
+            identifiers['EAN_GLN'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': normalized_value,
+            }
+
+        # FR_CN skipped
+        # FR_CTC skipped
+
+        # FR_SIREN
+        if (
+            country_code == 'FR'
+            and 'siret' in partner._fields
+            and 'FR_SIREN' not in identifiers
+            and partner.siret
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['FR_SIREN']
+            identifiers['FR_SIREN'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': partner.siret,
+            }
+
+        # GS1 skipped
+
+        # HU_EN is a GLN number.
+        if (
+            country_code == 'HR'
+            and 'EAN_GLN' in identifiers
+            and 'HR_EN' not in identifiers
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['HR_EN']
+            identifiers['HR_EN'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': identifiers['EAN_GLN']['value'],
+            }
+
+        # HU_EN skipped.
+        # IBAN skipped.
+
+        # IT_CODICE
+        if (
+            country_code == 'IT'
+            and 'l10n_it_codice_fiscale' in partner._fields
+            and 'IT_CODICE' not in identifiers
+            and partner.l10n_it_codice_fiscale
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['IT_CODICE']
+            identifiers['IT_CODICE'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': partner.l10n_it_codice_fiscale,
+            }
+
+        # LEI skipped.
+        # LT_JAK skipped.
+        # MA_ICE skipped.
+
+        # NL_KVK
+        if (
+            country_code == 'NL'
+            and 'NL_KVK' not in identifiers
+            and partner.company_registry
+            and len(partner.company_registry) == 8
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['NL_KVK']
+            identifiers['NL_KVK'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': partner.company_registry,
+            }
+
+        # NL_OIN
+        if (
+            country_code == 'NL'
+            and 'NL_OIN' not in identifiers
+            and partner.company_registry
+            and len(partner.company_registry) == 20
+        ):
+            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['NL_OIN']
+            identifiers['NL_OIN'] = {
+                'iso6523': metadata.get('iso6523'),
+                'country_code': country_code,
+                'value': partner.company_registry,
+            }
+
+    def _ubl_add_partner_misc_identifiers_from_peppol_eas_endpoint_fields(self, vals, partner, identifiers):
+        peppol_eas = partner.peppol_eas
+        peppol_endpoint = partner.peppol_endpoint
+        if not peppol_eas and not peppol_endpoint:
+            return
+
+        for key, value in party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA.items():
+            if (
+                peppol_eas == value.get('iso6523')
+                and len(value.get('countries', [])) == 1
+                and key not in identifiers
+                # TODO: normalize, checks etc
+            ):
+                country_code = value['countries'][0]
+                identifiers[key] = {
+                    'iso6523': value['iso6523'],
+                    'category': value.get('category'),
+                    'country_code': country_code,
+                    'value': peppol_endpoint,
+                }
+                return
+
+    def _get_partner_identifiers(self, vals, partner):
+        identifiers = {}
+        self._ubl_add_partner_identifiers_tin_from_vat_field(vals, partner, identifiers)
+        self._ubl_add_partner_identifiers_tin_from_peppol_eas_endpoint_fields(vals, partner, identifiers)
+        self._ubl_add_partner_identifiers_enterprise_number_from_company_registry_field(vals, partner, identifiers)
+        self._ubl_add_partner_misc_identifiers_from_custom_fields(vals, partner, identifiers)
+        self._ubl_add_partner_misc_identifiers_from_peppol_eas_endpoint_fields(vals, partner, identifiers)
+        return identifiers
 
     # -------------------------------------------------------------------------
     # EXPORT: Templates for invoice header nodes
@@ -1341,30 +1577,45 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         nodes = vals['party_node']['cac:PartyTaxScheme']
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
+        country_code = commercial_partner.country_code
+        identifiers = commercial_partner.all_identifiers
 
-        if commercial_partner.vat and commercial_partner.vat != '/':
-            vat = commercial_partner.vat
-            country_code = commercial_partner.country_id.code
-            if country_code in GST_COUNTRY_CODES:
-                tax_scheme_id = 'GST'
-            else:
-                tax_scheme_id = 'VAT'
-
-            if country_code == 'HU' and not vat.upper().startswith('HU'):
-                vat = 'HU' + vat[:8]
-
+        # Tax identifier number (TIN).
+        tin_metadata = get_tin_metadata_of_country(country_code)
+        if (
+            tin_metadata
+            and (identifier := identifiers.get(tin_metadata['key']))
+        ):
             nodes.append({
-                'cbc:CompanyID': {'_text': vat},
+                'cbc:CompanyID': {'_text': identifier['value']},
                 'cac:TaxScheme': {
-                    'cbc:ID': {'_text': tax_scheme_id},
+                    'cbc:ID': {'_text': identifier['category']},
                 },
             })
-        elif commercial_partner.peppol_endpoint and commercial_partner.peppol_eas:
-            # TaxScheme based on partner's EAS/Endpoint.
+
+        # Local tax registration identification to state his registered tax status.
+        # Malaysia (MY)
+        if (
+            country_code == 'MY'
+            and (identifier := identifiers.get('MY_SST'))
+        ):
             nodes.append({
-                'cbc:CompanyID': {'_text': commercial_partner.peppol_endpoint},
+                'cbc:CompanyID': {'_text': identifier['value']},
                 'cac:TaxScheme': {
-                    'cbc:ID': {'_text': commercial_partner.peppol_eas},
+                    'cbc:ID': {'_text': 'SST'},
+                },
+            })
+
+        # Romania (RO)
+        if (
+            country_code == 'RO'
+            and not nodes
+            and (identifier := identifiers.get('RO_CIF'))
+        ):
+            nodes.append({
+                'cbc:CompanyID': {'_text': identifier['value']},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': 'CIF'},
                 },
             })
 
