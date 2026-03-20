@@ -2,6 +2,11 @@
 import re
 from stdnum.fr import siret
 
+from odoo.addons.account_edi_ubl_cii.tools.party_identifiers import (
+    get_identifier_metadata_of_country,
+    get_tin_metadata_of_country,
+)
+
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING
@@ -134,6 +139,8 @@ class ResPartner(models.Model):
         ]
     )
     available_peppol_eas = fields.Json(compute='_compute_available_peppol_eas')
+    additional_identifiers = fields.Json(compute='_compute_additional_identifiers')
+    all_identifiers = fields.Json(compute='_compute_all_identifiers')
 
     @api.constrains('peppol_endpoint')
     def _check_peppol_fields(self):
@@ -305,3 +312,35 @@ class ResPartner(models.Model):
             return self.env['account.edi.xml.ubl_bis3']
         if invoice_edi_format == 'ubl_sg':
             return self.env['account.edi.xml.ubl_sg']
+
+    def _compute_additional_identifiers(self):
+        for partner in self:
+            additional_identifiers = {}
+
+
+
+            partner.additional_identifiers = additional_identifiers
+
+    @api.depends('additional_identifiers')
+    def _compute_all_identifiers(self):
+        for partner in self:
+            partner.all_identifiers = partner._get_all_identifiers()
+
+    @api.model
+    def get_available_identifiers_metadata(self, country_code, seq_min=0, seq_max=100):
+        return get_identifier_metadata_of_country(country_code, seq_min=seq_min, seq_max=seq_max)
+
+    def _get_identifier(self, key):
+        self.ensure_one()
+        return self.additional_identifiers.get(key, {}).get('value')
+
+    def _get_all_identifiers(self):
+        """ Returns a dict with identifier_key: identifier_value, containing
+        both additional identifiers and the VAT.
+        """
+        self.ensure_one()
+        identifiers = self.additional_identifiers or {}
+        if self.vat and self.country_code:
+            key = get_tin_metadata_of_country(self.country_code)['key']
+            return {key: self.vat, **identifiers}
+        return identifiers
