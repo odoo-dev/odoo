@@ -37,3 +37,9 @@ class PosSession(models.Model):
             > 0
         )
         return read_records
+
+    def write(self, vals):
+        if vals.get('state') == 'opened' or vals.get('state') == 'closed':
+            for session in self:
+                session.config_id._notify("SESSION_STATE_CHANGED", {})
+        return super().write(vals)

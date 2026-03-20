@@ -1,0 +1,64 @@
+[1mdiff --git a/addons/pos_self_order/controllers/self_entry.py b/addons/pos_self_order/controllers/self_entry.py[m
+[1mindex bfefd0da74d4..95a4acd7788c 100644[m
+[1m--- a/addons/pos_self_order/controllers/self_entry.py[m
+[1m+++ b/addons/pos_self_order/controllers/self_entry.py[m
+[36m@@ -67,8 +67,6 @@[m [mclass PosSelfKiosk(http.Controller):[m
+             raise werkzeug.exceptions.NotFound()[m
+ [m
+         if pos_config and pos_config.has_active_session and pos_config.self_ordering_mode == 'mobile':[m
+[31m-            if config_access_token:[m
+[31m-                config_access_token = pos_config.access_token[m
+             table_sudo = table_identifier and ([m
+                 request.env["restaurant.table"][m
+                 .sudo()[m
+[36m@@ -76,9 +74,9 @@[m [mclass PosSelfKiosk(http.Controller):[m
+             )[m
+             if table_sudo and table_sudo.parent_id:[m
+                 table_sudo = table_sudo.parent_id[m
+[31m-        elif pos_config.self_ordering_mode == 'kiosk':[m
+[31m-            if config_access_token:[m
+[31m-                config_access_token = pos_config.access_token[m
+[32m+[m
+[32m+[m[32m        if config_access_token and (pos_config.self_ordering_mode == 'kiosk' or pos_config.self_ordering_mode == 'mobile') :[m
+[32m+[m[32m            config_access_token = pos_config.access_token # Required for notification[m
+         else:[m
+             config_access_token = ''[m
+ [m
+[1mdiff --git a/addons/pos_self_order/models/pos_session.py b/addons/pos_self_order/models/pos_session.py[m
+[1mindex fcc16be24cd0..d3569f5fe2b9 100644[m
+[1m--- a/addons/pos_self_order/models/pos_session.py[m
+[1m+++ b/addons/pos_self_order/models/pos_session.py[m
+[36m@@ -37,3 +37,9 @@[m [mclass PosSession(models.Model):[m
+             > 0[m
+         )[m
+         return read_records[m
+[32m+[m
+[32m+[m[32m    def write(self, vals):[m
+[32m+[m[32m        if vals.get('state') == 'opened' or vals.get('state') == 'closed':[m
+[32m+[m[32m            for session in self:[m
+[32m+[m[32m                session.config_id._notify("SESSION_STATE_CHANGED", {})[m
+[32m+[m[32m        return super().write(vals)[m
+[1mdiff --git a/addons/pos_self_order/static/src/app/services/self_order_service.js b/addons/pos_self_order/static/src/app/services/self_order_service.js[m
+[1mindex bec2ecacf077..d274f7ce4c30 100644[m
+[1m--- a/addons/pos_self_order/static/src/app/services/self_order_service.js[m
+[1m+++ b/addons/pos_self_order/static/src/app/services/self_order_service.js[m
+[36m@@ -23,6 +23,7 @@[m [mimport {[m
+ } from "@point_of_sale/utils";[m
+ import { getOrderLineValues } from "./card_utils";[m
+ import { EpsonPrinter } from "@point_of_sale/app/utils/printer/epson_printer";[m
+[32m+[m[32mimport { session } from "@web/session";[m
+ import { initLNA } from "@point_of_sale/app/utils/init_lna";[m
+ [m
+ const { DateTime } = luxon;[m
+[36m@@ -79,6 +80,11 @@[m [mexport class SelfOrder extends Reactive {[m
+             await this.initMobileData();[m
+         }[m
+ [m
+[32m+[m[32m         this.data.connectWebSocket("SESSION_STATE_CHANGED", () => {[m
+[32m+[m[32m            if (!session.test_mode) {[m
+[32m+[m[32m                window.location.reload();[m
+[32m+[m[32m            }[m
+[32m+[m[32m        });[m
+         this.data.connectWebSocket("ORDER_STATE_CHANGED", () => this.getUserDataFromServer());[m
+         this.data.connectWebSocket("PRODUCT_CHANGED", (payload) => {[m
+             const productTemplateIds = payload["product.template"].map((tmpl) => tmpl.id);[m

@@ -23,6 +23,7 @@ import {
 } from "@point_of_sale/utils";
 import { getOrderLineValues } from "./card_utils";
 import { EpsonPrinter } from "@point_of_sale/app/utils/printer/epson_printer";
+import { session } from "@web/session";
 import { initLNA } from "@point_of_sale/app/utils/init_lna";
 
 const { DateTime } = luxon;
@@ -79,6 +80,11 @@ export class SelfOrder extends Reactive {
             await this.initMobileData();
         }
 
+         this.data.connectWebSocket("SESSION_STATE_CHANGED", () => {
+            if (!session.test_mode) {
+                window.location.reload();
+            }
+        });
         this.data.connectWebSocket("ORDER_STATE_CHANGED", () => this.getUserDataFromServer());
         this.data.connectWebSocket("PRODUCT_CHANGED", (payload) => {
             const productTemplateIds = payload["product.template"].map((tmpl) => tmpl.id);
