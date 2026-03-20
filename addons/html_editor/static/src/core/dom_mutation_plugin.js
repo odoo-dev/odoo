@@ -243,7 +243,7 @@ export class DomMutationPlugin extends Plugin {
                 return true;
             }
         },
-        on_will_undo_handlers: this.discardDraft.bind(this),
+        on_will_undo_handlers: this.discard.bind(this),
         on_single_commit_undone_handlers: withSequence(0, (revertedCommit) => {
             // TODO AGE: This used to be done in history after undo a single
             // commit and before dispatching on_undone_handlers. See if there is
@@ -260,7 +260,7 @@ export class DomMutationPlugin extends Plugin {
                 metadata: revertedCommit.metadata,
             });
         }),
-        on_will_redo_handlers: this.discardDraft.bind(this),
+        on_will_redo_handlers: this.discard.bind(this),
         on_single_commit_redone_handlers: withSequence(0, (revertedCommit) => {
             // TODO AGE: This used to be done in history after redo a single
             // commit and before dispatching on_redone_handlers. See if there is
@@ -353,18 +353,17 @@ export class DomMutationPlugin extends Plugin {
     }
 
     discard() {
-        this.flush({ dispatch: true });
-        const currentMutationsCount = this.currentChanges.mutations.length;
-        if (currentMutationsCount === 0) {
-            // TODO AGE: not sure it's needed here. If not, probably better not to
-            // make a commit and just to call revert directly.
-            return;
-        }
-        this.revertChanges(this.createCommit().data);
+        const changes = this.currentChanges.data;
+        // Discard current draft.
+        this.flush();
+        this.revertMutations(this.currentChanges.mutations);
+        this.observer.takeRecords();
+        this.currentChanges.resetMutations();
+        return changes;
     }
 
     stash() {
-        this.currentStash.push(this.discardDraft());
+        this.currentStash.push(this.discard());
     }
 
     unstash(index = -1) {
@@ -1008,17 +1007,6 @@ export class DomMutationPlugin extends Plugin {
     // Commit management
     // =================
 
-    // TODO: rename
-    discardDraft() {
-        const changes = this.currentChanges.data;
-        // Discard current draft.
-        this.flush();
-        this.revertMutations(this.currentChanges.mutations);
-        this.observer.takeRecords();
-        this.currentChanges.resetMutations();
-        return changes;
-    }
-
     /**
      * @returns { EditorCommit<DomMutationCommitData> }
      */
@@ -1609,7 +1597,7 @@ export class DomMutationPlugin extends Plugin {
      * @returns { CommitData | undefined }
      */
     restoreToCommit(commit) {
-        this.discardDraft();
+        this.discard();
         if (commit === this.dependencies.history.getHistoryCommits().at(-1)) {
             return;
         }
