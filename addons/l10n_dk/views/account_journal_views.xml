@@ -24,6 +24,11 @@
                        groups="account.group_account_readonly"
                 />
             </field>
+            <field name="invoice_reference_model" position="after">
+                <field name="l10n_dk_fik_creditor_number"
+                       invisible="type != 'sale' or invoice_reference_model not in ['dk_fik_71', 'dk_fik_75']"
+                       required="invoice_reference_model in ['dk_fik_71', 'dk_fik_75']"/>
+            </field>
         </field>
     </record>
 </odoo>
