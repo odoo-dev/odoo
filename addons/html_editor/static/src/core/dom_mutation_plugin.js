@@ -697,49 +697,6 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * Turn `EditorMutation`s into `SerializedMutation`s by replacing their
-     * references to nodes with node IDs and serialized trees.
-     *
-     * @param { EditorMutation[] } records
-     * @returns { SerializedMutation[] }
-     */
-    serializeEditorMutations(records) {
-        return records.flatMap((record) => {
-            switch (record.type) {
-                case "characterData":
-                case "classList":
-                case "attributes": {
-                    const nodeId = this.getNodeId(record.target);
-                    return { ...omit(record, "target"), nodeId };
-                }
-                case "add":
-                case "remove": {
-                    const [nextNodeId, previousNodeId] = [
-                        record.nextSibling,
-                        record.previousSibling,
-                    ].map((sibling) =>
-                        // Preserve undefined and null values
-                        sibling ? this.getNodeId(sibling) : sibling
-                    );
-                    // Note: IDs are assigned to added nodes in
-                    // `processChildListMutation`.
-                    return {
-                        type: record.type,
-                        nodeId: this.getNodeId(record.tree.node),
-                        parentNodeId: this.getNodeId(record.parent),
-                        serializedNode: this.serializeTree(record.tree),
-                        nextNodeId,
-                        previousNodeId,
-                    };
-                }
-                default: {
-                    return record;
-                }
-            }
-        });
-    }
-
-    /**
      * Break down a single class attribute `NativeMutation` into individual
      * class addition/removal `EditorMutation`s for more precise history
      * tracking.
@@ -872,20 +829,6 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * Serialize an editor selection.
-     * @param { EditorSelection } selection
-     * @returns { SerializedSelection }
-     */
-    serializeSelection(selection) {
-        return {
-            anchorNodeId: this.getNodeId(selection.anchorNode),
-            anchorOffset: selection.anchorOffset,
-            focusNodeId: this.getNodeId(selection.focusNode),
-            focusOffset: selection.focusOffset,
-        };
-    }
-
-    /**
      * Serialize a node and its children.
      *
      * @param { Node } node
@@ -926,6 +869,63 @@ export class DomMutationPlugin extends Plugin {
                 .filter(Boolean);
         }
         return result;
+    }
+
+    /**
+     * Serialize an editor selection.
+     * @param { EditorSelection } selection
+     * @returns { SerializedSelection }
+     */
+    serializeSelection(selection) {
+        return {
+            anchorNodeId: this.getNodeId(selection.anchorNode),
+            anchorOffset: selection.anchorOffset,
+            focusNodeId: this.getNodeId(selection.focusNode),
+            focusOffset: selection.focusOffset,
+        };
+    }
+
+    /**
+     * Turn `EditorMutation`s into `SerializedMutation`s by replacing their
+     * references to nodes with node IDs and serialized trees.
+     *
+     * @param { EditorMutation[] } records
+     * @returns { SerializedMutation[] }
+     */
+    serializeEditorMutations(records) {
+        return records.flatMap((record) => {
+            switch (record.type) {
+                case "characterData":
+                case "classList":
+                case "attributes": {
+                    const nodeId = this.getNodeId(record.target);
+                    return { ...omit(record, "target"), nodeId };
+                }
+                case "add":
+                case "remove": {
+                    const [nextNodeId, previousNodeId] = [
+                        record.nextSibling,
+                        record.previousSibling,
+                    ].map((sibling) =>
+                        // Preserve undefined and null values
+                        sibling ? this.getNodeId(sibling) : sibling
+                    );
+                    // Note: IDs are assigned to added nodes in
+                    // `processChildListMutation`.
+                    return {
+                        type: record.type,
+                        nodeId: this.getNodeId(record.tree.node),
+                        parentNodeId: this.getNodeId(record.parent),
+                        serializedNode: this.serializeTree(record.tree),
+                        nextNodeId,
+                        previousNodeId,
+                    };
+                }
+                default: {
+                    return record;
+                }
+            }
+        });
     }
 
     /**
