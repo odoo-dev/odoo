@@ -315,12 +315,20 @@ export class DomMutationPlugin extends Plugin {
     }
 
     _commit({ type = "original", metadata = {} } = {}) {
-        const hasMutations = this.prepareForCommit(type || "original");
-        if (!hasMutations) {
-            // TODO AGE: I isolated `prepareForCommit` for now for simplicity for me
-            // but it's not clear with its return functions so it should not
-            // remain this way.
+        this.flush({ dispatch: true, currentOperation: type });
+        const currentMutationsCount = this.currentChanges.mutations.length;
+        if (currentMutationsCount === 0) {
             return false;
+        }
+        const commitRoot = this.getMutationsRoot(this.currentChanges.mutations) || this.editable;
+        this.processThrough("normalize_processors", commitRoot, type);
+        this.flush({ dispatch: false, currentOperation: type });
+        if (currentMutationsCount === this.currentChanges.mutations.length) {
+            // If there was no registered mutation during the normalization commit,
+            // force the dispatch of a content_updated to allow i.e. the hint
+            // plugin to react to non-observed changes (i.e. a div becoming
+            // a baseContainer).
+            this.dispatchContentUpdated();
         }
 
         // TODO AGE: rename
@@ -345,7 +353,9 @@ export class DomMutationPlugin extends Plugin {
     }
 
     discard() {
-        if (!this.prepareForCommit()) {
+        this.flush({ dispatch: true });
+        const currentMutationsCount = this.currentChanges.mutations.length;
+        if (currentMutationsCount === 0) {
             // TODO AGE: not sure it's needed here. If not, probably better not to
             // make a commit and just to call revert directly.
             return;
@@ -994,26 +1004,9 @@ export class DomMutationPlugin extends Plugin {
         return [node, _map];
     }
 
-    // NEW: Commit creation
-
-    prepareForCommit(type) {
-        this.flush({ dispatch: true, currentOperation: type });
-        const currentMutationsCount = this.currentChanges.mutations.length;
-        if (currentMutationsCount === 0) {
-            return false;
-        }
-        const commitRoot = this.getMutationsRoot(this.currentChanges.mutations) || this.editable;
-        this.processThrough("normalize_processors", commitRoot, type);
-        this.flush({ dispatch: false, currentOperation: type });
-        if (currentMutationsCount === this.currentChanges.mutations.length) {
-            // If there was no registered mutation during the normalization commit,
-            // force the dispatch of a content_updated to allow i.e. the hint
-            // plugin to react to non-observed changes (i.e. a div becoming
-            // a baseContainer).
-            this.dispatchContentUpdated();
-        }
-        return true;
-    }
+    // =================
+    // Commit management
+    // =================
 
     // TODO: rename
     discardDraft() {
