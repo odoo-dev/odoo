@@ -1,37 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
-<t t-name="website.search_image_item">
-    <img t-if="result['image_url']" t-att-src="result['image_url']" class="o_search_result_image flex-shrink-0 rounded-2"/>
-    <i t-else="" t-attf-class="o_search_result_image flex-shrink-0 align-content-center rounded-2 fs-6 text-center text-muted fa #{result['_fa']}"/>
-</t>
-
-<t t-name="website.search_result_item">
-    <t t-foreach="results.data" t-as="result" t-key="result_index">
-        <li class="o_search_result_item">
-            <a t-att-href="result['website_url']" class="o_search_result_link d-flex gap-2 py-2 px-3 text-decoration-none text-muted">
-                <t t-call="website.search_image_item"/>
-                <div class="o_search_result_content d-flex flex-grow-1">
-                    <div>
-                        <h3 class="h6 mb-0 d-inline" t-out="result['name']"/>
-                        <span t-if="result['search_item_metadata']" class="align-baseline text-nowrap smaller">
-                            <span> · </span>
-                            <t t-out="result['search_item_metadata']"/>
-                        </span>
-                    </div>
-                    <div class="o_search_result_description d-empty-none">
-                        <!-- Add a <t t-if="module_speficic_matching_area"/> -->
-                        <t t-if="result['tags']" t-out="result['tags']"/>
-                        <p t-elif="result['description']" class="mb-0 small"
-                            t-out="result['description']"
-                        />
-                    </div>
-                </div>
-            </a>
-        </li>
-    </t>
-</t>
-
 <div t-name="website.s_searchbar.autocomplete.skeleton.loader" class="o_dropdown_menu o_cc o_cc1 show w-100">
     <ul class="list-unstyled mb-0">
         <li class="o_search_result_item o_search_result_item_placeholder" t-foreach="[1, 2, 3]" t-as="i" t-key="i">
@@ -67,11 +36,7 @@
     </t>
     <!-- Render results -->
     <ul class="list-unstyled mb-0">
-        <t t-foreach="Object.values(results)" t-as="group_result" t-key="group_result_index">
-            <t t-set="results" t-value="group_result"/>
-            <!-- Items -->
-            <t t-call="website.search_result_item" results="results"/>
-        </t>
+        <div id="search_result_items"/>
     </ul>
 </div>
 

@@ -668,6 +668,7 @@ class Website(Home):
 
         mappings = []
         result = {}
+        values = []
         for search_result in search_results:
             if not search_result['results_data']:
                 continue
@@ -716,15 +717,14 @@ class Website(Home):
                 'groupName': group_name,
                 'searchCount': search_result.get('count') or 0,
                 'data': result_data,
+                'has_more': search_result.get('count') > offset + limit
             }
+            values.extend(result_data)
 
-        if options.get('renderTemplate'):
-            values = next(iter(result.values()), {})
-            has_more = values.get('searchCount') > offset + limit
-            html = self.env['ir.ui.view']._render_template('website.search_result_item', {'results': values})
-            return {'html': html, 'has_more': has_more}
+        html = self.env['ir.ui.view']._render_template('website.search_result_item', {'results': values})
 
         return {
+            'html': html,
             'results': result,
             'results_count': results_count,
             'parts': {key: True for mapping in mappings for key in mapping},

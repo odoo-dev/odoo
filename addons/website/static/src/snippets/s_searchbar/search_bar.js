@@ -1,7 +1,6 @@
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
-import { markup } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { getTemplate } from "@web/core/templates";
 import { KeepLast } from "@web/core/utils/concurrency";
@@ -112,17 +111,6 @@ export class SearchBar extends Interaction {
             ),
             options: this.options,
         });
-
-        const field_set = new Set(this.getFieldsNames());
-        for (const group of Object.values(res.results)) {
-            for (const record of group.data) {
-                for (const key of field_set) {
-                    if (record[key]) {
-                        record[key] = markup(record[key]);
-                    }
-                }
-            }
-        }
         return res;
     }
 
@@ -153,6 +141,7 @@ export class SearchBar extends Interaction {
                 },
                 this.el
             )[0];
+            this.menuEl.querySelector("#search_result_items").innerHTML = res.html;
         }
         this.hasDropdown = !!res;
         prevMenuEl?.remove();
@@ -177,10 +166,6 @@ export class SearchBar extends Interaction {
         this.resultsEl.classList.add("d-none");
         this.iconEl.classList.add("d-none");
         this.spinnerEl.classList.remove("d-none");
-    }
-
-    getFieldsNames() {
-        return ["description", "name", "search_item_metadata", "tags"];
     }
 
     async onInput() {

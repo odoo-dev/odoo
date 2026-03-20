@@ -30,7 +30,7 @@ export class SearchResults extends Interaction {
         const buttonEl = ev.target;
         const searchType = buttonEl.dataset.searchType;
         const offset = parseInt(buttonEl.dataset.offset || this.limit);
-        const { html: html, has_more: hasMore } = await this.keepLast.add(
+        const { html: html, results } = await this.keepLast.add(
             rpc("/website/snippet/autocomplete", {
                 search: this.inputEl.value,
                 search_type: searchType,
@@ -51,7 +51,7 @@ export class SearchResults extends Interaction {
 
         // Set offset for next loadMore
         buttonEl.dataset.offset = offset + this.limit;
-        buttonEl.classList.toggle("d-none", !hasMore);
+        buttonEl.classList.toggle("d-none", !Object.values(results)[0]?.has_more);
     }
 }
 
