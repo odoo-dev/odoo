@@ -1126,7 +1126,7 @@
         .o_form_label {
             font-size: $o-label-font-size-factor * $o-font-size-base-touch;
             font-weight: $font-weight-normal;
-            color: $o-brand-secondary;
+            //color: $o-brand-secondary;
         }
     }
 }
@@ -1165,23 +1165,31 @@
 }
 
 // M3
-.o_form_header_group, .o_input_box {
-    display: flex;
-    gap: map-get($spacers, 1);
-}
-
-.o_input_box {
-    align-items: baseline;
-}
-
-@include media-breakpoint-down(md) {
-    %-o-field-box {
-        border-radius: map-get($spacers, 2);
-        border: 1px solid $o-enterprise-action-color;
-        padding: map-get($spacers, 2) + map-get($spacers, 1);
+.o_form_view {
+    .o_form_header_group, .o_input_box {
+        display: flex;
+        gap: map-get($spacers, 1);
     }
 
-    .o_form_view {
+    .o_input_box {
+        align-items: baseline;
+    }
+
+    @include media-breakpoint-down(md) {
+        %-o-field-box {
+            border-radius: map-get($spacers, 2);
+            border: 1px solid var(--o-input-border-color);
+            padding: map-get($spacers, 2) + map-get($spacers, 1);
+
+            &:focus-within {
+                @include print-variable(o-input-border-color, $o-action);;
+            }
+
+            h1, h2, h3, h4, h5, h6 {
+                all: unset;
+            }
+        }
+
         .o_inner_group {
             :is(.o_cell,.o_cell_custom):not(.o_wrap_label):not(.o_no_box *) {
                 @extend %-o-field-box;
@@ -1196,7 +1204,25 @@
                 z-index: 1; // TODO finetune for quick create kanban
 
                 &:has(+ *:focus-within) .o_form_label {
-                    color: $o-enterprise-action-color;
+                    color: $o-action;
+                }
+
+                // Same as ligne +/- 592; TODO merge the rules after maybe
+                .o_form_label, .o_form_label * {
+                    padding: 0 !important;
+                    color: inherit;
+                    font-size: $font-size-sm !important;
+                    line-height: $line-height-base !important;
+                    font-weight: $font-weight-bold !important;
+                }
+                .o_form_label {
+                    margin-bottom: map-get($spacers, 1) !important;
+                    color: $headings-color;
+                }
+
+                // For o_readonly_modifier input label
+                span.o_form_label {
+                    display: inline-block;
                 }
             }
         }
