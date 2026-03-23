@@ -26,7 +26,7 @@ export class CustomerDisplayPosAdapter {
                 "update_customer_display",
                 [[pos.config.id], this.data, localStorage.getItem("device_uuid")],
                 {
-                    timeout: 5000,
+                    timeout: 1000,
                 }
             )
             .catch((error) => {

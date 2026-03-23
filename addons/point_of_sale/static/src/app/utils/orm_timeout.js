@@ -17,40 +17,12 @@ export function applyOrmTimeout(orm) {
             return originalRpc.call(this, route, params, settings);
         }
 
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), timeout);
-
-        const xhr = new XMLHttpRequest();
-
-        controller.signal.addEventListener("abort", () => {
-            xhr.abort();
-        });
-
-        try {
-            const finalSettings = {
-                ...settings,
-                xhr,
-            };
-
-            // cache
-            // - Avoid duplicate RPC calls
-            // - Avoid duplicate RPC calls
-            // - Reuse previous results
-
-            // It conflicts with xhr because:
-            // cache = shared request
-            // abort = individual control
-            delete finalSettings.cache;
-
-            return await originalRpc.call(this, route, params, finalSettings);
-        } catch (err) {
-            if (err.name === "AbortError") {
-                throw new ConnectionLostError();
-            }
-            throw err;
-        } finally {
-            clearTimeout(timer);
-        }
+        return Promise.race([
+            originalRpc.call(this, route, params, settings),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new ConnectionLostError()), timeout)
+            ),
+        ]);
     };
 
     orm.__timeoutPatched = true;
