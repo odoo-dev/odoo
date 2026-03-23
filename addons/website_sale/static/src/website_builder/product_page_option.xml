@@ -96,13 +96,15 @@
                 title.translate="Image on the left"
                 actionParam="{ previewClass: '' }"
                 actionValue="'regular'"
-                iconImg="'/website/static/src/img/snippets_options/image_left.svg'"
+                icon="'format_image_left'"
+                iconClass="'oi-filled'"
             />
             <BuilderButton ltrRtlMapping="'left-right'"
                 title.translate="Image on the right"
                 actionParam="{ previewClass: 'flex-lg-row-reverse' }"
                 actionValue="'inverse'"
-                iconImg="'/website/static/src/img/snippets_options/image_right.svg'"
+                icon="'format_image_right'"
+                iconClass="'oi-flip-horizontal oi-filled'"
             />
         </BuilderButtonGroup>
     </BuilderRow>

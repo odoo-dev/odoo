@@ -36,8 +36,8 @@
                 action="'showOnMobile'"
                 preview="false"
                 className="'o-hb-btn-has-img-icon o_hb_device btn-danger-color-active'"
-                t-if="this.state.hasShape">
-                <Image src="'/html_builder/static/img/options/mobile_invisible.svg'" style="'width: 12px'" />
+                t-if="this.state.hasShape"
+                icon="'mobile_off'">
             </BuilderButton>
     </BuilderRow>
 

@@ -154,9 +154,9 @@
             <BuilderButton title.translate="Hide" actionValue="'none'">
                 <i class="oi" data-icon="visibility_off"/>
             </BuilderButton>
-            <BuilderButton title.translate="Top" actionValue="'top'" iconImg="'/website/static/src/img/snippets_options/pos_top.svg'"/>
-            <BuilderButton ltrRtlMapping="'left-right'" title.translate="Left" actionValue="'left'" iconImg="'/website/static/src/img/snippets_options/pos_left.svg'"/>
-            <BuilderButton ltrRtlMapping="'left-right'" title.translate="Right" actionValue="'right'" iconImg="'/website/static/src/img/snippets_options/pos_right.svg'"/>
+            <BuilderButton title.translate="Top" actionValue="'top'" icon="'vertical_align_top'"/>
+            <BuilderButton ltrRtlMapping="'left-right'" title.translate="Left" actionValue="'left'" icon="'horizontal_align_left'"/>
+            <BuilderButton ltrRtlMapping="'left-right'" title.translate="Right" actionValue="'right'" icon="'horizontal_align_right'"/>
         </BuilderButtonGroup>
     </BuilderRow>
     <BuilderRow label.translate="Link to country">

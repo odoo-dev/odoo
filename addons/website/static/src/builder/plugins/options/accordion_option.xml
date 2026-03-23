@@ -56,10 +56,10 @@
             <BuilderButtonGroup>
                 <BuilderButton ltrRtlMapping="'left-right'" title.translate="Left"
                     classAction="'justify-content-end flex-row-reverse o_icons_position_reversed'"
-                    iconImg="'/website/static/src/img/snippets_options/pos_left.svg'"/>
+                    icon="'horizontal_align_left'"/>
                 <BuilderButton ltrRtlMapping="'left-right'" title.translate="Right"
                     classAction="'justify-content-between'"
-                    iconImg="'/website/static/src/img/snippets_options/pos_right.svg'"/>
+                    icon="'horizontal_align_right'"/>
             </BuilderButtonGroup>
         </BuilderRow>
     </BuilderContext>
