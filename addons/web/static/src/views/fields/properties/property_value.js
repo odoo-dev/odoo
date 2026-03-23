@@ -28,7 +28,6 @@ import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relat
 import { PropertyTags } from "./property_tags";
 import { PropertyText } from "./property_text";
 import { fileTypeMagicWordMap } from "@web/views/fields/image/image_field";
-import { positionInputBoxOverlay } from "@web/core/input_box/input_box";
 
 class PropertyValueTag extends Component {
     static template = "web.PropertyValueTag";
@@ -132,11 +131,14 @@ export class PropertyValue extends Component {
             fieldString: this.props.string,
         });
 
-        useLayoutEffect(() => {
-            if (this.root.el) {
-                this._positionSuffixOverlay();
-            }
-        }, () => [this.root.el, this.props.suffix]);
+        useLayoutEffect(
+            () => {
+                if (this.root.el) {
+                    this._positionSuffixOverlay();
+                }
+            },
+            () => [this.root.el, this.props.suffix]
+        );
     }
 
     /* --------------------------------------------------------
@@ -190,13 +192,19 @@ export class PropertyValue extends Component {
             return value.map((many2manyValue) => {
                 const hasAccess = many2manyValue[1] !== null;
                 const props = {
-                    imageUrl: this.showAvatar && hasAccess ? imageUrl(this.props.comodel, many2manyValue[0], "avatar_128") : undefined,
-                    onClick: hasAccess && this.clickableRelational
-                        ? (async () => await this._openRecord(this.props.comodel, many2manyValue[0]))
-                        : undefined,
-                    onDelete: !this.props.readonly && hasAccess
-                        ? (() => this.onMany2manyDelete(many2manyValue[0]))
-                        : undefined,
+                    imageUrl:
+                        this.showAvatar && hasAccess
+                            ? imageUrl(this.props.comodel, many2manyValue[0], "avatar_128")
+                            : undefined,
+                    onClick:
+                        hasAccess && this.clickableRelational
+                            ? async () =>
+                                  await this._openRecord(this.props.comodel, many2manyValue[0])
+                            : undefined,
+                    onDelete:
+                        !this.props.readonly && hasAccess
+                            ? () => this.onMany2manyDelete(many2manyValue[0])
+                            : undefined,
                     text: hasAccess ? many2manyValue[1] : _t("No Access"),
                 };
                 return {
@@ -326,9 +334,14 @@ export class PropertyValue extends Component {
                 // Make a RPC call to resolve the display name of the record.
                 newValue = await this._nameGet(newValue.id);
             } else if (newValue && !newValue.id && newValue.display_name) {
-                const result = await this.orm.call(this.props.comodel, "name_create", [newValue.display_name], {
-                    context: this.props.context,
-                });
+                const result = await this.orm.call(
+                    this.props.comodel,
+                    "name_create",
+                    [newValue.display_name],
+                    {
+                        context: this.props.context,
+                    }
+                );
                 newValue.id = result[0];
                 newValue.display_name = result[1];
             }
@@ -396,10 +409,6 @@ export class PropertyValue extends Component {
     /* --------------------------------------------------------
      * Private methods
      * -------------------------------------------------------- */
-
-    _positionSuffixOverlay() {
-        positionInputBoxOverlay(this.root.el);
-    }
 
     /**
      * Open the form view of the given record id / model.

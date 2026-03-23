@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState } from "@web/owl2/utils";
+import { useRef, useState } from "@web/owl2/utils";
 import { Component, toRaw } from "@odoo/owl";
 import * as BarcodeScanner from "@web/core/barcode/barcode_dialog";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
@@ -11,7 +11,6 @@ import { useService } from "@web/core/utils/hooks";
 import { getFieldDomain } from "@web/model/relational_model/utils";
 import { InternalLinkButton } from "@web/views/view_components/internal_link_button";
 import { Many2XAutocomplete, useOpenMany2XRecord } from "@web/views/fields/relational_utils";
-import { positionInputBoxOverlay } from "@web/core/input_box/input_box";
 
 ///////////////////////////////////////////////////////////////////////////////
 // UTILS
@@ -151,14 +150,6 @@ export class Many2One extends Component {
                 resModel: this.props.relation,
             }),
         };
-        useLayoutEffect(() => {
-            if (!this.props.readonly) {
-                const input = this.input;
-                if (input) {
-                    positionInputBoxOverlay(input);
-                }
-            }
-        });
     }
 
     get activeActions() {

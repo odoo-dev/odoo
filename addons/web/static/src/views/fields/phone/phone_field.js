@@ -2,7 +2,6 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
-import { InputBox } from "@web/core/input_box/input_box";
 import { useChildRef } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { Component } from "@odoo/owl";
@@ -13,11 +12,10 @@ export class PhoneField extends Component {
         ...standardFieldProps,
         placeholder: { type: String, optional: true },
     };
-    static components = { InputBox };
 
     setup() {
         this.input = useChildRef();
-        useInputField({ ref: this.input, getValue: () => this.props.record.data[this.props.name] || "" });
+        useInputField({ getValue: () => this.props.record.data[this.props.name] || "" });
     }
     get inlineButtons() {
         return [];
@@ -50,18 +48,7 @@ export const phoneField = {
 registry.category("fields").add("phone", phoneField);
 
 export class FormPhoneField extends PhoneField {
-    get overlayButtons() {
-        return [
-            {
-                icon: "fa-phone",
-                onSelected: () => this.onLinkClicked(),
-                name: _t("Call")
-            }
-        ]
-    }
-    get inlineButtons() {
-        return this.overlayButtons.filter(btn => btn.showInReadonly);
-    }
+    static template = "web.FormPhoneField";
 }
 
 export const formPhoneField = {
