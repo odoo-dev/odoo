@@ -111,7 +111,9 @@ class TestStockCommon(ProductVariantsCommon):
         # Some tests depend on additional warehouse setup
         cls.warehouse_1.write(cls.warehouse_1._create_or_update_sequences_and_picking_types())
 
-        cls._enable_feature_group(cls.quick_ref('stock.group_stock_multi_locations'))
+        cls.env['res.config.settings'].create({
+            'group_stock_multi_locations': True,
+        }).execute()
         cls._enable_feature_group(cls.quick_ref('stock.group_production_lot'))
 
         # FIXME multi-company group is automatic, shouldn't be ever enforced

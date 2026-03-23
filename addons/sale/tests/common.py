@@ -61,6 +61,113 @@ class TestSaleCommon(AccountTestInvoicingCommon):
     def collect_company_accounting_data(cls, company):
         company_data = super().collect_company_accounting_data(company)
 
+        default_product_vals = {
+            "categ_id": cls.product_category.id,
+            "uom_id": cls.uom_unit.id,
+            "taxes_id": [Command.set([])],
+            "supplier_taxes_id": [Command.set([])],
+            "company_id": company.id,
+        }
+        (
+            product_service_delivery,
+            product_service_order,
+            product_order_cost,
+            product_delivery_cost,
+            product_order_sales_price,
+            product_delivery_sales_price,
+            product_order_no,
+            product_delivery_no,
+        ) = (
+            cls
+            .env["product.product"]
+            .with_company(company)
+            .create([
+                {
+                    "name": "product_service_delivery",
+                    "standard_price": 200.0,
+                    "list_price": 180.0,
+                    "type": "service",
+                    "default_code": "SERV_DEL",
+                    "invoice_policy": "delivery",
+                    **default_product_vals,
+                },
+                {
+                    "name": "product_service_order",
+                    "standard_price": 40.0,
+                    "list_price": 90.0,
+                    "type": "service",
+                    "uom_id": cls.uom_hour.id,
+                    "description": "Example of product to invoice on order",
+                    "default_code": "PRE-PAID",
+                    "invoice_policy": "order",
+                    **default_product_vals,
+                },
+                {
+                    "name": "product_order_cost",
+                    "standard_price": 235.0,
+                    "list_price": 280.0,
+                    "type": "consu",
+                    "weight": 0.01,
+                    "default_code": "FURN_9999",
+                    "invoice_policy": "order",
+                    "reinvoice_policy": "cost",
+                    **default_product_vals,
+                },
+                {
+                    "name": "product_delivery_cost",
+                    "standard_price": 55.0,
+                    "list_price": 70.0,
+                    "type": "consu",
+                    "weight": 0.01,
+                    "default_code": "FURN_7777",
+                    "invoice_policy": "delivery",
+                    "reinvoice_policy": "cost",
+                    **default_product_vals,
+                },
+                {
+                    "name": "product_order_sales_price",
+                    "standard_price": 235.0,
+                    "list_price": 280.0,
+                    "type": "consu",
+                    "weight": 0.01,
+                    "default_code": "FURN_9999",
+                    "invoice_policy": "order",
+                    "reinvoice_policy": "sales_price",
+                    **default_product_vals,
+                },
+                {
+                    "name": "product_delivery_sales_price",
+                    "standard_price": 55.0,
+                    "list_price": 70.0,
+                    "type": "consu",
+                    "weight": 0.01,
+                    "default_code": "FURN_7777",
+                    "invoice_policy": "delivery",
+                    "reinvoice_policy": "sales_price",
+                    **default_product_vals,
+                },
+                {
+                    "name": "product_order_no",
+                    "standard_price": 235.0,
+                    "list_price": 280.0,
+                    "type": "consu",
+                    "weight": 0.01,
+                    "default_code": "FURN_9999",
+                    "invoice_policy": "order",
+                    **default_product_vals,
+                },
+                {
+                    "name": "product_delivery_no",
+                    "standard_price": 55.0,
+                    "list_price": 70.0,
+                    "type": "consu",
+                    "weight": 0.01,
+                    "default_code": "FURN_7777",
+                    "invoice_policy": "delivery",
+                    **default_product_vals,
+                },
+            ])
+        )
         company_data.update({
             # Users
             "default_user_salesman": cls.env["res.users"].create({
@@ -69,150 +176,19 @@ class TestSaleCommon(AccountTestInvoicingCommon):
                 "email": "default_user_salesman@example.com",
                 "signature": "--\nMark",
                 "notification_type": "email",
-                "group_ids": [(6, 0, cls.quick_ref("sales_team.group_sale_salesman").ids)],
-                "company_ids": [(6, 0, company.ids)],
+                "group_ids": [Command.set(cls.quick_ref("sales_team.group_sale_salesman").ids)],
+                "company_ids": [Command.set(company.ids)],
                 "company_id": company.id,
             }),
             # Products
-            "product_service_delivery": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_service_delivery",
-                "categ_id": cls.product_category.id,
-                "standard_price": 200.0,
-                "list_price": 180.0,
-                "type": "service",
-                "uom_id": cls.uom_unit.id,
-                "default_code": "SERV_DEL",
-                "invoice_policy": "delivery",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
-            "product_service_order": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_service_order",
-                "categ_id": cls.product_category.id,
-                "standard_price": 40.0,
-                "list_price": 90.0,
-                "type": "service",
-                "uom_id": cls.uom_hour.id,
-                "description": "Example of product to invoice on order",
-                "default_code": "PRE-PAID",
-                "invoice_policy": "order",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
-            "product_order_cost": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_order_cost",
-                "categ_id": cls.product_category.id,
-                "standard_price": 235.0,
-                "list_price": 280.0,
-                "type": "consu",
-                "weight": 0.01,
-                "uom_id": cls.uom_unit.id,
-                "default_code": "FURN_9999",
-                "invoice_policy": "order",
-                "reinvoice_policy": "cost",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
-            "product_delivery_cost": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_delivery_cost",
-                "categ_id": cls.product_category.id,
-                "standard_price": 55.0,
-                "list_price": 70.0,
-                "type": "consu",
-                "weight": 0.01,
-                "uom_id": cls.uom_unit.id,
-                "default_code": "FURN_7777",
-                "invoice_policy": "delivery",
-                "reinvoice_policy": "cost",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
-            "product_order_sales_price": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_order_sales_price",
-                "categ_id": cls.product_category.id,
-                "standard_price": 235.0,
-                "list_price": 280.0,
-                "type": "consu",
-                "weight": 0.01,
-                "uom_id": cls.uom_unit.id,
-                "default_code": "FURN_9999",
-                "invoice_policy": "order",
-                "reinvoice_policy": "sales_price",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
-            "product_delivery_sales_price": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_delivery_sales_price",
-                "categ_id": cls.product_category.id,
-                "standard_price": 55.0,
-                "list_price": 70.0,
-                "type": "consu",
-                "weight": 0.01,
-                "uom_id": cls.uom_unit.id,
-                "default_code": "FURN_7777",
-                "invoice_policy": "delivery",
-                "reinvoice_policy": "sales_price",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
-            "product_order_no": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_order_no",
-                "categ_id": cls.product_category.id,
-                "standard_price": 235.0,
-                "list_price": 280.0,
-                "type": "consu",
-                "weight": 0.01,
-                "uom_id": cls.uom_unit.id,
-                "default_code": "FURN_9999",
-                "invoice_policy": "order",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
-            "product_delivery_no": cls
-            .env["product.product"]
-            .with_company(company)
-            .create({
-                "name": "product_delivery_no",
-                "categ_id": cls.product_category.id,
-                "standard_price": 55.0,
-                "list_price": 70.0,
-                "type": "consu",
-                "weight": 0.01,
-                "uom_id": cls.uom_unit.id,
-                "default_code": "FURN_7777",
-                "invoice_policy": "delivery",
-                "taxes_id": [(6, 0, [])],
-                "supplier_taxes_id": [(6, 0, [])],
-                "company_id": company.id,
-            }),
+            "product_service_delivery": product_service_delivery,
+            "product_service_order": product_service_order,
+            "product_order_cost": product_order_cost,
+            "product_delivery_cost": product_delivery_cost,
+            "product_order_sales_price": product_order_sales_price,
+            "product_delivery_sales_price": product_delivery_sales_price,
+            "product_order_no": product_order_no,
+            "product_delivery_no": product_delivery_no,
         })
 
         return company_data

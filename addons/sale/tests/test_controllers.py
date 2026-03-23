@@ -1,9 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 from odoo.tools import mute_logger
 
-from odoo.addons.base.tests.common import HttpCaseWithUserPortal
 from odoo.addons.sale.tests.common import SaleCommon
 
 
@@ -61,15 +61,6 @@ class TestAccessRightsControllers(HttpCase, SaleCommon):
         )
         self.assertEqual(req.status_code, 303)
 
-
-@tagged("post_install", "-at_install")
-class TestSalesControllers(HttpCase, SaleCommon):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.user_portal = cls._create_new_portal_user()
-
     def test_sales_portal_report(self):
         portal_so = self.sale_order.copy()
         portal_so.message_subscribe(self.user_portal.partner_id.ids)
@@ -92,22 +83,16 @@ class TestSalesControllers(HttpCase, SaleCommon):
             f"attachment; filename*=UTF-8''Quotation_{portal_so.name}.pdf",
         )
 
-
-@tagged("post_install", "-at_install", "mail_flow")
-class TestSaleSignature(HttpCaseWithUserPortal):
-    def test_01_portal_sale_signature_tour(self):
+    def test_portal_sale_signature_tour(self):
         """The goal of this test is to make sure the portal user can sign SO."""
-        portal_user_partner = self.partner_portal
+        portal_user_partner = self.user_portal.partner_id
         # create a SO to be signed
         sales_order = self.env["sale.order"].create({
             "name": "test SO",
             "partner_id": portal_user_partner.id,
             "state": "sent",
             "require_payment": False,
-        })
-        self.env["sale.order.line"].create({
-            "order_id": sales_order.id,
-            "product_id": self.env["product.product"].create({"name": "A product"}).id,
+            "order_line": [Command.create({"product_id": self.product.id})],
         })
         self.assertFalse(sales_order.message_partner_ids)
 
@@ -123,4 +108,4 @@ class TestSaleSignature(HttpCaseWithUserPortal):
             "Do not automatically set customer as follower, will be suggested recipient",
         )
 
-        self.start_tour("/my/quotes", "sale_signature", login="portal")
+        self.start_tour("/my/quotes", "sale_signature", login=self.user_portal.login)

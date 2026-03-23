@@ -269,7 +269,9 @@ class TestMrpMulticompany(BaseCommon):
         manufacture_route.company_id = self.company_a
 
         # Enable multi warehouse
-        self._enable_feature_group(self.quick_ref('stock.group_stock_multi_locations'))
+        self.env['res.config.settings'].create({
+            'group_stock_multi_locations': True,
+        }).execute()
         self._enable_feature_group(self.quick_ref('stock.group_stock_multi_warehouses'))
         new_warehouse = self.env['stock.warehouse'].with_user(self.user_a).with_context(allowed_company_ids=[self.company_b.id]).create({
             'name': 'Warehouse #2',
