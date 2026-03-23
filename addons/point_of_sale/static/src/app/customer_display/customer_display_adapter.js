@@ -21,11 +21,14 @@ export class CustomerDisplayPosAdapter {
     dispatch(pos) {
         this.channel.postMessage(JSON.parse(JSON.stringify(this.data)));
         pos.data
-            .call("pos.config", "update_customer_display", [
-                [pos.config.id],
-                this.data,
-                localStorage.getItem("device_uuid"),
-            ])
+            .call(
+                "pos.config",
+                "update_customer_display",
+                [[pos.config.id], this.data, localStorage.getItem("device_uuid")],
+                {
+                    timeout: 5000,
+                }
+            )
             .catch((error) => {
                 logPosMessage(
                     "CustomerDisplay",

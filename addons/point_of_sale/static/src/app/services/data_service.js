@@ -12,6 +12,7 @@ import { _t } from "@web/core/l10n/translation";
 import DeviceIdentifierSequence from "../utils/devices_identifier_sequence";
 import { logPosMessage } from "../utils/pretty_console_log";
 import { registerPythonTemplate } from "../utils/convert_python_template";
+import { applyOrmTimeout } from "../utils/orm_timeout";
 
 const { DateTime } = luxon;
 const CONSOLE_COLOR = "#28ffeb";
@@ -21,7 +22,7 @@ export class PosData {
     static serviceDependencies = ["orm", "bus_service"];
 
     async setup(env, { orm, bus_service }) {
-        this.orm = orm;
+        this.orm = applyOrmTimeout(orm);
         this.bus = bus_service;
         this.relations = [];
         this.custom = {};
