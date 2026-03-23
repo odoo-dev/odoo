@@ -17,9 +17,12 @@ class TestPricelist(ProductVariantsCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.datacard = cls.env['product.product'].create({'name': 'Office Lamp'})
-        cls.usb_adapter = cls.env['product.product'].create({'name': 'Office Chair'})
+        cls.datacard, cls.usb_adapter = cls.env['product.product'].create([
+            {'name': 'Datacard'},
+            {'name': 'USB adapter'},
+        ])
 
+        # Enable pricelists
         cls.pricelist = cls._enable_pricelists()
         cls.sale_pricelist_id, cls.pricelist_eu = cls.env['product.pricelist'].create([{
             'name': 'Sale pricelist',
@@ -49,10 +52,6 @@ class TestPricelist(ProductVariantsCommon):
             'name': "EU Pricelist",
             'country_group_ids': cls.env.ref('base.europe').ids,
         }])
-
-        # Enable pricelist feature
-        cls.env.user.group_ids += cls.env.ref('product.group_product_pricelist')
-        cls.uom_ton = cls.env.ref('uom.product_uom_ton')
 
     def test_10_discount(self):
         # Make sure the price using a pricelist is the same than without after

@@ -2075,8 +2075,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         stock_location = self.company_data['default_warehouse'].lot_stock_id
         custo_location = self.env.ref('stock.stock_location_customers')
 
-        grp_uom = self.env.ref('uom.group_uom')
-        self.env.user.write({'group_ids': [(4, grp_uom.id)]})
+        self._enable_uom()
 
         # 100 kit_3 = 100 x compo_f + 200 x compo_g
         self.env['stock.quant']._update_available_quantity(self.component_f, stock_location, 100)
@@ -2142,8 +2141,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         """
         stock_location = self.company_data['default_warehouse'].lot_stock_id
 
-        grp_uom = self.env.ref('uom.group_uom')
-        self.env.user.write({'group_ids': [(4, grp_uom.id)]})
+        self._enable_uom()
 
         # 10 kit_3 = 10 x compo_f + 20 x compo_g
         self.env['stock.quant']._update_available_quantity(self.component_f, stock_location, 10)
@@ -2184,8 +2182,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         stock_location = self.company_data['default_warehouse'].lot_stock_id
         self.company_data['default_warehouse'].delivery_steps = 'pick_ship'
 
-        grp_uom = self.env.ref('uom.group_uom')
-        self.env.user.write({'group_ids': [(4, grp_uom.id)]})
+        self._enable_uom()
 
         # 10 kit_3 = 10 x compo_f + 20 x compo_g
         self.env['stock.quant']._update_available_quantity(self.component_f, stock_location, 10)

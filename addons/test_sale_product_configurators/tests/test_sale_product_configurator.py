@@ -29,7 +29,7 @@ class TestProductConfiguratorUi(TestProductConfiguratorCommon):
         cls.env['res.partner'].create({'name': 'Tajine Saucisse'})
 
     def test_01_product_configurator(self):
-        self.env.ref('base.user_admin').write({'group_ids': [(4, self.env.ref('product.group_product_variant').id)]})
+        self._enable_feature_group(self.quick_ref('product.group_product_variant'))
         tax = self.env['account.tax'].create({'name': "Test tax", 'amount': 15})
         self.product_product_custo_desk.taxes_id = tax
         self.product_product_conf_chair_floor_protect.taxes_id = tax

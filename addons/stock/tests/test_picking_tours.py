@@ -1,23 +1,25 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import Command
 from odoo.tests import HttpCase, tagged
 
+from odoo.addons.base.tests.common import BaseCommon
+
 
 @tagged('-at_install', 'post_install')
-class TestStockPickingTour(HttpCase):
-    def setUp(self):
-        config = self.env['res.config.settings'].create({
-            'group_stock_production_lot': True
-        })
-        config.execute()
+class TestStockPickingTour(HttpCase, BaseCommon):
 
-        self.receipt = self.env['stock.picking'].create({
-            'picking_type_id': self.env.ref('stock.picking_type_in').id,
-            'location_id': self.env.ref('stock.stock_location_suppliers').id,
-            'location_dest_id': self.env.ref('stock.stock_location_stock').id,
-        })
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
-        return super().setUp()
+        cls._enable_feature_group(cls.quick_ref('stock.group_production_lot'))
+
+        cls.receipt = cls.env['stock.picking'].create({
+            'picking_type_id': cls.env.ref('stock.picking_type_in').id,
+            'location_id': cls.env.ref('stock.stock_location_suppliers').id,
+            'location_dest_id': cls.env.ref('stock.stock_location_stock').id,
+        })
 
     def _get_picking_url(self, picking_id):
         return '/odoo/action-stock.action_picking_tree_incoming/%s' % (picking_id)

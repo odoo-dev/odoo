@@ -13,7 +13,7 @@ class TestLifoPrice(ValuationReconciliationTestCommon):
 
     def test_lifoprice(self):
         # Required for `uom_id` to be visible in the view
-        self.env.user.group_ids += self.env.ref('uom.group_uom')
+        self._enable_uom()
 
         # Set product category removal strategy as LIFO
         product_category_001 = self.env['product.category'].create({

@@ -260,9 +260,8 @@ class TestSaleStockInvoices(TestSaleCommon):
         A user invoice a tracked product with a smaller quantity than delivered.
         On the invoice, the quantity of the used lot should be the invoiced one.
         """
-        display_lots = self.env.ref('stock_account.group_lot_on_invoice')
-        display_uom = self.env.ref('uom.group_uom')
-        self.env.user.write({'group_ids': [(4, display_lots.id), (4, display_uom.id)]})
+        self._enable_feature_group(self.quick_ref('stock_account.group_lot_on_invoice'))
+        self._enable_uom()
 
         so = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,
@@ -594,9 +593,8 @@ class TestSaleStockInvoices(TestSaleCommon):
         Then he adds credit notes and issues full refund and new draft invoice.
         The new draft invoice should have correct USN
         """
-        display_lots = self.env.ref('stock_account.group_lot_on_invoice')
-        display_uom = self.env.ref('uom.group_uom')
-        self.env.user.write({'group_ids': [(4, display_lots.id), (4, display_uom.id)]})
+        self._enable_feature_group(self.quick_ref('stock_account.group_lot_on_invoice'))
+        self._enable_uom()
 
         so = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,

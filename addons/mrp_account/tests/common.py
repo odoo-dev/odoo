@@ -52,10 +52,11 @@ class TestBomPriceCommon(TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
         # Required for `uom_id ` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
+        cls._enable_uom()
         # Required for `product_id ` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('product.group_product_variant')
+        cls._enable_feature_group(cls.quick_ref('product.group_product_variant'))
         cls.Product = cls.env['product.product']
         cls.Bom = cls.env['mrp.bom']
         cls.prod_location = cls.warehouse._get_production_location()
@@ -68,7 +69,7 @@ class TestBomPriceCommon(TestStockValuationCommon):
         cls.glass = cls._create_product('Glass', 100, quantity=0, category=cls.category_avco_auto)
 
         # Unit of Measure.
-        cls.dozen = cls.env.ref("uom.product_uom_dozen")
+        cls.dozen = cls.uom_dozen
 
         # Bills Of Materials.
         # -------------------------------------------------------------------------------

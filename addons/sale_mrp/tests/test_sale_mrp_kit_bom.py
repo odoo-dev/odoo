@@ -17,7 +17,7 @@ class TestSaleMrpKitBom(BaseCommon):
         cls.env.ref('base.user_admin').write({
             'email': 'mitchell.admin@example.com',
         })
-        cls.env.user.group_ids += cls.quick_ref('product.group_product_variant')
+        cls._enable_feature_group(cls.quick_ref('product.group_product_variant'))
 
     def _create_product(self, name, storable, price):
         return self.env['product.product'].create({

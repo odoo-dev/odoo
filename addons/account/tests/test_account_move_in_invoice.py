@@ -127,7 +127,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_tax': 168.0,
             'amount_total': 1128.0,
         }
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
+        cls._enable_uom()
 
     @classmethod
     def setup_armageddon_tax(cls, tax_name, company_data, **kwargs):
@@ -2611,7 +2611,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         tax = self.company_data['default_tax_purchase']
         product = self.env['product.product'].create({
             'name': 'product',
-            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'uom_id': self.uom_unit.id,
             'standard_price': 0.0,
             'supplier_taxes_id': [Command.set(tax.ids)],
         })

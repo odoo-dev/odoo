@@ -12,7 +12,9 @@ class WebsiteSaleGMCCommon(ProductVariantsCommon, WebsiteSaleCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.ProductFeedController = ProductFeed()
-        cls.env["res.config.settings"].create({"group_gmc_feed": True}).execute()
+
+        cls.group_product_feed = cls.quick_ref("website_sale.group_product_feed")
+        cls._enable_feature_group(cls.group_product_feed)
 
         cls.gmc_feed = cls.env["product.feed"].create({"name": "GMC", "website_id": cls.website.id})
 
@@ -59,9 +61,6 @@ class WebsiteSaleGMCCommon(ProductVariantsCommon, WebsiteSaleCommon):
         cls.eur_pricelist = cls._create_pricelist(
             name="EUR", currency_id=cls.eur_currency.id, selectable=True
         )
-
-        # Needed for gmc tests to succeed, should be investigated and dropped someday ideally
-        cls.env.user.group_ids -= cls.group_product_pricelist
 
     def update_items(self, feed=None):
         feed = feed or self.gmc_feed

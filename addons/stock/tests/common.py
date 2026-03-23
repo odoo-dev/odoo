@@ -110,9 +110,14 @@ class TestStockCommon(ProductVariantsCommon):
         })
         # Some tests depend on additional warehouse setup
         cls.warehouse_1.write(cls.warehouse_1._create_or_update_sequences_and_picking_types())
-        cls.env['res.config.settings'].create({
-            'group_stock_multi_locations': True,
-        }).execute()
+
+        cls._enable_feature_group(cls.quick_ref('stock.group_stock_multi_locations'))
+        cls._enable_feature_group(cls.quick_ref('stock.group_production_lot'))
+
+        # FIXME multi-company group is automatic, shouldn't be ever enforced
+        cls.group_user.write({'implied_ids': [
+            (4, cls.quick_ref('base.group_multi_company').id),
+        ]})
 
         cls.route_mto = cls.warehouse_1.mto_pull_id.route_id
         cls.route_mto.rule_ids.procure_method = "make_to_order"
@@ -170,11 +175,6 @@ class TestStockCommon(ProductVariantsCommon):
             {'name': 'kg-B', 'is_storable': True, 'uom_id': cls.uom_kg.id},
             {'name': 'g-B', 'is_storable': True, 'uom_id': cls.uom_gm.id}
         ])
-
-        cls.group_user.write({'implied_ids': [
-            (4, cls.quick_ref('base.group_multi_company').id),
-            (4, cls.quick_ref('stock.group_production_lot').id),
-        ]})
 
         # User Data: stock user and stock manager
         cls.user_stock_user = mail_new_test_user(

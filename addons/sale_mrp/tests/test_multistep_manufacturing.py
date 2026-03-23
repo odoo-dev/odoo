@@ -13,8 +13,6 @@ class TestMultistepManufacturing(TestMrpCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        # Required for `uom_id ` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
         # Required for `manufacture_steps` to be visible in the view
         cls.env.user.group_ids += cls.env.ref('stock.group_adv_location')
         # Required for `product_id` to be visible in the view

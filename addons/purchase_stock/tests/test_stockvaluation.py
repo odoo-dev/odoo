@@ -225,16 +225,14 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             'rate': 2,
         })
 
-        grp_uom = self.env.ref('uom.group_uom')
-        self.env.user.write({'group_ids': [(4, grp_uom.id)]})
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        self._enable_uom()
         uom_hundred = self.env['uom.uom'].create({
             'name': '100 x U',
             'relative_factor': 100.0,
-            'relative_uom_id': uom_unit.id,
+            'relative_uom_id': self.uom_unit.id,
         })
         self.product1.write({
-            'uom_id': uom_unit.id,
+            'uom_id': self.uom_unit.id,
         })
 
         self.product1.categ_id.property_cost_method = 'fifo'

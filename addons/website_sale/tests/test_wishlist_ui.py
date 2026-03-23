@@ -3,14 +3,16 @@
 from odoo.fields import Command
 from odoo.tests import HttpCase, tagged
 
+from odoo.addons.base.tests.common import BaseCommon
+
 
 @tagged("-at_install", "post_install")
-class TestWishlistProcess(HttpCase):
+class TestWishlistProcess(HttpCase, BaseCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.env["product.template"].search([]).write({"website_published": False})
-        cls.env["res.config.settings"].create({"group_product_variant": True}).execute()
+        cls._enable_feature_group(cls.quick_ref("product.group_product_variant"))
 
     def test_wishlist_ui(self):
         # Setup attributes and attributes values

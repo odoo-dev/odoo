@@ -23,10 +23,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         cls.warehouse = cls.env['stock.warehouse'].search([('company_id', '=', cls.env.company.id)])
         cls.stock_location = cls.warehouse.lot_stock_id
 
-        grp_uom = cls.env.ref('uom.group_uom')
-        group_user = cls.env.ref('base.group_user')
-        group_user.write({'implied_ids': [(4, grp_uom.id)]})
-        cls.env.user.write({'group_ids': [(4, grp_uom.id)]})
+        cls._enable_uom()
 
         cls.uom_kg = cls.env.ref('uom.product_uom_kgm')
         cls.uom_gm = cls.env.ref('uom.product_uom_gram')

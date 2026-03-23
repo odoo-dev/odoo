@@ -1507,11 +1507,10 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         - on OUT picking: there should be 2 stock.move.lines, one with package and one without
         """
         warehouse = self.company_data.get('default_warehouse')
-        self.env['res.config.settings'].write({
-            'group_stock_tracking_lot': True,
-            'group_stock_adv_location': True,
-            'group_stock_multi_locations': True,
-        })
+        self._enable_feature_group(self.quick_ref('stock.group_stock_multi_locations'))
+        self._enable_feature_group(self.quick_ref('stock.group_production_lot'))
+        self._enable_feature_group(self.quick_ref('stock.group_adv_location'))
+
         warehouse.delivery_steps = 'pick_pack_ship'
         self.env['stock.quant']._update_available_quantity(self.test_product_delivery, warehouse.lot_stock_id, 10)
 

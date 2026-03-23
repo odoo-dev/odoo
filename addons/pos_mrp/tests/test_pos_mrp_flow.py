@@ -67,7 +67,7 @@ class TestPosMrp(CommonPosMrpTest):
         """This test make sure that when a kit is made of product using UoM A but the bom line uses UoM B
            the price unit is correctly computed on the invoice lines.
         """
-        self.env.user.group_ids += self.env.ref('uom.group_uom')
+        self._enable_uom()
 
         # Edit kit product and component product
         self.product_product_kit_one.categ_id = self.category_fifo_realtime
@@ -370,14 +370,11 @@ class TestPosMrp(CommonPosMrpTest):
         self.env['pos.order'].sync_from_ui([pos_order_data])['pos.order'][0]['id']
         self.assertEqual(len(current_session.picking_ids.move_line_ids), 4)
 
-
-@odoo.tests.tagged('post_install', '-at_install')
-class TestPosMrpTemp(CommonPosMrpTest):
     def test_bom_kit_different_uom_invoice_valuation_no_invoice(self):
         """This test make sure that when a kit is made of product using UoM A but the bom line uses UoM B
            the price unit is correctly computed on the invoice lines.
         """
-        self.env.user.group_ids += self.env.ref('uom.group_uom')
+        self._enable_uom()
         self.env.company.inventory_valuation = 'real_time'
         # Edit kit product and component product
         self.product_product_kit_one.categ_id = self.category_fifo_realtime

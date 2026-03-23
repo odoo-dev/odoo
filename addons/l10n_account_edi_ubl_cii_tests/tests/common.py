@@ -17,7 +17,7 @@ class TestUBLCommon(AccountTestInvoicingCommon):
         cls.other_currency = cls.setup_other_currency('USD')
 
         # Required for `product_uom_id` to be visible in the form views
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
+        cls._enable_uom()
 
         # remove this tax, otherwise, at import, this tax with children taxes can be selected and the total is wrong
         cls.tax_armageddon.children_tax_ids.unlink()

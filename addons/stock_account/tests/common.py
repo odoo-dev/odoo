@@ -1,12 +1,14 @@
 import re
+
 from dateutil.relativedelta import relativedelta
 
 from odoo import Command, fields
 from odoo.tools.misc import clean_context
-from odoo.addons.base.tests.common import BaseCommon
+
+from odoo.addons.uom.tests.common import UomCommon
 
 
-class TestStockValuationCommon(BaseCommon):
+class TestStockValuationCommon(UomCommon):
     # Override
     @classmethod
     def _create_company(cls, **create_values):
@@ -355,7 +357,7 @@ class TestStockValuationCommon(BaseCommon):
 
         cls.picking_type_in = cls.warehouse.in_type_id
         cls.picking_type_out = cls.warehouse.out_type_id
-        cls.uom = cls.env.ref('uom.product_uom_unit')
+        cls.uom = cls.uom_unit
         cls.uom_pack_of_6 = cls.env['uom.uom'].create({
             'name': 'Pack of 6',
             'relative_uom_id': cls.uom.id,

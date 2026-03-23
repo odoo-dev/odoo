@@ -375,7 +375,7 @@ class TestWebsiteSaleProductConfigurator(HttpCase, WebsiteSaleCommon):
     def test_product_configurator_strikethrough_price(self):
         """Test that the product configurator displays the strikethrough price correctly."""
         self.pricelist = self._enable_pricelists()
-        self.env["res.config.settings"].create({"group_product_price_comparison": True}).execute()
+        self._enable_feature_group(self.quick_ref("website_sale.group_product_price_comparison"))
         self.website.show_line_subtotals_tax_selection = "tax_included"
         tax = self.env["account.tax"].create({"name": "Tax", "amount": 10})
         optional_product = self.env["product.template"].create({

@@ -246,10 +246,10 @@ class TestPurchase(AccountTestInvoicingCommon):
 
     def test_with_different_uom(self):
         """ This test ensures that the unit price is correctly computed"""
-        # Required for `uom_id` to be visibile in the view
-        self.env.user.group_ids += self.env.ref('uom.group_uom')
-        uom_units = self.env.ref('uom.product_uom_unit')
-        uom_dozens = self.env.ref('uom.product_uom_dozen')
+        # Required for `uom_id` to be visible in the view
+        self._enable_uom()
+        uom_units = self.uom_unit
+        uom_dozens = self.uom_dozen
         uom_pairs = self.env['uom.uom'].create({
             'name': 'Pairs',
             'relative_factor': 2,

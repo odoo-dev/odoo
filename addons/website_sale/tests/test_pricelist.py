@@ -210,7 +210,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         # Enable discounts to view discount in sale_order
         self._enable_discounts()
         self.pricelist = self._enable_pricelists()
-        self.env.user.group_ids += self.env.ref("sale.group_discount_per_so_line")
+        self._enable_feature_group(self.quick_ref("sale.group_discount_per_so_line"))
 
         product = self.env["product.product"].create({
             "name": "Super Product",
@@ -487,7 +487,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
 
 def simulate_frontend_context(self, website_id=None):
     if website_id is None:
-        website_id = self.env.ref('website.default_website').id
+        website_id = self.env.ref("website.default_website").id
 
     # Mock this method will be enough to simulate frontend context in most methods
     def get_request_website():

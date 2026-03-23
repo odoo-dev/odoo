@@ -41,12 +41,12 @@ class ProductCommon(UomCommon):
 
     @classmethod
     def _enable_pricelists(cls):
-        cls.group_user._apply_group(cls.group_product_pricelist)
+        cls._enable_feature_group(cls.group_product_pricelist)
         return cls._create_pricelist()
 
     @classmethod
     def _enable_variants(cls):
-        cls.group_user._apply_group(cls.group_product_variant)
+        cls._enable_feature_group(cls.group_product_variant)
 
     @classmethod
     def _create_pricelist(cls, **create_vals):

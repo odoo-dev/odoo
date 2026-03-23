@@ -17,10 +17,7 @@ class TestBoM(TestMrpCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.group_user.write({'implied_ids': [
-            Command.link(cls.group_product_variant.id),
-            Command.link(cls.group_mrp_routings.id),
-        ]})
+        cls._enable_variants()
 
     @classmethod
     def make_prods(cls, n):
@@ -851,8 +848,6 @@ class TestBoM(TestMrpCommon):
             'name': 'Crafting Table'
         })
 
-        # Required to display `operation_ids` in the form view
-        self.env.user.group_ids += self.env.ref("mrp.group_mrp_routings")
         bom_pickaxe.write({
             "bom_line_ids": [
                 Command.create({"product_id": stick.id, "product_qty": 2}),
@@ -1498,8 +1493,6 @@ class TestBoM(TestMrpCommon):
         bom_from_mo_2.active = False  # Archives the created BoM to avoid to use it for the next MOs
 
         # Generates a BoM from a confirmed MO using operations and by-products.
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')  # Enables by-products.
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')  # Enables workorders.
         # Produces 3 qties to check if the operations' duration will be correctly divided by 3.
         mo_3 = create_mo(3)
         mo_3.action_confirm()
@@ -1545,7 +1538,6 @@ class TestBoM(TestMrpCommon):
         then to generate a new BoM from this MO.
         Checks the generated BoM has the expected BoM lines UoM and quantity.
         """
-        self.env.user.group_ids += self.env.ref('uom.group_uom')
         # Creates some products.
         common_vals = {'is_storable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="CO² Molecule"))
@@ -1581,7 +1573,6 @@ class TestBoM(TestMrpCommon):
         """ Creates a Manufacturing Order without BoM then to generate a new BoM from this MO and
         modifies by-products values.
         """
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')  # Enables by-products.
         # Creates some products.
         common_vals = {'is_storable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Banana Bread"))
@@ -1648,7 +1639,6 @@ class TestBoM(TestMrpCommon):
         Checks the BoM will be marked as updated in the right situation, and checks the "Update BoM"
         action update the MO accordingly to the changes done in the BoM.
         """
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
         # Creates a BoM.
         common_vals = {'is_storable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
@@ -1794,7 +1784,6 @@ class TestBoM(TestMrpCommon):
         then modifies the BoM's component's quantity and update the MO.
         Checks the MO's raw moves' quantities are correctly updated.
         """
-        self.env.user.group_ids += self.env.ref('uom.group_uom')
         # Creates a BoM.
         common_vals = {'is_storable': True}
         finished_product = self.env['product.product'].create(dict(common_vals, name="Monster in Jar"))
@@ -1960,7 +1949,6 @@ class TestBoM(TestMrpCommon):
         replacing one of its BoM line's product. Updates the MO and checks a new
         move for this product was created in the MO's picking.
         """
-        self.env.user.group_ids += self.env.ref('stock.group_adv_location')
         self.warehouse_1.manufacture_steps = 'pbm'
 
         # Creates a MO.
@@ -2932,10 +2920,6 @@ class TestTourBoM(HttpCase):
         })
 
     def test_mrp_bom_product_catalog(self):
-        grp_uom = self.env.ref('uom.group_uom')
-        group_user = self.env.ref('base.group_user')
-        group_user.write({'implied_ids': [Command.link(grp_uom.id)]})
-        self.env.user.write({'group_ids': [Command.link(grp_uom.id)]})
         self.assertEqual(len(self.bom.bom_line_ids), 0)
 
         url = f'/odoo/action-mrp.mrp_bom_form_action/{self.bom.id}'

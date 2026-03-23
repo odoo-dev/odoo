@@ -302,7 +302,7 @@ class TestSaleOrder(SaleCommon):
             "Customer should not be added automatically in followers",
         )
 
-        self.env.user.group_ids += self.env.ref("sale.group_auto_done_setting")
+        self._enable_feature_group(self.quick_ref("sale.group_auto_done_setting"))
         self.sale_order.action_confirm()
         self.assertEqual(self.sale_order.state, "sale")
         self.assertTrue(self.sale_order.locked)
@@ -949,7 +949,7 @@ class TestSalesTeam(SaleCommon):
         )
 
     def test_sale_order_analytic_distribution_change(self):
-        self.env.user.group_ids += self.env.ref("analytic.group_analytic_accounting")
+        self._enable_feature_group(self.quick_ref("analytic.group_analytic_accounting"))
 
         analytic_plan = self.env["account.analytic.plan"].create({"name": "Plan Test"})
         analytic_account_super = self.env["account.analytic.account"].create({

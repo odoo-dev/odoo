@@ -171,7 +171,7 @@ class TestSaleToInvoice(TestSaleCommon):
     def test_downpayment_validation(self):
         """Test invoice for downpayment and check it can be validated."""
         # Lock the sale orders when confirmed
-        self.env.user.group_ids += self.env.ref("sale.group_auto_done_setting")
+        self._enable_feature_group(self.quick_ref("sale.group_auto_done_setting"))
 
         # Confirm the SO
         self.sale_order.action_confirm()
@@ -1122,7 +1122,7 @@ class TestSaleToInvoice(TestSaleCommon):
         the conversion from so to invoice. An additional analytic account set manually in another
         plan is also passed to the invoice.
         """
-        self.env.user.group_ids += self.env.ref("analytic.group_analytic_accounting")
+        self._enable_feature_group(self.quick_ref("analytic.group_analytic_accounting"))
         analytic_plan_default = self.env["account.analytic.plan"].create({
             "name": "default",
             "applicability_ids": [

@@ -19,7 +19,7 @@ class TestWebsiteSaleGMC(WebsiteSaleGMCCommon, HttpCase):
         self.assertEqual(200, response.status_code)
 
     def test_gmc_xml_not_found_if_gmc_setting_disabled(self):
-        self.env["res.config.settings"].create({"group_gmc_feed": False}).execute()
+        self.group_user._remove_group(self.group_product_feed)
 
         response = self.url_open(self.gmc_feed.url)
 
@@ -300,7 +300,7 @@ class TestWebsiteSaleGMC(WebsiteSaleGMCCommon, HttpCase):
         self.assertEqual("in_stock", self.red_sofa_item["availability"])
 
     def _setup_6l_water_pack(self):
-        self.env.user.group_ids |= self.env.ref("uom.group_uom")
+        self._enable_uom()
         uom_litre = self.env.ref("uom.product_uom_pack_6")
         base_unit_litre = self.env["product.base.unit"].create({"name": "L"})
         six_pack = self.env["product.product"].create([
@@ -322,7 +322,7 @@ class TestWebsiteSaleGMC(WebsiteSaleGMCCommon, HttpCase):
         self.assertNotIn("unit_pricing_measure", self.items[six_pack])
 
         # enable "Product Reference Price" setting
-        self.env.user.group_ids |= self.env.ref("product.group_show_uom_price")
+        self._enable_feature_group(self.quick_ref("website_sale.group_show_uom_price"))
         self.update_items()
 
         self.assertEqual("6.0l", self.items[six_pack]["unit_pricing_measure"], "$12 / 6l")

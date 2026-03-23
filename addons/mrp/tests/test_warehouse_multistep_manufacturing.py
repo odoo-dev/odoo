@@ -9,13 +9,10 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Required for `uom_id` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('uom.group_uom')
-        cls.env.user.group_ids += cls.env.ref('product.group_product_variant')
         # Required for `manufacture_steps` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('stock.group_adv_location')
+        cls._enable_feature_group(cls.quick_ref('stock.group_adv_location'))
         # Required for `product_id` to be visible in the view
-        cls.env.user.group_ids += cls.env.ref('product.group_product_variant')
+        cls._enable_variants()
 
         # Create manufactured product
         product_form = Form(cls.env['product.product'])
@@ -732,7 +729,6 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             Checks if transfers is updated when we adding a new byproduct/component
             after confirm the MO
         """
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
         demo = self.env['product.product'].create({
             'name': 'DEMO',
             'is_storable': True,

@@ -69,13 +69,13 @@ class TestProjectCommon(TransactionCase):
             'login': 'armandel',
             'password': 'armandel',
             'email': 'armande.projectuser@example.com',
-            'group_ids': [(6, 0, [user_group_employee.id, user_group_project_user.id, user_group_partner_manager.id])]
+            'group_ids': [(6, 0, [user_group_project_user.id, user_group_partner_manager.id])]
         })
         cls.user_projectmanager = Users.create({
             'name': 'Bastien ProjectManager',
             'login': 'bastien',
             'email': 'bastien.projectmanager@example.com',
-            'group_ids': [(6, 0, [user_group_employee.id, user_group_project_manager.id, user_group_partner_manager.id])]})
+            'group_ids': [(6, 0, [user_group_project_manager.id, user_group_partner_manager.id])]})
 
         # Test 'Pigs' project
         cls.project_pigs = cls.env['project.project'].with_context({'mail_create_nolog': True}).create({

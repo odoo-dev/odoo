@@ -11,6 +11,7 @@ from odoo.tests.common import HttpCase
 
 from odoo.addons.mail.tests.common import MailCase
 from odoo.addons.mrp.tests.common import TestMrpCommon
+from odoo.addons.base.tests.common import BaseCommon
 
 
 class TestMrpOrder(TestMrpCommon, MailCase):
@@ -21,7 +22,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         cls.env.ref('mrp.route_warehouse0_manufacture').write({
             'product_selectable': True,
         })
-        cls.env.ref('base.group_user').write({'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]})
 
     def _handle_workorder_compatibility(self):
         # Once `mrp_workorder` is installed, an employee is required for a lot of workorder usecases.
@@ -440,8 +440,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
 
     def test_update_quantity_4(self):
         """ Workcenter 1 has 10' start time and 5' stop time """
-        # Required for `workerorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         bom = self.env['mrp.bom'].create({
             'product_id': self.product_6.id,
             'product_tmpl_id': self.product_6.product_tmpl_id.id,
@@ -506,8 +504,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
 
     def test_qty_producing(self):
         """Qty producing should be the qty remain to produce, instead of 0"""
-        # Required for `workerorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         bom = self.env['mrp.bom'].create({
             'product_id': self.product_6.id,
             'product_tmpl_id': self.product_6.product_tmpl_id.id,
@@ -947,8 +943,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         byproduct3 none   1.0 dozen
         Check qty producing update and moves finished values.
         """
-        # Required for `byproduct_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
         self.byproduct1 = self.env['product.product'].create({
             'name': 'Byproduct 1',
             'is_storable': True,
@@ -1151,7 +1145,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         by-products quantity are updated aswell when they are not produced yet,
         and the by-products quantity is NOT updated when already produced.
         """
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
         byproduct1, byproduct2 = self.env['product.product'].create([{
             'name': f'byproduct{i}',
             'is_storable': True,
@@ -1587,7 +1580,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             update the qty_producing and mark their respective operations from Consume
             In Operation as done directly through the WO record
         """
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_byproducts')
         demo = self.env['product.product'].create({
             'name': 'DEMO'
         })
@@ -2673,8 +2665,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         Create a second one in 10 minutes (expected should NOT go from 15 to 12.5, it should go from 15 to 10)
         """
         # First production, the default is 60 and there is 0 productions of that operation
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
+
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_4
         production = production_form.save()
@@ -2719,8 +2710,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         Test that when tracking the 2 last production, if we make one with under capacity, and one with normal capacity,
         the two are equivalent (1 done with capacity 2 in 10mn = 2 done with capacity 2 in 10mn)
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_5
         production = production_form.save()
@@ -2770,8 +2759,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         5 -> 30mn
         ...
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_6
         production = production_form.save()
@@ -2847,9 +2834,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         """Create a MO for a product with several work orders.
         Produce different quantities to test quantity propagation and workorder cancellation.
         """
-
         # setup test
-
         work_center_1 = self.env['mrp.workcenter'].create({"name": "WorkCenter 1", "time_start": 11})
         work_center_2 = self.env['mrp.workcenter'].create({"name": "WorkCenter 2", "time_start": 12})
         work_center_3 = self.env['mrp.workcenter'].create({"name": "WorkCenter 3", "time_start": 13})
@@ -3112,8 +3097,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             Check that the work order is started only once when clicking the start button several times.
         """
         self._handle_workorder_compatibility()
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
+
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_2
         production_form.product_qty = 1
@@ -3222,8 +3206,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         -> The user replans one of the WO: the warnings should disappear and the
         WO should be postponed.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         mos = self.env['mrp.production']
         for _ in range(2):
             mo_form = Form(self.env['mrp.production'])
@@ -3255,8 +3237,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         -> The user replans one of the WO: the warnings should disappear and the
         WO should be postponed.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         mos = self.env['mrp.production']
         for _ in range(2):
             mo_form = Form(self.env['mrp.production'])
@@ -3301,10 +3281,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
                 Add a second WO scheduled before the other one (with different WC)
                 Confirm => MO should Replan without Error
         """
-
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
-
         mos = self.env['mrp.production']
         for _ in range(2):
             mo_form = Form(self.env['mrp.production'])
@@ -3500,8 +3476,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         """
             Test, when writing to a confirmed MO, that all workorders that are expected to be planned are planned.
         """
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
-
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product_8
         mo = mo_form.save()
@@ -3649,7 +3623,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         """
         Test that the operation type set on the bom is set in the manufacturing order
         when selecting the BoM"""
-        self.env.user.group_ids += self.env.ref("stock.group_adv_location")
+        self._enable_feature_group(self.quick_ref("stock.group_adv_location"))
         picking_type = self.env['stock.picking.type'].create({
             'name': 'new_picking_type',
             'code': 'internal',
@@ -3778,8 +3752,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
     def test_workcenter_specific_capacities(self):
         """ Test that the duraction expected is correctly computed when specific capacities are defined on the workcenter.
         """
-        # Required for `workorder_ids` to be visible in the view
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         self.env['mrp.workcenter.capacity'].search([
             ('workcenter_id', '=', self.workcenter_2.id),
             ('product_id', '=', False),
@@ -4744,7 +4716,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         Test updating an MO from BoM when the finished product has a kit with variants as a component.
         """
         # Enable variants
-        self.env.user.group_ids += self.env.ref('product.group_product_variant')
+        self._enable_variants()
         # Create an attribute for variants
         color_attribute = self.env['product.attribute'].create({
             'name': 'Variant Color',
@@ -4882,7 +4854,6 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         # Change the BoM UoM to be Dozens instead of Units
         self.bom_4.uom_id = self.uom_dozen
 
-        self.env.user.group_ids += self.env.ref('mrp.group_mrp_routings')
         production_form = Form(self.env['mrp.production'])
         production_form.bom_id = self.bom_4
         production = production_form.save()
@@ -5444,8 +5415,8 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         """Ensure that when updating the component's quantity to consume,
         the move is not marked as picked allowing the new quantity to be
         correctly reserved."""
-        group_unlock_mo = self.env.ref('mrp.group_unlocked_by_default')
-        self.env.user.group_ids += group_unlock_mo
+        self._enable_feature_group(self.quick_ref("mrp.group_unlocked_by_default"))
+
         self.bom_1.bom_line_ids.product_id.is_storable = True
         self.env['stock.quant']._update_available_quantity(self.bom_1.bom_line_ids[0].product_id, self.stock_location, 10)
         self.env['stock.quant']._update_available_quantity(self.bom_1.bom_line_ids[1].product_id, self.stock_location, 10)
@@ -5558,7 +5529,7 @@ class TestMrpOrderPostInstall(TestMrpCommon):
         ])
 
 
-class TestTourMrpOrder(HttpCase):
+class TestTourMrpOrder(HttpCase, BaseCommon):
     def test_mrp_order_product_catalog(self):
         product = self.env['product.product'].create({
             'name': 'test1',
@@ -5582,9 +5553,8 @@ class TestTourMrpOrder(HttpCase):
         """ Test the synchronization between stock moves and stock move lines within
             the detailed operation modal for manufacturings and by-products.
         """
-
-        self.env['res.config.settings'].create({'group_stock_multi_locations': True}).execute()
-        self.env['res.config.settings'].create({'group_mrp_byproducts': True}).execute()
+        self._enable_feature_group(self.quick_ref('mrp.group_mrp_byproducts'))
+        self._enable_feature_group(self.quick_ref('stock.group_stock_multi_locations'))
 
         location = self.env.ref('stock.stock_location_stock')
         product = self.env['product.product']
@@ -5639,7 +5609,7 @@ class TestTourMrpOrder(HttpCase):
         is in draft.
         '''
         # Enable storage locations
-        self.env['res.config.settings'].create({'group_stock_multi_locations': True}).execute()
+        self._enable_feature_group(self.quick_ref('stock.group_stock_multi_locations'))
         # Set WH manufacture to 2-step
         warehouse = self.env.ref('stock.warehouse0')
         warehouse.manufacture_steps = 'pbm'

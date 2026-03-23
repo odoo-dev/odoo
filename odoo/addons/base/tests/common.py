@@ -103,6 +103,14 @@ class BaseCommon(TransactionCase):
         return currency
 
     @classmethod
+    def _enable_feature_group(cls, res_group):
+        cls.group_user._apply_group(res_group)
+
+    @classmethod
+    def _disable_feature_group(cls, res_group):
+        cls.group_user._remove_group(res_group)
+
+    @classmethod
     def _use_currency(cls, company, currency_code):
         # Enforce constant currency
         currency = cls._enable_currency(currency_code)

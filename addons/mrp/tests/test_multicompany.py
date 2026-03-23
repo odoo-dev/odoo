@@ -1,19 +1,20 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.fields import Command
-from odoo.tests import common, Form
 from odoo.exceptions import UserError
+from odoo.fields import Command
+from odoo.tests import Form
+
+from odoo.addons.base.tests.common import BaseCommon
 
 
-class TestMrpMulticompany(common.TransactionCase):
+class TestMrpMulticompany(BaseCommon):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.ref('base.group_user').write({'implied_ids': [(4, cls.env.ref('stock.group_production_lot').id)]})
+        cls._enable_feature_group(cls.quick_ref('stock.group_production_lot'))
 
-        group_user = cls.env.ref('base.group_user')
-        group_mrp_manager = cls.env.ref('mrp.group_mrp_manager')
+        group_mrp_manager = cls.quick_ref('mrp.group_mrp_manager')
         cls.company_a = cls.env['res.company'].create({'name': 'Company A'})
         cls.company_b = cls.env['res.company'].create({'name': 'Company B'})
         cls.warehouse_a = cls.env['stock.warehouse'].search([('company_id', '=', cls.company_a.id)], limit=1)
@@ -24,14 +25,14 @@ class TestMrpMulticompany(common.TransactionCase):
         cls.user_a = cls.env['res.users'].create({
             'name': 'user company a with access to company b',
             'login': 'user a',
-            'group_ids': [(6, 0, [group_user.id, group_mrp_manager.id])],
+            'group_ids': [(6, 0, [group_mrp_manager.id])],
             'company_id': cls.company_a.id,
             'company_ids': [(6, 0, [cls.company_a.id, cls.company_b.id])]
         })
         cls.user_b = cls.env['res.users'].create({
             'name': 'user company a with access to company b',
             'login': 'user b',
-            'group_ids': [(6, 0, [group_user.id, group_mrp_manager.id])],
+            'group_ids': [(6, 0, [group_mrp_manager.id])],
             'company_id': cls.company_b.id,
             'company_ids': [(6, 0, [cls.company_a.id, cls.company_b.id])]
         })
@@ -268,14 +269,8 @@ class TestMrpMulticompany(common.TransactionCase):
         manufacture_route.company_id = self.company_a
 
         # Enable multi warehouse
-        group_user = self.env.ref('base.group_user')
-        group_stock_multi_warehouses = self.env.ref('stock.group_stock_multi_warehouses')
-        group_stock_multi_locations = self.env.ref('stock.group_stock_multi_locations')
-        self.env['res.config.settings'].create({
-            'group_stock_multi_locations': True,
-        }).execute()
-        group_user.write({'implied_ids': [(4, group_stock_multi_warehouses.id), (4, group_stock_multi_locations.id)]})
-
+        self._enable_feature_group(self.quick_ref('stock.group_stock_multi_locations'))
+        self._enable_feature_group(self.quick_ref('stock.group_stock_multi_warehouses'))
         new_warehouse = self.env['stock.warehouse'].with_user(self.user_a).with_context(allowed_company_ids=[self.company_b.id]).create({
             'name': 'Warehouse #2',
             'code': 'WH2',
