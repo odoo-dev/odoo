@@ -114,7 +114,7 @@ class PosPaymentMethod(models.Model):
             error_code = str(error_json.get('error_code') or error_json.get('errorCode') or error_json.get('resultCode'))
             error_message = error_json.get('errorMessage') or error_json.get('error_description') or error_json.get('resultDescription') or str(error_json)
 
-            if error_code == "403":
+            if error_message == "Terminal not ready":
                 error_message = _("Please ensure the device is online and confirm that the Merchant ID (MID) and Terminal ID (TID) are correct. %s", error_message)
 
             if error_code == "999911":

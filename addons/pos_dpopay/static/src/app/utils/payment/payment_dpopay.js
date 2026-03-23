@@ -169,6 +169,10 @@ export class PaymentDPOPay extends PaymentInterface {
             return true;
         }
 
+        this._handleError(
+            response,
+            _t(`DPO Pay terminal is busy. Current status: ${response.displayText}`)
+        );
         return false;
     }
 
