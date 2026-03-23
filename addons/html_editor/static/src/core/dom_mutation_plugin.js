@@ -384,10 +384,10 @@ export class DomMutationPlugin extends Plugin {
     }
 
     /**
-     * Add the given mutation(s) to `this.currentChanges`, which will be used in
-     * the next commit.
+     * Add the given serialized mutation(s) to `this.currentChanges`, which will
+     * be used in the next commit.
      *
-     * @param { EditorMutation | EditorMutation[] } mutations
+     * @param { SerializedMutation | SerializedMutation[] } mutations
      */
     stage(mutations) {
         mutations = Array.isArray(mutations) ? mutations : [mutations];
@@ -420,7 +420,7 @@ export class DomMutationPlugin extends Plugin {
         const serializedRecords = this.serializeEditorMutations(processedRecords);
 
         // Then stage them.
-        this.stage(serializedRecords); // NOTE AGE: stage takes EditorMutations but we're staging SerializedMutations here!
+        this.stage(serializedRecords);
 
         // And finally, inform other plugins of changes.
         if (serializedRecords.length) {
@@ -1826,7 +1826,7 @@ class CurrentChanges {
     constructor() {
         /** @type { number } */
         this._authorTimestamp = Date.now();
-        /** @type { EditorMutation[] } */
+        /** @type { SerializedMutation[] } */
         this._mutations = [];
         /** @type { NodeId | null } */
         this._activeElementId = null;
@@ -1877,7 +1877,7 @@ class CurrentChanges {
     }
 
     /**
-     * @param  { ...EditorMutation } mutations
+     * @param  { ...SerializedMutation } mutations
      */
     addMutations(...mutations) {
         this._mutations.push(...mutations);
