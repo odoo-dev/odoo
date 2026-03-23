@@ -1418,7 +1418,11 @@ class TransactionCase(BaseCase):
             old_run_wkhtmltopdf = ir_actions_report._run_wkhtmltopdf
 
             def _patched_run_wkhtmltopdf(args):
-                with patch.object(self, 'http_request_key', 'wkhtmltopdf'), release_test_lock():
+                self.env.cr.flush()  # flush now to avoid flushing_cursor with a request
+                with (
+                    patch.object(self, 'http_request_key', 'wkhtmltopdf'),
+                    release_test_lock(),
+                ):
                     args = ['--cookie', TEST_CURSOR_COOKIE_NAME, 'wkhtmltopdf', *args]
                     return old_run_wkhtmltopdf(args)
 
@@ -2523,7 +2527,11 @@ class HttpCase(TransactionCase):
         old_run_wkhtmltopdf = ir_actions_report._run_wkhtmltopdf
 
         def _patched_run_wkhtmltopdf(args):
-            with patch.object(self, 'http_request_key', 'wkhtmltopdf'), release_test_lock():
+            self.env.cr.flush()  # flush now to avoid flushing_cursor with a request
+            with (
+                patch.object(self, 'http_request_key', 'wkhtmltopdf'),
+                release_test_lock(),
+            ):
                 args = ['--cookie', TEST_CURSOR_COOKIE_NAME, 'wkhtmltopdf', *args]
                 return old_run_wkhtmltopdf(args)
 
