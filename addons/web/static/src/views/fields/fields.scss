@@ -166,6 +166,15 @@
         flex-direction: column;
     }
 
+    .o_field_many2one_selection {
+        display: flex;
+    }
+
+    .o_external_button {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
     // Handle widget
     .o_row_handle {
         cursor: grab;
