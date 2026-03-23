@@ -152,6 +152,7 @@ class RegistryRLock(threading._RLock):
 # Further filtering on cursors can be done by extending `assertCanOpenTestCursor`.
 _registry_test_lock = RegistryRLock()
 _registry_test_lock.acquire()
+_disable_flushing_cursor = False
 
 
 @contextmanager
@@ -174,6 +175,12 @@ def flushing_cursor(cr: Cursor):
     changes made on the main cursor. You can still continue using the main
     cursor inside the block, it will be flushed on exit and then reset.
     """
+    if _disable_flushing_cursor:
+        # execution of wkhtml happens in parallel, we don't want to flush the
+        # cursor in that case
+        yield
+        return
+
     # simulating a cr.commit()
     cr.flush()
     if cr.transaction is None:  # no environment to clear
@@ -1453,7 +1460,11 @@ class TransactionCase(BaseCase):
             old_run_wkhtmltopdf = ir_actions_report._run_wkhtmltopdf
 
             def _patched_run_wkhtmltopdf(args):
-                with patch.object(self, 'http_request_key', 'wkhtmltopdf'), release_test_lock():
+                with (
+                    patch.object(self, 'http_request_key', 'wkhtmltopdf'),
+                    release_test_lock(),
+                    patch('odoo.tests.common._disable_flushing_cursor', True),
+                ):
                     args = ['--cookie', TEST_CURSOR_COOKIE_NAME, 'wkhtmltopdf', *args]
                     return old_run_wkhtmltopdf(args)
 
@@ -2544,7 +2555,11 @@ class HttpCase(TransactionCase):
         old_run_wkhtmltopdf = ir_actions_report._run_wkhtmltopdf
 
         def _patched_run_wkhtmltopdf(args):
-            with patch.object(self, 'http_request_key', 'wkhtmltopdf'), release_test_lock():
+            with (
+                patch.object(self, 'http_request_key', 'wkhtmltopdf'),
+                release_test_lock(),
+                patch('odoo.tests.common._disable_flushing_cursor', True),
+            ):
                 args = ['--cookie', TEST_CURSOR_COOKIE_NAME, 'wkhtmltopdf', *args]
                 return old_run_wkhtmltopdf(args)
 
