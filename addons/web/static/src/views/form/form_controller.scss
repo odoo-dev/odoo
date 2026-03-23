@@ -1185,6 +1185,10 @@
                 @include print-variable(o-input-border-color, $o-action);;
             }
 
+            input {
+                border-width: 0;
+            }
+
             h1, h2, h3, h4, h5, h6 {
                 all: unset;
             }
