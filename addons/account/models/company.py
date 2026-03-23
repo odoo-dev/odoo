@@ -47,7 +47,7 @@ PEPPOL_MAILING_COUNTRIES = [
 # List of countries where Peppol is accessible.
 PEPPOL_LIST = PEPPOL_DEFAULT_COUNTRIES + [
     'AD', 'AL', 'AX', 'BA', 'BG', 'BL', 'GB', 'GF', 'GP', 'HR', 'HU', 'LI', 'MC', 'ME',
-    'MF', 'MK', 'MQ', 'NC', 'PF', 'PM', 'RE', 'RS', 'SK', 'SM', 'TF', 'TR', 'VA', 'WF',
+    'MF', 'MK', 'MQ', 'NC', 'PF', 'PM', 'RE', 'RS', 'SG', 'SK', 'SM', 'TF', 'TR', 'VA', 'WF',
     'YT',
 ]
 
