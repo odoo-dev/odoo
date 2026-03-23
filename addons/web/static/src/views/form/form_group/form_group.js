@@ -1,6 +1,5 @@
 import { Component } from "@odoo/owl";
 import { sortBy } from "@web/core/utils/arrays";
-import { hasTouch } from "@web/core/browser/feature_detection";
 
 class Group extends Component {
     static template = "";
@@ -52,9 +51,6 @@ export class OuterGroup extends Group {
 
 export class InnerGroup extends Group {
     static template = "web.Form.InnerGroup";
-    setup() {
-        this.hasTouch = hasTouch();
-    }
     getTemplate(subType) {
         return this.constructor.templates[subType] || this.constructor.templates.default;
     }
