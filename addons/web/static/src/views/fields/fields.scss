@@ -43,20 +43,6 @@
     @include print-variable(o-caret-color, map-get($theme-colors, 'danger'));
 }
 
-// Add padding around value to prevent overlays overlapping
-.o_field_widget:not(.o_field_widget .o_field_widget):not(:has(.o_input, textarea, select, [contenteditable])):not(.o_input_box_overlay_start, .o_input_box_overlay_end, .o_input_box_overlay_start *, .o_input_box_overlay_end *), .o_field_many2one_extra {
-    &:is(.o_input_box *), .o_input_box:not(.o_input_box .o_input_box) {
-        &:not(.o_readonly_modifier .o_field_many2one_extra) {
-            padding-left: var(--inputbox-inner-padding-start);
-            padding-right: var(--inputbox-inner-padding-end);
-        }
-        &:is(.o_touch_device *) {
-            padding-top: var(--inputbox-overlay-padding-y);
-            padding-bottom: var(--inputbox-overlay-padding-y);
-        }
-    }
-}
-
 //------------------------------------------------------------------------------
 // Generic input
 //------------------------------------------------------------------------------
