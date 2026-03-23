@@ -1176,16 +1176,18 @@
     }
 
     @include media-breakpoint-down(md) {
+        --field-spacing-unit: 8px;
+
         %-o-field-box {
-            border-radius: map-get($spacers, 2);
+            border-radius: calc(.5 * var(--field-spacing-unit));
             border: 1px solid var(--o-input-border-color);
-            padding: map-get($spacers, 2) + map-get($spacers, 1);
+            padding: var(--field-spacing-unit) calc(1.5 * var(--field-spacing-unit));
 
             &:focus-within {
                 @include print-variable(o-input-border-color, $o-action);;
             }
 
-            input {
+            .o_input {
                 border-width: 0;
             }
 
@@ -1197,15 +1199,24 @@
         .o_inner_group {
             :is(.o_cell,.o_cell_custom):not(.o_wrap_label):not(.o_no_box *) {
                 @extend %-o-field-box;
+
+                &:has(.o_field_widget.o_readonly_modifier):not(:has(.o_field_widget:not(.o_readonly_modifier))) {
+                    background: rgba($body-color, .04);
+                }
             }
 
             .o_wrap_label:has(+ .o_cell):not(.o_no_box *) {
-                width: max-content;
-                padding-inline: map-get($spacers, 1);
                 margin-bottom: calc(-1 * var(--body-font-size));
-                background: linear-gradient(0deg, transparent 0%, $o-view-background-color 25%, $o-view-background-color 75%, transparent 100%);;
-                transform: translateX(map-get($spacers, 3));
-                z-index: 1; // TODO finetune for quick create kanban
+
+                .o_form_label {
+                    width: max-content;
+                    transform: translate(var(--field-spacing-unit), calc(-.5 * var(--field-spacing-unit)));
+                    z-index: 1; // TODO finetune for quick create kanban
+                    padding: 0 calc(var(--field-spacing-unit) / 2) !important;
+                    background: $o-view-background-color;
+                    border-radius: var(--field-spacing-unit);
+                    margin-bottom: 0 !important;
+                }
 
                 &:has(+ *:focus-within) .o_form_label {
                     color: $o-action;
@@ -1213,14 +1224,12 @@
 
                 // Same as ligne +/- 592; TODO merge the rules after maybe
                 .o_form_label, .o_form_label * {
-                    padding: 0 !important;
                     color: inherit;
                     font-size: $font-size-sm !important;
                     line-height: $line-height-base !important;
                     font-weight: $font-weight-bold !important;
                 }
                 .o_form_label {
-                    margin-bottom: map-get($spacers, 1) !important;
                     color: $headings-color;
                 }
 
