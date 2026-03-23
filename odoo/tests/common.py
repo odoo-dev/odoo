@@ -1091,6 +1091,7 @@ class BaseCase(case.TestCase):
             return test_cursor.TestCursor(
                 cr, _registry_test_lock, readonly and cls._registry_readonly_enabled
             )
+
         return [
             # New cursor should point to the test's cursor
             patch.object(registry, 'cursor', _patched_cursor),
@@ -1377,7 +1378,11 @@ class TransactionCase(BaseCase):
                 for name in names:
                     cls.registry.cache_sequences[name] += 1
 
+        def get_sequences(cr):
+            return cls.registry.registry_sequence, cls.registry.cache_sequences.copy()
+
         cls.startClassPatcher(patch.object(cls.registry, '_signal_changes', signal_changes))
+        cls.startClassPatcher(patch.object(cls.registry, 'get_sequences', get_sequences))
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(typing.cast('Cursor', cls.cr).close)
