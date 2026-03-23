@@ -105,7 +105,7 @@ class ProductTemplate(models.Model):
         help="Price at which the product is sold to customers.",
     )
     standard_price = fields.Float(
-        'Cost', compute='_compute_standard_price',
+        'Cost', compute='_compute_standard_price', company_dependent=True,
         inverse='_set_standard_price', search='_search_standard_price',
         min_display_digits='Product Price', groups="base.group_user",
         help="""Value of the product (automatically computed in AVCO).
@@ -720,7 +720,7 @@ class ProductTemplate(models.Model):
                 if vals.get(field_name) and not template[field_name]:
                     related_vals[field_name] = vals[field_name]
             if related_vals:
-                template.write(related_vals)
+                template.with_context(mail_notrack=True).write(related_vals)
 
         return templates
 

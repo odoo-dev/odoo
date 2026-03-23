@@ -474,22 +474,22 @@ class ProductProduct(models.Model):
 
     def _update_standard_price(self, extra_value=None, extra_quantity=None):
         # TODO: Add extra value and extra quantity kwargs to avoid total recomputation
-        for product in self:
+        for product in self.with_context(disable_auto_revaluation=True, mail_notrack=True):
             if product.cost_method == 'standard':
                 continue
             if product.lot_valuated:
-                product.sudo().with_context(disable_auto_revaluation=True).standard_price = product.avg_cost
+                product.sudo().standard_price = product.avg_cost
                 continue
             if product.cost_method == 'fifo':
                 qty_available = product._with_valuation_context().qty_available
                 if product.uom_id.compare(qty_available, 0) > 0:
-                    product.sudo().with_context(disable_auto_revaluation=True).standard_price = product.total_value / qty_available
+                    product.sudo().standard_price = product.total_value / qty_available
                 elif last_in := product._get_last_in():
-                    product.sudo().with_context(disable_auto_revaluation=True).standard_price = last_in._get_price_unit()
+                    product.sudo().standard_price = last_in._get_price_unit()
                 continue
             new_standard_price = product._run_avco()[0]
             if new_standard_price:
-                product.with_context(disable_auto_revaluation=True).sudo().standard_price = new_standard_price
+                product.sudo().standard_price = new_standard_price
 
 
 class ProductCategory(models.Model):
