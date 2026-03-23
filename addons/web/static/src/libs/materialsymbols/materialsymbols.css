@@ -3,3 +3,8 @@
     font-style: normal;
     src: url(MaterialSymbolsSharp_wgth-400_opsz-24.woff2) format('woff2');
 }
+@font-face {
+    font-family: "material_symbols_rounded";
+    font-style: normal;
+    src: url(MaterialSymbolsRounded_wgth-400_opsz-24.woff2) format('woff2');
+}
