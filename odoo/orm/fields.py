@@ -638,6 +638,8 @@ class Field[T]:
         model.pool.field_setup_dependents.add(field, self)
 
         # determine dependencies, compute, inverse, and search
+        if self.compute:
+            _logger.warning("Setting related field %s has compute %s", self, self.compute)
         self.compute = self._compute_related
         if self.inherited or not (self.readonly or field.readonly):
             self.inverse = self._inverse_related
