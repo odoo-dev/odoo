@@ -38,6 +38,8 @@ import { EditorCommit } from "@html_editor/utils/commit";
 /**
  * @typedef { import("../utils/commit").EditorCommit } Commit
  * @typedef { import("../utils/commit").EditorCommitType } EditorCommitType
+ * @typedef { import("@html_editor/utils/commit").EditorCommitId } EditorCommitId
+ * @typedef { import("@html_editor/utils/commit").EditorCommitMetadata } EditorCommitMetadata
  *
  * @typedef { Object } DomMutationCommitData
  * @property { number } authorTimestamp              // timestamp of the commit authoring, before any mutation is applied
@@ -255,7 +257,7 @@ export class DomMutationPlugin extends Plugin {
             for (const [key, value] of Object.entries(revertedCommit.data.external)) {
                 this.updateExternal(key, value);
             }
-            this._commit({
+            this.commit({
                 type: "undo",
                 metadata: revertedCommit.metadata,
             });
@@ -271,7 +273,7 @@ export class DomMutationPlugin extends Plugin {
             for (const [key, value] of Object.entries(revertedCommit.data.external)) {
                 this.updateExternal(key, value);
             }
-            this._commit({
+            this.commit({
                 type: "redo",
                 metadata: revertedCommit.metadata,
             });
@@ -310,44 +312,80 @@ export class DomMutationPlugin extends Plugin {
     // Main public API
     // ===============
 
-    commit({ batchable = false } = {}) {
-        return this._commit({ metadata: { batchable } });
-    }
+    /**
+     * Stage the observer's current mutations, bundle them into a commit object,
+     * and write that commit to history @see historyPlugin.
+     *
+     * @param { Object } param0
+     * @param { EditorCommitType } [param0.type = "original"]
+     * @param { boolean } [param0.batchable]
+     * @param { EditorCommitMetadata } [param0.metadata = {}]
+     * @returns { EditorCommit<DomMutationCommitData> | false }
+     */
+    commit({ type = "original", batchable, metadata = {} } = {}) {
+        metadata.batchable = batchable ?? metadata.batchable ?? false;
 
-    _commit({ type = "original", metadata = {} } = {}) {
+        /**
+         * 1. Update `this.currentChanges` to set the correct data on the commit.
+         */
+
+        // Stage the observer's current changes.
         this.flush({ dispatch: true, currentOperation: type });
         const currentMutationsCount = this.currentChanges.mutations.length;
         if (currentMutationsCount === 0) {
             return false;
         }
+
+        // Normalize the mutated nodes. Note: this can cause other commits to be written.
         const commitRoot = this.getMutationsRoot(this.currentChanges.mutations) || this.editable;
         this.processThrough("normalize_processors", commitRoot, type);
         this.flush({ dispatch: false, currentOperation: type });
         if (currentMutationsCount === this.currentChanges.mutations.length) {
-            // If there was no registered mutation during the normalization commit,
-            // force the dispatch of a content_updated to allow i.e. the hint
-            // plugin to react to non-observed changes (i.e. a div becoming
+            // If there was no registered mutation during the normalization
+            // commit, force the dispatch of a content_updated to allow i.e. the
+            // hint plugin to react to non-observed changes (i.e. a div becoming
             // a baseContainer).
             this.dispatchContentUpdated();
         }
 
-        // TODO AGE: rename
-        this.trigger("on_will_commit_handlers", type); // making sure it updates the commit we're adding
+        // Give a chance to other plugins to update the current changes'
+        // external data before we create the commit object.
+        this.trigger("on_will_commit_handlers", type);
+
+        this.currentChanges.updateSelectionAfter(
+            this.serializeSelection(this.dependencies.selection.getEditableSelection())
+        );
+
+        /**
+         * 2. Create the commit.
+         */
 
         // Set the type of the commit here. That way, the state of undo and redo
-        // is truly accessible when executing the onChange callback. It is
-        // useful for external components if they execute shared.can(Undo|Redo)
-        const commit = this.dependencies.history.write(this.createCommit(type, metadata));
+        // is truly accessible when executing the `onChange` callback. It is
+        // useful for external components if they execute `can(Undo|Redo)`.
+        let commit = this.createCommit({ type, data: this.currentChanges.data, metadata });
+
+        /**
+         * 3. Write the commit to history.
+         */
+
+        commit = this.dependencies.history.write(commit);
+
+        /**
+         * 4. Reset the current state for the next commit.
+         */
 
         this.currentChanges = new CurrentChanges();
-
         this.stageSelection();
+
+        /**
+         * 5. Notify of changes.
+         */
 
         // Note AGE: will not trigger for a reset commit (it calls history.write
         // directly). That's like it used to be before my changes: reset caused
         // a step without calling addStep but by using steps.push directly.
         this.trigger("on_committed_handlers", commit);
-
         this.config.onChange?.({ isPreviewing: this.isPreviewing });
         return commit;
     }
@@ -1014,17 +1052,20 @@ export class DomMutationPlugin extends Plugin {
     // =================
 
     /**
+     * @param { Object } param0
+     * @param { EditorCommitId } [param0.id]
+     * @param { EditorCommitType } [param0.type]
+     * @param { DomMutationCommitData } [param0.data]
+     * @param { EditorCommitMetadata } [param0.metadata]
      * @returns { EditorCommit<DomMutationCommitData> }
      */
-    createCommit(type = "original", metadata = {}) {
-        this.currentChanges.updateSelectionAfter(
-            this.serializeSelection(this.dependencies.selection.getEditableSelection())
-        );
+    createCommit({ id, type, data, metadata }) {
         return this.processThrough(
             "editor_commit_processors",
             new EditorCommit({
+                id,
                 type,
-                data: this.currentChanges.data,
+                data,
                 metadata,
             })
         );
@@ -1036,33 +1077,30 @@ export class DomMutationPlugin extends Plugin {
      */
     createSnapshotCommit(type = "original") {
         const authorTimestamp = this.currentChanges.authorTimestamp || Date.now();
-        return this.processThrough(
-            "editor_commit_processors",
-            new EditorCommit({
-                id: this.dependencies.history.getHistoryCommits().at(-1)?.id,
-                type,
-                data: {
-                    authorTimestamp,
-                    mutations: childNodes(this.editable)
-                        .filter((node) => this.nodeMap.hasNode(node))
-                        .map((node) => ({
-                            type: "add",
-                            parentNodeId: "root",
-                            nodeId: this.getNodeId(node),
-                            serializedNode: this.serializeNode(node),
-                            nextNodeId: null,
-                        })),
-                    activeElementId: null,
-                    selection: {
-                        anchorNode: undefined,
-                        anchorOffset: undefined,
-                        focusNode: undefined,
-                        focusOffset: undefined,
-                    },
-                    selectionAfter: null,
+        return this.createCommit({
+            id: this.dependencies.history.getHistoryCommits().at(-1)?.id,
+            type,
+            data: /** @type { DomMutationCommitData } */ {
+                authorTimestamp,
+                mutations: childNodes(this.editable)
+                    .filter((node) => this.nodeMap.hasNode(node))
+                    .map((node) => ({
+                        type: "add",
+                        parentNodeId: "root",
+                        nodeId: this.getNodeId(node),
+                        serializedNode: this.serializeNode(node),
+                        nextNodeId: null,
+                    })),
+                activeElementId: null,
+                selection: {
+                    anchorNode: undefined,
+                    anchorOffset: undefined,
+                    focusNode: undefined,
+                    focusOffset: undefined,
                 },
-            })
-        );
+                selectionAfter: null,
+            },
+        });
     }
 
     // NEW: Apply mutations
@@ -1638,7 +1676,7 @@ export class DomMutationPlugin extends Plugin {
         this.setSerializedSelection(lastRevertedChanges.selection);
         // Register resulting mutations as a new "restore" commit (prevent undo).
         this.dispatchContentUpdated();
-        this._commit({ type: "restore" });
+        this.commit({ type: "restore" });
         return lastRevertedChanges;
     }
 
