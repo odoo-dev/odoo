@@ -1163,3 +1163,46 @@
 .o_breadcrumb:not(:has(.breadcrumb)) + .o_form_status_indicator {
     align-self: center !important;
 }
+
+// M3
+.o_form_header_group, .o_input_box {
+    display: flex;
+    gap: map-get($spacers, 1);
+}
+
+.o_input_box {
+    align-items: baseline;
+}
+
+@include media-breakpoint-down(md) {
+    %-o-field-box {
+        border-radius: map-get($spacers, 2);
+        border: 1px solid $o-enterprise-action-color;
+        padding: map-get($spacers, 2) + map-get($spacers, 1);
+    }
+
+    .o_form_view {
+        .o_inner_group {
+            :is(.o_cell,.o_cell_custom):not(.o_wrap_label):not(.o_no_box *) {
+                @extend %-o-field-box;
+            }
+
+            .o_wrap_label:has(+ .o_cell):not(.o_no_box *) {
+                width: max-content;
+                padding-inline: map-get($spacers, 1);
+                margin-bottom: calc(-1 * var(--body-font-size));
+                background: linear-gradient(0deg, transparent 0%, $o-view-background-color 25%, $o-view-background-color 75%, transparent 100%);;
+                transform: translateX(map-get($spacers, 3));
+                z-index: 1; // TODO finetune for quick create kanban
+
+                &:has(+ *:focus-within) .o_form_label {
+                    color: $o-enterprise-action-color;
+                }
+            }
+        }
+
+        .o_form_header_group {
+            flex-direction: column;
+        }
+    }
+}
