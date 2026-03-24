@@ -1217,6 +1217,13 @@
                 line-height: inherit !important;
                 font-weight: inherit !important;
             }
+
+            sup {
+                height: 1em;
+                display: inline-flex;
+                align-items: center;
+                top: 0;
+            }
         }
 
         .o_inner_group {
@@ -1225,6 +1232,18 @@
 
                 &:has(.o_field_widget.o_readonly_modifier):not(:has(.o_field_widget:not(.o_readonly_modifier))) {
                     background: rgba($body-color, .04);
+                }
+
+                a:has(i.fa), .o_external_button {
+                    // TODO discuss about it. There is no magic to give this style to any button at the right of the box
+                    height: calc(3 * var(--field-spacing-unit));
+                    min-width: calc(3 * var(--field-spacing-unit));
+                    color: var(--body-color);
+                    background: var(--secondary-bg);
+                    padding: 0 !important;
+                    padding-inline: var(--field-spacing-unit);
+                    border-radius: calc(1.5 * var(--field-spacing-unit));
+                    justify-content: center;
                 }
             }
 
