@@ -276,6 +276,7 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async initServerData() {
+        // debugger;
         try {
             await this.processServerData();
             this.data.connectWebSocket(

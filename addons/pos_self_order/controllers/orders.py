@@ -47,6 +47,12 @@ class PosSelfOrderController(http.Controller):
         if amount_total == 0:
             order_ids._process_saved_order(False)
 
+        if device_type == 'mobile' and pos_config.is_order_printer:
+            if pos_config.self_order_online_payment_method_id and pos_config.self_ordering_pay_after == 'meal':
+                order_ids._notify_self_order_preparation_ticket()
+            elif not pos_config.self_order_online_payment_method_id:
+                order_ids._notify_self_order_preparation_ticket()
+
         return self._generate_return_values(order_ids, pos_config)
 
     def _get_prefixes(self, device_type):

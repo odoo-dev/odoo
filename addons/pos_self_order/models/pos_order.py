@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 from odoo import Command, models, fields, api, _
 from odoo.exceptions import UserError
 from odoo.tools import float_round
@@ -89,6 +90,13 @@ class PosOrder(models.Model):
         })
         if payment_result == 'Success':
             self._send_order()
+
+    def _notify_self_order_preparation_ticket(self):
+        self.config_id._notify("SELF_ORDER_PREPARATION_PRINT", {
+            'data': {
+                'pos.order': self.read(self._load_pos_self_data_fields(self.config_id.id), load=False),
+            }
+        })
 
     @api.model
     def _check_pos_order_lines(self, pos_config, order, line, fiscal_position_id):

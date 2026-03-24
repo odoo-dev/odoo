@@ -485,6 +485,9 @@ export class SelfOrder extends Reactive {
     }
 
     async printKioskChanges(access_token = "") {
+        if (this.config.self_ordering_mode !== "kiosk") {
+            return;
+        }
         const d = new Date();
         let hours = "" + d.getHours();
         hours = hours.length < 2 ? "0" + hours : hours;
@@ -634,7 +637,7 @@ export class SelfOrder extends Reactive {
     }
 
     shouldUpdateLastOrderChange() {
-        return true;
+        return !!this.config.printerCategories.size;
     }
 
     async sendDraftOrderToServer() {
