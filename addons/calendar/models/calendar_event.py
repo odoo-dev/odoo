@@ -829,7 +829,7 @@ class CalendarEvent(models.Model):
                 detached_events = event.with_context(skip_contact_description=True)._apply_recurrence_values(recurrence_values)
                 detached_events.active = False
 
-        events.filtered(lambda event: event.start > fields.Datetime.now()).attendee_ids._send_invitation_emails()
+        events.attendee_ids._send_invitation_emails()
 
         # update activities based on calendar event data, unless already prepared
         # above manually. Heuristic: a new command (0, 0, vals) is considered as
@@ -969,10 +969,7 @@ class CalendarEvent(models.Model):
         skip_attendee_notification = self.env.context.get('skip_attendee_notification')
         if not skip_attendee_notification and 'partner_ids' in values:
             # we send to all partners and not only the new ones
-            (current_attendees - previous_attendees)._notify_attendees(
-                self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
-                force_send=True,
-            )
+            (current_attendees - previous_attendees)._send_invitation_emails()
         if not skip_attendee_notification and not self.env.context.get('is_calendar_event_new') and 'start' in values:
             start_date = fields.Datetime.to_datetime(values.get('start'))
             # Only notify on future events
