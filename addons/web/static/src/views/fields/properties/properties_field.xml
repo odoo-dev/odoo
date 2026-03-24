@@ -66,7 +66,6 @@
                                 readonly="this.props.readonly"
                                 selection="propertyConfiguration.selection"
                                 string="propertyConfiguration.string"
-                                suffix="propertyConfiguration.suffix"
                                 tags="propertyConfiguration.tags"
                                 type="propertyConfiguration.type"
                                 value="propertyConfiguration.value"

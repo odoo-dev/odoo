@@ -71,7 +71,6 @@ class PageUrlField extends UrlField {
 
 const pageUrlField = {
     ...urlField,
-    additionalClasses: ["o_input_box"],
     component: PageUrlField,
 };
 
