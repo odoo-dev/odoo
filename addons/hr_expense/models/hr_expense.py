@@ -252,7 +252,16 @@ class HrExpense(models.Model):
         tracking=True,
     )
     vendor_id = fields.Many2one(comodel_name='res.partner', string="Vendor")
-    is_paid_by_company_match_bill = fields.Boolean(string="Existing bill")
+    selectable_matching_bill = fields.Many2one(
+        string="Existing Bill",
+        comodel_name='account.move',
+        domain="""[
+            ('move_type', '=', 'in_invoice'),
+            ('state', 'in', ['posted', 'draft']),
+            ('payment_state', '=', 'not_paid'),
+            '|', ('partner_id', '=', vendor_id), (not vendor_id, '=', True),
+        ]"""
+    )
     account_id = fields.Many2one(
         comodel_name='account.account',
         string="Account",
@@ -581,12 +590,12 @@ class HrExpense(models.Model):
             expense.currency_rate = expense.total_amount / expense.total_amount_currency if expense.total_amount_currency else 1.0
             expense.price_unit = expense.total_amount / expense.quantity if expense.quantity else expense.total_amount
 
-    @api.depends('product_id', 'company_id', 'is_paid_by_company_match_bill')
+    @api.depends('product_id', 'company_id', 'selectable_matching_bill')
     def _compute_tax_ids(self):
         for expense_ in self.filtered('company_id'):  # Avoid a traceback, the field is required anyway
             expense = expense_.with_company(expense_.company_id)
             # taxes only from the same company
-            if expense.is_paid_by_company_match_bill:
+            if expense.selectable_matching_bill:
                 expense.tax_ids = False
             else:
                 taxes = expense.product_id.supplier_taxes_id.filtered_domain(
@@ -697,19 +706,19 @@ class HrExpense(models.Model):
                 ])
 
     @api.onchange('payment_mode')
-    def _onchange_is_paid_by_company_match_bill(self):
-        for expense in self:
-            if expense.payment_mode == 'own_account':
-                expense.is_paid_by_company_match_bill = False
-            else:
-                expense.is_paid_by_company_match_bill = expense.is_paid_by_company_match_bill
+    def _onchange_payment_mode(self):  # TO REMOVE JUST FOR TEST
+        print('ici')
 
-    @api.depends('product_id', 'company_id', 'vendor_id', 'is_paid_by_company_match_bill')
+    @api.onchange('selectable_matching_bill')
+    def _onchange_selectable_matching_bill(self):
+        self.filtered(lambda expense: expense.payment_mode == 'own_account').selectable_matching_bill = False
+
+    @api.depends('product_id', 'company_id', 'vendor_id', 'selectable_matching_bill')
     def _compute_account_id(self):
         for _expense in self:
             expense = _expense.with_company(_expense.company_id)
             account = expense.product_id and expense.product_id.product_tmpl_id._get_product_accounts()['expense']
-            if expense.is_paid_by_company_match_bill:
+            if expense.selectable_matching_bill:
                 # "Regular" supplier account, the product account line will be in the matched bill
                 account = (
                     self.vendor_id.commercial_partner_id.property_account_payable_id
@@ -849,7 +858,7 @@ class HrExpense(models.Model):
         restricted_fields = {
             'analytic_distribution',
             'account_id',
-            'is_paid_by_company_match_bill',
+            'selectable_matching_bill',
             'manager_id',
             'tax_ids',
             'vendor_id',
@@ -1803,7 +1812,7 @@ class HrExpense(models.Model):
         if account:
             return account
 
-        if self.is_paid_by_company_match_bill:
+        if self.selectable_matching_bill:
             account = (
                 self.vendor_id.commercial_partner_id.property_account_payable_id
                 or self.env['ir.default']._get('res.partner', 'property_account_payable_id', company_id=self.company_id)
