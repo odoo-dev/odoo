@@ -894,6 +894,17 @@ font[class*='bg-'] {
     }
 }
 
+// Background blur option
+.o_bg_blur_option {
+    backdrop-filter: contrast(MIN(calc(1 + var(--o-bg-blur) * .05), var(--o-bg-blur-enhance, 1.25)))
+                     brightness(MIN(calc(1 + var(--o-bg-blur) * .05), var(--o-bg-blur-enhance, 1.25)))
+                     blur(calc(var(--o-bg-blur, 0) * 1px));
+
+    &.o_bg_blur_no_enhance {
+        --o-bg-blur-enhance: 1;
+    }
+}
+
 // Background videos
 .o_bg_video_container {
     @extend %o-we-background-layer;

@@ -2,6 +2,12 @@
 <templates xml:space="preserve">
 
 <t t-name="website.WebsiteBackgroundOption" t-inherit="html_builder.BackgroundOption">
+    <xpath expr="//BuilderRow[@label.translate='Background']" position="after">
+        <BgBlurOption/>
+    </xpath>
+    <xpath expr="//BuilderRow[@label.translate='Color Filter']" position="after">
+        <BgBlurOption applyTo="':scope > .o_we_bg_filter'"/>
+    </xpath>
     <xpath expr="//BuilderButton[@action=&quot;'toggleBgImage'&quot;]" position="after">
         <t t-if="this.props.withVideos">
             <BuilderButton
