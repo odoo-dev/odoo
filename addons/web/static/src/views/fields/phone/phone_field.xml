@@ -2,22 +2,22 @@
 <templates xml:space="preserve">
 
     <t t-name="web.PhoneField">
-        <div class="o_input_box">
+        <div class="d-inline-flex w-100">
             <t t-if="this.props.readonly">
                 <a t-if="this.props.record.data[this.props.name]" t-att-href="this.phoneHref" class="o_form_uri" t-custom-click.prevent.stop="() => this.onLinkClicked()" t-out="this.props.record.data[this.props.name]"/>
                 <t t-foreach="this.inlineButtons" t-as="btn" t-key="btn.name">
-                    <button t-attf-class="btn btn-link o_input_box_overlay_end" t-on-click.stop="btn.onSelected" t-att-data-tooltip="btn.name">
-                        <i t-attf-class="i fa {{ btn.icon }}" />
+                    <button t-attf-class="btn btn-link o_input_box_overlay_end" t-on-click.stop="this.btn.onSelected" t-att-data-tooltip="this.btn.name">
+                        <i t-attf-class="i fa {{ this.btn.icon }}" />
                     </button>
                 </t>
             </t>
             <t t-else="">
                 <input
                     class="o_input"
-                    t-att-id="props.id"
+                    t-att-id="this.props.id"
                     type="tel"
                     autocomplete="off"
-                    t-att-placeholder="props.placeholder"
+                    t-att-placeholder="this.props.placeholder"
                     t-custom-ref="input"
                 />
             </t>
