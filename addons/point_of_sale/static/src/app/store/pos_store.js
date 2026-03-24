@@ -1272,6 +1272,7 @@ export class PosStore extends Reactive {
             try {
                 const data = await this.data.call("pos.order", "sync_from_ui", [[serialized]], {
                     context,
+                    timeout: options.timeout,
                 });
                 const missingRecords = await this.data.missingRecursive(data);
                 const newData = this.models.loadData(missingRecords, [], false);

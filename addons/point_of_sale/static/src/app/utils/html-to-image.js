@@ -328,8 +328,23 @@ function isDataUrl(url) {
 function makeDataUrl(content, mimeType) {
     return `data:${mimeType};base64,${content}`;
 }
+async function fetchWithTimeout(url, init = {}, timeout = 1000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+        return await fetch(url, { ...init, signal: controller.signal });
+    } catch (err) {
+        if (err.name === "AbortError") {
+            throw new Error("Request timed out");
+        }
+        throw err;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
 async function fetchAsDataURL(url, init, process) {
-    const res = await fetch(url, { ...init, mode: "no-cors" });
+    const res = await fetchWithTimeout(url, { ...init, mode: "no-cors" });
     if (res.status === 404) {
         throw new Error(`Resource "${res.url}" not found`);
     }

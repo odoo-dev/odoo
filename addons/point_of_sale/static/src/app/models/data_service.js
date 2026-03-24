@@ -24,7 +24,7 @@ export class PosData extends Reactive {
     }
 
     async setup(env, { orm, bus_service }) {
-        this.orm = orm;
+        this.orm = this.applyTimeout(orm);
         this.bus = bus_service;
         this.relations = [];
         this.custom = {};
@@ -65,6 +65,47 @@ export class PosData extends Reactive {
         });
 
         this.bus.addEventListener("connect", this.reconnectWebSocket.bind(this));
+    }
+
+    applyTimeout(orm) {
+        if (orm.__timeoutPatched) {
+            return orm;
+        }
+
+        const originalRpc = orm.rpc;
+        const networkState = this.network;
+        orm.rpc = async function (route, params = {}, settings = {}) {
+            const kwargs = params.kwargs ?? {};
+            const { timeout, ...cleanKwargs } = kwargs;
+
+            params.kwargs = cleanKwargs;
+
+            let timer;
+
+            try {
+                return await Promise.race([
+                    originalRpc.call(this, route, params, settings),
+                    new Promise((_, reject) => {
+                        timer = setTimeout(() => {
+                            console.warn(
+                                `RPC call to ${route} timed out after ${timeout ?? 10000}ms`
+                            );
+                            reject(new ConnectionLostError());
+                        }, timeout ?? 10000);
+                    }),
+                ]);
+            } catch (error) {
+                if (error instanceof ConnectionLostError) {
+                    networkState.offline = true;
+                }
+                throw error;
+            } finally {
+                clearTimeout(timer);
+            }
+        };
+
+        orm.__timeoutPatched = true;
+        return orm;
     }
 
     intializeWebsocket() {
