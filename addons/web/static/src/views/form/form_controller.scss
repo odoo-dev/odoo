@@ -1196,6 +1196,16 @@
             }
         }
 
+        %-o-field-label {
+            width: max-content;
+            transform: translate(var(--field-spacing-unit), calc(-.5 * var(--field-spacing-unit)));
+            z-index: 1; // TODO finetune for quick create kanban
+            padding: 0 calc(var(--field-spacing-unit) / 2) !important;
+            background: $o-view-background-color;
+            border-radius: var(--field-spacing-unit);
+            margin-bottom: 0 !important;
+        }
+
         .o_inner_group {
             :is(.o_cell,.o_cell_custom):not(.o_wrap_label):not(.o_no_box *) {
                 @extend %-o-field-box;
@@ -1209,13 +1219,7 @@
                 margin-bottom: calc(-1 * var(--body-font-size));
 
                 .o_form_label {
-                    width: max-content;
-                    transform: translate(var(--field-spacing-unit), calc(-.5 * var(--field-spacing-unit)));
-                    z-index: 1; // TODO finetune for quick create kanban
-                    padding: 0 calc(var(--field-spacing-unit) / 2) !important;
-                    background: $o-view-background-color;
-                    border-radius: var(--field-spacing-unit);
-                    margin-bottom: 0 !important;
+                    @extend %-o-field-label;
                 }
 
                 &:has(+ *:focus-within) .o_form_label {
@@ -1236,6 +1240,22 @@
                 // For o_readonly_modifier input label
                 span.o_form_label {
                     display: inline-block;
+                }
+            }
+
+            .o_property_field.o_wrap_label {
+                display: contents;
+                --o-input-border-color: $o-form-lightsecondary;
+
+                .o_input_box {
+                    @extend %-o-field-box;
+                    margin-bottom: map-get($spacers, 3);
+                }
+
+                label {
+                    @extend %-o-field-label;
+                    width: max-content !important;
+                    margin-bottom: calc(-1 * var(--body-font-size)) !important;
                 }
             }
         }
