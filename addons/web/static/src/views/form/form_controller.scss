@@ -1204,6 +1204,19 @@
             background: $o-view-background-color;
             border-radius: var(--field-spacing-unit);
             margin-bottom: 0 !important;
+
+            // Same as ligne +/- 592; TODO merge the rules after maybe
+            color: $headings-color;
+            font-size: $font-size-sm !important;
+            line-height: $line-height-base !important;
+            font-weight: $font-weight-bold !important;
+
+            & * {
+                color: inherit !important;
+                font-size: inherit !important;
+                line-height: inherit !important;
+                font-weight: inherit !important;
+            }
         }
 
         .o_inner_group {
@@ -1224,17 +1237,6 @@
 
                 &:has(+ *:focus-within) .o_form_label {
                     color: $o-action;
-                }
-
-                // Same as ligne +/- 592; TODO merge the rules after maybe
-                .o_form_label, .o_form_label * {
-                    color: inherit;
-                    font-size: $font-size-sm !important;
-                    line-height: $line-height-base !important;
-                    font-weight: $font-weight-bold !important;
-                }
-                .o_form_label {
-                    color: $headings-color;
                 }
 
                 // For o_readonly_modifier input label
@@ -1272,5 +1274,6 @@
                 width: 100%;
             }
         }
+
     }
 }
