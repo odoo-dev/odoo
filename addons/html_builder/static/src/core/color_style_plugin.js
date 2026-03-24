@@ -2,6 +2,7 @@ import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { applyNeededCss } from "@html_builder/utils/utils_css";
 import { withSequence } from "@html_editor/utils/resource";
+import { isColorGradient } from "@web/core/utils/colors";
 
 /**
  * @typedef {((editingElement: HTMLElement) => void)[]} on_bg_color_updated_handlers
@@ -39,6 +40,13 @@ export class ColorStylePlugin extends Plugin {
                 value = `bg-${match[1]}`;
             }
             this.dependencies.color.colorElement(editingElement, value, "backgroundColor", params);
+            // When a gradient is applied as background-image, explicitly set
+            // background-color: transparent. This overrides o_cc(x) background,
+            // allowing gradient with transparency to show the content
+            // underneath.
+            if (isColorGradient(value)) {
+                editingElement.style["background-color"] = "transparent";
+            }
             this.trigger("on_bg_color_updated_handlers", editingElement);
             return true;
         } else if (styleName === "color") {
