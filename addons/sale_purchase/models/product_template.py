@@ -12,6 +12,21 @@ class ProductTemplate(models.Model):
         "Subcontract Service", company_dependent=True, copy=False,
         help="If ticked, each time you sell this product through a SO, a RfQ is automatically created to buy the product. Tip: don't forget to set a vendor on the product.")
 
+    service_tracking = fields.Selection(selection_add=[
+        ('subcontract', 'Subcontracting RFQ')
+    ], ondelete={'subcontract': 'set default'},
+    inverse='_inverse_service_tracking')
+
+    @api.depends('purchase_ok', 'reinvoice_policy', 'service_to_purchase')
+    def _compute_service_tracking(self):
+        super()._compute_service_tracking()
+        self.filtered(lambda t: t.service_tracking == 'subcontract' and (not t.purchase_ok or t.reinvoice_policy != 'no')).service_tracking = 'no'
+
+    def _inverse_service_tracking(self):
+        for record in self:
+            if record.service_tracking == 'subcontract':
+                record.service_to_purchase = True
+
     @api.constrains('service_to_purchase', 'seller_ids', 'type')
     def _check_service_to_purchase(self):
         for template in self:
