@@ -69,7 +69,7 @@
 
             <!-- Is there a discount on at least one line? -->
             <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
-            <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
+            <t t-set="display_discount" t-value="any(l.discount > 0 for l in lines_to_report)"/>
 
             <div class="oe_structure"></div>
             <table class="o_has_total_table table o_main_table table-borderless">
