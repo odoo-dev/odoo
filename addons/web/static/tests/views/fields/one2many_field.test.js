@@ -1,4 +1,4 @@
-import { useState } from "@web/owl2/utils";
+import { reactive, useState } from "@web/owl2/utils";
 import { expect, getFixture, test } from "@odoo/hoot";
 import {
     click,
@@ -11,7 +11,7 @@ import {
 } from "@odoo/hoot-dom";
 import { Deferred, animationFrame, mockTimeZone, runAllTimers } from "@odoo/hoot-mock";
 
-import { Component, onWillDestroy, onWillStart, reactive, xml } from "@odoo/owl";
+import { Component, onWillDestroy, onWillStart, xml } from "@odoo/owl";
 import { getPickerCell } from "@web/../tests/core/datetime/datetime_test_helpers";
 import {
     clickFieldDropdown,

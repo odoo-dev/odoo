@@ -1,8 +1,8 @@
-import { useState } from "@web/owl2/utils";
+import { reactive, useRef, useState } from "@web/owl2/utils";
 import { expect, test } from "@odoo/hoot";
 import { queryFirst, queryOne, queryRect } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
-import { Component, reactive, useRef, xml } from "@odoo/owl";
+import { Component, xml } from "@odoo/owl";
 import { contains, mountWithCleanup, sortableDrag } from "@web/../tests/web_test_helpers";
 
 import { useNestedSortable } from "@web/core/utils/nested_sortable";
