@@ -373,11 +373,9 @@ class App extends owl.App {
 
     createRoot(component, config = {}) {
         if (config.env) {
-            const originalComponent = component;
-            component = class extends Component {
-                static template = owl.xml`<t t-component="this.component" t-props="this.props"/>`;
-                setup() {
-                    this.component = originalComponent;
+            component = class extends component {
+                constructor(node) {
+                    super(node);
                     provideEnv(config.env);
                 }
             };
