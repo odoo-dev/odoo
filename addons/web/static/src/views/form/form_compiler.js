@@ -69,7 +69,7 @@ export class FormCompiler extends ViewCompiler {
         if (!params.isSubView) {
             compiled.children[0].setAttribute(
                 "t-ref",
-                "{ set: (el) => __comp__.__refs__.compiled_view_root = el }"
+                "{ set: (el) => __comp__.__owl__.__refs__.compiled_view_root = el }"
             );
         }
         return compiled;
