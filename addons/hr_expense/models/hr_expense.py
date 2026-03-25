@@ -705,10 +705,6 @@ class HrExpense(models.Model):
                     ('journal_id.active', '=', True),
                 ])
 
-    @api.onchange('payment_mode')
-    def _onchange_payment_mode(self):  # TO REMOVE JUST FOR TEST
-        print('ici')
-
     @api.onchange('selectable_matching_bill')
     def _onchange_selectable_matching_bill(self):
         self.filtered(lambda expense: expense.payment_mode == 'own_account').selectable_matching_bill = False
@@ -1268,9 +1264,17 @@ class HrExpense(models.Model):
             raise UserError(_("You can't post simultaneously employee-paid expenses belonging to different companies"))
 
         if company_expenses:
-            company_expenses._create_company_paid_moves()
+            with_matched_bill = company_expenses.filtered(lambda expense: expense.selectable_matching_bill)
+            without_matched_bill = company_expenses - with_matched_bill
+
+            for exp in with_matched_bill:
+                # checks to do on the matched bill
+                exp.account_move_id = exp.selectable_matching_bill.id
+                # maybe I should post it.
+
+            without_matched_bill._create_company_paid_moves()
             # Post the company-paid expense through the payment, to post both at the same time
-            company_expenses.account_move_id.origin_payment_id.action_post()
+            without_matched_bill.account_move_id.origin_payment_id.action_post()
 
         if employee_expenses:
             return employee_expenses.with_context(company_paid_move_ids=company_expenses.account_move_id.ids)._post_wizard()
