@@ -2,7 +2,17 @@
 <templates xml:space="preserve">
 
     <t t-name="web.ColorPickerField">
-        <ColorList canToggle="this.props.canToggle" colors="this.constructor.RECORD_COLORS" forceExpanded="this.isExpanded" onColorSelected.bind="this.switchColor" selectedColor="this.props.record.data[this.props.name] || 0"/>
+        <t t-if="this.env.isSmall">
+            <Dropdown>
+                <button class="rounded-circle"/>
+                <t t-set-slot="content">
+                    <ColorList canToggle="false" colors="this.constructor.RECORD_COLORS" forceExpanded="true" onColorSelected.bind="this.switchColor" selectedColor="this.props.record.data[this.props.name] || 0"/>
+                </t>
+            </Dropdown>
+        </t>
+        <t t-else="">
+            <ColorList canToggle="this.props.canToggle" colors="this.constructor.RECORD_COLORS" forceExpanded="this.isExpanded" onColorSelected.bind="this.switchColor" selectedColor="this.props.record.data[this.props.name] || 0"/>
+        </t>
     </t>
 
 </templates>
