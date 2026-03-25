@@ -1,6 +1,11 @@
 import { reactive } from "@web/owl2/utils";
 import { fields, Record } from "@mail/model/export";
 import { BlurManager } from "@mail/discuss/call/common/blur_manager";
+import {
+    MUTE_SUGGESTION_NOTIFICATION_ID,
+    MUTE_SUGGESTION_TEXT,
+    setupMuteSuggestion,
+} from "@mail/discuss/call/common/call_mute_suggestion";
 import { CallPermissionDialog } from "@mail/discuss/call/common/call_permission_dialog";
 import { CALL_PROMOTE_FULLSCREEN } from "@mail/discuss/call/common/discuss_channel_model_patch";
 import { monitorAudio } from "@mail/utils/common/media_monitoring";
@@ -321,6 +326,12 @@ export class Rtc extends Record {
     timeouts = new Map();
     /** @type {Map<number, number>} timeoutId by sessionId for download pausing delay */
     downloadTimeouts = new Map();
+    muteSuggestion = reactive({
+        dismissed: false,
+        isVisible: false,
+        text: MUTE_SUGGESTION_TEXT,
+    });
+    muteSuggestionTarget;
     /** @type {{urls: string[]}[]} */
     iceServers = fields.Attr(undefined, {
         compute() {
@@ -353,7 +364,11 @@ export class Rtc extends Record {
                 this.store["discuss.channel.rtc.session"].get(this._remotelyHostedSessionId)
             );
         },
+        onAdd() {
+            this._muteSuggestionCleanup = setupMuteSuggestion(this.store);
+        },
         onDelete() {
+            this._muteSuggestionCleanup?.();
             if (this.channel) {
                 this.channel.promoteFullscreen = CALL_PROMOTE_FULLSCREEN.INACTIVE;
             }
@@ -683,6 +698,20 @@ export class Rtc extends Record {
         browser.clearTimeout(this.timeouts.get(id));
         this.notifications.delete(id);
         this.timeouts.delete(id);
+    }
+
+    dismissMuteSuggestion() {
+        this.muteSuggestion.dismissed = true;
+        this.hideMuteSuggestion();
+    }
+
+    hideMuteSuggestion() {
+        this.muteSuggestion.isVisible = false;
+        this.removeCallNotification(MUTE_SUGGESTION_NOTIFICATION_ID);
+    }
+
+    showMuteSuggestion() {
+        this.muteSuggestion.isVisible = true;
     }
 
     /**

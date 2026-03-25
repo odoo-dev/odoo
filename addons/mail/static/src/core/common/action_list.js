@@ -1,6 +1,7 @@
 import { CallDropdown } from "@mail/discuss/call/common/call_dropdown";
 import { attClassObjectToString } from "@mail/utils/common/format";
-import { Component, onWillUnmount } from "@odoo/owl";
+import { useRef } from "@web/owl2/utils";
+import { Component, onMounted, onPatched, onWillUnmount } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
@@ -20,6 +21,7 @@ class Action extends Component {
         "group?",
         "isFirstInGroup?",
         "isLastInGroup?",
+        "onButtonRef?",
         "style?",
         ...actionListProps,
     ];
@@ -43,11 +45,15 @@ class Action extends Component {
         this.store = useService("mail.store");
         this.ui = useService("ui");
         this.attClassObjectToString = attClassObjectToString;
+        this.buttonRef = useRef("button");
         if (this.props.action.definition?.isMoreAction) {
             onWillUnmount(() => {
                 this.props.action.dropdownState.close();
             });
         }
+        onMounted(() => this.notifyButtonRef());
+        onPatched(() => this.notifyButtonRef());
+        onWillUnmount(() => this.props.onButtonRef?.(this.props.action.id, null));
     }
 
     get action() {
@@ -66,11 +72,15 @@ class Action extends Component {
         action.onSelected?.(ev);
         this.env.inCallDropdown?.close();
     }
+
+    notifyButtonRef() {
+        this.props.onButtonRef?.(this.props.action.id, this.buttonRef.el);
+    }
 }
 
 export class ActionList extends Component {
     static components = { Action };
-    static props = ["actions", "groupClass?", ...actionListProps];
+    static props = ["actions", "groupClass?", "onButtonRef?", ...actionListProps];
     static template = "mail.ActionList";
 
     getActionProps(action, group, { index, isFirstInGroup, isLastInGroup } = {}) {
@@ -87,6 +97,7 @@ export class ActionList extends Component {
                     return [actualPropName, this.props[actualPropName]];
                 })
             ),
+            onButtonRef: this.props.onButtonRef,
             style: `z-index: ${group.length - index + (action.hotkey ? 1 : 0)}`,
         };
     }

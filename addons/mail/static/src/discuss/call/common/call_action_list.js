@@ -1,4 +1,4 @@
-import { onWillRender, useRef } from "@web/owl2/utils";
+import { onWillRender, useLayoutEffect, useRef } from "@web/owl2/utils";
 import { Component, toRaw } from "@odoo/owl";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -9,6 +9,13 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { Tooltip } from "@web/core/tooltip/tooltip";
 import { ActionList } from "@mail/core/common/action_list";
 import { ACTION_TAGS } from "@mail/core/common/action";
+import {
+    MUTE_SUGGESTION_CONFIG,
+    MUTE_SUGGESTION_NOTIFICATION_ID,
+    MUTE_SUGGESTION_NOTIFICATION_TEXT,
+    MUTE_SUGGESTION_TEXT,
+} from "@mail/discuss/call/common/call_mute_suggestion";
+import { CallSuggestionTooltip } from "@mail/discuss/call/common/call_suggestion_tooltip";
 
 export class CallActionList extends Component {
     static components = { ActionList };
@@ -26,6 +33,39 @@ export class CallActionList extends Component {
         this.popover = usePopover(Tooltip, {
             position: "top-middle",
         });
+        this.muteSuggestionPopover = usePopover(CallSuggestionTooltip, {
+            position: "top-middle",
+        });
+        useLayoutEffect(
+            () => {
+                const { isVisible, text } = this.rtc.muteSuggestion;
+                const target = this.rtc.muteSuggestionTarget;
+                if (isVisible && target && !this.rtc.isPipMode) {
+                    this.rtc.removeCallNotification(MUTE_SUGGESTION_NOTIFICATION_ID);
+                    this.muteSuggestionPopover.open(target, {
+                        text: text || MUTE_SUGGESTION_TEXT,
+                        onDismiss: () => this.rtc.dismissMuteSuggestion(),
+                    });
+                } else {
+                    this.muteSuggestionPopover.close();
+                    if (isVisible && (!target || this.rtc.isPipMode)) {
+                        this.rtc.addCallNotification({
+                            id: MUTE_SUGGESTION_NOTIFICATION_ID,
+                            delay: MUTE_SUGGESTION_CONFIG.activeDuration,
+                            text: MUTE_SUGGESTION_NOTIFICATION_TEXT,
+                        });
+                    } else {
+                        this.rtc.removeCallNotification(MUTE_SUGGESTION_NOTIFICATION_ID);
+                    }
+                }
+            },
+            () => [
+                this.rtc.muteSuggestion.isVisible,
+                this.rtc.muteSuggestion.text,
+                this.rtc.muteSuggestionTarget,
+                this.rtc.isPipMode,
+            ]
+        );
         onWillRender(() => {
             const partition = toRaw(this.callActions).partition;
             const other = partition.other.filter((a) => !a.tags.includes(ACTION_TAGS.CALL_LAYOUT));
@@ -58,6 +98,12 @@ export class CallActionList extends Component {
             }
             this.actions = [...group2, other];
         });
+    }
+
+    onButtonRef(actionId, el) {
+        if (actionId === "mute") {
+            this.rtc.muteSuggestionTarget = el;
+        }
     }
 
     get MORE() {
