@@ -96,12 +96,6 @@ $ms-size-multiplier: 1.214285; // Compensate pictogram's inner spacing
     animation: fa-spin 1s infinite steps(8);
 }
 
-.o_barcode {
-    -webkit-mask: url('/web/static/img/barcode.svg') center/contain no-repeat;
-    mask: url('/web/static/img/barcode.svg') center/contain no-repeat;
-    background-color: $o-brand-primary;
-}
-
 .o_fa_stack {
     display: grid;
     align-items: baseline;
