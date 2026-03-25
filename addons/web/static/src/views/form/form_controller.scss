@@ -1273,10 +1273,6 @@
                     color: $o-action;
                 }
 
-                &:has(+ * .o_required_modifier:not(.o_readonly_modifier)) .o_form_label {
-                    font-weight: $font-weight-bolder !important;
-                }
-
                 &:has(+ * .o_field_invalid) .o_form_label {
                     color: o-text-color('danger') !important;
                 }
@@ -1285,6 +1281,11 @@
                 span.o_form_label {
                     display: inline-block;
                 }
+            }
+
+            .o_wrap_field_boolean .o_form_label {
+                margin-inline-start: calc(1.5 * var(--field-spacing-unit));
+                font-weight: $font-weight-bold;
             }
 
             .o_property_field.o_wrap_label {
