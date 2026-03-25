@@ -1194,6 +1194,19 @@
             h1, h2, h3, h4, h5, h6 {
                 all: unset;
             }
+
+            &:has(.o_required_modifier:not(.o_readonly_modifier)) {
+                border: 2px solid var(--o-input-border-color);
+            }
+
+            &:has(.o_field_invalid) {
+                --o-input-border-color: o-text-color('danger');
+                background: #{$o-input-invalid-bg};
+
+                .o_field_invalid {
+                    --o-input-background-color: transparent;
+                }
+            }
         }
 
         %-o-field-label {
@@ -1219,6 +1232,7 @@
             }
 
             sup {
+                color: $o-action !important;
                 height: 1em;
                 display: inline-flex;
                 align-items: center;
@@ -1239,9 +1253,8 @@
                     height: calc(3 * var(--field-spacing-unit));
                     min-width: calc(3 * var(--field-spacing-unit));
                     color: var(--body-color);
-                    background: var(--secondary-bg);
-                    padding: 0 !important;
-                    padding-inline: var(--field-spacing-unit);
+                    background: var(--secondary-bg) !important;
+                    padding: 0 var(--field-spacing-unit) !important;
                     border-radius: calc(1.5 * var(--field-spacing-unit));
                     justify-content: center;
                 }
@@ -1256,6 +1269,14 @@
 
                 &:has(+ *:focus-within) .o_form_label {
                     color: $o-action;
+                }
+
+                &:has(+ * .o_required_modifier:not(.o_readonly_modifier)) .o_form_label {
+                    font-weight: $font-weight-bolder !important;
+                }
+
+                &:has(+ * .o_field_invalid) .o_form_label {
+                    color: o-text-color('danger') !important;
                 }
 
                 // For o_readonly_modifier input label
