@@ -1,0 +1,82 @@
+.pos .delivery-screen {
+    background-color: var(--o-gray-100, #f8f9fa);
+}
+
+.pos .delivery-list-panel {
+    width: 420px;
+    min-width: 320px;
+    max-width: 480px;
+    background: white;
+}
+
+.pos .delivery-item {
+    transition: background-color 0.15s ease;
+
+    &:hover {
+        background-color: var(--o-gray-100, #f8f9fa);
+    }
+
+    &.border-start-4 {
+        border-left-width: 4px !important;
+    }
+}
+
+.pos .delivery-detail-panel {
+    background: white;
+}
+
+.pos .delivery-detail-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.pos .delivery-actions .btn {
+    min-width: 100px;
+    font-size: 0.85rem;
+
+    &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+}
+
+.pos .delivery-detail-lines {
+    .table th {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--o-gray-600, #6c757d);
+    }
+}
+
+// Responsive: on small screens, list takes full width
+@media (max-width: 768px) {
+    .pos .delivery-list-panel {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+// Split delivery dialog
+.split-delivery-qty {
+    width: 80px;
+}
+
+// Warehouse selector
+.warehouse-selector {
+    .warehouse-option {
+        padding: 0.75rem 1rem;
+        border: 2px solid transparent;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+            background-color: var(--o-gray-100, #f8f9fa);
+        }
+
+        &.selected {
+            border-color: var(--o-action, #714b67);
+            background-color: rgba(113, 75, 103, 0.05);
+        }
+    }
+}

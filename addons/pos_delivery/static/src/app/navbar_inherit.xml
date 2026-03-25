@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-inherit="point_of_sale.Navbar" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('navbar-menu')]" position="inside">
+            <button t-if="this.pos.config.iface_pos_delivery"
+                    class="delivery-button btn btn-outline-secondary btn-lg lh-lg"
+                    t-att-class="{'active': mainButton === 'delivery'}"
+                    t-on-click="() => this.onClickDeliveries()">
+                <t t-if="!ui.isSmall">
+                    <span>Deliveries</span>
+                </t>
+                <i t-else="" class="fa fa-fw fa-truck" t-att-class="{'fa-lg' : !ui.isSmall}"/>
+            </button>
+        </xpath>
+    </t>
+
+</templates>

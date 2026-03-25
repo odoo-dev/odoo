@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_delivery.PaymentScreenButtons" t-inherit="point_of_sale.PaymentScreenButtons" t-inherit-mode="extension">
+        <xpath expr="//button[hasclass('button') and @t-if='this.pos.config.ship_later']" position="after">
+            <button t-if="this.pos.config.iface_pos_delivery and this.pos.config.ship_later"
+                    class="button btn btn-secondary btn-lg d-flex justify-content-between align-items-baseline w-100 lh-lg"
+                    t-att-class="{ 'highlight active text-action': this.currentOrder.pickup_date }"
+                    t-on-click="togglePickupDatePicker">
+                <span t-attf-class="{{this.currentOrder.pickup_date ? 'me-auto' : 'mx-auto' }}">
+                    <i class="fa fa-shopping-bag me-2" />Pick Up Later
+                </span>
+                <span t-if="this.currentOrder.pickup_date">
+                    <t t-out="this.currentOrder.formatDateOrTime('pickup_date', 'date')" />
+                </span>
+            </button>
+        </xpath>
+    </t>
+
+</templates>

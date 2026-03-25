@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_delivery.SplitDeliveryDialog">
+        <Dialog title="title" size="'md'">
+            <div class="p-3">
+                <p class="text-muted mb-3" t-out="description"/>
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-center">Demand</th>
+                            <th class="text-center">To Process</th>
+                            <th class="text-center">Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="state.lineSplits" t-as="split" t-key="split.move_id">
+                            <tr>
+                                <td>
+                                    <span class="fw-semibold" t-out="split.product_name"/>
+                                    <span class="text-muted small ms-1" t-out="split.uom_name"/>
+                                </td>
+                                <td class="text-center" t-out="split.qty_demand"/>
+                                <td class="text-center">
+                                    <input type="number"
+                                           class="form-control form-control-sm split-delivery-qty mx-auto text-center"
+                                           t-att-value="split.qty_delivered"
+                                           t-att-max="split.qty_demand"
+                                           min="0"
+                                           step="1"
+                                           t-on-change="(ev) => this.onQtyChange(split_index, ev)"/>
+                                </td>
+                                <td class="text-center">
+                                    <span t-att-class="(split.qty_demand - split.qty_delivered) > 0 ? 'text-warning fw-bold' : 'text-muted'"
+                                          t-out="split.qty_demand - split.qty_delivered"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <div t-if="hasPartialDelivery and props.showBackorderInfo" class="alert alert-info mt-3 mb-0">
+                    <i class="fa fa-info-circle me-1"/>
+                    A backorder will be created for the remaining quantities.
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <t t-if="props.secondaryConfirmLabel">
+                    <button class="btn btn-outline-primary me-2" t-on-click="onSecondaryConfirm">
+                        <i class="fa fa-clock-o me-1"/>
+                        <t t-out="props.secondaryConfirmLabel"/>
+                    </button>
+                </t>
+                <button class="btn btn-primary" t-on-click="onConfirm">
+                    <i t-attf-class="fa #{props.secondaryConfirmLabel ? 'fa-exchange' : 'fa-check'} me-1"/>
+                    <t t-out="confirmLabel"/>
+                </button>
+                <button class="btn btn-secondary ms-auto" t-on-click="props.close">
+                    Cancel
+                </button>
+            </t>
+        </Dialog>
+    </t>
+
+</templates>

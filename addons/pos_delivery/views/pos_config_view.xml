@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_config_view_form_inherit_pos_delivery" model="ir.ui.view">
+        <field name="name">pos.config.form.inherit.pos.delivery</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='multiple_employee_session']" position="after">
+                <setting id="iface_pos_delivery" string="POS Delivery Management" help="Manage eCommerce pickups, split deliveries and returns directly from POS.">
+                    <field name="iface_pos_delivery"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

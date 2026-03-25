@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_delivery.DeliveryScreen">
+        <div class="delivery-screen d-flex h-100">
+            <!-- LEFT PANEL: Delivery List -->
+            <div class="delivery-list-panel d-flex flex-column border-end"
+                 t-att-class="{'w-100': ui.isSmall and !state.selectedDeliveryId, 'd-none': ui.isSmall and state.selectedDeliveryId}">
+
+                <!-- Search Bar -->
+                <div class="delivery-search p-2 border-bottom bg-view">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fa fa-search text-muted"/>
+                        </span>
+                        <input type="text"
+                               class="form-control border-start-0"
+                               t-att-value="state.searchTerm"
+                               t-on-input="onSearch"
+                               t-on-keydown="onSearchKeydown"
+                               placeholder="Search by name, reference, phone..."/>
+                        <button t-if="state.searchTerm"
+                                class="btn btn-outline-secondary"
+                                t-on-click="onClearSearch">
+                            <i class="fa fa-times"/>
+                        </button>
+                        <button class="btn btn-primary" t-on-click="() => this.fetchDeliveries()">
+                            <i class="fa fa-search"/>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="delivery-filters d-flex gap-1 p-2 border-bottom bg-view">
+                    <t t-foreach="filters" t-as="filter" t-key="filter.key">
+                        <button class="btn btn-sm"
+                                t-att-class="state.activeFilter === filter.key ? 'btn-' + filter.color : 'btn-outline-' + filter.color"
+                                t-on-click="() => this.onFilterClick(filter.key)">
+                            <i t-attf-class="fa {{filter.icon}} me-1"/>
+                            <t t-out="filter.label"/>
+                        </button>
+                    </t>
+                </div>
+
+                <!-- Delivery List -->
+                <div class="delivery-items flex-grow-1 overflow-auto">
+                    <div t-if="state.loading" class="d-flex justify-content-center align-items-center h-100">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div t-elif="state.deliveries.length === 0" class="d-flex flex-column justify-content-center align-items-center h-100 text-muted p-4">
+                        <i class="fa fa-truck fa-3x mb-3 opacity-25"/>
+                        <p class="fs-5 fw-bold">No deliveries found</p>
+                        <p class="text-center">Try changing the filter or search term</p>
+                    </div>
+
+                    <t t-else="">
+                        <t t-foreach="state.deliveries" t-as="delivery" t-key="delivery.id">
+                            <div class="delivery-item d-flex align-items-center p-3 border-bottom cursor-pointer"
+                                 t-att-class="{'bg-100 border-start border-start-4 border-primary': state.selectedDeliveryId === delivery.id}"
+                                 t-on-click="() => this.selectDelivery(delivery)">
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-bold text-truncate" t-out="delivery.name"/>
+                                        <span class="badge rounded-pill"
+                                              t-att-class="getStateBadgeClass(delivery.state)"
+                                              t-out="getStateLabel(delivery.state)"/>
+                                        <t t-set="typeInfo" t-value="getDeliveryTypeInfo(delivery.delivery_type)"/>
+                                        <span t-attf-class="small {{typeInfo.class}}" t-att-title="typeInfo.label">
+                                            <i t-attf-class="fa {{typeInfo.icon}}"/>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-muted small">
+                                        <i class="fa fa-user"/>
+                                        <span class="text-truncate" t-out="delivery.partner_name"/>
+                                    </div>
+                                    <div t-if="delivery.origin" class="text-muted small mt-1">
+                                        <i class="fa fa-tag me-1"/>
+                                        <span t-out="delivery.origin"/>
+                                    </div>
+                                    <div t-if="delivery.scheduled_date" class="text-muted small">
+                                        <i class="fa fa-calendar me-1"/>
+                                        <span t-out="delivery.scheduled_date"/>
+                                    </div>
+                                </div>
+                                <div class="flex-shrink-0 ms-2 text-end">
+                                    <span class="badge bg-light text-dark d-block mb-1" t-out="delivery.lines.length + ' items'"/>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+
+                <!-- Action Buttons (Bottom) -->
+                <div class="delivery-actions p-2 border-top bg-view d-flex flex-wrap gap-2">
+                    <button class="btn btn-success flex-fill"
+                            t-att-class="{'disabled': !canValidate}"
+                            t-on-click="onValidateDelivery">
+                        <i class="fa fa-check me-1"/> Validate
+                    </button>
+                    <button t-if="canCheckAvailability"
+                            class="btn btn-primary flex-fill"
+                            t-on-click="onCheckAvailability">
+                        <i class="fa fa-refresh me-1"/> Check Availability
+                    </button>
+                    <button class="btn btn-warning flex-fill"
+                            t-att-class="{'disabled': !canSplit}"
+                            t-on-click="onSplitDelivery">
+                        <i class="fa fa-cut me-1"/> Split
+                    </button>
+
+                    <button class="btn btn-outline-danger flex-fill"
+                            t-att-class="{'disabled': !canExchange}"
+                            t-on-click="onExchange">
+                        <i class="fa fa-exchange me-1"/> Exchange
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Delivery Detail -->
+            <div class="delivery-detail-panel flex-grow-1 d-flex flex-column"
+                 t-att-class="{'w-100': ui.isSmall and state.selectedDeliveryId, 'd-none': ui.isSmall and !state.selectedDeliveryId}">
+
+                <t t-if="selectedDelivery">
+                    <!-- Detail Header -->
+                    <div class="delivery-detail-header p-3 border-bottom bg-view">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <button t-if="ui.isSmall" class="btn btn-light me-2"
+                                        t-on-click="() => this.state.selectedDeliveryId = null">
+                                    <i class="fa fa-arrow-left"/>
+                                </button>
+                                <span class="fs-4 fw-bold" t-out="selectedDelivery.name"/>
+                                <span class="badge ms-2"
+                                      t-att-class="getStateBadgeClass(selectedDelivery.state)"
+                                      t-out="getStateLabel(selectedDelivery.state)"/>
+                                <t t-set="typeInfo" t-value="getDeliveryTypeInfo(selectedDelivery.delivery_type)"/>
+                                <span t-attf-class="badge ms-2 border {{typeInfo.class}} border-{{typeInfo.class.replace('text-', '')}}">
+                                    <i t-attf-class="fa {{typeInfo.icon}} me-1"/>
+                                    <t t-out="typeInfo.label"/>
+                                </span>
+                            </div>
+                            <div class="header-actions">
+                                <button class="btn btn-outline-primary btn-sm"
+                                        t-if="['waiting', 'confirmed', 'assigned'].includes(selectedDelivery.state)"
+                                        t-on-click="onCheckAvailability">
+                                    <i class="fa fa-refresh me-1"/> Check Availability
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Partial Reservation Warning -->
+                        <div t-if="isPartial" class="alert alert-warning mt-2 mb-0 d-flex align-items-center" style="border-left: 5px solid #ff9800;">
+                            <i class="fa fa-exclamation-triangle fa-2x me-3 text-warning"/>
+                            <div>
+                                <div class="fw-bold fs-5 text-dark">Partial / Incomplete Stock</div>
+                                <div class="text-dark">Warning: Some items in this order are not reserved in stock.</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-2 d-flex flex-wrap gap-3 text-muted">
+                            <div>
+                                <i class="fa fa-user me-1"/>
+                                <span t-out="selectedDelivery.partner_name"/>
+                                <span t-if="selectedDelivery.partner_phone" class="ms-1">
+                                    (<i class="fa fa-phone me-1"/><t t-out="selectedDelivery.partner_phone"/>)
+                                </span>
+                            </div>
+                            <div t-if="selectedDelivery.origin">
+                                <i class="fa fa-tag me-1"/>
+                                <span t-out="selectedDelivery.origin"/>
+                            </div>
+                            <div t-if="selectedDelivery.pos_order_name">
+                                <i class="fa fa-shopping-cart me-1"/>
+                                <span t-out="selectedDelivery.pos_order_name"/>
+                            </div>
+                        </div>
+                        <div class="mt-1 d-flex flex-wrap gap-3 small text-muted">
+                            <div>
+                                <i class="fa fa-arrow-right me-1"/>
+                                <span t-out="selectedDelivery.source_location"/>
+                                <i class="fa fa-long-arrow-right mx-1"/>
+                                <span t-out="selectedDelivery.dest_location"/>
+                            </div>
+                            <div t-if="selectedDelivery.scheduled_date">
+                                <i class="fa fa-calendar me-1"/>
+                                <span t-out="formatDate(selectedDelivery.scheduled_date)"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Lines -->
+                    <div class="delivery-detail-lines flex-grow-1 overflow-auto p-3">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Demand</th>
+                                    <th class="text-center">Reserved</th>
+                                    <th class="text-center">Done</th>
+                                    <th>UoM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="selectedDelivery.lines" t-as="line" t-key="line.id">
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold" t-out="line.product_name"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-out="line.qty_demand"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-att-class="(line.qty_reserved &lt; line.qty_demand and selectedDelivery.state !== 'done') ? 'text-danger fw-bold' : (line.qty_reserved === line.qty_demand and selectedDelivery.state !== 'done') ? 'text-success fw-bold' : ''"
+                                                  t-out="line.qty_reserved"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-out="line.qty_done"/>
+                                        </td>
+                                        <td class="text-muted" t-out="line.uom_name"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Note -->
+                    <div t-if="selectedDelivery.note" class="p-3 border-top bg-light">
+                        <div class="small text-muted mb-1"><i class="fa fa-sticky-note me-1"/>Note</div>
+                        <div t-out="selectedDelivery.note"/>
+                    </div>
+                </t>
+
+                <t t-else="">
+                    <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted">
+                        <i class="fa fa-hand-pointer-o fa-3x mb-3 opacity-25"/>
+                        <p class="fs-5">Select a delivery to view details</p>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>
