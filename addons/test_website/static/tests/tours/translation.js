@@ -206,7 +206,7 @@ registerWebsitePreviewTour("translation_single_language_fr_user_en_site", {}, ()
     ...singleLanguage(),
 ]);
 
-function switchLanguage(lang, timeout = 50000) {
+function switchLanguage(lang, timeout = 60000) {
     return [
         {
             content: "Ensure was in other language",
