@@ -1181,10 +1181,12 @@
         %-o-field-box {
             border-radius: calc(.5 * var(--field-spacing-unit));
             border: 1px solid var(--o-input-border-color);
+            outline: 1px solid transparent;
             padding: var(--field-spacing-unit) calc(1.5 * var(--field-spacing-unit));
 
             &:focus-within {
-                @include print-variable(o-input-border-color, $o-action);;
+                @include print-variable(o-input-border-color, $o-action);
+                outline: 1px solid var(--o-input-border-color);
             }
 
             .o_input {
