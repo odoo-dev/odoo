@@ -90,8 +90,8 @@ function removeRegExp(query) {
  */
 const templateIncludeWidget = (tagName) => /* xml */ `
     <t t-set="type" t-value="category === 'tag' ? category : 'id'" />
-    <t t-set="includeStatus" t-value="runnerState.includeSpecs[type][job.id] or 0" />
-    <t t-set="readonly" t-value="isReadonly(includeStatus)" />
+    <t t-set="includeStatus" t-value="this.runnerState.includeSpecs[type][job.id] or 0" />
+    <t t-set="readonly" t-value="this.isReadonly(includeStatus)" />
 
     <${tagName}
         class="flex items-center gap-1 cursor-pointer select-none"
@@ -105,7 +105,7 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                 'opacity-50': readonly,
             }"
             t-att-title="readonly and 'Cannot change because it depends on a tag modifier in the code'"
-            t-on-pointerup="focusSearchInput"
+            t-on-pointerup="this.focusSearchInput"
             t-on-change="(ev) => this.onIncludeChange(type, job.id, ev.target.value)"
         >
             <input
@@ -132,7 +132,7 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                 t-att-checked="includeStatus gt 0"
             />
         </div>
-        <t t-if="isTag(job)">
+        <t t-if="this.isTag(job)">
             <HootTagButton tag="job" inert="true" />
         </t>
         <t t-else="">
@@ -140,11 +140,11 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                 class="flex items-center font-bold whitespace-nowrap overflow-hidden"
                 t-att-title="job.fullName"
             >
-                <t t-foreach="getShortPath(job.path)" t-as="suite" t-key="suite.id">
-                    <span class="text-gray px-1" t-esc="suite.name" />
+                <t t-foreach="this.getShortPath(job.path)" t-as="suite" t-key="suite.id">
+                    <span class="text-gray px-1" t-out="suite.name" />
                     <span class="font-normal">/</span>
                 </t>
-                <t t-set="isSet" t-value="job.id in runnerState.includeSpecs.id" />
+                <t t-set="isSet" t-value="job.id in this.runnerState.includeSpecs.id" />
                 <span
                     class="truncate px-1"
                     t-att-class="{
@@ -155,7 +155,7 @@ const templateIncludeWidget = (tagName) => /* xml */ `
                         'text-primary': !isSet and !hasIncludeValue,
                         'italic': hasIncludeValue ? includeStatus lte 0 : includeStatus lt 0,
                     }"
-                    t-esc="job.name"
+                    t-out="job.name"
                 />
             </span>
         </t>
@@ -204,23 +204,23 @@ const RESULT_LIMIT = 5;
 
 const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
     <div class="flex mb-2">
-        <t t-if="trimmedQuery">
+        <t t-if="this.trimmedQuery">
             <button
                 class="flex items-center gap-1"
                 type="submit"
                 title="Run this filter"
-                t-on-pointerdown="updateFilterParam"
+                t-on-pointerdown="this.updateFilterParam"
             >
                 <h4 class="text-primary m-0">
                     Filter using
-                    <t t-if="hasRegExpFilter()">
+                    <t t-if="this.hasRegExpFilter()">
                         regular expression
                     </t>
                     <t t-else="">
                         text
                     </t>
                 </h4>
-                <t t-esc="wrappedQuery()" />
+                <t t-out="this.wrappedQuery()" />
             </button>
         </t>
         <t t-else="">
@@ -229,14 +229,14 @@ const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
             </em>
         </t>
     </div>
-    <t t-foreach="categories" t-as="category" t-key="category">
-        <t t-set="jobs" t-value="state.categories[category][0]" />
-        <t t-set="remainingCount" t-value="state.categories[category][1]" />
+    <t t-foreach="this.categories" t-as="category" t-key="category">
+        <t t-set="jobs" t-value="this.state.categories[category][0]" />
+        <t t-set="remainingCount" t-value="this.state.categories[category][1]" />
         <t t-if="jobs?.length">
             <div class="flex flex-col mb-2 max-h-48 overflow-hidden">
                 <h4
                     class="text-primary font-bold flex items-center mb-2"
-                    t-esc="title(category)"
+                    t-out="this.title(category)"
                 />
                 <ul class="flex flex-col overflow-y-auto gap-1">
                     <t t-foreach="jobs" t-as="job" t-key="job.id">
@@ -244,7 +244,7 @@ const TEMPLATE_FILTERS_AND_CATEGORIES = /* xml */ `
                     </t>
                     <t t-if="remainingCount > 0">
                         <div class="italic">
-                            <t t-esc="remainingCount" /> more items ...
+                            <t t-out="remainingCount" /> more items ...
                         </div>
                     </t>
                 </ul>
@@ -262,13 +262,13 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
                 </span>
             </h4>
             <ul class="flex flex-col overflow-y-auto gap-1">
-                <t t-foreach="getLatestSearches()" t-as="text" t-key="text_index">
+                <t t-foreach="this.getLatestSearches()" t-as="text" t-key="text_index">
                     <li>
                         <button
                             class="w-full px-2 hover:bg-gray-300 dark:hover:bg-gray-700"
                             type="button"
                             t-on-click.stop="() => this.setQuery(text)"
-                            t-esc="text"
+                            t-out="text"
                         />
                     </li>
                 </t>
@@ -281,7 +281,7 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
                 </span>
             </h4>
             <ul class="flex flex-col overflow-y-auto gap-1">
-                <t t-foreach="getTop(env.runner.rootSuites)" t-as="job" t-key="job.id">
+                <t t-foreach="this.getTop(this.env.runner.rootSuites)" t-as="job" t-key="job.id">
                     <t t-set="category" t-value="'suite'" />
                     ${templateIncludeWidget("li")}
                 </t>
@@ -294,7 +294,7 @@ const TEMPLATE_SEARCH_DASHBOARD = /* xml */ `
                 </span>
             </h4>
             <ul class="flex flex-col overflow-y-auto gap-1">
-                <t t-foreach="getTop(env.runner.tags.values())" t-as="job" t-key="job.id">
+                <t t-foreach="this.getTop(this.env.runner.tags.values())" t-as="job" t-key="job.id">
                     <t t-set="category" t-value="'tag'" />
                     ${templateIncludeWidget("li")}
                 </t>

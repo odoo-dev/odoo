@@ -38,9 +38,9 @@ const issueTemplate = (varName, colorClassName) => /* xml */ `
         >
             <h3 class="flex items-center gap-1 whitespace-nowrap">
                 <span class="min-w-3 min-h-3 rounded-full bg-${colorClassName}" />
-                Global <t t-esc="issue.name" />
+                Global <t t-out="issue.name" />
                 <span t-if="issue.count > 1">
-                    (x<t t-esc="issue.count" />)
+                    (x<t t-out="issue.count" />)
                 </span>:
                 <small class="ms-auto text-gray whitespace-nowrap italic font-normal">
                     stack trace available in the console
@@ -48,7 +48,7 @@ const issueTemplate = (varName, colorClassName) => /* xml */ `
             </h3>
             <ul>
                 <t t-foreach="issue.message.split('\\n')" t-as="messagePart" t-key="messagePart_index">
-                    <li class="truncate" t-esc="messagePart" />
+                    <li class="truncate" t-out="messagePart" />
                 </t>
             </ul>
         </div>
