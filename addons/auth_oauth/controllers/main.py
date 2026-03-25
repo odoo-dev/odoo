@@ -133,7 +133,7 @@ class OAuthController(Controller):
         try:
             # auth_oauth may create a new user, the commit makes it
             # visible to authenticate()'s own transaction below
-            _, login, key = request.env['res.users'].with_user(SUPERUSER_ID).auth_oauth(provider, kw)
+            _, user, key = request.env['res.users'].with_user(SUPERUSER_ID).auth_oauth(provider, kw)
             request.env.cr.commit()
 
             action = state.get('a')
@@ -147,7 +147,7 @@ class OAuthController(Controller):
             elif menu:
                 url = '/odoo?menu_id=%s' % menu
 
-            credential = {'login': login, 'token': key, 'type': 'oauth_token'}
+            credential = {'login': user.login, 'token': key, 'type': 'oauth_token'}
             auth_info = authenticate(request.session, request.env, credential)
             resp = request.redirect(_get_login_redirect_url(auth_info['uid'], url), 303)
             resp.autocorrect_location_header = False

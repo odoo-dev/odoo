@@ -119,7 +119,7 @@ class ResUsers(models.Model):
                 raise AccessDenied()
             assert len(oauth_user) == 1
             oauth_user.write({'oauth_access_token': params['access_token']})
-            return oauth_user.login
+            return oauth_user
         except AccessDenied as access_denied_exception:
             if self.env.context.get('no_user_creation'):
                 return None
@@ -127,7 +127,7 @@ class ResUsers(models.Model):
             token = state.get('t')
             values = self._generate_signup_values(provider, validation, params)
             try:
-                return self.signup(values, token).login
+                return self.signup(values, token)
             except (SignupError, UserError):
                 raise access_denied_exception
 
@@ -142,11 +142,11 @@ class ResUsers(models.Model):
         validation = self._auth_oauth_validate(provider, access_token)
 
         # retrieve and sign in user
-        login = self._auth_oauth_signin(provider, validation, params)
-        if not login:
+        user = self._auth_oauth_signin(provider, validation, params)
+        if not user:
             raise AccessDenied()
         # return user credentials
-        return (self.env.cr.dbname, login, access_token)
+        return (self.env.cr.dbname, user, access_token)
 
     def _check_credentials(self, credential, env):
         try:
