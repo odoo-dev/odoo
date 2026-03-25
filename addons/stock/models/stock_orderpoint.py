@@ -215,7 +215,7 @@ class StockWarehouseOrderpoint(models.Model):
         for orderpoint in self:
             orderpoint.allowed_replenishment_uom_ids = orderpoint.product_id.uom_ids
             if 'buy' in orderpoint.rule_ids.mapped('action'):
-                orderpoint.allowed_replenishment_uom_ids += orderpoint.product_id.seller_ids.product_uom_id
+                orderpoint.allowed_replenishment_uom_ids += orderpoint.product_id.sudo().seller_ids.product_uom_id
 
     @api.depends('allowed_replenishment_uom_ids')
     def _compute_replenishment_uom_id_placeholder(self):
