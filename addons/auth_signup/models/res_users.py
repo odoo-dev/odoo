@@ -44,7 +44,7 @@ class ResUsers(models.Model):
             - change the password of a user (with token, and existing user).
             :param values: a dictionary with field values that are written on user
             :param token: signup token (optional)
-            :return: (dbname, login, password) for the signed up user
+            :return: the signed up user
         """
         if token:
             # signup with a token: find the corresponding partner id
@@ -67,7 +67,7 @@ class ResUsers(models.Model):
                 partner_user.write(values)
                 if not partner_user.login_date and partner_user._is_internal():
                     partner_user._notify_inviter()
-                return (partner_user.login, values.get('password'))
+                return partner_user
             else:
                 # user does not exist: sign up invited user
                 values.update({
@@ -82,9 +82,9 @@ class ResUsers(models.Model):
         else:
             # no token, sign up an external user
             values['email'] = values.get('email') or values.get('login')
-            self._signup_create_user(values)
+            partner_user = self._signup_create_user(values)
 
-        return (values.get('login'), values.get('password'))
+        return partner_user
 
     @api.model
     def _get_signup_invitation_scope(self):

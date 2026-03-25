@@ -177,8 +177,8 @@ class AuthSignupHome(Home):
         request.env.cr.commit()
 
     def _signup_with_values(self, token, values, do_login):
-        login, password = request.env['res.users'].sudo().signup(values, token)
-        credential = {'login': login, 'password': password, 'type': 'password'}
+        user = request.env['res.users'].sudo().signup(values, token)
+        credential = {'login': user.login, 'password': values.get('password'), 'type': 'password'}
         if do_login:
             authenticate(request.session, request.env, credential)
 
