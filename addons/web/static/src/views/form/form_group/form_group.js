@@ -95,4 +95,10 @@ export class InnerGroup extends Group {
 
         return rows;
     }
+    computeCellDisplay(cell) {
+        if(!cell.props.fieldInfo.widget) {
+            cell.props.fieldInfo.widget = "boolean_toggle";
+        }
+        return cell;
+    }
 }
