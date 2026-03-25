@@ -2388,7 +2388,12 @@
             this.status = 3 /* STATUS.DESTROYED */;
         }
         async updateAndRender(props, parentFiber) {
-            props = Object.assign({}, this.defaultProps, props);
+            props = Object.assign({}, props);
+            for (const key in this.defaultProps) {
+                if (props[key] === undefined) {
+                    props[key] = this.defaultProps[key];
+                }
+            }
             // update
             const fiber = makeChildFiber(this, parentFiber);
             this.fiber = fiber;
@@ -6468,7 +6473,8 @@
                 for (const key of keys) {
                     Reflect.deleteProperty(result, key);
                 }
-                applyPropGetters(Object.keys(np).filter((k) => k.charCodeAt(0) !== 1));
+                keys = [...Object.keys(defaults ?? {}), ...Object.keys(node.props)].filter((k) => k.charCodeAt(0) !== 1);
+                applyPropGetters(keys);
             });
         }
         return result;
