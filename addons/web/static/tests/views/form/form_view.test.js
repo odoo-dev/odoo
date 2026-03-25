@@ -1,4 +1,4 @@
-import { render, useState } from "@web/owl2/utils";
+import { render, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 import { after, before, expect, test } from "@odoo/hoot";
 import {
     clear,
@@ -28,8 +28,6 @@ import {
     onPatched,
     onWillStart,
     onWillUpdateProps,
-    useEffect,
-    useRef,
     xml,
 } from "@odoo/owl";
 import {
@@ -10150,7 +10148,7 @@ test(`basic support for widgets: onchange update`, async () => {
             this.state = useState({
                 dataToDisplay: this.props.record.data.foo,
             });
-            useEffect(() => {
+            useLayoutEffect(() => {
                 this.state.dataToDisplay = this.props.record.data.foo + "!";
             });
         }
