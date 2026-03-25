@@ -126,17 +126,17 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box"/>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    <div class="o_form_header_group d-flex flex-column flex-md-row gap-3">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-3">
                         <field name="image_1920" widget="contact_image" options="{'preview_image': 'avatar_128', 'size': [130,130], 'img_class': 'border'}"/>
                         <field name="avatar_128" invisible="1"/> <!-- Needed in contact_image widget -->
-                        <group class="o_form_header_details d-flex flex-column flex-grow-1 gap-md-0 ">
+                        <group class="d-flex flex-column gap-md-0 w-100">
                             <label for="name" class="d-md-none"/>
                             <h1>
                                 <field options="{'line_breaks': False}" widget="text" class="text-break d-block" name="name" default_focus="1" placeholder="Name (company or person)" required="type == 'contact'"/>
                             </h1>
                             <label for="parent_id" class="d-md-none"/>
-                            <div class="o_input_box w-md-50">
-                                <i class="o_input_box_overlay_start d-none d-md-inline-flex fa fa-building" title="Company"/>
+                            <div class="d-flex align-items-baseline w-md-50 gap-2">
+                                <i class="d-none d-md-inline-flex fa fa-building" title="Company"/>
                                 <field name="parent_id"
                                     widget="res_partner_many2one"
                                     placeholder="Company Employer"
@@ -145,14 +145,14 @@
                             </div>
 
                             <label for="email" class="d-md-none"/>
-                            <div class="o_input_box w-md-50">
-                                <i class="o_input_box_overlay_start d-none d-md-inline-flex fa fa-envelope" title="Email"/>
+                            <div class="d-flex align-items-baseline w-md-50 gap-2">
+                                <i class="d-none d-md-inline-flex fa fa-envelope" title="Email"/>
                                 <field name="email" widget="email" required="user_ids" placeholder="Email"/>
                             </div>
 
                             <label for="phone" class="d-md-none"/>
-                            <div class=" o_input_box w-md-50">
-                                <i class="o_input_box_overlay_start d-none d-md-inline-flex fa fa-phone" title="Phone"/>
+                            <div class="d-flex align-items-baseline w-md-50 gap-2">
+                                <i class="d-none d-md-inline-flex fa fa-phone" title="Phone"/>
                                 <field name="phone" widget="phone" placeholder="Phone"/>
                             </div>
                         </group>

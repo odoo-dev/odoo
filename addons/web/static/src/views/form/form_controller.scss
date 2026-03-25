@@ -1166,7 +1166,7 @@
 
 // M3
 .o_form_view {
-    .o_form_header_group, .o_input_box {
+    .o_input_box {
         display: flex;
         gap: map-get($spacers, 1);
     }
@@ -1308,15 +1308,5 @@
                 }
             }
         }
-
-        .o_form_header_group {
-            flex-direction: column;
-            align-items: center;
-
-            .o_inner_group {
-                width: 100%;
-            }
-        }
-
     }
 }
