@@ -436,7 +436,7 @@ class MailMail(models.Model):
         :rtype: str | False
         """
         try:
-            root = lxml.html.fromstring(body or '')
+            root = lxml.html.fromstring(body or '').getroottree()
             container = root.xpath('//div[hasclass("o-attachments-container")][not(ancestor::*[@data-oe-version])]')
         except lxml.etree.ParserError:
             root = None
@@ -454,7 +454,8 @@ class MailMail(models.Model):
         attachments -= self.env['ir.attachment'].browse(list(outside_attachments))
 
         if not force:
-            max_email_size_bytes = (self.env['ir.mail_server']).sudo()._get_max_email_size() * 1024 * 1024
+            max_email_size_bytes = 0
+            #(self.env['ir.mail_server']).sudo()._get_max_email_size() * 1024 * 1024
             default_estimated_header_size = 5000
             estimated_email_size_bytes = self._estimate_email_size(
                 {}, body, [a.file_size for a in attachments.sudo()]) + default_estimated_header_size

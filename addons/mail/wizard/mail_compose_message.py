@@ -645,8 +645,12 @@ class MailComposer(models.TransientModel):
 
     @api.onchange('attachment_ids')
     def _onchange_attachment_ids(self):
+        print(self.attachment_ids._origin)
+        print(self.attachment_ids)
         new_body = self.env['mail.mail']._render_attachment_links_in_body(self.body, self.attachment_ids._origin)
+        # print(new_body)
         if new_body is not False:
+            print(new_body)
             self.body = new_body
 
     # ------------------------------------------------------------
