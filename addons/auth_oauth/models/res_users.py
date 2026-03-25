@@ -21,7 +21,6 @@ class ResUsers(models.Model):
 
     oauth_provider_id = fields.Many2one('auth.oauth.provider', string='OAuth Provider')
     oauth_uid = fields.Char(string='OAuth User ID', help="Oauth Provider user_id", copy=False)
-    oauth_access_token = fields.Char(string='OAuth Access Token Store', readonly=True, copy=False, prefetch=False, groups=fields.NO_ACCESS)
 
     _uniq_users_oauth_provider_oauth_uid = models.Constraint(
         'unique(oauth_provider_id, oauth_uid)',
@@ -81,7 +80,6 @@ class ResUsers(models.Model):
             'email': email,
             'oauth_provider_id': provider,
             'oauth_uid': oauth_uid,
-            'oauth_access_token': params['access_token'],
             'active': True,
         }
 
@@ -102,7 +100,6 @@ class ResUsers(models.Model):
             if not oauth_user:
                 raise AccessDenied()
             assert len(oauth_user) == 1
-            oauth_user.write({'oauth_access_token': params['access_token']})
             return oauth_user
         except AccessDenied as access_denied_exception:
             if self.env.context.get('no_user_creation'):
@@ -129,25 +126,4 @@ class ResUsers(models.Model):
         user = self._auth_oauth_signin(provider, validation, params)
         if not user:
             raise AccessDenied()
-        # return user credentials
-        return (user, access_token)
-
-    def _check_credentials(self, credential, env):
-        try:
-            return super()._check_credentials(credential, env)
-        except AccessDenied:
-            if not (credential['type'] == 'oauth_token' and credential['token']):
-                raise
-            passwd_allowed = env['interactive'] or not self.env.user._rpc_api_keys_only()
-            if passwd_allowed and self.env.user.active:
-                res = self.sudo().search([('id', '=', self.env.uid), ('oauth_access_token', '=', credential['token'])])
-                if res:
-                    return {
-                        'uid': self.env.user.id,
-                        'auth_method': 'oauth',
-                        'mfa': 'default',
-                    }
-            raise
-
-    def _get_session_token_fields(self):
-        return super()._get_session_token_fields() | {'oauth_access_token'}
+        return user

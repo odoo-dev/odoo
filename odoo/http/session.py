@@ -24,6 +24,8 @@ if typing.TYPE_CHECKING:
 
     from .requestlib import Request
 
+    from odoo.models import BaseModel
+
 
 _logger = logging.getLogger('odoo.http')
 
@@ -222,22 +224,24 @@ def authenticate(session: Session, env: Environment, credential: dict) -> dict:
     }
     env = env(user=None, su=False)
     auth_info = env['res.users'].authenticate(credential, wsgienv)
-    pre_uid = auth_info['uid']
-
-    session.uid = None
-    session['pre_login'] = credential['login']
-    session['pre_uid'] = pre_uid
+    user = env['res.users'].browse(auth_info['uid']).sudo()
+    prepare(session, env, user)
 
     # if 2FA is disabled we finalize immediately
-    user = env['res.users'].browse(pre_uid)
     if auth_info.get('mfa') == 'skip' or not user._mfa_url():
         finalize(session, env)
 
     if request and request.session is session and request.db == env.registry.db_name:
         request.env = env(user=session.uid, context=session.context)
-        request.update_context(lang=get_lang(request.env(user=pre_uid)).code)
+        request.update_context(lang=get_lang(request.env(user=user.id)).code)
 
     return auth_info
+
+
+def prepare(session: Session, env: Environment, user: BaseModel):
+    session.uid = None
+    session['pre_login'] = user.login
+    session['pre_uid'] = user.id
 
 
 def finalize(session: Session, env: Environment) -> None:

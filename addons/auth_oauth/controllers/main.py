@@ -8,9 +8,8 @@ from werkzeug.exceptions import BadRequest
 
 from odoo import SUPERUSER_ID, _, api
 from odoo.exceptions import AccessDenied
-from odoo.http import Controller, Response, request, route
+from odoo.http import Controller, session, Response, request, route
 from odoo.http.router import db_filter
-from odoo.http.session import authenticate
 from odoo.modules.registry import Registry
 from odoo.tools.misc import clean_context
 
@@ -133,7 +132,7 @@ class OAuthController(Controller):
         try:
             # auth_oauth may create a new user, the commit makes it
             # visible to authenticate()'s own transaction below
-            user, key = request.env['res.users'].with_user(SUPERUSER_ID)._auth_oauth(provider, kw)
+            user = request.env['res.users'].with_user(SUPERUSER_ID)._auth_oauth(provider, kw)
             request.env.cr.commit()
 
             action = state.get('a')
@@ -147,9 +146,11 @@ class OAuthController(Controller):
             elif menu:
                 url = '/odoo?menu_id=%s' % menu
 
-            credential = {'login': user.login, 'token': key, 'type': 'oauth_token'}
-            auth_info = authenticate(request.session, request.env, credential)
-            resp = request.redirect(_get_login_redirect_url(auth_info['uid'], url), 303)
+            session.prepare(request.session, request.env, user)
+            session.finalize(request.session, request.env)
+            request.env = request.env(user=request.session.uid)
+            request.env.user._update_last_login()
+            resp = request.redirect(_get_login_redirect_url(request.session.uid, url), 303)
             resp.autocorrect_location_header = False
 
             # Since /web is hardcoded, verify user has right to land on it
