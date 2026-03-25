@@ -158,6 +158,7 @@
 
         # Main PoS assets, they are loaded in the PoS UI
         'point_of_sale._assets_pos': [
+            ("include", "web.assets_backend"),
             'web/static/src/scss/functions.scss',
 
             # JS boot

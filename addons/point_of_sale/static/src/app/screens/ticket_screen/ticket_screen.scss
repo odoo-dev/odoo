@@ -26,6 +26,76 @@
     width: 30px;
 }
 
+.ticket-screen .o_pos_ticket_kanban_view {
+    height: 100%;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_content {
+    height: 100%;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_view,
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_renderer {
+    height: 100%;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_renderer {
+    border-top: 0;
+    background: transparent;
+    gap: 0.75rem;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_renderer.o_kanban_ungrouped {
+    padding: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-content: start;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_record {
+    margin: 0;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_record:not(.o_kanban_ghost) {
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_ghost {
+    display: none;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_pos_ticket_kanban_card {
+    // background: var(--o-view-background-color, #fff);
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 1rem;
+    padding: 1rem;
+    // min-height: 230px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_record:hover .o_pos_ticket_kanban_card,
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_record:focus .o_pos_ticket_kanban_card {
+    border-color: $o-action;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_kanban_record.o_record_selected .o_pos_ticket_kanban_card {
+    // background: mix($o-component-active-bg, #fff, 35%);
+    border-color: $o-action;
+    box-shadow: 0 0 0 2px rgba($o-action, 0.15);
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .badge {
+    width: fit-content;
+}
+
+.ticket-screen .o_pos_ticket_kanban_view .o_control_panel {
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+    padding: 0.5rem;
+}
+
 @include media-breakpoint-down(sm) {
     .screen-full-width {
         flex-direction: column;
@@ -55,5 +125,12 @@
     .search .fields {
         z-index: 2;
     }
-}
 
+    .ticket-screen .o_pos_ticket_kanban_view .o_kanban_renderer.o_kanban_ungrouped {
+        grid-template-columns: 1fr;
+    }
+
+    .ticket-screen .o_pos_ticket_kanban_view .o_pos_ticket_kanban_card {
+        min-height: auto;
+    }
+}

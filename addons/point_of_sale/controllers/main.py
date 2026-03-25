@@ -109,6 +109,13 @@ class PosController(PortalAccount):
         session_info['user_companies'] = {'current_company': company.id, 'allowed_companies': {company.id: session_info['user_companies']['allowed_companies'][company.id]}}
         session_info['nomenclature_id'] = pos_session.company_id.nomenclature_id.id
         session_info['fallback_nomenclature_id'] = pos_session.config_id.fallback_nomenclature_id.id
+        session_info = {
+            **session_info,
+            'view_ids': {
+                'view_pos_order_filter': request.env.ref('point_of_sale.view_pos_order_filter').id,
+                'view_pos_order_ticket_kanban': request.env.ref('point_of_sale.view_pos_order_ticket_kanban').id,
+            },
+        }
         context = {
             'from_backend': 1 if from_backend else 0,
             'use_pos_fake_tours': True if k.get('tours', False) else False,

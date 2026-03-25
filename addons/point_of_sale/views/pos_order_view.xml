@@ -248,6 +248,95 @@
             </kanban>
         </field>
     </record>
+
+    <record model="ir.ui.view" id="view_pos_order_ticket_kanban">
+        <field name="name">pos.order.ticket.kanban</field>
+        <field name="model">pos.order</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile o_pos_ticket_order_kanban" create="0" sample="1">
+                <field name="currency_id"/>
+                <field name="floating_order_name"/>
+                <field name="name"/>
+                <field name="pos_reference"/>
+                <field name="date_order"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <field name="session_id"/>
+                <field name="config_id"/>
+                <field name="tracking_number"/>
+                <field name="account_move"/>
+                <field name="amount_total"/>
+                <field name="state"/>
+                <field name="tip_amount"/>
+                <field name="preset_id"/>
+                <field name="preset_time"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="o_pos_ticket_kanban_card d-flex flex-column gap-2">
+                            <div class="d-flex align-items-start gap-2">
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-bolder text-truncate">
+                                        <t t-if="record.floating_order_name.raw_value">
+                                            <field name="floating_order_name"/>
+                                        </t>
+                                        <t t-elif="record.partner_id.raw_value">
+                                            <field name="partner_id"/>
+                                        </t>
+                                        <t t-else="">
+                                            <field name="name"/>
+                                        </t>
+                                    </div>
+                                    <div class="text-muted text-truncate">
+                                        <field name="pos_reference"/>
+                                    </div>
+                                </div>
+                                <field name="amount_total" widget="monetary" class="fw-bolder text-nowrap"/>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                                <field name="date_order" class="text-muted text-nowrap"/>
+                                <field name="state" widget="label_selection"
+                                    options="{'classes': {'draft': 'default', 'paid': 'success', 'done': 'primary', 'cancel': 'danger'}}"/>
+                            </div>
+                            <div class="row g-2 small">
+                                <div class="col-6" t-if="record.user_id.raw_value">
+                                    <span class="text-muted d-block">Cashier</span>
+                                    <field name="user_id" class="text-truncate"/>
+                                </div>
+                                <div class="col-6" t-if="record.session_id.raw_value">
+                                    <span class="text-muted d-block">Session</span>
+                                    <field name="session_id" class="text-truncate"/>
+                                </div>
+                                <div class="col-6" t-if="record.config_id.raw_value">
+                                    <span class="text-muted d-block">Shop</span>
+                                    <field name="config_id" class="text-truncate"/>
+                                </div>
+                                <div class="col-6" t-if="record.preset_id.raw_value">
+                                    <span class="text-muted d-block">Preset</span>
+                                    <field name="preset_id" class="text-truncate"/>
+                                </div>
+                                <div class="col-6" t-if="record.tracking_number.raw_value">
+                                    <span class="text-muted d-block">Tracking</span>
+                                    <field name="tracking_number" class="text-truncate"/>
+                                </div>
+                                <div class="col-6" t-if="record.account_move.raw_value">
+                                    <span class="text-muted d-block">Invoice</span>
+                                    <field name="account_move" class="text-truncate"/>
+                                </div>
+                                <div class="col-6" t-if="record.tip_amount.raw_value">
+                                    <span class="text-muted d-block">Tip</span>
+                                    <field name="tip_amount" widget="monetary"/>
+                                </div>
+                                <div class="col-6" t-if="record.preset_time.raw_value">
+                                    <span class="text-muted d-block">Schedule</span>
+                                    <field name="preset_time"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
     <record model="ir.ui.view" id="view_pos_order_pivot">
         <field name="name">pos.order.pivot</field>
         <field name="model">pos.order</field>

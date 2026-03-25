@@ -3,6 +3,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { parseDate, parseDateTime, serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { parseFloat } from "@web/views/fields/parsers";
+import { View } from "@web/views/view";
+import { session } from "@web/session";
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/action_pad/action_pad";
@@ -10,7 +12,6 @@ import { BackButton } from "@point_of_sale/app/screens/product_screen/action_pad
 import { InvoiceButton } from "@point_of_sale/app/screens/ticket_screen/invoice_button/invoice_button";
 import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
 import { CenteredIcon } from "@point_of_sale/app/components/centered_icon/centered_icon";
-import { SearchBar } from "@point_of_sale/app/screens/ticket_screen/search_bar/search_bar";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { Component, onMounted, onWillStart } from "@odoo/owl";
 import {
@@ -43,7 +44,7 @@ export class TicketScreen extends Component {
         Orderline,
         OrderDisplay,
         CenteredIcon,
-        SearchBar,
+        View,
         Numpad,
         BackButton,
         BarcodeVideoScanner,
@@ -104,10 +105,7 @@ export class TicketScreen extends Component {
         });
     }
     onMounted() {
-        setTimeout(() => {
-            // Show updated list of synced orders when going back to the screen.
-            this.onFilterSelected(this.state.filter);
-        });
+        return;
     }
     async onClickPageNbr() {
         const nbr = await makeAwaitable(this.dialog, NumberPopup, {
@@ -207,6 +205,19 @@ export class TicketScreen extends Component {
         const printingChanges = order.uiState?.lastPrints;
         if (printingChanges) {
             await this.pos.ticketPrinter.printOrderChanges({ order, opts: printingChanges });
+        }
+    }
+    async onSelectKanbanRecord(resId) {
+        let order = this.pos.models["pos.order"].get(resId);
+        if (!order) {
+            const orders = await this.pos.data.loadServerOrders([["id", "=", resId]]);
+            order = orders[0];
+        }
+        if (order) {
+            this.onClickOrder(order);
+            if (this.ui.isSmall) {
+                this.pos.ticket_screen_mobile_pane = "right";
+            }
         }
     }
     async onNextPage() {
@@ -531,16 +542,19 @@ export class TicketScreen extends Component {
     getCashier(order) {
         return order.employee_id ? order.employee_id.name : "";
     }
-    getStatus(order) {
+    getStatusKey(order) {
         if (
             order.finalized &&
             (order.getScreenData().name === "" || this.state.filter === "SYNCED")
         ) {
-            return _t("Paid");
-        } else {
-            const screen = order.getScreenData();
-            return this._getOrderStates().get(this._getScreenToStatusMap()[screen.name])?.text;
+            return "PAID";
         }
+        const screen = order.getScreenData();
+        return this._getScreenToStatusMap()[screen.name];
+    }
+    getStatus(order) {
+        const status = this.getStatusKey(order);
+        return status === "PAID" ? _t("Paid") : this._getOrderStates().get(status)?.text;
     }
     /**
      * If the order is the only order and is empty
@@ -575,8 +589,60 @@ export class TicketScreen extends Component {
         const selectedOrder = this.getSelectedOrder();
         return selectedOrder ? order.id && order.id == selectedOrder.id : false;
     }
+    getOrderCardClasses(order) {
+        return {
+            highlight: this.isHighlighted(order),
+            active: this.isHighlighted(order),
+        };
+    }
+    getStatusBadgeClass(order) {
+        const status = this.getStatusKey(order);
+        if (status === "ONGOING" || status === "PAYMENT") {
+            return "text-bg-info";
+        } else if (status === "RECEIPT" || status === "PAID") {
+            return "text-bg-success";
+        }
+        return "text-bg-secondary";
+    }
     showCardholderName() {
         return this.pos.models["pos.payment.method"].some((method) => method.useTerminal);
+    }
+    get trustedConfigIds() {
+        return [this.pos.config.id, ...(this.pos.config.raw.trusted_config_ids || [])];
+    }
+    getOrderKanbanDomain() {
+        const domain = [
+            ["config_id", "in", this.trustedConfigIds],
+            ["state", "!=", "cancel"],
+        ];
+        if (this.state.filter === "SYNCED") {
+            domain.push(["state", "in", ["paid", "done"]]);
+        } else if (this.state.filter === "ACTIVE_ORDERS") {
+            domain.push(["state", "=", "draft"]);
+        }
+        if (this.state.search?.partnerId) {
+            domain.push(["partner_id", "=", this.state.search.partnerId]);
+        }
+        if (this.state.selectedPreset?.id) {
+            domain.push(["preset_id", "=", this.state.selectedPreset.id]);
+        }
+        return domain;
+    }
+    get orderKanbanViewProps() {
+        return {
+            className: "o_pos_ticket_kanban_view h-100",
+            context: {},
+            display: { searchPanel: false },
+            domain: this.getOrderKanbanDomain(),
+            forceGlobalClick: true,
+            noBreadcrumbs: true,
+            readonly: true,
+            resModel: "pos.order",
+            searchViewId: session.view_ids?.view_pos_order_filter || false,
+            selectRecord: this.onSelectKanbanRecord.bind(this),
+            type: "kanban",
+            viewId: session.view_ids?.view_pos_order_ticket_kanban || false,
+        };
     }
     getSearchBarConfig() {
         return {
