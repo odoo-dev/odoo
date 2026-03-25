@@ -228,10 +228,13 @@ export class Field extends Component {
     static props = ["fieldInfo?", "*"];
     static parseFieldNode = function (node, models, modelName, viewType, jsClass) {
         const name = node.getAttribute("name");
-        const widget = node.getAttribute("widget");
+        let widget = node.getAttribute("widget");
         const fields = models[modelName].fields;
         if (!fields[name]) {
             throw new Error(`"${modelName}"."${name}" field is undefined.`);
+        }
+        if (this.env.isSmall && !widget && fields[name].type === "boolean") {
+            widget = "boolean_toggle";
         }
         const field = getFieldFromRegistry(fields[name].type, widget, viewType, jsClass);
         const fieldInfo = {

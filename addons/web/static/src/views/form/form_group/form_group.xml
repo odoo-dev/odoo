@@ -54,14 +54,13 @@
         </div>
     </t>
     <t t-else="">
-        <t t-set="inlineCell" t-value="this.computeCellDisplay(cell)"/>
         <div class="o_wrap_field_boolean o_no_box d-flex d-sm-contents" t-attf-class="{{ marginOnSmallScreen }}">
             <div class="o_cell o_wrap_label flex-sm-grow-0 text-break text-900">
-                <t t-component="inlineCell.Component" t-if="inlineCell.isVisible" t-props="inlineCell.props"/>
+                <t t-component="cell.Component" t-if="cell.isVisible" t-props="cell.props"/>
             </div>
             <div class="o_cell o_wrap_input ms-auto ms-md-0"
-                t-attf-style="{{ inlineCell.itemSpan -1 > 1 ? 'grid-column: span ' + (inlineCell.itemSpan -1) + ';' : '' }}">
-                <t t-slot="{{ inlineCell.name }}" />
+                t-attf-style="{{ cell.itemSpan -1 > 1 ? 'grid-column: span ' + (cell.itemSpan -1) + ';' : '' }}">
+                <t t-slot="{{ cell.name }}" />
             </div>
         </div>
     </t>
