@@ -233,7 +233,7 @@ export class Field extends Component {
         if (!fields[name]) {
             throw new Error(`"${modelName}"."${name}" field is undefined.`);
         }
-        if (this.env.isSmall && !widget && fields[name].type === "boolean") {
+        if (isSmall() && !widget && fields[name].type === "boolean") {
             widget = "boolean_toggle";
         }
         const field = getFieldFromRegistry(fields[name].type, widget, viewType, jsClass);
