@@ -22,27 +22,11 @@ class ResUsers(models.Model):
     oauth_provider_id = fields.Many2one('auth.oauth.provider', string='OAuth Provider')
     oauth_uid = fields.Char(string='OAuth User ID', help="Oauth Provider user_id", copy=False)
     oauth_access_token = fields.Char(string='OAuth Access Token Store', readonly=True, copy=False, prefetch=False, groups=fields.NO_ACCESS)
-    has_oauth_access_token = fields.Boolean(string='Has OAuth Access Token', compute='_compute_has_oauth_access_token')
 
     _uniq_users_oauth_provider_oauth_uid = models.Constraint(
         'unique(oauth_provider_id, oauth_uid)',
         'OAuth UID must be unique per provider',
     )
-
-    @api.depends('oauth_access_token')
-    @api.depends_context('uid')
-    def _compute_has_oauth_access_token(self):
-        if not (self.env.su or self.env.user.has_group('base.group_erp_manager')):
-            self.has_oauth_access_token = False
-            self = self.filtered(lambda u: u._origin == self.env.user).with_prefetch()  # noqa: PLW0642
-        for user in self:
-            user.has_oauth_access_token = bool(user.sudo().oauth_access_token)
-
-    def remove_oauth_access_token(self):
-        user = self.env.user
-        if not (user.has_group('base.group_erp_manager') or self == user):
-            raise AccessError(self.env._('You do not have permissions to remove the access token'))
-        self.sudo().oauth_access_token = False
 
     def _auth_oauth_rpc(self, endpoint, access_token):
         if self.env['ir.config_parameter'].sudo().get_bool('auth_oauth.authorization_header'):
