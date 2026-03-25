@@ -1745,8 +1745,9 @@
     })(ComputationState || (ComputationState = {}));
     const atomSymbol = Symbol("Atom");
     let observers = [];
+    let immediateObservers = [];
     let currentComputation;
-    function createComputation(compute, isDerived, state = ComputationState.STALE) {
+    function createComputation(compute, isDerived, state = ComputationState.STALE, immediate = false) {
         return {
             state,
             value: undefined,
@@ -1754,6 +1755,7 @@
             sources: new Set(),
             observers: new Set(),
             isDerived,
+            immediate,
         };
     }
     function onReadAtom(atom) {
@@ -1769,11 +1771,21 @@
                 if (ctx.isDerived) {
                     markDownstream(ctx);
                 }
+                else if (ctx.immediate) {
+                    immediateObservers.push(ctx);
+                }
                 else {
                     observers.push(ctx);
                 }
             }
             ctx.state = ComputationState.STALE;
+        }
+        if (immediateObservers.length) {
+            const toRun = immediateObservers;
+            immediateObservers = [];
+            for (const ctx of toRun) {
+                updateComputation(ctx);
+            }
         }
         batchProcessEffects();
     }
@@ -5524,8 +5536,6 @@
 
     function effect(fn) {
         const computation = createComputation(() => {
-            // In case the cleanup read an atom.
-            // todo: test it
             setComputation(undefined);
             unsubscribeEffect(computation);
             setComputation(computation);
@@ -5533,10 +5543,23 @@
         }, false);
         getCurrentComputation()?.observers.add(computation);
         updateComputation(computation);
-        // Remove sources and unsubscribe
         return function cleanupEffect() {
-            // In case the cleanup read an atom.
-            // todo: test it
+            const previousComputation = getCurrentComputation();
+            setComputation(undefined);
+            unsubscribeEffect(computation);
+            setComputation(previousComputation);
+        };
+    }
+    function immediateEffect(fn) {
+        const computation = createComputation(() => {
+            setComputation(undefined);
+            unsubscribeEffect(computation);
+            setComputation(computation);
+            return fn();
+        }, false, ComputationState.STALE, true);
+        getCurrentComputation()?.observers.add(computation);
+        updateComputation(computation);
+        return function cleanupImmediateEffect() {
             const previousComputation = getCurrentComputation();
             setComputation(undefined);
             unsubscribeEffect(computation);
@@ -6599,6 +6622,7 @@
     exports.config = config;
     exports.effect = effect;
     exports.htmlEscape = htmlEscape;
+    exports.immediateEffect = immediateEffect;
     exports.markRaw = markRaw;
     exports.markup = markup;
     exports.mount = mount;
@@ -6629,8 +6653,8 @@
     exports.xml = xml;
 
 
-    __info__.date = '2026-03-18T08:16:53.570Z';
-    __info__.hash = '3974b08';
+    __info__.date = '2026-03-25T14:21:10.151Z';
+    __info__.hash = 'd4ea2b1';
     __info__.url = 'https://github.com/odoo/owl';
 
 

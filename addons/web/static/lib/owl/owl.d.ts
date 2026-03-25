@@ -189,6 +189,7 @@ interface ComputationAtom<T = any> extends Atom<T> {
     isDerived: boolean;
     sources: Set<Atom>;
     state: ComputationState;
+    immediate?: boolean;
 }
 declare function untrack<T>(fn: (...args: any[]) => T): T;
 
@@ -632,6 +633,7 @@ interface ComputedOptions<TWrite> {
 declare function computed<TRead, TWrite = TRead>(getter: () => TRead, options?: ComputedOptions<TWrite>): ReactiveValue<TRead, TWrite>;
 
 declare function effect<T>(fn: () => T): () => void;
+declare function immediateEffect<T>(fn: () => T): () => void;
 
 /**
  * This hook will run a callback when a component is mounted and patched, and
@@ -723,5 +725,5 @@ declare const __info__: {
     version: string;
 };
 
-export { App, Component, EventBus, OwlError, Plugin, Registry, Resource, __info__, assertType, batched, blockDom, computed, config, effect, htmlEscape, markRaw, markup, mount, onError, onMounted, onPatched, onWillDestroy, onWillPatch, onWillStart, onWillUnmount, onWillUpdateProps, plugin, props, providePlugins, proxy, signal, status, toRaw, types, untrack, useApp, useContext, useEffect, useListener, useResource, validateType, whenReady, xml };
+export { App, Component, EventBus, OwlError, Plugin, Registry, Resource, __info__, assertType, batched, blockDom, computed, config, effect, htmlEscape, immediateEffect, markRaw, markup, mount, onError, onMounted, onPatched, onWillDestroy, onWillPatch, onWillStart, onWillUnmount, onWillUpdateProps, plugin, props, providePlugins, proxy, signal, status, toRaw, types, untrack, useApp, useContext, useEffect, useListener, useResource, validateType, whenReady, xml };
 export type { CapturedContext, ComponentConstructor, GetProps, PluginConstructor, PluginInstance, ReactiveValue, Signal };
