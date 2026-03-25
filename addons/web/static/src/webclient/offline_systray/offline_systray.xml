@@ -51,7 +51,7 @@
                                     t-att-data-tooltip-template="'web.OfflineSystrayTooltip'"
                                     t-att-data-tooltip-info="element.tooltip">
                                     <span t-attf-class="o_tag mw-100 o_badge badge rounded-pill {{ 'o_tag_color_' + element.status.color }}">
-                                        <t class="o_tag_badge_text o_badge_text" t-esc="element.status.label"/>
+                                        <t class="o_tag_badge_text o_badge_text" t-out="element.status.label"/>
                                     </span>
                                 </div>
                                 <div>
