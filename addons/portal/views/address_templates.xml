@@ -175,66 +175,155 @@
                 id="o_email"
                 type="email"
                 name="email"
-                t-att-value="partner_sudo.email"
+                t-att-value="email"
                 class="form-control"
             />
         </div>
         <div id="div_phone" class="col-lg-6 mb-2">
-            <label class="col-form-label" for="o_phone">Phone</label>
+            <label
+                class="col-form-label"
+                for="o_phone"
+            >
+                Phone
+            </label>
             <input
                 id="o_phone"
                 type="tel"
                 name="phone"
-                t-att-value="partner_sudo.phone"
+                t-att-value="phone"
+                t-att-placeholder="phone_code"
                 class="form-control"
             />
         </div>
-        <t name="b2b_fields">
-            <div class="w-100"/>
-            <t t-if="is_used_as_billing">
-                <div id="company_name_div" class="col-lg-6 mb-2">
-                    <label
-                        class="col-form-label fw-normal label-optional"
-                        for="o_company_name"
-                    >
-                        Company Name
-                    </label>
-                    <input
-                        id="o_company_name"
-                        type="text"
-                        name="parent_name"
-                        t-att-value="current_partner.parent_name"
-                        t-att-readonly="'1' if not is_main_address else None"
-                        class="form-control"
-                    />
-                </div>
-                <div id="div_vat" class="col-lg-6 mb-2">
-                    <label class="col-form-label fw-normal label-optional" for="o_vat">
-                        <t t-out="vat_label"/>
-                    </label>
-                    <input
-                        name="vat"
-                        id="o_vat"
-                        type="text"
-                        class="form-control"
-                        t-att-value="current_partner.vat"
-                        t-att-readonly="'1' if (commercial_fields_warning or vat_warning) else None"
-                    />
-                    <div t-if="vat_warning" class="col-12 d-none d-lg-block mb-1">
-                        <small class="form-text text-muted" t-out="vat_warning"/>
-                    </div>
-                </div>
-                <div t-if="commercial_fields_warning" class="col-12 d-none d-lg-block mb-1">
-                    <small class="form-text text-muted">
-                        <t t-out="commercial_fields_warning"/>
-                        <t t-if="commercial_address_update_url">
-                            <br/>
-                            If you want to modify it, update
-                            <a t-att-href="commercial_address_update_url">your account details</a>.
-                        </t>
-                    </small>
-                </div>
-            </t>
+        <div class="w-100 mt-4"/>
+        <t t-set="state_required" t-att-value="not country.state_required or not states"/>
+        <div id="div_country" t-attf-class="mb-2 {{'col-lg-6' if state_required else 'col-lg-12'}}">
+            <label class="col-form-label" for="o_country_id">
+                Country
+            </label>
+            <select
+                id="o_country_id"
+                name="country_id"
+                t-att-class="'pe-none opacity-50 form-select' if not can_edit_country else 'form-select'"
+            >
+                <option value="">Country...</option>
+                <option
+                    t-foreach="countries"
+                    t-as="c"
+                    t-att-value="c.id"
+                    t-att-selected="c.id == country.id"
+                    t-att-data-code="c.code"
+                    t-out="c.name"
+                />
+            </select>
+            <div t-if="not can_edit_country" class="col-12 d-none d-lg-block mb-1">
+                <small class="form-text text-muted">
+                    Changing country is not allowed once document(s) have
+                    been issued for your account. Please contact us directly for this
+                    operation.
+                </small>
+            </div>
+        </div>
+        <div
+            id="div_state"
+            class="col-lg-6 mb-2"
+            t-att-style="state_required and 'display: none'"
+        >
+            <label class="col-form-label" for="o_state_id">
+                State / Province
+            </label>
+            <select
+                id="o_state_id"
+                name="state_id"
+                class="form-select"
+            >
+                <option value="">State / Province...</option>
+                <option
+                    t-foreach="states"
+                    t-as="s"
+                    t-att-value="s.id"
+                    t-att-selected="s.id == state.id"
+                    t-att-data-code="s.code"
+                    t-out="s.name"
+                />
+            </select>
+        </div>
+        <div class="w-100"/>
+        <t t-if="zip_before_city">
+            <div
+                id="div_zip"
+                class="col-md-4 mb-2"
+                t-att-style="country.zip_applicability == 'not_applicable' and 'display:none;'"
+            >
+                <label
+                    for="o_zip_before_city"
+                    class="col-form-label label-optional"
+                >
+                    Zip Code
+                </label>
+                <input
+                    id="o_zip_before_city"
+                    type="text"
+                    name="zip"
+                    class="form-control"
+                    t-att-value="partner_sudo.zip"
+                />
+            </div>
+        </t>
+        <div
+            id="div_city"
+            class="col-md-8 mb-2"
+            t-att-style="cities_data and 'display:none;'"
+        >
+            <label class="col-form-label" for="o_city">City</label>
+            <input
+                id="o_city"
+                type="text"
+                name="city"
+                class="form-control"
+                t-att-value="partner_sudo.city"
+            />
+        </div>
+        <div
+            id="div_city_id"
+            class="col-md-8 mb-2"
+            t-att-style="not cities_data and 'display:none;'"
+        >
+            <label class="col-form-label" for="city_id">City</label>
+            <select id="city_id" name="city_id" class="form-select">
+                <option value="">City...</option>
+                <option
+                    name="city_options"
+                    t-foreach="cities_data"
+                    t-as="c"
+                    t-att-value="c['id']"
+                    t-att-selected="c['id'] == city.id"
+                    t-att-data-state-id="c['state_id']"
+                    t-att-data-zipcode="c['zipcode']"
+                    t-out="c['name']"
+                />
+            </select>
+        </div>
+        <t t-if="not zip_before_city">
+            <div
+                id="div_zip"
+                class="col-md-4 mb-2"
+                t-att-style="country.zip_applicability == 'not_applicable' and 'display:none;'"
+            >
+                <label
+                    for="o_zip_after_city"
+                    class="col-form-label label-optional"
+                >
+                    Zip Code
+                </label>
+                <input
+                    id="o_zip_after_city"
+                    type="text"
+                    name="zip"
+                    class="form-control"
+                    t-att-value="partner_sudo.zip"
+                />
+            </div>
         </t>
         <div id="div_street" class="col-lg-12 mb-2">
             <label class="col-form-label" for="o_street">
@@ -260,101 +349,58 @@
                 t-att-value="partner_sudo.street2"
             />
         </div>
-        <div class="w-100"/>
-        <t t-if="zip_before_city">
-            <div id="div_zip" class="col-md-4 mb-2">
-                <label class="col-form-label" for="o_zip_before_city">
-                    Zip Code
-                </label>
-                <input
-                    id="o_zip_before_city"
-                    type="text"
-                    name="zip"
-                    class="form-control"
-                    t-att-value="partner_sudo.zip"
-                />
-            </div>
+        <div class="w-100 "/>
+        <t name="b2b_fields">
+            <div class="w-100 mt-4"/>
+            <t t-if="is_used_as_billing">
+                <div id="company_name_div" class="col-lg-6 mb-2">
+                    <label
+                        class="col-form-label fw-normal label-optional"
+                        for="o_company_name"
+                    >
+                        Company
+                    </label>
+                    <input
+                        id="o_company_name"
+                        type="text"
+                        name="parent_name"
+                        t-att-value="current_partner.parent_name"
+                        t-att-readonly="'1' if not is_main_address else None"
+                        class="form-control"
+                    />
+                </div>
+                <div id="div_vat" class="col-lg-6 mb-2">
+                    <label
+                        t-out="vat_label"
+                        for="o_vat"
+                        class="col-form-label fw-normal label-optional"
+                    />
+                    <input
+                        type="text"
+                        id="o_vat"
+                        name="vat"
+                        t-att-value="current_partner.vat"
+                        t-att-readonly="'1' if (commercial_fields_warning or vat_warning) else None"
+                        class="form-control"
+                    />
+                </div>
+                <div
+                    t-if="not can_edit_commercial_fields and commercial_fields_warning"
+                    class="col-12 d-none d-lg-block mb-1"
+                >
+                    <small class="form-text text-muted">
+                        <t t-out="commercial_fields_warning"/>
+                        <t t-if="commercial_address_update_url">
+                            If you want to modify it, update
+                            <a t-att-href="commercial_address_update_url">your account details</a>.
+                        </t>
+                    </small>
+                </div>
+            </t>
         </t>
-        <div id="div_city" class="col-md-8 mb-2">
-            <label class="col-form-label" for="o_city">City</label>
-            <input
-                id="o_city"
-                type="text"
-                name="city"
-                class="form-control"
-                t-att-value="partner_sudo.city"
-            />
-        </div>
-        <t t-if="not zip_before_city">
-            <div id="div_zip" class="col-md-4 mb-2">
-                <label class="col-form-label" for="o_zip_after_city">
-                    Zip Code
-                </label>
-                <input
-                    id="o_zip_after_city"
-                    type="text"
-                    name="zip"
-                    class="form-control"
-                    t-att-value="partner_sudo.zip"
-                />
-            </div>
-        </t>
-        <div class="w-100"/>
-        <div id="div_country" class="col-lg-6 mb-2">
-            <label class="col-form-label" for="o_country_id">
-                Country
-            </label>
-            <select
-                id="o_country_id"
-                name="country_id"
-                t-att-class="'pe-none opacity-50 form-select' if not can_edit_country else 'form-select'"
-            >
-                <option value="">Country...</option>
-                <option
-                    t-foreach="countries"
-                    t-as="c"
-                    t-att-value="c.id"
-                    t-att-selected="c.id == (country.id if country else partner_sudo.country_id.id)"
-                    t-att-code="c.code"
-                    t-out="c.name"
-                />
-            </select>
-            <div t-if="not can_edit_country" class="col-12 d-none d-lg-block mb-1">
-                <small class="form-text text-muted">
-                    Changing country is not allowed once document(s) have
-                    been issued for your account. Please contact us directly for this
-                    operation.
-                </small>
-            </div>
-        </div>
-        <div
-            id="div_state"
-            class="col-lg-6 mb-2"
-            t-att-style="not country_states and 'display: none'"
-        >
-            <label class="col-form-label label-optional" for="o_state_id">
-                State / Province
-            </label>
-            <select
-                id="o_state_id"
-                name="state_id"
-                class="form-select"
-            >
-                <option value="">State / Province...</option>
-                <option
-                    t-foreach="country_states"
-                    t-as="s"
-                    t-att-value="s.id"
-                    t-att-selected="s.id == (int(state_id) if state_id else partner_sudo.state_id.id)"
-                    t-out="s.name"
-                />
-            </select>
-        </div>
-        <input
-            type="hidden"
-            name="csrf_token"
-            t-att-value="request.csrf_token()"
-        />
+        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+        <input type="hidden" name="required_fields" value="name,email"/>
+        <input type="hidden" name="default_required_fields" t-att-value="','.join(required_fields)"/>
         <input type="hidden" name="address_type" t-att-value="address_type"/>
         <input type="hidden" name="use_delivery_as_billing" t-att-value="use_delivery_as_billing"/>
         <input type="hidden" name="parent_id" t-att-value="parent_id"/>
@@ -364,7 +410,6 @@
         <t t-if="callback">
             <input type="hidden" name="callback" t-att-value="callback"/>
         </t>
-        <input type="hidden" name="required_fields" t-att-value="'name,email'"/>
     </template>
 
     <template id="portal.address_footer">

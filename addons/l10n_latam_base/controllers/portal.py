@@ -12,16 +12,18 @@ class L10nLatamBasePortalAccount(PortalAccount):
         if request.env.company._is_latam() and rendering_values['is_used_as_billing']:
             can_edit_commercial_fields = rendering_values["can_edit_commercial_fields"]
             LatamIdentificationType = request.env['l10n_latam.identification.type'].sudo()
+            default_identification_type = (
+                rendering_values["current_partner"].l10n_latam_identification_type_id
+                or self._l10n_get_default_identification_type_id()
+                or LatamIdentificationType
+            )
             rendering_values.update({
-                'identification_type': (
-                    rendering_values['current_partner'].l10n_latam_identification_type_id
-                    or self._l10n_get_default_identification_type_id()
-                ),
+                "identification_type": default_identification_type,
                 'identification_types': LatamIdentificationType.search([
                     '|',
                         ('country_id', '=', False),
                         ('country_id.code', '=', request.env.company.country_code),
-                ]) if can_edit_commercial_fields else LatamIdentificationType,
+                ]) if can_edit_commercial_fields else default_identification_type,
                 'vat_label': request.env._("Identification Number"),
                 'is_latam_country': True,
                 'display_b2b_fields': True,
