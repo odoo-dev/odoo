@@ -2,7 +2,7 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
-import { useChildRef } from "@web/core/utils/hooks";
+
 import { Component } from "@odoo/owl";
 
 export class UrlField extends Component {
@@ -15,7 +15,6 @@ export class UrlField extends Component {
     };
 
     setup() {
-        this.input = useChildRef();
         useInputField({ getValue: () => this.value });
     }
 
