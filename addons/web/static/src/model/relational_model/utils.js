@@ -1,5 +1,12 @@
 import { useComponent } from "@web/owl2/utils";
-import { effect, markup, onWillDestroy, onWillStart, onWillUpdateProps, untrack } from "@odoo/owl";
+import {
+    immediateEffect,
+    markup,
+    onWillDestroy,
+    onWillStart,
+    onWillUpdateProps,
+    untrack,
+} from "@odoo/owl";
 import { evalPartialContext, makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import {
@@ -776,7 +783,7 @@ export function useRecordObserver(callback) {
         const { promise, resolve, reject } = Promise.withResolvers();
         const effectId = currentId;
         let firstCall = true;
-        disposePreviousEffect = effect(() => {
+        disposePreviousEffect = immediateEffect(() => {
             props.record; // consume signal
             if (firstCall) {
                 firstCall = false;
