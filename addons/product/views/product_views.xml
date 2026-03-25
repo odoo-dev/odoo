@@ -70,7 +70,7 @@
                         <field
                             name="image_1920"
                             widget="image_with_media_dialog"
-                            options="{'convert_to_webp': True, 'preview_image': 'image_128', 'size': [130,130] }"
+                            options="{'convert_to_webp': True, 'preview_image': 'image_128', 'size': [90, 90] }"
                         />
                     </div>
                     
@@ -581,7 +581,7 @@
                 <field name="name" position="after">
                     <field name="product_tmpl_id" readonly="1" invisible="1" required="id"/>
                 </field>
-                <xpath expr="//group[hasclass('o_form_header_details')]//h1" position="after">
+                <xpath expr="//div[@name='options']" position="before">
                     <field name="product_template_variant_value_ids" widget="many2many_tags" readonly="1" invisible="not product_template_variant_value_ids" groups="product.group_product_variant"/>
                 </xpath>
                 <field name="product_tag_ids" position="attributes">
