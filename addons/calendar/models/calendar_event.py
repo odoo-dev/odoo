@@ -969,7 +969,7 @@ class CalendarEvent(models.Model):
         skip_attendee_notification = self.env.context.get('skip_attendee_notification')
         if not skip_attendee_notification and 'partner_ids' in values:
             # we send to all partners and not only the new ones
-            (current_attendees - previous_attendees)._send_invitation_emails()
+            self._get_new_invited_attendees(current_attendees, previous_attendees, vals)._send_invitation_emails()
         if not skip_attendee_notification and not self.env.context.get('is_calendar_event_new') and 'start' in values:
             start_date = fields.Datetime.to_datetime(values.get('start'))
             # Only notify on future events
@@ -1780,6 +1780,11 @@ class CalendarEvent(models.Model):
                 contact_description.append("")  # To add a blank line between the organizer and partner details
             contact_description.extend(self._prepare_partner_contact_details_html(_("Contact Details"), first_partner))
         return Markup("<br/>").join(contact_description)
+
+    def _get_new_invited_attendees(self, current_attendees, previous_attendees, vals):
+        """Get the attendees who must receive an invitation for a modified calendar event. This method is meant
+        to be overridden."""
+        return current_attendees - previous_attendees
 
     @api.model
     def _prepare_partner_contact_details_html(self, section_title, partner):
