@@ -133,7 +133,7 @@ class OAuthController(Controller):
         try:
             # auth_oauth may create a new user, the commit makes it
             # visible to authenticate()'s own transaction below
-            _, user, key = request.env['res.users'].with_user(SUPERUSER_ID).auth_oauth(provider, kw)
+            user, key = request.env['res.users'].with_user(SUPERUSER_ID)._auth_oauth(provider, kw)
             request.env.cr.commit()
 
             action = state.get('a')

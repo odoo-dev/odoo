@@ -132,7 +132,7 @@ class ResUsers(models.Model):
                 raise access_denied_exception
 
     @api.model
-    def auth_oauth(self, provider, params):
+    def _auth_oauth(self, provider, params):
         # Advice by Google (to avoid Confused Deputy Problem)
         # if validation.audience != OUR_CLIENT_ID:
         #   abort()
@@ -146,7 +146,7 @@ class ResUsers(models.Model):
         if not user:
             raise AccessDenied()
         # return user credentials
-        return (self.env.cr.dbname, user, access_token)
+        return (user, access_token)
 
     def _check_credentials(self, credential, env):
         try:
