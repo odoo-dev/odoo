@@ -6338,4 +6338,4 @@
     __info__.url = 'https://github.com/odoo/owl';
 
 
-})(this.owl = this.owl || {});
+})(globalThis.owl = globalThis.owl || {});

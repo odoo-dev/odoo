@@ -15,7 +15,7 @@
             'spreadsheet/static/lib/chartjs-chart-geo/chartjs-chart-geo.js',
             'spreadsheet/static/lib/chart_js_treemap.js',
         ],
-        'spreadsheet.o_spreadsheet': [
+        'spreadsheet.o_spreadsheet_base': [
             'web/static/src/views/graph/graph_model.js',
             'web/static/src/views/pivot/pivot_model.js',
             'web/static/src/polyfills/clipboard.js',
@@ -27,6 +27,9 @@
             'spreadsheet/static/src/**/*.xml',
             ('remove', 'spreadsheet/static/src/assets_backend/**/*'),
             ('remove', 'spreadsheet/static/src/public_readonly_app/**/*'),
+        ],
+        'spreadsheet.o_spreadsheet': [
+            ('include', 'spreadsheet.o_spreadsheet_base'),
         ],
         'spreadsheet.assets_print': [
             'spreadsheet/static/src/print_assets/**/*',
@@ -85,6 +88,7 @@
             'spreadsheet/static/src/plugins.js',
         ],
         'web.assets_backend': [
+            ('prepend', 'spreadsheet/static/src/assets_backend/nodejs_polyfill.js'),
             'spreadsheet/static/src/o_spreadsheet/o_spreadsheet.css',
             'spreadsheet/static/src/**/*.scss',
             'spreadsheet/static/src/assets_backend/**/*',
