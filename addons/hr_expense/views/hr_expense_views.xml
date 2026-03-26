@@ -267,7 +267,7 @@
                             <field name="vendor_id" invisible="payment_mode != 'company_account'" readonly="not is_editable"/>
                             <field name="selectable_matching_bill" invisible="payment_mode != 'company_account'"
                                    context="{'name_as_amount_total': 1, 'list_view_ref': 'hr_expense.view_move_list_expense'}"
-                                   readonly="not is_editable" options="{'no_create': True}" groups="account.group_account_readonly" class="w-auto" />
+                                   readonly="not is_editable" options="{'no_create': True}" groups="account.group_account_readonly"/>
                             <field name="account_id" options="{'no_create': True}"
                                    domain="[('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card')), ('company_ids', 'parent_of', company_id)]"
                                    groups="account.group_account_readonly" readonly="not is_editable" invisible="selectable_matching_bill"

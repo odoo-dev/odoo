@@ -1267,17 +1267,42 @@ class HrExpense(models.Model):
             with_matched_bill = company_expenses.filtered(lambda expense: expense.selectable_matching_bill)
             without_matched_bill = company_expenses - with_matched_bill
 
-            for exp in with_matched_bill:
-                # checks to do on the matched bill
-                exp.account_move_id = exp.selectable_matching_bill.id
-                # maybe I should post it.
-
             without_matched_bill._create_company_paid_moves()
+            with_matched_bill._link_existing_bill()
+
             # Post the company-paid expense through the payment, to post both at the same time
-            without_matched_bill.account_move_id.origin_payment_id.action_post()
+            company_expenses.account_move_id.origin_payment_id.action_post()
 
         if employee_expenses:
             return employee_expenses.with_context(company_paid_move_ids=company_expenses.account_move_id.ids)._post_wizard()
+
+    def _link_existing_bill(self):
+
+        for expense in self:
+            payment_vals = {
+                'date': expense.date,
+                'memo': expense.name,
+                'journal_id': expense.journal_id.id,
+                'amount': expense.total_amount_currency,
+                'payment_type': 'outbound',
+                'partner_type': 'supplier',
+                'partner_id': expense.vendor_id.id,
+                'currency_id': expense.currency_id.id,
+                'payment_method_line_id': expense.payment_method_line_id.id,
+                'company_id': expense.company_id.id,
+            }
+
+            payment = self.env['account.payment'].create(payment_vals)
+            payment.move_id = expense.selectable_matching_bill.id
+
+            matched_bill = payment.move_id
+            # matched_bill.expense_ids |= expense
+            matched_bill.update({
+                'origin_payment_id': payment.id,
+                # We need to put the journal_id because editing origin_payment_id triggers a re-computation chain
+                # that voids the company_currency_id of the lines
+                'journal_id': matched_bill.journal_id.id,
+            })
 
     def action_pay(self):
         """ Register payment shortcut on the expense form view """
