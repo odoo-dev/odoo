@@ -262,9 +262,14 @@ export async function createPublicKioskAttendance(document, kiosk_backend_info) 
     const env = makeEnv();
     await startServices(env);
     session.server_version_info = kiosk_backend_info.server_version_info;
-    const app = new App(kioskAttendanceApp, {
+    const app = new App({
         getTemplate,
         env: env,
+        dev: env.debug,
+        translateFn: appTranslateFn,
+        translatableAttributes: ["data-tooltip"],
+    });
+    const root = app.createRoot(kioskAttendanceApp, {
         props: {
             token: kiosk_backend_info.token,
             companyId: kiosk_backend_info.company_id,
@@ -276,10 +281,7 @@ export async function createPublicKioskAttendance(document, kiosk_backend_info) 
             deviceTrackingEnabled: kiosk_backend_info.device_tracking_enabled,
             captureCheckInImage: kiosk_backend_info.capture_check_in_image,
         },
-        dev: env.debug,
-        translateFn: appTranslateFn,
-        translatableAttributes: ["data-tooltip"],
     });
-    return app.mount(document.body);
+    return root.mount(document.body);
 }
 export default { kioskAttendanceApp, createPublicKioskAttendance };
