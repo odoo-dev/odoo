@@ -292,6 +292,12 @@ class HrAttendance(models.Model):
         manual_overtimes = set(all_overtime_lines.filtered(
             lambda l: l.manual_duration != l.duration or l.status == 'to_approve'
         ).mapped(lambda l: (l.employee_id.id, l.date)))
+        no_need = set(all_overtime_lines.filtered(
+            lambda l: ((
+                    l.manual_duration == l.duration and l.status != 'to_approve'
+                )
+            )
+        ).mapped(lambda l: (l.employee_id.id, l.date, l.duration)))
         all_overtime_lines.unlink()
         all_attendances = (self | self.env['hr.attendance'].search(attendance_domain)).filtered_domain([('check_out', '!=', False)])
         if not all_attendances:
@@ -318,10 +324,15 @@ class HrAttendance(models.Model):
         for ruleset_sudo, ruleset_attendances in attendances_by_ruleset.items():
             attendances_dates = list(chain(*ruleset_attendances._get_dates().values()))
             overtime_vals_list.extend([
+            {
+                **val,
+                'status': 'to_approve'
+            } if (val['employee_id'], val['date'], val['duration']) in manual_overtimes else (
                 {
                     **val,
-                    'status': 'to_approve'
-                } if (val['employee_id'], val['date']) in manual_overtimes else val
+                    'status': 'approved' # Or whatever status "no_need" implies
+                } if (val['employee_id'], val['date'], val['duration']) in no_need else val
+            )
                 for val in ruleset_sudo.rule_ids._generate_overtime_vals_v2(min(attendances_dates), max(attendances_dates), ruleset_attendances, schedules_intervals_by_employee)
             ])
         self.env['hr.attendance.overtime.line'].create(overtime_vals_list)
