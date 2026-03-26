@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.StandNumberPage">
         <div class="kiosk_stand_page d-flex flex-column vh-100 overflow-hidden o_self_background text-center o_self_fade"
-        t-attf-style="background-image:#{this.selfOrder.kioskBackgroundImageUrl};background-size: cover; background-position: center;">
+        t-attf-style="background-image:#{this.selfOrder.backgroundImageUrl};background-size: cover; background-position: center;">
 
             <div class="d-flex flex-column flex-grow-1 overflow-y-auto" >
                 <div class="container o_self_container my-auto d-flex flex-column py-4">

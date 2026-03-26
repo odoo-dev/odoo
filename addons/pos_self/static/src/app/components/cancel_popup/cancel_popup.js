@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 
 export class CancelPopup extends Component {
     static template = "pos_self_order.CancelPopup";
@@ -10,7 +10,7 @@ export class CancelPopup extends Component {
     };
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
     }
 
     confirm() {

@@ -1,6 +1,6 @@
 import { useState } from "@web/owl2/utils";
 import { Component } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { AttributeSelectionHelper } from "./attribute_selection_helper";
 
 export class AttributeSelection extends Component {
@@ -8,7 +8,7 @@ export class AttributeSelection extends Component {
     static props = ["productTemplate", "onSelection?", "isCombo?"];
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.envSelectedValues = useState(this.env.selectedValues);
     }
 

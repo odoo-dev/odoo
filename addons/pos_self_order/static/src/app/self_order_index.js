@@ -1,7 +1,7 @@
 import { Component } from "@odoo/owl";
 import { MainComponentsContainer } from "@web/core/main_components_container";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
-import { Router } from "@pos_self_order/app/router";
+import { useSelf } from "@pos_self/app/services/self_service";
+import { Router } from "addons/pos_self/static/src/app/router";
 import { LandingPage } from "@pos_self_order/app/pages/landing_page/landing_page";
 import { ProductListPage } from "@pos_self_order/app/pages/product_list_page/product_list_page";
 import { ComboPage } from "@pos_self_order/app/pages/combo_page/combo_page";
@@ -37,7 +37,7 @@ export class selfOrderIndex extends Component {
     };
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         window.posmodel = this.selfOrder;
 
         // Disable cursor on touch devices (required on IoT Box Kiosk)

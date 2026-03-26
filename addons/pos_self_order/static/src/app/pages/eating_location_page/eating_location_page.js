@@ -1,6 +1,6 @@
 import { useRef } from "@web/owl2/utils";
 import { Component } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { useService } from "@web/core/utils/hooks";
 import { useScrollShadow } from "../../utils/scroll_shadow_hook";
 
@@ -9,7 +9,7 @@ export class EatingLocationPage extends Component {
     static props = {};
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.router = useService("router");
         this.scrollContainerRef = useRef("scrollContainer");
         this.scrollShadow = useScrollShadow(this.scrollContainerRef);

@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_self_order.PaymentPage">
         <div class="d-flex flex-column flex-grow-1 overflow-y-auto o_self_background o_self_fade"
-        t-attf-style="background-image:#{this.selfOrder.kioskBackgroundImageUrl};background-size: cover; background-position: center;">
+        t-attf-style="background-image:#{this.selfOrder.backgroundImageUrl};background-size: cover; background-position: center;">
             <div class="d-flex flex-column flex-grow-1 overflow-y-auto justify-content-center my-auto">
                <div class="container o_self_container ">
                     <div t-if="this.state.selection"  class="grid gap-4 align-items-center justify-content-center p-3 ">

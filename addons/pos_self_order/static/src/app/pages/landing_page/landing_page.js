@@ -2,9 +2,9 @@
 
 import { useRef } from "@web/owl2/utils";
 import { Component, onMounted, onWillStart, onWillUnmount } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { useService } from "@web/core/utils/hooks";
-import { LanguagePopup } from "@pos_self_order/app/components/language_popup/language_popup";
+import { LanguagePopup } from "addons/pos_self/static/src/app/components/language_popup/language_popup";
 import { session } from "@web/session";
 
 export class LandingPage extends Component {
@@ -12,7 +12,7 @@ export class LandingPage extends Component {
     static props = {};
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.router = useService("router");
         this.dialog = useService("dialog");
         this.carouselRef = useRef("carousel");

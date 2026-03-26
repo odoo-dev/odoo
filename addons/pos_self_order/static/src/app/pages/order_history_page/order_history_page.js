@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
@@ -8,7 +8,7 @@ export class OrdersHistoryPage extends Component {
     static props = {};
 
     async setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.router = useService("router");
     }
 

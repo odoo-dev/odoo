@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState } from "@web/owl2/utils";
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { cookie } from "@web/core/browser/cookie";
 import { useService } from "@web/core/utils/hooks";
 import { rpc } from "@web/core/network/rpc";
@@ -11,7 +11,7 @@ export class ConfirmationPage extends Component {
     static props = ["orderAccessToken", "screenMode"];
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.router = useService("router");
         this.dialog = useService("dialog");
         this.changeToDisplay = [];

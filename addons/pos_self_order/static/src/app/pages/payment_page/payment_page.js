@@ -1,6 +1,6 @@
 import { useState } from "@web/owl2/utils";
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 
@@ -10,7 +10,7 @@ export class PaymentPage extends Component {
     static props = {};
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.selfOrder.isOrder();
         this.router = useService("router");
         this.state = useState({

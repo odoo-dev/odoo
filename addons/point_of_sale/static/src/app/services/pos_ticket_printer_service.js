@@ -1,7 +1,6 @@
 import { registry } from "@web/core/registry";
 import { EpsonPrinter } from "../utils/printer/epson_printer";
 import { GeneratePrinterData } from "../utils/printer/generate_printer_data";
-import { RetryPrintPopup } from "../components/popups/retry_print_popup/retry_print_popup";
 import { _t } from "@web/core/l10n/translation";
 import { renderToElement, renderToString } from "@web/core/utils/render";
 import { toCanvas } from "../utils/html-to-image";
@@ -86,15 +85,7 @@ export class PosTicketPrinterService {
         iframe.contentWindow.print();
     }
 
-    showPrinterErrorDialog(message, retryFunction, fallbackFunction = undefined) {
-        return this.dialog.add(RetryPrintPopup, {
-            title: message.title,
-            message: message.body,
-            canRetry: true,
-            retry: retryFunction,
-            download: fallbackFunction,
-        });
-    }
+    showPrinterErrorDialog(message, retryFunction, fallbackFunction = undefined) {}
 
     async openCashbox() {
         if (!this.config.default_receipt_printer_id?._instance?.openCashbox) {

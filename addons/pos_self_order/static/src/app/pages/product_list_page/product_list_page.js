@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { useService } from "@web/core/utils/hooks";
 
 import { OrderWidget } from "@pos_self_order/app/components/order_widget/order_widget";
@@ -19,7 +19,7 @@ export class ProductListPage extends Component {
     static props = {};
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.router = useService("router");
         this.dialog = useService("dialog");
         this.categoryListRef = useRef("category_list");

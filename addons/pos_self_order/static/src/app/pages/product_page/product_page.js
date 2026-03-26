@@ -1,6 +1,6 @@
 import { useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { Component } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { useService } from "@web/core/utils/hooks";
 import { AttributeSelection } from "@pos_self_order/app/components/attribute_selection/attribute_selection";
 import { useScrollShadow } from "../../utils/scroll_shadow_hook";
@@ -9,7 +9,7 @@ import {
     getProductVariantByAttributes,
     getAttributeValues,
     getAttributeValuesExtraPrice,
-} from "@pos_self_order/app/services/card_utils";
+} from "addons/pos_self/static/src/app/services/card_utils";
 import { shouldShowMissingDetails } from "../../utils";
 
 export class ProductPage extends Component {
@@ -18,7 +18,7 @@ export class ProductPage extends Component {
     static props = ["productTemplate"];
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.router = useService("router");
 
         if (!this.props.productTemplate) {
@@ -29,7 +29,6 @@ export class ProductPage extends Component {
         const editedLine = this.selfOrder.editedLine;
         useSubEnv({ selectedValues: {} });
 
-        this.selfOrder.lastEditedProductId = this.props.productTemplate.id;
         this.state = useState({
             qty: editedLine ? editedLine.qty : 1,
             selectedValues: this.env.selectedValues,

@@ -1,11 +1,11 @@
 import { useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { Component } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { useService } from "@web/core/utils/hooks";
 import { AttributeSelection } from "@pos_self_order/app/components/attribute_selection/attribute_selection";
 import { ProductNameWidget } from "@pos_self_order/app/components/product_name_widget/product_name_widget";
 import { Stepper } from "@pos_self_order/app/components/combo_stepper/combo_stepper";
-import { computeTotalComboPrice } from "../../services/card_utils";
+import { computeTotalComboPrice } from "../../../../../../pos_self/static/src/app/services/card_utils";
 import { useScrollShadow } from "../../utils/scroll_shadow_hook";
 import { useStickyTitleObserver } from "@pos_self_order/app/utils/sticky_title_observer";
 import { formatProductName, shouldShowMissingDetails } from "../../utils";
@@ -26,7 +26,7 @@ export class ComboPage extends Component {
             return;
         }
         useSubEnv({ selectedValues: {} });
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
         this.state = useState({
             selectedChoiceIndex: 0,
             choices: [],

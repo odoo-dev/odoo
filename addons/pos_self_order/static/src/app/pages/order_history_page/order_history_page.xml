@@ -66,12 +66,12 @@
                                         <tbody>
                                             <tr class="text-end">
                                                 <th class="pt-2 pb-0 pe-0">Total:</th>
-                                                <th class="pt-2 pb-0 pe-0 o-so-tabular-nums" t-if="!this.selfOrder.priceLoading" t-out="this.selfOrder.formatMonetary(order.amount_total)"/>
+                                                <th class="pt-2 pb-0 pe-0 o-so-tabular-nums" t-out="this.selfOrder.formatMonetary(order.amount_total)"/>
                                                  <span t-else="" class="spinner-border"/>
                                             </tr>
                                              <tr class="text-end text-muted">
                                                 <th class="py-0 pe-0 fw-normal">Tax:</th>
-                                                <th class="py-0 pe-0 fw-normal o-so-tabular-nums" t-if="!this.selfOrder.priceLoading" t-out="this.selfOrder.formatMonetary(order.amount_tax)"/>
+                                                <th class="py-0 pe-0 fw-normal o-so-tabular-nums" t-out="this.selfOrder.formatMonetary(order.amount_tax)"/>
                                             </tr>
                                         </tbody>
                                     </table>

@@ -14,7 +14,7 @@ whenReady(async () => {
             getTemplate,
             props: { loader },
             translatableAttributes: ["data-tooltip"],
-            trsnalteFn: (s) => s,
+            translateFn: (s) => s,
         });
         console.log(err);
     }

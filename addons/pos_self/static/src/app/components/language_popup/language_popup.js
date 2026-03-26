@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { useSelf } from "@pos_self/app/services/self_service";
 import { cookie } from "@web/core/browser/cookie";
 
 export class LanguagePopup extends Component {
@@ -9,7 +9,7 @@ export class LanguagePopup extends Component {
     };
 
     setup() {
-        this.selfOrder = useSelfOrder();
+        this.selfOrder = useSelf();
     }
 
     get languages() {
