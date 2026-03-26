@@ -23,4 +23,5 @@ Provides electronic invoicing for Jordan in the POS.
             "l10n_jo_edi_pos/static/tests/tours/**/*",
         ],
     },
+    "post_init_hook": "_post_init_hook",
 }
