@@ -138,8 +138,15 @@ function getXpath(operation) {
  */
 function getNode(element, operation) {
     const root = getRoot(element);
-    const doc = new Document();
-    doc.appendChild(root); // => root is the documentElement of its ownerDocument (we do that in case root is a clone)
+    // In the common case root is the documentElement of its ownerDocument (set up by getClone),
+    // so we can reuse root.ownerDocument directly without creating a new Document each call.
+    // The only exception is when root was replaced by a deepClone that has not been adopted into
+    // a fresh document yet (outer-mode "replace" on the root element).
+    let doc = root.ownerDocument;
+    if (root !== doc.documentElement) {
+        doc = new Document();
+        doc.appendChild(root);
+    }
     if (operation.tagName === "xpath") {
         const xpath = getXpath(operation);
         const result = doc.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE);
