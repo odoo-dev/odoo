@@ -19,9 +19,7 @@
         <t t-foreach="this.getRows()" t-as="row" t-key="row_index" t-if="row.isVisible">
             <t t-foreach="row" t-as="cell" t-key="cell_index">
                 <t t-if="cell.subType === 'item_component'">
-                    <t t-call="web.Form.InnerGroup.ItemComponent">
-                        <t t-set="cell" t-value="cell" />
-                    </t>
+                    <t t-call="web.Form.InnerGroup.ItemComponent" cell="cell"/>
                 </t>
 
                 <t t-else="">
