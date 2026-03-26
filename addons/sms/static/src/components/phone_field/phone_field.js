@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
+import { user } from "@web/core/user";
 import { PhoneField, phoneField } from "@web/views/fields/phone/phone_field";
 
 patch(PhoneField, {
