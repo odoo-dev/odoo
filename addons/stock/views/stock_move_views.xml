@@ -170,16 +170,12 @@
             <field name="priority">1000</field>
             <field name="arch" type="xml">
                 <list editable="bottom" decoration-muted="state == 'done' and is_locked == True" default_order="result_package_id desc, location_id asc, location_dest_id asc, picking_id asc, id">
-                    <field name="company_id" column_invisible="True" force_save="1"/>
                     <field name="picking_id" column_invisible="True" force_save="1"/>
-                    <field name="move_id" column_invisible="True" force_save="1" />
                     <field name="product_id" column_invisible="True"/>
                     <field name="location_id" column_invisible="True"/>
                     <field name="location_dest_id" column_invisible="True"/>
                     <field name="package_id" column_invisible="True" context="{'show_src_package': 1}"/>
                     <field name="result_package_id" column_invisible="True" context="{'show_dest_package': 1}"/>
-                    <field name="tracking" column_invisible="True"/>
-                    <field name="picking_type_id" column_invisible="True"/>
                     <field name="quant_id"
                         domain="[('product_id', '=', product_id), ('location_id', 'child_of', parent.location_id)]"
                         context="{'default_location_id': location_id, 'default_product_id': product_id, 'search_view_ref': 'stock.quant_search_view', 'list_view_ref': 'stock.view_stock_quant_tree', 'form_view_ref': 'stock.view_stock_quant_form', 'readonly_form': True, 'show_src_package': 1}"
@@ -203,9 +199,6 @@
                     <field name="package_id" column_invisible="1" readonly="state == 'done' and is_locked" groups="stock.group_tracking_lot"/>
                     <field name="result_package_id" readonly="state == 'done' and is_locked" widget="package_m2o" groups="stock.group_tracking_lot" context="{'picking_id': picking_id, 'show_dest_package': 1}"/>
                     <field name="owner_id" column_invisible="parent.show_quant" groups="stock.group_tracking_owner"/>
-                    <field name="state" column_invisible="True"/>
-                    <field name="is_locked" column_invisible="True"/>
-                    <field name="picking_code" column_invisible="True"/>
                     <field name="picked" column_invisible="True"/>
                     <field name="quantity" string="Quantity" readonly="state == 'done' and is_locked" sum="Quantity"/>
                     <field name="uom_id" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom" widget="many2one_uom"
