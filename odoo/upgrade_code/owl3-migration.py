@@ -8,7 +8,12 @@ EXCLUDED_PATH = (
     'iot_drivers/static/src/',
     'web/static/src/owl2',
     'addons/web/static/lib/owl/owl.js',
-    '/node_modules/'
+    'html_builder/static/tests/custom_tab/builder_components/builder_list.test.js',  # Test has weird string formatting syntax easier to skip
+    'html_builder/static/tests/custom_tab/builder_components/builder_row.test.js',  # Test has weird string formatting syntax easier to skip
+    'web_studio/static/src/client_action/report_editor/report_editor_xml/translate_xml.js',  # Weird inline xml, easier to do by hand
+    '/node_modules/',
+    'test_assetsbundle/static/invalid_src',
+    'test_assetsbundle/static/accessible.xml',
 )
 
 # Templates that are called by:
@@ -17,6 +22,7 @@ EXCLUDED_PATH = (
 # - renderToFragment
 # - renderToElement
 EXCLUDED_TEMPLATES = (
+    'point_of_sale.Navbar',  # Inherited from checksum file, to remove from list when checksum is recertified
     'Appointment.appointment_info_no_capacity',
     'Appointment.appointment_info_no_slot',
     'Appointment.appointment_info_no_slot_month',
@@ -317,7 +323,7 @@ class JSTooling:
             prefix = match.group(1)
             xml_content = match.group(2)
             suffix = match.group(3)
-            return f"{prefix}{transform_func(xml_content)}{suffix}"
+            return f"{prefix}{transform_func("<t>" + xml_content + "</t>")[3:][:-4]}{suffix}"
 
         return pattern.sub(replacer, content)
 
@@ -411,34 +417,34 @@ class JSTooling:
     @staticmethod
     def get_js_files(file_manager, include_test_files=False):
         """Gets all static js files. Include .test.js files if include_test_files is True."""
-        path_pattern = re.compile('|'.join(EXCLUDED_PATH))
+        path_pattern = re.compile('|'.join(EXCLUDED_PATH + CHECKSUM_FILES))
         target_dir = '/static/' if include_test_files else '/static/src'
 
         return [
             f for f in file_manager
-            if f.path.suffix == '.js'
-            and target_dir in f.path._str
-            and not path_pattern.search(f.path._str)
+            if str(f.path).endswith('.js')
+            and '/static/' in str(f.path)
+            and not path_pattern.search(str(f.path))
         ]
 
     @staticmethod
     def get_template_files(file_manager):
-        excluded_path_pattern = re.compile('|'.join(EXCLUDED_PATH))
+        excluded_path_pattern = re.compile('|'.join(EXCLUDED_PATH + CHECKSUM_FILES))
         return [
             file for file in file_manager
-            if '/static/src/' in file.path._str
-            and file.path.suffix in ['.xml', '.js']
-            and not re.search(excluded_path_pattern, file.path._str)
+            if '/static/' in str(file.path)
+            and (str(file.path).endswith('.js') or str(file.path).endswith('.xml'))
+            and not re.search(excluded_path_pattern, str(file.path))
         ]
 
     @staticmethod
     def get_xml_files(file_manager):
-        path_pattern = re.compile('|'.join(EXCLUDED_PATH))
+        path_pattern = re.compile('|'.join(EXCLUDED_PATH + CHECKSUM_FILES))
         return [
             file for file in file_manager
-            if '/static/src/' in file.path._str
-            and file.path.suffix == '.xml'
-            and not re.search(path_pattern, file.path._str)
+            if '/static/' in str(file.path)
+            and str(file.path).endswith('.xml')
+            and not re.search(path_pattern, str(file.path))
         ]
 
 
@@ -1033,6 +1039,270 @@ def upgrade_this_in_js(file_manager, log_info, log_error, targets=[]):
             log_error(file.path, e)
 
 
+def upgrade_t_slot(file_manager, log_info, log_error):
+    files = JSTooling.get_template_files(file_manager)
+    reg_t_slot = re.compile(r'\b(?<!-)t-slot(\s*=)')
+
+    def apply_transformations(text):
+        text = reg_t_slot.sub(r't-call-slot\1', text)
+        return text
+
+    for fileno, file in enumerate(files, start=1):
+        try:
+            raw_content = file.path.read_bytes()
+            content = raw_content.decode("utf-8", errors="ignore")
+
+            if file.path.suffix == ".js":
+                new_content = JSTooling.transform_xml_literals(content, apply_transformations)
+            else:
+                new_content = apply_transformations(content)
+
+            if new_content != content:
+                file.content = new_content
+
+        except Exception as e:  # noqa: BLE001
+            log_error(file.path, e)
+
+        file_manager.print_progress(fileno, len(files))
+
+
+def upgrade_t_call_param(file_manager, log_info, log_error):
+    AUTO_CLOSE_T = re.compile(r"(<t [^>]*[^/>])>\s*</t>", flags=re.MULTILINE)
+    XPATH_TCALL_REG = re.compile(r'\[@(t-call)=[^\]]+\]$')
+
+    def detach_node_tail(node):
+        if (prev := node.getprevious()) is not None:
+            prev.tail = (prev.tail or '').rstrip() + (node.tail or '')
+        else:
+            parent = node.getparent()
+            parent.text = (parent.text or '').rstrip() + (node.tail or '')
+
+
+    def move_tset_before_tcall(tset, tcall):
+        parent = tcall.getparent()
+        previous_indent = get_indentation(tset)
+        indent = get_indentation(tcall)
+
+        detach_node_tail(tset)
+        tset.tail = indent
+
+        tset.set('__need_dedent__', str(len(previous_indent) - len(indent)))
+
+        parent.insert(parent.index(tcall), tset)
+
+
+    def remove_tset_add_attribute(tset, tcall):
+        detach_node_tail(tset)
+
+        if 't-value' in tset.attrib:
+            value = tset.get('t-value')
+            tcall.set(tset.get('t-set'), value)
+        else:
+            tcall.set(f"{tset.get('t-set')}.translate", (tset.text or '').strip())
+
+        tset.getparent().remove(tset)
+
+
+    def is_not_direct_children_of(tset, tcall):
+        closest_tcall = tset.xpath('ancestor::t[@t-call or @t-if or @t-elif or @t-else or @t-set or @t-foreach]')
+        return closest_tcall and closest_tcall[-1] != tcall
+
+
+    def varname_is_used_inside(tset, tcall):
+        n = tset
+        while (skip_to := n.getnext()) is None and n != tcall:
+            n = n.getparent()
+        if skip_to is None:
+            return set()
+        return _varname_is_used_inside(tset, tcall, skip_to)
+
+
+    def _varname_is_used_inside(tset, container, skip_to):
+        used = set()
+        varname = tset.get('t-set')
+        REG = re.compile(rf"(^|[,({{ /*+-]){ varname }([\[\] .()}})/*+-]|$)")
+
+        for el in container.iter():
+            if skip_to is not None and el is not skip_to:
+                continue
+            skip_to = None
+            if not el.tag:
+                continue
+
+            # For the t-set using this value, we check if this new value is used
+            # in the template and continue to check the other usecases.
+            # If the varname is used, if is used by an other unused t-set, we
+            # need to move the current t-set before the t-call.
+            # If the varname is use only by attribute and t-set also used, the
+            # current t-set does'nt move.
+            for attr, value in el.attrib.items():
+                if not attr.startswith('t-'):
+                    if el.attrib.get('t-call') and REG.search(value):
+                        used.add('used')
+                elif attr == 't-set' or attr == 't-as':
+                    if value == varname:
+                        closest_tcall = el.xpath('ancestor::t[@t-call]')
+                        if closest_tcall and closest_tcall[-1] == container:
+                            used.add('rewrite')
+                elif REG.search(value):
+                    used.add('current-used')
+
+            is_tset = el.get('t-set')
+            if is_tset:
+                # get if the value is used inside an other t-set
+                if len(el) and _varname_is_used_inside(tset, el, el[0]):
+                    used.add('current-used')
+                skip_to = el.getnext()
+
+            if 'current-used' in used:
+                used.remove('current-used')
+                if is_tset:
+                    sub_used = varname_is_used_inside(el, container) - {'rewrite'}
+                    if sub_used:
+                        used.update(sub_used)
+                    else:
+                        if is_not_direct_children_of(tset, container):
+                            used.add('used')
+                        else:
+                            used.add('t-set')
+                else:
+                    used.add('used')
+
+        return used
+
+    def remove_tset_add_inherit_attribute(tset, container):
+        attribute = etree.Element('attribute')
+        if len(container):
+            container[-1].tail = container.text  # indent
+        container.append(attribute)
+
+        if 't-value' in tset.attrib:
+            value = tset.get('t-value')
+            attribute.attrib['name'] = tset.get('t-set')
+            attribute.text = value
+        elif not len(tset):
+            attribute.attrib['name'] = f"{tset.get('t-set')}.translate"
+            attribute.text = (tset.text or '').strip()
+        else:
+            raise ValueError('Wrong conversion')
+
+        if tset.getparent() is not None:
+            tset.getparent().remove(tset)
+
+    def change(root: etree._ElementTree, path: str) -> bool:
+        content_updated = False
+        for tcall in root.xpath('//*[@t-call or @t-snippet-call][not(@position="inside")]'):
+
+            if any(not att.startswith('t-') for att in tcall.attrib):
+                continue
+
+            # every t-set children
+            for tset in tcall.xpath('.//*[@t-set]'):
+                if is_not_direct_children_of(tset, tcall):
+                    # not in a directive (as t-if, t-foreach...) or an other
+                    # t-set and not in an other t-call
+                    continue
+
+                used = varname_is_used_inside(tset, tcall)
+
+                if 'used' in used:
+                    # This set of characters is used within the current content.
+                    # It is presumably not used by the t-call.
+                    continue
+
+                if 'rewrite' in used:
+                    log_info("Can not determine the position of the rewrited t-set: '%s' in '%s'", tset.get('t-set'), path)
+                    break
+
+                # Move the t-set if the are some content or if it's used for an
+                # other t-set else we can remove it and add as an attribute.
+                if ('t-set' in used or (len(tset) or tset.get('t-if'))):
+                    # Move the t-set if the are some content or if it's used
+                    # for an other t-set
+                    move_tset_before_tcall(tset, tcall)
+                    tcall.set(tset.get('t-set'), tset.get('t-set'))
+                    content_updated = True
+                else:
+                    # never used inside we can remove it and add as an attribute.
+                    remove_tset_add_attribute(tset, tcall)
+                    content_updated = True
+
+        # inherit t-call
+        inherit_tcalls = (
+            root.xpath('//*[@t-call][@position="inside"]') +
+            [
+                tcall for tcall in root.xpath('//xpath[contains(@expr, "@t-call")][@position="inside"]')
+                if XPATH_TCALL_REG.search(tcall.get('expr'))
+            ]
+        )
+        for tcall in inherit_tcalls:
+            parent = tcall.getparent()
+            index = parent.index(tcall)
+            indent = get_indentation(tcall)
+            before = None
+            attributes = None
+            for tset in tcall.xpath('t[@t-set]'):
+                detach_node_tail(tset)
+                content_updated = True
+
+                if attributes is None:
+                    attributes = etree.Element(tcall.tag, tcall.attrib)
+                    attributes.attrib['position'] = 'attributes'
+                    attributes.text = indent + ' ' * 4
+                    attributes.tail = indent
+                    parent.insert(index, attributes)
+
+                t_set_key = tset.get('t-set')
+                if len(tset) or varname_is_used_inside(tset, tcall):
+                    if before is None:
+                        before = etree.Element(tcall.tag, tcall.attrib)
+                        before.attrib['position'] = 'before'
+                        before.text = indent + ' ' * 4
+                        before.tail = indent
+                        parent.insert(index, before)
+
+                    before.append(tset)
+                    tset = etree.Element('t', {'t-set': t_set_key, 't-value': t_set_key})
+
+                remove_tset_add_inherit_attribute(tset, attributes)
+
+            if before is not None:
+                before[-1].tail = indent
+            if attributes is not None:
+                attributes[-1].tail = indent
+
+            if not len(tcall):
+                detach_node_tail(tcall)
+                parent.remove(tcall)
+                content_updated = True
+
+        return content_updated
+
+    def apply_transformations(content, path):
+        content = update_etree(content, lambda root: change(root, path))
+        content = AUTO_CLOSE_T.sub(r"\g<1>/>", content)
+        return content
+
+    files = JSTooling.get_template_files(file_manager)
+    for fileno, file in enumerate(files, start=1):
+        try:
+            raw_content = file.path.read_bytes()
+            content = raw_content.decode("utf-8", errors="ignore")
+
+            if file.path.suffix == ".js":
+                new_content = JSTooling.transform_xml_literals(content, lambda c: apply_transformations(c, str(file.path)))
+            else:
+                new_content = apply_transformations(content, str(file.path))
+
+            if new_content != content:
+                file.content = new_content
+
+        except Exception as e:  # noqa: BLE001
+            log_error(file.path, e)
+
+        file_manager.print_progress(fileno, len(files))
+
+
 def upgrade(file_manager) -> str:
     """Main upgrade_code entry point."""
     collector = MigrationCollector(file_manager)
@@ -1054,5 +1324,7 @@ def upgrade(file_manager) -> str:
     collector.run_sub("Migrating t-model", upgrade_t_model)
     collector.run_sub("Migrating this. in xml templates", upgrade_this, targets=[])
     collector.run_sub("Migrating this. in test.js xml fragments", upgrade_this_in_js, targets=[])
+    collector.run_sub("Migrating t-slot", upgrade_t_slot)
+    # collector.run_sub("Migrating parametric t-call", upgrade_t_call_param)
 
     collector.finalize()
