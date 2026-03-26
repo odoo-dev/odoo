@@ -17,7 +17,10 @@ Allow users to login through OAuth2 Provider.
     ],
     'assets': {
         'web.assets_frontend': [
-            'auth_oauth/static/**/*',
+            'auth_oauth/static/src/**/*',
+        ],
+        'web.assets_tests': [
+            'auth_oauth/static/tests/tours/**/*',
         ],
     },
     'author': 'Odoo S.A.',
