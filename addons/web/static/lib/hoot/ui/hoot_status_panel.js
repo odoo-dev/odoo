@@ -1,9 +1,9 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { getColorHex } from "../../hoot-dom/hoot_dom_utils";
 import { Test } from "../core/test";
-import { formatTime } from "../hoot_utils";
+import { formatTime, onWillRender, useLayoutEffect } from "../hoot_utils";
 import { getTitle, setTitle } from "../mock/window";
 import { onColorSchemeChange } from "./hoot_colors";
 import { HootTestPath } from "./hoot_test_path";
@@ -223,7 +223,7 @@ export class HootStatusPanel extends Component {
                 </t>
             </div>
         </div>
-        <canvas t-ref="progress-canvas" class="flex h-1 w-full" />
+        <canvas t-ref="{ set: (el) => this.canvasRef.el = el }" class="flex h-1 w-full" />
     `;
 
     currentTestStart;
@@ -232,14 +232,14 @@ export class HootStatusPanel extends Component {
 
     setup() {
         const { runner, ui } = this.env;
-        this.canvasRef = useRef("progress-canvas");
-        this.runnerReporting = useState(runner.reporting);
-        this.runnerState = useState(runner.state);
-        this.state = useState({
+        this.canvasRef = { el: null };
+        this.runnerReporting = proxy(runner.reporting);
+        this.runnerState = proxy(runner.state);
+        this.state = proxy({
             className: "",
             timer: null,
         });
-        this.uiState = useState(ui);
+        this.uiState = proxy(ui);
         this.progressBarIndex = 0;
 
         runner.beforeAll(this.globalSetup.bind(this));
@@ -249,10 +249,10 @@ export class HootStatusPanel extends Component {
             runner.afterPostTest(this.stopTimer.bind(this));
         }
 
-        useEffect(setupCanvas, () => [this.canvasRef.el]);
+        useLayoutEffect(setupCanvas, () => [this.canvasRef.el]);
 
         onColorSchemeChange(this.onColorSchemeChange.bind(this));
-        onWillRender(this.updateProgressBar.bind(this));
+        onWillRender(this, this.updateProgressBar.bind(this));
     }
 
     /**

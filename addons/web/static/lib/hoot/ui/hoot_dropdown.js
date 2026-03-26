@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useRef, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { useAutofocus, useHootKey, useWindowListener } from "../hoot_utils";
 
 /**
@@ -18,13 +18,13 @@ import { useAutofocus, useHootKey, useWindowListener } from "../hoot_utils";
 /** @extends {Component<HootDropdownProps, import("../hoot").Environment>} */
 export class HootDropdown extends Component {
     static template = xml`
-        <div class="${HootDropdown.name} relative" t-att-class="this.props.className" t-ref="root">
+        <div class="${HootDropdown.name} relative" t-att-class="this.props.className" t-ref="{ set: (el) => this.rootRef.el = el }">
             <button
-                t-ref="toggler"
+                t-ref="{ set: (el) => this.togglerRef.el = el }"
                 class="flex rounded p-2 transition-colors"
                 t-att-class="this.props.buttonClassName"
             >
-                <t t-slot="toggler" open="state.open" />
+                <t t-call-slot="toggler" open="this.state.open" />
             </button>
             <t t-if="this.state.open">
                 <div
@@ -36,7 +36,7 @@ export class HootDropdown extends Component {
                     <button class="fixed end-2 top-2 p-1 text-rose sm:hidden" t-on-click="() => this.state.open = false">
                         <i class="fa fa-times w-5 h-5" />
                     </button>
-                    <t t-slot="menu" open="state.open" />
+                    <t t-call-slot="menu" open="this.state.open" />
                 </div>
             </t>
         </div>
@@ -54,14 +54,14 @@ export class HootDropdown extends Component {
     };
 
     setup() {
-        this.rootRef = useRef("root");
-        this.togglerRef = useRef("toggler");
-        this.state = useState({
+        this.rootRef = { el: null };
+        this.togglerRef = { el: null };
+        this.state = proxy({
             open: false,
         });
 
         useAutofocus(this.rootRef);
-        useHootKey(["Escape"], this.close);
+        useHootKey(["Escape"], this.close.bind(this));
         useWindowListener(
             "click",
             (ev) => {

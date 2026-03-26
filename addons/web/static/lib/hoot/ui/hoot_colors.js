@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { reactive, useState } from "@odoo/owl";
+import { proxy } from "@odoo/owl";
 import { getAllColors, getPreferredColorScheme } from "../../hoot-dom/hoot_dom_utils";
 import { STORAGE, storageGet, storageSet } from "../hoot_utils";
 
@@ -30,27 +30,27 @@ if (!COLOR_SCHEMES.includes(defaultScheme)) {
     storageSet(STORAGE.scheme, defaultScheme);
 }
 
-const colorChangedCallbacks = [
-    () => {
-        const { classList } = current.root;
-        classList.remove(...COLOR_SCHEMES);
-        classList.add(current.scheme);
-    },
-];
-const current = reactive(
+// const colorChangedCallbacks = [
+//     () => {
+//         const { classList } = current.root;
+//         classList.remove(...COLOR_SCHEMES);
+//         classList.add(current.scheme);
+//     },
+// ];
+const current = proxy(
     {
         /** @type {HTMLElement | null} */
         root: null,
         scheme: defaultScheme,
-    },
-    () => {
-        if (!current.root) {
-            return;
-        }
-        for (const callback of colorChangedCallbacks) {
-            callback(current.scheme);
-        }
     }
+    // () => {
+    //     if (!current.root) {
+    //         return;
+    //     }
+    //     for (const callback of colorChangedCallbacks) {
+    //         callback(current.scheme);
+    //     }
+    // }
 );
 current.root;
 
@@ -79,7 +79,7 @@ export function getColorScheme() {
  * @param {(scheme: ColorScheme) => any} callback
  */
 export function onColorSchemeChange(callback) {
-    colorChangedCallbacks.push(callback);
+    // colorChangedCallbacks.push(callback);
 }
 
 /**
@@ -95,5 +95,5 @@ export function toggleColorScheme() {
 }
 
 export function useColorScheme() {
-    return useState(current);
+    return proxy(current);
 }

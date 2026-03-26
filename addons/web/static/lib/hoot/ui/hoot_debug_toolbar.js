@@ -1,9 +1,9 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useEffect, useRef, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { Test } from "../core/test";
 import { refresh } from "../core/url";
-import { formatTime, throttle } from "../hoot_utils";
+import { formatTime, onWillRender, throttle, useLayoutEffect } from "../hoot_utils";
 import { HootConfigMenu } from "./hoot_config_menu";
 import { HootTestPath } from "./hoot_test_path";
 import { HootTestResult } from "./hoot_test_result";
@@ -20,11 +20,11 @@ const removeWindowListener = window.removeEventListener.bind(window);
 const { addEventListener, removeEventListener } = HTMLElement.prototype;
 
 /**
- * @param {string} containerRefName
- * @param {string} handleRefName
+ * @param {{ readonly el: HTMLElement | null }} containerRef
+ * @param {{ readonly el: HTMLElement | null }} handleRef
  * @param {() => any} allowDrag
  */
-function useMovable(containerRefName, handleRefName, allowDrag) {
+function useMovable(containerRef, handleRef, allowDrag) {
     function computeEffectDependencies() {
         return [(currentContainer = containerRef.el), (currentHandle = handleRef.el)];
     }
@@ -117,8 +117,6 @@ function useMovable(containerRefName, handleRefName, allowDrag) {
 
     const throttledDrag = throttle(drag);
 
-    const containerRef = useRef(containerRefName);
-    const handleRef = useRef(handleRefName);
     /** @type {HTMLElement | null} */
     let currentContainer = null;
     /** @type {HTMLElement | null} */
@@ -129,7 +127,7 @@ function useMovable(containerRefName, handleRefName, allowDrag) {
     let offsetX = 0;
     let offsetY = 0;
 
-    useEffect(onEffect, computeEffectDependencies);
+    useLayoutEffect(onEffect, computeEffectDependencies);
 
     return {
         resetPosition,
@@ -158,14 +156,14 @@ export class HootDebugToolBar extends Component {
         <div
             class="${HootDebugToolBar.name} absolute start-0 bottom-0 max-w-full max-h-full flex p-4 z-4"
             t-att-class="{ 'w-full': this.state.open }"
-            t-ref="root"
+            t-ref="{ set: (el) => this.rootRef.el = el }"
         >
             <div class="flex flex-col w-full overflow-hidden rounded shadow bg-gray-200 dark:bg-gray-800">
                 <div class="flex items-center gap-2 px-2">
                     <i
                         class="fa fa-bug text-cyan p-2"
                         t-att-class="{ 'cursor-move': !this.state.open }"
-                        t-ref="handle"
+                        t-ref="{ set: (el) => this.handleRef.el = el }"
                     />
                     <div class="flex gap-px rounded my-1 overflow-hidden min-w-fit">
                         <button
@@ -245,15 +243,17 @@ export class HootDebugToolBar extends Component {
     }
 
     setup() {
-        this.runnerState = useState(this.env.runner.state);
-        this.state = useState({
+        this.runnerState = proxy(this.env.runner.state);
+        this.state = proxy({
             configOpen: false,
             open: false,
         });
+        this.rootRef = { el: null };
+        this.handleRef = { el: null };
 
-        onWillRender(this.onWillRender.bind(this));
+        onWillRender(this, this.onWillRender.bind(this));
 
-        this.movable = useMovable("root", "handle", this.allowDrag.bind(this));
+        this.movable = useMovable(this.rootRef, this.handleRef, this.allowDrag.bind(this));
     }
 
     allowDrag() {

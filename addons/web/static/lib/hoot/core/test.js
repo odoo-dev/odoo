@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { markup, reactive } from "@odoo/owl";
+import { markup, proxy } from "@odoo/owl";
 import { HootError, stringify } from "../hoot_utils";
 import { Job } from "./job";
 import { Tag } from "./tag";
@@ -48,12 +48,12 @@ export class Test extends Job {
     static ABORTED = 3;
 
     formatted = false;
-    logs = reactive({
+    logs = proxy({
         error: 0,
         warn: 0,
     });
     /** @type {import("./expect").CaseResult[]} */
-    results = reactive([]);
+    results = proxy([]);
     /** @type {() => MaybePromise<void> | null} */
     run = null;
     runFnString = "";

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { on, queryAll } from "@odoo/hoot-dom";
-import { reactive, useComponent, useEffect, useExternalListener } from "@odoo/owl";
+import { onMounted, onPatched, onWillUnmount, proxy, useListener } from "@odoo/owl";
 import { isNode } from "@web/../lib/hoot-dom/helpers/dom";
 import {
     isInstanceOf,
@@ -738,7 +738,7 @@ export function createReporting(parentReporting) {
         parentReporting?.add(values);
     }
 
-    const reporting = reactive({
+    const reporting = proxy({
         assertions: 0,
         duration: 0,
         failed: 0,
@@ -1597,7 +1597,7 @@ export function useAutofocus(ref) {
     }
 
     let displayed = new Set();
-    useEffect(autofocus, () => [ref.el]);
+    useLayoutEffect(autofocus, () => [ref.el]);
 }
 
 /**
@@ -1605,9 +1605,8 @@ export function useAutofocus(ref) {
  * @param {(ev: KeyboardEvent) => any} callback
  */
 export function useHootKey(keyStroke, callback) {
-    const component = useComponent();
     /** @type {KeyboardEventInit} */
-    const params = { callback: callback.bind(component) };
+    const params = { callback };
     for (const key of keyStroke) {
         switch (key) {
             case "Alt": {
@@ -1635,9 +1634,45 @@ export function useHootKey(keyStroke, callback) {
     hootKeys.push(params);
 }
 
+/**
+ * @param {Function} effect
+ * @param {() => any[]} computeDependencies
+ */
+export function useLayoutEffect(effect, computeDependencies = () => [NaN]) {
+    /** @type {Function} */
+    let cleanup;
+    /** @type {any[]} */
+    let dependencies;
+    onMounted(() => {
+        dependencies = computeDependencies();
+        cleanup = effect(...dependencies);
+    });
+    onPatched(() => {
+        const newDeps = computeDependencies();
+        const shouldReapply = newDeps.some((val, i) => val !== dependencies[i]);
+        if (shouldReapply) {
+            dependencies = newDeps;
+            if (cleanup) {
+                cleanup();
+            }
+            cleanup = effect(...dependencies);
+        }
+    });
+    onWillUnmount(() => cleanup && cleanup());
+}
+
 /** @type {EventTarget["addEventListener"]} */
 export function useWindowListener(type, callback, options) {
-    return useExternalListener(windowTarget, type, (ev) => ev.isTrusted && callback(ev), options);
+    return useListener(windowTarget, type, (ev) => ev.isTrusted && callback(ev), options);
+}
+
+export function onWillRender(component, callback) {
+    const node = component.__owl__;
+    const render = node.renderFn;
+    node.renderFn = () => {
+        callback.call(component);
+        return render();
+    };
 }
 
 /**

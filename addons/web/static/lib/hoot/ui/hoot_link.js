@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { Component, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { FILTER_SCHEMA } from "../core/config";
 import { createUrlFromId } from "../core/url";
 import { ensureArray, INCLUDE_LEVEL } from "../hoot_utils";
@@ -47,7 +47,7 @@ export class HootLink extends Component {
             t-on-focus="this.updateHref"
             t-on-pointerenter="this.updateHref"
         >
-            <t t-slot="default" />
+            <t t-call-slot="default" />
         </a>
     `;
     static props = {
@@ -77,7 +77,7 @@ export class HootLink extends Component {
     };
 
     setup() {
-        this.state = useState({ href: "#" });
+        this.state = proxy({ href: "#" });
     }
 
     /**

@@ -20,7 +20,7 @@ export async function mountForTest(ComponentClass, config) {
         };
     }
 
-    const app = new App(ComponentClass, {
+    const app = new App({
         name: "TEST",
         test: true,
         warnIfNoStaticProps: true,
@@ -31,7 +31,7 @@ export async function mountForTest(ComponentClass, config) {
     after(() => destroy(app));
 
     fixture.style.backgroundColor = "#fff";
-    await app.mount(fixture);
+    await app.createRoot(ComponentClass, config).mount(fixture);
     if (fixture.hasIframes) {
         await fixture.waitForIframes();
     }

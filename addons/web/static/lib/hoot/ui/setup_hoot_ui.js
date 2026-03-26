@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { mount, reactive } from "@odoo/owl";
+import { mount, proxy } from "@odoo/owl";
 import { HootFixtureElement } from "../core/fixture";
 import { waitForDocument } from "../hoot_utils";
 import { getRunner } from "../main_runner";
@@ -114,7 +114,7 @@ customElements.define("hoot-container", HootContainer);
 //-----------------------------------------------------------------------------
 
 export function makeUiState() {
-    return reactive({
+    return proxy({
         resultsPage: 0,
         resultsPerPage: 40,
         /** @type {string | null} */

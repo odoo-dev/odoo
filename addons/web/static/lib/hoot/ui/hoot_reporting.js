@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import { Component, onWillRender, useState, xml } from "@odoo/owl";
+import { Component, proxy, xml } from "@odoo/owl";
 import { Test } from "../core/test";
-import { formatTime, parseQuery } from "../hoot_utils";
+import { formatTime, onWillRender, parseQuery } from "../hoot_utils";
 import { HootJobButtons } from "./hoot_job_buttons";
 import { HootLogCounters } from "./hoot_log_counters";
 import { HootTestPath } from "./hoot_test_path";
@@ -30,17 +30,17 @@ const { Boolean } = globalThis;
  * @param {string} colorClassName
  */
 const issueTemplate = (varName, colorClassName) => /* xml */ `
-    <t t-foreach="runnerState['${varName}']" t-as="key" t-key="key">
-        <t t-set="issue" t-value="runnerState['${varName}'][key]" />
+    <t t-foreach="this.runnerState['${varName}']" t-as="key" t-key="key">
+        <t t-set="issue" t-value="this.runnerState['${varName}'][key]" />
         <div
             class="flex flex-col justify-center px-3 py-2 gap-2 border-gray border-b text-${colorClassName} bg-${colorClassName}-900"
             t-att-title="issue.message"
         >
             <h3 class="flex items-center gap-1 whitespace-nowrap">
                 <span class="min-w-3 min-h-3 rounded-full bg-${colorClassName}" />
-                Global <t t-esc="issue.name" />
+                Global <t t-out="issue.name" />
                 <span t-if="issue.count > 1">
-                    (x<t t-esc="issue.count" />)
+                    (x<t t-out="issue.count" />)
                 </span>:
                 <small class="ms-auto text-gray whitespace-nowrap italic font-normal">
                     stack trace available in the console
@@ -48,7 +48,7 @@ const issueTemplate = (varName, colorClassName) => /* xml */ `
             </h3>
             <ul>
                 <t t-foreach="issue.message.split('\\n')" t-as="messagePart" t-key="messagePart_index">
-                    <li class="truncate" t-esc="messagePart" />
+                    <li class="truncate" t-out="messagePart" />
                 </t>
             </ul>
         </div>
@@ -253,16 +253,16 @@ export class HootReporting extends Component {
     setup() {
         const { runner, ui } = this.env;
 
-        this.config = useState(runner.config);
-        this.runnerReporting = useState(runner.reporting);
-        this.runnerState = useState(runner.state);
-        this.state = useState({
+        this.config = proxy(runner.config);
+        this.runnerReporting = proxy(runner.reporting);
+        this.runnerState = proxy(runner.state);
+        this.state = proxy({
             /** @type {string[]} */
             openGroups: [],
             /** @type {string[]} */
             openTests: [],
         });
-        this.uiState = useState(ui);
+        this.uiState = proxy(ui);
 
         const { showdetail } = this.config;
 
@@ -278,7 +278,7 @@ export class HootReporting extends Component {
             }
         });
 
-        onWillRender(() => {
+        onWillRender(this, () => {
             this.filteredResults = this.computeFilteredResults();
             this.uiState.totalResults = this.filteredResults.length;
         });
