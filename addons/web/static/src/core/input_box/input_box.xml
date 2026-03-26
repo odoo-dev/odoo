@@ -29,7 +29,7 @@
                                 <t t-foreach="this.overlayButtons" t-as="link" t-key="link.name">
                                     <DropdownItem onSelected="link.onSelected">
                                         <i t-attf-class="fa {{ link.icon }}" class="me-2"/>
-                                        <t t-esc="link.name"/>
+                                        <t t-out="link.name"/>
                                     </DropdownItem>
                                 </t>
                             </t>
