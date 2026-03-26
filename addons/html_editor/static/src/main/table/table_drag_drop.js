@@ -19,13 +19,25 @@ export class TableDragDrop extends Component {
 
     setup() {
         this.overlayRef = useRef("dragOverlay");
+        let frameRect = { top: 0, left: 0 };
+        let frameElement;
+        try {
+            frameElement = this.props.document.defaultView.frameElement;
+        } catch {
+            // We don't access the frameElement if we don't have access to it.
+            // (i.e. iframe origin or sandbox restriction)
+        }
+        if (frameElement) {
+            frameRect = frameElement.getBoundingClientRect();
+        }
+        this.frameRect = frameRect;
         this.pointerPos = { ...this.props.pointerPos };
         this.tableElement = closestElement(this.props.target, "table");
-        this.tableRect = this.tableElement.getBoundingClientRect();
+        this.tableRect = this.getFrameRect(this.tableElement, frameRect);
         const targetRect =
             this.props.type === "row"
-                ? this.props.target.parentElement.getBoundingClientRect()
-                : this.props.target.getBoundingClientRect();
+                ? this.getFrameRect(this.props.target.parentElement, frameRect)
+                : this.getFrameRect(this.props.target, frameRect);
         this.overlayRect = {
             top: targetRect.top,
             left: targetRect.left,
@@ -35,8 +47,10 @@ export class TableDragDrop extends Component {
         // Compute bounding rects of rows or column cells
         this.itemRects =
             this.props.type === "row"
-                ? [...this.tableElement.rows].map((r) => r.getBoundingClientRect())
-                : [...this.props.target.parentElement.cells].map((c) => c.getBoundingClientRect());
+                ? [...this.tableElement.rows].map((r) => this.getFrameRect(r, frameRect))
+                : [...this.props.target.parentElement.cells].map((c) =>
+                      this.getFrameRect(c, frameRect)
+                  );
 
         useExternalListener(this.props.document, "pointermove", this.onPointerMove);
         useExternalListener(this.props.document, "pointerup", this.onPointerUp);
@@ -114,17 +128,17 @@ export class TableDragDrop extends Component {
                 ? this.tableRect.bottom - this.overlayRect.height / 2 - OVERLAY_CLAMP_OFFSET
                 : this.tableRect.right - this.overlayRect.width / 2 - OVERLAY_CLAMP_OFFSET;
         // Update overlay position on pointer movement, clamped within min/max
+        let top;
+        const { clientX, clientY } = this.getFramePoint(ev);
         if (this.props.type === "row") {
-            this.overlayRect.top = Math.min(
-                max,
-                Math.max(min, this.overlayRect.top + ev.clientY - this.pointerPos.y)
-            );
+            top = Math.min(max, Math.max(min, this.overlayRect.top + clientY - this.pointerPos.y));
         } else {
             this.overlayRect.left = Math.min(
                 max,
-                Math.max(min, this.overlayRect.left + ev.clientX - this.pointerPos.x)
+                Math.max(min, this.overlayRect.left + clientX - this.pointerPos.x)
             );
         }
+        this.overlayRect.top = top;
         this.clearBorderHighlights();
         const { targetIndex, insertBefore } = this.getInsertPosition();
         // Highlight the target row or column
@@ -142,8 +156,8 @@ export class TableDragDrop extends Component {
         overlayStyle.top = `${this.overlayRect.top}px`;
         overlayStyle.left = `${this.overlayRect.left}px`;
         // Update stored pointer position for next move
-        this.pointerPos.x = ev.clientX;
-        this.pointerPos.y = ev.clientY;
+        this.pointerPos.x = clientX;
+        this.pointerPos.y = clientY;
     }
 
     onPointerUp() {
@@ -169,5 +183,29 @@ export class TableDragDrop extends Component {
         }
         // Close overlay after drop
         this.props.close();
+    }
+
+    getFrameRect(el, frameRect) {
+        let rect = el.getBoundingClientRect();
+        rect = {
+            ...rect,
+            top: rect.top + frameRect.top,
+            bottom: rect.bottom + frameRect.top,
+            left: rect.left + frameRect.left,
+            right: rect.right + frameRect.left,
+            height: rect.height,
+            width: rect.width,
+        };
+        return rect;
+    }
+
+    getFramePoint(ev) {
+        let clientX = ev.clientX;
+        let clientY = ev.clientY;
+        if (ev.target.ownerDocument === this.props.document) {
+            clientX += this.frameRect.left;
+            clientY += this.frameRect.top;
+        }
+        return { clientX, clientY };
     }
 }
