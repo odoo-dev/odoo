@@ -328,7 +328,11 @@ function makeDataUrl(content, mimeType) {
     return `data:${mimeType};base64,${content}`;
 }
 async function fetchAsDataURL(url, init, process) {
-    const res = await fetch(url, { ...init, mode: "no-cors" });
+    const res = await fetch(url, {
+        ...init,
+        mode: "no-cors",
+        signal: AbortSignal.timeout(2000),
+    });
     if (res.status === 404) {
         throw new Error(`Resource "${res.url}" not found`);
     }

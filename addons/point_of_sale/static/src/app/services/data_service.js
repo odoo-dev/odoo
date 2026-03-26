@@ -7,13 +7,14 @@ import IndexedDB from "../models/utils/indexed_db";
 import { DataServiceOptions } from "../models/data_service_options";
 import { getOnNotified, uuidv4 } from "@point_of_sale/utils";
 import { browser } from "@web/core/browser/browser";
-import { ConnectionLostError, rpc, RPCError } from "@web/core/network/rpc";
+import { ConnectionAbortedError, ConnectionLostError, rpc, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import DeviceIdentifierSequence from "../utils/devices_identifier_sequence";
 import { logPosMessage } from "../utils/pretty_console_log";
 
 const { DateTime } = luxon;
 const CONSOLE_COLOR = "#28ffeb";
+const EXECUTE_TIMEOUT = 10000;
 
 export class PosData {
     static modelToLoad = []; // When empty all models are loaded
@@ -535,7 +536,6 @@ export class PosData {
                 throw new ConnectionLostError();
             }
 
-            let result = true;
             let limitedFields = false;
             if (fields.length === 0) {
                 fields = this.fields[model] || [];
@@ -548,34 +548,48 @@ export class PosData {
                 limitedFields = true;
             }
 
+            let requestPromise;
             switch (type) {
+                case "create":
+                    requestPromise = this.orm.create(model, values);
+                    break;
                 case "write":
-                    result = await this.orm.write(model, ids, values);
+                    requestPromise = this.orm.write(model, ids, values);
                     break;
                 case "delete":
-                    result = await this.orm.unlink(model, ids);
+                    requestPromise = this.orm.unlink(model, ids);
                     break;
                 case "call":
-                    result = await this.orm.call(model, method, args, kwargs);
+                    requestPromise = this.orm.call(model, method, args, kwargs);
                     break;
                 case "read":
                     queue = false;
-                    result = await this.orm.read(model, ids, fields, {
+                    requestPromise = this.orm.read(model, ids, fields, {
                         ...options,
                         load: false,
                     });
                     break;
                 case "search_read":
                     queue = false;
-                    result = await this.orm.searchRead(model, args, fields, {
+                    requestPromise = this.orm.searchRead(model, args, fields, {
                         ...options,
                         load: false,
                     });
             }
 
+            // Timeout handling
+            const { promise: timeoutPromise, resolve: timeoutResolve } = Promise.withResolvers();
+
+            const timeoutId = setTimeout(() => {
+                requestPromise.abort();
+                timeoutResolve();
+            }, EXECUTE_TIMEOUT);
+
+            let result = await Promise.race([requestPromise, timeoutPromise]);
+            clearTimeout(timeoutId);
+
             if (type === "create") {
-                const response = await this.orm.create(model, values);
-                values[0].id = response[0];
+                values[0].id = result[0];
                 result = values;
             }
 
@@ -667,7 +681,7 @@ export class PosData {
                 queue &&
                 !uuids.includes(uuid) &&
                 method !== "sync_from_ui" &&
-                error instanceof ConnectionLostError
+                (error instanceof ConnectionLostError || error instanceof ConnectionAbortedError)
             ) {
                 this.network.unsyncData.push({
                     args: [...arguments],
@@ -677,6 +691,13 @@ export class PosData {
                 });
 
                 throwErr = false;
+            }
+
+            if (error instanceof ConnectionAbortedError) {
+                this.checkConnectivity();
+                if (!this.network.warningTriggered) {
+                    throw new ConnectionLostError();
+                }
             }
 
             if (throwErr) {
