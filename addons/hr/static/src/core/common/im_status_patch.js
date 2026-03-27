@@ -6,6 +6,7 @@ imStatusDataRegistry.add(
     {
         condition: ({ user }) => user?.employee_id?.work_location_type === "home",
         icon: "home",
+        icon_class: "",
         title: {
             online: _t("User is at home and online"),
             away: _t("User is at home and idle"),
@@ -37,6 +38,7 @@ imStatusDataRegistry.add(
     {
         condition: ({ user }) => user?.employee_id?.work_location_type === "other",
         icon: "location_on",
+        icon_class: "",
         title: {
             online: _t("User is at other location and online"),
             away: _t("User is at other location and idle"),

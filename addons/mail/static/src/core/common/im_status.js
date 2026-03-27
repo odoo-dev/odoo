@@ -70,7 +70,7 @@ export class ImStatus extends Component {
         return attClassObjectToString({
             [`o-mail-ImStatus d-flex ${this.colorClass} ${this.props.className}`]: true,
             "o-fs-small": this.persona?.im_status !== "bot",
-            [`rounded-circle bg-transparent ${this.icon_class}`]: !this.showTypingIndicator,
+            [`rounded-circle bg-transparent ${this.iconClass}`]: !this.showTypingIndicator,
             "rounded-pill": this.showTypingIndicator,
         });
     }
@@ -84,6 +84,11 @@ export class ImStatus extends Component {
     get icon() {
         const data = this.activeImStatusData;
         return data.icon[this.persona.imStatusUI] || data.icon.default || data.icon;
+    }
+
+    get iconClass() {
+        const data = this.activeImStatusData;
+        return data.icon_class[this.persona.imStatusUI] || data.icon_class.default || data.icon_class;
     }
 
     get title() {
