@@ -4,7 +4,6 @@ import functools
 from odoo import _
 from odoo.exceptions import AccessError
 from odoo.http import Controller, route, request, Response
-from odoo.http.session import authenticate
 
 
 class ImportModule(Controller):
@@ -16,7 +15,7 @@ class ImportModule(Controller):
             if not request.db:
                 raise Exception(_("Could not select database '%s'", request.db))
             credential = {'login': login, 'password': password, 'type': 'password'}
-            authenticate(request.session, request.env, credential)
+            request.authenticate(credential)
             # request.env.uid is None in case of MFA
             if request.env.uid and request.env.user._is_admin():
                 return request.env['ir.module.module']._import_zipfile(mod_file, force=force == '1')[0]

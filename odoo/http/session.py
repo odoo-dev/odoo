@@ -17,7 +17,7 @@ from http import HTTPStatus
 from zlib import adler32
 
 from odoo.api import Environment
-from odoo.tools import config, consteq, get_lang
+from odoo.tools import config, consteq
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterable
@@ -198,46 +198,6 @@ def get_session_max_inactivity(env: Environment | None) -> int:
 
     ICP = env['ir.config_parameter'].sudo()
     return ICP.get_int('sessions.max_inactivity_seconds') or SESSION_LIFETIME
-
-
-def authenticate(session: Session, env: Environment, credential: dict) -> dict:
-    """
-    Authenticate the current user with the given db, login and
-    credential. If successful, store the authentication parameters in
-    the current session, unless multi-factor-auth (MFA) is
-    activated. In that case, that last part will be done by
-    :ref:`finalize`.
-
-    .. versionchanged:: saas-15.3
-        The current request is no longer updated using the user and
-        context of the session when the authentication is done using
-        a database different than request.db. It is up to the caller
-        to open a new cursor/registry/env on the given database.
-    """
-    wsgienv = {
-        'interactive': True,
-        'base_location': request.httprequest.url_root.rstrip('/'),
-        'HTTP_HOST': request.httprequest.environ['HTTP_HOST'],
-        'REMOTE_ADDR': request.httprequest.environ['REMOTE_ADDR'],
-    }
-    env = env(user=None, su=False)
-    auth_info = env['res.users'].authenticate(credential, wsgienv)
-    pre_uid = auth_info['uid']
-
-    session.uid = None
-    session['pre_login'] = credential['login']
-    session['pre_uid'] = pre_uid
-
-    # if 2FA is disabled we finalize immediately
-    user = env['res.users'].browse(pre_uid)
-    if auth_info.get('mfa') == 'skip' or not user._mfa_url():
-        finalize(session, env)
-
-    if request and request.session is session and request.db == env.registry.db_name:
-        request.env = env(user=session.uid, context=session.context)
-        request.update_context(lang=get_lang(request.env(user=pre_uid)).code)
-
-    return auth_info
 
 
 def finalize(session: Session, env: Environment) -> None:

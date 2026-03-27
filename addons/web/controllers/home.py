@@ -9,7 +9,7 @@ import odoo.exceptions
 from odoo.exceptions import AccessError
 from odoo.http import Controller, request, route
 from odoo.http.router import db_list
-from odoo.http.session import authenticate, check, touch, update_session_token
+from odoo.http.session import check, touch, update_session_token
 from odoo.tools import LazyTranslate, _, config, hmac
 from odoo.tools.cloc import Cloc
 
@@ -133,7 +133,7 @@ class Home(Controller):
                 credential.setdefault('type', 'password')
                 if request.env['res.users']._should_captcha_login(credential):
                     request.env['ir.http']._verify_request_recaptcha_token('login')
-                auth_info = authenticate(request.session, request.env, credential)
+                auth_info = request.authenticate(credential)
                 request.params['login_success'] = True
                 return request.redirect(self._login_redirect(auth_info['uid'], redirect=redirect))
             except odoo.exceptions.AccessDenied as e:

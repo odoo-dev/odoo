@@ -15,7 +15,6 @@ from odoo.http import Controller, request, route
 from odoo.http.response import Response
 from odoo.http.router import db_filter
 from odoo.http.session import (
-    authenticate,
     logout,
     save_session,
     touch,
@@ -44,21 +43,19 @@ class Session(Controller):
                 # Use a new env only when no db on the request, which means the env was not set on in through `serve_db`
                 # or the db is different than the request db
                 cr = stack.enter_context(odoo.modules.registry.Registry(db).cursor())
-                env = odoo.api.Environment(cr, None, {})
-            else:
-                env = request.env
+                request.env = odoo.api.Environment(cr, None, {})
 
             credential = {'login': login, 'password': password, 'type': 'password'}
-            auth_info = authenticate(request.session, env, credential)
+            auth_info = request.authenticate(credential)
             if auth_info['uid'] != request.session.uid:
                 # Crapy workaround for unupdatable Odoo Mobile App iOS (Thanks Apple :@) and Android
                 # Correct behavior should be to raise AccessError("Renewing an expired session for user that has multi-factor-authentication is not supported. Please use /web/login instead.")
                 return {'uid': None}
 
             request.session.db = db
-            save_session(request, env)
+            save_session(request)
 
-            return env['ir.http'].with_user(request.session.uid).session_info()
+            return request.env['ir.http'].with_user(request.session.uid).session_info()
 
     @route('/web/session/modules', type='jsonrpc', auth='user', readonly=True)
     def modules(self):

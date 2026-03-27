@@ -23,7 +23,7 @@ from werkzeug.local import LocalStack
 from werkzeug.urls import URL, url_encode, url_parse
 from werkzeug.utils import redirect
 
-from odoo.tools import consteq, json_default
+from odoo.tools import consteq, get_lang, json_default
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
@@ -337,6 +337,40 @@ class Request:
             return response.render()
         return response
 
+    def authenticate(self, credential):
+        """
+        Authenticate the current user with the given login and
+        credential. If successful, store the authentication parameters in
+        the current session, unless multi-factor-auth (MFA) is
+        activated. In that case, that last part will be done by
+        :ref:`finalize`.
+        """
+        wsgienv = {
+            'interactive': True,
+            'base_location': request.httprequest.url_root.rstrip('/'),
+            'HTTP_HOST': request.httprequest.environ['HTTP_HOST'],
+            'REMOTE_ADDR': request.httprequest.environ['REMOTE_ADDR'],
+        }
+        env = request.env(user=None, su=False)
+        auth_info = env['res.users'].authenticate(credential, wsgienv)
+
+        uid = auth_info['uid']
+        session = request.session
+        session.uid = None
+        session['pre_login'] = credential['login']
+        session['pre_uid'] = uid
+
+        user = env['res.users'].browse(uid)
+        if auth_info.get('mfa') == 'skip' or not user._mfa_url():
+            finalize(session, env)
+
+        env = env(user=session.uid)
+        lang = get_lang(env).code
+        request.env = env(context=session.context)
+        request.update_context(lang=lang)
+
+        return auth_info
+
     def reroute(self, path: str | bytes, query_string=None) -> None:
         """
         Rewrite the current request URL using the new path and query
@@ -373,4 +407,4 @@ else:
 from .dispatcher import HttpDispatcher
 from .geoip import GeoIP
 from .response import FutureResponse, Response
-from .session import DEFAULT_LANG, STORED_SESSION_BYTES, get_default_session
+from .session import DEFAULT_LANG, STORED_SESSION_BYTES, get_default_session, finalize
