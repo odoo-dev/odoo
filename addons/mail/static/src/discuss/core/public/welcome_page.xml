@@ -7,7 +7,7 @@
             <div class="col-12 col-lg-4">
                 <div class="d-flex flex-column justify-content-center h-100 rounded p-4 p-lg-5 bg-white">
                     <div class="text-center mb-4">
-                        <i class="oi oi-users oi-2x mb-3 p-2 rounded text-bg-primary"/>
+                        <i class="oi oi-filled oi-2x mb-3 p-2 rounded text-bg-primary" data-icon="group"/>
                         <h1 class="h2">
                             <span t-if="this.showCallPreview">You've been invited to a meeting!</span>
                             <span t-else="">You've been invited to a chat!</span>
@@ -29,7 +29,7 @@
                         <t t-if="this.showCallPreview" t-set="joinText">Join call</t>
                         <t t-else="" t-set="joinText">Join</t>
                         <span t-out="joinText"/>
-                        <i class="oi oi-arrow-right ms-2"/>
+                        <i class="oi ms-2" data-icon="east"/>
                     </button>
                     <small t-if="this.store.self_user and this.showCallPreview and this.noActiveParticipants" class="mt-2 text-center text-muted">No one else is here.</small>
                 </div>

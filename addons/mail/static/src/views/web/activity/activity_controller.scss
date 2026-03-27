@@ -125,7 +125,7 @@
     }
     .o_activity_type_cell {
         min-width:100px;
-        .oi-ellipsis-v {
+        .oi[data-icon="more_vert"] {
             cursor: pointer;
         }
 

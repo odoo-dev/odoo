@@ -34,7 +34,7 @@ const discussAppPatch = {
                     addTitle: _t("Add or join a channel"),
                     canView: true,
                     extraClass: "o-mail-DiscussSidebarCategory-channel",
-                    icon: "fa fa-hashtag",
+                    icon: "tag",
                     id: "channels",
                     name: _t("Channels"),
                     sequence: 10,
@@ -53,7 +53,7 @@ const discussAppPatch = {
                 return {
                     extraClass: "o-mail-DiscussSidebarCategory-favorite",
                     hideWhenEmpty: true,
-                    icon: "fa fa-star",
+                    icon: "star",
                     id: "favorites",
                     name: _t("Favorites"),
                     sequence: 5,
