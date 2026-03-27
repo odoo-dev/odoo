@@ -12,6 +12,7 @@ from datetime import timedelta
 
 import psycopg2
 from dateutil.parser import parse
+from markupsafe import Markup
 
 from odoo import _, api, fields, models, modules, SUPERUSER_ID, tools
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
@@ -502,7 +503,7 @@ class MailMail(models.Model):
                 record_owned_attachments.sudo().generate_access_token()
                 attachments_links = self.env['ir.qweb']._render('mail.mail_attachment_links',
                                                                 {'attachments': record_owned_attachments})
-                body = tools.mail.append_content_to_html(body, attachments_links, plaintext=False)
+                body = str(tools.mail.prepend_html_content(Markup(body), attachments_links))
                 attachments -= record_owned_attachments
         # attachments sorted by increasing ID to match front-end and upload ordering
         attachments.sudo().fetch(['name', 'raw', 'mimetype'])

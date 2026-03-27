@@ -7,7 +7,7 @@ import { MailFullComposerSuggestionPlugin } from "./mail_full_composer_suggestio
 import { ContentExpandablePlugin } from "./content_expandable_plugin";
 import { DisableBannerCommandsPlugin } from "./disable_banner_commands_plugin";
 import { fillEmpty } from "@html_editor/utils/dom";
-import { markup } from "@odoo/owl";
+import {markup, onWillUnmount} from "@odoo/owl";
 
 export class HtmlComposerMessageField extends HtmlMailField {
     setup() {
@@ -36,6 +36,13 @@ export class HtmlComposerMessageField extends HtmlMailField {
                 this.editor.shared.history.addStep();
             });
         }
+        this.lastAttachmentSet = new Set();
+        this.attachmentObserver = null;
+        onWillUnmount(() => {
+            if (this.attachmentObserver) {
+                this.attachmentObserver.disconnect();
+            }
+        });
     }
 
     getConfig() {
@@ -78,6 +85,34 @@ export class HtmlComposerMessageField extends HtmlMailField {
             el.remove();
         }
         return elContent;
+    }
+
+    _commitChangesIfInlineAttachmentsHasChanged() {
+        const nodes = this.editor.editable.querySelectorAll("[data-attachment-id]");
+        const newAttachmentSet = new Set(
+            [...nodes].map((node) => node.getAttribute("data-attachment-id"))
+        );
+        if (newAttachmentSet.symmetricDifference(this.lastAttachmentSet).size) {
+            this.lastAttachmentSet = newAttachmentSet;
+            this.commitChanges();
+        }
+    }
+
+    onChange() {
+        super.onChange();
+        // Setup inline attachment observer (not setup in onEditorLoad because editable is not ready there)
+        if (!this.attachmentObserver && this.editor.editable) {
+            this._commitChangesIfInlineAttachmentsHasChanged();
+            this.attachmentObserver = new MutationObserver(
+                this._commitChangesIfInlineAttachmentsHasChanged.bind(this)
+            );
+            this.attachmentObserver.observe(this.editor.editable, {
+                attributes: true,
+                attributeFilter: ["data-attachment-id"],
+                childList: true, // to be notified when a node is added but will be called more often than necessary
+                subtree: true,
+            });
+        }
     }
 }
 

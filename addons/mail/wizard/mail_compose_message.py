@@ -92,6 +92,8 @@ class MailComposeMessage(models.TransientModel):
         'ir.attachment', 'mail_compose_message_ir_attachments_rel',
         'wizard_id', 'attachment_id', string='Attachments',
         compute='_compute_attachment_ids', readonly=False, store=True, bypass_search_access=True)
+    attachment_links = fields.Html("Attachment links", compute="_compute_attachment_links")
+    attachment_links_info = fields.Char(compute="_compute_attachment_links")
     email_layout_xmlid = fields.Char(
         'Email Notification Layout',
         compute='_compute_email_layout_xmlid', readonly=False, store=True,
@@ -291,6 +293,32 @@ class MailComposeMessage(models.TransientModel):
                     composer.attachment_ids = attachment_ids
             elif not composer.template_id:
                 composer.attachment_ids = False
+
+    @api.depends('attachment_ids', 'body')
+    def _compute_attachment_links(self):
+        MailMail = self.env['mail.mail']
+        IrQweb = self.env['ir.qweb']
+        default_estimated_header_size = 5000
+        max_email_size_mb = self.env['ir.mail_server'].sudo()._get_max_email_size()
+        max_email_size_bytes = max_email_size_mb * 1024 * 1024
+
+        for composer in self:
+            # Only binary attachments not already in the body (added through the html editor)
+            attachments = composer.attachment_ids.filtered(
+                lambda a: a.type == 'binary' and (not a.access_token or a.access_token not in (composer.body or '')))
+            estimate_size = MailMail._estimate_email_size(
+                {}, composer.body, attachments.mapped('file_size')) + default_estimated_header_size
+            if not attachments or estimate_size <= max_email_size_bytes:
+                composer.attachment_links_info = False
+                composer.attachment_links = False
+                continue
+            # _origin as we need to actually write the access_token to the database so that the link works
+            attachments._origin.generate_access_token()
+            composer.attachment_links = IrQweb._render(
+                'mail.mail_attachment_links', {'attachments': attachments._origin})
+            composer.attachment_links_info = _(
+                "Your attachments exceed %(max_email_size_mb)sMB and will be sent as secure links to ensure they reach your recipients",
+                max_email_size_mb=round(max_email_size_mb))
 
     @api.depends('template_id')
     def _compute_email_add_signature(self):
@@ -1324,7 +1352,8 @@ class MailComposeMessage(models.TransientModel):
         return {
             res_id: {
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
-                'body': self.body or '',
+                # we prepend the div of the attachment link as body is just a div as well (not a full html document).
+                'body': (self.attachment_links or '') + (self.body or ''),
                 'email_from': self.email_from,
                 'partner_ids': self.partner_ids.ids,
                 'scheduled_date': self.scheduled_date,
