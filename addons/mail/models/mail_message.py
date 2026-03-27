@@ -1037,7 +1037,11 @@ class Message(models.Model):
                 for follower in followers
             }
         for record in records:
-            thread_data = {}
+            thread_data = {
+                "hasReadAccess": record.sudo(False).has_access("read"),
+                "hasWriteAccess": record.sudo(False).has_access("write"),
+                "canPostOnReadonly": record._get_mail_message_access(record.ids, "create") == "read"
+            }
             if record._name != "discuss.channel":
                 try:
                     # sudo: mail.thread - if mentionned in a non accessible thread, name is allowed

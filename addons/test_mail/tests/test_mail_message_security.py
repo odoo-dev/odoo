@@ -216,6 +216,7 @@ class TestMailMessageAccess(MessageAccessCommon):
     def test_access_create_customized(self):
         """ Test '_get_mail_message_access' support """
         record = self.env['mail.test.access.custo'].with_user(self.user_employee).create({'name': 'Open'})
+        # breakpoint()
         for user in self.user_employee + self.user_portal:
             with self.subTest(user_name=user.name):
                 _message = record.with_user(user).message_post(

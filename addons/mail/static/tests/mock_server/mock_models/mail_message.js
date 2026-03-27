@@ -122,7 +122,11 @@ export class MailMessage extends models.ServerModel {
             const [data] = this._read_format(message.id, fields, false);
             const thread = message.model && this.env[message.model].browse(message.res_id)[0];
             if (thread) {
-                const thread_data = { module_icon: "/base/static/description/icon.png" };
+                const thread_data = {
+                    module_icon: "/base/static/description/icon.png",
+                    hasReadAccess: true,
+                    hasWriteAccess: true,
+                };
                 if (message.model !== "discuss.channel") {
                     thread_data.name = thread.name ?? thread.display_name;
                 }
