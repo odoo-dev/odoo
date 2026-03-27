@@ -561,7 +561,7 @@ stepUtils.autoExpandMoreButtons(),
     trigger: ".o_select_menu_item:contains(Based on Timesheets)",
     run: "click",
 },  {
-    trigger: ".o_field_widget[name=service_tracking] input",
+    trigger: ".o_field_widget[name=display_service_tracking] input",
     content: _t('Change service policy'),
     tooltipPosition: 'left',
     run: "click",
