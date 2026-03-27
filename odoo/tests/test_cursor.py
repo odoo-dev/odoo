@@ -5,6 +5,7 @@ from datetime import datetime
 
 import odoo.modules
 from odoo.sql_db import Cursor, Savepoint, _logger
+from psycopg2.errors import ConnectionException
 
 if typing.TYPE_CHECKING:
     import threading
@@ -74,7 +75,8 @@ class TestCursor(Cursor):
         self._cursors_stack.append(self)
 
     def execute(self, *args, **kwargs) -> None:
-        assert not self.closed, "Cannot use a closed cursor"
+        if self.closed:
+            raise ConnectionException("cursor already closed")
         if self._now is None:
             self._now = datetime.now()
         self._cnx._check_savepoint()
