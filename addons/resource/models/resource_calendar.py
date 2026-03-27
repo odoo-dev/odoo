@@ -516,7 +516,7 @@ class ResourceCalendar(models.Model):
                     tz_dates[(tz, end_dt)] = end
                 dt0 = string_to_datetime(leave_date_from).astimezone(tz)
                 dt1 = string_to_datetime(leave_date_to).astimezone(tz)
-                if leave_resource and leave_resource._is_fully_flexible():
+                if leave_resource and leave_resource._is_flexible():
                     dt0, dt1 = self._handle_flexible_leave_interval(dt0, dt1, leave)
                 result[resource.id].append((max(start, dt0), min(end, dt1), leave))
 
