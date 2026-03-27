@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website.HeaderBgBlurOption">
+    <BuilderRow label.translate="Blur">
+        <BuilderRange
+            action="'headerBgBlurRangeAction'"
+            min="0"
+            max="10"
+            step="0.5"
+        />
+        <BuilderButton
+            action="'headerBgBlurNoEnhanceAction'"
+            inverseAction="true"
+            title.translate="Enhance contrast and brightness"
+            className="'ms-1 px-2 fa fa-adjust'"
+        />
+    </BuilderRow>
+</t>
+
+</templates>

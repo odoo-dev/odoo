@@ -432,11 +432,29 @@ body {
     }
 }
 
+// Background blur option
+@mixin o-bg-blur-option {
+    backdrop-filter: contrast(MIN(calc(1 + var(--o-bg-blur) * .05), var(--o-bg-blur-enhance, 1.25)))
+                     brightness(MIN(calc(1 + var(--o-bg-blur) * .05), var(--o-bg-blur-enhance, 1.25)))
+                     blur(calc(var(--o-bg-blur, 0) * 1px));
+}
+
+.o_bg_blur_option {
+    @include o-bg-blur-option;
+
+    &.o_bg_blur_no_enhance {
+        --o-bg-blur-enhance: 1;
+    }
+}
+
 .navbar-light {
     // Style only navbar-light which Odoo is only supposed to use in standard
     // anyway. Automatically mimic navbar-dark if the user's menu color is dark.
     // Note: this only works because navbar-light is defined before navbar-dark,
     // we may want to use a safest way when possible.
+    --o-bg-blur: #{o-website-value('test-mano-blur')};
+    --o-bg-blur-enhance: #{if(o-website-value('test-mano-blur-enhance'), 1.25, 1)};
+    @include o-bg-blur-option;
     @include o-apply-colors('menu');
     @include o-apply-colors('menu-custom');
     $-menu-color: o-color('menu-custom') or o-color('menu');
@@ -891,17 +909,6 @@ font[class*='bg-'] {
     }
     &.o_bg_img_opt_repeat_y {
         background-repeat: repeat-y;
-    }
-}
-
-// Background blur option
-.o_bg_blur_option {
-    backdrop-filter: contrast(MIN(calc(1 + var(--o-bg-blur) * .05), var(--o-bg-blur-enhance, 1.25)))
-                     brightness(MIN(calc(1 + var(--o-bg-blur) * .05), var(--o-bg-blur-enhance, 1.25)))
-                     blur(calc(var(--o-bg-blur, 0) * 1px));
-
-    &.o_bg_blur_no_enhance {
-        --o-bg-blur-enhance: 1;
     }
 }
 

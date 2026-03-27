@@ -2081,6 +2081,8 @@ $o-selected-color-palettes-names: (
 //------------------------------------------------------------------------------
 
 $o-base-website-values-palette: (
+    'test-mano-blur': null,
+    'test-mano-blur-enhance': null,
     'font-size-base': 1rem, // Need a set value as the value is used in bootstrap_overridden files
     'body-line-height': 1.5,
     'headings-line-height': 1.2,

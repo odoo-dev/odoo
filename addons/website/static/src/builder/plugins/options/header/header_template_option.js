@@ -1,5 +1,6 @@
 import { BaseOptionComponent } from "@html_builder/core/base_option_component";
 import { registry } from "@web/core/registry";
+import { HeaderBgBlurOption } from "./header_bg_blur_option";
 
 export class HeaderTemplateOption extends BaseOptionComponent {
     static id = "header_template_option";
@@ -11,10 +12,15 @@ export class HeaderTemplateOption extends BaseOptionComponent {
         this.headerTemplates = this.dependencies.headerOption.getHeaderTemplates();
     }
 
+    static components = {
+        HeaderBgBlurOption,
+    };
+
     hasSomeOptions(opts) {
         return opts.some((opt) => this.isActiveItem(opt));
     }
 }
+
 
 registry.category("website-options").add(HeaderTemplateOption.id, HeaderTemplateOption);
 

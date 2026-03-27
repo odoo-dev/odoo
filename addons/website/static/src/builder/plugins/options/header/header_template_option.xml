@@ -66,6 +66,7 @@
                     nullValue: 'NULL',
                 }"/>
         </BuilderRow>
+        <HeaderBgBlurOption/>
 
         <t t-set="noPreviewOptionsContentWidth" t-value="[
             'header_search_opt',
