@@ -69,7 +69,7 @@ export class InnerGroup extends Group {
                 continue;
             }
 
-            const { newline, itemSpan } = slot;
+            const { newline, itemSpan, noBox } = slot;
             if (newline) {
                 rows.push(currentRow);
                 currentRow = [];
@@ -85,7 +85,7 @@ export class InnerGroup extends Group {
             }
 
             const isVisible = !("isVisible" in slot) || slot.isVisible;
-            currentRow.push({ ...slot, name: slotName, itemSpan, isVisible });
+            currentRow.push({ ...slot, name: slotName, itemSpan, isVisible, noBox });
             reservedSpace += itemSpan || 1;
 
             // Allows to remove the line if the content is not visible instead of leaving an empty line.

@@ -1241,7 +1241,7 @@
         }
 
         .o_inner_group {
-            :is(.o_cell,.o_cell_custom):not(.o_wrap_label):not(.o_no_box *) {
+            :is(.o_cell,.o_cell_custom):not(.o_wrap_label):not(.o_no_box) {
                 @extend %-o-field-box;
 
                 &:has(.o_field_widget.o_readonly_modifier):not(:has(.o_field_widget:not(.o_readonly_modifier))) {
@@ -1259,7 +1259,7 @@
                 }
             }
 
-            .o_wrap_label:has(+ .o_cell):not(.o_no_box *) {
+            .o_wrap_label:has(+ .o_cell:not(.o_no_box)) {
                 margin-bottom: calc(-1 * var(--body-font-size));
 
                 .o_form_label {
@@ -1288,7 +1288,7 @@
             .o_property_field.o_wrap_label {
                 display: contents;
 
-                .o_input_box {
+                .o_property_field_value {
                     @include print-variable(o-input-border-color, $o-form-lightsecondary);
                     @extend %-o-field-box;
                     margin-bottom: map-get($spacers, 3);
