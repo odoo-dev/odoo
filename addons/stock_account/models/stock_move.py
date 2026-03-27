@@ -319,6 +319,9 @@ class StockMove(models.Model):
                 valued_qty = move._get_valued_qty()
                 move.value = move.product_id.with_context(fifo_qty_already_processed=fifo_qty_processed[move.product_id])._run_fifo(valued_qty)
                 fifo_qty_processed[move.product_id] += valued_qty
+            elif move.unbuild_id:
+                um_qty = move._get_valued_qty()
+                move.value = move.origin_returned_move_id.value * um_qty / move.origin_returned_move_id._get_valued_qty() if move.origin_returned_move_id._get_valued_qty() else 0
             else:
                 move.value = move.product_id.standard_price * move._get_valued_qty()
 

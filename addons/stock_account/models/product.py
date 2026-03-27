@@ -487,7 +487,12 @@ class ProductProduct(models.Model):
                         elif previous_qty <= 0:
                             average_cost = in_value / in_qty if in_qty else average_cost
                             value = average_cost * quantity
-                    if move.is_out or move.is_dropship:
+                    if move.unbuild_id and move.is_out:
+                        um_qty = move._get_valued_qty()
+                        um_value = move.origin_returned_move_id.value * um_qty / move.origin_returned_move_id._get_valued_qty() if move.origin_returned_move_id._get_valued_qty() else 0
+                        quantity -= um_qty
+                        value -= um_value
+                    elif move.is_out or move.is_dropship:
                         out_qty = move._get_valued_qty()
                         out_value = out_qty * average_cost
                         if lot:
