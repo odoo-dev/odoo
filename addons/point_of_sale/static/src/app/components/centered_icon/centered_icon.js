@@ -3,7 +3,7 @@ import { Component, xml } from "@odoo/owl";
 export class CenteredIcon extends Component {
     static props = {
         icon: String,
-        icon_class: String,
+        icon_class: { type: String, optional: true },
         text: { type: String, optional: true },
         class: { type: String, optional: true },
     };
