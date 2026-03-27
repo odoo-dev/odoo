@@ -17,7 +17,7 @@ from http import HTTPStatus
 from zlib import adler32
 
 from odoo.api import Environment
-from odoo.tools import config, consteq, get_lang
+from odoo.tools import config, consteq
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterable
@@ -232,10 +232,6 @@ def authenticate(session: Session, env: Environment, credential: dict) -> dict:
     user = env['res.users'].browse(pre_uid)
     if auth_info.get('mfa') == 'skip' or not user._mfa_url():
         finalize(session, env)
-
-    if request and request.session is session and request.db == env.registry.db_name:
-        request.env = env(user=session.uid, context=session.context)
-        request.update_context(lang=get_lang(request.env(user=pre_uid)).code)
 
     return auth_info
 
