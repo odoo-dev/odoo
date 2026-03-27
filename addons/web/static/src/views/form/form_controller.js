@@ -600,6 +600,7 @@ export class FormController extends Component {
                 availableOffline: true,
                 sequence: 50,
                 icon: "delete",
+                icon_class: "oi-filled",
                 description: _t("Delete"),
                 class: "text-danger",
                 callback: () => this.deleteRecord(),
