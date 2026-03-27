@@ -721,9 +721,6 @@ export class SelfOrder extends Reactive {
             this.currentOrder.setOrderPrices();
             const tableIdentifier = this.router.getTableIdentifier();
             let uuid = this.selectedOrderUuid;
-            if (this.shouldUpdateLastOrderChange()) {
-                this.currentOrder.updateLastOrderChange();
-            }
             const data = await rpc(
                 `/pos-self-order/process-order/${this.config.self_ordering_mode}`,
                 {

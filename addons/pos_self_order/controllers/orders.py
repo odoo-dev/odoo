@@ -31,6 +31,13 @@ class PosSelfOrderController(http.Controller):
             order_ids._process_saved_order(False)
             order_ids._send_self_order_receipt()
 
+        for order_id in order_ids:
+            if order_id.source == 'mobile' and (not order_id.use_self_order_online_payment or order_id.config_id.self_ordering_pay_after == 'meal'):
+                order_id.config_id._notify('SELF_ORDER_KITCHEN_PRINT', {
+                    'order_id': order_id.id,
+                    'data': order_id.read_pos_data([], order_id.config_id.id),
+                })
+
         return self._generate_return_values(order_ids, pos_config)
 
     def _generate_return_values(self, order, config):

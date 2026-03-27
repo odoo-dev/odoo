@@ -37,7 +37,9 @@ patch(PosStore.prototype, {
                 orderId,
             ]);
             const order = result["pos.order"][0];
-            await this.sendOrderInPreparation(order, { bypassPdis: true });
+            if (order.config_id.self_ordering_pay_after !== "meal") {
+                await this.sendOrderInPreparation(order, { bypassPdis: true });
+            }
             await this.printReceipt({ order });
         } catch {
             logPosMessage(
