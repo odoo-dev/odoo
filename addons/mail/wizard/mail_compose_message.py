@@ -7,6 +7,7 @@ import json
 from odoo import _, api, fields, models, Command, tools
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
+from odoo.tools import human_size
 from odoo.tools.mail import is_html_empty, email_normalize, email_split_and_format, html_remove_xpath
 from odoo.tools.misc import clean_context
 from odoo.addons.mail.tools.parser import parse_res_ids
@@ -92,6 +93,8 @@ class MailComposeMessage(models.TransientModel):
         'ir.attachment', 'mail_compose_message_ir_attachments_rel',
         'wizard_id', 'attachment_id', string='Attachments',
         compute='_compute_attachment_ids', readonly=False, store=True, bypass_search_access=True)
+    attachment_links = fields.Html("Attachment links", compute="_compute_attachment_links")
+    attachment_links_info = fields.Char(compute="_compute_attachment_links")
     email_layout_xmlid = fields.Char(
         'Email Notification Layout',
         compute='_compute_email_layout_xmlid', readonly=False, store=True,
@@ -291,6 +294,32 @@ class MailComposeMessage(models.TransientModel):
                     composer.attachment_ids = attachment_ids
             elif not composer.template_id:
                 composer.attachment_ids = False
+
+    @api.depends('attachment_ids', 'body')
+    def _compute_attachment_links(self):
+        MailMail = self.env['mail.mail']
+        IrQweb = self.env['ir.qweb']
+        # Headers are not yet defined at this stage, so we add a default size for them for the email size estimation.
+        default_estimated_header_size = 5000
+        max_email_size_mb = self.env['ir.mail_server']._get_max_email_size()
+        max_email_size_bytes = max_email_size_mb * 1024 * 1024
+
+        for composer in self:
+            # We consider only attachments not already in the body (added through the html editor)
+            attachments = composer.attachment_ids._origin - MailMail._extract_attachments(composer.body or '')
+            estimate_size = MailMail._estimate_email_size(
+                {}, composer.body, attachments.mapped('file_size')) + default_estimated_header_size
+            if not attachments or estimate_size <= max_email_size_bytes:
+                composer.attachment_links_info = False
+                composer.attachment_links = False
+                continue
+            # _origin as we need to actually write the access_token to the database so that the link works
+            attachments._origin.generate_access_token()
+            composer.attachment_links = IrQweb._render(
+                'mail.mail_attachment_links', {'attachments': attachments._origin})
+            composer.attachment_links_info = _(
+                "Your attachments exceed %(max_email_size)s and will be sent as secure links to ensure they reach your recipients",
+                max_email_size=human_size(max_email_size_bytes))
 
     @api.depends('template_id')
     def _compute_email_add_signature(self):

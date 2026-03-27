@@ -390,6 +390,12 @@ class MailMail(models.Model):
             body = re.sub(_UNFOLLOW_REGEX, '', body)
         return body
 
+    @api.model
+    def _extract_attachments(self, body):
+        """ Return the attachments present as link in the body. """
+        link_ids = {int(link) for link in re.findall(r'/web/(?:content|image)/([0-9]+)', body)}
+        return self.env['ir.attachment'].browse(list(link_ids))
+
     def _prepare_outgoing_list(self, mail_server=False, doc_to_followers=None):
         """ Return a list of emails to send based on current mail.mail. Each
         is a dictionary for specific email values, depending on a partner, or
@@ -476,9 +482,7 @@ class MailMail(models.Model):
         # Prepare attachments:
         # Remove attachments if user send the link with the access_token.
         if body and attachments:
-            link_ids = {int(link) for link in re.findall(r'/web/(?:content|image)/([0-9]+)', body)}
-            if link_ids:
-                attachments = attachments - self.env['ir.attachment'].browse(list(link_ids))
+            attachments = attachments - self._extract_attachments(body)
 
         # Convert URL-only attachments (e.g. cloud or plain external links) into email links
         url_attachments = attachments.sudo().filtered(
@@ -502,7 +506,7 @@ class MailMail(models.Model):
                 record_owned_attachments.sudo().generate_access_token()
                 attachments_links = self.env['ir.qweb']._render('mail.mail_attachment_links',
                                                                 {'attachments': record_owned_attachments})
-                body = tools.mail.append_content_to_html(body, attachments_links, plaintext=False)
+                body = tools.mail.prepend_html_content(str(body), str(attachments_links))
                 attachments -= record_owned_attachments
         # attachments sorted by increasing ID to match front-end and upload ordering
         attachments.sudo().fetch(['name', 'raw', 'mimetype'])
