@@ -104,6 +104,7 @@ def retrying[T](func: Callable[[], T], env: Environment) -> T:
                 time.sleep(wait_time)
 
         if not env.cr.closed:
+            env.cr._closing = True  # cursor should not be used after this, mark it as closing
             env.cr.commit()  # effectively commits and execute post-commits
         return result
 
