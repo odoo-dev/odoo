@@ -5871,10 +5871,10 @@ test(`handling dirty state: switching to another record`, async () => {
     await contains(`.o_form_button_save`).click();
     await contains(`.o_pager_next`).click();
     expect(`.o_breadcrumb`).toHaveText("second record");
-    expect(`.o_priority [data-icon="star"]`).toHaveCount(2);
+    expect(`.o_priority [data-icon="star"]:not(.oi-filled)`).toHaveCount(2);
 
-    await contains(`.o_priority [data-icon="star"]`).click();
-    expect(`.o_priority [data-icon="star"]`).toHaveCount(1);
+    await contains(`.o_priority [data-icon="star"]:not(.oi-filled)`).click();
+    expect(`.o_priority [data-icon="star"].oi-filled`).toHaveCount(1);
 
     await contains(`.o_pager_next`).click();
     expect(`.o_breadcrumb`).toHaveText("first record");
@@ -5917,7 +5917,7 @@ test(`handling dirty state: switching to another record on desktop`, async () =>
     await contains(`.o_pager_next`).click();
     expect(`.o_pager_counter`).toHaveText("2 / 2");
 
-    await contains(`.o_priority [data-icon="star"]`).click();
+    await contains(`.o_priority [data-icon="star"]:not(.oi-filled)`).click();
 
     await contains(`.o_pager_next`).click();
     expect(`.o_pager_counter`).toHaveText("1 / 2");

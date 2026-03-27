@@ -255,7 +255,7 @@ test("share dashboard from dashboard view", async function () {
         },
     });
     expect(".spreadsheet_share_dropdown").toHaveCount(0);
-    await contains("i[data-icon='family_history']").click();
+    await contains("i[data-icon='share']").click();
     await animationFrame();
     expect(".spreadsheet_share_dropdown .o_loading_state").toHaveText("Generating sharing link");
     def.resolve();
@@ -293,17 +293,17 @@ test("Changing filter values will create a new share", async function () {
             }
         },
     });
-    await contains("i[data-icon='family_history']").click();
+    await contains("i[data-icon='share']").click();
     await animationFrame();
     expect(".o_field_CopyClipboardChar").toHaveText(`localhost:8069/share/url/1`);
 
-    await contains("i[data-icon='family_history']").click(); // close share dropdown
+    await contains("i[data-icon='share']").click(); // close share dropdown
 
-    await contains("i[data-icon='family_history']").click();
+    await contains("i[data-icon='share']").click();
     await animationFrame();
     expect(".o_field_CopyClipboardChar").toHaveText(`localhost:8069/share/url/1`);
 
-    await contains("i[data-icon='family_history']").click();
+    await contains("i[data-icon='share']").click();
     const year = luxon.DateTime.local().year;
     expect(".o_control_panel_actions .o_facet_value").toHaveText(String(year));
     await contains(".o_searchview_facet_label").click();
@@ -311,7 +311,7 @@ test("Changing filter values will create a new share", async function () {
     await contains(".o-dropdown-item[data-id='year'] .btn-previous").click();
     await contains(".o-filter-values-footer .btn-primary").click();
 
-    await contains("i[data-icon='family_history']").click();
+    await contains("i[data-icon='share']").click();
     await animationFrame();
     expect(".o_field_CopyClipboardChar").toHaveText(`localhost:8069/share/url/2`);
 });
@@ -324,7 +324,7 @@ test("Should toggle favorite status of a dashboard when the 'Favorite' icon is c
     await createSpreadsheetDashboard();
     expect(".o_search_panel_section").toHaveCount(2);
     await contains(".o_dashboard_star").click();
-    expect(".o_dashboard_star").toHaveAttribute("data-icon", "star", {
+    expect(".o_dashboard_star.oi-filled").toHaveAttribute("data-icon", "star", {
         message: "The star should be filled",
     });
     expect(".o_search_panel_section").toHaveCount(3);
@@ -333,7 +333,7 @@ test("Should toggle favorite status of a dashboard when the 'Favorite' icon is c
         "FAVORITES"
     );
     await contains(".o_dashboard_star").click();
-    expect(".o_dashboard_star").not.toHaveAttribute("data-icon", "star", {
+    expect(".o_dashboard_star:not(.oi-filled)").not.toHaveAttribute("data-icon", "star", {
         message: "The star should not be filled",
     });
     expect.verifySteps(["action_toggle_favorite"]);

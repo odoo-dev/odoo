@@ -89,7 +89,7 @@ test("BadgesMany2OneField: verify icons are fetched via search_read and displaye
         arch: `
             <form>
                 <field name="product_id" widget="badges_many2one"
-                    options="{'default_icon': 'fa-cog', 'related_icon_field': 'icon'}"/>
+                    options="{'default_icon': 'settings', 'related_icon_field': 'icon'}"/>
             </form>`,
     });
 

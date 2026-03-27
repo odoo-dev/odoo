@@ -149,7 +149,7 @@ test("FavoriteField in form view", async () => {
     expect(`.o_field_widget .o_favorite i[data-icon="star"].oi-filled`).toHaveCount(0, {
         message: "should not be favorite",
     });
-    expect(`.o_field_widget .o_favorite i[data-icon="star"].oi-filled-o`).toHaveCount(1, {
+    expect(`.o_field_widget .o_favorite i[data-icon="star"]:not(.oi-filled)`).toHaveCount(1, {
         message: "should not be favorite",
     });
     expect(`.o_field_widget .o_favorite`).toHaveText("Add to Favorites", {
@@ -198,7 +198,7 @@ test("FavoriteField in editable list view without label", async () => {
 
     // save
     await contains(`.o_list_button_save`).click();
-    expect(`.o_data_row:first .o_field_widget .o_favorite i[data-icon="star"].oi-filled-o`).toHaveCount(1, {
+    expect(`.o_data_row:first .o_field_widget .o_favorite i[data-icon="star"]:not(.oi-filled)`).toHaveCount(1, {
         message: "should not be favorite",
     });
 });

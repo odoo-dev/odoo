@@ -9052,7 +9052,7 @@ test(`list view with nested groups`, async () => {
     await contains(`.o_group_header:eq(1)`).click();
     expect.verifySteps([]);
     expect(`.o_group_header`).toHaveCount(2);
-    expect(`.o_group_name [[data-icon='arrow_right']]`).toHaveCount(2);
+    expect(`.o_group_name [data-icon='arrow_right']`).toHaveCount(2);
     expect(`.o_data_row`).toHaveCount(0);
 });
 
@@ -19943,7 +19943,7 @@ test(`cache web_read_group: do not send opening_info if not necessary`, async ()
     // Do not follow the same steps as earlier, directly remove the filter
     if (getMockEnv().isSmall) {
         // Toggle searchbar in mobile
-        await contains(`.o_control_panel_navigation .fa-search`).click();
+        await contains(`.o_control_panel_navigation [data-icon="search"]`).click();
     }
     await contains(".o_searchview_facet [data-icon='close']").click();
     expect(`.o_group_header`).toHaveCount(4);

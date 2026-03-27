@@ -925,7 +925,7 @@ test("doesn't change the color of the whole section when there's an icon next to
         contentAfterEdit: `
         <p data-selection-placeholder=""><br></p><section style="color: rgb(255, 0, 0);">
             <p>a<font style="color: rgb(0, 0, 255);">[bc]</font>d</p>
-            <span class="oi" data-icon="local_bar"  contenteditable="false">\u200b</span>
+            <span class="oi" data-icon="local_bar" contenteditable="false">\u200b</span>
         </section><p data-selection-placeholder=""><br></p>`,
         contentAfter: `
         <section style="color: rgb(255, 0, 0);">

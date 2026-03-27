@@ -667,7 +667,7 @@
                             classAction="'o_wsale_products_opt_actions_promote'">
                             <div class="d-flex align-items-center">
                                 <span class="me-1">Promote</span>
-                                <i class="fa fa-shopping-cart ms-2"/>
+                                <i class="oi ms-2" data-icon="shopping_cart"/>
                             </div>
                         </BuilderSelectItem>
                         <BuilderSelectItem

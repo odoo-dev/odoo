@@ -314,7 +314,7 @@ test("[Offline] render ActionMenus in form view", async () => {
     await setOffline(true);
 
     // select CogMenu
-    await contains(`div.o_control_panel_breadcrumbs_actions i.fa-cog`).click();
+    await contains(`div.o_control_panel_breadcrumbs_actions i[data-icon='settings']`).click();
 
     expect(queryAllTexts(`.o-dropdown--menu span.o-dropdown-item`)).toEqual([
         "No report available.",

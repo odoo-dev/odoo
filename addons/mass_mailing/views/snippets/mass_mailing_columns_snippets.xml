@@ -396,17 +396,17 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4 col-12">
-                    <span class="fa fa-envelope bg-light rounded p-3 mb-3" contenteditable="false"/>
+                    <span class="oi oi-filled bg-light rounded p-3 mb-3" data-icon="mail" contenteditable="false"/>
                     <h2>Reliability</h2>
                     <p>Consistent performance and uptime ensure efficient, reliable service with minimal interruptions and quick response times.</p>
                 </div>
                 <div class="col-md-4 col-12">
-                    <span class="fa fa-credit-card bg-light rounded p-3 mb-3" contenteditable="false"/>
+                    <span class="oi bg-light rounded p-3 mb-3" data-icon="credit_card" contenteditable="false"/>
                     <h2>Performance</h2>
                     <p>Speed and efficiency ensure tasks are completed quickly and resources are used optimally, enhancing productivity and satisfaction.</p>
                 </div>
                 <div class="col-md-4 col-12">
-                    <span class="fa fa-flag bg-light rounded p-3 mb-3" contenteditable="false"/>
+                    <span class="oi oi-filled bg-light rounded p-3 mb-3" data-icon="flag" contenteditable="false"/>
                     <h2>Scalability</h2>
                     <p>Growth capability is a system's ability to scale and adapt, meeting increasing demands and evolving needs for long-term success.</p>
                 </div>

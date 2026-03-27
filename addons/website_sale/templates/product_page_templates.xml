@@ -1303,7 +1303,7 @@
                     t-att-data-product-id="product_variant.id"
                     t-att-data-product-template-id="product.id"
                 >
-                    <span class="fa fa-exchange"/>
+                    <span class="oi" data-icon="swap_horiz"/>
                     <span t-att-class="'d-inline ms-2' + (' d-lg-none' if website.product_page_image_width == '50_pc' and not (is_view_active('website_sale.cta_wrapper_boxed') or is_view_active('website_sale.cta_wrapper_large')) or is_view_active('website_sale.product_add_to_wishlist') else '')">Add to compare</span>
                 </button>
             </t>

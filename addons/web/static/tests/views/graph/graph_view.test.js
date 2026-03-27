@@ -2202,48 +2202,48 @@ test("graph view sort by measure", async () => {
         `,
     });
 
-    expect("[data-icon='sort']").toHaveCount(1);
-    expect("[data-icon='sort']").toHaveCount(1);
+    expect("[data-icon='sort'].oi-flip-vertical").toHaveCount(1);
+    expect("[data-icon='sort']:not(.oi-flip-vertical)").toHaveCount(1);
 
     checkLegend(view, []);
     checkMeasure("Count");
-    expect("[data-icon='sort']").toHaveClass("active");
+    expect("[data-icon='sort']:not(.oi-flip-vertical)").toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 3, 1] });
 
     await clickSort("asc");
 
-    expect("[data-icon='sort']").toHaveClass("active");
+    expect("[data-icon='sort'].oi-flip-vertical").toHaveClass("active");
     checkDatasets(view, "data", { data: [1, 3, 4] });
 
     await clickSort("desc");
 
-    expect("[data-icon='sort']").toHaveClass("active");
+    expect("[data-icon='sort']:not(.oi-flip-vertical)").toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 3, 1] });
 
     // again click on descending button to deactivate order
     await clickSort("desc");
 
-    expect("[data-icon='sort']").not.toHaveClass("active");
+    expect("[data-icon='sort']:not(.oi-flip-vertical)").not.toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 1, 3] });
 
     // set line mode
     await selectMode("line");
-    expect("[data-icon='sort']").toHaveCount(1);
-    expect("[data-icon='sort']").toHaveCount(1);
+    expect("[data-icon='sort'].oi-flip-vertical").toHaveCount(1);
+    expect("[data-icon='sort']:not(.oi-flip-vertical)").toHaveCount(1);
 
     checkLegend(view, []);
     checkMeasure("Count");
-    expect("[data-icon='sort']").not.toHaveClass("active");
+    expect("[data-icon='sort']:not(.oi-flip-vertical)").not.toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 1, 3] });
 
     await clickSort("asc");
 
-    expect("[data-icon='sort']").toHaveClass("active");
+    expect("[data-icon='sort'].oi-flip-vertical").toHaveClass("active");
     checkDatasets(view, "data", { data: [1, 3, 4] });
 
     await clickSort("desc");
 
-    expect("[data-icon='sort']").toHaveClass("active");
+    expect("[data-icon='sort']:not(.oi-flip-vertical)").toHaveClass("active");
     checkDatasets(view, "data", { data: [4, 3, 1] });
 });
 

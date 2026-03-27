@@ -105,15 +105,15 @@
                                 <field name="partner_id" nolabel="1" widget="res_partner_many2one" placeholder="Select Customer" context="{'show_address': True}"/>
                             </div>
                             <div class="o_input_box" invisible="not partner_phone">
-                                <i class="o_input_box_overlay_start fa fa-phone" title="Phone"/>
+                                <i class="o_input_box_overlay_start oi oi-filled" data-icon="phone" title="Phone"/>
                                 <field name="partner_phone" nolabel="1" widget="phone"/>
                             </div>
                             <div class="o_input_box" invisible="not partner_email">
-                                <i class="o_input_box_overlay_start fa fa-envelope" title="Email"/>
+                                <i class="o_input_box_overlay_start oi oi-filled" data-icon="mail" title="Email"/>
                                 <field name="partner_email" nolabel="1" widget="email"/>
                             </div>
                             <div class="o_input_box">
-                                <i class="o_input_box_overlay_start fa fa-tag" title="Tags"/>
+                                <i class="o_input_box_overlay_start oi" data-icon="label" title="Tags"/>
                                 <field name="tag_ids" nolabel="1" widget="many2many_tags" placeholder="Select Tags" options="{'color_field': 'color', 'on_tag_click': 'edit_color'}"/>
                             </div>
                         </div>

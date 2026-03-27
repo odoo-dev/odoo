@@ -135,7 +135,7 @@ test("should not preserve image styles when replacing an image with an icon", as
     await click("[data-icon='local_bar']");
     await animationFrame();
     expect(getContent(el).replace(/<img.*?>/, "<img>")).toBe(
-        `<p>\ufeff[<span class="oi" data-icon="local_bar"  style="" contenteditable="false">\u200b</span>]\ufeff</p>`
+        `<p>\ufeff[<span class="oi" data-icon="local_bar" style="" contenteditable="false">\u200b</span>]\ufeff</p>`
     );
 });
 

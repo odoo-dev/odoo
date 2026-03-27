@@ -207,7 +207,7 @@ export function selectPresetTimingSlotHour({ title, hour } = {}) {
         },
         {
             content: `Wait the slot hour ${hour} is set and loading is done (to avoid currency error)`,
-            trigger: `body:not(:has(.modal)):not(:has(.oe_status .fa-spin)) .pos-leftheader .preset-time-btn:contains(${hour})`,
+            trigger: `body:not(:has(.modal)):not(:has(.oe_status .oi-spin)) .pos-leftheader .preset-time-btn:contains(${hour})`,
         },
     ];
 }
@@ -248,7 +248,7 @@ export function waitRequest() {
                 let isLoading = false;
                 try {
                     isLoading = await waitFor("body:has([data-icon='autorenew'])", {
-                        timeout: 2000
+                        timeout: 2000,
                     });
                 } catch {
                     /* autorenew icon will certainly never appears :'( */
@@ -301,7 +301,7 @@ export function clickOnScanButton() {
 export function ClickOnCustomerDisplayButton() {
     return {
         content: "Click on the customer display button inside the burger menu",
-        trigger: "span i.fa-desktop",
+        trigger: "span i[data-icon='desktop_windows']",
         run: "click",
     };
 }

@@ -2033,7 +2033,7 @@ actual arch.
 
         if node.get('icon'):
             description = 'A button with icon attribute (%s)' % node.get('icon')
-            self._validate_fa_class_accessibility(node, description)
+            self._validate_oi_class_accessibility(node, description)
 
     def _validate_tag_groupby(self, node, name_manager, node_info):
         # groupby nodes should be considered as nested view because they may
@@ -2272,7 +2272,7 @@ actual arch.
 
         if any(klass.startswith('oi') for klass in classes):
             description = 'A <%s> with oi class (%s)' % (node.tag, expr)
-            self._validate_fa_class_accessibility(node, description)
+            self._validate_oi_class_accessibility(node, description)
 
         if any(klass.startswith('btn') for klass in classes):
             if node.tag in ('a', 'button', 'select'):
@@ -2289,7 +2289,7 @@ actual arch.
                         "btn-group/btn-toolbar/btn-addr")
                 self._log_view_warning(msg, node)
 
-    def _validate_fa_class_accessibility(self, node, description):
+    def _validate_oi_class_accessibility(self, node, description):
         valid_aria_attrs = {
             *att_names('title'), *att_names('aria-label'), *att_names('aria-labelledby'),
         }

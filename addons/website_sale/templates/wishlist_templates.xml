@@ -76,7 +76,8 @@
                                             >
                                                 <span class="d-inline-flex align-items-baseline">
                                                     <i
-                                                        class="fa fa-fw fa-envelope o_not-animable"
+                                                        class="oi oi-fw oi-filled o_not-animable"
+                                                        data-icon="mail"
                                                         role="presentation"
                                                     />
                                                     <span class="o_label small ms-1">
@@ -96,7 +97,8 @@
                                             >
                                                 <span class="d-inline-flex align-items-baseline">
                                                     <i
-                                                        class="fa fa-fw fa-shopping-cart o_not-animable"
+                                                        class="oi oi-fw o_not-animable"
+                                                        data-icon="shopping_cart"
                                                         role="presentation"
                                                     />
                                                     <span class="o_label small ms-1">
@@ -111,12 +113,12 @@
                                                     aria-label="Add to compare"
                                                     t-att-data-product-id="wish.product_id.id"
                                                 >
-                                                    <i class="fa fa-fw fa-exchange" role="presentation"/>
+                                                    <i class="oi oi-fw" data-icon="swap_horiz" role="presentation"/>
                                                 </button>
 
                                                 <!-- Render placeholder when product is not comparable to ensure alignment -->
                                                 <div t-else="" class="o_add_to_compare_placeholder btn btn-light pe-none opacity-0">
-                                                    <i class="fa fa-exchange fa-fw" aria-hidden="true"/>
+                                                    <i class="oi oi-fw" data-icon="swap_horiz" aria-hidden="true"/>
                                                 </div>
                                             </t>
                                         </div>

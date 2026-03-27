@@ -8,6 +8,7 @@ export class BooleanIconField extends Component {
     static props = {
         ...standardFieldProps,
         icon: { type: String, optional: true },
+        icon_class: { type: String, optional: true },
         label: { type: String, optional: true },
     };
     static defaultProps = {
@@ -32,6 +33,7 @@ export const booleanIconField = {
     supportedTypes: ["boolean"],
     extractProps: ({ options, string }) => ({
         icon: options.icon,
+        icon_class: options.icon_class,
         label: string,
     }),
 };

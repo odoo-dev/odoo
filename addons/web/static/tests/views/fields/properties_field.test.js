@@ -2931,7 +2931,7 @@ test("properties definition: test display and edit", async () => {
     expect(".o_field_property_selection_option").toHaveCount(3, {
         message: "Only the 3 options from the demo data should be displayed.",
     });
-    await click(".o_field_property_selection .fa-plus");
+    await click(".o_field_property_selection [data-icon='add']");
     await animationFrame();
     await edit("New option");
     await closePopover();

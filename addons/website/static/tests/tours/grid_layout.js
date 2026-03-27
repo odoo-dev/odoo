@@ -43,7 +43,7 @@ registerWebsitePreviewTour(
         },
         {
             content: `Target the "Text - Image" group`,
-            trigger: `.options-container[data-container-title="Text - Image"]:has(.options-container-label i.fa-caret-right) button[title="Select only this block"]`,
+            trigger: `.options-container[data-container-title="Text - Image"]:has(.options-container-label i[data-icon='arrow_right']) button[title="Select only this block"]`,
             run: "click",
         },
         {

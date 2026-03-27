@@ -69,7 +69,7 @@ test("PriorityField when not set", async () => {
         message: "should have no full star since there is no value",
     });
 
-    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']").toHaveCount(2, {
+    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(2, {
         message: "should have two empty stars since there is no value",
     });
 });
@@ -118,7 +118,7 @@ test("PriorityField in form view", async () => {
     expect(".o_field_widget .o_priority:not(.o_field_empty)").toHaveCount(1);
     expect(".o_field_widget .o_priority button.o_priority_star").toHaveCount(2);
     expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1);
-    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1);
+    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1);
 
     // click on the second star in edit mode
     await click(".o_field_widget .o_priority button.o_priority_star[data-icon='star']:last");
@@ -126,7 +126,7 @@ test("PriorityField in form view", async () => {
 
     expect(".o_field_widget .o_priority button.o_priority_star").toHaveCount(2);
     expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(2);
-    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']").toHaveCount(0);
+    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(0);
 });
 
 test.tags("desktop");
@@ -149,7 +149,7 @@ test("PriorityField hover a star in form view", async () => {
     expect(".o_field_widget .o_priority:not(.o_field_empty)").toHaveCount(1);
     expect(".o_field_widget .o_priority button.o_priority_star").toHaveCount(2);
     expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1);
-    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1);
+    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1);
 
     // hover last star
     const star = ".o_field_widget .o_priority button.o_priority_star[data-icon='star']:last";
@@ -159,7 +159,7 @@ test("PriorityField hover a star in form view", async () => {
     expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(2, {
         message: "should temporary have two full stars since we are hovering the third value",
     });
-    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']").toHaveCount(0, {
+    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(0, {
         message: "should temporary have no empty star since we are hovering the third value",
     });
 
@@ -168,7 +168,7 @@ test("PriorityField hover a star in form view", async () => {
 
     expect(".o_field_widget .o_priority button.o_priority_star").toHaveCount(2);
     expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1);
-    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1);
+    expect(".o_field_widget .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1);
 });
 
 test("PriorityField can write after adding a record -- kanban", async () => {
@@ -231,7 +231,7 @@ test("PriorityField in editable list view", async () => {
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1, {
         message: "should have one full star since the value is the second value",
     });
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1, {
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1, {
         message: "should have one empty star since the value is the second value",
     });
 
@@ -246,7 +246,7 @@ test("PriorityField in editable list view", async () => {
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1, {
         message: "should have one full star since the value is the second value",
     });
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1, {
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1, {
         message: "should have one empty star since the value is the second value",
     });
 
@@ -261,7 +261,7 @@ test("PriorityField in editable list view", async () => {
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1, {
         message: "should have one full star since the value is the second value",
     });
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1, {
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1, {
         message: "should have one empty star since the value is the second value",
     });
 
@@ -275,7 +275,7 @@ test("PriorityField in editable list view", async () => {
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(0, {
         message: "should now have no full star since the value is the first value",
     });
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(2, {
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(2, {
         message: "should now have two empty stars since the value is the first value",
     });
 
@@ -289,7 +289,7 @@ test("PriorityField in editable list view", async () => {
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(0, {
         message: "should now have no full star since the value is the first value",
     });
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(2, {
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(2, {
         message: "should now have two empty stars since the value is the first value",
     });
 
@@ -303,7 +303,7 @@ test("PriorityField in editable list view", async () => {
     expect(".o_data_row:last-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(2, {
         message: "should now have two full stars since the value is the third value",
     });
-    expect(".o_data_row:last-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(0, {
+    expect(".o_data_row:last-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(0, {
         message: "should now have no empty star since the value is the third value",
     });
 
@@ -317,7 +317,7 @@ test("PriorityField in editable list view", async () => {
     expect(".o_data_row:last-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(2, {
         message: "should now have two full stars since the value is the third value",
     });
-    expect(".o_data_row:last-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(0, {
+    expect(".o_data_row:last-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(0, {
         message: "should now have no empty star since the value is the third value",
     });
 });
@@ -339,7 +339,7 @@ test("PriorityField hover in editable list view", async () => {
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1, {
         message: "should have one full star since the value is the second value",
     });
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1, {
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1, {
         message: "should have one empty star since the value is the second value",
     });
 
@@ -352,7 +352,7 @@ test("PriorityField hover in editable list view", async () => {
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(2, {
         message: "should temporary have two full stars since we are hovering the third value",
     });
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(0, {
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(0, {
         message: "should temporary have no empty star since we are hovering the third value",
     });
 
@@ -361,7 +361,7 @@ test("PriorityField hover in editable list view", async () => {
 
     expect(".o_data_row:first-child .o_priority button.o_priority_star").toHaveCount(2);
     expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star'].oi-filled").toHaveCount(1);
-    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']").toHaveCount(1);
+    expect(".o_data_row:first-child .o_priority button.o_priority_star[data-icon='star']:not(.oi-filled)").toHaveCount(1);
 });
 
 test("PriorityField with readonly attribute", async () => {
