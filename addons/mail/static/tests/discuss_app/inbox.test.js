@@ -737,7 +737,7 @@ test("show thread priority in Inbox", async () => {
     await start();
     await openDiscuss("mail.box_inbox");
     await contains(".o-mail-Message-header [data-icon='star'].oi-filled", { count: 2 });
-    await contains(".o-mail-Message-header [data-icon='star']");
+    await contains(".o-mail-Message-header [data-icon='star']:not(.oi-filled)");
 });
 
 test("show thread priority with only 1 or 0 star", async () => {
@@ -790,5 +790,5 @@ test("show thread priority with only 1 or 0 star", async () => {
     await start();
     await openDiscuss("mail.box_inbox");
     await contains(".o-mail-Message-header [data-icon='star'].oi-filled");
-    await contains(".o-mail-Message-header [data-icon='star']");
+    await contains(".o-mail-Message-header [data-icon='star']:not(.oi-filled)");
 });

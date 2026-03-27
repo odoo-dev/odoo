@@ -3,7 +3,7 @@
 
     <t t-name="mail.DiscussCommand">
         <div class="o-mail-DiscussCommand o_command_default d-flex align-items-center ps-3 pe-4" t-att-class="{ 'o-uiSmall': this.ui.isSmall }">
-            <i t-if="this.props.channel" class="oi oi-fw opacity-75 text-muted me-2" t-att-class="this.props.channel.parent_channel_id ? '' : this.props.channel.discussAppCategory?.icon ?? 'opacity-0'"/>
+            <i t-if="this.props.channel" class="oi oi-fw opacity-75 text-muted me-2" t-att-class="this.props.channel.discussAppCategory?.icon ? '' : 'opacity-0'" t-att-data-icon="this.props.channel.parent_channel_id ? '' : this.props.channel.discussAppCategory?.icon"/>
             <i t-elif="this.props.persona" class="oi oi-fw opacity-75 text-muted me-2" data-icon="person"/>
             <DiscussAvatar t-if="this.props.channel or this.props.persona" channel="this.props.channel" persona="this.props.persona" size="this.ui.isSmall ? 32 : 26" className="'me-2'"/>
             <span class="o-mail-DiscussCommand-nameContainer pe-1 text-ellipsis d-flex align-items-center fw-bold" t-att-class="{ 'o-action': this.props.action }">

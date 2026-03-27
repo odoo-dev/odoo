@@ -41,7 +41,7 @@ test("activity upload document is available", async () => {
     await start();
     await openFormView("res.partner", partnerId);
     await contains(".o-mail-Activity .btn:text('Upload Document')");
-    await contains(".btn data-icon=[data-icon='upload']");
+    await contains(".btn [data-icon='upload']");
     await contains(".o-mail-Activity .o_input_file");
 });
 

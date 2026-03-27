@@ -4,7 +4,7 @@
         <xpath expr="//*[@t-name='mail.MessagingMenu']" position="inside">
             <Dropdown t-if="!this.env.inDiscussApp" state="this.dropdown" beforeOpen.bind="this.beforeOpen" position="'bottom-end'" menuClass="this.discussSystray.menuClass" bottomSheet="false">
                 <button t-att-class="this.discussSystray.class">
-                    <i class="oi oi-lg" data-icon="forum" role="img" aria-label="Messages" t-on-click="() => this.store.discuss.activeTab = this.ui.isSmall and this.store.discuss.activeTab === 'notification' ? 'notification' : this.store.discuss.activeTab"></i>
+                    <i class="oi oi-lg oi-filled" data-icon="forum" role="img" aria-label="Messages" t-on-click="() => this.store.discuss.activeTab = this.ui.isSmall and this.store.discuss.activeTab === 'notification' ? 'notification' : this.store.discuss.activeTab"></i>
                     <span t-if="this.counter" class="o-mail-MessagingMenu-counter badge rounded-pill"><t t-out="this.counter"/></span>
                 </button>
                 <t t-set-slot="content">
@@ -52,7 +52,7 @@
                             <a t-if="this.ui.isSmall" class="btn oi px-0" data-icon="cloud_download"/>
                             <t t-else="">
                                 <a class="btn btn-primary px-1 py-0 smaller">Install</a>
-                                <span t-if="!this.hasTouch()" t-on-click.stop="() => this.pwa.decline()" class="text-dark bg-transparent oi opacity-50 opacity-100-hover" data-icon="close" title="Dismiss"></span>
+                                <span t-if="!this.hasTouch()" t-on-click.stop="() => this.pwa.decline()" class="text-dark bg-transparent oi opacity-50 opacity-100-hover" data-icon="close_small" title="Dismiss"></span>
                             </t>
                         </div>
                     </t>

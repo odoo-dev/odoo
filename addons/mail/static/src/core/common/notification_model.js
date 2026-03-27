@@ -86,6 +86,10 @@ export class Notification extends Record {
         return ["exception", "bounce"].includes(this.notification_status);
     }
 
+    get icon() {
+        return "mail";
+    }
+
     get iconClass() {
         if (this.isFailure) {
             return "oi-filled";

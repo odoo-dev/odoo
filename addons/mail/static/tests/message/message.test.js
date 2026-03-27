@@ -1140,7 +1140,7 @@ test("add and remove bookmark from message", async () => {
     await openDiscuss(channelId);
     await contains(".o-mail-Message");
     await contains(".o-mail-Message [title='Bookmark']");
-    await contains(".o-mail-Message [title='Bookmark']" + " i[data-icon='bookmark']");
+    await contains(".o-mail-Message [title='Bookmark']" + " i[data-icon='bookmark']:not(.oi-filled)");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge", { count: 0 }] });
     await click(".o-mail-Message [title='Bookmark']");
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge:text('1')"] });
@@ -1151,7 +1151,7 @@ test("add and remove bookmark from message", async () => {
     await contains("button:has(:text('Bookmarks'))", { contains: [".badge", { count: 0 }] });
     await waitStoreFetch([["remove_bookmark", { message_id: messageId }]]);
     await contains(".o-mail-Message");
-    await contains(".o-mail-Message [title='Bookmark']" + " i[data-icon='bookmark']");
+    await contains(".o-mail-Message [title='Bookmark']" + " i[data-icon='bookmark']:not(.oi-filled)");
 });
 
 test("can bookmark a persistent message without thread", async () => {
