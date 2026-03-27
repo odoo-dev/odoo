@@ -113,7 +113,7 @@ registerMessageAction("add-bookmark", {
 registerMessageAction("remove-bookmark", {
     condition: ({ message }) => message.canToggleBookmark && message.is_bookmarked,
     icon: "bookmark",
-    icon_class: "oi-filled",
+    iconClass: "oi-filled",
     name: _t("Remove from Bookmarks"),
     onSelected: ({ message, thread }) => message.removeBookmark(thread),
     sequence: 30,
