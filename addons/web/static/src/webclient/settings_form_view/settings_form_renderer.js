@@ -7,7 +7,7 @@ import { SettingHeader } from "./settings/setting_header";
 import { SettingsBlock } from "./settings/settings_block";
 import { SettingsApp } from "./settings/settings_app";
 import { SettingsPage } from "./settings/settings_page";
-import { normalizedMatch } from "@web/core/l10n/utils";
+import { normalize } from "@web/core/l10n/utils";
 
 export class SettingsFormRenderer extends FormRenderer {
     static components = {
@@ -39,14 +39,17 @@ export class SettingsFormRenderer extends FormRenderer {
         if (!this.searchState.value) {
             return true;
         }
-        const blockTexts = [blockTitle, blockTip].filter(Boolean).join();
-        if (normalizedMatch(blockTexts, this.searchState.value).match) {
+        // This should be done in the begining !! in the Controller !
+        const normalizedSearchValue = normalize(this.searchState.value);
+        const blockTexts = [blockTitle, blockTip].join();
+        if (normalize(blockTexts).includes(normalizedSearchValue)) {
             return true;
         }
-        const settingTexts = [string ? string : this.props.record?.fields[fieldName]?.string, help]
-            .filter(Boolean)
-            .join();
-        if (normalizedMatch(settingTexts, this.searchState.value).match) {
+        const settingTexts = [
+            string ? string : this.props.record?.fields[fieldName]?.string,
+            help,
+        ].join();
+        if (normalize(settingTexts).includes(normalizedSearchValue)) {
             return true;
         }
         return false;
