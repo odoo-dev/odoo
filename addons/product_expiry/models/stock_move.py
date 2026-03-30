@@ -25,7 +25,19 @@ class StockMove(models.Model):
             expiration_date = from_date + datetime.timedelta(days=product.expiration_time)
             for vals in vals_list:
                 vals['expiration_date'] = vals.get('expiration_date') or expiration_date
+        for vals in vals_list:
+            lot_id = vals.get('lot_id')
+            if lot_id:
+                lot_id['display_name'] = self.env['stock.lot'].with_context(show_lot_removal_date=True).browse(lot_id['id']).display_name
+
         return vals_list
+
+    def action_show_details(self):
+        action = super().action_show_details()
+        if self.product_id.use_expiration_date:
+            action['context']['show_lot_removal_date'] = True
+            action['context']['show_lot_expiration_date'] = self.picking_type_id.use_create_lots
+        return action
 
     def _generate_serial_move_line_commands(self, field_data, location_dest_id=False, origin_move_line=None):
         """Override to add a default `expiration_date` into the move lines values."""
