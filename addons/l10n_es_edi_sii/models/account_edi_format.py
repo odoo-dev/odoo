@@ -368,9 +368,10 @@ class AccountEdiFormat(models.Model):
                                                          - sign * tax_details_info_other_vals['tax_amount_retention'], 2)
 
                 invoice_node['CuotaDeducible'] = round(sign * (
-                    tax_details_info_isp_vals['tax_amount_deductible']
-                    + tax_details_info_other_vals['tax_amount_deductible']
-                ), 2)
+                        tax_details_info_isp_vals['tax_amount_deductible']
+                        + tax_details_info_other_vals['tax_amount_deductible']
+                ), 2) + round(math.copysign(tax_details_info_other_vals['tax_details']['tax_amount'],
+                                            tax_details_info_other_vals['tax_details']['base_amount']), 2)
 
             info_list.append(info)
         return info_list
