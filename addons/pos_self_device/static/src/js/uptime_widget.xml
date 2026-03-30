@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pos_self_device.UptimeWidget">
+        <span class="o_field_uptime">
+            <t t-esc="formattedUptime"/>
+        </span>
+    </t>
+</templates>

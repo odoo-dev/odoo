@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_self_device_user,self.device.user,model_pos_self_device,point_of_sale.group_pos_user,1,0,0,0
+access_self_device_manager,self.device.manager,model_pos_self_device,point_of_sale.group_pos_manager,1,1,1,1
+access_self_device_config_user,self.device.config.user,model_pos_self_device_config,point_of_sale.group_pos_user,1,0,0,0
+access_self_device_config_manager,self.device.config.manager,model_pos_self_device_config,point_of_sale.group_pos_manager,1,1,1,1

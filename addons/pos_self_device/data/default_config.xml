@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="kiosk_device_config_default" model="pos.self.device.config">
+        <field name="name">Main config</field>
+        <field name="is_default" eval="True"/>
+        <field name="volume" eval="0"/>
+        <field name="brightness" eval="100"/>
+        <field name="admin_pin">1234</field>
+    </record>
+</odoo>

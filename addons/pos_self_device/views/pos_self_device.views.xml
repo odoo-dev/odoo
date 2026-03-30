@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_mdm_device_list" model="ir.ui.view">
+        <field name="name">pos.self.device.list</field>
+        <field name="model">pos.self.device</field>
+        <field name="arch" type="xml">
+            <list string="Self Devices" create="false">
+                <field name="name"/>
+                <field name="device_id"/>
+                <field name="config_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_mdm_device_form" model="ir.ui.view">
+        <field name="name">pos.self.device.form</field>
+        <field name="model">pos.self.device</field>
+        <field name="arch" type="xml">
+
+            <form create="false"
+                  js_class="pos_self_device_form_controller">
+                <header>
+                    <button name="action_refresh_state" string="Refresh state" type="object"/>
+                    <button name="action_reload_url" string="Reload Kiosk" type="object"/>
+                    <button name="action_lock_screen" string="Lock screen" type="object" invisible="screen_locked"/>
+                    <button name="action_unlock_screen" string="Unlock screen" type="object"
+                            invisible="not screen_locked"/>
+
+
+                    <button name="action_take_screenshot" string="Screenshot" type="object"/>
+                    <button name="action_get_logs" string="Get logs" type="object"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="device_id" readonly="1"/>
+                        <field name="config_id"/>
+                        <field name="device_config_id"/>
+                        <field name="status" readonly="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Device Info">
+                            <group>
+                                <group string="Android info">
+                                    <field name="app_version" readonly="1"/>
+                                    <field name="device_model" readonly="1"/>
+                                    <field name="device_name" readonly="1"/>
+                                    <field name="android_version" readonly="1"/>
+                                    <field name="android_build" readonly="1"/>
+                                    <field name="web_view" readonly="1"/>
+                                </group>
+                                <group string="System">
+                                    <field name="device_owner" readonly="1" widget="boolean_toggle"/>
+                                    <field name="language" readonly="1"/>
+                                    <field name="timezone" readonly="1"/>
+                                    <field name="uptime" readonly="1" widget="pos_self_device_uptime"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Network">
+                            <group>
+                                <field name="ip_address" readonly="1"/>
+                                <field name="wifi" readonly="1"/>
+                                <field name="ethernet" readonly="1" widget="boolean_toggle"/>
+                            </group>
+                        </page>
+
+                        <page string="Screen &amp; Battery">
+                            <group>
+                                <group string="Screen">
+                                    <field name="screen_size" readonly="1"/>
+                                    <field name="screen_brightness" readonly="1"/>
+                                    <field name="screen_on" readonly="1" widget="boolean_toggle"/>
+                                    <field name="screen_locked" readonly="1" widget="boolean_toggle"/>
+                                </group>
+                                <group string="Power">
+                                    <field name="battery_level" readonly="1"/>
+                                    <field name="plugged_in" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="Memory &amp; Storage">
+                            <group>
+                                <field name="ram" readonly="1"/>
+                                <field name="storage" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Screenshot">
+                            <group>
+                                <field name="screenshot" readonly="1" widget="image" style="max-width:200px"/>
+                                <field name="screenshot_date" readonly="1"/>
+                            </group>
+                        </page>
+
+                        <page string="Logs">
+                            <group>
+                                <field name="log" readonly="1" widget="binary" filename="logs.zip"/>
+                                <field name="log_date" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+
+                    <group class="mt-4">
+                        <field name="state_updated_at" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_mdm_device" model="ir.actions.act_window">
+        <field name="name">Self Devices</field>
+        <field name="res_model">pos.self.device</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add device
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_pos_kiosk_device_root"
+              name="Kiosk Devices"
+              parent="point_of_sale.menu_point_config_product"
+              sequence="14"/>
+
+    <menuitem id="menu_mdm_device_configuration"
+              name="Configurations"
+              action="action_kiosk_device_config"
+              parent="menu_pos_kiosk_device_root"
+              sequence="1"/>
+
+    <menuitem id="menu_mdm_device"
+              name="Devices"
+              parent="menu_pos_kiosk_device_root"
+              action="action_mdm_device"
+              sequence="2"/>
+
+</odoo>
+
