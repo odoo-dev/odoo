@@ -27,7 +27,9 @@ const notificationPatch = {
         return super.statusIcon;
     },
     get statusIconClass() {
-        return super.statusIcons[this.notification_status] || "text-danger";
+        if (["sent", "ready", "canceled"].includes(this.notification_status)) {
+            return "text-danger";
+        }
     },
     get failureMessage() {
         switch (this.failure_type) {
