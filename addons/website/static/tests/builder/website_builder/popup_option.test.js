@@ -159,10 +159,10 @@ describe("Popup options: popup in page before edit", () => {
     test("changing background color of s_popup, then closing it, then undo, then redo keep it visible", async () => {
         const editor = builder.getEditor();
         await expectToTriggerEvent(":iframe .s_popup .modal", "shown.bs.modal", () =>
-            contains(".o_we_invisible_entry [data-icon='visibility']").click()
+            contains(".o_we_invisible_entry [data-icon='visibility_off']").click()
         );
         await waitFor(":iframe .s_popup .modal", { visible: true });
-        expect(".o_we_invisible_entry .fa").toHaveAttribute('data-icon', 'visibility');
+        expect(".o_we_invisible_entry [data-icon='visibility']").toHaveAttribute('data-icon', 'visibility');
         expect(":iframe .s_popup .modal").toBeVisible();
         await contains("[data-label=Backdrop] button.o_we_color_preview").click();
         await contains("button.o_color_button[data-color='#FF0000']").click();
@@ -173,11 +173,11 @@ describe("Popup options: popup in page before edit", () => {
         await expectToTriggerEvent(":iframe .s_popup .modal", "hidden.bs.modal", () =>
             contains(":iframe .s_popup div.js_close_popup").click()
         );
-        expect(".o_we_invisible_entry .fa").toHaveAttribute("data-icon", "visibility_off");
+        expect(".o_we_invisible_entry [data-icon='visibility_off']").toHaveAttribute("data-icon", "visibility_off");
         expect(":iframe .s_popup .modal").not.toBeVisible();
         expect(editor.shared.history.canUndo()).toBe(true);
         await expectToTriggerEvent(":iframe .s_popup .modal", "shown.bs.modal", () => undo(editor));
-        expect(".o_we_invisible_entry .fa").toHaveAttribute('data-icon', 'visibility');
+        expect(".o_we_invisible_entry [data-icon='visibility']").toHaveAttribute('data-icon', 'visibility');
         expect(":iframe .s_popup .modal").toBeVisible();
         redo(editor);
         expect(":iframe .s_popup .modal").toHaveStyle({

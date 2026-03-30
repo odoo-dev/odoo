@@ -248,13 +248,13 @@ test("reload should reopen the builder with the reloadable target, and the same 
         delayReload: async () => await deferred.promise,
     });
     await contains(":iframe .test-option").click();
-    expect(".options-container-header:has(i.fa-caret-right)").toHaveCount(1);
-    expect(".options-container-header:has(i.fa-caret-down)").toHaveCount(1);
+    expect(".options-container-header:has(i[data-icon='arrow_right'])").toHaveCount(1);
+    expect(".options-container-header:has(i[data-icon='arrow_drop_down'])").toHaveCount(1);
     await unfoldAllOptionsGroups();
     await contains("[data-action-id=testAction]").click();
     expect(":iframe .test-option").toHaveAttribute("data-applied");
-    expect(".options-container-header:has(i.fa-caret-right)").toHaveCount(0);
-    expect(".options-container-header:has(i.fa-caret-down)").toHaveCount(2);
+    expect(".options-container-header:has(i[data-icon='arrow_right'])").toHaveCount(0);
+    expect(".options-container-header:has(i[data-icon='arrow_drop_down'])").toHaveCount(2);
     deferred.resolve();
     expect.verifySteps(["save"]);
     await animationFrame();
@@ -264,8 +264,8 @@ test("reload should reopen the builder with the reloadable target, and the same 
     // resets to initial content
     expect(":iframe .test-option").not.toHaveAttribute("data-applied");
 
-    expect(".options-container-header:has(i.fa-caret-right)").toHaveCount(0);
-    expect(".options-container-header:has(i.fa-caret-down)").toHaveCount(2);
+    expect(".options-container-header:has(i[data-icon='arrow_right'])").toHaveCount(0);
+    expect(".options-container-header:has(i[data-icon='arrow_drop_down'])").toHaveCount(2);
 });
 
 test("preview shouldn't let o_dirty", async () => {

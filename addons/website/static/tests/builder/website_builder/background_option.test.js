@@ -619,7 +619,7 @@ test("Connections shape do not update if it is inside an invisible element", asy
     ).click();
     await waitSidebarUpdated();
     await contains(".o_we_invisible_entry").click();
-    await contains(".overlay .fa-angle-up").click();
+    await contains(".overlay [data-icon='keyboard_arrow_up']").click();
     shapeData = JSON.parse(queryOne(":iframe #section1").dataset.oeShapeData);
     expect(shapeData.colors.c5).toBe(HEX_GREEN);
 });
