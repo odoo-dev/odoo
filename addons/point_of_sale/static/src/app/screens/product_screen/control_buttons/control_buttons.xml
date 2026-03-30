@@ -14,10 +14,10 @@
             <span t-else="">Preset</span>
         </button>
         <button t-if="!this.props.showRemainingButtons and !this.ui.isSmall and this.pos.showSaveOrderButton" t-att-disabled="this.pos.getOrder().isEmpty()" t-attf-class="{{ this.buttonClass }} ms-auto" t-on-click="() => this.pos.clickSaveOrder()">
-            <i class="fa fa-upload"/>
+            <i class="oi" data-icon="upload"/>
         </button>
         <button class="btn btn-secondary btn-lg flex-shrink-0 more-btn" t-att-class="{'ms-auto': !this.pos.showSaveOrderButton}" t-if="!this.props.showRemainingButtons and !this.ui.isSmall and this.props.onClickMore" t-on-click="this.props.onClickMore">
-            <i class="oi oi-fw oi-ellipsis-v" aria-hidden="true" />
+            <i class="oi oi-fw" data-icon="more_vert" aria-hidden="true" />
         </button>
         <!-- All these buttons will only be displayed in a dialog -->
         <t t-if="this.props.showRemainingButtons">
@@ -25,14 +25,14 @@
                 <NoteButton
                     label.translate="Customer Note"
                     class="this.buttonClass"
-                    icon="'fa fa-sticky-note'"/>
+                    icon="'sticky_note_2'"/>
                 <button t-if="this.pos.config.iface_printbill" t-att-class="this.buttonClass"
                     t-att-disabled="!this.pos.getOrder()?.getOrderlines()?.length"
                     t-on-click="this.clickPrintBill">
-                    <i class="fa fa-print me-1"></i>Bill
+                    <i class="oi me-1" data-icon="print"></i>Bill
                 </button>
                 <button t-if="this.pos.cashier._role != 'minimal'" class="o_pricelist_button" t-att-class="this.buttonClass" t-on-click="() => this.clickPricelist()">
-                    <i class="fa fa-th-list me-2" role="img" aria-label="Price list" title="Price list" />
+                    <i class="oi me-2" data-icon="view_list" role="img" aria-label="Price list" title="Price list" />
                     <t t-if="this.currentOrder?.pricelist_id" t-out="this.currentOrder.pricelist_id.display_name" />
                     <t t-else="">Pricelist</t>
                 </button>
@@ -40,23 +40,23 @@
                     class="control-button o_fiscal_position_button"
                     t-att-class="this.buttonClass"
                     t-on-click="() => this.clickFiscalPosition()">
-                    <i class="fa fa-book me-1" role="img" aria-label="Set fiscal position"
+                    <i class="oi me-1" data-icon="book" role="img" aria-label="Set fiscal position"
                     title="Set fiscal position" />
                     <t t-if="this.currentOrder?.fiscal_position_id" t-out="this.currentOrder.fiscal_position_id.display_name" />
                     <t t-else="">Tax</t>
                 </button>
                 <button t-if="this.displayProductInfoBtn()" t-att-class="this.buttonClass" t-on-click="() => this.pos.onProductInfoClick(this.currentOrder.getSelectedOrderline().product_id.product_tmpl_id, this.currentOrder.getSelectedOrderline().product_id)">
-                    <i class="fa fa-info-circle me-1" role="img" aria-label="Product Info" title="Product Info" /> Info
+                    <i class="oi me-1" data-icon="info" role="img" aria-label="Product Info" title="Product Info" /> Info
                 </button>
                 <button t-if="this.pos.isSelectedLineCombo" class="break-combo-button" t-att-class="this.buttonClass" t-on-click="() => this.breakSelectedCombo()">
-                    <i class="fa fa-outdent" role="img" aria-label="Break combo" title="Brean combo" /> Break combo
+                    <i class="oi" data-icon="format_indent_decrease" role="img" aria-label="Break combo" title="Brean combo" /> Break combo
                 </button>
                 <button
                     t-if="this.pos.cashier._role != 'minimal'"
                     t-att-class="this.buttonClass" t-on-click="() => this.pos.onDeleteOrder(this.pos.getOrder())"
                     t-att-disabled="!this.pos.getOrder()?.getOrderlines()?.length"
                 >
-                    <i class="fa fa-trash me-1" role="img" /> Cancel Order
+                    <i class="oi oi-filled me-1" data-icon="delete" role="img" /> Cancel Order
                 </button>
             </div>
         </t>

@@ -454,7 +454,7 @@ test("hotkey sharing copies complex search to clipboard", async () => {
     await toggleMenuItem("Cool Vendors");
     await toggleMenuItem("Vendor");
 
-    await click(".o_searchview .oi-group"); // Facet click to trigger orderBy
+    await click(".o_searchview [data-icon='stacks']"); // Facet click to trigger orderBy
     await animationFrame();
 
     await press(["alt", "shift", "h"]);

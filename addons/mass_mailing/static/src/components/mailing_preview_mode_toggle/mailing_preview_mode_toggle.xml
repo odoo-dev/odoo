@@ -9,7 +9,7 @@
             </button>
             <button type="button" class="btn py-0 px-2" t-on-click="() => this.onTogglePreviewMode(true)"
                     t-att-class="this.state.isMobileMode? 'btn-primary' : 'btn-secondary'">
-                <i class="fa fa-lg fa-mobile" title="Mobile Preview"/>
+                <i class="oi oi-lg" data-icon="smartphone" title="Mobile Preview"/>
             </button>
         </div>
     </t>

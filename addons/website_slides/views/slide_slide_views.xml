@@ -221,28 +221,28 @@
                                 <footer class="mt-auto d-flex justify-content-between align-items-end pt-0">
                                     <span>
                                         <t t-if="record.slide_category.raw_value == 'infographic'">
-                                            <i class="fa fa-file-image-o me-2" aria-label="Infographic" role="img" title="Infographic"/>
+                                            <i class="oi me-2" data-icon="image" aria-label="Infographic" role="img" title="Infographic"/>
                                         </t>
                                         <t t-elif="record.slide_category.raw_value == 'article'">
-                                            <i class="fa fa-file-code-o me-2" aria-label="article" role="img" title="Article"/>
+                                            <i class="oi me-2" data-icon="code" aria-label="article" role="img" title="Article"/>
                                         </t>
                                         <t t-elif="record.slide_category.raw_value == 'video'">
-                                            <i class="fa fa-file-video-o me-2" aria-label="Video" role="img" title="Video"/>
+                                            <i class="oi me-2" data-icon="movie" aria-label="Video" role="img" title="Video"/>
                                         </t>
                                         <t t-elif="record.slide_category.raw_value == 'quiz'">
-                                            <i class="fa fa-flag me-2" aria-label="Quiz" role="img" title="Quiz"/>
+                                            <i class="oi oi-filled me-2" data-icon="flag" aria-label="Quiz" role="img" title="Quiz"/>
                                         </t>
-                                        <t t-else=""><i class="fa fa-file-pdf-o me-2" aria-label="Document" role="img" title="Document"/></t>
+                                        <t t-else=""><i class="oi me-2" data-icon="picture_as_pdf" aria-label="Document" role="img" title="Document"/></t>
                                         <field name="slide_category"/>
                                     </span>
                                     <span class="d-flex align-items-center">
-                                        <i class="fa fa-clock-o me-2" aria-label="Duration" role="img" title="Duration"/><field name="completion_time" widget="float_time"/>
+                                        <i class="oi me-2" data-icon="schedule" aria-label="Duration" role="img" title="Duration"/><field name="completion_time" widget="float_time"/>
                                     </span>
                                     <span>
-                                        <i class="fa fa-question me-2" aria-label="Number of Questions" role="img" title="Number of Questions"/><field name="questions_count"/>
+                                        <i class="oi me-2" data-icon="help" aria-label="Number of Questions" role="img" title="Number of Questions"/><field name="questions_count"/>
                                     </span>
                                     <span>
-                                        <i class="fa fa-eye me-2" aria-label="Views" role="img" title="Views"/><field name="total_views"/>
+                                        <i class="oi me-2" data-icon="visibility" aria-label="Views" role="img" title="Views"/><field name="total_views"/>
                                     </span>
                                     <field name="user_id" widget="many2one_avatar_user"/>
                                 </footer>

@@ -145,15 +145,15 @@
                                         force_save="1" readonly="videocall_source == 'discuss' or not user_can_edit"/>
                                     <button name="clear_videocall_location" type="object" class="btn btn-link o_input_box_overlay_end"
                                         invisible="not videocall_location or not user_can_edit" context="{'recurrence_update': recurrence_update}">
-                                        <i title="Clear meeting" data-tooltip="Clear meeting" class="fa fa-times"/>
+                                        <i title="Clear meeting" data-tooltip="Clear meeting" class="oi" data-icon="close"/>
                                     </button>
                                     <button name="action_join_video_call" class="btn btn-link o_input_box_overlay_end" type="object"
                                         invisible="not videocall_location or not user_can_edit">
-                                        <i title="Join Video Call" data-tooltip="Join video call" class="fa fa-sign-in"/>
+                                        <i title="Join Video Call" data-tooltip="Join video call" class="oi" data-icon="login"/>
                                     </button>
                                     <button name="set_discuss_videocall_location" type="object" class="btn btn-link o_input_box_overlay_end"
                                         invisible="videocall_location or not user_can_edit" context="{'recurrence_update': recurrence_update}">
-                                        <span class="mx-1"><i class="fa fa-plus me-1"/>Odoo meeting</span>
+                                        <span class="mx-1"><i class="oi me-1" data-icon="add"/>Odoo meeting</span>
                                     </button>
                                 </div>
                             </div>
@@ -288,9 +288,9 @@
                                             <field name="email" widget="email"/>
                                             <span>Status: <field name="state" /></span>
                                             <footer class="justify-content-end">
-                                                <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" icon="fa-asterisk"/>
-                                                <button name="do_accept" invisible="state not in ('needsAction', 'tentative', 'declined')" string="Accept" type="object" class="text-success" icon="fa-check"/>
-                                                <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="Decline" type="object" class="text-danger" icon="fa-times-circle"/>
+                                                <button name="do_tentative" invisible="state not in ('needsAction', 'declined', 'accepted')" string="Uncertain" type="object" icon="emergency"/>
+                                                <button name="do_accept" invisible="state not in ('needsAction', 'tentative', 'declined')" string="Accept" type="object" class="text-success" icon="check"/>
+                                                <button name="do_decline" invisible="state not in ('needsAction', 'tentative', 'accepted')" string="Decline" type="object" class="text-danger" icon="cancel"/>
                                             </footer>
                                         </t>
                                     </templates>
@@ -317,7 +317,7 @@
                 </div>
                 <field name="invalid_email_partner_ids" invisible="1"/> <!--used in many2many_attendees widget-->
                 <div class="o_input_box">
-                    <i class="o_input_box_overlay_start fa fa-tag" title="Booking Name"/>
+                    <i class="o_input_box_overlay_start oi" data-icon="label" title="Booking Name"/>
                     <field name="name" nolabel="1"
                         placeholder="Add Title"
                     />
@@ -349,14 +349,14 @@
                     <field name="stop" invisible="1"/>
                 </div>
                 <div class="o_input_box">
-                    <i class="o_input_box_overlay_start fa fa-user" title="Participants"/>
+                    <i class="o_input_box_overlay_start oi oi-filled" data-icon="person" title="Participants"/>
                     <field name="partner_ids" nolabel="1"
                         widget="many2many_tags"
                         placeholder="Participants"
                     />
                 </div>
                 <div class="o_input_box">
-                    <i class="o_input_box_overlay_start fa fa-map" title="Location"/>
+                    <i class="o_input_box_overlay_start oi" data-icon="map" title="Location"/>
                     <field name="location" nolabel="1"
                         placeholder="Room or Location"
                     />
@@ -367,25 +367,25 @@
                     <field name="videocall_source" force_save="1" invisible="1"/>
                     <button name="set_discuss_videocall_location" type="object" class="o_input_box_overlay_end btn btn-link"
                         invisible="videocall_location" context="{'recurrence_update': recurrence_update}">
-                        <span class="fa fa-plus me-1"/>Video conference
+                        <span class="oi me-1" data-icon="add"/>Video conference
                     </button>
                 </div>
                 <div class="o_input_box" invisible="not videocall_location">
-                    <i class="o_input_box_overlay_start fa fa-video-camera" title="Videocall URL"/>
+                    <i class="o_input_box_overlay_start oi oi-filled" data-icon="videocam" title="Videocall URL"/>
                     <field name="videocall_location" nolabel="1" widget="CopyClipboardChar"/>
-                    <button name="clear_videocall_location" class="o_input_box_overlay_end btn btn-link"><i class="fa fa-remove" title="Remove"/></button>
+                    <button name="clear_videocall_location" class="o_input_box_overlay_end btn btn-link"><i class="oi" data-icon="close" title="Remove"/></button>
                 </div>
                 <div class="o_input_box">
-                    <i class="o_input_box_overlay_start fa fa-lock" title="Visibility"/>
+                    <i class="o_input_box_overlay_start oi" data-icon="lock" title="Visibility"/>
                     <field name="privacy_placeholder" invisible="1"/> <!-- Used to generate the privacy field's placeholder. -->
                     <field name="privacy" nolabel="1" options="{'placeholder_field': 'privacy_placeholder'}"/>
                 </div>
                 <div class="o_input_box">
-                    <i class="o_input_box_overlay_start fa fa-circle" title="Show as"/>
+                    <i class="o_input_box_overlay_start oi oi-filled" data-icon="circle" title="Show as"/>
                     <field name="show_as" nolabel="1"/>
                 </div>
                 <div class="o_input_box d-flex">
-                    <i class="o_input_box_overlay_start fa fa-sticky-note" title="Notes"/>
+                    <i class="o_input_box_overlay_start oi" data-icon="sticky_note_2" title="Notes"/>
                     <field name="notes" nolabel="1" placeholder="Notes" widget="calendar_event_notes_html"/>
                 </div>
             </form>

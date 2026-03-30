@@ -36,11 +36,11 @@
     <t t-name="web.CalendarCommonPopover.body">
         <ul class="list-group list-group-flush">
             <li t-if="this.date" class="list-group-item">
-                <i class="fa fa-fw fa-calendar text-400" />
+                <i class="oi oi-fw oi-filled text-400" data-icon="calendar_today"/>
                 <span class="fw-bold ms-2" t-out="this.date" /> <small t-if="this.dateDuration != 'All day'"><b t-out="this.dateDuration" /></small>
             </li>
             <li t-if="this.time" class="list-group-item">
-                <i class="fa fa-fw fa-clock-o text-400" />
+                <i class="oi oi-fw text-400" data-icon="schedule" />
                 <span class="fw-bold ms-2" t-out="this.time" /> <small t-if="this.timeDuration"><b t-out="`(${this.timeDuration})`" /></small>
             </li>
         </ul>

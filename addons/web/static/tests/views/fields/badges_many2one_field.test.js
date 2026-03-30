@@ -39,8 +39,8 @@ class Product extends models.Model {
     icon = fields.Char("icon");
 
     _records = [
-        { id: 37, display_name: "xphone", color: 6, icon: "fa-mobile" },
-        { id: 41, display_name: "xpad", color: 7, icon: "fa-check" },
+        { id: 37, display_name: "xphone", color: 6, icon: "smartphone" },
+        { id: 41, display_name: "xpad", color: 7, icon: "check" },
     ];
 }
 
@@ -94,9 +94,9 @@ test("BadgesMany2OneField: verify icons are fetched via search_read and displaye
     });
 
     // Check if icons are rendered
-    expect("span.o_selection_badge:eq(0) span.fa-cog").toHaveCount(1);
-    expect("span.o_selection_badge:eq(1) span.fa-mobile").toHaveCount(1);
-    expect("span.o_selection_badge:eq(2) span.fa-check").toHaveCount(1);
+    expect("span.o_selection_badge:eq(0) span[data-icon='settings']").toHaveCount(1);
+    expect("span.o_selection_badge:eq(1) span[data-icon='smartphone']").toHaveCount(1);
+    expect("span.o_selection_badge:eq(2) span[data-icon='check']").toHaveCount(1);
 
     expect.verifySteps(["search_read_triggered"]);
 });

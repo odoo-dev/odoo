@@ -14,7 +14,7 @@ registry.category("web_tour.tours").add('project_task_activities_split', {
             content: 'Task "New Task!" is listed in the activity view',
             trigger: 'td.o_data_cell:contains("New Task!")',
         }, {
-            trigger: ".o_control_panel_navigation button i.fa-sliders",
+            trigger: ".o_control_panel_navigation button i[data-icon='tune']",
             content: "Open embedded actions dropdown",
             run: "click",
         }, {

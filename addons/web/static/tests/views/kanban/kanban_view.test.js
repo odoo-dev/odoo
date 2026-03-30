@@ -460,7 +460,7 @@ test("Hide tooltip when user click inside a kanban headers item", async () => {
     await runAllTimers();
     expect(".o-tooltip").toHaveCount(1);
 
-    await contains(".o_kanban_group:first-child .o_kanban_header_title .fa-gear", {
+    await contains(".o_kanban_group:first-child .o_kanban_header_title [data-icon='settings']", {
         visible: false,
     }).click();
     expect(".o-tooltip").toHaveCount(0);
@@ -1845,7 +1845,7 @@ test("priority field should not be editable when missing access rights", async (
     });
     // Try to fill one star in the priority field of the first record
     await contains(".o_kanban_record:first-child .o_priority_star:first-child").click();
-    expect(".o_kanban_record:first-child .o_priority .fa-star-o").toHaveCount(2, {
+    expect(".o_kanban_record:first-child .o_priority [data-icon='star']").toHaveCount(2, {
         message: "first record should still contain 2 empty stars",
     });
 });
@@ -4693,7 +4693,7 @@ test("support styling of anchor tags with action type", async function (assert) 
                 <templates>
                     <div t-name="card">
                         <field name="foo"/>
-                        <a type="action" name="42" class="btn-primary" style="margin-left: 10px"><i class="oi oi-arrow-right"/> Click me !</a>
+                        <a type="action" name="42" class="btn-primary" style="margin-left: 10px"><i class="oi" data-icon="east"/> Click me !</a>
                     </div>
                 </templates>
             </kanban>`,
@@ -8831,7 +8831,7 @@ test(`kanban with custom cog action that has a confirmation target="new" action`
     await keyDown("alt");
     await contains(".o_kanban_record:nth-of-type(1)").click();
     expect(".o_selection_box").toHaveCount(1);
-    await contains(`.o_cp_action_menus button:has(.fa-cog)`).click();
+    await contains(`.o_cp_action_menus button:has([data-icon="settings"])`).click();
     await contains(`.o-dropdown-item:contains(Sort of confirmation dialog)`).click();
     expect(".o_dialog").toHaveCount(1);
 
@@ -9903,7 +9903,7 @@ test(`[Offline] use offline searchbar`, async () => {
         "Filter Blip",
     ]);
 
-    await contains(".o_offline_search_bar .o_searchview_facet .oi-close").click(); // remove search
+    await contains(".o_offline_search_bar .o_searchview_facet [data-icon='close']").click(); // remove search
     expect(".o_offline_search_bar .o_searchview_facet").toHaveCount(0);
     expect(".o_kanban_group").toHaveCount(0);
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(4);
@@ -10048,7 +10048,7 @@ test(`[Offline] keep facets name when coming back online (favorite filter)`, asy
 
     // Switch offline and visit available filters
     await setOffline(true);
-    await contains(".o_searchview_facet .oi-close").click();
+    await contains(".o_searchview_facet [data-icon='close']").click();
     expect(".o_kanban_record:not(.o_kanban_ghost)").toHaveCount(4);
     await toggleSearchBarMenu();
     await contains(".o_search_bar_menu_offline .o-dropdown-item:eq(0)").click();
@@ -10057,7 +10057,7 @@ test(`[Offline] keep facets name when coming back online (favorite filter)`, asy
     // Switch back online
     await setOffline(false);
     expect(queryAllTexts(".o_searchview .o_facet_values")).toEqual(["My favorite"]);
-    expect(".o_searchview_facet .fa-star").toHaveCount(1);
+    expect(".o_searchview_facet [data-icon='star']").toHaveCount(1);
 
     await toggleSearchBarMenu();
     await toggleMenuItem("GroupBy Blip");

@@ -41,7 +41,7 @@
     <t t-name="web.CalendarYearPopover.footer">
         <t t-if="this.props.model.canCreate">
             <a href="#" class="btn-link o_cw_popover_create" t-on-click.prevent="this.onCreateButtonClick">
-                <i class="fa fa-plus" />
+                <i class="oi" data-icon="add" />
                 Create
             </a>
         </t>

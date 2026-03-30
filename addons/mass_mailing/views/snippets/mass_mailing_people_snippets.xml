@@ -112,13 +112,13 @@
                             <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                                 <span class="s_rating_inactive_icons" style="color: var(--border-color);">
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                             </div>
                         </div>
@@ -144,13 +144,13 @@
                             <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                                 <span class="s_rating_inactive_icons" style="color: var(--border-color);">
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                             </div>
                         </div>
@@ -176,13 +176,13 @@
                             <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                                 <span class="s_rating_inactive_icons" style="color: var(--border-color);">
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                             </div>
                         </div>
@@ -208,13 +208,13 @@
                             <p class="mb-0 s_rating_title"><strong>Rating</strong></p>
                             <div class="s_rating_icons o_not_editable">
                                 <span class="s_rating_active_icons" style="color: #f3cc00;">
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                                 <span class="s_rating_inactive_icons" style="color: var(--border-color);">
-                                    <i class="fa fa-star" role="presentation"/>
+                                    <i class="oi oi-filled" data-icon="star" role="presentation"/>
                                 </span>
                             </div>
                         </div>

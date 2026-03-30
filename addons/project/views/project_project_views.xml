@@ -53,9 +53,9 @@
                             </div>
                         </button>
                         <button class="oe_stat_button" name="action_get_list_view" type="object" groups="project.group_project_milestone" invisible="not allow_milestones or milestone_count &lt;= 0 or is_template">
-                            <i class="fa o_button_icon fa-check" invisible="next_milestone_status == False or next_milestone_status != 'on_track'" title="On Track"/>
-                            <i class="fa o_button_icon fa-check text-success" invisible="next_milestone_status != 'next_track'" title="On Track"/>
-                            <i class="fa o_button_icon fa-check text-danger" invisible="next_milestone_status != 'off_track'" title="Off Track"/>
+                            <i class="oi o_button_icon" data-icon="check" invisible="next_milestone_status == False or next_milestone_status != 'on_track'" title="On Track"/>
+                            <i class="oi o_button_icon text-success" data-icon="check" invisible="next_milestone_status != 'next_track'" title="On Track"/>
+                            <i class="oi o_button_icon text-danger" data-icon="check" invisible="next_milestone_status != 'off_track'" title="Off Track"/>
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_text">Milestones</span>
                                 <span class="o_stat_value">
@@ -101,7 +101,7 @@
                     <group>
                         <div>
                             <div class="o_input_box">
-                                <i class="o_input_box_overlay_start fa fa-user" title="Customer" name="partner_id"/>
+                                <i class="o_input_box_overlay_start oi oi-filled" data-icon="person" title="Customer" name="partner_id"/>
                                 <field name="partner_id" nolabel="1" widget="res_partner_many2one" placeholder="Select Customer" context="{'show_address': True}"/>
                             </div>
                             <div class="o_input_box" invisible="not partner_phone">
@@ -163,10 +163,10 @@
                                     <field name="privacy_visibility" widget="radio"/>
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" placeholder="Visible to all"/>
                                     <div colspan="2" class="text-muted o_input_box" invisible="access_instruction_message == ''">
-                                        <i class="o_input_box_overlay_start fa fa-lightbulb-o" title="Info"/><field name="access_instruction_message" nolabel="1"/>
+                                        <i class="o_input_box_overlay_start oi" data-icon="lightbulb" title="Info"/><field name="access_instruction_message" nolabel="1"/>
                                     </div>
                                     <div colspan="2" class="text-muted o_input_box" invisible="privacy_visibility_warning == ''">
-                                        <i class="o_input_box_overlay_start fa fa-warning" title="Warning"/><field name="privacy_visibility_warning" nolabel="1"/>
+                                        <i cclass="o_input_box_overlay_start oi" data-icon="warning" title="Warning"/><field name="privacy_visibility_warning" nolabel="1"/>
                                     </div>
                                 </group>
                                 <div class="o_col">
@@ -504,20 +504,20 @@
                                 </div>
                                 <div class="o_project_kanban_body min-w-0 pb-4 me-2">
                                     <span name="partner_name" class="text-muted d-flex align-items-baseline" t-if="record.partner_id.value">
-                                        <span class="fa fa-user me-2" aria-label="Partner" title="Partner"></span><field class="text-truncate" name="partner_id"/>
+                                        <span class="oi oi-filled me-2" data-icon="person" aria-label="Partner" title="Partner"></span><field class="text-truncate" name="partner_id"/>
                                     </span>
                                     <div t-if="record.date.raw_value or record.date_start.raw_value" class="text-muted d-flex align-items-baseline">
-                                        <span class="fa fa-clock-o me-2" title="Dates"/>
+                                        <span class="oi me-2" data-icon="schedule" title="Dates"/>
                                         <field name="date_start" widget="daterange" options="{'end_date_field': 'date'}"/>
                                     </div>
                                     <div t-if="record.alias_email.value" class="text-muted text-truncate" t-att-title="record.alias_email.value">
-                                        <span class="fa fa-envelope-o me-2" aria-label="Domain Alias" title="Domain Alias"></span><field name="alias_email"/>
+                                        <span class="oi me-2" data-icon="mail" aria-label="Domain Alias" title="Domain Alias"></span><field name="alias_email"/>
                                     </div>
                                     <div t-if="record.show_ratings.raw_value and record.rating_count.raw_value &gt; 0" class="d-flex text-muted">
                                         <b class="me-1">
-                                            <span class="fa mt4 fa-smile-o fw-bolder text-success" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Happy" role="img" aria-label="Happy face"/>
-                                            <span class="fa mt4 fa-meh-o fw-bolder text-warning" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Neutral" role="img" aria-label="Neutral face"/>
-                                            <span class="fa mt4 fa-frown-o fw-bolder text-danger" t-else="" title="Average Rating: Unhappy" role="img" aria-label="Unhappy face"/>
+                                            <span class="oi mt4 fw-bolder text-success" data-icon="sentiment_satisfied" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Happy" role="img" aria-label="Happy face"/>
+                                            <span class="oi mt4 fw-bolder text-warning" data-icon="sentiment_neutral" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Neutral" role="img" aria-label="Neutral face"/>
+                                            <span class="oi mt4 fw-bolder text-danger" data-icon="sentiment_sad" t-else="" title="Average Rating: Unhappy" role="img" aria-label="Unhappy face"/>
                                         </b>
                                         <t t-if="record.rating_avg.raw_value % 1 == 0">
                                             <field name="rating_avg" nolabel="1" widget="float" digits="[1, 0]"/>
@@ -545,7 +545,7 @@
                                             type="object"
                                             t-attf-title="#{record.milestone_count_reached.value} Milestones reached out of #{record.milestone_count.value}"
                                         >
-                                            <span class="fa fa-flag me-1"/>
+                                            <span class="oi oi-filled me-1" data-icon="flag"/>
                                             <field name="milestone_count_reached"/>/<field name="milestone_count"/>
                                         </a>
                                     </div>

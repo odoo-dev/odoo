@@ -411,7 +411,7 @@
                             <field name="rotting_days" class="d-flex" widget="rotting"/>
                             <div class="d-flex ms-auto align-items-center">
                                 <a name="action_open_attachments" type="object">
-                                    <i class='fa fa-paperclip' role="img" aria-label="Documents"/>
+                                    <i class="oi" data-icon="attach_file" role="img" aria-label="Documents"/>
                                     <field name="attachment_number"/>
                                 </a>
                                 <field name="kanban_state" class="mx-1" widget="hr_applicant_state_selection"/>

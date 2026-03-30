@@ -31,7 +31,8 @@ export class OrderDetailsDialog extends Component {
             {
                 title: _t("Order Info"),
                 subtitle: formatDateTime(this.order.date_order),
-                icon: "fa-bookmark",
+                icon: "bookmark",
+                icon_class: "oi-filled",
                 fields: this.getOrderFields(),
                 buttons: [
                     {
@@ -47,7 +48,8 @@ export class OrderDetailsDialog extends Component {
             this.orderDetails.push({
                 title: _t("Payment Info"),
                 subtitle: formatCurrency(this.order.amount_total, orderCurrecy),
-                icon: "fa-credit-card",
+                icon: "credit_card",
+                icon_class: "",
                 buttons: [
                     {
                         label: _t("Edit Payment"),

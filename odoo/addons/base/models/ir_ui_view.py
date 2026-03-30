@@ -2270,8 +2270,8 @@ actual arch.
                         "be read immediately.")
                 self._log_view_warning(msg, node)
 
-        if any(klass.startswith('fa-') for klass in classes):
-            description = 'A <%s> with fa class (%s)' % (node.tag, expr)
+        if any(klass.startswith('oi') for klass in classes):
+            description = 'A <%s> with oi class (%s)' % (node.tag, expr)
             self._validate_fa_class_accessibility(node, description)
 
         if any(klass.startswith('btn') for klass in classes):
@@ -2297,7 +2297,7 @@ actual arch.
 
         ## Following or preceding text
         if (node.tail or '').strip() or (node.getparent().text or '').strip():
-            # text<i class="fa-..."/> or <i class="fa-..."/>text or
+            # text<i class="oi" data-icon="..."/> or <i class="oi" data-icon="..."/>text or
             return
 
         ## Following or preceding text in span
@@ -2326,7 +2326,7 @@ actual arch.
         ## And we ignore all elements with describing in children
         def contains_description(node, depth=0):
             if depth > 2:
-                _logger.warning('excessive depth in fa')
+                _logger.warning('excessive depth in oi')
             if any(node.get(attr) for attr in valid_t_attrs):
                 return True
             if has_title_or_aria_label(node):

@@ -1243,7 +1243,7 @@ test("should display overlay on video hover and handle video replacement and rem
     await click(".video-overlay button");
     await waitFor(".o-dropdown-item");
     expect(queryAllTexts(".o-dropdown-item")[0]).toBe("Replace");
-    await click(".o-dropdown-item .fa-exchange");
+    await click(".o-dropdown-item [data-icon='swap_horiz']");
     await waitFor("textarea[id='o_video_text']");
 
     // Replace video
@@ -1270,7 +1270,7 @@ test("should display overlay on video hover and handle video replacement and rem
     await click(".video-overlay button");
     await waitFor(".o-dropdown-item");
     expect(queryAllTexts(".o-dropdown-item")[1]).toBe("Remove");
-    await click(".o-dropdown-item .fa-trash");
+    await click(".o-dropdown-item [data-icon='delete'].oi-filled");
     await expectElementCount('div[data-embedded="video"]', 0);
 });
 

@@ -201,23 +201,23 @@
                                 />
                                 <label for="email_from" class="oe_inline"/>
                                 <div class="o_row o_row_readonly">
-                                    <button name="mail_action_blacklist_remove" class="fa fa-ban text-danger"
+                                    <button name="mail_action_blacklist_remove" class="oi text-danger" data-icon="block"
                                         title="This email is blacklisted for mass mailings. Click to unblacklist."
                                         type="object" context="{'default_email': email_from}" groups="base.group_user"
                                         invisible="not is_blacklisted"/>
                                     <field name="email_from" string="Email" widget="email" placeholder="e.g. john.doe@email.com"/>
-                                    <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
+                                    <span class="oi text-warning oe_edit_only" data-icon="warning"
                                         title="By saving this change, the customer email will also be updated."
                                         invisible="not partner_email_update"/>
                                 </div>
                                 <label for="phone" class="oe_inline"/>
                                 <div class="o_row o_row_readonly">
-                                    <button name="phone_action_blacklist_remove" class="fa fa-ban text-danger"
+                                    <button name="phone_action_blacklist_remove" class="oi text-danger" data-icon="block"
                                         title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
                                         type="object" context="{'default_phone': phone}" groups="base.group_user"
                                         invisible="not phone_blacklisted"/>
                                     <field name="phone" widget="phone" placeholder="e.g. (555) 555-0199"/>
-                                    <span class="fa fa-exclamation-triangle text-warning oe_edit_only"
+                                    <span class="oi text-warning oe_edit_only" data-icon="warning"
                                         title="By saving this change, the customer phone number will also be updated."
                                         invisible="not partner_phone_update"/>
                                 </div>
@@ -391,7 +391,7 @@
                 <form>
                     <group class="crm_quick_create_opportunity_form_group">
                         <div class="o_input_box" colspan="2">
-                            <i class="fa fa-user o_input_box_overlay_start" title="Contact"/>
+                            <i class="oi oi-filled o_input_box_overlay_start" data-icon="person" title="Contact"/>
                             <field name="partner_id"
                                 nolabel="1"
                                 placeholder='Contact'
@@ -407,25 +407,25 @@
                             />
                         </div>
                         <div class="o_input_box" colspan="2">
-                            <i class="fa fa-briefcase o_input_box_overlay_start" title="Opportunity Name"/>
+                            <i class="oi o_input_box_overlay_start" data-icon="work" title="Opportunity Name"/>
                             <field name="name" nolabel="1" placeholder="Opportunity's Name"/>
                         </div>
                         <div class="o_input_box" colspan="2">
-                            <i class="fa fa-envelope o_input_box_overlay_start" title="Contact Email"/>
+                            <i class="oi oi-filled o_input_box_overlay_start" data-icon="mail" title="Contact Email"/>
                             <field name="email_from" string="Contact Email" placeholder='Contact Email' nolabel="1"/>
                         </div>
                         <div class="o_input_box" colspan="2">
-                            <i class="fa fa-mobile fa-lg o_input_box_overlay_start" title="Contact Phone"/>
+                            <i class="oi o_input_box_overlay_start" data-icon="smartphone" title="Contact Phone"/>
                             <field name="phone" string="Contact Phone" placeholder='Contact Phone' nolabel="1"/>
                         </div>
                         <div class="o_input_box" colspan="2">
-                            <i class="fa fa-money o_input_box_overlay_start" title="Expected Revenue"/>
+                            <i class="oi o_input_box_overlay_start" data-icon="payments" title="Expected Revenue"/>
                             <field name="expected_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                             <field name="priority" class="o_input_box_overlay_end" nolabel="1" widget="priority"/>
                         </div>
                         <div class="o_row" colspan="2">
                             <div class="o_input_box" groups="crm.group_use_recurring_revenues">
-                                <button class="o_input_box_overlay_start btn btn-link fa fa-refresh" data-tooltip="Recurring Revenue" title="Recurring Revenue"/>
+                                <button class="o_input_box_overlay_start btn btn-link oi" data-icon="refresh" data-tooltip="Recurring Revenue" title="Recurring Revenue"/>
                                 <field name="recurring_revenue" widget="monetary" options="{'currency_field': 'company_currency'}"/>
                             </div>
                             <field name="recurring_plan" placeholder='e.g. "Monthly"'

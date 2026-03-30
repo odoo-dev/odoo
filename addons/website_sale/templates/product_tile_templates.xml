@@ -245,7 +245,7 @@
                     t-att-data-product-type="product.type"
                     t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
                 >
-                    <i class="fa fa-fw fa-shopping-cart o_not-animable" role="presentation"/>
+                    <i class="oi oi-fw o_not-animable" data-icon="shopping_cart" role="presentation"/>
                     <span class="o_label small ms-1">Add to Cart</span>
                 </button>
             </t>

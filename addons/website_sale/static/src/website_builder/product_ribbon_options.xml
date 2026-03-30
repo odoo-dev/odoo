@@ -15,7 +15,7 @@
                     <BuilderSelectItem actionValue="ribbon.id" label="ribbon.name">
                         <div>
                             <t t-out="ribbon.name" />
-                            <span t-attf-class="fa fa-arrow-#{ribbon.position} ms-1"/>
+                            <span class="oi ms-1" t-attf-data-icon="#{ribbon.position === 'left' ? 'arrow_back' : 'arrow_forward'}"/>
                             <span
                                 t-attf-class="o_wsale_color_preview ms-1"
                                 t-attf-style="background-color: #{ribbon.bg_color}; border: {{(ribbon.bg_color == '#FFFFFF' || ribbon.bg_color == '') ? '2px solid #CCCCCC' : ''}};"

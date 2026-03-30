@@ -159,7 +159,7 @@
                                                invisible="question_type != 'datetime'"
                                                required="validation_required and question_type == 'datetime' and not validation_max_datetime"/>
 
-                                        <i class="fa fa-long-arrow-right mx-2" aria-label="Arrow icon" title="Arrow"/>
+                                        <i class="oi mx-2" data-icon="east" aria-label="Arrow icon" title="Arrow"/>
                                         <!-- Maxima -->
                                         <field name="validation_length_max" class="o_survey_question_validation_inline" nolabel="1" placeholder="Maximum"
                                                invisible="question_type != 'char_box'"

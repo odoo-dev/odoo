@@ -72,18 +72,18 @@
                                 <label for="login" class="d-md-none"/>
                                 <div class="o_input_box">
                                     <field name="email" invisible="1"/> <!-- needed to update partner's email from on_change_login() -->
-                                    <i class="d-none d-md-inline-flex fa fa-envelope" title="Email"/>
+                                    <i class="d-none d-md-inline-flex oi oi-filled" data-icon="mail" title="Email"/>
                                     <field name="email_domain_placeholder" invisible="1" /> <!-- needed to compute the placeholder whenever the dialog opens -->
                                     <field name="login" options="{'placeholder_field': 'email_domain_placeholder'}"/>
                                 </div>
                                 <label for="phone" class="d-md-none"/>
                                 <div class="o_input_box">
-                                    <i class="d-none d-md-inline-flex fa fa-phone" title="Phone"/>
+                                    <i class="d-none d-md-inline-flex oi oi-filled" data-icon="phone" title="Phone"/>
                                     <field name="phone" widget="phone" placeholder="Phone"/>
                                 </div>
                                 <label for="company_id" class="d-md-none" groups="base.group_multi_company"/>
                                 <div class="o_input_box" groups="base.group_multi_company">
-                                    <i class="d-none d-md-inline-flex fa fa-building" title="Company"/>
+                                    <i class="d-none d-md-inline-flex oi oi-filled" data-icon="business" title="Company"/>
                                     <field name="company_id" context="{'user_preference': 0}" placeholder="Company"/>
                                 </div>
                             </group>
@@ -140,18 +140,18 @@
                                 </h1>
                                 <label for="login" class="d-md-none"/>
                                 <div name="login" class="o_input_box d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-inline-flex fa fa-envelope" title="Login / Email" invisible="login != email"/>
-                                    <i class="d-none d-md-inline-flex fa fa-key" title="Login" invisible="login == email"/>
+                                    <i class="d-none d-md-inline-flex oi oi-filled" data-icon="mail" title="Login / Email" invisible="login != email"/>
+                                    <i class="d-none d-md-inline-flex oi" data-icon="key" title="Login" invisible="login == email"/>
                                     <field name="login" placeholder="Login"/>
                                 </div>
                                 <label for="email" class="d-md-none" invisible="login == email"/>
                                 <div name="email" class="o_input_box d-flex align-items-baseline w-md-50 gap-2" invisible="login == email">
-                                    <i class="d-none d-md-inline-flex fa fa-envelope" title="Email"/>
+                                    <i class="d-none d-md-inline-flex oi oi-filled" data-icon="mail" title="Email"/>
                                     <field name="email" placeholder="Email"/>
                                 </div>
                                 <label for="phone" class="d-md-none"/>
                                 <div name="phone" class="o_input_box d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-inline-flex fa fa-phone" title="Phone"/>
+                                    <i class="d-none d-md-inline-flex oi oi-filled" data-icon="phone" title="Phone"/>
                                     <field name="phone" placeholder="Phone"/>
                                 </div>
                             </group>
@@ -181,7 +181,8 @@
                                             <button
                                                 type="action"
                                                 name="%(base.action_view_base_language_install)d"
-                                                class="btn btn-link fa fa-globe o_input_box_overlay_end"
+                                                class="btn btn-link oi o_input_box_overlay_end"
+                                                data-icon="public"
                                                 groups="base.group_system"
                                                 aria-label="Add a language"
                                                 title="Add a language"/>
@@ -281,16 +282,16 @@
                             <main class="w-100 ps-2 pt-1">
                                 <div>
                                     <div t-if="record.active.raw_value" class="text-success float-end mb4">
-                                        <i class="fa fa-circle" role="img" aria-label="Ok" title="Ok"></i>
+                                        <i class="oi oi-filled" data-icon="circle" role="img" aria-label="Ok" title="Ok"></i>
                                     </div>
                                     <div t-else="" class="text-danger float-end mb4">
-                                        <i class="fa fa-circle" role="img" aria-label="Invalid" title="Invalid"></i>
+                                        <i class="oi oi-filled" data-icon="circle" role="img" aria-label="Invalid" title="Invalid"></i>
                                     </div>
                                     <field class="fw-bold" name="name"/>
                                 </div>
                                 <div>
                                     <span class="mb4 text-truncate" title="Login">
-                                        <i class="fa fa-envelope me-1" role="img" aria-label="Login"></i>
+                                        <i class="oi oi-filled me-1" data-icon="mail" role="img" aria-label="Login"></i>
                                         <field name="login"/>
                                     </span>
                                     <field class="badge rounded-pill float-end" name="lang"/>
@@ -426,12 +427,12 @@
                                 </h1>
                                 <label for="email" class="d-md-none"/>
                                 <div name="email" class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-inline-flex fa fa-fw fa-envelope" title="Email"/>
+                                    <i class="d-none d-md-inline-flex oi oi-fw oi-filled" data-icon="mail" title="Email"/>
                                     <field name="email" placeholder="Email"/>
                                 </div>
                                 <label for="phone" class="d-md-none"/>
                                 <div name="phone" class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-inline-flex fa fa-fw fa-phone" title="Phone"/>
+                                    <i class="d-none d-md-inline-flex oi oi-fw oi-filled" data-icon="phone" title="Phone"/>
                                     <field name="phone" placeholder="Phone"/>
                                 </div>
                             </group>
@@ -446,7 +447,8 @@
                                             <button
                                                 type="action"
                                                 name="%(base.action_view_base_language_install)d"
-                                                class="btn btn-link fa fa-globe o_input_box_overlay_end"
+                                                class="btn btn-link oi o_input_box_overlay_end"
+                                                data-icon="public"
                                                 aria-label="Add a language"
                                                 groups="base.group_system"
                                                 title="Add a language"

@@ -426,6 +426,7 @@ export class EditSocialMediaLinkAction extends BuilderAction {
     static id = "editSocialMediaLink";
     static dependencies = ["socialMediaOptionPlugin"];
     apply({ editingElement, params: { mainParam }, value }) {
+        console.log('salut')
         if (!value) {
             editingElement.remove();
         }

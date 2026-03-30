@@ -221,7 +221,7 @@
                             <block title="Accounting" id="pos_accounting_section">
                                 <setting id="default_sales_tax_setting" title="This tax is applied to any new product created in the catalog." documentation="/applications/finance/accounting/taxation/taxes/default_taxes.html">
                                     <label string="Default Sales Tax" for="sale_tax_id"/>
-                                    <i class="fa fa-info-circle me-1" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
+                                    <i class="oi me-1" data-icon="info" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
                                     <div class="text-muted">
                                         Default sales tax for products
                                     </div>
@@ -234,7 +234,7 @@
                                 </setting>
                                 <setting groups="account.group_account_readonly">
                                     <label string="Default POS Receivable Account" for="account_default_pos_receivable_account_id"/>
-                                    <i class="fa fa-info-circle me-1" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
+                                    <i class="oi me-1" data-icon="info" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
                                     <div class="text-muted">
                                         Intermediary account used for unidentified customers.
                                     </div>
@@ -539,7 +539,7 @@
                                 </setting>
                                 <setting id="barcode_scanner">
                                     <span class="o_form_label">Barcodes</span>
-                                    <i class="fa fa-info-circle me-1" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
+                                    <i class="oi me-1" data-icon="info" title="This setting is common to all PoS." pos-data-toggle="tooltip"/>
                                     <div class="text-muted">
                                         Use barcodes to scan products, customer cards, etc.
                                     </div>

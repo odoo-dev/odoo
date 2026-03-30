@@ -161,7 +161,7 @@
                         options="{'no_create': True}"
                     />
                     <span
-                        class="fa fa-exclamation-triangle text-warning"
+                        class="oi text-warning" data-icon="warning"
                         title="The sales order associated with this project has been cancelled. We recommend either updating the sales order item or cancelling this project in alignment with the cancellation of the sales order."
                         invisible="sale_order_state != 'cancel'"/>
                 </div>
@@ -235,7 +235,8 @@
                         widget="so_line_create_button"
                         placeholder="Non-billable"/>
                     <span
-                        class="fa fa-exclamation-triangle text-warning"
+                        class="oi text-warning"
+                        data-icon="warning"
                         title="The sales order associated with this task has been cancelled. We recommend either updating the sales order item or cancelling this task in alignment with the cancellation of the sales order."
                         invisible="sale_order_state != 'cancel'"/>
                 </div>

@@ -112,7 +112,7 @@ class SlideSlide(models.Model):
     image_google_url = fields.Char('Image Link', related='url', readonly=False,
         help="Link of the image (we currently only support Google Drive as source)")
     # content - documents
-    slide_icon_class = fields.Char('Slide Icon fa-class', compute='_compute_slide_icon_class')
+    slide_icon_class = fields.Char('Slide Icon oi-class', compute='_compute_slide_icon_class')
     slide_type = fields.Selection([
         ('image', 'Image'),
         ('article', 'Article'),
@@ -327,19 +327,19 @@ class SlideSlide(models.Model):
     @api.depends('slide_type')
     def _compute_slide_icon_class(self):
         icon_per_slide_type = {
-            'image': 'fa-file-picture-o',
-            'article': 'fa-file-text-o',
-            'quiz': 'fa-question-circle-o',
-            'pdf': 'fa-file-pdf-o',
-            'sheet': 'fa-file-excel-o',
-            'doc': 'fa-file-word-o',
-            'slides': 'fa-file-powerpoint-o',
-            'youtube_video': 'fa-youtube-play',
-            'google_drive_video': 'fa-play-circle-o',
-            'vimeo_video': 'fa-vimeo',
+            'image': 'image',
+            'article': 'article',
+            'quiz': 'help_outline',
+            'pdf': 'picture_as_pdf',
+            'sheet': 'table_chart',
+            'doc': 'description',
+            'slides': 'slideshow',
+            'youtube_video': 'oi_youtube-play',
+            'google_drive_video': 'play_circle',
+            'vimeo_video': 'oi_vimeo',
         }
         for slide in self:
-            slide.slide_icon_class = icon_per_slide_type.get(slide.slide_type, 'fa-file-o')
+            slide.slide_icon_class = icon_per_slide_type.get(slide.slide_type, 'description')
 
     @api.depends('slide_category', 'source_type', 'video_source_type')
     def _compute_slide_type(self):

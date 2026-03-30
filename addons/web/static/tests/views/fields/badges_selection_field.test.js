@@ -40,7 +40,7 @@ class Product extends models.Model {
     color = fields.Integer("color");
     icon = fields.Char("icon");
     _records = [
-        { id: 37, display_name: "xphone", name: "xphone", color: 6, icon: "fa-mobile" },
+        { id: 37, display_name: "xphone", name: "xphone", color: 6, icon: "smartphone" },
         { id: 41, display_name: "xpad", name: "xpad", color: 7, icon: false },
     ];
 }

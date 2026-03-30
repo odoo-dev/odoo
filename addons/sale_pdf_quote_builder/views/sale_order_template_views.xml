@@ -38,7 +38,7 @@
                                 target="_blank"
                                 invisible="not quotation_document_ids"
                             >
-                                <i class="fa fa-arrow-right"/> Link to the demo video
+                                <i class="oi" data-icon="arrow_forward"/> Link to the demo video
                             </a>
                             <iframe
                                 title="Quote Builder Demo Video"

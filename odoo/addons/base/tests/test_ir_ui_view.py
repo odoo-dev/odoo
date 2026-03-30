@@ -1102,7 +1102,7 @@ class TestTemplating(ViewCase):
                 <div role="search">
                     <input type="search" name="search"/>
                     <button type="submit">
-                        <i class="oi-search"/>
+                        <i class="oi" data-icon="search"/>
                     </button>
                 </div>
             </root>

@@ -98,7 +98,7 @@
                                     <field name="account_id"/>
                                 </div>
                                 <strong t-if="record.date_maturity.raw_value" class="col-4 ps-0 text-end">
-                                    <i class="fa fa-clock-o" aria-label="Date" role="img" title="Date"/> <field name="date_maturity"/>
+                                    <i class="oi" data-icon="schedule" aria-label="Date" role="img" title="Date"/> <field name="date_maturity"/>
                                 </strong>
                             </div>
                             <div class="row mb4" style="min-height: 60px;">
@@ -867,7 +867,7 @@
                                 type="object"
                                 class="btn btn-link text-danger ms-auto d-flex align-items-center gap-1"
                                 invisible="not is_draft_duplicated_ref_ids">
-                            <i class="fa fa-trash text-danger"/>
+                            <i class="oi oi-filled text-danger" data-icon="delete"/>
                             <span class="text-danger" invisible="duplicated_ref_ids.length == 1">Delete all duplicates</span>
                             <span class="text-danger" invisible="duplicated_ref_ids.length &gt; 1">Delete duplicate</span>
                         </button>

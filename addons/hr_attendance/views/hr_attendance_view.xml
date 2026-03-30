@@ -52,7 +52,7 @@
                         <field name="employee_id" widget="many2one_avatar_employee" options="{'display_avatar_name': True}" class="fs-5 fw-bold mb-2"/>
                         <hr class="mt4 mb8"/>
                         <div>
-                            <i class="fa fa-calendar me-1" aria-label="Period" role="img" title="Period"></i>
+                            <i class="oi oi-filled me-1" data-icon="calendar_today" aria-label="Period" role="img" title="Period"></i>
                             <field name="check_in" /> - <field name="check_out" />
                         </div>
                     </t>

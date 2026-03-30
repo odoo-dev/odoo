@@ -22,7 +22,7 @@
                                 </div>
                                 <div class="o_row">
                                     <a class="oe_link fw-bold" target="_blank" href="https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/spain.html#veri-factu">
-                                        <i class="o_button_icon oi oi-fw oi oi-arrow-right"/>
+                                        <i class="o_button_icon oi oi-fw oi" data-icon="east"/>
                                         Access Declaración Responsable
                                     </a>
                                 </div>

@@ -252,7 +252,7 @@
                             </div>
                             <div><t t-out="luxon.DateTime.fromISO(record.date_begin.raw_value).toFormat('t')"/></div>
                                 <div t-if="record.date_begin.raw_value !== record.date_end.raw_value">
-                                    <i class="oi oi-arrow-right me-2" title="End date"/>
+                                    <i class="oi me-2" data-icon="east" title="End date"/>
                                     <t t-out="luxon.DateTime.fromISO(record.date_end.raw_value).toFormat('d MMM')"/>
                                 </div>
                         </aside>
@@ -262,12 +262,12 @@
                                     <field name="name"/>
                                 </div>
                                 <div class="d-flex ps-1">
-                                    <i class="fa fa-map-marker mt-1 me-2 text-center ps-1" title="Location"/>
+                                    <i class="oi mt-1 me-2 text-center ps-1" data-icon="location_on" title="Location"/>
                                     <field t-if="record.address_id.value" name="address_id" class="ms-1"/>
                                     <span t-else="" class="ms-1">Online Event</span>
                                 </div>
                                 <div t-if="record.seats_taken.raw_value" class="d-flex ps-1">
-                                    <i class="fa fa-group mt-1 me-2 text-center" title="Attendees"/>
+                                    <i class="oi oi-filled mt-1 me-2 text-center" data-icon="group" title="Attendees"/>
                                     <field name="seats_taken" class="me-1"/> Attendees
                                 </div>
                             </div>

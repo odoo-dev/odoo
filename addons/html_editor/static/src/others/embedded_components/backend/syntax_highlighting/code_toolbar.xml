@@ -6,7 +6,7 @@
                 <Dropdown menuClass="'o_language_selector'" focusToggleOnClosed="false">
                     <button class="btn" t-att-title="this.languages[this.props.currentLanguage]" name="language">
                         <span class="px-1" t-out="this.languages[this.props.currentLanguage]"/>
-                        <i class="fa fa-caret-down"></i>
+                        <i class="oi" data-icon="arrow_drop_down"></i>
                     </button>
                     <t t-set-slot="content">
                         <t t-foreach="Object.entries(this.languages)" t-as="language" t-key="language[0]">
@@ -26,7 +26,7 @@
                 <button class="text-nowrap btn"
                     t-on-click="this.props.convertToParagraph"
                 >
-                    <span class="mx-1 fa fa-paragraph" title="Convert to paragraph"></span>
+                    <span class="oi mx-1" data-icon="format_paragraph" title="Convert to paragraph"></span>
                 </button>
             </div>
         </div>

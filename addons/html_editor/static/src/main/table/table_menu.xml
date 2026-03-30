@@ -5,7 +5,8 @@
                 t-custom-ref="menuRef"
                 t-att-data-type="this.props.type"
                 class="o-we-table-menu oi"
-                t-attf-class="oi-ellipsis-{{ this.props.type === 'column' ? 'h w-100' : 'v h-100 px-0' }}"
+                t-attf-class="{{ this.props.type === 'column' ? 'w-100' : 'h-100 px-0' }}"
+                t-attf-data-icon="{{ this.props.type === 'column' ? 'more_horiz' : 'more_vert' }}"
                 title="Click to open options&#10;Drag to move"
                 t-on-pointerdown.prevent="() => {}"
             />

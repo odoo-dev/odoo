@@ -129,7 +129,7 @@
                                             class="btn btn-light o_wish_rm z-3 rounded-pill lh-1"
                                             title="Remove from wishlist"
                                         >
-                                            <i class="oi oi-close" role="presentation"/>
+                                            <i class="oi" data-icon="close" role="presentation"/>
                                         </button>
                                     </t>
                                     <t t-call="website_sale.products_item"
@@ -166,7 +166,8 @@
             t-att-title="in_wish and btnTitleActive or btnTitle"
         >
             <span
-                t-attf-class="fa o_not-animable #{in_wish and 'fa-heart' or 'fa-heart-o'}"
+                t-attf-class="oi o_not-animable #{in_wish and 'oi-filled' or ''}"
+                data-icon="favorite"
                 role="presentation"
             />
             <span t-if="not in_wish" class="o_label small ms-2">Add to wishlist</span>

@@ -192,7 +192,7 @@
                     </div>
                     <div class="badge rounded-pill text-bg-secondary float-end fs-6 border-0"
                         invisible="not locked">
-                        <i class="fa fa-lock"/>
+                        <i class="oi" data-icon="lock"/>
                         Locked
                     </div>
                     <div class="oe_title">

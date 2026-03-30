@@ -5,7 +5,7 @@
             t-attf-class="{{this.props.class}} flex-shrink-0"
             t-att-disabled="this.pos.getOrder()?.isEmpty()" t-on-click="this.onClick">
             <t t-if="this.props.icon">
-                <i t-attf-class="{{this.props.icon}} me-1"/>
+                <i t-attf-class="{{this.props.icon_class}} me-1" t-att-data-icon="this.props.icon"/>
             </t>
             <span t-out="this.props.label"/>
         </button>

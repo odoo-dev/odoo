@@ -204,7 +204,7 @@
                             <field name="description"/>
                         </div>
                         <div t-if="record.scheduled_date.raw_value">
-                            <i class="fa fa-calendar text-primary me-2" title="Calendar"/>
+                            <i class="oi oi-filled text-primary me-2" data-icon="calendar_today" title="Calendar"/>
                             <field name="scheduled_date"/>
                         </div>
                         <footer class="mt-auto">

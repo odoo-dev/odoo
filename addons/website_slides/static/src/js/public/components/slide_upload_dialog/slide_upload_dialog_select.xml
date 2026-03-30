@@ -46,7 +46,7 @@
             href="#" t-on-click="() => this.props.onClickInstallModuleIcon(this.props.moduleId)"
             t-att-title="this.props.title"
             t-att-data-module-id="this.props.moduleId">
-            <i class="fa fa-trophy"/> <t t-out="this.props.motivational"/><span class="text-primary"> Install the <t t-out="this.props.title"/> app.</span>
+            <i class="oi oi-filled" data-icon="trophy"/> <t t-out="this.props.motivational"/><span class="text-primary"> Install the <t t-out="this.props.title"/> app.</span>
         </a>
     </t>
 </templates>

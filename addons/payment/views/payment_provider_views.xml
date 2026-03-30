@@ -74,7 +74,7 @@
                                            role="button"
                                            invisible="state == 'disabled'"
                                         >
-                                            <i class="oi oi-fw o_button_icon oi-arrow-right"/>
+                                            <i class="oi oi-fw o_button_icon" data-icon="east"/>
                                             Enable Payment Methods
                                         </a>
                                     </div>
