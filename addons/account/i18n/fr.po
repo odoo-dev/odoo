@@ -88,8 +88,8 @@ msgstr ""
 #. module: account
 #. odoo-python
 #: code:addons/account/models/account_lock_exception.py:0
-msgid " for '%s'"
-msgstr " pour '%s'"
+msgid "for '%s'"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -115,8 +115,8 @@ msgstr "# Lignes de relevé rapprochées"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__supplier_invoice_count
 #: model:ir.model.fields,field_description:account.field_res_users__supplier_invoice_count
-msgid "# Vendor Bills"
-msgstr "# Factures fournisseurs"
+msgid "# Vendor Bill"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -133,8 +133,8 @@ msgstr "%(action)s pour le journal %(journal)s"
 #. module: account
 #. odoo-python
 #: code:addons/account/models/product.py:0
-msgid "%(amount)s Excl. Taxes"
-msgstr "%(amount)s hors taxes"
+msgid "%(amount)s Excl. Tax"
+msgstr ""
 
 #. module: account
 #. odoo-python
@@ -22075,6 +22075,15 @@ msgid ""
 msgstr ""
 "{{ object.company_id.name }} Facture en autofacturation (Réf. {{ object.name "
 "or 'n/a' }})"
+
+#~ msgid " for '%s'"
+#~ msgstr " pour '%s'"
+
+#~ msgid "# Vendor Bills"
+#~ msgstr "# Factures fournisseurs"
+
+#~ msgid "%(amount)s Excl. Taxes"
+#~ msgstr "%(amount)s hors taxes"
 
 #~ msgid ""
 #~ "%(tax_account)s (%(account_name)s) should be an account of type \"%"
