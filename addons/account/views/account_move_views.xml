@@ -1701,6 +1701,11 @@
                     <separator/>
                     <filter string="To Review" name="to_check" domain="[('checked', '=', False), ('state', '!=', 'draft')]"/>
                     <separator/>
+                    <filter name="to_pay" string="To Pay" domain="[
+                        ('state', '!=', 'cancel'),
+                        ('payment_state', 'in', ('not_paid', 'partial')),
+                        ('move_type', '!=', 'entry')
+                    ]"/>
                     <!-- in_payment & paid -->
                     <filter name="in_payment" string="In payment" domain="[('state', '=', 'posted'), ('payment_state', '=', 'in_payment')]"/>
                     <!-- overdue -->
