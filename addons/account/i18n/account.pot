@@ -55,7 +55,7 @@ msgstr ""
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_payment__reconciled_bills_count
-msgid "# Reconciled Bill"
+msgid "# Reconciled Bills"
 msgstr ""
 
 #. module: account
