@@ -86,8 +86,8 @@
                 a:has(i.fa), button.fa, .o_external_button {
                     height: calc(3 * var(--field-spacing-unit));
                     min-width: calc(3 * var(--field-spacing-unit));
-                    color: var(--body-color);
-                    background: var(--secondary-bg) !important;
+                    color: var(--body-color) !important;
+                    background: $o-gray-300 !important;
                     padding: 0 !important;
                     border-radius: calc(1.5 * var(--field-spacing-unit));
                     justify-content: center;
