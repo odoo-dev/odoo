@@ -1,0 +1,5 @@
+$radius: o-website-value('website_partnership_card_roundness');
+
+.o_wpartners_card {
+  border-radius: #{$radius * 1%} / #{$radius * 0.5%} !important;
+}
