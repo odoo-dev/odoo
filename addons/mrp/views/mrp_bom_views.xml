@@ -180,10 +180,11 @@
                                             <field name="json_popover" widget="mrp_bom_popover"/>
                                         </button>
                                     </div>
-                                    <field name="enable_batch_size" widget="boolean_toggle"/>
-                                    <div class="o_input_box" invisible="type != 'normal'">
-                                        <field name="batch_size" invisible="not enable_batch_size" decoration-danger="batch_size &lt;= 0.0"/>
-                                        <field name="uom_id" groups="uom.group_uom" readonly="1" invisible="not enable_batch_size" class="o_input_box_overlay_end o_input_box_inline"/>
+                                    <label for="batch_size" invisible="type != 'normal'"/>
+                                    <div class="o_row" invisible="type != 'normal'">
+                                        <field name="enable_batch_size"/>
+                                        <field name="batch_size" class="w-50" invisible="not enable_batch_size" decoration-danger="batch_size &lt;= 0.0"/>
+                                        <field name="uom_id" groups="uom.group_uom" readonly="1" invisible="not enable_batch_size"/>
                                     </div>
                                 </group>
                                 <group>
