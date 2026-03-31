@@ -719,6 +719,14 @@ class AccountMove(models.Model):
     invoice_incoterm_placeholder = fields.Char(compute='_compute_invoice_incoterm_placeholder')
 
     # === Display purpose fields === #
+    # used to have a tag if the move is sent or not
+    is_sent = fields.Selection(
+        selection=[
+            ('sent',"Sent"),
+            ('not_sent',"Not Sent"),
+        ],
+        compute='_compute_is_sent'
+    )
     # used to have a dynamic domain on journal / taxes in the form view.
     invoice_filter_type_domain = fields.Char(compute='_compute_invoice_filter_type_domain')
     bank_partner_id = fields.Many2one(
@@ -788,6 +796,11 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
+
+    @api.depends('is_move_sent')
+    def _compute_is_sent(self):
+        for move in self:
+            move.is_sent = 'sent' if move.is_move_sent else 'not_sent'
 
     @api.depends('move_type', 'partner_id')
     def _compute_invoice_default_sale_person(self):
