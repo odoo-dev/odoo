@@ -141,6 +141,7 @@ export class FormController extends Component {
         offlineId: { type: String, optional: true },
     };
     static defaultProps = {
+        onSave: () => {},
         preventCreate: false,
         preventEdit: false,
         readonly: false,
@@ -711,7 +712,8 @@ export class FormController extends Component {
                 ...params,
             });
         }
-        if (saved && this.props.onSave) {
+        if (saved) {
+            this.env.config.setDisplayName(this.displayName());
             this.props.onSave(record, params);
         }
         return saved;
