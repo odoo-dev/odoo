@@ -168,6 +168,7 @@ class CalendarEvent(models.Model):
         with the one of the associated meeting in that external calendar. Any update will be propagated there \
         and vice versa.""")
     is_draft = fields.Boolean(default=True)
+    is_cancelled = fields.Boolean(default=False)
     user_id = fields.Many2one('res.users', 'Organizer', default=lambda self: self.env.user, index='btree_not_null')
     partner_id = fields.Many2one(
         'res.partner', string='Scheduled by', related='user_id.partner_id', readonly=True)
@@ -1092,6 +1093,11 @@ class CalendarEvent(models.Model):
     def action_confirm(self):
         self.ensure_one()
         self.is_draft = False
+
+    def action_cancel(self):
+        self.ensure_one()
+        self.is_cancelled = True
+        self.active = False
 
     def action_unlink_event(self, attendee_id=None, recurrence=False):
         """

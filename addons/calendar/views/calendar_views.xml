@@ -105,14 +105,16 @@
             <form string="Meetings" class="o_calendar_event_form_view" js_class="calendar_form">
                 <header>
                     <button name="action_open_composer" class="btn btn-primary" type="object" string="Send email" invisible="is_draft or not user_can_edit"/>
-                    <button name="action_confirm" class="btn btn-primary" type="object" string="Confirm" invisible="not is_draft"/>
+                    <button name="action_confirm" class="btn btn-primary" type="object" string="Confirm" invisible="not (is_draft or is_cancelled)"/>
+                    <button name="action_cancel" class="btn btn-secondary" type="object" string="Cancel" invisible="is_draft or is_cancelled"/>
                 </header>
                 <div invisible="not recurrence_id" class="alert alert-info oe_edit_only" role="status">
                     <label for="recurrence_update" class="me-2">Edit recurring event</label>
                     <field name="recurrence_update" widget="radio" options="{'horizontal': True}"/>
                 </div>
                 <sheet>
-                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" class="o_calendar_archived_web_ribbon" invisible="active"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" class="o_calendar_archived_web_ribbon" invisible="active or is_cancelled"/>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="text-bg-warning" invisible="not is_cancelled"/>
                     <widget name="web_ribbon" title="Draft" bg_color="text-bg-500" invisible="not active or not is_draft"/>
                     <field name="active" invisible="1"/>
                     <field name="user_can_edit" invisible="1"/>
