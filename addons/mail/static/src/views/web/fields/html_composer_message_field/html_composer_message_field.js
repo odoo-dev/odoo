@@ -60,7 +60,7 @@ export class HtmlComposerMessageField extends HtmlMailField {
                 (plugin) => !DYNAMIC_FIELD_PLUGINS.includes(plugin)
             );
         }
-        config.onAttachmentChange = (attachment) => {
+        config.onAttachmentChange = async (attachment) => {
             // This only needs to happen for the composer for now
             if (
                 !(
@@ -70,6 +70,7 @@ export class HtmlComposerMessageField extends HtmlMailField {
             ) {
                 return;
             }
+            await this.commitChanges();
             this.props.record.data.attachment_ids.linkTo(attachment.id, attachment);
         };
         config.thread = this.env.services["mail.store"]?.["mail.thread"].get({
@@ -92,6 +93,7 @@ export class HtmlComposerMessageField extends HtmlMailField {
         const newAttachmentSet = new Set(
             [...nodes].map((node) => node.getAttribute("data-attachment-id"))
         );
+        console.log(this)
         if (newAttachmentSet.symmetricDifference(this.lastAttachmentSet).size) {
             this.lastAttachmentSet = newAttachmentSet;
             this.commitChanges();

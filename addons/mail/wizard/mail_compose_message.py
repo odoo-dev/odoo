@@ -302,6 +302,8 @@ class MailComposeMessage(models.TransientModel):
         max_email_size_mb = self.env['ir.mail_server'].sudo()._get_max_email_size()
         max_email_size_bytes = max_email_size_mb * 1024 * 1024
 
+        print(self.env.context)
+
         for composer in self:
             # Only binary attachments not already in the body (added through the html editor)
             attachments = composer.attachment_ids.filtered(

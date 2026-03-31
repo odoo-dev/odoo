@@ -178,6 +178,7 @@ export class FilePlugin extends Plugin {
             this.editable.focus();
             return;
         }
+        console.log(this.config.onAttachmentChange)
         if (this.config.onAttachmentChange) {
             attachments.forEach(this.config.onAttachmentChange);
         }
