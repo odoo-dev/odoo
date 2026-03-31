@@ -831,6 +831,7 @@ def validate_identifier(identifier_type, value):
 
 
 def normalize_identifier(identifier_type, value):
+    return value
     validate_results = validate_identifier(identifier_type, value)
     if validate_results['valid']:
         return validate_results['value']

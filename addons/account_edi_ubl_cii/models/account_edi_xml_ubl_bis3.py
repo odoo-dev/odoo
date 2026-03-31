@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from odoo import _, api, models
 from odoo.tools import html2plaintext
 from odoo.tools.misc import formatLang, str2bool, NON_BREAKING_SPACE
@@ -10,6 +9,10 @@ from odoo.addons.account_edi_ubl_cii.models.account_edi_common import (
 )
 from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import UBL_NAMESPACES
 from odoo.addons.account_edi_ubl_cii.tools.party_identifiers import (
+    TIN_METADATA,
+    ADDITIONAL_IDENTIFIERS_METADATA,
+    normalize_identifier,
+    get_deduced_additional_identifiers,
     get_identifier_metadata_of_country,
     get_tin_metadata_of_country,
 )
@@ -562,38 +565,58 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     # EXPORT: MULTI-ID
     # -------------------------------------------------------------------------
 
+    @api.model
     def _ubl_add_partner_identifiers_tin_from_vat_field(self, vals, partner, identifiers):
         vat = partner.vat.upper() if partner.vat and partner.vat != '/' else None
-        country_code = partner.country_code
+        country_code = partner.country_code.upper()
         if not vat or not country_code:
             return
 
-        for key, value in party_identifiers.TIN_METADATA.items():
+        keys = [
+            f'{country_code}_{i}'
+            for i in ('TIN', 'VAT', 'GST')
             if (
-                country_code in value.get('countries', [])
-                and key not in identifiers
-                and (normalized_value := party_identifiers.normalize_identifier(key, vat))
-            ):
+                f'{country_code}_{i}' not in identifiers
+            )
+        ]
+
+        for key in keys:
+            if value := TIN_METADATA.get(key):
                 identifiers[key] = {
                     'iso6523': value.get('iso6523'),
                     'category': value['category'],
                     'country_code': country_code,
-                    'value': normalized_value,
+                    'value': normalize_identifier(key, vat),
                 }
-                return
 
+        # for key, value in TIN_METADATA.items():
+        #     if (
+        #         country_code in value.get('countries', [])
+        #         and key not in identifiers
+        #         and (normalized_value := normalize_identifier(key, vat))
+        #     ):
+        #         identifiers[key] = {
+        #             'iso6523': value.get('iso6523'),
+        #             'category': value['category'],
+        #             'country_code': country_code,
+        #             'value': normalized_value,
+        #         }
+        #         return
+
+    @api.model
     def _ubl_add_partner_identifiers_tin_from_peppol_eas_endpoint_fields(self, vals, partner, identifiers):
         peppol_eas = partner.peppol_eas
         peppol_endpoint = partner.peppol_endpoint
         if not peppol_eas and not peppol_endpoint:
             return
 
-        for key, value in party_identifiers.TIN_METADATA.items():
+        # Search for the identifier that has the same scheme
+        for key, value in TIN_METADATA.items():
             if (
                 peppol_eas == value.get('iso6523')
                 and key not in identifiers
-                and len(value.get('countries', [])) == 1
-                and (normalized_value := party_identifiers.normalize_identifier(key, peppol_endpoint))
+                and len(value.get('countries', [])) == 1  # TODO ABOO: not sure to understand this condition ?
+                and (normalized_value := normalize_identifier(key, peppol_endpoint))
             ):
                 country_code = value['countries'][0]
                 identifiers[key] = {
@@ -604,27 +627,44 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                 }
                 return
 
+    @api.model
     def _ubl_add_partner_identifiers_enterprise_number_from_company_registry_field(self, vals, partner, identifiers):
         company_registry = partner.company_registry
         country_code = partner.country_code
         if not company_registry or not country_code:
             return
 
-        for key, value in party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA.items():
-            if (
-                country_code in value.get('countries', [])
-                and value.get('category') == 'EN'
-                and key not in identifiers
-                and (normalized_value := party_identifiers.normalize_identifier(key, company_registry))
-            ):
-                identifiers[key] = {
-                    'iso6523': value.get('iso6523'),
-                    'category': 'EN',
-                    'country_code': country_code,
-                    'value': normalized_value,
-                }
-                return
+        key = f'{country_code}_EN'
+        if key in identifiers:
+            return
 
+        value = ADDITIONAL_IDENTIFIERS_METADATA.get(key)
+        if not value:  # Unknown additional identifier, skip
+            return
+
+        identifiers[key] = {
+            'iso6523': value.get('iso6523'),
+            'category': value['category'],
+            'country_code': country_code,
+            'value': normalize_identifier(key, company_registry),
+        }
+
+        # for key, value in ADDITIONAL_IDENTIFIERS_METADATA.items():
+        #     if (
+        #         country_code in value.get('countries', [])
+        #         and value.get('category') == 'EN'
+        #         and key not in identifiers
+        #         and (normalized_value := normalize_identifier(key, company_registry))
+        #     ):
+        #         identifiers[key] = {
+        #             'iso6523': value.get('iso6523'),
+        #             'category': 'EN',
+        #             'country_code': country_code,
+        #             'value': normalized_value,
+        #         }
+        #         return
+
+    @api.model
     def _ubl_add_partner_misc_identifiers_from_custom_fields(self, vals, partner, identifiers):
         country_code = partner.country_code
 
@@ -635,9 +675,9 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             country_code == 'BE'
             and 'citizen_identification' in partner._fields
             and 'BE_CN' not in identifiers
-            and (normalized_value := party_identifiers.normalize_identifier('BE_CN', partner.citizen_identification))
+            and (normalized_value := normalize_identifier('BE_CN', partner.citizen_identification))
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['BE_CN']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['BE_CN']
             identifiers['BE_CN'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
@@ -652,11 +692,11 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             country_code == 'DK'
             and 'DK_VAT' in identifiers
             and 'DK_CVR' not in identifiers
-            and (deduced_values := party_identifiers.get_deduced_additional_identifiers('DK_VAT', identifiers['DK_VAT']['value']))
+            and (deduced_values := get_deduced_additional_identifiers('DK_VAT', identifiers['DK_VAT']['value']))
             and (dk_cvr := deduced_values.get('DK_CVR'))
-            and (normalized_value := party_identifiers.normalize_identifier('DK_CVR', dk_cvr))
+            and (normalized_value := normalize_identifier('DK_CVR', dk_cvr))
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['DK_CVR']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['DK_CVR']
             identifiers['DK_CVR'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
@@ -670,9 +710,9 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         if (
             'global_location_number' in partner._fields
             and 'EAN_GLN' not in identifiers
-            and (normalized_value := party_identifiers.normalize_identifier('EAN_GLN', partner.global_location_number))
+            and (normalized_value := normalize_identifier('EAN_GLN', partner.global_location_number))
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['EAN_GLN']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['EAN_GLN']
             identifiers['EAN_GLN'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
@@ -689,7 +729,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             and 'FR_SIREN' not in identifiers
             and partner.siret
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['FR_SIREN']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['FR_SIREN']
             identifiers['FR_SIREN'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
@@ -704,7 +744,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             and 'EAN_GLN' in identifiers
             and 'HR_EN' not in identifiers
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['HR_EN']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['HR_EN']
             identifiers['HR_EN'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
@@ -721,7 +761,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             and 'IT_CODICE' not in identifiers
             and partner.l10n_it_codice_fiscale
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['IT_CODICE']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['IT_CODICE']
             identifiers['IT_CODICE'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
@@ -739,7 +779,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             and partner.company_registry
             and len(partner.company_registry) == 8
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['NL_KVK']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['NL_KVK']
             identifiers['NL_KVK'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
@@ -753,20 +793,21 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             and partner.company_registry
             and len(partner.company_registry) == 20
         ):
-            metadata = party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA['NL_OIN']
+            metadata = ADDITIONAL_IDENTIFIERS_METADATA['NL_OIN']
             identifiers['NL_OIN'] = {
                 'iso6523': metadata.get('iso6523'),
                 'country_code': country_code,
                 'value': partner.company_registry,
             }
 
+    @api.model
     def _ubl_add_partner_misc_identifiers_from_peppol_eas_endpoint_fields(self, vals, partner, identifiers):
         peppol_eas = partner.peppol_eas
         peppol_endpoint = partner.peppol_endpoint
         if not peppol_eas and not peppol_endpoint:
             return
 
-        for key, value in party_identifiers.ADDITIONAL_IDENTIFIERS_METADATA.items():
+        for key, value in ADDITIONAL_IDENTIFIERS_METADATA.items():
             if (
                 peppol_eas == value.get('iso6523')
                 and len(value.get('countries', [])) == 1
@@ -782,8 +823,9 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
                 }
                 return
 
+    @api.model
     def _get_partner_identifiers(self, vals, partner):
-        identifiers = {}
+        identifiers = super()._get_partner_identifiers(vals, partner)
         self._ubl_add_partner_identifiers_tin_from_vat_field(vals, partner, identifiers)
         self._ubl_add_partner_identifiers_tin_from_peppol_eas_endpoint_fields(vals, partner, identifiers)
         self._ubl_add_partner_identifiers_enterprise_number_from_company_registry_field(vals, partner, identifiers)

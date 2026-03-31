@@ -317,14 +317,12 @@ class ResPartner(models.Model):
         for partner in self:
             additional_identifiers = {}
 
-
-
             partner.additional_identifiers = additional_identifiers
 
-    @api.depends('additional_identifiers')
+    @api.depends('additional_identifiers', 'vat', 'company_registry', 'peppol_eas', 'peppol_endpoint')
     def _compute_all_identifiers(self):
         for partner in self:
-            partner.all_identifiers = partner._get_all_identifiers()
+            partner.all_identifiers = self.env['account.edi.xml.ubl_bis3']._get_partner_identifiers({}, partner)
 
     @api.model
     def get_available_identifiers_metadata(self, country_code, seq_min=0, seq_max=100):

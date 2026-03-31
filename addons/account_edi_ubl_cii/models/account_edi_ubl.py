@@ -16,6 +16,11 @@ class AccountEdiUBL(models.AbstractModel):
     _inherit = 'account.edi.common'
     _description = "Base helpers for UBL"
 
+    def _get_partner_identifiers(self, vals, partner):
+        # To be overriden in different formats to return a dictionary of
+        # identifier for the given partner
+        return {}
+
     def _import_attachments(self, invoice, tree):
         """ EXTENDS 'account_edi_common': ATTEMPTS to create a PDF attachment when the XML file doesn't provide one."""
 
