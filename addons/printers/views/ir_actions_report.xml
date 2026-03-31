@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- printer device field on report form -->
+    <record id="act_report_xml_view_printers" model="ir.ui.view">
+        <field name="name">ir.actions.report.printers</field>
+        <field name="model">ir.actions.report</field>
+        <field name="inherit_id" ref="base.act_report_xml_view"/>
+         <field name="arch" type="xml">
+            <field name="report_type" position="after">
+                <field name="printer_ids" widget="many2many_tags"/>
+            </field>
+         </field>
+    </record>
+
+    <record id="act_report_xml_view_tree_printers" model="ir.ui.view">
+        <field name="name">ir.actions.report.list.printers</field>
+        <field name="model">ir.actions.report</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Report xml">
+                <field name="name"/>
+                <field name="model"/>
+                <field name="report_type"/>
+            </list>
+        </field>
+    </record>
+</odoo>

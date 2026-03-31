@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+web_map.access_printers_printer,access_printers_printer,printers.model_printers_printer,base.group_user,1,1,1,1
+printers.access_select_printer_wizard,access_select_printer_wizard,printers.model_select_printer_wizard,base.group_user,1,1,1,1
