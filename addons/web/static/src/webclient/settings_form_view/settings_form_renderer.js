@@ -39,17 +39,15 @@ export class SettingsFormRenderer extends FormRenderer {
         if (!this.searchState.value) {
             return true;
         }
-        // This should be done in the begining !! in the Controller !
-        const normalizedSearchValue = normalize(this.searchState.value);
         const blockTexts = [blockTitle, blockTip].join();
-        if (normalize(blockTexts).includes(normalizedSearchValue)) {
+        if (normalize(blockTexts).includes(this.searchState.value)) {
             return true;
         }
         const settingTexts = [
             string ? string : this.props.record?.fields[fieldName]?.string,
             help,
         ].join();
-        if (normalize(settingTexts).includes(normalizedSearchValue)) {
+        if (normalize(settingTexts).includes(this.searchState.value)) {
             return true;
         }
         return false;
