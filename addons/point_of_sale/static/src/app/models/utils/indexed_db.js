@@ -84,16 +84,17 @@ export default class IndexedDB {
 
                 timeoutId = setTimeout(() => {
                     if (!finished) {
+                        console.debug("transaction timeout");
                         reject(new Error("IndexedDB transaction timeout"));
                         try {
                             transaction.abort();
                         } catch (e) {
-                            console.debug("Error aborting transaction:", e);
+                            console.debug("Error aborting transaction:", e.toString());
                         }
                     }
                 }, TRANSACTION_TIMEOUT);
 
-                if (odoo.debug) {
+                if (true || odoo.debug) {
                     console.debug(
                         `[%cIndexedDB%c]: %c${method} ${batch.length}%c ${storeName}`,
                         "color:lime;",
@@ -119,11 +120,11 @@ export default class IndexedDB {
                         request.onerror = (event) => {
                             hasError = true;
                             clearTimeout(timeoutId);
-                            console.debug("IndexedDB error:", event.target?.error);
+                            console.debug("IndexedDB error:", event.target?.error.toString());
                             reject(event.target?.error || "Unknown error");
                         };
                     } catch {
-                        if (odoo.debug === "assets") {
+                        if (true || odoo.debug === "assets") {
                             console.debug(
                                 `%cIndexedDB: Error processing ${method} for ${storeName}`,
                                 "color: #ffb7a8"
