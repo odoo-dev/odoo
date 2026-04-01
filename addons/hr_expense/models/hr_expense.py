@@ -1098,7 +1098,7 @@ class HrExpense(models.Model):
                     template='hr_expense.hr_expense_template_submitted_expenses',
                     values={
                         'manager_name': manager.name,
-                        'url': f'/odoo/{manager.id}/expenses-to-process',
+                        'url': '/odoo/expenses-to-process',
                         'company': company,
                         'user': self.env.user,
                         'total_amount': sum(expenses_submitted.mapped('total_amount')),
