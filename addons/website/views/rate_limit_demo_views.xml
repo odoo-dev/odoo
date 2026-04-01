@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="rate_limit_demo_page" name="Rate Limiting Demo">
+        <t t-set="title">Rate Limiting Demo</t>
+        <t t-set="head">
+                <style>
+                    .rl-header { background: #1e293b; color: #f1f5f9; }
+                    .rl-header-sub {
+                        display: flex; flex-wrap: wrap; align-items: baseline;
+                        gap: .35rem .65rem; margin-top: .35rem; max-width: 100%;
+                        font-size: .875rem; line-height: 1.5; color: #e2e8f0;
+                    }
+                    .rl-header-sub .text-muted-rl {
+                        color: #cbd5e1 !important;
+                    }
+                    .rl-header-code {
+                        display: inline-block; padding: .12rem .45rem;
+                        background: rgba(255,255,255,.14); border-radius: 6px;
+                        color: #fff !important; font-size: .85em; vertical-align: baseline;
+                    }
+                    .rl-stats-row {
+                        display: grid;
+                        grid-template-columns: repeat(3, minmax(0, 1fr));
+                        gap: .5rem 1rem;
+                        align-items: end;
+                        margin-bottom: .5rem;
+                    }
+                    .rl-stat-col { min-width: 0; }
+                    .rl-stat-col--sub {
+                        font-size: .75rem; line-height: 1.35; color: #64748b;
+                    }
+                    .rl-stat-col--sub strong { color: #475569; font-weight: 600; }
+                    .rl-card {
+                        border: none; border-radius: 12px;
+                        box-shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+                        overflow: hidden;
+                    }
+                    .rl-card-fixed   { border-top: 4px solid #3b82f6; }
+                    .rl-card-sliding { border-top: 4px solid #8b5cf6; }
+                    .rl-card-token   { border-top: 4px solid #f59e0b; }
+                    .rl-formula {
+                        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                        font-size: .78rem; line-height: 1.6;
+                        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+                        padding: .65rem .9rem;
+                    }
+                    .rl-big { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+                    .rl-label {
+                        font-size: .6rem; text-transform: uppercase;
+                        letter-spacing: .05em; color: #64748b;
+                    }
+                    .rl-hint { font-size: .78rem; color: #64748b; }
+                    .rl-trait { font-size: .7rem; padding: .15em .5em; border-radius: 4px; white-space: nowrap; }
+                    .rl-warn { background: #fef3c7; color: #92400e; }
+                    .rl-ok   { background: #d1fae5; color: #065f46; }
+                    .rl-json {
+                        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                        font-size: .72rem; line-height: 1.4;
+                        max-height: 150px; overflow: auto; margin: 0;
+                    }
+                </style>
+        </t>
+        <t t-call="website.layout" head="head">
+            <!-- ==================== Header ==================== -->
+            <section class="rl-header py-3">
+                <div class="container">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="min-w-0">
+                            <h1 class="h4 fw-bold mb-0">Rate Limiting</h1>
+                            <div class="rl-header-sub">
+                                <span class="text-muted-rl">Session key:</span>
+                                <code class="rl-header-code"><t t-out="key"/></code>
+                                <span class="text-muted-rl small">
+                                    (per-browser — works behind ngrok / proxies)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-light" onclick="resetAllAlgorithms()">
+                                Reset all
+                            </button>
+                            <button class="btn btn-sm btn-light fw-semibold" onclick="burstAll(5)">
+                                Burst all x5
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== Cards ==================== -->
+            <div class="container py-4">
+                <div class="row g-4">
+
+                    <!-- ========== Fixed Window ========== -->
+                    <div class="col-lg-4">
+                        <div class="card rl-card rl-card-fixed h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h2 class="h5 fw-bold mb-1">Fixed Window</h2>
+                                        <span class="badge text-bg-light border" style="font-size:.65rem;">
+                                            <i class="fa fa-database me-1"/>PostgreSQL
+                                        </span>
+                                    </div>
+                                    <span class="rl-trait rl-warn">2x burst at boundary</span>
+                                </div>
+
+                                <div class="rl-formula mb-3">
+                                    count = rows WHERE date &gt;= now - 60s<br/>
+                                    <strong>if count &gt;= limit: REJECT</strong>
+                                </div>
+
+                                <div class="rl-stats-row">
+                                    <div class="rl-stat-col">
+                                        <div class="rl-label">Used / Limit</div>
+                                        <div class="rl-big">
+                                            <span id="rl_fixed_used"><t t-out="fixed_status.get('count', 0)"/></span><span
+                                                class="text-muted fw-normal" style="font-size:1.1rem;"
+                                            > / <span id="rl_fixed_limit"><t t-out="fixed_status.get('limit', 10)"/></span></span>
+                                        </div>
+                                    </div>
+                                    <div class="rl-stat-col">
+                                        <div class="rl-label">Left</div>
+                                        <div class="fs-4 fw-bold text-primary" id="rl_fixed_left">
+                                            <t t-out="fixed_status.get('remaining', 0)"/>
+                                        </div>
+                                    </div>
+                                    <div class="rl-stat-col">
+                                        <div class="rl-label">Window</div>
+                                        <div class="fs-6 fw-semibold" id="rl_fixed_window">
+                                            <t t-out="fixed_status.get('window_seconds', 60)"/>s
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <t t-set="pf" t-value="(fixed_status.get('count', 0) / max(fixed_status.get('limit', 1), 1)) * 100"/>
+                                <div class="progress mb-3" style="height:5px;">
+                                    <div id="rl_fixed_progress" role="progressbar"
+                                         t-att-class="'progress-bar ' + ('bg-danger' if pf &gt; 80 else ('bg-warning' if pf &gt; 50 else 'bg-success'))"
+                                         t-att-style="'width:' + str(min(pf, 100)) + '%'"/>
+                                </div>
+
+                                <p class="rl-hint mb-3" id="rl_fixed_hint"><span class="rl-hint-msg">--</span></p>
+
+                                <div class="d-flex gap-2 mb-3">
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick="testAlgorithm('fixed_window',this)">Test</button>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="burstAlgorithm('fixed_window',5,this)">Burst x5</button>
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="resetAlgorithm('fixed_window',this)">Reset</button>
+                                </div>
+
+                                <pre id="fixed_window_output"
+                                     class="rl-json bg-light border rounded p-2 mb-0">Click <b>Test</b> to send a request.</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========== Sliding Window ========== -->
+                    <div class="col-lg-4">
+                        <div class="card rl-card rl-card-sliding h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h2 class="h5 fw-bold mb-1">Sliding Window</h2>
+                                        <span class="badge text-bg-light border" style="font-size:.65rem;">
+                                            <i class="fa fa-bolt me-1"/>Memory
+                                        </span>
+                                    </div>
+                                    <span class="rl-trait rl-ok">No boundary burst</span>
+                                </div>
+
+                                <div class="rl-formula mb-3">
+                                    rate = prev x (1 - overlap) + curr<br/>
+                                    <strong>if rate &gt;= limit: REJECT</strong>
+                                </div>
+
+                                <div class="rl-stats-row">
+                                    <div class="rl-stat-col">
+                                        <div class="rl-label">Effective / Limit</div>
+                                        <div class="rl-big">
+                                            <span id="rl_sliding_effective"><t t-out="'%.1f' % sliding_status.get('effective_rate', 0)"/></span><span
+                                                class="text-muted fw-normal" style="font-size:1.1rem;"
+                                            > / <t t-out="sliding_status.get('limit', 10)"/></span>
+                                        </div>
+                                    </div>
+                                    <div class="rl-stat-col">
+                                        <div class="rl-label">Left</div>
+                                        <div class="fs-4 fw-bold text-primary" id="rl_sliding_remaining">
+                                            <t t-out="'%.1f' % sliding_status.get('remaining', 0)"/>
+                                        </div>
+                                    </div>
+                                    <div class="rl-stat-col rl-stat-col--sub">
+                                        <div class="rl-label">Windows</div>
+                                        <div>
+                                            <span>prev <strong id="rl_sliding_prev"><t t-out="sliding_status.get('previous_window_count', 0)"/></strong></span>
+                                            <span class="mx-1">·</span>
+                                            <span>curr <strong id="rl_sliding_curr"><t t-out="sliding_status.get('current_window_count', 0)"/></strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <t t-set="ps" t-value="(sliding_status.get('effective_rate', 0) / max(sliding_status.get('limit', 1), 1)) * 100"/>
+                                <div class="progress mb-3" style="height:5px;">
+                                    <div id="rl_sliding_progress" role="progressbar"
+                                         t-att-class="'progress-bar ' + ('bg-danger' if ps &gt; 80 else ('bg-warning' if ps &gt; 50 else 'bg-success'))"
+                                         t-att-style="'width:' + str(min(ps, 100)) + '%'"/>
+                                </div>
+
+                                <p class="rl-hint mb-3" id="rl_sliding_hint"><span class="rl-hint-msg">--</span></p>
+
+                                <div class="d-flex gap-2 mb-3">
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick="testAlgorithm('sliding_window',this)">Test</button>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="burstAlgorithm('sliding_window',5,this)">Burst x5</button>
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="resetAlgorithm('sliding_window',this)">Reset</button>
+                                </div>
+
+                                <pre id="sliding_window_output"
+                                     class="rl-json bg-light border rounded p-2 mb-0">Click <b>Test</b> to send a request.</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========== Token Bucket ========== -->
+                    <div class="col-lg-4">
+                        <div class="card rl-card rl-card-token h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h2 class="h5 fw-bold mb-1">Token Bucket</h2>
+                                        <span class="badge text-bg-light border" style="font-size:.65rem;">
+                                            <i class="fa fa-tint me-1"/>Memory
+                                        </span>
+                                    </div>
+                                    <span class="rl-trait rl-ok">Controlled burst</span>
+                                </div>
+
+                                <div class="rl-formula mb-3">
+                                    tokens += elapsed x refill_rate<br/>
+                                    <strong>if tokens &lt; 1: REJECT</strong><br/>
+                                    tokens -= 1
+                                </div>
+
+                                <div class="rl-stats-row">
+                                    <div class="rl-stat-col">
+                                        <div class="rl-label">Tokens / Capacity</div>
+                                        <div class="rl-big">
+                                            <span id="rl_token_tokens"><t t-out="'%.1f' % token_status.get('tokens', 0)"/></span><span
+                                                class="text-muted fw-normal" style="font-size:1.1rem;"
+                                            > / <span id="rl_token_capacity"><t t-out="token_status.get('capacity', 10)"/></span></span>
+                                        </div>
+                                    </div>
+                                    <div class="rl-stat-col">
+                                        <div class="rl-label">Refill</div>
+                                        <div class="fs-6 fw-semibold" id="rl_token_refill">
+                                            <t t-out="token_status.get('refill_rate', 1)"/>/s
+                                        </div>
+                                    </div>
+                                    <div class="rl-stat-col rl-stat-col--sub">
+                                        <div class="rl-label">Policy</div>
+                                        <div>Refill-limited burst</div>
+                                    </div>
+                                </div>
+
+                                <t t-set="pt" t-value="((token_status.get('capacity', 1) - token_status.get('tokens', 0)) / max(token_status.get('capacity', 1), 1)) * 100"/>
+                                <div class="progress mb-3" style="height:5px;">
+                                    <div id="rl_token_progress" role="progressbar"
+                                         t-att-class="'progress-bar ' + ('bg-danger' if pt &gt; 80 else ('bg-warning' if pt &gt; 50 else 'bg-success'))"
+                                         t-att-style="'width:' + str(min(pt, 100)) + '%'"/>
+                                </div>
+
+                                <p class="rl-hint mb-3" id="rl_token_hint"><span class="rl-hint-msg">--</span></p>
+
+                                <div class="d-flex gap-2 mb-3">
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick="testAlgorithm('token_bucket',this)">Test</button>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="burstAlgorithm('token_bucket',5,this)">Burst x5</button>
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="resetAlgorithm('token_bucket',this)">Reset</button>
+                                </div>
+
+                                <pre id="token_bucket_output"
+                                     class="rl-json bg-light border rounded p-2 mb-0">Click <b>Test</b> to send a request.</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ==================== Script ==================== -->
+            <script>
+                var POLL = 1000;
+                var ALGOS = ['fixed_window', 'sliding_window', 'token_bucket'];
+
+                /* --- helpers --- */
+                function byId(id) { return document.getElementById(id); }
+                function txt(id, v) { var e = byId(id); if (e) e.textContent = v; }
+                function bar(el, pct) {
+                    if (!el) return;
+                    var p = Math.min(Math.max(pct||0, 0), 100);
+                    el.style.width = p + '%';
+                    el.className = 'progress-bar ' + (p > 80 ? 'bg-danger' : p > 50 ? 'bg-warning' : 'bg-success');
+                }
+                function wait(s) {
+                    if (!s || s &lt;= 0.05) return 'Ready.';
+                    s = Math.ceil(s);
+                    return s &lt; 60 ? 'Wait ~' + s + 's' : 'Wait ~' + Math.ceil(s/60) + ' min';
+                }
+                function tokenWait(s, t) {
+                    if (t >= 1) return 'Ready (>= 1 token).';
+                    if (!s || s &lt;= 0.05) return 'Token available now.';
+                    return 'Next token in ~' + Number(s).toFixed(1) + 's';
+                }
+                function hint(id, msg) {
+                    var el = byId(id); if (!el) return;
+                    var sp = el.querySelector('.rl-hint-msg');
+                    if (sp) sp.textContent = msg;
+                }
+
+                /* --- refresh --- */
+                function refresh(algo) {
+                    return fetch('/website/rate_limit_demo/status/' + algo)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            if (!d || !d.status) return;
+                            var s = d.status;
+                            if (algo === 'fixed_window') {
+                                var l = s.limit || 1;
+                                txt('rl_fixed_used', s.count);
+                                txt('rl_fixed_left', s.remaining);
+                                txt('rl_fixed_limit', l);
+                                txt('rl_fixed_window', (s.window_seconds||60)+'s');
+                                bar(byId('rl_fixed_progress'), (s.count/l)*100);
+                                hint('rl_fixed_hint', wait(s.seconds_until_next_request));
+                            } else if (algo === 'sliding_window') {
+                                var l2 = s.limit || 1;
+                                txt('rl_sliding_effective', Number(s.effective_rate||0).toFixed(1));
+                                txt('rl_sliding_remaining', Number(s.remaining||0).toFixed(1));
+                                txt('rl_sliding_curr', s.current_window_count);
+                                txt('rl_sliding_prev', s.previous_window_count);
+                                bar(byId('rl_sliding_progress'), (s.effective_rate/l2)*100);
+                                hint('rl_sliding_hint', wait(s.seconds_until_next_request));
+                            } else if (algo === 'token_bucket') {
+                                var c = s.capacity || 1;
+                                txt('rl_token_tokens', Number(s.tokens||0).toFixed(1));
+                                txt('rl_token_capacity', c);
+                                txt('rl_token_refill', (s.refill_rate||0)+'/s');
+                                bar(byId('rl_token_progress'), ((c - s.tokens)/c)*100);
+                                hint('rl_token_hint', tokenWait(s.seconds_until_next_request, s.tokens));
+                            }
+                        });
+                }
+                function refreshAll() { ALGOS.forEach(refresh); }
+                refreshAll();
+                setInterval(refreshAll, POLL);
+
+                /* --- actions --- */
+                function out(algo, data, err) {
+                    var el = byId(algo + '_output'); if (!el) return;
+                    el.textContent = JSON.stringify(data, null, 2);
+                    el.classList.toggle('text-danger', err || data.success === false || !!data.error);
+                    el.classList.toggle('text-success', data.success === true);
+                }
+
+                function testAlgorithm(algo, btn) {
+                    if (btn) btn.disabled = true;
+                    fetch('/website/rate_limit_demo/test/' + algo, {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) { out(algo, d); refresh(algo); })
+                    .catch(function(e) { out(algo, {error: ''+e}, true); })
+                    .finally(function() { if (btn) btn.disabled = false; });
+                }
+
+                function burstAlgorithm(algo, n, btn) {
+                    if (btn) btn.disabled = true;
+                    out(algo, {status: 'sending ' + n + ' requests...'});
+                    var ps = [];
+                    for (var i = 0; i &lt; n; i++)
+                        ps.push(fetch('/website/rate_limit_demo/test/' + algo, {
+                            method: 'POST', headers: {'Content-Type': 'application/json'},
+                        }).then(function(r) { return r.json(); }));
+                    Promise.all(ps).then(function(res) {
+                        var ok = res.filter(function(r){return r.success;}).length;
+                        out(algo, {burst: n, allowed: ok, blocked: n - ok, last: res[res.length-1]});
+                        refresh(algo);
+                    }).finally(function() { if (btn) btn.disabled = false; });
+                }
+
+                function resetAlgorithm(algo, btn) {
+                    if (btn) btn.disabled = true;
+                    fetch('/website/rate_limit_demo/reset/' + algo, {method:'POST'})
+                    .then(function() { refresh(algo); out(algo, {reset: true}); })
+                    .finally(function() { if (btn) btn.disabled = false; });
+                }
+
+                function resetAllAlgorithms() {
+                    fetch('/website/rate_limit_demo/reset/all', {method:'POST'})
+                    .then(function() {
+                        refreshAll();
+                        ALGOS.forEach(function(a) { out(a, {reset: true}); });
+                    });
+                }
+
+                function burstAll(n) {
+                    ALGOS.forEach(function(a) { burstAlgorithm(a, n, null); });
+                }
+            </script>
+        </t>
+    </template>
+</odoo>

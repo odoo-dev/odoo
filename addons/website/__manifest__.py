@@ -212,6 +212,7 @@
         'views/res_partner_views.xml',
         'views/neutralize_views.xml',
         'views/digest_digest_views.xml',
+        'views/rate_limit_demo_views.xml',
         'wizard/base_language_install_views.xml',
         'wizard/blocked_third_party_domains.xml',
         'wizard/website_robots.xml',
