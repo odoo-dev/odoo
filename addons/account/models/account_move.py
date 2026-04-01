@@ -415,6 +415,13 @@ class AccountMove(models.Model):
         related='company_id.tax_calculation_rounding_method',
         string='Tax calculation rounding method', readonly=True)
     show_journal = fields.Boolean(compute='_compute_show_journal')
+    sent_status = fields.Selection([
+            ('sent', "sent"),
+            ('not_sent', "Not Sent"),
+        ],
+        compute='_compute_sent_status',
+    )
+
     # === Partner fields === #
     partner_id = fields.Many2one(
         'res.partner',
@@ -4007,6 +4014,11 @@ class AccountMove(models.Model):
     def _compute_display_name(self):
         for move in self:
             move.display_name = move._get_move_display_name(show_ref=True)
+
+    @api.depends('is_move_sent')
+    def _compute_sent_status(self):
+        for move in self:
+            move.sent_status = 'sent' if move.is_move_sent else 'not_sent'
 
     def onchange(self, values, field_names, fields_spec):
         # Since only one field can be changed at the same time (the record is
