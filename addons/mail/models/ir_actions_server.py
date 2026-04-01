@@ -83,7 +83,7 @@ class IrActionsServer(models.Model):
     activity_plan_has_user_on_demand = fields.Boolean(related="activity_plan_id.has_user_on_demand")
     # Next Activity: activity-based
     activity_type_id = fields.Many2one(
-        'mail.activity.type', string='Activity Type',
+        'mail.activity.type', string='Activity Type', related=False,
         domain="['|', ('res_model', '=', False), ('res_model', '=', model_name)]",
         compute='_compute_activity_type_id', readonly=False, store=True,
         ondelete='restrict')
