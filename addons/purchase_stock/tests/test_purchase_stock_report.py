@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from odoo import Command
+from datetime import datetime, timedelta
 
 from odoo.tests import Form
 from odoo.addons.mail.tests.common import mail_new_test_user
@@ -413,3 +415,40 @@ class TestPurchaseStockReports(TestReportsCommon):
         self.assertEqual(data['qty_total:sum'], 10)
         self.assertEqual(data['qty_on_time:sum'], 10)
         self.assertEqual(data['on_time_rate:sum'], 100)
+
+    def test_report_forecast_multi_line_different_dates(self):
+        """
+        Create a PO with two lines for the same product but different expected
+        arrival dates (date_planned). The forecast report should produce two
+        separate lines with distinct receipt dates rather than merging them.
+        """
+        date1 = datetime.now() + timedelta(days=7)
+        date2 = datetime.now() + timedelta(days=14)
+        puchase_order = self.env['purchase.order'].create({
+            'partner_id': self.partner.id,
+            'order_line': [
+               Command.create({
+                    'product_id': self.product.id,
+                    'product_qty': 3,
+                    'date_planned': date1,
+                }),
+                Command.create({
+                    'product_id': self.product.id,
+                    'product_qty': 7,
+                    'date_planned': date2,
+                }),
+            ],
+        })
+        puchase_order.button_confirm()
+        report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
+
+        # Both PO lines concern the same product, so we should have 2 incoming
+        # lines (plus the initial free-stock line), each with a distinct date.
+        incoming_lines = [l for l in lines if l.get('document_in') and l['document_in'].get('id') == puchase_order.id]
+        self.assertEqual(len(incoming_lines), 2, "Each PO line with a distinct date_planned must produce a separate forecast line.")
+
+        receipt_dates = {l['receipt_date'] for l in incoming_lines}
+        self.assertEqual(len(receipt_dates), 2, "Forecast lines must have distinct receipt dates matching the PO line date_planned values.")
+
+        quantities = sorted(l['quantity'] for l in incoming_lines)
+        self.assertEqual(quantities, [3.0, 7.0], "Forecast line quantities must match the individual PO line quantities.")
