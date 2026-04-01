@@ -661,6 +661,14 @@ class AccountMove(models.Model):
         copy=False,
         help="It indicates that the invoice/payment has been sent or the PDF has been generated.",
     )
+    move_sent_status = fields.Selection(
+        selection=[
+            ('not_sent', "Not Sent"),
+            ('sent', "Sent"),
+        ],
+        help="It indicates that the invoice/payment has been sent or not",
+        compute='_compute_move_sent_status',
+    )
     is_being_sent = fields.Boolean(
         help="Is the move being sent asynchronously",
         compute='_compute_is_being_sent'
@@ -804,6 +812,11 @@ class AccountMove(models.Model):
                     )
             else:
                 move.invoice_user_id = False
+
+    @api.depends('is_move_sent')
+    def _compute_move_sent_status(self):
+        for move in self:
+            move.move_sent_status = 'sent' if move.is_move_sent else 'not_sent'
 
     @api.depends('sending_data')
     def _compute_is_being_sent(self):
