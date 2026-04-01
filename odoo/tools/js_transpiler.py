@@ -12,6 +12,7 @@ the original source need to be supported by the browsers.
 """
 
 import re
+import subprocess
 from functools import partial
 
 from odoo.tools.misc import OrderedSet
@@ -30,6 +31,7 @@ def transpile_javascript(url, content):
     dependencies = OrderedSet()
     # The order of the operations does sometimes matter.
     steps = [
+        partial(convert_typescript, url),
         convert_legacy_default_import,
         convert_basic_import,
         convert_default_and_named_import,
@@ -83,9 +85,9 @@ def url_to_module_path(url):
     match = URL_RE.match(url)
     if match:
         url = match["url"]
-        if url.endswith(('/index.js', '/index')):
+        if url.endswith(('/index.js', '/index.ts', '/index')):
             url, _ = url.rsplit('/', 1)
-        if url.endswith('.js'):
+        if url.endswith(('.js', '.ts')):
             url = url[:-3]
         if match["type"] == "src":
             return "@%s%s" % (match['module'], url)
@@ -661,6 +663,22 @@ def convert_unnamed_relative_import(content):
     """
     repl = r"\g<space>require(\g<path>)"
     return IMPORT_UNNAMED_RELATIVE_RE.sub(repl, content)
+
+
+def convert_typescript(url, content):
+    """
+    Remove Typescript syntax from content using `swc`.
+    """
+    if not url.endswith(".ts"):
+        return content
+    result = subprocess.run(
+        ["npx", "swc", "-C", "jsc.parser.syntax=typescript", "-C", "jsc.target=es2024", "--no-swcrc"],
+        input=content,
+        check=True,
+        capture_output=True,
+        text=True
+    )
+    return result.stdout
 
 
 URL_INDEX_RE = re.compile(r"""

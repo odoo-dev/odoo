@@ -23,7 +23,7 @@ from odoo.tools.misc import file_open, file_path
 _logger = logging.getLogger(__name__)
 
 ANY_UNIQUE = '_' * 7
-EXTENSIONS = (".js", ".css", ".scss", ".sass", ".less", ".xml")
+EXTENSIONS = (".js", ".ts", ".css", ".scss", ".sass", ".less", ".xml")
 
 class CompileError(RuntimeError): pass
 
@@ -111,7 +111,7 @@ class AssetsBundle(object):
                 elif extension == 'css':
                     self.stylesheets.append(StylesheetAsset(self, **params, **css_params))
             if js:
-                if extension == 'js':
+                if extension in {'js', 'ts'} and not params["filename"].endswith(".d.ts"):
                     self.javascripts.append(JavascriptAsset(self, **params))
                 elif extension == 'xml':
                     self.templates.append(XMLAsset(self, **params))

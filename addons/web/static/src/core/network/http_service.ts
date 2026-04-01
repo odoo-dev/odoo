@@ -1,7 +1,7 @@
 import { browser } from "@web/core/browser/browser";
 import { registry } from "../registry";
 
-function checkResponseStatus(response) {
+function checkResponseStatus(response: Response) {
     if (response.status === 502) {
         throw new Error("Failed to fetch");
     }
@@ -10,13 +10,13 @@ function checkResponseStatus(response) {
     }
 }
 
-export async function get(route, readMethod = "json") {
+export async function get(route: string, readMethod: "json" | "text" = "json") {
     const response = await browser.fetch(route, { method: "GET" });
     checkResponseStatus(response);
     return response[readMethod]();
 }
 
-export async function post(route, params = {}, readMethod = "json") {
+export async function post(route: string, params: FormData | Record<string, string> = {}, readMethod: "json" | "text" | "url" = "json") {
     let formData = params;
     if (!(formData instanceof FormData)) {
         formData = new FormData();
