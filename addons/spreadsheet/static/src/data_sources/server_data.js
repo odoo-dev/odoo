@@ -140,12 +140,12 @@ export class ServerData {
             const promise = this.orm
                 .call(resModel, method, args)
                 .then((result) => (this.cache[request.key] = result))
-                .catch(
-                    (error) =>
-                        (this.cache[request.key] = new EvaluationError(
-                            error.data?.message || error.message
-                        ))
-                );
+                .catch((error) => {
+                    console.error(error);
+                    this.cache[request.key] = new EvaluationError(
+                        error.data?.message || error.message
+                    );
+                });
             this.startLoadingCallback(promise);
             throw error;
         }
@@ -205,10 +205,10 @@ export class ServerData {
             successCallback: (request, result) => {
                 this.cache[request.key] = result;
             },
-            failureCallback: (request, error) =>
-                (this.cache[request.key] = new EvaluationError(
-                    error.data?.message || error.message
-                )),
+            failureCallback: (request, error) => {
+                this.cache[request.key] = new EvaluationError(error.data?.message || error.message);
+                console.error(error);
+            },
         });
     }
 }
@@ -301,7 +301,10 @@ export class BatchEndpoint {
                 .then((result) =>
                     mergedResults.set(request, batch.splitResponse(result).get(request))
                 )
-                .catch((error) => mergedResults.set(request, error));
+                .catch((error) => {
+                    mergedResults.set(request, error);
+                    console.error(error);
+                });
             proms.push(prom);
         }
         await Promise.allSettled(proms);
