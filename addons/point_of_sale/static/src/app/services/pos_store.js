@@ -2671,6 +2671,13 @@ export class PosStore extends WithLazyGetterTrap {
         );
     }
 
+    get sessionReportType() {
+        if (this.session.state == "closed") {
+            return _t("Z Report");
+        }
+        return _t("X Report");
+    }
+
     async isSessionDeleted() {
         return (
             (await this.data.orm.searchCount("pos.session", [["id", "=", this.session.id]])) === 0

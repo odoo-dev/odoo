@@ -31,6 +31,15 @@
                             <t t-call="point_of_sale.pos_sale_details_receipt_product_line"/>
                         </t>
 
+                        <t t-set="products" t-value="extra_data['cancel']"/>
+                        <t t-if="len(products)">
+                            <hr class="my-2" style="border: none; border-top: 2px dashed black;"/>
+                            <div class="text-large text-center text-bold">
+                                CANCELLED:
+                            </div>
+                            <t t-call="point_of_sale.pos_sale_details_receipt_product_line"/>
+                        </t>
+
 
                         <hr class="my-2" style="border: none; border-top: 2px dashed black;"/>
                         <div class="text-large text-center text-bold">

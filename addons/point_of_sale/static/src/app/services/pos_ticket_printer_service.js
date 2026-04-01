@@ -1,4 +1,5 @@
 import { registry } from "@web/core/registry";
+import { formatDateTime } from "@web/core/l10n/dates";
 import { EpsonPrinter } from "../utils/printer/epson_printer";
 import { GeneratePrinterData } from "../utils/printer/generate_printer_data";
 import { RetryPrintPopup } from "../components/popups/retry_print_popup/retry_print_popup";
@@ -6,6 +7,8 @@ import { _t } from "@web/core/l10n/translation";
 import { renderToElement, renderToString } from "@web/core/utils/render";
 import { toCanvas } from "../utils/html-to-image";
 import { logPosImage } from "../utils/pretty_console_log";
+
+const { DateTime } = luxon;
 
 export const posTicketPrinterService = {
     dependencies: ["dialog", "pos_data", "notification"],
@@ -123,10 +126,11 @@ export class PosTicketPrinterService {
         iframe,
         image = null,
         webFallback = true,
+        download = false,
         printer = this.config.default_receipt_printer_id,
         fallbacks = this.config.receipt_printer_ids,
     } = {}) {
-        if (!printer) {
+        if (!printer && !download) {
             webFallback && this.printWeb(iframe);
             return;
         }
@@ -146,7 +150,17 @@ export class PosTicketPrinterService {
             }
         }
 
-        if (!status.successful) {
+        if (download && !status.successful) {
+            const image = await this.generateImage(iframe);
+            const link = document.createElement("a");
+            const currentDate = formatDateTime(DateTime.now(), {
+                format: "MM_dd_yyyy-HH_mm_ss",
+            });
+            const configName = this.config.name.replaceAll(" ", "_");
+            link.download = `${configName}-${this.session.id}-${currentDate}.png`;
+            link.href = image.toDataURL("image/png");
+            link.click();
+        } else if (!status.successful) {
             this.showPrinterErrorDialog(
                 status.message,
                 () => this.printWithFallback(...arguments),
@@ -163,7 +177,7 @@ export class PosTicketPrinterService {
      * - this.config.default_receipt_printer_id
      * - this.config.receipt_printer_ids
      */
-    async printSaleDetailsReceipt({ webFallback = true } = {}) {
+    async printSaleDetailsReceipt({ download = true } = {}) {
         const generator = this.getGenerator({ models: this.data.models });
         const saleDetails = await this.data.call(
             "report.point_of_sale.report_saledetails",
@@ -172,7 +186,7 @@ export class PosTicketPrinterService {
         );
         const data = generator.generateSaleDetailsData(saleDetails);
         const iframe = await this.generateIframe("point_of_sale.pos_sale_details_receipt", data);
-        return await this.printWithFallback({ iframe, webFallback });
+        return await this.printWithFallback({ iframe, download });
     }
 
     async printTipReceipt({ order, name, webFallback = true }) {

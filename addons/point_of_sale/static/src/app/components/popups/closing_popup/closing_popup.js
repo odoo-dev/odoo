@@ -242,6 +242,7 @@ export class ClosePosPopup extends Component {
                 return this.handleClosingError(response);
             }
             this.pos.session.state = "closed";
+            await this.pos.ticketPrinter.printSaleDetailsReceipt();
             this.pos.router.close();
         } catch (error) {
             if (error instanceof ConnectionLostError) {
