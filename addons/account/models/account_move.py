@@ -785,6 +785,12 @@ class AccountMove(models.Model):
         if not column_exists(self.env.cr, "account_move", "preferred_payment_method_line_id"):
             create_column(self.env.cr, "account_move", "preferred_payment_method_line_id", "int4")
 
+    invoice_sending_status = fields.Selection([
+            ('sent', "Sent"),
+            ('not_sent', "Not Sent"),
+        ],
+        string="Sending Status",
+        compute='_compute_invoice_sending_status')
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
@@ -2393,6 +2399,10 @@ class AccountMove(models.Model):
                     lambda line: line.account_type in ('asset_receivable', 'liability_payable'),
                 ).no_followup = move.no_followup
 
+    @api.depends('is_move_sent')
+    def _compute_invoice_sending_status(self):
+        for move in self:
+            move.invoice_sending_status = 'sent' if move.is_move_sent else 'not_sent'
     # -------------------------------------------------------------------------
     # ALERTS
     # -------------------------------------------------------------------------
