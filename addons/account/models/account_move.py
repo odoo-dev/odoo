@@ -614,6 +614,14 @@ class AccountMove(models.Model):
         compute='_compute_status_in_payment',
         copy=False,
     )
+    status_sent = fields.Selection(
+        selection=[
+            ('sent', "Sent"),
+            ('not_sent', "Not Sent"),
+        ],
+        compute='_compute_status_sent',
+        copy=False,
+    )
     amount_total_words = fields.Char(
         string="Amount total in words",
         compute="_compute_amount_total_words",
@@ -1313,6 +1321,11 @@ class AccountMove(models.Model):
 
             if not move.status_in_payment:
                 move.status_in_payment = move.state
+
+    @api.depends('is_move_sent')
+    def _compute_status_sent(self):
+        for move in self:
+            move.status_sent = "sent" if move.is_move_sent else "not_sent"
 
     def _field_to_sql(self, alias: str, fname: str, query=None) -> SQL:
         if fname == 'status_in_payment':
