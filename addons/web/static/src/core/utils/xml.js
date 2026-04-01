@@ -39,18 +39,18 @@ export function serializeXML(xml) {
  * @param {(el: Element, visitChildren: () => any) => any} callback
  */
 export function visitXML(xml, callback) {
-    const visit = (el) => {
+    const visit = (el, param) => {
         if (el) {
             let didVisitChildren = false;
-            const visitChildren = () => {
+            const visitChildren = (param) => {
                 for (const child of el.children) {
-                    visit(child);
+                    visit(child, param);
                 }
                 didVisitChildren = true;
             };
-            const shouldVisitChildren = callback(el, visitChildren);
-            if (shouldVisitChildren !== false && !didVisitChildren) {
-                visitChildren();
+            const res = callback(el, visitChildren, param);
+            if (res !== false && !didVisitChildren) {
+                visitChildren(res);
             }
         }
     };

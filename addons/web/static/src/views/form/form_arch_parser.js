@@ -11,32 +11,21 @@ export class FormArchParser {
         const activeActions = getActiveActions(xmlDoc);
         const fieldNodes = {};
         const widgetNodes = {};
-        let widgetNextId = 0;
-        const fieldNextIds = {};
         const autofocusFieldIds = [];
-        visitXML(xmlDoc, (node) => {
-            if (node.tagName === "field") {
-                const fieldInfo = Field.parseFieldNode(node, models, modelName, "form", jsClass);
-                if (!(fieldInfo.name in fieldNextIds)) {
-                    fieldNextIds[fieldInfo.name] = 0;
-                }
-                const fieldId = `${fieldInfo.name}_${fieldNextIds[fieldInfo.name]++}`;
-                fieldNodes[fieldId] = fieldInfo;
-                node.setAttribute("field_id", fieldId);
-                if (exprToBoolean(node.getAttribute("default_focus") || "")) {
-                    autofocusFieldIds.push(fieldId);
-                }
-                if (fieldInfo.type === "properties" || fieldInfo.type === "properties_definition") {
-                    activeActions.addPropertyFieldValue = true;
-                }
-                return false;
-            } else if (node.tagName === "widget") {
-                const widgetInfo = Widget.parseWidgetNode(node);
-                const widgetId = `widget_${++widgetNextId}`;
-                widgetNodes[widgetId] = widgetInfo;
-                node.setAttribute("widget_id", widgetId);
-            }
-        });
+
+        const state = {
+            models,
+            modelName,
+            jsClass,
+            fieldNextIds: {},
+            fieldNodes,
+            autofocusFieldIds,
+            activeActions,
+            widgetNextId: 0,
+            widgetNodes,
+        };
+
+        visitXML(xmlDoc, (node) => this.visitNode(node, state));
         return {
             activeActions,
             autofocusFieldIds,
@@ -45,5 +34,44 @@ export class FormArchParser {
             widgetNodes,
             xmlDoc,
         };
+    }
+
+    visitNode(node, state) {
+        if (node.tagName === "field") {
+            this.visitField(node, state);
+        } else if (node.tagName === "widget") {
+            this.visitWidget(node, state);
+        }
+    }
+
+    visitField(node, state) {
+        const fieldInfo = Field.parseFieldNode(
+            node,
+            state.models,
+            state.modelName,
+            "form",
+            state.jsClass
+        );
+        if (!(fieldInfo.name in state.fieldNextIds)) {
+            state.fieldNextIds[fieldInfo.name] = 0;
+        }
+        const fieldId = `${fieldInfo.name}_${state.fieldNextIds[fieldInfo.name]++}`;
+        state.fieldNodes[fieldId] = fieldInfo;
+        node.setAttribute("field_id", fieldId);
+        if (exprToBoolean(node.getAttribute("default_focus") || "")) {
+            state.autofocusFieldIds.push(fieldId);
+        }
+        if (fieldInfo.type === "properties" || fieldInfo.type === "properties_definition") {
+            state.activeActions.addPropertyFieldValue = true;
+        }
+        return false;
+    }
+
+    visitWidget(node, state) {
+        const widgetInfo = Widget.parseWidgetNode(node);
+        const widgetId = `widget_${++state.widgetNextId}`;
+        state.widgetNodes[widgetId] = widgetInfo;
+        node.setAttribute("widget_id", widgetId);
+        return false;
     }
 }

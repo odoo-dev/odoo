@@ -93,14 +93,19 @@ export class SettingsFormCompiler extends FormCompiler {
     compileBlock(el, params) {
         params.blockTitle = toStringExpression(el.getAttribute("title") || "");
         params.blockTip = toStringExpression(el.getAttribute("help") || "");
-        const settingsContainer = createElement("SettingsBlock", {
+        const settingsBlock = createElement("SettingsBlock", {
             title: params.blockTitle,
             tip: params.blockTip,
         });
+        params.settings = [];
         for (const child of el.children) {
-            append(settingsContainer, this.compileNode(child, params));
+            append(settingsBlock, this.compileNode(child, params));
         }
-        return settingsContainer;
+        settingsBlock.setAttribute(
+            "t-if",
+            `__comp__.isBlockVisible(${blockId}, ${params.settings})`
+        );
+        return settingsBlock;
     }
 
     compileSetting(el, params) {
@@ -110,6 +115,12 @@ export class SettingsFormCompiler extends FormCompiler {
         const fieldName = res.getAttribute("fieldName");
         const string = res.getAttribute("string");
         const help = res.getAttribute("help");
+        params.settings.push({
+            id: plop,
+            fieldName,
+            string,
+            help,
+        });
         res.setAttribute(
             "t-if",
             `__comp__.isSettingVisible(${fieldName}, ${string}, ${help}, ${params.blockTitle}, ${params.blockTip})`

@@ -6,6 +6,7 @@ import { formView } from "@web/views/form/form_view";
 import { SettingsFormController } from "./settings_form_controller";
 import { SettingsFormRenderer } from "./settings_form_renderer";
 import { SettingsFormCompiler } from "./settings_form_compiler";
+import { SettingsFormArchParser } from "./settings_form_arch_parser";
 
 class SettingRecord extends formView.Model.Record {
     _update(changes) {
@@ -59,6 +60,7 @@ export const settingsFormView = {
     Controller: SettingsFormController,
     Compiler: SettingsFormCompiler,
     Renderer: SettingsFormRenderer,
+    ArchParser: SettingsFormArchParser,
     props: (genericProps, view) => {
         [...genericProps.arch.querySelectorAll("setting[type='header'] field")].forEach((el) => {
             const options = evaluateExpr(el.getAttribute("options") || "{}");

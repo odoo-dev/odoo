@@ -52,4 +52,6 @@ export class SettingsFormRenderer extends FormRenderer {
         }
         return false;
     }
+
+    isBlockVisible(blockTitle, blockTip) {}
 }

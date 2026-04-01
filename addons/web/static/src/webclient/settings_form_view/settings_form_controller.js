@@ -19,6 +19,7 @@ export class SettingsFormController extends formView.Controller {
 
     setup() {
         super.setup();
+        debugger;
         useAutofocus();
         this.state = useState({ displayNoContent: false });
         this.searchState = useState({ value: "" });
