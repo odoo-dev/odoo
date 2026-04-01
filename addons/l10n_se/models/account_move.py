@@ -54,6 +54,22 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self._get_invoice_reference_se_ocr4(self.partner_id.ref if str(self.partner_id.ref).isdecimal() else str(self.partner_id.id))
 
+    @api.depends('country_code', 'move_type')
+    def _compute_show_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_show_delivery_date()
+        for move in self:
+            if move.country_code == 'SE':
+                move.show_delivery_date = move.is_sale_document()
+
+    def _post(self, soft=True):
+        # EXTENDS 'account'
+        res = super()._post(soft)
+        for move in self:
+            if move.country_code == 'SE' and move.is_sale_document() and not move.delivery_date:
+                move.delivery_date = move.invoice_date or fields.Date.context_today(self)
+        return res
+
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
         """ If Vendor Bill and Vendor OCR is set, add it. """
