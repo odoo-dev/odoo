@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_checkout.LandingPage" t-inherit="pos_self.LandingPage" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('page-body')]" position="after">
+            <div class="o_pos_landing_footer position-absolute bottom-0 end-0 d-flex w-100 ">
+                <div class="container o_self_container py-3">
+                    <div  class="row justify-content-center g-2 g-md-3">
+                        <button type="button" class="btn btn-lg btn-primary col-12 col-md-6 col-lg-6 col-kiosk-p-12">
+                            Scan an item or touch the screen to start your checkout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

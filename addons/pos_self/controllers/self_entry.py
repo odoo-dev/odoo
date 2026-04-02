@@ -5,23 +5,28 @@ from odoo.http import request
 
 
 class PosSelfEntry(http.Controller):
+    @http.route("/pos-self/data/<config_id>", type='jsonrpc', auth='public', website=True)
     def get_self_data(self, config_id=None, access_token=None, table_identifier=None):
-        pos_config, _, config_access_token = self._verify_entry_access(config_id, access_token, table_identifier)
+        res = self._verify_entry_access(config_id, access_token, table_identifier=table_identifier)
+        pos_config = res['pos_config']
+        config_access_token = res['config_access_token']
         data = pos_config.load_self_data()
         data['pos.config'][0]['access_token'] = config_access_token
         return data
 
-    def get_self_receipt_template(self, config_id=None, access_token=None, table_identifier=None):
-        pos_config, _, _ = self._verify_entry_access(config_id, access_token, table_identifier)
+    @http.route("/pos-self/receipt-template/<config_id>", type='jsonrpc', auth='public')
+    def get_self_receipt_template(self, config_id=None, access_token=None, **kwargs):
+        res = self._verify_entry_access(config_id, access_token, **kwargs)
+        pos_config = res['pos_config']
         return pos_config.env['pos.order'].get_receipt_template_for_pos_frontend()
 
-    def get_self_relations(self, config_id=None, access_token=None, table_identifier=None):
-        pos_config, _, _ = self._verify_entry_access(config_id, access_token, table_identifier)
+    @http.route("/pos-self/relations/<config_id>", type='jsonrpc', auth='public')
+    def get_self_relations(self, config_id=None, access_token=None, **kwargs):
+        res = self._verify_entry_access(config_id, access_token, **kwargs)
+        pos_config = res['pos_config']
         return pos_config.load_data_params()
 
-    def _verify_entry_access(self, config_id=None, access_token=None, table_identifier=None):
-        table_sudo = False
-
+    def _verify_entry_access(self, config_id=None, access_token=None, **kwargs):
         if not config_id or not config_id.isnumeric():
             raise werkzeug.exceptions.NotFound()
 
@@ -43,22 +48,7 @@ class PosSelfEntry(http.Controller):
 
         if not pos_config:
             raise werkzeug.exceptions.NotFound()
-
-        if pos_config and pos_config.has_active_session and pos_config.self_ordering_mode == 'mobile':
-            if config_access_token:
-                config_access_token = pos_config.access_token
-            table_sudo = table_identifier and (
-                request.env["restaurant.table"]
-                .sudo()
-                .search([("identifier", "=", table_identifier), ("active", "=", True)], limit=1)
-            )
-            if table_sudo and table_sudo.parent_id:
-                table_sudo = table_sudo.parent_id
-        elif pos_config.self_ordering_mode == 'kiosk':
-            if config_access_token:
-                config_access_token = pos_config.access_token
-        else:
-            config_access_token = ''
-
-        table = table_sudo.sudo(False).with_company(company).with_user(user) if table_sudo else False
-        return pos_config, table, config_access_token
+        return {
+            'pos_config': pos_config,
+            'config_access_token': config_access_token,
+        }

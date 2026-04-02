@@ -170,7 +170,8 @@ class PosConfig(models.Model):
             'res.currency', 'pos.printer', 'pos.category', 'product.template', 'product.product', 'product.combo', 'product.combo.item', 'res.company', 'account.tax',
             'account.tax.group', 'res.country', 'product.category', 'product.pricelist', 'product.pricelist.item', 'account.fiscal.position',
             'res.lang', 'product.attribute', 'product.attribute.custom.value', 'product.template.attribute.line', 'product.template.attribute.value', 'product.tag',
-            'decimal.precision', 'uom.uom', 'account.cash.rounding', 'res.country', 'res.country.state', 'mail.template', 'pos.product.template.snooze']
+            'decimal.precision', 'uom.uom', 'account.cash.rounding', 'res.country', 'res.country.state', 'mail.template', 'pos.product.template.snooze',
+            'barcode.nomenclature', 'barcode.rule']
 
     @api.model
     def _load_pos_self_data_domain(self, data, config):

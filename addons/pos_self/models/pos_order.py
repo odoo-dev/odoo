@@ -76,7 +76,7 @@ class PosOrder(models.Model):
             'data': {
                 'pos.order': self.read(self._load_pos_self_data_fields(self.config_id), load=False),
                 'pos.order.line': self.lines.read(self.lines._load_pos_self_data_fields(self.config_id), load=False),
-            }
+            },
         })
         if payment_result == 'Success':
             self._send_self_order_receipt()
@@ -85,8 +85,7 @@ class PosOrder(models.Model):
     def _load_pos_self_data_fields(self, config):
         return ['id', 'uuid', 'name', 'display_name', 'access_token', 'last_order_preparation_change', 'date_order', 'amount_total', 'amount_paid', 'amount_return', 'user_id', 'amount_tax', 'lines', 'pricelist_id', 'company_id', 'country_code', 'sequence_number', 'session_id',
                 'config_id', 'currency_id', 'currency_rate', 'is_refund', 'has_refundable_lines', 'state', 'account_move', 'preset_id', 'floating_order_name', 'general_customer_note', 'internal_note', 'nb_print', 'pos_reference', 'fiscal_position_id', 'payment_ids', 'to_invoice',
-                'shipping_date', 'preset_time', 'is_invoiced', 'is_tipped', 'tip_amount', 'ticket_code', 'tracking_number', 'email', 'mobile', 'table_id', 'course_ids',
-                'create_date', 'write_date', 'partner_id', 'customer_count']
+                'shipping_date', 'preset_time', 'is_invoiced', 'is_tipped', 'tip_amount', 'ticket_code', 'tracking_number', 'email', 'mobile', 'create_date', 'write_date', 'partner_id']
 
     @api.model
     def _check_pos_order_lines(self, pos_config, order, line, fiscal_position_id):
@@ -148,10 +147,7 @@ class PosOrder(models.Model):
 
         return {
             'id': order.get('id'),
-            'table_stand_number': order.get('table_stand_number'),
             'access_token': order.get('access_token'),
-            'customer_count': order.get('customer_count'),
-            'self_ordering_table_id': table.id if table else False,
             'last_order_preparation_change': order.get('last_order_preparation_change'),
             'date_order': str(fields.Datetime.now()),
             'amount_difference': order.get('amount_difference'),
@@ -168,7 +164,7 @@ class PosOrder(models.Model):
             'preset_id': preset_id.id if preset_id else False,
             'preset_time': order.get('preset_time'),
             'tracking_number': f"{prefix}{tracking_number}",
-            'source': 'kiosk' if device_type == 'kiosk' else 'mobile',
+            'source': device_type,
             'email': partner.email if partner else order.get('email'),
             'mobile': order.get('mobile'),
             'state': order.get('state'),

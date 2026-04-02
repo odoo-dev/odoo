@@ -1,0 +1,21 @@
+import { reactive } from "@web/owl2/utils";
+import { mount, whenReady } from "@odoo/owl";
+import { selfCheckoutIndex as Index } from "./self_checkout_index";
+import { mountComponent } from "@web/env";
+import { Loader } from "@point_of_sale/app/components/loader/loader";
+import { getTemplate } from "@web/core/templates";
+
+whenReady(async () => {
+    try {
+        await mountComponent(Index, document.body);
+    } catch (err) {
+        const loader = reactive({ isShown: true, error: err });
+        mount(Loader, document.body, {
+            getTemplate,
+            props: { loader },
+            translatableAttributes: ["data-tooltip"],
+            translateFn: (s) => s,
+        });
+        console.log(err);
+    }
+});

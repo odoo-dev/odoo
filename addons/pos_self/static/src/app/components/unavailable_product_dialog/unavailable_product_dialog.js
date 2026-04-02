@@ -2,7 +2,7 @@ import { Component } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 
 export class UnavailableProductsDialog extends Component {
-    static template = "pos_self_order.UnavailableProductsDialog";
+    static template = "pos_self.UnavailableProductsDialog";
     static components = { Dialog };
     static props = {
         productNames: { type: Array },

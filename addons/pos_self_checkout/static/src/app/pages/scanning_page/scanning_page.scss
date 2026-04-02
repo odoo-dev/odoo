@@ -1,0 +1,92 @@
+$button-height: 120px;
+$max-button-height: 14rem;
+$header-height: 60px;
+$max-header-height: 6rem;
+
+.o_self_scanning_page {
+    min-height: 0;
+
+    .o_self_scanning_content {
+        min-height: 0;
+    }
+
+    .header {
+        height: $header-height;
+        max-height: $max-header-height;
+    }
+
+    .category-buttons-modal {
+        grid-template-columns: repeat(5, 1fr);
+
+        @include media-breakpoint-down(lg) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @include media-breakpoint-down(sm) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .leftpane {
+        width: 45%;
+        min-width: 45%;
+
+        .o_self_order_display_container {
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+
+            > div {
+                min-height: 0;
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+
+                .order-container {
+                    min-height: 0;
+                    overflow-y: auto;
+                    scrollbar-width: none;  // Firefox
+                    -ms-overflow-style: none; // old Edge/IE
+                }
+
+                .order-container::-webkit-scrollbar {
+                    width: 0;
+                    height: 0;
+                    display: none;          // Chrome/Safari
+                }
+            }
+        }
+    }
+
+    .rightpane {
+        min-height: 0;
+    }
+
+    .o_self_products_scroll {
+        min-height: 0;
+    }
+
+    .o_self_products_grid {
+        min-height: 100%;
+    }
+
+    .button-height {
+        height: $button-height;
+        max-height: $max-button-height;
+    }
+
+    .timer-hours{
+        font-variant-numeric: tabular-nums;
+    }
+
+    .logo {
+        img {
+            height: calc(#{$header-height} - 2px);
+            max-height: calc(#{$max-header-height} - 2px);
+        }
+    }
+
+    .product_img {
+        width: 90px;
+    }
+}

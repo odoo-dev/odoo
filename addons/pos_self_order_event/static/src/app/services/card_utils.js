@@ -1,4 +1,4 @@
-import { getOrderLineValues } from "addons/pos_self/static/src/app/services/card_utils";
+import { getOrderLineValues } from "@pos_self/app/services/card_utils";
 
 export const getEventOrderLineValues = function (
     selfOrder,

@@ -1,31 +1,20 @@
-import { useState } from "@web/owl2/utils";
-import { Component, onMounted, onWillUnmount } from "@odoo/owl";
-import { useSelf } from "@pos_self/app/services/self_service";
-import { rpc } from "@web/core/network/rpc";
+import { onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { PaymentInterface } from "@pos_self/app/components/payment_interface/payment_interface";
 
 // This component is only use in Kiosk mode
-export class PaymentPage extends Component {
+export class PaymentPage extends PaymentInterface {
     static template = "pos_self_order.PaymentPage";
-    static props = {};
 
     setup() {
-        this.selfOrder = useSelf();
+        super.setup(...arguments);
         this.selfOrder.isOrder();
         this.router = useService("router");
-        this.state = useState({
-            selection: true,
-            paymentMethodId: null,
-        });
 
         onMounted(() => {
             if (this.selfOrder.models["pos.payment.method"].length === 1) {
                 this.selectMethod(this.selfOrder.models["pos.payment.method"].getFirst().id);
             }
-        });
-
-        onWillUnmount(() => {
-            this.selfOrder.paymentError = false;
         });
     }
 
@@ -34,49 +23,7 @@ export class PaymentPage extends Component {
         this.router.back();
     }
 
-    selectMethod(methodId) {
-        this.state.selection = false;
-        this.state.paymentMethodId = methodId;
-        this.startPayment();
-    }
-
-    get selectedPaymentMethod() {
-        return this.selfOrder.models["pos.payment.method"].find(
-            (p) => p.id === this.state.paymentMethodId
-        );
-    }
-
-    // this function will be override by pos_online_payment_self_order module
-    // in mobile is the only available payment method
-    async startPayment() {
-        this.selfOrder.paymentError = false;
-        try {
-            if (this.selectedPaymentMethod.payment_interface) {
-                const result = this.selfOrder.currentOrder.addPaymentline(
-                    this.selectedPaymentMethod
-                );
-                if (!result.status) {
-                    throw new Error(`Adding payment line failed: ${result.data}`);
-                }
-                const newPaymentLine = result.data;
-                try {
-                    const paymentSuccessful = await newPaymentLine.pay();
-                    if (!paymentSuccessful) {
-                        throw new Error("Payment terminal payment failed");
-                    }
-                } catch (err) {
-                    this.selfOrder.currentOrder.removePaymentline(newPaymentLine);
-                    throw err;
-                }
-            }
-            await rpc(`/kiosk/payment/${this.selfOrder.config.id}/kiosk`, {
-                order: this.selfOrder.currentOrder.serializeForORM(),
-                access_token: this.selfOrder.access_token,
-                payment_method_id: this.state.paymentMethodId,
-            });
-        } catch (error) {
-            this.selfOrder.handleErrorNotification(error);
-            this.selfOrder.paymentError = true;
-        }
+    get paymentRoute() {
+        return `/kiosk/payment/${this.selfOrder.config.id}/kiosk`;
     }
 }

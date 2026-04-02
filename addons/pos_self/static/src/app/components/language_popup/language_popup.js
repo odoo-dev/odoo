@@ -3,7 +3,7 @@ import { useSelf } from "@pos_self/app/services/self_service";
 import { cookie } from "@web/core/browser/cookie";
 
 export class LanguagePopup extends Component {
-    static template = "pos_self_order.LanguagePopup";
+    static template = "pos_self.LanguagePopup";
     static props = {
         close: Function,
     };

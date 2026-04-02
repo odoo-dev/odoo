@@ -1,4 +1,4 @@
-import { SelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { SelfOrder } from "@pos_self/app/services/self_service";
 import { createDummyProductForEvents, updateSeats } from "@pos_event/app/utils/event_util";
 import { getEventOrderLineValues } from "../services/card_utils";
 import { patch } from "@web/core/utils/patch";

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="pos_self_order.UnavailableProductsDialog">
+    <t t-name="pos_self.UnavailableProductsDialog">
         <Dialog>
             <t t-set-slot="header">
                 <h4 class="modal-title">Oops...</h4>

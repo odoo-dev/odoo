@@ -19,7 +19,7 @@ class IrHttp(models.AbstractModel):
 
         referer_url = request.httprequest.headers.get('Referer', '')
         path = request.httprequest.path
-        accepted_path_prefixes = ['/pos-self/', '/pos-self-checkout/']
+        accepted_path_prefixes = ['/pos-self/', '/pos-self-order/', '/pos-self-checkout/']
 
         if any(p in path for p in accepted_path_prefixes):
             path_with_config = path
@@ -29,7 +29,7 @@ class IrHttp(models.AbstractModel):
             path_with_config = None
 
         if path_with_config:
-            config_id_match = re.search(r'/(pos-self|pos-self-checkout)(?:/data)?/(\d+)', path_with_config)
+            config_id_match = re.search(r'/(pos-self|pos-self-order|pos-self-checkout)(?:/data)?/(\d+)', path_with_config)
             if config_id_match:
                 pos_config = request.env['pos.config'].sudo().browse(int(config_id_match[2]))
                 if pos_config.self_ordering_available_language_ids:

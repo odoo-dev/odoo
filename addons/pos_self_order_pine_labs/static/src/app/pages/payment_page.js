@@ -1,7 +1,7 @@
 import { patch } from "@web/core/utils/patch";
-import { PaymentPage } from "@pos_self_order/app/pages/payment_page/payment_page";
+import { PaymentInterface } from "@pos_self/app/components/payment_interface/payment_interface";
 
-patch(PaymentPage.prototype, {
+patch(PaymentInterface.prototype, {
     async startPayment() {
         const paymentMethod = this.selfOrder.models["pos.payment.method"].find(
             (p) => p.id === this.state.paymentMethodId

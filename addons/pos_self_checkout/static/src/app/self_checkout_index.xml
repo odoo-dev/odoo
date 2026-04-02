@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_checkout.selfCheckoutIndex">
+        <button type="button" t-on-click="this.selfOrder.clickAdminButton.bind(this.selfOrder)" class="position-fixed o-self-hidden-admin-button top-0 end-0 opacity-0 border-0 p-0 m-0" />
+        <div t-if="this.selfOrder.adminMode" t-on-click="this.selfOrder.toggleAdminMode.bind(this.selfOrder)" class="o-self-closed w-100 m-0 text-center bg-black text-white py-2">
+            Admin mode active
+        </div>
+        <div t-if="this.selfOrder.rpcLoading">
+            <LoadingOverlay />
+        </div>
+        <Router t-if="this.selfIsReady" pos_config_id="this.selfOrder.config.id">
+            <t t-set-slot="default" route="`/pos-self-checkout/${selfOrder.config.id}`">
+                <LandingPage />
+            </t>
+            <t t-set-slot="scanning" route="`/pos-self-checkout/${selfOrder.config.id}/scanning`">
+                <ScanningPage />
+            </t>
+        </Router>
+        <div t-else="" class="h-100 w-100 d-flex align-items-center justify-content-center text-center">
+            Hey, looks like you forgot to create products or add them to pos_config. Please add them before using the Self Checkout
+        </div>
+        <MainComponentsContainer />
+        <div id="receipt-iframe-container" style="position: absolute; left: -9999px; top: 0;" />
+    </t>
+</templates>

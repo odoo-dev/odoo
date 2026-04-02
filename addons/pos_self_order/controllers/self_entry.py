@@ -4,9 +4,12 @@ from odoo.addons.pos_self.controllers.self_entry import PosSelfEntry
 
 
 class PosSelfKiosk(PosSelfEntry):
-    @http.route(["/pos-self/<config_id>", "/pos-self/<config_id>/<path:subpath>"], auth="public", website=True, sitemap=True)
-    def start_self_ordering(self, config_id=None, access_token=None, table_identifier=None, subpath=None):
-        pos_config, _, config_access_token = self._verify_entry_access(config_id, access_token, table_identifier)
+    @http.route(["/pos-self-order/<config_id>", "/pos-self-order/<config_id>/<path:subpath>"], auth="public", website=True, sitemap=True)
+    def start_self_ordering(self, config_id=None, access_token=None, subpath=None, **kwargs):
+        res = self._verify_entry_access(config_id, access_token, **kwargs)
+        pos_config = res['pos_config']
+        config_access_token = res['config_access_token']
+
         return request.render(
                 'pos_self_order.index',
                 {
@@ -20,18 +23,37 @@ class PosSelfKiosk(PosSelfEntry):
                         },
                         "base_url": request.env['pos.session'].get_base_url(),
                         "db": request.env.cr.dbname,
-                    }
-                }
+                    },
+                },
             )
 
-    @http.route("/pos-self/data/<config_id>", type='jsonrpc', auth='public', website=True)
-    def get_self_ordering_data(self, config_id=None, access_token=None, table_identifier=None):
-        return self.get_self_data(config_id, access_token, table_identifier)
+    def _verify_entry_access(self, config_id=None, access_token=None, **kwargs):
+        res = super()._verify_entry_access(config_id, access_token, **kwargs)
+        pos_config = res['pos_config']
+        config_access_token = res['config_access_token']
+        if pos_config.self_ordering_mode not in ['kiosk', 'mobile', 'consultation']:
+            return res
 
-    @http.route("/pos-self/receipt-template/<config_id>", type='jsonrpc', auth='public')
-    def get_self_ordering_receipt_template(self, config_id=None, access_token=None, table_identifier=None):
-        return self.get_self_receipt_template(config_id, access_token, table_identifier)
+        table_identifier = kwargs.get('table_identifier')
+        table_sudo = False
+        company = pos_config.company_id
+        user = pos_config.self_ordering_default_user_id
+        if pos_config and pos_config.has_active_session and pos_config.self_ordering_mode == 'mobile':
+            if config_access_token:
+                res['config_access_token'] = pos_config.access_token
+            table_sudo = table_identifier and (
+                request.env["restaurant.table"]
+                .sudo()
+                .search([("identifier", "=", table_identifier), ("active", "=", True)], limit=1)
+            )
+            if table_sudo and table_sudo.parent_id:
+                table_sudo = table_sudo.parent_id
+        elif pos_config.self_ordering_mode == 'kiosk':
+            if config_access_token:
+                res['config_access_token'] = pos_config.access_token
+        else:
+            res['config_access_token'] = ''
 
-    @http.route("/pos-self/relations/<config_id>", type='jsonrpc', auth='public')
-    def get_self_ordering_relations(self, config_id=None, access_token=None, table_identifier=None):
-        return self.get_self_relations(config_id, access_token, table_identifier)
+        table = table_sudo.sudo(False).with_company(company).with_user(user) if table_sudo else False
+        res['table'] = table
+        return res

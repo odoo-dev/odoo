@@ -14,6 +14,15 @@ class ResConfigSettings(models.TransientModel):
     pos_self_ordering_service_mode = fields.Selection(related="pos_config_id.self_ordering_service_mode", readonly=False, required=True)
     pos_self_ordering_pay_after = fields.Selection(related="pos_config_id.self_ordering_pay_after", readonly=False, required=True)
 
+    @api.onchange("pos_self_ordering_default_user_id")
+    def _onchange_default_user(self):
+        self.ensure_one()
+        if self.pos_self_ordering_default_user_id and self.pos_self_ordering_mode == 'mobile':
+            user = self.pos_self_ordering_default_user_id
+            if not (user.has_group("point_of_sale.group_pos_user")
+                    or user.has_group("point_of_sale.group_pos_manager")):
+                raise ValidationError(_("The user must be a POS user"))
+
     @api.onchange("pos_self_ordering_service_mode")
     def _onchange_pos_self_order_service_mode(self):
         if self.pos_self_ordering_service_mode == 'counter':

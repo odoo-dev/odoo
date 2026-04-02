@@ -4,9 +4,21 @@ import { TimeoutPopup } from "@pos_self/app/components/timeout_popup/timeout_pop
 import { GeneratePrinterData } from "@point_of_sale/app/utils/printer/generate_printer_data";
 
 import { patch } from "@web/core/utils/patch";
-import { SelfService } from "@pos_self/app/services/self_service.js";
+import { SelfOrder } from "@pos_self/app/services/self_service";
 
-patch(SelfService.prototype, {
+patch(SelfOrder.prototype, {
+    async _barcodeProductAction(code) {
+        const productTemplate = await super._barcodeProductAction(...arguments);
+        if (!productTemplate) {
+            return;
+        }
+        if (productTemplate.isConfigurable()) {
+            this.router.navigate("product", { id: productTemplate.id });
+            return;
+        }
+        this.addToCart(productTemplate, 1, "", {}, {});
+        this.router.navigate("cart");
+    },
     async initData() {
         await super.initData(...arguments);
         if (this.config.self_ordering_mode === "kiosk") {
@@ -14,6 +26,12 @@ patch(SelfService.prototype, {
         } else if (["mobile", "consultation"].includes(this.config.self_ordering_mode)) {
             await this.initMobileData();
         }
+    },
+    initHardware() {
+        if (this.config.self_ordering_mode !== "kiosk") {
+            return;
+        }
+        super.initHardware(...arguments);
     },
     supportPaymentWebSocket() {
         return this.config.self_ordering_mode === "kiosk";

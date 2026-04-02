@@ -4,7 +4,7 @@ import { session } from "@web/session";
 import { rpc } from "@web/core/network/rpc";
 import { registerPythonTemplate } from "@point_of_sale/app/utils/convert_python_template";
 
-export const unpatchSelf = patch(PosData.prototype, {
+patch(PosData.prototype, {
     async loadInitialData() {
         const configId = session.data.config_id;
         const localData = await this.getCachedServerDataFromIndexedDB();
@@ -33,38 +33,8 @@ export const unpatchSelf = patch(PosData.prototype, {
     async initializeDeviceIdentifier() {
         return false;
     },
-    initIndexedDB() {
-        return session.data.self_ordering_mode === "mobile"
-            ? super.initIndexedDB(...arguments)
-            : true;
-    },
-    initListeners() {
-        return session.data.self_ordering_mode === "mobile"
-            ? super.initListeners(...arguments)
-            : true;
-    },
-    synchronizeLocalDataInIndexedDB() {
-        return session.data.self_ordering_mode === "mobile"
-            ? super.synchronizeLocalDataInIndexedDB(...arguments)
-            : true;
-    },
-    async getCachedServerDataFromIndexedDB() {
-        return session.data.self_ordering_mode === "mobile"
-            ? await super.getCachedServerDataFromIndexedDB(...arguments)
-            : {};
-    },
-    async getLocalDataFromIndexedDB() {
-        return session.data.self_ordering_mode === "mobile"
-            ? await super.getLocalDataFromIndexedDB(...arguments)
-            : {};
-    },
     async missingRecursive(recordMap) {
         return recordMap;
     },
     async checkAndDeleteMissingOrders(results) {},
-    async deleteRecordsInIndexedDB(model, ids) {
-        return session.data.self_ordering_mode === "mobile"
-            ? await super.deleteRecordsInIndexedDB(...arguments)
-            : true;
-    },
 });

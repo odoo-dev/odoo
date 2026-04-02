@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_checkout.ScanningPage">
+        <div class="o_self_scanning_page d-flex flex-column gap-1 vh-100 overflow-hidden o_self_background o_self_fade my-3 mx-1">
+            <div class="header border rounded-3 bg-view d-flex justify-content-between px-1">
+                <div class="timer d-flex align-items-center gap-2">
+                    <div class="timer-hours fs-1" t-out="this.time.hours"> </div>
+                    <div class="timer-date-container d-flex flex-column smaller">
+                        <div class="timer-day" t-out="this.time.day"> </div>
+                        <div class="timer-date" t-out="this.time.date"> </div>
+                    </div>
+                </div>
+                <div class="logo overflow-hidden">
+                    <img t-attf-src="{{ this.selfOrder.config.receiptLogoUrl }}" alt="Logo"/>
+                </div>
+                <div t-if="this.selfOrder.config.self_ordering_available_language_ids.length > 1" t-on-click="this.openLanguages" class="o_self_language_selector p-3 bg-white cursor-pointer user-select-none ">
+                    <img class="rounded" t-attf-src="{{this.selfOrder.currentLanguage.flag_image_url}}" />
+                    <span t-out="this.selfOrder.currentLanguage.display_name" class="ms-3"/>
+                </div>
+            </div>
+            <div class="border rounded-3 bg-view flex-fill d-flex gap-1 o_self_scanning_content">
+                <div class="d-flex flex-column justify-content-between leftpane p-1 border-end">
+                    <!-- Left side -->
+                    <div class="o_self_order_display_container flex-grow-1 overflow-hidden">
+                        <OrderDisplay order="this.selfOrder.currentOrder" t-slot-scope="scope">
+                            <Orderline line="scope.line" onLongPress="(ev, duration) => this.onOrderlineLongPress(ev, scope.line)"/>
+                            <t t-set-slot="emptyCart">
+                                <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1 rounded-3 gap-3">
+                                    <i class="fa fa-shopping-cart fa-5x opacity-50" aria-hidden="true"></i>
+                                    <p class="text-muted">Scan a product to add it to your cart</p>
+                                </div>
+                            </t>
+                        </OrderDisplay>
+                    </div>
+                    <div class="o_self_scanning_buttons button-height d-flex gap-2 mt-2 flex-shrink-0">
+                        <button t-on-click="() => this.selfOrder.toggleAdminHelp()" type="button" class="btn btn-secondary btn-lg lh-lg" t-att-class="{'btn-danger': this.selfOrder.helpAsked}">
+                            <i class="fa fa-male" aria-hidden="true"></i> Ask for help
+                        </button>
+                        <button type="button" class="o_self_checkout_button btn btn-lg lh-lg btn-primary flex-fill" t-on-click="() => this.payment()" t-att-disabled="this.selfOrder.currentOrder.isEmpty()">
+                            Pay
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex flex-column justify-content-between gap-2 p-1 ps-0 rightpane flex-grow-1" t-attf-style="background-image:#{this.selfOrder.backgroundImageUrl};background-size: cover; background-position: center;">
+                    <!-- Right side -->
+                    <div class="o_self_products_scroll flex-fill overflow-auto">
+                        <div class="o_self_products_grid d-flex flex-wrap justify-content-center align-content-center gap-2">
+                            <t t-if="this.state.pageStatus === 'scanning'">
+                                <t t-if="this.shouldDisplayCategory">
+                                    <button t-foreach="this.displayedCategories" t-as="category" t-key="category_index" t-on-click="() => this.selectCategory(category)" type="button" class="col-3 btn btn-secondary btn-lg lh-lg">
+                                        <span t-out="category.name"/>
+                                    </button>
+                                </t>
+                                <t t-else="">
+                                    <div t-foreach="this.displayedProducts" t-as="product" t-key="product.id" class="o_self_product_box col-5 rounded-4 p-3 shadow-sm">
+                                        <t t-set="snoozed" t-value="this.selfOrder.isProductSnoozed(product)" />
+                                        <article role="button" t-on-click="() => this.selectProduct(product)" class="position-relative d-flex align-items-start cursor-pointer" t-att-class="{'opacity-25' : snoozed}">
+                                            <div class="d-flex flex-column flex-fill p-3 text-center align-items-start">
+                                                <span t-out="product.display_name"/>
+                                                <div t-if="snoozed" class="badge my-1 rounded-pill text-bg-danger w-auto me-auto mx-auto">
+                                                    <span>Unavailable</span>
+                                                </div>
+                                                <span t-out="this.selfOrder.formatMonetary(this.selfOrder.getProductDisplayPrice(product))" class="o-so-tabular-nums fs-4 fw-bold text-primary"/>
+                                            </div>
+                                            <div class="product_img ratio ratio-1x1 flex-shrink-0 ms-2 ms-lg-0">
+                                                <img class="object-fit-cover rounded-4" t-attf-src="/web/image/product.template/#{product.id}/image_512?unique=#{product.write_date}" loading="lazy"/>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </t>
+                                <button t-if="this.state.selectedCategory" t-on-click="() => this.selectCategory(this.state.selectedCategory.parent_id)" type="button" class="col-3 btn btn-secondary btn-lg lh-lg">
+                                    <span>Back</span>
+                                </button>
+                            </t>
+                            <t t-else="">
+                                <t t-if="this.shouldDisplayPaymentMethods">
+                                    <button t-foreach="this.selfOrder.models['pos.payment.method'].getAll()" t-as="pm" t-key="pm_index" t-on-click="() => this.selectMethod(pm.id)" type="button" class="col-3 btn btn-secondary btn-lg lh-lg">
+                                        <span t-out="pm.name"/>
+                                    </button>
+                                </t>
+                                <t t-else="">
+                                    <div class="payment-container">
+                                        Follow instructions on the terminal to complete the payment.
+                                    </div>
+                                </t>
+                            </t>
+                        </div>
+                    </div>
+                    <button t-if="this.state.pageStatus == 'scanning'" t-on-click="enterBarcodeManually" type="button" class="button-height btn btn-secondary btn-lg lh-lg w-100 flex-shrink-0">
+                        <i class="fa fa-barcode" aria-hidden="true"></i> Enter barcode manually
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

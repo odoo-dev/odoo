@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <t t-name="pos_self_order.NetworkConnectionLostPopup">
+    <t t-name="pos_self.NetworkConnectionLostPopup">
         <div class="self_order_network_popup o_dialog">
             <div role="dialog" class="modal d-block" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered" role="document">

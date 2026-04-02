@@ -55,6 +55,8 @@
         ],
         "pos_self_order.assets": [
             ("include", "pos_self.assets"),
+            "pos_self_order/static/src/app/primary_variables.scss",
+            "pos_self_order/static/src/app/self_order_index.scss",
             "pos_self_order/static/src/overrides/utils/printer/generate_printer_data.js",
             "pos_self_order/static/src/app/**/*",
             "pos_restaurant/static/src/app/models/restaurant_table.js",

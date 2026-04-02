@@ -2,7 +2,7 @@ import { Component } from "@odoo/owl";
 import { useSelf } from "@pos_self/app/services/self_service";
 
 export class CancelPopup extends Component {
-    static template = "pos_self_order.CancelPopup";
+    static template = "pos_self.CancelPopup";
     static props = {
         title: String,
         confirm: Function,

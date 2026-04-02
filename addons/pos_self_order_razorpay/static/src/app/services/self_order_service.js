@@ -1,5 +1,5 @@
 import { patch } from "@web/core/utils/patch";
-import { SelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { SelfOrder } from "@pos_self/app/services/self_service";
 import { Razorpay, RazorpayError } from "@pos_self_order_razorpay/app/razorpay";
 
 patch(SelfOrder.prototype, {

@@ -29,7 +29,6 @@ export class SelfOrder extends Reactive {
         "router",
         "pos_data",
         "pos_ticket_printer",
-        "barcode",
         "bus_service",
         "dialog",
     ];
@@ -39,17 +38,13 @@ export class SelfOrder extends Reactive {
         this.ready = this.setup(...args).then(() => this);
     }
 
-    async setup(
-        env,
-        { notification, router, pos_ticket_printer, barcode, bus_service, dialog, pos_data }
-    ) {
+    async setup(env, { notification, router, pos_ticket_printer, bus_service, dialog, pos_data }) {
         // services
         this.notification = notification;
         this.router = router;
         this.data = pos_data;
         this.env = env;
         this.ticketPrinter = pos_ticket_printer;
-        this.barcode = barcode;
         this.bus = bus_service;
         this.dialog = dialog;
 
@@ -74,36 +69,35 @@ export class SelfOrder extends Reactive {
 
         await this.initData();
         this.initWebSocket();
-        barcode.bus.addEventListener("barcode_scanned", (ev) => {
-            if (!this.ordering) {
-                this.notification.add(_t("We're currently closed"), {
-                    type: "danger",
-                });
-                return;
-            }
-            const product = this.models["product.product"].filter(
-                (p) => p.barcode === ev.detail.barcode
-            )?.[0];
-            if (!product) {
-                this.notification.add(_t("Product not found"), {
-                    type: "danger",
-                });
-                return;
-            }
-            if (!product.self_order_available) {
-                this.notification.add(_t("Product is not available"), {
-                    type: "danger",
-                });
-                return;
-            }
-            const productTemplate = product.product_tmpl_id;
-            if (productTemplate.isConfigurable()) {
-                this.router.navigate("product", { id: productTemplate.id });
-                return;
-            }
-            this.addToCart(productTemplate, 1, "", {}, {});
-            this.router.navigate("cart");
-        });
+    }
+
+    async _barcodeProductAction(code) {
+        if (!this.ordering) {
+            this.notification.add(_t("We're currently closed"), {
+                type: "danger",
+            });
+            return;
+        }
+        if (this.getOrder() == null) {
+            return this.startOrder();
+        }
+        const product = this.models["product.product"].filter(
+            (p) => p.barcode === code.base_code
+        )?.[0];
+        if (!product) {
+            this.notification.add(_t("Product not found"), {
+                type: "danger",
+            });
+            return;
+        }
+        if (!product.self_order_available) {
+            this.notification.add(_t("Product is not available"), {
+                type: "danger",
+            });
+            return;
+        }
+        const productTemplate = product.product_tmpl_id;
+        return productTemplate;
     }
 
     initWebSocket() {
@@ -203,6 +197,21 @@ export class SelfOrder extends Reactive {
                 return !(now >= hourStart && now <= hourUntil);
             }
         });
+    }
+    getProductToDisplay(category) {
+        const products =
+            category.associatedProducts || this.selfOrder.productByCategIds[category.id] || [];
+
+        if (!products.length) {
+            return [];
+        }
+
+        return products.filter(
+            (product) =>
+                product.self_order_available &&
+                (product.pos_categ_ids.length == 0 ||
+                    product.pos_categ_ids.some((categ) => this.isCategoryAvailable(categ.id)))
+        );
     }
     computeAvailableCategories() {
         this.availableCategories = this.getAvailableCategories();
@@ -394,10 +403,6 @@ export class SelfOrder extends Reactive {
     }
 
     initHardware() {
-        if (this.config.self_ordering_mode !== "kiosk") {
-            return;
-        }
-
         for (const pm of this.models["pos.payment.method"].getAll()) {
             const PaymentInterface = registry
                 .category("pos_payment_providers")

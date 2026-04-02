@@ -2,7 +2,7 @@
     "name": "POS Self",
     "summary": "Addon for the POS App that allows customers to view the menu on their smartphone.",
     "category": "Hidden",
-    "depends": ["point_of_sale", "http_routing", "link_tracker"],
+    "depends": ["point_of_sale", "http_routing", "link_tracker", "barcodes", "barcodes_gs1_nomenclature"],
     "data": [
         "views/pos_category_views.xml",
         "views/pos_config_view.xml",
@@ -15,7 +15,7 @@
             'pos_self/static/src/overrides/**/*',
         ],
         "pos_self.assets": [
-            "pos_self/static/src/app/primary_variables.scss",
+            "pos_self/static/src/app/primary_variable.scss",
             "pos_self/static/src/app/bootstrap_overridden.scss",
             ("include", "point_of_sale.base_app"),
             'web/static/src/core/currency.js',
@@ -51,6 +51,10 @@
             'point_of_sale/static/src/app/utils/html-to-image.js',
             'point_of_sale/static/src/app/utils/use_timed_press.js',
             'point_of_sale/static/src/app/services/pos_ticket_printer_service.js',
+            'barcodes/static/src/js/barcode_parser.js',
+            'barcodes_gs1_nomenclature/static/src/js/barcode_parser.js',
+            'point_of_sale/static/src/app/services/barcode_reader_service.js',
+            'point_of_sale/static/src/app/hooks/barcode_reader_hook.js',
             "pos_self/static/src/app/**/*",
             "web/static/src/core/utils/render.js",
             "account/static/src/helpers/*.js",

@@ -5,7 +5,7 @@ import { useSelf } from "@pos_self/app/services/self_service";
 import { OrderWidget } from "@pos_self_order/app/components/order_widget/order_widget";
 import { PresetInfoPopup } from "@pos_self_order/app/components/preset_info_popup/preset_info_popup";
 import { useScrollShadow } from "../../utils/scroll_shadow_hook";
-import { CancelPopup } from "addons/pos_self/static/src/app/components/cancel_popup/cancel_popup";
+import { CancelPopup } from "@pos_self/app/components/cancel_popup/cancel_popup";
 import { _t } from "@web/core/l10n/translation";
 import { formatProductName } from "../../utils";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";

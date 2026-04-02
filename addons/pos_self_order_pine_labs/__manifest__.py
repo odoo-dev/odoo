@@ -4,10 +4,10 @@
     "name": "POS Self Order Pine Labs",
     "summary": "An addon for the Self Order App (KIOSK) that allows customers to pay using the Pine Labs POS Terminal.",
     "category": "Sales/Point Of Sale",
-    "depends": ["pos_pine_labs", "pos_self_order"],
+    "depends": ["pos_pine_labs", "pos_self"],
     "auto_install": True,
     "assets": {
-        "pos_self_order.assets": [
+        "pos_self.assets": [
             "pos_self_order_pine_labs/static/src/**/*",
         ],
     },

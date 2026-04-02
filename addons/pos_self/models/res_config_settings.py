@@ -21,15 +21,6 @@ class ResConfigSettings(models.TransientModel):
     pos_self_ordering_default_user_id = fields.Many2one(related="pos_config_id.self_ordering_default_user_id", readonly=False)
     pos_self_ordering_primary_color = fields.Char(related="pos_config_id.self_ordering_primary_color", readonly=False)
 
-    @api.onchange("pos_self_ordering_default_user_id")
-    def _onchange_default_user(self):
-        self.ensure_one()
-        if self.pos_self_ordering_default_user_id and self.pos_self_ordering_mode == 'mobile':
-            user = self.pos_self_ordering_default_user_id
-            if not (user.has_group("point_of_sale.group_pos_user")
-                    or user.has_group("point_of_sale.group_pos_manager")):
-                raise ValidationError(_("The user must be a POS user"))
-
     @api.onchange("pos_self_ordering_default_language_id", "pos_self_ordering_available_language_ids")
     def _onchange_pos_self_order_default_language(self):
         if self.pos_self_ordering_default_language_id not in self.pos_self_ordering_available_language_ids:

@@ -1,33 +1,14 @@
 import { patch } from "@web/core/utils/patch";
-import { PaymentPage } from "@pos_self_order/app/pages/payment_page/payment_page";
+import { PaymentInterface } from "@pos_self/app/components/payment_interface/payment_interface";
 import { _t } from "@web/core/l10n/translation";
-import { generateQRCodeDataUrl } from "@point_of_sale/utils";
 
-patch(PaymentPage.prototype, {
-    async startPayment() {
-        let order = this.selfOrder.currentOrder;
-        const pm = this.selectedPaymentMethod;
-        const device = this.selfOrder.config.self_ordering_mode;
-
-        if (!pm || !pm.is_online_payment) {
-            return super.startPayment(...arguments);
-        } else {
-            order = await this.selfOrder.sendDraftOrderToServer();
-        }
-
+patch(PaymentInterface.prototype, {
+    openOnlinePayment(order, device) {
         if (device === "kiosk") {
-            const url = this.selfOrder.getOnlinePaymentUrl(order, false);
-            this.generateQrcodeImg(url);
+            super.openOnlinePayment(...arguments);
         } else {
             this.checkAndOpenPaymentPage(order);
         }
-    },
-    get selectedPaymentIsOnline() {
-        const paymentMethods = this.selectedPaymentMethod;
-        return paymentMethods && paymentMethods.is_online_payment;
-    },
-    generateQrcodeImg(url) {
-        this.state.qrImage = generateQRCodeDataUrl(url);
     },
     async checkAndOpenPaymentPage(order) {
         if (order.state === "draft") {

@@ -49,13 +49,13 @@ class PosConfig(models.Model):
         for record in self:
             exists = record.env['pos_self_order.custom_link'].search_count([
                 ('pos_config_ids', 'in', record.id),
-                ('url', '=', f'/pos-self/{record.id}/products')
+                ('url', '=', f'/pos-self-order/{record.id}/products')
             ])
 
             if not exists:
                 record.env['pos_self_order.custom_link'].create({
                     'name': _('Order Now'),
-                    'url': f'/pos-self/{record.id}/products',
+                    'url': f'/pos-self-order/{record.id}/products',
                     'pos_config_ids': [(4, record.id)],
                 })
 
@@ -136,7 +136,7 @@ class PosConfig(models.Model):
 
     def _get_self_order_route(self, table_id: int | None = None) -> str:
         self.ensure_one()
-        base_route = f"/pos-self/{self.id}"
+        base_route = f"/pos-self-order/{self.id}"
         table_route = ""
 
         if self.self_ordering_mode == 'consultation':

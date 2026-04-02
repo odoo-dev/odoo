@@ -8,9 +8,9 @@ from odoo import models
 class PosPaymentMethod(models.Model):
     _inherit = 'pos.payment.method'
 
-    def _payment_request_from_kiosk(self, order):
+    def _payment_request_from_self(self, order):
         if self.payment_provider != 'pine_labs':
-            return super()._payment_request_from_kiosk(order)
+            return super()._payment_request_from_self(order)
         reference_prefix = order.config_id.name.replace(' ', '')
         # We need to provide the amount in paisa since Pine Labs processes amounts in paisa.
         # The conversion rate between INR and paisa is set as 1 INR = 100 paisa.

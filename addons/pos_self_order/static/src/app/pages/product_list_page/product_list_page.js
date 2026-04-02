@@ -155,16 +155,7 @@ export class ProductListPage extends Component {
     }
 
     getProducts(category) {
-        const products =
-            category.associatedProducts || this.selfOrder.productByCategIds[category.id] || [];
-
-        if (!products.length) {
-            return [];
-        }
-
-        return products.filter(
-            (product) => product.self_order_available && this.isProductAvailable(product)
-        );
+        return this.selfOrder.getProductToDisplay(category);
     }
 
     toggleSubCategoryPanel() {

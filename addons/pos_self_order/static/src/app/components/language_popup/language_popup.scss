@@ -1,0 +1,7 @@
+@include o-kiosk-portrait() {
+    .self_order_language_popup {
+        img {
+            max-width: 60px !important;
+        }
+    }
+}

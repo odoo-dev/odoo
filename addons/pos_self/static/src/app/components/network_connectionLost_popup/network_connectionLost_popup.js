@@ -5,7 +5,7 @@ import { ConnectionLostError, rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 
 export class NetworkConnectionLostPopup extends Component {
-    static template = "pos_self_order.NetworkConnectionLostPopup";
+    static template = "pos_self.NetworkConnectionLostPopup";
     static props = ["close", "access_token"];
 
     setup() {

@@ -11,7 +11,7 @@ import { session } from "@web/session";
 import { registry } from "@web/core/registry";
 import { selfOrderIndex } from "@pos_self_order/app/self_order_index";
 import { setupPosEnv } from "@point_of_sale/../tests/unit/utils";
-import { unpatchSelf } from "addons/pos_self/static/src/app/services/data_service";
+import { unpatchSelf } from "@pos_self/app/services/data_service";
 
 export function initMockRpc() {
     onRpc("/pos-self/relations/1", () =>

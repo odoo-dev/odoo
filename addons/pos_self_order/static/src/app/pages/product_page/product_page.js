@@ -9,7 +9,7 @@ import {
     getProductVariantByAttributes,
     getAttributeValues,
     getAttributeValuesExtraPrice,
-} from "addons/pos_self/static/src/app/services/card_utils";
+} from "@pos_self/app/services/card_utils";
 import { shouldShowMissingDetails } from "../../utils";
 
 export class ProductPage extends Component {

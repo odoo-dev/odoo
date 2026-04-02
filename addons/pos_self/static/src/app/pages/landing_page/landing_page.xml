@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self.LandingPage">
+        <div t-if="this.languages.length > 1" t-on-click="this.openLanguages" class="position-absolute d-flex top-0 end-0 w-100 o_self_fade">
+            <div class="container o_self_container mt-4 d-flex justify-content-end">
+                <div class="o_self_language_selector p-3 bg-white cursor-pointer user-select-none ">
+                    <img class="rounded" t-attf-src="{{this.currentLanguage.flag_image_url}}" />
+                    <span t-out="this.currentLanguage.display_name" class="ms-3"/>
+                </div>
+            </div>
+        </div>
+        <div t-if="this.selfOrder.config._self_ordering_image_home_ids.length > 0" t-on-click="this.start" class="page-body d-flex flex-column vh-100 align-items-center overflow-hidden">
+            <div id="carouselAutoplaying" t-custom-ref="carousel" class="carousel slide w-100 h-100" data-bs-ride="true">
+                <div class="carousel-inner h-100 w-100">
+                    <div
+                        t-foreach="this.selfOrder.config._self_ordering_image_home_ids"
+                        t-as="imageId"
+                        t-key="imageId"
+                        t-attf-class="carousel-item object-fit-cover h-100 w-100 {{this.activeImage}}"
+                        t-attf-style="background-image: url('/web/image/ir.attachment/{{imageId}}/raw'); background-size: cover; background-position: center;" />
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

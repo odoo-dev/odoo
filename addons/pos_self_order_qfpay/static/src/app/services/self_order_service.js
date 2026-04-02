@@ -1,5 +1,5 @@
 import { patch } from "@web/core/utils/patch";
-import { SelfOrder } from "@pos_self_order/app/services/self_order_service";
+import { SelfOrder } from "@pos_self/app/services/self_service";
 import { QFPay, QFPayError } from "@pos_qfpay/app/qfpay";
 
 patch(SelfOrder.prototype, {

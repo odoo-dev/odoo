@@ -1,15 +1,18 @@
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
+
 from odoo import http
+from odoo.exceptions import MissingError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.service.model import call_kw
-from werkzeug.exceptions import Forbidden, NotFound, BadRequest, Unauthorized
-from odoo.exceptions import MissingError
 from odoo.tools import consteq
 
 
 class PosSelfController(http.Controller):
-    def process_order(self, order, access_token, table_identifier, device_type):
-        pos_config, table = self._verify_authorization(access_token, table_identifier, order)
+    def process_order(self, order, access_token, device_type, **kwargs):
+        authorization = self._verify_authorization(access_token, order, **kwargs)
+        pos_config = authorization['pos_config']
+        table = authorization.get('table')
 
         # Create a safe copy of the order with only the necessary fields for order creation to
         # avoid potential security issues and to reduce the payload size
@@ -86,20 +89,8 @@ class PosSelfController(http.Controller):
 
         pos_order.remove_from_ui([pos_order.id])
 
-    def get_orders_by_access_token(self, access_token, order_access_tokens, table_identifier=None):
-        pos_config = self._verify_pos_config(access_token)
-        table = pos_config.env["restaurant.table"].search([('identifier', '=', table_identifier)], limit=1)
-        domain = False
-
-        if not table_identifier or pos_config.self_ordering_pay_after == 'each':
-            domain = [(False, '=', True)]
-        else:
-            domain = ['&', '&',
-                ('table_id', '=', table.id),
-                ('state', '=', 'draft'),
-                ('access_token', 'not in', [data.get('access_token') for data in order_access_tokens])
-            ]
-
+    def _get_domain_access_token(self, pos_config, order_access_tokens, **kwargs):
+        domain = [(False, '=', True)]
         for data in order_access_tokens:
             domain = Domain.OR([domain, ['&',
                 ('access_token', '=', data['access_token']),
@@ -107,6 +98,12 @@ class PosSelfController(http.Controller):
                 ('write_date', '>', data.get('write_date')),
                 ('state', '!=', data.get('state')),
             ]])
+        return domain
+
+    def get_orders_by_access_token(self, access_token, order_access_tokens, **kwargs):
+        pos_config = self._verify_pos_config(access_token)
+        domain = self._get_domain_access_token(pos_config, order_access_tokens, **kwargs)
+
         orders = pos_config.env['pos.order'].search(domain)
         access_tokens = set({o.get('access_token') for o in order_access_tokens})
         # Do not use session.order_ids, it may fail if there is shared sessions
@@ -116,9 +113,9 @@ class PosSelfController(http.Controller):
             pos_config._notify('REMOVE_ORDERS', {'deleted_order_tokens': deleted_order_tokens})
         return self._generate_return_values(orders, pos_config) if orders else {}
 
-    def pos_self_order_kiosk_payment(self, pos_config_id, order, payment_method_id, access_token, device_type):
+    def pos_self_payment(self, pos_config_id, order, payment_method_id, access_token, device_type):
         pos_config = self._verify_pos_config(access_token)
-        results = self.process_order(order, access_token, None, device_type)
+        results = self.process_order(order, access_token, device_type)
 
         if not results['pos.order'][0].get('id'):
             raise BadRequest("Something went wrong")
@@ -129,29 +126,27 @@ class PosSelfController(http.Controller):
         if not order_sudo or not payment_method_sudo or payment_method_sudo not in order_sudo.config_id.payment_method_ids:
             raise NotFound("Order or payment method not found")
 
-        status = payment_method_sudo._payment_request_from_kiosk(order_sudo)
+        status = payment_method_sudo._payment_request_from_self(order_sudo)
 
         if not status:
             raise BadRequest("Something went wrong")
 
         return {'order': self.env['pos.order']._load_pos_self_data_read(order_sudo, pos_config), 'payment_status': status}
 
-    def pos_self_order_kiosk_payment_method_action(self, access_token, action, args, kwargs):
+    def pos_self_payment_method_action(self, access_token, action, args, kwargs):
         pos_config = self._verify_pos_config(access_token)
         payment_method_env = pos_config.env["pos.payment.method"]
-        if pos_config.self_ordering_mode != "kiosk":
-            raise Forbidden("Method only allowed in kiosk mode")
         if args and isinstance(args[0], list):
             if len(args[0]) != 1:
                 raise BadRequest("Only one payment method ID should be provided")
             if not payment_method_env.search_count([("id", "=", args[0]), ("config_ids", "in", pos_config.id)]):
                 raise NotFound("Payment method not found in config")
         if action not in payment_method_env._allowed_actions_in_self_order():
-            raise Forbidden(f"Method '{action}' is forbidden in the self order kiosk")
+            raise Forbidden(f"Method '{action}' is forbidden in the self.")
 
         return call_kw(payment_method_env, action, args, kwargs)
 
-    def pos_kiosk_increment_nb_print(self, access_token, order_id, order_access_token):
+    def pos_self_increment_nb_print(self, access_token, order_id, order_access_token):
         pos_config = self._verify_pos_config(access_token)
         pos_order = pos_config.env['pos.order'].browse(order_id)
 
@@ -190,24 +185,17 @@ class PosSelfController(http.Controller):
         return pos_config_sudo.sudo(False).with_company(company).with_user(user).with_context(allowed_company_ids=company.ids)
 
     def _verify_config_constraint(self, pos_config_sudo, check_active_session=True):
-        return not pos_config_sudo or (pos_config_sudo.self_ordering_mode != 'mobile' and pos_config_sudo.self_ordering_mode != 'kiosk') or (check_active_session and not pos_config_sudo.has_active_session)
+        return not pos_config_sudo or (check_active_session and not pos_config_sudo.has_active_session)
 
-    def _verify_authorization(self, access_token, table_identifier, order):
+    def _verify_authorization(self, access_token, order, **kwargs):
         """
         Similar to _verify_pos_config but also looks for the restaurant.table of the given identifier.
         The restaurant.table record is also returned with reduced privileges.
         """
         pos_config = self._verify_pos_config(access_token)
-        table_sudo = request.env["restaurant.table"].sudo().search([('identifier', '=', table_identifier)], limit=1)
-        preset = request.env['pos.preset'].sudo().browse(order.get('preset_id'))
-        is_takeaway = order and pos_config.use_presets and preset and preset.service_at != 'table'
-        if not table_sudo and not pos_config.self_ordering_mode == 'kiosk' and pos_config.self_ordering_service_mode == 'table' and not is_takeaway:
-            raise Unauthorized("Table not found")
-
-        company = pos_config.company_id
-        user = pos_config.self_ordering_default_user_id
-        table = table_sudo.sudo(False).with_company(company).with_user(user).with_context(allowed_company_ids=company.ids)
-        return pos_config, table
+        return {
+            'pos_config': pos_config,
+        }
 
     @http.route(['/pos-self/ping'], type='jsonrpc', auth='public')
     def pos_ping(self, access_token):
