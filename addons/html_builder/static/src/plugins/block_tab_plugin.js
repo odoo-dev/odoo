@@ -3,30 +3,26 @@ import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { closest } from "@web/core/utils/ui";
 
-class BlockTabPlugin extends Plugin {
+/**
+ * @typedef {import("@html_builder/core/drag_and_drop_plugin").DragState} DragState
+ */
+
+export class BlockTabPlugin extends Plugin {
     static id = "blockTab";
     static dependencies = ["operation", "history", "dropzone", "disableSnippets"];
-    static shared = [
-        "onSnippetGroupClick",
-        "scrollToDroppedSnippet",
-        "updateDroppedSnippet",
-        "processDroppedSnippet",
-    ];
+    static shared = ["insertSnippetGroup", "scrollToDroppedSnippet", "processDroppedSnippet"];
 
     /**
      * Opens and manages the snippet dialog after clicking on a snippet group,
      * and inserts the selected snippet in the page.
      *
      * @param {Object} snippet the clicked snippet group
-     * @param {Object} state   the state of the working blockTab
      */
-    onSnippetGroupClick(snippet, state) {
+    insertSnippetGroup(snippet) {
         this.dependencies.operation.next(
             async () => {
-                state.cancelDragAndDrop = this.dependencies.history.makeSavePoint();
-                this.dragState = {};
+                const cancelInsertion = this.dependencies.history.makeSavePoint();
                 let snippetEl;
-                state.ongoingInsertion = true;
                 await new Promise((resolve) => {
                     this.config.snippetModel.openSnippetDialog(
                         snippet,
@@ -79,14 +75,8 @@ class BlockTabPlugin extends Plugin {
 
                 if (snippetEl) {
                     await this.scrollToDroppedSnippet(snippetEl);
-                    await this.processDroppedSnippet(
-                        snippetEl,
-                        this.dragState,
-                        state.cancelDragAndDrop
-                    );
+                    await this.processDroppedSnippet(snippetEl, cancelInsertion);
                 }
-                state.ongoingInsertion = false;
-                delete state.cancelDragAndDrop;
             },
             {
                 withLoadingEffect: false,
@@ -116,17 +106,18 @@ class BlockTabPlugin extends Plugin {
     }
 
     /**
-     *
      * @param {HTMLElement} snippetEl
+     * @param {Function} cancelInsertion
+     * @param {DragState} [dragState]
      */
-    async processDroppedSnippet(snippetEl, dragState, cancelDragAndDrop) {
+    async processDroppedSnippet(snippetEl, cancelInsertion, dragState = {}) {
         this.updateDroppedSnippet(snippetEl);
         // Build the snippet.
         for (const onSnippetDropped of this.getResource("on_snippet_dropped_handlers")) {
-            const cancel = await onSnippetDropped({ snippetEl, dragState: dragState });
+            const cancel = await onSnippetDropped({ snippetEl, dragState });
             // Cancel everything if the resource asked to.
             if (cancel) {
-                cancelDragAndDrop();
+                cancelInsertion();
                 return;
             }
             // Update `snippetEl` (and `draggedEl` of `dragState`) if it was
