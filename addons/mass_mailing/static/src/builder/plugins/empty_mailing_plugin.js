@@ -28,7 +28,7 @@ export class EmptyMailingPlugin extends Plugin {
             "snippet_groups",
             "s_snippet_group"
         );
-        this.dependencies.blockTab.onSnippetGroupClick(snippet, {});
+        this.dependencies.blockTab.insertSnippetGroup(snippet);
     }
 }
 
