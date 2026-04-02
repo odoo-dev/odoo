@@ -22,7 +22,7 @@ class ProductTemplate(models.Model):
              "Create a task and track hours: Create a task on the sales order validation and track the work hours.")
     sale_line_warn = fields.Selection(
         WARNING_MESSAGE, string="Sales Order Line",
-        help=WARNING_HELP, required=True, default="no-message")
+        help=WARNING_HELP, default="no-message")
     sale_line_warn_msg = fields.Text(string="Message for Sales Order Line")
     expense_policy = fields.Selection(
         selection=[
